@@ -1,0 +1,140 @@
+{
+  "$schema_note": "Owner decision 2026-09-29 s6 (docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md). The explicit production activation gate model read by backend/van_gateway/automation/production_gates.py and surfaced by the automation/browser health API. Each required decision names the gates that must be GREEN, where each gate's status is read from (a dotted path into the decision record), and the closed vocabulary that maps a raw value to GREEN / PENDING / BLOCKED. Any value outside the declared vocabulary, a missing path, a missing or unparseable file, or an empty model is UNKNOWN and fails closed. production_activation_permitted is true only when every gate of every required decision is GREEN. This file declares where truth lives; it never holds a status itself. Decision records stay append-only: when a later append supersedes an earlier gate, the path here moves to the newer block.",
+  "schema_version": 1,
+  "model_id": "VAN-PRODUCTION-ACTIVATION-GATES",
+  "authorization_id": "auth-20260929-owner-stagehand-private-plane-gates",
+  "decisions_dir": "docs/decisions",
+  "required_decisions": [
+    {
+      "decision": "VAN-ADOPT-N8N-001.yaml",
+      "format": "yaml",
+      "gates": [
+        {
+          "id": "owner_decision",
+          "kind": "owner_decision",
+          "path": "owner_signature_status",
+          "green": ["SIGNED"],
+          "pending": ["PENDING"]
+        },
+        {
+          "id": "live_qualification",
+          "kind": "production",
+          "path": "observed_runtime.pin_status",
+          "green": ["PINNED_DIGEST_VERIFIED"],
+          "pending": ["UNPINNED_VERIFY_AT_ADOPTION"],
+          "note": "registries/automation_browser_dependencies.json: versions stay UNPINNED_VERIFY_AT_ADOPTION until an adoption gate records a digest; docs/EXTERNAL_GATES.md n8n rows are PENDING_LIVE."
+        }
+      ]
+    },
+    {
+      "decision": "VAN-ADOPT-STAGEHAND-001.yaml",
+      "format": "yaml",
+      "gates": [
+        {
+          "id": "owner_decision",
+          "kind": "owner_decision",
+          "path": "owner_signature_status",
+          "green": ["SIGNED"],
+          "pending": ["PENDING"]
+        },
+        {
+          "id": "owner_intent",
+          "kind": "owner_decision",
+          "path": "owner_decisions_20260929.owner_intent",
+          "green": ["OWNER_INTENT_APPROVED"],
+          "pending": ["PENDING"]
+        },
+        {
+          "id": "production_gate",
+          "kind": "production",
+          "path": "owner_decisions_20260929.production_gate.status",
+          "green": ["GREEN"],
+          "pending": ["PENDING"],
+          "blocked": ["BLOCKED"]
+        },
+        {
+          "id": "signed_ingress",
+          "kind": "production",
+          "path": "owner_decisions_20260929.signed_ingress.status",
+          "green": ["SIGNED_INGRESS_VERIFIED"],
+          "pending": ["SIGNED_INGRESS_PENDING"],
+          "note": "Owner decision s2: not waived; no waiver value is accepted as GREEN."
+        },
+        {
+          "id": "production_host",
+          "kind": "production",
+          "path": "owner_decisions_20260929.hosting.zone_status",
+          "green": ["AVAILABLE"],
+          "pending": ["UNPROVISIONED"],
+          "blocked": ["UNAVAILABLE"],
+          "note": "Owner decision s1: van-browser-core unavailable => Stagehand PRODUCTION_DISABLED."
+        },
+        {
+          "id": "model_pin",
+          "kind": "production",
+          "path": "owner_decisions_20260929.model.pin_status",
+          "green": ["PINNED_IMMUTABLE_REVISION"],
+          "pending": ["UNVERIFIED", "FLOATING_ALIAS_ONLY"],
+          "note": "Owner decision s4: FLOATING_ALIAS_ONLY keeps the gate pending where deterministic pinning is mandatory."
+        },
+        {
+          "id": "live_qualification",
+          "kind": "production",
+          "path": "owner_decisions_20260929.version.live_qualification.status",
+          "green": ["GREEN"],
+          "pending": ["PENDING"],
+          "blocked": ["FAILED"],
+          "note": "Owner decision s5: live runtime reports the 4.1.0 artifact and passes the runtime canary."
+        },
+        {
+          "id": "blocker_verifier_gap",
+          "kind": "production",
+          "path": "owner_decisions_20260929.blockers.STAGEHAND-VERIFIER-GAP-20260929.status",
+          "green": ["CLOSED"],
+          "blocked": ["OPEN"]
+        },
+        {
+          "id": "blocker_direct_actuation",
+          "kind": "production",
+          "path": "owner_decisions_20260929.blockers.STAGEHAND-DIRECT-ACTUATION-20260929.status",
+          "green": ["CLOSED"],
+          "blocked": ["OPEN"]
+        }
+      ]
+    },
+    {
+      "decision": "VAN-ADOPT-BROWSER-HARNESS-001.yaml",
+      "format": "yaml",
+      "gates": [
+        {
+          "id": "owner_decision",
+          "kind": "owner_decision",
+          "path": "owner_signature_status",
+          "green": ["SIGNED"],
+          "pending": ["PENDING"]
+        },
+        {
+          "id": "live_qualification",
+          "kind": "production",
+          "path": "observed_runtime.pin_status",
+          "green": ["PINNED_DIGEST_VERIFIED"],
+          "pending": ["UNPINNED_VERIFY_AT_ADOPTION"],
+          "note": "docs/EXTERNAL_GATES.md Browser Harness row is REPO_COMPLETE / PENDING_LIVE."
+        }
+      ]
+    },
+    {
+      "decision": "VAN-AMEND-SECURITY-POLICY-001.md",
+      "format": "markdown",
+      "gates": [
+        {
+          "id": "owner_decision",
+          "kind": "owner_decision",
+          "path": "Status",
+          "green": ["OWNER_APPROVED"],
+          "pending": ["PENDING", "PROPOSED"]
+        }
+      ]
+    }
+  ]
+}

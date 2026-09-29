@@ -113,6 +113,96 @@ def test_stagehand_reconciliation_is_append_only_and_keeps_production_pending():
         assert "decision" not in q, "open questions must not carry a decision"
 
 
+#: sha256 of VAN-ADOPT-STAGEHAND-001.yaml through the end of reconciliation_20260929 (H's
+#: append, commit 379d6ab). The owner decisions of 2026-09-29 are appended after the marker
+#: below; nothing above it may change.
+STAGEHAND_RECONCILED_SHA256 = "e667a5b3b3bac824d51bca238e8a3c833c9e7e1f60dadbaa8130863fcdf51152"
+STAGEHAND_OWNER_DECISIONS_MARKER = (
+    "\n\n# ====================================================================================="
+    "\n# APPENDED 2026-09-29 (second append)"
+)
+OWNER_DECISIONS_20260929 = DECISIONS / "OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md"
+OWNER_DECISIONS_20260929_SHA256 = "64f1c0560ef88776d0d199392d315767ea3576827e335ba2da8081d12e307c81"
+STAGEHAND_LOCK = ROOT / "deploy" / "van-trading-core" / "browser" / "package-lock.json"
+
+
+def test_stagehand_owner_decisions_20260929_are_appended_truthfully():
+    """Owner decisions 2026-09-29 §§1-8: recorded append-only, with nothing overstated.
+
+    Intent is approved but signed ingress is still pending (not waived); the host is
+    van-browser-core and Stagehand is PRODUCTION_DISABLED while it is unprovisioned; the
+    model pin is not claimed; 4.1.0 is the release commit, not upstream HEAD; the router
+    findings are blockers; the five open questions are closed by reference, not by editing.
+    """
+    import yaml
+
+    assert hashlib.sha256(OWNER_DECISIONS_20260929.read_bytes()).hexdigest() == (
+        OWNER_DECISIONS_20260929_SHA256
+    ), "the committed owner decision text must stay verbatim"
+
+    text = (DECISIONS / "VAN-ADOPT-STAGEHAND-001.yaml").read_text(encoding="utf-8")
+    assert STAGEHAND_OWNER_DECISIONS_MARKER in text
+    prior = text.split(STAGEHAND_OWNER_DECISIONS_MARKER, 1)[0] + "\n"
+    assert hashlib.sha256(prior.encode("utf-8")).hexdigest() == STAGEHAND_RECONCILED_SHA256, (
+        "text above the 2026-09-29 owner-decisions append was edited; append instead"
+    )
+
+    doc = yaml.safe_load(text)
+    dec = doc["owner_decisions_20260929"]
+    assert dec["record_sha256"] == OWNER_DECISIONS_20260929_SHA256
+    assert dec["signature_claimed"] == "none"
+    assert dec["owner_intent"] == "OWNER_INTENT_APPROVED"
+    assert dec["signed_ingress"]["status"] == "SIGNED_INGRESS_PENDING"
+    assert dec["signed_ingress"]["waived"] is False
+
+    host = dec["hosting"]
+    assert host["production_host"] == "van-browser-core"
+    assert set(host["forbidden_production_hosts"]) == {
+        "van-trading-core", "dial-control", "van-private-core"
+    }
+    assert host["when_zone_unavailable"] == "PRODUCTION_DISABLED"
+    if host["zone_status"] != "AVAILABLE":
+        assert host["stagehand_production_state"] == "PRODUCTION_DISABLED"
+    assert "Stagehand" in dec["private_plane"]["must_not_host"]
+
+    model = dec["model"]
+    assert (model["provider"], model["model"]) == ("anthropic", "claude-sonnet-5")
+    # No immutable revision may be recorded unless one was actually observed and pinned.
+    if model["pin_status"] != "PINNED_IMMUTABLE_REVISION":
+        assert model["immutable_revision_id"] is None
+
+    version = dec["version"]
+    assert version["adopted_version"] == "4.1.0"
+    assert version["release_commit"] == "cd7b230778cf92269e4cb90e80d97f5113781c51"
+    assert version["not_the_adopted_artifact"]["commit"].startswith("ad2bf12e")
+    lock = json.loads(STAGEHAND_LOCK.read_text(encoding="utf-8"))
+    entry = lock["packages"]["node_modules/@browserbasehq/stagehand"]
+    assert entry["version"] == version["adopted_version"]
+    assert entry["integrity"] == version["npm_integrity"]
+
+    assert dec["production_gate"]["status"] == "PENDING"
+    for finding in dec["blockers"].values():
+        assert finding["severity"] == "BLOCKER"
+
+    open_ids = {q["id"] for q in doc["reconciliation_20260929"]["owner_decisions_required"]}
+    closed = {q["id"]: q for q in dec["open_questions_closed"]}
+    assert open_ids == set(closed)
+    for q in closed.values():
+        assert q["status"] == "DECIDED" and q["decision_ref"].startswith("owner_decisions_20260929.")
+
+
+def test_no_provenance_pairs_unreleased_stagehand_head_with_4_1_0():
+    """Owner decision §5: ad2bf12e is later unreleased work, never "Stagehand 4.1.0"."""
+    row = next(
+        line
+        for line in (ROOT / "docs" / "project-state" / "MISSION_PROVENANCE_MEMORY_FABRIC_JEV_20260929.md")
+        .read_text(encoding="utf-8")
+        .splitlines()
+        if line.startswith("| browserbase/stagehand |")
+    )
+    assert "not** 4.1.0" in row and "cd7b230778cf92269e4cb90e80d97f5113781c51" in row
+
+
 def test_security_policy_amendment_was_applied():
     """§368 — the amendment is owner-approved and now lives in the locked policy."""
     amendment = (DECISIONS / "VAN-AMEND-SECURITY-POLICY-001.md").read_text(encoding="utf-8")

@@ -1,0 +1,204 @@
+"""Owner decision 2026-09-29 §6 — the production activation gate model fails closed.
+
+The health surface once reported production activation as permitted because no required
+decision carried the literal ``owner_signature_status: PENDING``. These regressions pin the
+replacement: activation is permitted only when every governance and production gate in the
+explicit model is GREEN, and anything unknown, missing or unparseable is not GREEN.
+
+Each case builds a throwaway repository (gate model + decision records) so the verdict is
+driven by the records alone; the last cases run the real repository.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+
+from van_gateway.automation import health
+from van_gateway.automation.production_gates import GATE_MODEL, evaluate_production_gates
+
+OWNER = {"id": "owner_decision", "kind": "owner_decision", "path": "owner_signature_status",
+         "green": ["SIGNED"], "pending": ["PENDING"]}
+INTENT = {"id": "owner_intent", "kind": "owner_decision", "path": "decisions.owner_intent",
+          "green": ["OWNER_INTENT_APPROVED"], "pending": ["PENDING"]}
+PRODUCTION = {"id": "production_gate", "kind": "production", "path": "decisions.production_gate.status",
+              "green": ["GREEN"], "pending": ["PENDING"], "blocked": ["BLOCKED"]}
+LIVE = {"id": "live_qualification", "kind": "production",
+        "path": "decisions.live_qualification.status",
+        "green": ["GREEN"], "pending": ["PENDING"], "blocked": ["FAILED"]}
+INGRESS = {"id": "signed_ingress", "kind": "production", "path": "decisions.signed_ingress.status",
+           "green": ["SIGNED_INGRESS_VERIFIED"], "pending": ["SIGNED_INGRESS_PENDING"]}
+
+
+def _record(owner="SIGNED", intent="OWNER_INTENT_APPROVED", production="GREEN", live="GREEN",
+            ingress="SIGNED_INGRESS_VERIFIED") -> str:
+    return (
+        f"decision_id: X-001\nowner_signature_status: {owner}\n"
+        "decisions:\n"
+        f"  owner_intent: {intent}\n"
+        f"  production_gate:\n    status: {production}\n"
+        f"  live_qualification:\n    status: {live}\n"
+        f"  signed_ingress:\n    status: {ingress}\n"
+    )
+
+
+def _repo(tmp_path: Path, record: str | None, gates=(OWNER, INTENT, PRODUCTION, LIVE, INGRESS),
+          extra: list[dict] | None = None) -> Path:
+    (tmp_path / "docs" / "decisions").mkdir(parents=True)
+    if record is not None:
+        (tmp_path / "docs" / "decisions" / "X-001.yaml").write_text(record, encoding="utf-8")
+    model = {
+        "schema_version": 1,
+        "decisions_dir": "docs/decisions",
+        "required_decisions": [{"decision": "X-001.yaml", "format": "yaml", "gates": list(gates)}]
+        + (extra or []),
+    }
+    path = tmp_path / "gates.json"
+    path.write_text(json.dumps(model), encoding="utf-8")
+    return path
+
+
+def _eval(tmp_path: Path, model: Path) -> dict:
+    return evaluate_production_gates(model_path=model, repo_root=tmp_path)
+
+
+def _status(result: dict, gate: str) -> str:
+    return next(g["status"] for g in result["gates"] if g["gate"] == gate)
+
+
+# --------------------------------------------------------------- the §6 required regressions
+
+
+def test_owner_intent_approved_with_production_gate_pending_is_not_permitted(tmp_path):
+    """§6 regression 1 — the exact shape of the bypass: intent approved, production PENDING."""
+    result = _eval(tmp_path, _repo(tmp_path, _record(production="PENDING")))
+    assert _status(result, "owner_intent") == "GREEN"
+    assert _status(result, "production_gate") == "PENDING"
+    assert result["owner_decisions_pending"] == []  # the owner half is satisfied...
+    assert result["production_activation_permitted"] is False  # ...and that is not enough
+    assert result["production_gates_not_green"] == ["X-001.yaml:production_gate"]
+
+
+def test_signed_owner_decision_with_live_qualification_pending_is_not_permitted(tmp_path):
+    """§6 regression 2 — a signature authorizes; it does not qualify a live runtime."""
+    result = _eval(tmp_path, _repo(tmp_path, _record(owner="SIGNED", live="PENDING")))
+    assert _status(result, "owner_decision") == "GREEN"
+    assert _status(result, "live_qualification") == "PENDING"
+    assert result["production_activation_permitted"] is False
+
+
+def test_all_required_gates_green_is_permitted(tmp_path):
+    """§6 regression 3 — the model is not a constant False; all GREEN opens it."""
+    result = _eval(tmp_path, _repo(tmp_path, _record()))
+    assert {g["status"] for g in result["gates"]} == {"GREEN"}
+    assert result["production_gates_not_green"] == []
+    assert result["production_activation_permitted"] is True
+
+
+# ------------------------------------------------------------------------- fail closed
+
+
+def test_missing_decision_file_is_not_permitted(tmp_path):
+    result = _eval(tmp_path, _repo(tmp_path, None))
+    assert result["owner_decisions_missing"] == ["X-001.yaml"]
+    assert {g["status"] for g in result["gates"]} == {"UNKNOWN"}
+    assert result["production_activation_permitted"] is False
+
+
+def test_unknown_status_value_is_not_permitted(tmp_path):
+    """A value outside the declared vocabulary — even a hopeful one — is UNKNOWN."""
+    result = _eval(tmp_path, _repo(tmp_path, _record(ingress="WAIVED")))
+    assert _status(result, "signed_ingress") == "UNKNOWN"
+    assert result["production_activation_permitted"] is False
+
+
+def test_missing_gate_path_is_not_permitted(tmp_path):
+    record = "decision_id: X-001\nowner_signature_status: SIGNED\n"
+    result = _eval(tmp_path, _repo(tmp_path, record))
+    assert _status(result, "owner_decision") == "GREEN"
+    assert _status(result, "production_gate") == "UNKNOWN"
+    assert result["production_activation_permitted"] is False
+
+
+def test_unparseable_decision_is_not_permitted(tmp_path):
+    result = _eval(tmp_path, _repo(tmp_path, "owner_signature_status: [SIGNED\n  : :"))
+    assert {g["status"] for g in result["gates"]} == {"UNKNOWN"}
+    assert result["production_activation_permitted"] is False
+
+
+@pytest.mark.parametrize("model_text", [None, "{not json", json.dumps({"required_decisions": []})])
+def test_missing_unreadable_or_empty_model_is_not_permitted(tmp_path, model_text):
+    """An empty model must not be vacuously GREEN."""
+    path = tmp_path / "gates.json"
+    if model_text is not None:
+        path.write_text(model_text, encoding="utf-8")
+    result = _eval(tmp_path, path)
+    assert result["gate_model_error"]
+    assert result["production_activation_permitted"] is False
+
+
+def test_decision_with_no_declared_gates_is_not_permitted(tmp_path):
+    model = _repo(tmp_path, _record(), extra=[{"decision": "Y-001.yaml", "gates": []}])
+    result = _eval(tmp_path, model)
+    assert result["production_activation_permitted"] is False
+
+
+def test_markdown_status_is_read_as_a_field_not_a_substring(tmp_path):
+    """A Markdown record's `**Status:**` field is parsed, not grepped anywhere in the text."""
+    (tmp_path / "docs" / "decisions").mkdir(parents=True)
+    (tmp_path / "docs" / "decisions" / "M.md").write_text(
+        "# M\n\n**Status:** `PROPOSED`\n\nOnce approved this becomes OWNER_APPROVED.\n",
+        encoding="utf-8",
+    )
+    spec = {"id": "owner_decision", "kind": "owner_decision", "path": "Status",
+            "green": ["OWNER_APPROVED"], "pending": ["PROPOSED"]}
+    model = tmp_path / "gates.json"
+    model.write_text(json.dumps({"required_decisions": [
+        {"decision": "M.md", "format": "markdown", "gates": [spec]}]}), encoding="utf-8")
+    result = _eval(tmp_path, model)
+    assert _status(result, "owner_decision") == "PENDING"
+    assert result["owner_decisions_pending"] == ["M.md"]
+    assert result["production_activation_permitted"] is False
+
+
+# ------------------------------------------------------------------- the real repository
+
+
+def test_real_repository_is_not_permitted_today():
+    """Project Truth on 2026-09-29: owner intent approved, Stagehand production PENDING."""
+    state = health.governance_state()
+    assert state["gate_model_error"] is None
+    assert state["owner_decisions_pending"] == []
+    assert state["owner_decisions_missing"] == []
+    assert state["production_activation_permitted"] is False
+    by_id = {(g["decision"], g["gate"]): g for g in state["gates"]}
+    stagehand = "VAN-ADOPT-STAGEHAND-001.yaml"
+    assert by_id[(stagehand, "owner_intent")]["status"] == "GREEN"
+    assert by_id[(stagehand, "production_gate")]["status"] == "PENDING"
+    assert by_id[(stagehand, "signed_ingress")]["raw_value"] == "SIGNED_INGRESS_PENDING"
+    assert by_id[(stagehand, "blocker_verifier_gap")]["status"] == "BLOCKED"
+    assert by_id[(stagehand, "blocker_direct_actuation")]["status"] == "BLOCKED"
+
+
+def test_real_model_covers_every_required_decision_with_owner_and_production_gates():
+    """The four §368 decisions stay required, and each Stagehand production gate is modelled."""
+    model = json.loads(GATE_MODEL.read_text(encoding="utf-8"))
+    decisions = {d["decision"]: d for d in model["required_decisions"]}
+    assert set(decisions) == {
+        "VAN-ADOPT-N8N-001.yaml",
+        "VAN-ADOPT-STAGEHAND-001.yaml",
+        "VAN-ADOPT-BROWSER-HARNESS-001.yaml",
+        "VAN-AMEND-SECURITY-POLICY-001.md",
+    }
+    assert set(health.REQUIRED_DECISIONS) == set(decisions)
+    for entry in decisions.values():
+        assert any(g["kind"] == "owner_decision" for g in entry["gates"])
+    stagehand_gates = {g["id"] for g in decisions["VAN-ADOPT-STAGEHAND-001.yaml"]["gates"]}
+    assert {"production_gate", "signed_ingress", "production_host", "model_pin",
+            "live_qualification"} <= stagehand_gates
+    # No gate may accept a waiver of signed ingress as GREEN (owner decision §2).
+    ingress = next(g for g in decisions["VAN-ADOPT-STAGEHAND-001.yaml"]["gates"]
+                   if g["id"] == "signed_ingress")
+    assert all("WAIV" not in v for v in ingress["green"])

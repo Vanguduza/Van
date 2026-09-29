@@ -247,3 +247,205 @@ reconciliation_20260929:
       question: >-
         Confirm 4.1.0 (the released, lockfile-pinned version) as the production adoption
         pin, rather than any post-4.1.0 upstream HEAD?
+
+# =====================================================================================
+# APPENDED 2026-09-29 (second append) — owner decisions on Stagehand, the VAN private
+# plane and the Programme B gates. Append-only: every byte above this line, including the
+# 2026-09-18 decision and reconciliation_20260929, is preserved unchanged. Where this block
+# resolves something reconciliation_20260929 left open, it says so here; the earlier text
+# is not edited.
+# Authority: auth-20260929-owner-stagehand-private-plane-gates (OWNER_EXPLICIT; owner
+# message in session session_01ELKqm4GCPmPvF3ggKkgB1J). No device, biometric or
+# cryptographic signature is claimed.
+# Owner text (verbatim): docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md
+# (sha256 64f1c0560ef88776d0d199392d315767ea3576827e335ba2da8081d12e307c81)
+# Machine-readable gate model reading this block: registries/production_activation_gates.json
+# =====================================================================================
+owner_decisions_20260929:
+  record: docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md
+  record_sha256: 64f1c0560ef88776d0d199392d315767ea3576827e335ba2da8081d12e307c81
+  authorization_id: auth-20260929-owner-stagehand-private-plane-gates
+  signature_claimed: none
+
+  # Decisions section 2. The 2026-09-18 approval is owner intent, not signed ingress.
+  owner_intent: OWNER_INTENT_APPROVED
+  owner_intent_is_not:
+    - device-authenticated
+    - biometric
+    - cryptographically signed
+    - replay-protected production ingress
+  signed_ingress:
+    status: SIGNED_INGRESS_PENDING
+    waived: false
+    blocks: production activation where VAN policy requires signed owner ingress
+    does_not_block:
+      - repository implementation
+      - tests
+      - convergence
+      - Stagehand integration
+      - PR preparation
+      - non-production qualification
+    evidence_fabricated: false
+
+  # Decisions section 1.
+  hosting:
+    production_host: van-browser-core
+    trust_zone: dedicated VAN browser/automation trust zone
+    forbidden_production_hosts:
+      - van-trading-core
+      - dial-control
+      - van-private-core
+    co_residence_permitted: Harness-owned Chromium, under the existing browser lease/isolation rules
+    no_direct_authority_over:
+      - VATI Risk Authority
+      - Execution Router
+      - broker credentials
+      - trading secrets
+      - Owner Model database
+      - owner-private Hindsight
+      - owner-private OpenViking
+      - Project Truth mutation
+    cross_zone_access: bounded authenticated interfaces only
+    current_repo_placement: >-
+      deploy/van-trading-core/browser/** is historical packaging, not the final production
+      placement. Migration to van-browser-core is owned by the placement unit (M).
+    temporary_provisioning_on_van_trading_core: forbidden
+    zone_status: UNPROVISIONED
+    when_zone_unavailable: PRODUCTION_DISABLED
+    stagehand_production_state: PRODUCTION_DISABLED
+    unaffected_when_disabled: >-
+      The deterministic browser path and any independently qualified Jev lane continue under
+      their own policy.
+
+  # Decisions section 3 (recorded here because OQ-VAN-PRIVATE-PLANE-HOST is closed by it).
+  private_plane:
+    trust_zone: van-private-core
+    hosts:
+      - Owner Cognitive Model
+      - owner_model_revision
+      - correction/invalidation outbox
+      - owner-private Hindsight
+      - owner-private OpenViking projection
+      - personal-context resolver
+    must_not_host:
+      - generic browser automation
+      - Stagehand
+      - Chromium
+      - Jev browser execution
+      - VATI order execution
+      - broker adapters
+    cross_plane_access: bounded authenticated APIs only
+    personal_context_rule: >-
+      requested owner revision must equal the authoritative current owner_model_revision;
+      if it cannot be verified the resolver returns PERSONAL_CONTEXT_UNAVAILABLE and never
+      serves stale cached owner context.
+    provisioning_status: EXTERNAL_DEPLOYMENT_GATE
+
+  # Decisions section 4.
+  model:
+    provider: anthropic
+    model: claude-sonnet-5
+    family: Claude Sonnet 5
+    role: Hermes-managed specialist worker/subagent (not the DIAL manager)
+    pin_status: UNVERIFIED
+    pin_status_note: >-
+      Whether Anthropic exposes an immutable snapshot/revision identifier for the exact
+      Sonnet 5 model used could not be determined from this environment (no provider API
+      access). No snapshot id is recorded because none was observed; claude-sonnet-5 is
+      the configured family/name and must not be read as an immutable revision. The gate
+      stays pending until the provider identifier is established and either pinned
+      (PINNED_IMMUTABLE_REVISION) or the limitation recorded (FLOATING_ALIAS_ONLY, which
+      keeps production pending where deterministic pinning is mandatory).
+    immutable_revision_id: null
+    substitution_without_owner_decision: forbidden
+    if_stagehand_4_1_0_cannot_operate_with_it: >-
+      reproduce the incompatibility, report it, keep Stagehand production-disabled; no
+      substitute model without another explicit owner decision.
+    credential_locus: gateway/runtime only; never page content, prompts-as-data, browser
+      memory, Jev payloads or repository files
+
+  # Decisions section 5.
+  version:
+    package: "@browserbasehq/stagehand"
+    adopted_version: "4.1.0"
+    canonical_source_identity: released 4.1.0 artifact (not upstream default-branch HEAD)
+    release_commit: cd7b230778cf92269e4cb90e80d97f5113781c51
+    npm_integrity: sha512-PJikMBVoaCRh6TFD7GcmeISmsMq4IwUu1BD5FOsGUVDUxrVqZomWa6W6dF+a/zu4xRZu2Z2xX1nXVMDaCuZWsw==
+    integrity_matches_repo_lockfile: true
+    integrity_checked_against: >-
+      deploy/van-trading-core/browser/package-lock.json
+      node_modules/@browserbasehq/stagehand (version 4.1.0, stagehand-4.1.0.tgz)
+    not_the_adopted_artifact:
+      commit: ad2bf12ea7abd95bb1d6f3a59600842a0954fffb
+      reading: later unreleased upstream work past the 4.1.0 tag; it is NOT Stagehand 4.1.0
+    live_qualification:
+      status: PENDING
+      requires:
+        - the live runtime reports the expected 4.1.0 artifact through the gateway health check
+        - the runtime canary passes
+
+  # Supersedes reconciliation_20260929.production_gate for the gate model; that text stays.
+  production_gate:
+    status: PENDING
+    supersedes: reconciliation_20260929.production_gate
+    blocking_on:
+      - signed_ingress (SIGNED_INGRESS_PENDING; not waived)
+      - van-browser-core provisioning (zone_status UNPROVISIONED => PRODUCTION_DISABLED)
+      - model pin determination (pin_status UNVERIFIED)
+      - live 4.1.0 runtime report + canary (version.live_qualification PENDING)
+      - blockers STAGEHAND-VERIFIER-GAP-20260929 and STAGEHAND-DIRECT-ACTUATION-20260929
+
+  # Decisions sections 7 and 8 classify H's findings as mandatory Programme B remediation.
+  blockers:
+    STAGEHAND-VERIFIER-GAP-20260929:
+      severity: BLOCKER
+      status: OPEN
+      owner_unit: Programme B browser router unit (G)
+      source: reconciliation_20260929.programme_b_router_position.gap_found.finding
+      decision_section: 7
+      required: >-
+        lane proposes/acts -> VERIFYING -> independent postcondition verifier ->
+        VERIFIED_SUCCESS -> COMPLETED; done=True, GOAL_ACHIEVED, an empty control set, model
+        prose or Stagehand success never produce completed/succeeded directly.
+    STAGEHAND-DIRECT-ACTUATION-20260929:
+      severity: BLOCKER
+      status: OPEN
+      owner_unit: Programme B browser router unit (G)
+      source: reconciliation_20260929.programme_b_router_position.gap_found.also
+      decision_section: 8
+      required: >-
+        Stagehand -> typed action proposal -> Browser Router / policy -> Browser Harness /
+        Browser Control Agent -> Chromium -> independent verifier; Stagehand holds no
+        independent actuation authority.
+
+  # The open questions listed in reconciliation_20260929.owner_decisions_required.
+  open_questions_closed:
+    - id: OQ-STAGEHAND-HOST
+      status: DECIDED
+      decided_on: 2026-09-29
+      decision_ref: owner_decisions_20260929.hosting (record section 1)
+    - id: OQ-STAGEHAND-SIGNED-INGRESS
+      status: DECIDED
+      decided_on: 2026-09-29
+      decision_ref: owner_decisions_20260929.signed_ingress (record section 2)
+    - id: OQ-VAN-PRIVATE-PLANE-HOST
+      status: DECIDED
+      decided_on: 2026-09-29
+      decision_ref: owner_decisions_20260929.private_plane (record section 3)
+    - id: OQ-STAGEHAND-MODEL
+      status: DECIDED
+      decided_on: 2026-09-29
+      decision_ref: owner_decisions_20260929.model (record section 4)
+    - id: OQ-STAGEHAND-VERSION-AT-ADOPTION
+      status: DECIDED
+      decided_on: 2026-09-29
+      decision_ref: owner_decisions_20260929.version (record section 5)
+
+  health_governance_finding:
+    id: HEALTH-GOVERNANCE-BYPASS-20260929
+    decision_section: 6
+    finding: >-
+      health.py governance_state() declared production_activation_permitted=true when no
+      required decision carried a literal PENDING owner-signature line (a substring test), ignoring
+      reconciliation_20260929.production_gate.status PENDING.
+    remediation: registries/production_activation_gates.json + backend/van_gateway/automation/production_gates.py
