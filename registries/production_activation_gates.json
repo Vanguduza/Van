@@ -89,16 +89,18 @@
         {
           "id": "blocker_verifier_gap",
           "kind": "production",
-          "path": "owner_decisions_20260929.blockers.STAGEHAND-VERIFIER-GAP-20260929.status",
+          "path": "blocker_closure_20260929.blockers.STAGEHAND-VERIFIER-GAP-20260929.status",
           "green": ["CLOSED"],
-          "blocked": ["OPEN"]
+          "blocked": ["OPEN"],
+          "note": "Moved to the blocker_closure_20260929 append (OWNER_DERIVED; review I3 at VAN f55d360d). The earlier owner_decisions_20260929 block still records OPEN as the state at the time."
         },
         {
           "id": "blocker_direct_actuation",
           "kind": "production",
-          "path": "owner_decisions_20260929.blockers.STAGEHAND-DIRECT-ACTUATION-20260929.status",
+          "path": "blocker_closure_20260929.blockers.STAGEHAND-DIRECT-ACTUATION-20260929.status",
           "green": ["CLOSED"],
-          "blocked": ["OPEN"]
+          "blocked": ["OPEN"],
+          "note": "Moved to the blocker_closure_20260929 append (OWNER_DERIVED; review I3 at VAN f55d360d). The earlier owner_decisions_20260929 block still records OPEN as the state at the time."
         }
       ]
     },

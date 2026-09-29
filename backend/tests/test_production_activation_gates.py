@@ -178,8 +178,15 @@ def test_real_repository_is_not_permitted_today():
     assert by_id[(stagehand, "owner_intent")]["status"] == "GREEN"
     assert by_id[(stagehand, "production_gate")]["status"] == "PENDING"
     assert by_id[(stagehand, "signed_ingress")]["raw_value"] == "SIGNED_INGRESS_PENDING"
-    assert by_id[(stagehand, "blocker_verifier_gap")]["status"] == "BLOCKED"
-    assert by_id[(stagehand, "blocker_direct_actuation")]["status"] == "BLOCKED"
+    # Closed by the blocker_closure_20260929 append (review I3 at VAN f55d360d); the other
+    # Stagehand gates stay pending, so neither the global summary nor Stagehand is permitted.
+    for blocker in ("blocker_verifier_gap", "blocker_direct_actuation"):
+        assert by_id[(stagehand, blocker)]["status"] == "GREEN"
+        assert by_id[(stagehand, blocker)]["path"].startswith("blocker_closure_20260929.blockers.")
+    assert state["capabilities"]["stagehand"]["production_activation_permitted"] is False
+    assert {"VAN-ADOPT-STAGEHAND-001.yaml:production_gate", "VAN-ADOPT-STAGEHAND-001.yaml:signed_ingress",
+            "VAN-ADOPT-STAGEHAND-001.yaml:production_host", "VAN-ADOPT-STAGEHAND-001.yaml:model_pin",
+            "VAN-ADOPT-STAGEHAND-001.yaml:live_qualification"} <= set(state["production_gates_not_green"])
 
 
 def test_real_model_covers_every_required_decision_with_owner_and_production_gates():

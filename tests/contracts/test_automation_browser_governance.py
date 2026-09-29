@@ -191,6 +191,102 @@ def test_stagehand_owner_decisions_20260929_are_appended_truthfully():
         assert q["status"] == "DECIDED" and q["decision_ref"].startswith("owner_decisions_20260929.")
 
 
+#: sha256 of VAN-ADOPT-STAGEHAND-001.yaml through the end of owner_decisions_20260929 (the
+#: second append; VAN f55d360d). The blocker closure (unit G4b, review I3) is appended after
+#: the marker below; nothing above it may change.
+STAGEHAND_OWNER_DECISIONS_SHA256 = "d46d8618253fac1819c7bd7d4c7c65d34998ab98f6b078eaf789c622f0dd82bc"
+STAGEHAND_BLOCKER_CLOSURE_MARKER = (
+    "\n\n# ====================================================================================="
+    "\n# APPENDED 2026-09-29 (third append)"
+)
+STAGEHAND_VERIFIER_GAP_LIMITATION = (
+    'CLOSED (review I3, VAN f55d360d). On /assignments, /interaction/step, the watch runner, '
+    'the notebook consumer and automation dispatch, no lane result (done=True, GOAL_ACHIEVED,'
+    ' empty Stagehand controls, Jev done, engine success) yields COMPLETED/VERIFIED_SUCCESS; '
+    'only WorkflowVerifier VERIFIED over a declared predicate (field/expected other than '
+    '`exists`, or correlation keys each with a caller-declared expected value) does. '
+    'BrowserTaskService.complete(COMPLETED) requires the latest recorded verdict to be '
+    'VERIFIED; dispatch additionally requires the action receipt VERIFIED_SUCCESS with the '
+    'engine execution id independently observed. Limits: (1) READ_BACK observes a page the '
+    'site controls, so a declared title/URL/text proves what the page shows, not the '
+    'server-side effect; (2) automation dispatch has no production observer, so every run is '
+    'UNVERIFIABLE until one is qualified; (3) completion is refused while a router step or '
+    'assignment run is in flight on the task, and is written only if the verdict it checked '
+    "is still the task's latest (I3 MINOR-1, fixed by unit G4b; the in-flight marker is per "
+    'gateway process).'
+)
+STAGEHAND_DIRECT_ACTUATION_LIMITATION = (
+    'CLOSED (review I3, VAN f55d360d). On every production caller Stagehand is used only via '
+    'observe(); router lane 3 and HybridBrowserWorker turn one observed candidate into a '
+    'typed click/fill/press/scroll that VAN classifies from the Harness-observed element and '
+    'the Browser Harness executes. StagehandAdapter.act() refuses unless actuation_enabled, '
+    'which production wiring never sets; the worker serves /act only on a HISTORICAL_DEV_ONLY'
+    ' placement, and the gate refuses a worker whose /health reports act_endpoint_enabled. '
+    'Limits: (1) separation is process policy, not capability: the Stagehand 4.1.0 worker '
+    'still attaches to the Harness-owned Chromium over a full CDP connection '
+    "(stagehand_service.mjs:335), so a compromised worker could actuate; (2) Stagehand's "
+    'autonomous act/agent modes stay outside production, which makes the NotebookLM consumer '
+    '(notebook.py → act) non-functional in production; (3) the live Harness reports no '
+    'element list, so every targeted Stagehand proposal currently goes to owner takeover.'
+)
+
+
+def test_stagehand_blocker_closure_is_appended_and_reads_closed():
+    """Review I3 at VAN f55d360d: both Programme B blockers CLOSED, OWNER_DERIVED, append-only.
+
+    The earlier blocks are byte-for-byte what they were (their OPEN statuses included); the
+    gate model reads the blocker statuses from the new block, and nothing else about
+    Stagehand's production posture changes.
+    """
+    import yaml
+
+    text = (DECISIONS / "VAN-ADOPT-STAGEHAND-001.yaml").read_text(encoding="utf-8")
+    assert text.count(STAGEHAND_BLOCKER_CLOSURE_MARKER) == 1
+    prior = text.split(STAGEHAND_BLOCKER_CLOSURE_MARKER, 1)[0] + "\n"
+    assert hashlib.sha256(prior.encode("utf-8")).hexdigest() == STAGEHAND_OWNER_DECISIONS_SHA256, (
+        "text above the blocker-closure append was edited; append instead"
+    )
+
+    doc = yaml.safe_load(text)
+    # The recorded-at-the-time statuses stay OPEN; closure is a later statement, not an edit.
+    for blocker in doc["owner_decisions_20260929"]["blockers"].values():
+        assert blocker["status"] == "OPEN"
+    closure = doc["blocker_closure_20260929"]
+    assert closure["authority_class"] == "OWNER_DERIVED"
+    assert closure["signature_claimed"] == "none"
+    assert closure["authority_basis"]["owner_record_sha256"] == OWNER_DECISIONS_20260929_SHA256
+    assert closure["authority_basis"]["owner_sections"] == [7, 8, 10]
+    review = closure["independent_review"]
+    assert (review["id"], review["reviewed_commit"][:8], review["verdict_on_these_blockers"]) == (
+        "I3", "f55d360d", "CLOSED")
+    blockers = closure["blockers"]
+    assert set(blockers) == {"STAGEHAND-VERIFIER-GAP-20260929", "STAGEHAND-DIRECT-ACTUATION-20260929"}
+    assert all(b["status"] == "CLOSED" for b in blockers.values())
+    assert blockers["STAGEHAND-VERIFIER-GAP-20260929"]["limitation"] == STAGEHAND_VERIFIER_GAP_LIMITATION
+    assert blockers["STAGEHAND-DIRECT-ACTUATION-20260929"]["limitation"] == STAGEHAND_DIRECT_ACTUATION_LIMITATION
+    for blocker_id, blocker in blockers.items():
+        assert blocker["closes"] == f"owner_decisions_20260929.blockers.{blocker_id}"
+
+    # The gate model reads the new block, and only the two blocker gates moved.
+    model = json.loads((ROOT / "registries" / "production_activation_gates.json").read_text(encoding="utf-8"))
+    stagehand = next(d for d in model["required_decisions"] if d["decision"] == "VAN-ADOPT-STAGEHAND-001.yaml")
+    paths = {g["id"]: g["path"] for g in stagehand["gates"]}
+    assert paths["blocker_verifier_gap"] == (
+        "blocker_closure_20260929.blockers.STAGEHAND-VERIFIER-GAP-20260929.status")
+    assert paths["blocker_direct_actuation"] == (
+        "blocker_closure_20260929.blockers.STAGEHAND-DIRECT-ACTUATION-20260929.status")
+    assert paths["production_gate"] == "owner_decisions_20260929.production_gate.status"
+    assert paths["signed_ingress"] == "owner_decisions_20260929.signed_ingress.status"
+
+    # And Stagehand's production posture is unchanged by the closure.
+    dec = doc["owner_decisions_20260929"]
+    assert dec["production_gate"]["status"] == "PENDING"
+    assert dec["signed_ingress"]["status"] == "SIGNED_INGRESS_PENDING"
+    assert dec["hosting"]["stagehand_production_state"] == "PRODUCTION_DISABLED"
+    assert dec["model"]["pin_status"] == "UNVERIFIED"
+    assert dec["version"]["live_qualification"]["status"] == "PENDING"
+
+
 def test_no_provenance_pairs_unreleased_stagehand_head_with_4_1_0():
     """Owner decision §5: ad2bf12e is later unreleased work, never "Stagehand 4.1.0"."""
     row = next(

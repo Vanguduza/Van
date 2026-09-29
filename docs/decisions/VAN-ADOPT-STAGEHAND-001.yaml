@@ -449,3 +449,70 @@ owner_decisions_20260929:
       required decision carried a literal PENDING owner-signature line (a substring test), ignoring
       reconciliation_20260929.production_gate.status PENDING.
     remediation: registries/production_activation_gates.json + backend/van_gateway/automation/production_gates.py
+
+# =====================================================================================
+# APPENDED 2026-09-29 (third append) — closure of the two Programme B blockers recorded in
+# owner_decisions_20260929.blockers. Append-only: every byte above this line is preserved
+# unchanged, including the OPEN statuses there (they record the state at the time); the
+# gate model's blocker paths move to this block (registries/production_activation_gates.json).
+# Authority class: OWNER_DERIVED. The owner ordered these blockers closed by the runtime work
+# (docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md sections 7, 8 and 10:
+# "its findings remain blockers until closed"); independent review I3 at VAN f55d360d
+# confirmed closure. This block changes no product, security, money, provider or
+# owner-control intent, claims no signature, and leaves every other Stagehand gate as it was.
+# =====================================================================================
+blocker_closure_20260929:
+  authority_class: OWNER_DERIVED
+  authority_basis:
+    owner_record: docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md
+    owner_record_sha256: 64f1c0560ef88776d0d199392d315767ea3576827e335ba2da8081d12e307c81
+    owner_sections: [7, 8, 10]
+    parent_authorization_id: auth-20260929-owner-stagehand-private-plane-gates
+  signature_claimed: none
+  independent_review:
+    id: I3
+    reviewed_commit: f55d360dcefe3aa2439a4324c547d0d27acb5670
+    verdict_on_these_blockers: CLOSED
+    evidence_probes:
+      location: review-i3/probes/ (reviewer I3's probe set, held outside this repository)
+      on_direct_actuation: [act_refused.py, adapter_gate_slice.py, sh_lane_slice.py]
+      on_verifier_gap: [corr_types.py]
+      on_follow_up_findings: [lease_race.py, complete_inflight.py, terminal_resurrect.py,
+        watch_terminal.py, jev_gate.py]
+    review_suites_at_reviewed_commit: backend 2567 passed; trading 1280 passed 2 skipped;
+      tests/contracts + tests/hermes 627 passed 4 skipped (all exit 0)
+  follow_up_findings_from_the_same_review:
+    - id: I3-MAJOR-3
+      subject: /step lease exclusivity under concurrent steps on one task
+      disposition: fixed by unit G4b (in-flight marker, holder-checked release, Harness lease-generation fence)
+    - id: I3-MINOR-1
+      subject: /complete COMPLETED during an in-flight step
+      disposition: fixed by unit G4b (refused while a run is in flight; verdict-id conditional write)
+    - id: I3-MINOR-2
+      subject: end states not sticky outside complete()
+      disposition: fixed by unit G4b (single guarded status writer)
+    - id: I3-MINOR-3
+      subject: watch runner aborted on an already-terminal task
+      disposition: fixed by unit G4b
+    - id: I3-MINOR-4
+      subject: Jev browser effect GREEN without owner signature
+      disposition: fixed by unit G4b (owner_decision + owner_decision_reference gates)
+  blockers:
+    STAGEHAND-VERIFIER-GAP-20260929:
+      status: CLOSED
+      closes: owner_decisions_20260929.blockers.STAGEHAND-VERIFIER-GAP-20260929
+      decision_section: 7
+      limitation: >-
+        CLOSED (review I3, VAN f55d360d). On /assignments, /interaction/step, the watch runner, the notebook consumer and automation dispatch, no lane result (done=True, GOAL_ACHIEVED, empty Stagehand controls, Jev done, engine success) yields COMPLETED/VERIFIED_SUCCESS; only WorkflowVerifier VERIFIED over a declared predicate (field/expected other than `exists`, or correlation keys each with a caller-declared expected value) does. BrowserTaskService.complete(COMPLETED) requires the latest recorded verdict to be VERIFIED; dispatch additionally requires the action receipt VERIFIED_SUCCESS with the engine execution id independently observed. Limits: (1) READ_BACK observes a page the site controls, so a declared title/URL/text proves what the page shows, not the server-side effect; (2) automation dispatch has no production observer, so every run is UNVERIFIABLE until one is qualified; (3) completion is refused while a router step or assignment run is in flight on the task, and is written only if the verdict it checked is still the task's latest (I3 MINOR-1, fixed by unit G4b; the in-flight marker is per gateway process).
+    STAGEHAND-DIRECT-ACTUATION-20260929:
+      status: CLOSED
+      closes: owner_decisions_20260929.blockers.STAGEHAND-DIRECT-ACTUATION-20260929
+      decision_section: 8
+      limitation: >-
+        CLOSED (review I3, VAN f55d360d). On every production caller Stagehand is used only via observe(); router lane 3 and HybridBrowserWorker turn one observed candidate into a typed click/fill/press/scroll that VAN classifies from the Harness-observed element and the Browser Harness executes. StagehandAdapter.act() refuses unless actuation_enabled, which production wiring never sets; the worker serves /act only on a HISTORICAL_DEV_ONLY placement, and the gate refuses a worker whose /health reports act_endpoint_enabled. Limits: (1) separation is process policy, not capability: the Stagehand 4.1.0 worker still attaches to the Harness-owned Chromium over a full CDP connection (stagehand_service.mjs:335), so a compromised worker could actuate; (2) Stagehand's autonomous act/agent modes stay outside production, which makes the NotebookLM consumer (notebook.py → act) non-functional in production; (3) the live Harness reports no element list, so every targeted Stagehand proposal currently goes to owner takeover.
+  not_changed_by_this_block:
+    - owner_decisions_20260929.production_gate.status (PENDING)
+    - owner_decisions_20260929.signed_ingress.status (SIGNED_INGRESS_PENDING)
+    - owner_decisions_20260929.hosting.zone_status (UNPROVISIONED => Stagehand PRODUCTION_DISABLED)
+    - owner_decisions_20260929.model.pin_status (UNVERIFIED)
+    - owner_decisions_20260929.version.live_qualification.status (PENDING)
