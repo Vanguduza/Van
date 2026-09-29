@@ -218,3 +218,44 @@ package installs a production Stagehand unit outside `deploy/van-browser-core`.
 | Browser Stream Host certificates re-issued with `.browser-core` identities | PENDING (host) |
 | decommission `vati-stagehand`/`vati-browser-harness` on the live trading core | PENDING (operator) |
 | signed owner ingress (§2) | SIGNED_INGRESS_PENDING — unchanged, not waived |
+
+## 7. Enforcement points and known limitations (independent review I, 2026-09-29)
+
+**The gate is in the adapter.** `StagehandAdapter` evaluates the Stagehand production gate
+before every worker call (observe, extract, act). The default gate is the router's own
+composition (`interaction_router.load_stagehand_production_gate`): placement with the
+worker's live `/health` AND `evaluate_production_gates()`. A missing, failing or non-`True`
+gate refuses the call (`STAGEHAND_PRODUCTION_DISABLED:<reason>`). The adapter reports
+`configured = false` and status `POLICY_DISABLED` while the gate is closed. So the
+L2–L5 assignment path, the NotebookLM consumer and any future consumer are held to the
+same gate as the B5 router (review I B-1). The deterministic Harness path does not use the
+adapter and is unaffected.
+
+**Owner takeover preempts the assignment path.** `BrowserSubagentRunner` checks the
+router's `OwnerControlProbe` before every propose and every execute. Owner control, an
+unreadable control state or a missing probe end the run `OWNER_TAKEOVER`, and the task is
+left `WAITING_FOR_OWNER` (review I M-4). Resuming automation after the owner hands control
+back is a new assignment; there is no automatic resume.
+
+**COMPLETED needs a verdict.** `BrowserTaskService.complete(COMPLETED)` requires the task's
+latest `postcondition_verification` evidence row to be `VERIFIED`. Only the verifier path
+writes that kind; `seal_evidence` refuses it. The internal `/complete` route answers
+409 `BROWSER_TASK_NOT_VERIFIED` otherwise (review I M-2).
+
+**Limitation — the personal NotebookLM consumer is UNAVAILABLE.** `NotebookConsumerProvider`
+asks questions and creates notes with `stagehand.act`, which §8 removed from the production
+path. Its only read-back is `stagehand.extract`, i.e. Stagehand checking its own work,
+which §7 forbids. It therefore reports `UNCONFIGURED` with
+`details.unavailable_reason = NOTEBOOK_CONSUMER_REQUIRES_STAGEHAND_ACTUATION_AND_SELF_VERIFICATION`
+and refuses every operation before opening a browser task (review I M-7). Restoring it
+means rebuilding both operations as typed Browser Harness actions with an independent
+postcondition verifier. Re-enabling `act()` is not an acceptable fix. NotebookLM
+Enterprise (API) is unaffected.
+
+**Worker `/act` and version identity.** The van-browser-core worker serves `/act` only when
+`VAN_STAGEHAND_ACT_ENDPOINT_DEV_ONLY=1` is set on a development-only placement. Otherwise
+`/act` is `404 NOT_FOUND` and `/health` reports `act_endpoint_enabled: false`.
+`/health.runtime_version` is read from the installed
+`node_modules/@browserbasehq/stagehand/package.json` (`runtime_version_source:
+installed-package-metadata`), not a constant. The placement gate requires that source, the
+exact 4.1.0 version and `act_endpoint_enabled: false` (review I minor 5).

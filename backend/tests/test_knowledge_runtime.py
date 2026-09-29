@@ -10,7 +10,6 @@ import pytest
 from van_gateway.action.models import ExecutionStatus
 from van_gateway.action.registry import install_builtin_actions
 from van_gateway.action.service import ActionPolicyError, ActionRuntime
-from van_gateway.browser.models import BrowserObservation
 from van_gateway.browser.service import BrowserTaskService
 from van_gateway.config import Settings
 from van_gateway.context.models import EpistemicState, SourceTrust
@@ -335,43 +334,83 @@ async def test_enterprise_delete_timeout_is_conflicted_and_never_replayed(tmp_pa
 
 
 @pytest.mark.asyncio
-async def test_consumer_preexisting_same_title_is_not_claimed_as_van_created(tmp_path):
+async def test_consumer_is_unavailable_while_stagehand_cannot_actuate(tmp_path):
+    """Review I M-7 — the consumer is dead, so it must not report itself ready.
+
+    This replaced ``test_consumer_preexisting_same_title_is_not_claimed_as_van_created``,
+    whose fake Stagehand had a working ``act()``. The real ``StagehandAdapter`` refuses
+    ``act`` on the production path (owner decision 2026-09-29 §8) and the consumer's only
+    read-back is Stagehand ``extract`` (§7), so the fake hid a provider that reported
+    CONFIGURED while every operation failed. The real adapter is used here, with its
+    production gate held open so that the only thing under test is the consumer.
+    """
+    import httpx
+
+    from van_gateway.automation.external_runtime import ExternalRuntimeRegistry
+    from van_gateway.browser.adapters import StagehandAdapter
+    from van_gateway.knowledge.models import NotebookConsumerNoteCreateRequest
+    from van_gateway.knowledge.notebook import NOTEBOOK_CONSUMER_UNAVAILABLE_REASON
+
     store, _schema, evidence = await prepared_store(tmp_path)
+    calls: list[str] = []
+
+    def handler(request):
+        calls.append(request.url.path)
+        return httpx.Response(200, json={"controls": [], "extraction": {"answer": "x"}})
 
     class Harness:
         configured = True
         async def navigate(self, _task, _url):
+            calls.append("harness:navigate")
             return {"ok": True}
         async def page_info(self, _task):
             return {"url": "https://notebooklm.google.com/notebook/nb-owner"}
 
-    class Stagehand:
-        configured = True
-        async def act(self, _task, _action):
-            return {"ok": True}
-        async def extract(self, task, _instruction, _schema):
-            return BrowserObservation(
-                task_id=task.task_id,
-                extraction={"exact_title_exists": True, "auth_required": False},
-            )
-
+    stagehand = StagehandAdapter(
+        ExternalRuntimeRegistry(store), base_url="http://127.0.0.1:9140", enabled=True,
+        model_provider="anthropic", model_name="claude-sonnet-5",
+        transport=httpx.MockTransport(handler), production_gate=lambda: (True, "TEST_GATE_OPEN"),
+    )
+    await stagehand.evaluate_production_gate()
+    assert stagehand.configured is True  # fully wired: the limitation is not wiring
     provider = NotebookConsumerProvider(
-        store,
-        evidence,
-        enabled=True,
-        browser_tasks=BrowserTaskService(store),
+        store, evidence, enabled=True, browser_tasks=BrowserTaskService(store),
         harness=Harness(),  # type: ignore[arg-type]
-        stagehand=Stagehand(),  # type: ignore[arg-type]
-        profile_alias="authenticated_owner",
-        profile_secret_ref="secretref://browser/google-primary",
+        stagehand=stagehand,
+        profile_alias="authenticated_owner", profile_secret_ref="secretref://browser/google-primary",
     )
 
-    result = await provider.create_note(
-        __import__('van_gateway.knowledge.models', fromlist=['NotebookConsumerNoteCreateRequest']).NotebookConsumerNoteCreateRequest(
+    status = await provider.status()
+    assert status.state == ProviderState.UNCONFIGURED
+    assert status.details["unavailable_reason"] == NOTEBOOK_CONSUMER_UNAVAILABLE_REASON
+    assert status.details["stagehand_actuation_permitted"] is False
+
+    with pytest.raises(NotebookProviderError, match="notebook_consumer_unavailable"):
+        await provider.ask(NotebookConsumerAskRequest(notebook_id="nb-owner", question="What changed?"))
+    with pytest.raises(NotebookProviderError, match="notebook_consumer_unavailable"):
+        await provider.create_note(NotebookConsumerNoteCreateRequest(
             notebook_id="nb-owner", title="Dial Health", body="", idempotency_key="idem-consumer-existing-001",
-        )
+        ))
+    # Refused before anything happened: no Stagehand call, no navigation, no browser task.
+    assert calls == []
+    assert await store.fetchone("SELECT 1 FROM browser_tasks LIMIT 1") is None
+
+
+@pytest.mark.asyncio
+async def test_consumer_prior_ready_certification_does_not_outlive_the_limitation(tmp_path):
+    store, _schema, evidence = await prepared_store(tmp_path)
+
+    class Wired:
+        configured = True
+
+    await evidence.certify(
+        KnowledgeProvider.NOTEBOOK_CONSUMER, ProviderState.READY,
+        evidence_pointer="google://notebook-consumer/nb/query/old", details={"grounded_ask": True},
     )
-    assert result.status == KnowledgeOperationStatus.VERIFICATION_FAILED
-    assert result.error_code == "PREEXISTING_NOTE_AMBIGUOUS"
-    assert result.evidence_pointer is None
+    provider = NotebookConsumerProvider(
+        store, evidence, enabled=True, browser_tasks=BrowserTaskService(store),
+        harness=Wired(), stagehand=Wired(),  # type: ignore[arg-type]
+        profile_alias="authenticated_owner",
+    )
+    assert (await provider.status()).state == ProviderState.UNCONFIGURED
 

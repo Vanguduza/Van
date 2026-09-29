@@ -586,12 +586,27 @@ class NotebookEnterpriseProvider:
         )
 
 
+#: Review I M-7 — why the consumer cannot run today. Stable, machine-readable.
+NOTEBOOK_CONSUMER_UNAVAILABLE_REASON = "NOTEBOOK_CONSUMER_REQUIRES_STAGEHAND_ACTUATION_AND_SELF_VERIFICATION"
+
+
 class NotebookConsumerProvider:
     """Personal NotebookLM provider routed through the canonical Browser Fabric.
 
     Browser Harness owns deterministic navigation/session control and Stagehand
     supplies bounded semantic interaction. The provider never launches Chromium,
     exports cookies, or owns a second browser stack.
+
+    **Known limitation — currently UNAVAILABLE (review I M-7).** Both operations need
+    Stagehand to actuate: ``ask`` types the question with ``stagehand.act`` and
+    ``create_note`` creates the note with it. Owner decision 2026-09-29 §8 removed
+    Stagehand's actuation authority (``StagehandAdapter.act`` is refused on the production
+    path), and §7 forbids a lane certifying its own work — yet the only read-back here is
+    ``stagehand.extract``, i.e. Stagehand checking what Stagehand did. The provider
+    therefore reports ``UNCONFIGURED`` with ``details.unavailable_reason`` and refuses
+    every operation before opening a browser task. Re-enabling it needs the actuation moved
+    to typed Browser Harness operations and an independent postcondition verifier; it
+    must not be re-enabled by turning ``act()`` back on.
     """
 
     DOMAIN = "notebooklm.google.com"
@@ -623,8 +638,16 @@ class NotebookConsumerProvider:
         self.timeout_seconds = timeout_seconds
         self.operations = NotebookOperationStore(store)
 
+    def unavailable_reason(self) -> str | None:
+        """Why the consumer cannot run even when fully wired. None would mean it can."""
+        # Unconditional until the operations are rebuilt on the Harness with an
+        # independent verifier: an adapter built with actuation enabled (non-production)
+        # would still leave Stagehand verifying its own work (§7).
+        return NOTEBOOK_CONSUMER_UNAVAILABLE_REASON
+
     async def status(self) -> ProviderStatus:
         certification = await self.evidence.certification(KnowledgeProvider.NOTEBOOK_CONSUMER)
+        unavailable = self.unavailable_reason()
         configured = bool(
             self.profile_alias
             and self.browser_tasks is not None
@@ -635,7 +658,8 @@ class NotebookConsumerProvider:
         )
         if not self.enabled:
             state = ProviderState.DISABLED
-        elif not configured:
+        elif not configured or unavailable is not None:
+            # A prior READY certification cannot outlive the reason it no longer works.
             state = ProviderState.UNCONFIGURED
         elif certification and certification["state"] == ProviderState.READY.value:
             state = ProviderState.READY
@@ -653,6 +677,8 @@ class NotebookConsumerProvider:
                 "direct_playwright": False,
                 "readback_required": True,
                 "automatic_owner_truth_promotion": False,
+                "unavailable_reason": unavailable,
+                "stagehand_actuation_permitted": False,
             },
         )
 
@@ -665,6 +691,9 @@ class NotebookConsumerProvider:
             raise NotebookProviderError("notebook_consumer_browser_fabric_unconfigured")
         if not self.harness.configured or not self.stagehand.configured:
             raise NotebookProviderError("notebook_consumer_browser_fabric_unconfigured")
+        unavailable = self.unavailable_reason()
+        if unavailable is not None:
+            raise NotebookProviderError(f"notebook_consumer_unavailable:{unavailable}")
         return self.browser_tasks, self.harness, self.stagehand
 
     async def _open_task(
