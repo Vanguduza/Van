@@ -33,6 +33,7 @@ under DEC-039; nothing here is copied from them.
 
 from __future__ import annotations
 
+import contextvars
 import dataclasses
 import hashlib
 import inspect
@@ -200,6 +201,8 @@ class StepResult:
     #: The SHADOW Jev proposal for this step, if any, and whether the lane that did act
     #: agreed with it. Evidence for §8 only; it never influenced what executed.
     shadow_jev: dict[str, Any] | None = None
+    #: ``browser-evidence://<id>`` of this step's ledger record, when the router has one.
+    ledger_ref: str | None = None
 
     @property
     def verified_success(self) -> bool:
@@ -226,6 +229,7 @@ class StepResult:
             "attempts": list(self.attempts),
             "escalated": self.escalated,
             "shadow_jev": None if self.shadow_jev is None else dict(self.shadow_jev),
+            "ledger_ref": self.ledger_ref,
             "verified_success": self.verified_success,
         }
 
@@ -479,8 +483,24 @@ def validate_jev_proposal(
 # ------------------------------------------------------------------------ metrics (§8)
 
 
+#: The counter increments of the step running in this asyncio task, so each persisted step
+#: record carries exactly its own increments even when steps interleave.
+_STEP_INCREMENTS: contextvars.ContextVar[dict[str, int] | None] = contextvars.ContextVar(
+    "router_step_increments", default=None
+)
+
+
 class RouterMetrics:
-    """The §8 pre-registered counters. Every rate is published with its denominator."""
+    """The §8 pre-registered counters. Every rate is published with its denominator.
+
+    Reviewer I minor 6: counters are no longer memory-only when the router has a step
+    ledger. Each routed step's increments are stored on its ledger record and the totals are
+    re-derived from the ledger on first use, so a restart does not reset §8. Two limits,
+    stated rather than hidden: the totals cover the step records the ``browser_evidence``
+    retention class keeps (``ops/retention.py``), so they are a retention-window total, not
+    an all-time one; and ``record_owner_judged_wrong``, the one counter moved outside a step,
+    is not persisted (it has no caller in the gateway today).
+    """
 
     COUNTERS = (
         "total_steps",
@@ -518,6 +538,15 @@ class RouterMetrics:
         if name not in self.counts:
             raise KeyError(name)
         self.counts[name] += by
+        increments = _STEP_INCREMENTS.get()
+        if increments is not None:
+            increments[name] = increments.get(name, 0) + by
+
+    def absorb(self, persisted: dict[str, int]) -> None:
+        """Add totals re-derived from the ledger. Unknown names are ignored, never guessed."""
+        for name, value in persisted.items():
+            if name in self.counts and isinstance(value, int) and not isinstance(value, bool):
+                self.counts[name] += value
 
     def record_owner_judged_wrong(self) -> None:
         """An owner said an executed Jev proposal was wrong (verifier passed it)."""
@@ -663,6 +692,7 @@ class BrowserInteractionRouter:
         stagehand_gate: Callable[[], Any] | None = None,
         target_resolver: TargetResolver | None = None,
         require_owner_private_terms: bool = False,
+        ledger: "RouterStepLedger | None" = None,
     ) -> None:
         self.enabled = enabled
         self.executor = executor
@@ -687,6 +717,9 @@ class BrowserInteractionRouter:
         self.target_resolver = target_resolver
         #: Reviewer I minor 1: production requires B2 to know the owner's own name/handles.
         self.require_owner_private_terms = require_owner_private_terms
+        #: Reviewer I minor 6: every step is written to the browser task's evidence ledger.
+        self.ledger = ledger
+        self._metrics_loaded = ledger is None
 
     # ----------------------------------------------------------- lane readiness
 
@@ -719,6 +752,8 @@ class BrowserInteractionRouter:
             "stagehand_lane": self.semantic_fallback is not None,
             "owner_control_probe": self.owner_control_probe is not None,
             "verifier": self.verifier is not None,
+            "step_ledger": self.ledger is not None,
+            "metrics_persisted": self.ledger is not None,
         }
 
     # ----------------------------------------------------------- entry point
@@ -760,9 +795,34 @@ class BrowserInteractionRouter:
             eligibility_class=next((r.split(":", 1)[1] for r in reasons if r.startswith("B2:")), None),
         )
 
+    async def ensure_metrics_loaded(self) -> None:
+        """Re-derive the §8 counters from the step ledger once per process."""
+        if self._metrics_loaded or self.ledger is None:
+            return
+        self._metrics_loaded = True
+        try:
+            self.metrics.absorb(await self.ledger.persisted_counters())
+        except Exception:  # noqa: BLE001 - an unreadable ledger leaves live counts, retried next time
+            self._metrics_loaded = False
+
     async def route(self, step: InteractionStep) -> StepResult:
         if not self.enabled:
             raise RuntimeError("BROWSER_INTERACTION_ROUTER_DISABLED")
+        await self.ensure_metrics_loaded()
+        increments: dict[str, int] = {}
+        token = _STEP_INCREMENTS.set(increments)
+        try:
+            result = await self._route(step)
+        finally:
+            _STEP_INCREMENTS.reset(token)
+        if self.ledger is not None:
+            try:
+                result.ledger_ref = await self.ledger.record(step, result, increments)
+            except Exception as exc:  # noqa: BLE001 - the step happened; say the record did not
+                result.reasons.append(f"ROUTER_STEP_LEDGER_WRITE_FAILED:{type(exc).__name__}")
+        return result
+
+    async def _route(self, step: InteractionStep) -> StepResult:
         self.metrics.inc("total_steps")
         if step.action_class_ceiling not in PROPOSABLE_ACTION_CLASSES:
             # A4/A5 are never routed autonomously; an unknown ceiling is not guessed at.
@@ -1229,6 +1289,113 @@ class BrowserInteractionRouter:
         )
 
 
+# ------------------------------------------------------------------------ step ledger
+
+ROUTER_STEP_EVIDENCE_KIND = "interaction_router_step"
+
+
+class RouterStepLedger:
+    """Reviewer I minor 6 — each router step is written to the browser task's evidence ledger.
+
+    Reuses the existing ``browser_evidence`` table (the per-task record ``/v1/browser/tasks/
+    {id}/evidence`` already lists), under its own ``kind`` so nothing mistakes a routing
+    record for a captured page artefact: the mission ``browser-evidence`` read-back excludes
+    this kind. What is stored is the step's outcome — lane, state, trail, reason codes, the
+    action's operation/opaque target/class, the verification outcome, the SHADOW comparison —
+    and the §8 counter increments it caused. No locator, label, value or page content.
+    """
+
+    def __init__(self, store: Any) -> None:
+        self.store = store
+
+    @staticmethod
+    def _record_json(step: InteractionStep, result: StepResult, increments: dict[str, int]) -> dict[str, Any]:
+        body = result.to_json()
+        body.pop("ledger_ref", None)
+        return {
+            "router_step": 1,
+            "step_ceiling": step.action_class_ceiling,
+            "task_action_class": getattr(step.task.action_class, "value", step.task.action_class),
+            "lane": body["lane"],
+            "state": body["state"],
+            "trail": body["trail"],
+            "reasons": body["reasons"],
+            "action": body["action"],
+            "verification": body["verification"],
+            "attempts": [
+                {"lane": a.get("lane"), "state": a.get("state"), "action": a.get("action")}
+                for a in body["attempts"]
+            ],
+            "escalated": body["escalated"],
+            "verified_success": body["verified_success"],
+            "jev_consulted": body["jev_consulted"],
+            "eligibility_class": body["eligibility_class"],
+            "shadow_jev": body["shadow_jev"],
+            "metric_increments": dict(increments),
+        }
+
+    async def record(self, step: InteractionStep, result: StepResult, increments: dict[str, int]) -> str:
+        from van_gateway.automation.canonical import digest, new_id
+        from van_gateway.browser.policy import BrowserPolicyEngine, BrowserPolicyError
+
+        record = self._record_json(step, result, increments)
+        try:
+            BrowserPolicyEngine.assert_no_secrets(record, context="router_step")
+        except BrowserPolicyError:
+            # Refuse the text, keep the fact: a reason carrying secret-shaped material is
+            # dropped rather than stored, and the record says so.
+            record["reasons"] = []
+            record["verification"] = None if record["verification"] is None else {
+                "outcome": record["verification"]["outcome"], "detail": None,
+            }
+            record["reasons_withheld"] = "secret_material"
+        page_url = step.observation.get("url") if isinstance(step.observation, dict) else None
+        now = int(time.time() * 1000)
+        evidence_id = new_id("browser_evidence")
+        await self.store.execute(
+            """
+            INSERT INTO browser_evidence(
+              evidence_id, task_id, kind, url_digest, dom_digest, screenshot_digest,
+              extraction_digest, source_trust, injection_assessment, contains_secrets,
+              created_at_ms, evidence_json
+            ) VALUES (?, ?, ?, ?, NULL, NULL, ?, 'VAN_ROUTER', 'NONE_DETECTED', 0, ?, ?)
+            """,
+            (
+                evidence_id, step.task.task_id, ROUTER_STEP_EVIDENCE_KIND,
+                digest({"url": page_url if isinstance(page_url, str) else None}),
+                digest(record), now, json.dumps(record, sort_keys=True, separators=(",", ":")),
+            ),
+        )
+        return f"browser-evidence://{evidence_id}"
+
+    async def persisted_counters(self) -> dict[str, int]:
+        rows = await self.store.fetchall(
+            "SELECT evidence_json FROM browser_evidence WHERE kind = ?", (ROUTER_STEP_EVIDENCE_KIND,),
+        )
+        totals: dict[str, int] = {}
+        for row in rows:
+            try:
+                increments = json.loads(str(row["evidence_json"])).get("metric_increments") or {}
+            except (ValueError, AttributeError):
+                continue
+            for name, value in increments.items():
+                if isinstance(value, int) and not isinstance(value, bool):
+                    totals[name] = totals.get(name, 0) + value
+        return totals
+
+    async def steps_for_task(self, task_id: str) -> list[dict[str, Any]]:
+        rows = await self.store.fetchall(
+            "SELECT evidence_id, created_at_ms, evidence_json FROM browser_evidence "
+            "WHERE task_id = ? AND kind = ? ORDER BY created_at_ms, evidence_id",
+            (task_id, ROUTER_STEP_EVIDENCE_KIND),
+        )
+        return [
+            {"evidence_id": row["evidence_id"], "created_at_ms": row["created_at_ms"],
+             **json.loads(str(row["evidence_json"]))}
+            for row in rows
+        ]
+
+
 # ------------------------------------------------------------------------ production adapters
 
 
@@ -1456,6 +1623,7 @@ def build_interaction_router(
         target_resolver=HarnessTargetResolver(harness),
         eligibility_policy=build_eligibility_policy(settings),
         require_owner_private_terms=True,
+        ledger=RouterStepLedger(store) if store is not None else None,
     )
 
 
@@ -1494,7 +1662,10 @@ def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter)
     @api.get("/metrics")
     async def interaction_metrics(x_van_internal_token: str | None = Header(default=None)):
         browser_api._require_internal(x_van_internal_token)
-        return router.metrics.snapshot()
+        await router.ensure_metrics_loaded()
+        snapshot = router.metrics.snapshot()
+        snapshot["persisted"] = router.ledger is not None
+        return snapshot
 
     @api.post("/step")
     async def interaction_step(
@@ -1541,7 +1712,9 @@ __all__ = [
     "RouterAction",
     "RouterLane",
     "OwnerControlProbe",
+    "ROUTER_STEP_EVIDENCE_KIND",
     "RouterMetrics",
+    "RouterStepLedger",
     "SemanticProposalRefused",
     "StagehandSemanticFallback",
     "StepResult",
