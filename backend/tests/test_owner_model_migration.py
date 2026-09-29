@@ -51,10 +51,13 @@ async def _real_episodes(store) -> dict[str, str]:
 
 async def _v30_store(tmp_path, monkeypatch, name="legacy.sqlite3") -> Store:
     store = Store(str(tmp_path / name))
-    monkeypatch.delitem(dbmod.MIGRATIONS, 31)
+    # Every version after 30 is withheld, not only 31: a later version applied on its own
+    # would record a higher schema version and 31 would then never run.
+    for version in [v for v in dbmod.MIGRATIONS if v > 30]:
+        monkeypatch.delitem(dbmod.MIGRATIONS, version)
     await store.migrate()
     monkeypatch.undo()
-    assert 31 in dbmod.MIGRATIONS
+    assert 31 in dbmod.MIGRATIONS and 32 in dbmod.MIGRATIONS
     return store
 
 
@@ -99,7 +102,7 @@ async def test_migration_backfills_legacy_episodes_as_system_observed(tmp_path, 
     assert eps == expected
     assert revs == [("owner", 1), ("someone-else", 1)]
     version = await store.fetchone("SELECT MAX(version) AS v FROM schema_migrations")
-    assert version["v"] == dbmod.SCHEMA_VERSION == 31
+    assert version["v"] == dbmod.SCHEMA_VERSION == 32
 
     model = OwnerCognitiveModel(store)
     legacy = await model.get("oca_ev")

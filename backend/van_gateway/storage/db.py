@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 31
+SCHEMA_VERSION = 32
 
 
 MIGRATION_17 = """
@@ -787,6 +787,133 @@ BEGIN
    WHERE r.owner_principal_id = OLD.owner_principal_id;
 END;
 """
+
+# ---------------------------------------------------------------------------- migration 32
+#
+# Why 32 and not an edit of 31: `Store.migrate()` applies a version once and records it in
+# `schema_migrations`; it never re-reads the SQL of an applied version. Migration 31 has been
+# pushed on the Memory Fabric branch, so any database that already ran it would silently keep
+# the defects below if they were fixed only inside 31. A new version reaches both a fresh
+# database (31 then 32) and one that already ran 31. Every statement in the repair script is
+# deterministic from the tables it reads, so re-running it changes nothing.
+
+def _m32_resolved_principal(column: str) -> str:
+    """A stored principal, with `device:<id>` resolved through owner_device_bindings."""
+    return (f"(CASE WHEN substr({column}, 1, 7) = 'device:' THEN COALESCE(("
+            f"SELECT b.owner_principal_id FROM owner_device_bindings b "
+            f"WHERE b.device_id = substr({column}, 8) LIMIT 1), {column}) ELSE {column} END)")
+
+
+def _m32_foreign(ref: str, owner: str) -> str:
+    """True when anything attributes episode `ref` to a principal other than `owner`.
+
+    The same rule as `OwnerCognitiveModel._foreign_principal` (O2)."""
+    principal = _m32_resolved_principal("m.owner_principal_id")
+    return f"""(
+      (substr({ref}, 1, 8) = 'mission:' AND EXISTS (
+         SELECT 1 FROM missions m WHERE m.mission_id = substr({ref}, 9)
+            AND {principal} != {owner}))
+   OR (substr({ref}, 1, 8) = 'command:' AND (
+         EXISTS (SELECT 1 FROM missions m WHERE json_valid(m.authority_envelope_json)
+                    AND json_extract(m.authority_envelope_json, '$.source_command_id')
+                        = substr({ref}, 9)
+                    AND {principal} != {owner})
+      OR EXISTS (SELECT 1 FROM audit c JOIN owner_device_bindings b ON b.device_id = c.device_id
+                  WHERE c.command_id = substr({ref}, 9) AND b.owner_principal_id != {owner}))))"""
+
+
+# The episode identity the ladder counts (M4) — the same expression as
+# `owner_model.EPISODE_KEY_SQL`, frozen here because an applied migration must not change.
+_M32_KEY = (
+    "COALESCE(CASE WHEN substr(e.episode_ref, 1, 8) = 'mission:' THEN ("
+    "SELECT 'command:' || NULLIF(trim(json_extract(m.authority_envelope_json, "
+    "'$.source_command_id')), '') FROM missions m "
+    "WHERE m.mission_id = substr(e.episode_ref, 9) "
+    "AND json_valid(m.authority_envelope_json)) END, e.episode_ref)"
+)
+_M32_VOTES = (
+    f"(SELECT COUNT(DISTINCT {_M32_KEY}) FROM owner_model_episodes e "
+    "WHERE e.assertion_id = owner_cognitive_model.assertion_id "
+    "AND e.origin = 'SYSTEM_OBSERVED')"
+)
+# What evidence alone can produce (OwnerCognitiveModel._ladder). Autonomy-bearing fields
+# stop at CANDIDATE.
+_M32_LADDER = (
+    f"(CASE WHEN {_M32_VOTES} >= 3 AND field NOT IN ("
+    "'delegation_preferences', 'accepted_risk_patterns', 'interruption_preferences') "
+    f"THEN 'EVIDENCED' WHEN {_M32_VOTES} >= 2 THEN 'CANDIDATE' ELSE 'OBSERVED' END)"
+)
+_M32_RANK = "(CASE {s} WHEN 'EVIDENCED' THEN 2 WHEN 'CANDIDATE' THEN 1 ELSE 0 END)"
+
+MIGRATION_32_OWNER_MODEL_REPAIR = f"""
+-- Memory Fabric Programme A, reviewer D findings M4, M5 and O2. Idempotent.
+
+-- Snapshot, so the revision fence can be advanced for exactly the owners this changes.
+DROP TABLE IF EXISTS temp.m32_before;
+CREATE TEMP TABLE m32_before AS
+  SELECT assertion_id, owner_principal_id, state, confidence, supporting_episode_refs_json
+    FROM owner_cognitive_model;
+
+-- O2. An episode another principal owns was never evidence about this owner. Migration 31
+-- (and observe() until now) never read missions.owner_principal_id, so such an episode may
+-- be stored as SYSTEM_OBSERVED. It is kept for provenance as MODEL_INFERRED, which never
+-- evidences: the same fail-closed label 31 gives any legacy ref it cannot vouch for.
+INSERT OR IGNORE INTO owner_model_episodes(
+  assertion_id, episode_ref, origin, evidence_refs_json, recorded_at_ms
+)
+SELECT e.assertion_id, e.episode_ref, 'MODEL_INFERRED', e.evidence_refs_json, e.recorded_at_ms
+  FROM owner_model_episodes e JOIN owner_cognitive_model a ON a.assertion_id = e.assertion_id
+ WHERE e.origin = 'SYSTEM_OBSERVED' AND {_m32_foreign("e.episode_ref", "a.owner_principal_id")};
+DELETE FROM owner_model_episodes
+ WHERE origin = 'SYSTEM_OBSERVED' AND EXISTS (
+   SELECT 1 FROM owner_cognitive_model a
+    WHERE a.assertion_id = owner_model_episodes.assertion_id
+      AND {_m32_foreign("owner_model_episodes.episode_ref", "a.owner_principal_id")});
+
+-- M5. CONFIRMED means the owner said so, and confirm()/correct() are the only writers that
+-- set owner_confirmed_at_ms. A CONFIRMED row without it was minted by the pre-P1-SYM-001
+-- evidence ladder (three free strings made CONFIRMED) and 31 left it alone, so the capsule
+-- labelled it owner_stated at S0 with zero evidencing episodes. It is recomputed from its
+-- SYSTEM_OBSERVED votes like any ladder state: EVIDENCED at best, never CONFIRMED.
+-- M4/O2. Ladder states are re-checked against the vote count after the relabel above and
+-- with a mission and its source command counted once. Demote only, never promote.
+UPDATE owner_cognitive_model
+   SET state = CASE
+         WHEN state = 'CONFIRMED' THEN {_M32_LADDER}
+         WHEN {_M32_RANK.format(s=_M32_LADDER)} < {_M32_RANK.format(s="state")} THEN {_M32_LADDER}
+         ELSE state END
+ WHERE state IN ('OBSERVED', 'CANDIDATE', 'EVIDENCED')
+    OR (state = 'CONFIRMED' AND owner_confirmed_at_ms IS NULL);
+
+-- Supporting refs are SYSTEM_OBSERVED refs; ladder-state confidence follows the vote count
+-- with the model's formula. Owner states and SUPERSEDED keep their confidence.
+UPDATE owner_cognitive_model
+   SET supporting_episode_refs_json = COALESCE((
+         SELECT json_group_array(ref) FROM (
+           SELECT DISTINCT e.episode_ref AS ref FROM owner_model_episodes e
+            WHERE e.assertion_id = owner_cognitive_model.assertion_id
+              AND e.origin = 'SYSTEM_OBSERVED' ORDER BY e.episode_ref)), '[]'),
+       confidence = CASE
+         WHEN state NOT IN ('OBSERVED', 'CANDIDATE', 'EVIDENCED') THEN confidence
+         WHEN {_M32_VOTES} = 0 THEN 0.0
+         ELSE MIN(0.95, 0.2 + 0.25 * ({_M32_VOTES} - 1))
+       END;
+
+-- C2. A capsule issued before this repair carries the old labels (an M5 row as
+-- owner_stated). Advancing the revision of every owner whose assertions changed makes the
+-- fence refuse it. Owners with no change keep their revision, so a re-run bumps nothing.
+UPDATE owner_model_revisions
+   SET owner_model_revision = owner_model_revision + 1,
+       updated_at_ms = MAX(updated_at_ms, CAST(strftime('%s','now') AS INTEGER) * 1000)
+ WHERE owner_principal_id IN (
+   SELECT b.owner_principal_id FROM m32_before b JOIN owner_cognitive_model a
+     ON a.assertion_id = b.assertion_id
+    WHERE a.state IS NOT b.state OR a.confidence IS NOT b.confidence
+       OR a.supporting_episode_refs_json IS NOT b.supporting_episode_refs_json);
+DROP TABLE IF EXISTS temp.m32_before;
+"""
+
+MIGRATION_32 = MIGRATION_32_OWNER_MODEL_REPAIR
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -2121,6 +2248,7 @@ MIGRATIONS: dict[int, str] = {
     29: MIGRATION_29,
     30: MIGRATION_30,
     31: MIGRATION_31,
+    32: MIGRATION_32,
 }
 
 
