@@ -256,8 +256,12 @@ async def test_the_worker_actually_drives_the_adapter(tmp_path):
     """P2-BROW-001 — nothing on this path imported an adapter, so evidence was whatever
     the caller handed in."""
     task = await _task(tmp_path)
+    # Review I4 MAJOR-A (action_risk R6): a fill needs the Harness to report the field; one
+    # it does not report is A4 (owner takeover), never filled blind.
+    password = {"locator": "#password", "role": "textbox", "name": "Password", "type": "password"}
     harness = FakeHarness([
-        {"url": f"https://{DOMAIN}/login", "title": "login", "extraction": {}},
+        {"url": f"https://{DOMAIN}/login", "title": "login", "extraction": {}, "elements": [password]},
+        {"url": f"https://{DOMAIN}/login", "title": "login", "extraction": {}, "elements": [password]},
         {"url": f"https://{DOMAIN}/home", "title": "home", "extraction": {"text": "Welcome"}},
     ])
     worker = AdapterBackedWorker(harness, task=task, plan=BrowserTaskPlan(steps=[

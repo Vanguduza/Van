@@ -103,7 +103,10 @@ async def test_the_harness_observed_element_decides_not_an_innocent_locator(tmp_
 
 async def test_a_class_above_the_ceiling_is_refused_not_stamped(tmp_path):
     """A fill is A3; under an A2 ceiling it is refused (it used to run as the A2 ceiling)."""
-    result, harness = await _run(tmp_path, [{"kind": "fill", "locator": "#email", "instruction": "Email", **FILL}])
+    # Review I4 MAJOR-A (action_risk R6): a fill into a field the Harness did not report is
+    # A4, so the field is reported here to reach the ceiling check at all.
+    result, harness = await _run(tmp_path, [{"kind": "fill", "locator": "#email", "instruction": "Email", **FILL}],
+                                 elements=[{"locator": "#email", "role": "textbox", "name": "Email", "type": "email"}])
     assert result.stop_reason is SubagentStop.ACTION_CLASS_VIOLATION
     assert result.detail == "A3>A2"
     assert harness.calls == []

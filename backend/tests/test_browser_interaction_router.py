@@ -313,8 +313,11 @@ async def test_stagehand_action_above_ceiling_goes_to_owner_not_executor():
                        description="Pay now with saved card")
     router = make_router(jev_client=FakeJev(None), semantic_fallback=FakeStagehand(pay))
     result = await router.route(step())
-    assert result.lane is RouterLane.OWNER_TAKEOVER and router.executor.executed == []
+    # Payments first (review I4 MAJOR-A): an A4 the payment boundary recognises is a
+    # payment refusal; either way lane 4 and nothing executed.
+    assert result.lane is RouterLane.POLICY_REFUSAL and router.executor.executed == []
     assert "STAGEHAND_ACTION_ABOVE_CEILING:A4" in result.reasons
+    assert any("automated_payment_prohibited" in r for r in result.reasons)
 
 
 async def test_stagehand_result_is_success_only_through_the_verifier():
