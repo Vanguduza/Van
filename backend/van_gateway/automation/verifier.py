@@ -32,6 +32,33 @@ class VerificationOutcome(str, Enum):
 EXISTENCE_SIGNAL = "exists"
 
 
+def is_blank_expected(value: Any) -> bool:
+    """Review I3 MINOR-5 — an empty (or whitespace-only) expected string matches a blank
+    page's ``visible_text``/``title``, so it asserts nothing an observation can be wrong
+    about. It is refused like an undeclared value."""
+    return isinstance(value, str) and not value.strip()
+
+
+def strictly_equal(expected: Any, observed: Any) -> bool:
+    """Type-strict equality (review I3 MINOR-5).
+
+    Python's ``==`` says ``True == 1`` and ``1 == 1.0``, so a declared ``True`` was VERIFIED by
+    an observed ``1``. Types must match exactly (``bool`` is not ``int``, ``int`` is not
+    ``float``), recursively through lists and dicts.
+    """
+    if type(expected) is not type(observed):
+        return False
+    if isinstance(expected, dict):
+        return expected.keys() == observed.keys() and all(
+            strictly_equal(expected[key], observed[key]) for key in expected
+        )
+    if isinstance(expected, (list, tuple)):
+        return len(expected) == len(observed) and all(
+            strictly_equal(e, o) for e, o in zip(expected, observed)
+        )
+    return expected == observed
+
+
 class PostconditionSpec(BaseModel):
     """What the IR declared must become true (§165)."""
 
@@ -61,7 +88,7 @@ class PostconditionSpec(BaseModel):
         observer's own existence signal. Each one would pass on any readable observation."""
         return [
             key for key, value in self.correlation_predicates.items()
-            if value is None or key == EXISTENCE_SIGNAL
+            if value is None or key == EXISTENCE_SIGNAL or is_blank_expected(value)
         ]
 
     @property
@@ -78,6 +105,9 @@ class PostconditionSpec(BaseModel):
         it fails closed rather than silently dropping the key.
         """
         if self.undeclared_correlation_keys:
+            return False
+        if self.field is not None and is_blank_expected(self.expected):
+            # Review I3 MINOR-5: `expected=""` is VERIFIED by any blank page.
             return False
         has_field_predicate = (
             self.field is not None and self.field != EXISTENCE_SIGNAL and self.expected is not None
@@ -140,7 +170,7 @@ class WorkflowVerifier:
                 verifier_type=verifier_type,
                 detail=(
                     "postcondition declares no predicate (field/expected, or correlation keys "
-                    "each with a declared expected value)"
+                    "each with a declared, non-blank expected value)"
                     + (
                         f"; undeclared correlation keys: {sorted(spec.undeclared_correlation_keys)}"
                         if spec.undeclared_correlation_keys else ""
@@ -177,7 +207,7 @@ class WorkflowVerifier:
 
         if spec.field is not None and spec.expected is not None:
             actual = observed.get(spec.field)
-            if actual != spec.expected:
+            if not strictly_equal(spec.expected, actual):
                 return VerificationResult(
                     outcome=VerificationOutcome.FAILED,
                     verifier_type=verifier_type,
@@ -197,7 +227,9 @@ class WorkflowVerifier:
                 correlation=correlation,
                 detail="correlation incomplete",
             )
-        mismatched = sorted(key for key, value in correlation.items() if value != predicates[key])
+        mismatched = sorted(
+            key for key, value in correlation.items() if not strictly_equal(predicates[key], value)
+        )
         if mismatched:
             # N-1 — an observed correlation value that is not the declared one is evidence the
             # effect is someone else's (or absent), never a pass.
@@ -244,4 +276,6 @@ __all__ = [
     "VerificationOutcome",
     "VerificationResult",
     "WorkflowVerifier",
+    "is_blank_expected",
+    "strictly_equal",
 ]
