@@ -969,8 +969,10 @@ PUBLIC_PAGE = {
     "url": "https://docs.python.org/3/library/json.html", "title": "json",
     "authenticated": False, "cookies_present": False,
     "elements": [
-        {"ref": "a#next", "role": "link", "label": "Next topic"},
-        {"ref": "#qs", "role": "searchbox", "label": "Quick search"},
+        # Review I4: the Harness always reports visibility; an element without it is
+        # treated as hidden (withheld), so the fixture states it.
+        {"ref": "a#next", "role": "link", "label": "Next topic", "hidden": False},
+        {"ref": "#qs", "role": "searchbox", "label": "Quick search", "hidden": False},
     ],
 }
 

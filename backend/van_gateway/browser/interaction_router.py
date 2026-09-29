@@ -471,13 +471,27 @@ def observed_element_text(element: dict[str, Any], locator: str | None) -> str:
     return " | ".join(dict.fromkeys(t for t in texts if t))
 
 
+def harness_element_locator(element: Any) -> str | None:
+    """The locator a Harness-reported element is acted on by (``locator``; ``ref`` legacy)."""
+    if not isinstance(element, dict):
+        return None
+    for key in ("locator", "ref"):
+        value = element.get(key)
+        if isinstance(value, str) and value:
+            return value
+    return None
+
+
 class HarnessTargetResolver:
     """Resolves a Stagehand locator to the element the Browser Harness itself reports.
 
-    Uses the ``elements`` list of the Harness ``page_info`` (the same list B2 reads). An
-    element is resolved only when its ``ref`` is exactly the locator the Harness will act
-    on. The live Harness does not report elements today, so this resolves nothing and every
-    targeted Stagehand action goes to owner takeover — the fail-closed answer.
+    Review I4: the Harness ``page_info`` now reports a bounded ``elements`` list (the same
+    list B2 reads), each entry keyed by the ``locator`` the Harness executes verbatim. An
+    element is resolved only when that locator is exactly the one the action will use. A
+    locator the bounded list omitted is resolved through the Harness ``describe`` operation,
+    which reports the element the Harness would act on for it in the same shape, under the
+    same locator. Anything else — no such element, a describe fault, a different locator
+    echoed back — resolves nothing, and the caller fails closed (owner takeover).
     """
 
     def __init__(self, harness: Any) -> None:
@@ -486,9 +500,16 @@ class HarnessTargetResolver:
     async def __call__(self, task: BrowserTask, locator: str) -> dict[str, Any] | None:
         page = await self.harness.page_info(task)
         for raw in (page or {}).get("elements") or ():
-            if isinstance(raw, dict) and raw.get("ref") == locator:
+            if harness_element_locator(raw) == locator:
                 return raw
-        return None
+        describe = getattr(self.harness, "describe", None)
+        if describe is None:
+            return None
+        described = await describe(task, locator)
+        element = (described or {}).get("element") if isinstance(described, dict) else None
+        if harness_element_locator(element) != locator:
+            return None
+        return element
 
 
 #: The element fields any one of which names the target well enough to classify it.
@@ -785,15 +806,19 @@ def _observation_digest(observation: Any) -> str:
 def harness_page_to_jev_observation(page: Any, *, profile_alias: str) -> Any:
     """Build B2's ``JevPageObservation`` from what the Browser Harness reports.
 
-    Never guesses in the permissive direction. The Harness ``page_info`` today returns
-    ``url``/``title``/``extraction`` and, when the page marks one, ``account_identity``; it
-    does not return an element list, a login state or a cookie state. So:
+    Never guesses in the permissive direction. Review I4: the Harness ``page_info`` reports
+    ``url``/``title``/``extraction``, ``account_identity`` when the page marks one, a bounded
+    ``elements`` list, and ``authenticated``/``cookies_present`` as booleans or None:
 
     * ``authenticated``/``cookies_present`` are taken only when the Harness reports a real
       bool; otherwise ``None`` (unknown), which B2 treats as an authenticated session. An
-      ``account_identity`` marker means signed in.
-    * ``elements`` come only from a Harness-reported ``elements`` list; each ``ref`` is the
-      Harness locator used to act on it. No list means no targets, which B2 denies.
+      ``account_identity`` marker means signed in whatever else was reported.
+    * ``elements`` come only from the Harness-reported list; each ``ref`` is the Harness
+      ``locator`` used to act on it (legacy ``ref`` accepted). ``name`` is the label,
+      ``attributes["aria-label"]`` the aria label, ``attributes.title`` (else the
+      ``description``) the title, ``type`` the input type. The Harness never reports a
+      value; ``value_present`` becomes a redacted placeholder value so B2 still sees that
+      a field holds owner input. No list means no targets, which B2 denies.
     """
     from van_gateway.browser.jev_eligibility import JevPageObservation, ObservedElement
 
@@ -803,19 +828,35 @@ def harness_page_to_jev_observation(page: Any, *, profile_alias: str) -> Any:
         value = page.get(key)
         return value if isinstance(value, bool) else None
 
+    def text(raw: dict[str, Any], *keys: str) -> str:
+        attributes = raw.get("attributes") if isinstance(raw.get("attributes"), dict) else {}
+        for key in keys:
+            source, _, name = key.partition(".")
+            value = attributes.get(name) if source == "attributes" else raw.get(key)
+            if isinstance(value, str) and value:
+                return value
+        return ""
+
     authenticated = tri("authenticated")
     if page.get("account_identity"):
         authenticated = True
     elements = []
     for raw in page.get("elements") or ():
-        if not isinstance(raw, dict) or not isinstance(raw.get("ref"), str) or not raw.get("ref"):
+        ref = harness_element_locator(raw)
+        if ref is None:
             continue
+        value = text(raw, "value")
+        if not value and raw.get("value_present") is True:
+            value = "[REDACTED]"
+        tag = text(raw, "tag").lower()
+        # A <button type=submit> is not an input field; its type is not an input type.
+        input_type = text(raw, "input_type") or (text(raw, "type") if tag in ("", "input", "textarea", "select") else "")
         elements.append(ObservedElement(
-            ref=raw["ref"], role=str(raw.get("role") or ""),
-            label=str(raw.get("label") or ""), aria_label=str(raw.get("aria_label") or ""),
-            placeholder=str(raw.get("placeholder") or ""), title=str(raw.get("title") or ""),
-            value=str(raw.get("value") or ""), input_type=str(raw.get("input_type") or ""),
-            autocomplete=str(raw.get("autocomplete") or ""), hidden=bool(raw.get("hidden", False)),
+            ref=ref, role=text(raw, "role"),
+            label=text(raw, "label", "name"), aria_label=text(raw, "aria_label", "attributes.aria-label"),
+            placeholder=text(raw, "placeholder"), title=text(raw, "title", "attributes.title", "description"),
+            value=value, input_type=input_type,
+            autocomplete=text(raw, "autocomplete"), hidden=raw.get("hidden") is not False,
         ))
     return JevPageObservation(
         url=str(page.get("url") or ""), profile_alias=profile_alias,
@@ -1843,38 +1884,45 @@ class InteractionStepBody(BaseModel):
     value_slots: dict[str, str] = Field(default_factory=dict)
 
 
-async def _step_page_lease(browser_api: Any, task: BrowserTask) -> tuple[Any, HarnessLeaseFence]:
-    """The page lease a ``/step`` runs under (review I2 N-5, I3 MAJOR-3).
+#: Review I4 MINOR-A — a step ends this long before its page lease would lapse, at most.
+STEP_LEASE_MARGIN_MS = 30_000
 
-    Returns ``(acquired, fence)``: ``acquired`` is the lease this step took and must give
-    back, or ``None`` when the task already held a live one (which the step then must not
-    release); ``fence`` is the holder and generation sent to the Harness with every action.
-    409 when anything else holds the profile.
+
+async def _step_page_lease(browser_api: Any, task: BrowserTask) -> tuple[Any, HarnessLeaseFence, float]:
+    """The page lease a ``/step`` runs under (review I2 N-5, I3 MAJOR-3, I4 MINOR-A).
+
+    Returns ``(acquired, fence, deadline_seconds)``: ``acquired`` is the lease this step took
+    and must give back, or ``None`` when the task already held a live one (which the step
+    then must not release); ``fence`` is the holder and generation sent to the Harness with
+    every action, and its guard asserts the lease is still live (renewing it when due) before
+    each one; ``deadline_seconds`` bounds the whole router step to end before the lease
+    could lapse. 409 when anything else holds the profile or the lease cannot be confirmed.
     """
-    now = int(time.time() * 1000)
-    row = await browser_api.store.fetchone(
-        "SELECT lease_holder, lease_expires_at_ms, lease_holder_kind, lease_holder_id, lease_generation "
-        "FROM browser_profiles WHERE profile_alias = ?",
-        (task.profile_alias,),
-    )
-    if row is None:
-        raise HTTPException(status_code=409, detail=f"browser_profile_unregistered:{task.profile_alias}")
-    live = row["lease_holder"] is not None and int(row["lease_expires_at_ms"] or 0) > now
-    if live:
-        held_by_task = (
-            (row["lease_holder_kind"] or "TASK") == "TASK" and row["lease_holder_id"] == task.task_id
-        )
-        if held_by_task:
-            return None, HarnessLeaseFence(
-                task.profile_alias, task.task_id, int(row["lease_generation"] or 0)
-            )
-        raise HTTPException(status_code=409, detail=f"browser_profile_leased:{task.profile_alias}")
+    from van_gateway.browser.adapters import broker_lease_fence
+
     try:
-        lease = await browser_api.broker.acquire_lease(profile_alias=task.profile_alias, task_id=task.task_id)
+        acquired, lease = await browser_api.broker.lease_for_task_run(
+            profile_alias=task.profile_alias, task_id=task.task_id,
+        )
     except BrowserPolicyError as exc:
         # Taken between the read and the acquire: the atomic acquire is the arbiter.
         raise HTTPException(status_code=409, detail=str(exc)) from exc
-    return lease, HarnessLeaseFence(task.profile_alias, lease.holder_id, int(lease.generation))
+    fence = broker_lease_fence(browser_api.broker, lease)
+    try:
+        # Confirms the holding and renews a lease that is past two thirds of its TTL, so the
+        # step starts with most of the lease ahead of it.
+        await fence.guard()  # type: ignore[misc]
+    except BrowserAdapterError as exc:
+        if acquired is not None:
+            await browser_api.broker.release_lease_if_held(acquired)
+        raise HTTPException(status_code=409, detail=f"BROWSER_LEASE_LOST:{exc.detail or exc.code}") from exc
+    row = await browser_api.store.fetchone(
+        "SELECT lease_expires_at_ms FROM browser_profiles WHERE lease_holder = ?", (lease.lease_id,),
+    )
+    remaining_ms = int(row["lease_expires_at_ms"] or 0) - int(time.time() * 1000) if row else 0
+    margin_ms = min(STEP_LEASE_MARGIN_MS, remaining_ms // 4)
+    deadline = max(0.0, (remaining_ms - margin_ms) / 1000)
+    return acquired, fence, deadline
 
 
 def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter) -> APIRouter:
@@ -1943,7 +1991,7 @@ def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter)
         # lease: it uses the one the task already holds, or takes one for the step and gives
         # it back; another holder on the profile (a task, or the owner's interactive session)
         # refuses the step rather than sharing the page.
-        acquired, fence = await _step_page_lease(browser_api, task)
+        acquired, fence, deadline = await _step_page_lease(browser_api, task)
         try:
             step = InteractionStep(
                 task=task,
@@ -1965,8 +2013,18 @@ def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter)
                 step.resume_authorization_id = grant.get("authorization_id")
             # The Harness is told which lease generation each action runs under, and refuses
             # a generation older than the newest it has seen for the profile.
+            # Review I4 MINOR-A — the guard re-checks the lease (and renews it when due)
+            # before each Harness call, and the step as a whole ends before the lease could
+            # lapse, so a slow step cannot outlive its lease and act on the next holder's page.
+            import asyncio
+
             with harness_lease_fence(fence):
-                result = await router.route(step)
+                try:
+                    result = await asyncio.wait_for(router.route(step), timeout=deadline)
+                except asyncio.TimeoutError as exc:
+                    raise HTTPException(
+                        status_code=504, detail="BROWSER_STEP_DEADLINE_EXCEEDED"
+                    ) from exc
         finally:
             if acquired is not None:
                 # Only the lease this step took, and only while it still holds it (lease id,

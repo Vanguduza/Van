@@ -253,9 +253,11 @@ def _load_harness_service():
 
 
 @pytest.fixture
-def harness_worker(monkeypatch):
+def harness_worker(monkeypatch, tmp_path):
     """The real Harness worker HTTP handler on an ephemeral loopback port, with the browser
-    operation stubbed (no Chromium) so the fence is what is under test."""
+    operation stubbed (no Chromium) so the fence is what is under test. The fence persists
+    its state under a per-test directory (review I4 MINOR-A)."""
+    monkeypatch.setenv("VAN_HARNESS_STATE_ROOT", str(tmp_path / "harness-state"))
     module = _load_harness_service()
     clicks: list[str] = []
 

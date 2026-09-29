@@ -261,9 +261,14 @@ async def test_harness_envelope_disables_helper_authoring(tmp_path):
         ExternalRuntimeRegistry(store), base_url="http://127.0.0.1:9141", enabled=True,
         transport=httpx.MockTransport(handler),
     )
-    await adapter.navigate(task, "https://research.example.com/a")
+    # Review I4 MINOR-A: a mutating Harness call is sent only under a lease fence.
+    from van_gateway.browser.adapters import HarnessLeaseFence, harness_lease_fence
+
+    with harness_lease_fence(HarnessLeaseFence(task.profile_alias, task.task_id, 1)):
+        await adapter.navigate(task, "https://research.example.com/a")
     assert seen["mode"] == "PRODUCTION_ACTUATOR"
     assert seen["allow_helper_authoring"] is False
+    assert (seen["lease_generation"], seen["lease_holder_id"]) == (1, task.task_id)
 
 
 async def test_stagehand_unconfigured_without_model_provider(tmp_path):

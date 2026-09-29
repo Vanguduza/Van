@@ -28,6 +28,7 @@ from pydantic import BaseModel, Field
 
 from van_gateway.auth.control_scopes import ControlScope, require_scoped_internal
 from van_gateway.observability import instruments
+from van_gateway.browser.adapters import broker_lease_fence, harness_lease_fence
 from van_gateway.browser.lane_gates import OwnerControlProbe
 from van_gateway.browser.models import (
     AutonomyTier,
@@ -1002,11 +1003,22 @@ class BrowserApi:
         binder = getattr(worker, "for_task", None)
         if binder is not None:
             worker = binder(task, body.plan)
+        # Review I4 MINOR-A — an assignment acts under the task's page lease, fenced like
+        # /interaction/step: the lease the task holds, or one taken for this run and given
+        # back after it. Every Harness call carries its generation, and the fence's guard
+        # re-checks (and renews) the lease with the broker before each one.
         try:
-            result = await self.runner.run(
-                assignment=assignment, worker=worker, task=task,
-                verifier=self.verifier, postcondition=body.postcondition,
+            acquired, lease = await self.broker.lease_for_task_run(
+                profile_alias=task.profile_alias, task_id=task.task_id,
             )
+        except BrowserPolicyError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        try:
+            with harness_lease_fence(broker_lease_fence(self.broker, lease)):
+                result = await self.runner.run(
+                    assignment=assignment, worker=worker, task=task,
+                    verifier=self.verifier, postcondition=body.postcondition,
+                )
         except SemanticWorkerUnavailable as exc:
             # An L2+ assignment asked for judgement about a page and no semantic
             # runtime is configured. Walking the deterministic plan instead would be
@@ -1014,6 +1026,9 @@ class BrowserApi:
             raise HTTPException(
                 status_code=503, detail=f"BROWSER_SEMANTIC_RUNTIME_UNAVAILABLE:{exc}"
             ) from exc
+        finally:
+            if acquired is not None:
+                await self.broker.release_lease_if_held(acquired)
 
         if result.verification_outcome is not None:
             # The verifier's verdict on the worker's "done" claim goes on record for

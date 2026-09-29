@@ -15,6 +15,7 @@ import time
 from typing import Any
 from urllib.parse import urlsplit
 
+from van_gateway.browser.adapters import broker_lease_fence, harness_lease_fence
 from van_gateway.browser.models import (
     AutonomyTier, BrowserStrategy, BrowserTaskStatus,
 )
@@ -127,7 +128,10 @@ class WatchRunner:
                 lease = await self.broker.acquire_lease(
                     profile_alias=self.PROFILE_ALIAS, task_id=task.task_id, now_ms=now
                 )
-                info = await self.harness.navigate(task, watch.target)
+                # Review I4 MINOR-A: the navigation carries the lease generation and is
+                # re-checked against the broker before it reaches the Harness.
+                with harness_lease_fence(broker_lease_fence(self.broker, lease)):
+                    info = await self.harness.navigate(task, watch.target)
                 observation = self._observation(watch, info)
                 evidence = await self.tasks.seal_evidence(
                     task=task,

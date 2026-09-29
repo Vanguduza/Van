@@ -287,6 +287,42 @@ class BrowserSessionBroker:
         if int(row["lease_expires_at_ms"] or 0) <= now:
             raise BrowserPolicyError("browser_profile_lease_expired")
 
+    async def lease_for_task_run(
+        self, *, profile_alias: str, task_id: str, now_ms: int | None = None
+    ) -> tuple[PageLease | None, PageLease]:
+        """The page lease a task run (``/interaction/step``, ``/assignments``) acts under.
+
+        Returns ``(acquired, lease)``. When the task already holds a live lease on the
+        profile, ``acquired`` is None (the run must not release it) and ``lease`` is that
+        holding, read back with its id, generation and expiry so it can be fenced and
+        re-checked. Otherwise the run takes a lease of its own (``acquired is lease``).
+        Raises ``BrowserPolicyError`` when anything else holds the profile or it is not
+        registered (review I2 N-5, I3 MAJOR-3, I4 MINOR-A).
+        """
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        row = await self.store.fetchone(
+            "SELECT lease_holder, lease_expires_at_ms, lease_holder_kind, lease_holder_id, "
+            "lease_generation, lease_acquired_at_ms FROM browser_profiles WHERE profile_alias = ?",
+            (profile_alias,),
+        )
+        if row is None:
+            raise BrowserPolicyError(f"browser_profile_unregistered:{profile_alias}")
+        if row["lease_holder"] is not None and int(row["lease_expires_at_ms"] or 0) > now:
+            held_by_task = (
+                (row["lease_holder_kind"] or "TASK") == "TASK" and row["lease_holder_id"] == task_id
+            )
+            if not held_by_task:
+                raise BrowserPolicyError(f"browser_profile_leased:{profile_alias}")
+            expires = int(row["lease_expires_at_ms"])
+            return None, PageLease(
+                lease_id=row["lease_holder"], profile_alias=profile_alias, task_id=task_id,
+                holder_kind=ProfileLeaseHolderKind.TASK, holder_id=task_id,
+                acquired_at_ms=int(row["lease_acquired_at_ms"] or (expires - self.DEFAULT_LEASE_SECONDS * 1000)),
+                expires_at_ms=expires, generation=int(row["lease_generation"] or 0),
+            )
+        lease = await self.acquire_lease(profile_alias=profile_alias, task_id=task_id, now_ms=now)
+        return lease, lease
+
     async def release_lease(self, lease: PageLease, *, now_ms: int | None = None) -> None:
         now = int(time.time() * 1000) if now_ms is None else now_ms
         await self.store.execute(

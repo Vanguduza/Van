@@ -12,10 +12,11 @@ is off, and reports readiness through the same evidence-backed contract as n8n
 from __future__ import annotations
 
 import inspect
-from collections.abc import Callable, Iterator
+import time
+from collections.abc import Awaitable, Callable, Iterator
 from contextlib import contextmanager
 from contextvars import ContextVar
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 import httpx
@@ -40,17 +41,24 @@ class BrowserAdapterError(RuntimeError):
 
 @dataclass(frozen=True)
 class HarnessLeaseFence:
-    """The page lease a Harness call is made under (review I3 MAJOR-3).
+    """The page lease a Harness call is made under (review I3 MAJOR-3, I4 MINOR-A).
 
     Sent in every Harness action envelope while it is set, so the Harness worker can refuse
     a call carrying a generation older than the newest it has seen for that profile: work
     still holding a lease the profile has since been re-leased past is not applied to
     whoever holds it now.
+
+    ``guard`` (not part of equality) is awaited by the adapter before every Harness call
+    made under the fence. ``broker_lease_fence`` builds it from the gateway broker: it
+    asserts the lease is still the profile's live holding (``assert_lease_active``) and
+    renews it when renewal is due, so a caller whose lease lapsed or was taken stops before
+    it reaches the page even when the new holder has not yet touched the Harness.
     """
 
     profile_alias: str
     holder_id: str
     generation: int
+    guard: Callable[[], Awaitable[None]] | None = field(default=None, compare=False, repr=False)
 
 
 _HARNESS_LEASE_FENCE: ContextVar[HarnessLeaseFence | None] = ContextVar(
@@ -60,7 +68,11 @@ _HARNESS_LEASE_FENCE: ContextVar[HarnessLeaseFence | None] = ContextVar(
 
 @contextmanager
 def harness_lease_fence(fence: HarnessLeaseFence | None) -> Iterator[None]:
-    """Run the enclosed Harness calls under ``fence`` (``/interaction/step`` sets it)."""
+    """Run the enclosed Harness calls under ``fence``.
+
+    Every gateway caller of a mutating Harness operation sets one: ``/interaction/step``,
+    ``/assignments``, the watch runner and the notebook consumer (review I4 MINOR-A).
+    """
     token = _HARNESS_LEASE_FENCE.set(fence)
     try:
         yield
@@ -70,6 +82,40 @@ def harness_lease_fence(fence: HarnessLeaseFence | None) -> Iterator[None]:
 
 def current_harness_lease_fence() -> HarnessLeaseFence | None:
     return _HARNESS_LEASE_FENCE.get()
+
+
+def broker_lease_fence(broker: Any, lease: Any) -> HarnessLeaseFence:
+    """A fence for ``lease`` (a ``PageLease``) whose guard re-checks it with ``broker``.
+
+    The guard runs before each Harness call: ``assert_lease_active`` (lease id, holder and
+    generation must still match and it must not have expired), then ``renew_lease`` for the
+    lease's own TTL once two thirds of it has elapsed. Any failure raises
+    ``BROWSER_HARNESS_LEASE_LOST`` and nothing is sent to the Harness.
+    """
+    ttl_ms = max(30_000, int(lease.expires_at_ms) - int(lease.acquired_at_ms))
+    state = {"expires_at_ms": int(lease.expires_at_ms)}
+
+    async def guard() -> None:
+        now = int(time.time() * 1000)
+        try:
+            await broker.assert_lease_active(
+                lease_id=lease.lease_id, holder_id=lease.holder_id,
+                generation=int(lease.generation), now_ms=now,
+            )
+            if state["expires_at_ms"] - now < (ttl_ms * 2) // 3:
+                renewed = await broker.renew_lease(
+                    lease_id=lease.lease_id, holder_id=lease.holder_id,
+                    generation=int(lease.generation), ttl_seconds=ttl_ms // 1000, now_ms=now,
+                )
+                state["expires_at_ms"] = int(renewed.expires_at_ms)
+        except BrowserPolicyError as exc:
+            raise BrowserAdapterError("BROWSER_HARNESS_LEASE_LOST", str(exc)) from exc
+
+    return HarnessLeaseFence(lease.profile_alias, lease.holder_id, int(lease.generation), guard)
+
+
+#: Harness operations that change the page; the adapter refuses to send one unfenced.
+HARNESS_MUTATING_PATHS = frozenset({"/navigate", "/click", "/fill", "/press", "/scroll", "/upload"})
 
 
 class BrowserHarnessAdapter(Protocol):
@@ -90,6 +136,7 @@ class BrowserHarnessAdapter(Protocol):
     async def wait(self, task: BrowserTask, condition: dict[str, Any]) -> dict[str, Any]: ...
     async def upload(self, task: BrowserTask, locator: str, file_ref: str) -> dict[str, Any]: ...
     async def tabs(self, task: BrowserTask) -> dict[str, Any]: ...
+    async def describe(self, task: BrowserTask, locator: str) -> dict[str, Any]: ...
 
 
 def _error_code(response: httpx.Response) -> str | None:
@@ -172,6 +219,8 @@ class _PrivateWorkerClient:
             if response.status_code == 409 and _error_code(response) == "LEASE_GENERATION_STALE":
                 # Review I3 MAJOR-3: the worker has seen a newer lease on this profile.
                 raise BrowserAdapterError(f"{self.CAPABILITY.upper()}_LEASE_GENERATION_STALE")
+            if response.status_code == 428 and _error_code(response) == "LEASE_FENCE_REQUIRED":
+                raise BrowserAdapterError(f"{self.CAPABILITY.upper()}_LEASE_FENCE_REQUIRED")
             raise BrowserAdapterError(
                 f"{self.CAPABILITY.upper()}_REQUEST_FAILED", str(response.status_code)
             )
@@ -235,6 +284,21 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
             envelope["lease_generation"] = int(fence.generation)
         return envelope
 
+    async def _call(self, path: str, payload: dict[str, Any]) -> dict[str, Any]:  # type: ignore[override]
+        """Review I4 MINOR-A — fenced, and re-checked with the broker, before it is sent.
+
+        A mutating operation without a fence for the task's profile is refused here (and by
+        the worker). When the fence carries a guard it runs first, so a lease that lapsed or
+        was taken stops the call before it reaches the page.
+        """
+        fenced = "lease_generation" in payload
+        if path in HARNESS_MUTATING_PATHS and not fenced:
+            raise BrowserAdapterError(f"{self.CAPABILITY.upper()}_LEASE_FENCE_REQUIRED", path)
+        fence = _HARNESS_LEASE_FENCE.get()
+        if fenced and fence is not None and fence.guard is not None:
+            await fence.guard()
+        return await super()._call(path, payload)
+
     async def navigate(self, task: BrowserTask, url: str) -> dict[str, Any]:
         return await self._call("/navigate", self._envelope(task, url=url))
 
@@ -267,6 +331,11 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
 
     async def tabs(self, task: BrowserTask) -> dict[str, Any]:
         return await self._call("/tabs", self._envelope(task))
+
+    async def describe(self, task: BrowserTask, locator: str) -> dict[str, Any]:
+        """Review I4 — the element the Harness would act on for ``locator``, in the same
+        shape as a ``page_info`` ``elements`` entry, for targets the bounded list omitted."""
+        return await self._call("/describe", self._envelope(task, locator=locator))
 
     async def status(self) -> ExternalRuntimeStatus:  # type: ignore[override]
         return await super().status("BROWSER_HARNESS_UNAVAILABLE")
@@ -495,7 +564,9 @@ __all__ = [
     "canonical_stagehand_production_gate",
     "BrowserAdapterError",
     "BrowserHarnessAdapter",
+    "HARNESS_MUTATING_PATHS",
     "HarnessLeaseFence",
+    "broker_lease_fence",
     "HttpBrowserHarnessAdapter",
     "current_harness_lease_fence",
     "harness_lease_fence",

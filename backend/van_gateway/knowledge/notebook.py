@@ -14,7 +14,9 @@ import httpx
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 
-from van_gateway.browser.adapters import BrowserAdapterError, HttpBrowserHarnessAdapter, StagehandAdapter
+from van_gateway.browser.adapters import (
+    BrowserAdapterError, HttpBrowserHarnessAdapter, StagehandAdapter, broker_lease_fence, harness_lease_fence,
+)
 from van_gateway.browser.models import AutonomyTier, BrowserStrategy, BrowserTask, BrowserTaskStatus, PageLease
 from van_gateway.browser.service import BrowserTaskService
 from van_gateway.browser.policy import BrowserPolicyError
@@ -765,14 +767,17 @@ class NotebookConsumerProvider:
         except BrowserPolicyError as exc:
             raise NotebookProviderError(f"notebook_consumer_evidence_policy:{exc}") from exc
 
-    async def _navigate(self, task: BrowserTask, notebook_id: str) -> None:
-        _tasks, harness, _stagehand = self._require_transport()
+    async def _navigate(self, task: BrowserTask, notebook_id: str, lease: PageLease) -> None:
+        tasks, harness, _stagehand = self._require_transport()
         try:
-            await harness.navigate(
-                task,
-                f"{self.base_url}/notebook/{quote(notebook_id)}",
-            )
-            info = await harness.page_info(task)
+            # Review I4 MINOR-A: Harness calls carry the task lease's generation and are
+            # re-checked against the broker before they reach the page.
+            with harness_lease_fence(broker_lease_fence(tasks.broker, lease)):
+                await harness.navigate(
+                    task,
+                    f"{self.base_url}/notebook/{quote(notebook_id)}",
+                )
+                info = await harness.page_info(task)
         except BrowserAdapterError as exc:
             raise NotebookProviderError(f"notebook_consumer_browser_harness:{exc.code}") from exc
         url = str(info.get("url", ""))
@@ -787,7 +792,7 @@ class NotebookConsumerProvider:
             action_class=ActionClass.A2,
         )
         try:
-            await self._navigate(task, request.notebook_id)
+            await self._navigate(task, request.notebook_id, lease)
             _tasks, _harness, stagehand = self._require_transport()
             try:
                 await stagehand.act(
@@ -899,7 +904,7 @@ class NotebookConsumerProvider:
             execution_id=execution_id,
         )
         try:
-            await self._navigate(task, request.notebook_id)
+            await self._navigate(task, request.notebook_id, lease)
             _tasks, _harness, stagehand = self._require_transport()
             try:
                 before = await stagehand.extract(
