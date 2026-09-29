@@ -1,0 +1,100 @@
+{
+  "schema": "van.deploy.trust_zone_topology.v1",
+  "zone": "van-private-core",
+  "authority": {
+    "source": "Owner decisions 2026-09-29, §3 VAN PRIVATE PLANE — DECIDED",
+    "authorization_id": "auth-20260929-owner-van-private-core",
+    "authority_class": "OWNER_EXPLICIT",
+    "signature": "NONE_CLAIMED — owner instruction in a Claude Code session; no device or cryptographic signature is claimed"
+  },
+  "responsibilities": [
+    {
+      "id": "owner_cognitive_model",
+      "name": "Owner Cognitive Model",
+      "code_modules": ["backend/van_gateway/understanding/owner_model.py"],
+      "stores": ["table:owner_cognitive_model", "table:owner_model_episodes"],
+      "repository_status": "IMPLEMENTED"
+    },
+    {
+      "id": "owner_model_revision",
+      "name": "owner_model_revision",
+      "code_modules": ["backend/van_gateway/understanding/owner_model.py"],
+      "stores": ["table:owner_model_revisions"],
+      "repository_status": "IMPLEMENTED"
+    },
+    {
+      "id": "correction_invalidation_outbox",
+      "name": "correction/invalidation outbox",
+      "code_modules": ["backend/van_gateway/understanding/owner_model_outbox.py"],
+      "stores": ["table:owner_model_outbox"],
+      "repository_status": "IMPLEMENTED"
+    },
+    {
+      "id": "owner_private_hindsight",
+      "name": "owner-private Hindsight",
+      "code_modules": [],
+      "stores": ["path:/var/lib/van-private-core/hindsight-owner"],
+      "outbox_target": "HINDSIGHT_OWNER",
+      "repository_status": "PLACEMENT_ONLY — no client or service in this repository; outbox target only"
+    },
+    {
+      "id": "owner_private_openviking_projection",
+      "name": "owner-private OpenViking projection",
+      "code_modules": [],
+      "stores": ["path:/var/lib/van-private-core/openviking-owner"],
+      "outbox_target": "OPENVIKING_OWNER_PROJECTION",
+      "repository_status": "PLACEMENT_ONLY — no client or service in this repository; outbox target only"
+    },
+    {
+      "id": "personal_context_resolver",
+      "name": "personal-context resolver",
+      "code_modules": [
+        "backend/van_gateway/understanding/personal_context.py",
+        "backend/van_gateway/understanding/personal_context_resolver.py"
+      ],
+      "stores": [],
+      "outbox_target": "PERSONAL_CONTEXT_CACHE",
+      "repository_status": "IMPLEMENTED"
+    }
+  ],
+  "protected_tables": [
+    "owner_cognitive_model",
+    "owner_model_episodes",
+    "owner_model_revisions",
+    "owner_model_outbox"
+  ],
+  "private_core_modules": [
+    "backend/van_gateway/understanding/owner_model.py",
+    "backend/van_gateway/understanding/owner_model_outbox.py",
+    "backend/van_gateway/understanding/personal_context.py",
+    "backend/van_gateway/understanding/personal_context_resolver.py",
+    "backend/van_gateway/private_core/app.py"
+  ],
+  "store_definition_and_governance_modules": {
+    "backend/van_gateway/storage/db.py": "Schema, migrations and the forget trigger for the protected tables. Runs inside whichever process owns the store (on this zone: van-private-core.service lifespan migrate()).",
+    "backend/van_gateway/context/forget.py": "Owner right-to-forget executor. Names the table so an owner forget reaches it; must execute on the zone that owns the store. Split gate G-PC-4.",
+    "backend/van_gateway/ops/retention.py": "Retention policy registry. Names the tables to declare their retention class; must execute on the zone that owns the store. Split gate G-PC-4."
+  },
+  "ingress": {
+    "unit": "deploy/van-private-core/systemd/van-private-core.service",
+    "entrypoint": "van_gateway.private_core.app:create_private_core_app",
+    "routes": [
+      ["GET", "/v1/private-core/owner-model/revision"],
+      ["GET", "/v1/private-core/personal-context"]
+    ],
+    "authentication": [
+      "mutual TLS against a CA private to this plane (uvicorn --ssl-cert-reqs 2)",
+      "X-Van-Internal-Token holding the 'understanding' control scope"
+    ],
+    "bind": "VAN_PRIVATE_CORE_BIND — private overlay address; wildcard refused by ExecStartPre"
+  },
+  "must_not_host": [
+    {"class": "generic browser automation", "repository_names": ["backend/van_gateway/browser", "backend/van_gateway/automation", "backend/van_gateway/computer_use", "services/browser_control_agent", "services/browser_stream_host", "deploy/van-trading-core/browser/harness_service.py", "vati-browser-harness.service"]},
+    {"class": "Stagehand", "repository_names": ["deploy/van-trading-core/browser/stagehand_service.mjs", "vati-stagehand.service", "@browserbasehq/stagehand"]},
+    {"class": "Chromium", "repository_names": ["van-browser-chromium.service", "playwright", "chromium"]},
+    {"class": "Jev browser execution", "repository_names": ["dial-jev (Programme B; not on this branch)"]},
+    {"class": "VATI order execution", "repository_names": ["trading/vati/execution/router.py", "trading/vati", "vati-session@.service", "vati-commander.service"]},
+    {"class": "broker adapters", "repository_names": ["trading/vati/execution/deriv.py", "trading/vati/execution/mt5_bridge.py", "trading/vati/execution/mt5_pull.py", "trading/vati/execution/ctrader", "deploy/van-trading-core/windows/mt5_worker", "deploy/van-trading-core/mql5"]}
+  ],
+  "external_gates": "docs/project-state/VAN_PRIVATE_CORE_TOPOLOGY_20260929.md"
+}

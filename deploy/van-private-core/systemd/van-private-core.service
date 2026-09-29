@@ -1,0 +1,51 @@
+# Owner decision 2026-09-29 §3 — the VAN private plane.
+#
+# The only process on van-private-core that listens on a network interface. It serves the
+# bounded authenticated API in van_gateway.private_core.app (revision read, fenced personal
+# context) and nothing else: mutual TLS against the private-core CA *and* the scoped
+# internal credential (understanding scope). The Owner Model store is a file under
+# /var/lib/van-private-core that no other zone mounts.
+#
+# The bind address must be the private overlay/VCN address. ExecStartPre refuses to start
+# on an empty, wildcard or public-looking bind rather than trusting a comment.
+[Unit]
+Description=VAN private core (Owner Model, owner_model_revision, outbox, personal-context resolver)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=van-private
+Group=van-private
+EnvironmentFile=/etc/van-private-core/runtime.env
+WorkingDirectory=/opt/van-private-core/src/backend
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/opt/van-private-core/src/backend
+ExecStartPre=/bin/sh -c 'case "${VAN_PRIVATE_CORE_BIND}" in ""|0.0.0.0|::|"[::]") echo "VAN_PRIVATE_CORE_BIND must be the private overlay address" >&2; exit 1;; esac'
+ExecStartPre=/bin/sh -c 'case "${VAN_DATABASE_PATH}" in /var/lib/van-private-core/*) ;; *) echo "VAN_DATABASE_PATH must live under /var/lib/van-private-core" >&2; exit 1;; esac'
+ExecStart=/opt/van-private-core/venv/bin/python -m uvicorn --factory van_gateway.private_core.app:create_private_core_app \
+    --host ${VAN_PRIVATE_CORE_BIND} --port ${VAN_PRIVATE_CORE_PORT} \
+    --ssl-certfile ${VAN_PRIVATE_CORE_PKI_DIR}/server.crt \
+    --ssl-keyfile ${VAN_PRIVATE_CORE_PKI_DIR}/server.key \
+    --ssl-ca-certs ${VAN_PRIVATE_CORE_PKI_DIR}/ca.crt \
+    --ssl-cert-reqs 2 \
+    --no-server-header
+Restart=on-failure
+RestartSec=3
+UMask=0077
+
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+ReadOnlyPaths=/opt/van-private-core
+ReadWritePaths=/var/lib/van-private-core /var/log/van-private-core
+
+[Install]
+WantedBy=multi-user.target
