@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 30
+SCHEMA_VERSION = 31
 
 
 MIGRATION_17 = """
@@ -609,6 +609,116 @@ CREATE TABLE IF NOT EXISTS visual_acceptances (
 );
 CREATE INDEX IF NOT EXISTS idx_visual_acceptances_latest
   ON visual_acceptances(verified_at DESC);
+"""
+
+MIGRATION_31 = """
+-- Memory Fabric Programme A, contracts C1/C2 — Owner Model origin provenance, revision
+-- fence and correction outbox. Every statement is idempotent (IF NOT EXISTS / OR IGNORE /
+-- NOT EXISTS guards), so re-running this script against a database that already has it
+-- changes nothing.
+
+-- C1. Per-episode origin. An assertion used to hold a bare list of episode refs, so the
+-- ladder could not tell a mission VAN watched happen from a Hindsight/OpenViking/model
+-- derivation that merely *cited* a mission id — and the derived one was a vote. Origin is
+-- recorded per (assertion, episode, origin), never per assertion; only SYSTEM_OBSERVED
+-- rows count toward promotion.
+CREATE TABLE IF NOT EXISTS owner_model_episodes (
+  assertion_id TEXT NOT NULL
+    REFERENCES owner_cognitive_model(assertion_id) ON DELETE CASCADE,
+  episode_ref TEXT NOT NULL,
+  origin TEXT NOT NULL CHECK (origin IN (
+    'OWNER_EXPLICIT', 'SYSTEM_OBSERVED', 'HINDSIGHT_DERIVED',
+    'OPENVIKING_RETRIEVED', 'MODEL_INFERRED'
+  )),
+  evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+  recorded_at_ms INTEGER NOT NULL,
+  PRIMARY KEY (assertion_id, episode_ref, origin)
+);
+CREATE INDEX IF NOT EXISTS idx_owner_model_episodes_origin
+  ON owner_model_episodes(assertion_id, origin);
+
+-- Legacy backfill: every existing supporting episode becomes SYSTEM_OBSERVED. That is what
+-- they are — before this migration the only production producer of observe() was the
+-- internal-control `/v1/understanding/observe` route, and every episode it accepted had to
+-- resolve to a real `missions`/`audit` row (P1-SYM-001). No derived-origin producer
+-- existed. The NOT EXISTS guard (not just OR IGNORE) means a re-run never relabels an
+-- episode that already has an origin row of any kind.
+INSERT OR IGNORE INTO owner_model_episodes(
+  assertion_id, episode_ref, origin, evidence_refs_json, recorded_at_ms
+)
+SELECT a.assertion_id, j.value, 'SYSTEM_OBSERVED', '[]', a.updated_at_ms
+  FROM owner_cognitive_model a, json_each(a.supporting_episode_refs_json) j
+ WHERE NOT EXISTS (
+   SELECT 1 FROM owner_model_episodes e
+    WHERE e.assertion_id = a.assertion_id AND e.episode_ref = j.value
+ );
+
+-- C2. A strictly monotonic revision per owner principal, advanced inside the same
+-- transaction as every authoritative Owner Model mutation. Deliberately NOT forgettable:
+-- resetting it would let a capsule issued at an old revision match again later.
+CREATE TABLE IF NOT EXISTS owner_model_revisions (
+  owner_principal_id TEXT PRIMARY KEY,
+  owner_model_revision INTEGER NOT NULL CHECK (owner_model_revision >= 0),
+  updated_at_ms INTEGER NOT NULL
+);
+-- Owners that already hold assertions start at 1 (a capsule could not have been issued
+-- against them before this migration, so any value >= 1 is safe; 1 is the smallest).
+INSERT OR IGNORE INTO owner_model_revisions(owner_principal_id, owner_model_revision, updated_at_ms)
+SELECT DISTINCT owner_principal_id, 1, CAST(strftime('%s','now') AS INTEGER) * 1000
+  FROM owner_cognitive_model;
+
+-- Durable correction/invalidation outbox: one row per (event, target), written in the
+-- same transaction as the Owner Model commit and revision bump. Delivery is at-least-once
+-- per target; a receipt is recorded per target. No distributed atomicity is claimed — the
+-- synchronous guarantee is the revision fence above.
+CREATE TABLE IF NOT EXISTS owner_model_outbox (
+  outbox_id TEXT NOT NULL,
+  target TEXT NOT NULL CHECK (target IN (
+    'HINDSIGHT_OWNER', 'OPENVIKING_OWNER_PROJECTION', 'PERSONAL_CONTEXT_CACHE'
+  )),
+  owner_principal_id TEXT NOT NULL,
+  owner_model_revision INTEGER NOT NULL,
+  event_kind TEXT NOT NULL,
+  payload_json TEXT NOT NULL DEFAULT '{}',
+  status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'DELIVERED')),
+  attempts INTEGER NOT NULL DEFAULT 0,
+  receipt TEXT,
+  last_error TEXT,
+  created_at_ms INTEGER NOT NULL,
+  last_attempt_at_ms INTEGER,
+  delivered_at_ms INTEGER,
+  PRIMARY KEY (outbox_id, target)
+);
+CREATE INDEX IF NOT EXISTS idx_owner_model_outbox_pending
+  ON owner_model_outbox(status, created_at_ms);
+
+-- The owner's forget path (context/forget.py) deletes assertions outside the Owner Model
+-- class. Without this trigger that deletion would leave the revision unchanged, and a
+-- capsule issued before the forget would still verify as current. The trigger runs in the
+-- deleting statement's transaction, so the fence and the invalidation rows commit (or
+-- roll back) with the delete. The payload carries ids and field names only, never values.
+CREATE TRIGGER IF NOT EXISTS trg_owner_model_forget_fence
+AFTER DELETE ON owner_cognitive_model
+BEGIN
+  INSERT INTO owner_model_revisions(owner_principal_id, owner_model_revision, updated_at_ms)
+  VALUES (OLD.owner_principal_id, 1, CAST(strftime('%s','now') AS INTEGER) * 1000)
+  ON CONFLICT(owner_principal_id) DO UPDATE SET
+    owner_model_revision = owner_model_revision + 1,
+    updated_at_ms = MAX(updated_at_ms, excluded.updated_at_ms);
+  INSERT OR IGNORE INTO owner_model_outbox(
+    outbox_id, target, owner_principal_id, owner_model_revision, event_kind,
+    payload_json, status, attempts, created_at_ms
+  )
+  SELECT 'omo_forget_' || OLD.assertion_id || '_' || r.owner_model_revision, t.target,
+         OLD.owner_principal_id, r.owner_model_revision, 'FORGOTTEN',
+         json_object('assertion_ids', json_array(OLD.assertion_id), 'field', OLD.field),
+         'PENDING', 0, CAST(strftime('%s','now') AS INTEGER) * 1000
+    FROM owner_model_revisions r,
+         (SELECT 'HINDSIGHT_OWNER' AS target
+          UNION ALL SELECT 'OPENVIKING_OWNER_PROJECTION'
+          UNION ALL SELECT 'PERSONAL_CONTEXT_CACHE') t
+   WHERE r.owner_principal_id = OLD.owner_principal_id;
+END;
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -1943,6 +2053,7 @@ MIGRATIONS: dict[int, str] = {
     28: MIGRATION_28,
     29: MIGRATION_29,
     30: MIGRATION_30,
+    31: MIGRATION_31,
 }
 
 

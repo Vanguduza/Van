@@ -49,6 +49,7 @@ from van_gateway.understanding.memory import (
     SymbioticGrowthLedger,
 )
 from van_gateway.understanding.owner_model import (
+    ObservationOrigin,
     OwnerCognitiveModel,
     OwnerModelError,
     OwnerModelField,
@@ -60,6 +61,9 @@ class ObserveBody(BaseModel):
     field: OwnerModelField
     value: str
     episode_ref: str
+    #: Contract C1 — required, no default. Only SYSTEM_OBSERVED advances the ladder;
+    #: HINDSIGHT_DERIVED / OPENVIKING_RETRIEVED / MODEL_INFERRED are recorded as provenance.
+    origin: ObservationOrigin
     evidence_refs: list[str] = Field(default_factory=list)
     project_id: str | None = None
 
@@ -359,12 +363,20 @@ class UnderstandingApi:
         ):
             """Hermes observes. It never confirms — that asymmetry is the point."""
             self._require_internal(x_van_internal_token)
-            assertion = await self.owner_model.observe(
-                owner_principal_id=body.owner_principal_id, field=body.field,
-                value=body.value, episode_ref=body.episode_ref,
-                evidence_refs=body.evidence_refs, project_id=body.project_id,
-            )
+            try:
+                assertion = await self.owner_model.observe(
+                    owner_principal_id=body.owner_principal_id, field=body.field,
+                    value=body.value, episode_ref=body.episode_ref, origin=body.origin,
+                    evidence_refs=body.evidence_refs, project_id=body.project_id,
+                )
+            except OwnerModelError as exc:
+                raise HTTPException(status_code=422, detail=exc.code) from exc
             return assertion.model_dump(mode="json")
+
+        @router.get("/understanding/revision")
+        async def owner_model_revision(owner_principal_id: str = "owner"):
+            """Contract C2 — the live Owner Model revision a personal capsule is fenced by."""
+            return await self.owner_model.revision(owner_principal_id)
 
         @router.get("/permissions")
         async def permissions():
