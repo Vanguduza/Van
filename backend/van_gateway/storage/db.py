@@ -920,13 +920,21 @@ MIGRATION_32_OUTBOX_DELIVERY = """
 -- own: a failure sets next_attempt_at_ms (exponential backoff) and, past the attempt
 -- budget, dead_lettered_at_ms. A dead-lettered row stays PENDING (the status CHECK is
 -- unchanged) and is never selected again; it is the operator's to inspect.
-ALTER TABLE owner_model_outbox ADD COLUMN next_attempt_at_ms INTEGER;
-ALTER TABLE owner_model_outbox ADD COLUMN dead_lettered_at_ms INTEGER;
+-- The two columns (MIGRATION_32_OUTBOX_COLUMNS) are added by Store._ensure_m32_outbox_columns
+-- before this script runs: ALTER TABLE ADD COLUMN cannot be guarded in SQL, and a crash
+-- between this script and its schema_migrations row must leave a database that migrates.
 CREATE INDEX IF NOT EXISTS idx_owner_model_outbox_due
   ON owner_model_outbox(status, target, dead_lettered_at_ms, created_at_ms);
 """
 
 MIGRATION_32 = MIGRATION_32_OWNER_MODEL_REPAIR + MIGRATION_32_OUTBOX_DELIVERY
+
+# (column, declared type) added to owner_model_outbox by migration 32's guarded pre-step,
+# in this order (A-MIN-VAN, reviewer D2: the plain ALTERs were not re-runnable).
+MIGRATION_32_OUTBOX_COLUMNS: tuple[tuple[str, str], ...] = (
+    ("next_attempt_at_ms", "INTEGER"),
+    ("dead_lettered_at_ms", "INTEGER"),
+)
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -2299,6 +2307,22 @@ class Store:
             await db.execute("ALTER TABLE devices ADD COLUMN access_token_hash TEXT")
             await db.commit()
 
+    @staticmethod
+    async def _ensure_m32_outbox_columns(db: aiosqlite.Connection) -> None:
+        """Migration 32's outbox columns, added only when absent.
+
+        ``executescript`` autocommits statement by statement, so a process that dies after
+        migration 32's script but before its ``schema_migrations`` row leaves the columns in
+        place with version 31 recorded; a plain ``ALTER TABLE ... ADD COLUMN`` would then fail
+        every later migrate with "duplicate column name". The rest of 32 is idempotent.
+        """
+        cur = await db.execute("PRAGMA table_info(owner_model_outbox)")
+        columns = {str(row["name"]) for row in await cur.fetchall()}
+        for name, decl in MIGRATION_32_OUTBOX_COLUMNS:
+            if name not in columns:
+                await db.execute(f"ALTER TABLE owner_model_outbox ADD COLUMN {name} {decl}")
+        await db.commit()
+
     async def migrate(self) -> None:
         async with self.connection() as db:
             await db.execute(
@@ -2318,6 +2342,8 @@ class Store:
                     continue
                 if version == 5:
                     await self._ensure_access_token_column(db)
+                if version == 32:
+                    await self._ensure_m32_outbox_columns(db)
                 await db.executescript(MIGRATIONS[version])
                 await db.execute(
                     "INSERT INTO schema_migrations(version, applied_at_unix) VALUES (?, ?)",

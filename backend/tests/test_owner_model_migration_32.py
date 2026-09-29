@@ -141,3 +141,41 @@ async def test_migration_32_repairs_a_database_that_already_ran_31(tmp_path, mon
         "e.episode_ref, e.origin FROM owner_cognitive_model a "
         "LEFT JOIN owner_model_episodes e USING (assertion_id) ORDER BY 1, 5, 6")] == snapshot
     assert await model.current_revision("owner") == 5
+
+
+async def test_migration_32_reruns_after_a_crash_before_its_version_row(tmp_path, monkeypatch):
+    """A-MIN-VAN (reviewer D2): 32's plain ALTER TABLE ADD COLUMNs were not re-runnable.
+    `executescript` autocommits, so dying after the script but before the
+    schema_migrations insert left version 31 recorded with the columns present, and every
+    later migrate raised "duplicate column name: next_attempt_at_ms"."""
+    from van_gateway.storage.db import MIGRATION_32, MIGRATION_32_OUTBOX_COLUMNS
+
+    store = await _v31_store(tmp_path, monkeypatch)
+    # Everything migration 32 does, as the pre-fix script did it, then the process dies.
+    async with aiosqlite.connect(store.path) as db:
+        for name, decl in MIGRATION_32_OUTBOX_COLUMNS:
+            await db.execute(f"ALTER TABLE owner_model_outbox ADD COLUMN {name} {decl}")
+        await db.commit()
+        await db.executescript(MIGRATION_32)
+    assert (await store.fetchone("SELECT MAX(version) AS v FROM schema_migrations"))["v"] == 31
+    await store.migrate()
+    assert (await store.fetchone("SELECT MAX(version) AS v FROM schema_migrations"))["v"] == 32
+    cols = [r["name"] for r in await store.fetchall("PRAGMA table_info(owner_model_outbox)")]
+    assert cols[-2:] == ["next_attempt_at_ms", "dead_lettered_at_ms"]
+    assert cols.count("next_attempt_at_ms") == 1 and cols.count("dead_lettered_at_ms") == 1
+
+    # ...and the recovered schema is the one a fresh database gets.
+    fresh = Store(str(tmp_path / "fresh.sqlite3"))
+    await fresh.migrate()
+    q = "SELECT type, name, sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type, name"
+    assert [tuple(r) for r in await store.fetchall(q)] == [tuple(r) for r in await fresh.fetchall(q)]
+
+
+async def test_migration_32_reruns_after_a_crash_between_its_two_columns(tmp_path, monkeypatch):
+    store = await _v31_store(tmp_path, monkeypatch)
+    async with aiosqlite.connect(store.path) as db:
+        await db.execute("ALTER TABLE owner_model_outbox ADD COLUMN next_attempt_at_ms INTEGER")
+        await db.commit()
+    await store.migrate()
+    cols = [r["name"] for r in await store.fetchall("PRAGMA table_info(owner_model_outbox)")]
+    assert cols[-2:] == ["next_attempt_at_ms", "dead_lettered_at_ms"]
