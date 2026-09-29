@@ -123,7 +123,7 @@ STAGEHAND_OWNER_DECISIONS_MARKER = (
 )
 OWNER_DECISIONS_20260929 = DECISIONS / "OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md"
 OWNER_DECISIONS_20260929_SHA256 = "64f1c0560ef88776d0d199392d315767ea3576827e335ba2da8081d12e307c81"
-STAGEHAND_LOCK = ROOT / "deploy" / "van-trading-core" / "browser" / "package-lock.json"
+STAGEHAND_LOCK = ROOT / "deploy" / "van-browser-core" / "browser" / "package-lock.json"
 
 
 def test_stagehand_owner_decisions_20260929_are_appended_truthfully():
