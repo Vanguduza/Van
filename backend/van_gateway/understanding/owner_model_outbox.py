@@ -13,6 +13,12 @@ What is guaranteed, and what is not:
   A handler may be called again for an event it already applied (a crash between the
   handler returning and the DELIVERED mark committing), so handlers must be idempotent on
   ``(outbox_id, target)``.
+* **One row cannot block the others.** A drain reads only rows for targets that have a
+  handler, and only rows that are due: a failure schedules the row's next attempt with
+  exponential backoff, and after ``max_attempts`` failures the row is dead-lettered
+  (``dead_lettered_at_ms`` set, still ``PENDING``) and never selected again. Before this,
+  the oldest 100 PENDING rows of *any* target filled every batch, so unhandled or poison
+  rows starved handled targets indefinitely.
 * **No distributed atomicity is claimed.** Between the commit and a successful delivery a
   derived store can still hold the old belief. The synchronous guarantee is the revision
   fence: every consumer of personal context must compare the capsule's
@@ -51,6 +57,18 @@ class OutboxEventKind(str, Enum):
 
 
 ALL_TARGETS: tuple[OutboxTarget, ...] = tuple(OutboxTarget)
+
+#: Failures a row may accumulate before it is dead-lettered.
+DEFAULT_MAX_ATTEMPTS = 8
+#: Backoff after the n-th failure: base * 2**(n-1), capped.
+DEFAULT_BACKOFF_BASE_MS = 1_000
+DEFAULT_BACKOFF_CAP_MS = 15 * 60 * 1_000
+
+
+def backoff_ms(failures: int, *, base_ms: int = DEFAULT_BACKOFF_BASE_MS,
+               cap_ms: int = DEFAULT_BACKOFF_CAP_MS) -> int:
+    """Delay before the next attempt after `failures` consecutive failures (>= 1)."""
+    return min(cap_ms, base_ms * (2 ** max(failures - 1, 0)))
 
 
 @dataclass(frozen=True)
@@ -103,8 +121,11 @@ async def write_outbox(
 class DrainReport:
     delivered: list[tuple[str, str]] = field(default_factory=list)
     failed: list[tuple[str, str, str]] = field(default_factory=list)
-    #: PENDING rows whose target has no handler registered. Not attempted, not counted.
+    #: PENDING rows whose target has no handler registered. Not attempted, not counted,
+    #: and — since they are read separately — never taking a handled row's place.
     unhandled: list[tuple[str, str]] = field(default_factory=list)
+    #: Rows that failed for the last permitted time in this drain and are now parked.
+    dead_lettered: list[tuple[str, str, str]] = field(default_factory=list)
 
 
 async def drain_outbox(
@@ -113,27 +134,47 @@ async def drain_outbox(
     *,
     limit: int = 100,
     now_ms: int | None = None,
+    max_attempts: int = DEFAULT_MAX_ATTEMPTS,
+    backoff_base_ms: int = DEFAULT_BACKOFF_BASE_MS,
+    backoff_cap_ms: int = DEFAULT_BACKOFF_CAP_MS,
 ) -> DrainReport:
-    """Deliver PENDING rows to their target handlers, oldest first.
+    """Deliver due PENDING rows to their target handlers, oldest first.
 
     Idempotent: only PENDING rows are selected, and the DELIVERED mark is conditional on
     the row still being PENDING, so re-running a drain never re-delivers a delivered row.
     One target failing does not block the others; each (event, target) is independent.
+
+    The batch is drawn only from targets in `handlers`, and only from rows that are due
+    (not backing off, not dead-lettered), so neither a target nobody serves nor a row
+    that always fails can occupy the batch a handled row needs.
     """
     now = int(time.time() * 1000) if now_ms is None else now_ms
     report = DrainReport()
+    handled = sorted(t.value for t in handlers)
+    unhandled_targets = sorted(t.value for t in OutboxTarget if t.value not in handled)
+    if unhandled_targets:
+        marks = ",".join("?" for _ in unhandled_targets)
+        for row in await store.fetchall(
+            "SELECT outbox_id, target FROM owner_model_outbox WHERE status = 'PENDING' "
+            f"AND dead_lettered_at_ms IS NULL AND target IN ({marks}) "  # noqa: S608
+            "ORDER BY created_at_ms, outbox_id, target LIMIT ?",
+            (*unhandled_targets, limit),
+        ):
+            report.unhandled.append((str(row["outbox_id"]), str(row["target"])))
+    if not handled:
+        return report
+    marks = ",".join("?" for _ in handled)
     rows = await store.fetchall(
         "SELECT * FROM owner_model_outbox WHERE status = 'PENDING' "
+        f"AND dead_lettered_at_ms IS NULL AND target IN ({marks}) "  # noqa: S608
+        "AND (next_attempt_at_ms IS NULL OR next_attempt_at_ms <= ?) "
         "ORDER BY created_at_ms, outbox_id, target LIMIT ?",
-        (limit,),
+        (*handled, now, limit),
     )
     for row in rows:
         target = OutboxTarget(str(row["target"]))
         key = (str(row["outbox_id"]), target.value)
-        handler = handlers.get(target)
-        if handler is None:
-            report.unhandled.append(key)
-            continue
+        handler = handlers[target]
         event = OutboxEvent(
             outbox_id=key[0], target=target,
             owner_principal_id=str(row["owner_principal_id"]),
@@ -149,17 +190,24 @@ async def drain_outbox(
         except Exception as exc:  # noqa: BLE001 — any handler failure keeps the row pending
             # The error *type/code* only: a handler's message could echo owner content.
             error = exc.code if isinstance(exc, OutboxDeliveryError) else type(exc).__name__
+            failures = int(row["attempts"]) + 1
+            dead = failures >= max_attempts
             await store.execute(
                 "UPDATE owner_model_outbox SET attempts = attempts + 1, last_error = ?, "
-                "last_attempt_at_ms = ? WHERE outbox_id = ? AND target = ? "
-                "AND status = 'PENDING'",
-                (error, now, *key),
+                "last_attempt_at_ms = ?, next_attempt_at_ms = ?, dead_lettered_at_ms = ? "
+                "WHERE outbox_id = ? AND target = ? AND status = 'PENDING'",
+                (error, now,
+                 now + backoff_ms(failures, base_ms=backoff_base_ms, cap_ms=backoff_cap_ms),
+                 now if dead else None, *key),
             )
             report.failed.append((*key, error))
+            if dead:
+                report.dead_lettered.append((*key, error))
             continue
         await store.execute(
             "UPDATE owner_model_outbox SET status = 'DELIVERED', receipt = ?, "
             "attempts = attempts + 1, last_error = NULL, last_attempt_at_ms = ?, "
+            "next_attempt_at_ms = NULL, "
             "delivered_at_ms = ? WHERE outbox_id = ? AND target = ? AND status = 'PENDING'",
             (receipt, now, now, *key),
         )
@@ -175,12 +223,16 @@ class OutboxDeliveryError(RuntimeError):
 
 __all__ = [
     "ALL_TARGETS",
+    "DEFAULT_BACKOFF_BASE_MS",
+    "DEFAULT_BACKOFF_CAP_MS",
+    "DEFAULT_MAX_ATTEMPTS",
     "DrainReport",
     "OutboxDeliveryError",
     "OutboxEvent",
     "OutboxEventKind",
     "OutboxHandler",
     "OutboxTarget",
+    "backoff_ms",
     "drain_outbox",
     "write_outbox",
 ]

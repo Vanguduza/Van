@@ -28,9 +28,10 @@ from van_gateway.understanding.personal_context import (
 
 SYSTEM = ObservationOrigin.SYSTEM_OBSERVED
 FIELD = OwnerModelField.COMMUNICATION_PREFERENCE
+HOUR_MS = 3_600_000
 
 
-async def seed_episodes(store, *names: str) -> dict[str, str]:
+async def seed_episodes(store, *names: str, owner: str = "owner") -> dict[str, str]:
     from van_gateway.mission.models import MissionOrigin
     from van_gateway.mission.service import MissionService
     from van_gateway.models import OriginChannel
@@ -38,7 +39,7 @@ async def seed_episodes(store, *names: str) -> dict[str, str]:
     missions = MissionService(store)
     out = {}
     for name in names:
-        m = await missions.create(owner_principal_id="owner", origin=MissionOrigin.OWNER_VOICE,
+        m = await missions.create(owner_principal_id=owner, origin=MissionOrigin.OWNER_VOICE,
                                   origin_channel=OriginChannel.VOICE, title=name, goal=name)
         out[name] = f"mission:{m.mission_id}"
     return out
@@ -98,7 +99,9 @@ async def test_revision_strictly_increases_on_every_mutation_type(tmp_path):
     assert seen == sorted(seen) and seen[-1] == 8  # 8 mutations, 3 no-ops
     # Per owner: another owner's mutation does not move this one.
     before = await model.current_revision("owner")
-    await _obs(model, eps["s1"], owner="someone-else")
+    # O2 — the other owner observes from its own mission; the owner's is not its evidence.
+    theirs = await seed_episodes(store, "x1", owner="someone-else")
+    await _obs(model, theirs["x1"], owner="someone-else")
     assert await model.current_revision("owner") == before
     assert await model.current_revision("someone-else") == 1
 
@@ -201,8 +204,10 @@ async def test_a_failing_target_stays_pending_and_the_others_are_delivered(tmp_p
     store = await _one_correction(tmp_path)
     fakes = {t: FakeTarget(t.value) for t in OutboxTarget}
     fakes[OutboxTarget.OPENVIKING_OWNER_PROJECTION].fail_times = 2
+    # Drains an hour apart: a failed row backs off before its retry, and an hour is past
+    # the backoff cap, so each drain here is a real retry.
     for n in (1, 2):
-        report = await drain_outbox(store, fakes, now_ms=n)
+        report = await drain_outbox(store, fakes, now_ms=n * HOUR_MS)
         rows = {r["target"]: r for r in await _outbox(store)}
         ov = rows["OPENVIKING_OWNER_PROJECTION"]
         assert ov["status"] == "PENDING" and ov["attempts"] == n
@@ -210,7 +215,7 @@ async def test_a_failing_target_stays_pending_and_the_others_are_delivered(tmp_p
         assert rows["HINDSIGHT_OWNER"]["status"] == "DELIVERED"
         assert rows["PERSONAL_CONTEXT_CACHE"]["status"] == "DELIVERED"
         assert [f[1] for f in report.failed] == ["OPENVIKING_OWNER_PROJECTION"]
-    report = await drain_outbox(store, fakes, now_ms=3)
+    report = await drain_outbox(store, fakes, now_ms=3 * HOUR_MS)
     assert report.delivered == [(rows["HINDSIGHT_OWNER"]["outbox_id"], "OPENVIKING_OWNER_PROJECTION")]
     rows = {r["target"]: r for r in await _outbox(store)}
     assert rows["OPENVIKING_OWNER_PROJECTION"]["status"] == "DELIVERED"

@@ -152,6 +152,14 @@ class EpisodeProvenance(BaseModel):
     origin: ObservationOrigin
     evidence_refs: list[str] = Field(default_factory=list)
     recorded_at_ms: int = 0
+    #: What the ladder counts: the episode's identity, not its spelling. A mission opened
+    #: by a command and that command are one thing the owner did, so both carry the key
+    #: `command:<source_command_id>`. Empty means "same as `episode_ref`".
+    episode_key: str = ""
+
+    @property
+    def key(self) -> str:
+        return self.episode_key or self.episode_ref
 
 
 class OwnerAssertion(BaseModel):
@@ -178,8 +186,12 @@ class OwnerAssertion(BaseModel):
 
     @property
     def evidencing_episode_count(self) -> int:
-        """C1 — distinct SYSTEM_OBSERVED episodes. The only number the ladder reads."""
-        return len({e.episode_ref for e in self.episodes if e.origin.is_evidencing})
+        """C1 — distinct SYSTEM_OBSERVED episodes. The only number the ladder reads.
+
+        Distinct by episode *key*, so a mission and the command that opened it are one
+        vote (M4), not two.
+        """
+        return len({e.key for e in self.episodes if e.origin.is_evidencing})
 
     @property
     def derived_episode_refs(self) -> list[str]:
@@ -218,6 +230,31 @@ EPISODE_SOURCES: dict[str, tuple[str, str]] = {
 
 REVISION_SCHEMA = "van.owner_model.revision.v1"
 
+#: SQL for an episode row's identity (alias `e`). M4 — `mission:M` and `command:C` used to
+#: be two votes when M was opened by C: one owner command, two episode refs. A mission
+#: whose authority envelope names a source command is keyed by that command, so the pair
+#: is one vote whichever was observed first (keying the command by its mission instead
+#: would miss the case where the command was observed before the mission existed). Keys
+#: are computed at read time, not stored, so the recorded ref keeps its provenance.
+#: Migration 32 inlines the same expression; the two must stay equivalent.
+EPISODE_KEY_SQL = (
+    "COALESCE(CASE WHEN substr(e.episode_ref, 1, 8) = 'mission:' THEN ("
+    "SELECT 'command:' || NULLIF(trim(json_extract(m.authority_envelope_json, "
+    "'$.source_command_id')), '') FROM missions m "
+    "WHERE m.mission_id = substr(e.episode_ref, 9) "
+    "AND json_valid(m.authority_envelope_json)) END, e.episode_ref)"
+)
+
+#: The principal a stored mission principal resolves to. Missions opened by a command
+#: are owned by `device:<device_id>` (command/mission_link.py); that device is the owner's
+#: only if `owner_device_bindings` binds it to them. `?` is the mission's
+#: owner_principal_id.
+_RESOLVE_PRINCIPAL_SQL = (
+    "SELECT CASE WHEN substr(?1, 1, 7) = 'device:' THEN COALESCE(("
+    "SELECT b.owner_principal_id FROM owner_device_bindings b "
+    "WHERE b.device_id = substr(?1, 8) LIMIT 1), ?1) ELSE ?1 END AS principal"
+)
+
 
 def _confidence(evidencing: int) -> float:
     """Confidence is a function of admissible evidence only. No admissible episode, none."""
@@ -248,15 +285,22 @@ class OwnerCognitiveModel:
                 raise
             await db.commit()
 
-    async def _require_episode(self, episode_ref: str) -> str:
+    async def _require_episode(self, episode_ref: str, owner_principal_id: str) -> str:
         """Refuse an episode reference that does not name something that happened.
 
         The ladder counts distinct references, so an unresolvable one is not merely
         untidy: it is a vote. Requiring the prefix as well as the row means a caller
         cannot satisfy the check by passing a bare id that happens to collide.
 
-        Returns the normalised ref (`<lowercase kind>:<stripped id>`), which is what the
-        ladder counts, so one episode is one vote however it was spelled.
+        Returns the normalised ref (`<lowercase kind>:<stripped id>`), so one episode is
+        one vote however it was spelled.
+
+        O2 — the episode must also be the owner's. A mission owned by another principal
+        (directly, or through a `device:` principal bound to someone else) is refused. A
+        command is refused when anything attributes it to another principal: a mission it
+        opened, or an audit row whose device is bound to someone else. The audit table
+        records no principal of its own, so a command nothing attributes is accepted, as
+        it was before; that is the one case this check cannot decide.
         """
         raw = episode_ref or ""
         kind, separator, identifier = raw.partition(":")
@@ -278,10 +322,44 @@ class OwnerCognitiveModel:
                 f"no {kind} {identifier!r} exists; an assertion cannot be "
                 "evidenced by something that did not happen",
             )
+        foreign = await self._foreign_principal(kind, identifier, owner_principal_id)
+        if foreign is not None:
+            raise OwnerModelError(
+                "OWNER_MODEL_EPISODE_FOREIGN_PRINCIPAL",
+                f"{kind} {identifier!r} belongs to {foreign!r}, not {owner_principal_id!r}; "
+                "another principal's episode is not evidence about this owner",
+            )
         # The canonical spelling of the episode that was looked up — not the caller's.
         # Returning the caller's spelling made `mission:X`, `mission: X` and `MISSION:\tX`
         # one mission for the lookup and three distinct votes for the ladder.
         return f"{kind}:{identifier}"
+
+    async def _resolve_principal(self, principal: str) -> str:
+        row = await self.store.fetchone(_RESOLVE_PRINCIPAL_SQL, (principal,))
+        return str(row["principal"])
+
+    async def _foreign_principal(self, kind: str, identifier: str, owner: str) -> str | None:
+        """The other principal this episode belongs to, or None if nothing says so."""
+        if kind == "mission":
+            missions = await self.store.fetchall(
+                "SELECT owner_principal_id FROM missions WHERE mission_id = ?", (identifier,))
+        else:
+            missions = await self.store.fetchall(
+                "SELECT owner_principal_id FROM missions WHERE json_valid(authority_envelope_json) "
+                "AND json_extract(authority_envelope_json, '$.source_command_id') = ?",
+                (identifier,))
+            devices = await self.store.fetchall(
+                "SELECT DISTINCT b.owner_principal_id FROM audit c "
+                "JOIN owner_device_bindings b ON b.device_id = c.device_id "
+                "WHERE c.command_id = ?", (identifier,))
+            for d in devices:
+                if str(d["owner_principal_id"]) != owner:
+                    return str(d["owner_principal_id"])
+        for m in missions:
+            principal = await self._resolve_principal(str(m["owner_principal_id"]))
+            if principal != owner:
+                return principal
+        return None
 
     @staticmethod
     def _require_origin(origin: Any) -> ObservationOrigin:
@@ -318,7 +396,7 @@ class OwnerCognitiveModel:
         """
         origin = self._require_origin(origin)
         now = int(time.time() * 1000) if now_ms is None else now_ms
-        episode_ref = await self._require_episode(episode_ref)
+        episode_ref = await self._require_episode(episode_ref, owner_principal_id)
         new_evidence = sorted(set(evidence_refs or []))
 
         async with self._tx() as db:
@@ -359,13 +437,16 @@ class OwnerCognitiveModel:
                 return existing
 
             system_refs = await self._evidencing_refs(db, existing.assertion_id)
+            # M4 — the ladder counts episodes, not refs: a mission and its source command
+            # are two refs and one vote.
+            votes = await self._evidencing_count(db, existing.assertion_id)
             state = existing.state
             if existing.state in (AssertionState.OBSERVED, AssertionState.CANDIDATE):
-                state = self._ladder(field, len(system_refs), existing.state)
+                state = self._ladder(field, votes, existing.state)
 
             updated = existing.model_copy(update={
                 "supporting_episode_refs": system_refs, "evidence_refs": evidence,
-                "state": state, "confidence": _confidence(len(system_refs)),
+                "state": state, "confidence": _confidence(votes),
                 "updated_at_ms": now,
             })
             await self._update(db, updated)
@@ -668,6 +749,18 @@ class OwnerCognitiveModel:
         return [str(r[0]) for r in await cursor.fetchall()]
 
     @staticmethod
+    async def _evidencing_count(db: aiosqlite.Connection, assertion_id: str) -> int:
+        """Distinct SYSTEM_OBSERVED episode *keys* — the number the ladder reads (M4)."""
+        cursor = await db.execute(
+            f"SELECT COUNT(DISTINCT {EPISODE_KEY_SQL}) FROM owner_model_episodes e "  # noqa: S608
+            "WHERE e.assertion_id = ? AND e.origin = ?",
+            (assertion_id, ObservationOrigin.SYSTEM_OBSERVED.value),
+        )
+        row = await cursor.fetchone()
+        await cursor.close()
+        return int(row[0])
+
+    @staticmethod
     async def _insert(db: aiosqlite.Connection, a: OwnerAssertion) -> None:
         await db.execute(
             """
@@ -708,8 +801,9 @@ class OwnerCognitiveModel:
         ids = [str(r["assertion_id"]) for r in rows]
         placeholders = ",".join("?" for _ in ids)
         cursor = await db.execute(
-            f"SELECT * FROM owner_model_episodes WHERE assertion_id IN ({placeholders}) "  # noqa: S608
-            "ORDER BY recorded_at_ms, episode_ref, origin",
+            f"SELECT e.*, {EPISODE_KEY_SQL} AS episode_key FROM owner_model_episodes e "  # noqa: S608
+            f"WHERE e.assertion_id IN ({placeholders}) "
+            "ORDER BY e.recorded_at_ms, e.episode_ref, e.origin",
             tuple(ids),
         )
         by_assertion: dict[str, list[EpisodeProvenance]] = {}
@@ -718,6 +812,7 @@ class OwnerCognitiveModel:
                 episode_ref=str(e["episode_ref"]), origin=ObservationOrigin(str(e["origin"])),
                 evidence_refs=json.loads(str(e["evidence_refs_json"])),
                 recorded_at_ms=int(e["recorded_at_ms"]),
+                episode_key=str(e["episode_key"]),
             ))
         return [self._row(r, by_assertion.get(str(r["assertion_id"]), [])) for r in rows]
 
@@ -741,6 +836,7 @@ class OwnerCognitiveModel:
 
 __all__ = [
     "AUTONOMY_BEARING_FIELDS",
+    "EPISODE_KEY_SQL",
     "EPISODE_SOURCES",
     "EPISODES_FOR_CANDIDATE",
     "EPISODES_FOR_CONFIRMED",
