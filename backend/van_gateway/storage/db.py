@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 33
+SCHEMA_VERSION = 34
 
 
 MIGRATION_17 = """
@@ -835,6 +835,37 @@ CREATE TABLE IF NOT EXISTS conversation_followups (
 );
 CREATE INDEX IF NOT EXISTS idx_conversation_followups_thread
   ON conversation_followups(thread_id, status, created_at_ms);
+"""
+
+MIGRATION_34 = """
+-- Review I4 MINOR-C. End states are sticky at the database, not only in the service.
+-- BrowserTaskService._write_status is the one guarded status writer (its UPDATE carries
+-- `status NOT IN (<terminal>)`), but the only thing enforcing "one writer" was a source
+-- regex that `UPDATE main.browser_tasks` or `UPDATE "browser_tasks"` walked past. These
+-- triggers refuse, whoever writes, a status change out of a terminal status
+-- (browser/service.py TERMINAL_TASK_STATUSES; tests pin the two lists together), and an
+-- INSERT OR REPLACE over a terminal task (REPLACE deletes then inserts, so no UPDATE
+-- trigger would see it). Deleting a row (retention) is unaffected.
+CREATE TRIGGER IF NOT EXISTS browser_tasks_terminal_status_sticky
+BEFORE UPDATE OF status ON browser_tasks
+WHEN OLD.status IN ('COMPLETED', 'FAILED', 'DENIED', 'BLOCKED_POLICY', 'BLOCKED_UNSAFE',
+                    'CANCELLED', 'EXPIRED')
+  AND NEW.status IS NOT OLD.status
+BEGIN
+  SELECT RAISE(ABORT, 'browser_task_terminal_status');
+END;
+
+CREATE TRIGGER IF NOT EXISTS browser_tasks_terminal_not_replaced
+BEFORE INSERT ON browser_tasks
+WHEN EXISTS (
+  SELECT 1 FROM browser_tasks
+  WHERE task_id = NEW.task_id
+    AND status IN ('COMPLETED', 'FAILED', 'DENIED', 'BLOCKED_POLICY', 'BLOCKED_UNSAFE',
+                   'CANCELLED', 'EXPIRED')
+)
+BEGIN
+  SELECT RAISE(ABORT, 'browser_task_terminal_status');
+END;
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -2172,6 +2203,7 @@ MIGRATIONS: dict[int, str] = {
     31: MIGRATION_31,
     32: MIGRATION_32,
     33: MIGRATION_33,
+    34: MIGRATION_34,
 }
 
 

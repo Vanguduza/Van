@@ -54,6 +54,7 @@ from van_gateway.browser.service import (
     BrowserTaskNotVerified,
     BrowserTaskService,
     BrowserTaskTransitionRefused,
+    TERMINAL_TASK_STATUSES,
 )
 from van_gateway.browser.subagent import OwnerTakeoverRequired, ProposedAction
 from van_gateway.config import get_settings
@@ -462,15 +463,137 @@ async def test_set_working_status_refuses_end_states_and_out_of_order_resume(tmp
     assert row["status"] == "CANCELLED"
 
 
+#: Review I4 MINOR-C: the table name may be schema-qualified (``main.browser_tasks``) and
+#: either part quoted ("", ``, []); UPDATE may carry ``OR <conflict>``; and REPLACE rewrites
+#: a row without an UPDATE. ``UPDATE ...`` in backticks is prose.
+_Q_OPEN, _Q_CLOSE = r'["`\[]?', r'["`\]]?'
+_TASKS_NAME = rf"(?:{_Q_OPEN}\w+{_Q_CLOSE}\s*\.\s*)?{_Q_OPEN}browser_tasks{_Q_CLOSE}"
+TASK_STATUS_WRITE = re.compile(
+    rf"(?<!`)\b(?:UPDATE\s+(?:OR\s+\w+\s+)?{_TASKS_NAME}\s+SET"
+    rf"|(?:REPLACE|INSERT\s+OR\s+REPLACE)\s+INTO\s+{_TASKS_NAME})\b",
+    re.IGNORECASE,
+)
+
+
+@pytest.mark.parametrize("sql", [
+    "UPDATE browser_tasks SET status = ?",
+    "update browser_tasks\n   set status = ?",
+    "UPDATE main.browser_tasks SET status = ?",
+    'UPDATE "browser_tasks" SET status = ?',
+    'UPDATE "main"."browser_tasks" SET status = ?',
+    "UPDATE `browser_tasks` SET status = ?",
+    "UPDATE [browser_tasks] SET status = ?",
+    "UPDATE main . browser_tasks SET status = ?",
+    "UPDATE OR REPLACE browser_tasks SET status = ?",
+    "REPLACE INTO browser_tasks(task_id, status) VALUES (?, ?)",
+    "INSERT OR REPLACE INTO main.browser_tasks(task_id, status) VALUES (?, ?)",
+])
+def test_the_single_writer_pattern_catches_qualified_and_quoted_names(sql):
+    """Probe: ``main.browser_tasks`` and ``"browser_tasks"`` walked past the old pattern."""
+    assert TASK_STATUS_WRITE.search(sql), sql
+
+
+@pytest.mark.parametrize("prose", ["``UPDATE browser_tasks SET status``", "UPDATE browser_tasks_archive SET x"])
+def test_the_single_writer_pattern_ignores_prose_and_other_tables(prose):
+    assert not TASK_STATUS_WRITE.search(prose)
+
+
 def test_no_status_write_bypasses_the_guarded_writer():
-    """Every ``UPDATE browser_tasks ... status`` in VAN is BrowserTaskService._write_status."""
-    # Whole-file, so SQL split over lines is caught too; ``UPDATE ...`` in backticks is prose.
-    pattern = re.compile(r"(?<!`)\bUPDATE\s+browser_tasks\s+SET\b", re.IGNORECASE)
+    """Every status write to ``browser_tasks`` in VAN is BrowserTaskService._write_status.
+
+    A source scan is a tripwire, not the control: migration 34's triggers refuse a status
+    change out of an end state at the database whoever writes it (review I4 MINOR-C).
+    """
     hits = []
     for path in BACKEND.rglob("*.py"):
-        for match in pattern.finditer(path.read_text(encoding="utf-8")):
+        for match in TASK_STATUS_WRITE.finditer(path.read_text(encoding="utf-8")):
             hits.append(f"{path.relative_to(BACKEND).as_posix()}:{match.start()}")
     assert len(hits) == 1 and hits[0].startswith("browser/service.py:"), hits
+
+
+def _terminal_trigger_statuses(sql: str) -> set[str]:
+    return set(re.findall(r"'([A-Z_]+)'", sql.split("BEGIN")[0]))
+
+
+async def test_the_terminal_triggers_name_exactly_the_terminal_statuses(tmp_path):
+    store = await make_store(tmp_path)
+    rows = await store.fetchall(
+        "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' AND tbl_name = 'browser_tasks'")
+    by_name = {r["name"]: r["sql"] for r in rows}
+    assert set(by_name) == {"browser_tasks_terminal_status_sticky", "browser_tasks_terminal_not_replaced"}
+    expected = {s.value for s in TERMINAL_TASK_STATUSES}
+    for name, sql in by_name.items():
+        assert _terminal_trigger_statuses(sql) == expected, name
+
+
+@pytest.mark.parametrize("sql", [
+    "UPDATE browser_tasks SET status = 'PENDING' WHERE task_id = ?",
+    "UPDATE main.browser_tasks SET status = 'RUNNING' WHERE task_id = ?",
+    'UPDATE "browser_tasks" SET status = \'COMPLETED\' WHERE task_id = ?',
+    "UPDATE OR REPLACE browser_tasks SET status = 'RESUME_AUTHORIZED' WHERE task_id = ?",
+    "UPDATE browser_tasks SET status = NULL WHERE task_id = ?",
+])
+async def test_a_raw_update_out_of_cancelled_aborts_at_the_database(tmp_path, sql):
+    """Review I4 MINOR-C: the database refuses what the source regex could only look for."""
+    import sqlite3
+
+    store = await make_store(tmp_path)
+    tasks = BrowserTaskService(store)
+    task = await _plain_task(tasks)
+    await tasks.complete(task_id=task.task_id, status=BrowserTaskStatus.CANCELLED)
+    with pytest.raises(sqlite3.IntegrityError, match="browser_task_terminal_status"):
+        await store.execute(sql, (task.task_id,))
+    row = await store.fetchone("SELECT status FROM browser_tasks WHERE task_id = ?", (task.task_id,))
+    assert row["status"] == "CANCELLED"
+
+
+async def test_insert_or_replace_cannot_resurrect_an_ended_task(tmp_path):
+    import sqlite3
+
+    store = await make_store(tmp_path)
+    tasks = BrowserTaskService(store)
+    task = await _plain_task(tasks)
+    await tasks.complete(task_id=task.task_id, status=BrowserTaskStatus.EXPIRED)
+    row = dict(await store.fetchone("SELECT * FROM browser_tasks WHERE task_id = ?", (task.task_id,)))
+    row["status"] = "PENDING"
+    cols = ", ".join(row)
+    with pytest.raises(sqlite3.IntegrityError, match="browser_task_terminal_status"):
+        await store.execute(f"INSERT OR REPLACE INTO browser_tasks({cols}) VALUES ({', '.join('?' for _ in row)})",
+                            tuple(row.values()))
+    again = await store.fetchone("SELECT status FROM browser_tasks WHERE task_id = ?", (task.task_id,))
+    assert again["status"] == "EXPIRED"
+
+
+async def test_the_triggers_leave_live_tasks_same_status_writes_and_deletion_alone(tmp_path):
+    """Live tasks move freely; an ended task may be touched without a status change and may be
+    deleted (retention prunes browser_tasks as telemetry)."""
+    store = await make_store(tmp_path)
+    tasks = BrowserTaskService(store)
+    task = await _plain_task(tasks)
+    await store.execute("UPDATE browser_tasks SET status = 'RUNNING' WHERE task_id = ?", (task.task_id,))
+    await tasks.set_working_status(task_id=task.task_id, status=BrowserTaskStatus.WAITING_FOR_OWNER)
+    await tasks.set_working_status(task_id=task.task_id, status=BrowserTaskStatus.RESUME_AUTHORIZED)
+    await tasks.complete(task_id=task.task_id, status=BrowserTaskStatus.FAILED, error_code="X")
+    await store.execute("UPDATE browser_tasks SET status = 'FAILED', updated_at_ms = 1 WHERE task_id = ?",
+                        (task.task_id,))
+    await store.execute("UPDATE browser_tasks SET error_code = 'Y' WHERE task_id = ?", (task.task_id,))
+    await store.execute("DELETE FROM browser_tasks WHERE task_id = ?", (task.task_id,))
+    assert await store.fetchone("SELECT 1 FROM browser_tasks WHERE task_id = ?", (task.task_id,)) is None
+
+
+async def test_the_guarded_writer_still_completes_a_live_task_over_a_verified_verdict(tmp_path):
+    """COMPLETED from a non-terminal state still goes through with the triggers installed."""
+    store = await make_store(tmp_path)
+    tasks = BrowserTaskService(store)
+    task = await _plain_task(tasks)
+    await tasks.set_working_status(task_id=task.task_id, status=BrowserTaskStatus.VERIFYING)
+    await tasks.record_verification(task=task, outcome="VERIFIED", verifier="test")
+    await tasks.complete(task_id=task.task_id, status=BrowserTaskStatus.COMPLETED, evidence_pointer="bevd://ok")
+    row = await store.fetchone("SELECT status, evidence_pointer FROM browser_tasks WHERE task_id = ?", (task.task_id,))
+    assert (row["status"], row["evidence_pointer"]) == ("COMPLETED", "bevd://ok")
+    with pytest.raises(BrowserTaskTransitionRefused) as ended:
+        await tasks.complete(task_id=task.task_id, status=BrowserTaskStatus.CANCELLED)
+    assert ended.value.why == "TASK_ALREADY_TERMINAL"
 
 
 # ----------------------------------------------------------------------------- MINOR-3
