@@ -27,6 +27,11 @@ class VerificationOutcome(str, Enum):
     UNVERIFIABLE = "UNVERIFIABLE"
 
 
+#: The observer's own "I could read something" signal. It is not a fact about the world the
+#: action was meant to change, so naming it as the predicate field declares nothing.
+EXISTENCE_SIGNAL = "exists"
+
+
 class PostconditionSpec(BaseModel):
     """What the IR declared must become true (§165)."""
 
@@ -34,6 +39,20 @@ class PostconditionSpec(BaseModel):
     field: str | None = None
     expected: Any = None
     correlation_keys: list[str] = Field(default_factory=list)
+
+    @property
+    def declares_predicate(self) -> bool:
+        """True when the spec names something an observation can be *wrong* about.
+
+        Reviewer I M-1: ``{"kind": "READ_BACK"}`` alone was VERIFIED whenever the observer
+        returned anything at all (a readable page is ``exists: True``), so a spec that
+        asserted nothing passed. A predicate is a ``field`` with an ``expected`` value (other
+        than the existence signal itself) or at least one correlation key.
+        """
+        has_field_predicate = (
+            self.field is not None and self.field != EXISTENCE_SIGNAL and self.expected is not None
+        )
+        return has_field_predicate or bool(self.correlation_keys)
 
 
 class VerificationResult(BaseModel):
@@ -79,6 +98,17 @@ class WorkflowVerifier:
                 outcome=VerificationOutcome.UNVERIFIABLE,
                 verifier_type=verifier_type,
                 detail="no postcondition declared",
+            )
+
+        if not spec.declares_predicate:
+            # M-1 — a postcondition that names no field/expected value and no correlation
+            # key cannot be observed false, so observing it proves nothing. Enforced here so
+            # every caller (automation dispatch, the browser router, the subagent runner)
+            # gets the same answer.
+            return VerificationResult(
+                outcome=VerificationOutcome.UNVERIFIABLE,
+                verifier_type=verifier_type,
+                detail="postcondition declares no predicate (field/expected or correlation_keys)",
             )
 
         observer = self.observers.get(spec.kind)
@@ -158,6 +188,7 @@ class DocumentUploadObserver:
 
 
 __all__ = [
+    "EXISTENCE_SIGNAL",
     "DocumentUploadObserver",
     "PostconditionObserver",
     "PostconditionSpec",
