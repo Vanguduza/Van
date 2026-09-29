@@ -11,7 +11,10 @@ What goes in ``content``:
 
 * only assertions VAN may act on — CONFIRMED or EVIDENCED, not superseded — and each is
   labelled with whether the *owner* stated it (CONFIRMED) or VAN concluded it from its own
-  observations (EVIDENCED);
+  observations (EVIDENCED), and carries its own `authority_stratum`: CONFIRMED →
+  S0_OWNER_PROJECT_TRUTH, EVIDENCED → S5_ADMITTED_SPMRF (`owner_model_evidenced`). The
+  capsule-level stratum is the lowest-authority item present; an empty capsule is S0
+  because it asserts nothing (see `EMPTY_CAPSULE_STRATUM`);
 * nothing whose support is derived-origin only. Derived episodes (Hindsight, OpenViking,
   model inference) cannot make an assertion actionable (C1), so such assertions never
   reach the actionable set; they are excluded from the capsule entirely rather than
@@ -40,10 +43,40 @@ from van_gateway.understanding.owner_model import (
 CAPSULE_SCHEMA = "dial.context_capsule.v1"
 CONTENT_SCHEMA = "van.owner_model.personal_context.v1"
 PRIVACY_CLASS = "OWNER_PRIVATE"
-#: C4. The Owner Model is the owner's own plane. EVIDENCED items inside it are labelled
-#: `owner_stated: false` rather than given a separate stratum, because C4 has no stratum
-#: for "VAN's own system-observed conclusion about the owner" (reported to the parent).
-AUTHORITY_STRATUM = "S0_OWNER_PROJECT_TRUTH"
+#: C3/C4 per-item strata (parent amendment). An owner-stated assertion (CONFIRMED, reached
+#: only through the owner's confirm/correct) is owner truth. An EVIDENCED assertion is VAN's
+#: governed conclusion from its own system observations — admitted inference, not owner
+#: truth — and is ranked with admitted SPMRF. Consumers must never promote an item above
+#: its own stratum.
+STRATUM_OWNER_STATED = "S0_OWNER_PROJECT_TRUTH"
+STRATUM_OWNER_MODEL_EVIDENCED = "S5_ADMITTED_SPMRF"
+LABEL_OWNER_STATED = "owner_stated"
+LABEL_OWNER_MODEL_EVIDENCED = "owner_model_evidenced"
+#: C4 ranks: 0 is the highest authority. Only the strata this producer emits are listed.
+STRATUM_RANK = {STRATUM_OWNER_STATED: 0, STRATUM_OWNER_MODEL_EVIDENCED: 5}
+#: Capsule stratum when `content` holds no items. An empty capsule asserts nothing about the
+#: owner, so there is no item a consumer could promote; S0 is used because the only source
+#: of an empty answer is the Owner Model itself. Consumers must not read an empty S0 capsule
+#: as "the owner has stated they have no preferences" — it means "nothing actionable".
+EMPTY_CAPSULE_STRATUM = STRATUM_OWNER_STATED
+#: Retained name: the stratum of an empty capsule.
+AUTHORITY_STRATUM = EMPTY_CAPSULE_STRATUM
+
+
+def item_stratum(state: AssertionState) -> tuple[str, str]:
+    """(authority_stratum, authority_label) for one actionable assertion state."""
+    if state is AssertionState.CONFIRMED:
+        return STRATUM_OWNER_STATED, LABEL_OWNER_STATED
+    if state is AssertionState.EVIDENCED:
+        return STRATUM_OWNER_MODEL_EVIDENCED, LABEL_OWNER_MODEL_EVIDENCED
+    raise ValueError(f"PERSONAL_CONTEXT_NOT_ACTIONABLE: {state.value}")
+
+
+def capsule_stratum(items: list[dict[str, Any]]) -> str:
+    """The lowest-authority (highest-rank) stratum among the items present."""
+    if not items:
+        return EMPTY_CAPSULE_STRATUM
+    return max((i["authority_stratum"] for i in items), key=STRATUM_RANK.__getitem__)
 
 
 def canonical_json(content: Any) -> bytes:
@@ -110,8 +143,11 @@ async def build_personal_capsule(
         # Belt and braces over the SQL filter: never let a non-actionable row through.
         if not a.may_act_on:
             continue
+        stratum, label = item_stratum(a.state)
         items.append({
             "assertion_id": a.assertion_id,
+            "authority_stratum": stratum,
+            "authority_label": label,
             "field": a.field.value,
             "value": a.value,
             "state": a.state.value,
@@ -134,7 +170,7 @@ async def build_personal_capsule(
         "context_capsule_id": f"cc_{uuid.uuid4().hex}",
         "principal_scope": owner_principal_id,
         "project_scope": project_id,
-        "authority_stratum": AUTHORITY_STRATUM,
+        "authority_stratum": capsule_stratum(items),
         "purpose": purpose,
         "privacy_class": PRIVACY_CLASS,
         "provenance_refs": list(dict.fromkeys(provenance)),
@@ -149,6 +185,14 @@ async def build_personal_capsule(
 
 __all__ = [
     "AUTHORITY_STRATUM",
+    "EMPTY_CAPSULE_STRATUM",
+    "LABEL_OWNER_MODEL_EVIDENCED",
+    "LABEL_OWNER_STATED",
+    "STRATUM_OWNER_MODEL_EVIDENCED",
+    "STRATUM_OWNER_STATED",
+    "STRATUM_RANK",
+    "capsule_stratum",
+    "item_stratum",
     "CAPSULE_SCHEMA",
     "CONTENT_SCHEMA",
     "PRIVACY_CLASS",

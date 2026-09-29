@@ -313,3 +313,62 @@ async def test_capsule_project_scope_and_purpose(tmp_path):
     assert in_project["project_scope"] == "van"
     with pytest.raises(ValueError):
         await build_personal_capsule(model, "owner", purpose=" ")
+
+
+# ------------------------------------------------------------------ C3/C4 strata
+
+
+async def _evidenced_and_confirmed(model, store, *, confirm_evidenced=False):
+    eps = await seed_episodes(store, "s1", "s2", "s3")
+    for n in ("s1", "s2", "s3"):
+        ev = await _obs(model, eps[n], value="evidenced")
+    assert ev.state is AssertionState.EVIDENCED
+    stated = await _obs(model, eps["s1"], value="stated")
+    await model.confirm(stated.assertion_id)
+    if confirm_evidenced:
+        await model.confirm(ev.assertion_id)
+    return ev, stated
+
+
+async def test_mixed_capsule_takes_the_lowest_authority_stratum(tmp_path):
+    store = await make_store(tmp_path)
+    model = OwnerCognitiveModel(store)
+    ev, stated = await _evidenced_and_confirmed(model, store)
+    capsule = await build_personal_capsule(model, "owner", purpose="p")
+    items = {i["assertion_id"]: i for i in capsule["content"]["assertions"]}
+    assert items[stated.assertion_id]["authority_stratum"] == "S0_OWNER_PROJECT_TRUTH"
+    assert items[stated.assertion_id]["authority_label"] == "owner_stated"
+    assert items[ev.assertion_id]["authority_stratum"] == "S5_ADMITTED_SPMRF"
+    assert items[ev.assertion_id]["authority_label"] == "owner_model_evidenced"
+    assert capsule["authority_stratum"] == "S5_ADMITTED_SPMRF"
+    assert verify_content_hash(capsule)
+
+
+@pytest.mark.parametrize("order", ["stated_first", "evidenced_first"])
+async def test_capsule_min_rule_does_not_depend_on_item_order(tmp_path, order):
+    from van_gateway.understanding.personal_context import capsule_stratum
+
+    s0 = {"authority_stratum": "S0_OWNER_PROJECT_TRUTH"}
+    s5 = {"authority_stratum": "S5_ADMITTED_SPMRF"}
+    items = [s0, s5] if order == "stated_first" else [s5, s0]
+    assert capsule_stratum(items) == "S5_ADMITTED_SPMRF"
+
+
+async def test_confirmed_only_capsule_is_s0(tmp_path):
+    store = await make_store(tmp_path)
+    model = OwnerCognitiveModel(store)
+    await _evidenced_and_confirmed(model, store, confirm_evidenced=True)
+    capsule = await build_personal_capsule(model, "owner", purpose="p")
+    assert len(capsule["content"]["assertions"]) == 2
+    assert {i["authority_stratum"] for i in capsule["content"]["assertions"]} == {
+        "S0_OWNER_PROJECT_TRUTH"}
+    assert capsule["authority_stratum"] == "S0_OWNER_PROJECT_TRUTH"
+
+
+async def test_empty_capsule_stratum_is_documented_s0(tmp_path):
+    from van_gateway.understanding.personal_context import EMPTY_CAPSULE_STRATUM
+
+    capsule = await build_personal_capsule(
+        OwnerCognitiveModel(await make_store(tmp_path)), "owner", purpose="p")
+    assert capsule["content"]["assertions"] == []
+    assert capsule["authority_stratum"] == EMPTY_CAPSULE_STRATUM == "S0_OWNER_PROJECT_TRUTH"
