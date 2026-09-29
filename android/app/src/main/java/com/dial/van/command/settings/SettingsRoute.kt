@@ -63,6 +63,7 @@ fun SettingsRoute(
     app: VanApplication,
     onOpenVoice: () -> Unit,
     onOpenNotifications: () -> Unit,
+    onOpenJev: () -> Unit,
 ) {
     val tokens = LocalVanTokens.current
     val context = LocalContext.current
@@ -245,6 +246,13 @@ fun SettingsRoute(
                 title = "Notifications",
                 detail = "Which apps VAN reads, and quiet hours",
                 onClick = onOpenNotifications,
+            )
+        }
+        item {
+            SettingsLink(
+                title = "Jev Control",
+                detail = "System-1 modules, provider qualification, activity, contribution and owner controls",
+                onClick = onOpenJev,
             )
         }
 

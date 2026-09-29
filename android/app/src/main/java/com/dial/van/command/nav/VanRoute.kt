@@ -42,6 +42,7 @@ object VanRoute {
     const val PROJECT_DETAIL_TEMPLATE = "projects/{projectId}"
     const val CONNECTED = "connected"
     const val SETTINGS = "settings"
+    const val JEV = "jev"
     /**
      * Full-screen children of Settings for the two legacy bodies this rebuild reuses rather
      * than duplicates (`SpeechModule`, `NotificationPolicyModule`) — both are themselves a
@@ -98,7 +99,7 @@ object VanRoute {
         HOME, ATTENTION, WORK, WORK_ACTIVITY, WORK_ARTEMIS, WORK_ASSETS, WORK_DOCUMENT_TEMPLATE, WORK_THREAD_TEMPLATE,
         WORK_BROWSER, WORK_BROWSER_TASKS, WORK_BROWSER_ESCALATIONS,
         WORK_BROWSER_SESSIONS, WORK_BROWSER_POLICY, WORK_MISSION_TEMPLATE, TRADING, MEMORY,
-        PROJECTS, PROJECT_DETAIL_TEMPLATE, CONNECTED, SETTINGS,
+        PROJECTS, PROJECT_DETAIL_TEMPLATE, CONNECTED, SETTINGS, JEV,
         SETTINGS_VOICE, SETTINGS_NOTIFICATIONS,
     ) + DEV_TEMPLATES
 
@@ -132,6 +133,7 @@ object VanRoute {
         PROJECT_DETAIL_TEMPLATE to PROJECTS,
         CONNECTED to HOME,
         SETTINGS to HOME,
+        JEV to HOME,
         SETTINGS_VOICE to SETTINGS,
         SETTINGS_NOTIFICATIONS to SETTINGS,
     ) + DEV_TEMPLATES.associateWith { WORK }
