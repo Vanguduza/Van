@@ -3,7 +3,8 @@ authority is not. Everything here produces evidence, candidates and bounded
 reduce-only adjustments. Nothing here can size, send, promote or widen."""
 
 from vati.learning.episodes import Environment, ENVIRONMENT_WEIGHT, ExperienceEpisode, MissedOpportunityEpisode, CounterfactualResult, MacroEventEpisode, episode_from_ledger
-from vati.learning.boundary import LearningBoundary, LearningBoundaryError, LiveAdjustment
+from vati.learning.boundary import LearningBoundary, LearningBoundaryError, LiveAdjustment, LiveAdjustmentProposal
+from vati.learning.evidence import EvidenceClass, EvidenceError, EvidenceRecord, EvidenceResolver, EvidenceSet, InMemoryEvidenceStore, LedgerEvidenceResolver, CompositeEvidenceResolver
 from vati.learning.health import HealthObservation, StrategyHealthTracker, HealthVerdict
 from vati.learning.broker import BrokerExecutionProfile, BrokerLearner, BrokerState
 from vati.learning.counterfactual import CounterfactualVariant, run_counterfactuals

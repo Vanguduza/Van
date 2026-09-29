@@ -19,6 +19,7 @@ from vati.learning import (
     cluster_failures, curriculum_gate, daily_report, episode_from_ledger, evaluate_missed_opportunity, monthly_report, propose_candidate, run_counterfactuals, weekly_report,
 )
 from vati.learning.boundary import FORBIDDEN_TARGETS, LiveTarget
+from vati.learning.evidence import EvidenceClass, InMemoryEvidenceStore
 from vati.learning.hooks import LearningHooks
 from vati.learning.replay import restore_learning_runtime
 from vati.market_data import FX_CALENDAR
@@ -31,24 +32,37 @@ EV = ("a" * 64,)
 
 
 # ------------------------------------------------------------------ boundary
+def _live_health_evidence(key, n, env=Environment.LIVE):
+    """n distinct, resolvable STRATEGY_HEALTH_OBSERVATION records for `key` (C5)."""
+    store = InMemoryEvidenceStore()
+    refs = tuple(store.register(EvidenceClass.STRATEGY_HEALTH_OBSERVATION, {"strategy_id": key, "environment": env, "r_multiple": "-1", "observation_seq": i}) for i in range(n))
+    return store, refs
+
+
 def test_boundary_accepts_only_reduce_only_adjustments_on_three_targets():
-    ok = LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "FX-TREND-PULLBACK-01", D("0.8"), "DEGRADED", EV, D("40"))
-    assert LearningBoundary.check(ok) is ok
+    # C5: a bare 64-hex string with a caller-asserted count is no longer accepted;
+    # the acceptance case now cites resolvable evidence whose recomputed weight is 40.
+    store, EV40 = _live_health_evidence("FX-TREND-PULLBACK-01", 40)
+    ok = LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "FX-TREND-PULLBACK-01", D("0.8"), "DEGRADED", EV40, D("40"))
+    assert LearningBoundary.check(ok, store) is ok
+    xs, XEV = _live_health_evidence("x", 40)
     with pytest.raises(LearningBoundaryError):
-        LearningBoundary.check(LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "x", D("1.2"), None, EV, D("40")))   # widening
+        LearningBoundary.check(LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "x", D("1.2"), None, XEV, D("40")), xs)   # widening
+    bs, BEV = _live_health_evidence("BULL", 40)
     with pytest.raises(LearningBoundaryError):
-        LearningBoundary.check(LiveAdjustment(LiveTarget.REGIME_PROBABILITY, "BULL", D("0.5"), "SHADOW", EV, D("40")))   # only health demotes
+        LearningBoundary.check(LiveAdjustment(LiveTarget.REGIME_PROBABILITY, "BULL", D("0.5"), "SHADOW", BEV, D("40")), bs)   # only health demotes
     with pytest.raises(LearningBoundaryError):
-        LearningBoundary.check(LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "x", D("0.5"), "LIMITED_LIVE", EV, D("40")))   # promotion is never an output
-    with pytest.raises(LearningBoundaryError):
-        LearningBoundary.check(LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "x", D("0.5"), None, EV, D("5")))   # too few weighted samples
-    with pytest.raises(LearningBoundaryError):
-        LearningBoundary.check(LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "x", D("0.5"), None, (), D("40")))   # no evidence
+        LearningBoundary.check(LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "x", D("0.5"), "LIMITED_LIVE", XEV, D("40")), xs)   # promotion is never an output
+    fs, FEV = _live_health_evidence("x", 5)
+    with pytest.raises(LearningBoundaryError, match="insufficient"):
+        LearningBoundary.check(LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "x", D("0.5"), None, FEV, D("5")), fs)   # too few weighted samples
+    with pytest.raises(LearningBoundaryError, match="must cite evidence"):
+        LearningBoundary.check(LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "x", D("0.5"), None, (), D("40")), xs)   # no evidence
     for tgt in sorted(FORBIDDEN_TARGETS):
         with pytest.raises(LearningBoundaryError):
             LearningBoundary.attempt(tgt)
         with pytest.raises(LearningBoundaryError):
-            LearningBoundary.check(LiveAdjustment(tgt, "x", D("0.5"), None, EV, D("40")))   # type: ignore[arg-type]
+            LearningBoundary.check(LiveAdjustment(tgt, "x", D("0.5"), None, XEV, D("40")), xs)   # type: ignore[arg-type]
 
 
 # -------------------------------------------------------------------- health

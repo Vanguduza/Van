@@ -10,8 +10,9 @@ from decimal import Decimal
 from enum import Enum
 from typing import Optional
 
-from vati.learning.boundary import LearningBoundary, LiveAdjustment, LiveTarget
+from vati.learning.boundary import LearningBoundary, LiveAdjustment, LiveAdjustmentProposal, LiveTarget
 from vati.learning.episodes import EXECUTION_FACT_WEIGHT, Environment
+from vati.learning.evidence import EvidenceClass, InMemoryEvidenceStore
 
 ONE, ZERO = Decimal(1), Decimal(0)
 
@@ -30,6 +31,7 @@ class BrokerExecutionProfile:
     symbol: str
     session: str
     samples: list = field(default_factory=list)   # (weight, cost_ratio, slippage_pips, rejected:bool, in_event:bool)
+    evidence_refs: list = field(default_factory=list)   # one TCA_RECORD evidence ref per sample
 
     def _w(self) -> Decimal:
         return sum((s[0] for s in self.samples), ZERO)
@@ -71,9 +73,13 @@ class BrokerExecutionProfile:
 @dataclass
 class BrokerLearner:
     profiles: dict[tuple[str, str, str], BrokerExecutionProfile] = field(default_factory=dict)
+    evidence: InMemoryEvidenceStore = field(default_factory=InMemoryEvidenceStore)
 
     def observe(self, *, broker: str, symbol: str, session: str, environment: Environment, cost_ratio: Decimal, slippage_pips: Decimal, rejected: bool, in_event_window: bool) -> BrokerExecutionProfile:
         p = self.profiles.setdefault((broker, symbol, session), BrokerExecutionProfile(broker, symbol, session))
+        p.evidence_refs.append(self.evidence.register(EvidenceClass.TCA_RECORD, {
+            "broker": broker, "symbol": symbol, "session": session, "environment": environment, "cost_ratio": cost_ratio,
+            "slippage_pips": slippage_pips, "rejected": rejected, "in_event_window": in_event_window, "observation_seq": len(p.samples)}))
         p.samples.append((EXECUTION_FACT_WEIGHT[environment], cost_ratio, slippage_pips, rejected, in_event_window))
         return p
 
@@ -81,4 +87,4 @@ class BrokerLearner:
         p = self.profiles.get((broker, symbol, session))
         if p is None or p._w() < LearningBoundary.MIN_WEIGHTED_SAMPLES:
             return None
-        return LearningBoundary.check(LiveAdjustment(LiveTarget.BROKER_PROFILE, f"{broker}:{symbol}:{session}", p.liquidity_multiplier(), None, (f"broker-profile:{broker}:{symbol}:{session}",), p._w()))
+        return LearningBoundary.admit(LiveAdjustmentProposal(LiveTarget.BROKER_PROFILE, f"{broker}:{symbol}:{session}", p.liquidity_multiplier(), None, tuple(p.evidence_refs)), self.evidence)

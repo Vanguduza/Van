@@ -7,8 +7,9 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Optional
 
-from vati.learning.boundary import LearningBoundary, LiveAdjustment, LiveTarget
+from vati.learning.boundary import LearningBoundary, LiveAdjustment, LiveAdjustmentProposal, LiveTarget
 from vati.learning.episodes import ENVIRONMENT_WEIGHT, Environment
+from vati.learning.evidence import EvidenceClass, InMemoryEvidenceStore
 
 ONE, ZERO = Decimal(1), Decimal(0)
 
@@ -43,11 +44,26 @@ class StrategyHealthTracker:
     _obs: dict[str, list[HealthObservation]] = field(default_factory=dict)
     _below_count: dict[str, int] = field(default_factory=dict)
     _state: dict[str, str] = field(default_factory=dict)
+    # Each observation is registered as STRATEGY_HEALTH_OBSERVATION evidence so the
+    # boundary recomputes the weighted sample count instead of trusting ours.
+    evidence: InMemoryEvidenceStore = field(default_factory=InMemoryEvidenceStore)
+    _refs: dict[str, list[str]] = field(default_factory=dict)
+    _seq: dict[str, int] = field(default_factory=dict)
 
     def observe(self, o: HealthObservation) -> HealthVerdict:
+        seq = self._seq.get(o.strategy_id, 0)
+        self._seq[o.strategy_id] = seq + 1
+        ref = self.evidence.register(EvidenceClass.STRATEGY_HEALTH_OBSERVATION, {
+            "strategy_id": o.strategy_id, "environment": o.environment, "r_multiple": o.r_multiple, "process_ok": o.process_ok,
+            "cost_ratio": o.cost_ratio, "regime_fit": o.regime_fit, "source_ref": o.evidence_ref, "observation_seq": seq})
         buf = self._obs.setdefault(o.strategy_id, [])
+        refs = self._refs.setdefault(o.strategy_id, [])
         buf.append(o)
+        refs.append(ref)
         del buf[:-self.window]
+        for old in refs[:-self.window]:
+            self.evidence.discard(old)
+        del refs[:-self.window]
         return self.verdict(o.strategy_id)
 
     def verdict(self, strategy_id: str) -> HealthVerdict:
@@ -80,5 +96,5 @@ class StrategyHealthTracker:
         v = self.verdict(strategy_id)
         if v.weighted_samples < LearningBoundary.MIN_WEIGHTED_SAMPLES:
             return None
-        adj = LiveAdjustment(LiveTarget.CAPSULE_HEALTH, strategy_id, min(ONE, v.health), v.state_recommendation, tuple(o.evidence_ref for o in self._obs[strategy_id][-5:]), v.weighted_samples)
-        return LearningBoundary.check(adj)
+        proposal = LiveAdjustmentProposal(LiveTarget.CAPSULE_HEALTH, strategy_id, min(ONE, v.health), v.state_recommendation, tuple(self._refs[strategy_id]))
+        return LearningBoundary.admit(proposal, self.evidence)

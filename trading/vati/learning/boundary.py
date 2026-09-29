@@ -1,16 +1,26 @@
-"""Learning boundary (Rev 4 improvement over integration doc §23).
+"""Learning boundary (Rev 4 improvement over integration doc §23; C5 evidence).
 
 The learning engine may change exactly three live-affecting quantities, all
 reduce-only or demote-only: capsule health (→ multiplier ≤ 1 / demotion),
 regime probabilities (→ multiplier ≤ 1), broker execution profile (→ liquidity
 multiplier ≤ 1 / eligibility). Any other target raises. Promotion, mandates,
-ceilings, capsule logic, instruments, credentials and leverage are outside."""
+ceilings, capsule logic, instruments, credentials and leverage are outside.
+
+EXPERIENCE asks the question. EVIDENCE establishes what happened. AUTHORITY
+decides what may change. Every adjustment cites typed, hashed VATI evidence
+(`vati-evidence:<CLASS>:<64-hex>`, see `vati.learning.evidence`) that an
+`EvidenceResolver` must resolve; the environment-weighted sample count is
+recomputed from the resolved, de-duplicated evidence and never taken from the
+caller. Hindsight/OpenViking/DEIL output is never live evidence."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
+from typing import Optional
+
+from vati.learning.evidence import EvidenceError, EvidenceResolver, EvidenceSet
 
 ONE, ZERO = Decimal(1), Decimal(0)
 
@@ -26,15 +36,33 @@ class LiveTarget(str, Enum):
 
 
 FORBIDDEN_TARGETS = frozenset({"MANDATE", "PLATFORM_CEILINGS", "CAPSULE_LOGIC", "CAPSULE_STATE_PROMOTION", "INSTRUMENT_LIST", "BROKER_CREDENTIALS", "LEVERAGE", "RISK_POLICY", "EXECUTION_POLICY", "PRODUCTION_MODEL_ALIAS"})
+DEMOTION_TARGETS = ("DEGRADED", "SHADOW", "SUSPENDED")
+
+
+@dataclass(frozen=True)
+class LiveAdjustmentProposal:
+    """What learning would like to change, with the evidence it cites. It has
+    no sample count: the boundary computes that from resolved evidence."""
+    target: LiveTarget
+    key: str
+    multiplier: Decimal
+    demote_to: Optional[str] = None
+    evidence_refs: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
 class LiveAdjustment:
+    """An adjustment the boundary has admitted (or is asked to re-check).
+
+    `environment_weighted_samples` is DEPRECATED as caller authority: it is kept
+    for compatibility with direct constructors, but `LearningBoundary.check`
+    recomputes it from resolved evidence and rejects any mismatch. Build new
+    adjustments with `LearningBoundary.admit(LiveAdjustmentProposal, resolver)`."""
     target: LiveTarget
     key: str                 # strategy_id / regime label / broker:symbol:session
     multiplier: Decimal      # ≤ 1
     demote_to: str | None = None   # DEGRADED | SHADOW | SUSPENDED (capsule health only)
-    evidence_refs: tuple[str, ...] = ()
+    evidence_refs: tuple[str, ...] = ()   # vati-evidence:<CLASS>:<64-hex> only
     environment_weighted_samples: Decimal = ZERO
 
 
@@ -42,19 +70,49 @@ class LearningBoundary:
     MIN_WEIGHTED_SAMPLES = Decimal("30")
 
     @classmethod
-    def check(cls, adj: LiveAdjustment) -> LiveAdjustment:
-        if str(adj.target) in FORBIDDEN_TARGETS or adj.target not in LiveTarget:
-            raise LearningBoundaryError(f"learning may not touch {adj.target}")
-        if adj.multiplier > ONE or adj.multiplier < ZERO:
+    def _check_shape(cls, target: object, multiplier: Decimal, demote_to: Optional[str]) -> None:
+        if str(target) in FORBIDDEN_TARGETS or target not in LiveTarget:
+            raise LearningBoundaryError(f"learning may not touch {target}")
+        if multiplier > ONE or multiplier < ZERO:
             raise LearningBoundaryError("learning multipliers are reduce-only within [0, 1]")
-        if adj.demote_to is not None and adj.target is not LiveTarget.CAPSULE_HEALTH:
+        if demote_to is not None and target is not LiveTarget.CAPSULE_HEALTH:
             raise LearningBoundaryError("only capsule health may demote")
-        if adj.demote_to is not None and adj.demote_to not in ("DEGRADED", "SHADOW", "SUSPENDED"):
+        if demote_to is not None and demote_to not in DEMOTION_TARGETS:
             raise LearningBoundaryError("demotion targets are DEGRADED|SHADOW|SUSPENDED; promotion is never a learning output")
-        if adj.environment_weighted_samples < cls.MIN_WEIGHTED_SAMPLES and adj.multiplier < ONE:
-            raise LearningBoundaryError(f"insufficient environment-weighted samples ({adj.environment_weighted_samples} < {cls.MIN_WEIGHTED_SAMPLES}) for a live adjustment")
-        if not adj.evidence_refs:
+
+    @classmethod
+    def _evidence(cls, target: LiveTarget, key: str, refs: tuple[str, ...], resolver: Optional[EvidenceResolver]) -> tuple[EvidenceSet, Decimal]:
+        if not refs:
             raise LearningBoundaryError("a live adjustment must cite evidence artifact hashes")
+        try:
+            ev = EvidenceSet.resolve(refs, resolver, subject=key)
+        except EvidenceError as e:
+            raise LearningBoundaryError(f"live evidence rejected: {e}") from None
+        # Execution facts from simulated environments weigh zero for the broker profile.
+        return ev, ev.weighted_samples(execution_facts=target is LiveTarget.BROKER_PROFILE)
+
+    @classmethod
+    def _check_samples(cls, samples: Decimal, multiplier: Decimal) -> None:
+        if samples < cls.MIN_WEIGHTED_SAMPLES and multiplier < ONE:
+            raise LearningBoundaryError(f"insufficient environment-weighted samples ({samples} < {cls.MIN_WEIGHTED_SAMPLES}) for a live adjustment")
+
+    @classmethod
+    def admit(cls, proposal: LiveAdjustmentProposal, resolver: EvidenceResolver) -> LiveAdjustment:
+        """Proposal → resolver → EvidenceSet → recomputed samples → boundary."""
+        cls._check_shape(proposal.target, proposal.multiplier, proposal.demote_to)
+        ev, samples = cls._evidence(proposal.target, proposal.key, tuple(proposal.evidence_refs), resolver)
+        cls._check_samples(samples, proposal.multiplier)
+        return LiveAdjustment(proposal.target, proposal.key, proposal.multiplier, proposal.demote_to, ev.refs, samples)
+
+    @classmethod
+    def check(cls, adj: LiveAdjustment, resolver: Optional[EvidenceResolver] = None) -> LiveAdjustment:
+        """Re-check a directly constructed adjustment. Without a resolver there
+        is no evidence authority, so the adjustment is refused."""
+        cls._check_shape(adj.target, adj.multiplier, adj.demote_to)
+        _, samples = cls._evidence(adj.target, adj.key, tuple(adj.evidence_refs), resolver)
+        if adj.environment_weighted_samples != samples:
+            raise LearningBoundaryError(f"caller-supplied environment_weighted_samples {adj.environment_weighted_samples} != {samples} recomputed from resolved evidence")
+        cls._check_samples(samples, adj.multiplier)
         return adj
 
     @staticmethod
