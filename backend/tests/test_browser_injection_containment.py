@@ -37,6 +37,12 @@ from van_gateway.browser.worker import (
 )
 from van_gateway.models import ActionClass
 
+
+async def _no_owner_control(_task) -> bool:
+    """Review I M-4: the runner fails closed without an owner-control probe; these
+    tests are about other bounds, so the owner is explicitly not holding control."""
+    return False
+
 DOMAIN = "research.example.com"
 
 #: The canary corpus: page text a hostile site would actually serve to an agent.
@@ -213,7 +219,7 @@ async def test_a_hostile_page_ends_the_task_through_the_real_runner(tmp_path):
         PlannedStep(kind="navigate", domain=DOMAIN, url=f"https://{DOMAIN}/reports"),
         PlannedStep(kind="read", domain=DOMAIN),
     ]))
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task), worker=worker, task=task,
     )
     assert result.stop_reason is SubagentStop.INJECTION_REFUSED
@@ -235,7 +241,7 @@ async def test_an_ordinary_page_is_not_stopped(tmp_path):
         PlannedStep(kind="navigate", domain=DOMAIN, url=f"https://{DOMAIN}/"),
         PlannedStep(kind="navigate", domain=DOMAIN, url=f"https://{DOMAIN}/reports"),
     ]))
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task), worker=worker, task=task, verifier=_VerifiedReadBack(),
     )
     assert result.stop_reason is SubagentStop.GOAL_ACHIEVED
@@ -261,7 +267,7 @@ async def test_the_worker_actually_drives_the_adapter(tmp_path):
             value_ref="secretref://browser/google-primary",
         ),
     ]))
-    await BrowserSubagentRunner().run(assignment=_assignment(task), worker=worker, task=task)
+    await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(assignment=_assignment(task), worker=worker, task=task)
     assert f"navigate:https://{DOMAIN}/login" in harness.calls
     # A reference, never a literal: §367.3 forbids secret material crossing this boundary.
     assert "fill:#password:secretref://browser/google-primary" in harness.calls
@@ -318,7 +324,7 @@ async def test_a_plan_cannot_widen_its_assignment(tmp_path):
     worker = AdapterBackedWorker(harness, task=task, plan=BrowserTaskPlan(steps=[
         PlannedStep(kind="navigate", domain="elsewhere.example", url="https://elsewhere.example/"),
     ]))
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task), worker=worker, task=task,
     )
     assert result.stop_reason is SubagentStop.SCOPE_VIOLATION

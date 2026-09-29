@@ -27,11 +27,13 @@ from van_gateway.browser.worker import BrowserTaskPlan, HybridBrowserWorker, Pla
 from van_gateway.config import Settings
 from van_gateway.models import ActionClass
 
-DOMAIN = "research.example.com"
 
-
-async def _never_owner(_task) -> bool:
+async def _no_owner_control(_task) -> bool:
+    """Review I M-4: the runner fails closed without an owner-control probe; these
+    tests are about other bounds, so the owner is explicitly not holding control."""
     return False
+
+DOMAIN = "research.example.com"
 
 
 class _Recorder:
@@ -83,7 +85,7 @@ async def test_assignment_path_never_reaches_stagehand_with_default_settings(tmp
     stagehand = _adapter(store, recorder, settings=settings)
     worker = HybridBrowserWorker(harness=None, stagehand=stagehand, task=task)  # type: ignore[arg-type]
 
-    result = await BrowserSubagentRunner(BrowserPolicyEngine()).run(
+    result = await BrowserSubagentRunner(BrowserPolicyEngine(), owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task), worker=worker, task=task,
     )
 
@@ -223,7 +225,7 @@ async def test_deterministic_path_still_runs_with_stagehand_production_disabled(
     harness = Harness()
     plan = BrowserTaskPlan(steps=[PlannedStep(kind="navigate", domain=DOMAIN, url=f"https://{DOMAIN}/a")])
     worker = HybridBrowserWorker(harness, stagehand, plan=plan, task=task)  # type: ignore[arg-type]
-    result = await BrowserSubagentRunner(BrowserPolicyEngine()).run(
+    result = await BrowserSubagentRunner(BrowserPolicyEngine(), owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task, autonomy_tier=AutonomyTier.L1_HARNESS_DETERMINISTIC),
         worker=worker, task=task, verifier=Verified(),
     )

@@ -156,7 +156,11 @@ class BrowserApi:
         self.binder = binder
         self.broker = BrowserSessionBroker(store, self.policy)
         self.tasks = BrowserTaskService(store, self.broker, self.policy)
-        self.runner = BrowserSubagentRunner(self.policy)
+        # Review I M-4 / owner decision 2026-09-29 §9: owner takeover preempts the
+        # assignment path exactly as it preempts the B5 router — the same probe.
+        from van_gateway.browser.interaction_router import OwnerControlProbe
+
+        self.runner = BrowserSubagentRunner(self.policy, owner_control_probe=OwnerControlProbe(store))
         self.worker = worker
         #: Owner decision 2026-09-29 §7 — the independent postcondition verifier. None means
         #: every "done" claim is UNVERIFIABLE: fail closed, never COMPLETED.
@@ -943,7 +947,23 @@ class BrowserApi:
                 ) from exc
 
             escalation = None
-            if result.stop_reason in (SubagentStop.SCOPE_VIOLATION, SubagentStop.ACTION_CLASS_VIOLATION):
+            if result.stop_reason is SubagentStop.OWNER_TAKEOVER:
+                # Handed over, not finished: the owner is driving this profile. Not
+                # terminal (completed_at_ms stays NULL) and never success; the task
+                # lease is dropped so automation holds nothing while the owner acts.
+                now = int(time.time() * 1000)
+                await self._release_task_lease(task)
+                await self.store.execute(
+                    "UPDATE browser_tasks SET status = ?, error_code = ?, completed_at_ms = NULL, "
+                    "updated_at_ms = ? WHERE task_id = ?",
+                    (
+                        BrowserTaskStatus.WAITING_FOR_OWNER.value,
+                        f"{SubagentStop.OWNER_TAKEOVER.value}:{result.detail or ''}"[:200],
+                        now, task.task_id,
+                    ),
+                )
+                instruments.record_browser_task(BrowserTaskStatus.WAITING_FOR_OWNER)
+            elif result.stop_reason in (SubagentStop.SCOPE_VIOLATION, SubagentStop.ACTION_CLASS_VIOLATION):
                 escalation = await self._create_boundary_escalation(
                     task=task, assignment=assignment, result=result
                 )
@@ -980,7 +1000,7 @@ class BrowserApi:
                 "stop_reason": result.stop_reason.value,
                 "succeeded": result.succeeded,
                 "verification_outcome": result.verification_outcome,
-                "needs_owner": result.stop_reason is SubagentStop.UNVERIFIABLE,
+                "needs_owner": result.stop_reason in (SubagentStop.UNVERIFIABLE, SubagentStop.OWNER_TAKEOVER),
                 "step_count": result.step_count,
                 "steps": [step.model_dump(mode="json") for step in result.steps],
                 "extraction": result.extraction,
