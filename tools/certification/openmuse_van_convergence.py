@@ -73,7 +73,7 @@ MARKERS: dict[str, tuple[tuple[str, str], ...]] = {
         ("android/app/src/main/java/com/dial/van/command/work/ConversationThreadRoute.kt", "fun ConversationThreadRoute("),
     ),
     "OMV-007": (
-        ("backend/van_gateway/google/transport.py", "In-Reply-To:"),
+        ("backend/van_gateway/google/transport.py", 'msg["In-Reply-To"] = source_id'),
         ("backend/van_gateway/google/transport.py", "gmail_attachment_get"),
         ("backend/van_gateway/google/transport.py", "expected_version"),
         ("backend/tests/test_google_openmuse_depth.py", "test_gmail_reply_draft_binds_threading_headers"),
