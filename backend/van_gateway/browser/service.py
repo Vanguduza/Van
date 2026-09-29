@@ -30,6 +30,25 @@ from van_gateway.models import ActionClass
 from van_gateway.storage.db import Store
 
 
+#: Owner decision 2026-09-29 §7 / review I M-2. A browser task's postcondition verdict is
+#: an append-only ``browser_evidence`` row of this kind. It is written only by
+#: ``BrowserTaskService.record_verification`` (``seal_evidence`` refuses the kind), and
+#: ``complete(status=COMPLETED)`` requires the task's latest verdict to be VERIFIED.
+VERIFICATION_EVIDENCE_KIND = "postcondition_verification"
+VERIFIED = "VERIFIED"
+
+
+class BrowserTaskNotVerified(BrowserPolicyError):
+    """COMPLETED was requested for a task with no VERIFIED postcondition verdict."""
+
+    def __init__(self, task_id: str, latest: str | None) -> None:
+        super().__init__(
+            f"browser_task_completion_requires_verified_postcondition:{latest or 'NO_VERIFICATION'}"
+        )
+        self.task_id = task_id
+        self.latest = latest
+
+
 class BrowserSessionBroker:
     """§§182-183 — profile registry plus exclusive, time-bounded page leases."""
 
@@ -295,6 +314,9 @@ class BrowserTaskService:
         now_ms: int | None = None,
     ) -> BrowserEvidence:
         """§§184-185 — digests only, and refuse anything secret-shaped."""
+        if kind == VERIFICATION_EVIDENCE_KIND:
+            # §7: a verdict is recorded by the verifier path, never sealed by a caller.
+            raise BrowserPolicyError("browser_evidence_kind_reserved_for_verifier")
         for payload, context in ((dom, "dom"), (extraction, "extraction")):
             if payload is not None:
                 self.policy.assert_no_secrets(payload, context=f"evidence_{context}")
@@ -335,6 +357,83 @@ class BrowserTaskService:
         )
         return evidence
 
+    async def record_verification(
+        self,
+        *,
+        task: BrowserTask,
+        outcome: str,
+        verifier: str,
+        detail: str | None = None,
+        assignment_id: str | None = None,
+        now_ms: int | None = None,
+    ) -> str:
+        """Append the independent verifier's verdict for ``task``. Returns the evidence id."""
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        evidence_id = new_id("browser_evidence")
+        record = {
+            "outcome": str(outcome),
+            "verifier": str(verifier)[:128],
+            "detail": (str(detail)[:512] if detail is not None else None),
+            "assignment_id": assignment_id,
+        }
+        await self.store.execute(
+            """
+            INSERT INTO browser_evidence(
+              evidence_id, task_id, kind, url_digest, dom_digest, screenshot_digest,
+              extraction_digest, source_trust, injection_assessment, contains_secrets,
+              created_at_ms, evidence_json
+            ) VALUES (?, ?, ?, ?, NULL, NULL, ?, 'VAN_VERIFIER', ?, 0, ?, ?)
+            """,
+            (
+                evidence_id, task.task_id, VERIFICATION_EVIDENCE_KIND,
+                digest({"url": task.target_domain}), digest(record),
+                InjectionAssessment.NONE_DETECTED.value, now, Store.dumps(record),
+            ),
+        )
+        return evidence_id
+
+    async def verify_read_only_evidence(
+        self, *, task: BrowserTask, evidence_id: str, now_ms: int | None = None
+    ) -> str:
+        """Verdict for a read-only (A1) task whose whole postcondition is "a page was read
+        and its digest sealed" — e.g. an owner-authored watch. The durable evidence row is
+        read back; the caller's word is not taken. Anything above A1 is UNVERIFIABLE here:
+        a task that changes the world needs a real postcondition verifier."""
+        outcome = "UNVERIFIABLE"
+        detail = "read_only_verification_requires_A1"
+        if task.action_class is ActionClass.A1:
+            row = await self.store.fetchone(
+                "SELECT task_id, kind FROM browser_evidence WHERE evidence_id = ?", (evidence_id,)
+            )
+            if row is None or str(row["task_id"]) != task.task_id:
+                detail = "sealed_evidence_not_found_for_task"
+            elif str(row["kind"]) == VERIFICATION_EVIDENCE_KIND:
+                detail = "verdict_is_not_observation_evidence"
+            else:
+                outcome, detail = VERIFIED, f"sealed_evidence:{evidence_id}"
+        await self.record_verification(
+            task=task, outcome=outcome, verifier="READ_ONLY_EVIDENCE_READ_BACK", detail=detail,
+            now_ms=now_ms,
+        )
+        return outcome
+
+    async def latest_verification(self, task_id: str) -> str | None:
+        """The outcome of the task's most recent verdict, or None when there is none."""
+        row = await self.store.fetchone(
+            "SELECT evidence_json FROM browser_evidence WHERE task_id = ? AND kind = ? "
+            "ORDER BY created_at_ms DESC, rowid DESC LIMIT 1",
+            (task_id, VERIFICATION_EVIDENCE_KIND),
+        )
+        if row is None:
+            return None
+        try:
+            import json
+
+            outcome = json.loads(str(row["evidence_json"])).get("outcome")
+        except (ValueError, AttributeError):
+            return "UNREADABLE"
+        return str(outcome) if outcome is not None else "UNREADABLE"
+
     async def complete(
         self,
         *,
@@ -344,6 +443,16 @@ class BrowserTaskService:
         error_code: str | None = None,
         now_ms: int | None = None,
     ) -> None:
+        """Set a task's end state. COMPLETED only over a VERIFIED verdict (§7, review I M-2).
+
+        This is the one place a browser task can become COMPLETED, so every caller — the
+        internal ``/complete`` route, the assignment path, the watch runner, the notebook
+        consumer — is held to the same rule. Nothing any lane says is a verdict.
+        """
+        if status is BrowserTaskStatus.COMPLETED:
+            latest = await self.latest_verification(task_id)
+            if latest != VERIFIED:
+                raise BrowserTaskNotVerified(task_id, latest)
         now = int(time.time() * 1000) if now_ms is None else now_ms
         await self.store.execute(
             "UPDATE browser_tasks SET status = ?, evidence_pointer = ?, error_code = ?, "
@@ -352,4 +461,9 @@ class BrowserTaskService:
         )
 
 
-__all__ = ["BrowserSessionBroker", "BrowserTaskService"]
+__all__ = [
+    "VERIFICATION_EVIDENCE_KIND",
+    "BrowserSessionBroker",
+    "BrowserTaskNotVerified",
+    "BrowserTaskService",
+]

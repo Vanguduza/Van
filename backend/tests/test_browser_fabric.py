@@ -200,6 +200,12 @@ async def test_task_completion_records_status(tmp_path):
         autonomy_tier=AutonomyTier.L1_HARNESS_DETERMINISTIC, action_class=ActionClass.A2,
         target_domain="research.example.com", goal="capture",
     )
+    # Review I M-2: COMPLETED is refused until the verifier's VERIFIED verdict is recorded.
+    from van_gateway.browser.service import BrowserTaskNotVerified
+
+    with pytest.raises(BrowserTaskNotVerified):
+        await service.complete(task_id=task.task_id, status=BrowserTaskStatus.COMPLETED)
+    await service.record_verification(task=task, outcome="VERIFIED", verifier="test")
     await service.complete(
         task_id=task.task_id, status=BrowserTaskStatus.COMPLETED,
         evidence_pointer="gateway://browser/evidence/1",

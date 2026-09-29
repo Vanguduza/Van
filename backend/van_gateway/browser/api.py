@@ -37,7 +37,7 @@ from van_gateway.browser.models import (
     BrowserTaskStatus,
 )
 from van_gateway.browser.policy import BrowserPolicyEngine, BrowserPolicyError
-from van_gateway.browser.service import BrowserSessionBroker, BrowserTaskService
+from van_gateway.browser.service import BrowserSessionBroker, BrowserTaskNotVerified, BrowserTaskService
 from van_gateway.automation.canonical import digest
 from van_gateway.automation.verifier import PostconditionSpec
 from van_gateway.browser.worker import BrowserTaskPlan, SemanticWorkerUnavailable
@@ -886,10 +886,17 @@ class BrowserApi:
         ):
             self._require_internal(x_van_internal_token)
             await self._load_task(task_id)
-            await self.tasks.complete(
-                task_id=task_id, status=body.status,
-                evidence_pointer=body.evidence_pointer, error_code=body.error_code,
-            )
+            try:
+                await self.tasks.complete(
+                    task_id=task_id, status=body.status,
+                    evidence_pointer=body.evidence_pointer, error_code=body.error_code,
+                )
+            except BrowserTaskNotVerified as exc:
+                # §7 / review I M-2: a caller cannot declare success. COMPLETED needs the
+                # independent verifier's VERIFIED verdict on record for this task.
+                raise HTTPException(
+                    status_code=409, detail=f"BROWSER_TASK_NOT_VERIFIED:{exc.latest or 'NO_VERIFICATION'}"
+                ) from exc
             return {"task_id": task_id, "status": body.status.value}
 
         @router.post("/assignments")
@@ -945,6 +952,15 @@ class BrowserApi:
                 raise HTTPException(
                     status_code=503, detail=f"BROWSER_SEMANTIC_RUNTIME_UNAVAILABLE:{exc}"
                 ) from exc
+
+            if result.verification_outcome is not None:
+                # The verifier's verdict on the worker's "done" claim goes on record for
+                # this task, whatever it was; COMPLETED is only reachable over VERIFIED.
+                await self.tasks.record_verification(
+                    task=task, outcome=result.verification_outcome,
+                    verifier=type(self.verifier).__name__ if self.verifier is not None else "NONE",
+                    detail=result.detail, assignment_id=assignment.assignment_id,
+                )
 
             escalation = None
             if result.stop_reason is SubagentStop.OWNER_TAKEOVER:
