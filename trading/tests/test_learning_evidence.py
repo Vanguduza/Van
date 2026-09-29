@@ -10,7 +10,7 @@ import pytest
 
 from vati.core import EventKind, Ledger
 from vati.core.events import make_event
-from vati.learning import Environment, HealthObservation, StrategyHealthTracker, BrokerLearner
+from vati.learning import Environment, HealthObservation, HermesMemoryBridge, MemoryBridgeError, StrategyHealthTracker, BrokerLearner
 from vati.learning.boundary import LearningBoundary, LearningBoundaryError, LiveAdjustment, LiveAdjustmentProposal, LiveTarget
 from vati.learning.evidence import (
     EVIDENCE_CLASS_SOURCES, CompositeEvidenceResolver, EvidenceClass, EvidenceError, EvidenceRecord, InMemoryEvidenceStore,
@@ -221,3 +221,11 @@ def test_ledger_resolver_verifies_identity_and_kind():
 
 def test_every_allowlisted_class_is_mapped_to_a_vati_source():
     assert set(EVIDENCE_CLASS_SOURCES) == set(EvidenceClass)
+
+
+# ------------------------------------------------------- memory bridge
+def test_owner_preference_continuity_record_is_rejected():
+    b = HermesMemoryBridge()
+    with pytest.raises(MemoryBridgeError, match="Owner Model"):
+        b.remember(kind="OWNER_PREFERENCE", subject="owner", summary="prefers smaller size on Fridays", now_ms=1_000)
+    assert b.records == {}

@@ -16,7 +16,11 @@ from vati.core.canonical import canonical_hash
 
 SECRET_PATTERNS = re.compile(r"(?i)(password|passwd|api[_-]?key|secret|token|bearer|private[_-]?key|login[_ ]?id|account[_ ]?number|otp)")
 NAMESPACE = "trading"
-DEFAULT_TTL_MS = {"OPEN_INVESTIGATION": 14 * 86_400_000, "PENDING_CANDIDATE": 30 * 86_400_000, "BROKER_ANOMALY": 7 * 86_400_000, "REGIME_NOTE": 3 * 86_400_000, "RESEARCH_PRIORITY": 7 * 86_400_000, "OWNER_PREFERENCE": 365 * 86_400_000}
+DEFAULT_TTL_MS = {"OPEN_INVESTIGATION": 14 * 86_400_000, "PENDING_CANDIDATE": 30 * 86_400_000, "BROKER_ANOMALY": 7 * 86_400_000, "REGIME_NOTE": 3 * 86_400_000, "RESEARCH_PRIORITY": 7 * 86_400_000}
+# Retired: OWNER_PREFERENCE. Owner preferences have exactly one home, the VAN Owner
+# Model (backend/van_gateway/understanding/owner_model.py); a TTL'd continuity note
+# here would be a second, unreviewed owner-preference path.
+RETIRED_KINDS = {"OWNER_PREFERENCE": "owner preferences belong to the VAN Owner Model (backend/van_gateway/understanding/owner_model.py); the Hermes trading continuity bridge is not an owner-preference path"}
 
 
 class MemoryBridgeError(ValueError):
@@ -47,6 +51,8 @@ class HermesMemoryBridge:
     records: dict[str, ContinuityRecord] = field(default_factory=dict)
 
     def remember(self, *, kind: str, subject: str, summary: str, now_ms: int, evidence_hashes: Iterable[str] = (), ttl_ms: Optional[int] = None) -> ContinuityRecord:
+        if kind in RETIRED_KINDS:
+            raise MemoryBridgeError(f"continuity kind {kind} is retired: {RETIRED_KINDS[kind]}")
         if kind not in DEFAULT_TTL_MS:
             raise MemoryBridgeError(f"unknown continuity kind {kind}")
         if SECRET_PATTERNS.search(summary) or SECRET_PATTERNS.search(subject):

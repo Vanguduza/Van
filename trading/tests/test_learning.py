@@ -311,6 +311,8 @@ def test_memory_bridge_refuses_secrets_and_free_text_evidence_and_expires():
         b.remember(kind="REGIME_NOTE", subject="EURUSD", summary="gold up", now_ms=1_000, evidence_hashes=("I saw it on a forum",))
     with pytest.raises(MemoryBridgeError):
         b.remember(kind="BROKER_TOKENS", subject="x", summary="y", now_ms=1_000)
+    with pytest.raises(MemoryBridgeError, match="Owner Model"):   # retired: owner preferences live only in the VAN Owner Model
+        b.remember(kind="OWNER_PREFERENCE", subject="owner", summary="smaller size on Fridays", now_ms=1_000)
     assert [x.record_hash for x in b.recall(now_ms=2_000)] == [r.record_hash]
     assert "continuity" not in b.export_prompt_context(now_ms=2_000) and r.evidence_hashes[0][:8] in b.export_prompt_context(now_ms=2_000)
     assert b.recall(now_ms=r.expires_ms) == [] and b.expire(now_ms=r.expires_ms) == 1 and b.records == {}
