@@ -30,7 +30,7 @@ SYSTEM = ObservationOrigin.SYSTEM_OBSERVED
 FIELD = OwnerModelField.COMMUNICATION_PREFERENCE
 
 
-async def seed_episodes(store, *names: str) -> dict[str, str]:
+async def seed_episodes(store, *names: str, owner: str = "owner") -> dict[str, str]:
     from van_gateway.mission.models import MissionOrigin
     from van_gateway.mission.service import MissionService
     from van_gateway.models import OriginChannel
@@ -38,7 +38,7 @@ async def seed_episodes(store, *names: str) -> dict[str, str]:
     missions = MissionService(store)
     out = {}
     for name in names:
-        m = await missions.create(owner_principal_id="owner", origin=MissionOrigin.OWNER_VOICE,
+        m = await missions.create(owner_principal_id=owner, origin=MissionOrigin.OWNER_VOICE,
                                   origin_channel=OriginChannel.VOICE, title=name, goal=name)
         out[name] = f"mission:{m.mission_id}"
     return out
@@ -98,7 +98,9 @@ async def test_revision_strictly_increases_on_every_mutation_type(tmp_path):
     assert seen == sorted(seen) and seen[-1] == 8  # 8 mutations, 3 no-ops
     # Per owner: another owner's mutation does not move this one.
     before = await model.current_revision("owner")
-    await _obs(model, eps["s1"], owner="someone-else")
+    # O2 — the other owner observes from its own mission; the owner's is not its evidence.
+    theirs = await seed_episodes(store, "x1", owner="someone-else")
+    await _obs(model, theirs["x1"], owner="someone-else")
     assert await model.current_revision("owner") == before
     assert await model.current_revision("someone-else") == 1
 
