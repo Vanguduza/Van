@@ -55,9 +55,10 @@ class BrowserHarnessAdapter(Protocol):
 class _PrivateWorkerClient:
     """Shared plumbing for the two loopback worker processes.
 
-    Both workers bind to 127.0.0.1 by deployment contract
-    (``deploy/van-trading-core/browser/runtime.env.example``); a public listener
-    is forbidden by ``config/browser/domains.yaml``.
+    Both workers are reached only through the van-browser-core edge (owner decision
+    2026-09-29 §1; deployment under ``deploy/van-browser-core/browser/``, formerly
+    ``deploy/van-trading-core/browser/``); a public listener is forbidden by
+    ``config/browser/domains.yaml``.
     """
 
     CAPABILITY = "worker"
@@ -209,8 +210,8 @@ class StagehandAdapter(_PrivateWorkerClient):
         base_url: str = "",
         enabled: bool = False,
         expected_version: str | None = None,
-        model_provider: str = "",
-        model_name: str = "",
+        model_provider: str | None = None,
+        model_name: str | None = None,
         max_tier: AutonomyTier = AutonomyTier.L5_STAGEHAND_AGENT,
         timeout_seconds: float = 60.0,
         transport: httpx.AsyncBaseTransport | None = None,
@@ -224,6 +225,17 @@ class StagehandAdapter(_PrivateWorkerClient):
             timeout_seconds=timeout_seconds,
             transport=transport,
         )
+        # Owner decision 2026-09-29 §4: the model comes from settings (the canonical
+        # anthropic / claude-sonnet-5), never from a code default and never another model.
+        # Unset in settings stays unset, which leaves the adapter unconfigured.
+        if model_provider is None or model_name is None:
+            from van_gateway.config import get_settings
+
+            settings = get_settings()
+            if model_provider is None:
+                model_provider = getattr(settings, "browser_stagehand_model_provider", "") or ""
+            if model_name is None:
+                model_name = getattr(settings, "browser_stagehand_model_name", "") or ""
         self.model_provider = model_provider
         self.model_name = model_name
         self.max_tier = max_tier

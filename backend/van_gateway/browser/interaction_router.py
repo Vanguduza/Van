@@ -560,7 +560,7 @@ class BrowserInteractionRouter:
         eligibility_policy: Any = None,
         metrics: RouterMetrics | None = None,
         owner_control_probe: Callable[[BrowserTask], Awaitable[bool]] | None = None,
-        stagehand_gate: Callable[[], tuple[bool, str]] | None = None,
+        stagehand_gate: Callable[[], Any] | None = None,
     ) -> None:
         self.enabled = enabled
         self.executor = executor
@@ -606,14 +606,13 @@ class BrowserInteractionRouter:
             "jev_lane_disabled_reasons": self.jev_lane_disabled_reasons(),
             "deterministic_lane": self.executor is not None,
             "stagehand_lane": self.semantic_fallback is not None,
-            "stagehand_lane_disabled_reason": self._stagehand_disabled_reason(),
             "owner_control_probe": self.owner_control_probe is not None,
             "verifier": self.verifier is not None,
         }
 
     # ----------------------------------------------------------- entry point
 
-    def _stagehand_disabled_reason(self) -> str | None:
+    async def _stagehand_disabled_reason(self) -> str | None:
         if self.semantic_fallback is None:
             return "STAGEHAND_LANE_DISABLED:FALLBACK_MISSING"
         if self.executor is None:
@@ -621,7 +620,7 @@ class BrowserInteractionRouter:
         if self.stagehand_gate is None:
             return "STAGEHAND_LANE_DISABLED:PRODUCTION_GATE_MISSING"
         try:
-            permitted, reason = self.stagehand_gate()
+            permitted, reason = await _maybe_await(self.stagehand_gate())
         except Exception as exc:  # noqa: BLE001 - a gate fault is "not permitted"
             return f"STAGEHAND_LANE_DISABLED:PRODUCTION_GATE_FAILED:{type(exc).__name__}"
         if permitted is not True:
@@ -703,7 +702,7 @@ class BrowserInteractionRouter:
         return await self._jev_lane(step, reasons)
 
     async def _stagehand_lane(self, step: InteractionStep, reasons: list[str]) -> StepResult | None:
-        disabled = self._stagehand_disabled_reason()
+        disabled = await self._stagehand_disabled_reason()
         if disabled is not None:
             reasons.append(disabled)
             return None
@@ -1090,16 +1089,59 @@ class OwnerControlProbe:
         return row is not None
 
 
-def load_stagehand_production_gate(settings: Any) -> Callable[[], tuple[bool, str]] | None:
-    """Unit M's ``stagehand_production_enabled(settings)``, imported lazily; ``None`` if absent."""
+async def _fetch_stagehand_worker_health(stagehand: Any) -> dict[str, Any] | None:
+    """GET the Stagehand worker's ``/health`` through the van-browser-core edge. None on any failure."""
+    import httpx
+
+    base = (getattr(stagehand, "base_url", "") or "").rstrip("/")
+    if not base:
+        return None
     try:
-        from van_gateway.automation import placement  # type: ignore[attr-defined]
-    except ImportError:
+        async with httpx.AsyncClient(
+            base_url=base, timeout=5.0, transport=getattr(stagehand, "transport", None)
+        ) as client:
+            response = await client.get("/health")
+        if response.status_code != 200:
+            return None
+        body = response.json()
+        return body if isinstance(body, dict) else None
+    except Exception:  # noqa: BLE001 - unreachable health is absent health
         return None
-    fn = getattr(placement, "stagehand_production_enabled", None)
-    if fn is None:
-        return None
-    return lambda: fn(settings)
+
+
+def load_stagehand_production_gate(settings: Any, stagehand: Any = None) -> Callable[[], Any]:
+    """The Stagehand lane's production gate: placement/model AND the production gate model.
+
+    * unit M's ``stagehand_production_enabled(settings, worker_health=...)`` (placement on
+      van-browser-core + model/provider-key rules), fed the worker's live ``/health``; absent
+      module or absent health fails closed;
+    * ``evaluate_production_gates()`` (owner decision §6; includes signed ingress and the
+      §7/§8 blocker records) must report ``production_activation_permitted``.
+    """
+
+    async def gate() -> tuple[bool, str]:
+        try:
+            from van_gateway.automation import placement  # type: ignore[attr-defined]
+        except ImportError:
+            return False, "PLACEMENT_GATE_MISSING"
+        fn = getattr(placement, "stagehand_production_enabled", None)
+        if fn is None:
+            return False, "PLACEMENT_GATE_MISSING"
+        health = await _fetch_stagehand_worker_health(stagehand) if stagehand is not None else None
+        permitted, reason = fn(settings, worker_health=health)
+        if permitted is not True:
+            return False, str(reason or "PRODUCTION_DISABLED")
+        try:
+            from van_gateway.automation.production_gates import evaluate_production_gates
+        except ImportError:
+            return False, "PRODUCTION_GATE_MODEL_MISSING"
+        gates = evaluate_production_gates()
+        if gates.get("production_activation_permitted") is not True:
+            not_green = ",".join(gates.get("production_gates_not_green") or [])[:200]
+            return False, f"PRODUCTION_GATES_NOT_GREEN:{not_green or gates.get('gate_model_error') or 'UNKNOWN'}"
+        return True, str(reason)
+
+    return gate
 
 
 class HarnessReadBackObserver:
@@ -1165,7 +1207,7 @@ def build_interaction_router(
         semantic_fallback=StagehandSemanticFallback(stagehand),
         observer=observe,
         owner_control_probe=OwnerControlProbe(store) if store is not None else None,
-        stagehand_gate=load_stagehand_production_gate(settings),
+        stagehand_gate=load_stagehand_production_gate(settings, stagehand),
     )
 
 

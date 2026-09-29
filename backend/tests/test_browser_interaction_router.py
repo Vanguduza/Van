@@ -1006,3 +1006,104 @@ def test_harness_adapter_never_guesses_permissively():
     assert obs.cookies_present is None     # not a bool -> unknown
     assert [e.ref for e in obs.elements] == ["a#next", "#qs"]
     assert harness_page_to_jev_observation({}, profile_alias="p").elements == ()
+
+
+# ---------------------------------------------------------------- Stagehand production gate (M + K)
+
+
+async def test_async_gate_is_awaited():
+    async def gate():
+        return False, "STAGEHAND_PROVIDER_KEY_ENTERS_BROWSER_MEMORY"
+
+    stagehand = FakeStagehand(STAGEHAND_ACTION)
+    router = make_router(jev_client=FakeJev(None), semantic_fallback=stagehand, stagehand_gate=gate)
+    result = await router.route(step())
+    assert "STAGEHAND_LANE_DISABLED:STAGEHAND_PROVIDER_KEY_ENTERS_BROWSER_MEMORY" in result.reasons
+    assert stagehand.calls == 0
+
+
+async def test_production_gate_without_placement_module_fails_closed(monkeypatch):
+    import sys
+    from van_gateway.browser.interaction_router import load_stagehand_production_gate
+
+    monkeypatch.setitem(sys.modules, "van_gateway.automation.placement", None)  # import fails
+    assert await load_stagehand_production_gate(Settings())() == (False, "PLACEMENT_GATE_MISSING")
+
+
+def _fake_placement(monkeypatch, verdict):
+    import sys
+    import types
+
+    seen = {}
+
+    def stagehand_production_enabled(settings, *, worker_health=None):
+        seen["health"] = worker_health
+        return verdict(worker_health)
+
+    mod = types.ModuleType("van_gateway.automation.placement")
+    mod.stagehand_production_enabled = stagehand_production_enabled
+    monkeypatch.setitem(sys.modules, "van_gateway.automation.placement", mod)
+    import van_gateway.automation as pkg
+    monkeypatch.setattr(pkg, "placement", mod, raising=False)
+    return seen
+
+
+class _EdgeStagehand:
+    def __init__(self, health: dict | None, status: int = 200):
+        self.base_url = "http://edge.test/stagehand"
+        body = health
+
+        def handler(request):
+            assert request.url.path == "/stagehand/health"
+            return httpx.Response(status, json=body)
+
+        self.transport = httpx.MockTransport(handler)
+
+
+async def test_gate_passes_live_worker_health_and_ands_with_production_gates(monkeypatch):
+    from van_gateway.browser.interaction_router import load_stagehand_production_gate
+
+    seen = _fake_placement(monkeypatch, lambda h: (bool(h), "PLACEMENT_OK" if h else "NO_HEALTH"))
+    import van_gateway.automation.production_gates as pg
+
+    monkeypatch.setattr(pg, "evaluate_production_gates", lambda: {
+        "production_activation_permitted": False, "production_gates_not_green": ["X:signed_ingress"],
+    })
+    gate = load_stagehand_production_gate(Settings(), _EdgeStagehand({"status": "ok", "version": "4.1.0"}))
+    ok, reason = await gate()
+    assert seen["health"] == {"status": "ok", "version": "4.1.0"}
+    assert ok is False and reason == "PRODUCTION_GATES_NOT_GREEN:X:signed_ingress"
+
+    monkeypatch.setattr(pg, "evaluate_production_gates", lambda: {"production_activation_permitted": True})
+    assert await gate() == (True, "PLACEMENT_OK")
+
+
+async def test_gate_without_worker_health_fails_closed(monkeypatch):
+    from van_gateway.browser.interaction_router import load_stagehand_production_gate
+
+    seen = _fake_placement(monkeypatch, lambda h: (False, "WORKER_HEALTH_UNAVAILABLE") if h is None else (True, "OK"))
+    ok, reason = await load_stagehand_production_gate(Settings(), _EdgeStagehand(None, status=503))()
+    assert seen["health"] is None and (ok, reason) == (False, "WORKER_HEALTH_UNAVAILABLE")
+
+
+def test_stagehand_adapter_model_comes_from_settings_never_a_code_default(monkeypatch):
+    from van_gateway.automation.external_runtime import ExternalRuntimeRegistry
+    from van_gateway.browser.adapters import StagehandAdapter
+
+    monkeypatch.setenv("VAN_BROWSER_STAGEHAND_MODEL_PROVIDER", "anthropic")
+    monkeypatch.setenv("VAN_BROWSER_STAGEHAND_MODEL_NAME", "claude-sonnet-5")
+    get_settings.cache_clear()
+    try:
+        adapter = StagehandAdapter(ExternalRuntimeRegistry.__new__(ExternalRuntimeRegistry))
+        assert (adapter.model_provider, adapter.model_name) == ("anthropic", "claude-sonnet-5")
+    finally:
+        get_settings.cache_clear()
+    monkeypatch.delenv("VAN_BROWSER_STAGEHAND_MODEL_PROVIDER")
+    monkeypatch.delenv("VAN_BROWSER_STAGEHAND_MODEL_NAME")
+    get_settings.cache_clear()
+    try:
+        bare = StagehandAdapter(ExternalRuntimeRegistry.__new__(ExternalRuntimeRegistry), base_url="http://x")
+        # Nothing configured => unconfigured, not some other model.
+        assert bare.model_name in ("", "claude-sonnet-5") and not (bare.model_name and "sonnet-4" in bare.model_name)
+    finally:
+        get_settings.cache_clear()
