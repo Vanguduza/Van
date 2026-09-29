@@ -140,6 +140,12 @@ async def _app(tmp_path, *, executor=None, worker=None, **router_kw):
     return AsyncClient(transport=ASGITransport(app=app), base_url="http://test"), store, api, executor
 
 
+async def _bounded(awaitable, seconds: float = 5):
+    """A broken fence must fail these tests, not hang them: every await that a regression
+    could leave blocked on the gated executor is bounded."""
+    return await asyncio.wait_for(awaitable, seconds)
+
+
 def _step(tid):
     return {"task_id": tid, "action_class_ceiling": "A2",
             "deterministic_action": {"operation": "click", "locator": "#go"},
@@ -168,21 +174,21 @@ async def test_a_second_step_on_a_task_with_a_step_in_flight_is_refused(tmp_path
         two = (await t._make_task(ac))["task_id"]
         a = asyncio.create_task(ac.post("/v1/browser/interaction/step", headers=H, json=_step(one)))
         await asyncio.wait_for(ex.entered.get(), 5)
-        b = await ac.post("/v1/browser/interaction/step", headers=H, json=_step(one))
+        b = await _bounded(ac.post("/v1/browser/interaction/step", headers=H, json=_step(one)))
         assert (b.status_code, b.json()["detail"]) == (409, "BROWSER_TASK_RUN_IN_FLIGHT:STEP")
         # Still step A's lease; another task cannot take the profile while A actuates.
         assert (await _lease_row(store))["lease_holder_id"] == one
         denied = await ac.post("/v1/browser/leases", headers=H, json={"profile_alias": "public_research", "task_id": two})
         assert denied.status_code == 409
         ex.gates[0].set()
-        ra = await a
+        ra = await _bounded(a)
         assert ra.status_code == 200, ra.text
         assert (await _lease_row(store))["lease_holder"] is None
         # The marker is released with the step: the next step on the task runs.
         c = asyncio.create_task(ac.post("/v1/browser/interaction/step", headers=H, json=_step(one)))
         await asyncio.wait_for(ex.entered.get(), 5)
         ex.gates[1].set()
-        assert (await c).status_code == 200
+        assert (await _bounded(c)).status_code == 200
     assert ex.executed == [(one, "#go"), (one, "#go")]
 
 
@@ -195,20 +201,20 @@ async def test_step_and_assignment_on_the_same_task_do_not_overlap(tmp_path):
             "task_id": tid, "turn_id": "t1", "command_id": "cmd-owner-1",
             "goal": "read the statement total", "allowed_domains": [t.DOMAIN]}))
         await asyncio.wait_for(worker.entered.wait(), 5)
-        s = await ac.post("/v1/browser/interaction/step", headers=H, json=_step(tid))
+        s = await _bounded(ac.post("/v1/browser/interaction/step", headers=H, json=_step(tid)))
         assert (s.status_code, s.json()["detail"]) == (409, "BROWSER_TASK_RUN_IN_FLIGHT:ASSIGNMENT")
         worker.release.set()
-        assert (await run).status_code == 200
+        assert (await _bounded(run)).status_code == 200
         # And the other way round.
         tid2 = (await t._make_task(ac))["task_id"]
         st = asyncio.create_task(ac.post("/v1/browser/interaction/step", headers=H, json=_step(tid2)))
         await asyncio.wait_for(ex.entered.get(), 5)
-        r = await ac.post("/v1/browser/assignments", headers=H, json={
+        r = await _bounded(ac.post("/v1/browser/assignments", headers=H, json={
             "task_id": tid2, "turn_id": "t2", "command_id": "cmd-owner-1",
-            "goal": "read the statement total", "allowed_domains": [t.DOMAIN]})
+            "goal": "read the statement total", "allowed_domains": [t.DOMAIN]}))
         assert (r.status_code, r.json()["detail"]) == (409, "BROWSER_TASK_RUN_IN_FLIGHT:STEP")
         ex.gates[0].set()
-        assert (await st).status_code == 200
+        assert (await _bounded(st)).status_code == 200
     assert ex.executed == [(tid2, "#go")]
 
 
@@ -220,7 +226,7 @@ async def test_step_actions_carry_the_lease_generation_they_run_under(tmp_path):
         await asyncio.wait_for(ex.entered.get(), 5)
         row = await _lease_row(store)
         ex.gates[0].set()
-        await a
+        await _bounded(a)
     assert ex.fences == [HarnessLeaseFence("public_research", tid, int(row["lease_generation"]))]
     assert current_harness_lease_fence() is None
 
@@ -329,14 +335,14 @@ async def test_complete_is_refused_while_a_step_is_in_flight(tmp_path):
         first = asyncio.create_task(ac.post("/v1/browser/interaction/step", headers=H, json=_step(tid)))
         await asyncio.wait_for(ex.entered.get(), 5)
         ex.gates[0].set()
-        assert (await first).json()["state"] == "VERIFIED_SUCCESS"
+        assert (await _bounded(first)).json()["state"] == "VERIFIED_SUCCESS"
         second = asyncio.create_task(ac.post("/v1/browser/interaction/step", headers=H, json=_step(tid)))
         await asyncio.wait_for(ex.entered.get(), 5)
-        c = await ac.post(f"/v1/browser/tasks/{tid}/complete", headers=H, json={"status": "COMPLETED"})
+        c = await _bounded(ac.post(f"/v1/browser/tasks/{tid}/complete", headers=H, json={"status": "COMPLETED"}))
         assert (c.status_code, c.json()["detail"]) == (
             409, "BROWSER_TASK_TRANSITION_REFUSED:RUN_IN_FLIGHT_STEP:UNKNOWN->COMPLETED")
         ex.gates[1].set()
-        await second
+        await _bounded(second)
         assert await _status(ac, tid) != "COMPLETED"
         assert await BrowserTaskService(store).latest_verification(tid) == "FAILED"
         # Nothing in flight now, and the latest verdict is FAILED: still refused.
