@@ -48,7 +48,10 @@ What is required of every commit after the baseline (ledger-only commits excepte
 
 **Commit scope (review I6 M1).** A record with `"reusable": true` covers any commit. Every other
 record covers only the commits it declares in `"commit_scope": {"commits": [<full sha>...],
-"ranges": ["<sha>..<sha>"]}`, plus merge commits that bring one of those in. A record written
+"ranges": ["<sha>..<sha>"]}`, plus merge commits that bring one of those in (the
+pre-merge-commit hook sees them through HEAD..MERGE_HEAD). A merge that carries a record file in
+unchanged from a merged-in parent needs no authorization for that file; a record the merge
+resolution itself creates or alters does. A record written
 before scopes were read gets its scope from exactly one `"record_kind": "commit_scope_binding"`
 record (`binds: {<id>: <scope>}`); a second binding makes the record cover nothing, and a
 binding cannot re-scope a record that declares its own scope. A non-reusable record with no
