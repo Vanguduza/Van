@@ -145,6 +145,8 @@ run "$RUNTIME/harness-venv/bin/python -m pip freeze --all | LC_ALL=C sort > $RUN
 
 echo "== workers and units =="
 run "install -o root -g root -m 0755 $HERE/browser/harness_service.py $RUNTIME/harness_service.py"
+# Unit G11 (review I7 minor 5): qualify.sh runs it against the installed worker and Chromium.
+run "install -o root -g root -m 0755 $HERE/browser/guard_canary.py $RUNTIME/guard_canary.py"
 run "install -o root -g root -m 0755 $HERE/browser/stagehand_service.mjs $RUNTIME/stagehand_service.mjs"
 for unit in van-browser-harness.service van-stagehand.service van-browser-core-edge.service; do
   run "install -o root -g root -m 0644 $HERE/systemd/$unit /etc/systemd/system/$unit"

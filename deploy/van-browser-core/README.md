@@ -76,6 +76,24 @@ fence state while `/etc/van-browser-core/harness-fence-installed` exists makes t
 refuse fenced calls (503 `LEASE_FENCE_STATE_MISSING`, review I5 F2) until the state directory
 is restored; it is never silently re-initialised.
 
+## Network-effect guard: what was tested where (review I7 minor 5)
+
+The guard's test suite (`backend/tests/test_browser_network_effect_guard.py`,
+`test_browser_network_guard_lease.py`) runs against **Chromium 1194** (the CI/dev
+`/opt/pw-browsers/chromium-1194`). `bootstrap.sh` installs Playwright 1.63.0's Chromium,
+**build 1243**, on this zone, and the pinned Playwright is not changed here (a dependency change
+needs the owner's authorization). Recorded gap: the suite has not run on 1243. `qualify.sh`
+therefore runs `browser/guard_canary.py` (installed to the runtime by bootstrap) against the
+installed worker and Chromium and is RED unless an immediate and a 2.5 s-delayed handler write
+are both stopped before the fixture server sees them and the lease ends frozen; the report
+carries `chromium --version`. A missing canary is RED.
+
+The guard's lifetime is the page lease (unit G11): it starts with the lease's first Harness
+call, is serviced between calls by the worker, freezes the page (popups closed, service workers
+stopped, the tab on about:blank) on any blocked or detected write, and is ended — page frozen,
+interception removed — by `/release` (the gateway calls it whenever it gives a page lease back),
+by a newer lease generation, or after `VAN_HARNESS_GUARD_IDLE_SECONDS` without a call.
+
 ## The historical placement
 
 `deploy/van-trading-core/browser/**` and `vati-{stagehand,browser-harness}.service` are the

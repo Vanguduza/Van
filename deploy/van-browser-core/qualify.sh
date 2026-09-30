@@ -63,6 +63,23 @@ if [[ -n "$EDGE_BIND" ]]; then
   else add edge_refuses_stagehand_act UNKNOWN "no client certificate on this host to probe with (expected: moved to van-gateway)"; fi
 else add edge_configured RED "VAN_BROWSER_CORE_EDGE_BIND not set"; fi
 
+# 4b. The network-effect guard holds on the INSTALLED Chromium (review I7 minor 5, unit G11).
+# CI qualified the guard on Chromium 1194; bootstrap.sh installs Playwright 1.63.0's Chromium
+# (build 1243). Fetch interception, related-target auto-attach and the launch flags it relies
+# on are Chromium behaviour, so the canary drives the running Harness worker (its real
+# browser-harness child and this Chromium) against a local fixture server and reads that
+# server's log: an immediate and a 2.5 s-delayed handler POST must both be stopped and the
+# lease must end frozen. A missing canary is RED, never skipped.
+CANARY=/opt/van-browser-core/runtime/guard_canary.py
+if [[ ! -f "$CANARY" ]]; then
+  add network_guard_canary RED "guard canary missing: $CANARY (re-run bootstrap.sh)"
+elif python3.12 "$CANARY" --runtime-env "$ETC/runtime.env" >/tmp/vbcq-guard.json 2>/tmp/vbcq-guard.err \
+     && jq -e '.ok==true' /tmp/vbcq-guard.json >/dev/null; then
+  add network_guard_canary GREEN "$(jq -c '{chromium_version,cases:(.cases|map_values(.ok))}' /tmp/vbcq-guard.json)"
+else
+  add network_guard_canary RED "$(jq -c '{chromium_version,error,cases}' /tmp/vbcq-guard.json 2>/dev/null || head -c 400 /tmp/vbcq-guard.err)"
+fi
+
 # 5. No foreign-zone credential names in this zone's runtime environment.
 if [[ -f "$ETC/runtime.env" ]] && grep -Eq '^(VAN_COMMANDER_|VAN_ACCOUNTS_REGISTRY|VAN_OWNER_AUTHORITY_KEYS|VAN_DATABASE_PATH|VAN_VATI_|DERIV_|CTRADER_|BRIDGE_|POSTGRES_PASSWORD|SERVICE_ROLE_KEY|VAN_INTERNAL_CONTROL|VAN_DEVICE_|HINDSIGHT|OPENVIKING|GITHUB_TOKEN|GH_TOKEN)' "$ETC/runtime.env"; then
   add runtime_env_clean RED "foreign-zone credential name in $ETC/runtime.env"
