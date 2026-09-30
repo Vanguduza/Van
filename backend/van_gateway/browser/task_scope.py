@@ -1,4 +1,7 @@
-"""Owner decision 2026-09-30 — browser actions stay inside the task's own truth.
+"""Browser actions stay inside the task's own truth. This implements the integrator's
+interpretation (section 3 of docs/decisions/OWNER-DECISION-20260930-BROWSER-TASK-SCOPE.md) of
+the owner's 2026-09-30 answer; that interpretation is PENDING owner confirmation in the
+repository's records and is not itself an owner decision.
 
 The owner rejected a fixed allowlist ("I do not want to build a fixed allowlist, pages should
 [be] relevant to the task truth"). A classifier cannot prove a click on an arbitrary page is
@@ -53,9 +56,186 @@ from __future__ import annotations
 
 import json
 from typing import Any, Iterable
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import urlsplit
 
 from pydantic import BaseModel, Field
+
+# --- VAN shared URL scope rule: begin (review I6 M3) ---
+# Byte-identical in backend/van_gateway/browser/task_scope.py and in the Harness helpers
+# (deploy/van-browser-core/browser/harness_service.py VAN_HELPERS_PY): tests/contracts
+# pins that, and both sides run backend/tests/fixtures/task_scope/url_vectors.v1.json.
+# A URL is parsed the way the WHATWG URL parser parses an http(s) URL (the parser the
+# browser uses), so the check sees the page the browser will load: tab/newline removed,
+# C0/space trimmed, scheme and host lower-cased, host percent-decoded, a trailing host dot
+# dropped, the default port dropped, userinfo ignored, backslash read as slash, %2E read as
+# "." (as Chromium does), and dot segments (".", "..") removed. Anything the rule does
+# not model exactly (IPv6, non-ASCII hosts, other than two slashes after the scheme) is
+# not parsed: it is out of scope (fail closed). A path whose segment percent-decodes to a
+# slash, a backslash, a NUL or a dot segment is ambiguous (a server may decode it before
+# resolving): also out of scope.
+import re as _vs_re
+from urllib.parse import unquote as _vs_unquote
+
+_VS_TRIM = "".join(chr(_c) for _c in range(0x21))
+_VS_DOT = (".", "%2e")
+_VS_DOTDOT = ("..", ".%2e", "%2e.", "%2e%2e")
+_VS_PATH_ENCODE = frozenset(' "<>`{}')
+_VS_SCHEME = _vs_re.compile(r"([A-Za-z][A-Za-z0-9+.\-]*):")
+_VS_HOST = _vs_re.compile(r"[a-z0-9\-]+(?:\.[a-z0-9\-]+)*")
+
+
+def _vs_path(path):
+    path = path.replace("\\", "/")
+    if not path.startswith("/"):
+        path = "/" + path
+    encoded = []
+    for ch in path:
+        code = ord(ch)
+        if code < 0x20 or code == 0x7F or ch in _VS_PATH_ENCODE:
+            encoded.append("%%%02X" % code)
+        elif code > 0x7E:
+            encoded.extend("%%%02X" % b for b in ch.encode("utf-8"))
+        else:
+            encoded.append(ch)
+    # Chromium (the browser the Harness drives) also decodes %2E to "." anywhere in a path
+    # (checked against it in backend/tests/test_browser_review_i6_scope.py).
+    segments = _vs_re.sub(r"%2[eE]", ".", "".join(encoded)).split("/")[1:]
+    out = []
+    for i, seg in enumerate(segments):
+        last = i == len(segments) - 1
+        low = seg.lower()
+        if low in _VS_DOTDOT:
+            if out:
+                out.pop()
+            if last:
+                out.append("")
+        elif low in _VS_DOT:
+            if last:
+                out.append("")
+        else:
+            out.append(seg)
+    return "/" + "/".join(out)
+
+
+def _vs_authority(scheme, rest):
+    end = len(rest)
+    for i, ch in enumerate(rest):
+        if ch in "/\\?#":
+            end = i
+            break
+    hostport, tail = rest[:end].rsplit("@", 1)[-1], rest[end:]
+    if hostport.startswith("["):
+        return None
+    host, _sep, port = hostport.partition(":")
+    try:
+        host = _vs_unquote(host, errors="strict").lower()
+    except UnicodeDecodeError:
+        return None
+    if host.endswith("."):
+        host = host[:-1]
+    if not host or not _VS_HOST.fullmatch(host):
+        return None
+    if port:
+        if not _vs_re.fullmatch(r"[0-9]+", port) or int(port) > 65535:
+            return None
+        port = int(port)
+        if port == {"http": 80, "https": 443}[scheme]:
+            port = None
+    else:
+        port = None
+    return (scheme, host, port, _vs_path(_vs_re.split(r"[?#]", tail, maxsplit=1)[0] or "/"))
+
+
+def _vs_parse(raw, base=None):
+    # (scheme, host, port|None, path) of an http(s) URL, resolved against ``base``; None
+    # when it is not an http(s) URL this rule parses exactly.
+    s = "" if raw is None else str(raw)
+    try:
+        s.encode("utf-8")
+    except UnicodeEncodeError:
+        return None
+    s = s.strip(_VS_TRIM).replace("\t", "").replace("\n", "").replace("\r", "")
+    m = _VS_SCHEME.match(s)
+    if m:
+        scheme = m.group(1).lower()
+        rest = s[m.end():]
+        if scheme not in ("http", "https") or len(rest) - len(rest.lstrip("/\\")) != 2:
+            return None
+        return _vs_authority(scheme, rest[2:])
+    b = base if isinstance(base, tuple) else (_vs_parse(base) if base is not None else None)
+    if b is None:
+        return None
+    lead = len(s) - len(s.lstrip("/\\"))
+    if lead >= 2:
+        return _vs_authority(b[0], s[2:]) if lead == 2 else None
+    rel = _vs_re.split(r"[?#]", s, maxsplit=1)[0]
+    if lead == 1:
+        path = rel
+    elif rel == "":
+        path = b[3]
+    else:
+        path = b[3][: b[3].rfind("/") + 1] + rel
+    return (b[0], b[1], b[2], _vs_path(path))
+
+
+def _vs_origin(parts):
+    return parts[0] + "://" + parts[1] + ("" if parts[2] is None else ":" + str(parts[2]))
+
+
+def _vs_ambiguous(path):
+    for seg in path.split("/"):
+        if "%" not in seg:
+            continue
+        try:
+            decoded = _vs_unquote(seg, errors="strict")
+        except UnicodeDecodeError:
+            return True
+        if "/" in decoded or "\\" in decoded or "\x00" in decoded or decoded in (".", ".."):
+            return True
+    return False
+
+
+def _vs_normal_prefix(prefix):
+    # A recorded path prefix is used only when it is already in normal form.
+    if not isinstance(prefix, str) or not prefix.startswith("/"):
+        return False
+    parts = _vs_parse("http://h" + prefix)
+    return parts is not None and parts[3] == prefix and not _vs_ambiguous(prefix)
+
+
+def _vs_scope_violation(entries, url, what="PAGE", base=None):
+    # None when ``url`` (resolved against ``base``) is inside one of ``entries``
+    # ({"origin", "path_prefix"} dicts); otherwise the typed reason.
+    if not isinstance(entries, (list, tuple)) or not entries:
+        return "TASK_SCOPE_MISSING"
+    raw = "" if url is None else str(url)
+    if not raw.strip(_VS_TRIM):
+        return "TASK_SCOPE_" + what + "_URL_UNKNOWN"
+    parts = _vs_parse(raw, base)
+    if parts is None:
+        m = _VS_SCHEME.match(raw.strip(_VS_TRIM).replace("\t", "").replace("\n", "").replace("\r", ""))
+        if m and m.group(1).lower() not in ("http", "https"):
+            return "TASK_SCOPE_" + what + "_URL_NOT_HTTP"
+        return "TASK_SCOPE_" + what + "_URL_INVALID"
+    if _vs_ambiguous(parts[3]):
+        return "TASK_SCOPE_" + what + "_PATH_AMBIGUOUS"
+    origin, path, same_origin = _vs_origin(parts), parts[3], False
+    for entry in entries:
+        entry_origin = entry.get("origin") if isinstance(entry, dict) else None
+        declared = _vs_parse(entry_origin) if isinstance(entry_origin, str) else None
+        if declared is None or declared[3] != "/" or _vs_origin(declared) != origin:
+            continue
+        same_origin = True
+        prefix = entry.get("path_prefix")
+        if not prefix:
+            return None
+        if not _vs_normal_prefix(prefix):
+            continue
+        if path.startswith(prefix) if prefix.endswith("/") else (path == prefix or path.startswith(prefix + "/")):
+            return None
+    return "TASK_SCOPE_" + what + ("_PATH_OUTSIDE" if same_origin else "_ORIGIN_OUTSIDE")
+# --- VAN shared URL scope rule: end ---
+
 
 #: Operations the gate covers. ``done``/``abstain`` act on nothing.
 GATED_OPERATIONS = frozenset({"click", "fill", "select", "press_key", "scroll", "navigate"})
@@ -110,16 +290,11 @@ def _host_within(host: str, domain: str) -> bool:
     return host == domain or host.endswith("." + domain)
 
 
-def _origin_of(parts) -> str:
-    scheme = (parts.scheme or "").lower()
-    host = (parts.hostname or "").lower().rstrip(".")
-    port = parts.port
-    default = {"http": 80, "https": 443}.get(scheme)
-    return f"{scheme}://{host}" + (f":{port}" if port and port != default else "")
-
-
 def parse_scope_entry(raw: str, target_domain: str) -> ScopeEntry:
-    """``https://host[:port][/path/prefix]`` -> ScopeEntry. No query, fragment or userinfo."""
+    """``https://host[:port][/path/prefix]`` -> ScopeEntry. No query, fragment or userinfo;
+    the path must already be in the normal form the browser would load (review I6 M3: no
+    dot segments, backslashes or encoded separators), since the prefix is compared with
+    the normalised path of every page and destination."""
     text = str(raw or "").strip()
     try:
         parts = urlsplit(text)
@@ -130,12 +305,16 @@ def parse_scope_entry(raw: str, target_domain: str) -> ScopeEntry:
         raise TaskScopeError("TASK_SCOPE_ENTRY_SCHEME_OR_HOST_INVALID")
     if parts.username or parts.password or parts.query or parts.fragment:
         raise TaskScopeError("TASK_SCOPE_ENTRY_INVALID")
+    whatwg = _vs_parse(text)
+    if whatwg is None:
+        raise TaskScopeError("TASK_SCOPE_ENTRY_INVALID")
     domain = str(target_domain or "").strip().lower().rstrip(".")
-    host = parts.hostname.lower().rstrip(".")
-    if not domain or not _host_within(host, domain):
+    if not domain or not _host_within(whatwg[1], domain):
         raise TaskScopeError("TASK_SCOPE_OUTSIDE_TARGET_DOMAIN")
-    path = parts.path or ""
-    return ScopeEntry(origin=_origin_of(parts), path_prefix=path if path not in ("", "/") else None)
+    path = parts.path or "/"
+    if whatwg[3] != path or _vs_ambiguous(path):
+        raise TaskScopeError("TASK_SCOPE_ENTRY_PATH_NOT_NORMAL")
+    return ScopeEntry(origin=_vs_origin(whatwg), path_prefix=path if path != "/" else None)
 
 
 def scope_for_new_task(target_domain: str, declared: list[str] | None) -> TaskScope:
@@ -161,35 +340,12 @@ def load_scope(raw: Any) -> TaskScope | None:
     return scope if scope.entries else None
 
 
-def _path_within(path: str, prefix: str | None) -> bool:
-    if not prefix:
-        return True
-    path = path or "/"
-    if prefix.endswith("/"):
-        return path.startswith(prefix)
-    return path == prefix or path.startswith(prefix + "/")
-
-
-def url_scope_violation(scope: TaskScope | None, url: str | None, *, what: str = "PAGE") -> str | None:
-    """None when ``url`` is inside ``scope``; otherwise the typed reason."""
+def url_scope_violation(scope: TaskScope | None, url: str | None, *, what: str = "PAGE", base: str | None = None) -> str | None:
+    """None when ``url`` (resolved against ``base``) is inside ``scope``; otherwise the typed
+    reason. The rule is the shared ``_vs_scope_violation`` the Harness runs too."""
     if scope is None or not scope.entries:
         return "TASK_SCOPE_MISSING"
-    if not url:
-        return f"TASK_SCOPE_{what}_URL_UNKNOWN"
-    try:
-        parts = urlsplit(str(url))
-        parts.port  # noqa: B018
-    except ValueError:
-        return f"TASK_SCOPE_{what}_URL_INVALID"
-    if parts.scheme not in ("http", "https") or not parts.hostname:
-        return f"TASK_SCOPE_{what}_URL_NOT_HTTP"
-    origin = _origin_of(parts)
-    for entry in scope.entries:
-        if entry.origin == origin and _path_within(parts.path, entry.path_prefix):
-            return None
-    if any(entry.origin == origin for entry in scope.entries):
-        return f"TASK_SCOPE_{what}_PATH_OUTSIDE"
-    return f"TASK_SCOPE_{what}_ORIGIN_OUTSIDE"
+    return _vs_scope_violation(scope.to_wire()["entries"], url, what, base)
 
 
 def element_destination(element: dict[str, Any] | None) -> str | None:
@@ -248,8 +404,8 @@ def task_scope_gate(
         if destination is not None:
             if destination == "(form-without-action)":
                 destination = page
-            resolved = urljoin(str(page), destination)
-            violation = url_scope_violation(scope, resolved, what="DESTINATION")
+            # Resolved against the page the way the browser resolves it (review I6 M3).
+            violation = url_scope_violation(scope, destination, what="DESTINATION", base=page)
             if violation is not None:
                 return violation
     return None

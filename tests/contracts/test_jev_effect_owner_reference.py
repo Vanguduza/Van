@@ -188,3 +188,31 @@ def test_probe_cases_2_and_11_are_not_permitted(tmp_path, overrides, reason):
     assert cap["production_activation_permitted"] is False
     assert gates["owner_decision_reference"]["status"] == "UNKNOWN"
     assert gates["owner_decision_reference"]["reason"] == reason
+
+
+# ------------------------------------------------------------------ review I6 m8
+#
+# review-i5/probes/jev_ref.py row 12: an authorization whose expires_at_utc is in the past
+# still made jev_browser_effect permitted. Any of expires_at / expires_at_utc / not_after /
+# not_after_utc present is honoured; expired, unreadable or zone-less fails closed.
+
+
+@pytest.mark.parametrize("field", ["expires_at", "expires_at_utc", "not_after", "not_after_utc"])
+@pytest.mark.parametrize("value,fragment", [
+    ("2020-01-01T00:00:00Z", "authorization expired"),
+    ("not a date", "is not an ISO-8601 timestamp"),
+    ("2999-01-01T00:00:00", "has no time zone"),
+    (12345, "is not an ISO-8601 timestamp"),
+])
+def test_i6_m8_an_expired_or_unreadable_expiry_is_not_permitted(tmp_path, field, value, fragment):
+    cap, gates = _setup(tmp_path, **{field: value})
+    assert cap["production_activation_permitted"] is False
+    assert gates["owner_decision_reference"]["status"] == "UNKNOWN"
+    assert fragment in gates["owner_decision_reference"]["reason"]
+
+
+@pytest.mark.parametrize("field", ["expires_at_utc", "not_after"])
+def test_i6_m8_control_a_future_expiry_is_permitted(tmp_path, field):
+    cap, gates = _setup(tmp_path, **{field: "2999-01-01T00:00:00Z"})
+    assert gates["owner_decision_reference"]["status"] == "GREEN", gates["owner_decision_reference"]
+    assert cap["production_activation_permitted"] is True

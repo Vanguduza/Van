@@ -85,9 +85,10 @@ class CreateTaskBody(BaseModel):
     #: intentions while the real execution sits in browser_tasks.
     mission_id: str | None = None
     inputs: dict[str, Any] = Field(default_factory=dict)
-    #: Owner decision 2026-09-30 — the pages this task may act on, as URL prefixes
-    #: (``https://host[:port][/path/]``), each inside ``target_domain``. Omitted: the task's
-    #: ``target_domain`` origin is recorded. See ``browser/task_scope.py``.
+    #: The integrator's interpretation (PENDING owner confirmation; docs/decisions/OWNER-
+    #: DECISION-20260930-BROWSER-TASK-SCOPE.md section 3) of the owner's 2026-09-30 answer —
+    #: the pages this task may act on, as URL prefixes (``https://host[:port][/path/]``), each inside ``target_domain``. Omitted:
+    #: the task's ``target_domain`` origin is recorded. See ``browser/task_scope.py``.
     scope: list[str] | None = Field(default=None, max_length=32)
 
 
@@ -193,27 +194,46 @@ class BrowserApi:
             raise HTTPException(status_code=503, detail="BROWSER_FABRIC_DISABLED")
 
     async def _task_scope(self, row) -> TaskScope | None:
-        """Owner decision 2026-09-30 — the scope in the task's truth: what was recorded at
-        creation, widened by the domains the owner approved for *this* task
-        (``browser_scope_authorizations``, the record the owner's decision produced).
-        Missing or unreadable recorded scope stays None — an approval does not invent the
-        rest of a scope — and every action on the task is refused."""
+        """Task-scope rule (integrator's interpretation of the owner's 2026-09-30 answer,
+        pending confirmation) — the scope in the task's truth: what was
+        recorded at creation, widened by the domain the owner approved for *this* task.
+
+        Review I6 m1: only the approved *delta* widens it — the ``allowed_domain`` of the
+        escalation the owner answered, not every domain the authorization row lists (those
+        include the task's current domains, and adding them origin-wide would drop a declared
+        path limit). A domain the recorded scope already names is not widened at all (the
+        owner approved a domain, not the removal of that domain's path limit). Only an
+        ACTIVE authorization that has not expired counts: a REVOKED, EXPIRED or CONSUMED
+        row, or one past ``expires_at_ms``, widens nothing. (``consume_resume_authorization``
+        consumes the row for the run it authorizes; that run's task was loaded, and its scope
+        read, while the row was still ACTIVE.) Missing or unreadable recorded scope stays
+        None — an approval does not invent the rest of a scope — and every action on the
+        task is refused."""
         scope = load_scope(row["scope_json"] if "scope_json" in row.keys() else None)
         if scope is None:
             return None
         grants = await self.store.fetchall(
-            "SELECT authorization_id, approved_domains_json FROM browser_scope_authorizations "
-            "WHERE task_id = ? ORDER BY issued_at_ms",
-            (str(row["task_id"]),),
+            "SELECT a.authorization_id, a.approved_domains_json, e.requested_scope_delta_json "
+            "FROM browser_scope_authorizations a "
+            "JOIN browser_escalations e ON e.escalation_id = a.escalation_id "
+            "WHERE a.task_id = ? AND a.status = 'ACTIVE' "
+            "AND (a.expires_at_ms IS NULL OR a.expires_at_ms > ?) "
+            "ORDER BY a.issued_at_ms",
+            (str(row["task_id"]), int(time.time() * 1000)),
         )
+        declared_hosts = scope.hosts()
         for grant in grants:
             try:
-                domains = json.loads(str(grant["approved_domains_json"]))
+                approved = json.loads(str(grant["approved_domains_json"]))
+                delta = json.loads(str(grant["requested_scope_delta_json"]))
             except ValueError:
                 continue
-            for domain in domains if isinstance(domains, list) else ():
-                if isinstance(domain, str) and domain.strip():
-                    scope = scope.with_origin(domain, f"OWNER_APPROVED:{grant['authorization_id']}")
+            domain = delta.get("allowed_domain") if isinstance(delta, dict) else None
+            if not isinstance(domain, str) or not domain.strip() or not isinstance(approved, list) or domain not in approved:
+                continue
+            if domain.strip().lower().rstrip(".") in declared_hosts:
+                continue
+            scope = scope.with_origin(domain, f"OWNER_APPROVED:{grant['authorization_id']}")
         return scope
 
     async def _load_task(self, task_id: str) -> BrowserTask:
