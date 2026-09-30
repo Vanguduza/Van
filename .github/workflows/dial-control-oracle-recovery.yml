@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 concurrency:
   group: dial-control-oracle-netcup-recovery
@@ -132,76 +131,95 @@ jobs:
             exit 1')"
           [[ -n "$ROOTDEV" ]] || { echo "REFUSE: Ubuntu root filesystem not found" >&2; exit 25; }
 
+          BOOT_SCRIPT="$RUNNER_TEMP/dial-runner-recovery-once"
+          cat >"$BOOT_SCRIPT" <<'BASH'
+          #!/usr/bin/env bash
+          set -Eeuo pipefail
+          umask 077
+          LOG=/var/log/dial-runner-recovery.log
+          exec >>"$LOG" 2>&1
+          echo "RECOVERY_STARTED=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          MARKER=/var/lib/dial-control/recovery/github-runner-repair.pending
+          [[ -f "$MARKER" ]] || { echo "RECOVERY_NOT_PENDING"; exit 0; }
+          [[ "$(hostname)" == "dial-control" ]] || { echo "REFUSE_WRONG_HOST=$(hostname)"; exit 3; }
+          REPO=/home/ubuntu/dial-live-a73bc3d9
+          INSTALLER="$REPO/deploy/netcup/hermes-control/install-github-admin-runner.sh"
+          [[ -x "$INSTALLER" || -f "$INSTALLER" ]] || { echo "REFUSE_INSTALLER_MISSING=$INSTALLER"; exit 4; }
+          runuser -u ubuntu -- env \
+            HOME=/home/ubuntu \
+            PATH=/home/ubuntu/.local/bin:/usr/local/bin:/usr/bin:/bin:/snap/bin \
+            DIAL_GITHUB_REPOSITORY=Vanguduza/dial-development-system \
+            DIAL_REPO_DIR="$REPO" \
+            bash "$INSTALLER"
+          rm -f "$MARKER"
+          systemctl disable dial-recover-github-runner-once.service || true
+          echo "DDS_GITHUB_RUNNER_RECOVERY=GREEN"
+          echo "RECOVERY_FINISHED=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          BASH
+          chmod 0700 "$BOOT_SCRIPT"
+
+          UNIT_FILE="$RUNNER_TEMP/dial-recover-github-runner-once.service"
+          cat >"$UNIT_FILE" <<'UNIT'
+          [Unit]
+          Description=DIAL one-shot GitHub runner recovery
+          Wants=network-online.target
+          After=network-online.target
+          ConditionPathExists=/var/lib/dial-control/recovery/github-runner-repair.pending
+
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/local/sbin/dial-runner-recovery-once
+          TimeoutStartSec=1800
+          Restart=on-failure
+          RestartSec=30
+
+          [Install]
+          WantedBy=multi-user.target
+          UNIT
+
+          "${SSH[@]}" 'cat >/tmp/dial-runner-recovery-once' <"$BOOT_SCRIPT"
+          "${SSH[@]}" 'cat >/tmp/dial-recover-github-runner-once.service' <"$UNIT_FILE"
           "${SSH[@]}" "set -Eeuo pipefail
             mkdir -p /mnt/dial-root
+            umount /mnt/dial-root >/dev/null 2>&1 || true
             mount '$ROOTDEV' /mnt/dial-root
-            test -f /mnt/dial-root$CONTROLLER_PATH
-            cp -a /mnt/dial-root$CONTROLLER_PATH /mnt/dial-root$CONTROLLER_PATH.pre-van-recovery
-            install -d -m 0700 /mnt/dial-root/var/lib/dial-control/github-oidc
-            date -d '+2 hours' +%s > /mnt/dial-root/var/lib/dial-control/github-oidc/emergency-van-recovery-until
-            chmod 0600 /mnt/dial-root/var/lib/dial-control/github-oidc/emergency-van-recovery-until
-            python3 - <<'PY'
-          from pathlib import Path
-          p=Path('/mnt/dial-root/usr/local/lib/dial-control/github-oidc-control.mjs')
-          s=p.read_text()
-          wf="  '/.github/workflows/dial-control-oracle-recovery.yml@',\n"
-          needle="const ALLOWED_WORKFLOWS = [\n"
-          if wf.strip() not in s:
-              s=s.replace(needle, needle+wf, 1)
-          old="if(payload.repository!==REPOSITORY) throw new Error('repository claim mismatch');"
-          new="""const emergencyVan = (() => { try { const until=Number(fs.readFileSync(path.join(ROOT,'emergency-van-recovery-until'),'utf8').trim()); return Date.now()/1000 < until && payload.repository==='Vanguduza/Van' && payload.actor===OWNER && payload.ref==='refs/heads/ops/dial-control-recovery-20260930' && String(payload.workflow_ref||'').includes('/.github/workflows/dial-control-oracle-recovery.yml@'); } catch { return false; } })();
-          if(payload.repository!==REPOSITORY && !emergencyVan) throw new Error('repository claim mismatch');"""
-          if old not in s: raise SystemExit('repository guard pattern missing')
-          s=s.replace(old,new,1)
-          old2="const body=JSON.parse(raw.toString('utf8'));\n    audit({event:'ACTION_START'"
-          new2="const body=JSON.parse(raw.toString('utf8'));\n    if(claims.repository==='Vanguduza/Van' && body.action!=='ensure-github-admin-runner') throw new Error('emergency VAN recovery action refused');\n    audit({event:'ACTION_START'"
-          if old2 not in s: raise SystemExit('action guard insertion point missing')
-          s=s.replace(old2,new2,1)
-          old3="requireOk(r,'ensure-github-admin-runner');\n      return r;"
-          new3="""requireOk(r,'ensure-github-admin-runner');
-                if(claims.repository==='Vanguduza/Van') {
-                  const canonical=path.join(REPO,'deploy/netcup/hermes-control/github-oidc-control.mjs');
-                  const reseal=command("install -m 0755 '"+canonical+"' /usr/local/lib/dial-control/github-oidc-control.mjs && rm -f '"+path.join(ROOT,'emergency-van-recovery-until')+"' && systemd-run --unit=dial-reseal-github-oidc-recovery --on-active=10s /bin/systemctl restart dial-github-oidc-control.service");
-                  requireOk(reseal,'emergency-controller-reseal');
-                }
-                return r;"""
-          if old3 not in s: raise SystemExit('runner recovery pattern missing')
-          s=s.replace(old3,new3,1)
-          p.write_text(s)
-          PY
-            chown root:root /mnt/dial-root$CONTROLLER_PATH
-            chmod 0755 /mnt/dial-root$CONTROLLER_PATH
-            /mnt/dial-root/home/ubuntu/.local/bin/node --check /mnt/dial-root$CONTROLLER_PATH
+            test -f /mnt/dial-root/home/ubuntu/dial-live-a73bc3d9/deploy/netcup/hermes-control/install-github-admin-runner.sh
+            install -d -m 0700 /mnt/dial-root/var/lib/dial-control/recovery
+            install -m 0755 /tmp/dial-runner-recovery-once /mnt/dial-root/usr/local/sbin/dial-runner-recovery-once
+            install -m 0644 /tmp/dial-recover-github-runner-once.service /mnt/dial-root/etc/systemd/system/dial-recover-github-runner-once.service
+            touch /mnt/dial-root/var/lib/dial-control/recovery/github-runner-repair.pending
+            chmod 0600 /mnt/dial-root/var/lib/dial-control/recovery/github-runner-repair.pending
+            mkdir -p /mnt/dial-root/etc/systemd/system/multi-user.target.wants
+            ln -sfn ../dial-recover-github-runner-once.service /mnt/dial-root/etc/systemd/system/multi-user.target.wants/dial-recover-github-runner-once.service
+            rm -f /tmp/dial-runner-recovery-once /tmp/dial-recover-github-runner-once.service
             sync
             umount /mnt/dial-root
           "
-          echo "EMERGENCY_CONTROLLER_TRUST=STAGED"
+          echo "DDS_RUNNER_ONE_SHOT_PRESTAGE=GREEN"
 
           patch "$SCP_API/v1/servers/$SERVER_ID?stateOption=POWEROFF" '{"state":"OFF"}' >/dev/null || true
           for _ in $(seq 1 90); do
             [[ "$(get "$SCP_API/v1/servers/$SERVER_ID" | jq -r '.serverLiveInfo.state // empty')" == SHUTOFF ]] && break
             sleep 3
           done
+          [[ "$(get "$SCP_API/v1/servers/$SERVER_ID" | jq -r '.serverLiveInfo.state // empty')" == SHUTOFF ]] || { echo "REFUSE: rescue did not stop" >&2; exit 26; }
+
           curl -sS --fail-with-body -X DELETE "${auth[@]}" "$SCP_API/v1/servers/$SERVER_ID/rescuesystem" >/dev/null
           for _ in $(seq 1 60); do
             [[ "$(get "$SCP_API/v1/servers/$SERVER_ID/rescuesystem" | jq -r '.active // false')" == false ]] && break
             sleep 3
           done
+          [[ "$(get "$SCP_API/v1/servers/$SERVER_ID/rescuesystem" | jq -r '.active // false')" == false ]] || { echo "REFUSE: rescue did not deactivate" >&2; exit 27; }
+
           patch "$SCP_API/v1/servers/$SERVER_ID" '{"state":"ON"}' >/dev/null
           for _ in $(seq 1 120); do
+            state_now="$(get "$SCP_API/v1/servers/$SERVER_ID" | jq -r '.serverLiveInfo.state // empty')"
             code="$(curl -sS --connect-timeout 3 --max-time 5 -o /dev/null -w '%{http_code}' "http://$IP:9134/healthz" 2>/dev/null || true)"
-            [[ "$code" == 200 ]] && break
+            [[ "$state_now" == RUNNING && "$code" == 200 ]] && break
             sleep 5
           done
           HEALTH="$(curl -fsS --max-time 5 "http://$IP:9134/healthz")"
-          echo "DIAL_CONTROL_HEALTH_AFTER_RESCUE=$(jq -c '{ok,host,repo_head,bootstrap_ref,bootstrap_phase}' <<<"$HEALTH")"
-
-          BODY='{"action":"ensure-github-admin-runner"}'
-          HASH="$(printf '%s' "$BODY" | sha256sum | awk '{print $1}')"
-          AUD="dial-control:$HASH"
-          OIDC_URL="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=$(python3 -c 'import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1],safe=""))' "$AUD")"
-          JWT="$(curl -fsS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$OIDC_URL" | jq -r .value)"
-          RESP="$(curl -fsS --max-time 1200 -H 'content-type: application/json' -H "Authorization: Bearer $JWT" --data "$BODY" "http://$IP:9134/v1/action")"
-          jq -e '.ok == true and .action == "ensure-github-admin-runner"' <<<"$RESP" >/dev/null
-          echo "DDS_GITHUB_RUNNER_RECOVERY=GREEN"
-          jq -r '.result.stdout // ""' <<<"$RESP" | grep -E '^(GITHUB_ADMIN_RUNNER|runner|environment)=' || true
+          jq -e '.ok == true and .host == "dial-control"' <<<"$HEALTH" >/dev/null
+          echo "DIAL_CONTROL_NORMAL_BOOT=GREEN"
+          echo "DIAL_CONTROL_HEALTH=$(jq -c '{ok,host,repo_head,bootstrap_ref,bootstrap_phase}' <<<"$HEALTH")"
+          echo "DDS_RUNNER_RECOVERY_BOOT_TRIGGERED=YES"
