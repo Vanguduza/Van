@@ -1,0 +1,21 @@
+[Unit]
+Description=VAN Muse SOCKS proxy inside isolated namespace
+Requires=van-muse-netns.service
+After=van-muse-netns.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/ip netns exec van-muse /usr/sbin/danted -f /etc/van-muse-egress/danted.conf
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+
+[Install]
+WantedBy=multi-user.target
