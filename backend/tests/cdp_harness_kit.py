@@ -310,11 +310,29 @@ class HarnessSession:
             self.ws.close()
 
 
+#: Unit G15 — a script's environment is the process environment here (browser-harness runs
+#: each script in a process of its own). Scripts of different workers in one test process —
+#: a guard thread an earlier test's worker left running, say — must not see each other's
+#: variables: they run one at a time, and a guard variable the script was not given is absent.
+_EXEC_LOCK = threading.RLock()
+_SCRIPT_ONLY_ENV = ("VAN_BH_NETGUARD", "VAN_BH_NETGUARD_STATE")
+
+
 def exec_script(session: HarnessSession, script: str, extra: dict[str, str] | None = None) -> Any:
     """Run a fixed Harness script the way browser-harness does (helpers as globals, JSON on
     stdout), on the calling thread."""
-    saved = {k: os.environ.get(k) for k in (extra or {})}
-    os.environ.update(extra or {})
+    with _EXEC_LOCK:
+        return _exec_script(session, script, extra)
+
+
+def _exec_script(session: HarnessSession, script: str, extra: dict[str, str] | None = None) -> Any:
+    extra = dict(extra or {})
+    keys = set(extra) | {k for k in _SCRIPT_ONLY_ENV if k in os.environ}
+    saved = {k: os.environ.get(k) for k in keys}
+    for key in _SCRIPT_ONLY_ENV:
+        if key not in extra:
+            os.environ.pop(key, None)
+    os.environ.update(extra)
     out = io.StringIO()
 
     def _print(*args: Any, **kwargs: Any) -> None:

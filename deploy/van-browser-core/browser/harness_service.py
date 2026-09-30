@@ -1441,6 +1441,14 @@ def _van_emit(payload):
 #     ``NETGUARD_IDLE_SECONDS`` without a call. Each ends the guard the same way: the page is
 #     frozen, then interception is removed. Nothing the lease started keeps running
 #     unintercepted.
+#   * Unit G15 (review I8 MAJOR-1) — a lease's guard is never lost silently. If any script of
+#     the lease (an operation, a read, the guard thread's tick) cannot adopt it — a page that
+#     busy-loops its renderer makes the adopt's CDP calls time out — the lease is broken with
+#     NETWORK_GUARD_UNAVAILABLE: interception stays on, the page is frozen (retried until it
+#     is on about:blank), the lease's egress policy is revoked for good, and the code is
+#     refused on the lease's next call and reported by its /release. A guard started later in
+#     the same lease carries the lease's ``acted`` and pending state; a lease whose guard
+#     ended (idle expiry, a guard thread that could not service it) is resumed, not replaced.
 #
 # Owner answer 2026-09-30 after review I7 ("Block silently, continue (Recommended)"): for a
 # task *not* admitted as mutating, a write blocked before the task's first automated input
@@ -1511,6 +1519,8 @@ NETGUARD_TICK_SECONDS = 0.4
 NETGUARD_TICK_PAUSE_SECONDS = 0.05
 NETGUARD_IDLE_SECONDS = float(os.getenv("VAN_HARNESS_GUARD_IDLE_SECONDS", "900"))
 NETGUARD_TICK_FAILURE_LIMIT = 20
+#: Unit G15 — ended or lost leases remembered per profile until the gateway releases them.
+NETGUARD_RETIRED_PER_ALIAS = 16
 
 NETWORK_GUARD_PY = r"""
 import threading as _ng_threading, time as _ng_time
@@ -1574,11 +1584,15 @@ class _VanNetGuard:
         self.registrations = set()
         self.last = _ng_time.monotonic()
         self.enabled_page = False
-        self.acted = False
+        # Unit G15 (review I8 MAJOR-1): a guard started while its lease is already under way
+        # (its earlier guard was lost) carries what the lease knows: whether the task has
+        # acted, and that a code is pending (the page is frozen again at once).
+        self.acted = policy.get("acted") is True
         self.window = False
         self.running = False
-        self.freeze_due = False
+        self.freeze_due = policy.get("pending") is True
         self.frozen = False
+        self.blanked = False
         self.freezing = False
         self.doc_url = None
 
@@ -1589,7 +1603,7 @@ class _VanNetGuard:
         return {"browser_sid": self.browser_sid, "main_frame": self.main_frame,
                 "children": {k: list(v) for k, v in self.children.items()},
                 "form_frames": sorted(f for f in self.form_frames if isinstance(f, str)),
-                "acted": self.acted, "frozen": self.frozen, "doc_url": self.doc_url}
+                "acted": self.acted, "frozen": self.frozen, "blanked": self.blanked, "doc_url": self.doc_url}
 
     def adopt(self, state):
         try:
@@ -1597,17 +1611,52 @@ class _VanNetGuard:
             self.main_frame = str(state["main_frame"])
             self.children = {str(k): (v[0], str(v[1])) for k, v in dict(state["children"]).items()}
             self.form_frames = set(state.get("form_frames") or [])
-            self.acted = state.get("acted") is True
+            self.acted = self.acted or state.get("acted") is True
             self.frozen = state.get("frozen") is True
+            self.blanked = state.get("blanked") is True
             self.doc_url = state.get("doc_url") if isinstance(state.get("doc_url"), str) else None
             self.enabled_page = True
             # Still the same page. Interception was never disabled: the requests paused since
-            # the last script are waiting in the event buffer.
-            if cdp("Page.getFrameTree")["frameTree"]["frame"]["id"] != self.main_frame:
+            # the last script are waiting in the event buffer. Unit G15: they are answered
+            # while the frame tree is read — a main-frame document request left paused holds
+            # Page.getFrameTree until it is answered (measured: a 15 s timeout whenever the
+            # page navigated between two scripts), so reading it first deadlocked the adopt.
+            if self._frame_id_serviced() != self.main_frame:
                 raise ValueError("frame")
         except Exception:
-            self.stop()
+            # Unit G15 (review I8 MAJOR-1): a page that keeps its renderer busy (a handler
+            # spinning for 20 s after a click) makes these CDP calls time out. Before G15 the
+            # guard then removed its interception (stop) and the guard thread's tick, which
+            # does not require a guard, went on without one: the next tick started a fresh
+            # guard that had never acted, and the page's write after the busy loop reached the
+            # server (a mutating task) or was dropped as background traffic (a read-only
+            # task), with no code for the owner. Now the lease's guard is never given up mid-
+            # lease: interception stays on (a request nobody answers stays paused), the guard
+            # is marked broken, the wrapper hands it back (``_VAN_NET_LOST``) so the worker
+            # records NETWORK_GUARD_UNAVAILABLE on the lease, the page is frozen (retried
+            # until it is on about:blank), and the worker revokes the lease's egress policy.
+            self.broken = self.broken or "NETWORK_GUARD_UNAVAILABLE"
+            self.freeze_due = True
             raise _VanRefused("NETWORK_GUARD_UNAVAILABLE")
+
+    def _frame_id_serviced(self):
+        '''The main frame's id, read on a helper thread while this thread answers paused
+        requests (as ``run`` does for an action). Raises when it cannot be read.'''
+        box = {}
+        def _get():
+            try:
+                box["id"] = cdp("Page.getFrameTree")["frameTree"]["frame"]["id"]
+            except BaseException as exc:  # noqa: BLE001 - re-raised below
+                box["error"] = exc
+        worker = _ng_threading.Thread(target=_get, daemon=True)
+        worker.start()
+        limit = _ng_time.monotonic() + 30.0
+        while worker.is_alive() and _ng_time.monotonic() < limit:
+            self.pump()
+            _ng_time.sleep(0.01)
+        if "id" not in box:
+            raise box.get("error") or TimeoutError("Page.getFrameTree")
+        return box["id"]
 
     def start(self):
         try:
@@ -1871,12 +1920,14 @@ class _VanNetGuard:
     def freeze(self):
         '''Stop everything the page started, with interception still on: close popups and
         other tabs, unregister and stop service workers, navigate the main frame to
-        about:blank (its timers and dedicated workers end with the document).'''
+        about:blank (its timers and dedicated workers end with the document). Unit G15: a
+        freeze that could not confirm about:blank (a renderer too busy to answer) is tried
+        again by the next script of the lease.'''
         self.freeze_due = False
-        if self.frozen:
+        if self.frozen and self.blanked:
             return
         self.frozen = True
-        _van_freeze_page(self)
+        self.blanked = _van_freeze_page(self) is True
 
     def stop(self):
         try:
@@ -1952,12 +2003,15 @@ def _van_freeze_page(guard=None):
             done.append(True)
         _ng_threading.Thread(target=_blank, daemon=True).start()
         until = _ng_time.monotonic() + 5.0
+        blank = False
         while _ng_time.monotonic() < until:
             _pump()  # unload handlers' requests are answered (failed) meanwhile
             if done and _van_frame_url() == "about:blank":
+                blank = True
                 break
             _ng_time.sleep(0.03)
         _pump()
+        return blank
     finally:
         if guard is not None:
             guard.freezing = False
@@ -1996,6 +2050,13 @@ def _van_net_begin():
             guard.start()
         guard.service(0)
     except _VanRefused:
+        if isinstance(adopted, dict) or policy.get("midlease") is True:
+            # Unit G15 (review I8 MAJOR-1): the lease's guard could not be adopted (or, its
+            # state already lost, restarted) mid-lease — whatever the script, the guard
+            # thread's tick included. It is handed back broken, never silently replaced.
+            guard.broken = guard.broken or "NETWORK_GUARD_UNAVAILABLE"
+            guard.freeze_due = True
+            globals()["_VAN_NET_LOST"] = guard
         if required:
             raise
         return None
@@ -2037,8 +2098,11 @@ def _van_net_end(guard, end=False):
     if guard is None:
         return None
     try:
-        guard.service(0)
-        if guard.broken and not guard.frozen:
+        try:
+            guard.service(0)
+        except Exception:
+            guard.broken = guard.broken or "NETWORK_GUARD_UNAVAILABLE"
+        if (guard.broken or guard.freeze_due or guard.frozen) and not (guard.frozen and guard.blanked):
             guard.freeze()
         if end:
             guard.freeze()
@@ -2073,6 +2137,7 @@ def _vw_print(*args, **kwargs):
     else:
         _vw_emit(*args, **kwargs)
 _VAN_NET = None
+_VAN_NET_LOST = None
 try:
     _VAN_NET = _van_net_begin()
 except Exception as _vw_exc:
@@ -2101,7 +2166,8 @@ if _vw_payload is None:
 if _vw_error is not None:
     _vw_payload = {"__error__": _vw_error}
 _vw_payload = dict(_vw_payload) if isinstance(_vw_payload, dict) else {"__error__": "NO_RESULT"}
-_vw_payload["__guard__"] = _van_net_end(_VAN_NET, end=_VW_POLICY.get("end") is True)
+_vw_payload["__guard__"] = _van_net_end(_VAN_NET if _VAN_NET is not None else _VAN_NET_LOST,
+                                        end=_VW_POLICY.get("end") is True)
 _vw_emit("__VAN_JSON__" + json.dumps(_vw_payload))
 """
 
@@ -2197,17 +2263,40 @@ class GuardLease:
         self.dropped: list[str] = []
         self.last_call = time.monotonic()
         self.failures = 0
+        #: Unit G15 — a guard state has been handed back at least once: from then on the
+        #: lease's guard can only be lost, never silently restarted.
+        self.started = False
         #: Unit G13 — the egress proxy's side of the lease: older leases' policies revoked at
         #: its start; its own revoked (finally) once it ends or its guard froze the page.
         self.egress_started = False
         self.egress_revoked = False
 
-    def absorb(self, guard: Any) -> None:
+    def lose(self) -> None:
+        """Unit G15 (review I8 MAJOR-1) — the lease's guard is gone mid-lease. The lease is
+        broken (NETWORK_GUARD_UNAVAILABLE unless a code is already pending): every further
+        call is refused with it and ``/release`` reports it; the caller revokes the egress
+        policy. A guard started later for this lease carries ``acted`` and the pending state
+        (``guard_policy``)."""
+        if self.pending is None:
+            self.pending = "NETWORK_GUARD_UNAVAILABLE"
+
+    def guard_policy(self) -> dict[str, Any]:
+        """What the in-script guard is told about its lease besides the task policy."""
+        return {"acted": self.acted, "pending": self.pending is not None, "midlease": self.started}
+
+    def absorb(self, guard: Any, *, ending: bool = False) -> None:
         if not isinstance(guard, dict):
-            self.state = None  # not started (a read without one) or lost: the next script starts it
+            if self.started and not ending:
+                # Unit G15: a lease whose guard had been running handed none back.
+                self.lose()
+            self.state = None  # not started (a read before the lease's first guard)
             return
         state = guard.get("state")
         self.state = state if isinstance(state, dict) else None
+        if self.state is not None:
+            self.started = True
+        elif self.started and not ending:
+            self.lose()
         self.acted = self.acted or guard.get("acted") is True
         self.frozen = self.frozen or guard.get("frozen") is True
         codes = [f"NETWORK_WRITE_BLOCKED:{k if k in NETWORK_WRITE_KINDS else 'OTHER'}" for k in guard.get("blocked") or []]
@@ -2239,6 +2328,12 @@ class NetGuardRegistry:
     def __init__(self) -> None:
         self.lock = threading.Lock()
         self.leases: dict[str, GuardLease] = {}
+        #: Unit G15 (review I8 MAJOR-1) — leases whose guard ended or was lost before the
+        #: gateway released them (idle expiry, a guard thread that could no longer service
+        #: it, a newer lease): kept, per alias and (generation, holder), so a later call of the
+        #: same lease resumes it with its ``acted`` and pending code instead of starting a
+        #: fresh guard, and its ``/release`` still reports what it blocked.
+        self.retired: dict[str, dict[tuple[int, str], GuardLease]] = {}
         self._local = threading.local()
         self._thread: threading.Thread | None = None
         self._closed = False
@@ -2271,12 +2366,26 @@ class NetGuardRegistry:
             self.end(alias, current)
             current = None
         if current is None:
-            current = GuardLease(alias, generation, holder, str(body.get("task_id") or ""))
+            with self.lock:
+                # Unit G15: the same lease again after its guard ended or was lost mid-lease:
+                # resumed (acted, pending code, revoked egress) — never a fresh guard.
+                current = self.retired.get(alias, {}).pop((generation, holder), None)
+            if current is None:
+                current = GuardLease(alias, generation, holder, str(body.get("task_id") or ""))
+            current.failures = 0
             with self.lock:
                 self.leases[alias] = current
             self._ensure_thread()
         current.last_call = time.monotonic()
         return current
+
+    def _retire(self, alias: str, lease: GuardLease) -> None:
+        """Unit G15 — remember an ended/lost lease (the caller has removed it from ``leases``)."""
+        with self.lock:
+            kept = self.retired.setdefault(alias, {})
+            kept[(lease.generation, lease.holder)] = lease
+            while len(kept) > NETGUARD_RETIRED_PER_ALIAS:
+                kept.pop(next(iter(kept)))
 
     def end(self, alias: str, lease: GuardLease) -> dict[str, Any]:
         """Freeze the lease's page and remove its interception (the caller holds the lock)."""
@@ -2295,18 +2404,32 @@ class NetGuardRegistry:
             report["frozen"] = False
         report["blocked"] = lease.pending
         report["dropped"] = lease.take_dropped()
+        self._retire(alias, lease)
         return report
 
     def release(self, alias: str, body: dict[str, Any]) -> dict[str, Any]:
         generation, holder = body.get("lease_generation"), body.get("lease_holder_id")
         with self.lock:
             current = self.leases.get(alias)
-        if isinstance(generation, int) and not isinstance(generation, bool) and isinstance(holder, str) \
-                and (current is None or (current.generation, current.holder) != (generation, holder)):
+        fenced = isinstance(generation, int) and not isinstance(generation, bool) and isinstance(holder, str)
+        if fenced and (current is None or (current.generation, current.holder) != (generation, holder)):
             # Unit G13: a lease this worker holds no guard for (a restarted worker, an idle
             # expiry, a newer lease) still has its proxy policy revoked; a newer lease's is kept.
             with contextlib.suppress(WorkerError):
                 revoke_egress_policy(alias, generation, holder, final=True)
+            with self.lock:
+                retired = self.retired.get(alias, {}).pop((generation, holder), None)
+            if retired is not None:
+                # Unit G15: its guard ended or was lost before this release — what it blocked
+                # (or NETWORK_GUARD_UNAVAILABLE) is still reported. Its page is frozen again
+                # only while no other lease holds the profile.
+                if current is None:
+                    report = self.end(alias, retired)
+                    with self.lock:
+                        self.retired.get(alias, {}).pop((generation, holder), None)
+                    return {**report, "guard": "ENDED"}
+                return {"released": True, "blocked": retired.pending, "frozen": retired.frozen,
+                        "dropped": retired.take_dropped(), "guard": "ENDED"}
         if current is None:
             return {"released": True, "blocked": None, "frozen": False, "guard": None}
         if (current.generation, current.holder) != (generation, holder) and current.generation > int(generation):
@@ -2350,6 +2473,10 @@ class NetGuardRegistry:
                         with self.lock:
                             if self.leases.get(alias) is lease:
                                 del self.leases[alias]
+                        # Unit G15: the lease is broken, not forgotten — its next call and its
+                        # /release report NETWORK_GUARD_UNAVAILABLE.
+                        lease.lose()
+                        self._retire(alias, lease)
                         _revoke_lease_egress(lease)  # unit G13
                         print(f"[van-browser-harness] NETWORK_GUARD_SERVICE_FAILED profile={alias}", flush=True)
                 finally:
@@ -2373,13 +2500,16 @@ def _run(alias: str, script: str, extra: dict[str, str] | None = None, *, requir
         return run_harness(alias, script, extra)
     env = dict(extra or {})
     # ``role``: "op" (an operation's script), "tick" (the guard thread) or "end" (the lease ends).
-    env["VAN_BH_NETGUARD"] = json.dumps({**lease.policy, "required": required, "end": end, "role": role})
+    # Unit G15: ``acted``/``pending``/``midlease`` — a guard started for a lease already under
+    # way carries what the lease knows (never a fresh guard that has not acted).
+    env["VAN_BH_NETGUARD"] = json.dumps({**lease.policy, **lease.guard_policy(), "required": required,
+                                         "end": end, "role": role})
     if lease.state is not None:
         env["VAN_BH_NETGUARD_STATE"] = json.dumps(lease.state)
     result = run_harness(alias, guard_wrapped(script), env)
     if not isinstance(result, dict):
         raise WorkerError("BROWSER_HARNESS_RESPONSE_INVALID", 502)
-    lease.absorb(result.pop("__guard__", None))
+    lease.absorb(result.pop("__guard__", None), ending=end)
     if lease.pending is not None or lease.frozen:
         # Unit G13: the guard froze the page on a blocked/detected write — the egress proxy
         # stops serving the lease too, so nothing the frozen page sends leaves the zone.
