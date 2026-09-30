@@ -56,7 +56,9 @@ def _req(method="GET", target="/docs/x", host="docs.example.com", extra=()):
     (False, _req(target="https://evil.example.net/x"), "https", "docs.example.com", 443, "EGRESS_HOST_MISMATCH"),
     (False, _req("POST", extra=[("Content-Length", "3")]), "https", "docs.example.com", 443, "EGRESS_WRITE_REFUSED"),
     (False, _req("DELETE"), "https", "docs.example.com", 443, "EGRESS_WRITE_REFUSED"),
-    (False, _req("OPTIONS"), "https", "docs.example.com", 443, "EGRESS_WRITE_REFUSED"),
+    (False, _req("OPTIONS"), "https", "docs.example.com", 443, None),  # review I8 MINOR-7: a read, as in the guard
+    (False, _req("OPTIONS", extra=[("Content-Length", "3")]), "https", "docs.example.com", 443, "EGRESS_WRITE_REFUSED"),
+    (False, _req("PROPFIND"), "https", "docs.example.com", 443, "EGRESS_WRITE_REFUSED"),
     (False, _req("GET", extra=[("Content-Length", "3")]), "https", "docs.example.com", 443, "EGRESS_WRITE_REFUSED"),
     (False, _req(extra=[("Upgrade", "websocket"), ("Connection", "Upgrade")]), "https", "docs.example.com", 443,
      "EGRESS_WEBSOCKET_REFUSED"),
@@ -367,3 +369,123 @@ def test_the_canary_mac_is_the_same_in_the_harness_proxy_and_canary(monkeypatch,
     assert "service.canary_mac(" in canary and '"op": "canary"' in canary
     # No gateway code computes the canary MAC context.
     assert not [p for p in (ROOT / "backend/van_gateway").rglob("*.py") if "van-egress-canary" in p.read_text(encoding="utf-8")]
+
+
+# ------------------------------------------------ review I8: smuggling, client uid, restart
+def _head(raw: bytes):
+    async def run():
+        reader = asyncio.StreamReader()
+        reader.feed_data(raw)
+        reader.feed_eof()
+        return await ep.read_head(reader)
+    return asyncio.run(run())
+
+
+@pytest.mark.parametrize("raw", [
+    b"GET /docs/x HTTP/1.1\r\nHost: docs.example.com\r\nX-A: 1\n\nPOST /api/pay HTTP/1.1\nHost: docs.example.com\r\n\r\n",
+    b"GET /docs/x HTTP/1.1\r\nHost: docs.example.com\r\nX-A: 1\rX-B: 2\r\n\r\n",
+    b"GET /docs/x HTTP/1.1\r\nHost: docs.example.com\r\nX-A: 1\x00\r\n\r\n",
+    b"GET /docs/x HTTP/1.1\r\nHost: docs.example.com\r\nX-A: \x01\r\n\r\n",
+    b"GET /docs/x HTTP/1.1\r\nHost: docs.example.com\r\nX-A: \x7f\r\n\r\n",
+    b"GET /docs/x HTTP/1.1\r\nX\nY: 1\r\nHost: docs.example.com\r\n\r\n",
+    b"GET /docs/\tx HTTP/1.1\r\nHost: docs.example.com\r\n\r\n",
+    b"GET /docs/\nx HTTP/1.1\r\nHost: docs.example.com\r\n\r\n",
+    b"GET /docs/\xe9 HTTP/1.1\r\nHost: docs.example.com\r\n\r\n",
+    b"GET /docs/x\rPOST /api/pay HTTP/1.1\r\nHost: docs.example.com\r\n\r\n",
+])
+def test_cr_lf_nul_and_control_characters_are_refused_not_repaired(raw):
+    """Review I8 MAJOR-3: a bare LF in a header value became a second request upstream."""
+    with pytest.raises(ep.Refused) as err:
+        _head(raw)
+    assert err.value.code == "EGRESS_REQUEST_INVALID"
+
+
+def test_an_ordinary_request_still_parses_and_a_tab_in_a_value_is_allowed():
+    req = _head(b"GET /docs/x?a=1 HTTP/1.1\r\nHost: docs.example.com\r\nUser-Agent: a\tb\r\n\r\n")
+    assert (req.method, req.target, req.header("user-agent")) == ("GET", "/docs/x?a=1", ["a\tb"])
+
+
+@pytest.mark.parametrize("target,forwarded", [
+    ("/docs/x?a=1#frag", "https://docs.example.com/docs/x?a=1"),
+    ("/docs/../static/a.js", "https://docs.example.com/static/a.js"),
+    ("/docs/%2e%2e/static/a.js", "https://docs.example.com/static/a.js"),
+    ("/docs/a b".replace(" ", "%20"), "https://docs.example.com/docs/a%20b"),
+    ("https://docs.example.com/docs/y?q", "https://docs.example.com/docs/y?q"),
+])
+def test_the_forwarded_target_is_the_one_the_decision_parsed(target, forwarded):
+    code, url = ep.classify(_policy(False), _req(target=target), "https", "docs.example.com", 443)
+    assert (code, url) == (None, forwarded)
+
+
+def test_a_write_is_judged_and_forwarded_on_the_same_normalised_path():
+    code, url = ep.classify(_policy(True), _req("POST", target="/docs/../api/pay", extra=[("Content-Length", "1")]),
+                            "https", "docs.example.com", 443)
+    assert code == "EGRESS_WRITE_OUT_OF_SCOPE" and url.endswith("/api/pay")
+
+
+def test_the_listener_client_uid_comes_from_the_kernel_socket_table():
+    import socket as _socket
+
+    server = _socket.socket()
+    server.bind(("127.0.0.1", 0))
+    server.listen(1)
+    client = _socket.create_connection(server.getsockname())
+    try:
+        accepted, peer = server.accept()
+        assert ep.socket_owner_uid(peer, accepted.getsockname()) == os.getuid()
+        assert ep.socket_owner_uid(("127.0.0.1", 1), accepted.getsockname()) is None
+
+        class W:
+            def get_extra_info(self, name):
+                return {"peername": peer, "sockname": accepted.getsockname()}[name]
+        assert ep.client_allowed(W(), str(os.getuid())) is True
+        assert ep.client_allowed(W(), str(os.getuid() + 1)) is False
+        assert ep.client_allowed(W(), "") is True  # development: not configured
+        accepted.close()
+    finally:
+        client.close()
+        server.close()
+
+
+def test_a_trust_zone_proxy_refuses_to_start_without_the_client_uid(tmp_path):
+    key = tmp_path / "k"
+    key.write_bytes(b"k" * 40)
+    proc = _run({"VAN_TRUST_ZONE": "van-browser-core", "VAN_EGRESS_FENCE_KEY_FILE": str(key)}, tmp_path)
+    assert proc.returncode != 0 and "VAN_EGRESS_CLIENT_UID" in proc.stderr
+    proc = _run({"VAN_TRUST_ZONE": "van-browser-core", "VAN_EGRESS_FENCE_KEY_FILE": str(key), "VAN_EGRESS_CLIENT_UID": "999",
+                 "VAN_EGRESS_SERVICE_ALLOW": "api.anthropic.com:443"}, tmp_path)
+    assert proc.returncode != 0 and "VAN_EGRESS_SERVICE_CLIENT_UID" in proc.stderr
+    with pytest.raises(ValueError):
+        ep.EgressProxy(ep.PolicyStore(KEY), ep.CertAuthority(tmp_path / "ca"), client_uid="van-browser")
+
+
+def test_newest_and_ended_leases_survive_a_restart(tmp_path):
+    """Review I8 MINOR-2: after a restart a captured policy of an older or finally revoked
+    lease was accepted again."""
+    state = tmp_path / "policy-state.json"
+    store = ep.PolicyStore(KEY, state_file=state)
+    assert store.set(_message(generation=1)) is None
+    assert store.set(_message(generation=2)) is None
+    assert store.revoke({"alias": "a", "lease_generation": 2, "lease_holder_id": "h", "final": True,
+                         "revoke_mac": ep.revoke_mac(KEY, "a", 2, "h", True)}) is None
+    assert state.stat().st_mode & 0o777 == 0o600
+    restarted = ep.PolicyStore(KEY, state_file=state)
+    assert restarted.get("a") is None                                           # no policy survives
+    assert restarted.set(_message(generation=1, mutating=True)) == "POLICY_GENERATION_STALE"
+    assert restarted.set(_message(generation=2, mutating=True)) == "POLICY_LEASE_ENDED"
+    assert restarted.set(_message(generation=3)) is None
+    state.write_text("{not json", encoding="utf-8")
+    with pytest.raises(ValueError):
+        ep.PolicyStore(KEY, state_file=state)
+    state.write_text(json.dumps({"schema": "other"}), encoding="utf-8")
+    with pytest.raises(ValueError):
+        ep.PolicyStore(KEY, state_file=state)
+
+
+def test_a_proxy_with_unreadable_policy_state_refuses_to_start(tmp_path):
+    key = tmp_path / "k"
+    key.write_bytes(b"k" * 40)
+    (tmp_path / "st").mkdir(mode=0o700)
+    (tmp_path / "st" / "policy-state.json").write_text("{", encoding="utf-8")
+    proc = _run({"VAN_EGRESS_FENCE_KEY_FILE": str(key)}, tmp_path)
+    assert proc.returncode != 0 and "egress proxy:" in proc.stderr

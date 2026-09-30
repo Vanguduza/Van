@@ -149,19 +149,27 @@ udp="$(sed -n 's/^udp //p' <<<"$probe")"; tcp="$(sed -n 's/^tcp //p' <<<"$probe"
 # a WebSocket upgrade and a POST under a read-only policy it has verified. The probe policy is
 # MACed with the proxy's own key copy (root reads it here) for the alias qualify_probe only;
 # nothing is sent upstream (every probe is refused before a connection is opened).
-egress="$(python3 - "$ETC/runtime.env" 2>/dev/null <<'PY'
-import hashlib, hmac, json, re, socket, sys
+egress="$(python3 - "$ETC/runtime.env" "$BROWSER_USER" 2>/dev/null <<'PY'
+import hashlib, hmac, json, pwd, re, socket, subprocess, sys
 env = dict(re.findall(r"^([A-Z_][A-Z0-9_]*)=(.*)$", open(sys.argv[1], encoding="utf-8").read(), re.M))
 ctl, key_file = env.get("VAN_EGRESS_CONTROL_SOCKET", ""), env.get("VAN_EGRESS_FENCE_KEY_FILE", "")
+browser = pwd.getpwnam(sys.argv[2])
 def call(msg):
     with socket.socket(socket.AF_UNIX) as s:
         s.settimeout(5); s.connect(ctl); s.sendall(json.dumps(msg).encode() + b"\n")
         return json.loads(s.makefile().readline())
-def raw(port, data):
-    with socket.create_connection(("127.0.0.1", port), timeout=5) as s:
-        s.sendall(data); head = s.recv(4096).decode("latin-1")
-    m = re.search(r"X-Van-Egress-Refused: ([A-Z_]+)", head)
-    return m.group(1) if m else head.split("\r\n")[0][:40]
+SEND = ("import re,socket,sys\n"
+        "with socket.create_connection(('127.0.0.1', int(sys.argv[1])), timeout=5) as s:\n"
+        "    s.sendall(bytes.fromhex(sys.argv[2])); head = s.recv(4096).decode('latin-1')\n"
+        "m = re.search(r'X-Van-Egress-Refused: ([A-Z_]+)', head)\n"
+        "print(m.group(1) if m else head.split('\\r\\n')[0][:40])\n")
+def raw(port, data, as_browser=True):
+    # Review I8 MAJOR-3: the listeners serve the browser user only, so the probe connects as it
+    # (and once as root, which must be refused).
+    cmd = [sys.executable, "-c", SEND, str(port), data.hex()]
+    if as_browser:
+        cmd = ["setpriv", f"--reuid={browser.pw_uid}", f"--regid={browser.pw_gid}", "--clear-groups"] + cmd
+    return subprocess.run(cmd, capture_output=True, text=True, timeout=20).stdout.strip() or "NO_ANSWER"
 try:
     h = call({"op": "health"})
     print("health", "OK" if h.get("ok") and h.get("trust_zone") == "van-browser-core" and h.get("policy_key") is True
@@ -183,6 +191,11 @@ try:
     print("policy", "OK" if ok.get("ok") is True and forged.get("error") == "POLICY_MAC_INVALID" else "BAD")
     print("websocket", raw(port, b"GET http://example.com/ws-pay HTTP/1.1\r\nHost: example.com\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n"))
     print("post", raw(port, b"POST http://example.com/pay HTTP/1.1\r\nHost: example.com\r\nContent-Length: 1\r\n\r\nx"))
+    # Both are POSTs: if the check under test regressed, the write rule still refuses them
+    # (a different code, so RED), and nothing reaches example.com either way.
+    print("smuggle", raw(port, b"POST http://example.com/ HTTP/1.1\r\nHost: example.com\r\nX-A: 1\n\nPOST /pay HTTP/1.1\r\n\r\n"))
+    print("otheruid", raw(port, b"POST http://example.com/pay HTTP/1.1\r\nHost: example.com\r\nContent-Length: 1\r\n\r\nx",
+                          as_browser=False))
 except Exception as exc:  # noqa: BLE001
     print("error", type(exc).__name__)
 PY
@@ -197,6 +210,10 @@ field() { sed -n "s/^$1 //p" <<<"$egress"; }
 [[ "$(field websocket)" == EGRESS_WEBSOCKET_REFUSED && "$(field post)" == EGRESS_WRITE_REFUSED ]] \
   && add egress_refuses_websocket_and_write GREEN "Upgrade: websocket and POST refused under a read-only policy" \
   || add egress_refuses_websocket_and_write RED "websocket=$(field websocket) post=$(field post)$(field error)"
+[[ "$(field smuggle)" == EGRESS_REQUEST_INVALID ]] && add egress_refuses_smuggling GREEN "a bare-LF header injection is refused" \
+  || add egress_refuses_smuggling RED "smuggle=$(field smuggle)$(field error)"
+[[ "$(field otheruid)" == EGRESS_CLIENT_REFUSED ]] && add egress_refuses_other_users GREEN "a root client of a browser listener is refused" \
+  || add egress_refuses_other_users RED "otheruid=$(field otheruid)$(field error)"
 if jq -e '.egress_proxy==true' /tmp/vbcq-h.json >/dev/null 2>&1; then add harness_uses_egress_proxy GREEN "Harness /health egress_proxy=true"
 else add harness_uses_egress_proxy RED "Harness does not report its egress proxy"; fi
 

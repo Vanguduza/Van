@@ -38,7 +38,7 @@ ORDER = ["van-local-reset", "van-other-users", "van-dns-resolver", "van-dns-reso
          "van-loopback-tcp6", "van-tcp-bypass-reject", "van-other-drop"]
 FIREWALL_CHECKS = ["firewall_loaded", "browser_udp_blocked", "browser_tcp_bypass_blocked"]
 EGRESS_CHECKS = ["egress_proxy_active", "egress_refuses_without_policy", "egress_policy_mac_enforced",
-                 "egress_refuses_websocket_and_write"]
+                 "egress_refuses_websocket_and_write", "egress_refuses_smuggling", "egress_refuses_other_users"]
 
 
 def _rules() -> list[str]:
@@ -277,7 +277,7 @@ def test_live_qualify_reports_the_firewall_and_the_proxy_green(tmp_path):
         ["unshare", "-n", "--", sys.executable, str(ZONE_DIR / "browser" / "egress_proxy.py")],
         env={"PATH": "/usr/bin:/bin", "VAN_TRUST_ZONE": "van-browser-core", "VAN_EGRESS_CONTROL_SOCKET": env["ctl"],
              "VAN_EGRESS_FENCE_KEY_FILE": env["key"], "VAN_EGRESS_STATE_DIR": str(tmp_path / "egress-state"),
-             "VAN_EGRESS_PORT_RANGE": "20000-20010"},
+             "VAN_EGRESS_PORT_RANGE": "20000-20010", "VAN_EGRESS_CLIENT_UID": "65534"},
         stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
     try:
         deadline = time.monotonic() + 20

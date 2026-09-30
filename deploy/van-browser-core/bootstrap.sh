@@ -147,6 +147,10 @@ s = re.sub(r'^VAN_TRUST_ZONE=.*$', 'VAN_TRUST_ZONE=van-browser-core', s, flags=r
 open(p, 'w', encoding='utf-8').write(s)
 PY"
 run "sed -i 's/^VAN_BROWSER_DNS_RESOLVER=.*/VAN_BROWSER_DNS_RESOLVER=$DNS_RESOLVER/' $CONFIG"
+# Review I8 MAJOR-3: the egress proxy serves its listeners to these uids only.
+EGRESS_CLIENT_UID="$(id -u van-browser 2>/dev/null || echo UNRESOLVED)"
+EGRESS_SERVICE_CLIENT_UID="$(id -u van-browser 2>/dev/null || echo UNRESOLVED)"
+run "sed -i 's/^VAN_EGRESS_CLIENT_UID=.*/VAN_EGRESS_CLIENT_UID=$EGRESS_CLIENT_UID/; s/^VAN_EGRESS_SERVICE_CLIENT_UID=.*/VAN_EGRESS_SERVICE_CLIENT_UID=$EGRESS_SERVICE_CLIENT_UID/' $CONFIG"
 run "install -o root -g van-browser-edge -m 0640 $HERE/edge/Caddyfile $ETC/Caddyfile"
 
 echo "== guard canary origin (unit G14) =="
