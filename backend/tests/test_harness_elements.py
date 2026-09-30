@@ -292,11 +292,69 @@ def _chromium() -> str | None:
     return None
 
 
+def _guard_flags() -> tuple[str, ...]:
+    """The Chromium flags the Harness worker launches with for its network-effect guard."""
+    import re
+
+    source = HARNESS_SERVICE.read_text(encoding="utf-8")
+    block = re.search(r"NETWORK_GUARD_CHROMIUM_FLAGS = \((.*?)\)", source, re.S)
+    return tuple(re.findall(r'"(--[^"]+)"', block.group(1))) if block else ()
+
+
+def _free_port() -> int:
+    import socket
+
+    with socket.socket() as sock:
+        sock.bind(("127.0.0.1", 0))
+        return sock.getsockname()[1]
+
+
 class _PlaywrightPage:
     """One headless Chromium page on its own thread (Playwright's sync API is thread-bound),
-    serving the fixture pages at https://docs.example.com/ through request interception."""
+    serving the fixture pages at https://docs.example.com/ through request interception.
+
+    Unit G9c (network-effect guard): the Harness's fixed scripts need browser-harness's
+    event stream (``drain_events``) and browser-level ``Target.*`` calls, which a Playwright
+    CDP session cannot give. So Chromium also listens on a DevTools port, the scripts run on
+    the caller's thread with the helper surface of ``cdp_harness_kit.HarnessSession`` over
+    that port (``guarded_run_harness``), and this thread keeps servicing Playwright's route
+    handlers while it waits for jobs (``_serve_jobs``)."""
+
+    def launch_args(self) -> list[str]:
+        self.debug_port = _free_port()
+        return [f"--remote-debugging-port={self.debug_port}", *_guard_flags()]
+
+    def _serve_jobs(self, page, cdp) -> None:
+        while True:
+            try:
+                job = self.jobs.get_nowait()
+            except queue.Empty:
+                page.wait_for_timeout(5)  # services route handlers while idle
+                continue
+            if job is None:
+                break
+            fn, box, done = job
+            try:
+                box["value"] = fn(page, cdp)
+            except BaseException as exc:  # noqa: BLE001 - handed back to the caller
+                box["error"] = exc
+            done.set()
+
+    def harness_session(self):
+        import urllib.request
+
+        import cdp_harness_kit as kit
+
+        if getattr(self, "_session", None) is None:
+            with urllib.request.urlopen(f"http://127.0.0.1:{self.debug_port}/json/version", timeout=10) as r:
+                self._session = kit.HarnessSession(json.loads(r.read())["webSocketDebuggerUrl"])
+            # These fixtures were written against Playwright's mouse.click, which moves the
+            # pointer to the point before pressing (the I5 race page reacts to that).
+            self._session.move_before_click = True
+        return self._session
 
     def __init__(self, executable: str) -> None:
+        self._session = None
         self.jobs: queue.Queue = queue.Queue()
         self.ready = threading.Event()
         self.error: BaseException | None = None
@@ -311,7 +369,7 @@ class _PlaywrightPage:
 
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(executable_path=executable)
+                browser = p.chromium.launch(executable_path=executable, args=self.launch_args())
                 page = browser.new_page()
                 pages = {"/pay": (FIXTURES / "harness_elements.html").read_text(encoding="utf-8"),
                          "/docs": (FIXTURES / "harness_elements_benign.html").read_text(encoding="utf-8")}
@@ -325,16 +383,7 @@ class _PlaywrightPage:
                 cdp = page.context.new_cdp_session(page)
                 self.page, self.cdp = page, cdp
                 self.ready.set()
-                while True:
-                    job = self.jobs.get()
-                    if job is None:
-                        break
-                    fn, box, done = job
-                    try:
-                        box["value"] = fn(page, cdp)
-                    except BaseException as exc:  # noqa: BLE001 - handed back to the caller
-                        box["error"] = exc
-                    done.set()
+                self._serve_jobs(page, cdp)
                 browser.close()
         except BaseException as exc:  # noqa: BLE001
             self.error = exc
@@ -350,8 +399,24 @@ class _PlaywrightPage:
         return box.get("value")
 
     def close(self):
+        if self._session is not None:
+            self._session.close()
         self.jobs.put(None)
         self.thread.join(30)
+
+
+def guarded_run_harness(pw: _PlaywrightPage):
+    """``run_harness`` for a Harness module under test: the fixed script runs on the calling
+    thread with browser-harness's helper surface (``cdp_harness_kit``) on ``pw``'s page."""
+    import cdp_harness_kit as kit
+
+    lock = threading.Lock()
+
+    def run_harness(alias, script, extra=None):
+        with lock:
+            return kit.exec_script(pw.harness_session(), script, extra)
+
+    return run_harness
 
 
 @pytest.fixture
@@ -365,18 +430,7 @@ def chromium_harness(monkeypatch, tmp_path):
     module = _load(monkeypatch, tmp_path)
     pw = _PlaywrightPage(executable)
 
-    def run_harness(alias, script, extra=None):
-        def job(page, cdp):
-            namespace = {
-                "page_info": lambda: {"url": page.url, "title": page.title()},
-                "js": lambda expression: page.evaluate(expression),
-                "cdp": lambda method, **params: cdp.send(method, params),
-                "click_at_xy": lambda x, y: page.mouse.click(x, y),
-            }
-            return _exec_script(script, namespace, extra)
-        return pw.call(job)
-
-    monkeypatch.setattr(module, "run_harness", run_harness)
+    monkeypatch.setattr(module, "run_harness", guarded_run_harness(pw))
     server = ThreadingHTTPServer(("127.0.0.1", 0), module.Handler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()

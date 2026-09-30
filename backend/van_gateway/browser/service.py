@@ -406,7 +406,8 @@ class BrowserTaskService:
             task_id=new_id("browser_task"), command_id=command_id, execution_id=execution_id,
             capability_id=capability_id, profile_alias=profile_alias, strategy=strategy,
             autonomy_tier=autonomy_tier, action_class=action_class, target_domain=target_domain,
-            goal=goal, inputs=inputs, scope=task_scope, status=BrowserTaskStatus.PENDING,
+            goal=goal, inputs=inputs, scope=task_scope, mutating=mutating is True,
+            status=BrowserTaskStatus.PENDING,
             started_at_ms=now,
         )
         await self.store.execute(
@@ -414,14 +415,14 @@ class BrowserTaskService:
             INSERT INTO browser_tasks(
               task_id, command_id, execution_id, capability_id, profile_alias, strategy,
               autonomy_tier, action_class, target_domain, goal, status, evidence_pointer,
-              error_code, started_at_ms, completed_at_ms, updated_at_ms, scope_json
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, NULL, ?, ?)
+              error_code, started_at_ms, completed_at_ms, updated_at_ms, scope_json, mutating
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, NULL, ?, ?, ?)
             """,
             (
                 task.task_id, task.command_id, task.execution_id, task.capability_id,
                 task.profile_alias, task.strategy.value, task.autonomy_tier.value,
                 task.action_class.value, task.target_domain, task.goal, task.status.value,
-                task.started_at_ms, now, task_scope.to_json(),
+                task.started_at_ms, now, task_scope.to_json(), 1 if task.mutating else 0,
             ),
         )
         return task

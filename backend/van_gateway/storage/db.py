@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 36
+SCHEMA_VERSION = 37
 
 
 MIGRATION_17 = """
@@ -964,6 +964,16 @@ MIGRATION_36 = """
 -- approval. NULL (every task created before this migration) is "no scope": the router, the
 -- assignment workers and the Harness refuse every action on it (fail closed).
 ALTER TABLE browser_tasks ADD COLUMN scope_json TEXT;
+"""
+
+MIGRATION_37 = """
+-- Owner decision 2026-09-30 (answer to review I6 M4: "Network-effect guard"). Whether a browser
+-- task was admitted as mutating (``mutating=true`` at creation, which BrowserPolicyEngine.
+-- check_task admits only for a gateway_authorized_only profile and a mutation-admitted
+-- domain) is recorded with the task. The Harness blocks every network write during an
+-- automated action unless the task is admitted as mutating. 0 (every task created before
+-- this migration) is non-mutating: fail closed.
+ALTER TABLE browser_tasks ADD COLUMN mutating INTEGER NOT NULL DEFAULT 0;
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -2304,6 +2314,7 @@ MIGRATIONS: dict[int, str] = {
     34: MIGRATION_34,
     35: MIGRATION_35,
     36: MIGRATION_36,
+    37: MIGRATION_37,
 }
 
 

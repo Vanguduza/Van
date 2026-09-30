@@ -15,6 +15,7 @@ import asyncio
 import hashlib
 import hmac
 import inspect
+import json
 import time
 from collections.abc import Awaitable, Callable, Iterator
 from contextlib import contextmanager
@@ -132,6 +133,29 @@ def harness_fence_mac(key: bytes, alias: str, generation: int, holder_id: str) -
     return hmac.new(key, message, hashlib.sha256).hexdigest()
 
 
+def harness_scope_digest(scope: dict[str, Any] | None) -> str:
+    """sha256 of the task scope as the Harness receives it (canonical JSON). Must match
+    ``scope_digest`` in deploy/van-browser-core/browser/harness_service.py."""
+    return hashlib.sha256(
+        json.dumps(scope if isinstance(scope, dict) else None, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+
+
+def harness_effect_mac(
+    key: bytes, alias: str, generation: int, holder_id: str, task_id: str, mutating: bool, scope_digest: str,
+) -> str:
+    """Owner decision 2026-09-30 (network-effect guard) — binds what the task is admitted to
+    do to the lease fence: whether it is admitted as mutating, and the digest of the scope
+    the call carries. The Harness honours ``mutating`` only under a valid MAC and, with a
+    key, refuses a guarded action whose MAC does not verify. Must match ``effect_mac`` in
+    deploy/van-browser-core/browser/harness_service.py."""
+    message = (
+        f"van-harness-effect/1\n{alias}\n{int(generation)}\n{holder_id}\n{task_id}\n"
+        f"{'1' if mutating else '0'}\n{scope_digest}"
+    ).encode()
+    return hmac.new(key, message, hashlib.sha256).hexdigest()
+
+
 def load_harness_fence_key(path: str) -> bytes | None:
     """The shared fence key from ``path`` (whitespace stripped); None when unset.
 
@@ -243,7 +267,7 @@ class BrowserHarnessAdapter(Protocol):
 
 #: Harness refusal codes (409) that mean "the target is not the one VAN classified, or the
 #: page is outside the task scope" — nothing was actuated. Mapped to lane 4 by the router.
-HARNESS_REFUSAL_PREFIXES = ("TARGET_", "TASK_SCOPE_", "FOCUS_", "PAGE_DIALOG")
+HARNESS_REFUSAL_PREFIXES = ("TARGET_", "TASK_SCOPE_", "FOCUS_", "PAGE_DIALOG", "NETWORK_WRITE_BLOCKED", "NETWORK_GUARD_")
 
 
 def _scope_wire(task: BrowserTask) -> dict[str, Any] | None:
@@ -464,6 +488,16 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
                 envelope["lease_mac"] = harness_fence_mac(
                     self.fence_key, fence.profile_alias, int(fence.generation), fence.holder_id,
                 )
+        # Owner decision 2026-09-30 — the network-effect guard: whether the task is admitted
+        # as mutating (task truth, default False) and, under the fence key, a MAC binding it
+        # and the scope this call carries to the fence.
+        mutating = getattr(task, "mutating", False) is True
+        envelope["mutating"] = mutating
+        if fence is not None and fence.profile_alias == task.profile_alias and self.fence_key is not None:
+            envelope["effect_mac"] = harness_effect_mac(
+                self.fence_key, fence.profile_alias, int(fence.generation), fence.holder_id,
+                task.task_id, mutating, harness_scope_digest(envelope.get("task_scope")),
+            )
         return envelope
 
     async def _call(self, path: str, payload: dict[str, Any]) -> dict[str, Any]:  # type: ignore[override]
@@ -773,7 +807,9 @@ __all__ = [
     "HarnessInflight",
     "HarnessLeaseFence",
     "harness_fence_key_from_settings",
+    "harness_effect_mac",
     "harness_fence_mac",
+    "harness_scope_digest",
     "load_harness_fence_key",
     "broker_lease_fence",
     "HttpBrowserHarnessAdapter",

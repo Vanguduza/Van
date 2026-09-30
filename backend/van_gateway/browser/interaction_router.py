@@ -2175,7 +2175,7 @@ def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter)
     The observation is never taken from the request body: the router reads the page
     itself through the harness, so a caller cannot hand B2 a page it did not see.
     """
-    from van_gateway.browser.service import BrowserTaskRunInFlight
+    from van_gateway.browser.service import BrowserTaskRunInFlight, BrowserTaskTransitionRefused
 
     api = APIRouter(prefix="/v1/browser/interaction", tags=["browser"])
 
@@ -2279,7 +2279,35 @@ def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter)
                 # Only the lease this step took, and only while it still holds it (lease id,
                 # holder and generation must all match): never another holder's.
                 await browser_api.broker.release_lease_if_held(acquired)
+        await _hand_blocked_write_to_owner(task, result)
         return {"task_id": task.task_id, "at_ms": int(time.time() * 1000), **result.to_json()}
+
+    async def _hand_blocked_write_to_owner(task: BrowserTask, result: StepResult) -> None:
+        """Owner decision 2026-09-30 (network-effect guard): "A blocked request goes to you."
+
+        When the Harness blocked a network write during the step (or could not guard it), the
+        task goes to the owner through the same takeover path ``/assignments`` uses: status
+        WAITING_FOR_OWNER with a closed-vocabulary error code (``OWNER_TAKEOVER:
+        NETWORK_WRITE_BLOCKED:<kind>``; no URL, body or header), and the task's profile lease
+        is dropped so automation holds nothing while the owner decides. A later step on the
+        task is refused until the owner's decision resumes it."""
+        code = next(
+            (r.split(":", 1)[1] for r in result.reasons
+             if r.startswith(("HARNESS_REFUSED:NETWORK_WRITE_BLOCKED", "HARNESS_REFUSED:NETWORK_GUARD_"))),
+            None,
+        )
+        if code is None or result.state is not StepState.OWNER_TAKEOVER:
+            return
+        try:
+            await browser_api.tasks.set_working_status(
+                task_id=task.task_id, status=BrowserTaskStatus.WAITING_FOR_OWNER,
+                error_code=f"OWNER_TAKEOVER:{code}"[:200],
+            )
+        except BrowserTaskTransitionRefused:
+            return  # the task ended meanwhile; it stays ended
+        release = getattr(browser_api, "_release_task_lease", None)
+        if release is not None:
+            await release(task)
 
     return api
 

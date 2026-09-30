@@ -142,6 +142,18 @@ async def _harness_act(harness: Any, method: str, *args: Any, binding: dict[str,
         raise
 
 
+async def _harness_unbound(harness: Any, method: str, *args: Any) -> Any:
+    """An unbound Harness actuation (navigate, scroll). A Harness refusal — the network-effect
+    guard blocked a write (owner decision 2026-09-30, ``NETWORK_WRITE_BLOCKED:<kind>``) or
+    the page left the task scope — is an owner takeover, as for the bound operations."""
+    try:
+        return await getattr(harness, method)(*args)
+    except BrowserAdapterError as exc:
+        if exc.code.endswith("_REFUSED"):
+            raise OwnerTakeoverRequired(f"HARNESS_REFUSED:{exc.detail or exc.code}") from exc
+        raise
+
+
 class SemanticWorkerUnavailable(RuntimeError):
     """A semantic tier was assigned and no semantic runtime is configured.
 
@@ -338,7 +350,7 @@ class AdapterBackedWorker:
         if kind == "navigate":
             if not action.url:
                 raise BrowserAdapterError("BROWSER_NAVIGATE_URL_MISSING", action.kind)
-            await self.adapter.navigate(task, action.url)
+            await _harness_unbound(self.adapter, "navigate", task, action.url)
             return await self.adapter.page_info(task)
         binding = (action.payload or {}).get("binding") if action.payload else None
         if kind == "click":
@@ -546,7 +558,7 @@ class HybridBrowserWorker:
         elif operation == "press_key":
             await _harness_act(self.harness, "press", task, str(typed["key"]), binding=binding)
         elif operation == "scroll":
-            await self.harness.scroll(task, {"selector": typed.get("selector"), "direction": "down"})
+            await _harness_unbound(self.harness, "scroll", task, {"selector": typed.get("selector"), "direction": "down"})
         else:
             raise BrowserAdapterError("BROWSER_ACTION_UNSUPPORTED", operation)
         payload = await self.harness.page_info(task)

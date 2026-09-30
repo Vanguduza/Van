@@ -50,11 +50,13 @@ def _refused(db, fn, match="browser_task_terminal_status"):
 
 async def test_schema_is_35():
     # Integration G8: G6a's migration 36 (browser_tasks.scope_json) follows migration 35.
+    # Unit G9c: migration 37 (browser_tasks.mutating, the network-effect guard) follows 36.
     from van_gateway.storage.db import MIGRATIONS
 
-    assert SCHEMA_VERSION == 36
-    assert sorted(MIGRATIONS)[-2:] == [35, 36]
+    assert SCHEMA_VERSION == 37
+    assert sorted(MIGRATIONS)[-3:] == [35, 36, 37]
     assert "browser_task_tombstones" in MIGRATIONS[35] and "scope_json" in MIGRATIONS[36]
+    assert "mutating" in MIGRATIONS[37]
 
 
 @pytest.mark.parametrize("terminal", TERMINAL)
@@ -149,12 +151,14 @@ async def test_upgrading_a_v34_database_tombstones_tasks_already_terminal(db):
     # Integration G8: a v34 store also lacks migration 36 (G6a's scope_json); migrate() applies
     # every version above the highest recorded, so both are rolled back and both re-applied.
     conn.execute("ALTER TABLE browser_tasks DROP COLUMN scope_json")
-    conn.execute("DELETE FROM schema_migrations WHERE version IN (35, 36)")
+    conn.execute("ALTER TABLE browser_tasks DROP COLUMN mutating")  # unit G9c: migration 37
+    conn.execute("DELETE FROM schema_migrations WHERE version IN (35, 36, 37)")
     conn.commit()
     _ins(conn, "legacy", "EXPIRED")
     await store.migrate()
-    assert [r[0] for r in conn.execute("SELECT version FROM schema_migrations WHERE version >= 35 ORDER BY version")] == [35, 36]
+    assert [r[0] for r in conn.execute("SELECT version FROM schema_migrations WHERE version >= 35 ORDER BY version")] == [35, 36, 37]
     assert "scope_json" in [r[1] for r in conn.execute("PRAGMA table_info(browser_tasks)")]
+    assert "mutating" in [r[1] for r in conn.execute("PRAGMA table_info(browser_tasks)")]
     conn.execute("DELETE FROM browser_tasks WHERE task_id = 'legacy'")
     conn.commit()
     _refused(conn, lambda: _ins(conn, "legacy", "PENDING"))

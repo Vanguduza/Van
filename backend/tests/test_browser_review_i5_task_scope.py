@@ -71,7 +71,7 @@ class _Pages(he._PlaywrightPage):
 
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(executable_path=executable)
+                browser = p.chromium.launch(executable_path=executable, args=self.launch_args())
                 page = browser.new_page()
 
                 def serve(route):
@@ -90,16 +90,7 @@ class _Pages(he._PlaywrightPage):
                 cdp = page.context.new_cdp_session(page)
                 self.page, self.cdp = page, cdp
                 self.ready.set()
-                while True:
-                    job = self.jobs.get()
-                    if job is None:
-                        break
-                    fn, box, done = job
-                    try:
-                        box["value"] = fn(page, cdp)
-                    except BaseException as exc:  # noqa: BLE001 - handed back to the caller
-                        box["error"] = exc
-                    done.set()
+                self._serve_jobs(page, cdp)
                 browser.close()
         except BaseException as exc:  # noqa: BLE001
             self.error = exc
@@ -118,18 +109,7 @@ def chromium(monkeypatch, tmp_path):
     monkeypatch.setattr(module, "SECRET_ROOT", secrets)
     pw = _Pages(executable)
 
-    def run_harness(alias, script, extra=None):
-        def job(page, cdp):
-            return he._exec_script(script, {
-                "page_info": lambda: {"url": page.url, "title": page.title()},
-                "js": lambda expression: page.evaluate(expression),
-                "cdp": lambda method, **params: cdp.send(method, params),
-                "click_at_xy": lambda x, y: page.mouse.click(x, y),
-                "press_key": lambda key: page.keyboard.press(key),
-            }, extra)
-        return pw.call(job)
-
-    monkeypatch.setattr(module, "run_harness", run_harness)
+    monkeypatch.setattr(module, "run_harness", he.guarded_run_harness(pw))
     server = ThreadingHTTPServer(("127.0.0.1", 0), module.Handler)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     try:

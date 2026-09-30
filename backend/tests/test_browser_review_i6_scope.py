@@ -79,7 +79,7 @@ class _Pages(he._PlaywrightPage):
 
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(executable_path=executable)
+                browser = p.chromium.launch(executable_path=executable, args=self.launch_args())
                 page = browser.new_page()
 
                 def serve(route):
@@ -92,16 +92,7 @@ class _Pages(he._PlaywrightPage):
                 cdp = page.context.new_cdp_session(page)
                 self.page, self.cdp = page, cdp
                 self.ready.set()
-                while True:
-                    job = self.jobs.get()
-                    if job is None:
-                        break
-                    fn, box, done = job
-                    try:
-                        box["value"] = fn(page, cdp)
-                    except BaseException as exc:  # noqa: BLE001 - handed back to the caller
-                        box["error"] = exc
-                    done.set()
+                self._serve_jobs(page, cdp)  # unit G9c: keeps servicing routes while idle
                 browser.close()
         except BaseException as exc:  # noqa: BLE001
             self.error = exc
@@ -116,22 +107,8 @@ def chromium(monkeypatch, tmp_path):
     module = he._load(monkeypatch, tmp_path)
     pw = _Pages(executable)
 
-    def run_harness(alias, script, extra=None):
-        def job(page, cdp):
-            return he._exec_script(script, {
-                "page_info": lambda: {"url": page.url, "title": page.title()},
-                "js": lambda expression: page.evaluate(expression),
-                "cdp": lambda method, **params: cdp.send(method, params),
-                "click_at_xy": lambda x, y: page.mouse.click(x, y),
-                "press_key": lambda key: page.keyboard.press(key),
-                "current_tab": lambda: {"url": page.url},
-                "new_tab": lambda url: page.goto(url),
-                "goto_url": lambda url: page.goto(url),
-                "wait_for_load": lambda: page.wait_for_load_state(),
-            }, extra)
-        return pw.call(job)
-
-    monkeypatch.setattr(module, "run_harness", run_harness)
+    # Unit G9c: the fixed scripts need browser-harness's event stream for the network guard.
+    monkeypatch.setattr(module, "run_harness", he.guarded_run_harness(pw))
     server = ThreadingHTTPServer(("127.0.0.1", 0), module.Handler)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     try:
@@ -236,8 +213,12 @@ async def test_m3_runtime_destination_out_of_scope_is_lane_4_and_closed(chromium
     _m, pw, harness = chromium
     result = await _route(pw, harness, path, **_click(loc))
     assert result.state is StepState.OWNER_TAKEOVER, result.reasons
-    assert "TASK_SCOPE:TASK_SCOPE_LANDED_PATH_OUTSIDE" in result.reasons
-    assert result.trail[-2:] == [StepState.NOT_SATISFIED.value, StepState.OWNER_TAKEOVER.value]
+    # Unit G9c: the network-effect guard now stops the out-of-scope navigation itself (lane 4,
+    # NAVIGATION_OUT_OF_SCOPE) before the browser can land there; the landing check still
+    # closes the page. Without the guard the landing check reports it (G9b's code).
+    if "HARNESS_REFUSED:NETWORK_WRITE_BLOCKED:NAVIGATION_OUT_OF_SCOPE" not in result.reasons:
+        assert "TASK_SCOPE:TASK_SCOPE_LANDED_PATH_OUTSIDE" in result.reasons, result.reasons
+        assert result.trail[-2:] == [StepState.NOT_SATISFIED.value, StepState.OWNER_TAKEOVER.value]
     # The out-of-scope page was closed: nothing further runs on it.
     assert _url(pw) == "about:blank"
 
@@ -395,7 +376,9 @@ async def test_m3_harness_itself_refuses_an_out_of_scope_landing(chromium):
     with harness_lease_fence(HarnessLeaseFence("public_research", _task().task_id, 1)):
         with pytest.raises(BrowserAdapterError) as landed:
             await harness.click(_task(), "#b", binding=described["binding"])
-    assert landed.value.code == "BROWSER_HARNESS_REFUSED" and landed.value.detail == "TASK_SCOPE_LANDED_PATH_OUTSIDE"
+    # Unit G9c: the guard blocks the navigation (NAVIGATION_OUT_OF_SCOPE) before it lands.
+    assert landed.value.code == "BROWSER_HARNESS_REFUSED" and landed.value.detail in (
+        "TASK_SCOPE_LANDED_PATH_OUTSIDE", "NETWORK_WRITE_BLOCKED:NAVIGATION_OUT_OF_SCOPE")
     assert _url(pw) == "about:blank"
 
 
