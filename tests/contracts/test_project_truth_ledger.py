@@ -443,6 +443,43 @@ def test_a_merge_is_covered_when_it_brings_in_a_scoped_commit(repo, capsys):
     assert rc == 1 and f"UNCOVERED_FILES {later}" in out
 
 
+def test_the_merge_hook_covers_a_merge_that_brings_in_scoped_commits(repo, capsys):
+    """The integrator's pre-merge-commit hook: the merge has no SHA yet, but what it brings in does."""
+    git(repo, "checkout", "-q", "-b", "side")
+    s = unrecorded_commit(repo, {"src/side.py": "s = 1\n"}, "side")
+    scoped_authorization(repo, "auth-test-side", ["src/side.py"], [s])
+    git(repo, "checkout", "-q", "main")
+    git(repo, "merge", "-q", "--no-ff", "--no-commit", "side")
+    rc, out = run(repo, "record", "--stage", capsys=capsys)
+    assert rc == 0, out
+    m = commit(repo, "merge side")
+    assert json.loads((repo / LEDGER).read_text().splitlines()[-1])["authorization_ids"] == ["auth-test-side"]
+    rc, out = verify(repo, capsys, "--committed")
+    assert rc == 0, out
+    # A plain staged change touching the same file is not covered by that record.
+    write(repo, "src/side.py", "s = 2\n")
+    git(repo, "add", ".")
+    rc, out = run(repo, "record", "--stage", "--auth", "auth-test-side", capsys=capsys)
+    assert rc == 3 and "REFUSED" in out
+    assert m
+
+
+def test_a_record_created_in_a_merge_resolution_is_not_carried(repo, capsys):
+    git(repo, "checkout", "-q", "-b", "side")
+    s = unrecorded_commit(repo, {"src/side.py": "s = 1\n"}, "side")
+    scoped_authorization(repo, "auth-test-side", ["src/side.py"], [s])
+    git(repo, "checkout", "-q", "main")
+    git(repo, "merge", "-q", "--no-ff", "--no-commit", "side")
+    write(repo, f"{AUTH_DIR}/auth-test-sneak.json", auth_record("auth-test-sneak", ["src/**"]))
+    git(repo, "add", ".")
+    rc, out = run(repo, "record", "--stage", capsys=capsys)
+    assert rc == 3 and "auth-test-sneak.json" in out
+    run(repo, "record", "--stage", "--allow-uncovered", capsys=capsys)
+    m = commit(repo, "merge side, and slip a record in")
+    rc, out = verify(repo, capsys, "--committed")
+    assert rc == 1 and f"UNCOVERED_FILES {m}: 1 file(s)" in out and "auth-test-sneak.json" in out
+
+
 def test_glob_star_stays_in_one_directory():
     """I6 case 6: fnmatch let `docs/*` match docs/decisions/x/y.md."""
     cases = [

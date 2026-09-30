@@ -69,7 +69,8 @@ Coverage
         written before commit_scope existed, the scope that exactly one
         "record_kind": "commit_scope_binding" record assigns to it. A merge commit is covered
         when it brings in (C^1..C) a commit of the scope. A non-reusable record with no scope
-        covers nothing.
+        covers nothing. A merge that carries a record file in unchanged from a merged-in parent
+        needs no authorization for that file (its intake is verified where it was made).
       * lists the path in authorized_paths and not in excluded_paths. Globs: `*` and `?` do
         not cross `/`, `**` does. An entry may carry one trailing annotation:
         "(append-only)" / "(append-only rows)" cover the path only when the commit keeps the
@@ -248,6 +249,24 @@ def intake_ids(name_status: list[tuple[str, str]]) -> list[str] | None:
             return None  # GUARD:intake-pure-only
         ids.append(p[len(AUTH_DIR_REL) + 1: -len(".json")])
     return ids
+
+
+def merged_in_records(repo: Repo, parents: list[str], files: list[str], new_ref: str) -> set[str]:
+    """Record files a merge adds that arrive unchanged from a merged-in parent.
+
+    The commit that added such a record on the other side is verified on its own (as an intake
+    commit, or covered like any change); the merge only carries it over. A record the merge
+    resolution itself creates or alters is not in this set and must be covered."""
+    out = set()
+    if len(parents) < 2:
+        return out
+    for f in files:
+        if not is_record_path(f) or repo.show_bytes(parents[0], f) is not None:
+            continue
+        new = repo.show_bytes(new_ref, f)
+        if new is not None and any(repo.show_bytes(p, f) == new for p in parents[1:]):  # GUARD:merged-record-unchanged
+            out.add(f)
+    return out
 
 
 def record_changes_vs(repo: Repo, parent: str, sha: str) -> list[str]:
@@ -479,13 +498,16 @@ class Authorizations:
             return f"UNSCOPED_AUTHORIZATION {aid}: {self.scope_errors[aid]}"
         return None
 
-    def in_scope(self, aid: str, sha: str | None) -> bool:
+    def in_scope(self, aid: str, sha: str | None, introduced: frozenset[str] | None = None) -> bool:
+        """Does record `aid` cover commit `sha`? For a staged change (sha None) only a reusable
+        record does, or, for a staged merge, a record whose scope holds a commit the merge brings
+        in (`introduced`, from HEAD..MERGE_HEAD)."""
         rec = self.records[aid]
         if rec.get("reusable") is True:
             return True
-        if sha is None:
-            return False  # a staged change has no SHA yet; only a reusable record can cover it
         scope = self.scope.get(aid, frozenset())
+        if sha is None:
+            return bool(introduced and introduced & scope)
         if sha in scope:
             return True
         return bool(self.repo.introduced(sha) & scope)
@@ -513,8 +535,9 @@ class Authorizations:
                 note = f"{aid} lists {path} with annotation '({ann})', which this checker cannot enforce; the entry covers nothing"
         return False, note
 
-    def covers(self, aid: str, path: str, sha: str | None = None, old: bytes | None = None, new: bytes | None = None) -> bool:
-        if self.problem(aid) is not None or not self.in_scope(aid, sha):
+    def covers(self, aid: str, path: str, sha: str | None = None, old: bytes | None = None, new: bytes | None = None,
+               introduced: frozenset[str] | None = None) -> bool:
+        if self.problem(aid) is not None or not self.in_scope(aid, sha, introduced):
             return False
         return self.path_cover(aid, path, old, new)[0]
 
@@ -604,6 +627,7 @@ def verify_range(repo: Repo, start: str, head: str, auths: Authorizations, rows:
                     findings.append(f"INVALID_AUTHORIZATION_INTAKE {sha}: {aid}.json is not a record whose authorization_id matches its file name")
             continue
         ids = sorted({str(i) for r in bound for i in (r.get("authorization_ids") or [])})
+        carried = merged_in_records(repo, parents, files, sha)
         usable, notes = [], []
         for aid in ids:
             problem = auths.problem(aid)
@@ -620,6 +644,8 @@ def verify_range(repo: Repo, start: str, head: str, auths: Authorizations, rows:
                 usable.append(aid)
         uncovered = []
         for f in files:
+            if f in carried:
+                continue
             old = repo.show_bytes(parent, f)
             new = repo.show_bytes(sha, f)
             ok = False
@@ -776,14 +802,20 @@ def _inherited_ids(repo: Repo, rows: list[dict], first: str, others: list[str]) 
 class _Change:
     """A change to cover: a commit (sha) or the staged index (sha None)."""
 
-    def __init__(self, repo: Repo, sha: str | None, parent: str | None, files: list[str]):
+    def __init__(self, repo: Repo, sha: str | None, parent: str | None, files: list[str], merge_heads: list[str] | None = None):
         self.sha, self.parent, self.files = sha, parent, files
+        self.introduced = frozenset(x for mh in merge_heads or [] for x in repo.out("rev-list", f"{parent}..{mh}").split())
+        ps = repo.parents(sha) if sha else ([parent] if parent else []) + list(merge_heads or [])
+        self.carried = merged_in_records(repo, ps, files, INDEX if sha is None else sha)
+        self.need = [f for f in files if f not in self.carried]  # what an authorization must cover
         new_ref = INDEX if sha is None else sha
         self.content = {f: (repo.show_bytes(parent, f), repo.show_bytes(new_ref, f)) for f in files}
 
     def covered(self, auths: Authorizations, aid: str, f: str) -> bool:
+        if f in self.carried:
+            return True
         old, new = self.content[f]
-        return auths.covers(aid, f, self.sha, old, new)
+        return auths.covers(aid, f, self.sha, old, new, self.introduced)
 
 
 def _select(auths: Authorizations, change: _Change, explicit: list[str], added_ids: set[str],
@@ -796,7 +828,7 @@ def _select(auths: Authorizations, change: _Change, explicit: list[str], added_i
     never picked up just because its path list matches; it is reported as a hint and must be
     named with --auth.
     """
-    files = change.files
+    files = change.need
     covered_by_existing = {f for f in files if any(change.covered(auths, a, f) for a in existing)}
     pool = list(dict.fromkeys(explicit))
     for aid in sorted(auths.records):
@@ -904,7 +936,7 @@ def cmd_record(repo: Repo, args) -> int:
                and r.get("commit_diff_sha256") == digest for r in rows):
             print("project-truth-ledger record: staged change already has a row")
             return 0
-        change = _Change(repo, None, parents[0] if parents else None, files)
+        change = _Change(repo, None, parents[0] if parents else None, files, parents[1:])
         intake = intake_ids(status)
         if intake is not None:
             new_rows.append(_row(repo, "authorization-intake", f"tools/ci/project_truth_ledger.py record ({args.hook or 'manual'})",

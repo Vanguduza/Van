@@ -43,6 +43,7 @@ MUTATIONS: dict[str, tuple[str, str]] = {
     "history": ('findings += [f"HISTORY_BROKEN_BY_CHANGE {f}" for f in hist]', "pass"),
     "ledger-append-only": ("if lost:", "if False:"),
     "digest": ('if r.get("commit_diff_sha256") != digest:', "if False:"),
+    "merged-record-unchanged": ("any(repo.show_bytes(p, f) == new for p in parents[1:])", "True"),
 }
 
 
