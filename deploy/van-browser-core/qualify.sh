@@ -8,7 +8,8 @@
 # mTLS client identity, the owner-decided model and fresh worker health through the edge.
 set -uo pipefail
 
-ETC=/etc/van-browser-core
+# VAN_BROWSER_CORE_ETC: only for exercising this script against a scratch configuration.
+ETC="${VAN_BROWSER_CORE_ETC:-/etc/van-browser-core}"
 DATA=/var/lib/van-browser-core
 PKI="$ETC/pki"
 checks=()
@@ -85,7 +86,112 @@ if [[ -f "$ETC/runtime.env" ]] && grep -Eq '^(VAN_COMMANDER_|VAN_ACCOUNTS_REGIST
   add runtime_env_clean RED "foreign-zone credential name in $ETC/runtime.env"
 else add runtime_env_clean GREEN "no foreign-zone credential names"; fi
 
-# 6. Model pin status (§4): informational, required=0. UNVERIFIED is not GREEN.
+# 6. Unit G12 — egress proxy and zone firewall (owner answers 2026-09-30 after review I7:
+#    "Egress proxy (Recommended)", "Firewall UDP in zone (Recommended)"). Each result below is
+#    measured on this host, never read from a file this zone wrote about itself.
+BROWSER_USER="${VAN_QUALIFY_BROWSER_USER:-van-browser}"
+if ! command -v nft >/dev/null 2>&1; then add firewall_loaded RED "nft not installed"
+elif ruleset="$(nft list table inet van_browser_core 2>/dev/null)"; then
+  missing=""
+  for c in van-local-reset van-other-users van-dns-resolver van-udp-drop van-loopback-tcp van-tcp-bypass-reject van-other-drop; do
+    grep -q "comment \"$c\"" <<<"$ruleset" || missing="$missing $c"
+  done
+  uid="$(id -u "$BROWSER_USER" 2>/dev/null || true)"
+  if [[ -z "$uid" ]]; then add firewall_loaded RED "browser user $BROWSER_USER does not exist"
+  elif [[ -n "$missing" ]]; then add firewall_loaded RED "rules missing:$missing"
+  elif grep -Eq "meta skuid != ($uid|\"?$BROWSER_USER\"?) accept comment \"van-other-users\"" <<<"$ruleset"; then
+    add firewall_loaded GREEN "table inet van_browser_core loaded for uid $uid"
+  else add firewall_loaded RED "ruleset is not bound to $BROWSER_USER (uid $uid)"; fi
+else add firewall_loaded RED "table inet van_browser_core not loaded"; fi
+# The browser user's own sockets: UDP (STUN, QUIC) must fail locally; direct TCP must be reset.
+probe="$(setpriv --reuid="$BROWSER_USER" --regid="$(id -g "$BROWSER_USER" 2>/dev/null || echo 65534)" --clear-groups \
+  python3 - 2>/dev/null <<'PY'
+import errno, socket
+out = []
+for host, port in (("192.0.2.1", 3478), ("192.0.2.1", 443), ("127.0.0.1", 3478)):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.sendto(b"van-qualify", (host, port))
+        out.append("SENT")
+    except OSError as exc:
+        out.append("BLOCKED" if exc.errno == errno.EPERM else "ERR%d" % exc.errno)
+    finally:
+        s.close()
+print("udp", ",".join(out))
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.settimeout(3)
+try:
+    s.connect(("192.0.2.1", 443))
+    print("tcp CONNECTED")
+except ConnectionRefusedError:
+    print("tcp REJECTED")
+except socket.timeout:
+    print("tcp TIMEOUT")
+except OSError as exc:
+    print("tcp ERR%d" % exc.errno)
+PY
+)"
+udp="$(sed -n 's/^udp //p' <<<"$probe")"; tcp="$(sed -n 's/^tcp //p' <<<"$probe")"
+[[ "$udp" == "BLOCKED,BLOCKED,BLOCKED" ]] && add browser_udp_blocked GREEN "UDP send as $BROWSER_USER: $udp" \
+  || add browser_udp_blocked RED "UDP send as $BROWSER_USER: ${udp:-probe did not run}"
+[[ "$tcp" == "REJECTED" ]] && add browser_tcp_bypass_blocked GREEN "direct TCP as $BROWSER_USER: reset" \
+  || add browser_tcp_bypass_blocked RED "direct TCP as $BROWSER_USER: ${tcp:-probe did not run}"
+# The egress proxy: running, keyed, no test overrides; it refuses without a policy and refuses
+# a WebSocket upgrade and a POST under a read-only policy it has verified. The probe policy is
+# MACed with the proxy's own key copy (root reads it here) for the alias qualify_probe only;
+# nothing is sent upstream (every probe is refused before a connection is opened).
+egress="$(python3 - "$ETC/runtime.env" 2>/dev/null <<'PY'
+import hashlib, hmac, json, re, socket, sys
+env = dict(re.findall(r"^([A-Z_][A-Z0-9_]*)=(.*)$", open(sys.argv[1], encoding="utf-8").read(), re.M))
+ctl, key_file = env.get("VAN_EGRESS_CONTROL_SOCKET", ""), env.get("VAN_EGRESS_FENCE_KEY_FILE", "")
+def call(msg):
+    with socket.socket(socket.AF_UNIX) as s:
+        s.settimeout(5); s.connect(ctl); s.sendall(json.dumps(msg).encode() + b"\n")
+        return json.loads(s.makefile().readline())
+def raw(port, data):
+    with socket.create_connection(("127.0.0.1", port), timeout=5) as s:
+        s.sendall(data); head = s.recv(4096).decode("latin-1")
+    m = re.search(r"X-Van-Egress-Refused: ([A-Z_]+)", head)
+    return m.group(1) if m else head.split("\r\n")[0][:40]
+try:
+    h = call({"op": "health"})
+    print("health", "OK" if h.get("ok") and h.get("trust_zone") == "van-browser-core" and h.get("policy_key") is True
+          and h.get("test_overrides") is False and h.get("interception") == "zone-local-ca" else "BAD " + json.dumps(h)[:200])
+    # An alias that is never given a policy, and one that is (both fixed: no port leak per run).
+    empty = call({"op": "listener", "alias": "qualify_nopolicy"})["port"]
+    print("nopolicy", raw(empty, b"CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n"))
+    alias = "qualify_probe"
+    port = call({"op": "listener", "alias": alias})["port"]
+    key = open(key_file, "rb").read().strip()
+    scope = {"entries": [{"origin": "http://example.com", "path_prefix": None}]}
+    digest = hashlib.sha256(json.dumps(scope, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    gen = 1 << 40
+    mac = hmac.new(key, f"van-harness-effect/1\n{alias}\n{gen}\nqualify\nqualify\n0\n{digest}".encode(), hashlib.sha256).hexdigest()
+    ok = call({"op": "policy", "alias": alias, "lease_generation": gen, "lease_holder_id": "qualify", "task_id": "qualify",
+               "mutating": False, "task_scope": scope, "effect_mac": mac})
+    forged = call({"op": "policy", "alias": alias, "lease_generation": gen, "lease_holder_id": "qualify", "task_id": "qualify",
+                   "mutating": True, "task_scope": scope, "effect_mac": mac})
+    print("policy", "OK" if ok.get("ok") is True and forged.get("error") == "POLICY_MAC_INVALID" else "BAD")
+    print("websocket", raw(port, b"GET http://example.com/ws-pay HTTP/1.1\r\nHost: example.com\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n"))
+    print("post", raw(port, b"POST http://example.com/pay HTTP/1.1\r\nHost: example.com\r\nContent-Length: 1\r\n\r\nx"))
+except Exception as exc:  # noqa: BLE001
+    print("error", type(exc).__name__)
+PY
+)"
+field() { sed -n "s/^$1 //p" <<<"$egress"; }
+[[ "$(field health)" == OK ]] && add egress_proxy_active GREEN "keyed, zone-local CA, no test overrides" \
+  || add egress_proxy_active RED "egress proxy health: $(field health)$(field error)"
+[[ "$(field nopolicy)" == EGRESS_POLICY_UNKNOWN ]] && add egress_refuses_without_policy GREEN "EGRESS_POLICY_UNKNOWN" \
+  || add egress_refuses_without_policy RED "$(field nopolicy)$(field error)"
+[[ "$(field policy)" == OK ]] && add egress_policy_mac_enforced GREEN "valid MAC accepted, flipped flag refused" \
+  || add egress_policy_mac_enforced RED "$(field policy)$(field error)"
+[[ "$(field websocket)" == EGRESS_WEBSOCKET_REFUSED && "$(field post)" == EGRESS_WRITE_REFUSED ]] \
+  && add egress_refuses_websocket_and_write GREEN "Upgrade: websocket and POST refused under a read-only policy" \
+  || add egress_refuses_websocket_and_write RED "websocket=$(field websocket) post=$(field post)$(field error)"
+if jq -e '.egress_proxy==true' /tmp/vbcq-h.json >/dev/null 2>&1; then add harness_uses_egress_proxy GREEN "Harness /health egress_proxy=true"
+else add harness_uses_egress_proxy RED "Harness does not report its egress proxy"; fi
+
+# 7. Model pin status (§4): informational, required=0. UNVERIFIED is not GREEN.
 add model_immutable_snapshot UNKNOWN "immutable provider revision for claude-sonnet-5 not established" 0
 
 printf '{"zone":"van-browser-core","fails":%d,"checks":[%s]}\n' "$fails" "$(IFS=,; echo "${checks[*]}")"

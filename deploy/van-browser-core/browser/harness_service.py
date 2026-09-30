@@ -16,6 +16,7 @@ import json
 import os
 import re
 import signal
+import socket
 import subprocess
 import threading
 import time
@@ -68,6 +69,10 @@ TRUST_ZONE = os.getenv("VAN_TRUST_ZONE", "")
 REQUEST_TIMEOUT_SECONDS = float(
     os.getenv("VAN_BROWSER_WORKER_TIMEOUT_SECONDS", "45")
 )
+#: Unit G12 (owner answer 2026-09-30 after review I7, "Egress proxy (Recommended)") — the
+#: control socket of the zone's egress proxy (deploy/van-browser-core/browser/egress_proxy.py).
+#: With a trust zone configured it is required: Chromium does not start without its proxy.
+EGRESS_CONTROL_SOCKET = os.getenv("VAN_BROWSER_EGRESS_CONTROL_SOCKET", "")
 
 if BIND not in {"127.0.0.1", "::1", "localhost"}:
     raise SystemExit("browser harness worker refuses a non-loopback bind")
@@ -208,7 +213,7 @@ class ChromeSession:
             active = self.profile_dir / "DevToolsActivePort"
             active.unlink(missing_ok=True)
             self.process = subprocess.Popen(
-                chromium_argv(self.profile_dir),
+                chromium_argv(self.profile_dir, extra=egress_proxy_flags(self.alias)),
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
@@ -2366,6 +2371,97 @@ def _run(alias: str, script: str, extra: dict[str, str] | None = None, *, requir
     return result
 
 
+# ------------------------------------------------------------------------ egress proxy
+#
+# Unit G12 (owner answer 2026-09-30 after review I7: "Egress proxy (Recommended)"). The
+# Harness-owned Chromium reaches the network only through the zone's egress proxy, which
+# refuses WebSocket upgrades, non-GET requests and request bodies unless the task is admitted
+# as mutating (and then only inside the task scope), and refuses any origin outside the task
+# scope. The policy it enforces is the one this worker has just verified under the effect MAC;
+# the proxy re-verifies the same MAC with its own copy of the fence key, so neither the page
+# nor a local caller without the key can widen it. The zone firewall (firewall/*.nft) drops
+# direct TCP and all UDP from the browser user, so the proxy cannot be bypassed.
+EGRESS_SPKI_RE = re.compile(r"^[A-Za-z0-9+/]{43}=$")
+
+
+def _egress_call(message: dict[str, Any]) -> dict[str, Any]:
+    try:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
+            sock.settimeout(10)
+            sock.connect(EGRESS_CONTROL_SOCKET)
+            sock.sendall(json.dumps(message, separators=(",", ":")).encode() + b"\n")
+            data = b""
+            while not data.endswith(b"\n") and len(data) < 65536:
+                chunk = sock.recv(4096)
+                if not chunk:
+                    break
+                data += chunk
+        reply = json.loads(data)
+    except (OSError, ValueError) as exc:
+        raise WorkerError("EGRESS_PROXY_UNAVAILABLE", 503) from exc
+    if not isinstance(reply, dict):
+        raise WorkerError("EGRESS_PROXY_UNAVAILABLE", 503)
+    return reply
+
+
+def egress_proxy_flags(alias: str) -> tuple[str, ...]:
+    """Chromium flags that route every request through this alias's egress-proxy listener.
+
+    ``--proxy-bypass-list=<-loopback>`` removes Chromium's implicit loopback bypass, so a page
+    cannot reach the zone's loopback services directly. ``--ignore-certificate-errors-spki-list``
+    names the proxy's leaf key only (the interception certificates are trusted for this
+    Chromium alone, never through a system or profile trust store). ``--disable-quic`` makes
+    HTTP/3 fall back to TCP through the proxy. Without a configured proxy a development worker
+    still disables QUIC; a trust-zone worker refuses to start Chromium.
+    """
+    if not EGRESS_CONTROL_SOCKET:
+        if TRUST_ZONE:
+            raise WorkerError("EGRESS_PROXY_UNCONFIGURED", 503)
+        return ("--disable-quic",)
+    reply = _egress_call({"op": "listener", "alias": alias})
+    port, spki = reply.get("port"), reply.get("spki")
+    if reply.get("ok") is not True or isinstance(port, bool) or not isinstance(port, int) \
+            or not 1024 <= port <= 65535 or not isinstance(spki, str) or not EGRESS_SPKI_RE.fullmatch(spki):
+        raise WorkerError("EGRESS_PROXY_UNAVAILABLE", 503)
+    return (
+        f"--proxy-server=http://127.0.0.1:{port}",
+        "--proxy-bypass-list=<-loopback>",
+        f"--ignore-certificate-errors-spki-list={spki}",
+        "--disable-quic",
+    )
+
+
+def push_egress_policy(body: dict[str, Any], alias: str, scope: dict[str, Any] | None, claimed: bool) -> None:
+    """Hand the task's policy, with the gateway's effect MAC, to the egress proxy before the
+    action runs. The proxy refuses it without a valid MAC; either failure refuses the action."""
+    if not EGRESS_CONTROL_SOCKET:
+        if TRUST_ZONE:
+            raise WorkerError("EGRESS_PROXY_UNCONFIGURED", 503)
+        return
+    reply = _egress_call({
+        "op": "policy",
+        "alias": alias,
+        "lease_generation": body.get("lease_generation"),
+        "lease_holder_id": body.get("lease_holder_id"),
+        "task_id": str(body.get("task_id") or ""),
+        "mutating": claimed,
+        "task_scope": scope,
+        "effect_mac": body.get("effect_mac"),
+    })
+    if reply.get("ok") is not True:
+        raise WorkerError("EGRESS_POLICY_REFUSED", 503)
+
+
+def apply_lease_policy(lease: "GuardLease", body: dict[str, Any], alias: str) -> None:
+    """Unit G13 — the one place a lease's network policy is set or changed (each action, or a
+    read that carries the task scope): the in-browser guard's policy (unit G11) and the egress
+    proxy's (unit G12) change together. A frozen lease pushes nothing."""
+    policy = network_guard_policy(body, alias)
+    if lease.pending is None and not lease.frozen:
+        push_egress_policy(body, alias, policy["scope"], body.get("mutating") is True)
+    lease.policy = policy
+
+
 def _bound_script(body: str) -> str:
     """A fixed script: the bound prologue, then ``body`` run with typed refusals."""
     prologue = (
@@ -3239,6 +3335,8 @@ class Handler(BaseHTTPRequestHandler):
                 "raw_cdp_http": False,
                 "bind": BIND,
                 "trust_zone": TRUST_ZONE or None,
+                # Unit G12: Chromium is launched only through the zone's egress proxy.
+                "egress_proxy": bool(EGRESS_CONTROL_SOCKET),
             })
             return
         self.send_json(404, {"error": "NOT_FOUND"})
@@ -3273,10 +3371,11 @@ class Handler(BaseHTTPRequestHandler):
                 if lease is not None and "lease_generation" in body:
                     if self.path in MUTATING_OPERATIONS:
                         # A forged mutating flag or widened scope is refused before anything runs.
-                        lease.policy = network_guard_policy(body, alias)
+                        # Unit G13: the proxy's policy changes with the guard's (the action window).
+                        apply_lease_policy(lease, body, alias)
                     elif isinstance(body.get("task_scope"), dict):
                         with contextlib.suppress(WorkerError):
-                            lease.policy = network_guard_policy(body, alias)
+                            apply_lease_policy(lease, body, alias)
                     if lease.pending is not None:
                         # The lease's guard blocked a write (or detected one it could not
                         # block) and froze the page: nothing more runs, and nothing is read

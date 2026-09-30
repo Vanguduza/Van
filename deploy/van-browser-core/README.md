@@ -94,6 +94,30 @@ stopped, the tab on about:blank) on any blocked or detected write, and is ended 
 interception removed — by `/release` (the gateway calls it whenever it gives a page lease back),
 by a newer lease generation, or after `VAN_HARNESS_GUARD_IDLE_SECONDS` without a call.
 
+## Egress proxy and zone firewall (unit G12)
+
+Owner answers 2026-09-30 after review I7: "Egress proxy (Recommended)" and "Firewall UDP in
+zone (Recommended)". A WebSocket handshake, a write issued after an action's guard window and
+WebRTC/WebTransport UDP all left the browser unseen by the Harness's CDP guard; now:
+
+- **`van-browser-egress.service`** (`browser/egress_proxy.py`, user `van-browser-egress`) is
+  the Harness-owned Chromium's only way out. Chromium is launched with `--proxy-server`
+  (one loopback listener per profile alias), `--proxy-bypass-list=<-loopback>`, the SPKI pin
+  of the proxy's leaf key and `--disable-quic`. The proxy intercepts TLS with a zone-local CA
+  whose keys never leave `/var/lib/van-browser-egress`. It refuses every origin outside the
+  task scope, and WebSocket upgrades, non-GET/HEAD methods and request bodies unless the task
+  is admitted as mutating (then only inside the task scope). The task policy reaches it only
+  over its Unix control socket with the gateway's effect MAC; no policy means refuse all.
+- **`van-browser-core-firewall.service`** loads `firewall/van-browser-core.nft`: the browser
+  user sends no UDP except DNS to `VAN_BROWSER_DNS_RESOLVER`, and no TCP except to loopback.
+  `bootstrap.sh` loads it at provisioning (refusing without a resolver or `nft`); the Harness
+  and Stagehand units are bound to it; `qualify.sh` checks it is loaded and that a UDP send and
+  a direct TCP connect from the browser user fail, and probes the proxy's refusals.
+
+The browser capability, Stagehand and Jev browser effect stay production-gated on
+`docs/decisions/VAN-BROWSER-CORE-EGRESS-001.yaml` (PENDING until qualification on the host).
+Remaining limits are listed in `zone.json` `egress.remaining_limits`.
+
 ## The historical placement
 
 `deploy/van-trading-core/browser/**` and `vati-{stagehand,browser-harness}.service` are the

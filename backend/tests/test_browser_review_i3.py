@@ -679,19 +679,24 @@ def _jev_capability(tmp_path: Path, record: str, *, reference: bool = True,
         _authorization() if authorization is None else authorization), encoding="utf-8")
     simple = {"id": "owner_decision", "kind": "owner_decision", "path": "owner_signature_status",
               "green": ["SIGNED"], "pending": ["PENDING"]}
-    for name in ("VAN-ADOPT-N8N-001.yaml", "VAN-ADOPT-BROWSER-HARNESS-001.yaml", "VAN-ADOPT-STAGEHAND-001.yaml"):
+    # Unit G12: the egress decision the capability also inherits, as a GREEN stand-in here (its
+    # own qualify_report gate is tested in test_production_activation_gates.py).
+    for name in ("VAN-ADOPT-N8N-001.yaml", "VAN-ADOPT-BROWSER-HARNESS-001.yaml", "VAN-ADOPT-STAGEHAND-001.yaml",
+                 production_gates.BROWSER_EGRESS_DECISION):
         (decisions / name).write_text("owner_signature_status: SIGNED\n", encoding="utf-8")
     (decisions / "VAN-AMEND-SECURITY-POLICY-001.md").write_text("**Status:** `OWNER_APPROVED`\n", encoding="utf-8")
     (decisions / "VAN-JEV-BROWSER-EFFECT-001.yaml").write_text(record, encoding="utf-8")
     required = [{"decision": n, "format": "yaml", "gates": [simple]} for n in (
-        "VAN-ADOPT-N8N-001.yaml", "VAN-ADOPT-BROWSER-HARNESS-001.yaml", "VAN-ADOPT-STAGEHAND-001.yaml")]
+        "VAN-ADOPT-N8N-001.yaml", "VAN-ADOPT-BROWSER-HARNESS-001.yaml", "VAN-ADOPT-STAGEHAND-001.yaml",
+        production_gates.BROWSER_EGRESS_DECISION)]
     required.append({"decision": "VAN-AMEND-SECURITY-POLICY-001.md", "format": "markdown",
                      "gates": [{"id": "owner_decision", "kind": "owner_decision", "path": "Status",
                                 "green": ["OWNER_APPROVED"]}]})
     model = json.loads(production_gates.GATE_MODEL.read_text(encoding="utf-8"))
     path = tmp_path / "gates.json"
+    jev_only = [d for d in model["capability_decisions"] if d["decision"] == "VAN-JEV-BROWSER-EFFECT-001.yaml"]
     path.write_text(json.dumps({"decisions_dir": "docs/decisions", "required_decisions": required,
-                                "capability_decisions": model["capability_decisions"]}), encoding="utf-8")
+                                "capability_decisions": jev_only}), encoding="utf-8")
     return production_gates.evaluate_production_gates(path, tmp_path)["capabilities"]["jev_browser_effect"]
 
 

@@ -45,18 +45,25 @@ GATE_MODEL = REPO_ROOT / "registries" / "production_activation_gates.json"
 #: does not require makes that capability UNKNOWN, never permitted.
 SECURITY_POLICY_DECISION = "VAN-AMEND-SECURITY-POLICY-001.md"
 JEV_BROWSER_EFFECT_DECISION = "VAN-JEV-BROWSER-EFFECT-001.yaml"
+#: Unit G12 (owner answers 2026-09-30 after review I7, "Egress proxy" and "Firewall UDP in
+#: zone"): the browser's egress proxy and zone firewall must be qualified on the host before
+#: the browser capability, Stagehand ("stays production-disabled until it exists") or Jev's
+#: browser effect may be production-activated. PENDING until a live qualify.sh report.
+BROWSER_EGRESS_DECISION = "VAN-BROWSER-CORE-EGRESS-001.yaml"
 CAPABILITY_DECISIONS: dict[str, tuple[str, ...]] = {
     "n8n": ("VAN-ADOPT-N8N-001.yaml", SECURITY_POLICY_DECISION),
-    "browser_harness": ("VAN-ADOPT-BROWSER-HARNESS-001.yaml", SECURITY_POLICY_DECISION),
+    "browser_harness": ("VAN-ADOPT-BROWSER-HARNESS-001.yaml", BROWSER_EGRESS_DECISION, SECURITY_POLICY_DECISION),
     "stagehand": (
-        "VAN-ADOPT-STAGEHAND-001.yaml", "VAN-ADOPT-BROWSER-HARNESS-001.yaml", SECURITY_POLICY_DECISION,
+        "VAN-ADOPT-STAGEHAND-001.yaml", "VAN-ADOPT-BROWSER-HARNESS-001.yaml", BROWSER_EGRESS_DECISION,
+        SECURITY_POLICY_DECISION,
     ),
     # Review I2 N-7 — VAN's own gate on Jev browser effect. Blueprint §11: no Jev module can
     # carry effect today; PROPOSE_ACTION stays SHADOW until a separate owner decision. The
     # record starts SHADOW_ONLY (pending). Jev's actions go through the Harness, so the
     # Harness decision is inherited like Stagehand's.
     "jev_browser_effect": (
-        JEV_BROWSER_EFFECT_DECISION, "VAN-ADOPT-BROWSER-HARNESS-001.yaml", SECURITY_POLICY_DECISION,
+        JEV_BROWSER_EFFECT_DECISION, "VAN-ADOPT-BROWSER-HARNESS-001.yaml", BROWSER_EGRESS_DECISION,
+        SECURITY_POLICY_DECISION,
     ),
 }
 
@@ -76,6 +83,11 @@ class GateKind(str, Enum):
     #: directory, the record pins that file's sha256 and the pin matches, and the record
     #: names an existing, unrevoked Project Truth authorization record for that file.
     OWNER_REFERENCE = "owner_reference"
+    #: Unit G12 — a production gate whose GREEN value must be backed by a host qualification
+    #: report: the record names a report file under ``report_dir`` and pins its sha256, the
+    #: report is for the declared zone, and every ``required_checks`` entry is in it, required
+    #: and GREEN. A GREEN word without that report is UNKNOWN; a required check RED is BLOCKED.
+    QUALIFY_REPORT = "qualify_report"
 
 
 #: Kinds that report as an owner decision in ``owner_decisions_pending``.
@@ -291,6 +303,52 @@ def _classify_owner_reference(
     return GateStatus.GREEN, None
 
 
+def _classify_qualify_report(
+    spec: dict[str, Any], record: dict[str, Any], raw: Any, root: Path
+) -> tuple[GateStatus, str | None]:
+    """Unit G12. GREEN needs the report, not the word (see ``GateKind.QUALIFY_REPORT``)."""
+    status, reason = _classify(spec, raw)
+    if status is not GateStatus.GREEN:
+        return status, reason
+    try:
+        reference = _resolve(record, spec["report_path"])
+        pinned = _resolve(record, spec["sha256_path"])
+    except KeyError:
+        return GateStatus.UNKNOWN, "qualify report reference or sha256 pin is missing"
+    if not isinstance(reference, str) or not reference:
+        return GateStatus.UNKNOWN, "qualify report reference is missing"
+    path = Path(reference)
+    if path.is_absolute() or ".." in path.parts:
+        return GateStatus.UNKNOWN, f"{reference!r} is not a repository-relative path"
+    target = root / path
+    if not _inside(target, root / spec["report_dir"]) or not target.is_file():
+        return GateStatus.UNKNOWN, f"{reference!r} is not a file inside {spec['report_dir']}"
+    if not isinstance(pinned, str) or not _SHA256.fullmatch(pinned):
+        return GateStatus.UNKNOWN, "qualify report sha256 pin is not a lower-case sha256"
+    data = target.read_bytes()
+    actual = hashlib.sha256(data).hexdigest()
+    if actual != pinned:
+        return GateStatus.UNKNOWN, f"qualify report sha256 mismatch: pinned {pinned}, file {actual}"
+    try:
+        report = json.loads(data)
+        checks = {c["check"]: c for c in report["checks"]}
+    except (ValueError, KeyError, TypeError) as exc:
+        return GateStatus.UNKNOWN, f"qualify report unreadable: {type(exc).__name__}"
+    if report.get("zone") != spec["zone"]:
+        return GateStatus.UNKNOWN, f"qualify report is for zone {report.get('zone')!r}, not {spec['zone']!r}"
+    missing = [name for name in spec["required_checks"] if name not in checks]
+    if missing:
+        return GateStatus.UNKNOWN, f"qualify report lacks checks: {', '.join(missing)}"
+    red = [name for name in spec["required_checks"] if checks[name].get("status") == "RED"]
+    if red:
+        return GateStatus.BLOCKED, f"qualify report checks RED: {', '.join(red)}"
+    not_green = [name for name in spec["required_checks"]
+                 if checks[name].get("status") != "GREEN" or checks[name].get("required") != 1]
+    if not_green:
+        return GateStatus.UNKNOWN, f"qualify report checks not GREEN and required: {', '.join(not_green)}"
+    return GateStatus.GREEN, None
+
+
 #: Expiry fields an authorization record may carry (any one present is honoured).
 AUTHORIZATION_EXPIRY_FIELDS = ("expires_at", "expires_at_utc", "not_after", "not_after_utc")
 
@@ -341,6 +399,13 @@ def _gate_spec_problem(spec: Any) -> str | None:
         except re.error:
             return "gate green_pattern is not a valid regular expression"
         return None
+    if spec["kind"] == GateKind.QUALIFY_REPORT.value:
+        for field in ("report_path", "sha256_path", "report_dir", "zone"):
+            if not isinstance(spec.get(field), str) or not spec[field]:
+                return f"qualify_report gate lacks {field}"
+        checks = spec.get("required_checks")
+        if not isinstance(checks, list) or not checks or not all(isinstance(c, str) and c for c in checks):
+            return "qualify_report gate lacks required_checks"
     # Review I4 MINOR-B: a pattern match is a shape, never a GREEN on its own. Only an
     # owner_reference gate, which also resolves and pins the file, may declare one.
     if spec.get("green_pattern") is not None:
@@ -453,6 +518,8 @@ def evaluate_production_gates(
                 continue
             if kind == GateKind.OWNER_REFERENCE.value:
                 status, reason = _classify_owner_reference(spec, record, raw, root, source)
+            elif kind == GateKind.QUALIFY_REPORT.value:
+                status, reason = _classify_qualify_report(spec, record, raw, root)
             else:
                 status, reason = _classify(spec, raw)
             results.append(
@@ -475,7 +542,7 @@ def evaluate_production_gates(
     not_green = [
         f"{r.decision}:{r.gate}"
         for r in results
-        if r.kind == GateKind.PRODUCTION.value and r.status is not GateStatus.GREEN
+        if r.kind in (GateKind.PRODUCTION.value, GateKind.QUALIFY_REPORT.value) and r.status is not GateStatus.GREEN
     ]
     capabilities: dict[str, Any] = {}
     declared = set(names) | set(capability_names)
@@ -504,4 +571,4 @@ def evaluate_production_gates(
     return base
 
 
-__all__ = ["CAPABILITY_DECISIONS", "GATE_MODEL", "JEV_BROWSER_EFFECT_DECISION", "DuplicateKeyError", "GateKind", "GateResult", "GateStatus", "evaluate_production_gates"]
+__all__ = ["BROWSER_EGRESS_DECISION", "CAPABILITY_DECISIONS", "GATE_MODEL", "JEV_BROWSER_EFFECT_DECISION", "DuplicateKeyError", "GateKind", "GateResult", "GateStatus", "evaluate_production_gates"]

@@ -163,12 +163,16 @@ def test_zone_workers_read_only_declared_env():
              "VAN_BH_BINDING", "VAN_BH_SCOPE", "VAN_BH_FOCUS",
              # Unit G9c: the network-effect guard's policy (mutating flag + task scope).
              "VAN_BH_NETGUARD", "VAN_BH_NETGUARD_STATE"}
-    # Explicit development-only escape, refused in production by the worker itself.
-    allowed = declared | child | {"VAN_BROWSER_HISTORICAL_DEV_ONLY"}
+    # Explicit development-only escapes, refused in production by the workers themselves
+    # (unit G12: the egress proxy exits when VAN_EGRESS_TEST_* is set in a trust zone).
+    allowed = declared | child | {"VAN_BROWSER_HISTORICAL_DEV_ONLY", "VAN_EGRESS_TEST_RESOLVE",
+                                  "VAN_EGRESS_TEST_UPSTREAM_CAFILE"}
     harness = (ZONE_DIR / "browser" / "harness_service.py").read_text(encoding="utf-8")
+    harness += (ZONE_DIR / "browser" / "egress_proxy.py").read_text(encoding="utf-8")
     stagehand = (ZONE_DIR / "browser" / "stagehand_service.mjs").read_text(encoding="utf-8")
     read = set(re.findall(r'os\.(?:getenv|environ\.get)\(\s*"([A-Z0-9_]+)"', harness))
     read |= set(re.findall(r'os\.environ\["([A-Z0-9_]+)"\]', harness))
+    assert {"VAN_EGRESS_FENCE_KEY_FILE", "VAN_BROWSER_EGRESS_CONTROL_SOCKET"} <= read
     read |= set(re.findall(r"process\.env\.([A-Z0-9_]+)", stagehand))
     assert read, "env-read scan found nothing; the instrument is broken"
     assert read <= allowed, sorted(read - allowed)
@@ -332,3 +336,36 @@ def test_model_is_named_and_no_repository_file_holds_a_provider_key():
         if key_re.search(p.read_bytes()):
             offenders.append(rel.decode())
     assert not offenders, offenders
+
+
+# ---------------------------------------------------------------- egress (unit G12)
+def test_zone_declares_the_egress_proxy_and_firewall_it_ships():
+    """Owner answers 2026-09-30 after review I7: egress proxy and UDP firewall in zone."""
+    egress = ZONE["egress"]
+    for rel in (egress["proxy"]["code"], egress["proxy"]["unit"], egress["firewall"]["ruleset"]):
+        assert (ZONE_DIR / rel).is_file(), rel
+    for rel in ("systemd/van-browser-egress.service", "systemd/van-browser-core-firewall.service",
+                "firewall/van-browser-core.nft"):
+        assert rel in ZONE["unit_env_config_files"], rel
+    proxy = (ZONE_DIR / egress["proxy"]["code"]).read_text(encoding="utf-8")
+    for line in egress["proxy"]["refuses"]:
+        for code in re.findall(r"EGRESS_[A-Z_]+", line):
+            assert f'"{code}"' in proxy, code
+    assert "CONNECT host allowlist" in egress["proxy"]["design"] and "wss://" in egress["proxy"]["design"]
+    assert "never copied off the host" in egress["proxy"]["key_handling"]
+    limits = " ".join(egress["remaining_limits"])
+    assert "unverified" in limits.lower() and "DNS" in limits
+    # The production gate it names exists and the migration record carries the design.
+    assert (ROOT / "docs/decisions/VAN-BROWSER-CORE-EGRESS-001.yaml").is_file()
+    assert "VAN-BROWSER-CORE-EGRESS-001.yaml" in egress["production_gate"]
+    migration = (ROOT / "docs/project-state/VAN_BROWSER_CORE_MIGRATION_20260929.md").read_text(encoding="utf-8")
+    assert "## 8. Egress proxy and zone firewall" in migration and "CONNECT host allowlist" in migration
+    bc4 = next(i for i in ZONE["cross_zone_interfaces"] if i["id"] == "BC-IF-4")
+    assert "egress proxy" in bc4["transport"] and "firewall" in bc4["transport"]
+    # The Harness puts the proxy flags on Chromium's command line (and nothing else changes it).
+    # Unit G13: through the single argv assembler (G11), so --disable-features stays merged.
+    harness = (ZONE_DIR / "browser" / "harness_service.py").read_text(encoding="utf-8")
+    assert harness.count("egress_proxy_flags(self.alias)") == 1
+    assert harness.count("chromium_argv(self.profile_dir, extra=egress_proxy_flags(self.alias)),") == 1
+    for flag in ("--proxy-bypass-list=<-loopback>", "--ignore-certificate-errors-spki-list=", "--disable-quic"):
+        assert flag in harness

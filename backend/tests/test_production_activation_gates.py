@@ -272,6 +272,8 @@ def _capability_repo(tmp_path: Path, *, stagehand="PENDING", harness="SIGNED", n
         "VAN-ADOPT-BROWSER-HARNESS-001.yaml": (f"owner_signature_status: {harness}\n", [simple]),
         "VAN-ADOPT-STAGEHAND-001.yaml": (f"owner_signature_status: SIGNED\nproduction_gate: {stagehand}\n",
                                          [simple, prod]),
+        # Unit G12: the egress qualification the browser capabilities inherit (GREEN stand-in).
+        "VAN-BROWSER-CORE-EGRESS-001.yaml": ("owner_signature_status: SIGNED\n", [simple]),
     }
     required = []
     for name, (text, gates) in records.items():
@@ -321,3 +323,92 @@ def test_health_governance_keeps_its_keys_and_adds_per_capability_fields():
             "production_gates_not_green", "gates", "gate_model", "gate_model_error"} <= set(state)
     assert set(state["production_activation_permitted_by_capability"]) == {"n8n", "browser_harness", "stagehand", "jev_browser_effect"}
     assert state["production_activation_permitted"] is False
+
+
+# --------------------------------------------------------------- unit G12: egress qualification
+EGRESS = "VAN-BROWSER-CORE-EGRESS-001.yaml"
+
+
+def _egress_gate() -> dict:
+    model = json.loads(GATE_MODEL.read_text(encoding="utf-8"))
+    return next(d for d in model["capability_decisions"] if d["decision"] == EGRESS)["gates"][0]
+
+
+def test_real_model_gates_every_browser_capability_on_egress_qualification_and_it_is_pending():
+    from van_gateway.automation.production_gates import BROWSER_EGRESS_DECISION, CAPABILITY_DECISIONS
+
+    assert BROWSER_EGRESS_DECISION == EGRESS
+    for capability in ("browser_harness", "stagehand", "jev_browser_effect"):
+        assert EGRESS in CAPABILITY_DECISIONS[capability]
+    assert EGRESS not in CAPABILITY_DECISIONS["n8n"]
+    gate = _egress_gate()
+    assert gate["kind"] == "qualify_report" and gate["zone"] == "van-browser-core"
+    assert set(gate["required_checks"]) == {
+        "firewall_loaded", "browser_udp_blocked", "browser_tcp_bypass_blocked", "egress_proxy_active",
+        "egress_refuses_without_policy", "egress_policy_mac_enforced", "egress_refuses_websocket_and_write",
+        "harness_uses_egress_proxy"}
+    state = evaluate_production_gates()
+    gates = {(g["decision"], g["gate"]): g for g in state["capability_gates"]}
+    assert gates[(EGRESS, "egress_qualification")]["status"] == "PENDING"
+    for capability in ("browser_harness", "stagehand", "jev_browser_effect"):
+        assert f"{EGRESS}:egress_qualification" in state["capabilities"][capability]["gates_not_green"]
+        assert state["capabilities"][capability]["production_activation_permitted"] is False
+    # Every check the gate requires is one qualify.sh emits and requires.
+    qualify = (GATE_MODEL.parents[1] / "deploy/van-browser-core/qualify.sh").read_text(encoding="utf-8")
+    for check in gate["required_checks"]:
+        assert f"add {check} GREEN" in qualify and f"add {check} RED" in qualify, check
+
+
+def _egress_repo(tmp_path: Path, *, status="QUALIFIED", checks=None, zone="van-browser-core",
+                 reference=None, pin=None, gate=None) -> dict:
+    gate = gate or _egress_gate()
+    decisions = tmp_path / "docs" / "decisions"
+    decisions.mkdir(parents=True)
+    report = tmp_path / gate["report_dir"] / "qualify-20261001.json"
+    report.parent.mkdir(parents=True)
+    rows = checks if checks is not None else [
+        {"check": c, "status": "GREEN", "required": 1, "detail": ""} for c in gate["required_checks"]]
+    report.write_text(json.dumps({"zone": zone, "fails": 0, "checks": rows}), encoding="utf-8")
+    import hashlib
+
+    sha = hashlib.sha256(report.read_bytes()).hexdigest()
+    ref = reference if reference is not None else report.relative_to(tmp_path).as_posix()
+    (decisions / EGRESS).write_text(
+        f"egress_qualification:\n  status: {status}\n  qualify_report: {json.dumps(ref)}\n"
+        f"  qualify_report_sha256: {json.dumps(pin if pin is not None else sha)}\n", encoding="utf-8")
+    path = tmp_path / "gates.json"
+    path.write_text(json.dumps({"decisions_dir": "docs/decisions", "required_decisions": [
+        {"decision": EGRESS, "format": "yaml", "gates": [gate]}]}), encoding="utf-8")
+    result = evaluate_production_gates(path, tmp_path)
+    return result["gates"][0]
+
+
+def test_egress_gate_is_green_only_with_a_pinned_all_green_report(tmp_path):
+    assert _egress_repo(tmp_path)["status"] == "GREEN"
+
+
+@pytest.mark.parametrize("label, kwargs, expected", [
+    ("pending as committed", {"status": "PENDING"}, "PENDING"),
+    ("QUALIFIED with no report", {"reference": ""}, "UNKNOWN"),
+    ("report outside the report directory", {"reference": "docs/decisions/" + EGRESS}, "UNKNOWN"),
+    ("report path climbing out", {"reference": "evidence/van-browser-core/qualify/../../../gates.json"}, "UNKNOWN"),
+    ("pin does not match", {"pin": "0" * 64}, "UNKNOWN"),
+    ("report for another zone", {"zone": "van-trading-core"}, "UNKNOWN"),
+    ("a required check missing", {"checks": [{"check": "firewall_loaded", "status": "GREEN", "required": 1}]}, "UNKNOWN"),
+    ("a required check RED", {"checks": None, "red": "browser_udp_blocked"}, "BLOCKED"),
+    ("a required check GREEN but not required", {"checks": None, "optional": "egress_proxy_active"}, "UNKNOWN"),
+    ("status outside the vocabulary", {"status": "GREEN"}, "UNKNOWN"),
+])
+def test_egress_gate_is_not_green_without_the_report(tmp_path, label, kwargs, expected):
+    red, optional = kwargs.pop("red", None), kwargs.pop("optional", None)
+    if red or optional:
+        rows = [{"check": c, "status": "RED" if c == red else "GREEN", "required": 0 if c == optional else 1}
+                for c in _egress_gate()["required_checks"]]
+        kwargs["checks"] = rows
+    assert _egress_repo(tmp_path, **kwargs)["status"] == expected, label
+
+
+def test_a_qualify_report_gate_without_required_checks_is_unknown(tmp_path):
+    gate = dict(_egress_gate(), required_checks=[])
+    result = _egress_repo(tmp_path, gate=gate)
+    assert result["status"] == "UNKNOWN" and "required_checks" in result["reason"]

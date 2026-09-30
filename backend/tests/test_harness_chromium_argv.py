@@ -55,9 +55,43 @@ def test_ensure_launches_one_merged_disable_features_with_the_guards_features(mo
     assert "--remote-debugging-address=127.0.0.1" in argv and "--headless=new" in argv
 
 
+SPKI = "A" * 43 + "="
+
+
+def test_ensure_launches_through_the_egress_proxy_with_one_merged_disable_features(monkeypatch, tmp_path):
+    """Unit G13 (G11 + G12): ``ensure()`` passes G12's proxy flags through ``chromium_argv``'s
+    ``extra``; the launch still carries exactly one --disable-features with the guard's features."""
+    module = he._load(monkeypatch, tmp_path)
+    monkeypatch.setattr(module, "EGRESS_CONTROL_SOCKET", str(tmp_path / "egress.sock"))
+    calls = []
+
+    def egress_call(message):
+        calls.append(message)
+        return {"ok": True, "port": 9150, "spki": SPKI}
+
+    monkeypatch.setattr(module, "_egress_call", egress_call)
+    argv = _ensure_argv(module, monkeypatch, tmp_path)
+    assert calls == [{"op": "listener", "alias": "public_research"}]
+    assert [a for a in argv if a.startswith("--proxy-server")] == ["--proxy-server=http://127.0.0.1:9150"]
+    assert "--proxy-bypass-list=<-loopback>" in argv
+    assert f"--ignore-certificate-errors-spki-list={SPKI}" in argv
+    assert "--disable-quic" in argv and "--ignore-certificate-errors" not in argv
+    assert "--no-proxy-server" not in argv
+    assert {"KeepAliveInBrowserMigration", "SharedWorker"} <= _one_disable_features(argv)
+    assert argv[-1] == "about:blank"
+
+
+def test_without_a_proxy_a_development_launch_still_disables_quic(monkeypatch, tmp_path):
+    module = he._load(monkeypatch, tmp_path)
+    monkeypatch.setattr(module, "EGRESS_CONTROL_SOCKET", "")
+    monkeypatch.setattr(module, "TRUST_ZONE", "")
+    argv = _ensure_argv(module, monkeypatch, tmp_path)
+    assert "--disable-quic" in argv and not [a for a in argv if a.startswith("--proxy-server")]
+    _one_disable_features(argv)
+
+
 def test_a_flag_added_later_is_merged_not_appended(monkeypatch, tmp_path):
-    """Unit G12 will add ``--proxy-server`` (the owner's egress proxy); any flag added through
-    ``chromium_argv`` keeps the single merged --disable-features."""
+    """Any flag added through ``chromium_argv`` keeps the single merged --disable-features."""
     module = he._load(monkeypatch, tmp_path)
     argv = module.chromium_argv(tmp_path / "p", ("--proxy-server=http://127.0.0.1:3128", "--disable-features=Translate"))
     assert "--proxy-server=http://127.0.0.1:3128" in argv

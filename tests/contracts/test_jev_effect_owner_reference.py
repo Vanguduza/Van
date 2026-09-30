@@ -44,10 +44,35 @@ def _copy_repo(tmp_path: Path) -> Path:
     data["owner_signature_status"] = "SIGNED"
     data.setdefault("observed_runtime", {})["pin_status"] = "PINNED_DIGEST_VERIFIED"
     harness.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+    _qualify_egress(tmp_path)
     policy = tmp_path / "docs/decisions/VAN-AMEND-SECURITY-POLICY-001.md"
     policy.write_text(re.sub(r"^\*\*Status:\*\*\s*`[^`]+`", "**Status:** `OWNER_APPROVED`",
                              policy.read_text(encoding="utf-8"), count=1, flags=re.M), encoding="utf-8")
     return tmp_path
+
+
+def _qualify_egress(root: Path) -> None:
+    """Unit G12: the capability also inherits the egress qualification gate. Make it GREEN the
+    only way it can be: a qualify report with every required check GREEN, pinned by sha256."""
+    import hashlib
+
+    model = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    gate = next(d for d in model["capability_decisions"]
+                if d["decision"] == production_gates.BROWSER_EGRESS_DECISION)["gates"][0]
+    report = root / gate["report_dir"] / "qualify-fixture.json"
+    report.parent.mkdir(parents=True)
+    report.write_text(json.dumps({"zone": "van-browser-core", "fails": 0, "checks": [
+        {"check": c, "status": "GREEN", "required": 1, "detail": "fixture"} for c in gate["required_checks"]]}),
+        encoding="utf-8")
+    record = root / "docs/decisions" / production_gates.BROWSER_EGRESS_DECISION
+    text = record.read_text(encoding="utf-8")
+    for old, new in (("  status: PENDING", "  status: QUALIFIED"),
+                     ("  qualify_report: null", f"  qualify_report: {report.relative_to(root).as_posix()}"),
+                     ("  qualify_report_sha256: null",
+                      f'  qualify_report_sha256: "{hashlib.sha256(report.read_bytes()).hexdigest()}"')):
+        assert text.count(old) == 1, old
+        text = text.replace(old, new)
+    record.write_text(text, encoding="utf-8")
 
 
 def _spoof(root: Path, *, sha: str | None = None, auth_id: str | None = None) -> None:
