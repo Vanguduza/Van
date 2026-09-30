@@ -1,0 +1,16 @@
+# VAN governance paths (review I6 M2, unit G9a). A change to any of these needs the repository
+# owner's review. The Project Truth ledger gate trusts authorization records, baselines and the
+# checker only once they are on the base branch; this file is what makes getting them there an
+# owner act. It takes effect only when branch protection on the programme branches and main
+# requires code-owner review and the project-truth-ledger check — a GitHub setting outside the
+# repository that the owner must enable (tools/ci/README.md, "Branch protection").
+#
+# Owner: @Vanguduza (github.com/Vanguduza/Van; the repository owner and the author of the
+# overwhelming majority of commits).
+
+/docs/project-state/authorizations/                @Vanguduza
+/registries/project_truth_ledger_baselines.json    @Vanguduza
+/tools/ci/                                         @Vanguduza
+/.githooks/                                        @Vanguduza
+/.github/workflows/                                @Vanguduza
+/.github/CODEOWNERS                                @Vanguduza
