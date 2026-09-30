@@ -1,68 +1,139 @@
-# VAN Trading Core - hardened Muse egress enclave
+# VAN Trading Core — hardened Meta Muse egress enclave
 
-This package gives Hermes a fixed US/Canada network egress for the official Meta Muse client without putting Muse, Meta credentials, or web content inside VATI's trading authority boundary.
+This module gives Hermes/VAN a persistent US or Canadian network identity for the official Meta Muse client while keeping Meta credentials, web content, and the Muse browser **outside VATI's trading authority boundary**.
 
-## Security boundary
-
-`van-trading-core` remains the network relay only. A dedicated `van-muse` Linux network namespace contains the WireGuard interface and SOCKS5 process. It has no trading/LAN NIC, no route to OCI metadata, no RFC1918 route, no IPv6 escape, and no inbound public listener. The host exposes the proxy only on `127.0.0.1:17890`; `dial-control` consumes it through the existing SSH path.
-
-The design deliberately does **not** change the trading core's host default route, VATI services, broker routes, UFW public policy, trading credentials, or Commander principals.
-
-## Flow
+## Canonical boundary
 
 ```text
-Hermes browser on dial-control
+Muse browser on dial-control / Hermes
         |
-  SSH local forward
+        | local SOCKS5 127.0.0.1:17891
+        v
+persistent SSH local-forward
         |
+        v
 van-trading-core 127.0.0.1:17890
         |
- isolated SOCKS5 / van-muse namespace
+        v
+van-muse network namespace
+  ├─ Dante SOCKS5 169.254.77.2:1080
+  ├─ no trading/LAN NIC
+  ├─ no IPv6 default path
+  ├─ private/link-local destinations blocked
+  └─ default route = wg-muse only
         |
- WireGuard only
+        v
+WireGuard
         |
+        v
 dedicated static US/Canada exit VPS
         |
-      muse.ai
+        v
+muse.ai / Meta
 ```
 
-Use `socks5h://` so hostname resolution happens behind the tunnel. Keep the Muse browser profile persistent on `dial-control`; do not store Meta credentials on the trading VM.
+The trading host's own default route, VATI sessions, broker connectivity, Commander principals, Supabase, and trading credentials are not changed.
 
-## Provision an exit
+## Security properties
 
-Create a small VPS physically hosted in a Muse-supported US/Canada region with a fixed IPv4. Generate the trading-core client key first:
+- The Muse SOCKS bridge is bound only to `127.0.0.1:17890` on trading core.
+- The namespace has exactly `lo`, `muse-ns`, and `wg-muse`.
+- Namespace Internet traffic can leave only through `wg-muse`.
+- RFC1918, CGNAT, loopback, link-local/metadata, multicast, and reserved IPv4 destinations are blocked before encryption.
+- IPv6 is disabled inside the namespace until an explicitly governed IPv6 peer exists.
+- The US/Canada exit also blocks private destinations and drops traffic aimed at the exit VPS itself.
+- DNS is performed behind the SOCKS5/WireGuard path. Consumers must use `socks5h` or Chromium remote DNS.
+- The health check verifies both a fixed public IP and country code (`US` or `CA`). A mismatch stops the bridge.
+- Installation actively proves the kill switch by taking `wg-muse` down and confirming that no public connection succeeds.
+- Installation snapshots the trading host default route before/after and removes the enclave if it changes.
+- No Meta password, cookie, or Muse profile is stored on the trading VM.
 
-```bash
-sudo install -d -m 0700 /opt/van-muse-egress/secrets
-sudo sh -c 'umask 077; wg genkey > /opt/van-muse-egress/secrets/wg-private.key'
-sudo wg pubkey < /opt/van-muse-egress/secrets/wg-private.key
-```
+## 1. Stage the trading-core client
 
-On the US/Canada VPS, run `MUSE_CLIENT_PUBLIC_KEY=<printed-key> sudo -E bash install-us-ca-exit.sh`. Put the returned server public key and the VPS fixed public IPv4 into `/etc/van-muse-egress.env` on trading core. Provider firewall should expose UDP/51820 only, plus whatever separate SSH administration rule you already require.
-
-## Install on trading core
+From this directory on `van-trading-core`:
 
 ```bash
 sudo install -m 0600 muse-egress.env.example /etc/van-muse-egress.env
-sudoedit /etc/van-muse-egress.env
 sudo bash install-muse-egress.sh
-sudo bash qualify-muse-egress.sh
 ```
 
-A GREEN qualification proves the bridge is loopback-only, namespace default route is WireGuard, metadata and trading-LAN access are blocked, and the observed internet address exactly matches `MUSE_EXPECTED_EGRESS_IP`.
+The first run generates the WireGuard client private key and prints:
 
-## Hermes consumption
+```text
+MUSE_CLIENT_PUBLIC_KEY=...
+```
 
-From `dial-control`, create an SSH local forward using the existing `van-trading-core` alias:
+It deliberately exits staged/not-started until a real exit peer is configured.
+
+## 2. Provision a dedicated US/Canada exit
+
+Use a small **dedicated** Ubuntu 24.04 VPS with a static public IPv4 in the US or Canada. Copy only `install-us-ca-exit.sh` to it and run:
 
 ```bash
-ssh -N -L 127.0.0.1:17890:127.0.0.1:17890 van-trading-core
+sudo env \
+  MUSE_CLIENT_PUBLIC_KEY='<client-public-key>' \
+  MUSE_EXIT_EXPECTED_COUNTRY=US \
+  bash install-us-ca-exit.sh
 ```
 
-Point the dedicated persistent Muse browser at `socks5://127.0.0.1:17890`. For automated Chromium/Playwright, ensure proxy-side DNS is used; do not fall back to host DNS. Keep this browser/profile dedicated to Muse so account cookies and location/network history do not mix with unrelated browsing.
+For Canada use `MUSE_EXIT_EXPECTED_COUNTRY=CA`.
 
-## Fail-closed behavior
+The installer refuses a country mismatch and prints the exact values to place in trading core:
 
-`van-muse-egress-check` compares the live public IP through SOCKS5 with the configured fixed exit IP. Any mismatch stops `van-muse-bridge.service`, so the browser loses connectivity rather than silently falling back to the Johannesburg host route. A five-minute systemd timer repeats that check.
+```text
+MUSE_WG_PEER_PUBLIC_KEY=...
+MUSE_WG_ENDPOINT=<fixed-ip>:51820
+MUSE_EXPECTED_EGRESS_IP=<fixed-ip>
+MUSE_EXPECTED_COUNTRY=US
+```
 
-This only supplies a stable supported-region network path. It does not guarantee Meta account eligibility, and it should not be used to falsify identity, age, billing details, or other account information.
+At the VPS/provider firewall expose WireGuard UDP only. Restrict the source to trading core's public source IP when the provider supports it. Keep SSH administration separately restricted.
+
+## 3. Activate trading-core egress
+
+Edit `/etc/van-muse-egress.env` on trading core with the returned values, then:
+
+```bash
+sudo bash install-muse-egress.sh
+sudo qualify-muse-egress
+```
+
+A successful install emits `MUSE_EGRESS_GREEN`. The normal `deploy/van-trading-core/qualify.sh` also becomes RED if Muse is configured but this enclave fails qualification.
+
+## 4. Give Hermes the persistent path
+
+On `dial-control` / Hermes:
+
+```bash
+bash deploy/van-trading-core/muse/hermes/install-muse-egress-tunnel.sh
+```
+
+This creates a persistent systemd user tunnel:
+
+```text
+127.0.0.1:17891  -> SSH ->  van-trading-core:127.0.0.1:17890
+```
+
+The Hermes check is:
+
+```bash
+~/.local/bin/van-muse-egress-check
+```
+
+It must return the configured fixed IP and `US` or `CA`.
+
+## 5. Persistent Muse browser
+
+Launch the dedicated profile with:
+
+```bash
+bash deploy/van-trading-core/muse/hermes/launch-muse-browser.sh
+```
+
+The launcher uses a persistent profile, SOCKS5 only, proxy-side DNS, disables QUIC, and disables non-proxied WebRTC UDP. The profile should be dedicated to Muse rather than mixed with unrelated browsing.
+
+## Operational rule
+
+**VAN/Hermes remains the authority.** This enclave supplies a stable network execution path only. It does not grant Muse trading authority, infrastructure credentials, or access to VATI secrets, and it does not guarantee Meta account eligibility.
+
+Do not falsify age, identity, billing, or other account information. The purpose of this module is deterministic network isolation and region-stable egress, not identity spoofing.
