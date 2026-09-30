@@ -34,7 +34,8 @@ cat >/etc/nftables.d-van-muse-exit.nft <<NFT
  table inet van_muse_exit_filter {
    set blocked4 { type ipv4_addr; flags interval; elements = { 0.0.0.0/8, 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.0.0.0/24, 192.168.0.0/16, 224.0.0.0/4, 240.0.0.0/4 } }
    chain forward {
-     type filter hook forward priority -5; policy accept;
+     type filter hook forward priority -5; policy drop;
+     ct state invalid drop
      iifname "wg-muse" ip daddr @blocked4 drop
      iifname "wg-muse" oifname "$WAN_IF" accept
      iifname "$WAN_IF" oifname "wg-muse" ct state established,related accept
