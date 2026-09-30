@@ -1,0 +1,22 @@
+name: DIAL control recovery compute probe
+
+on:
+  push:
+    branches:
+      - ops/dial-control-recovery-20260930
+    paths:
+      - .github/workflows/dial-control-recovery-probe.yml
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Prove hosted recovery compute
+        run: |
+          set -euo pipefail
+          echo "DIAL_RECOVERY_COMPUTE=GREEN"
+          uname -a
