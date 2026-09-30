@@ -1,0 +1,206 @@
+name: DIAL Control Oracle-to-Netcup recovery
+
+on:
+  push:
+    branches:
+      - ops/dial-control-recovery-20260930
+    paths:
+      - .github/workflows/dial-control-oracle-recovery.yml
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: dial-control-oracle-netcup-recovery
+  cancel-in-progress: false
+
+env:
+  SCP_API: https://www.servercontrolpanel.de/scp-core/api
+  SCP_OIDC: https://www.servercontrolpanel.de/realms/scp/protocol/openid-connect
+  EMERGENCY_BRANCH: ops/dial-control-recovery-20260930
+  CONTROLLER_PATH: /usr/local/lib/dial-control/github-oidc-control.mjs
+
+jobs:
+  request-authorization:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      device_code: ${{ steps.device.outputs.device_code }}
+      interval: ${{ steps.device.outputs.interval }}
+    steps:
+      - id: device
+        name: Request short-lived Netcup recovery authorization
+        shell: bash
+        run: |
+          set -euo pipefail
+          R="$(curl -sS --fail-with-body -X POST "$SCP_OIDC/auth/device" -d 'client_id=scp' -d 'scope=openid')"
+          echo "device_code=$(jq -r .device_code <<<"$R")" >>"$GITHUB_OUTPUT"
+          echo "interval=$(jq -r '.interval // 5' <<<"$R")" >>"$GITHUB_OUTPUT"
+          echo "NETCUP_RECOVERY_APPROVAL_URL=$(jq -r .verification_uri_complete <<<"$R")"
+          echo "NETCUP_RECOVERY_USER_CODE=$(jq -r .user_code <<<"$R")"
+
+  recover:
+    needs: request-authorization
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Authorize, patch bounded emergency trust, and restore DDS runner
+        shell: bash
+        env:
+          DEVICE_CODE: ${{ needs.request-authorization.outputs.device_code }}
+          DEVICE_INTERVAL: ${{ needs.request-authorization.outputs.interval }}
+        run: |
+          set -Eeuo pipefail
+          umask 077
+          interval="${DEVICE_INTERVAL:-5}"
+          TOKEN=""
+          for attempt in $(seq 1 150); do
+            R="$(curl -sS -X POST "$SCP_OIDC/token" -d 'grant_type=urn:ietf:params:oauth:grant-type:device_code' -d "device_code=$DEVICE_CODE" -d 'client_id=scp' || true)"
+            TOKEN="$(jq -r '.access_token // empty' <<<"$R" 2>/dev/null || true)"
+            [[ -n "$TOKEN" ]] && break
+            err="$(jq -r '.error // empty' <<<"$R" 2>/dev/null || true)"
+            case "$err" in
+              authorization_pending|"") ;;
+              slow_down) interval=$((interval+5)) ;;
+              access_denied|expired_token) echo "REFUSE: Netcup authorization $err" >&2; exit 20 ;;
+            esac
+            sleep "$interval"
+          done
+          [[ -n "$TOKEN" ]] || { echo "REFUSE: Netcup authorization unavailable" >&2; exit 20; }
+
+          auth=(-H "Authorization: Bearer $TOKEN" -H 'accept: application/json')
+          get(){ curl -sS --fail-with-body "${auth[@]}" "$1"; }
+          patch(){ curl -sS --fail-with-body -X PATCH "${auth[@]}" -H 'Content-Type: application/merge-patch+json' --data "$2" "$1"; }
+          tcp(){ timeout 3 bash -c "</dev/tcp/$1/$2" >/dev/null 2>&1; }
+
+          SERVERS="$(get "$SCP_API/v1/servers")"
+          SERVER_ID="$(jq -r '[.[] | select((.hostname // "")=="dial-control" or (.nickname // "")=="dial-control" or (.name // "")=="dial-control")] | if length==1 then .[0].id else empty end' <<<"$SERVERS")"
+          [[ "$SERVER_ID" =~ ^[0-9]+$ ]] || { echo "REFUSE: dial-control server not uniquely resolved" >&2; jq '[.[]|{id,name,hostname,nickname}]' <<<"$SERVERS"; exit 21; }
+          SERVER="$(get "$SCP_API/v1/servers/$SERVER_ID")"
+          IP="$(jq -r '.ipv4Addresses[0] // empty' <<<"$SERVER")"
+          [[ "$IP" =~ ^[0-9]+(\.[0-9]+){3}$ ]] || { echo "REFUSE: dial-control IPv4 unavailable" >&2; exit 21; }
+          echo "DIAL_CONTROL_SCP_RESOLVED=YES"
+          echo "state=$(jq -r '.serverLiveInfo.state // "unknown"' <<<"$SERVER")"
+          echo "guest_agent=$(get "$SCP_API/v1/servers/$SERVER_ID/guest-agent/status" | jq -r '.available // false' 2>/dev/null || true)"
+
+          # Stop normal boot before rescue. Provider state changes are owner-authorized by the device grant.
+          state="$(jq -r '.serverLiveInfo.state // empty' <<<"$SERVER")"
+          if [[ "$state" == RUNNING ]]; then
+            patch "$SCP_API/v1/servers/$SERVER_ID?stateOption=POWEROFF" '{"state":"OFF"}' >/dev/null
+            for _ in $(seq 1 90); do
+              [[ "$(get "$SCP_API/v1/servers/$SERVER_ID" | jq -r '.serverLiveInfo.state // empty')" == SHUTOFF ]] && break
+              sleep 5
+            done
+          fi
+          [[ "$(get "$SCP_API/v1/servers/$SERVER_ID" | jq -r '.serverLiveInfo.state // empty')" == SHUTOFF ]] || { echo "REFUSE: dial-control did not stop" >&2; exit 22; }
+
+          RESCUE="$(get "$SCP_API/v1/servers/$SERVER_ID/rescuesystem" || echo '{}')"
+          if [[ "$(jq -r '.active // false' <<<"$RESCUE")" != true ]]; then
+            curl -sS --fail-with-body -X POST "${auth[@]}" -H 'Content-Type: application/json' "$SCP_API/v1/servers/$SERVER_ID/rescuesystem" >/dev/null
+          fi
+          PASS=""
+          for _ in $(seq 1 60); do
+            RESCUE="$(get "$SCP_API/v1/servers/$SERVER_ID/rescuesystem" || echo '{}')"
+            PASS="$(jq -r '.password // empty' <<<"$RESCUE")"
+            [[ "$(jq -r '.active // false' <<<"$RESCUE")" == true && -n "$PASS" ]] && break
+            sleep 3
+          done
+          [[ -n "$PASS" ]] || { echo "REFUSE: rescue password unavailable" >&2; exit 23; }
+          current="$(get "$SCP_API/v1/servers/$SERVER_ID" | jq -r '.serverLiveInfo.state // empty')"
+          if [[ "$current" == SHUTOFF ]]; then
+            patch "$SCP_API/v1/servers/$SERVER_ID" '{"state":"ON"}' >/dev/null || true
+          fi
+          for _ in $(seq 1 120); do tcp "$IP" 22 && break; sleep 5; done
+          tcp "$IP" 22 || { echo "REFUSE: rescue SSH unavailable" >&2; exit 24; }
+
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq sshpass
+          export SSHPASS="$PASS"
+          SSH=(sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 root@"$IP")
+
+          ROOTDEV="$("${SSH[@]}" 'set -Eeuo pipefail
+            mkdir -p /mnt/dial-probe
+            for dev in $(lsblk -rpno NAME,FSTYPE | awk '"'"'$2 ~ /^(ext4|xfs|btrfs)$/ {print $1}'"'"'); do
+              umount /mnt/dial-probe >/dev/null 2>&1 || true
+              if mount -o ro "$dev" /mnt/dial-probe >/dev/null 2>&1; then
+                if grep -q "^ID=ubuntu" /mnt/dial-probe/etc/os-release 2>/dev/null; then printf "%s" "$dev"; umount /mnt/dial-probe; exit 0; fi
+                umount /mnt/dial-probe
+              fi
+            done
+            exit 1')"
+          [[ -n "$ROOTDEV" ]] || { echo "REFUSE: Ubuntu root filesystem not found" >&2; exit 25; }
+
+          "${SSH[@]}" "set -Eeuo pipefail
+            mkdir -p /mnt/dial-root
+            mount '$ROOTDEV' /mnt/dial-root
+            test -f /mnt/dial-root$CONTROLLER_PATH
+            cp -a /mnt/dial-root$CONTROLLER_PATH /mnt/dial-root$CONTROLLER_PATH.pre-van-recovery
+            install -d -m 0700 /mnt/dial-root/var/lib/dial-control/github-oidc
+            date -d '+2 hours' +%s > /mnt/dial-root/var/lib/dial-control/github-oidc/emergency-van-recovery-until
+            chmod 0600 /mnt/dial-root/var/lib/dial-control/github-oidc/emergency-van-recovery-until
+            python3 - <<'PY'
+          from pathlib import Path
+          p=Path('/mnt/dial-root/usr/local/lib/dial-control/github-oidc-control.mjs')
+          s=p.read_text()
+          wf="  '/.github/workflows/dial-control-oracle-recovery.yml@',\n"
+          needle="const ALLOWED_WORKFLOWS = [\n"
+          if wf.strip() not in s:
+              s=s.replace(needle, needle+wf, 1)
+          old="if(payload.repository!==REPOSITORY) throw new Error('repository claim mismatch');"
+          new="""const emergencyVan = (() => { try { const until=Number(fs.readFileSync(path.join(ROOT,'emergency-van-recovery-until'),'utf8').trim()); return Date.now()/1000 < until && payload.repository==='Vanguduza/Van' && payload.actor===OWNER && payload.ref==='refs/heads/ops/dial-control-recovery-20260930' && String(payload.workflow_ref||'').includes('/.github/workflows/dial-control-oracle-recovery.yml@'); } catch { return false; } })();
+          if(payload.repository!==REPOSITORY && !emergencyVan) throw new Error('repository claim mismatch');"""
+          if old not in s: raise SystemExit('repository guard pattern missing')
+          s=s.replace(old,new,1)
+          old2="const body=JSON.parse(raw.toString('utf8'));\n    audit({event:'ACTION_START'"
+          new2="const body=JSON.parse(raw.toString('utf8'));\n    if(claims.repository==='Vanguduza/Van' && body.action!=='ensure-github-admin-runner') throw new Error('emergency VAN recovery action refused');\n    audit({event:'ACTION_START'"
+          if old2 not in s: raise SystemExit('action guard insertion point missing')
+          s=s.replace(old2,new2,1)
+          old3="requireOk(r,'ensure-github-admin-runner');\n      return r;"
+          new3="""requireOk(r,'ensure-github-admin-runner');
+                if(claims.repository==='Vanguduza/Van') {
+                  const canonical=path.join(REPO,'deploy/netcup/hermes-control/github-oidc-control.mjs');
+                  const reseal=command("install -m 0755 '"+canonical+"' /usr/local/lib/dial-control/github-oidc-control.mjs && rm -f '"+path.join(ROOT,'emergency-van-recovery-until')+"' && systemd-run --unit=dial-reseal-github-oidc-recovery --on-active=10s /bin/systemctl restart dial-github-oidc-control.service");
+                  requireOk(reseal,'emergency-controller-reseal');
+                }
+                return r;"""
+          if old3 not in s: raise SystemExit('runner recovery pattern missing')
+          s=s.replace(old3,new3,1)
+          p.write_text(s)
+          PY
+            chown root:root /mnt/dial-root$CONTROLLER_PATH
+            chmod 0755 /mnt/dial-root$CONTROLLER_PATH
+            /mnt/dial-root/home/ubuntu/.local/bin/node --check /mnt/dial-root$CONTROLLER_PATH
+            sync
+            umount /mnt/dial-root
+          "
+          echo "EMERGENCY_CONTROLLER_TRUST=STAGED"
+
+          patch "$SCP_API/v1/servers/$SERVER_ID?stateOption=POWEROFF" '{"state":"OFF"}' >/dev/null || true
+          for _ in $(seq 1 90); do
+            [[ "$(get "$SCP_API/v1/servers/$SERVER_ID" | jq -r '.serverLiveInfo.state // empty')" == SHUTOFF ]] && break
+            sleep 3
+          done
+          curl -sS --fail-with-body -X DELETE "${auth[@]}" "$SCP_API/v1/servers/$SERVER_ID/rescuesystem" >/dev/null
+          for _ in $(seq 1 60); do
+            [[ "$(get "$SCP_API/v1/servers/$SERVER_ID/rescuesystem" | jq -r '.active // false')" == false ]] && break
+            sleep 3
+          done
+          patch "$SCP_API/v1/servers/$SERVER_ID" '{"state":"ON"}' >/dev/null
+          for _ in $(seq 1 120); do
+            code="$(curl -sS --connect-timeout 3 --max-time 5 -o /dev/null -w '%{http_code}' "http://$IP:9134/healthz" 2>/dev/null || true)"
+            [[ "$code" == 200 ]] && break
+            sleep 5
+          done
+          HEALTH="$(curl -fsS --max-time 5 "http://$IP:9134/healthz")"
+          echo "DIAL_CONTROL_HEALTH_AFTER_RESCUE=$(jq -c '{ok,host,repo_head,bootstrap_ref,bootstrap_phase}' <<<"$HEALTH")"
+
+          BODY='{"action":"ensure-github-admin-runner"}'
+          HASH="$(printf '%s' "$BODY" | sha256sum | awk '{print $1}')"
+          AUD="dial-control:$HASH"
+          OIDC_URL="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=$(python3 -c 'import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1],safe=""))' "$AUD")"
+          JWT="$(curl -fsS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$OIDC_URL" | jq -r .value)"
+          RESP="$(curl -fsS --max-time 1200 -H 'content-type: application/json' -H "Authorization: Bearer $JWT" --data "$BODY" "http://$IP:9134/v1/action")"
+          jq -e '.ok == true and .action == "ensure-github-admin-runner"' <<<"$RESP" >/dev/null
+          echo "DDS_GITHUB_RUNNER_RECOVERY=GREEN"
+          jq -r '.result.stdout // ""' <<<"$RESP" | grep -E '^(GITHUB_ADMIN_RUNNER|runner|environment)=' || true
