@@ -75,7 +75,7 @@ jobs:
           tcp(){ timeout 3 bash -c "</dev/tcp/$1/$2" >/dev/null 2>&1; }
 
           SERVERS="$(get "$SCP_API/v1/servers")"
-          SERVER_ID="$(jq -r '[.[] | select((.hostname // "")=="dial-control" or (.nickname // "")=="dial-control" or (.name // "")=="dial-control")] | if length==1 then .[0].id else empty end' <<<"$SERVERS")"
+          SERVER_ID="$(jq -r 'if length==1 then .[0].id else ([.[] | select((.hostname // "")=="dial-control" or (.nickname // "")=="dial-control" or (.nickname // "")=="Hermes" or (.name // "")=="dial-control")] | if length==1 then .[0].id else empty end) end' <<<"$SERVERS")"
           [[ "$SERVER_ID" =~ ^[0-9]+$ ]] || { echo "REFUSE: dial-control server not uniquely resolved" >&2; jq '[.[]|{id,name,hostname,nickname}]' <<<"$SERVERS"; exit 21; }
           SERVER="$(get "$SCP_API/v1/servers/$SERVER_ID")"
           IP="$(jq -r '.ipv4Addresses[0] // empty' <<<"$SERVER")"
