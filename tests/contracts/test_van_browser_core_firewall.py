@@ -177,7 +177,12 @@ NETNS_DRIVER = textwrap.dedent(r'''
 
     ifup("lo")
     addr("lo:1", "192.0.2.10", "255.255.255.255")  # this host's own non-loopback address
-    route("192.0.2.0", "255.255.255.0", "lo")        # and a "remote" network
+    if os.environ.get("VAN_TEST_REMOTE_IS_LOCAL"):
+        # 192.0.2.1 becomes a local address with nothing listening: the kernel itself answers a
+        # connect with RST (ECONNREFUSED) whether or not the ruleset is loaded.
+        addr("lo:2", "192.0.2.1", "255.255.255.255")
+    else:
+        route("192.0.2.0", "255.255.255.0", "lo")    # and a "remote" network
     listener = socket.socket(); listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     listener.bind(("0.0.0.0", 18080)); listener.listen(16)
     threading.Thread(target=lambda: [listener.accept()[0].close() for _ in iter(int, 1)], daemon=True).start()
@@ -321,8 +326,10 @@ def _qualify_env(tmp_path: Path) -> dict:
     (etc / "zone").write_text("van-browser-core\n", encoding="utf-8")
     key = tmp_path / "fence.key"
     key.write_bytes(b"q" * 64)
+    key.chmod(0o400)  # as bootstrap.sh installs it
     ctl = tmp_path / "egress.sock"
-    (etc / "runtime.env").write_text(f"VAN_EGRESS_CONTROL_SOCKET={ctl}\nVAN_EGRESS_FENCE_KEY_FILE={key}\n", encoding="utf-8")
+    (etc / "runtime.env").write_text(f"VAN_EGRESS_CONTROL_SOCKET={ctl}\nVAN_EGRESS_FENCE_KEY_FILE={key}\n"
+                                     f"VAN_HARNESS_FENCE_KEY_FILE={key}\n", encoding="utf-8")
     return {"VAN_BROWSER_CORE_ETC": str(etc), "ctl": str(ctl), "key": str(key)}
 
 
@@ -355,7 +362,9 @@ def test_live_qualify_reports_the_firewall_and_the_proxy_green(tmp_path):
     for check in FIREWALL_CHECKS + EGRESS_CHECKS:
         assert status[check] == "GREEN", (check, out["qualify"])
     assert status["harness_uses_egress_proxy"] == "RED"  # no Harness here: honest RED, not GREEN
-    assert status["stagehand_isolated"] == "RED"         # no Stagehand here either
+    # No Stagehand here either; the probe itself ran (as uid 65533: key and socket denied).
+    iso = next(c["detail"] for c in out["qualify"]["checks"] if c["check"] == "stagehand_isolated")
+    assert status["stagehand_isolated"] == "RED" and "notrunning separate DENIED,DENIED,DENIED" in iso, iso
     assert "reset by van-tcp-bypass-reject" in next(c["detail"] for c in out["qualify"]["checks"]
                                                     if c["check"] == "browser_tcp_bypass_blocked")
 
@@ -388,3 +397,14 @@ def test_live_qualify_fails_without_the_ruleset(tmp_path):
     assert status["browser_tcp_bypass_blocked"] == "RED"
     assert status["egress_proxy_active"] == "RED"  # no proxy running here either
     assert out["qualify"]["fails"] > 0
+
+
+@live
+def test_live_qualify_does_not_take_a_kernel_reset_for_the_ruleset(tmp_path):
+    """Review I8 MINOR-5: a refused connect is not proof; without the ruleset the kernel can
+    reset the probe too (here: the probe's target is a closed local address). The check needs
+    the ruleset's own reject counter to move."""
+    out = _netns(tmp_path, "qualify_unloaded", {**_qualify_env(tmp_path), "VAN_TEST_REMOTE_IS_LOCAL": "1"})
+    detail = next(c for c in out["qualify"]["checks"] if c["check"] == "browser_tcp_bypass_blocked")
+    assert "REJECTED" in detail["detail"]           # the kernel did reset it ...
+    assert detail["status"] == "RED"                # ... and that is not the ruleset
