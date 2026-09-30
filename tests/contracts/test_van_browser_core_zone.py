@@ -162,7 +162,7 @@ def test_zone_workers_read_only_declared_env():
              # Review I5 (unit G6a): the bound node, the task scope and describe-the-focus.
              "VAN_BH_BINDING", "VAN_BH_SCOPE", "VAN_BH_FOCUS",
              # Unit G9c: the network-effect guard's policy (mutating flag + task scope).
-             "VAN_BH_NETGUARD"}
+             "VAN_BH_NETGUARD", "VAN_BH_NETGUARD_STATE"}
     # Explicit development-only escape, refused in production by the worker itself.
     allowed = declared | child | {"VAN_BROWSER_HISTORICAL_DEV_ONLY"}
     harness = (ZONE_DIR / "browser" / "harness_service.py").read_text(encoding="utf-8")
