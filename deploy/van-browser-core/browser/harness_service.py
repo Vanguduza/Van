@@ -1197,9 +1197,10 @@ def _van_emit(payload):
 #     Dedicated-worker requests arrive on the page session. Without this, a cross-origin
 #     iframe's POST and a service worker's own fetch escaped page-session interception.
 #   * Chromium launch flags (``ChromeSession.ensure``): ``KeepAliveInBrowserMigration`` off
-#     (with it on, sendBeacon, ``fetch(..., {keepalive})`` and ``<a ping>`` bypassed every
-#     Fetch session) and ``SharedWorker`` off (a shared worker is not a related target and
-#     its requests escaped).
+#     (with it on, sendBeacon, ``fetch(..., {keepalive})`` and ``<a ping>`` from a page a
+#     service worker controls bypassed every Fetch session) and ``SharedWorker`` off (a
+#     shared worker is not a related target and its requests escaped). Chromium honours
+#     only the last ``--disable-features``: this must stay the launch's only one.
 #   * A request answered by nobody stays paused: ``Fetch.disable`` / detaching the session
 #     does not release it (measured: it never reaches the server). A lost event therefore
 #     fails closed.
@@ -1454,7 +1455,10 @@ class _VanNetGuard:
         except Exception:
             pass
         try:
-            cdp("Target.setAutoAttach", autoAttach=False, waitForDebuggerOnStart=False)
+            # Cancels autoAttachRelated (and detaches its sessions). Browser-level auto-attach
+            # accepts only flatten=True; without it the call fails and every frame created
+            # later would wait for a debugger forever.
+            cdp("Target.setAutoAttach", autoAttach=False, waitForDebuggerOnStart=False, flatten=True)
         except Exception:
             pass
         for sid in list(self.children):
