@@ -158,15 +158,7 @@ async def test_a_busy_renderer_cannot_make_the_lease_guard_forget_the_click(g, m
         assert broken == [] and report["blocked"] == "NETWORK_WRITE_BLOCKED:POST"
 
 
-@chromium
-async def test_a_page_that_navigates_itself_between_calls_keeps_its_guard(g, monkeypatch):
-    """Found while fixing MAJOR-1: a main-frame document request the guard has paused holds
-    Page.getFrameTree until it is answered, and the adopt read the frame tree before answering
-    anything. So a page that navigated itself between two calls made the next script's adopt
-    time out (15 s) — before G15 the guard was then silently dropped (review I8's path); with
-    the lost-guard rule alone the lease would break. The adopt now answers paused requests
-    while it reads the frame tree: the navigation is served and the guard kept."""
-    module, rig, session, harness = g
+def _spy_absorb(module, monkeypatch) -> list[Any]:
     seen: list[Any] = []
     absorb = module.GuardLease.absorb
 
@@ -175,6 +167,89 @@ async def test_a_page_that_navigates_itself_between_calls_keeps_its_guard(g, mon
         return absorb(self, guard, **kw)
 
     monkeypatch.setattr(module.GuardLease, "absorb", spy)
+    return seen
+
+
+@chromium
+async def test_a_navigation_started_outside_the_page_between_calls_keeps_its_guard(g, monkeypatch):
+    """Found while fixing MAJOR-1 (test_browser_review_i5_task_scope's focus case, whose
+    fixture navigates with Playwright between two Harness calls): a main-frame document
+    request the guard has paused, for a navigation started over CDP (Page.navigate), holds
+    Page.getFrameTree until it is answered, and the adopt read the frame tree before answering
+    anything — a 15 s timeout. Before G15 the guard was then silently dropped (review I8's
+    path); with the lost-guard rule alone the lease would break. The adopt now answers paused
+    requests while it reads the frame tree: the navigation is served and the guard kept. (A
+    navigation the page starts itself, location.href, never held the frame tree: the next case.)"""
+    module, rig, session, harness = g
+    seen = _spy_absorb(module, monkeypatch)
+    PAGES["/docs/start"] = "<p>start</p>"
+    PAGES["/docs/landed"] = "<p id='l'>landed</p>"
+    scope = scope_for_new_task(he.DOMAIN, [f"https://{he.DOMAIN}/docs/"])
+    task = he._task().model_copy(update={"scope": scope, "mutating": False})
+    with harness_lease_fence(HarnessLeaseFence(task.profile_alias, task.task_id, 1)):
+        await harness.page_info(task)
+        await harness.navigate(task, f"https://{he.DOMAIN}/docs/start")
+    first = module.NET_GUARDS.leases.get("public_research")
+    # Another CDP client navigates the page while the lease is idle (the guard thread ticking).
+    threading.Thread(target=lambda: session.send("Page.navigate", {"url": f"https://{he.DOMAIN}/docs/landed"},
+                                                 session_id=session.session, timeout=30), daemon=True).start()
+    time.sleep(18.0)  # longer than one CDP timeout: a deadlocked adopt would have failed by now
+    lease = module.NET_GUARDS.leases.get("public_research")
+    state = dict(lease.state or {}) if lease else {}
+    frame_url = session.cdp("Page.getFrameTree")["frameTree"]["frame"]["url"]
+    report = await harness.release_page(profile_alias=task.profile_alias, holder_id=task.task_id, generation=1)
+    print(f"\nG15OUTSIDENAV frame={frame_url} same_lease={lease is first} pending={lease.pending if lease else None} "
+          f"absorbed_broken={sorted(set(map(str, seen)))} release={report.get('blocked')}")
+    assert lease is first and lease.pending is None and state.get("main_frame")
+    assert set(seen) == {None}
+    assert frame_url.endswith("/docs/landed")
+    assert report.get("blocked") is None
+
+
+@chromium
+async def test_a_freeze_that_did_not_land_is_retried(g, monkeypatch):
+    """A freeze whose navigation to about:blank did not land (the renderer did not answer)
+    is tried again by the lease's next script, until the page is on about:blank."""
+    module, rig, session, harness = g
+    PAGES["/docs/write_now"] = "<button id=\"b\" onclick=\"fetch('/api/pay',{method:'POST',body:'x'})\">Next</button>"
+    scope = scope_for_new_task(he.DOMAIN, [f"https://{he.DOMAIN}/docs/"])
+    task = he._task().model_copy(update={"scope": scope, "mutating": False})
+    with harness_lease_fence(HarnessLeaseFence(task.profile_alias, task.task_id, 1)):
+        await harness.page_info(task)
+        await harness.navigate(task, f"https://{he.DOMAIN}/docs/write_now")
+    failed: list[str] = []
+
+    def fail_once(params):
+        if params.get("url") == "about:blank" and not failed:
+            failed.append(params["url"])
+            raise RuntimeError("renderer did not answer")
+
+    session.fail["Page.navigate"] = fail_once
+    router = tr.make_router(target_resolver=HarnessTargetResolver(harness), executor=HarnessActionExecutor(harness),
+                            semantic_fallback=tr.FakeStagehand(None), jev_client=None)
+    step = tr.step(deterministic_action=DeterministicAction(operation="click", locator="#b", value_ref=None))
+    step.task = task
+    with harness_lease_fence(HarnessLeaseFence(task.profile_alias, task.task_id, 1)):
+        await router.route(step)
+    lease = module.NET_GUARDS.leases.get("public_research")
+    time.sleep(3.0)  # the guard thread's next ticks
+    frame_url = session.cdp("Page.getFrameTree")["frameTree"]["frame"]["url"]
+    state = dict(lease.state or {})
+    report = await harness.release_page(profile_alias=task.profile_alias, holder_id=task.task_id, generation=1)
+    writes = [e for e in rig.server_log() if e[0] not in kit.READ_METHODS or "pay" in e[2]]
+    print(f"\nG15FREEZE failed_first={failed} frame={frame_url} state_frozen={state.get('frozen')} "
+          f"blanked={state.get('blanked')} release={report.get('blocked')} writes={writes}")
+    assert failed == ["about:blank"]  # the first freeze's navigation was refused
+    assert frame_url == "about:blank" and state.get("blanked") is True
+    assert report.get("blocked") == "NETWORK_WRITE_BLOCKED:POST" and writes == []
+
+
+@chromium
+async def test_a_page_that_navigates_itself_between_calls_keeps_its_guard(g, monkeypatch):
+    """Control: a navigation the page starts itself between two calls is served and the guard
+    kept (it never held Page.getFrameTree; measured with the frame read first as well)."""
+    module, rig, session, harness = g
+    seen = _spy_absorb(module, monkeypatch)
     PAGES["/docs/selfnav"] = "<p>x</p><script>setTimeout(()=>{location.href='/docs/landed'},1500)</script>"
     PAGES["/docs/landed"] = "<p id='l'>landed</p>"
     scope = scope_for_new_task(he.DOMAIN, [f"https://{he.DOMAIN}/docs/"])
