@@ -127,10 +127,45 @@ the task scope) sets the guard's policy and pushes the proxy's through one funct
 detected write revoke the lease's proxy policy finally (`revoke`, MAC `van-egress-revoke/1`
 under the lease-fence key), after which the proxy refuses to install it again, so a frozen page
 gets nothing. The proxy TTL (`VAN_EGRESS_POLICY_TTL_SECONDS`) stays the backstop when the
-proxy cannot be reached. Recorded interaction: `guard_canary.py` serves its fixture on
-loopback, which the proxy refuses by design (non-global upstreams), so in a zone with the
-proxy in front the canary cannot load its page and `network_guard_canary` is RED until the
-owner decides how the canary is qualified behind the proxy.
+proxy cannot be reached. Recorded interaction (G13): `guard_canary.py` served its fixture on
+loopback, which the proxy refuses by design (non-global upstreams), so with the proxy in front
+`network_guard_canary` was always RED. Resolved by the in-zone canary origin below.
+
+## Guard canary origin (unit G14)
+
+Owner answer 2026-09-30 after unit G13, "In-zone canary origin (Recommended)": *"The canary
+serves its fixture from a dedicated canary hostname on the zone's private overlay, listed in the
+proxy config as the only allowed non-global upstream. It is checked by qualify.sh and never
+reachable by a task scope. The proxy's local-address rule stays strict for everything else."*
+
+- **Origin.** `VAN_BROWSER_CANARY_ORIGIN` (default `https://canary.van-browser-core.internal`)
+  at `VAN_BROWSER_CANARY_ADDRESS`, a private overlay IPv4 address (bootstrap.sh defaults it to
+  the edge's `VAN_BROWSER_CORE_EDGE_BIND`; loopback, wildcard, link-local and global addresses
+  are refused by bootstrap.sh and by the proxy at start). The fixture is served over TLS by
+  `guard_canary.py` (run by `qualify.sh` as root) only while the canary runs, with a certificate
+  bootstrap.sh issues for the canary name into `/etc/van-browser-core/canary/` (key 0400 root).
+- **The proxy's one exception.** Exact host, exact address (pinned from config: the proxy never
+  looks the name up), exact port, TLS only, and the upstream certificate verified against the
+  pinned canary certificate only. It applies only while alias `guard_canary` holds the read-only
+  policy of task `van-guard-canary` for the lease the canary armed through the control socket
+  (`op: canary`, MAC `van-egress-canary/1` under the lease-fence key; 180 s; ended by that
+  lease's end or a newer lease). Anything else naming the canary host, and every other
+  non-global address, is `EGRESS_UPSTREAM_ADDRESS_REFUSED` as before. The proxy's decision log
+  now also records upstream refusals (`UPSTREAM`), which it previously did not.
+- **Never task-reachable.** `*.internal` names are reserved: the gateway refuses them in task
+  creation, target domains and owner-approved widening (`TASK_SCOPE_RESERVED_HOST`; a recorded
+  scope naming one fails closed); the Harness refuses any call whose scope or target domain
+  names one (409 `TASK_SCOPE_RESERVED_HOST`, before the fence) unless it is the canary's own
+  MAC-checked call; the proxy refuses such a policy (`POLICY_SCOPE_RESERVED_HOST`). The zone
+  firewall already stops the browser user from connecting to the overlay address directly.
+- **What the canary checks.** The immediate and delayed guard cases as before, now through the
+  proxy; a `proxy` case (a GET through the canary lease's own listener reaches the fixture, a
+  WebSocket upgrade to `/docs/ws-pay` is refused `EGRESS_WEBSOCKET_REFUSED` and never reaches
+  it); and a `task_refused` case (an ordinary task naming the canary origin is refused by the
+  Harness and by the proxy).
+- **Verified where.** In the repository sandbox only (TEST-NET address 192.0.2.2 on the sandbox
+  interface, Chromium 1194, browser-harness 0.1.13): see `backend/tests/test_browser_canary_origin.py`
+  and the migration record §8. Not yet on a provisioned host.
 
 ## The historical placement
 

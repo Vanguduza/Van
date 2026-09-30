@@ -37,7 +37,11 @@ evaluated and cannot refuse ``wss://<in-scope host>/ws-pay``; see
   refused unless the task is admitted as mutating *and* the URL is inside the task scope
   (the shared URL scope rule below, ``WRITE``); any other ``Upgrade`` is refused;
 * upstream addresses that are not globally routable (loopback, private, link-local...) are
-  refused, so an in-scope name cannot be pointed at the zone's own loopback services;
+  refused, so an in-scope name cannot be pointed at the zone's own loopback services. The one
+  exception (unit G14, owner answer "In-zone canary origin"): the guard canary's own
+  ``*.internal`` origin, at its pinned private overlay address and port, TLS-verified against
+  its pinned certificate, only for the canary lease qualify.sh armed (see "guard canary"
+  below). A task scope that names any ``*.internal`` host is refused at policy install;
 * one request per connection; a refusal is ``403`` with ``X-Van-Egress-Refused: <code>``
   from a closed vocabulary. The decision log holds alias, method, origin and code: never a
   path, query, header or body.
@@ -83,6 +87,13 @@ POLICY_TTL_SECONDS = float(os.getenv("VAN_EGRESS_POLICY_TTL_SECONDS", "600"))
 SERVICE_PORT = int(os.getenv("VAN_EGRESS_SERVICE_PORT", "9149"))
 SERVICE_ALLOW = os.getenv("VAN_EGRESS_SERVICE_ALLOW", "")
 OPENSSL = os.getenv("VAN_EGRESS_OPENSSL", "/usr/bin/openssl")
+#: Unit G14 (owner answer 2026-09-30 after unit G13, "In-zone canary origin (Recommended)"):
+#: the guard canary's origin on the zone's private overlay, the overlay address it is served
+#: from and its certificate (pinned: the only trust anchor for that one upstream). Empty
+#: origin and address: no canary exception exists.
+CANARY_ORIGIN = os.getenv("VAN_BROWSER_CANARY_ORIGIN", "")
+CANARY_ADDRESS = os.getenv("VAN_BROWSER_CANARY_ADDRESS", "")
+CANARY_CERT = os.getenv("VAN_BROWSER_CANARY_CERT", "")
 #: Development/test only; refused when a trust zone is configured (see ``_test_overrides``).
 TEST_RESOLVE = os.getenv("VAN_EGRESS_TEST_RESOLVE", "")
 TEST_UPSTREAM_CAFILE = os.getenv("VAN_EGRESS_TEST_UPSTREAM_CAFILE", "")
@@ -317,6 +328,76 @@ def revoke_mac(key: bytes, alias: str, generation: int, holder_id: str, final: b
     return hmac.new(key, message, hashlib.sha256).hexdigest()
 
 
+# ------------------------------------------------------------------------ guard canary
+#
+# Unit G14 (owner answer 2026-09-30 after unit G13, "In-zone canary origin (Recommended)"):
+# "The canary serves its fixture from a dedicated canary hostname on the zone's private
+# overlay, listed in the proxy config as the only allowed non-global upstream. It is checked
+# by qualify.sh and never reachable by a task scope. The proxy's local-address rule stays
+# strict for everything else."
+#
+# * Overlay names are reserved: a policy whose scope names a host under ``.internal`` is
+#   refused (POLICY_SCOPE_RESERVED_HOST) unless it is the canary's own policy: alias
+#   ``guard_canary``, task id ``van-guard-canary``, read-only, every entry the canary origin.
+# * The exception itself (host, pinned address, port; TLS verified against the pinned canary
+#   certificate only) is used only while that policy is in force *and* qualify.sh's canary
+#   has armed it for the same lease (``op: canary``, MAC ``van-egress-canary/1`` under the
+#   lease-fence key). No gateway code computes that MAC context.
+# * Anything else naming the canary host is refused as a non-global upstream, before any
+#   lookup; every other non-global address is refused exactly as before.
+CANARY_ALIAS = "guard_canary"
+CANARY_TASK_ID = "van-guard-canary"
+CANARY_MAC_CONTEXT = "van-egress-canary/1"
+CANARY_GRANT_TTL_SECONDS = 180.0
+RESERVED_HOST_SUFFIX = ".internal"
+
+
+def reserved_host(host: str) -> bool:
+    """A zone-overlay name (``*.internal``): never part of a task scope."""
+    host = str(host or "").lower().rstrip(".")
+    return host == RESERVED_HOST_SUFFIX[1:] or host.endswith(RESERVED_HOST_SUFFIX)
+
+
+class Canary:
+    """The one allowed non-global upstream: exact host, exact (pinned) address, exact port."""
+
+    def __init__(self, origin: str, host: str, port: int, address: str) -> None:
+        self.origin, self.host, self.port, self.address = origin, host, port, address
+
+
+def parse_canary(origin: str, address: str) -> Canary | None:
+    """None when neither is configured; ValueError when the pair is not a valid canary.
+
+    The origin is ``https://<name>.internal[:port]`` with no path; the address is a specific
+    IPv4 address on a private network: not global, not loopback (the zone's own loopback
+    services stay unreachable), not unspecified, link-local, multicast or reserved."""
+    origin, address = str(origin or "").strip(), str(address or "").strip()
+    if not origin and not address:
+        return None
+    parts = _vs_parse(origin)
+    exact = set() if parts is None else {_vs_origin(parts), f"https://{parts[1]}:{parts[2] or 443}"}
+    if parts is None or parts[0] != "https" or origin.rstrip("/") not in exact \
+            or not reserved_host(parts[1]) or "." not in parts[1]:
+        raise ValueError("VAN_BROWSER_CANARY_ORIGIN must be https://<name>.internal[:port] with no path")
+    try:
+        ip = ipaddress.ip_address(address)
+    except ValueError as exc:
+        raise ValueError("VAN_BROWSER_CANARY_ADDRESS must be an IPv4 address") from exc
+    if ip.version != 4 or ip.is_global or ip.is_loopback or ip.is_unspecified or ip.is_link_local \
+            or ip.is_multicast or ip.is_reserved:
+        raise ValueError("VAN_BROWSER_CANARY_ADDRESS must be a private overlay IPv4 address (not global, loopback,"
+                         " unspecified, link-local, multicast or reserved)")
+    return Canary(_vs_origin(parts), parts[1], parts[2] or 443, str(ip))
+
+
+def canary_mac(key: bytes, alias: str, generation: int, holder_id: str, task_id: str,
+               origin: str, address: str) -> str:
+    """Same bytes as ``canary_mac`` in harness_service.py and guard_canary.py."""
+    message = (f"{CANARY_MAC_CONTEXT}\n{alias}\n{int(generation)}\n{holder_id}\n{task_id}\n"
+               f"{origin}\n{address}").encode()
+    return hmac.new(key, message, hashlib.sha256).hexdigest()
+
+
 def load_key(path: str) -> bytes | None:
     if not path:
         return None
@@ -351,7 +432,7 @@ class Policy:
 class PolicyStore:
     """Per-alias task policy. Set only with a valid effect MAC; newest lease generation wins."""
 
-    def __init__(self, key: bytes | None, ttl: float = POLICY_TTL_SECONDS) -> None:
+    def __init__(self, key: bytes | None, ttl: float = POLICY_TTL_SECONDS, canary: Canary | None = None) -> None:
         self.key = key
         self.ttl = ttl
         self.policies: dict[str, Policy] = {}
@@ -359,6 +440,62 @@ class PolicyStore:
         #: Unit G13 — per alias, the leases whose policy was finally revoked (lease end, or
         #: the Harness guard froze the page): their policy is never installed again.
         self.ended: dict[str, set[tuple[int, str]]] = {}
+        #: Unit G14 — the configured canary origin, and the lease qualify.sh armed it for:
+        #: (generation, holder, task id, monotonic expiry).
+        self.canary = canary
+        self.canary_grant: tuple[int, str, str, float] | None = None
+
+    def _reserved_scope(self, alias: str, task_id: str, mutating: bool, scope: dict[str, Any]) -> bool:
+        """True when the scope names an overlay host and is not exactly the canary's own."""
+        entries = scope.get("entries") if isinstance(scope.get("entries"), list) else []
+        canary_own = (self.canary is not None and alias == CANARY_ALIAS and task_id == CANARY_TASK_ID
+                      and not mutating)
+        for entry in entries:
+            raw = entry.get("origin") if isinstance(entry, dict) else None
+            parts = _vs_parse(raw) if isinstance(raw, str) else None
+            host = parts[1] if parts is not None else ""
+            if parts is None and isinstance(raw, str) and RESERVED_HOST_SUFFIX in raw.lower():
+                return True  # unparseable but names an overlay host: refuse, never guess
+            if parts is not None and reserved_host(host):
+                if not canary_own or parts[3] != "/" or _vs_origin(parts) != self.canary.origin:
+                    return True
+        return False
+
+    def arm_canary(self, msg: dict[str, Any]) -> str | None:
+        """Unit G14 — qualify.sh's guard canary arms the canary exception for one lease of the
+        canary alias. None when armed; otherwise the refusal code. Arming installs no policy:
+        the Harness still pushes the lease's own (effect-MACed) policy, and the exception is
+        used only while that policy is the canary's own and matches this grant."""
+        alias, task_id = msg.get("alias"), msg.get("task_id")
+        generation, holder, mac = msg.get("lease_generation"), msg.get("lease_holder_id"), msg.get("canary_mac")
+        if self.canary is None:
+            return "CANARY_UNCONFIGURED"
+        if self.key is None:
+            return "POLICY_KEY_UNCONFIGURED"
+        if alias != CANARY_ALIAS or task_id != CANARY_TASK_ID:
+            return "CANARY_TASK_INVALID"
+        if isinstance(generation, bool) or not isinstance(generation, int) or generation < 1 \
+                or not isinstance(holder, str) or not holder or not isinstance(mac, str):
+            return "POLICY_FIELDS_INVALID"
+        expected = canary_mac(self.key, alias, generation, holder, task_id, self.canary.origin, self.canary.address)
+        if not hmac.compare_digest(mac, expected):
+            return "CANARY_MAC_INVALID"
+        newest = self.newest.get(alias)
+        if newest is not None and generation < newest[0]:
+            return "POLICY_GENERATION_STALE"
+        if (generation, holder) in self.ended.get(alias, ()):
+            return "POLICY_LEASE_ENDED"
+        self.canary_grant = (generation, holder, task_id, time.monotonic() + CANARY_GRANT_TTL_SECONDS)
+        return None
+
+    def canary_armed(self, policy: Policy | None) -> bool:
+        """The exception applies to this request's policy: the canary's own, read-only, for
+        the lease qualify.sh armed, within the grant's lifetime."""
+        grant = self.canary_grant
+        return (self.canary is not None and policy is not None and grant is not None
+                and policy.alias == CANARY_ALIAS and policy.task_id == CANARY_TASK_ID and not policy.mutating
+                and (policy.generation, policy.holder, policy.task_id) == grant[:3]
+                and time.monotonic() < grant[3])
 
     def set(self, msg: dict[str, Any]) -> str | None:
         """None when installed; otherwise the refusal code."""
@@ -377,6 +514,9 @@ class PolicyStore:
         expected = effect_mac(self.key, alias, generation, holder, task_id, mutating, scope_digest(scope))
         if not hmac.compare_digest(mac, expected):
             return "POLICY_MAC_INVALID"
+        if self._reserved_scope(alias, task_id, mutating, scope):
+            # Unit G14: a task scope never names the zone's overlay (the canary origin included).
+            return "POLICY_SCOPE_RESERVED_HOST"
         newest = self.newest.get(alias)
         if newest is not None and (generation < newest[0] or (generation == newest[0] and holder != newest[1])):
             return "POLICY_GENERATION_STALE"
@@ -411,6 +551,12 @@ class PolicyStore:
         if policy is not None and (policy.generation < generation
                                    or (policy.generation, policy.holder) == (generation, holder)):
             del self.policies[alias]
+        grant = self.canary_grant
+        if alias == CANARY_ALIAS and grant is not None and (
+                grant[0] < generation or (final and grant[:2] == (generation, holder))):
+            # Unit G14: the canary exception ends with its lease (a newer lease's start, or
+            # this lease's end / freeze); the lease's own start leaves the grant it was armed with.
+            self.canary_grant = None
         if final:
             ended = self.ended.setdefault(alias, set())
             ended.add((generation, holder))
@@ -591,8 +737,16 @@ class EgressProxy:
     def __init__(self, store: PolicyStore, ca: CertAuthority, *, port_range: str = PORT_RANGE,
                  resolve: dict[str, str] | None = None, upstream_cafile: str | None = None,
                  service_allow: str = SERVICE_ALLOW, service_port: int = SERVICE_PORT,
-                 decision_log: str = DECISION_LOG) -> None:
+                 decision_log: str = DECISION_LOG, canary_cert: str = CANARY_CERT) -> None:
         self.store, self.ca = store, ca
+        #: Unit G14 — the canary upstream is verified against its pinned certificate only
+        #: (never the system trust store, never the test CA file), for the canary host name.
+        self.canary_ctx: ssl.SSLContext | None = None
+        if store.canary is not None:
+            if not canary_cert or not Path(canary_cert).is_file():
+                raise ValueError("VAN_BROWSER_CANARY_CERT must name the canary's certificate")
+            self.canary_ctx = ssl.create_default_context(cafile=canary_cert)
+            self.canary_ctx.set_alpn_protocols(["http/1.1"])
         low, _, high = port_range.partition("-")
         self.ports = range(int(low), int(high or low) + 1)
         self.listeners: dict[str, tuple[int, asyncio.base_events.Server]] = {}
@@ -617,7 +771,21 @@ class EgressProxy:
             pass
 
     # -- upstream
-    async def _open_upstream(self, host: str, port: int, tls: bool):
+    async def _open_upstream(self, host: str, port: int, tls: bool, canary_ok: bool = False):
+        canary = self.store.canary
+        if canary is not None and host == canary.host:
+            # Unit G14 — the only allowed non-global upstream: this exact host, only over TLS on
+            # this exact port, only to the pinned address (no lookup: DNS cannot move it), and
+            # only for the armed canary lease's own policy. Otherwise it is what it is: an
+            # overlay name, refused like any other non-global upstream.
+            if not canary_ok or not tls or port != canary.port or self.canary_ctx is None:
+                raise Refused("EGRESS_UPSTREAM_ADDRESS_REFUSED")
+            try:
+                return await asyncio.wait_for(asyncio.open_connection(
+                    canary.address, canary.port, ssl=self.canary_ctx, server_hostname=canary.host),
+                    IO_TIMEOUT_SECONDS)
+            except (OSError, ssl.SSLError, asyncio.TimeoutError) as exc:
+                raise Refused("EGRESS_UPSTREAM_UNAVAILABLE") from exc
         override = self.resolve_override.get(f"{host}:{port}") or self.resolve_override.get(f"*:{port}")
         if override:
             addr_host, _, addr_port = override.rpartition(":")
@@ -663,8 +831,15 @@ class EgressProxy:
             except (OSError, RuntimeError):
                 pass
 
-    async def _forward(self, req: Request, reader, writer, scheme: str, host: str, port: int, url: str) -> None:
-        up_reader, up_writer = await self._open_upstream(host, port, scheme == "https")
+    async def _forward(self, req: Request, reader, writer, scheme: str, host: str, port: int, url: str,
+                       alias: str = "", canary_ok: bool = False) -> None:
+        try:
+            up_reader, up_writer = await self._open_upstream(host, port, scheme == "https", canary_ok)
+        except Refused as exc:
+            # Unit G14: the upstream refusal is a decision too (the request line above was
+            # logged ALLOW before the address was known).
+            self.log(alias, "UPSTREAM", f"{scheme}://{host}:{port}", exc.code)
+            raise
         try:
             target = url[len(scheme) + 3:]
             target = target[target.find("/"):] if "/" in target else "/"
@@ -703,7 +878,7 @@ class EgressProxy:
         self.log(alias, req.method + (" UPGRADE" if req.header("upgrade") else ""), origin, code)
         if code:
             raise Refused(code)
-        await self._forward(req, reader, writer, scheme, host, port, url)
+        await self._forward(req, reader, writer, scheme, host, port, url, alias, self.store.canary_armed(policy))
 
     async def handle(self, alias: str, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
         try:
@@ -745,7 +920,7 @@ class EgressProxy:
                              f"http://{host}:{port}", code)
                     if code:
                         raise Refused(code)
-                    await self._forward(req, reader, writer, "http", host, port, url)
+                    await self._forward(req, reader, writer, "http", host, port, url, alias)
             except Refused as exc:
                 try:
                     writer.write(_refusal(exc.code))
@@ -820,7 +995,11 @@ class EgressProxy:
                 reply = {"ok": True, "service": SERVICE_VERSION, "trust_zone": TRUST_ZONE or None,
                          "policy_key": self.store.key is not None, "listeners": len(self.listeners),
                          "test_overrides": bool(self.resolve_override) or bool(TEST_UPSTREAM_CAFILE),
-                         "interception": "zone-local-ca", "leaf_spki_sha256": self.ca.spki}
+                         "interception": "zone-local-ca", "leaf_spki_sha256": self.ca.spki,
+                         # Unit G14: the one allowed non-global upstream, or None.
+                         "canary": None if self.store.canary is None else {
+                             "origin": self.store.canary.origin, "address": self.store.canary.address,
+                             "port": self.store.canary.port, "certificate_pinned": self.canary_ctx is not None}}
             elif op == "listener":
                 alias = msg.get("alias")
                 if not isinstance(alias, str) or not PROFILE_RE.fullmatch(alias):
@@ -830,6 +1009,10 @@ class EgressProxy:
                 error = self.store.set(msg)
                 if error is None and isinstance(msg.get("alias"), str):
                     await self.listener(msg["alias"])
+                reply = {"ok": error is None, "error": error}
+            elif op == "canary":
+                # Unit G14: qualify.sh's guard canary arms the canary exception for one lease.
+                error = self.store.arm_canary(msg)
                 reply = {"ok": error is None, "error": error}
             elif op == "revoke":
                 # Unit G13: lease start (older leases' policy), lease end and guard freeze.
@@ -883,9 +1066,16 @@ def main() -> None:
     if key is None and TRUST_ZONE:
         # Without the key no policy can be verified; every request would be refused anyway.
         raise SystemExit("egress proxy refuses to start in a trust zone without VAN_EGRESS_FENCE_KEY_FILE")
+    try:
+        canary = parse_canary(CANARY_ORIGIN, CANARY_ADDRESS)
+    except ValueError as exc:
+        raise SystemExit(f"egress proxy: {exc}") from exc
     ca = CertAuthority(STATE_DIR)
     ca.ensure()
-    proxy = EgressProxy(PolicyStore(key), ca, resolve=resolve, upstream_cafile=cafile)
+    try:
+        proxy = EgressProxy(PolicyStore(key, canary=canary), ca, resolve=resolve, upstream_cafile=cafile)
+    except ValueError as exc:
+        raise SystemExit(f"egress proxy: {exc}") from exc
     asyncio.run(proxy.serve(CONTROL_SOCKET))
 
 

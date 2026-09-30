@@ -149,6 +149,34 @@ PY"
 run "sed -i 's/^VAN_BROWSER_DNS_RESOLVER=.*/VAN_BROWSER_DNS_RESOLVER=$DNS_RESOLVER/' $CONFIG"
 run "install -o root -g van-browser-edge -m 0640 $HERE/edge/Caddyfile $ETC/Caddyfile"
 
+echo "== guard canary origin (unit G14) =="
+# Owner answer 2026-09-30 after unit G13, "In-zone canary origin (Recommended)": qualify.sh's
+# guard canary serves its test page over TLS from a dedicated *.internal name on this zone's
+# private overlay address — the egress proxy's only allowed non-global upstream. The address
+# defaults to the edge's overlay address; loopback, wildcard or global addresses are refused.
+# The certificate is self-signed for the canary name and pinned by the proxy; its key stays
+# root's (qualify.sh serves the fixture), the certificate is world-readable (the proxy reads it).
+env_value() { if [[ -f "$CONFIG" ]]; then sed -n "s/^$1=//p" "$CONFIG" | tail -1; fi; }
+CANARY_ORIGIN="${VAN_BROWSER_CANARY_ORIGIN:-$(env_value VAN_BROWSER_CANARY_ORIGIN)}"
+CANARY_ORIGIN="${CANARY_ORIGIN:-https://canary.van-browser-core.internal}"
+CANARY_ADDRESS="${VAN_BROWSER_CANARY_ADDRESS:-$(env_value VAN_BROWSER_CANARY_ADDRESS)}"
+CANARY_ADDRESS="${CANARY_ADDRESS:-$EDGE_BIND}"
+CANARY_HOST="$(python3 - "$HERE/browser/egress_proxy.py" "$CANARY_ORIGIN" "$CANARY_ADDRESS" 2>/dev/null <<'PY'
+import importlib.util, sys
+spec = importlib.util.spec_from_file_location("egress", sys.argv[1]); ep = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(ep)
+print(ep.parse_canary(sys.argv[2], sys.argv[3]).host)
+PY
+)" || refuse "VAN_BROWSER_CANARY_ORIGIN/VAN_BROWSER_CANARY_ADDRESS must be https://<name>.internal[:port] and a private overlay IPv4 address (not loopback)"
+run "sed -i 's#^VAN_BROWSER_CANARY_ORIGIN=.*#VAN_BROWSER_CANARY_ORIGIN=$CANARY_ORIGIN#; s#^VAN_BROWSER_CANARY_ADDRESS=.*#VAN_BROWSER_CANARY_ADDRESS=$CANARY_ADDRESS#' $CONFIG"
+run "install -d -o root -g root -m 0755 $ETC/canary"
+if [[ -f "$ETC/canary/canary.crt" ]] && openssl x509 -in "$ETC/canary/canary.crt" -noout -checkhost "$CANARY_HOST" 2>/dev/null | grep -q 'does match'; then
+  say "$ETC/canary/canary.crt exists for $CANARY_HOST; left alone"
+else
+  run "(umask 0277 && openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:P-256 -nodes -keyout $ETC/canary/canary.key -out $ETC/canary/canary.crt -days 397 -subj /CN=$CANARY_HOST -addext subjectAltName=DNS:$CANARY_HOST -addext extendedKeyUsage=serverAuth -addext basicConstraints=critical,CA:FALSE -addext keyUsage=critical,digitalSignature)"
+  run "chown root:root $ETC/canary/canary.key $ETC/canary/canary.crt && chmod 0400 $ETC/canary/canary.key && chmod 0644 $ETC/canary/canary.crt"
+fi
+
 echo "== pinned runtime (Stagehand 4.1.0 @ cd7b2307, Playwright 1.63.0) =="
 run "install -o van-browser -g van-browser -m 0644 $HERE/browser/package.json $RUNTIME/package.json"
 run "install -o van-browser -g van-browser -m 0644 $HERE/browser/package-lock.json $RUNTIME/package-lock.json"

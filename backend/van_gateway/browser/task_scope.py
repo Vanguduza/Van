@@ -247,6 +247,21 @@ BOUND_OPERATIONS = frozenset({"click", "fill", "select", "press_key"})
 SOURCE_HERMES = "HERMES_DECLARED"
 SOURCE_TARGET_DOMAIN = "TARGET_DOMAIN"
 
+#: Unit G14 (owner answer 2026-09-30 after unit G13, "In-zone canary origin (Recommended)"):
+#: van-browser-core's guard canary is served from a dedicated ``*.internal`` name on that
+#: zone's private overlay, the egress proxy's only allowed non-global upstream, and it is
+#: "never reachable by a task scope". Overlay names are therefore reserved: no task scope,
+#: target domain or owner-approved widening names a host under ``.internal``
+#: (TASK_SCOPE_RESERVED_HOST). The Harness and the egress proxy refuse the same, so a scope
+#: that slipped past the gateway would still be refused in the zone.
+RESERVED_HOST_SUFFIX = ".internal"
+
+
+def reserved_host(host: str | None) -> bool:
+    """A zone-overlay name (``*.internal``, the guard canary's origin among them)."""
+    name = str(host or "").strip().lower().rstrip(".")
+    return name == RESERVED_HOST_SUFFIX[1:] or name.endswith(RESERVED_HOST_SUFFIX)
+
 
 class TaskScopeError(ValueError):
     def __init__(self, code: str) -> None:
@@ -282,6 +297,9 @@ class TaskScope(BaseModel):
         return TaskScope(entries=[e for e in self.entries if (urlsplit(e.origin).hostname or "") in allowed])
 
     def with_origin(self, host: str, source: str) -> "TaskScope":
+        if reserved_host(host):
+            # Unit G14: an approval never widens a task onto the zone overlay.
+            raise TaskScopeError("TASK_SCOPE_RESERVED_HOST")
         origin = f"https://{host.strip().lower().rstrip('.')}"
         if any(e.origin == origin and e.path_prefix is None for e in self.entries):
             return self
@@ -310,6 +328,8 @@ def parse_scope_entry(raw: str, target_domain: str) -> ScopeEntry:
     whatwg = _vs_parse(text)
     if whatwg is None:
         raise TaskScopeError("TASK_SCOPE_ENTRY_INVALID")
+    if reserved_host(whatwg[1]) or reserved_host(parts.hostname):
+        raise TaskScopeError("TASK_SCOPE_RESERVED_HOST")  # unit G14
     domain = str(target_domain or "").strip().lower().rstrip(".")
     if not domain or not _host_within(whatwg[1], domain):
         raise TaskScopeError("TASK_SCOPE_OUTSIDE_TARGET_DOMAIN")
@@ -321,6 +341,8 @@ def parse_scope_entry(raw: str, target_domain: str) -> ScopeEntry:
 
 def scope_for_new_task(target_domain: str, declared: list[str] | None) -> TaskScope:
     """The scope recorded when a task is created (see the module docstring)."""
+    if reserved_host(target_domain):
+        raise TaskScopeError("TASK_SCOPE_RESERVED_HOST")  # unit G14
     if declared:
         entries = [parse_scope_entry(item, target_domain) for item in declared]
         return TaskScope(entries=entries)
@@ -339,6 +361,9 @@ def load_scope(raw: Any) -> TaskScope | None:
         scope = TaskScope.model_validate(data)
     except (ValueError, TypeError):
         return None
+    if any(reserved_host(urlsplit(e.origin).hostname) or reserved_host((_vs_parse(e.origin) or ("", ""))[1])
+           for e in scope.entries):
+        return None  # unit G14: a recorded overlay host fails closed (TASK_SCOPE_MISSING)
     return scope if scope.entries else None
 
 
@@ -422,6 +447,7 @@ __all__ = [
     "element_destination",
     "load_scope",
     "parse_scope_entry",
+    "reserved_host",
     "scope_for_new_task",
     "task_scope_gate",
     "url_scope_violation",

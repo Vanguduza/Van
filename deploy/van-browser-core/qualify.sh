@@ -68,17 +68,26 @@ else add edge_configured RED "VAN_BROWSER_CORE_EDGE_BIND not set"; fi
 # CI qualified the guard on Chromium 1194; bootstrap.sh installs Playwright 1.63.0's Chromium
 # (build 1243). Fetch interception, related-target auto-attach and the launch flags it relies
 # on are Chromium behaviour, so the canary drives the running Harness worker (its real
-# browser-harness child and this Chromium) against a local fixture server and reads that
-# server's log: an immediate and a 2.5 s-delayed handler POST must both be stopped and the
-# lease must end frozen. A missing canary is RED, never skipped.
+# browser-harness child and this Chromium) against a fixture server and reads that server's
+# log: an immediate and a 2.5 s-delayed handler POST must both be stopped and the lease must
+# end frozen. A missing canary is RED, never skipped.
+# Unit G14 (owner answer 2026-09-30 after unit G13, "In-zone canary origin (Recommended)"): the
+# Chromium reaches nothing but through the egress proxy, which refuses every non-global
+# upstream, so the fixture is served over TLS from VAN_BROWSER_CANARY_ORIGIN (a *.internal name)
+# at the zone's overlay address VAN_BROWSER_CANARY_ADDRESS — the proxy's only allowed
+# non-global upstream, armed here for the canary's own lease through the MAC-checked control
+# socket with the dedicated task id van-guard-canary. The canary also checks the proxy: a
+# WebSocket upgrade to the canary origin is refused (EGRESS_WEBSOCKET_REFUSED) and never reaches
+# the fixture, and an ordinary task naming the canary origin is refused by the Harness
+# (TASK_SCOPE_RESERVED_HOST) and by the proxy (POLICY_SCOPE_RESERVED_HOST).
 CANARY=/opt/van-browser-core/runtime/guard_canary.py
 if [[ ! -f "$CANARY" ]]; then
   add network_guard_canary RED "guard canary missing: $CANARY (re-run bootstrap.sh)"
 elif python3.12 "$CANARY" --runtime-env "$ETC/runtime.env" >/tmp/vbcq-guard.json 2>/tmp/vbcq-guard.err \
      && jq -e '.ok==true' /tmp/vbcq-guard.json >/dev/null; then
-  add network_guard_canary GREEN "$(jq -c '{chromium_version,cases:(.cases|map_values(.ok))}' /tmp/vbcq-guard.json)"
+  add network_guard_canary GREEN "$(jq -c '{chromium_version,origin,cases:(.cases|map_values(.ok)),websocket:.cases.proxy.websocket}' /tmp/vbcq-guard.json)"
 else
-  add network_guard_canary RED "$(jq -c '{chromium_version,error,cases}' /tmp/vbcq-guard.json 2>/dev/null || head -c 400 /tmp/vbcq-guard.err)"
+  add network_guard_canary RED "$(jq -c '{chromium_version,origin,error,cases}' /tmp/vbcq-guard.json 2>/dev/null || head -c 400 /tmp/vbcq-guard.err)"
 fi
 
 # 5. No foreign-zone credential names in this zone's runtime environment.

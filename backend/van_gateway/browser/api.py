@@ -39,7 +39,7 @@ from van_gateway.browser.models import (
     BrowserTaskStatus,
 )
 from van_gateway.browser.policy import BrowserPolicyEngine, BrowserPolicyError
-from van_gateway.browser.task_scope import TaskScope, load_scope
+from van_gateway.browser.task_scope import TaskScope, TaskScopeError, load_scope
 from van_gateway.browser.service import (
     BrowserSessionBroker,
     BrowserTaskNotVerified,
@@ -234,7 +234,10 @@ class BrowserApi:
                 continue
             if domain.strip().lower().rstrip(".") in declared_hosts:
                 continue
-            scope = scope.with_origin(domain, f"OWNER_APPROVED:{grant['authorization_id']}")
+            try:
+                scope = scope.with_origin(domain, f"OWNER_APPROVED:{grant['authorization_id']}")
+            except TaskScopeError:
+                continue  # unit G14: an approval never widens a task onto the zone overlay
         return scope
 
     async def _load_task(self, task_id: str) -> BrowserTask:
