@@ -45,11 +45,11 @@ On the US/Canada VPS, run `MUSE_CLIENT_PUBLIC_KEY=<printed-key> sudo -E bash ins
 ```bash
 sudo install -m 0600 muse-egress.env.example /etc/van-muse-egress.env
 sudoedit /etc/van-muse-egress.env
-sudo bash install-use-egress.sh
+sudo bash install-muse-egress.sh
 sudo bash qualify-muse-egress.sh
 ```
 
-A GREEN qualification proves the bridge is looopback-only, namespace default route is WireGuard, metadata and trading-LAN access are blocked, and the observed internet address exactly matches `MUSE_EXPECTED_EGRESS_IP`.
+A GREEN qualification proves the bridge is loopback-only, namespace default route is WireGuard, metadata and trading-LAN access are blocked, and the observed internet address exactly matches `MUSE_EXPECTED_EGRESS_IP`.
 
 ## Hermes consumption
 
