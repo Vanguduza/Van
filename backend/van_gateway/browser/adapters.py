@@ -11,12 +11,16 @@ is off, and reports readiness through the same evidence-backed contract as n8n
 
 from __future__ import annotations
 
+import asyncio
+import hashlib
+import hmac
 import inspect
 import time
 from collections.abc import Awaitable, Callable, Iterator
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Protocol
 
 import httpx
@@ -39,6 +43,63 @@ class BrowserAdapterError(RuntimeError):
         self.detail = detail
 
 
+class HarnessInflight:
+    """Harness calls sent under a fence that have not yet ended (review I5 F1).
+
+    A fenced call runs as its own task, shielded from the caller's cancellation: when a
+    ``/step`` hits its deadline the router stops waiting, but the HTTP request is not torn
+    down mid-flight, and the step does not give its lease back until ``settle`` reports
+    that every call it sent has ended.
+    """
+
+    def __init__(self) -> None:
+        self._tasks: set[asyncio.Task[Any]] = set()
+        self.unknown_outcome = False
+
+    def track(self, task: "asyncio.Task[Any]") -> None:
+        self._tasks.add(task)
+
+        def _done(t: "asyncio.Task[Any]") -> None:
+            self._tasks.discard(t)
+            exc = None if t.cancelled() else t.exception()
+            if t.cancelled() or (exc is not None and not (
+                isinstance(exc, BrowserAdapterError) and not exc.code.endswith("_UNAVAILABLE")
+            )):
+                # No response (transport failure, timeout, cancellation): the Harness may
+                # still be applying it. An HTTP error status is a response: the call ended.
+                self.unknown_outcome = True
+
+        task.add_done_callback(_done)
+
+    @property
+    def pending(self) -> int:
+        return len(self._tasks)
+
+    async def settle(
+        self, keepalive: Callable[[], Awaitable[None]] | None = None, *,
+        poll_seconds: float = 5.0, max_seconds: float = 300.0,
+    ) -> bool:
+        """Wait for every tracked call to end; True when each ended with a response.
+
+        ``keepalive`` (the fence guard) runs between polls so the lease is renewed, not
+        allowed to lapse, while a call is still at the Harness. False means a call ended
+        without a response (or did not end within ``max_seconds``): the Harness may still
+        apply it, so the caller must not release the lease early.
+        """
+        deadline = time.monotonic() + max_seconds
+        while self._tasks:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return False
+            await asyncio.wait(set(self._tasks), timeout=min(poll_seconds, remaining))
+            if self._tasks and keepalive is not None:
+                try:
+                    await keepalive()
+                except Exception:  # noqa: BLE001 - lease already lost; keep waiting
+                    pass
+        return not self.unknown_outcome
+
+
 @dataclass(frozen=True)
 class HarnessLeaseFence:
     """The page lease a Harness call is made under (review I3 MAJOR-3, I4 MINOR-A).
@@ -59,6 +120,46 @@ class HarnessLeaseFence:
     holder_id: str
     generation: int
     guard: Callable[[], Awaitable[None]] | None = field(default=None, compare=False, repr=False)
+    inflight: HarnessInflight = field(default_factory=HarnessInflight, compare=False, repr=False)
+
+
+def harness_fence_mac(key: bytes, alias: str, generation: int, holder_id: str) -> str:
+    """Review I5 F3 — HMAC-SHA256 over the fence, verified by the Harness worker.
+
+    Must match ``fence_mac`` in deploy/van-browser-core/browser/harness_service.py.
+    """
+    message = f"van-harness-fence/1\n{alias}\n{int(generation)}\n{holder_id}".encode()
+    return hmac.new(key, message, hashlib.sha256).hexdigest()
+
+
+def load_harness_fence_key(path: str) -> bytes | None:
+    """The shared fence key from ``path`` (whitespace stripped); None when unset.
+
+    A configured but unreadable or short (< 32 bytes) key raises: the gateway does not
+    silently send unauthenticated fences that a production Harness would refuse anyway.
+    """
+    if not path:
+        return None
+    key = Path(path).read_bytes().strip()
+    if len(key) < 32:
+        raise ValueError("VAN_BROWSER_HARNESS_FENCE_KEY_FILE holds fewer than 32 bytes")
+    return key
+
+
+def harness_fence_key_from_settings(settings: Any) -> bytes | None:
+    """The fence key named by settings, or None (unset, unreadable or too short).
+
+    None means fences go out without a MAC; a production Harness (which requires one)
+    then refuses every fenced call, so a broken key fails closed at the Harness rather
+    than stopping the whole gateway from starting.
+    """
+    try:
+        return load_harness_fence_key(getattr(settings, "browser_harness_fence_key_file", "") or "")
+    except (OSError, ValueError):
+        import logging
+
+        logging.getLogger(__name__).error("BROWSER_HARNESS_FENCE_KEY_UNUSABLE")
+        return None
 
 
 _HARNESS_LEASE_FENCE: ContextVar[HarnessLeaseFence | None] = ContextVar(
@@ -255,6 +356,7 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
         expected_version: str | None = None,
         timeout_seconds: float = 30.0,
         transport: httpx.AsyncBaseTransport | None = None,
+        fence_key: bytes | None = None,
     ) -> None:
         super().__init__(
             registry,
@@ -264,6 +366,8 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
             timeout_seconds=timeout_seconds,
             transport=transport,
         )
+        #: Review I5 F3 — shared with the Harness (VAN_HARNESS_FENCE_KEY_FILE there).
+        self.fence_key = fence_key
 
     def _envelope(self, task: BrowserTask, **extra: Any) -> dict[str, Any]:
         envelope = {
@@ -282,6 +386,10 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
             # generation older than the newest it has seen for the profile.
             envelope["lease_holder_id"] = fence.holder_id
             envelope["lease_generation"] = int(fence.generation)
+            if self.fence_key is not None:
+                envelope["lease_mac"] = harness_fence_mac(
+                    self.fence_key, fence.profile_alias, int(fence.generation), fence.holder_id,
+                )
         return envelope
 
     async def _call(self, path: str, payload: dict[str, Any]) -> dict[str, Any]:  # type: ignore[override]
@@ -297,7 +405,13 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
         fence = _HARNESS_LEASE_FENCE.get()
         if fenced and fence is not None and fence.guard is not None:
             await fence.guard()
-        return await super()._call(path, payload)
+        if not fenced or fence is None:
+            return await super()._call(path, payload)
+        # Review I5 F1 — the request runs to its end even if the caller is cancelled (a /step
+        # deadline); the fence tracks it so the lease is not given back while it is in flight.
+        call = asyncio.ensure_future(super()._call(path, payload))
+        fence.inflight.track(call)
+        return await asyncio.shield(call)
 
     async def navigate(self, task: BrowserTask, url: str) -> dict[str, Any]:
         return await self._call("/navigate", self._envelope(task, url=url))
@@ -565,7 +679,11 @@ __all__ = [
     "BrowserAdapterError",
     "BrowserHarnessAdapter",
     "HARNESS_MUTATING_PATHS",
+    "HarnessInflight",
     "HarnessLeaseFence",
+    "harness_fence_key_from_settings",
+    "harness_fence_mac",
+    "load_harness_fence_key",
     "broker_lease_fence",
     "HttpBrowserHarnessAdapter",
     "current_harness_lease_fence",

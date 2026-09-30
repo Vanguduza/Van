@@ -9,6 +9,9 @@ HTTP. Authority remains in VAN Gateway.
 from __future__ import annotations
 
 import atexit
+import contextlib
+import hashlib
+import hmac
 import json
 import os
 import re
@@ -49,6 +52,15 @@ RUNTIME_ROOT = Path(os.getenv("VAN_BROWSER_RUNTIME_ROOT", "/run/van-browser-core
 HARNESS_STATE_ROOT = Path(
     os.getenv("VAN_HARNESS_STATE_ROOT", "/var/lib/van-browser-core/harness-state")
 )
+#: Review I5 F2 — written by bootstrap.sh when it creates the fence state directory. While it
+#: exists, a missing fence manifest means the state was lost (not a first boot): fenced
+#: calls are refused rather than the fence silently restarting at "nothing seen".
+HARNESS_FENCE_INSTALL_MARKER = Path(
+    os.getenv("VAN_HARNESS_FENCE_INSTALL_MARKER", "/etc/van-browser-core/harness-fence-installed")
+)
+#: Review I5 F3 — the key the gateway MACs each lease fence with (shared with the gateway's
+#: VAN_BROWSER_HARNESS_FENCE_KEY_FILE). A file path; the key never appears in env or repo.
+HARNESS_FENCE_KEY_FILE = os.getenv("VAN_HARNESS_FENCE_KEY_FILE", "")
 #: Owner decision 2026-09-29 §1 — the trust zone this worker was installed into, written by
 #: deploy/van-browser-core/bootstrap.sh. Reported, never inferred; the gateway's placement
 #: gate refuses production Stagehand unless the zone is van-browser-core.
@@ -909,8 +921,32 @@ OPERATIONS = {
 }
 
 
+FENCE_MAC_CONTEXT = "van-harness-fence/1"
+MIN_FENCE_KEY_BYTES = 32
+
+
+def fence_mac(key: bytes, alias: str, generation: int, holder_id: str) -> str:
+    """HMAC-SHA256 the gateway sends with a fence (review I5 F3); same bytes on both sides."""
+    message = f"{FENCE_MAC_CONTEXT}\n{alias}\n{int(generation)}\n{holder_id}".encode()
+    return hmac.new(key, message, hashlib.sha256).hexdigest()
+
+
+def load_fence_key(path: str) -> bytes | None:
+    """The fence key from ``path`` (surrounding whitespace stripped), or None when unset.
+
+    A configured path that is unreadable or holds fewer than 32 bytes is an error: the
+    caller fails closed rather than running unauthenticated.
+    """
+    if not path:
+        return None
+    key = Path(path).read_bytes().strip()
+    if len(key) < MIN_FENCE_KEY_BYTES:
+        raise ValueError("fence key shorter than 32 bytes")
+    return key
+
+
 class LeaseFence:
-    """Refuse actions under a stale page-lease generation (review I3 MAJOR-3, I4 MINOR-A).
+    """Refuse actions under a stale page-lease generation (review I3 MAJOR-3, I4 MINOR-A, I5).
 
     The gateway's broker increments a profile's lease generation on every acquisition and
     sends the generation an action runs under (``lease_generation`` + ``lease_holder_id``).
@@ -919,40 +955,90 @@ class LeaseFence:
     still holding a lease the profile has since been re-leased past is not applied to the
     new holder's page.
 
-    Review I4 MINOR-A — the fence works both ways now:
+    Review I4 MINOR-A — the fence works both ways:
 
     * A *mutating* operation (``MUTATING_OPERATIONS``) without a generation is refused
-      (``LEASE_FENCE_REQUIRED``). An unfenced caller can no longer act on a page without
-      advancing the fence, which is how a stale generation used to be re-admitted after an
-      unfenced new holder. Reads may be unfenced; a fenced read is still checked.
+      (``LEASE_FENCE_REQUIRED``). Reads may be unfenced; a fenced read is still checked.
     * The newest generation is persisted per profile under ``VAN_HARNESS_STATE_ROOT``
-      (written and fsynced *before* the action runs), so a Harness restart does not forget
-      it. Unreadable state refuses the action rather than resetting the fence.
+      (written and fsynced *before* the action runs). Unreadable state refuses the action.
+
+    Review I5:
+
+    * F1 — ``admit`` holds the profile's lock from the check until the operation has been
+      applied, so the check is atomic with the apply: once a newer generation has been
+      admitted no older one can still be applying, and an older call that is applying
+      finishes before the newer one is checked.
+    * F2 — every profile that has ever been fenced is listed in a manifest next to the
+      state files, and bootstrap.sh writes an install marker. A state file missing for a
+      listed profile, or a manifest missing while the install marker exists, refuses the
+      call (``LEASE_FENCE_STATE_MISSING``, 503) instead of re-admitting any generation.
+      First boot (empty manifest, or no manifest and no install marker) admits.
+    * F3 — with a key configured every fence must carry ``lease_mac`` =
+      HMAC-SHA256(key, alias, generation, holder); a local caller without the key cannot
+      advance the fence to lock the real holder out. ``require_mac`` without a key (a
+      production worker whose key is missing or unreadable) refuses every fenced call.
 
     Owner interactive input does not travel through this worker: it is the browser stream
     host / control agent path, fenced by the interactive control lease and its control
-    generation (``InteractiveSessionService.assert_may_actuate``). The owner preempts
-    automation; an owner session takes the profile lease, which advances the generation the
-    gateway checks before every automated Harness call.
+    generation (``InteractiveSessionService.assert_may_actuate``).
     """
 
     FILE_PREFIX = "lease-fence-"
+    MANIFEST = "lease-fence-manifest.json"
 
-    def __init__(self, state_root: Path | None = None) -> None:
+    def __init__(
+        self,
+        state_root: Path | None = None,
+        *,
+        key: bytes | None = None,
+        require_mac: bool = False,
+        install_marker: Path | None = None,
+    ) -> None:
         self._lock = threading.Lock()
+        self._profile_locks: dict[str, threading.RLock] = {}
         self._newest: dict[str, tuple[int, str]] = {}
         self._state_root = state_root
+        self._key = key
+        self._require_mac = require_mac or key is not None
+        self._install_marker = install_marker
 
     def _path(self, alias: str) -> Path | None:
         if self._state_root is None:
             return None
         return safe_child(self._state_root, f"{self.FILE_PREFIX}{alias}.json")
 
+    def _manifest_path(self) -> Path | None:
+        return None if self._state_root is None else self._state_root / self.MANIFEST
+
+    def _manifest(self) -> set[str] | None:
+        """Profiles that have a persisted fence; None when there is no manifest."""
+        path = self._manifest_path()
+        if path is None or not path.exists():
+            return None
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            aliases = data["aliases"]
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            raise WorkerError("LEASE_FENCE_STATE_INVALID", 503) from exc
+        if not isinstance(aliases, list) or not all(isinstance(a, str) for a in aliases):
+            raise WorkerError("LEASE_FENCE_STATE_INVALID", 503)
+        return set(aliases)
+
     def _load(self, alias: str) -> tuple[int, str] | None:
         if alias in self._newest:
             return self._newest[alias]
         path = self._path(alias)
-        if path is None or not path.exists():
+        if path is None:
+            return None
+        manifest = self._manifest()
+        if not path.exists():
+            if manifest is None:
+                if self._install_marker is not None and self._install_marker.exists():
+                    # Installed, but the whole fence state is gone: not a first boot.
+                    raise WorkerError("LEASE_FENCE_STATE_MISSING", 503)
+                return None
+            if alias in manifest:
+                raise WorkerError("LEASE_FENCE_STATE_MISSING", 503)
             return None
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
@@ -964,21 +1050,45 @@ class LeaseFence:
         self._newest[alias] = (generation, holder)
         return self._newest[alias]
 
+    @staticmethod
+    def _write_atomic(path: Path, payload: dict[str, Any]) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_name(f".{path.name}.tmp")
+        with open(tmp, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.chmod(tmp, 0o600)
+        os.replace(tmp, path)
+
     def _store(self, alias: str, generation: int, holder: str) -> None:
         path = self._path(alias)
         if path is not None:
             try:
-                path.parent.mkdir(parents=True, exist_ok=True)
-                tmp = path.with_name(f".{path.name}.tmp")
-                with open(tmp, "w", encoding="utf-8") as handle:
-                    json.dump({"profile_alias": alias, "generation": generation, "holder_id": holder}, handle)
-                    handle.flush()
-                    os.fsync(handle.fileno())
-                os.chmod(tmp, 0o600)
-                os.replace(tmp, path)
+                # State first, then the manifest entry: a crash between the two leaves state
+                # without an entry (still enforced), never an entry without state.
+                self._write_atomic(path, {"profile_alias": alias, "generation": generation, "holder_id": holder})
+                manifest = self._manifest() or set()
+                if alias not in manifest:
+                    self._write_atomic(self._manifest_path(), {"schema_version": 1, "aliases": sorted(manifest | {alias})})
             except OSError as exc:
                 raise WorkerError("LEASE_FENCE_STATE_UNWRITABLE", 503) from exc
         self._newest[alias] = (generation, holder)
+
+    def _verify_mac(self, alias: str, generation: int, holder: str, body: dict[str, Any]) -> None:
+        if self._key is None:
+            if self._require_mac:
+                raise WorkerError("LEASE_FENCE_KEY_UNCONFIGURED", 503)
+            return
+        mac = body.get("lease_mac")
+        if not isinstance(mac, str) or not hmac.compare_digest(
+            mac, fence_mac(self._key, alias, generation, holder)
+        ):
+            raise WorkerError("LEASE_FENCE_MAC_INVALID", 403)
+
+    def profile_lock(self, alias: str) -> threading.RLock:
+        with self._lock:
+            return self._profile_locks.setdefault(alias, threading.RLock())
 
     def check(self, alias: str, body: dict[str, Any], mutating: bool = True) -> None:
         raw = body.get("lease_generation")
@@ -991,6 +1101,7 @@ class LeaseFence:
         holder = body.get("lease_holder_id")
         if not isinstance(holder, str) or not holder or len(holder) > 128:
             raise WorkerError("LEASE_HOLDER_REQUIRED", 422)
+        self._verify_mac(alias, raw, holder, body)
         with self._lock:
             newest = self._load(alias)
             if newest is not None:
@@ -1003,13 +1114,37 @@ class LeaseFence:
                     return
             self._store(alias, raw, holder)
 
+    @contextlib.contextmanager
+    def admit(self, alias: str, body: dict[str, Any], mutating: bool = True):
+        """Check the fence and keep the profile locked until the operation has run (I5 F1)."""
+        with self.profile_lock(alias):
+            self.check(alias, body, mutating)
+            yield
+
 
 #: Operations that change the page. Each must carry the lease generation it runs under.
 MUTATING_OPERATIONS = frozenset({"/navigate", "/click", "/fill", "/press", "/scroll", "/upload"})
 #: Reads. Unfenced is allowed; a fenced read is checked like any other call.
 READ_OPERATIONS = frozenset({"/page_info", "/screenshot", "/tabs", "/describe", "/wait"})
 
-FENCE = LeaseFence(HARNESS_STATE_ROOT)
+
+
+def _module_fence() -> LeaseFence:
+    # A production worker (a trust zone is configured) or one told to use a key file must
+    # have a usable key; otherwise every fenced call is refused (fail closed, review I5 F3).
+    try:
+        key = load_fence_key(HARNESS_FENCE_KEY_FILE)
+    except (OSError, ValueError):
+        key = None
+    return LeaseFence(
+        HARNESS_STATE_ROOT,
+        key=key,
+        require_mac=bool(TRUST_ZONE) or bool(HARNESS_FENCE_KEY_FILE),
+        install_marker=HARNESS_FENCE_INSTALL_MARKER,
+    )
+
+
+FENCE = _module_fence()
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -1060,20 +1195,21 @@ class Handler(BaseHTTPRequestHandler):
             domain = safe_domain(body.get("target_domain"))
             if self.path not in MUTATING_OPERATIONS and self.path not in READ_OPERATIONS:
                 raise WorkerError("OPERATION_NOT_ALLOWED", 404)
-            FENCE.check(alias, body, mutating=self.path in MUTATING_OPERATIONS)
-            if self.path == "/page_info":
-                result = page_info_result(alias, domain)
-            elif self.path == "/describe":
-                result = describe(body, alias, domain)
-            elif self.path == "/screenshot":
-                result = screenshot(alias, domain)
-            elif self.path == "/tabs":
-                result = tabs(alias, domain)
-            else:
-                operation = OPERATIONS.get(self.path)
-                if operation is None:
-                    raise WorkerError("OPERATION_NOT_ALLOWED", 404)
-                result = operation(body, alias, domain)
+            # Review I5 F1 — the fence check and the operation run under one profile lock.
+            with FENCE.admit(alias, body, mutating=self.path in MUTATING_OPERATIONS):
+                if self.path == "/page_info":
+                    result = page_info_result(alias, domain)
+                elif self.path == "/describe":
+                    result = describe(body, alias, domain)
+                elif self.path == "/screenshot":
+                    result = screenshot(alias, domain)
+                elif self.path == "/tabs":
+                    result = tabs(alias, domain)
+                else:
+                    operation = OPERATIONS.get(self.path)
+                    if operation is None:
+                        raise WorkerError("OPERATION_NOT_ALLOWED", 404)
+                    result = operation(body, alias, domain)
             self.send_json(200, result)
         except WorkerError as exc:
             self.send_json(exc.status, {"error": exc.code})
@@ -1084,6 +1220,15 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
+    if TRUST_ZONE or HARNESS_FENCE_KEY_FILE:
+        try:
+            if load_fence_key(HARNESS_FENCE_KEY_FILE) is None:
+                raise ValueError("unset")
+        except (OSError, ValueError) as exc:
+            raise SystemExit(
+                "browser harness worker refuses to start without a readable "
+                "VAN_HARNESS_FENCE_KEY_FILE (>= 32 bytes)"
+            ) from exc
     for path in (PROFILE_ROOT, DOWNLOAD_ROOT, SECRET_ROOT, RUNTIME_ROOT, HARNESS_STATE_ROOT):
         path.mkdir(parents=True, exist_ok=True)
     server = ThreadingHTTPServer((BIND, PORT), Handler)

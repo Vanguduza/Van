@@ -87,6 +87,22 @@ run "install -d -o van-browser -g van-browser -m 0750 $DATA/downloads $DATA/evid
 run "install -d -o van-browser -g van-browser -m 0700 /run/van-browser-core"
 run "install -d -o van-browser -g van-browser -m 0750 /var/log/van-browser-core"
 run "install -d -o van-browser-edge -g van-browser-edge -m 0700 /var/lib/van-browser-edge"
+# Review I5 F2 — the lease fence install marker and an empty fence manifest, together and
+# only once. Re-running bootstrap never recreates a manifest that was lost: with the marker
+# present the Harness then refuses fenced calls until the state is restored.
+FENCE_MARKER="$ETC/harness-fence-installed"
+if [[ -e "$FENCE_MARKER" ]]; then say "$FENCE_MARKER exists; fence state left alone"; else
+  run "printf '{\"schema_version\":1,\"aliases\":[]}\n' > $DATA/harness-state/lease-fence-manifest.json"
+  run "chown van-browser:van-browser $DATA/harness-state/lease-fence-manifest.json && chmod 0600 $DATA/harness-state/lease-fence-manifest.json"
+  run "date -u +%Y-%m-%dT%H:%M:%SZ > $FENCE_MARKER && chmod 0644 $FENCE_MARKER"
+fi
+# Review I5 F3 — the lease fence MAC key, generated here and never in the repository. Copy
+# it to the gateway host (VAN_BROWSER_HARNESS_FENCE_KEY_FILE) with the mTLS client files.
+FENCE_KEY="$DATA/secrets/harness-fence.key"
+if [[ -e "$FENCE_KEY" ]]; then say "$FENCE_KEY exists; left alone"; else
+  run "(umask 0277 && head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \\n' > $FENCE_KEY)"
+  run "chown van-browser:van-browser $FENCE_KEY && chmod 0400 $FENCE_KEY"
+fi
 run "install -d -o root -g van-browser-edge -m 0750 $ETC/pki"
 
 echo "== configuration =="

@@ -6,7 +6,11 @@ from pydantic import ValidationError
 
 from van_gateway.action.models import ExecutionStatus, VerificationObservation
 from van_gateway.action.service import ActionPolicyError, ActionRuntime
-from van_gateway.browser.adapters import HttpBrowserHarnessAdapter, StagehandAdapter
+from van_gateway.browser.adapters import (
+    HttpBrowserHarnessAdapter,
+    StagehandAdapter,
+    harness_fence_key_from_settings,
+)
 from van_gateway.browser.policy import BrowserPolicyEngine
 from van_gateway.browser.service import BrowserTaskService
 from van_gateway.automation.external_runtime import ExternalRuntimeRegistry
@@ -89,6 +93,7 @@ class KnowledgeRuntime:
             enabled=settings.browser_enabled,
             expected_version=settings.browser_harness_expected_version or None,
             timeout_seconds=settings.notebook_consumer_timeout_seconds,
+            fence_key=harness_fence_key_from_settings(settings),
         )
         browser_stagehand = StagehandAdapter(
             browser_registry,

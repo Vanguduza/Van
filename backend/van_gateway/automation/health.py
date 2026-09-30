@@ -27,7 +27,11 @@ from van_gateway.automation.production_gates import GATE_MODEL, evaluate_product
 from van_gateway.automation.registry import HotWorkflowIndex
 from van_gateway.automation.telemetry import TelemetryService
 from van_gateway.automation.workflow_health import WorkflowHealthService
-from van_gateway.browser.adapters import HttpBrowserHarnessAdapter, StagehandAdapter
+from van_gateway.browser.adapters import (
+    HttpBrowserHarnessAdapter,
+    StagehandAdapter,
+    harness_fence_key_from_settings,
+)
 from van_gateway.computer_use.fabric import ComputerInteractionFabric
 from van_gateway.config import Settings
 from van_gateway.degraded.registry import DegradedRegistry
@@ -117,6 +121,7 @@ class AutomationHealthApi:
             enabled=settings.browser_enabled,
             expected_version=settings.browser_harness_expected_version
             or self._manifest("browser_harness"),
+            fence_key=harness_fence_key_from_settings(settings),
         )
         self.stagehand = StagehandAdapter(
             self.runtime,
