@@ -23,6 +23,7 @@ is GREEN.
 
 from __future__ import annotations
 
+import fnmatch
 import hashlib
 import json
 import re
@@ -265,11 +266,23 @@ def _classify_owner_reference(
         return GateStatus.UNKNOWN, f"authorization authority {auth.get('authority')!r} is not accepted"
     if auth.get("owner_instruction_record") != raw:
         return GateStatus.UNKNOWN, "authorization record is for a different owner instruction record"
+    # Review I5 J1 — the authorization binds the owner's instruction by content, not only by
+    # name: it must pin the same bytes the gate record pins (and the file holds).
+    if auth.get("owner_instruction_sha256") != pinned:
+        return GateStatus.UNKNOWN, "authorization owner_instruction_sha256 does not match the pinned owner decision"
     paths = auth.get("authorized_paths")
     if not isinstance(paths, list) or not any(
         isinstance(entry, str) and entry.split(maxsplit=1)[:1] == [record_source] for entry in paths
     ):
         return GateStatus.UNKNOWN, f"authorization record does not authorize {record_source}"
+    # Review I5 J1 — an exclusion wins over an authorization (exactly or by glob).
+    excluded = auth.get("excluded_paths", [])
+    if not isinstance(excluded, list):
+        return GateStatus.UNKNOWN, "authorization excluded_paths is not a list"
+    for entry in excluded:
+        head = entry.split(maxsplit=1)[:1] if isinstance(entry, str) else []
+        if head and (head[0] == record_source or fnmatch.fnmatchcase(record_source, head[0])):
+            return GateStatus.UNKNOWN, f"authorization record excludes {record_source}"
     return GateStatus.GREEN, None
 
 
