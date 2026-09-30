@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20260930-owner-explicit-task-scope-confirmation",
+  "project": "van",
+  "authority": "OWNER_EXPLICIT",
+  "owner_instruction_sha256": "978a6ec849242df51beffe5abd69b7f9b016554114254cf3bab09bcf34dfa652",
+  "owner_instruction_digest_input": "UTF-8 bytes of the verbatim selected answer label \"Yes, confirmed\" with no quotes and no trailing newline",
+  "owner_instruction_record": "docs/decisions/OWNER-DECISION-20260930-BROWSER-TASK-SCOPE.md",
+  "owner_instruction_excerpt": "Yes, confirmed",
+  "question_verbatim": "Do you confirm this reading of \"pages should be relevant to the task truth\": each browser task's recorded scope (URL prefixes Hermes declares from the mission, or the task's target domain if none are declared, widened only by your approvals) decides what automation may act on, and anything outside it comes to you?",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "claude_code",
+    "request_id": "claude-code-session_01ELKqm4GCPmPvF3ggKkgB1J-20260930",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "signature_note": "The owner selected this answer in the Claude Code session that asked the question; the integrator records it first-hand. No device, biometric or cryptographic signature is claimed; not signed-ingress evidence.",
+  "purpose": "Record the owner's confirmation of the task-scope reading as an append to its decision record. The confirmation makes the task-scope rule (backend/van_gateway/browser/task_scope.py) an owner-confirmed decision; it authorizes no code change by itself.",
+  "authorized_paths": [
+    "docs/decisions/OWNER-DECISION-20260930-BROWSER-TASK-SCOPE.md (append-only)"
+  ],
+  "commit_scope": {
+    "commits": [
+      "3a62fde14c68ceb417dfdb2b43e64e11c227f559"
+    ]
+  },
+  "limits": [
+    "Covers only the listed commit and only as an append to the listed file.",
+    "Opens no production gate and cannot satisfy the jev_browser_effect owner_reference gate (that gate needs its own decision record).",
+    "Does not widen any task scope, path or authority of any other record."
+  ],
+  "issued_at_utc": "2026-09-30T00:00:00Z",
+  "recorded_by": "integrator (session_01ELKqm4GCPmPvF3ggKkgB1J), first-hand",
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false,
+  "reusable": false,
+  "revoked": false
+}
