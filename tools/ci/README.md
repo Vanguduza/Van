@@ -72,6 +72,17 @@ trusted side (PR base, or the branch head before a push) out into `trusted/`, th
 that edits the checker does not run its edit. The job runs on pull requests and on pushes to
 `main`, `claude/**`, `forge/**` and the programme branches `gpt/**`.
 
+**Push path (review I7 minor 9).** A push used to be judged with the checker and records of
+`github.event.before`, the branch's previous head — on an unprotected branch the pusher's own
+earlier push. The job now computes the trusted side from a protected ref: a push to `main` or a
+programme branch (`gpt/**`, the protected branches) is judged from that branch's previous head
+and refused unless it is a fast-forward of it (that head moved only by a reviewed merge, if
+branch protection is on); a push to any other branch is judged from the newest commit it shares
+with a protected branch (its protected upstream, else the default branch's merge-base), and
+refused if it shares none. Pull requests are unchanged (their base). Limit: for a `push` event
+GitHub runs the workflow file of the pushed commit, so on an unprotected branch this job is a
+signal, not a gate; the gate is the pull request into a protected branch.
+
 `verify` without `--base` trusts the tree it audits (HEAD or the working tree). It is the audit
 of a protected branch and the developer's local check, not a PR gate.
 
