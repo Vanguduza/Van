@@ -154,7 +154,8 @@ async def test_the_real_gate_model_keeps_jev_effect_shadow_only():
     # carries three gates, so the full list is read from the evaluator below.
     assert "VAN-JEV-BROWSER-EFFECT-001.yaml:" in reason
     state = production_gates.evaluate_production_gates()
-    assert state["capability_decisions"] == ["VAN-JEV-BROWSER-EFFECT-001.yaml"]
+    # Unit G12 added the browser egress qualification gate (browser capabilities only).
+    assert state["capability_decisions"] == ["VAN-JEV-BROWSER-EFFECT-001.yaml", "VAN-BROWSER-CORE-EGRESS-001.yaml"]
     gates = {g["gate"]: g for g in state["capability_gates"]}
     assert (gates["jev_browser_effect"]["status"], gates["jev_browser_effect"]["raw_value"]) == ("PENDING", "SHADOW_ONLY")
     # Review I3 MINOR-4: effect also needs the owner's signature and decision reference.
@@ -174,8 +175,9 @@ def _jev_repo(tmp_path: Path, *, jev: str, harness: str = "SIGNED") -> Path:
     decisions.mkdir(parents=True)
     simple = {"id": "owner_decision", "kind": "owner_decision", "path": "owner_signature_status",
               "green": ["SIGNED"], "pending": ["PENDING"]}
+    # Unit G12: the inherited egress decision as a GREEN stand-in.
     for name, sig in (("VAN-ADOPT-N8N-001.yaml", "SIGNED"), ("VAN-ADOPT-BROWSER-HARNESS-001.yaml", harness),
-                      ("VAN-ADOPT-STAGEHAND-001.yaml", "SIGNED")):
+                      ("VAN-ADOPT-STAGEHAND-001.yaml", "SIGNED"), (production_gates.BROWSER_EGRESS_DECISION, "SIGNED")):
         (decisions / name).write_text(f"owner_signature_status: {sig}\n", encoding="utf-8")
     (decisions / "VAN-AMEND-SECURITY-POLICY-001.md").write_text("**Status:** `OWNER_APPROVED`\n", encoding="utf-8")
     # Review I3 MINOR-4 / I4 MINOR-B: the capability also needs the owner signature and a
@@ -197,14 +199,16 @@ def _jev_repo(tmp_path: Path, *, jev: str, harness: str = "SIGNED") -> Path:
         "  owner_decision_authorization_id: auth-20261001-jev\n",
         encoding="utf-8")
     required = [{"decision": n, "format": "yaml", "gates": [simple]} for n in (
-        "VAN-ADOPT-N8N-001.yaml", "VAN-ADOPT-BROWSER-HARNESS-001.yaml", "VAN-ADOPT-STAGEHAND-001.yaml")]
+        "VAN-ADOPT-N8N-001.yaml", "VAN-ADOPT-BROWSER-HARNESS-001.yaml", "VAN-ADOPT-STAGEHAND-001.yaml",
+        production_gates.BROWSER_EGRESS_DECISION)]
     required.append({"decision": "VAN-AMEND-SECURITY-POLICY-001.md", "format": "markdown",
                      "gates": [{"id": "owner_decision", "kind": "owner_decision", "path": "Status",
                                 "green": ["OWNER_APPROVED"]}]})
     model = json.loads((production_gates.GATE_MODEL).read_text(encoding="utf-8"))
+    jev_only = [d for d in model["capability_decisions"] if d["decision"] == "VAN-JEV-BROWSER-EFFECT-001.yaml"]
     path = tmp_path / "gates.json"
     path.write_text(json.dumps({"decisions_dir": "docs/decisions", "required_decisions": required,
-                                "capability_decisions": model["capability_decisions"]}), encoding="utf-8")
+                                "capability_decisions": jev_only}), encoding="utf-8")
     return path
 
 

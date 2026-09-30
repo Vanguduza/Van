@@ -355,6 +355,11 @@ def test_zone_declares_the_egress_proxy_and_firewall_it_ships():
     assert "never copied off the host" in egress["proxy"]["key_handling"]
     limits = " ".join(egress["remaining_limits"])
     assert "unverified" in limits.lower() and "DNS" in limits
+    # The production gate it names exists and the migration record carries the design.
+    assert (ROOT / "docs/decisions/VAN-BROWSER-CORE-EGRESS-001.yaml").is_file()
+    assert "VAN-BROWSER-CORE-EGRESS-001.yaml" in egress["production_gate"]
+    migration = (ROOT / "docs/project-state/VAN_BROWSER_CORE_MIGRATION_20260929.md").read_text(encoding="utf-8")
+    assert "## 8. Egress proxy and zone firewall" in migration and "CONNECT host allowlist" in migration
     bc4 = next(i for i in ZONE["cross_zone_interfaces"] if i["id"] == "BC-IF-4")
     assert "egress proxy" in bc4["transport"] and "firewall" in bc4["transport"]
     # The Harness puts the proxy flags on Chromium's command line (and nothing else changes it).
