@@ -12,19 +12,29 @@ Modes
 record
     Append a row. With no --commit/--range it records the *staged* change: that is what the
     pre-commit and pre-merge-commit hooks in `.githooks/` call; hooks take no arguments, so
-    PROJECT_TRUTH_AUTH=<id>[,<id>] names authorizations there. The row is keyed by
+    PROJECT_TRUTH_AUTH=<id>[,<id>] names authorizations there and
+    PROJECT_TRUTH_ALLOW_UNCOVERED=1 records an uncovered change truthfully. The row is keyed by
     (parent_sha, commit_diff_sha256) because the commit SHA does not exist yet. With
     --commit SHA (repeatable) or --range A..B it records commits that already exist, keyed by
     commit_sha; the integrator uses this for commits made without the hook (rebase,
-    cherry-pick, another worktree with no hook installed, amend).
-verify [--baseline SHA]
+    cherry-pick, another worktree with no hook installed, amend) and for commits whose
+    commit-scoped authorization was recorded after them.
+verify [--baseline SHA] [--committed]
     Every commit in baseline..HEAD must have a bound row whose digest matches the commit, and
     every changed file must be covered by a valid authorization the rows name. Without
     --baseline the nearest enforcement baseline in
-    `registries/project_truth_ledger_baselines.json` that is an ancestor of HEAD is used.
-verify-pr --base SHA
-    The same check over merge-base(SHA, HEAD)..HEAD, starting no earlier than the enforcement
-    baseline of this lineage. For CI on pull requests.
+    `registries/project_truth_ledger_baselines.json` that is an ancestor of HEAD is used. The
+    configuration and authorization records are read from HEAD (or the working tree): this mode
+    trusts the branch it audits, so it is the audit of a protected branch, not a PR gate.
+verify-pr --base REF
+    The PR gate. The configuration, the baselines and the authorization records are read from
+    the BASE ref, never from the PR: a PR cannot move its own baseline, widen the allowed
+    authorities, or authorize itself with a record it adds. Commits in merge-base(REF, HEAD)..HEAD
+    (starting no earlier than an enforcement baseline that is an ancestor of REF) are checked
+    against the base's records. The base..merge-base history is then re-checked against the PR
+    head's records, so a PR that revokes or conflicts with a record history relies on is refused.
+    CI runs the BASE ref's copy of this script (`--repo <pr checkout>`), so a PR that edits the
+    checker does not run its own edit.
 
 Diff digest (the recipe unit G6c used for the retroactive Programme B rows)
     sha256(git diff --binary --no-ext-diff --no-renames <parent> <commit>
@@ -50,11 +60,32 @@ Row binding and supersession
 Coverage
     A changed file (the ledger itself excepted) is covered when one of the effective
     authorization ids names a record in `docs/project-state/authorizations/<id>.json` that
-    exists in the verified tree, is not revoked, has an authority in the configured allowed
-    set, lists the path (exactly or by glob; trailing " (...)" annotations are ignored) in
-    authorized_paths and does not list it in excluded_paths. Authorization records are
-    looked up at the verified head, not at the commit, so retroactive records are honoured;
-    records must be append-only (added, never modified or deleted) across the range.
+      * exists in the trusted tree (the base ref for verify-pr; HEAD for verify),
+      * is not revoked and has an authority in the allowed set (the configured list, which can
+        only narrow OWNER_EXPLICIT / OWNER_DERIVED / OWNER_DELEGATED_AUTONOMY),
+      * covers commit C: a record with "reusable": true covers any commit; any other record
+        covers only the commits its "commit_scope" declares ({"commits": [sha, ...]} and/or
+        {"ranges": ["A..B", ...]}, full SHAs, ranges as `git rev-list A..B`), or, for a record
+        written before commit_scope existed, the scope that exactly one
+        "record_kind": "commit_scope_binding" record assigns to it. A merge commit is covered
+        when it brings in (C^1..C) a commit of the scope. A non-reusable record with no scope
+        covers nothing.
+      * lists the path in authorized_paths and not in excluded_paths. Globs: `*` and `?` do
+        not cross `/`, `**` does. An entry may carry one trailing annotation:
+        "(append-only)" / "(append-only rows)" cover the path only when the commit keeps the
+        first parent's bytes as a prefix of the new content (and does not delete it); any other
+        annotation on an authorized path covers nothing. Annotations on excluded_paths are
+        comments (an exclusion only narrows).
+    Authorization records are append-only commit by commit: a commit may add record files but
+    never modify or delete one, relative to each of its parents.
+
+Authorization intake
+    A commit whose whole change is the addition of new authorization record files is an intake
+    commit. It needs a bound row, but no record authorizes it: a record cannot authorize its own
+    addition, and a record added by a PR authorizes nothing in that PR. The record becomes
+    usable only once it is on the base ref, which is what the code-owner review on
+    `docs/project-state/authorizations/**` (.github/CODEOWNERS) guards. Bootstrap: merge the
+    intake commit first, then verify the commits it authorizes against the new base.
 
 Commits whose diff touches only the ledger are exempt from needing a row (they cannot name
 their own SHA). The ledger must be append-only across the range: every row present in a
@@ -69,7 +100,6 @@ from __future__ import annotations
 import argparse
 import collections
 import datetime as dt
-import fnmatch
 import hashlib
 import json
 import os
@@ -82,12 +112,16 @@ LEDGER_REL = "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl"
 AUTH_DIR_REL = "docs/project-state/authorizations"
 CONFIG_REL = "registries/project_truth_ledger_baselines.json"
 DEFAULT_ALLOWED = ("OWNER_EXPLICIT", "OWNER_DERIVED", "OWNER_DELEGATED_AUTONOMY")
+BINDING_KIND = "commit_scope_binding"
+APPEND_ONLY_ANNOTATIONS = frozenset({"append-only", "append-only rows"})
 EMPTY_TREE = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
 DIFF_RECIPE = (
     "sha256(git diff --binary --no-ext-diff --no-renames <parent_sha> <commit_sha> -- . "
     "':(exclude)docs/project-state/LOCAL_CHANGE_LEDGER.jsonl'); first parent for merges"
 )
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+RANGE_RE = re.compile(r"^([0-9a-f]{40})\.\.([0-9a-f]{40})$")
+ANNOTATION_RE = re.compile(r"^(.*?)\s+\(([^()]*)\)\s*$")
 # Pin the diff-header options a user's config could change, so the digest depends on the
 # change and not on whoever computed it. These are git's defaults.
 GIT_PIN = [
@@ -97,11 +131,13 @@ GIT_PIN = [
     "-c", "core.quotePath=true",
     "-c", "color.ui=never",
 ]
+INDEX = ":"  # pseudo-ref: the staged content
 
 
 class Repo:
     def __init__(self, root: Path):
         self.root = root
+        self._introduced: dict[str, frozenset[str]] = {}
 
     def git(self, *args: str, check: bool = True, binary: bool = False) -> subprocess.CompletedProcess:
         proc = subprocess.run(
@@ -133,8 +169,27 @@ class Repo:
         return self.ok("merge-base", "--is-ancestor", a, b)
 
     def show(self, ref: str, path: str) -> str | None:
-        proc = self.git("show", f"{ref}:{path}", check=False)
+        spec = f":{path}" if ref == INDEX else f"{ref}:{path}"
+        proc = self.git("show", spec, check=False)
         return proc.stdout if proc.returncode == 0 else None
+
+    def show_bytes(self, ref: str | None, path: str) -> bytes | None:
+        if ref is None:
+            return None
+        spec = f":{path}" if ref == INDEX else f"{ref}:{path}"
+        proc = self.git("show", spec, check=False, binary=True)
+        return proc.stdout if proc.returncode == 0 else None
+
+    def introduced(self, sha: str) -> frozenset[str]:
+        """Commits a merge brings in: C^1..C without C itself (empty for non-merges)."""
+        if sha not in self._introduced:
+            ps = self.parents(sha)
+            if len(ps) < 2:
+                self._introduced[sha] = frozenset()
+            else:
+                got = self.out("rev-list", f"{ps[0]}..{sha}").split()
+                self._introduced[sha] = frozenset(x for x in got if x != sha)
+        return self._introduced[sha]
 
 
 # --------------------------------------------------------------------------- diff digests
@@ -179,6 +234,33 @@ def staged_name_status(repo: Repo) -> list[tuple[str, str]]:
     return [tuple(x.split("\t", 1)) for x in out.splitlines() if "\t" in x]  # type: ignore[misc]
 
 
+def is_record_path(p: str) -> bool:
+    return p.startswith(AUTH_DIR_REL + "/")
+
+
+def intake_ids(name_status: list[tuple[str, str]]) -> list[str] | None:
+    """The record ids a pure intake change adds, or None if the change is anything else."""
+    if not name_status:
+        return None
+    ids = []
+    for status, p in name_status:
+        if status != "A" or not is_record_path(p) or "/" in p[len(AUTH_DIR_REL) + 1:] or not p.endswith(".json"):
+            return None  # GUARD:intake-pure-only
+        ids.append(p[len(AUTH_DIR_REL) + 1: -len(".json")])
+    return ids
+
+
+def record_changes_vs(repo: Repo, parent: str, sha: str) -> list[str]:
+    """Authorization-record paths `sha` modifies or deletes relative to `parent` (additions are fine)."""
+    out = repo.out("diff", "--name-status", "--no-renames", parent, sha, "--", AUTH_DIR_REL)
+    bad = []
+    for line in out.splitlines():
+        status, _, p = line.partition("\t")
+        if status != "A":
+            bad.append(f"{status} {p}")
+    return bad
+
+
 # --------------------------------------------------------------------------- ledger
 
 def parse_rows(text: str | None) -> tuple[list[dict], list[str]]:
@@ -216,42 +298,99 @@ def bound_rows(rows: list[dict], sha: str, parent: str | None, digest: str) -> l
     return out
 
 
+# --------------------------------------------------------------------------- paths
+
+def _glob_regex(pat: str) -> re.Pattern:
+    out, i, n = [], 0, len(pat)
+    while i < n:
+        c = pat[i]
+        if pat.startswith("**/", i):
+            out.append("(?:.*/)?")  # zero or more whole directories
+            i += 3
+        elif pat.startswith("**", i):
+            out.append(".*")
+            i += 2
+        elif c == "*":
+            out.append("[^/]*")
+            i += 1
+        elif c == "?":
+            out.append("[^/]")
+            i += 1
+        else:
+            out.append(re.escape(c))
+            i += 1
+    return re.compile("".join(out) + r"\Z")
+
+
+def glob_match(path: str, pat: str) -> bool:
+    """`*` and `?` stay inside one path segment; `**` crosses `/`."""
+    if path == pat:
+        return True
+    return _glob_regex(pat).match(path) is not None
+
+
+def parse_entry(entry: str) -> tuple[str, str | None]:
+    """"docs/X.yaml (append-only)" -> ("docs/X.yaml", "append-only"); no annotation -> None."""
+    m = ANNOTATION_RE.match(entry)
+    if m:
+        return m.group(1).strip(), m.group(2).strip()
+    return entry.strip(), None
+
+
+def is_append_only(old: bytes | None, new: bytes | None) -> bool:
+    if new is None:
+        return False  # deleted
+    return old is None or new.startswith(old)
+
+
 # --------------------------------------------------------------------------- authorizations
 
-def _pattern(entry: str) -> str:
-    # "docs/decisions/X.yaml (append-only)" -> "docs/decisions/X.yaml"
-    return entry.split(" (", 1)[0].strip()
-
-
-def path_matches(path: str, entries) -> bool:
-    for entry in entries or []:
-        if not isinstance(entry, str):
-            continue
-        pat = _pattern(entry)
-        if not pat:
-            continue
-        if path == pat or fnmatch.fnmatchcase(path, pat):
-            return True
-        if pat.endswith("/**") and path.startswith(pat[:-2]):
-            return True
-    return False
+def _resolve_scope(repo: Repo, spec) -> tuple[frozenset[str] | None, str | None]:
+    if not isinstance(spec, dict) or not spec:
+        return None, "commit scope must be an object with 'commits' and/or 'ranges'"
+    unknown = set(spec) - {"commits", "ranges", "note", "derivation"}
+    if unknown:
+        return None, f"commit scope has unknown keys {sorted(unknown)}"
+    commits: set[str] = set()
+    for sha in spec.get("commits") or []:
+        if not isinstance(sha, str) or not SHA_RE.match(sha):
+            return None, f"commit scope entry {sha!r} is not a full commit SHA"
+        commits.add(sha)
+    for r in spec.get("ranges") or []:
+        m = RANGE_RE.match(r) if isinstance(r, str) else None
+        if not m:
+            return None, f"commit scope range {r!r} is not <full sha>..<full sha>"
+        if not repo.resolve(m.group(1)) or not repo.resolve(m.group(2)):
+            return None, f"commit scope range {r!r} names a commit this repository does not have"
+        commits.update(x for x in repo.out("rev-list", r).split() if x)
+    if not commits:
+        return None, "commit scope is empty"
+    return frozenset(commits), None
 
 
 class Authorizations:
-    """Authorization records as they stand in one tree (the verified head or the worktree)."""
+    """Authorization records as they stand in one trusted tree (a ref or the worktree)."""
 
-    def __init__(self, records: dict[str, dict], errors: dict[str, str], allowed: set[str]):
+    def __init__(self, repo: Repo, records: dict[str, dict], bindings: dict[str, dict], errors: dict[str, str],
+                 allowed: set[str], source: str):
+        self.repo = repo
         self.records = records
+        self.bindings = bindings
         self.load_errors = errors
         self.allowed = allowed
+        self.source = source
         self.revoked_by: dict[str, str] = {}
         for aid, rec in records.items():
             for target in rec.get("revokes") or []:
                 self.revoked_by[str(target)] = aid
+        self.global_findings: list[str] = []
+        self.scope: dict[str, frozenset[str]] = {}
+        self.scope_errors: dict[str, str] = {}
+        self._resolve_scopes()
 
     @classmethod
     def load(cls, repo: Repo, ref: str | None, allowed: set[str]) -> "Authorizations":
-        records, errors = {}, {}
+        records, bindings, errors = {}, {}, {}
         if ref is None:
             base = repo.root / AUTH_DIR_REL
             items = [(p.name, p.read_text(encoding="utf-8")) for p in sorted(base.glob("*.json"))] if base.is_dir() else []
@@ -272,16 +411,61 @@ class Authorizations:
             if not isinstance(rec, dict) or rec.get("authorization_id") != stem:
                 errors[stem] = "authorization_id does not match its file name"
                 continue
-            records[stem] = rec
-        return cls(records, errors, allowed)
+            if rec.get("record_kind") == BINDING_KIND:
+                bindings[stem] = rec
+            else:
+                records[stem] = rec
+        return cls(repo, records, bindings, errors, allowed, "worktree" if ref is None else ref)
+
+    def _resolve_scopes(self) -> None:
+        claims: dict[str, list[tuple[str, object]]] = collections.defaultdict(list)
+        for bid, b in sorted(self.bindings.items()):
+            why = None
+            if b.get("revoked") is True or bid in self.revoked_by:
+                continue
+            if b.get("authority") not in self.allowed:
+                why = f"authority {b.get('authority')!r} not in {sorted(self.allowed)}"
+            elif not isinstance(b.get("binds"), dict) or not b["binds"]:
+                why = "'binds' must be a non-empty object {authorization_id: commit scope}"
+            if why:
+                self.global_findings.append(f"INVALID_SCOPE_BINDING {bid}: {why}")
+                continue
+            for target, spec in b["binds"].items():
+                rec = self.records.get(target)
+                if rec is None:
+                    self.global_findings.append(f"INVALID_SCOPE_BINDING {bid}: binds {target}, which is not an authorization record here")
+                elif rec.get("reusable") is True or "commit_scope" in rec:  # GUARD:binding-cannot-rescope
+                    self.global_findings.append(f"INVALID_SCOPE_BINDING {bid}: {target} declares its own scope (or is reusable); a binding cannot re-scope it")
+                else:
+                    claims[target].append((bid, spec))
+        for aid, rec in self.records.items():
+            if rec.get("reusable") is True:
+                continue
+            if "commit_scope" in rec:
+                scope, err = _resolve_scope(self.repo, rec["commit_scope"])
+            elif len(claims.get(aid, [])) > 1:  # GUARD:binding-conflict
+                scope, err = None, f"bound by more than one scope binding ({', '.join(b for b, _ in claims[aid])}); refusing to choose"
+            elif claims.get(aid):
+                bid, spec = claims[aid][0]
+                scope, err = _resolve_scope(self.repo, spec)
+                if err:
+                    err = f"scope binding {bid}: {err}"
+            else:
+                scope, err = None, "non-reusable record declares no commit_scope and no scope binding names it; it covers nothing"
+            if err:
+                self.scope_errors[aid] = err
+            else:
+                self.scope[aid] = scope  # type: ignore[assignment]
 
     def problem(self, aid: str) -> str | None:
         """Why this id cannot authorize anything, or None if it can."""
         if aid in self.load_errors:
             return f"INVALID_AUTHORIZATION {aid}: {self.load_errors[aid]}"
+        if aid in self.bindings:
+            return f"NOT_AN_AUTHORIZATION {aid}: a commit_scope_binding record authorizes no files"
         rec = self.records.get(aid)
         if rec is None:
-            return f"UNKNOWN_AUTHORIZATION {aid}: no {AUTH_DIR_REL}/{aid}.json"
+            return f"UNKNOWN_AUTHORIZATION {aid}: no {AUTH_DIR_REL}/{aid}.json in the trusted tree ({self.source})"
         if rec.get("revoked") is True:
             return f"REVOKED_AUTHORIZATION {aid}: record says revoked"
         if aid in self.revoked_by:
@@ -291,18 +475,56 @@ class Authorizations:
         paths = rec.get("authorized_paths")
         if not isinstance(paths, list) or not paths:
             return f"INVALID_AUTHORIZATION {aid}: authorized_paths must be a non-empty list"
+        if aid in self.scope_errors:  # GUARD:unscoped
+            return f"UNSCOPED_AUTHORIZATION {aid}: {self.scope_errors[aid]}"
         return None
 
-    def covers(self, aid: str, path: str) -> bool:
-        if self.problem(aid) is not None:
-            return False
+    def in_scope(self, aid: str, sha: str | None) -> bool:
         rec = self.records[aid]
-        return path_matches(path, rec.get("authorized_paths")) and not path_matches(path, rec.get("excluded_paths"))
+        if rec.get("reusable") is True:
+            return True
+        if sha is None:
+            return False  # a staged change has no SHA yet; only a reusable record can cover it
+        scope = self.scope.get(aid, frozenset())
+        if sha in scope:
+            return True
+        return bool(self.repo.introduced(sha) & scope)
+
+    def path_cover(self, aid: str, path: str, old: bytes | None, new: bytes | None) -> tuple[bool, str | None]:
+        """Does this record's path list cover `path` for a change old -> new? (covered, note)."""
+        rec = self.records[aid]
+        for entry in rec.get("excluded_paths") or []:
+            if isinstance(entry, str) and glob_match(path, parse_entry(entry)[0]):
+                return False, None
+        note = None
+        for entry in rec.get("authorized_paths") or []:
+            if not isinstance(entry, str):
+                continue
+            pat, ann = parse_entry(entry)
+            if not pat or not glob_match(path, pat):  # GUARD:glob
+                continue
+            if ann is None:
+                return True, None
+            if ann in APPEND_ONLY_ANNOTATIONS:
+                if is_append_only(old, new):  # GUARD:append-only
+                    return True, None
+                note = f"{aid} allows {path} only as '({ann})' and this change does not keep the old content as a prefix"
+            else:  # GUARD:unrecognised-annotation
+                note = f"{aid} lists {path} with annotation '({ann})', which this checker cannot enforce; the entry covers nothing"
+        return False, note
+
+    def covers(self, aid: str, path: str, sha: str | None = None, old: bytes | None = None, new: bytes | None = None) -> bool:
+        if self.problem(aid) is not None or not self.in_scope(aid, sha):
+            return False
+        return self.path_cover(aid, path, old, new)[0]
 
 
 # --------------------------------------------------------------------------- config
 
-def load_config(repo: Repo) -> dict:
+def load_config(repo: Repo, ref: str | None = None) -> dict:
+    if ref is not None:
+        text = repo.show(ref, CONFIG_REL)
+        return json.loads(text) if text else {}
     path = repo.root / CONFIG_REL
     if not path.exists():
         return {}
@@ -310,14 +532,18 @@ def load_config(repo: Repo) -> dict:
 
 
 def allowed_authorities(config: dict) -> set[str]:
-    return set(config.get("allowed_authorities") or DEFAULT_ALLOWED) - {"NO_AUTHORITY"}
+    # The configuration can narrow the owner authority classes, never add to them.
+    return set(config.get("allowed_authorities") or DEFAULT_ALLOWED) & set(DEFAULT_ALLOWED)  # GUARD:allowed-narrow-only
 
 
-def nearest_baseline(repo: Repo, config: dict, head: str) -> tuple[str, dict] | None:
+def nearest_baseline(repo: Repo, config: dict, head: str, anchor: str | None = None) -> tuple[str, dict] | None:
+    """Nearest lineage baseline that is an ancestor of head (and of `anchor`, the trusted base, if given)."""
     best = None
     for lineage in config.get("lineages") or []:
         sha = repo.resolve(str(lineage.get("baseline_sha", "")))
         if not sha or not repo.is_ancestor(sha, head):
+            continue
+        if anchor is not None and not repo.is_ancestor(sha, anchor):  # GUARD:baseline-ancestor-of-base
             continue
         distance = int(repo.out("rev-list", "--count", f"{sha}..{head}"))
         if best is None or distance < best[0]:
@@ -327,35 +553,10 @@ def nearest_baseline(repo: Repo, config: dict, head: str) -> tuple[str, dict] | 
 
 # --------------------------------------------------------------------------- verify
 
-def verify_range(repo: Repo, start: str, head: str, use_worktree: bool, config: dict) -> list[str]:
-    findings: list[str] = []
-    allowed = allowed_authorities(config)
-    head_ledger = repo.show(head, LEDGER_REL)
-    if use_worktree:
-        path = repo.root / LEDGER_REL
-        ledger_text = path.read_text(encoding="utf-8") if path.exists() else ""
-        auths = Authorizations.load(repo, None, allowed)
-        missing = ledger_lines(head_ledger) - ledger_lines(ledger_text)
-        if missing:
-            findings.append(f"LEDGER_NOT_APPEND_ONLY worktree: {sum(missing.values())} row(s) committed at HEAD are missing or edited in the working tree")
-        changed = repo.out("diff", "--name-status", "--no-renames", head, "--", AUTH_DIR_REL)
-        for line in changed.splitlines():
-            status, _, p = line.partition("\t")
-            if status != "A":
-                findings.append(f"AUTHORIZATION_NOT_APPEND_ONLY worktree: {status} {p}")
-    else:
-        ledger_text = head_ledger or ""
-        auths = Authorizations.load(repo, head, allowed)
-
-    rows, bad = parse_rows(ledger_text)
-    findings += [f"MALFORMED_ROW {b}" for b in bad]
-
-    changed = repo.out("diff", "--name-status", "--no-renames", start, head, "--", AUTH_DIR_REL)
-    for line in changed.splitlines():
-        status, _, p = line.partition("\t")
-        if status != "A":
-            findings.append(f"AUTHORIZATION_NOT_APPEND_ONLY {start[:12]}..{head[:12]}: {status} {p}")
-
+def verify_range(repo: Repo, start: str, head: str, auths: Authorizations, rows: list[dict],
+                 head_ids: set[str] | None = None) -> list[str]:
+    """Check every commit in start..head against `auths` (the trusted records) and `rows`."""
+    findings: list[str] = list(auths.global_findings)
     commits = [x for x in repo.out("rev-list", "--reverse", f"{start}..{head}").splitlines() if x]
     for sha in commits:
         parents = repo.parents(sha)
@@ -363,8 +564,14 @@ def verify_range(repo: Repo, start: str, head: str, use_worktree: bool, config: 
         child_lines = ledger_lines(repo.show(sha, LEDGER_REL))
         for p in parents:
             lost = ledger_lines(repo.show(p, LEDGER_REL)) - child_lines
-            if lost:
+            if lost:  # GUARD:ledger-append-only
                 findings.append(f"LEDGER_NOT_APPEND_ONLY {sha}: {sum(lost.values())} row(s) of parent {p[:12]} removed or edited")
+        # The same rule for authorization records: a commit may add record files, never
+        # modify or delete one, relative to each of its parents.
+        for p in parents or [EMPTY_TREE]:
+            bad = record_changes_vs(repo, p, sha)
+            if bad:  # GUARD:record-append-only
+                findings.append(f"AUTHORIZATION_NOT_APPEND_ONLY {sha}: {', '.join(bad)} (vs parent {p[:12]})")
         files = commit_files(repo, sha)
         if not files:
             continue  # ledger-only commit
@@ -376,24 +583,72 @@ def verify_range(repo: Repo, start: str, head: str, use_worktree: bool, config: 
             continue
         for r in bound:
             if r.get("commit_sha") == sha:
-                if r.get("commit_diff_sha256") != digest:
+                if r.get("commit_diff_sha256") != digest:  # GUARD:digest
                     findings.append(
                         f"DIGEST_MISMATCH {sha}: row ({r.get('kind', '?')}) says {r.get('commit_diff_sha256')!r}, commit is {digest}"
                     )
                 if r.get("parent_sha") not in (None, parent):
                     findings.append(f"PARENT_MISMATCH {sha}: row parent {r.get('parent_sha')} is not first parent {parent}")
+        status = commit_name_status(repo, sha)
+        added = intake_ids(status)
+        if added is not None:  # GUARD:intake-exemption
+            # Intake: the commit only adds record files. No record authorizes its own addition;
+            # the records become usable once they are on the base ref (code-owner review).
+            for aid in added:
+                text = repo.show(sha, f"{AUTH_DIR_REL}/{aid}.json") or ""
+                try:
+                    rec = json.loads(text)
+                except json.JSONDecodeError:
+                    rec = None
+                if not isinstance(rec, dict) or rec.get("authorization_id") != aid:
+                    findings.append(f"INVALID_AUTHORIZATION_INTAKE {sha}: {aid}.json is not a record whose authorization_id matches its file name")
+            continue
         ids = sorted({str(i) for r in bound for i in (r.get("authorization_ids") or [])})
-        usable = []
+        usable, notes = [], []
         for aid in ids:
             problem = auths.problem(aid)
             if problem:
-                findings.append(f"{problem.split(' ', 1)[0]} {sha}: {problem.split(' ', 1)[1]}")
+                code, _, detail = problem.partition(" ")
+                if code == "UNKNOWN_AUTHORIZATION" and head_ids is not None and aid in head_ids:
+                    code, detail = "UNTRUSTED_AUTHORIZATION", (
+                        f"{aid}: added by this change, not present on the trusted base ({auths.source}); "
+                        "a record cannot authorize the change that adds it (merge the record first)")
+                findings.append(f"{code} {sha}: {detail}")
+            elif not auths.in_scope(aid, sha):  # GUARD:scope
+                notes.append(f"{aid} is not reusable and {sha[:12]} is not in its commit scope")
             else:
                 usable.append(aid)
-        uncovered = [f for f in files if not any(auths.covers(aid, f) for aid in usable)]
+        uncovered = []
+        for f in files:
+            old = repo.show_bytes(parent, f)
+            new = repo.show_bytes(sha, f)
+            ok = False
+            for aid in usable:
+                hit, note = auths.path_cover(aid, f, old, new)
+                if hit:
+                    ok = True
+                    break
+                if note:
+                    notes.append(note)
+            if not ok:
+                uncovered.append(f)
         if uncovered:
             shown = ", ".join(uncovered[:8]) + (f" (+{len(uncovered) - 8} more)" if len(uncovered) > 8 else "")
-            findings.append(f"UNCOVERED_FILES {sha}: {len(uncovered)} file(s) not covered by {ids or 'no authorization'}: {shown}")
+            why = f" [{'; '.join(dict.fromkeys(notes))}]" if notes else ""
+            findings.append(f"UNCOVERED_FILES {sha}: {len(uncovered)} file(s) not covered by {ids or 'no authorization'}: {shown}{why}")
+    return findings
+
+
+def worktree_findings(repo: Repo, head_ledger: str | None, ledger_text: str) -> list[str]:
+    findings = []
+    missing = ledger_lines(head_ledger) - ledger_lines(ledger_text)
+    if missing:
+        findings.append(f"LEDGER_NOT_APPEND_ONLY worktree: {sum(missing.values())} row(s) committed at HEAD are missing or edited in the working tree")
+    changed = repo.out("diff", "--name-status", "--no-renames", "HEAD", "--", AUTH_DIR_REL)
+    for line in changed.splitlines():
+        status, _, p = line.partition("\t")
+        if status != "A":
+            findings.append(f"AUTHORIZATION_NOT_APPEND_ONLY worktree: {status} {p}")
     return findings
 
 
@@ -413,11 +668,12 @@ def report(mode: str, start: str, head: str, findings: list[str], extra: dict, a
 
 
 def cmd_verify(repo: Repo, args) -> int:
-    config = load_config(repo)
     head = repo.resolve(args.head)
     if not head:
         print(f"project-truth-ledger: head {args.head!r} not found", file=sys.stderr)
         return 2
+    use_worktree = args.head == "HEAD" and not args.committed
+    config = load_config(repo, None if use_worktree else head)
     extra: dict = {}
     if args.baseline:
         start = repo.resolve(args.baseline)
@@ -432,25 +688,40 @@ def cmd_verify(repo: Repo, args) -> int:
         start, lineage = found
         extra["lineage"] = lineage.get("id")
     extra["baseline"] = start
-    use_worktree = args.head == "HEAD" and not args.committed
     extra["ledger_source"] = "worktree" if use_worktree else f"{head[:12]}:{LEDGER_REL}"
-    findings = verify_range(repo, start, head, use_worktree, config)
+    extra["trusted_records"] = "worktree" if use_worktree else head[:12]
+    allowed = allowed_authorities(config)
+    head_ledger = repo.show(head, LEDGER_REL)
+    findings: list[str] = []
+    if use_worktree:
+        path = repo.root / LEDGER_REL
+        ledger_text = path.read_text(encoding="utf-8") if path.exists() else ""
+        auths = Authorizations.load(repo, None, allowed)
+        findings += worktree_findings(repo, head_ledger, ledger_text)
+    else:
+        ledger_text = head_ledger or ""
+        auths = Authorizations.load(repo, head, allowed)
+    rows, bad = parse_rows(ledger_text)
+    findings += [f"MALFORMED_ROW {b}" for b in bad]
+    findings += verify_range(repo, start, head, auths, rows)
     return report("verify", start, head, findings, extra, args.json, repo)
 
 
 def cmd_verify_pr(repo: Repo, args) -> int:
-    config = load_config(repo)
     head = repo.resolve(args.head)
     base = repo.resolve(args.base)
     if not head or not base:
         print(f"project-truth-ledger: base {args.base!r} or head {args.head!r} not found (is the checkout shallow?)", file=sys.stderr)
         return 2
+    # Everything that decides what counts comes from the base ref, not from the PR.
+    trusted = base  # GUARD:trust-base
+    config = load_config(repo, trusted)
     mb = repo.out("merge-base", base, head)
     start = mb
-    extra: dict = {"base": base, "merge_base": mb}
-    found = nearest_baseline(repo, config, head)
+    extra: dict = {"base": base, "merge_base": mb, "trusted_config_and_records": trusted[:12]}
+    found = nearest_baseline(repo, config, head, anchor=base)
     if found is None:
-        print(f"project-truth-ledger: no enforcement baseline in {CONFIG_REL} is an ancestor of {head}; refusing to guess", file=sys.stderr)
+        print(f"project-truth-ledger: no enforcement baseline in {base[:12]}:{CONFIG_REL} is an ancestor of both the base and {head[:12]}; refusing to guess", file=sys.stderr)
         return 2
     baseline, lineage = found
     extra["lineage"] = lineage.get("id")
@@ -459,7 +730,22 @@ def cmd_verify_pr(repo: Repo, args) -> int:
         gap = int(repo.out("rev-list", "--count", f"{mb}..{baseline}"))
         extra["unenforced_before_baseline"] = f"{gap} commit(s) {mb[:12]}..{baseline[:12]} predate enforcement (see {CONFIG_REL})"
         start = baseline
-    findings = verify_range(repo, start, head, use_worktree=False, config=config)
+    allowed = allowed_authorities(config)
+    rows, bad = parse_rows(repo.show(head, LEDGER_REL))
+    findings = [f"MALFORMED_ROW {b}" for b in bad]
+    head_auths = Authorizations.load(repo, head, allowed)
+    base_auths = Authorizations.load(repo, trusted, allowed)
+    head_ids = set(head_auths.records) | set(head_auths.bindings) | set(head_auths.load_errors)
+    findings += verify_range(repo, start, head, base_auths, rows, head_ids=head_ids)
+    # History the base already carries must still verify under the records the PR leaves
+    # behind: a PR that revokes, or adds a conflicting binding for, a record history relies on
+    # breaks the branch and is refused here.
+    if baseline != start and repo.is_ancestor(baseline, start):
+        hist = verify_range(repo, baseline, start, head_auths, rows)
+        hist = [f for f in hist if f not in head_auths.global_findings]
+        findings += [f"HISTORY_BROKEN_BY_CHANGE {f}" for f in hist]  # GUARD:history
+        extra["history_rechecked"] = f"{baseline[:12]}..{start[:12]} against the PR head's records"
+    findings += [f for f in head_auths.global_findings if f not in findings]
     return report("verify-pr", start, head, findings, extra, args.json, repo)
 
 
@@ -487,16 +773,31 @@ def _inherited_ids(repo: Repo, rows: list[dict], first: str, others: list[str]) 
     return ids
 
 
-def _select(auths: Authorizations, files: list[str], explicit: list[str], added_ids: set[str],
+class _Change:
+    """A change to cover: a commit (sha) or the staged index (sha None)."""
+
+    def __init__(self, repo: Repo, sha: str | None, parent: str | None, files: list[str]):
+        self.sha, self.parent, self.files = sha, parent, files
+        new_ref = INDEX if sha is None else sha
+        self.content = {f: (repo.show_bytes(parent, f), repo.show_bytes(new_ref, f)) for f in files}
+
+    def covered(self, auths: Authorizations, aid: str, f: str) -> bool:
+        old, new = self.content[f]
+        return auths.covers(aid, f, self.sha, old, new)
+
+
+def _select(auths: Authorizations, change: _Change, explicit: list[str], added_ids: set[str],
             inherited: set[str], existing: set[str]) -> tuple[list[str], list[str], dict[str, list[str]]]:
-    """Choose authorization ids for files. Returns (new_ids, uncovered, hints).
+    """Choose authorization ids for a change. Returns (new_ids, uncovered, hints).
 
     Selectable without being named: records whose "reusable" is true, records added by this
-    very change, and (for merges) ids already recorded for the merged-in commits. A
-    non-reusable record from some other change is never picked up just because its path list
-    matches; it is reported as a hint and must be named with --auth.
+    very change, and (for merges) ids already recorded for the merged-in commits; each still
+    covers only the commits in its scope. A non-reusable record from some other change is
+    never picked up just because its path list matches; it is reported as a hint and must be
+    named with --auth.
     """
-    covered_by_existing = {f for f in files if any(auths.covers(a, f) for a in existing)}
+    files = change.files
+    covered_by_existing = {f for f in files if any(change.covered(auths, a, f) for a in existing)}
     pool = list(dict.fromkeys(explicit))
     for aid in sorted(auths.records):
         rec = auths.records[aid]
@@ -510,22 +811,23 @@ def _select(auths: Authorizations, files: list[str], explicit: list[str], added_
             continue
         # Named or not, an id is added only where it covers a file nothing else covers, so a
         # --range over already-covered commits writes nothing.
-        if any(auths.covers(aid, f) for f in files if f not in covered_by_existing and
-               not any(auths.covers(c, f) for c in chosen)):
+        if any(change.covered(auths, aid, f) for f in files if f not in covered_by_existing and
+               not any(change.covered(auths, c, f) for c in chosen)):
             chosen.append(aid)
     all_ids = set(existing) | set(chosen)
-    uncovered = [f for f in files if not any(auths.covers(a, f) for a in all_ids)]
+    uncovered = [f for f in files if not any(change.covered(auths, a, f) for a in all_ids)]
     hints: dict[str, list[str]] = {}
     for f in uncovered:
         for aid in sorted(auths.records):
-            if aid not in pool and auths.covers(aid, f):
+            if aid not in pool and not auths.problem(aid) and auths.path_cover(aid, f, *change.content[f])[0]:
                 hints.setdefault(aid, []).append(f)
     return chosen, uncovered, hints
 
 
-def _row(repo: Repo, kind: str, source: str, files: list[str], digest: str, parents: list[str],
-         commit_sha: str | None, ids: list[str], auths: Authorizations, all_ids: set[str], note: str | None) -> dict:
-    covered = [f for f in files if any(auths.covers(a, f) for a in all_ids)]
+def _row(repo: Repo, kind: str, source: str, change: _Change, digest: str, parents: list[str],
+         ids: list[str], auths: Authorizations, all_ids: set[str], note: str | None) -> dict:
+    files = change.files
+    covered = [f for f in files if any(change.covered(auths, a, f) for a in all_ids)] if kind != "authorization-intake" else []
     row = {
         "schema_version": 2,
         "kind": kind,
@@ -541,14 +843,18 @@ def _row(repo: Repo, kind: str, source: str, files: list[str], digest: str, pare
         "authorization_ids": sorted(ids),
         "authority_classes": sorted({str(auths.records[a].get("authority")) for a in ids if a in auths.records}),
         "covered_files": covered,
-        "uncovered_files": [f for f in files if f not in covered],
+        "uncovered_files": [] if kind == "authorization-intake" else [f for f in files if f not in covered],
         "recorded_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
     }
-    if commit_sha:
-        row["commit_sha"] = commit_sha
+    if change.sha:
+        row["commit_sha"] = change.sha
     if note:
         row["note"] = note
     return row
+
+
+INTAKE_NOTE = ("Authorization intake: this change only adds authorization record files. No record authorizes its own "
+               "addition; the ids listed are the records added, for reference. They become usable once on the base ref.")
 
 
 def _append(repo: Repo, new_rows: list[dict]) -> None:
@@ -567,6 +873,8 @@ def cmd_record(repo: Repo, args) -> int:
     # being made with PROJECT_TRUTH_AUTH=auth-a[,auth-b] git commit ...
     env_ids = [x.strip() for x in os.environ.get("PROJECT_TRUTH_AUTH", "").split(",") if x.strip()]
     args.auth = list(dict.fromkeys([*args.auth, *env_ids]))
+    if os.environ.get("PROJECT_TRUTH_ALLOW_UNCOVERED") == "1":
+        args.allow_uncovered = True
     config = load_config(repo)
     auths = Authorizations.load(repo, None, allowed_authorities(config))
     for aid in args.auth:
@@ -585,7 +893,7 @@ def cmd_record(repo: Repo, args) -> int:
         if not files:
             return 0
         status = staged_name_status(repo)
-        edited = [f"{s} {p}" for s, p in status if p.startswith(AUTH_DIR_REL + "/") and s != "A"]
+        edited = [f"{s} {p}" for s, p in status if is_record_path(p) and s != "A"]
         if edited:
             print("project-truth-ledger record: BLOCKED — authorization records are append-only: " + ", ".join(edited), file=sys.stderr)
             return 3
@@ -596,15 +904,20 @@ def cmd_record(repo: Repo, args) -> int:
                and r.get("commit_diff_sha256") == digest for r in rows):
             print("project-truth-ledger record: staged change already has a row")
             return 0
-        added = {p[len(AUTH_DIR_REL) + 1: -5] for s, p in status if s == "A" and p.startswith(AUTH_DIR_REL + "/") and p.endswith(".json")}
-        inherited = _inherited_ids(repo, rows, parents[0], parents[1:]) if len(parents) > 1 else set()
-        chosen, uncovered, hints = _select(auths, files, args.auth, added, inherited, set())
-        if uncovered and not args.allow_uncovered:
-            _refuse("staged change", uncovered, hints)
-            return 3
-        kind = "precommit-staged-diff"
-        new_rows.append(_row(repo, kind, f"tools/ci/project_truth_ledger.py record ({args.hook or 'manual'})", files, digest,
-                             parents, None, chosen, auths, set(chosen), args.note))
+        change = _Change(repo, None, parents[0] if parents else None, files)
+        intake = intake_ids(status)
+        if intake is not None:
+            new_rows.append(_row(repo, "authorization-intake", f"tools/ci/project_truth_ledger.py record ({args.hook or 'manual'})",
+                                 change, digest, parents, intake, auths, set(), args.note or INTAKE_NOTE))
+        else:
+            added = {p[len(AUTH_DIR_REL) + 1: -5] for s, p in status if s == "A" and is_record_path(p) and p.endswith(".json")}
+            inherited = _inherited_ids(repo, rows, parents[0], parents[1:]) if len(parents) > 1 else set()
+            chosen, uncovered, hints = _select(auths, change, args.auth, added, inherited, set())
+            if uncovered and not args.allow_uncovered:
+                _refuse("staged change", uncovered, hints)
+                return 3
+            new_rows.append(_row(repo, "precommit-staged-diff", f"tools/ci/project_truth_ledger.py record ({args.hook or 'manual'})",
+                                 change, digest, parents, chosen, auths, set(chosen), args.note))
     else:
         targets: list[str] = []
         for c in args.commit:
@@ -623,11 +936,21 @@ def cmd_record(repo: Repo, args) -> int:
             parents = repo.parents(sha)
             digest = commit_digest(repo, sha)
             bound = bound_rows(rows + new_rows, sha, parents[0] if parents else None, digest)
+            change = _Change(repo, sha, parents[0] if parents else None, files)
+            status = commit_name_status(repo, sha)
+            intake = intake_ids(status)
+            if intake is not None:
+                if bound:
+                    print(f"skip {sha[:12]}: intake commit already has a row")
+                    continue
+                new_rows.append(_row(repo, "authorization-intake", "tools/ci/project_truth_ledger.py record --commit", change,
+                                     digest, parents, intake, auths, set(), args.note or INTAKE_NOTE))
+                print(f"authorization-intake {sha[:12]}: adds {intake}")
+                continue
             existing = {str(i) for r in bound for i in (r.get("authorization_ids") or [])}
-            added = {p[len(AUTH_DIR_REL) + 1: -5] for s, p in commit_name_status(repo, sha)
-                     if s == "A" and p.startswith(AUTH_DIR_REL + "/") and p.endswith(".json")}
+            added = {p[len(AUTH_DIR_REL) + 1: -5] for s, p in status if s == "A" and is_record_path(p) and p.endswith(".json")}
             inherited = _inherited_ids(repo, rows + new_rows, parents[0], parents[1:]) if len(parents) > 1 else set()
-            chosen, uncovered, hints = _select(auths, files, args.auth, added, inherited, existing)
+            chosen, uncovered, hints = _select(auths, change, args.auth, added, inherited, existing)
             if bound and not chosen:
                 state = "covered" if not uncovered else f"{len(uncovered)} uncovered, no new authorization selectable"
                 print(f"skip {sha[:12]}: row exists ({state})")
@@ -643,15 +966,15 @@ def cmd_record(repo: Repo, args) -> int:
             note = args.note
             if bound and not note:
                 note = f"Adds authorization ids for {sha}; effective authorization is the union over all rows bound to this commit."
-            new_rows.append(_row(repo, kind, "tools/ci/project_truth_ledger.py record --commit", files, digest,
-                                 parents, sha, chosen, auths, existing | set(chosen), note))
+            new_rows.append(_row(repo, kind, "tools/ci/project_truth_ledger.py record --commit", change, digest,
+                                 parents, chosen, auths, existing | set(chosen), note))
             print(f"{kind} {sha[:12]}: +{chosen}")
     if new_rows:
         _append(repo, new_rows)
         if args.stage:
             repo.git("add", LEDGER_REL)
     if not args.commit and not args.range:
-        print(f"project-truth-ledger record: row appended ({', '.join(new_rows[0]['authorization_ids']) or 'no authorization'})")
+        print(f"project-truth-ledger record: row appended ({new_rows[0]['kind']}; {', '.join(new_rows[0]['authorization_ids']) or 'no authorization'})")
     return 3 if refused else 0
 
 
@@ -660,8 +983,11 @@ def _refuse(what: str, uncovered: list[str], hints: dict[str, list[str]]) -> Non
     for f in uncovered:
         print(f"    {f}", file=sys.stderr)
     for aid, fs in hints.items():
-        print(f"  hint: non-reusable {aid} lists {len(fs)} of them; pass --auth {aid} only if it really authorizes this change", file=sys.stderr)
-    print("  Nothing was written. Add an owner authorization record, name it with --auth, or pass --allow-uncovered to record the gap truthfully (verify will still fail).", file=sys.stderr)
+        print(f"  hint: non-reusable {aid} lists {len(fs)} of them; pass --auth {aid} only if it really authorizes this change "
+              "(it covers only the commits in its commit scope)", file=sys.stderr)
+    print("  Nothing was written. Add an owner authorization record whose commit_scope names this commit, then record it "
+          "with --auth; or pass --allow-uncovered (hooks: PROJECT_TRUTH_ALLOW_UNCOVERED=1) to record the gap truthfully "
+          "(verify will still fail until a record covers it).", file=sys.stderr)
 
 
 # --------------------------------------------------------------------------- main
@@ -680,13 +1006,13 @@ def main(argv: list[str] | None = None) -> int:
     rec.add_argument("--hook", help="hook name, recorded in the row's source")
     rec.add_argument("--note")
 
-    ver = sub.add_parser("verify", help="verify baseline..HEAD")
+    ver = sub.add_parser("verify", help="verify baseline..HEAD (audit of a protected branch; trusts HEAD's records)")
     ver.add_argument("--baseline")
     ver.add_argument("--head", default="HEAD")
-    ver.add_argument("--committed", action="store_true", help="read the ledger and records from HEAD, not the working tree")
+    ver.add_argument("--committed", action="store_true", help="read the ledger, config and records from HEAD, not the working tree")
     ver.add_argument("--json", action="store_true")
 
-    pr = sub.add_parser("verify-pr", help="verify merge-base(base, HEAD)..HEAD")
+    pr = sub.add_parser("verify-pr", help="PR gate: verify merge-base(base, HEAD)..HEAD against the base ref's config and records")
     pr.add_argument("--base", required=True)
     pr.add_argument("--head", default="HEAD")
     pr.add_argument("--json", action="store_true")
