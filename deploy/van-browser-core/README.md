@@ -118,6 +118,20 @@ The browser capability, Stagehand and Jev browser effect stay production-gated o
 `docs/decisions/VAN-BROWSER-CORE-EGRESS-001.yaml` (PENDING until qualification on the host).
 Remaining limits are listed in `zone.json` `egress.remaining_limits`.
 
+**Guard and proxy together (unit G13).** The proxy's policy follows the page lease of the
+network-effect guard: Chromium's argv is still assembled only by `chromium_argv()` (the proxy
+flags go in through `extra`, keeping one merged `--disable-features`); a lease's first call
+revokes every older lease's proxy policy for the alias; each action (and each read that carries
+the task scope) sets the guard's policy and pushes the proxy's through one function,
+`apply_lease_policy`; `/release`, a newer lease, idle expiry and a guard freeze on a blocked or
+detected write revoke the lease's proxy policy finally (`revoke`, MAC `van-egress-revoke/1`
+under the lease-fence key), after which the proxy refuses to install it again, so a frozen page
+gets nothing. The proxy TTL (`VAN_EGRESS_POLICY_TTL_SECONDS`) stays the backstop when the
+proxy cannot be reached. Recorded interaction: `guard_canary.py` serves its fixture on
+loopback, which the proxy refuses by design (non-global upstreams), so in a zone with the
+proxy in front the canary cannot load its page and `network_guard_canary` is RED until the
+owner decides how the canary is qualified behind the proxy.
+
 ## The historical placement
 
 `deploy/van-trading-core/browser/**` and `vati-{stagehand,browser-harness}.service` are the

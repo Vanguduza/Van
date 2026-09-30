@@ -14,7 +14,8 @@ What runs here is production code end to end except the network itself:
   as root) — so the proxy flags, the SPKI pin and ``--disable-quic`` are the real ones;
 * the policy reaches the proxy through the worker's ``apply_lease_policy`` — the one place the
   page lease's guard policy is set (unit G13 merge of G11's lease guard) — effect MAC verified
-  by the worker, then again by the proxy.
+  by the worker, then again by the proxy; it is revoked through ``revoke_egress_policy`` at the
+  lease's start, end and on a guard freeze.
 
 The instrument is the fixture servers' request log (outside the browser and the proxy): a
 refused handshake or write never appears there. There is no ``--host-resolver-rules`` and no
@@ -37,6 +38,7 @@ from pathlib import Path
 import pytest
 
 import cdp_harness_kit as kit
+from test_browser_api import _settings  # noqa: F401 - the API settings the gateway adapter's router needs
 
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = ROOT / "deploy/van-browser-core/browser/harness_service.py"
@@ -175,6 +177,7 @@ class EgressRig:
         """A new page lease whose first action carries this policy (the worker's handler path)."""
         self.generation += 1
         lease = self.hs.GuardLease(alias, self.generation, "holder", "task-1")
+        self.hs.revoke_egress_policy(alias, self.generation, "holder", final=False)
         self.hs.apply_lease_policy(lease, self.body(alias, mutating=mutating, scope=scope), alias)
         return lease
 
@@ -407,3 +410,162 @@ def test_a_trust_zone_worker_refuses_to_start_chromium_without_the_proxy(rig, mo
     monkeypatch.setattr(rig.hs, "TRUST_ZONE", "")
     assert rig.hs.egress_proxy_flags("egress_a") == ("--disable-quic",)
 
+
+# ------------------------------------------------------------ unit G13: the lease lifecycle
+#
+# G11's network guard lives as long as the page lease; G12's proxy policy now follows it: a
+# lease's start revokes older leases' policies, each action (re)pushes the lease's policy, and
+# the lease's end or a guard freeze revokes it finally, so the frozen page gets nothing.
+
+
+def test_a_lease_start_revokes_the_older_lease_policy(rig):
+    rig.policy("egress_a", mutating=False, scope=DOCS_SCOPE)
+    session = rig.launch("egress_a")
+    rig.visit(session, f"https://{DOCS}/docs/page")
+    rig.hs.revoke_egress_policy("egress_a", rig.generation + 1, "holder", final=False)
+    session.goto_url(f"https://{DOCS}/docs/page")
+    time.sleep(2)
+    assert rig.server_log() == []
+    assert set(_codes(rig)) == {"EGRESS_POLICY_UNKNOWN"}
+
+
+def test_the_lease_end_revokes_finally_and_the_policy_cannot_come_back(rig):
+    lease = rig.policy("egress_a", mutating=True, scope=DOCS_SCOPE)
+    session = rig.launch("egress_a")
+    rig.visit(session, f"https://{DOCS}/docs/delay_post")
+    rig.hs._revoke_lease_egress(lease)
+    assert lease.egress_revoked is True
+    rig.click(session)
+    session.goto_url(f"https://{DOCS}/docs/page")
+    time.sleep(2)
+    assert rig.server_log() == []
+    assert set(_codes(rig)) == {"EGRESS_POLICY_UNKNOWN"}
+    # The same lease's (validly MACed) policy is refused from now on: the worker refuses the action.
+    with pytest.raises(rig.hs.WorkerError) as err:
+        rig.hs.apply_lease_policy(rig.hs.GuardLease("egress_a", rig.generation, "holder", "task-1"),
+                                  rig.body("egress_a", mutating=True, scope=DOCS_SCOPE), "egress_a")
+    assert err.value.code == "EGRESS_POLICY_REFUSED"
+    assert _control(rig.control, {"op": "policy", "alias": "egress_a", **rig.body("egress_a", mutating=True, scope=DOCS_SCOPE)}) \
+        == {"ok": False, "error": "POLICY_LEASE_ENDED"}
+
+
+def test_a_guard_freeze_revokes_the_lease_policy(rig, monkeypatch):
+    """The in-browser guard blocked a write and froze the page (``pending``): the worker's next
+    guard hand-back revokes the proxy policy, and the lease pushes none again."""
+    lease = rig.policy("egress_a", mutating=False, scope=DOCS_SCOPE)
+    session = rig.launch("egress_a")
+    rig.visit(session, f"https://{DOCS}/docs/delay_post")
+    monkeypatch.setattr(rig.hs, "run_harness", lambda alias, script, extra=None: {
+        "__guard__": {"state": {}, "blocked": ["POST"], "frozen": True}, "ok": True})
+    with rig.hs.NET_GUARDS.using(lease):
+        rig.hs._run("egress_a", "pass")
+    assert lease.pending == "NETWORK_WRITE_BLOCKED:POST" and lease.egress_revoked is True
+    session.goto_url(f"https://{DOCS}/docs/page")
+    time.sleep(2)
+    assert rig.server_log() == []
+    assert set(_codes(rig)) == {"EGRESS_POLICY_UNKNOWN"}
+    # A frozen lease pushes nothing (the proxy would refuse it anyway: POLICY_LEASE_ENDED).
+    rig.clear()
+    rig.hs.apply_lease_policy(lease, rig.body("egress_a", mutating=False, scope=DOCS_SCOPE), "egress_a")
+    session.goto_url(f"https://{DOCS}/docs/page")
+    time.sleep(2)
+    assert rig.server_log() == []
+    assert set(_codes(rig)) == {"EGRESS_POLICY_UNKNOWN"}
+
+
+def test_an_older_lease_release_leaves_the_newer_lease_policy(rig):
+    rig.policy("egress_a", mutating=False, scope=DOCS_SCOPE)
+    older = rig.generation
+    rig.policy("egress_a", mutating=False, scope=DOCS_SCOPE)
+    rig.hs.revoke_egress_policy("egress_a", older, "holder", final=True)
+    session = rig.launch("egress_a")
+    session.goto_url(f"https://{DOCS}/docs/page")
+    time.sleep(2)
+    assert ("GET", DOCS, "/docs/page") in rig.https.log
+
+
+def test_a_revocation_without_a_valid_mac_is_refused(rig):
+    rig.policy("egress_a", mutating=False, scope=DOCS_SCOPE)
+    forged = {"op": "revoke", "alias": "egress_a", "lease_generation": rig.generation, "lease_holder_id": "holder",
+              "final": True, "revoke_mac": rig.hs.egress_revoke_mac(b"x" * 64, "egress_a", rig.generation, "holder", True)}
+    assert _control(rig.control, forged) == {"ok": False, "error": "POLICY_MAC_INVALID"}
+    flipped = dict(forged, revoke_mac=rig.hs.egress_revoke_mac(KEY, "egress_a", rig.generation, "holder", False))
+    assert _control(rig.control, flipped) == {"ok": False, "error": "POLICY_MAC_INVALID"}
+    session = rig.launch("egress_a")
+    session.goto_url(f"https://{DOCS}/docs/page")
+    time.sleep(2)
+    assert ("GET", DOCS, "/docs/page") in rig.https.log
+
+
+PAGES["/docs/ws_button"] = "<button id='b' onclick=\"window.__ws=new WebSocket('wss://docs.example.com/api/ws-pay?amount=500')\">Next</button>"
+
+
+async def test_through_the_worker_handler_the_proxy_policy_follows_the_page_lease(rig, monkeypatch, _settings):
+    """The real Harness handler (G11's lease guard) in front of the real proxy (G12): the lease's
+    first call starts it with a policy, a click that opens a WebSocket is refused by the proxy
+    (the server never sees the handshake) and the guard's freeze revokes the policy; /release
+    of a fresh lease revokes its policy too."""
+    import threading as _threading
+    from http.server import ThreadingHTTPServer as _Server
+
+    import test_browser_interaction_router as tr
+    import test_harness_elements as he
+    from van_gateway.browser.adapters import HarnessLeaseFence, HttpBrowserHarnessAdapter, harness_lease_fence
+    from van_gateway.browser.interaction_router import DeterministicAction, HarnessActionExecutor, HarnessTargetResolver
+    from van_gateway.browser.task_scope import scope_for_new_task
+
+    alias = "public_research"
+    session = rig.launch(alias)
+    lock = _threading.Lock()
+
+    def run_harness(_alias, script, extra=None):
+        with lock:
+            return kit.exec_script(session, script, extra)
+
+    monkeypatch.setattr(rig.hs, "run_harness", run_harness)
+    server = _Server(("127.0.0.1", 0), rig.hs.Handler)
+    _threading.Thread(target=server.serve_forever, daemon=True).start()
+    harness = HttpBrowserHarnessAdapter(None, base_url=f"http://127.0.0.1:{server.server_address[1]}",
+                                        enabled=True, fence_key=KEY)
+    task = he._task().model_copy(update={"scope": scope_for_new_task(DOCS, [f"https://{DOCS}/docs/"]), "mutating": False})
+    try:
+        # Lease 1 starts: its first read carries the task scope, so the proxy serves the page.
+        with harness_lease_fence(HarnessLeaseFence(alias, task.task_id, 1)):
+            await harness.page_info(task)
+        # A test-side CDP Page.navigate issued within ~0.3 s of a lease's first guarded read
+        # times out on unit G11's head too (reproduced without the proxy); not a G13 change.
+        time.sleep(1)
+        rig.visit(session, f"https://{DOCS}/docs/ws_button")
+        assert session.js("document.getElementById('b') !== null") is True
+        router = tr.make_router(target_resolver=HarnessTargetResolver(harness), executor=HarnessActionExecutor(harness),
+                                semantic_fallback=tr.FakeStagehand(None), jev_client=None)
+        step = tr.step(deterministic_action=DeterministicAction(operation="click", locator="#b", value_ref=None))
+        step.task = task
+        with harness_lease_fence(HarnessLeaseFence(alias, task.task_id, 1)):
+            result = await router.route(step)
+        time.sleep(3)
+        assert [e for e in rig.server_log() if "ws-pay" in e[2]] == []
+        assert "EGRESS_WEBSOCKET_REFUSED" in _codes(rig)
+        assert "HARNESS_REFUSED:NETWORK_WRITE_DETECTED:WEBSOCKET" in result.reasons, result.reasons
+        # The guard froze the page: the proxy serves the lease nothing any more.
+        rig.clear()
+        session.goto_url(f"https://{DOCS}/docs/page")
+        time.sleep(2)
+        assert rig.server_log() == [] and set(_codes(rig)) == {"EGRESS_POLICY_UNKNOWN"}
+        report = await harness.release_page(profile_alias=alias, holder_id=task.task_id, generation=1)
+        assert report["guard"] == "ENDED" and report["blocked"] == "NETWORK_WRITE_DETECTED:WEBSOCKET"
+        # Lease 2 starts afresh, is served, then /release takes its policy away.
+        rig.clear()
+        with harness_lease_fence(HarnessLeaseFence(alias, task.task_id, 2)):
+            await harness.navigate(task, f"https://{DOCS}/docs/page")
+        assert ("GET", DOCS, "/docs/page") in rig.https.log
+        report = await harness.release_page(profile_alias=alias, holder_id=task.task_id, generation=2)
+        assert report["guard"] == "ENDED" and report["blocked"] is None
+        rig.clear()
+        session.goto_url(f"https://{DOCS}/docs/page")
+        time.sleep(2)
+        assert rig.server_log() == [] and set(_codes(rig)) == {"EGRESS_POLICY_UNKNOWN"}
+    finally:
+        rig.hs.NET_GUARDS.close()
+        server.shutdown()
+        server.server_close()

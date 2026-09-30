@@ -2197,6 +2197,10 @@ class GuardLease:
         self.dropped: list[str] = []
         self.last_call = time.monotonic()
         self.failures = 0
+        #: Unit G13 — the egress proxy's side of the lease: older leases' policies revoked at
+        #: its start; its own revoked (finally) once it ends or its guard froze the page.
+        self.egress_started = False
+        self.egress_revoked = False
 
     def absorb(self, guard: Any) -> None:
         if not isinstance(guard, dict):
@@ -2279,6 +2283,9 @@ class NetGuardRegistry:
         with self.lock:
             if self.leases.get(alias) is lease:
                 del self.leases[alias]
+        # Unit G13: the proxy stops serving the lease first, so the page gets nothing while
+        # (and after) it is frozen.
+        _revoke_lease_egress(lease)
         report = {"released": True, "blocked": lease.pending, "frozen": False}
         try:
             with self.using(lease):
@@ -2294,6 +2301,12 @@ class NetGuardRegistry:
         generation, holder = body.get("lease_generation"), body.get("lease_holder_id")
         with self.lock:
             current = self.leases.get(alias)
+        if isinstance(generation, int) and not isinstance(generation, bool) and isinstance(holder, str) \
+                and (current is None or (current.generation, current.holder) != (generation, holder)):
+            # Unit G13: a lease this worker holds no guard for (a restarted worker, an idle
+            # expiry, a newer lease) still has its proxy policy revoked; a newer lease's is kept.
+            with contextlib.suppress(WorkerError):
+                revoke_egress_policy(alias, generation, holder, final=True)
         if current is None:
             return {"released": True, "blocked": None, "frozen": False, "guard": None}
         if (current.generation, current.holder) != (generation, holder) and current.generation > int(generation):
@@ -2337,6 +2350,7 @@ class NetGuardRegistry:
                         with self.lock:
                             if self.leases.get(alias) is lease:
                                 del self.leases[alias]
+                        _revoke_lease_egress(lease)  # unit G13
                         print(f"[van-browser-harness] NETWORK_GUARD_SERVICE_FAILED profile={alias}", flush=True)
                 finally:
                     lock.release()
@@ -2366,6 +2380,10 @@ def _run(alias: str, script: str, extra: dict[str, str] | None = None, *, requir
     if not isinstance(result, dict):
         raise WorkerError("BROWSER_HARNESS_RESPONSE_INVALID", 502)
     lease.absorb(result.pop("__guard__", None))
+    if lease.pending is not None or lease.frozen:
+        # Unit G13: the guard froze the page on a blocked/detected write — the egress proxy
+        # stops serving the lease too, so nothing the frozen page sends leaves the zone.
+        _revoke_lease_egress(lease)
     if "__error__" in result:
         raise WorkerError("BROWSER_HARNESS_REQUEST_FAILED", 502)
     return result
@@ -2452,14 +2470,60 @@ def push_egress_policy(body: dict[str, Any], alias: str, scope: dict[str, Any] |
         raise WorkerError("EGRESS_POLICY_REFUSED", 503)
 
 
+EGRESS_REVOKE_MAC_CONTEXT = "van-egress-revoke/1"
+
+
+def egress_revoke_mac(key: bytes, alias: str, generation: int, holder_id: str, final: bool) -> str:
+    """HMAC-SHA256 over a revocation of an alias's egress policy (unit G13). Same bytes as
+    ``revoke_mac`` in egress_proxy.py; the key is the lease-fence key, as for the effect MAC."""
+    message = f"{EGRESS_REVOKE_MAC_CONTEXT}\n{alias}\n{int(generation)}\n{holder_id}\n{'1' if final else '0'}".encode()
+    return hmac.new(key, message, hashlib.sha256).hexdigest()
+
+
+def revoke_egress_policy(alias: str, generation: int, holder: str, *, final: bool) -> None:
+    """Unit G13 — take the proxy's policy away from a page lease.
+
+    ``final=False`` at a lease's start: every older lease's policy for the alias is removed, so
+    the new lease starts with nothing until its own policy is pushed. ``final=True`` when the
+    lease ends (``/release``, a newer lease, idle expiry) or its guard froze the page on a
+    blocked or detected write: the lease's policy is removed and the proxy refuses to install
+    it again, so the frozen page gets nothing. Raises EGRESS_PROXY_UNAVAILABLE /
+    EGRESS_REVOKE_REFUSED; the policy's TTL is the backstop when the proxy is unreachable."""
+    if not EGRESS_CONTROL_SOCKET:
+        return
+    key = getattr(FENCE, "_key", None)
+    reply = _egress_call({
+        "op": "revoke",
+        "alias": alias,
+        "lease_generation": generation,
+        "lease_holder_id": holder,
+        "final": final,
+        "revoke_mac": egress_revoke_mac(key, alias, generation, holder, final) if key is not None else None,
+    })
+    if reply.get("ok") is not True:
+        raise WorkerError("EGRESS_REVOKE_REFUSED", 503)
+
+
 def apply_lease_policy(lease: "GuardLease", body: dict[str, Any], alias: str) -> None:
     """Unit G13 — the one place a lease's network policy is set or changed (each action, or a
     read that carries the task scope): the in-browser guard's policy (unit G11) and the egress
-    proxy's (unit G12) change together. A frozen lease pushes nothing."""
+    proxy's (unit G12) change together. A frozen lease pushes nothing: its proxy policy stays
+    revoked."""
     policy = network_guard_policy(body, alias)
     if lease.pending is None and not lease.frozen:
         push_egress_policy(body, alias, policy["scope"], body.get("mutating") is True)
     lease.policy = policy
+
+
+def _revoke_lease_egress(lease: "GuardLease") -> None:
+    """Final revocation of a lease's proxy policy, once; failures are logged, never raised."""
+    if lease.egress_revoked:
+        return
+    try:
+        revoke_egress_policy(lease.alias, lease.generation, lease.holder, final=True)
+        lease.egress_revoked = True
+    except WorkerError as exc:
+        print(f"[van-browser-harness] {exc.code} profile={lease.alias}", flush=True)
 
 
 def _bound_script(body: str) -> str:
@@ -3368,6 +3432,10 @@ class Handler(BaseHTTPRequestHandler):
             # Review I5 F1 — the fence check and the operation run under one profile lock.
             with FENCE.admit(alias, body, mutating=self.path in MUTATING_OPERATIONS), \
                     NET_GUARDS.using(NET_GUARDS.bind(alias, body)) as lease:
+                if lease is not None and not lease.egress_started:
+                    # Unit G13 — the lease starts: no older lease's proxy policy survives it.
+                    revoke_egress_policy(alias, lease.generation, lease.holder, final=False)
+                    lease.egress_started = True
                 if lease is not None and "lease_generation" in body:
                     if self.path in MUTATING_OPERATIONS:
                         # A forged mutating flag or widened scope is refused before anything runs.

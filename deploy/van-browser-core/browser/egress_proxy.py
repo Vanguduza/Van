@@ -24,6 +24,9 @@ evaluated and cannot refuse ``wss://<in-scope host>/ws-pay``; see
   (``van-harness-effect/1``, the Harness lease-fence key) over the lease fence, the task id,
   the flag and the scope digest. The proxy verifies the MAC itself; the Harness relays it;
 * no policy, an expired policy or a stale lease generation: every request is refused;
+* the Harness revokes a lease's policy (``revoke``, unit G13, MAC ``van-egress-revoke/1``) at
+  the lease's start (older leases' policies), at its end and when its network guard froze the
+  page; a finally revoked lease's policy is never installed again;
 * ``CONNECT`` is allowed only to a host:port that is an origin of the task scope. Inside the
   tunnel TLS is terminated with a per-host certificate minted by the zone-local CA over one
   leaf key; Chromium trusts it only through ``--ignore-certificate-errors-spki-list`` naming
@@ -305,6 +308,15 @@ def effect_mac(key: bytes, alias: str, generation: int, holder_id: str, task_id:
     return hmac.new(key, message, hashlib.sha256).hexdigest()
 
 
+REVOKE_MAC_CONTEXT = "van-egress-revoke/1"
+
+
+def revoke_mac(key: bytes, alias: str, generation: int, holder_id: str, final: bool) -> str:
+    """Same bytes as ``egress_revoke_mac`` in harness_service.py (unit G13)."""
+    message = f"{REVOKE_MAC_CONTEXT}\n{alias}\n{int(generation)}\n{holder_id}\n{'1' if final else '0'}".encode()
+    return hmac.new(key, message, hashlib.sha256).hexdigest()
+
+
 def load_key(path: str) -> bytes | None:
     if not path:
         return None
@@ -344,6 +356,9 @@ class PolicyStore:
         self.ttl = ttl
         self.policies: dict[str, Policy] = {}
         self.newest: dict[str, tuple[int, str]] = {}
+        #: Unit G13 — per alias, the leases whose policy was finally revoked (lease end, or
+        #: the Harness guard froze the page): their policy is never installed again.
+        self.ended: dict[str, set[tuple[int, str]]] = {}
 
     def set(self, msg: dict[str, Any]) -> str | None:
         """None when installed; otherwise the refusal code."""
@@ -365,9 +380,44 @@ class PolicyStore:
         newest = self.newest.get(alias)
         if newest is not None and (generation < newest[0] or (generation == newest[0] and holder != newest[1])):
             return "POLICY_GENERATION_STALE"
+        if (generation, holder) in self.ended.get(alias, ()):
+            return "POLICY_LEASE_ENDED"
         self.newest[alias] = (generation, holder)
         self.policies[alias] = Policy(alias, generation, holder, task_id, mutating, scope,
                                       time.monotonic() + self.ttl)
+        return None
+
+    def revoke(self, msg: dict[str, Any]) -> str | None:
+        """Unit G13 — the Harness takes a lease's policy away. None when done; else the code.
+
+        Removes the alias's policy if it belongs to an older lease, or to this lease. With
+        ``final`` (the lease ended, or its guard froze the page) this lease's policy can never
+        be installed again. A newer lease's policy is never touched. The message carries a MAC
+        under the lease-fence key (context ``van-egress-revoke/1``), so no local caller without
+        the key can revoke, and none can widen anything."""
+        alias = msg.get("alias")
+        generation, holder, final = msg.get("lease_generation"), msg.get("lease_holder_id"), msg.get("final")
+        mac = msg.get("revoke_mac")
+        if self.key is None:
+            return None  # without the key no policy was ever installed: nothing to revoke
+        if not isinstance(alias, str) or not PROFILE_RE.fullmatch(alias):
+            return "POLICY_ALIAS_INVALID"
+        if isinstance(generation, bool) or not isinstance(generation, int) or generation < 1 \
+                or not isinstance(holder, str) or not holder or not isinstance(final, bool) or not isinstance(mac, str):
+            return "POLICY_FIELDS_INVALID"
+        if not hmac.compare_digest(mac, revoke_mac(self.key, alias, generation, holder, final)):
+            return "POLICY_MAC_INVALID"
+        policy = self.policies.get(alias)
+        if policy is not None and (policy.generation < generation
+                                   or (policy.generation, policy.holder) == (generation, holder)):
+            del self.policies[alias]
+        if final:
+            ended = self.ended.setdefault(alias, set())
+            ended.add((generation, holder))
+            newest = self.newest.get(alias)
+            # Only the newest ended lease matters (older generations are stale anyway).
+            if newest is not None:
+                self.ended[alias] = {e for e in ended if e[0] >= newest[0]}
         return None
 
     def get(self, alias: str) -> Policy | None:
@@ -780,6 +830,10 @@ class EgressProxy:
                 error = self.store.set(msg)
                 if error is None and isinstance(msg.get("alias"), str):
                     await self.listener(msg["alias"])
+                reply = {"ok": error is None, "error": error}
+            elif op == "revoke":
+                # Unit G13: lease start (older leases' policy), lease end and guard freeze.
+                error = self.store.revoke(msg)
                 reply = {"ok": error is None, "error": error}
             else:
                 reply = {"ok": False, "error": "OP_UNKNOWN"}
