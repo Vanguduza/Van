@@ -1,9 +1,11 @@
 [Unit]
 Description=VAN Stagehand semantic browser worker (van-browser-core)
 Documentation=file:///opt/van-browser-core/README.md
-After=network-online.target van-browser-harness.service
+After=network-online.target van-browser-harness.service van-browser-core-firewall.service
 Wants=network-online.target
 Requires=van-browser-harness.service
+# Unit G12: the zone firewall applies to this user too (no direct egress).
+BindsTo=van-browser-core-firewall.service
 # Owner decision 2026-09-29 §1: production Stagehand runs only in van-browser-core.
 ConditionPathExists=/etc/van-browser-core/zone
 StartLimitIntervalSec=300
@@ -14,6 +16,11 @@ Type=simple
 User=van-browser
 Group=van-browser
 EnvironmentFile=/etc/van-browser-core/runtime.env
+# Unit G12: the firewall allows this user no direct TCP egress; its model-provider traffic
+# goes through the egress proxy's service tunnel (CONNECT to VAN_EGRESS_SERVICE_ALLOW only).
+# Whether Stagehand 4.1.0's HTTP client honours these variables is UNVERIFIED; Stagehand stays
+# PRODUCTION_DISABLED regardless.
+Environment=HTTPS_PROXY=http://127.0.0.1:9149 NODE_USE_ENV_PROXY=1
 WorkingDirectory=/opt/van-browser-core/runtime
 ExecStartPre=/usr/bin/grep -qx van-browser-core /etc/van-browser-core/zone
 ExecStart=/usr/bin/node /opt/van-browser-core/runtime/stagehand_service.mjs

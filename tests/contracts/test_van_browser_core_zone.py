@@ -336,3 +336,29 @@ def test_model_is_named_and_no_repository_file_holds_a_provider_key():
         if key_re.search(p.read_bytes()):
             offenders.append(rel.decode())
     assert not offenders, offenders
+
+
+# ---------------------------------------------------------------- egress (unit G12)
+def test_zone_declares_the_egress_proxy_and_firewall_it_ships():
+    """Owner answers 2026-09-30 after review I7: egress proxy and UDP firewall in zone."""
+    egress = ZONE["egress"]
+    for rel in (egress["proxy"]["code"], egress["proxy"]["unit"], egress["firewall"]["ruleset"]):
+        assert (ZONE_DIR / rel).is_file(), rel
+    for rel in ("systemd/van-browser-egress.service", "systemd/van-browser-core-firewall.service",
+                "firewall/van-browser-core.nft"):
+        assert rel in ZONE["unit_env_config_files"], rel
+    proxy = (ZONE_DIR / egress["proxy"]["code"]).read_text(encoding="utf-8")
+    for line in egress["proxy"]["refuses"]:
+        for code in re.findall(r"EGRESS_[A-Z_]+", line):
+            assert f'"{code}"' in proxy, code
+    assert "CONNECT host allowlist" in egress["proxy"]["design"] and "wss://" in egress["proxy"]["design"]
+    assert "never copied off the host" in egress["proxy"]["key_handling"]
+    limits = " ".join(egress["remaining_limits"])
+    assert "unverified" in limits.lower() and "DNS" in limits
+    bc4 = next(i for i in ZONE["cross_zone_interfaces"] if i["id"] == "BC-IF-4")
+    assert "egress proxy" in bc4["transport"] and "firewall" in bc4["transport"]
+    # The Harness puts the proxy flags on Chromium's command line (and nothing else changes it).
+    harness = (ZONE_DIR / "browser" / "harness_service.py").read_text(encoding="utf-8")
+    assert harness.count("*egress_proxy_flags(self.alias),") == 1
+    for flag in ("--proxy-bypass-list=<-loopback>", "--ignore-certificate-errors-spki-list=", "--disable-quic"):
+        assert flag in harness

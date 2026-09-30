@@ -1,0 +1,53 @@
+[Unit]
+Description=VAN browser-core egress proxy (the Harness-owned Chromium's only way out)
+Documentation=file:///opt/van-browser-core/README.md
+# Unit G12 (owner answer 2026-09-30 after review I7, "Egress proxy (Recommended)"). Runs as its
+# own user: the zone firewall lets this user out and keeps the browser user on loopback.
+After=network-online.target van-browser-core-firewall.service
+Wants=network-online.target
+Requires=van-browser-core-firewall.service
+ConditionPathExists=/etc/van-browser-core/zone
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=van-browser-egress
+# Primary group van-browser: the control socket (0660) is reachable by the Harness worker and
+# nothing else. The interception keys stay in the 0700 state directory of this user.
+Group=van-browser
+EnvironmentFile=/etc/van-browser-core/runtime.env
+WorkingDirectory=/var/lib/van-browser-egress
+ExecStartPre=/usr/bin/grep -qx van-browser-core /etc/van-browser-core/zone
+ExecStart=/usr/bin/python3.12 /opt/van-browser-core/runtime/egress_proxy.py
+RuntimeDirectory=van-browser-egress
+RuntimeDirectoryMode=0750
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=45
+TimeoutStopSec=15
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077
+ReadWritePaths=/var/lib/van-browser-egress /var/log/van-browser-egress
+ReadOnlyPaths=/opt/van-browser-core/runtime /etc/van-browser-core/runtime.env
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+CPUWeight=30
+MemoryAccounting=true
+MemoryMax=512M
+TasksMax=128
+
+[Install]
+WantedBy=multi-user.target

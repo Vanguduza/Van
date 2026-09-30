@@ -12,6 +12,12 @@
 #     not available, STAGEHAND = PRODUCTION_DISABLED, not "run it on van-trading-core";
 #   * no private overlay address for the edge, or a wildcard/loopback one, is refused.
 #
+# Unit G12 (owner answers 2026-09-30 after review I7): it also installs the egress proxy
+# (van-browser-egress.service, its own user) and loads the zone firewall
+# (firewall/van-browser-core.nft: the browser user sends no UDP but DNS to the resolver and
+# no TCP but loopback). No resolver, or no nft, is refused: the browser does not run without
+# its firewall.
+#
 # Nothing here reads, writes or references trading, broker, owner-model, owner-private
 # memory or Project Truth credentials. tests/contracts/test_van_browser_core_zone.py
 # enforces that for every unit/env/config file in this package.
@@ -58,6 +64,15 @@ case "$EDGE_BIND" in
   ""|0.0.0.0|::|127.*|localhost) refuse "VAN_BROWSER_CORE_EDGE_BIND must be this host's private overlay address" ;;
 esac
 
+DNS_RESOLVER="${VAN_BROWSER_DNS_RESOLVER:-}"
+if [[ -z "$DNS_RESOLVER" && -f "$CONFIG" ]]; then
+  DNS_RESOLVER="$(sed -n 's/^VAN_BROWSER_DNS_RESOLVER=//p' "$CONFIG" | tail -1)"
+fi
+python3 - "$DNS_RESOLVER" 2>/dev/null <<'PY' || refuse "VAN_BROWSER_DNS_RESOLVER must be the IPv4 address of this host's resolver (the only DNS the browser user may reach)"
+import ipaddress, sys
+ip = ipaddress.ip_address(sys.argv[1])
+assert ip.version == 4 and not ip.is_unspecified and not ip.is_multicast
+PY
 node - <<'NODE'
 const [major, minor] = process.versions.node.split('.').map(Number);
 if (major !== 22 || minor < 18) {
@@ -65,6 +80,9 @@ if (major !== 22 || minor < 18) {
   process.exit(42);
 }
 NODE
+if ! command -v nft >/dev/null 2>&1; then
+  [[ "$DRY_RUN" == 1 ]] && say "would refuse: nft is not installed" || refuse "nft (nftables) is not installed; the zone firewall is not optional"
+fi
 if ! command -v caddy >/dev/null 2>&1; then
   [[ "$DRY_RUN" == 1 ]] && say "would refuse: caddy is not installed" || refuse "caddy is not installed; the mTLS edge is the only cross-zone listener and is not optional"
 fi
@@ -78,6 +96,12 @@ for user in van-browser van-browser-edge; do
   fi
 done
 
+# Unit G12 — the egress proxy's own user. Primary group van-browser so the Harness can reach
+# its control socket; its state directory (interception CA and leaf keys) is 0700 to itself.
+if id van-browser-egress >/dev/null 2>&1; then say "van-browser-egress exists"; else
+  run "useradd --system --gid van-browser --home-dir /var/lib/van-browser-egress --shell /usr/sbin/nologin van-browser-egress"
+fi
+
 echo "== zone marker and directories =="
 run "install -d -o root -g root -m 0755 $ETC $BASE"
 run "printf '%s\n' $ZONE > $ETC/zone && chmod 0644 $ETC/zone"
@@ -87,6 +111,8 @@ run "install -d -o van-browser -g van-browser -m 0750 $DATA/downloads $DATA/evid
 run "install -d -o van-browser -g van-browser -m 0700 /run/van-browser-core"
 run "install -d -o van-browser -g van-browser -m 0750 /var/log/van-browser-core"
 run "install -d -o van-browser-edge -g van-browser-edge -m 0700 /var/lib/van-browser-edge"
+run "install -d -o van-browser-egress -g van-browser -m 0700 /var/lib/van-browser-egress"
+run "install -d -o van-browser-egress -g van-browser -m 0750 /var/log/van-browser-egress"
 # Review I5 F2 — the lease fence install marker and an empty fence manifest, together and
 # only once. Re-running bootstrap never recreates a manifest that was lost: with the marker
 # present the Harness then refuses fenced calls until the state is restored.
@@ -103,6 +129,9 @@ if [[ -e "$FENCE_KEY" ]]; then say "$FENCE_KEY exists; left alone"; else
   run "(umask 0277 && head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \\n' > $FENCE_KEY)"
   run "chown van-browser:van-browser $FENCE_KEY && chmod 0400 $FENCE_KEY"
 fi
+# Unit G12 — the egress proxy verifies the gateway's effect MAC with the same key: its own
+# copy, readable by that user only. Re-copied on every run so the two never drift.
+run "install -o van-browser-egress -g van-browser -m 0400 $FENCE_KEY /var/lib/van-browser-egress/fence.key"
 run "install -d -o root -g van-browser-edge -m 0750 $ETC/pki"
 
 echo "== configuration =="
@@ -117,6 +146,7 @@ s = re.sub(r'^VAN_BROWSER_CORE_EDGE_BIND=.*$', 'VAN_BROWSER_CORE_EDGE_BIND=' + b
 s = re.sub(r'^VAN_TRUST_ZONE=.*$', 'VAN_TRUST_ZONE=van-browser-core', s, flags=re.M)
 open(p, 'w', encoding='utf-8').write(s)
 PY"
+run "sed -i 's/^VAN_BROWSER_DNS_RESOLVER=.*/VAN_BROWSER_DNS_RESOLVER=$DNS_RESOLVER/' $CONFIG"
 run "install -o root -g van-browser-edge -m 0640 $HERE/edge/Caddyfile $ETC/Caddyfile"
 
 echo "== pinned runtime (Stagehand 4.1.0 @ cd7b2307, Playwright 1.63.0) =="
@@ -143,10 +173,19 @@ run "python3.12 -m venv $RUNTIME/harness-venv"
 run "$RUNTIME/harness-venv/bin/python -m pip install --disable-pip-version-check --no-cache-dir browser-harness==0.1.13 cdp-use==1.4.5 fetch-use==0.4.0 pillow==12.2.0 websockets==15.0.1"
 run "$RUNTIME/harness-venv/bin/python -m pip freeze --all | LC_ALL=C sort > $RUNTIME/harness-freeze.txt"
 
+echo "== zone firewall (unit G12) =="
+BROWSER_UID="$(id -u van-browser 2>/dev/null || echo UNRESOLVED)"
+run "printf 'define VAN_BROWSER_UID = %s\\ndefine VAN_DNS_RESOLVER = %s\\n' $BROWSER_UID $DNS_RESOLVER > $ETC/firewall-vars.nft && chmod 0644 $ETC/firewall-vars.nft"
+run "install -o root -g root -m 0644 $HERE/firewall/van-browser-core.nft $ETC/firewall.nft"
+run "nft -c -f $ETC/firewall.nft"
+run "nft -f $ETC/firewall.nft"
+
 echo "== workers and units =="
 run "install -o root -g root -m 0755 $HERE/browser/harness_service.py $RUNTIME/harness_service.py"
+run "install -o root -g root -m 0755 $HERE/browser/egress_proxy.py $RUNTIME/egress_proxy.py"
 run "install -o root -g root -m 0755 $HERE/browser/stagehand_service.mjs $RUNTIME/stagehand_service.mjs"
-for unit in van-browser-harness.service van-stagehand.service van-browser-core-edge.service; do
+for unit in van-browser-core-firewall.service van-browser-egress.service van-browser-harness.service \
+            van-stagehand.service van-browser-core-edge.service; do
   run "install -o root -g root -m 0644 $HERE/systemd/$unit /etc/systemd/system/$unit"
 done
 if [[ "$DRY_RUN" == 0 ]]; then
@@ -168,8 +207,8 @@ if [[ ! -f "$ETC/pki/edge.crt" ]]; then
   exit 0
 fi
 
-run "systemctl enable van-browser-harness.service van-stagehand.service van-browser-core-edge.service"
-run "systemctl restart van-browser-harness.service van-stagehand.service van-browser-core-edge.service"
+run "systemctl enable van-browser-core-firewall.service van-browser-egress.service van-browser-harness.service van-stagehand.service van-browser-core-edge.service"
+run "systemctl restart van-browser-core-firewall.service van-browser-egress.service van-browser-harness.service van-stagehand.service van-browser-core-edge.service"
 if [[ "$DRY_RUN" == 1 ]]; then echo "dry run complete"; exit 0; fi
 
 for attempt in 1 2 3 4 5; do
@@ -181,6 +220,7 @@ h = json.load(open(sys.argv[1], encoding="utf-8"))
 s = json.load(open(sys.argv[2], encoding="utf-8"))
 assert h["ok"] is True and h["runtime_version"] == "0.1.13" and h["trust_zone"] == "van-browser-core"
 assert h["helper_authoring"] is False and h["raw_cdp_http"] is False
+assert h["egress_proxy"] is True
 assert s["ok"] is True and s["runtime_version"] == "4.1.0" and s["trust_zone"] == "van-browser-core"
 assert s["stagehand_release_commit"] == "cd7b230778cf92269e4cb90e80d97f5113781c51"
 assert s["model_name"] == "anthropic/claude-sonnet-5"
@@ -209,6 +249,8 @@ cat > "$DATA/evidence/runtime-manifest.json" <<JSON
   "chromium_executable": "$chromium_path",
   "node": "$(node -v)",
   "edge_bind": "$EDGE_BIND:9443",
+  "egress_proxy": "van-browser-egress.service (TLS interception, zone-local CA; keys in /var/lib/van-browser-egress, never exported)",
+  "zone_firewall": "table inet van_browser_core (browser uid $BROWSER_UID; DNS only to $DNS_RESOLVER)",
   "service_state": "VAN_BROWSER_CORE_INSTALLED_PENDING_QUALIFY_AND_GATES",
   "stagehand_production": "PRODUCTION_DISABLED_UNTIL_GATEWAY_PLACEMENT_GATE_PASSES",
   "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
