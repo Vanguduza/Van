@@ -109,3 +109,36 @@ Integrator's interpretation of the first answer (to be confirmed by the owner, n
   classification, form/submit context, visible text as well as accessible name, empty-name → A4) remain required:
   they make "the target" mean the element actually acted on, which task-scope enforcement depends on.
 ```
+
+---
+
+## Owner confirmation of the task-scope reading (appended 2026-09-30)
+
+Recorded first-hand by the integrator (the Claude Code session that asked the question and received the
+answer: `session_01ELKqm4GCPmPvF3ggKkgB1J`). No device, biometric or cryptographic signature is claimed.
+This block appends; nothing above it is changed.
+
+Question put to the owner (verbatim):
+
+> Do you confirm this reading of "pages should be relevant to the task truth": each browser task's recorded scope
+> (URL prefixes Hermes declares from the mission, or the task's target domain if none are declared, widened only by
+> your approvals) decides what automation may act on, and anything outside it comes to you?
+
+Owner's selected answer (verbatim label): **"Yes, confirmed"** — option text: "The scope rule becomes an
+owner-confirmed decision, and the records change from PENDING to confirmed."
+
+Consequence: the task-scope rule implemented in `backend/van_gateway/browser/task_scope.py` (units G6a, G9b) is an
+owner-confirmed decision from this point. Earlier records that say `PENDING_OWNER_CONFIRMATION` are left unchanged
+(append-only); this block supersedes their pending status. Authorization:
+`auth-20260930-owner-explicit-task-scope-confirmation`.
+
+Recorded in the same exchange (verbatim labels):
+
+- Handler-borne money: **"Network-effect guard (Recommended)"** — see
+  `OWNER-DECISION-20260930-NETWORK-EFFECT-GUARD.md` and `auth-20260930-owner-explicit-network-effect-guard`.
+- Rule R11 (long-number / token-like labels go to the owner): **"Keep (Recommended)"** — "Fail-safe: occasional
+  unnecessary handoffs to you."
+- Later, covering unit G9c's two commits outside its record's stated range: **"Widen by binding (Recommended)"** —
+  "Append an OWNER_DERIVED binding that extends the guard record to G9c's 9 first-parent commits
+  (72e72120..2833fa4c), citing your 'Network-effect guard' choice. Paths are unchanged." See
+  `auth-20260930-scope-binding-network-effect-guard`.
