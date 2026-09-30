@@ -22,7 +22,6 @@ set -a; . "$ENVF"; set +a
 }
 [[ -s "$MUSE_WG_PRIVATE_KEY_FILE" ]] || { echo "private key missing" >&2; exit 3; }
 
-# Always rebuild from a known-empty namespace. No host default route is touched.
 ip netns del van-muse 2>/dev/null || true
 ip link del muse-host 2>/dev/null || true
 ip link del wg-muse 2>/dev/null || true
@@ -40,9 +39,8 @@ ip -n van-muse addr add 169.254.77.2/30 dev muse-ns
 ip -n van-muse link set lo up
 ip -n van-muse link set muse-ns up
 
-# Create WireGuard in the root namespace and move only the interface. WireGuard's
-# encrypted UDP socket remains in the root namespace, so endpoint reachability uses
-# the host's existing route while decrypted traffic exists only inside van-muse.
+# Create WireGuard in the root namespace and move only the interface. Its encrypted
+# UDP socket remains in the host namespace; decrypted traffic exists only in van-muse.
 ip link add wg-muse type wireguard
 wg set wg-muse   private-key "$MUSE_WG_PRIVATE_KEY_FILE"   peer "$MUSE_WG_PEER_PUBLIC_KEY"   endpoint "$MUSE_WG_ENDPOINT"   allowed-ips 0.0.0.0/0   persistent-keepalive 25
 ip link set wg-muse netns van-muse
@@ -51,16 +49,23 @@ ip -n van-muse link set wg-muse mtu 1380
 ip -n van-muse link set wg-muse up
 ip -n van-muse route replace default dev wg-muse
 
-# IPv6 is disabled in this namespace until the Muse egress has an explicitly
-# provisioned IPv6 peer. This prevents an accidental host/ISP IPv6 fallback.
 ip netns exec van-muse sysctl -q -w net.ipv6.conf.all.disable_ipv6=1
 ip netns exec van-muse sysctl -q -w net.ipv6.conf.default.disable_ipv6=1
 
-# Namespace policy: the only clear-text path is host -> danted:1080 across the
-# veth. New outbound connections may leave only through wg-muse.
+# Only the SOCKS listener may use the clear-text veth. The namespace can initiate
+# traffic only through WireGuard, and private/link-local destinations are rejected
+# before encryption to prevent access to the exit VPS, metadata, or either VAN LAN.
 ip netns exec van-muse nft -f - <<'NFT'
-flush table inet van_muse_ns
 table inet van_muse_ns {
+  set blocked4 {
+    type ipv4_addr
+    flags interval
+    elements = {
+      0.0.0.0/8, 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8,
+      169.254.0.0/16, 172.16.0.0/12, 192.0.0.0/24, 192.168.0.0/16,
+      224.0.0.0/4, 240.0.0.0/4
+    }
+  }
   chain input {
     type filter hook input priority 0; policy drop;
     ct state established,related accept
@@ -70,11 +75,11 @@ table inet van_muse_ns {
   chain output {
     type filter hook output priority 0; policy drop;
     oifname "lo" accept
+    oifname "wg-muse" ip daddr @blocked4 drop
     oifname "wg-muse" accept
     oifname "muse-ns" ip daddr 169.254.77.1 ct state established,related accept
   }
 }
 NFT
 
-# The host must never forward namespace packets into the trading VCN.
 sysctl -q -w net.ipv4.conf.muse-host.forwarding=0 || true
