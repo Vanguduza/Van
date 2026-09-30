@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20260930-owner-explicit-browser-egress-and-beacons",
+  "project": "van",
+  "authority": "OWNER_EXPLICIT",
+  "owner_instruction_sha256": "bb585837793f4ad187205e1c663848d4a53315fa6ee319db3d02536035026c49",
+  "owner_instruction_digest_input": "UTF-8 bytes of the verbatim selected answer label \"Egress proxy (Recommended)\", no quotes, no trailing newline",
+  "owner_instruction_record": "docs/decisions/OWNER-DECISION-20260930-BROWSER-TASK-SCOPE.md",
+  "owner_instruction_excerpt": "Egress proxy (Recommended)",
+  "additional_owner_answers": {
+    "udp": {
+      "label": "Firewall UDP in zone (Recommended)",
+      "sha256": "3f82614aae8f431c5485fddc37d93855bb919f330ad311eba89c254601bd16a3"
+    },
+    "beacons": {
+      "label": "Block silently, continue (Recommended)",
+      "sha256": "64b65ff7f660819d6f5bcf153cc8eb6362f38ef7d0f02752bea00ada8b9d7158"
+    }
+  },
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "claude_code",
+    "request_id": "claude-code-session_01ELKqm4GCPmPvF3ggKkgB1J-20260930",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "signature_note": "The owner selected these answers in the Claude Code session that asked (after review I7); recorded first-hand by the integrator. No signature of any kind is claimed.",
+  "purpose": "Authorize unit G12's egress proxy (refuses WebSocket upgrades and non-GET/out-of-scope requests unless the task is mutating), UDP/TCP firewall, egress production gate and decision record; unit G13's integration of that proxy with unit G11's persistent guard (policy follows the lease, revoke on freeze/release); and the append recording the owner's answers.",
+  "authorized_paths": [
+    "backend/tests/cdp_harness_kit.py",
+    "backend/tests/test_browser_egress_proxy.py",
+    "backend/tests/test_browser_review_i2_router.py",
+    "backend/tests/test_browser_review_i3.py",
+    "backend/tests/test_harness_chromium_argv.py",
+    "backend/tests/test_production_activation_gates.py",
+    "backend/van_gateway/automation/production_gates.py",
+    "deploy/van-browser-core/README.md",
+    "deploy/van-browser-core/bootstrap.sh",
+    "deploy/van-browser-core/browser/egress_proxy.py",
+    "deploy/van-browser-core/browser/harness_service.py",
+    "deploy/van-browser-core/firewall/van-browser-core.nft",
+    "deploy/van-browser-core/qualify.sh",
+    "deploy/van-browser-core/runtime.env.example",
+    "deploy/van-browser-core/systemd/van-browser-core-firewall.service",
+    "deploy/van-browser-core/systemd/van-browser-egress.service",
+    "deploy/van-browser-core/systemd/van-browser-harness.service",
+    "deploy/van-browser-core/systemd/van-stagehand.service",
+    "deploy/van-browser-core/zone.json",
+    "docs/decisions/OWNER-DECISION-20260930-BROWSER-TASK-SCOPE.md (append-only)",
+    "docs/decisions/VAN-BROWSER-CORE-EGRESS-001.yaml",
+    "docs/project-state/VAN_BROWSER_CORE_MIGRATION_20260929.md",
+    "registries/production_activation_gates.json",
+    "tests/contracts/test_jev_effect_owner_reference.py",
+    "tests/contracts/test_task_scope_shared_url_rule.py",
+    "tests/contracts/test_van_browser_core_egress_proxy.py",
+    "tests/contracts/test_van_browser_core_firewall.py",
+    "tests/contracts/test_van_browser_core_zone.py"
+  ],
+  "commit_scope": {
+    "commits": [
+      "20d16df5dad903d1e6ef0e80d9e3637888e82a10",
+      "8591163fc72d28c02c678c7acceb8792ee515c1c",
+      "98119544cc57b8a8eec08c588f4eb5b2942de045",
+      "64e137952e158a9ed1f57931e8e4c65d488d9959",
+      "5ebca079a46911b48205274bc69110df61b1446b",
+      "9317e8d08b94a26499594caf4b31103cfe6490fc",
+      "47944b22981a8c86bb6f777857cc51f0ff5b1af2"
+    ]
+  },
+  "limits": [
+    "Covers only the listed paths in the listed commits.",
+    "Opens no production gate: egress_qualification stays PENDING until a live qualify.sh report on a provisioned van-browser-core host.",
+    "Stagehand stays production-disabled.",
+    "Not reusable."
+  ],
+  "issued_at_utc": "2026-09-30T00:00:00Z",
+  "recorded_by": "integrator (session_01ELKqm4GCPmPvF3ggKkgB1J), first-hand",
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false,
+  "reusable": false,
+  "revoked": false
+}
