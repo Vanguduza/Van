@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+[[ -f "$HOME/.config/van/muse-egress.env" ]] && . "$HOME/.config/van/muse-egress.env"
 PORT="${VAN_MUSE_LOCAL_PORT:-17891}"
 PROFILE="${VAN_MUSE_PROFILE:-$HOME/.local/share/van/muse-browser-profile}"
 CHECK="${VAN_MUSE_EGRESS_CHECK:-$HOME/.local/bin/van-muse-egress-check}"
