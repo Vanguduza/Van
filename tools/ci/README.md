@@ -135,7 +135,16 @@ GitHub → Settings → Branches (or Rulesets) for `main` and the programme bran
 - **Require review from Code Owners** (`.github/CODEOWNERS` names `@Vanguduza` for
   `docs/project-state/authorizations/`, the baselines registry, `tools/ci/`, `.githooks/` and
   `.github/workflows/`);
-- **Do not allow bypassing** and block force pushes,
+- **Do not allow bypassing** and block force pushes;
+- **Restrict creation of and direct pushes to `gpt/**`** (rulesets: a branch ruleset targeting
+  `gpt/**` with "Restrict creations", so only the owner creates a programme branch, and
+  "Require a pull request before merging", so nobody pushes to one directly), so a programme
+  branch changes only through a reviewed pull request. The ledger job trusts a `gpt/**`
+  branch's previous head, and a push to any other branch is judged from the newest commit it
+  shares with a `gpt/**` branch. Review I8 measured (local emulation of the job) that without
+  this, a weakened checker pushed to a *new* `gpt/...` branch, or pushed directly to the
+  programme branch, is red once and then becomes the trusted side: the next push on top of it
+  is judged by the weakened checker and is green,
 
 a red ledger check can still be merged and anyone with push access can land a record, a
 baseline or a checker change directly. Unit G9a could not verify whether these settings are on.
