@@ -20,6 +20,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Owner decision 2026-09-30 ("enforce van's ledger"). Every commit a pull request adds must
+  # carry a LOCAL_CHANGE_LEDGER.jsonl row whose diff digest matches the commit and whose owner
+  # authorization records cover every file it changes. Checks out the PR head (not GitHub's
+  # synthetic merge commit, which has no row) with full history, since the check walks commits.
+  project-truth-ledger:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Project Truth ledger (every PR commit has an authorized row)
+        run: python tools/ci/project_truth_ledger.py verify-pr --base ${{ github.event.pull_request.base.sha }}
+      - name: Project Truth ledger self-test
+        run: pip install pytest && pytest -q tests/contracts/test_project_truth_ledger.py
+
   backend:
     runs-on: ubuntu-latest
     steps:
