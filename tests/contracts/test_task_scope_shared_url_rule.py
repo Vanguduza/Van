@@ -19,6 +19,8 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 GATEWAY = ROOT / "backend/van_gateway/browser/task_scope.py"
 HARNESS = ROOT / "deploy/van-browser-core/browser/harness_service.py"
+#: Unit G12 — the egress proxy enforces the same rule on writes and upgrades.
+PROXY = ROOT / "deploy/van-browser-core/browser/egress_proxy.py"
 VECTORS = json.loads((ROOT / "backend/tests/fixtures/task_scope/url_vectors.v1.json").read_text(encoding="utf-8"))
 BEGIN = "# --- VAN shared URL scope rule: begin"
 END = "# --- VAN shared URL scope rule: end ---"
@@ -43,6 +45,14 @@ def test_the_block_is_byte_identical_on_both_sides(monkeypatch, tmp_path):
     # ...and it is what the Harness actually executes (the helpers embedded in its scripts).
     hs = _harness(monkeypatch, tmp_path)
     assert gateway in hs.VAN_HELPERS_PY and gateway in hs.CLICK_SCRIPT and gateway in hs.LANDING_SCRIPT
+    assert _block(PROXY.read_text(encoding="utf-8")) == gateway
+
+
+def _proxy():
+    spec = importlib.util.spec_from_file_location("van_egress_proxy_shared_rule", PROXY)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def _sides(monkeypatch, tmp_path):
@@ -52,10 +62,10 @@ def _sides(monkeypatch, tmp_path):
     from van_gateway.browser import task_scope
 
     hs = _harness(monkeypatch, tmp_path)
-    return {"gateway": task_scope, "harness": hs}
+    return {"gateway": task_scope, "harness": hs, "egress_proxy": _proxy()}
 
 
-@pytest.mark.parametrize("side", ["gateway", "harness"])
+@pytest.mark.parametrize("side", ["gateway", "harness", "egress_proxy"])
 def test_both_sides_run_the_shared_vectors(monkeypatch, tmp_path, side):
     module = _sides(monkeypatch, tmp_path)[side]
     entries = VECTORS["scope_entries"]
@@ -71,7 +81,7 @@ def test_both_sides_run_the_shared_vectors(monkeypatch, tmp_path, side):
         scope = TaskScope.model_validate({"entries": entries})
         for vector in VECTORS["vectors"]:
             assert url_scope_violation(scope, vector["input"], base=vector["base"]) == vector["violation_docs_scope"]
-    else:
+    elif side == "harness":
         for vector in VECTORS["vectors"]:
             if vector["base"] is None:
                 assert module._van_scope_violation({"entries": entries}, vector["input"]) == vector["violation_docs_scope"]

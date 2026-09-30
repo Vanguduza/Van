@@ -163,12 +163,16 @@ def test_zone_workers_read_only_declared_env():
              "VAN_BH_BINDING", "VAN_BH_SCOPE", "VAN_BH_FOCUS",
              # Unit G9c: the network-effect guard's policy (mutating flag + task scope).
              "VAN_BH_NETGUARD", "VAN_BH_NETGUARD_STATE"}
-    # Explicit development-only escape, refused in production by the worker itself.
-    allowed = declared | child | {"VAN_BROWSER_HISTORICAL_DEV_ONLY"}
+    # Explicit development-only escapes, refused in production by the workers themselves
+    # (unit G12: the egress proxy exits when VAN_EGRESS_TEST_* is set in a trust zone).
+    allowed = declared | child | {"VAN_BROWSER_HISTORICAL_DEV_ONLY", "VAN_EGRESS_TEST_RESOLVE",
+                                  "VAN_EGRESS_TEST_UPSTREAM_CAFILE"}
     harness = (ZONE_DIR / "browser" / "harness_service.py").read_text(encoding="utf-8")
+    harness += (ZONE_DIR / "browser" / "egress_proxy.py").read_text(encoding="utf-8")
     stagehand = (ZONE_DIR / "browser" / "stagehand_service.mjs").read_text(encoding="utf-8")
     read = set(re.findall(r'os\.(?:getenv|environ\.get)\(\s*"([A-Z0-9_]+)"', harness))
     read |= set(re.findall(r'os\.environ\["([A-Z0-9_]+)"\]', harness))
+    assert {"VAN_EGRESS_FENCE_KEY_FILE", "VAN_BROWSER_EGRESS_CONTROL_SOCKET"} <= read
     read |= set(re.findall(r"process\.env\.([A-Z0-9_]+)", stagehand))
     assert read, "env-read scan found nothing; the instrument is broken"
     assert read <= allowed, sorted(read - allowed)

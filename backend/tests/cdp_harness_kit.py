@@ -67,7 +67,7 @@ class FixtureServer:
     """HTTPS server for every host. ``pages(host, path)`` returns html, (content_type, body)
     or None (a plain landing page). ``log`` holds (method, host, path) per request."""
 
-    def __init__(self, pages: Callable[[str, str], Any], directory: Path) -> None:
+    def __init__(self, pages: Callable[[str, str], Any], directory: Path, tls: bool = True) -> None:
         self.pages = pages
         self.log: list[tuple[str, str, str]] = []
         server = self
@@ -102,9 +102,10 @@ class FixtureServer:
             do_GET = do_POST = do_PUT = do_DELETE = do_PATCH = do_OPTIONS = do_HEAD = _any
 
         self.httpd = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
-        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        context.load_cert_chain(*_certificate(directory))
-        self.httpd.socket = context.wrap_socket(self.httpd.socket, server_side=True)
+        if tls:  # unit G12: plain HTTP too (ws:// through the egress proxy)
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            context.load_cert_chain(*_certificate(directory))
+            self.httpd.socket = context.wrap_socket(self.httpd.socket, server_side=True)
         self.port = self.httpd.server_address[1]
         threading.Thread(target=self.httpd.serve_forever, daemon=True).start()
 
