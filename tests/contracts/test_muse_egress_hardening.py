@@ -77,3 +77,18 @@ def test_no_real_wireguard_or_meta_secret_is_committed():
         assert "BEGIN PRIVATE KEY" not in text, path
         assert "MUSE_WG_PRIVATE_KEY=" not in text, path
         assert "facebook.com;c_user=" not in text, path
+
+
+def test_socks_daemon_is_unprivileged_and_uses_namespace_dns():
+    installer = _read("install-muse-egress.sh")
+    service = _read("systemd/van-muse-socks.service")
+    dante = _read("danted.conf")
+    assert "id vanmuse" in installer
+    assert "install -d -m 0700 /opt/van-muse-egress/secrets" in installer
+    assert "User=vanmuse" in service
+    assert "Group=vanmuse" in service
+    assert "NetworkNamespacePath=/run/netns/van-muse" in service
+    assert "BindReadOnlyPaths=/etc/netns/van-muse/resolv.conf:/etc/resolv.conf" in service
+    assert "CapabilityBoundingSet=" in service
+    assert "user.privileged: vanmuse" in dante
+    assert "user.unprivileged: vanmuse" in dante
