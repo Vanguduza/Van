@@ -92,6 +92,8 @@ PAGES = {
                        "<script>navigator.serviceWorker.register('/docs/sw.js')</script>",
     "/docs/late_frame": "<button id=\"b\" onclick=\"document.title='clicked'\">Next</button>"
                         "<script>window.__alive=[];addEventListener('message',e=>window.__alive.push(e.data))</script>",
+    "/docs/shared": "<button id=\"b\" onclick=\"try{new SharedWorker('/docs/shared.js')}catch(e){document.title='no-shared-worker'}\">Next</button>",
+    "/docs/shared.js": ("text/javascript", f"{PAY}"),
     "/docs/get_only": "<button id=\"b\" onclick=\"fetch('/docs/data').then(r=>r.text()).then(t=>document.title='got')\">Next</button>",
     "/docs/link": '<a id="b" href="/docs/next">Read guide</a>',
     # A plain button whose handler submits its form (a submit-role control is A4 for the
@@ -260,6 +262,16 @@ async def test_a_beacon_from_a_service_worker_controlled_page_does_not_escape(g)
     result, writes, _seen = await _route(g, "/docs/sw_beacon")
     _blocked(result, "BEACON")
     assert writes == []
+
+
+async def test_a_shared_worker_cannot_be_started_to_write(g):
+    """A shared worker is not a target related to the page, so its requests escaped every
+    Fetch session (measured); the worker launches Chromium with SharedWorker disabled."""
+    module, rig, _h, _b = g
+    result, writes, _seen = await _route(g, "/docs/shared")
+    time.sleep(0.5)
+    assert rig.server.writes() == [] and writes == []
+    assert rig.session.js("document.title") == "no-shared-worker"
 
 
 async def test_frames_created_after_the_guard_are_not_left_paused(g):
