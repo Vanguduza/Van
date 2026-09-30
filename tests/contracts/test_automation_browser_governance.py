@@ -607,3 +607,46 @@ def test_stagehand_fence_correction_is_appended_and_leaves_the_blockers_closed()
     assert paths["blocker_verifier_gap"] == "blocker_closure_20260929.blockers.STAGEHAND-VERIFIER-GAP-20260929.status"
     assert paths["blocker_direct_actuation"] == (
         "blocker_closure_20260929.blockers.STAGEHAND-DIRECT-ACTUATION-20260929.status")
+
+
+#: sha256 of VAN-ADOPT-STAGEHAND-001.yaml through the end of the fourth append
+#: (blocker_closure_correction_20260929; VAN fbe5502e). The review-I5 correction (unit G6b)
+#: is appended after the marker below; nothing above it may change.
+STAGEHAND_FENCE_CORRECTION_SHA256 = "13d2a4d30c16144242fd91f797907576f93a1df44155f6df28274ba34b06b721"
+STAGEHAND_I5_CORRECTION_MARKER = (
+    "\n\n# ====================================================================================="
+    "\n# APPENDED 2026-09-30 (fifth append)"
+)
+
+
+def test_stagehand_i5_fence_correction_is_appended_and_corrects_the_three_statements():
+    """Review I5 R1: the fourth append overstated the fence (a /step kept inside its lease; a
+    restart never re-admitting a stale generation; "at least" a quarter). The correction is a
+    later append, the text above stays byte-for-byte and both blockers stay CLOSED."""
+    import yaml
+
+    text = (DECISIONS / "VAN-ADOPT-STAGEHAND-001.yaml").read_text(encoding="utf-8")
+    assert text.count(STAGEHAND_I5_CORRECTION_MARKER) == 1
+    prior = text.split(STAGEHAND_I5_CORRECTION_MARKER, 1)[0] + "\n"
+    assert hashlib.sha256(prior.encode("utf-8")).hexdigest() == STAGEHAND_FENCE_CORRECTION_SHA256, (
+        "text above the review-I5 append was edited; append instead"
+    )
+    doc = yaml.safe_load(text)
+    fix = doc["fence_correction_review_i5_20260930"]
+    assert (fix["authority_class"], fix["signature_claimed"]) == ("OWNER_DERIVED", "none")
+    assert fix["authority_basis"]["owner_record_sha256"] == OWNER_DECISIONS_20260929_SHA256
+    assert fix["independent_review"]["id"] == "I5"
+    by_target = {c["corrects"]: c for c in fix["statement_corrections"]}
+    prior_block = doc["blocker_closure_correction_20260929"]
+    step = by_target["blocker_closure_correction_20260929.limits_after_unit_g5b[1]"]
+    assert step["overstated"] in prior_block["limits_after_unit_g5b"][1]
+    restart = by_target["blocker_closure_correction_20260929.what_the_fence_covers_after_unit_g5b.harness_worker"]
+    assert restart["overstated"] in prior_block["what_the_fence_covers_after_unit_g5b"]["harness_worker"]
+    assert "LEASE_FENCE_STATE_MISSING" in restart["after_unit_g6b"]
+    quarter = by_target["blocker_closure_correction_20260929.what_the_fence_covers_after_unit_g5b.step_deadline"]
+    assert quarter["overstated"] in prior_block["what_the_fence_covers_after_unit_g5b"]["step_deadline"]
+    assert "at most a quarter" in quarter["correct_wording"]
+    assert "LEASE_FENCE_MAC_INVALID" in fix["added_after_unit_g6b"]["fence_authentication"]
+    assert fix["blockers_status_unchanged"] == {
+        "STAGEHAND-VERIFIER-GAP-20260929": "CLOSED", "STAGEHAND-DIRECT-ACTUATION-20260929": "CLOSED"}
+    assert all(b["status"] == "CLOSED" for b in doc["blocker_closure_20260929"]["blockers"].values())
