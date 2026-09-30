@@ -1992,7 +1992,12 @@ def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter)
                         status_code=504, detail="BROWSER_STEP_DEADLINE_EXCEEDED"
                     ) from exc
         finally:
-            if acquired is not None:
+            # Review I5 F1 — a deadline stops the router waiting, not the Harness: a call it
+            # sent may still be applying. Hold (and keep renewing) the lease until every call
+            # sent under it has ended; if one ended without a response its outcome is unknown,
+            # so the lease is left to expire rather than handed to the next holder early.
+            settled = await fence.inflight.settle(keepalive=fence.guard)
+            if acquired is not None and settled:
                 # Only the lease this step took, and only while it still holds it (lease id,
                 # holder and generation must all match): never another holder's.
                 await browser_api.broker.release_lease_if_held(acquired)

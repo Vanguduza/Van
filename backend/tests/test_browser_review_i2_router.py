@@ -184,11 +184,12 @@ def _jev_repo(tmp_path: Path, *, jev: str, harness: str = "SIGNED") -> Path:
     (tmp_path / ref).write_text("# owner decision (test fixture)\n", encoding="utf-8")
     auths = tmp_path / "docs" / "project-state" / "authorizations"
     auths.mkdir(parents=True)
+    sha = hashlib.sha256((tmp_path / ref).read_bytes()).hexdigest()
+    # Review I5 J1: the authorization pins the owner decision's bytes as well.
     (auths / "auth-20261001-jev.json").write_text(json.dumps({
         "authorization_id": "auth-20261001-jev", "authority": "OWNER_EXPLICIT",
-        "owner_instruction_record": ref, "revoked": False,
+        "owner_instruction_record": ref, "owner_instruction_sha256": sha, "revoked": False,
         "authorized_paths": ["docs/decisions/VAN-JEV-BROWSER-EFFECT-001.yaml"]}), encoding="utf-8")
-    sha = hashlib.sha256((tmp_path / ref).read_bytes()).hexdigest()
     (decisions / "VAN-JEV-BROWSER-EFFECT-001.yaml").write_text(
         "owner_signature_status: SIGNED\njev_browser_effect:\n  status: "
         f"{jev}\n  owner_decision_reference: {ref}\n  owner_decision_sha256: '{sha}'\n"

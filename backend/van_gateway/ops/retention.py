@@ -171,6 +171,10 @@ POLICIES: tuple[TablePolicy, ...] = (
     _p("automation_workflow_health", _TEL, "updated_at_ms"),
     _p("automation_runs", _TEL, "updated_at_ms"),
     _p("browser_tasks", _TEL, "updated_at_ms"),
+    _p("browser_task_tombstones", _OWNER,
+       note="Review I5 D1. Not owner content, but never pruned by a timer: a tombstone is what "
+            "stops a terminal task_id being inserted again after retention deletes its "
+            "browser_tasks row, so it must outlive that row. Triggers refuse its deletion."),
     _p("watch_runs", _TEL, "created_at_ms", note="Individual watch observations are operational history; triggered owner state lives in Attention."),
 
     # ---- Remote Browser Rev 1.5 (migration 27) ------------------------------

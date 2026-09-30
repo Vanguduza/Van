@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 34
+SCHEMA_VERSION = 35
 
 
 MIGRATION_17 = """
@@ -865,6 +865,95 @@ WHEN EXISTS (
 )
 BEGIN
   SELECT RAISE(ABORT, 'browser_task_terminal_status');
+END;
+"""
+
+MIGRATION_35 = """
+-- Review I5 D1. Migration 34 kept a terminal *status* sticky, but a terminal task could still
+-- be resurrected: DELETE then INSERT the same task_id as PENDING, or rename its task_id and
+-- INSERT the old one; and its other columns stayed writable. Now:
+--   * a task_id that reached a terminal status is tombstoned (by trigger, on INSERT or
+--     UPDATE, and backfilled here); an INSERT of a tombstoned task_id is refused, whether or
+--     not the row still exists. The tombstone outlives the row, so retention may still
+--     DELETE browser_tasks rows; tombstones themselves cannot be deleted or changed;
+--   * a task's identity columns never change once written;
+--   * a terminal row's evidence (evidence_pointer, completed_at_ms) never changes. Its
+--     error_code and updated_at_ms stay writable: review I4 pinned that an ended task may
+--     be touched without a status change.
+-- The terminal list is browser/service.py TERMINAL_TASK_STATUSES (tests pin the lists).
+CREATE TABLE IF NOT EXISTS browser_task_tombstones (
+  task_id TEXT PRIMARY KEY,
+  terminal_status TEXT NOT NULL,
+  tombstoned_at_ms INTEGER NOT NULL
+);
+
+INSERT OR IGNORE INTO browser_task_tombstones(task_id, terminal_status, tombstoned_at_ms)
+  SELECT task_id, status, CAST(strftime('%s', 'now') AS INTEGER) * 1000 FROM browser_tasks
+  WHERE status IN ('COMPLETED', 'FAILED', 'DENIED', 'BLOCKED_POLICY', 'BLOCKED_UNSAFE',
+                     'CANCELLED', 'EXPIRED');
+
+CREATE TRIGGER IF NOT EXISTS browser_tasks_tombstone_on_terminal_insert
+AFTER INSERT ON browser_tasks
+WHEN NEW.status IN ('COMPLETED', 'FAILED', 'DENIED', 'BLOCKED_POLICY', 'BLOCKED_UNSAFE',
+                     'CANCELLED', 'EXPIRED')
+BEGIN
+  INSERT OR IGNORE INTO browser_task_tombstones(task_id, terminal_status, tombstoned_at_ms)
+  VALUES (NEW.task_id, NEW.status, CAST(strftime('%s', 'now') AS INTEGER) * 1000);
+END;
+
+CREATE TRIGGER IF NOT EXISTS browser_tasks_tombstone_on_terminal_update
+AFTER UPDATE OF status ON browser_tasks
+WHEN NEW.status IN ('COMPLETED', 'FAILED', 'DENIED', 'BLOCKED_POLICY', 'BLOCKED_UNSAFE',
+                     'CANCELLED', 'EXPIRED')
+BEGIN
+  INSERT OR IGNORE INTO browser_task_tombstones(task_id, terminal_status, tombstoned_at_ms)
+  VALUES (NEW.task_id, NEW.status, CAST(strftime('%s', 'now') AS INTEGER) * 1000);
+END;
+
+CREATE TRIGGER IF NOT EXISTS browser_tasks_tombstoned_id_not_reinserted
+BEFORE INSERT ON browser_tasks
+WHEN EXISTS (SELECT 1 FROM browser_task_tombstones WHERE task_id = NEW.task_id)
+BEGIN
+  SELECT RAISE(ABORT, 'browser_task_terminal_status');
+END;
+
+CREATE TRIGGER IF NOT EXISTS browser_tasks_identity_immutable
+BEFORE UPDATE ON browser_tasks
+WHEN NEW.task_id IS NOT OLD.task_id
+  OR NEW.command_id IS NOT OLD.command_id
+  OR NEW.execution_id IS NOT OLD.execution_id
+  OR NEW.capability_id IS NOT OLD.capability_id
+  OR NEW.profile_alias IS NOT OLD.profile_alias
+  OR NEW.strategy IS NOT OLD.strategy
+  OR NEW.autonomy_tier IS NOT OLD.autonomy_tier
+  OR NEW.action_class IS NOT OLD.action_class
+  OR NEW.target_domain IS NOT OLD.target_domain
+  OR NEW.goal IS NOT OLD.goal
+  OR NEW.started_at_ms IS NOT OLD.started_at_ms
+BEGIN
+  SELECT RAISE(ABORT, 'browser_task_identity_immutable');
+END;
+
+CREATE TRIGGER IF NOT EXISTS browser_tasks_terminal_evidence_frozen
+BEFORE UPDATE OF evidence_pointer, completed_at_ms ON browser_tasks
+WHEN OLD.status IN ('COMPLETED', 'FAILED', 'DENIED', 'BLOCKED_POLICY', 'BLOCKED_UNSAFE',
+                     'CANCELLED', 'EXPIRED')
+  AND (NEW.evidence_pointer IS NOT OLD.evidence_pointer
+       OR NEW.completed_at_ms IS NOT OLD.completed_at_ms)
+BEGIN
+  SELECT RAISE(ABORT, 'browser_task_terminal_status');
+END;
+
+CREATE TRIGGER IF NOT EXISTS browser_task_tombstones_no_delete
+BEFORE DELETE ON browser_task_tombstones
+BEGIN
+  SELECT RAISE(ABORT, 'browser_task_tombstone_immutable');
+END;
+
+CREATE TRIGGER IF NOT EXISTS browser_task_tombstones_no_update
+BEFORE UPDATE ON browser_task_tombstones
+BEGIN
+  SELECT RAISE(ABORT, 'browser_task_tombstone_immutable');
 END;
 """
 
@@ -2204,6 +2293,7 @@ MIGRATIONS: dict[int, str] = {
     32: MIGRATION_32,
     33: MIGRATION_33,
     34: MIGRATION_34,
+    35: MIGRATION_35,
 }
 
 

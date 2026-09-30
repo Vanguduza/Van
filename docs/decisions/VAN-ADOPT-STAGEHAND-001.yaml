@@ -609,3 +609,82 @@ blocker_closure_correction_20260929:
   blockers_status_unchanged:
     STAGEHAND-VERIFIER-GAP-20260929: CLOSED
     STAGEHAND-DIRECT-ACTUATION-20260929: CLOSED
+
+# =====================================================================================
+# APPENDED 2026-09-30 (fifth append) — correction to blocker_closure_correction_20260929
+# after independent review I5. Append-only: every byte above this line is preserved
+# unchanged. Review I5 found three statements in the fourth append that overstated the
+# fence at VAN fbe5502e (findings F1, F2 and the deadline wording). This block records what
+# is true after unit G6b's fixes. It does not reopen either blocker (both stay CLOSED; the
+# gate model's blocker paths are unchanged) and changes no product, security, money,
+# provider or owner-control intent.
+# Authority class: OWNER_DERIVED (the owner ordered the review findings closed by the runtime
+# work: docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md sections 8-10).
+# =====================================================================================
+fence_correction_review_i5_20260930:
+  authority_class: OWNER_DERIVED
+  authority_basis:
+    owner_record: docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md
+    owner_record_sha256: 64f1c0560ef88776d0d199392d315767ea3576827e335ba2da8081d12e307c81
+    owner_sections: [8, 9, 10]
+  signature_claimed: none
+  corrects: blocker_closure_correction_20260929
+  independent_review:
+    id: I5
+    reviewed_commit: fbe5502e
+    findings: [I5-F1, I5-F2, I5-F3, I5-R1]
+    evidence_probe: review-i5/probes/test_i5_fence.py (held outside this repository)
+    fixed_by: unit G6b (branch unit-g6b)
+    reproduced_at_fbe5502e: >-
+      (F1) a /step past its 0.5 s deadline returned 504 and released its lease while its click
+      was still at the Harness; task2 took generation 2 and the Harness then applied the
+      generation-1 click. (F2) deleting a profile's fence state file and restarting the Harness
+      re-admitted stale generation 4 after generation 5. (F3) any local caller could send
+      lease_generation 2**62 and lock the real holder out, across restarts.
+  statement_corrections:
+    - corrects: blocker_closure_correction_20260929.limits_after_unit_g5b[1]
+      overstated: the step deadline keeps a /step inside its lease
+      at_fbe5502e: >-
+        False. The deadline stopped the router waiting, not the Harness call it had sent; the
+        lease was then released while that call was still in flight (F1).
+      after_unit_g6b: >-
+        The deadline stops the router waiting. Every fenced Harness call runs to its end as a
+        task the fence tracks, and /step does not release its lease until all of them have
+        ended, renewing it while it waits. If a call ended without a response (transport
+        failure, timeout), its outcome is unknown and the lease is not released but left to
+        expire. The Harness also checks the fence under the same per-profile lock it applies
+        the operation under, so no older generation is still applying once a newer one has
+        been admitted. Limits: the wait is bounded at 300 s, after which the lease is left to
+        expire; and the lease is a gateway-process fact (a gateway that dies mid-call stops
+        renewing, and the lease then lapses on its TTL).
+    - corrects: blocker_closure_correction_20260929.what_the_fence_covers_after_unit_g5b.harness_worker
+      overstated: so a restart does not re-admit a stale generation
+      at_fbe5502e: >-
+        False when the state file was missing: a missing file read as "never fenced" and the
+        fence restarted from nothing (F2). Only an unreadable file refused.
+      after_unit_g6b: >-
+        The Harness lists every fenced profile in lease-fence-manifest.json beside the state
+        files, and bootstrap.sh writes /etc/van-browser-core/harness-fence-installed (with an
+        empty manifest) once. A missing state file for a listed profile, or a missing manifest
+        while the install marker exists, refuses fenced calls (503 LEASE_FENCE_STATE_MISSING)
+        until the state is restored. Limit: a worker without the install marker (not installed
+        by bootstrap.sh) that loses its whole state directory, manifest included, starts
+        again from first boot.
+    - corrects: blocker_closure_correction_20260929.what_the_fence_covers_after_unit_g5b.step_deadline
+      overstated: at least a quarter of the remainder
+      correct_wording: >-
+        The margin before expiry is min(30 s, a quarter of the remaining lease): at most 30 s
+        and at most a quarter of the remainder (interaction_router._step_page_lease).
+  added_after_unit_g6b:
+    fence_authentication: >-
+      (F3) The fence was unauthenticated at fbe5502e. The gateway now sends lease_mac =
+      HMAC-SHA256 over (alias, generation, holder_id) with a key shared through
+      VAN_BROWSER_HARNESS_FENCE_KEY_FILE (gateway) and VAN_HARNESS_FENCE_KEY_FILE (Harness),
+      generated by bootstrap.sh and never in the repository. The Harness refuses a fence
+      without a valid MAC (403 LEASE_FENCE_MAC_INVALID). A worker with a trust zone configured
+      and no usable key refuses every fenced call (503 LEASE_FENCE_KEY_UNCONFIGURED) and will
+      not start. Limit: a caller that can read a valid MAC off the loopback can replay that
+      same (alias, generation, holder); it cannot advance the fence past the real holder.
+  blockers_status_unchanged:
+    STAGEHAND-VERIFIER-GAP-20260929: CLOSED
+    STAGEHAND-DIRECT-ACTUATION-20260929: CLOSED

@@ -167,9 +167,21 @@ def test_page_info_script_reports_cookie_presence_not_contents(hs):
         seen.append(expr)
         return snapshot if "elements_total" in expr else ""
 
+    calls: list[tuple[str, dict]] = []
+
     def cdp(method, **params):
-        assert method == "Network.getCookies" and params == {"urls": [f"https://{DOMAIN}/"]}
-        return {"cookies": [{"name": "sid", "value": "SESSIONCOOKIE", "httpOnly": True}]}
+        # Review I5 E2 — cookies for the whole site and storage counts come from CDP.
+        calls.append((method, params))
+        if method == "Network.getAllCookies":
+            return {"cookies": [{"name": "sid", "value": "SESSIONCOOKIE", "domain": DOMAIN, "path": "/app", "httpOnly": True}]}
+        if method == "DOMStorage.getDOMStorageItems":
+            assert params["storageId"]["securityOrigin"] == f"https://{DOMAIN}"
+            return {"entries": []}
+        if method == "IndexedDB.requestDatabaseNames":
+            return {"databaseNames": []}
+        if method == "Storage.getUsageAndQuota":
+            return {"usage": 0, "quota": 1}
+        raise AssertionError(method)
 
     raw = _exec_script(hs.PAGE_INFO_SCRIPT, {
         "page_info": lambda: {"url": f"https://{DOMAIN}/", "title": "Docs"}, "js": js, "cdp": cdp})
@@ -177,6 +189,9 @@ def test_page_info_script_reports_cookie_presence_not_contents(hs):
     assert "SESSIONCOOKIE" not in json.dumps(result)
     assert (result["cookies_present"], result["authenticated"]) == (True, None)
     assert [e["locator"] for e in result["elements"]] == ["#e1"]
+    assert [m for m, _p in calls] == ["Network.getAllCookies", "DOMStorage.getDOMStorageItems",
+                                      "DOMStorage.getDOMStorageItems", "IndexedDB.requestDatabaseNames",
+                                      "Storage.getUsageAndQuota"]
     # The in-page element expression is the module's own, not something assembled per call.
     assert hs.elements_expression("list") in seen
 

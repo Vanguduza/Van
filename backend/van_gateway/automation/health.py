@@ -12,6 +12,7 @@ production activation as permitted only when every gate in the explicit gate mod
 
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 from typing import Any
@@ -27,7 +28,11 @@ from van_gateway.automation.production_gates import GATE_MODEL, evaluate_product
 from van_gateway.automation.registry import HotWorkflowIndex
 from van_gateway.automation.telemetry import TelemetryService
 from van_gateway.automation.workflow_health import WorkflowHealthService
-from van_gateway.browser.adapters import HttpBrowserHarnessAdapter, StagehandAdapter
+from van_gateway.browser.adapters import (
+    HttpBrowserHarnessAdapter,
+    StagehandAdapter,
+    harness_fence_key_from_settings,
+)
 from van_gateway.computer_use.fabric import ComputerInteractionFabric
 from van_gateway.config import Settings
 from van_gateway.degraded.registry import DegradedRegistry
@@ -117,6 +122,7 @@ class AutomationHealthApi:
             enabled=settings.browser_enabled,
             expected_version=settings.browser_harness_expected_version
             or self._manifest("browser_harness"),
+            fence_key=harness_fence_key_from_settings(settings),
         )
         self.stagehand = StagehandAdapter(
             self.runtime,
@@ -228,7 +234,8 @@ class AutomationHealthApi:
             placement = {"state": "PRODUCTION_DISABLED", "reason": "PLACEMENT_GATE_MISSING"}
         else:
             health = await _fetch_stagehand_worker_health(self.stagehand)
-            placement = stagehand_production_state(self.settings, worker_health=health)
+            # Review I5 P2 — resolves the endpoint name; never on the event loop.
+            placement = await asyncio.to_thread(stagehand_production_state, self.settings, worker_health=health)
         gates = governance["capabilities"]["stagehand"]
         return {
             **placement,

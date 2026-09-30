@@ -9,6 +9,9 @@ HTTP. Authority remains in VAN Gateway.
 from __future__ import annotations
 
 import atexit
+import contextlib
+import hashlib
+import hmac
 import json
 import os
 import re
@@ -49,6 +52,15 @@ RUNTIME_ROOT = Path(os.getenv("VAN_BROWSER_RUNTIME_ROOT", "/run/van-browser-core
 HARNESS_STATE_ROOT = Path(
     os.getenv("VAN_HARNESS_STATE_ROOT", "/var/lib/van-browser-core/harness-state")
 )
+#: Review I5 F2 — written by bootstrap.sh when it creates the fence state directory. While it
+#: exists, a missing fence manifest means the state was lost (not a first boot): fenced
+#: calls are refused rather than the fence silently restarting at "nothing seen".
+HARNESS_FENCE_INSTALL_MARKER = Path(
+    os.getenv("VAN_HARNESS_FENCE_INSTALL_MARKER", "/etc/van-browser-core/harness-fence-installed")
+)
+#: Review I5 F3 — the key the gateway MACs each lease fence with (shared with the gateway's
+#: VAN_BROWSER_HARNESS_FENCE_KEY_FILE). A file path; the key never appears in env or repo.
+HARNESS_FENCE_KEY_FILE = os.getenv("VAN_HARNESS_FENCE_KEY_FILE", "")
 #: Owner decision 2026-09-29 §1 — the trust zone this worker was installed into, written by
 #: deploy/van-browser-core/bootstrap.sh. Reported, never inferred; the gateway's placement
 #: gate refuses production Stagehand unless the zone is van-browser-core.
@@ -337,6 +349,68 @@ SENSITIVE_NAME_RE = re.compile(
     re.IGNORECASE,
 )
 
+#: Review I5 E1 — the Python half of the value redaction (the page script also compares with
+#: the page's field values, which never leave the page). Digit-heavy values (6+ digits: card,
+#: account, phone, SSN) and token-like runs are redacted from data-*, aria-label/title/alt
+#: copies and URL path segments.
+_TOKEN_RUN_RE = re.compile(r"[A-Za-z0-9_\-+/=.~%]{16,}")
+_PROTOCOL_ONLY_RE = re.compile(r"^[a-z][a-z0-9+.-]*:$")
+VALUE_REDACTED_ATTRIBUTES = frozenset({"aria-label", "title", "alt"})
+URL_ATTRIBUTES = frozenset({"href", "action", "formaction"})
+
+
+def secret_like(value: str) -> bool:
+    if sum(ch.isdigit() for ch in value) >= 6:
+        return True
+    for run in _TOKEN_RUN_RE.findall(value):
+        if len(run) >= 32 or (re.search(r"\d", run) and re.search(r"[A-Za-z]", run)):
+            return True
+    return False
+
+
+_DIGIT_RUN_RE = re.compile(r"\d[\d \-./]*\d")
+
+
+def mask_digit_runs(value: str) -> str:
+    """Replace a run carrying 6+ digits (a card or account number in a title copied into a
+    description) and leave the words around it."""
+    return _DIGIT_RUN_RE.sub(lambda m: REDACTED if sum(c.isdigit() for c in m.group()) >= 6 else m.group(), value)
+
+
+def redact_url(value: str) -> str:
+    """origin + path (secret-like segments replaced) + query *names*; never values."""
+    from urllib.parse import unquote, urlsplit
+
+    if _PROTOCOL_ONLY_RE.fullmatch(value):
+        return value
+    try:
+        parts = urlsplit(value)
+    except ValueError:
+        return REDACTED
+    if parts.scheme and parts.scheme not in {"http", "https"}:
+        return f"{parts.scheme}:"
+    origin = ""
+    if parts.netloc:
+        host = parts.hostname or ""
+        origin = f"{parts.scheme}://{host}" + (f":{parts.port}" if parts.port else "")
+    segments = []
+    for segment in parts.path.split("/"):
+        decoded = unquote(segment)
+        segments.append(REDACTED if segment and (secret_like(decoded) or len(decoded) >= 32) else segment)
+    names = [item.split("=", 1)[0] for item in parts.query.split("&") if item]
+    return _clip(origin + "/".join(segments) + ("?" + "&".join(names) if names else ""))
+
+
+def sanitize_attribute(name: str, value: str) -> str:
+    if name in URL_ATTRIBUTES:
+        return redact_url(value)
+    if name.startswith("data-"):
+        return REDACTED if SENSITIVE_NAME_RE.search(name) or secret_like(value) else _clip(value)
+    if name in VALUE_REDACTED_ATTRIBUTES and secret_like(value):
+        return REDACTED
+    return _clip(value)
+
+
 ELEMENTS_JS = r"""
 (async (mode, target) => {
   const MAX = 200, MAX_BYTES = 60000, TEXT = 256, SCAN = 3000;
@@ -350,6 +424,40 @@ ELEMENTS_JS = r"""
   const NAME_FROM_CONTENT = new Set(['button','link','menuitem','menuitemcheckbox','menuitemradio','tab','option','checkbox','radio','switch','treeitem','gridcell','heading','tooltip']);
   const SKIP_TEXT = new Set(['SCRIPT','STYLE','NOSCRIPT','TEXTAREA','SELECT','OPTION','INPUT','TEMPLATE']);
   const clip = (s) => { s = String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); return s.length > TEXT ? s.slice(0, TEXT) : s; };
+  // Review I5 E1 — values a page mirrors out of its fields (data-value, data-pan...) or carries
+  // as secrets (card numbers, reset tokens) are redacted wherever an attribute or URL path
+  // would otherwise report them. Field values are read only to compare; never reported.
+  const VALUELESS = new Set(['button', 'submit', 'reset', 'image', 'checkbox', 'radio', 'file', 'color', 'range']);
+  const digitsOf = (v) => String(v).replace(/\D+/g, '');
+  const FIELD_VALUES = (() => {
+    const out = [];
+    try {
+      for (const f of document.querySelectorAll('input,textarea,select,[contenteditable=""],[contenteditable="true" i]')) {
+        if (out.length >= 400) break;
+        const tag = f.localName, type = (f.getAttribute('type') || '').toLowerCase();
+        if (tag === 'input' && VALUELESS.has(type)) continue;
+        const vals = [];
+        try { vals.push(f.isContentEditable && tag !== 'input' && tag !== 'textarea' ? f.textContent : f.value); } catch (e) { /* unreadable */ }
+        vals.push(f.getAttribute('value'));
+        for (let v of vals) { v = String(v == null ? '' : v).trim(); if (v.length >= 3) out.push(v.toLowerCase()); }
+      }
+    } catch (e) { /* no fields */ }
+    return out;
+  })();
+  function secretLike(v) {
+    v = String(v == null ? '' : v);
+    if (digitsOf(v).length >= 6) return true;
+    for (const run of v.match(/[A-Za-z0-9_\-+\/=.~%]{16,}/g) || []) {
+      if (run.length >= 32 || (/\d/.test(run) && /[A-Za-z]/.test(run))) return true;
+    }
+    const low = v.toLowerCase().trim(), dv = digitsOf(v);
+    for (const f of FIELD_VALUES) {
+      if (low === f || (f.length >= 4 && low.includes(f))) return true;
+      const df = digitsOf(f);
+      if (df.length >= 4 && dv.includes(df)) return true;
+    }
+    return false;
+  }
   const esc = (s) => (window.CSS && CSS.escape) ? CSS.escape(s) : String(s).replace(/[^a-zA-Z0-9_-]/g, (c) => '\\' + c);
   const unique = (sel, el) => { try { const n = document.querySelectorAll(sel); return n.length === 1 && n[0] === el; } catch (e) { return false; } };
   function locatorFor(el) {
@@ -455,19 +563,26 @@ ELEMENTS_JS = r"""
       const u = new URL(raw, location.href);
       if (!/^https?:$/.test(u.protocol)) return clip(u.protocol);
       const keys = Array.from(u.searchParams.keys());
-      return clip(u.origin + u.pathname + (keys.length ? '?' + keys.join('&') : ''));
+      // Review I5 E1 — a path segment that is a token, a long identifier or a field's value
+      // (/reset/tok_9f8e7d6c5b4a/confirm) is replaced; query values are already dropped.
+      const path = u.pathname.split('/').map((seg) => {
+        let d = seg; try { d = decodeURIComponent(seg); } catch (e) { /* keep raw */ }
+        return seg && (secretLike(d) || d.length >= 32) ? '[REDACTED]' : seg;
+      }).join('/');
+      return clip(u.origin + path + (keys.length ? '?' + keys.join('&') : ''));
     } catch (e) { return ''; }
   }
   function attrsOf(el) {
     const out = {}; let data = 0;
     for (const a of ['id', 'name', 'type', 'class', 'role', 'aria-label', 'title', 'alt', 'target']) {
-      const v = el.getAttribute(a); if (v != null && v !== '') out[a] = clip(v);
+      const v = el.getAttribute(a);
+      if (v != null && v !== '') out[a] = (['aria-label', 'title', 'alt'].includes(a) && secretLike(v)) ? '[REDACTED]' : clip(v);
     }
     for (const a of ['href', 'action', 'formaction']) { const v = el.getAttribute(a); if (v) out[a] = safeUrl(v); }
     for (const a of el.attributes) {
       if (!a.name.startsWith('data-') || data >= 16) continue;
       data++;
-      out[a.name] = SENSITIVE.test(a.name) ? '[REDACTED]' : clip(a.value);
+      out[a.name] = (SENSITIVE.test(a.name) || secretLike(a.value)) ? '[REDACTED]' : clip(a.value);
     }
     return out;
   }
@@ -579,6 +694,8 @@ def sanitize_element(raw: Any) -> dict[str, Any] | None:
     for key in ELEMENT_STRING_KEYS:
         value = raw.get(key)
         out[key] = value if key == "locator" else _clip(value if isinstance(value, str) else "")
+    # Review I5 E1 — a title used as the description can carry a card number.
+    out["description"] = mask_digit_runs(out["description"])
     for key in ELEMENT_BOOL_KEYS:
         out[key] = raw.get(key) is True
     # Unknown visibility is hidden: the gateway refuses to act on a hidden target.
@@ -595,7 +712,7 @@ def sanitize_element(raw: Any) -> dict[str, Any] | None:
                 break
             if not isinstance(name, str) or not ATTRIBUTE_NAME_RE.fullmatch(name) or not isinstance(value, str):
                 continue
-            attributes[name] = REDACTED if name.startswith("data-") and SENSITIVE_NAME_RE.search(name) else _clip(value)
+            attributes[name] = sanitize_attribute(name, value)
     out["attributes"] = attributes
     if out["type"] == "password" or out["autocomplete"].startswith(("cc-", "current-password", "new-password", "one-time-code")):
         out["sensitive"] = True
@@ -629,8 +746,10 @@ def session_facts(snapshot: dict[str, Any], identity: str, cookies: bool | None)
 
     ``authenticated`` is True on positive evidence (an account-identity marker, a visible
     sign-out control). It is False only when the profile demonstrably holds no session state
-    for the page: no cookie (CDP, HttpOnly included), no local/session storage entry and no
-    IndexedDB database. Anything else is None (unknown), which B2 treats as signed in.
+    for the page: no cookie for the site on any path or sibling host (CDP, HttpOnly
+    included), no local/session storage entry, no IndexedDB database and no other origin
+    storage in use, all read over CDP (review I5 E2). Anything else is None (unknown), which
+    B2 treats as signed in.
     """
     doc_cookie = tri_state(snapshot.get("document_cookie_present"))
     if cookies is None and doc_cookie is True:
@@ -645,6 +764,7 @@ def session_facts(snapshot: dict[str, Any], identity: str, cookies: bool | None)
         cookies is False
         and snapshot.get("storage_entries") == 0
         and snapshot.get("indexeddb_databases") == 0
+        and snapshot.get("storage_usage_bytes", 0) == 0
     ):
         authenticated, basis = False, "NO_SESSION_STATE"
     else:
@@ -665,13 +785,58 @@ if "dialog" not in info:
         snapshot = js(__ELEMENTS_LIST__) or {}
     except Exception:
         snapshot = {"elements_error": True}
+    snapshot = snapshot if isinstance(snapshot, dict) else {"elements_error": True}
+    # Review I5 E2 — session state is read over CDP, never from page JS (a page can redefine
+    # Storage.prototype.length or indexedDB.databases). Counts only; no content is kept.
+    from urllib.parse import urlsplit
+    parts = urlsplit(str(info.get("url") or ""))
+    host = (parts.hostname or "").lower().rstrip(".")
+    origin = f"{parts.scheme}://{parts.netloc}" if parts.scheme in ("http", "https") and host else ""
+    labels = host.split(".")
+    # The registrable domain, over-approximated as the last two labels: a sibling SSO host
+    # (auth.example.com for docs.example.com) counts; over-inclusion only yields "unknown".
+    site = ".".join(labels[-2:]) if len(labels) >= 2 and not host.replace(".", "").isdigit() else host
     cookies = None
     try:
-        got = cdp("Network.getCookies", urls=[str(info.get("url") or "")])
-        cookies = bool(got.get("cookies")) if isinstance(got, dict) and isinstance(got.get("cookies"), list) else None
+        got = cdp("Network.getAllCookies")
+        listed = got.get("cookies") if isinstance(got, dict) else None
+        if isinstance(listed, list) and site:
+            # Any cookie for the site, on any path or sibling host.
+            cookies = any(
+                isinstance(c, dict) and (lambda d: d == site or d.endswith("." + site))(str(c.get("domain") or "").lower().lstrip(".").rstrip("."))
+                for c in listed
+            )
     except Exception:
         cookies = None
-    info["__van_snapshot__"] = snapshot if isinstance(snapshot, dict) else {"elements_error": True}
+    for key in ("storage_entries", "indexeddb_databases", "storage_usage_bytes"):
+        snapshot[key] = None
+    if origin:
+        try:
+            count = 0
+            for local in (True, False):
+                got = cdp("DOMStorage.getDOMStorageItems", storageId={"securityOrigin": origin, "isLocalStorage": local})
+                entries = got.get("entries") if isinstance(got, dict) else None
+                if not isinstance(entries, list):
+                    raise ValueError("entries")
+                count += len(entries)
+            snapshot["storage_entries"] = count
+        except Exception:
+            pass
+        try:
+            got = cdp("IndexedDB.requestDatabaseNames", securityOrigin=origin)
+            names = got.get("databaseNames") if isinstance(got, dict) else None
+            if isinstance(names, list):
+                snapshot["indexeddb_databases"] = len(names)
+        except Exception:
+            pass
+        try:
+            got = cdp("Storage.getUsageAndQuota", origin=origin)
+            usage = got.get("usage") if isinstance(got, dict) else None
+            if isinstance(usage, (int, float)) and not isinstance(usage, bool):
+                snapshot["storage_usage_bytes"] = int(usage)
+        except Exception:
+            pass
+    info["__van_snapshot__"] = snapshot
     info["__van_cookies__"] = cookies
 info["harness_version"] = "0.1.13"
 print("__VAN_JSON__" + json.dumps(info))
@@ -909,8 +1074,32 @@ OPERATIONS = {
 }
 
 
+FENCE_MAC_CONTEXT = "van-harness-fence/1"
+MIN_FENCE_KEY_BYTES = 32
+
+
+def fence_mac(key: bytes, alias: str, generation: int, holder_id: str) -> str:
+    """HMAC-SHA256 the gateway sends with a fence (review I5 F3); same bytes on both sides."""
+    message = f"{FENCE_MAC_CONTEXT}\n{alias}\n{int(generation)}\n{holder_id}".encode()
+    return hmac.new(key, message, hashlib.sha256).hexdigest()
+
+
+def load_fence_key(path: str) -> bytes | None:
+    """The fence key from ``path`` (surrounding whitespace stripped), or None when unset.
+
+    A configured path that is unreadable or holds fewer than 32 bytes is an error: the
+    caller fails closed rather than running unauthenticated.
+    """
+    if not path:
+        return None
+    key = Path(path).read_bytes().strip()
+    if len(key) < MIN_FENCE_KEY_BYTES:
+        raise ValueError("fence key shorter than 32 bytes")
+    return key
+
+
 class LeaseFence:
-    """Refuse actions under a stale page-lease generation (review I3 MAJOR-3, I4 MINOR-A).
+    """Refuse actions under a stale page-lease generation (review I3 MAJOR-3, I4 MINOR-A, I5).
 
     The gateway's broker increments a profile's lease generation on every acquisition and
     sends the generation an action runs under (``lease_generation`` + ``lease_holder_id``).
@@ -919,40 +1108,90 @@ class LeaseFence:
     still holding a lease the profile has since been re-leased past is not applied to the
     new holder's page.
 
-    Review I4 MINOR-A — the fence works both ways now:
+    Review I4 MINOR-A — the fence works both ways:
 
     * A *mutating* operation (``MUTATING_OPERATIONS``) without a generation is refused
-      (``LEASE_FENCE_REQUIRED``). An unfenced caller can no longer act on a page without
-      advancing the fence, which is how a stale generation used to be re-admitted after an
-      unfenced new holder. Reads may be unfenced; a fenced read is still checked.
+      (``LEASE_FENCE_REQUIRED``). Reads may be unfenced; a fenced read is still checked.
     * The newest generation is persisted per profile under ``VAN_HARNESS_STATE_ROOT``
-      (written and fsynced *before* the action runs), so a Harness restart does not forget
-      it. Unreadable state refuses the action rather than resetting the fence.
+      (written and fsynced *before* the action runs). Unreadable state refuses the action.
+
+    Review I5:
+
+    * F1 — ``admit`` holds the profile's lock from the check until the operation has been
+      applied, so the check is atomic with the apply: once a newer generation has been
+      admitted no older one can still be applying, and an older call that is applying
+      finishes before the newer one is checked.
+    * F2 — every profile that has ever been fenced is listed in a manifest next to the
+      state files, and bootstrap.sh writes an install marker. A state file missing for a
+      listed profile, or a manifest missing while the install marker exists, refuses the
+      call (``LEASE_FENCE_STATE_MISSING``, 503) instead of re-admitting any generation.
+      First boot (empty manifest, or no manifest and no install marker) admits.
+    * F3 — with a key configured every fence must carry ``lease_mac`` =
+      HMAC-SHA256(key, alias, generation, holder); a local caller without the key cannot
+      advance the fence to lock the real holder out. ``require_mac`` without a key (a
+      production worker whose key is missing or unreadable) refuses every fenced call.
 
     Owner interactive input does not travel through this worker: it is the browser stream
     host / control agent path, fenced by the interactive control lease and its control
-    generation (``InteractiveSessionService.assert_may_actuate``). The owner preempts
-    automation; an owner session takes the profile lease, which advances the generation the
-    gateway checks before every automated Harness call.
+    generation (``InteractiveSessionService.assert_may_actuate``).
     """
 
     FILE_PREFIX = "lease-fence-"
+    MANIFEST = "lease-fence-manifest.json"
 
-    def __init__(self, state_root: Path | None = None) -> None:
+    def __init__(
+        self,
+        state_root: Path | None = None,
+        *,
+        key: bytes | None = None,
+        require_mac: bool = False,
+        install_marker: Path | None = None,
+    ) -> None:
         self._lock = threading.Lock()
+        self._profile_locks: dict[str, threading.RLock] = {}
         self._newest: dict[str, tuple[int, str]] = {}
         self._state_root = state_root
+        self._key = key
+        self._require_mac = require_mac or key is not None
+        self._install_marker = install_marker
 
     def _path(self, alias: str) -> Path | None:
         if self._state_root is None:
             return None
         return safe_child(self._state_root, f"{self.FILE_PREFIX}{alias}.json")
 
+    def _manifest_path(self) -> Path | None:
+        return None if self._state_root is None else self._state_root / self.MANIFEST
+
+    def _manifest(self) -> set[str] | None:
+        """Profiles that have a persisted fence; None when there is no manifest."""
+        path = self._manifest_path()
+        if path is None or not path.exists():
+            return None
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            aliases = data["aliases"]
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            raise WorkerError("LEASE_FENCE_STATE_INVALID", 503) from exc
+        if not isinstance(aliases, list) or not all(isinstance(a, str) for a in aliases):
+            raise WorkerError("LEASE_FENCE_STATE_INVALID", 503)
+        return set(aliases)
+
     def _load(self, alias: str) -> tuple[int, str] | None:
         if alias in self._newest:
             return self._newest[alias]
         path = self._path(alias)
-        if path is None or not path.exists():
+        if path is None:
+            return None
+        manifest = self._manifest()
+        if not path.exists():
+            if manifest is None:
+                if self._install_marker is not None and self._install_marker.exists():
+                    # Installed, but the whole fence state is gone: not a first boot.
+                    raise WorkerError("LEASE_FENCE_STATE_MISSING", 503)
+                return None
+            if alias in manifest:
+                raise WorkerError("LEASE_FENCE_STATE_MISSING", 503)
             return None
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
@@ -964,21 +1203,45 @@ class LeaseFence:
         self._newest[alias] = (generation, holder)
         return self._newest[alias]
 
+    @staticmethod
+    def _write_atomic(path: Path, payload: dict[str, Any]) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_name(f".{path.name}.tmp")
+        with open(tmp, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.chmod(tmp, 0o600)
+        os.replace(tmp, path)
+
     def _store(self, alias: str, generation: int, holder: str) -> None:
         path = self._path(alias)
         if path is not None:
             try:
-                path.parent.mkdir(parents=True, exist_ok=True)
-                tmp = path.with_name(f".{path.name}.tmp")
-                with open(tmp, "w", encoding="utf-8") as handle:
-                    json.dump({"profile_alias": alias, "generation": generation, "holder_id": holder}, handle)
-                    handle.flush()
-                    os.fsync(handle.fileno())
-                os.chmod(tmp, 0o600)
-                os.replace(tmp, path)
+                # State first, then the manifest entry: a crash between the two leaves state
+                # without an entry (still enforced), never an entry without state.
+                self._write_atomic(path, {"profile_alias": alias, "generation": generation, "holder_id": holder})
+                manifest = self._manifest() or set()
+                if alias not in manifest:
+                    self._write_atomic(self._manifest_path(), {"schema_version": 1, "aliases": sorted(manifest | {alias})})
             except OSError as exc:
                 raise WorkerError("LEASE_FENCE_STATE_UNWRITABLE", 503) from exc
         self._newest[alias] = (generation, holder)
+
+    def _verify_mac(self, alias: str, generation: int, holder: str, body: dict[str, Any]) -> None:
+        if self._key is None:
+            if self._require_mac:
+                raise WorkerError("LEASE_FENCE_KEY_UNCONFIGURED", 503)
+            return
+        mac = body.get("lease_mac")
+        if not isinstance(mac, str) or not hmac.compare_digest(
+            mac, fence_mac(self._key, alias, generation, holder)
+        ):
+            raise WorkerError("LEASE_FENCE_MAC_INVALID", 403)
+
+    def profile_lock(self, alias: str) -> threading.RLock:
+        with self._lock:
+            return self._profile_locks.setdefault(alias, threading.RLock())
 
     def check(self, alias: str, body: dict[str, Any], mutating: bool = True) -> None:
         raw = body.get("lease_generation")
@@ -991,6 +1254,7 @@ class LeaseFence:
         holder = body.get("lease_holder_id")
         if not isinstance(holder, str) or not holder or len(holder) > 128:
             raise WorkerError("LEASE_HOLDER_REQUIRED", 422)
+        self._verify_mac(alias, raw, holder, body)
         with self._lock:
             newest = self._load(alias)
             if newest is not None:
@@ -1003,13 +1267,37 @@ class LeaseFence:
                     return
             self._store(alias, raw, holder)
 
+    @contextlib.contextmanager
+    def admit(self, alias: str, body: dict[str, Any], mutating: bool = True):
+        """Check the fence and keep the profile locked until the operation has run (I5 F1)."""
+        with self.profile_lock(alias):
+            self.check(alias, body, mutating)
+            yield
+
 
 #: Operations that change the page. Each must carry the lease generation it runs under.
 MUTATING_OPERATIONS = frozenset({"/navigate", "/click", "/fill", "/press", "/scroll", "/upload"})
 #: Reads. Unfenced is allowed; a fenced read is checked like any other call.
 READ_OPERATIONS = frozenset({"/page_info", "/screenshot", "/tabs", "/describe", "/wait"})
 
-FENCE = LeaseFence(HARNESS_STATE_ROOT)
+
+
+def _module_fence() -> LeaseFence:
+    # A production worker (a trust zone is configured) or one told to use a key file must
+    # have a usable key; otherwise every fenced call is refused (fail closed, review I5 F3).
+    try:
+        key = load_fence_key(HARNESS_FENCE_KEY_FILE)
+    except (OSError, ValueError):
+        key = None
+    return LeaseFence(
+        HARNESS_STATE_ROOT,
+        key=key,
+        require_mac=bool(TRUST_ZONE) or bool(HARNESS_FENCE_KEY_FILE),
+        install_marker=HARNESS_FENCE_INSTALL_MARKER,
+    )
+
+
+FENCE = _module_fence()
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -1060,20 +1348,21 @@ class Handler(BaseHTTPRequestHandler):
             domain = safe_domain(body.get("target_domain"))
             if self.path not in MUTATING_OPERATIONS and self.path not in READ_OPERATIONS:
                 raise WorkerError("OPERATION_NOT_ALLOWED", 404)
-            FENCE.check(alias, body, mutating=self.path in MUTATING_OPERATIONS)
-            if self.path == "/page_info":
-                result = page_info_result(alias, domain)
-            elif self.path == "/describe":
-                result = describe(body, alias, domain)
-            elif self.path == "/screenshot":
-                result = screenshot(alias, domain)
-            elif self.path == "/tabs":
-                result = tabs(alias, domain)
-            else:
-                operation = OPERATIONS.get(self.path)
-                if operation is None:
-                    raise WorkerError("OPERATION_NOT_ALLOWED", 404)
-                result = operation(body, alias, domain)
+            # Review I5 F1 — the fence check and the operation run under one profile lock.
+            with FENCE.admit(alias, body, mutating=self.path in MUTATING_OPERATIONS):
+                if self.path == "/page_info":
+                    result = page_info_result(alias, domain)
+                elif self.path == "/describe":
+                    result = describe(body, alias, domain)
+                elif self.path == "/screenshot":
+                    result = screenshot(alias, domain)
+                elif self.path == "/tabs":
+                    result = tabs(alias, domain)
+                else:
+                    operation = OPERATIONS.get(self.path)
+                    if operation is None:
+                        raise WorkerError("OPERATION_NOT_ALLOWED", 404)
+                    result = operation(body, alias, domain)
             self.send_json(200, result)
         except WorkerError as exc:
             self.send_json(exc.status, {"error": exc.code})
@@ -1084,6 +1373,15 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
+    if TRUST_ZONE or HARNESS_FENCE_KEY_FILE:
+        try:
+            if load_fence_key(HARNESS_FENCE_KEY_FILE) is None:
+                raise ValueError("unset")
+        except (OSError, ValueError) as exc:
+            raise SystemExit(
+                "browser harness worker refuses to start without a readable "
+                "VAN_HARNESS_FENCE_KEY_FILE (>= 32 bytes)"
+            ) from exc
     for path in (PROFILE_ROOT, DOWNLOAD_ROOT, SECRET_ROOT, RUNTIME_ROOT, HARNESS_STATE_ROOT):
         path.mkdir(parents=True, exist_ok=True)
     server = ThreadingHTTPServer((BIND, PORT), Handler)

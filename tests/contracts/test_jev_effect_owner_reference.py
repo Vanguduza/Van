@@ -20,6 +20,7 @@ import re
 import shutil
 from pathlib import Path
 
+import pytest
 import yaml
 
 from van_gateway.automation import production_gates
@@ -134,3 +135,56 @@ def test_spoof_with_a_mismatched_pin_is_not_permitted(tmp_path):
     cap, gates = _jev(root)
     assert cap["production_activation_permitted"] is False
     assert "sha256 mismatch" in gates["owner_decision_reference"]["reason"]
+
+
+# ------------------------------------------------------------------ review I5 J1
+#
+# Probe review-i5/probes/jev_ref.py (fbe5502e): case 2, an authorization whose
+# owner_instruction_sha256 is for *different* text than the referenced owner decision file,
+# and case 11, an authorization listing the Jev record in both authorized_paths and
+# excluded_paths, both made jev_browser_effect permitted. The authorization must now pin the
+# same bytes the record pins, and an exclusion wins. A synthetic owner decision and
+# authorization are written into the copy only.
+
+REF = "docs/decisions/OWNER-DECISIONS-20990101-JEV-TEST.md"
+AUTH_ID = "auth-20990101-owner-jev-test"
+
+
+def _setup(tmp_path, **auth_overrides):
+    root = _copy_repo(tmp_path)
+    content = b"# Owner decision (test fixture)\nJev browser effect approved.\n"
+    (root / REF).write_bytes(content)
+    sha = hashlib.sha256(content).hexdigest()
+    auth = {
+        "schema_version": 1, "authorization_id": AUTH_ID, "project": "van", "authority": "OWNER_EXPLICIT",
+        "owner_instruction_sha256": sha, "owner_instruction_record": REF,
+        "authorized_paths": [f"docs/decisions/{JEV}"], "excluded_paths": [], "revoked": False,
+    }
+    auth.update(auth_overrides)
+    (root / "docs/project-state/authorizations" / f"{AUTH_ID}.json").write_text(json.dumps(auth), encoding="utf-8")
+    _spoof(root, sha=sha, auth_id=AUTH_ID)
+    path = root / "docs/decisions" / JEV
+    path.write_text(path.read_text(encoding="utf-8").replace(MISSING_REF, REF), encoding="utf-8")
+    return _jev(root)
+
+
+def test_control_a_bound_authorization_is_permitted(tmp_path):
+    cap, gates = _setup(tmp_path)
+    assert gates["owner_decision_reference"]["status"] == "GREEN", gates["owner_decision_reference"]
+    assert cap["production_activation_permitted"] is True
+
+
+@pytest.mark.parametrize("overrides,reason", [
+    ({"owner_instruction_sha256": hashlib.sha256(b"a DIFFERENT text the owner approved").hexdigest()},
+     "authorization owner_instruction_sha256 does not match the pinned owner decision"),
+    ({"owner_instruction_sha256": None},
+     "authorization owner_instruction_sha256 does not match the pinned owner decision"),
+    ({"excluded_paths": [f"docs/decisions/{JEV}"]}, f"authorization record excludes docs/decisions/{JEV}"),
+    ({"excluded_paths": ["docs/decisions/VAN-JEV-*.yaml  glob exclusion"]}, f"authorization record excludes docs/decisions/{JEV}"),
+    ({"excluded_paths": "docs/decisions"}, "authorization excluded_paths is not a list"),
+])
+def test_probe_cases_2_and_11_are_not_permitted(tmp_path, overrides, reason):
+    cap, gates = _setup(tmp_path, **overrides)
+    assert cap["production_activation_permitted"] is False
+    assert gates["owner_decision_reference"]["status"] == "UNKNOWN"
+    assert gates["owner_decision_reference"]["reason"] == reason
