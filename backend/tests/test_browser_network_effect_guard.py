@@ -279,8 +279,9 @@ async def test_a_shared_worker_cannot_be_started_to_write(g):
 
 
 async def test_frames_created_after_the_guard_are_not_left_paused(g):
-    """The guard cancels its auto-attach when it ends: a cross-origin frame created later
-    runs (a frame left waiting for a debugger would never post its message)."""
+    """Unit G11: the guard stays on for the lease and answers between calls, so a
+    cross-origin frame the page creates after the step is attached, intercepted and let run
+    (a frame left waiting for a debugger would never post its message)."""
     module, rig, _h, _b = g
     result, writes, _seen = await _route(g, "/docs/late_frame")
     assert result.state is StepState.VERIFIED_SUCCESS, result.reasons
@@ -310,9 +311,14 @@ async def test_a_custom_method_is_reported_in_the_closed_vocabulary_only(g):
 
 async def test_a_websocket_open_is_detected_and_goes_to_the_owner(g):
     """Residual, stated: CDP Fetch cannot intercept a WebSocket handshake in this Chromium,
-    so the open is detected (lane 4), not prevented."""
+    so the open is detected (lane 4), not prevented. Review I7 minor 1: it is reported as
+    detected, not blocked, and the page is closed (the egress proxy that would prevent it is
+    unit G12's)."""
+    module, rig, _h, _b = g
     result, writes, _seen = await _route(g, "/docs/websocket")
-    _blocked(result, "WEBSOCKET")
+    assert result.state is StepState.OWNER_TAKEOVER, result.reasons
+    assert "HARNESS_REFUSED:NETWORK_WRITE_DETECTED:WEBSOCKET" in result.reasons, result.reasons
+    assert rig.session.js("location.href") == "about:blank"
     assert writes == []
 
 
@@ -419,7 +425,7 @@ async def test_a_script_without_the_event_stream_refuses_the_action(g):
 # ------------------------------------------------------------------ navigate / scroll
 
 
-async def test_navigate_is_guarded_too(g):
+async def test_navigate_is_guarded_too(g, tmp_path):
     module, rig, harness, _b = g
     rig.session.goto(f"https://{DOMAIN}/docs/link")
     rig.server.log.clear()
@@ -427,14 +433,25 @@ async def test_navigate_is_guarded_too(g):
     from van_gateway.browser.adapters import BrowserAdapterError
 
     with harness_lease_fence(HarnessLeaseFence(task.profile_alias, task.task_id, 1)):
-        with pytest.raises(BrowserAdapterError) as exc:
-            await harness.navigate(task, f"https://{DOMAIN}/docs/onload_pay")
-    assert (exc.value.code, exc.value.detail) == ("BROWSER_HARNESS_REFUSED", "NETWORK_WRITE_BLOCKED:POST")
+        # Owner answer after review I7 ("Block silently, continue"): a read-only task has not
+        # acted yet, so the page's load-time write is background: failed, reported by kind,
+        # and the navigation stands.
+        landed = await harness.navigate(task, f"https://{DOMAIN}/docs/onload_pay")
+    assert landed["url"].endswith("/docs/onload_pay")
+    assert landed["network_background_writes_dropped"] == ["POST"]
     time.sleep(0.5)
     assert rig.server.writes() == []
     with harness_lease_fence(HarnessLeaseFence(task.profile_alias, task.task_id, 1)):
         info = await harness.navigate(task, f"https://{DOMAIN}/docs/link")
     assert info["url"].endswith("/docs/link")
+    # A mutating task gets no such exception: /api/pay is outside its /docs/ scope.
+    other = _task(mutating=True).model_copy(update={"task_id": "task-2"})
+    keyed = _keyed(g, tmp_path)
+    with harness_lease_fence(HarnessLeaseFence(other.profile_alias, other.task_id, 2)):
+        with pytest.raises(BrowserAdapterError) as exc:
+            await keyed.navigate(other, f"https://{DOMAIN}/docs/onload_pay")
+    assert (exc.value.code, exc.value.detail) == ("BROWSER_HARNESS_REFUSED", "NETWORK_WRITE_BLOCKED:OUT_OF_SCOPE_WRITE")
+    assert rig.server.writes() == []
 
 
 # ------------------------------------------------------------------ /assignments and /step
@@ -533,7 +550,9 @@ async def test_the_mutating_flag_is_task_truth_and_defaults_to_non_mutating(tmp_
     assert refused.status_code == 422  # policy decides admission: mutation forbidden on this profile
     assert (await api._load_task(plain["task_id"])).mutating is False
     assert (await api._load_task(mut.json()["task_id"])).mutating is True
-    await store.execute("UPDATE browser_tasks SET mutating = 7 WHERE task_id = ?", (plain["task_id"],))
+    from conftest_automation import rewrite_task_truth
+
+    await rewrite_task_truth(store, "UPDATE browser_tasks SET mutating = 7 WHERE task_id = ?", (plain["task_id"],))
     assert (await api._load_task(plain["task_id"])).mutating is False  # only 1 admits
 
 

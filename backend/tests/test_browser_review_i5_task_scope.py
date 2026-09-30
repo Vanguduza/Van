@@ -136,7 +136,7 @@ def _seen(pw):
     return pw.call(lambda page, cdp: page.evaluate("window.__van || []"))
 
 
-async def _route(pw, harness, path, *, task=None, **kw):
+async def _route(pw, harness, path, *, task=None, keep=False, **kw):
     _goto(pw, path)
     router = tr.make_router(target_resolver=HarnessTargetResolver(harness), executor=HarnessActionExecutor(harness),
                             semantic_fallback=kw.pop("stagehand", tr.FakeStagehand(None)), jev_client=None)
@@ -144,7 +144,12 @@ async def _route(pw, harness, path, *, task=None, **kw):
     step.task = task or _task()
     with harness_lease_fence(HarnessLeaseFence("public_research", step.task.task_id, 1)):
         result = await router.route(step)
-    return result, _seen(pw)
+    seen = _seen(pw)
+    # Unit G11: each route is one page lease, given back as /step gives it back (the Harness
+    # ends its network guard), so the next route's navigation is not judged by this one's scope.
+    if not keep:  # ``keep``: the caller reads the page afterwards (and gives the lease back itself)
+        await harness.release_page(profile_alias="public_research", holder_id=step.task.task_id, generation=1)
+    return result, seen
 
 
 def _det(op, loc=None, key=None):
@@ -223,7 +228,9 @@ async def test_creation_path_records_scope_and_legacy_rows_fail_closed(tmp_path)
         row = await store.fetchone("SELECT scope_json FROM browser_tasks WHERE task_id = ?", (default["task_id"],))
         loaded = await api._load_task(declared["task_id"])
         # A pre-migration row with no scope stays without one: fail closed.
-        await store.execute("UPDATE browser_tasks SET scope_json = NULL WHERE task_id = ?", (default["task_id"],))
+        from conftest_automation import rewrite_task_truth
+
+        await rewrite_task_truth(store, "UPDATE browser_tasks SET scope_json = NULL WHERE task_id = ?", (default["task_id"],))
         legacy = await api._load_task(default["task_id"])
     assert json.loads(row["scope_json"])["entries"] == [
         {"origin": f"https://{t.DOMAIN}", "path_prefix": None, "source": "TARGET_DOMAIN"}]
@@ -322,7 +329,9 @@ async def test_assignment_paths_apply_the_scope_rule(tmp_path):
             extra = {"scope": declared} if declared else {}
             task = await t._make_task(ac, strategy="HARNESS", autonomy_tier="L1_HARNESS_DETERMINISTIC", **extra)
             if scope_json_sql is not None:
-                await store.execute("UPDATE browser_tasks SET scope_json = NULL WHERE task_id = ?", (task["task_id"],))
+                from conftest_automation import rewrite_task_truth
+
+                await rewrite_task_truth(store, "UPDATE browser_tasks SET scope_json = NULL WHERE task_id = ?", (task["task_id"],))
             r = await ac.post("/v1/browser/assignments", headers=t.HEADERS, json={
                 "task_id": task["task_id"], "turn_id": "t1", "command_id": "cmd-owner-1", "goal": "read",
                 "allowed_domains": [t.DOMAIN], "action_class_ceiling": "A2", "autonomy_tier": "L1_HARNESS_DETERMINISTIC",
@@ -519,7 +528,7 @@ async def test_major4_form_context_is_reported_and_judged(chromium):
 
 async def test_major4_fill_in_a_form_goes_to_the_bound_field(chromium):
     _m, pw, harness = chromium
-    result, seen = await _route(pw, harness, "/i5/forms", action_class_ceiling="A3",
+    result, seen = await _route(pw, harness, "/i5/forms", action_class_ceiling="A3", keep=True,
                                 **_det("fill", "#q", "secretref://browser/q"))
     task_class = result.reasons
     value = pw.call(lambda page, cdp: page.evaluate("document.getElementById('q').value"))
@@ -527,9 +536,10 @@ async def test_major4_fill_in_a_form_goes_to_the_bound_field(chromium):
     # A3 task it fills the bound field.
     assert result.state is StepState.POLICY_REFUSED and value == "", task_class
     a3 = _task().model_copy(update={"action_class": "A3"})
-    result, seen = await _route(pw, harness, "/i5/forms", task=a3, action_class_ceiling="A3",
+    result, seen = await _route(pw, harness, "/i5/forms", task=a3, action_class_ceiling="A3", keep=True,
                                 **_det("fill", "#q", "secretref://browser/q"))
     value = pw.call(lambda page, cdp: page.evaluate("document.getElementById('q').value"))
+    await harness.release_page(profile_alias="public_research", holder_id=a3.task_id, generation=1)
     assert result.state is StepState.VERIFIED_SUCCESS and value == "install guide", result.reasons
     assert _money(seen) == []
 

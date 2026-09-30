@@ -1,7 +1,9 @@
-"""Browser actions stay inside the task's own truth. This implements the integrator's
-interpretation (section 3 of docs/decisions/OWNER-DECISION-20260930-BROWSER-TASK-SCOPE.md) of
-the owner's 2026-09-30 answer; that interpretation is PENDING owner confirmation in the
-repository's records and is not itself an owner decision.
+"""Browser actions stay inside the task's own truth. This implements the task-scope rule the
+owner confirmed on 2026-09-30 ("Yes, confirmed": the confirmation block of
+docs/decisions/OWNER-DECISION-20260930-BROWSER-TASK-SCOPE.md, authorization
+``auth-20260930-owner-explicit-task-scope-confirmation``): each browser task's recorded scope
+decides what automation may act on, and anything outside it goes to the owner. Section 3 of
+that record (the integrator's reading, then pending) is what the owner confirmed.
 
 The owner rejected a fixed allowlist ("I do not want to build a fixed allowlist, pages should
 [be] relevant to the task truth"). A classifier cannot prove a click on an arbitrary page is

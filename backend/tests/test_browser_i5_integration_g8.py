@@ -176,6 +176,11 @@ async def test_the_profile_lock_covers_the_bound_click(chromium, tmp_path):
     real = module.run_harness
 
     def slow(alias, script, extra=None):
+        # Unit G11: the lease guard's own service scripts (its thread between calls, and ending
+        # generation 1's guard when generation 2 arrives) are not operations; not counted.
+        role = json.loads((extra or {}).get("VAN_BH_NETGUARD") or "{}").get("role")
+        if role in ("tick", "end"):
+            return real(alias, script, extra)
         bound = "_van_bind(" in script and "click_at_xy" in script
         events.append("start:" + ("bound-click" if bound else "other"))
         if bound:
@@ -206,4 +211,8 @@ async def test_the_profile_lock_covers_the_bound_click(chromium, tmp_path):
     assert events == ["start:bound-click", "end:bound-click"] + ["start:other", "end:other"] * 3, events
     assert post("/click", locator="#plain", binding=plain["binding"], lease_generation=1,
                 lease_holder_id="task-a") == (409, "LEASE_GENERATION_STALE")
-    assert _seen(pw) == ["benign:plain"]
+    # Unit G11 (review I7 MAJOR-1): generation 2 reaching the worker ended generation 1's
+    # network guard, which froze generation 1's page (about:blank) before generation 2 ran. The
+    # generation-1 click itself answered 200, which it does only after its activation was seen
+    # (TARGET_NOT_ACTIVATED otherwise).
+    assert pw.call(lambda page, cdp: page.url) == "about:blank"

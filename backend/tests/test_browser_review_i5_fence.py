@@ -95,6 +95,12 @@ class Worker:
     def click(self, locator, gen, holder, key=None, **extra):
         if key is not None:
             extra["lease_mac"] = harness_fence_mac(key, "public_research", gen, holder)
+            # Unit G11: the worker checks the network guard's effect MAC for every mutating
+            # operation itself (it was checked inside the real /click this fake replaces).
+            from van_gateway.browser.adapters import harness_effect_mac, harness_scope_digest
+
+            extra.setdefault("effect_mac", harness_effect_mac(key, "public_research", gen, holder, "", False,
+                                                              harness_scope_digest(None)))
         return self.post("/click", locator=locator, lease_generation=gen, lease_holder_id=holder, **extra)
 
 

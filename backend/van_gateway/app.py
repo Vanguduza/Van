@@ -579,6 +579,9 @@ def create_app() -> FastAPI:
         ),
     )
     browser.interaction_router = browser_interaction
+    # Unit G11 (review I7 MAJOR-1) — every page lease the browser fabric gives back ends the
+    # Harness's network guard for it: the page is frozen, then interception is removed.
+    browser.broker.page_release_hook = getattr(automation_health.harness, "release_page", None)
 
     watch_runner = WatchRunner(
         goals,

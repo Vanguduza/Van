@@ -85,8 +85,8 @@ class CreateTaskBody(BaseModel):
     #: intentions while the real execution sits in browser_tasks.
     mission_id: str | None = None
     inputs: dict[str, Any] = Field(default_factory=dict)
-    #: The integrator's interpretation (PENDING owner confirmation; docs/decisions/OWNER-
-    #: DECISION-20260930-BROWSER-TASK-SCOPE.md section 3) of the owner's 2026-09-30 answer —
+    #: The owner-confirmed task-scope rule (docs/decisions/OWNER-DECISION-20260930-BROWSER-
+    #: TASK-SCOPE.md, confirmation block; auth-20260930-owner-explicit-task-scope-confirmation) —
     #: the pages this task may act on, as URL prefixes (``https://host[:port][/path/]``), each inside ``target_domain``. Omitted:
     #: the task's ``target_domain`` origin is recorded. See ``browser/task_scope.py``.
     scope: list[str] | None = Field(default=None, max_length=32)
@@ -194,8 +194,9 @@ class BrowserApi:
             raise HTTPException(status_code=503, detail="BROWSER_FABRIC_DISABLED")
 
     async def _task_scope(self, row) -> TaskScope | None:
-        """Task-scope rule (integrator's interpretation of the owner's 2026-09-30 answer,
-        pending confirmation) — the scope in the task's truth: what was
+        """Task-scope rule (owner-confirmed 2026-09-30: docs/decisions/OWNER-DECISION-20260930-
+        BROWSER-TASK-SCOPE.md, confirmation block; auth-20260930-owner-explicit-task-scope-
+        confirmation) — the scope in the task's truth: what was
         recorded at creation, widened by the domain the owner approved for *this* task.
 
         Review I6 m1: only the approved *delta* widens it — the ``allowed_domain`` of the
@@ -321,6 +322,9 @@ class BrowserApi:
         )
         lease_ref = None if row is None else row["lease_holder"]
         if lease_ref:
+            # Unit G11 (review I7 MAJOR-1): the Harness freezes the lease's page and removes its
+            # network interception before the lease is dropped.
+            await self.broker.release_page(profile_alias=task.profile_alias, lease_id=lease_ref)
             await self.store.execute(
                 "UPDATE browser_profiles SET lease_holder = NULL, lease_expires_at_ms = NULL, "
                 "updated_at_ms = ? WHERE profile_alias = ? AND lease_holder = ?",

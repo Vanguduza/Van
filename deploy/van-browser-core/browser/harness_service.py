@@ -141,6 +141,52 @@ def resolve_upload(file_ref: Any) -> Path:
     return path
 
 
+def merge_disable_features(flags: list[str] | tuple[str, ...]) -> list[str]:
+    """Chromium honours only the *last* ``--disable-features`` (review I7 minor 4): every one is
+    merged, in order and without duplicates, into a single flag at the first one's place."""
+    out: list[str | None] = []
+    features: list[str] = []
+    slot: int | None = None
+    for flag in flags:
+        if flag.startswith("--disable-features="):
+            for name in flag.split("=", 1)[1].split(","):
+                name = name.strip()
+                if name and name not in features:
+                    features.append(name)
+            if slot is None:
+                slot = len(out)
+                out.append(None)
+            continue
+        out.append(flag)
+    if slot is not None:
+        out[slot] = "--disable-features=" + ",".join(features)
+    return [flag for flag in out if flag is not None]
+
+
+def chromium_argv(profile_dir: Path, extra: tuple[str, ...] = ()) -> list[str]:
+    """The Harness-owned Chromium's command line — the one place it is assembled.
+
+    ``extra`` is for launch flags a later change adds in code (an egress proxy's
+    ``--proxy-server``, for example); a ``--disable-features`` among them is merged, never
+    appended, so it cannot switch the guard's features back on."""
+    flags = [
+        "--headless=new",
+        "--remote-debugging-address=127.0.0.1",
+        "--remote-debugging-port=0",
+        f"--user-data-dir={profile_dir}",
+        "--no-first-run",
+        "--no-default-browser-check",
+        "--disable-dev-shm-usage",
+        "--disable-background-networking",
+        "--disable-component-update",
+        # Network-effect guard (unit G9c): keepalive requests and shared workers otherwise
+        # escape CDP Fetch interception.
+        *NETWORK_GUARD_CHROMIUM_FLAGS,
+        *extra,
+    ]
+    return [CHROMIUM, *merge_disable_features(flags), "about:blank"]
+
+
 class ChromeSession:
     def __init__(self, alias: str) -> None:
         self.alias = alias
@@ -162,22 +208,7 @@ class ChromeSession:
             active = self.profile_dir / "DevToolsActivePort"
             active.unlink(missing_ok=True)
             self.process = subprocess.Popen(
-                [
-                    CHROMIUM,
-                    "--headless=new",
-                    "--remote-debugging-address=127.0.0.1",
-                    "--remote-debugging-port=0",
-                    f"--user-data-dir={self.profile_dir}",
-                    "--no-first-run",
-                    "--no-default-browser-check",
-                    "--disable-dev-shm-usage",
-                    "--disable-background-networking",
-                    "--disable-component-update",
-                    # Network-effect guard (unit G9c): keepalive requests and shared workers
-                    # otherwise escape CDP Fetch interception.
-                    *NETWORK_GUARD_CHROMIUM_FLAGS,
-                    "about:blank",
-                ],
+                chromium_argv(self.profile_dir),
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
@@ -1317,7 +1348,9 @@ def _van_bind(binding, scope):
     el = (_van_call(obj, _PREP_FN).get("value") or {}).get("element")
     if not isinstance(el, dict):
         raise _VanRefused("TARGET_BINDING_LOST")
-    violation = _van_scope_violation(scope, _van_frame_url())
+    # Review I7 minor 6: judged by the committed frame URL and by the document's last
+    # cross-document commit (a replaceState() into the scope does not move the document).
+    violation = _van_page_violation(scope)
     if violation:
         raise _VanRefused(violation)
     if _van_digest(el) != binding["digest"]:
@@ -1367,10 +1400,6 @@ def _van_finish_after_net(guard, net):
     return done
 
 def _van_emit(payload):
-    # A network guard handed to the landing check travels with the result (unit G9c).
-    handoff = globals().get("_VAN_GUARD_HANDOFF")
-    if handoff:
-        payload = {**payload, "__guard__": handoff[-1]}
     print("__VAN_JSON__" + json.dumps(payload))
 """
 
@@ -1378,9 +1407,44 @@ def _van_emit(payload):
 #
 # Owner decision 2026-09-30 (answer to review I6 M4, "Network-effect guard"): a page can move
 # money inside a JavaScript handler behind any label ("Next", "Go"), and no check before the
-# click can see it. So while the Harness acts, it intercepts the page's network requests and
-# fails every *write* unless the task is admitted as mutating; a blocked write ends the step
-# in lane 4 (owner takeover) with ``NETWORK_WRITE_BLOCKED:<kind>``.
+# click can see it. So the Harness intercepts the page's network requests and fails every
+# *write* unless the task is admitted as mutating; a blocked write goes to the owner (lane 4,
+# ``NETWORK_WRITE_BLOCKED:<kind>``).
+#
+# Unit G11 (review I7 MAJOR-1) — the guard lives as long as the task's page lease, not as long
+# as one action. Before G11 it was enabled around each action and disabled ~1.8 s later, and a
+# write the page issued after that (a 2.5 s or 6 s timer, a retry after the block, a service
+# worker's or dedicated worker's delayed fetch, a popup's timer) reached the server. Now:
+#
+#   * The first fenced call of a lease starts the guard; every later script of that lease
+#     (actions, reads, the landing check) adopts it, and between calls the worker's guard
+#     thread (``NetGuardRegistry``) keeps servicing it: it answers paused requests every
+#     ``NETGUARD_TICK_SECONDS`` while the profile is idle. Interception (page, browser-target,
+#     out-of-process iframe, service-worker and worker sessions) is never disabled while the
+#     lease holds the profile. A request nobody answers stays paused (measured by G9c: it never
+#     reaches the server), so a lost tick fails closed.
+#   * Outside an action window every write is failed. Inside a task admitted as mutating, only
+#     writes inside the task scope pass, and only during an action window (the input dispatch,
+#     its settle, and the landing check that follows it).
+#   * Any blocked write, a detected WebSocket, or a guard that stopped being trustworthy
+#     freezes the page before anything is handed to the owner: popups and other tabs are
+#     closed, the origin's service workers are unregistered and stopped, and the main frame is
+#     navigated to about:blank (which ends its timers and dedicated workers). The lease then
+#     refuses every further action with that code until it is released.
+#   * The lease ends through ``/release`` (the gateway calls it wherever a page lease is given
+#     back), through a newer lease generation reaching the worker, or after
+#     ``NETGUARD_IDLE_SECONDS`` without a call. Each ends the guard the same way: the page is
+#     frozen, then interception is removed. Nothing the lease started keeps running
+#     unintercepted.
+#
+# Owner answer 2026-09-30 after review I7 ("Block silently, continue (Recommended)"): for a
+# task *not* admitted as mutating, a write blocked before the task's first automated input
+# event (click, fill, key press, scroll, upload — a /navigate is not one) is background traffic
+# no action triggered, such as load-time analytics. It is still failed, but it is dropped: the
+# closed-vocabulary kind is logged (``NETWORK_BACKGROUND_WRITE_DROPPED:<kind>``, no URL, body or
+# header), the page is not frozen and the task continues. Every write after the first
+# automated input event of the lease — a delayed timer, a retry, a worker's write — goes to
+# the owner and freezes the page. A task admitted as mutating gets no such exception.
 #
 # Mechanism (Chromium 1194, measured by unit G9c against a local HTTPS server):
 #   * ``Fetch.enable`` (all URLs, request stage) on the page session, and on a browser-target
@@ -1389,23 +1453,12 @@ def _van_emit(payload):
 #   * ``Target.autoAttachRelated(page, waitForDebuggerOnStart)``: every out-of-process
 #     iframe and service worker related to the page is attached — new ones *paused* until
 #     their own ``Fetch.enable`` is in place — so their requests are intercepted too.
-#     Dedicated-worker requests arrive on the page session. Without this, a cross-origin
-#     iframe's POST and a service worker's own fetch escaped page-session interception.
-#   * Chromium launch flags (``ChromeSession.ensure``): ``KeepAliveInBrowserMigration`` off
-#     (with it on, sendBeacon, ``fetch(..., {keepalive})`` and ``<a ping>`` from a page a
-#     service worker controls bypassed every Fetch session) and ``SharedWorker`` off (a
-#     shared worker is not a related target and its requests escaped). Chromium honours
-#     only the last ``--disable-features``: this must stay the launch's only one.
-#   * A request answered by nobody stays paused: ``Fetch.disable`` / detaching the session
-#     does not release it (measured: it never reaches the server). A lost event therefore
-#     fails closed.
-# The guard is enabled before the action's input is dispatched and refuses the action
-# (``NETWORK_GUARD_UNAVAILABLE``) when any part cannot be enabled. The input is dispatched
-# on a helper thread while this thread answers paused requests (a handler's synchronous XHR
-# would otherwise deadlock the dispatch), then the guard stays on for a settle window:
-# until the network is idle (no in-flight request and no network event for
-# NETWORK_GUARD_IDLE_MS) or NETWORK_GUARD_SETTLE_MAX_MS after the input returned, whichever
-# comes first.
+#     Dedicated-worker requests arrive on the page session.
+#   * Chromium launch flags (``chromium_argv``): ``KeepAliveInBrowserMigration`` off (with it
+#     on, sendBeacon, ``fetch(..., {keepalive})`` and ``<a ping>`` from a page a service worker
+#     controls bypassed every Fetch session) and ``SharedWorker`` off (a shared worker is not a
+#     related target and its requests escaped). Chromium honours only the last
+#     ``--disable-features``, so ``chromium_argv`` merges every one into a single flag.
 #
 # Write classification (anything else is a read and continues):
 #   method other than GET/HEAD/OPTIONS                  -> POST | PUT | PATCH | DELETE | OTHER_METHOD
@@ -1416,12 +1469,12 @@ def _van_emit(payload):
 #   a main-frame navigation outside the task scope       -> NAVIGATION_OUT_OF_SCOPE
 #   a popup / new-window document                        -> POPUP
 #   a write from an out-of-process (cross-site) iframe   -> CROSS_ORIGIN_FRAME
-#   a WebSocket open                                     -> WEBSOCKET (detected, see below)
-# A task admitted as mutating may write to URLs inside its task scope only; any other write
-# is blocked as OUT_OF_SCOPE_WRITE (cross-origin frames and popups stay blocked).
+#   a write by a mutating task outside its scope         -> OUT_OF_SCOPE_WRITE
 # WebSocket handshakes are not interceptable by CDP Fetch in this Chromium (measured), so a
-# WebSocket opened during the action is detected (``Network.webSocketCreated``) and ends the
-# step in lane 4, but its handshake is not prevented.
+# WebSocket open is *detected* (``Network.webSocketCreated``), reported as
+# ``NETWORK_WRITE_DETECTED:WEBSOCKET`` (review I7 minor 1: it was not blocked, so it is not
+# called blocked), and the page is closed at once. Preventing the handshake is the egress
+# proxy the owner chose after review I7 (unit G12), not this guard.
 # The refusal carries only the closed-vocabulary kind: never a URL, body or header.
 NETWORK_GUARD_IDLE_MS = 500
 NETWORK_GUARD_SETTLE_MAX_MS = 2000
@@ -1433,18 +1486,70 @@ NETWORK_WRITE_KINDS = frozenset({
     "FORM_SUBMIT", "NAVIGATION_OUT_OF_SCOPE", "POPUP", "CROSS_ORIGIN_FRAME", "WEBSOCKET",
     "OUT_OF_SCOPE_WRITE",
 })
+#: Kinds the guard can see but not stop (reported as NETWORK_WRITE_DETECTED:<kind>).
+NETWORK_DETECTED_KINDS = frozenset({"WEBSOCKET"})
 NETWORK_REFUSALS = frozenset({"NETWORK_GUARD_UNAVAILABLE", "NETWORK_GUARD_OVERFLOW"})
-#: Chromium flags the guard depends on (see above). Added to ChromeSession's launch.
+#: Codes after which the page has been frozen and the lease refuses further actions.
+NETWORK_FREEZE_PREFIXES = ("NETWORK_WRITE_BLOCKED", "NETWORK_WRITE_DETECTED", "NETWORK_GUARD_")
+#: Chromium features the guard depends on being off (see above). ``chromium_argv`` merges
+#: them, with any other disabled feature, into the launch's single --disable-features.
+NETWORK_GUARD_DISABLED_FEATURES = ("KeepAliveInBrowserMigration", "SharedWorker")
 NETWORK_GUARD_CHROMIUM_FLAGS = (
-    "--disable-features=KeepAliveInBrowserMigration",
+    "--disable-features=" + ",".join(NETWORK_GUARD_DISABLED_FEATURES),
+    # Belt and braces: the Blink runtime switch for the same feature (both measured to remove
+    # the SharedWorker constructor in Chromium 1194).
     "--disable-blink-features=SharedWorker",
 )
+#: Unit G11 — how long one guard-service script answers paused requests, the pause between
+#: two of them, and how long a lease may go without a call before its page is frozen.
+NETGUARD_TICK_SECONDS = 0.4
+NETGUARD_TICK_PAUSE_SECONDS = 0.05
+NETGUARD_IDLE_SECONDS = float(os.getenv("VAN_HARNESS_GUARD_IDLE_SECONDS", "900"))
+NETGUARD_TICK_FAILURE_LIMIT = 20
 
 NETWORK_GUARD_PY = r"""
 import threading as _ng_threading, time as _ng_time
 
 _NG_READ = ("GET", "HEAD", "OPTIONS")
 _NG_METHODS = ("POST", "PUT", "PATCH", "DELETE")
+_NG_DETECTED = ("WEBSOCKET",)
+
+def _van_nav_doc_url():
+    # Review I7 minor 6 — the URL the current document was created for (its cross-document
+    # commit), read in a CDP isolated world: history.pushState/replaceState rewrite the frame
+    # URL (Page.getFrameTree, document.URL) but not the navigation timing entry.
+    try:
+        ctx = _van_world()
+        r = cdp("Runtime.evaluate", contextId=ctx, returnByValue=True,
+                expression="(performance.getEntriesByType('navigation')[0] || {}).name || ''")
+        return str(((r.get("result") or {}).get("value")) or "")
+    except Exception:
+        return ""
+
+def _van_doc_url():
+    g = globals().get("_VAN_NET")
+    if g is not None:
+        if not g.running:
+            try:
+                g.pump()
+            except Exception:
+                pass
+        if g.doc_url:
+            return g.doc_url
+    return _van_nav_doc_url()
+
+def _van_page_violation(scope, what="PAGE"):
+    # The page is judged by the committed frame URL *and* by the last cross-document commit
+    # (Page.frameNavigated, tracked separately from Page.navigatedWithinDocument): a document
+    # outside the scope that replaceState()s its URL into the scope is still outside it.
+    frame = _van_frame_url()
+    violation = _van_scope_violation(scope, frame, what)
+    if violation:
+        return violation
+    doc = _van_doc_url()
+    if doc and doc != "about:blank" and frame != "about:blank":
+        return _van_scope_violation(scope, doc, what)
+    return None
 
 class _VanNetGuard:
     def __init__(self, policy):
@@ -1455,21 +1560,31 @@ class _VanNetGuard:
         self.browser_sid = None
         self.main_frame = None
         self.blocked = []
+        self.detected = []
+        self.dropped = []
         self.broken = None
+        self.error = None
         self.form_frames = set()
         self.inflight = set()
+        self.registrations = set()
         self.last = _ng_time.monotonic()
         self.enabled_page = False
+        self.acted = False
+        self.window = False
+        self.running = False
+        self.freeze_due = False
+        self.frozen = False
+        self.freezing = False
+        self.doc_url = None
 
     def _in_scope(self, url):
         return _van_scope_violation(self.scope, url, "WRITE") is None
 
     def export(self):
-        # Handed from an action script to the landing check that follows it: interception
-        # stays enabled in between (requests made then wait, paused, for the next script).
         return {"browser_sid": self.browser_sid, "main_frame": self.main_frame,
                 "children": {k: list(v) for k, v in self.children.items()},
-                "form_frames": sorted(f for f in self.form_frames if isinstance(f, str))}
+                "form_frames": sorted(f for f in self.form_frames if isinstance(f, str)),
+                "acted": self.acted, "frozen": self.frozen, "doc_url": self.doc_url}
 
     def adopt(self, state):
         try:
@@ -1477,9 +1592,12 @@ class _VanNetGuard:
             self.main_frame = str(state["main_frame"])
             self.children = {str(k): (v[0], str(v[1])) for k, v in dict(state["children"]).items()}
             self.form_frames = set(state.get("form_frames") or [])
+            self.acted = state.get("acted") is True
+            self.frozen = state.get("frozen") is True
+            self.doc_url = state.get("doc_url") if isinstance(state.get("doc_url"), str) else None
             self.enabled_page = True
-            # Still the same page. Interception was never disabled (nothing is re-enabled:
-            # the requests paused since the action script ended are in the event buffer).
+            # Still the same page. Interception was never disabled: the requests paused since
+            # the last script are waiting in the event buffer.
             if cdp("Page.getFrameTree")["frameTree"]["frame"]["id"] != self.main_frame:
                 raise ValueError("frame")
         except Exception:
@@ -1488,8 +1606,10 @@ class _VanNetGuard:
 
     def start(self):
         try:
-            drain_events()
+            earlier = drain_events()
             self.main_frame = cdp("Page.getFrameTree")["frameTree"]["frame"]["id"]
+            for ev in earlier:  # the document's own commit, if the buffer still holds it
+                self._track_commit(ev)
             cdp("Fetch.enable", patterns=[{"urlPattern": "*"}])
             self.enabled_page = True
             self.browser_sid = cdp("Target.attachToBrowserTarget")["sessionId"]
@@ -1500,8 +1620,8 @@ class _VanNetGuard:
         except Exception:
             self.stop()
             raise _VanRefused("NETWORK_GUARD_UNAVAILABLE")
-        # Existing related targets (out-of-process iframes, service workers) attach now; the
-        # input is not dispatched until each has its own interception.
+        # Existing related targets (out-of-process iframes, service workers) attach now; no
+        # input is dispatched until each has its own interception.
         deadline = _ng_time.monotonic() + 1.0
         quiet_since = _ng_time.monotonic()
         seen = -1
@@ -1522,6 +1642,8 @@ class _VanNetGuard:
         if self.broken:
             self.stop()
             raise _VanRefused(self.broken)
+        if self.doc_url is None:
+            self.doc_url = _van_nav_doc_url() or None
 
     def _answer(self, sid, rid, kind):
         try:
@@ -1546,7 +1668,11 @@ class _VanNetGuard:
             if rtype != "Document":
                 return None  # the browser's own traffic; page-originated requests pause on page sessions
             if p.get("frameId") != self.main_frame:
-                return "POPUP"
+                if not self._subframe(p.get("frameId")):
+                    return "POPUP"
+                # A child frame of this page navigating (the browser session sees an
+                # out-of-process iframe's document request): judged like any request.
+                origin_kind = "iframe"
         kind = None
         if method not in _NG_READ:
             kind = method if method in _NG_METHODS else "OTHER_METHOD"
@@ -1564,9 +1690,40 @@ class _VanNetGuard:
             return None
         if origin_kind == "iframe":
             return "CROSS_ORIGIN_FRAME"
-        if self.mutating:
+        if self.mutating and self.window:
+            # Admitted as mutating: in-scope writes, during an action window only.
             return None if self._in_scope(url) else "OUT_OF_SCOPE_WRITE"
         return kind
+
+    def _subframe(self, frame_id):
+        # Unit G11: with the guard on for the whole lease, a frame the page adds between two
+        # actions is not a popup. A frame in this page's own frame tree is a child frame.
+        try:
+            stack = [cdp("Page.getFrameTree")["frameTree"]]
+        except Exception:
+            return False
+        while stack:
+            node = stack.pop()
+            if (node.get("frame") or {}).get("id") == frame_id:
+                return frame_id != self.main_frame
+            stack.extend(node.get("childFrames") or [])
+        return False
+
+    def _record(self, kind):
+        if not self.mutating and not self.acted and kind not in _NG_DETECTED:
+            # Owner answer after review I7 ("Block silently, continue"): background traffic of a
+            # read-only task before its first automated input. Failed, logged, not escalated.
+            self.dropped.append(kind)
+            return
+        (self.detected if kind in _NG_DETECTED else self.blocked).append(kind)
+        self.freeze_due = True
+
+    def _track_commit(self, ev):
+        if ev.get("method") != "Page.frameNavigated":
+            return
+        frame = (ev.get("params") or {}).get("frame") or {}
+        if frame.get("id") == self.main_frame and not frame.get("parentId"):
+            self.doc_url = str(frame.get("url") or "")
 
     def _attached(self, ev):
         p = ev.get("params") or {}
@@ -1595,6 +1752,7 @@ class _VanNetGuard:
             ok = False  # a target kind whose requests this guard cannot see: stays paused
         if not ok:
             self.broken = self.broken or "NETWORK_GUARD_UNAVAILABLE"
+            self.freeze_due = True
             return
         try:
             cdp("Runtime.runIfWaitingForDebugger", session_id=sid)
@@ -1612,18 +1770,31 @@ class _VanNetGuard:
             self.last = now
             kind = self.classify(ev)
             if kind:
-                self.blocked.append(kind)
+                self._record(kind)
             self._answer(sid, p.get("requestId"), kind)
+        elif m == "Page.frameNavigated":
+            self._track_commit(ev)
         elif m == "Page.frameRequestedNavigation":
             self.last = now
             if str(p.get("reason") or "").startswith("formSubmission"):
                 self.form_frames.add(p.get("frameId"))
+        elif m == "Page.javascriptDialogOpening":
+            if self.freezing:
+                try:
+                    cdp("Page.handleJavaScriptDialog", accept=True)
+                except Exception:
+                    pass
+        elif m == "ServiceWorker.workerRegistrationUpdated":
+            for reg in p.get("registrations") or []:
+                scope = str((reg or {}).get("scopeURL") or "")
+                if scope and not (reg or {}).get("isDeleted"):
+                    self.registrations.add(scope)
         elif m == "Network.webSocketCreated":
             self.last = now
             url = str(p.get("url") or "")
             http_url = ("https" + url[3:]) if url.startswith("wss") else (("http" + url[2:]) if url.startswith("ws") else url)
-            if not (self.mutating and self._in_scope(http_url)) or self.children.get(sid, (None, ""))[1] == "iframe":
-                self.blocked.append("WEBSOCKET")
+            if not (self.mutating and self.window and self._in_scope(http_url)) or self.children.get(sid, (None, ""))[1] == "iframe":
+                self._record("WEBSOCKET")
         elif m == "Network.requestWillBeSent":
             self.last = now
             self.inflight.add((sid, p.get("requestId")))
@@ -1637,34 +1808,70 @@ class _VanNetGuard:
         events = drain_events()
         if len(events) >= __OVERFLOW__:
             self.broken = self.broken or "NETWORK_GUARD_OVERFLOW"
+            self.freeze_due = True
         for ev in events:
             self.handle(ev)
 
-    def run(self, action):
+    def run(self, action, input_event=True, window=True, settle=True):
+        '''Run ``action`` on a helper thread while this thread answers paused requests (a
+        handler's synchronous XHR would otherwise deadlock the dispatch). ``input_event``: the
+        action dispatches an automated input (the task has now acted). ``window``: an action
+        window (a mutating task's in-scope writes pass). ``settle``: afterwards keep the window
+        open until the network is idle or NETWORK_GUARD_SETTLE_MAX_MS has passed.'''
         box = {}
         def _go():
             try:
                 action()
             except BaseException as exc:  # noqa: BLE001 - re-raised on the caller's thread
                 box["error"] = exc
-        worker = _ng_threading.Thread(target=_go, daemon=True)
-        worker.start()
-        limit = _ng_time.monotonic() + 30.0
-        while worker.is_alive():
-            self.pump()
-            if _ng_time.monotonic() > limit:
-                self.broken = self.broken or "NETWORK_GUARD_UNAVAILABLE"
-                break
-            _ng_time.sleep(0.01)
-        done = _ng_time.monotonic()
-        self.last = max(self.last, done)
-        while _ng_time.monotonic() - done < __SETTLE_MAX_S__:
-            self.pump()
-            now = _ng_time.monotonic()
-            if not self.inflight and now - self.last >= __IDLE_S__:
-                break
-            _ng_time.sleep(0.02)
+        if input_event:
+            self.acted = True
+        self.window, self.running = window, True
+        try:
+            worker = _ng_threading.Thread(target=_go, daemon=True)
+            worker.start()
+            limit = _ng_time.monotonic() + 30.0
+            while worker.is_alive():
+                self.pump()
+                if _ng_time.monotonic() > limit:
+                    self.broken = self.broken or "NETWORK_GUARD_UNAVAILABLE"
+                    self.freeze_due = True
+                    break
+                _ng_time.sleep(0.01)
+            done = _ng_time.monotonic()
+            self.last = max(self.last, done)
+            while settle and not self.freeze_due and _ng_time.monotonic() - done < __SETTLE_MAX_S__:
+                self.pump()
+                now = _ng_time.monotonic()
+                if not self.inflight and now - self.last >= __IDLE_S__:
+                    break
+                _ng_time.sleep(0.02)
+        finally:
+            self.window, self.running = False, False
+        if self.freeze_due:
+            self.freeze()
         return box.get("error")
+
+    def service(self, seconds):
+        '''Answer paused requests (outside any action window) for ``seconds``.'''
+        until = _ng_time.monotonic() + seconds
+        while True:
+            self.pump()
+            if self.freeze_due:
+                self.freeze()
+            if _ng_time.monotonic() >= until:
+                return
+            _ng_time.sleep(0.02)
+
+    def freeze(self):
+        '''Stop everything the page started, with interception still on: close popups and
+        other tabs, unregister and stop service workers, navigate the main frame to
+        about:blank (its timers and dedicated workers end with the document).'''
+        self.freeze_due = False
+        if self.frozen:
+            return
+        self.frozen = True
+        _van_freeze_page(self)
 
     def stop(self):
         try:
@@ -1694,49 +1901,229 @@ class _VanNetGuard:
             except Exception:
                 pass
 
-_VAN_GUARD_HANDOFF = []
+def _van_freeze_page(guard=None):
+    def _pump():
+        if guard is not None:
+            try:
+                guard.pump()
+            except Exception:
+                pass
+    if guard is not None:
+        guard.freezing = True
+    try:
+        main = guard.main_frame if guard is not None else None
+        try:
+            main = main or cdp("Page.getFrameTree")["frameTree"]["frame"]["id"]
+            for t in cdp("Target.getTargets")["targetInfos"]:
+                if t.get("type") == "page" and t.get("targetId") != main:
+                    try:
+                        cdp("Target.closeTarget", targetId=t["targetId"])
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+        try:
+            cdp("ServiceWorker.enable")
+            until = _ng_time.monotonic() + 0.3
+            while _ng_time.monotonic() < until:
+                _pump()
+                _ng_time.sleep(0.03)
+            scopes = sorted(guard.registrations) if guard is not None else []
+            for scope in scopes:
+                try:
+                    cdp("ServiceWorker.unregister", scopeURL=scope)
+                except Exception:
+                    pass
+            cdp("ServiceWorker.stopAllWorkers")
+            cdp("ServiceWorker.disable")
+        except Exception:
+            pass
+        done = []
+        def _blank():
+            try:
+                cdp("Page.navigate", url="about:blank")
+            except Exception:
+                pass
+            done.append(True)
+        _ng_threading.Thread(target=_blank, daemon=True).start()
+        until = _ng_time.monotonic() + 5.0
+        while _ng_time.monotonic() < until:
+            _pump()  # unload handlers' requests are answered (failed) meanwhile
+            if done and _van_frame_url() == "about:blank":
+                break
+            _ng_time.sleep(0.03)
+        _pump()
+    finally:
+        if guard is not None:
+            guard.freezing = False
 
-def _van_net_run(action, handoff=False):
-    '''Run ``action`` (the input dispatch) under the network-effect guard. Returns the guard;
-    ``_van_net_verdict`` turns what it saw into the typed refusal.
+def _van_net_refusal(guard):
+    if guard.blocked:
+        return "NETWORK_WRITE_BLOCKED:" + guard.blocked[0]
+    if guard.detected:
+        return "NETWORK_WRITE_DETECTED:" + guard.detected[0]
+    if guard.broken:
+        return guard.broken
+    if guard.frozen:
+        return "NETWORK_GUARD_PAGE_FROZEN"
+    return None
 
-    ``handoff``: the guard is not stopped; its state is emitted with the script's result
-    (``__guard__``) and the landing check that follows adopts and ends it, so interception
-    covers the whole action-then-land window. ``VAN_BH_NETGUARD_STATE`` set: this script
-    adopts a handed-over guard instead of starting one.'''
+def _van_net_begin():
+    '''Adopt the lease's guard (``VAN_BH_NETGUARD_STATE``) or start it. ``required``: an
+    action cannot run without it (NETWORK_GUARD_UNAVAILABLE); a read proceeds without one.'''
     try:
         policy = json.loads(os.environ.get("VAN_BH_NETGUARD") or "null")
         adopted = json.loads(os.environ.get("VAN_BH_NETGUARD_STATE") or "null")
     except ValueError:
         policy, adopted = None, None
-    if not isinstance(policy, dict) or "drain_events" not in globals():
-        raise _VanRefused("NETWORK_GUARD_UNAVAILABLE")
+    if not isinstance(policy, dict):
+        return None
+    required = policy.get("required") is True
+    if "drain_events" not in globals():
+        if required:
+            raise _VanRefused("NETWORK_GUARD_UNAVAILABLE")
+        return None
     guard = _VanNetGuard(policy)
-    if isinstance(adopted, dict):
-        guard.adopt(adopted)
-    else:
-        guard.start()
-    handed = False
     try:
-        guard.error = guard.run(action)
-        if handoff and not guard.broken:
-            _VAN_GUARD_HANDOFF.append(guard.export())
-            handed = True
-    finally:
-        if not handed:
-            guard.stop()
+        if isinstance(adopted, dict):
+            guard.adopt(adopted)
+        else:
+            guard.start()
+        guard.service(0)
+    except _VanRefused:
+        if required:
+            raise
+        return None
     return guard
 
+def _van_net_run(action, input_event=True, window=True, settle=True):
+    '''Run ``action`` (the input dispatch) under the lease's guard. Returns the guard;
+    ``_van_net_verdict`` turns what it saw into the typed refusal. Refused before anything is
+    dispatched when the guard is missing, or has already blocked, detected or frozen.'''
+    guard = globals().get("_VAN_NET")
+    if guard is None:
+        raise _VanRefused("NETWORK_GUARD_UNAVAILABLE")
+    refusal = _van_net_refusal(guard)
+    if refusal:
+        raise _VanRefused(refusal)
+    guard.error = guard.run(action, input_event=input_event, window=window, settle=settle)
+    return guard
+
+def _van_net_serve(action):
+    '''Run ``action`` (a read that waits on the page) while paused requests are answered,
+    outside any action window.'''
+    guard = globals().get("_VAN_NET")
+    if guard is None:
+        action()
+        return
+    err = guard.run(action, input_event=False, window=False, settle=False)
+    if err is not None:
+        raise err
+
 def _van_net_verdict(guard):
-    if guard.blocked:
-        raise _VanRefused("NETWORK_WRITE_BLOCKED:" + guard.blocked[0])
-    if guard.broken:
-        raise _VanRefused(guard.broken)
+    refusal = _van_net_refusal(guard)
+    if refusal:
+        raise _VanRefused(refusal)
     if guard.error is not None:
         raise guard.error
+
+def _van_net_end(guard, end=False):
+    '''What the worker keeps between scripts: the guard's sessions and what it saw.'''
+    if guard is None:
+        return None
+    try:
+        guard.service(0)
+        if guard.broken and not guard.frozen:
+            guard.freeze()
+        if end:
+            guard.freeze()
+            guard.stop()
+    except Exception:
+        guard.broken = guard.broken or "NETWORK_GUARD_UNAVAILABLE"
+    return {"state": None if end else guard.export(), "blocked": guard.blocked, "detected": guard.detected,
+            "dropped": guard.dropped, "broken": guard.broken, "acted": guard.acted, "frozen": guard.frozen}
 """.replace("__OVERFLOW__", str(NETWORK_GUARD_OVERFLOW_EVENTS)).replace(
     "__SETTLE_MAX_S__", repr(NETWORK_GUARD_SETTLE_MAX_MS / 1000)).replace(
     "__IDLE_S__", repr(NETWORK_GUARD_IDLE_MS / 1000))
+
+#: Unit G11 — every script a lease runs is wrapped: the lease's guard is adopted (or started)
+#: before the operation's own fixed script runs, keeps answering while it runs, and is handed
+#: back to the worker after it (``__guard__`` in the result), so interception never lapses
+#: between two scripts. The operation's own output is collected through ``print`` (never
+#: sys.stdout redirection: other threads of the process keep their output).
+GUARD_WRAPPER_PY = r"""
+import json, os
+__VAN_HELPERS__
+class _VanRefused(Exception):
+    pass
+__NETWORK_GUARD__
+_VW_BODY = __BODY__
+_VW_POLICY = json.loads(os.environ.get("VAN_BH_NETGUARD") or "{}")
+import builtins as _vw_builtins
+_vw_emit = globals().get("print") or _vw_builtins.print
+_vw_lines, _vw_payload, _vw_error = [], None, None
+def _vw_print(*args, **kwargs):
+    if kwargs.get("file") is None:
+        _vw_lines.append(kwargs.get("sep", " ").join(str(a) for a in args))
+    else:
+        _vw_emit(*args, **kwargs)
+_VAN_NET = None
+try:
+    _VAN_NET = _van_net_begin()
+except Exception as _vw_exc:
+    _vw_payload = {"refused": str(_vw_exc) if type(_vw_exc).__name__ == "_VanRefused" else "NETWORK_GUARD_UNAVAILABLE"}
+if _vw_payload is None:
+    _vw_had_print = "print" in globals()
+    _vw_saved_print = globals().get("print")
+    globals()["print"] = _vw_print
+    try:
+        exec(compile(_VW_BODY, "<van-op>", "exec"), globals())
+    except Exception as _vw_exc:
+        if type(_vw_exc).__name__ == "_VanRefused":
+            _vw_payload = {"refused": str(_vw_exc)}
+        else:
+            _vw_error = type(_vw_exc).__name__
+    finally:
+        if _vw_had_print:
+            globals()["print"] = _vw_saved_print
+        else:
+            globals().pop("print", None)
+    if _vw_payload is None:
+        for _vw_line in reversed(_vw_lines):
+            if _vw_line.startswith("__VAN_JSON__"):
+                _vw_payload = json.loads(_vw_line[len("__VAN_JSON__"):])
+                break
+if _vw_error is not None:
+    _vw_payload = {"__error__": _vw_error}
+_vw_payload = dict(_vw_payload) if isinstance(_vw_payload, dict) else {"__error__": "NO_RESULT"}
+_vw_payload["__guard__"] = _van_net_end(_VAN_NET, end=_VW_POLICY.get("end") is True)
+_vw_emit("__VAN_JSON__" + json.dumps(_vw_payload))
+"""
+
+#: The body of a guard-service script (the worker's guard thread, between calls).
+GUARD_TICK_BODY = r"""
+import json
+_VAN_NET.service(__TICK__) if _VAN_NET is not None else None
+print("__VAN_JSON__" + json.dumps({"serviced": _VAN_NET is not None}))
+""".replace("__TICK__", repr(NETGUARD_TICK_SECONDS))
+
+#: The body of the script that ends a lease's guard (/release, a newer lease, idle expiry):
+#: the wrapper freezes the page and removes interception (``end``). Without a guard to adopt
+#: or start, the page is frozen without one.
+GUARD_END_BODY = r"""
+import json
+if _VAN_NET is None:
+    _van_freeze_page(None)
+print("__VAN_JSON__" + json.dumps({"ended": True}))
+"""
+
+
+def guard_wrapped(body: str) -> str:
+    """``body`` (a fixed script) wrapped in the lease guard's adopt/answer/hand-back."""
+    return (GUARD_WRAPPER_PY.replace("__VAN_HELPERS__", VAN_HELPERS_PY)
+            .replace("__NETWORK_GUARD__", NETWORK_GUARD_PY)
+            .replace("__BODY__", json.dumps(body)))
+
 
 EFFECT_MAC_CONTEXT = "van-harness-effect/1"
 
@@ -1757,8 +2144,8 @@ def effect_mac(key: bytes, alias: str, generation: int, holder_id: str, task_id:
     return hmac.new(key, message, hashlib.sha256).hexdigest()
 
 
-def network_guard_env(body: dict[str, Any], alias: str) -> dict[str, str]:
-    """The guard policy for one action: ``mutating`` and the task scope.
+def network_guard_policy(body: dict[str, Any], alias: str) -> dict[str, Any]:
+    """The guard policy a call carries: ``mutating`` and the task scope.
 
     ``mutating`` is honoured only when the fence key verifies ``effect_mac`` over the lease
     fence, the task id, the flag and the scope digest; without a key it is always False (the
@@ -1776,13 +2163,213 @@ def network_guard_env(body: dict[str, Any], alias: str) -> dict[str, str]:
                     mac, effect_mac(key, alias, generation, holder, str(body.get("task_id") or ""), claimed, scope_digest(scope))):
             raise WorkerError("NETWORK_EFFECT_MAC_INVALID", 403)
         mutating = claimed
-    return {"VAN_BH_NETGUARD": json.dumps({"mutating": mutating, "scope": scope})}
+    return {"mutating": mutating, "scope": scope}
+
+
+def network_guard_env(body: dict[str, Any], alias: str) -> dict[str, str]:
+    """``network_guard_policy`` as the script environment variable (kept for callers)."""
+    return {"VAN_BH_NETGUARD": json.dumps(network_guard_policy(body, alias))}
+
+
+class GuardLease:
+    """The network-effect guard of one page lease (unit G11, review I7 MAJOR-1).
+
+    ``state`` is what the in-script guard hands back after every script (its CDP sessions,
+    whether the task has acted, whether the page is frozen, the document's last
+    cross-document commit); ``pending`` is the first blocked/detected/broken code, after which
+    every further action of the lease is refused with it."""
+
+    def __init__(self, alias: str, generation: int, holder: str, task_id: str) -> None:
+        self.alias = alias
+        self.generation = generation
+        self.holder = holder
+        self.task_id = task_id
+        self.state: dict[str, Any] | None = None
+        self.policy: dict[str, Any] = {"mutating": False, "scope": None}
+        self.pending: str | None = None
+        self.frozen = False
+        self.acted = False
+        self.dropped: list[str] = []
+        self.last_call = time.monotonic()
+        self.failures = 0
+
+    def absorb(self, guard: Any) -> None:
+        if not isinstance(guard, dict):
+            self.state = None  # not started (a read without one) or lost: the next script starts it
+            return
+        state = guard.get("state")
+        self.state = state if isinstance(state, dict) else None
+        self.acted = self.acted or guard.get("acted") is True
+        self.frozen = self.frozen or guard.get("frozen") is True
+        codes = [f"NETWORK_WRITE_BLOCKED:{k if k in NETWORK_WRITE_KINDS else 'OTHER'}" for k in guard.get("blocked") or []]
+        codes += [f"NETWORK_WRITE_DETECTED:{k if k in NETWORK_DETECTED_KINDS else 'OTHER'}" for k in guard.get("detected") or []]
+        broken = guard.get("broken")
+        if broken:
+            codes.append(broken if broken in NETWORK_REFUSALS else "NETWORK_GUARD_UNAVAILABLE")
+        if codes and self.pending is None:
+            self.pending = codes[0]
+        for kind in guard.get("dropped") or []:
+            kind = kind if kind in NETWORK_WRITE_KINDS else "OTHER"
+            # Owner answer after review I7 ("Block silently, continue"): logged in the closed
+            # vocabulary only — never a URL, body or header.
+            print(f"[van-browser-harness] NETWORK_BACKGROUND_WRITE_DROPPED:{kind} profile={self.alias}", flush=True)
+            self.dropped.append(kind)
+
+    def take_dropped(self) -> list[str]:
+        out, self.dropped = self.dropped, []
+        return out
+
+
+class NetGuardRegistry:
+    """Unit G11 — one network-effect guard per leased profile, alive for the whole lease.
+
+    ``bind`` (every call, under the profile lock) starts a lease's guard record or ends the
+    previous lease's; ``release`` ends it; a background thread answers each guard's paused
+    requests while its profile is idle and ends a guard idle for NETGUARD_IDLE_SECONDS."""
+
+    def __init__(self) -> None:
+        self.lock = threading.Lock()
+        self.leases: dict[str, GuardLease] = {}
+        self._local = threading.local()
+        self._thread: threading.Thread | None = None
+        self._closed = False
+
+    def current(self, alias: str | None = None) -> GuardLease | None:
+        lease = getattr(self._local, "lease", None)
+        if lease is not None and alias is not None and lease.alias != alias:
+            return None
+        return lease
+
+    @contextlib.contextmanager
+    def using(self, lease: GuardLease | None):
+        saved = getattr(self._local, "lease", None)
+        self._local.lease = lease
+        try:
+            yield lease
+        finally:
+            self._local.lease = saved
+
+    def bind(self, alias: str, body: dict[str, Any]) -> GuardLease | None:
+        """The guard of the lease this call runs under (the caller holds the profile lock and
+        the fence has admitted the call). An unfenced read runs under whatever guard holds the
+        page. A call under a newer lease first ends the older lease's guard."""
+        generation, holder = body.get("lease_generation"), body.get("lease_holder_id")
+        with self.lock:
+            current = self.leases.get(alias)
+        if not isinstance(generation, int) or isinstance(generation, bool) or not isinstance(holder, str):
+            return current
+        if current is not None and (current.generation, current.holder) != (generation, holder):
+            self.end(alias, current)
+            current = None
+        if current is None:
+            current = GuardLease(alias, generation, holder, str(body.get("task_id") or ""))
+            with self.lock:
+                self.leases[alias] = current
+            self._ensure_thread()
+        current.last_call = time.monotonic()
+        return current
+
+    def end(self, alias: str, lease: GuardLease) -> dict[str, Any]:
+        """Freeze the lease's page and remove its interception (the caller holds the lock)."""
+        with self.lock:
+            if self.leases.get(alias) is lease:
+                del self.leases[alias]
+        report = {"released": True, "blocked": lease.pending, "frozen": False}
+        try:
+            with self.using(lease):
+                result = _run(alias, GUARD_WRAPPER_END, end=True, role="end")
+            report["frozen"] = isinstance(result, dict) and result.get("ended") is True
+        except WorkerError:
+            report["frozen"] = False
+        report["blocked"] = lease.pending
+        report["dropped"] = lease.take_dropped()
+        return report
+
+    def release(self, alias: str, body: dict[str, Any]) -> dict[str, Any]:
+        generation, holder = body.get("lease_generation"), body.get("lease_holder_id")
+        with self.lock:
+            current = self.leases.get(alias)
+        if current is None:
+            return {"released": True, "blocked": None, "frozen": False, "guard": None}
+        if (current.generation, current.holder) != (generation, holder) and current.generation > int(generation):
+            return {"released": True, "blocked": None, "frozen": False, "guard": "OTHER_LEASE"}
+        return {**self.end(alias, current), "guard": "ENDED"}
+
+    def close(self) -> None:
+        self._closed = True
+
+    def _ensure_thread(self) -> None:
+        with self.lock:
+            if self._thread is not None and self._thread.is_alive():
+                return
+            self._thread = threading.Thread(target=self._serve, name="van-netguard", daemon=True)
+            self._thread.start()
+
+    def _serve(self) -> None:
+        while not self._closed:
+            with self.lock:
+                items = list(self.leases.items())
+                if not items:
+                    self._thread = None
+                    return
+            for alias, lease in items:
+                lock = FENCE.profile_lock(alias)
+                if not lock.acquire(blocking=False):
+                    continue  # an operation is running: its own scripts answer the guard
+                try:
+                    with self.lock:
+                        if self.leases.get(alias) is not lease:
+                            continue
+                    if time.monotonic() - lease.last_call > NETGUARD_IDLE_SECONDS:
+                        self.end(alias, lease)
+                        continue
+                    with self.using(lease):
+                        _run(alias, GUARD_WRAPPER_TICK, role="tick")
+                    lease.failures = 0
+                except Exception:  # noqa: BLE001 - the browser went away; counted, then dropped
+                    lease.failures += 1
+                    if lease.failures >= NETGUARD_TICK_FAILURE_LIMIT:
+                        with self.lock:
+                            if self.leases.get(alias) is lease:
+                                del self.leases[alias]
+                        print(f"[van-browser-harness] NETWORK_GUARD_SERVICE_FAILED profile={alias}", flush=True)
+                finally:
+                    lock.release()
+            time.sleep(NETGUARD_TICK_PAUSE_SECONDS)
+
+
+NET_GUARDS = NetGuardRegistry()
+GUARD_WRAPPER_TICK = GUARD_TICK_BODY
+GUARD_WRAPPER_END = GUARD_END_BODY
+
+
+def _run(alias: str, script: str, extra: dict[str, str] | None = None, *, required: bool = False,
+         end: bool = False, role: str = "op") -> Any:
+    """Run a fixed script. Under a lease's guard (unit G11) it runs wrapped: the guard is
+    adopted or started first (``required``: an action refuses NETWORK_GUARD_UNAVAILABLE
+    without it; a read proceeds), answers paused requests throughout, and its state comes back
+    for the next script. Without a lease the script runs as it is."""
+    lease = NET_GUARDS.current(alias)
+    if lease is None:
+        return run_harness(alias, script, extra)
+    env = dict(extra or {})
+    # ``role``: "op" (an operation's script), "tick" (the guard thread) or "end" (the lease ends).
+    env["VAN_BH_NETGUARD"] = json.dumps({**lease.policy, "required": required, "end": end, "role": role})
+    if lease.state is not None:
+        env["VAN_BH_NETGUARD_STATE"] = json.dumps(lease.state)
+    result = run_harness(alias, guard_wrapped(script), env)
+    if not isinstance(result, dict):
+        raise WorkerError("BROWSER_HARNESS_RESPONSE_INVALID", 502)
+    lease.absorb(result.pop("__guard__", None))
+    if "__error__" in result:
+        raise WorkerError("BROWSER_HARNESS_REQUEST_FAILED", 502)
+    return result
 
 
 def _bound_script(body: str) -> str:
     """A fixed script: the bound prologue, then ``body`` run with typed refusals."""
     prologue = (
-        BOUND_PROLOGUE_PY.replace("__VAN_HELPERS__", VAN_HELPERS_PY + NETWORK_GUARD_PY)
+        BOUND_PROLOGUE_PY.replace("__VAN_HELPERS__", VAN_HELPERS_PY)
         .replace("__ELEMENTS_JS__", json.dumps(ELEMENTS_JS.strip()))
         .replace("__HIT_FN__", json.dumps(HIT_FN))
         .replace("__GUARD_FN__", json.dumps(GUARD_FN))
@@ -1943,7 +2530,7 @@ def shape_page_info(result: dict[str, Any]) -> dict[str, Any]:
 
 
 def page_info_result(alias: str, domain: str) -> dict[str, Any]:
-    result = run_harness(alias, PAGE_INFO_SCRIPT)
+    result = _run(alias, PAGE_INFO_SCRIPT)
     if not isinstance(result, dict):
         raise WorkerError("BROWSER_PAGE_INFO_INVALID", 502)
     current = str(result.get("url") or "")
@@ -1966,7 +2553,7 @@ def describe(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
     if not locator or len(locator) > MAX_LOCATOR_LEN:
         raise WorkerError("LOCATOR_REQUIRED", 422)
     env = {"VAN_BH_FOCUS": "1"} if focus else {"VAN_BH_LOCATOR": locator}
-    result = run_harness(alias, DESCRIBE_SCRIPT, env)
+    result = _run(alias, DESCRIBE_SCRIPT, env)
     if not isinstance(result, dict):
         raise WorkerError("BROWSER_DESCRIBE_INVALID", 502)
     current = str(result.get("url") or "")
@@ -2000,13 +2587,11 @@ def describe(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
 
 
 def _guarded_script(body: str) -> str:
-    """A fixed unbound script whose input runs under the network-effect guard."""
-    prologue = ("import json, os\n" + VAN_HELPERS_PY + "\nclass _VanRefused(Exception):\n    pass\n"
-                + NETWORK_GUARD_PY)
+    """A fixed unbound script whose input runs under the lease's network-effect guard (the
+    guard itself comes from the wrapper every lease script runs in, ``guard_wrapped``)."""
+    prologue = "import json, os\n" + VAN_HELPERS_PY + "\nclass _VanRefused(Exception):\n    pass\n"
     indented = "\n".join("    " + line for line in body.strip().splitlines())
-    emit = ("\ndef _van_emit(payload):\n    handoff = globals().get(\"_VAN_GUARD_HANDOFF\")\n"
-            "    if handoff:\n        payload = {**payload, \"__guard__\": handoff[-1]}\n"
-            "    print(\"__VAN_JSON__\" + json.dumps(payload))\n")
+    emit = "\ndef _van_emit(payload):\n    print(\"__VAN_JSON__\" + json.dumps(payload))\n"
     return (prologue + emit + "try:\n" + indented + "\nexcept _VanRefused as _exc:\n"
             "    _van_emit({\"refused\": str(_exc)})\n")
 
@@ -2018,7 +2603,9 @@ def _go():
     # a new tab would be outside the guard, which fails its document as a POPUP.
     goto_url(url)
     wait_for_load()
-_van_net_verdict(_van_net_run(_go, handoff=True))
+# Not an automated input event: a /navigate's load-time traffic of a read-only task is
+# background (owner answer after review I7); the window is open for a mutating task.
+_van_net_verdict(_van_net_run(_go, input_event=False))
 _van_emit({"navigated": True})
 """)
 
@@ -2044,10 +2631,9 @@ print("__VAN_JSON__" + json.dumps({"uploaded": True}))
 def navigate(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
     url = assert_url_in_domain(str(body.get("url") or ""), domain)
     _assert_scope(body, url, "NAVIGATE")
-    # Unit G9c: the navigation runs under the network-effect guard, which the landing check
-    # (review I6 M3: judged where it lands) adopts and ends.
-    _act_then_land(alias, NAVIGATE_SCRIPT, {"VAN_BH_URL": url, **network_guard_env(body, alias)}, body,
-                   land_after_any_refusal=True)
+    # The navigation and the landing check after it (review I6 M3: judged where it lands) run
+    # under the lease's network-effect guard.
+    _act_then_land(alias, NAVIGATE_SCRIPT, {"VAN_BH_URL": url}, body, land_after_any_refusal=True)
     return page_info_result(alias, domain)
 
 
@@ -2064,7 +2650,7 @@ def _refusal_code(raw: str) -> str:
     """The typed code of a script refusal. A network-guard refusal keeps its kind, which is
     from a closed vocabulary (``NETWORK_WRITE_KINDS``) — never page data."""
     head, _, tail = raw.partition(":")
-    if head == "NETWORK_WRITE_BLOCKED":
+    if head in ("NETWORK_WRITE_BLOCKED", "NETWORK_WRITE_DETECTED"):
         return head + ":" + (tail if tail in NETWORK_WRITE_KINDS else "OTHER")
     return head[:64]
 
@@ -2099,7 +2685,14 @@ while True:
     elif now - since >= quiet or now >= deadline:
         break
     time.sleep(0.05)
-violation = None if last == "about:blank" else _van_scope_violation(scope, last, "LANDED")
+violation = None
+if last != "about:blank":
+    violation = _van_scope_violation(scope, last, "LANDED")
+    if not violation and "_van_doc_url" in globals():
+        # Review I7 minor 6: and where the last cross-document commit put it.
+        doc = _van_doc_url()
+        if doc and doc != "about:blank":
+            violation = _van_scope_violation(scope, doc, "LANDED")
 closed = False
 if violation:
     try:
@@ -2119,29 +2712,24 @@ print("__VAN_JSON__" + json.dumps({"landed_in_scope": violation is None, "violat
 POST_ACTUATION_REFUSALS = frozenset({"TARGET_MOVED_DURING_ACTUATION", "TARGET_NOT_ACTIVATED"})
 
 
-#: Unit G9c — the landing check runs under the network-effect guard the action handed over
-#: (adopted, then ended here), so interception covers the whole action-then-land window:
-#: the landing settle included. Without a handed-over guard it starts its own.
+#: The landing check runs under the lease's guard, in the action's window (it is the tail of
+#: the action: a mutating task's in-scope writes while the browser lands still pass).
 GUARDED_LANDING_SCRIPT = (
-    "import json, os\n" + VAN_HELPERS_PY + "\nclass _VanRefused(Exception):\n    pass\n" + NETWORK_GUARD_PY
-    + "\n_LANDING_SRC = " + json.dumps(LANDING_SCRIPT) + "\n"
+    "import json, os\n_LANDING_SRC = " + json.dumps(LANDING_SCRIPT) + "\n"
     + "try:\n"
-    + "    _van_net_verdict(_van_net_run(lambda: exec(compile(_LANDING_SRC, '<van-landing>', 'exec'), globals())))\n"
+    + "    _van_net_verdict(_van_net_run(lambda: exec(compile(_LANDING_SRC, '<van-landing>', 'exec'), globals()), input_event=False))\n"
     + "except _VanRefused as _exc:\n"
     + "    print(\"__VAN_JSON__\" + json.dumps({\"refused\": str(_exc)}))\n"
 )
 
 
-def _landing_check(alias: str, body: dict[str, Any], guard_state: Any = None) -> None:
+def _landing_check(alias: str, body: dict[str, Any]) -> None:
     """Raise TASK_SCOPE_LANDED_* (409) when the page the action left the browser on is
-    outside the task scope (it has been closed), or when that cannot be established.
-    Unit G9c: runs under the network-effect guard (``guard_state``: the one the action handed
-    over); a write blocked while landing is NETWORK_WRITE_BLOCKED:<kind>."""
+    outside the task scope (it has been closed), or when that cannot be established. Runs
+    under the lease's network-effect guard; a write blocked while landing is
+    NETWORK_WRITE_BLOCKED:<kind> (and the page is frozen)."""
     scope = body.get("task_scope") if isinstance(body.get("task_scope"), dict) else None
-    env = {"VAN_BH_SCOPE": json.dumps(scope), **network_guard_env(body, alias)}
-    if isinstance(guard_state, dict):
-        env["VAN_BH_NETGUARD_STATE"] = json.dumps(guard_state)
-    result = run_harness(alias, GUARDED_LANDING_SCRIPT, env)
+    result = _run(alias, GUARDED_LANDING_SCRIPT, {"VAN_BH_SCOPE": json.dumps(scope)}, required=True)
     _refused(result)
     if isinstance(result, dict) and result.get("landed_in_scope") is True:
         return
@@ -2152,35 +2740,23 @@ def _landing_check(alias: str, body: dict[str, Any], guard_state: Any = None) ->
 
 def _act_then_land(alias: str, script: str, env: dict[str, str], body: dict[str, Any],
                    *, land_after_any_refusal: bool = False) -> None:
-    """Run a bound action script, then check where the browser landed. A refusal before any
-    input reached the page is returned as is; after one that may have (or a failed script)
-    an out-of-scope landing is the more serious fact and is reported instead.
+    """Run an action script, then check where the browser landed. A refusal before any input
+    reached the page is returned as is; after one that may have (or a failed script) an
+    out-of-scope landing is the more serious fact and is reported instead.
 
-    Unit G9c: the action's network-effect guard is handed to the landing check (``__guard__``
-    in the script's result), which adopts and ends it. Whenever a guard was handed over the
-    landing check runs, so the guard is always ended. After a blocked write
-    (NETWORK_WRITE_BLOCKED) the landing check still runs and closes any page outside the scope.
-    A landing on an http(s) page outside the scope is reported as the more serious fact, as for
-    any refusal after input. A blocked navigation leaves the frame on Chromium's error page
-    (not http): that page is closed too, and the blocked write is what is reported."""
-    state = None
+    Unit G11: the action and the landing check run under the lease's guard, which neither
+    of them ends. After a blocked or detected write (or a guard that failed) the page has
+    already been frozen (about:blank, workers and popups gone): that code is reported and no
+    landing check runs on the frozen page."""
     try:
-        result = run_harness(alias, script, env)
-        if isinstance(result, dict):
-            state = result.pop("__guard__", None)
-        _refused(result)
+        _refused(_run(alias, script, env, required=True))
     except WorkerError as exc:
-        if exc.code.startswith("NETWORK_WRITE_BLOCKED"):
-            try:
-                _landing_check(alias, body, state)
-            except WorkerError as landed:
-                if landed.code not in ("TASK_SCOPE_LANDED_URL_NOT_HTTP", "TASK_SCOPE_LANDED_URL_UNKNOWN"):
-                    raise
+        if exc.code.startswith(NETWORK_FREEZE_PREFIXES):
             raise
-        if land_after_any_refusal or state is not None or exc.code in POST_ACTUATION_REFUSALS or exc.status >= 500:
-            _landing_check(alias, body, state)
+        if land_after_any_refusal or exc.code in POST_ACTUATION_REFUSALS or exc.status >= 500:
+            _landing_check(alias, body)
         raise
-    _landing_check(alias, body, state)
+    _landing_check(alias, body)
 
 
 CLICK_SCRIPT = _bound_script(r"""
@@ -2189,7 +2765,7 @@ scope = json.loads(os.environ["VAN_BH_SCOPE"])
 obj, el = _van_bind(binding, scope)
 x, y = _van_hit(obj, el)
 guard = _van_guard(obj)
-net = _van_net_run(lambda: click_at_xy(x, y), handoff=True)
+net = _van_net_run(lambda: click_at_xy(x, y))
 done = _van_finish_after_net(guard, net)
 if not done.get("navigated") and "click" not in (done.get("seen") or []):
     raise _VanRefused("TARGET_NOT_ACTIVATED")
@@ -2213,7 +2789,7 @@ def click(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
     locator = str(body.get("locator") or "")
     if not locator or len(locator) > 2048:
         raise WorkerError("LOCATOR_REQUIRED", 422)
-    _act_then_land(alias, CLICK_SCRIPT, {"VAN_BH_LOCATOR": locator, **_binding_env(body), **network_guard_env(body, alias)}, body)
+    _act_then_land(alias, CLICK_SCRIPT, {"VAN_BH_LOCATOR": locator, **_binding_env(body)}, body)
     return page_info_result(alias, domain)
 
 
@@ -2225,7 +2801,7 @@ focused = _van_call(obj, "function(){ this.focus(); let a = document.activeEleme
 if focused is not True:
     raise _VanRefused("TARGET_NOT_FOCUSABLE")
 guard = _van_guard(obj)
-net = _van_net_run(lambda: cdp("Input.insertText", text=os.environ["VAN_BH_SECRET"]), handoff=True)
+net = _van_net_run(lambda: cdp("Input.insertText", text=os.environ["VAN_BH_SECRET"]))
 _van_finish_after_net(guard, net)
 _van_emit({"filled": True})
 """)
@@ -2239,7 +2815,7 @@ def fill(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
     if not locator or len(locator) > 2048:
         raise WorkerError("LOCATOR_REQUIRED", 422)
     secret = resolve_secret(body.get("value_ref"))
-    _act_then_land(alias, FILL_SCRIPT, {"VAN_BH_LOCATOR": locator, "VAN_BH_SECRET": secret, **_binding_env(body), **network_guard_env(body, alias)}, body)
+    _act_then_land(alias, FILL_SCRIPT, {"VAN_BH_LOCATOR": locator, "VAN_BH_SECRET": secret, **_binding_env(body)}, body)
     return page_info_result(alias, domain)
 
 
@@ -2251,7 +2827,7 @@ still = _van_call(obj, "function(){ let a = document.activeElement; while (a && 
 if still is not True:
     raise _VanRefused("FOCUS_CHANGED")
 guard = _van_guard(obj)
-net = _van_net_run(lambda: press_key(os.environ["VAN_BH_KEY"]), handoff=True)
+net = _van_net_run(lambda: press_key(os.environ["VAN_BH_KEY"]))
 _van_finish_after_net(guard, net)
 _van_emit({"pressed": True})
 """)
@@ -2268,7 +2844,7 @@ def press(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
     key = str(body.get("key") or "")
     if not key or len(key) > 64:
         raise WorkerError("KEY_REQUIRED", 422)
-    _act_then_land(alias, PRESS_SCRIPT, {"VAN_BH_KEY": key, **_binding_env(body), **network_guard_env(body, alias)}, body)
+    _act_then_land(alias, PRESS_SCRIPT, {"VAN_BH_KEY": key, **_binding_env(body)}, body)
     return page_info_result(alias, domain)
 
 
@@ -2283,9 +2859,10 @@ def _require_scope(body: dict[str, Any]) -> dict[str, Any]:
 
 
 def _assert_scope(body: dict[str, Any], url: str, what: str) -> None:
-    """Task-scope rule (integrator's interpretation of the owner's 2026-09-30 answer, pending
-    confirmation) — the Harness re-checks the destination/page of a
-    navigate, scroll or upload against the task scope it must receive with the call."""
+    """Task-scope rule (owner-confirmed 2026-09-30: docs/decisions/OWNER-DECISION-20260930-
+    BROWSER-TASK-SCOPE.md, confirmation block; auth-20260930-owner-explicit-task-scope-
+    confirmation) — the Harness re-checks the destination/page of a navigate, scroll or
+    upload against the task scope it must receive with the call."""
     violation = _van_scope_violation(_require_scope(body), url, what)
     if violation:
         raise WorkerError(violation, 409)
@@ -2296,14 +2873,22 @@ def _assert_scope(body: dict[str, Any], url: str, what: str) -> None:
 FRAME_URL_SCRIPT = r"""
 import json
 __VAN_HELPERS__
-print("__VAN_JSON__" + json.dumps({"url": _van_frame_url()}))
+# Review I7 minor 6: and the document's last cross-document commit (under a lease's guard,
+# tracked from Page.frameNavigated; otherwise its navigation timing entry).
+print("__VAN_JSON__" + json.dumps({"url": _van_frame_url(),
+                                   "doc_url": _van_doc_url() if "_van_doc_url" in globals() else ""}))
 """.replace("__VAN_HELPERS__", VAN_HELPERS_PY)
 
 
 def _assert_page_in_scope(body: dict[str, Any], alias: str) -> None:
     _require_scope(body)
-    result = run_harness(alias, FRAME_URL_SCRIPT)
-    _assert_scope(body, str((result or {}).get("url") or "") if isinstance(result, dict) else "", "PAGE")
+    result = _run(alias, FRAME_URL_SCRIPT)
+    result = result if isinstance(result, dict) else {}
+    frame = str(result.get("url") or "")
+    _assert_scope(body, frame, "PAGE")
+    doc = str(result.get("doc_url") or "")
+    if doc and doc != "about:blank" and frame != "about:blank":
+        _assert_scope(body, doc, "PAGE")
 
 
 def scroll_page(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
@@ -2313,7 +2898,7 @@ def scroll_page(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]
     if abs(dx) > 20000 or abs(dy) > 20000:
         raise WorkerError("SCROLL_DELTA_OUT_OF_RANGE", 422)
     _assert_page_in_scope(body, alias)
-    _refused(run_harness(alias, SCROLL_SCRIPT, {"VAN_BH_DX": str(dx), "VAN_BH_DY": str(dy), **network_guard_env(body, alias)}))
+    _refused(_run(alias, SCROLL_SCRIPT, {"VAN_BH_DX": str(dx), "VAN_BH_DY": str(dy)}, required=True))
     return page_info_result(alias, domain)
 
 
@@ -2325,7 +2910,7 @@ with open(p, "rb") as f:
     data = f.read()
 print("__VAN_JSON__" + json.dumps({"screenshot_digest": hashlib.sha256(data).hexdigest(), "size_bytes": len(data), "contains_secrets": False}))
 """
-    result = run_harness(alias, script)
+    result = _run(alias, script)
     info = page_info_result(alias, domain)
     return {**result, "url": info.get("url"), "title": info.get("title")}
 
@@ -2334,21 +2919,27 @@ def wait(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
     condition = body.get("condition") if isinstance(body.get("condition"), dict) else {}
     kind = str(condition.get("kind") or "load")
     if kind == "load":
-        run_harness(alias, 'import json\nwait_for_load(timeout=10)\nprint("__VAN_JSON__"+json.dumps({"waited":"load"}))\n')
+        # Unit G11: the wait answers the lease guard's paused requests (the page's loads are
+        # held until someone does), outside any action window.
+        _run(alias, 'import json\n_van_net_serve(lambda: wait_for_load(timeout=10)) if "_van_net_serve" in globals() else wait_for_load(timeout=10)\nprint("__VAN_JSON__"+json.dumps({"waited":"load"}))\n')
     elif kind == "selector":
         selector = str(condition.get("selector") or "")
         if not selector or len(selector) > 2048:
             raise WorkerError("WAIT_SELECTOR_REQUIRED", 422)
-        run_harness(
+        _run(
             alias,
-            'import json,os\nok=wait_for_element(os.environ["VAN_BH_LOCATOR"],timeout=10)\nprint("__VAN_JSON__"+json.dumps({"waited":"selector","matched":bool(ok)}))\n',
+            'import json,os\n_w={}\n_f=lambda: _w.setdefault("ok", wait_for_element(os.environ["VAN_BH_LOCATOR"],timeout=10))\n_van_net_serve(_f) if "_van_net_serve" in globals() else _f()\nprint("__VAN_JSON__"+json.dumps({"waited":"selector","matched":bool(_w.get("ok"))}))\n',
             {"VAN_BH_LOCATOR": selector},
         )
     elif kind == "milliseconds":
         ms = int(condition.get("value", 0) or 0)
         if ms < 0 or ms > 10000:
             raise WorkerError("WAIT_DURATION_OUT_OF_RANGE", 422)
-        time.sleep(ms / 1000)
+        if NET_GUARDS.current(alias) is not None:
+            # Unit G11: under a lease the wait is spent answering the guard's paused requests.
+            _run(alias, 'import json\n_VAN_NET.service(' + repr(ms / 1000) + ') if _VAN_NET is not None else __import__("time").sleep(' + repr(ms / 1000) + ')\nprint("__VAN_JSON__"+json.dumps({"waited":"milliseconds"}))\n')
+        else:
+            time.sleep(ms / 1000)
     else:
         raise WorkerError("WAIT_KIND_UNSUPPORTED", 422)
     return page_info_result(alias, domain)
@@ -2360,7 +2951,7 @@ def upload(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
         raise WorkerError("LOCATOR_REQUIRED", 422)
     _assert_page_in_scope(body, alias)
     path = resolve_upload(body.get("file_ref"))
-    _refused(run_harness(alias, UPLOAD_SCRIPT, {"VAN_BH_LOCATOR": locator, "VAN_BH_UPLOAD": str(path), **network_guard_env(body, alias)}))
+    _refused(_run(alias, UPLOAD_SCRIPT, {"VAN_BH_LOCATOR": locator, "VAN_BH_UPLOAD": str(path)}, required=True))
     return page_info_result(alias, domain)
 
 
@@ -2370,7 +2961,7 @@ import json
 items = [{"targetId": str(t.get("targetId") or ""), "title": str(t.get("title") or "")[:512], "url": str(t.get("url") or "")[:4096]} for t in list_tabs()]
 print("__VAN_JSON__" + json.dumps({"tabs": items}))
 """
-    result = run_harness(alias, script)
+    result = _run(alias, script)
     safe = []
     for tab in result.get("tabs", []):
         url = str(tab.get("url") or "")
@@ -2599,6 +3190,9 @@ class LeaseFence:
 MUTATING_OPERATIONS = frozenset({"/navigate", "/click", "/fill", "/press", "/scroll", "/upload"})
 #: Reads. Unfenced is allowed; a fenced read is checked like any other call.
 READ_OPERATIONS = frozenset({"/page_info", "/screenshot", "/tabs", "/describe", "/wait"})
+#: Unit G11 — the gateway gives a page lease back: the lease's guard freezes the page and is
+#: removed. Fenced like a mutating operation (a stale generation cannot end a newer lease).
+LEASE_END_OPERATION = "/release"
 
 
 
@@ -2665,11 +3259,30 @@ class Handler(BaseHTTPRequestHandler):
             if body.get("allow_helper_authoring") is not False:
                 raise WorkerError("HELPER_AUTHORING_FORBIDDEN", 403)
             alias = safe_alias(body.get("profile_alias"))
+            if self.path == LEASE_END_OPERATION:
+                # Unit G11 — the page lease ends: freeze the page, then remove interception.
+                with FENCE.admit(alias, body, mutating=True):
+                    self.send_json(200, NET_GUARDS.release(alias, body))
+                return
             domain = safe_domain(body.get("target_domain"))
             if self.path not in MUTATING_OPERATIONS and self.path not in READ_OPERATIONS:
                 raise WorkerError("OPERATION_NOT_ALLOWED", 404)
             # Review I5 F1 — the fence check and the operation run under one profile lock.
-            with FENCE.admit(alias, body, mutating=self.path in MUTATING_OPERATIONS):
+            with FENCE.admit(alias, body, mutating=self.path in MUTATING_OPERATIONS), \
+                    NET_GUARDS.using(NET_GUARDS.bind(alias, body)) as lease:
+                if lease is not None and "lease_generation" in body:
+                    if self.path in MUTATING_OPERATIONS:
+                        # A forged mutating flag or widened scope is refused before anything runs.
+                        lease.policy = network_guard_policy(body, alias)
+                    elif isinstance(body.get("task_scope"), dict):
+                        with contextlib.suppress(WorkerError):
+                            lease.policy = network_guard_policy(body, alias)
+                    if lease.pending is not None:
+                        # The lease's guard blocked a write (or detected one it could not
+                        # block) and froze the page: nothing more runs, and nothing is read
+                        # off the frozen page, until the owner decides. The lease's next call
+                        # is how the gateway learns of a write blocked between its calls.
+                        raise WorkerError(lease.pending, 409)
                 if self.path == "/page_info":
                     result = page_info_result(alias, domain)
                 elif self.path == "/describe":
@@ -2683,6 +3296,9 @@ class Handler(BaseHTTPRequestHandler):
                     if operation is None:
                         raise WorkerError("OPERATION_NOT_ALLOWED", 404)
                     result = operation(body, alias, domain)
+                if lease is not None and lease.dropped and isinstance(result, dict):
+                    # Owner answer after review I7 ("Block silently, continue"): the kinds only.
+                    result["network_background_writes_dropped"] = lease.take_dropped()
             self.send_json(200, result)
         except WorkerError as exc:
             self.send_json(exc.status, {"error": exc.code})

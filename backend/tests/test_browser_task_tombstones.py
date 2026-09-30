@@ -53,10 +53,12 @@ async def test_schema_is_35():
     # Unit G9c: migration 37 (browser_tasks.mutating, the network-effect guard) follows 36.
     from van_gateway.storage.db import MIGRATIONS
 
-    assert SCHEMA_VERSION == 37
-    assert sorted(MIGRATIONS)[-3:] == [35, 36, 37]
+    # Unit G11: migration 38 (task truth — mutating, scope_json — immutable) follows 37.
+    assert SCHEMA_VERSION == 38
+    assert sorted(MIGRATIONS)[-4:] == [35, 36, 37, 38]
     assert "browser_task_tombstones" in MIGRATIONS[35] and "scope_json" in MIGRATIONS[36]
     assert "mutating" in MIGRATIONS[37]
+    assert "NEW.mutating IS NOT OLD.mutating" in MIGRATIONS[38] and "NEW.scope_json IS NOT OLD.scope_json" in MIGRATIONS[38]
 
 
 @pytest.mark.parametrize("terminal", TERMINAL)
@@ -152,13 +154,37 @@ async def test_upgrading_a_v34_database_tombstones_tasks_already_terminal(db):
     # every version above the highest recorded, so both are rolled back and both re-applied.
     conn.execute("ALTER TABLE browser_tasks DROP COLUMN scope_json")
     conn.execute("ALTER TABLE browser_tasks DROP COLUMN mutating")  # unit G9c: migration 37
-    conn.execute("DELETE FROM schema_migrations WHERE version IN (35, 36, 37)")
+    conn.execute("DELETE FROM schema_migrations WHERE version IN (35, 36, 37, 38)")
     conn.commit()
     _ins(conn, "legacy", "EXPIRED")
     await store.migrate()
-    assert [r[0] for r in conn.execute("SELECT version FROM schema_migrations WHERE version >= 35 ORDER BY version")] == [35, 36, 37]
+    assert [r[0] for r in conn.execute("SELECT version FROM schema_migrations WHERE version >= 35 ORDER BY version")] == [35, 36, 37, 38]
     assert "scope_json" in [r[1] for r in conn.execute("PRAGMA table_info(browser_tasks)")]
     assert "mutating" in [r[1] for r in conn.execute("PRAGMA table_info(browser_tasks)")]
     conn.execute("DELETE FROM browser_tasks WHERE task_id = 'legacy'")
     conn.commit()
     _refused(conn, lambda: _ins(conn, "legacy", "PENDING"))
+
+
+@pytest.mark.parametrize("column, value", [
+    ("mutating", 1),
+    ("scope_json", '{"entries":[{"origin":"https://evil.example.net","path_prefix":null}]}'),
+    ("scope_json", None),
+])
+async def test_task_truth_is_immutable_once_created(db, column, value):
+    """Review I7 minor 8 (migration 38): whether the Harness's network guard lets a task write
+    (``mutating``) and which pages it may act on (``scope_json``) are fixed at creation. A
+    running task is not flipped to mutating or re-scoped in place; ordinary progress (status)
+    still updates."""
+    conn, _ = db
+    _ins(conn, "t8", "RUNNING")
+    conn.execute("UPDATE browser_tasks SET scope_json = NULL WHERE task_id = 't8'")  # unchanged: allowed
+    conn.commit()
+    _refused(conn, lambda: (conn.execute(f"UPDATE browser_tasks SET {column} = ? WHERE task_id = 't8'",
+                                         (value if value is not None else '{"entries":[]}',)), conn.commit()),
+             match="browser_task_identity_immutable")
+    row = conn.execute("SELECT mutating, scope_json FROM browser_tasks WHERE task_id = 't8'").fetchone()
+    assert tuple(row) == (0, None)
+    conn.execute("UPDATE browser_tasks SET status = 'WAITING_FOR_OWNER' WHERE task_id = 't8'")
+    conn.commit()
+    assert _status(conn, "t8") == "WAITING_FOR_OWNER"

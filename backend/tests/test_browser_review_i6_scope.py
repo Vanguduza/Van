@@ -345,7 +345,9 @@ async def test_m1_approval_adds_only_the_delta_and_only_while_active(tmp_path):
     async with ac:
         tid, decision_id = await lc._escalate(ac, store)
         path_scope = scope_for_new_task(t.DOMAIN, [f"https://{t.DOMAIN}/statements/"])
-        await store.execute("UPDATE browser_tasks SET scope_json = ? WHERE task_id = ?", (path_scope.to_json(), tid))
+        from conftest_automation import rewrite_task_truth
+
+        await rewrite_task_truth(store, "UPDATE browser_tasks SET scope_json = ? WHERE task_id = ?", (path_scope.to_json(), tid))
         before = await api._load_task(tid)
         await store.execute("UPDATE decisions SET status = 'APPROVED' WHERE id = ?", (decision_id,))
         await api._sync_waiting_owner_decision(before)
