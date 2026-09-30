@@ -349,6 +349,68 @@ SENSITIVE_NAME_RE = re.compile(
     re.IGNORECASE,
 )
 
+#: Review I5 E1 — the Python half of the value redaction (the page script also compares with
+#: the page's field values, which never leave the page). Digit-heavy values (6+ digits: card,
+#: account, phone, SSN) and token-like runs are redacted from data-*, aria-label/title/alt
+#: copies and URL path segments.
+_TOKEN_RUN_RE = re.compile(r"[A-Za-z0-9_\-+/=.~%]{16,}")
+_PROTOCOL_ONLY_RE = re.compile(r"^[a-z][a-z0-9+.-]*:$")
+VALUE_REDACTED_ATTRIBUTES = frozenset({"aria-label", "title", "alt"})
+URL_ATTRIBUTES = frozenset({"href", "action", "formaction"})
+
+
+def secret_like(value: str) -> bool:
+    if sum(ch.isdigit() for ch in value) >= 6:
+        return True
+    for run in _TOKEN_RUN_RE.findall(value):
+        if len(run) >= 32 or (re.search(r"\d", run) and re.search(r"[A-Za-z]", run)):
+            return True
+    return False
+
+
+_DIGIT_RUN_RE = re.compile(r"\d[\d \-./]*\d")
+
+
+def mask_digit_runs(value: str) -> str:
+    """Replace a run carrying 6+ digits (a card or account number in a title copied into a
+    description) and leave the words around it."""
+    return _DIGIT_RUN_RE.sub(lambda m: REDACTED if sum(c.isdigit() for c in m.group()) >= 6 else m.group(), value)
+
+
+def redact_url(value: str) -> str:
+    """origin + path (secret-like segments replaced) + query *names*; never values."""
+    from urllib.parse import unquote, urlsplit
+
+    if _PROTOCOL_ONLY_RE.fullmatch(value):
+        return value
+    try:
+        parts = urlsplit(value)
+    except ValueError:
+        return REDACTED
+    if parts.scheme and parts.scheme not in {"http", "https"}:
+        return f"{parts.scheme}:"
+    origin = ""
+    if parts.netloc:
+        host = parts.hostname or ""
+        origin = f"{parts.scheme}://{host}" + (f":{parts.port}" if parts.port else "")
+    segments = []
+    for segment in parts.path.split("/"):
+        decoded = unquote(segment)
+        segments.append(REDACTED if segment and (secret_like(decoded) or len(decoded) >= 32) else segment)
+    names = [item.split("=", 1)[0] for item in parts.query.split("&") if item]
+    return _clip(origin + "/".join(segments) + ("?" + "&".join(names) if names else ""))
+
+
+def sanitize_attribute(name: str, value: str) -> str:
+    if name in URL_ATTRIBUTES:
+        return redact_url(value)
+    if name.startswith("data-"):
+        return REDACTED if SENSITIVE_NAME_RE.search(name) or secret_like(value) else _clip(value)
+    if name in VALUE_REDACTED_ATTRIBUTES and secret_like(value):
+        return REDACTED
+    return _clip(value)
+
+
 ELEMENTS_JS = r"""
 (async (mode, target) => {
   const MAX = 200, MAX_BYTES = 60000, TEXT = 256, SCAN = 3000;
@@ -362,6 +424,40 @@ ELEMENTS_JS = r"""
   const NAME_FROM_CONTENT = new Set(['button','link','menuitem','menuitemcheckbox','menuitemradio','tab','option','checkbox','radio','switch','treeitem','gridcell','heading','tooltip']);
   const SKIP_TEXT = new Set(['SCRIPT','STYLE','NOSCRIPT','TEXTAREA','SELECT','OPTION','INPUT','TEMPLATE']);
   const clip = (s) => { s = String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); return s.length > TEXT ? s.slice(0, TEXT) : s; };
+  // Review I5 E1 — values a page mirrors out of its fields (data-value, data-pan...) or carries
+  // as secrets (card numbers, reset tokens) are redacted wherever an attribute or URL path
+  // would otherwise report them. Field values are read only to compare; never reported.
+  const VALUELESS = new Set(['button', 'submit', 'reset', 'image', 'checkbox', 'radio', 'file', 'color', 'range']);
+  const digitsOf = (v) => String(v).replace(/\D+/g, '');
+  const FIELD_VALUES = (() => {
+    const out = [];
+    try {
+      for (const f of document.querySelectorAll('input,textarea,select,[contenteditable=""],[contenteditable="true" i]')) {
+        if (out.length >= 400) break;
+        const tag = f.localName, type = (f.getAttribute('type') || '').toLowerCase();
+        if (tag === 'input' && VALUELESS.has(type)) continue;
+        const vals = [];
+        try { vals.push(f.isContentEditable && tag !== 'input' && tag !== 'textarea' ? f.textContent : f.value); } catch (e) { /* unreadable */ }
+        vals.push(f.getAttribute('value'));
+        for (let v of vals) { v = String(v == null ? '' : v).trim(); if (v.length >= 3) out.push(v.toLowerCase()); }
+      }
+    } catch (e) { /* no fields */ }
+    return out;
+  })();
+  function secretLike(v) {
+    v = String(v == null ? '' : v);
+    if (digitsOf(v).length >= 6) return true;
+    for (const run of v.match(/[A-Za-z0-9_\-+\/=.~%]{16,}/g) || []) {
+      if (run.length >= 32 || (/\d/.test(run) && /[A-Za-z]/.test(run))) return true;
+    }
+    const low = v.toLowerCase().trim(), dv = digitsOf(v);
+    for (const f of FIELD_VALUES) {
+      if (low === f || (f.length >= 4 && low.includes(f))) return true;
+      const df = digitsOf(f);
+      if (df.length >= 4 && dv.includes(df)) return true;
+    }
+    return false;
+  }
   const esc = (s) => (window.CSS && CSS.escape) ? CSS.escape(s) : String(s).replace(/[^a-zA-Z0-9_-]/g, (c) => '\\' + c);
   const unique = (sel, el) => { try { const n = document.querySelectorAll(sel); return n.length === 1 && n[0] === el; } catch (e) { return false; } };
   function locatorFor(el) {
@@ -467,19 +563,26 @@ ELEMENTS_JS = r"""
       const u = new URL(raw, location.href);
       if (!/^https?:$/.test(u.protocol)) return clip(u.protocol);
       const keys = Array.from(u.searchParams.keys());
-      return clip(u.origin + u.pathname + (keys.length ? '?' + keys.join('&') : ''));
+      // Review I5 E1 — a path segment that is a token, a long identifier or a field's value
+      // (/reset/tok_9f8e7d6c5b4a/confirm) is replaced; query values are already dropped.
+      const path = u.pathname.split('/').map((seg) => {
+        let d = seg; try { d = decodeURIComponent(seg); } catch (e) { /* keep raw */ }
+        return seg && (secretLike(d) || d.length >= 32) ? '[REDACTED]' : seg;
+      }).join('/');
+      return clip(u.origin + path + (keys.length ? '?' + keys.join('&') : ''));
     } catch (e) { return ''; }
   }
   function attrsOf(el) {
     const out = {}; let data = 0;
     for (const a of ['id', 'name', 'type', 'class', 'role', 'aria-label', 'title', 'alt', 'target']) {
-      const v = el.getAttribute(a); if (v != null && v !== '') out[a] = clip(v);
+      const v = el.getAttribute(a);
+      if (v != null && v !== '') out[a] = (['aria-label', 'title', 'alt'].includes(a) && secretLike(v)) ? '[REDACTED]' : clip(v);
     }
     for (const a of ['href', 'action', 'formaction']) { const v = el.getAttribute(a); if (v) out[a] = safeUrl(v); }
     for (const a of el.attributes) {
       if (!a.name.startsWith('data-') || data >= 16) continue;
       data++;
-      out[a.name] = SENSITIVE.test(a.name) ? '[REDACTED]' : clip(a.value);
+      out[a.name] = (SENSITIVE.test(a.name) || secretLike(a.value)) ? '[REDACTED]' : clip(a.value);
     }
     return out;
   }
@@ -591,6 +694,8 @@ def sanitize_element(raw: Any) -> dict[str, Any] | None:
     for key in ELEMENT_STRING_KEYS:
         value = raw.get(key)
         out[key] = value if key == "locator" else _clip(value if isinstance(value, str) else "")
+    # Review I5 E1 — a title used as the description can carry a card number.
+    out["description"] = mask_digit_runs(out["description"])
     for key in ELEMENT_BOOL_KEYS:
         out[key] = raw.get(key) is True
     # Unknown visibility is hidden: the gateway refuses to act on a hidden target.
@@ -607,7 +712,7 @@ def sanitize_element(raw: Any) -> dict[str, Any] | None:
                 break
             if not isinstance(name, str) or not ATTRIBUTE_NAME_RE.fullmatch(name) or not isinstance(value, str):
                 continue
-            attributes[name] = REDACTED if name.startswith("data-") and SENSITIVE_NAME_RE.search(name) else _clip(value)
+            attributes[name] = sanitize_attribute(name, value)
     out["attributes"] = attributes
     if out["type"] == "password" or out["autocomplete"].startswith(("cc-", "current-password", "new-password", "one-time-code")):
         out["sensitive"] = True
@@ -641,8 +746,10 @@ def session_facts(snapshot: dict[str, Any], identity: str, cookies: bool | None)
 
     ``authenticated`` is True on positive evidence (an account-identity marker, a visible
     sign-out control). It is False only when the profile demonstrably holds no session state
-    for the page: no cookie (CDP, HttpOnly included), no local/session storage entry and no
-    IndexedDB database. Anything else is None (unknown), which B2 treats as signed in.
+    for the page: no cookie for the site on any path or sibling host (CDP, HttpOnly
+    included), no local/session storage entry, no IndexedDB database and no other origin
+    storage in use, all read over CDP (review I5 E2). Anything else is None (unknown), which
+    B2 treats as signed in.
     """
     doc_cookie = tri_state(snapshot.get("document_cookie_present"))
     if cookies is None and doc_cookie is True:
@@ -657,6 +764,7 @@ def session_facts(snapshot: dict[str, Any], identity: str, cookies: bool | None)
         cookies is False
         and snapshot.get("storage_entries") == 0
         and snapshot.get("indexeddb_databases") == 0
+        and snapshot.get("storage_usage_bytes", 0) == 0
     ):
         authenticated, basis = False, "NO_SESSION_STATE"
     else:
@@ -677,13 +785,58 @@ if "dialog" not in info:
         snapshot = js(__ELEMENTS_LIST__) or {}
     except Exception:
         snapshot = {"elements_error": True}
+    snapshot = snapshot if isinstance(snapshot, dict) else {"elements_error": True}
+    # Review I5 E2 — session state is read over CDP, never from page JS (a page can redefine
+    # Storage.prototype.length or indexedDB.databases). Counts only; no content is kept.
+    from urllib.parse import urlsplit
+    parts = urlsplit(str(info.get("url") or ""))
+    host = (parts.hostname or "").lower().rstrip(".")
+    origin = f"{parts.scheme}://{parts.netloc}" if parts.scheme in ("http", "https") and host else ""
+    labels = host.split(".")
+    # The registrable domain, over-approximated as the last two labels: a sibling SSO host
+    # (auth.example.com for docs.example.com) counts; over-inclusion only yields "unknown".
+    site = ".".join(labels[-2:]) if len(labels) >= 2 and not host.replace(".", "").isdigit() else host
     cookies = None
     try:
-        got = cdp("Network.getCookies", urls=[str(info.get("url") or "")])
-        cookies = bool(got.get("cookies")) if isinstance(got, dict) and isinstance(got.get("cookies"), list) else None
+        got = cdp("Network.getAllCookies")
+        listed = got.get("cookies") if isinstance(got, dict) else None
+        if isinstance(listed, list) and site:
+            # Any cookie for the site, on any path or sibling host.
+            cookies = any(
+                isinstance(c, dict) and (lambda d: d == site or d.endswith("." + site))(str(c.get("domain") or "").lower().lstrip(".").rstrip("."))
+                for c in listed
+            )
     except Exception:
         cookies = None
-    info["__van_snapshot__"] = snapshot if isinstance(snapshot, dict) else {"elements_error": True}
+    for key in ("storage_entries", "indexeddb_databases", "storage_usage_bytes"):
+        snapshot[key] = None
+    if origin:
+        try:
+            count = 0
+            for local in (True, False):
+                got = cdp("DOMStorage.getDOMStorageItems", storageId={"securityOrigin": origin, "isLocalStorage": local})
+                entries = got.get("entries") if isinstance(got, dict) else None
+                if not isinstance(entries, list):
+                    raise ValueError("entries")
+                count += len(entries)
+            snapshot["storage_entries"] = count
+        except Exception:
+            pass
+        try:
+            got = cdp("IndexedDB.requestDatabaseNames", securityOrigin=origin)
+            names = got.get("databaseNames") if isinstance(got, dict) else None
+            if isinstance(names, list):
+                snapshot["indexeddb_databases"] = len(names)
+        except Exception:
+            pass
+        try:
+            got = cdp("Storage.getUsageAndQuota", origin=origin)
+            usage = got.get("usage") if isinstance(got, dict) else None
+            if isinstance(usage, (int, float)) and not isinstance(usage, bool):
+                snapshot["storage_usage_bytes"] = int(usage)
+        except Exception:
+            pass
+    info["__van_snapshot__"] = snapshot
     info["__van_cookies__"] = cookies
 info["harness_version"] = "0.1.13"
 print("__VAN_JSON__" + json.dumps(info))
