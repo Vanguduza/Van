@@ -173,6 +173,8 @@ Type=simple
 User=vanmuse
 Group=vanmuse
 NetworkNamespacePath=/run/netns/van-muse
+# Force libc/Dante DNS through the namespace resolver; never inherit host systemd-resolved.
+BindReadOnlyPaths=/etc/netns/van-muse/resolv.conf:/etc/resolv.conf
 ExecStart=/usr/sbin/danted -f /opt/van-muse-egress/danted.conf
 Restart=on-failure
 RestartSec=3
