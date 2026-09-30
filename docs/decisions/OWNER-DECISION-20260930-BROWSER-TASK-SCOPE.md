@@ -170,3 +170,22 @@ Recorded first-hand by the integrator (the Claude Code session that asked and re
 Implemented by units G11 (persistent guard, background-write drop rule) and G12 (egress proxy, UDP/TCP firewall),
 integrated by G13. Authorizations: `auth-20260930-owner-explicit-browser-egress-and-beacons` and
 `auth-20260930-owner-derived-programme-b-review-i7-remediation`.
+
+---
+
+## Owner answer after unit G13: guard canary origin (appended 2026-09-30)
+
+Recorded first-hand by the integrator (the Claude Code session that asked and received the answer:
+`session_01ELKqm4GCPmPvF3ggKkgB1J`). No device, biometric or cryptographic signature is claimed. Append-only.
+
+Question (verbatim): "The guard canary in qualify.sh serves its test page from 127.0.0.1, but the egress proxy refuses
+local upstream addresses. So on a real host the canary always fails, and browser qualification can never pass. How
+should the canary be qualified?"
+Answer (verbatim label): **"In-zone canary origin (Recommended)"** — option text: "The canary serves its fixture from a
+dedicated canary hostname on the zone's private overlay, listed in the proxy config as the only allowed non-global
+upstream. It is checked by qualify.sh and never reachable by a task scope. The proxy's local-address rule stays strict
+for everything else."
+
+Implemented by unit G14 (canary origin, reserved `*.internal` hosts refused at the gateway, Harness and proxy).
+Authorization: `auth-20260930-owner-explicit-guard-canary-origin`. Unit G14's review-I8 egress remediation is
+authorized separately by `auth-20260930-owner-derived-programme-b-review-i8-egress-remediation`.
