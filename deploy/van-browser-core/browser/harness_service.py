@@ -211,6 +211,7 @@ class ChromeSession:
                 raise WorkerError("CHROMIUM_EXECUTABLE_UNAVAILABLE", 503)
             self.profile_dir.mkdir(parents=True, exist_ok=True)
             self.runtime_dir.mkdir(parents=True, exist_ok=True)
+            os.chmod(self.runtime_dir, 0o750)  # review I8 MINOR-4: see _publish_cdp
             active = self.profile_dir / "DevToolsActivePort"
             active.unlink(missing_ok=True)
             self.process = subprocess.Popen(
@@ -250,7 +251,9 @@ class ChromeSession:
             ),
             encoding="utf-8",
         )
-        os.chmod(tmp, 0o600)
+        # Review I8 MINOR-4: readable by group van-browser, where the Stagehand user (its own uid,
+        # without the fence key or the proxy's control socket) finds the CDP endpoint.
+        os.chmod(tmp, 0o640)
         os.replace(tmp, target)
 
     def stop(self) -> None:

@@ -13,9 +13,10 @@ StartLimitBurst=5
 [Service]
 Type=simple
 User=van-browser-egress
-# Primary group van-browser: the control socket (0660) is reachable by the Harness worker and
-# nothing else. The interception keys stay in the 0700 state directory of this user.
-Group=van-browser
+# Review I8 MINOR-4: group van-egress-ctl, whose only other member is the browser user (the
+# Harness worker): the control socket (0660) is reachable by the Harness and nothing else - not
+# the Stagehand user. The interception keys stay in the 0700 state directory of this user.
+Group=van-egress-ctl
 EnvironmentFile=/etc/van-browser-core/runtime.env
 WorkingDirectory=/var/lib/van-browser-egress
 ExecStartPre=/usr/bin/grep -qx van-browser-core /etc/van-browser-core/zone

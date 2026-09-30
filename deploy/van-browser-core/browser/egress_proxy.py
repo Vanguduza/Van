@@ -32,7 +32,7 @@ evaluated and cannot refuse ``wss://<in-scope host>/ws-pay``; see
   leaf key; Chromium trusts it only through ``--ignore-certificate-errors-spki-list`` naming
   that leaf key (no system or profile trust store is changed). Upstream TLS is verified
   normally against the system trust store;
-* each decrypted (or plain-HTTP) request: its origin must be a scope origin; ``GET``/``HEAD``
+* each decrypted (or plain-HTTP) request: its origin must be a scope origin; ``GET``/``HEAD``/``OPTIONS``
   without a body pass; any other method, any request body, any ``Upgrade: websocket`` is
   refused unless the task is admitted as mutating *and* the URL is inside the task scope
   (the shared URL scope rule below, ``WRITE``); any other ``Upgrade`` is refused;

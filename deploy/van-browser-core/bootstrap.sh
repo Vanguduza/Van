@@ -96,10 +96,19 @@ for user in van-browser van-browser-edge; do
   fi
 done
 
-# Unit G12 — the egress proxy's own user. Primary group van-browser so the Harness can reach
-# its control socket; its state directory (interception CA and leaf keys) is 0700 to itself.
-if id van-browser-egress >/dev/null 2>&1; then say "van-browser-egress exists"; else
-  run "useradd --system --gid van-browser --home-dir /var/lib/van-browser-egress --shell /usr/sbin/nologin van-browser-egress"
+# Unit G12 — the egress proxy's own user; its state directory (interception CA and leaf keys)
+# is 0700 to itself. Review I8 MINOR-4: its control socket belongs to group van-egress-ctl,
+# whose only other member is the browser user (the Harness), not van-browser any more.
+getent group van-egress-ctl >/dev/null 2>&1 && say "group van-egress-ctl exists" || run "groupadd --system van-egress-ctl"
+if id van-browser-egress >/dev/null 2>&1; then run "usermod -g van-egress-ctl van-browser-egress"; else
+  run "useradd --system --gid van-egress-ctl --home-dir /var/lib/van-browser-egress --shell /usr/sbin/nologin van-browser-egress"
+fi
+run "usermod -aG van-egress-ctl van-browser"
+# Review I8 MINOR-4 — Stagehand's own user: it reads the Harness's CDP endpoint files (group
+# van-browser, 0640) and nothing else of the browser user's (the fence key is 0400).
+getent group van-stagehand >/dev/null 2>&1 && say "group van-stagehand exists" || run "groupadd --system van-stagehand"
+if id van-stagehand >/dev/null 2>&1; then say "van-stagehand exists"; else
+  run "useradd --system --gid van-stagehand --groups van-browser --home-dir /var/lib/van-stagehand --shell /usr/sbin/nologin van-stagehand"
 fi
 
 echo "== zone marker and directories =="
@@ -108,11 +117,12 @@ run "printf '%s\n' $ZONE > $ETC/zone && chmod 0644 $ETC/zone"
 run "install -d -o van-browser -g van-browser -m 0750 $RUNTIME $RUNTIME/browsers"
 run "install -d -o van-browser -g van-browser -m 0700 $DATA $DATA/profiles $DATA/secrets $DATA/harness-state"
 run "install -d -o van-browser -g van-browser -m 0750 $DATA/downloads $DATA/evidence $DATA/evidence/sha256"
-run "install -d -o van-browser -g van-browser -m 0700 /run/van-browser-core"
+run "install -d -o van-browser -g van-browser -m 0750 /run/van-browser-core"
+run "install -d -o van-stagehand -g van-stagehand -m 0700 /var/lib/van-stagehand /var/lib/van-stagehand/secrets"
 run "install -d -o van-browser -g van-browser -m 0750 /var/log/van-browser-core"
 run "install -d -o van-browser-edge -g van-browser-edge -m 0700 /var/lib/van-browser-edge"
-run "install -d -o van-browser-egress -g van-browser -m 0700 /var/lib/van-browser-egress"
-run "install -d -o van-browser-egress -g van-browser -m 0750 /var/log/van-browser-egress"
+run "install -d -o van-browser-egress -g van-egress-ctl -m 0700 /var/lib/van-browser-egress"
+run "install -d -o van-browser-egress -g van-egress-ctl -m 0750 /var/log/van-browser-egress"
 # Review I5 F2 — the lease fence install marker and an empty fence manifest, together and
 # only once. Re-running bootstrap never recreates a manifest that was lost: with the marker
 # present the Harness then refuses fenced calls until the state is restored.
@@ -131,7 +141,7 @@ if [[ -e "$FENCE_KEY" ]]; then say "$FENCE_KEY exists; left alone"; else
 fi
 # Unit G12 — the egress proxy verifies the gateway's effect MAC with the same key: its own
 # copy, readable by that user only. Re-copied on every run so the two never drift.
-run "install -o van-browser-egress -g van-browser -m 0400 $FENCE_KEY /var/lib/van-browser-egress/fence.key"
+run "install -o van-browser-egress -g van-egress-ctl -m 0400 $FENCE_KEY /var/lib/van-browser-egress/fence.key"
 run "install -d -o root -g van-browser-edge -m 0750 $ETC/pki"
 
 echo "== configuration =="
@@ -149,7 +159,7 @@ PY"
 run "sed -i 's/^VAN_BROWSER_DNS_RESOLVER=.*/VAN_BROWSER_DNS_RESOLVER=$DNS_RESOLVER/' $CONFIG"
 # Review I8 MAJOR-3: the egress proxy serves its listeners to these uids only.
 EGRESS_CLIENT_UID="$(id -u van-browser 2>/dev/null || echo UNRESOLVED)"
-EGRESS_SERVICE_CLIENT_UID="$(id -u van-browser 2>/dev/null || echo UNRESOLVED)"
+EGRESS_SERVICE_CLIENT_UID="$(id -u van-stagehand 2>/dev/null || echo UNRESOLVED)"
 run "sed -i 's/^VAN_EGRESS_CLIENT_UID=.*/VAN_EGRESS_CLIENT_UID=$EGRESS_CLIENT_UID/; s/^VAN_EGRESS_SERVICE_CLIENT_UID=.*/VAN_EGRESS_SERVICE_CLIENT_UID=$EGRESS_SERVICE_CLIENT_UID/' $CONFIG"
 run "install -o root -g van-browser-edge -m 0640 $HERE/edge/Caddyfile $ETC/Caddyfile"
 
@@ -207,7 +217,8 @@ run "$RUNTIME/harness-venv/bin/python -m pip freeze --all | LC_ALL=C sort > $RUN
 
 echo "== zone firewall (unit G12) =="
 BROWSER_UID="$(id -u van-browser 2>/dev/null || echo UNRESOLVED)"
-run "printf 'define VAN_BROWSER_UID = %s\\ndefine VAN_DNS_RESOLVER = %s\\n' $BROWSER_UID $DNS_RESOLVER > $ETC/firewall-vars.nft && chmod 0644 $ETC/firewall-vars.nft"
+STAGEHAND_UID="$(id -u van-stagehand 2>/dev/null || echo UNRESOLVED)"
+run "printf 'define VAN_BROWSER_UID = %s\\ndefine VAN_STAGEHAND_UID = %s\\ndefine VAN_DNS_RESOLVER = %s\\n' $BROWSER_UID $STAGEHAND_UID $DNS_RESOLVER > $ETC/firewall-vars.nft && chmod 0644 $ETC/firewall-vars.nft"
 run "install -o root -g root -m 0644 $HERE/firewall/van-browser-core.nft $ETC/firewall.nft"
 run "nft -c -f $ETC/firewall.nft"
 run "nft -f $ETC/firewall.nft"

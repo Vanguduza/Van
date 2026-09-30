@@ -44,7 +44,9 @@ different installed artifact fails the gateway placement gate and `qualify.sh`.
 
 Model: `anthropic/claude-sonnet-5` (§4), pinned in `runtime.env.example`; the worker refuses
 a request naming another model. The credential is the file-backed
-`secretref://browser/stagehand-model` under `VAN_BROWSER_SECRET_ROOT`, never a repository file.
+`secretref://browser/stagehand-model` under `VAN_BROWSER_SECRET_ROOT`, never a repository file
+(for the Stagehand unit that root is `/var/lib/van-stagehand/secrets`, owned by its own user
+`van-stagehand` since review I8 MINOR-4).
 
 ## What this zone does not hold
 

@@ -99,20 +99,31 @@ else add runtime_env_clean GREEN "no foreign-zone credential names"; fi
 #    "Egress proxy (Recommended)", "Firewall UDP in zone (Recommended)"). Each result below is
 #    measured on this host, never read from a file this zone wrote about itself.
 BROWSER_USER="${VAN_QUALIFY_BROWSER_USER:-van-browser}"
+STAGEHAND_USER="${VAN_QUALIFY_STAGEHAND_USER:-van-stagehand}"
+uid_of() { if [[ "$1" =~ ^[0-9]+$ ]]; then echo "$1"; else id -u "$1" 2>/dev/null || true; fi; }
+reject_count() { nft list chain inet van_browser_core browser_out 2>/dev/null \
+  | sed -n 's/.*counter packets \([0-9]*\) .*comment "van-tcp-bypass-reject".*/\1/p' | head -1; }
+# Review I8 MAJOR-4: only the browser and Stagehand users' packets jump to browser_out; the
+# output chain accepts everything else (packets without an owning socket included).
 if ! command -v nft >/dev/null 2>&1; then add firewall_loaded RED "nft not installed"
 elif ruleset="$(nft list table inet van_browser_core 2>/dev/null)"; then
   missing=""
-  for c in van-local-reset van-other-users van-dns-resolver van-udp-drop van-loopback-tcp van-tcp-bypass-reject van-other-drop; do
+  for c in van-browser-users van-local-reset van-dns-resolver van-udp-drop van-loopback-tcp van-tcp-bypass-reject van-other-drop; do
     grep -q "comment \"$c\"" <<<"$ruleset" || missing="$missing $c"
   done
-  uid="$(id -u "$BROWSER_USER" 2>/dev/null || true)"
-  if [[ -z "$uid" ]]; then add firewall_loaded RED "browser user $BROWSER_USER does not exist"
+  uid="$(uid_of "$BROWSER_USER")"; suid="$(uid_of "$STAGEHAND_USER")"
+  jump="$(grep 'comment "van-browser-users"' <<<"$ruleset")"
+  if [[ -z "$uid" || -z "$suid" ]]; then add firewall_loaded RED "browser user $BROWSER_USER or Stagehand user $STAGEHAND_USER does not exist"
   elif [[ -n "$missing" ]]; then add firewall_loaded RED "rules missing:$missing"
-  elif grep -Eq "meta skuid != ($uid|\"?$BROWSER_USER\"?) accept comment \"van-other-users\"" <<<"$ruleset"; then
-    add firewall_loaded GREEN "table inet van_browser_core loaded for uid $uid"
-  else add firewall_loaded RED "ruleset is not bound to $BROWSER_USER (uid $uid)"; fi
+  elif grep -q "skuid !=" <<<"$ruleset" || grep -q "tcp dport 53" <<<"$ruleset"; then
+    add firewall_loaded RED "an old-form rule is loaded (skuid != ... / TCP 53): reload firewall/van-browser-core.nft"
+  elif grep -Eq "meta skuid \{ [^}]*\b($uid|\"?$BROWSER_USER\"?)\b" <<<"$jump" \
+       && grep -Eq "meta skuid \{ [^}]*\b($suid|\"?$STAGEHAND_USER\"?)\b" <<<"$jump" && grep -q "jump browser_out" <<<"$jump"; then
+    add firewall_loaded GREEN "table inet van_browser_core loaded for uids $uid (browser) and $suid (Stagehand)"
+  else add firewall_loaded RED "ruleset is not bound to $BROWSER_USER ($uid) and $STAGEHAND_USER ($suid)"; fi
 else add firewall_loaded RED "table inet van_browser_core not loaded"; fi
 # The browser user's own sockets: UDP (STUN, QUIC) must fail locally; direct TCP must be reset.
+rejects_before="$(reject_count)"
 probe="$(setpriv --reuid="$BROWSER_USER" --regid="$(id -g "$BROWSER_USER" 2>/dev/null || echo 65534)" --clear-groups \
   python3 - 2>/dev/null <<'PY'
 import errno, socket
@@ -143,8 +154,12 @@ PY
 udp="$(sed -n 's/^udp //p' <<<"$probe")"; tcp="$(sed -n 's/^tcp //p' <<<"$probe")"
 [[ "$udp" == "BLOCKED,BLOCKED,BLOCKED" ]] && add browser_udp_blocked GREEN "UDP send as $BROWSER_USER: $udp" \
   || add browser_udp_blocked RED "UDP send as $BROWSER_USER: ${udp:-probe did not run}"
-[[ "$tcp" == "REJECTED" ]] && add browser_tcp_bypass_blocked GREEN "direct TCP as $BROWSER_USER: reset" \
-  || add browser_tcp_bypass_blocked RED "direct TCP as $BROWSER_USER: ${tcp:-probe did not run}"
+# Review I8 MINOR-5: a refused connect alone proves nothing (anything can answer RST); the
+# ruleset's own reject counter must have counted it.
+rejects_after="$(reject_count)"
+if [[ "$tcp" == "REJECTED" && "$rejects_before" =~ ^[0-9]+$ && "$rejects_after" =~ ^[0-9]+$ && "$rejects_after" -gt "$rejects_before" ]]; then
+  add browser_tcp_bypass_blocked GREEN "direct TCP as $BROWSER_USER: reset by van-tcp-bypass-reject ($rejects_before -> $rejects_after)"
+else add browser_tcp_bypass_blocked RED "direct TCP as $BROWSER_USER: ${tcp:-probe did not run}; reject counter ${rejects_before:-?} -> ${rejects_after:-?}"; fi
 # The egress proxy: running, keyed, no test overrides; it refuses without a policy and refuses
 # a WebSocket upgrade and a POST under a read-only policy it has verified. The probe policy is
 # MACed with the proxy's own key copy (root reads it here) for the alias qualify_probe only;
@@ -214,8 +229,69 @@ field() { sed -n "s/^$1 //p" <<<"$egress"; }
   || add egress_refuses_smuggling RED "smuggle=$(field smuggle)$(field error)"
 [[ "$(field otheruid)" == EGRESS_CLIENT_REFUSED ]] && add egress_refuses_other_users GREEN "a root client of a browser listener is refused" \
   || add egress_refuses_other_users RED "otheruid=$(field otheruid)$(field error)"
-if jq -e '.egress_proxy==true' /tmp/vbcq-h.json >/dev/null 2>&1; then add harness_uses_egress_proxy GREEN "Harness /health egress_proxy=true"
-else add harness_uses_egress_proxy RED "Harness does not report its egress proxy"; fi
+# Review I8 MINOR-5: measured on the browser processes themselves (/proc/<pid>/cmdline), not
+# read from the Harness's own report: every Chromium browser process of the browser user runs
+# with the proxy flags (the canary above leaves at least one running).
+argv="$(python3 - "$BROWSER_USER" "$ETC/runtime.env" 2>/dev/null <<'PY'
+import os, pwd, re, sys
+uid = pwd.getpwnam(sys.argv[1]).pw_uid if not sys.argv[1].isdigit() else int(sys.argv[1])
+env = dict(re.findall(r"^([A-Z_][A-Z0-9_]*)=(.*)$", open(sys.argv[2], encoding="utf-8").read(), re.M))
+low, _, high = env.get("VAN_EGRESS_PORT_RANGE", "9150-9199").partition("-")
+found, bad = 0, []
+for pid in filter(str.isdigit, os.listdir("/proc")):
+    try:
+        if os.stat(f"/proc/{pid}").st_uid != uid:
+            continue
+        args = [a.decode("utf-8", "replace") for a in open(f"/proc/{pid}/cmdline", "rb").read().split(b"\0") if a]
+    except OSError:
+        continue
+    if not any(a.startswith("--user-data-dir=") for a in args) or not any(a.startswith("--remote-debugging-port=") for a in args) \
+            or any(a.startswith("--type=") for a in args):
+        continue  # the browser process of a Harness-owned Chromium only (not its renderers)
+    found += 1
+    proxy = [re.fullmatch(r"--proxy-server=http://127\.0\.0\.1:(\d+)", a) for a in args if a.startswith("--proxy-server=")]
+    if not (len(proxy) == 1 and proxy[0] and int(low) <= int(proxy[0].group(1)) <= int(high or low)
+            and "--proxy-bypass-list=<-loopback>" in args and "--disable-quic" in args
+            and any(a.startswith("--ignore-certificate-errors-spki-list=") for a in args)
+            and "--ignore-certificate-errors" not in args):
+        bad.append(pid)
+print(found, len(bad))
+PY
+)"
+if [[ "$argv" =~ ^([0-9]+)\ 0$ && "${BASH_REMATCH[1]}" -ge 1 ]] && jq -e '.egress_proxy==true' /tmp/vbcq-h.json >/dev/null 2>&1; then
+  add harness_uses_egress_proxy GREEN "${BASH_REMATCH[1]} Chromium browser process(es) of $BROWSER_USER, each with the proxy flags"
+else add harness_uses_egress_proxy RED "Chromium argv (processes, without proxy flags): ${argv:-none}; Harness /health egress_proxy: $(jq -c .egress_proxy /tmp/vbcq-h.json 2>/dev/null)"; fi
+
+# Review I8 MINOR-4: Stagehand runs as its own user, which can read neither the lease-fence key
+# nor the egress proxy's control socket (with them it could forge the gateway's MACs).
+iso="$(python3 - "$STAGEHAND_USER" "$ETC/runtime.env" "$BROWSER_USER" 2>/dev/null <<'PY'
+import os, pwd, re, subprocess, sys
+env = dict(re.findall(r"^([A-Z_][A-Z0-9_]*)=(.*)$", open(sys.argv[2], encoding="utf-8").read(), re.M))
+user = pwd.getpwnam(sys.argv[1])
+running = subprocess.run(["pgrep", "-u", str(user.pw_uid), "-f", "stagehand_service.mjs"], capture_output=True).returncode == 0
+as_browser = subprocess.run(["pgrep", "-u", sys.argv[3], "-f", "stagehand_service.mjs"],
+                            capture_output=True).returncode == 0
+code = ("import errno, socket, sys\n"
+        "out = []\n"
+        "for path in sys.argv[1:3]:\n"
+        "    try:\n"
+        "        open(path, 'rb').close(); out.append('READ')\n"
+        "    except OSError as e:\n"
+        "        out.append('DENIED' if e.errno in (errno.EACCES, errno.EPERM) else 'ERR%d' % e.errno)\n"
+        "s = socket.socket(socket.AF_UNIX)\n"
+        "try:\n"
+        "    s.connect(sys.argv[3]); out.append('CONNECTED')\n"
+        "except OSError as e:\n"
+        "    out.append('DENIED' if e.errno in (errno.EACCES, errno.EPERM) else 'ERR%d' % e.errno)\n"
+        "print(','.join(out))\n")
+probe = subprocess.run(["setpriv", f"--reuid={user.pw_uid}", f"--regid={user.pw_gid}", "--init-groups", sys.executable, "-c", code,
+                        env.get("VAN_HARNESS_FENCE_KEY_FILE", ""), env.get("VAN_EGRESS_FENCE_KEY_FILE", ""),
+                        env.get("VAN_EGRESS_CONTROL_SOCKET", "")], capture_output=True, text=True, timeout=20).stdout.strip()
+print("running" if running else "notrunning", "shared" if as_browser else "separate", probe or "noprobe")
+PY
+)"
+[[ "$iso" == "running separate DENIED,DENIED,DENIED" ]] && add stagehand_isolated GREEN "Stagehand runs as $STAGEHAND_USER; fence keys and control socket denied" \
+  || add stagehand_isolated RED "Stagehand isolation: ${iso:-probe did not run} (want: running separate DENIED,DENIED,DENIED)"
 
 # 7. Model pin status (§4): informational, required=0. UNVERIFIED is not GREEN.
 add model_immutable_snapshot UNKNOWN "immutable provider revision for claude-sonnet-5 not established" 0

@@ -34,35 +34,38 @@ ROOT = Path(__file__).resolve().parents[2]
 ZONE_DIR = ROOT / "deploy" / "van-browser-core"
 RULESET = ZONE_DIR / "firewall" / "van-browser-core.nft"
 VARS_INCLUDE = '/etc/van-browser-core/firewall-vars.nft'
-ORDER = ["van-local-reset", "van-other-users", "van-dns-resolver", "van-dns-resolver-tcp", "van-udp-drop", "van-loopback-tcp",
-         "van-loopback-tcp6", "van-tcp-bypass-reject", "van-other-drop"]
+ORDER = ["van-local-reset", "van-dns-resolver", "van-udp-drop", "van-loopback-tcp", "van-loopback-tcp6",
+         "van-tcp-bypass-reject", "van-other-drop"]
 FIREWALL_CHECKS = ["firewall_loaded", "browser_udp_blocked", "browser_tcp_bypass_blocked"]
 EGRESS_CHECKS = ["egress_proxy_active", "egress_refuses_without_policy", "egress_policy_mac_enforced",
                  "egress_refuses_websocket_and_write", "egress_refuses_smuggling", "egress_refuses_other_users"]
 
 
-def _rules() -> list[str]:
+def _chain(name: str) -> list[str]:
     text = RULESET.read_text(encoding="utf-8")
-    chain = re.search(r"chain output \{(.*?)\n\t\}", text, re.S).group(1)
+    chain = re.search(rf"chain {name} \{{(.*?)\n\t\}}", text, re.S).group(1)
     return [line.strip() for line in chain.splitlines() if line.strip() and not line.strip().startswith("#")]
 
 
 # ------------------------------------------------------------------------------ parse level
 def test_ruleset_rules_and_order():
+    """Review I8 MAJOR-4: only the browser/Stagehand users' packets are filtered (a jump); the
+    output chain accepts everything else, including packets that have no owning socket."""
     text = RULESET.read_text(encoding="utf-8")
     assert f'include "{VARS_INCLUDE}"' in text
-    rules = _rules()
-    assert rules[0] == "type filter hook output priority filter; policy accept;"
-    comments = [re.search(r'comment "([a-z0-9-]+)"$', r).group(1) for r in rules[1:]]
+    assert _chain("output") == [
+        "type filter hook output priority filter; policy accept;",
+        'meta skuid { $VAN_BROWSER_UID, $VAN_STAGEHAND_UID } jump browser_out comment "van-browser-users"',
+    ]
+    rules = _chain("browser_out")
+    comments = [re.search(r'comment "([a-z0-9-]+)"$', r).group(1) for r in rules]
     assert comments == ORDER
-    by = dict(zip(comments, rules[1:]))
+    by = dict(zip(comments, rules))
     # Resets towards this host only (what makes a rejected connect fail at once).
     assert by["van-local-reset"] == 'oifname "lo" tcp flags rst accept comment "van-local-reset"'
-    # Only the browser user is filtered; everything below applies to it alone.
-    assert by["van-other-users"] == 'meta skuid != $VAN_BROWSER_UID accept comment "van-other-users"'
-    # DNS: the one resolver, port 53, nothing else.
+    # DNS: the one resolver, UDP port 53, nothing else (review I8 MINOR-5: no TCP/53).
     assert by["van-dns-resolver"] == 'ip daddr $VAN_DNS_RESOLVER udp dport 53 accept comment "van-dns-resolver"'
-    assert by["van-dns-resolver-tcp"] == 'ip daddr $VAN_DNS_RESOLVER tcp dport 53 accept comment "van-dns-resolver-tcp"'
+    assert "tcp dport 53" not in "\n".join(l for l in text.splitlines() if not l.lstrip().startswith("#"))
     # Every other UDP datagram: no port, address or interface exception.
     assert by["van-udp-drop"] == 'meta l4proto udp counter drop comment "van-udp-drop"'
     # TCP: loopback addresses only, then reset; then drop anything else.
@@ -70,8 +73,10 @@ def test_ruleset_rules_and_order():
     assert by["van-loopback-tcp6"] == 'oifname "lo" ip6 daddr ::1 meta l4proto tcp accept comment "van-loopback-tcp6"'
     assert by["van-tcp-bypass-reject"] == 'meta l4proto tcp counter reject with tcp reset comment "van-tcp-bypass-reject"'
     assert by["van-other-drop"] == 'counter drop comment "van-other-drop"'
-    accepts = [r for r in rules[1:] if " accept " in f" {r} "]
-    assert len(accepts) == 6, accepts  # local resets, other users, DNS x2, loopback TCP x2: nothing else
+    accepts = [r for r in rules if " accept " in f" {r} "]
+    assert len(accepts) == 4, accepts  # local resets, UDP DNS, loopback TCP x2: nothing else
+    rule_text = "\n".join(l for l in text.splitlines() if not l.lstrip().startswith("#"))
+    assert "skuid !=" not in rule_text
 
 
 def test_bootstrap_applies_the_ruleset_at_provisioning_before_starting_workers():
@@ -80,6 +85,7 @@ def test_bootstrap_applies_the_ruleset_at_provisioning_before_starting_workers()
     load = text.index('run "nft -f $ETC/firewall.nft"')
     assert check < load < text.index('run "systemctl restart')
     assert "define VAN_BROWSER_UID = %s" in text and "define VAN_DNS_RESOLVER = %s" in text
+    assert "define VAN_STAGEHAND_UID = %s" in text and 'STAGEHAND_UID="$(id -u van-stagehand' in text
     assert 'BROWSER_UID="$(id -u van-browser' in text
     assert "VAN_BROWSER_DNS_RESOLVER must be the IPv4 address" in text
     assert "nft (nftables) is not installed; the zone firewall is not optional" in text
@@ -194,33 +200,64 @@ NETNS_DRIVER = textwrap.dedent(r'''
             return "TIMEOUT"
         except OSError as e:
             return "ERR%d" % e.errno
+    def ping(h):
+        import struct
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_ICMP); s.settimeout(1.5)
+            s.sendto(struct.pack("!BBHHH", 8, 0, 0, 1, 1) + b"van", (h, 0)); s.recvfrom(1024); return "REPLY"
+        except socket.timeout:
+            return "NO_REPLY"
+        except OSError as e:
+            return "BLOCKED" if e.errno == errno.EPERM else "ERR%d" % e.errno
+    def unreach():
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM); s.settimeout(1.5)
+        try:
+            s.connect(("127.0.0.1", 9)); s.send(b"x"); s.recv(10); return "DATA"
+        except ConnectionRefusedError:
+            return "ICMP_UNREACH_RECEIVED"
+        except socket.timeout:
+            return "NO_ICMP"
+        except OSError as e:
+            return "ERR%d" % e.errno
     print({"udp_stun_loopback": udp("127.0.0.1", 3478), "udp_quic_remote": udp("192.0.2.1", 443),
+           "icmp_ping_loopback": ping("127.0.0.1"), "icmp_ping_host_address": ping("192.0.2.10"),
+           "udp_closed_port_icmp": unreach(), "tcp_resolver_53": tcp("127.0.0.53", 53),
+           "udp_dns_offhost": udp("192.0.2.10", 53), "tcp_dns_offhost": tcp("192.0.2.10", 53),
            "udp_dns_resolver": udp("127.0.0.53", 53), "udp_resolver_other_port": udp("127.0.0.53", 54),
            "udp_dns_other_server": udp("192.0.2.1", 53),
            "tcp_loopback": tcp("127.0.0.1", 18080), "tcp_host_address": tcp("192.0.2.10", 18080),
            "tcp_remote": tcp("192.0.2.1", 443)})
     """
 
-    def probe(as_browser):
-        cmd = ["/usr/bin/python3", "-c", PROBE]
-        if as_browser:
-            cmd = ["setpriv", "--reuid=65534", "--regid=65534", "--clear-groups"] + cmd
-        return eval(subprocess.run(cmd, capture_output=True, text=True, timeout=30).stdout)
+    with open("/proc/sys/net/ipv4/ping_group_range", "w") as f:
+        f.write("0 2147483647")
+    for addr53 in ("127.0.0.53", "192.0.2.10"):
+        l53 = socket.socket(); l53.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        l53.bind((addr53, 53)); l53.listen(4)
+        threading.Thread(target=lambda l=l53: [l.accept()[0].close() for _ in iter(int, 1)], daemon=True).start()
 
-    out = {"before": probe(True)}
+    def probe(uid=None):
+        cmd = ["/usr/bin/python3", "-c", PROBE]
+        if uid is not None:
+            cmd = ["setpriv", f"--reuid={uid}", f"--regid={uid}", "--clear-groups"] + cmd
+        return eval(subprocess.run(cmd, capture_output=True, text=True, timeout=60).stdout)
+
+    out = {"before": probe(65534), "before_root": probe()}
     if mode in ("load", "qualify"):
         subprocess.run(["nft", "-f", ruleset], check=True)
-        out["browser"], out["root"] = probe(True), probe(False)
+        out["browser"], out["root"] = probe(65534), probe()
+        out["stagehand"], out["other_user"] = probe(65533), probe(65532)
     if mode in ("qualify", "qualify_unloaded"):
-        env = dict(os.environ, VAN_QUALIFY_BROWSER_USER="nobody", PATH="/usr/sbin:/usr/bin:/sbin:/bin")
+        env = dict(os.environ, VAN_QUALIFY_BROWSER_USER="nobody", VAN_QUALIFY_STAGEHAND_USER="65533",
+                   PATH="/usr/sbin:/usr/bin:/sbin:/bin")
         q = subprocess.run(["bash", sys.argv[3]], env=env, capture_output=True, text=True, timeout=120)
         out["qualify"] = json.loads(q.stdout.strip().splitlines()[-1])
     print("NETNS " + json.dumps(out))
 ''')
 
 
-def _netns(tmp_path: Path, mode: str, env: dict | None = None) -> dict:
-    (tmp_path / "vars.nft").write_text("define VAN_BROWSER_UID = 65534\ndefine VAN_DNS_RESOLVER = 127.0.0.53\n",
+def _netns(tmp_path: Path, mode: str, env: dict | None = None, resolver: str = "127.0.0.53") -> dict:
+    (tmp_path / "vars.nft").write_text(f"define VAN_BROWSER_UID = 65534\ndefine VAN_STAGEHAND_UID = 65533\ndefine VAN_DNS_RESOLVER = {resolver}\n",
                                        encoding="utf-8")
     ruleset = tmp_path / "firewall.nft"
     ruleset.write_text(RULESET.read_text(encoding="utf-8").replace(VARS_INCLUDE, str(tmp_path / "vars.nft")),
@@ -250,9 +287,32 @@ def test_live_ruleset_drops_browser_udp_and_direct_tcp(tmp_path):
     assert browser["tcp_loopback"] == "CONNECTED"         # the proxy listeners, CDP, the Harness API
     assert browser["tcp_host_address"] == "REJECTED"      # this host's own non-loopback address
     assert browser["tcp_remote"] == "REJECTED"            # any direct connection: the proxy cannot be bypassed
-    # Other users are untouched (the egress proxy's user goes out).
-    root = out["root"]
-    assert root["udp_stun_loopback"] == "SENT" and root["tcp_host_address"] == "CONNECTED"
+    # Review I8 MINOR-5: no TCP/53 rule. A loopback resolver (as here, 127.0.0.53) stays
+    # reachable over TCP like every loopback port; an off-host one does not (next test).
+    assert browser["tcp_resolver_53"] == "CONNECTED"
+    assert browser["icmp_ping_loopback"] == "BLOCKED"
+    # Review I8 MINOR-4: the Stagehand user is confined the same way.
+    assert {k: out["stagehand"][k] for k in browser} == browser
+    # Other users are untouched (the egress proxy's user goes out) ...
+    for user in ("root", "other_user"):
+        assert out[user]["udp_stun_loopback"] == "SENT" and out[user]["tcp_host_address"] == "CONNECTED", user
+        assert out[user]["tcp_resolver_53"] == "CONNECTED", user
+    # ... and so are packets without an owning socket (review I8 MAJOR-4): the kernel's echo
+    # replies and its ICMP port-unreachable reach root exactly as before the ruleset.
+    for key in ("icmp_ping_loopback", "icmp_ping_host_address", "udp_closed_port_icmp"):
+        assert out["before_root"][key] == out["root"][key], key
+    assert out["root"]["icmp_ping_loopback"] == "REPLY" and out["root"]["icmp_ping_host_address"] == "REPLY"
+    assert out["root"]["udp_closed_port_icmp"] == "ICMP_UNREACH_RECEIVED"
+
+
+@live
+def test_live_dns_to_an_off_host_resolver_is_udp_only(tmp_path):
+    """Review I8 MINOR-5: the owner's exception is UDP DNS; TCP/53 to the resolver is reset."""
+    out = _netns(tmp_path, "load", resolver="192.0.2.10")
+    assert out["before"]["tcp_dns_offhost"] == "CONNECTED"      # the instrument works
+    assert out["browser"]["udp_dns_offhost"] == "SENT"
+    assert out["browser"]["tcp_dns_offhost"] == "REJECTED"
+    assert out["root"]["tcp_dns_offhost"] == "CONNECTED"
 
 
 def _qualify_env(tmp_path: Path) -> dict:
@@ -295,10 +355,13 @@ def test_live_qualify_reports_the_firewall_and_the_proxy_green(tmp_path):
     for check in FIREWALL_CHECKS + EGRESS_CHECKS:
         assert status[check] == "GREEN", (check, out["qualify"])
     assert status["harness_uses_egress_proxy"] == "RED"  # no Harness here: honest RED, not GREEN
+    assert status["stagehand_isolated"] == "RED"         # no Stagehand here either
+    assert "reset by van-tcp-bypass-reject" in next(c["detail"] for c in out["qualify"]["checks"]
+                                                    if c["check"] == "browser_tcp_bypass_blocked")
 
 
 def _netns_in(pid: int, tmp_path: Path, env: dict) -> dict:
-    (tmp_path / "vars.nft").write_text("define VAN_BROWSER_UID = 65534\ndefine VAN_DNS_RESOLVER = 127.0.0.53\n",
+    (tmp_path / "vars.nft").write_text("define VAN_BROWSER_UID = 65534\ndefine VAN_STAGEHAND_UID = 65533\ndefine VAN_DNS_RESOLVER = 127.0.0.53\n",
                                        encoding="utf-8")
     ruleset = tmp_path / "firewall.nft"
     ruleset.write_text(RULESET.read_text(encoding="utf-8").replace(VARS_INCLUDE, str(tmp_path / "vars.nft")),

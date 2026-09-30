@@ -1,6 +1,6 @@
 #!/usr/sbin/nft -f
 #
-# van-browser-core zone firewall (unit G12).
+# van-browser-core zone firewall (unit G12; restructured after review I8 MAJOR-4).
 #
 # Owner answer 2026-09-30 after review I7, "Firewall UDP in zone (Recommended)": "Add a host
 # firewall rule in the van-browser-core deploy that drops all UDP from the browser user except
@@ -9,43 +9,50 @@
 # the zone's egress proxy (user van-browser-egress, loopback listeners), so a page cannot
 # bypass it.
 #
-# Scope: packets whose socket belongs to the browser user (the Harness worker, its Chromium
-# and the Stagehand worker all run as that user). Every other user is untouched.
+# Scope: packets whose socket belongs to the browser user (the Harness worker and its
+# Chromium) or to the Stagehand user (review I8 MINOR-4: Stagehand has its own uid now). Only
+# those packets jump to browser_out; everything else - other users, and packets with no owning
+# socket at all (kernel ICMP replies and errors, IPv6 neighbour discovery, TCP resets, kernel
+# WireGuard/VXLAN encapsulation) - is accepted by the chain policy. Review I8 MAJOR-4 measured
+# the old form (`meta skuid != $VAN_BROWSER_UID accept`, then drops) dropping root's ping
+# replies and ICMP port-unreachable: `skuid` does not match a packet without a socket.
 #
+# In browser_out:
 #   * UDP: dropped, except DNS to the one configured resolver. This is what stops WebRTC STUN
 #     / ICE and QUIC / WebTransport, which no Chromium flag and no CDP interception stops
 #     (review I7, measured). A dropped send fails locally with EPERM.
+#   * TCP to the resolver on port 53 is NOT allowed (review I8 MINOR-5): the owner's exception
+#     is UDP DNS, and behind the egress proxy Chromium resolves nothing itself.
 #   * TCP: loopback only (127.0.0.0/8, ::1): CDP between the Harness and its Chromium, the
-#     Harness API, the egress proxy listeners. Chromium itself sends even loopback through the
-#     proxy (--proxy-bypass-list=<-loopback>). Any other TCP destination - including this
-#     host's own non-loopback addresses - is reset.
+#     Harness API, the egress proxy listeners (which serve the browser uid only). Chromium
+#     itself sends even loopback through the proxy (--proxy-bypass-list=<-loopback>). Any other
+#     TCP destination - including this host's own non-loopback addresses, the guard canary's
+#     overlay address among them - is reset (counted: qualify.sh reads the counter).
 #   * Anything else (ICMP, SCTP, ...): dropped.
-#   * TCP resets on loopback are let through: they are what makes a refused connect fail
-#     immediately (a kernel-generated reset has no owning socket, so no uid).
+#   * TCP resets these users' sockets send on loopback are let through.
 #
-# The two values are host facts, written by bootstrap.sh to firewall-vars.nft:
+# The values are host facts, written by bootstrap.sh to firewall-vars.nft:
 #   define VAN_BROWSER_UID = <numeric uid of the browser user>
+#   define VAN_STAGEHAND_UID = <numeric uid of the Stagehand user>
 #   define VAN_DNS_RESOLVER = <IPv4 address of the resolver>
 # Loaded by van-browser-core-firewall.service (and by bootstrap.sh at provisioning), which
-# the Harness and Stagehand units are bound to. qualify.sh checks it is loaded and that a
-# UDP send and a direct TCP connect from the browser user fail.
+# the Harness and Stagehand units are bound to. qualify.sh checks it is loaded, that a UDP
+# send from the browser user fails and that a direct TCP connect is reset by this ruleset.
 include "/etc/van-browser-core/firewall-vars.nft"
 
-# Idempotent reload: create (no-op if present), delete, define.
+# Atomic replace on every load (the first line creates the table if it does not exist yet).
 table inet van_browser_core
 delete table inet van_browser_core
 
 table inet van_browser_core {
 	chain output {
 		type filter hook output priority filter; policy accept;
+		meta skuid { $VAN_BROWSER_UID, $VAN_STAGEHAND_UID } jump browser_out comment "van-browser-users"
+	}
 
-		# The reset "reject with tcp reset" (below) sends back to this host has no socket, so the
-		# uid test cannot pass it: without this the local connect waits for a timeout instead
-		# of failing at once (measured in a network namespace; unit G12).
+	chain browser_out {
 		oifname "lo" tcp flags rst accept comment "van-local-reset"
-		meta skuid != $VAN_BROWSER_UID accept comment "van-other-users"
 		ip daddr $VAN_DNS_RESOLVER udp dport 53 accept comment "van-dns-resolver"
-		ip daddr $VAN_DNS_RESOLVER tcp dport 53 accept comment "van-dns-resolver-tcp"
 		meta l4proto udp counter drop comment "van-udp-drop"
 		oifname "lo" ip daddr 127.0.0.0/8 meta l4proto tcp accept comment "van-loopback-tcp"
 		oifname "lo" ip6 daddr ::1 meta l4proto tcp accept comment "van-loopback-tcp6"
