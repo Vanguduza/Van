@@ -264,11 +264,15 @@ else add harness_uses_egress_proxy RED "Chromium argv (processes, without proxy 
 
 # Review I8 MINOR-4: Stagehand runs as its own user, which can read neither the lease-fence key
 # nor the egress proxy's control socket (with them it could forge the gateway's MACs).
-iso="$(python3 - "$STAGEHAND_USER" "$ETC/runtime.env" "$BROWSER_USER" 2>/dev/null <<'PY'
+iso="$(python3 - "$STAGEHAND_USER" "$ETC/runtime.env" "$BROWSER_USER" 2>/tmp/vbcq-iso.err <<'PY'
 import os, pwd, re, subprocess, sys
 env = dict(re.findall(r"^([A-Z_][A-Z0-9_]*)=(.*)$", open(sys.argv[2], encoding="utf-8").read(), re.M))
-user = pwd.getpwnam(sys.argv[1])
-running = subprocess.run(["pgrep", "-u", str(user.pw_uid), "-f", "stagehand_service.mjs"], capture_output=True).returncode == 0
+if sys.argv[1].isdigit():
+    uid = gid = int(sys.argv[1])
+else:
+    entry = pwd.getpwnam(sys.argv[1])
+    uid, gid = entry.pw_uid, entry.pw_gid
+running = subprocess.run(["pgrep", "-u", str(uid), "-f", "stagehand_service.mjs"], capture_output=True).returncode == 0
 as_browser = subprocess.run(["pgrep", "-u", sys.argv[3], "-f", "stagehand_service.mjs"],
                             capture_output=True).returncode == 0
 code = ("import errno, socket, sys\n"
@@ -284,14 +288,15 @@ code = ("import errno, socket, sys\n"
         "except OSError as e:\n"
         "    out.append('DENIED' if e.errno in (errno.EACCES, errno.EPERM) else 'ERR%d' % e.errno)\n"
         "print(','.join(out))\n")
-probe = subprocess.run(["setpriv", f"--reuid={user.pw_uid}", f"--regid={user.pw_gid}", "--init-groups", sys.executable, "-c", code,
+groups = ["--init-groups"] if not sys.argv[1].isdigit() else ["--clear-groups"]
+probe = subprocess.run(["setpriv", f"--reuid={uid}", f"--regid={gid}", *groups, sys.executable, "-c", code,
                         env.get("VAN_HARNESS_FENCE_KEY_FILE", ""), env.get("VAN_EGRESS_FENCE_KEY_FILE", ""),
                         env.get("VAN_EGRESS_CONTROL_SOCKET", "")], capture_output=True, text=True, timeout=20).stdout.strip()
 print("running" if running else "notrunning", "shared" if as_browser else "separate", probe or "noprobe")
 PY
 )"
 [[ "$iso" == "running separate DENIED,DENIED,DENIED" ]] && add stagehand_isolated GREEN "Stagehand runs as $STAGEHAND_USER; fence keys and control socket denied" \
-  || add stagehand_isolated RED "Stagehand isolation: ${iso:-probe did not run} (want: running separate DENIED,DENIED,DENIED)"
+  || add stagehand_isolated RED "Stagehand isolation: ${iso:-probe did not run: $(tail -c 300 /tmp/vbcq-iso.err 2>/dev/null)} (want: running separate DENIED,DENIED,DENIED)"
 
 # 7. Model pin status (§4): informational, required=0. UNVERIFIED is not GREEN.
 add model_immutable_snapshot UNKNOWN "immutable provider revision for claude-sonnet-5 not established" 0

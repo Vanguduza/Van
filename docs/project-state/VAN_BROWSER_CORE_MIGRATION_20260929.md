@@ -441,8 +441,11 @@ Induced failures: 12 mutations of these fixes; 11 are caught by a test. The surv
 only the CR/LF/NUL line check, because the header-value, header-name and target checks also
 refuse those bytes; removing it together with the header-value check lets the smuggled request
 through and is caught (live). One mutation (`stagehand_isolated` accepting anything) first
-survived too: the check's probe crashed on a numeric uid and was RED for the wrong reason;
-fixed in c2d6390e, after which the mutation is caught. Remaining: IPv6 neighbour discovery and kernel tunnels
+survived too: the check's probe crashed on a numeric uid and was RED for the wrong reason.
+Correction: c2d6390e's message claims that qualify.sh fix, but the commit holds only the test;
+the fix was lost when the induction script restored qualify.sh with `git checkout` before it
+was committed (the full suite run at 8921882c showed it: the netns qualify test failed). The fix
+is in the commit after 8921882c, and the probe's stderr now reaches the check's detail. Remaining: IPv6 neighbour discovery and kernel tunnels
 are accepted by construction but untested (the sandbox has no IPv6); a loopback resolver
 (e.g. 127.0.0.53) stays reachable over TCP like every loopback port; everything here is
 sandbox evidence, not host qualification.
