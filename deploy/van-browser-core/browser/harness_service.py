@@ -614,7 +614,8 @@ ELEMENTS_JS = r"""
     if (node.nodeType === 11) { let o = ''; for (const c of node.childNodes) { o += rawText(c, depth + 1); if (o.length > TEXT * 2) break; } return o; }
     if (node.nodeType !== 1) return '';
     const tag = node.tagName;
-    if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT' || tag === 'TEMPLATE' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'OPTION') return ' ';
+    // OUTPUT: its content is its value (review I5 probe OUTVAL; integration G8).
+    if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT' || tag === 'TEMPLATE' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'OPTION' || tag === 'OUTPUT') return ' ';
     if (tag === 'INPUT') {
       const t = (node.getAttribute('type') || '').toLowerCase();
       if (['button', 'submit', 'reset'].includes(t)) return ' ' + (node.getAttribute('value') || (t === 'submit' ? 'Submit' : t === 'reset' ? 'Reset' : '')) + ' ';

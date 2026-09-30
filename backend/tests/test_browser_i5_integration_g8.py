@@ -40,7 +40,7 @@ from van_gateway.browser.interaction_router import StepState
 
 KEY = b"g8" * 16 + b"0123456789abcdef"
 SECRETS = ("4111 1111", "4111111111111111", "5500000000000004", "tok_9f8e7d6c5b4a",
-           "hunter2-typed-x", "ROLETEXT-secret-value")
+           "hunter2-typed-x", "ROLETEXT-secret-value", "OUTVAL-777")
 #: Plain ``id``/``name``/``class`` attribute values are reported verbatim (G6b E1 left them
 #: out of scope); the form owner's name that G6a added is masked.
 FORM_NAME_SECRET = "12345678"
