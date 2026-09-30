@@ -5,17 +5,26 @@ After=van-muse-netns.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/ip netns exec van-muse /usr/sbin/danted -f /etc/van-muse-egress/danted.conf
+User=vanmuse
+Group=vanmuse
+NetworkNamespacePath=/run/netns/van-muse
+BindReadOnlyPaths=/etc/netns/van-muse/resolv.conf:/etc/resolv.conf
+ExecStart=/usr/sbin/danted -f /etc/van-muse-egress/danted.conf
 Restart=on-failure
 RestartSec=2
 NoNewPrivileges=yes
 PrivateTmp=yes
+PrivateDevices=yes
 ProtectSystem=strict
 ProtectHome=yes
 ProtectKernelTunables=yes
+ProtectKernelModules=yes
 ProtectControlGroups=yes
 RestrictSUIDSGID=yes
 LockPersonality=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+RestrictAddressFamilies=AF_INET AF_UNIX
 
 [Install]
 WantedBy=multi-user.target
