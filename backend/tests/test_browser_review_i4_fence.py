@@ -192,7 +192,13 @@ class _FenceSeeingHarness:
     async def page_info(self, task):
         return {"url": f"https://{t.DOMAIN}/x", "title": "Statement", "extraction": {}}
 
-    async def click(self, task, loc):
+    async def describe(self, task, loc):
+        # Review I5: the plan's target is the element the Harness binds (a read, unfenced).
+        return {"element": {"locator": loc, "role": "button", "name": "Next", "text": "Next", "tag": "button"},
+                "matches": 1, "page_url": f"https://{t.DOMAIN}/x",
+                "binding": {"backend_node_id": 4, "digest": "0" * 64}}
+
+    async def click(self, task, loc, *, binding=None):
         self.seen.append(("click", current_harness_lease_fence()))
         return {}
 

@@ -17,6 +17,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from van_gateway.browser.task_scope import TaskScope
 from van_gateway.models import ActionClass
 
 
@@ -146,6 +147,10 @@ class BrowserTask(BaseModel):
     goal: str
 
     inputs: dict[str, Any] = Field(default_factory=dict)
+    #: Owner decision 2026-09-30 — the pages this task may act on (``task_scope``). Recorded
+    #: at creation (Hermes-declared, else the target domain's origin) and widened only by an
+    #: owner approval. None means no scope in the task truth: every action is refused.
+    scope: TaskScope | None = None
     status: BrowserTaskStatus = BrowserTaskStatus.PENDING
     evidence_pointer: str | None = None
     error_code: str | None = None

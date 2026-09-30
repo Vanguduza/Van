@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 35
+SCHEMA_VERSION = 36
 
 
 MIGRATION_17 = """
@@ -955,6 +955,15 @@ BEFORE UPDATE ON browser_task_tombstones
 BEGIN
   SELECT RAISE(ABORT, 'browser_task_tombstone_immutable');
 END;
+"""
+
+MIGRATION_36 = """
+-- Owner decision 2026-09-30 — browser automation stays inside the task's own truth. The
+-- pages a task may act on are recorded with the task (browser/task_scope.py): declared by
+-- Hermes at creation, else the target domain's origin, and widened only by an owner
+-- approval. NULL (every task created before this migration) is "no scope": the router, the
+-- assignment workers and the Harness refuse every action on it (fail closed).
+ALTER TABLE browser_tasks ADD COLUMN scope_json TEXT;
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -2294,6 +2303,7 @@ MIGRATIONS: dict[int, str] = {
     33: MIGRATION_33,
     34: MIGRATION_34,
     35: MIGRATION_35,
+    36: MIGRATION_36,
 }
 
 

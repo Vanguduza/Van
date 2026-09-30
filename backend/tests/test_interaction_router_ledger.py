@@ -186,7 +186,13 @@ async def test_router_verdicts_use_the_task_verdict_record_that_completion_requi
     task = await _real_task(store)
     tasks = BrowserTaskService(store)
     ledger = RouterStepLedger(store)
-    router = make_router(ledger=ledger)
+    from test_browser_interaction_router import FakeResolver
+
+    router = make_router(ledger=ledger, target_resolver=FakeResolver({
+        "#a": {"ref": "#a", "role": "button", "label": "Next"},
+        "#b": {"ref": "#b", "role": "button", "label": "More"},
+        "#c": {"ref": "#c", "role": "button", "label": "Older"},
+        "#d": {"ref": "#d", "role": "button", "label": "Newer"}}))
     await router.route(_step_for(task, deterministic_action=DeterministicAction(operation="click", locator="#a")))
     assert await tasks.latest_verification(task.task_id) == "VERIFIED"
 

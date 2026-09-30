@@ -31,11 +31,19 @@ class Harness:
         self.calls.append(f"navigate:{url}")
         return {}
 
-    async def click(self, task, locator):
+    async def describe(self, task, locator):
+        """Review I5: /describe binds the element it reports."""
+        for e in self.elements or ():
+            if locator in (e.get("locator"), e.get("ref")):
+                return {"element": dict(e), "matches": 1, "page_url": f"https://{DOMAIN}/statement",
+                        "binding": {"backend_node_id": 2, "digest": "0" * 64}}
+        return {"element": None, "matches": 0}
+
+    async def click(self, task, locator, *, binding=None):
         self.calls.append(f"click:{locator}")
         return {}
 
-    async def fill_ref(self, task, locator, ref):
+    async def fill_ref(self, task, locator, ref, *, binding=None):
         self.calls.append(f"fill:{locator}")
         return {}
 
@@ -126,6 +134,7 @@ async def test_the_classified_step_is_the_step_that_runs(tmp_path):
     result, harness = await _run(tmp_path, [
         {"kind": "click", "locator": "#first", "instruction": "Open"},
         {"kind": "click", "locator": "#second", "instruction": "Open"},
-    ])
+    ], elements=[{"ref": "#first", "role": "link", "label": "First"},
+                 {"ref": "#second", "role": "link", "label": "Second"}])
     assert result.succeeded
     assert harness.calls == ["click:#first", "click:#second"]

@@ -75,12 +75,16 @@ from van_gateway.browser.lane_gates import (  # noqa: F401 - re-export
 )
 from van_gateway.browser.action_risk import (
     HIGH_RISK_WORDS,
+    INTERACTIVE_ROLES,
     RiskAssessment,
     assess_action,
+    assess_key_press,
     assess_supplementary_text,
     element_texts,
     judged_text,
+    key_activates,
 )
+from van_gateway.browser.task_scope import BOUND_OPERATIONS, task_scope_gate
 from van_gateway.browser.action_risk import fold as _risk_fold
 from van_gateway.browser.action_risk import words as _risk_words
 from van_gateway.browser.models import BrowserTask, BrowserTaskStatus
@@ -198,6 +202,10 @@ class RouterAction:
     #: Human-readable text of what is acted on (target label / Stagehand description),
     #: checked by the payment boundary exactly as the subagent runner checks instructions.
     description: str | None = None
+    #: Review I5 / owner decision 2026-09-30 — the Harness-reported, *bound* element this
+    #: action classified (the focused element for press_key): its ``binding`` is what the
+    #: Harness acts on and ``page_url`` is what the task-scope gate judges.
+    element: dict[str, Any] | None = None
 
 
 @dataclass
@@ -420,19 +428,38 @@ class HarnessTargetResolver:
     def __init__(self, harness: Any) -> None:
         self.harness = harness
 
+    @staticmethod
+    def _bound(described: Any, locator: str | None) -> dict[str, Any] | None:
+        element = (described or {}).get("element") if isinstance(described, dict) else None
+        if not isinstance(element, dict):
+            return None
+        if locator is not None and locator not in (element.get("locator"), element.get("ref")):
+            return None
+        element = dict(element)
+        # Review I5 MAJOR-2: the node the Harness bound, and the page it is on. The router
+        # sends the binding back with the action; the Harness acts on that node only.
+        element["binding"] = described.get("binding") if isinstance(described.get("binding"), dict) else None
+        element["page_url"] = described.get("page_url") or described.get("url")
+        return element
+
     async def __call__(self, task: BrowserTask, locator: str) -> dict[str, Any] | None:
+        describe = getattr(self.harness, "describe", None)
+        if describe is not None:
+            # Review I5 MAJOR-2: always through /describe — the page_info list carries no
+            # binding, and the element classified must be the element acted on.
+            return self._bound(await describe(task, locator), locator)
         page = await self.harness.page_info(task)
         for raw in (page or {}).get("elements") or ():
             if isinstance(raw, dict) and locator in (raw.get("locator"), raw.get("ref")):
-                return raw
-        describe = getattr(self.harness, "describe", None)
-        if describe is None:
+                return raw  # unbound: the task-scope gate refuses to act on it
+        return None
+
+    async def focused(self, task: BrowserTask) -> dict[str, Any] | None:
+        """Review I5 MAJOR-3 — the bound ``document.activeElement``, or None."""
+        describe_focus = getattr(self.harness, "describe_focus", None)
+        if describe_focus is None:
             return None
-        described = await describe(task, locator)
-        element = (described or {}).get("element") if isinstance(described, dict) else None
-        if not isinstance(element, dict) or locator not in (element.get("locator"), element.get("ref")):
-            return None
-        return element
+        return self._bound(await describe_focus(task), None)
 
 
 #: The element fields any one of which names the target well enough to classify it.
@@ -460,11 +487,45 @@ async def resolve_stagehand_target(
         return f"RESOLVER_FAILED:{type(exc).__name__}"
     if not isinstance(element, dict) or not element:
         return "TARGET_NOT_RESOLVED_BY_HARNESS"
+    return unresolved_reason(element) or element
+
+
+def unresolved_reason(element: dict[str, Any], *, focus: bool = False) -> str | None:
+    """Review I5 MAJOR-2 — what makes a Harness-reported element *not* a resolved target
+    (so a targeted action on it is A4): hidden, a frame, a shadow host (its real controls
+    are inside), the hit test at its centre landing elsewhere (an overlay), a role that is
+    not a control (``generic`` — a wrapper whose centre is some other control), or no role
+    or name at all. For the focused element (``focus``) the role is judged by the key
+    classifier instead (a navigation key on <body> is fine; Enter on it is not)."""
     if element.get("hidden") is True:
         return "TARGET_HIDDEN"
-    if not any(isinstance(element.get(k), str) and element.get(k) for k in TARGET_NAME_KEYS):
+    if element.get("frame") is True or str(element.get("tag") or "").lower() in ("iframe", "frame", "object", "embed"):
+        return "TARGET_IS_FRAME"
+    if element.get("shadow_host") is True:
+        return "TARGET_IS_SHADOW_HOST"
+    if element.get("occluded") is True:
+        return "TARGET_OCCLUDED"
+    role = element.get("role")
+    if not focus and isinstance(role, str) and role and role.strip().lower() not in INTERACTIVE_ROLES:
+        return f"TARGET_NOT_A_CONTROL:{role.strip().lower()[:32]}"
+    if not focus and not any(isinstance(element.get(k), str) and element.get(k) for k in TARGET_NAME_KEYS):
         return "TARGET_HAS_NO_ROLE_OR_NAME"
-    return element
+    return None
+
+
+async def resolve_focused_target(resolver: Any, task: BrowserTask) -> dict[str, Any] | str:
+    """Review I5 MAJOR-3 — the bound focused element for a key press, or why there is none
+    (an unknown focus is A4)."""
+    focused = getattr(resolver, "focused", None)
+    if focused is None:
+        return "NO_FOCUS_RESOLVER"
+    try:
+        element = await focused(task)
+    except Exception as exc:  # noqa: BLE001 - cannot observe the focus = cannot classify the key
+        return f"FOCUS_RESOLVER_FAILED:{type(exc).__name__}"
+    if not isinstance(element, dict) or not element:
+        return "FOCUS_NOT_RESOLVED_BY_HARNESS"
+    return unresolved_reason(element, focus=True) or element
 
 
 def load_eligibility_classifier() -> EligibilityClassifier | None:
@@ -1058,14 +1119,22 @@ class BrowserInteractionRouter:
         # does not make `#pay-now` an A1 click: the class comes from VAN's classifier over what
         # the Harness observes of the element plus the locator's own words, exactly as the
         # Stagehand lane does, and the payment boundary reads the same text.
+        bound: dict[str, Any] | None = None
         if det.operation in TARGETLESS_OPERATIONS:
             det_class, observed_text = "A0", ""
+        elif det.operation == "press_key":
+            # Review I5 MAJOR-3: a key goes to document.activeElement, so it is classified
+            # against the focused element the Harness reports (Enter/Space = a click on it,
+            # other keys in a field = a fill); an unknown focus is A4.
+            det_class, observed_text, bound = await self._classify_key(step, det.value_ref, reasons, "DETERMINISTIC")
         else:
             element = await self._resolve_target(step, det.locator)
             if not isinstance(element, dict):
-                # Unresolved (review I4 MAJOR-A, action_risk R6): a click is A2 only on a
-                # plain-ASCII locator with no risk stem; a fill/select is A4.
+                # Unresolved (action_risk R6, review I5): A4 — only the element the Harness
+                # bound can be acted on.
                 reasons.append(f"DETERMINISTIC_TARGET_UNRESOLVED:{element}")
+            else:
+                bound = element
             target = observed_target(det.operation, element, det.locator)
             observed_text = target["label"]
             det_class = self.action_classifier(det.operation, target, None)
@@ -1086,7 +1155,7 @@ class BrowserInteractionRouter:
         action = RouterAction(
             lane=RouterLane.DETERMINISTIC, operation=det.operation, locator=det.locator,
             value_ref=det.value_ref, action_class=det_class,
-            description=observed_text or None,
+            description=observed_text or None, element=bound,
         )
         self.metrics.inc("deterministic_steps")
         return await self._execute_and_verify(step, action, reasons, claimed_done=det.operation == "done")
@@ -1118,11 +1187,17 @@ class BrowserInteractionRouter:
         # attributes, resolved through the selector) together with the selector itself.
         # The description is also checked, so it can only make the answer stricter.
         observed_text = ""
-        if proposal.operation not in TARGETLESS_OPERATIONS:
+        bound: dict[str, Any] | None = None
+        if proposal.operation == "press_key":
+            observed_class, observed_text, bound = await self._classify_key(step, proposal.value_ref, reasons, "STAGEHAND")
+            if bound is None:
+                return self._takeover(reasons, [], "STAGEHAND_ACTION_UNCLASSIFIABLE")
+        elif proposal.operation not in TARGETLESS_OPERATIONS:
             unclassifiable = await self._resolve_stagehand_target(step, proposal)
             if isinstance(unclassifiable, str):
                 reasons.append(f"STAGEHAND_ACTION_UNCLASSIFIABLE:{unclassifiable}")
                 return self._takeover(reasons, [], "STAGEHAND_ACTION_UNCLASSIFIABLE")
+            bound = unclassifiable
             target = observed_target(proposal.operation, unclassifiable, proposal.locator)
             observed_text = target["label"]
             observed_class = self.action_classifier(proposal.operation, target, None)
@@ -1156,8 +1231,23 @@ class BrowserInteractionRouter:
             # The payment boundary in _execute_and_verify reads this: the Harness-observed
             # element and selector as well as Stagehand's description.
             description=" | ".join(t for t in (proposal.description, observed_text) if t) or None,
+            element=bound,
         )
         return await self._execute_and_verify(step, action, reasons, claimed_done=proposal.operation == "done")
+
+    async def _classify_key(
+        self, step: InteractionStep, key: str | None, reasons: list[str], lane: str,
+    ) -> tuple[str, str, dict[str, Any] | None]:
+        """(class, observed text, bound focused element | None) for a key press."""
+        focused = await resolve_focused_target(self.target_resolver, step.task)
+        if not isinstance(focused, dict):
+            reasons.append(f"{lane}_FOCUS_UNRESOLVED:{focused}")
+            assessment = assess_key_press(key, None, resolved=False)
+            reasons.append(f"{lane}_ACTION_RISK:{';'.join(assessment.rules)}")
+            return assessment.action_class, "", None
+        assessment = assess_key_press(key, focused, resolved=True)
+        reasons.append(f"{lane}_ACTION_RISK:{';'.join(assessment.rules)}")
+        return assessment.action_class, observed_element_text(focused, None), focused
 
     def _record_risk_rules(self, reasons: list[str], lane: str, operation: str, target: dict[str, Any]) -> None:
         """Which ``action_risk`` rules decided the class (default classifier only)."""
@@ -1448,6 +1538,50 @@ class BrowserInteractionRouter:
             return str(reason or "JEV_EFFECT_SHADOW_ONLY")
         return None
 
+    # ----------------------------------------------------------- task truth gate
+
+    async def _task_truth_gate(
+        self, step: InteractionStep, action: RouterAction, reasons: list[str], trail: list[str],
+    ) -> RouterAction | StepResult:
+        """Owner decision 2026-09-30 — the last check before any lane's action executes.
+
+        Rules (a) and (b) of ``task_scope``: the page (and a link/submit destination) is
+        inside the task's recorded scope, and the target is the element the Harness bound.
+        Rule (c), the money/commitment boundary, was applied by the lane (A4 + payment
+        boundary, payments first) and by the payment check above. A Jev action (lane 2)
+        reaches here with a locator only: it is resolved and bound now, and its class is the
+        stricter of Jev's and VAN's own over the bound element. Anything failing -> lane 4.
+        """
+        if action.operation in BOUND_OPERATIONS and action.element is None and action.operation != "press_key" and action.locator:
+            element = await self._resolve_target(step, action.locator)
+            if isinstance(element, dict):
+                target = observed_target(action.operation, element, action.locator)
+                observed = self.action_classifier(action.operation, target, None)
+                stricter = self._stricter_class(action.action_class or "A0", observed)
+                if stricter in NEVER_PROPOSABLE_ACTION_CLASSES or stricter not in B1_ACTION_CLASSES:
+                    reasons = reasons + [f"{action.lane.value}_BOUND_TARGET_CLASS:{stricter}"]
+                    refused = self._payment_refusal_first(
+                        step, action.operation, target["label"], action.lane.value.lower(), reasons,
+                    )
+                    if refused is not None:
+                        return refused
+                    return self._takeover(reasons, [], "TASK_TRUTH:BOUND_TARGET_REQUIRES_OWNER")
+                action = dataclasses.replace(action, element=element, action_class=stricter)
+            else:
+                reasons = reasons + [f"{action.lane.value}_TARGET_UNRESOLVED:{element}"]
+        violation = task_scope_gate(
+            getattr(step.task, "scope", None), operation=action.operation, element=action.element,
+            activates=key_activates(action.value_ref) if action.operation == "press_key" else True,
+        )
+        if violation is None:
+            return action
+        self.metrics.inc("owner_takeovers")
+        return StepResult(
+            lane=RouterLane.OWNER_TAKEOVER, state=StepState.OWNER_TAKEOVER,
+            trail=trail + [StepState.OWNER_TAKEOVER.value],
+            reasons=reasons + [f"TASK_SCOPE:{violation}"], action=action, escalated=True,
+        )
+
     # ----------------------------------------------------------- execute + verify
 
     async def _execute_and_verify(
@@ -1468,6 +1602,11 @@ class BrowserInteractionRouter:
                 action=action,
             )
 
+        if not claimed_done:
+            gated = await self._task_truth_gate(step, action, reasons, trail)
+            if isinstance(gated, StepResult):
+                return gated
+            action = gated
         if claimed_done:
             # `done` is a claim. Nothing executes; the verifier decides.
             trail.append(StepState.VERIFYING.value)
@@ -1491,6 +1630,17 @@ class BrowserInteractionRouter:
                     reasons=reasons + [f"POLICY_REFUSED:{exc}"], action=action,
                 )
             except BrowserAdapterError as exc:
+                if exc.code.endswith("_REFUSED"):
+                    # Review I5 / owner decision 2026-09-30: the Harness refused to act on the
+                    # bound target (it moved, changed, was covered, focus moved, or the page
+                    # left the task scope). Nothing was actuated; lane 4.
+                    self.metrics.inc("owner_takeovers")
+                    return StepResult(
+                        lane=RouterLane.OWNER_TAKEOVER, state=StepState.OWNER_TAKEOVER,
+                        trail=trail + [StepState.OWNER_TAKEOVER.value],
+                        reasons=reasons + [f"HARNESS_REFUSED:{exc.detail or exc.code}"],
+                        action=action, escalated=True,
+                    )
                 return StepResult(
                     lane=action.lane, state=StepState.EXECUTION_FAILED,
                     trail=trail + [StepState.EXECUTION_FAILED.value],
@@ -1680,19 +1830,22 @@ class HarnessActionExecutor:
 
     async def execute(self, task: BrowserTask, action: RouterAction) -> dict[str, Any]:
         op = action.operation
+        # Review I5 MAJOR-2/-3: the Harness acts on the node it bound when it described the
+        # target (or the focus) — never on a re-queried selector.
+        binding = (action.element or {}).get("binding") if isinstance(action.element, dict) else None
         if op == "click":
             if not action.locator:
                 raise BrowserAdapterError("BROWSER_LOCATOR_MISSING", op)
-            return await self.harness.click(task, action.locator)
+            return await self.harness.click(task, action.locator, binding=binding)
         if op == "fill":
             if not action.locator or not action.value_ref:
                 raise BrowserAdapterError("BROWSER_FILL_REF_MISSING", op)
             # fill_ref refuses anything that is not a secretref:// reference.
-            return await self.harness.fill_ref(task, action.locator, action.value_ref)
+            return await self.harness.fill_ref(task, action.locator, action.value_ref, binding=binding)
         if op == "press_key":
             if not action.value_ref:
                 raise BrowserAdapterError("BROWSER_KEY_MISSING", op)
-            return await self.harness.press(task, action.value_ref)
+            return await self.harness.press(task, action.value_ref, binding=binding)
         if op == "scroll":
             return await self.harness.scroll(task, {"direction": "down"})
         raise BrowserAdapterError("BROWSER_ACTION_UNSUPPORTED", op)
@@ -2037,7 +2190,9 @@ __all__ = [
     "load_eligibility_classifier",
     "load_owner_private_terms",
     "load_stagehand_production_gate",
+    "resolve_focused_target",
     "resolve_stagehand_target",
+    "unresolved_reason",
     "validate_b1_payload",
     "validate_jev_proposal",
 ]

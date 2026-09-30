@@ -77,7 +77,8 @@ async def test_a_payment_or_irreversible_deterministic_action_goes_to_the_owner(
 
 async def test_the_harness_observed_element_decides_not_an_innocent_locator():
     elements = {"#b1": {"ref": "#b1", "role": "button", "label": "Pay now"},
-                "#b2": {"ref": "#b2", "role": "button", "label": "Continue"}}
+                # ("Continue" is itself a risk word since review I5 MAJOR-6.)
+                "#b2": {"ref": "#b2", "role": "button", "label": "Next"}}
     ex = tr.FakeExecutor()
     router = tr.make_router(executor=ex, target_resolver=tr.FakeResolver(elements))
     paying = await router.route(tr.step(deterministic_action=DeterministicAction(operation="click", locator="#b1")))

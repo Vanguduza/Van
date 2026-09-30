@@ -298,6 +298,13 @@ class BrowserSubagentRunner:
 
             try:
                 observation = await worker.execute(assignment, action)
+            except OwnerTakeoverRequired as exc:
+                # Review I5: the Harness refused to act on the bound target (it moved,
+                # changed, lost focus, or the page left the task scope). Lane 4.
+                return self._stop(
+                    assignment, task, steps, extraction, SubagentStop.OWNER_TAKEOVER,
+                    detail=str(exc),
+                )
             except Exception as exc:  # noqa: BLE001
                 return self._stop(
                     assignment, task, steps, extraction, SubagentStop.WORKER_ERROR,

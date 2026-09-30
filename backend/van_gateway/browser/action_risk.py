@@ -28,21 +28,28 @@ positively establish that it is low-risk**. Low-risk means all of:
 Unresolved targets (``R6``)
 ===========================
 
-When the Harness does not report the element, only the locator is known. Decision:
+When the Harness does not report (and bind) the element, only the locator is known. Every
+targeted operation on an unresolved target is A4 (``R6_UNRESOLVED_TARGET`` /
+``R6_UNRESOLVED_WRITE``). Review I4 let a plain-ASCII click through as A2; review I5 and the
+owner decision of 2026-09-30 withdrew that: an action may run only on the element the
+Harness bound at describe time and re-verifies when it acts (``task_scope`` rule (b)), and
+an unresolved target cannot be that element. The router also treats as unresolved a hidden
+element, a frame, a shadow host, an element whose centre hits something else (an overlay, or
+a wrapper around another control), and a role that is not a control (``generic``).
 
-* ``click`` on an unresolved target is A2 **only** when the locator is plain ASCII as
-  written (no fold needed) and passes R2; otherwise A4;
-* ``fill`` / ``select`` on an unresolved target is always A4.
+Review I5 additions (defence in depth; the task scope is the primary control)
+=============================================================================
 
-Why: owner decision §9 makes "owner takeover / policy refusal" lane 4, the lane every step
-lands in when no machine lane produced a *safe* action, and a step we cannot classify has no
-established safe action. The deterministic lane still continues under its own policy for
-what it can establish: a caller-typed click whose selector is plain ASCII and names no risk
-stem is the case the deterministic lane exists for, and blocking it would send every
-typed ``#next`` to the owner while the Harness element report (unit G5b) is not live. A
-write is different: whether a field takes a card number, an expiry or a PIN is decided by
-its type, inputmode, maxlength, pattern and placeholder, none of which a locator carries, so
-a fill/select into an unobserved field cannot be positively established as low-risk.
+* ``R7`` a name-from-content role (button, link, tab, option ...) whose accessible name
+  differs from its visible ``text`` (``aria-label="Next"`` on "Pay 500 now");
+* ``R8`` a click with an empty name, or a name-from-content control with no visible text
+  (image-only / icon-only controls — their image and CSS file names are read as ``media``);
+* ``R3`` also covers an effective submit (``submits``: a ``<button>`` with no type in a
+  form), and the form's ``action``/``formaction`` are read as text;
+* ``press_key`` is classified against the focused element (``assess_key_press``: ``R6``
+  unknown focus, ``R9`` Enter/Space on a non-control, ``R10`` a non-navigation key outside a
+  field);
+* MAJOR-6 money/trading/commitment verbs in ``_RISK_STEMS`` / ``_RISK_WORDS``.
 
 Defence in depth — the denylist (``_RISK_STEMS``, ``_PAYMENT_FIELD_STEMS``)
 ============================================================================
@@ -72,6 +79,15 @@ over-matches, each pinned by a test (``test_browser_review_i4_fail_safe_classifi
 * fills: a Bootstrap ``.card`` wrapper in the selector, a birth year with
   ``inputmode=numeric maxlength=4``, a 3-4 digit numeric code, a "PIN" field, a "Pan"
   select on a cooking site, and every fill into a field the Harness did not report (R6).
+* review I5 (pinned in ``test_browser_review_i5_task_scope.py``): "Continue reading",
+  "Complete profile", "Industrial design" (trial), "Proceedings", "Place of birth", "Claim a
+  username", "Swap panels", "Investigate logs", "Executive summary", "Discharge summary",
+  "Desktop update" (topup), "Euro 2024"; every submit button, including a search form's
+  (R3); an icon-font ligature beside a label (R7: name "Next", text "arrow_forward Next"); an
+  icon-only or title-only button (R8); every unresolved click (R6).
+* words the classifier cannot tell from benign navigation stay A2 — "Next", "Go", "Ok",
+  "Yes", "I understand": on a page inside the task's scope they run, and only the scope
+  (a path the task declares) holds a page like I5's ``/words``.
 """
 
 from __future__ import annotations
@@ -212,6 +228,12 @@ _RISK_STEMS: tuple[str, ...] = (
     "betal", "afreken", "bestel", "koop",
     "zaplac", "zamow", "kupuj", "kupic",
     "finalizar", "encomend",
+    # Review I5 MAJOR-6 — money, trading and commitment verbs (defence in depth; the task
+    # scope is the primary control). Substring stems: each is distinctive enough inside a
+    # squashed id/label. Known over-matches are listed in the module docstring.
+    "charge", "invest", "pledge", "contribut", "topup", "unlock", "trial", "finaliz",
+    "finalis", "proceed", "complete", "finish", "redeem", "execut", "addtocart",
+    "addtobasket", "addtobag", "dollar", "euro",
 )
 
 #: Payment-instrument / number-like-secret field stems (fill/select only).
@@ -282,7 +304,15 @@ def _tokens(texts: Iterable[str]) -> set[str]:
 
 #: Risk words too short or too common inside other words to use as substrings ("kopen"
 #: is inside "link | open"), matched as whole folded words instead.
-_RISK_WORDS = frozenset({"kopen", "kup", "kupi", "bet", "tip"})
+_RISK_WORDS = frozenset({
+    "kopen", "kup", "kupi", "bet", "tip",
+    # Review I5 MAJOR-6: short commitment verbs that occur inside unrelated words
+    # ("forbidden", "bestseller", "mistake", "marketplace", "trademark", "current",
+    # "calendar", "committee", "wireless"), so matched as whole words only.
+    "bid", "bids", "bidding", "sell", "selling", "trade", "trading", "stake", "staking",
+    "place", "wire", "commit", "claim", "rent", "lend", "hire", "mint", "swap", "cart",
+    "basket", "continue",
+})
 
 
 def _segments(texts: Iterable[str]) -> list[str]:
@@ -333,8 +363,15 @@ def payment_field_text_hits(texts: Iterable[str]) -> list[str]:
 
 # ------------------------------------------------------------------ element evidence
 
-#: Element keys that are not text (booleans, bounds) and must not be read as words.
-_NON_TEXT_KEYS = frozenset({"hidden", "maxlength", "minlength", "size", "visible", "enabled", "disabled"})
+#: Element keys that are not text (booleans, bounds, the Harness binding and the page URL,
+#: which the task-scope gate judges) and must not be read as words.
+_NON_TEXT_KEYS = frozenset({
+    "hidden", "maxlength", "minlength", "size", "visible", "enabled", "disabled",
+    "binding", "page_url", "occluded", "shadow_host", "frame", "submits",
+    # el.type: every <button> reports "submit" even outside a form; whether it submits is
+    # ``submits`` (R3), and the attribute ``type`` is still read.
+    "effective_type",
+})
 
 
 #: Structural keys read as "key value" ("inputmode numeric", "type tel") so the text a
@@ -456,7 +493,58 @@ def structural_field_hits(element: dict[str, Any] | None) -> list[str]:
 def _role(element: dict[str, Any] | None) -> set[str]:
     if not isinstance(element, dict):
         return set()
-    return {v for v in (_field(element, "role"), _field(element, "type", "input_type")) if v}
+    roles = {v for v in (_field(element, "role"), _field(element, "type", "input_type")) if v}
+    if element.get("submits") is True:
+        # Review I5 MAJOR-4: a <button> with no type in a form submits it (el.type).
+        roles.add("submit")
+    return roles
+
+
+#: Roles a resolved target may have (review I5 MAJOR-2): a control. ``generic``, ``none``,
+#: ``presentation``, landmarks, headings, images and frames are not something a click can
+#: be positively established to mean anything about — the router treats them as unresolved.
+INTERACTIVE_ROLES = frozenset({
+    "button", "link", "checkbox", "radio", "tab", "menuitem", "menuitemcheckbox",
+    "menuitemradio", "option", "switch", "textbox", "searchbox", "combobox", "spinbutton",
+    "slider", "treeitem", "gridcell", "listbox",
+})
+
+#: Roles whose accessible name comes from their content (the Harness NAME_FROM_CONTENT set).
+_NAME_FROM_CONTENT = frozenset({
+    "button", "link", "menuitem", "menuitemcheckbox", "menuitemradio", "tab", "option",
+    "checkbox", "radio", "switch", "treeitem", "gridcell",
+})
+
+
+def _norm(text: Any) -> str:
+    return " ".join(words(fold(text)).lower().split())
+
+
+def content_rules(operation: str, element: dict[str, Any] | None) -> list[str]:
+    """Review I5 MAJOR-1/-5 — the accessible name is not the only thing a control shows.
+
+    For a Harness-reported element (it carries ``text``): a click with an empty name is A4
+    (``R8``); a name-from-content role with no visible text is A4 (``R8``) — an image-only
+    or icon-only control is judged by its media names, but is never positively low-risk;
+    and a name-from-content role whose name differs from its visible text is A4 (``R7``:
+    ``aria-label``/``aria-labelledby`` saying "Next" over a "Pay 500 now" button).
+    """
+    if not isinstance(element, dict) or operation != "click":
+        return []
+    name = _norm(element.get("name") or element.get("label") or "")
+    rules: list[str] = []
+    if not name:
+        rules.append("R8_EMPTY_NAME")
+    if "text" not in element:
+        return rules
+    text = _norm(element.get("text"))
+    role = _field(element, "role")
+    if role in _NAME_FROM_CONTENT:
+        if not text:
+            rules.append("R8_EMPTY_TEXT")
+        elif name and name != text:
+            rules.append("R7_NAME_CONTENT_MISMATCH")
+    return rules
 
 
 # ------------------------------------------------------------------ the classifier
@@ -492,6 +580,8 @@ def assess_action(
     risky_roles = _role(element) & _RISKY_ROLES if resolved else set()
     if risky_roles:
         rules.append(f"R3_RISKY_ROLE:{','.join(sorted(risky_roles))}")
+    if resolved:
+        rules.extend(content_rules(operation, element))
     if operation in WRITE_OPERATIONS:
         field_hits = payment_field_text_hits(texts) + (structural_field_hits(element) if resolved else [])
         if field_hits:
@@ -500,15 +590,73 @@ def assess_action(
         if not texts:
             rules.append("R5_NO_EVIDENCE")
         if not resolved:
-            if operation in WRITE_OPERATIONS:
-                rules.append("R6_UNRESOLVED_WRITE")
-            elif not locator or not locator.isascii():
-                rules.append("R6_UNRESOLVED_LOCATOR_NOT_PLAIN_ASCII")
+            # Review I5 / owner decision 2026-09-30: an action runs only on the element the
+            # Harness bound and verifies at the moment it acts. A target the Harness did not
+            # resolve cannot be that element, click included (I4 let a plain-ASCII locator
+            # through as A2).
+            rules.append("R6_UNRESOLVED_WRITE" if operation in WRITE_OPERATIONS else "R6_UNRESOLVED_TARGET")
     if rules:
         return RiskAssessment("A4", tuple(rules))
     if operation == "fill":
         return RiskAssessment("A3", ("LOW_RISK",))
     return RiskAssessment("A2", ("LOW_RISK",))
+
+
+#: Keys that activate the focused element (a click on it).
+_ACTIVATION_KEYS = frozenset({"enter", "numpadenter", " ", "space", "spacebar"})
+#: Keys that move focus/scroll and change nothing by themselves.
+_NAVIGATION_KEYS = frozenset({
+    "tab", "arrowup", "arrowdown", "arrowleft", "arrowright", "pageup", "pagedown", "home",
+    "end", "escape",
+})
+#: Roles/tags that take typed text.
+_FIELD_ROLES = frozenset({"textbox", "searchbox", "combobox", "spinbutton"})
+
+
+def key_activates(key: str | None) -> bool:
+    """Enter/Space, alone or with modifiers ("Shift+Enter"), activate the focused element."""
+    raw = str(key or "")
+    if raw.endswith(" "):  # " " is Space in Playwright/CDP key names ("Shift+ " too)
+        return True
+    return raw.split("+")[-1].strip().lower() in _ACTIVATION_KEYS
+
+
+def _is_field(element: dict[str, Any]) -> bool:
+    tag = _field(element, "tag")
+    typ = _field(element, "effective_type", "type")
+    return (
+        _field(element, "role") in _FIELD_ROLES
+        or tag == "textarea"
+        or (tag == "input" and typ not in ("button", "submit", "reset", "image", "checkbox", "radio", "file", "range", "color"))
+    )
+
+
+def assess_key_press(key: str | None, focused: dict[str, Any] | None, *, resolved: bool = True) -> RiskAssessment:
+    """Review I5 MAJOR-3 — ``press_key`` is classified against ``document.activeElement``.
+
+    * unknown focus (the Harness did not report/bind it) -> A4 (``R6_UNRESOLVED_FOCUS``);
+    * Enter/Space (with or without modifiers) -> a click on the focused element;
+    * any other key in a field -> a fill of that field;
+    * a navigation key (Tab, arrows, Page/Home/End, Escape) outside a field -> A2;
+    * any other key outside a field -> A4 (``R10_KEY_OUTSIDE_FIELD``): its effect is the
+      page's keyboard handler, which nothing observed.
+    """
+    if not key:
+        return RiskAssessment("A4", ("R5_NO_KEY",))
+    if not resolved or not isinstance(focused, dict):
+        return RiskAssessment("A4", ("R6_UNRESOLVED_FOCUS",))
+    if key_activates(key):
+        if _field(focused, "role") not in INTERACTIVE_ROLES:
+            return RiskAssessment("A4", ("KEY_ACTIVATES_FOCUSED", "R9_FOCUS_NOT_A_CONTROL"))
+        inner = assess_action("click", element=focused, locator=None, resolved=True)
+        return RiskAssessment(inner.action_class, ("KEY_ACTIVATES_FOCUSED",) + inner.rules)
+    if _is_field(focused):
+        inner = assess_action("fill", element=focused, locator=None, resolved=True)
+        return RiskAssessment(inner.action_class, ("KEY_FILLS_FOCUSED",) + inner.rules)
+    last = str(key).split("+")[-1].strip().lower()
+    if last in _NAVIGATION_KEYS:
+        return RiskAssessment("A2", ("KEY_NAVIGATES",))
+    return RiskAssessment("A4", ("R10_KEY_OUTSIDE_FIELD",))
 
 
 def assess_supplementary_text(operation: str, text: str | None) -> RiskAssessment:
@@ -540,9 +688,13 @@ def judged_text(*texts: str | None) -> str:
 
 __all__ = [
     "HIGH_RISK_WORDS",
+    "INTERACTIVE_ROLES",
     "RiskAssessment",
     "assess_action",
+    "assess_key_press",
     "assess_supplementary_text",
+    "content_rules",
+    "key_activates",
     "element_texts",
     "fold",
     "fold_latin",

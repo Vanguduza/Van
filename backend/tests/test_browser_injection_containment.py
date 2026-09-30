@@ -118,11 +118,20 @@ class FakeHarness:
         self.calls.append("page_info")
         return self.pages.pop(0) if self.pages else {"url": f"https://{DOMAIN}/", "title": "end"}
 
-    async def click(self, task, locator):
+    async def describe(self, task, locator):
+        """Review I5: /describe reports the element on the current page, bound to its node."""
+        page = self.pages[0] if self.pages else {}
+        for e in page.get("elements") or ():
+            if e.get("locator") == locator:
+                return {"element": dict(e), "matches": 1, "page_url": page.get("url"),
+                        "binding": {"backend_node_id": 3, "digest": "0" * 64}}
+        return {"element": None, "matches": 0}
+
+    async def click(self, task, locator, *, binding=None):
         self.calls.append(f"click:{locator}")
         return {"ok": True}
 
-    async def fill_ref(self, task, locator, value_ref):
+    async def fill_ref(self, task, locator, value_ref, *, binding=None):
         self.calls.append(f"fill:{locator}:{value_ref}")
         return {"ok": True}
 
