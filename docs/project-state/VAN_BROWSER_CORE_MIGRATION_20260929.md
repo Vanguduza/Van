@@ -382,3 +382,70 @@ request it can read.
 - Stagehand's model-provider traffic via the service tunnel (`HTTPS_PROXY`,
   `NODE_USE_ENV_PROXY`) is unverified; Stagehand stays PRODUCTION_DISABLED.
 - The resolver must be IPv4.
+
+### 8.6 Guard canary origin (unit G14, 2026-09-30)
+
+Owner answer after unit G13, "In-zone canary origin (Recommended)": *"The canary serves its
+fixture from a dedicated canary hostname on the zone's private overlay, listed in the proxy
+config as the only allowed non-global upstream. It is checked by qualify.sh and never reachable
+by a task scope. The proxy's local-address rule stays strict for everything else."*
+
+**Reproduced before the fix (17fec5d8).** `guard_canary.py` behind the proxy exited 1: every
+case navigated to the proxy's 403 page, `/describe` found no `#b` and `/click` answered
+`TARGET_BINDING_REQUIRED`. A direct probe of the proxy with a MACed read-only policy answered
+`EGRESS_UPSTREAM_ADDRESS_REFUSED` for a fixture on 127.0.0.1 and on 192.0.2.2 alike, and the
+decision log said `ALLOW` for both (the address refusal happened after the log line; it is now
+logged as `UPSTREAM`).
+
+**Design.**
+
+| Piece | What it does |
+|---|---|
+| Origin | `VAN_BROWSER_CANARY_ORIGIN` (`https://<name>.internal[:port]`) at `VAN_BROWSER_CANARY_ADDRESS` (private IPv4; loopback, unspecified, link-local, multicast, reserved and global refused; bootstrap.sh defaults it to the edge's overlay address). Certificate self-signed for the name by bootstrap.sh. |
+| Proxy exception | Exact host, pinned address (no DNS lookup), exact port, TLS only, verified against the pinned canary certificate only. Used only while alias `guard_canary` holds the read-only policy of task `van-guard-canary` for the lease qualify.sh armed (`op: canary`, MAC `van-egress-canary/1` under the lease-fence key, 180 s, ended by that lease's end or a newer lease). Anything else naming the canary host is `EGRESS_UPSTREAM_ADDRESS_REFUSED`. |
+| Never task-reachable | `*.internal` is reserved: the gateway (`task_scope.py`: declared scopes, target domains, owner-approved widening; recorded scopes fail closed), the Harness (409 `TASK_SCOPE_RESERVED_HOST` before the fence, unless the canary's own MAC-checked call) and the proxy (`POLICY_SCOPE_RESERVED_HOST`). |
+| Canary | Serves the fixture over TLS on the canary address; immediate and delayed guard cases through the proxy; a `proxy` case (GET through the canary lease's listener reaches the fixture, a WebSocket upgrade is refused `EGRESS_WEBSOCKET_REFUSED` and never reaches it); a `task_refused` case. |
+
+**Verified where** (repository sandbox; the overlay address is the sandbox interface's
+TEST-NET address 192.0.2.2; Chromium 1194; browser-harness 0.1.13):
+
+| Claim | Evidence |
+|---|---|
+| canary passes end to end through the proxy and the real Harness worker (browser-harness binary) | live run: `guard_canary.py` exit 0, and the real `qualify.sh` (only the installed canary path and interpreter swapped) reports `network_guard_canary` GREEN |
+| a normal task cannot reach the canary origin | `backend/tests/test_browser_canary_origin.py`: API create 422, Harness 409, proxy `POLICY_SCOPE_RESERVED_HOST`, another alias's Chromium gets `EGRESS_CONNECT_OUT_OF_SCOPE`, an unarmed canary lease gets `EGRESS_UPSTREAM_ADDRESS_REFUSED` |
+| 127.0.0.1, localhost, the overlay address under any other name, other private and link-local addresses stay refused while the canary is armed | same file (live) + `tests/contracts/test_van_browser_core_egress_proxy.py` |
+| Chromium's own resolution is not involved | Chromium launched with `--host-resolver-rules=MAP <canary name> 127.0.0.1`; the page still comes from 192.0.2.2 and the loopback service sees nothing |
+| each guard fails when broken | 10 induced mutations (proxy reserved-host check, grant check, exact port, local-address rule, certificate pin, WebSocket rule; Harness reserved-scope refusal, canary MAC; gateway reserved_host, owner-widening catch): each failed its tests; live: breaking the guard, the proxy's WebSocket rule or the exception turns the canary RED |
+| on a provisioned host (overlay address, Chromium 1243) | **UNVERIFIED** |
+
+**Limits.** Every holder of the lease-fence key (the gateway's copy, the Harness, the proxy,
+root) can compute the canary MAC; the separation from task traffic is the reserved names, the
+fixed alias/task id and the MAC context, not a separate key. Under the proxy Chromium never
+resolves the canary name, so `--host-resolver-rules` plays no part in production.
+
+### 8.7 Review I8 remediation in the egress scope (unit G14, 2026-09-30)
+
+Each finding was reproduced on this branch before the fix, with review I8's own probes.
+
+| Finding | Reproduced | Fix | After |
+|---|---|---|---|
+| MAJOR-3 request smuggling | `proxy_attacks.py`: `X-A: 1\n\nPOST /api/pay` put a POST upstream under a read-only policy (CONNECT and plain HTTP); a smuggled DELETE outside the path scope under a mutating one | CR/LF/NUL in request and header lines, non-visible-ASCII targets and control characters in header values refused; the parsed, normalised target is forwarded; listeners serve only the configured browser uid, the service tunnel only the Stagehand uid (owner read from `/proc/net/tcp` for the exact 4-tuple: SO_PEERCRED exists only for Unix sockets, and `--proxy-server` needs TCP) | every smuggling variant `EGRESS_REQUEST_INVALID`, nothing upstream; root refused `EGRESS_CLIENT_REFUSED` |
+| MAJOR-4 firewall | `fw_netns.py`: after the ruleset root's pings got no reply and its ICMP port-unreachable never arrived | output chain accepts; only `meta skuid { browser, stagehand } jump browser_out` | root ping REPLY and unreachable received; browser/Stagehand uids confined as before |
+| MINOR-1 egress gate | gate-lab report with fails=2, `network_guard_canary` RED: GREEN | fails must be 0 and every required check GREEN; `network_guard_canary`, `egress_refuses_smuggling`, `egress_refuses_other_users`, `stagehand_isolated` required | the lab report is BLOCKED |
+| MINOR-2 restart | after a proxy restart a finally revoked lease's policy was accepted and its POST went through | newest/ended leases persisted (0600, fsync+rename) | `POLICY_LEASE_ENDED` / `POLICY_GENERATION_STALE` after restart |
+| MINOR-4 Stagehand keys | Stagehand ran as `van-browser` (unit file) | own user `van-stagehand`; control socket group `van-egress-ctl`; own secret root; CDP endpoint files 0640 in 0750 dirs | `stagehand_isolated` check (RED in the sandbox: no Stagehand; its probe verified denied) |
+| MINOR-5 qualify.sh | argv from the Harness's own report; any ECONNREFUSED passed; TCP/53 open | argv read from `/proc/<pid>/cmdline`; reject counter must increase; TCP/53 rule removed | live: the argv check flagged the sandbox's foreign non-proxied Chromium processes and passed the Harness's own; a kernel RST without the ruleset is RED |
+| MINOR-7 OPTIONS | refused under read-only | OPTIONS without a body is a read | reaches in-scope origins; out-of-scope and with a body refused |
+
+Induced failures: 12 mutations of these fixes; 11 are caught by a test. The survivor: removing
+only the CR/LF/NUL line check, because the header-value, header-name and target checks also
+refuse those bytes; removing it together with the header-value check lets the smuggled request
+through and is caught (live). One mutation (`stagehand_isolated` accepting anything) first
+survived too: the check's probe crashed on a numeric uid and was RED for the wrong reason.
+Correction: c2d6390e's message claims that qualify.sh fix, but the commit holds only the test;
+the fix was lost when the induction script restored qualify.sh with `git checkout` before it
+was committed (the full suite run at 8921882c showed it: the netns qualify test failed). The fix
+is in the commit after 8921882c, and the probe's stderr now reaches the check's detail. Remaining: IPv6 neighbour discovery and kernel tunnels
+are accepted by construction but untested (the sandbox has no IPv6); a loopback resolver
+(e.g. 127.0.0.53) stays reachable over TCP like every loopback port; everything here is
+sandbox evidence, not host qualification.

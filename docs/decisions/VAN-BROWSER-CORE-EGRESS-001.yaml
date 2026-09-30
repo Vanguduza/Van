@@ -48,3 +48,30 @@ egress_qualification:
   status: PENDING
   qualify_report: null
   qualify_report_sha256: null
+
+# --- appended 2026-09-30 by unit G14 (nothing above this line was edited) ---
+# Records one further owner answer and the review-I8 remediation in the egress scope. NOT
+# owner-signed; the Project Truth authorization record is written by the integrator, not by
+# this unit. egress_qualification above is unchanged: PENDING (nothing has run on a
+# provisioned host).
+owner_answer_20260930_guard_canary_origin:
+  channel: owner answer in Claude Code session session_01ELKqm4GCPmPvF3ggKkgB1J, 2026-09-30, after unit G13; no device or cryptographic signature claimed
+  question: "The guard canary in qualify.sh serves its test page from 127.0.0.1, but the egress proxy refuses local upstream addresses. So on a real host the canary always fails, and browser qualification can never pass. How should the canary be qualified?"
+  selected_label: "In-zone canary origin (Recommended)"
+  selected_text: "The canary serves its fixture from a dedicated canary hostname on the zone's private overlay, listed in the proxy config as the only allowed non-global upstream. It is checked by qualify.sh and never reachable by a task scope. The proxy's local-address rule stays strict for everything else."
+
+unit_g14_20260930:
+  canary_origin:
+    config: VAN_BROWSER_CANARY_ORIGIN (https://<name>.internal[:port]), VAN_BROWSER_CANARY_ADDRESS (private overlay IPv4, not loopback), VAN_BROWSER_CANARY_CERT/KEY (self-signed by bootstrap.sh, pinned by the proxy)
+    proxy_exception: exact host, pinned address (no lookup), exact port, TLS only, verified against the pinned certificate only; only for alias guard_canary's read-only policy of task van-guard-canary on the lease qualify.sh armed (control op canary, MAC van-egress-canary/1)
+    never_task_reachable: gateway task_scope.py, Harness and proxy each refuse *.internal scope entries (TASK_SCOPE_RESERVED_HOST / POLICY_SCOPE_RESERVED_HOST)
+    qualification: qualify.sh network_guard_canary (immediate, delayed, proxy - WebSocket upgrade refused - and task_refused cases)
+  review_i8_remediation:
+    MAJOR-3: proxy refuses CR/LF/NUL and control characters in request and header lines, forwards the parsed target, serves listeners only to the configured browser uid (kernel socket table)
+    MAJOR-4: firewall filters only the browser and Stagehand users' sockets (jump); packets without a socket are accepted
+    MINOR-1: the egress gate needs the whole qualify report to pass (fails == 0, every required check GREEN); required_checks add network_guard_canary, egress_refuses_smuggling, egress_refuses_other_users, stagehand_isolated
+    MINOR-2: the proxy persists each alias's newest and ended leases
+    MINOR-4: Stagehand runs as van-stagehand, without the fence key or the control socket
+    MINOR-5: qualify.sh reads Chromium's argv from /proc, needs the reject counter to move, no TCP/53 for the browser user
+    MINOR-7: OPTIONS without a body is a read at the proxy
+  code_and_evidence: docs/project-state/VAN_BROWSER_CORE_MIGRATION_20260929.md sections 8.6 and 8.7

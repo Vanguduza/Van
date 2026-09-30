@@ -12,6 +12,7 @@ import atexit
 import contextlib
 import hashlib
 import hmac
+import ipaddress
 import json
 import os
 import re
@@ -210,6 +211,7 @@ class ChromeSession:
                 raise WorkerError("CHROMIUM_EXECUTABLE_UNAVAILABLE", 503)
             self.profile_dir.mkdir(parents=True, exist_ok=True)
             self.runtime_dir.mkdir(parents=True, exist_ok=True)
+            os.chmod(self.runtime_dir, 0o750)  # review I8 MINOR-4: see _publish_cdp
             active = self.profile_dir / "DevToolsActivePort"
             active.unlink(missing_ok=True)
             self.process = subprocess.Popen(
@@ -249,7 +251,9 @@ class ChromeSession:
             ),
             encoding="utf-8",
         )
-        os.chmod(tmp, 0o600)
+        # Review I8 MINOR-4: readable by group van-browser, where the Stagehand user (its own uid,
+        # without the fence key or the proxy's control socket) finds the CDP endpoint.
+        os.chmod(tmp, 0o640)
         os.replace(tmp, target)
 
     def stop(self) -> None:
@@ -2234,6 +2238,8 @@ def network_guard_policy(body: dict[str, Any], alias: str) -> dict[str, Any]:
                     mac, effect_mac(key, alias, generation, holder, str(body.get("task_id") or ""), claimed, scope_digest(scope))):
             raise WorkerError("NETWORK_EFFECT_MAC_INVALID", 403)
         mutating = claimed
+    # Unit G14: an overlay host never reaches the guard's or the egress proxy's policy.
+    assert_no_reserved_scope(body, alias)
     return {"mutating": mutating, "scope": scope}
 
 
@@ -2632,6 +2638,90 @@ def revoke_egress_policy(alias: str, generation: int, holder: str, *, final: boo
     })
     if reply.get("ok") is not True:
         raise WorkerError("EGRESS_REVOKE_REFUSED", 503)
+
+
+# ------------------------------------------------------------------------ guard canary
+#
+# Unit G14 (owner answer 2026-09-30 after unit G13, "In-zone canary origin (Recommended)"):
+# qualify.sh's guard canary serves its fixture from a dedicated ``*.internal`` name on the
+# zone's private overlay, the egress proxy's only allowed non-global upstream, and it is
+# "never reachable by a task scope". The Harness therefore refuses any call whose task scope
+# (or target domain) names an overlay host (``*.internal``), TASK_SCOPE_RESERVED_HOST, unless
+# the call is the canary's own: alias ``guard_canary``, task id ``van-guard-canary``,
+# read-only, every scope entry the configured canary origin, and a valid canary MAC
+# (``van-egress-canary/1`` under the lease-fence key; the proxy checks the same MAC when
+# qualify.sh arms the exception). No gateway code computes that MAC context.
+CANARY_ORIGIN = os.getenv("VAN_BROWSER_CANARY_ORIGIN", "")
+CANARY_ADDRESS = os.getenv("VAN_BROWSER_CANARY_ADDRESS", "")
+CANARY_ALIAS = "guard_canary"
+CANARY_TASK_ID = "van-guard-canary"
+CANARY_MAC_CONTEXT = "van-egress-canary/1"
+RESERVED_HOST_SUFFIX = ".internal"
+
+
+def reserved_host(host: str) -> bool:
+    """A zone-overlay name (``*.internal``): never part of a task scope."""
+    host = str(host or "").lower().rstrip(".")
+    return host == RESERVED_HOST_SUFFIX[1:] or host.endswith(RESERVED_HOST_SUFFIX)
+
+
+def canary_mac(key: bytes, alias: str, generation: int, holder_id: str, task_id: str,
+               origin: str, address: str) -> str:
+    """Same bytes as ``canary_mac`` in egress_proxy.py."""
+    message = (f"{CANARY_MAC_CONTEXT}\n{alias}\n{int(generation)}\n{holder_id}\n{task_id}\n"
+               f"{origin}\n{address}").encode()
+    return hmac.new(key, message, hashlib.sha256).hexdigest()
+
+
+def canary_config() -> tuple[str, str, str] | None:
+    """(origin, host, address) of the configured canary, or None (then no call is the canary's)."""
+    parts = _vs_parse(CANARY_ORIGIN) if CANARY_ORIGIN else None
+    try:
+        address = str(ipaddress.ip_address(CANARY_ADDRESS.strip()))
+    except ValueError:
+        return None
+    if parts is None or parts[0] != "https" or parts[3] != "/" or not reserved_host(parts[1]):
+        return None
+    return _vs_origin(parts), parts[1], address
+
+
+def reserved_scope_violation(body: dict[str, Any], alias: str) -> str | None:
+    """None unless the call's scope or target domain names an overlay host and the call is not
+    the guard canary's own (see above); then ``TASK_SCOPE_RESERVED_HOST``."""
+    scope = body.get("task_scope")
+    entries = scope.get("entries") if isinstance(scope, dict) and isinstance(scope.get("entries"), list) else []
+    reserved = reserved_host(str(body.get("target_domain") or ""))
+    parsed = []
+    for entry in entries:
+        raw = entry.get("origin") if isinstance(entry, dict) else None
+        parts = _vs_parse(raw) if isinstance(raw, str) else None
+        if parts is None and isinstance(raw, str) and RESERVED_HOST_SUFFIX in raw.lower():
+            return "TASK_SCOPE_RESERVED_HOST"  # unparseable but names an overlay host
+        parsed.append(parts)
+        if parts is not None and reserved_host(parts[1]):
+            reserved = True
+    if not reserved:
+        return None
+    config, key = canary_config(), getattr(FENCE, "_key", None)
+    if config is None or key is None or alias != CANARY_ALIAS or body.get("task_id") != CANARY_TASK_ID \
+            or body.get("mutating") is True or not parsed:
+        return "TASK_SCOPE_RESERVED_HOST"
+    origin, host, address = config
+    if str(body.get("target_domain") or "").lower().rstrip(".") != host \
+            or any(p is None or p[3] != "/" or _vs_origin(p) != origin for p in parsed):
+        return "TASK_SCOPE_RESERVED_HOST"
+    generation, holder, mac = body.get("lease_generation"), body.get("lease_holder_id"), body.get("canary_mac")
+    if isinstance(generation, bool) or not isinstance(generation, int) or not isinstance(holder, str) \
+            or not isinstance(mac, str) or not hmac.compare_digest(
+                mac, canary_mac(key, alias, generation, holder, CANARY_TASK_ID, origin, address)):
+        return "TASK_SCOPE_RESERVED_HOST"
+    return None
+
+
+def assert_no_reserved_scope(body: dict[str, Any], alias: str) -> None:
+    violation = reserved_scope_violation(body, alias)
+    if violation:
+        raise WorkerError(violation, 409)
 
 
 def apply_lease_policy(lease: "GuardLease", body: dict[str, Any], alias: str) -> None:
@@ -3145,6 +3235,7 @@ def _require_scope(body: dict[str, Any]) -> dict[str, Any]:
     scope = body.get("task_scope")
     if not isinstance(scope, dict) or not isinstance(scope.get("entries"), list) or not scope["entries"]:
         raise WorkerError("TASK_SCOPE_REQUIRED", 409)
+    assert_no_reserved_scope(body, str(body.get("profile_alias") or ""))  # unit G14
     return scope
 
 
@@ -3559,6 +3650,9 @@ class Handler(BaseHTTPRequestHandler):
             domain = safe_domain(body.get("target_domain"))
             if self.path not in MUTATING_OPERATIONS and self.path not in READ_OPERATIONS:
                 raise WorkerError("OPERATION_NOT_ALLOWED", 404)
+            # Unit G14: no task scope reaches the zone's overlay (the guard canary's origin
+            # included); refused before the fence or the page is touched.
+            assert_no_reserved_scope(body, alias)
             # Review I5 F1 — the fence check and the operation run under one profile lock.
             with FENCE.admit(alias, body, mutating=self.path in MUTATING_OPERATIONS), \
                     NET_GUARDS.using(NET_GUARDS.bind(alias, body)) as lease:

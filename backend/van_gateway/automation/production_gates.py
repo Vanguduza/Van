@@ -336,6 +336,15 @@ def _classify_qualify_report(
         return GateStatus.UNKNOWN, f"qualify report unreadable: {type(exc).__name__}"
     if report.get("zone") != spec["zone"]:
         return GateStatus.UNKNOWN, f"qualify report is for zone {report.get('zone')!r}, not {spec['zone']!r}"
+    # Review I8 MINOR-1: a report is GREEN only as a whole. qualify.sh exits non-zero when any
+    # required check is not GREEN (``fails`` counts them); a report with fails > 0, or a
+    # required check that is not GREEN among checks the model does not list, is not a pass.
+    fails = report.get("fails")
+    if isinstance(fails, bool) or not isinstance(fails, int) or fails < 0:
+        return GateStatus.UNKNOWN, "qualify report has no valid fails count"
+    failing = sorted(name for name, c in checks.items() if c.get("required") == 1 and c.get("status") != "GREEN")
+    if fails or failing:
+        return GateStatus.BLOCKED, f"qualify report failed: fails={fails}; required checks not GREEN: {', '.join(failing) or '-'}"
     missing = [name for name in spec["required_checks"] if name not in checks]
     if missing:
         return GateStatus.UNKNOWN, f"qualify report lacks checks: {', '.join(missing)}"

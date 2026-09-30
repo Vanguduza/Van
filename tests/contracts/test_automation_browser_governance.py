@@ -536,7 +536,8 @@ def test_private_browser_workers_are_real_and_fail_closed():
     assert "127.0.0.1" in harness
     assert "allow_helper_authoring" in harness
     assert "cdp-endpoint.json" in harness
-    assert "os.chmod(tmp, 0o600)" in harness
+    # Review I8 MINOR-4: group-readable (0640) for the Stagehand user, which has its own uid.
+    assert "os.chmod(tmp, 0o640)" in harness
     assert "User=van-browser" in harness_unit
 
     assert '@browserbasehq/stagehand' in (browser / "package.json").read_text(encoding="utf-8")
@@ -550,7 +551,7 @@ def test_private_browser_workers_are_real_and_fail_closed():
     assert "secretref://browser/stagehand-model" in env
     assert 's["runtime_version"] == "4.1.0"' in bootstrap
     assert "VAN_BROWSER_CORE_INSTALLED_PENDING_QUALIFY_AND_GATES" in bootstrap
-    assert "User=van-browser" in stagehand_unit
+    assert "User=van-stagehand\n" in stagehand_unit and "User=van-browser\n" not in stagehand_unit
     assert "Requires=van-browser-harness.service" in stagehand_unit
     assert "NoNewPrivileges=true" in stagehand_unit
 

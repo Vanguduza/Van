@@ -17,6 +17,8 @@ StartLimitBurst=5
 Type=simple
 User=van-browser
 Group=van-browser
+# Review I8 MINOR-4: the egress proxy's control socket belongs to this group.
+SupplementaryGroups=van-egress-ctl
 EnvironmentFile=/etc/van-browser-core/runtime.env
 WorkingDirectory=/opt/van-browser-core/runtime
 ExecStartPre=/usr/bin/grep -qx van-browser-core /etc/van-browser-core/zone
@@ -42,6 +44,11 @@ MemoryDenyWriteExecute=false
 CapabilityBoundingSet=
 AmbientCapabilities=
 UMask=0077
+# Review I8 MINOR-4: /run is tmpfs; systemd recreates the runtime root on every start, 0750 so
+# the Stagehand user (group van-browser) reaches the per-alias CDP endpoint files (0640).
+RuntimeDirectory=van-browser-core
+RuntimeDirectoryMode=0750
+RuntimeDirectoryPreserve=yes
 ReadWritePaths=/var/lib/van-browser-core /run/van-browser-core /var/log/van-browser-core -/run/van-browser-egress
 ReadOnlyPaths=/opt/van-browser-core/runtime /etc/van-browser-core/runtime.env
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6

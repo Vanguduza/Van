@@ -346,7 +346,8 @@ def test_real_model_gates_every_browser_capability_on_egress_qualification_and_i
     assert set(gate["required_checks"]) == {
         "firewall_loaded", "browser_udp_blocked", "browser_tcp_bypass_blocked", "egress_proxy_active",
         "egress_refuses_without_policy", "egress_policy_mac_enforced", "egress_refuses_websocket_and_write",
-        "harness_uses_egress_proxy"}
+        "harness_uses_egress_proxy", "network_guard_canary", "egress_refuses_smuggling", "egress_refuses_other_users",
+        "stagehand_isolated"}
     state = evaluate_production_gates()
     gates = {(g["decision"], g["gate"]): g for g in state["capability_gates"]}
     assert gates[(EGRESS, "egress_qualification")]["status"] == "PENDING"
@@ -360,7 +361,7 @@ def test_real_model_gates_every_browser_capability_on_egress_qualification_and_i
 
 
 def _egress_repo(tmp_path: Path, *, status="QUALIFIED", checks=None, zone="van-browser-core",
-                 reference=None, pin=None, gate=None) -> dict:
+                 reference=None, pin=None, gate=None, fails=0) -> dict:
     gate = gate or _egress_gate()
     decisions = tmp_path / "docs" / "decisions"
     decisions.mkdir(parents=True)
@@ -368,7 +369,7 @@ def _egress_repo(tmp_path: Path, *, status="QUALIFIED", checks=None, zone="van-b
     report.parent.mkdir(parents=True)
     rows = checks if checks is not None else [
         {"check": c, "status": "GREEN", "required": 1, "detail": ""} for c in gate["required_checks"]]
-    report.write_text(json.dumps({"zone": zone, "fails": 0, "checks": rows}), encoding="utf-8")
+    report.write_text(json.dumps({"zone": zone, "fails": fails, "checks": rows}), encoding="utf-8")
     import hashlib
 
     sha = hashlib.sha256(report.read_bytes()).hexdigest()
@@ -398,14 +399,36 @@ def test_egress_gate_is_green_only_with_a_pinned_all_green_report(tmp_path):
     ("a required check RED", {"checks": None, "red": "browser_udp_blocked"}, "BLOCKED"),
     ("a required check GREEN but not required", {"checks": None, "optional": "egress_proxy_active"}, "UNKNOWN"),
     ("status outside the vocabulary", {"status": "GREEN"}, "UNKNOWN"),
+    # Review I8 MINOR-1: the report as a whole must pass.
+    ("fails > 0 although every listed check is GREEN", {"fails": 1}, "BLOCKED"),
+    ("fails missing", {"fails": None}, "UNKNOWN"),
+    ("fails not an integer", {"fails": True}, "UNKNOWN"),
+    ("a required check outside the list RED", {"checks": None, "extra_red": "worker_health"}, "BLOCKED"),
 ])
 def test_egress_gate_is_not_green_without_the_report(tmp_path, label, kwargs, expected):
-    red, optional = kwargs.pop("red", None), kwargs.pop("optional", None)
-    if red or optional:
+    red, optional, extra_red = kwargs.pop("red", None), kwargs.pop("optional", None), kwargs.pop("extra_red", None)
+    if red or optional or extra_red:
         rows = [{"check": c, "status": "RED" if c == red else "GREEN", "required": 0 if c == optional else 1}
                 for c in _egress_gate()["required_checks"]]
+        if extra_red:
+            rows.append({"check": extra_red, "status": "RED", "required": 1})
         kwargs["checks"] = rows
     assert _egress_repo(tmp_path, **kwargs)["status"] == expected, label
+
+
+def test_review_i8_lab_report_with_the_canary_red_is_blocked(tmp_path):
+    """Review I8 MINOR-1, its gate-lab report: fails=2, network_guard_canary and worker_health
+    RED, every other listed check GREEN. It was GREEN."""
+    gate = _egress_gate()
+    rows = [{"check": c, "status": "RED" if c == "network_guard_canary" else "GREEN", "required": 1}
+            for c in gate["required_checks"]] + [{"check": "worker_health", "status": "RED", "required": 1}]
+    result = _egress_repo(tmp_path, checks=rows, fails=2)
+    assert result["status"] == "BLOCKED" and "network_guard_canary" in result["reason"]
+    # The same report with the canary dropped from the model's list is still BLOCKED.
+    other = tmp_path / "other"
+    other.mkdir()
+    thin = dict(gate, required_checks=[c for c in gate["required_checks"] if c != "network_guard_canary"])
+    assert _egress_repo(other, checks=rows, fails=2, gate=thin)["status"] == "BLOCKED"
 
 
 def test_a_qualify_report_gate_without_required_checks_is_unknown(tmp_path):
