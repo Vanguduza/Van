@@ -20,6 +20,7 @@ env:
   SCP_OIDC: https://www.servercontrolpanel.de/realms/scp/protocol/openid-connect
   EMERGENCY_BRANCH: ops/dial-control-recovery-20260930
   CONTROLLER_PATH: /usr/local/lib/dial-control/github-oidc-control.mjs
+  NETCUP_DIAL_CONTROL_IP: 62.83.35.103
 
 jobs:
   request-authorization:
@@ -74,12 +75,12 @@ jobs:
           patch(){ curl -sS --fail-with-body -X PATCH "${auth[@]}" -H 'Content-Type: application/merge-patch+json' --data "$2" "$1"; }
           tcp(){ timeout 3 bash -c "</dev/tcp/$1/$2" >/dev/null 2>&1; }
 
-          SERVERS="$(get "$SCP_API/v1/servers")"
-          SERVER_ID="$(jq -r 'if length==1 then .[0].id else ([.[] | select((.hostname // "")=="dial-control" or (.nickname // "")=="dial-control" or (.nickname // "")=="Hermes" or (.name // "")=="dial-control")] | if length==1 then .[0].id else empty end) end' <<<"$SERVERS")"
-          [[ "$SERVER_ID" =~ ^[0-9]+$ ]] || { echo "REFUSE: dial-control server not uniquely resolved" >&2; jq '[.[]|{id,name,hostname,nickname}]' <<<"$SERVERS"; exit 21; }
+          SERVERS="$(curl -sS --fail-with-body -G "${auth[@]}" --data-urlencode "ip=$NETCUP_DIAL_CONTROL_IP" "$SCP_API/v1/servers")"
+          SERVER_ID="$(jq -r 'if length==1 then .[0].id else empty end' <<<"$SERVERS")"
+          [[ "$SERVER_ID" =~ ^[0-9]+$ ]] || { echo "REFUSE: could not resolve exactly one server for $NETCUP_DIAL_CONTROL_IP" >&2; jq '[.[]|{id,name,hostname,nickname,serverLiveInfo}]' <<<"$SERVERS"; exit 21; }
           SERVER="$(get "$SCP_API/v1/servers/$SERVER_ID")"
-          IP="$(jq -r '.ipv4Addresses[0] // empty' <<<"$SERVER")"
-          [[ "$IP" =~ ^[0-9]+(\.[0-9]+){3}$ ]] || { echo "REFUSE: dial-control IPv4 unavailable" >&2; exit 21; }
+          IP="$NETCUP_DIAL_CONTROL_IP"
+          [[ "$IP" =~ ^[0-9]+(\.[0-9]+){3}$ ]] || { echo "REFUSE: dial-control IPv4 invalid" >&2; exit 21; }
           echo "DIAL_CONTROL_SCP_RESOLVED=YES"
           echo "state=$(jq -r '.serverLiveInfo.state // "unknown"' <<<"$SERVER")"
           echo "guest_agent=$(get "$SCP_API/v1/servers/$SERVER_ID/guest-agent/status" | jq -r '.available // false' 2>/dev/null || true)"
