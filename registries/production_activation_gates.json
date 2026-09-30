@@ -191,7 +191,7 @@
           "sha256_path": "egress_qualification.qualify_report_sha256",
           "report_dir": "evidence/van-browser-core/qualify",
           "zone": "van-browser-core",
-          "required_checks": ["firewall_loaded", "browser_udp_blocked", "browser_tcp_bypass_blocked", "egress_proxy_active", "egress_refuses_without_policy", "egress_policy_mac_enforced", "egress_refuses_websocket_and_write", "harness_uses_egress_proxy"]
+          "required_checks": ["firewall_loaded", "browser_udp_blocked", "browser_tcp_bypass_blocked", "egress_proxy_active", "egress_refuses_without_policy", "egress_policy_mac_enforced", "egress_refuses_websocket_and_write", "harness_uses_egress_proxy", "network_guard_canary", "egress_refuses_smuggling", "egress_refuses_other_users", "stagehand_isolated"]
         }
       ]
     }
