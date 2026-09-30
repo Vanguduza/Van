@@ -142,3 +142,31 @@ Recorded in the same exchange (verbatim labels):
   "Append an OWNER_DERIVED binding that extends the guard record to G9c's 9 first-parent commits
   (72e72120..2833fa4c), citing your 'Network-effect guard' choice. Paths are unchanged." See
   `auth-20260930-scope-binding-network-effect-guard`.
+
+---
+
+## Owner answers after independent review I7 (appended 2026-09-30)
+
+Recorded first-hand by the integrator (the Claude Code session that asked and received the answers:
+`session_01ELKqm4GCPmPvF3ggKkgB1J`). No device, biometric or cryptographic signature is claimed. Append-only.
+
+1. Question (verbatim): "WebSocket connections can't be blocked by the browser guard. It detects them and closes the
+   page, but the handshake still reaches the server. A handshake URL can carry a payment request (e.g.
+   /ws-pay?amount=500). What should happen?"
+   Answer (verbatim label): **"Egress proxy (Recommended)"** — option text: "Route the van-browser-core browser through
+   a local egress proxy that refuses WebSocket upgrades and non-GET requests unless the task is admitted as mutating.
+   That is repository and zone work, and it also covers UDP. Stagehand stays production-disabled until it exists."
+2. Question (verbatim): "Read-only browser tasks (watches, research) fail when a page sends ordinary analytics beacons
+   on load, which most real pages do. The guard blocks the beacon. What should happen?"
+   Answer (verbatim label): **"Block silently, continue (Recommended)"** — option text: "For read-only tasks, blocked
+   background writes that no action triggered (load-time analytics) are dropped and logged. The task continues. A
+   write that follows an automated action still goes to you."
+3. Question (verbatim): "The guard only covers requests made over HTTP. WebRTC and WebTransport (UDP) traffic from the
+   browser isn't seen at all, and Chrome flags don't stop it. How should that be handled?"
+   Answer (verbatim label): **"Firewall UDP in zone (Recommended)"** — option text: "Add a host firewall rule in the
+   van-browser-core deploy that drops all UDP from the browser user except DNS to the resolver. Applied at
+   provisioning and checked by qualify.sh."
+
+Implemented by units G11 (persistent guard, background-write drop rule) and G12 (egress proxy, UDP/TCP firewall),
+integrated by G13. Authorizations: `auth-20260930-owner-explicit-browser-egress-and-beacons` and
+`auth-20260930-owner-derived-programme-b-review-i7-remediation`.
