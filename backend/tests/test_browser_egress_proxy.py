@@ -473,6 +473,25 @@ def test_a_guard_freeze_revokes_the_lease_policy(rig, monkeypatch):
     assert set(_codes(rig)) == {"EGRESS_POLICY_UNKNOWN"}
 
 
+def test_the_lease_end_revokes_even_when_the_page_cannot_be_frozen(rig, monkeypatch):
+    """/release (or a newer lease, or idle expiry) whose freeze script fails — the browser went
+    away — still revokes the lease's proxy policy, before the freeze is attempted."""
+    lease = rig.policy("egress_a", mutating=True, scope=DOCS_SCOPE)
+    session = rig.launch("egress_a")
+
+    def gone(alias, script, extra=None):
+        raise rig.hs.WorkerError("BROWSER_HARNESS_REQUEST_FAILED", 502)
+
+    monkeypatch.setattr(rig.hs, "run_harness", gone)
+    report = rig.hs.NET_GUARDS.end("egress_a", lease)
+    assert report["frozen"] is False and lease.egress_revoked is True
+    rig.clear()
+    session.goto_url(f"https://{DOCS}/docs/page")
+    time.sleep(2)
+    assert rig.server_log() == []
+    assert set(_codes(rig)) == {"EGRESS_POLICY_UNKNOWN"}
+
+
 def test_an_older_lease_release_leaves_the_newer_lease_policy(rig):
     rig.policy("egress_a", mutating=False, scope=DOCS_SCOPE)
     older = rig.generation
@@ -565,6 +584,46 @@ async def test_through_the_worker_handler_the_proxy_policy_follows_the_page_leas
         session.goto_url(f"https://{DOCS}/docs/page")
         time.sleep(2)
         assert rig.server_log() == [] and set(_codes(rig)) == {"EGRESS_POLICY_UNKNOWN"}
+    finally:
+        rig.hs.NET_GUARDS.close()
+        server.shutdown()
+        server.server_close()
+
+
+async def test_through_the_worker_handler_a_lease_start_removes_an_older_lease_policy(rig, monkeypatch, _settings):
+    """A policy left at the proxy by an older lease (a restarted worker never saw it end) does not
+    serve the next lease: that lease's first call revokes it, even a read that pushes nothing."""
+    import threading as _threading
+    from http.server import ThreadingHTTPServer as _Server
+
+    import test_harness_elements as he
+    from van_gateway.browser.adapters import HarnessLeaseFence, HttpBrowserHarnessAdapter, harness_lease_fence
+
+    alias = "public_research"
+    rig.policy(alias, mutating=False, scope=DOCS_SCOPE)  # generation 1, never ended
+    session = rig.launch(alias)
+    rig.visit(session, f"https://{DOCS}/docs/page", wait=0)
+    lock = _threading.Lock()
+
+    def run_harness(_alias, script, extra=None):
+        with lock:
+            return kit.exec_script(session, script, extra)
+
+    monkeypatch.setattr(rig.hs, "run_harness", run_harness)
+    server = _Server(("127.0.0.1", 0), rig.hs.Handler)
+    _threading.Thread(target=server.serve_forever, daemon=True).start()
+    harness = HttpBrowserHarnessAdapter(None, base_url=f"http://127.0.0.1:{server.server_address[1]}",
+                                        enabled=True, fence_key=KEY)
+    task = he._task().model_copy(update={"scope": None, "mutating": False})  # a read that pushes no policy
+    try:
+        with harness_lease_fence(HarnessLeaseFence(alias, task.task_id, 2)):
+            await harness.page_info(task)
+        time.sleep(1)
+        rig.clear()
+        session.goto_url(f"https://{DOCS}/docs/page")
+        time.sleep(2)
+        assert rig.server_log() == []
+        assert set(_codes(rig)) == {"EGRESS_POLICY_UNKNOWN"}
     finally:
         rig.hs.NET_GUARDS.close()
         server.shutdown()
