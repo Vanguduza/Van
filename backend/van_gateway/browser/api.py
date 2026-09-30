@@ -234,6 +234,8 @@ class BrowserApi:
             target_domain=str(row["target_domain"]),
             goal=str(row["goal"]),
             scope=await self._task_scope(row),
+            # Network-effect guard: admitted as mutating only when the row says so (1).
+            mutating=("mutating" in row.keys() and row["mutating"] == 1),
             status=BrowserTaskStatus(str(row["status"])),
             evidence_pointer=row["evidence_pointer"],
             error_code=row["error_code"],
