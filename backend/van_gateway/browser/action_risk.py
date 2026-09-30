@@ -51,7 +51,8 @@ Review I5 additions (defence in depth; the task scope is the primary control)
   field);
 * MAJOR-6 money/trading/commitment verbs in ``_RISK_STEMS`` / ``_RISK_WORDS``;
 * ``R11`` (integration G8) the Harness redacted part of what the control shows (its
-  ``text``, a ``media`` entry, or its form's ``action``/``formaction``): review I5 E1
+  ``text``, a ``media`` entry, its form's ``action``/``formaction``, and since review I6
+  m3 its accessible ``name`` and ``description``): review I5 E1
   masks card/account digit runs, token-like runs and field values there, and a masked span
   may have held a risk word, so the target is never positively low-risk.
 
@@ -532,7 +533,9 @@ def redacted_content(element: dict[str, Any] | None) -> bool:
     """Integration G8 — True when the Harness masked part of the element's shown content."""
     if not isinstance(element, dict):
         return False
-    shown: list[Any] = [element.get("text")]
+    # Review I6 m3: the accessible name and description are masked too — a masked name or
+    # description is never positively low-risk.
+    shown: list[Any] = [element.get("text"), element.get("name"), element.get("description")]
     media = element.get("media")
     if isinstance(media, (list, tuple)):
         shown.extend(media)

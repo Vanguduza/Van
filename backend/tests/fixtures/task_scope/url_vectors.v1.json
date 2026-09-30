@@ -1,0 +1,468 @@
+{
+ "schema": "van.task_scope.url_vectors.v1",
+ "note": "Review I6 M3. Run by the gateway (task_scope.py) and the Harness (VAN_HELPERS_PY) tests, and checked against real Chromium's WHATWG URL parser (Chromium additionally decodes %2E in a path; the rule does too). parsed=null means the shared rule refuses to parse it (fail closed).",
+ "scope_entries": [
+  {
+   "origin": "https://docs.example.com",
+   "path_prefix": "/docs/"
+  }
+ ],
+ "vectors": [
+  {
+   "input": "https://docs.example.com/docs/ok",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/ok"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": "https://docs.example.com/docs/../checkout/pay",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/checkout/pay"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+  },
+  {
+   "input": "https://docs.example.com/docs/%2e%2e/checkout/pay",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/checkout/pay"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+  },
+  {
+   "input": "https://docs.example.com/docs/%2E%2E/checkout/pay",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/checkout/pay"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+  },
+  {
+   "input": "https://docs.example.com/docs/.%2e/checkout/pay",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/checkout/pay"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+  },
+  {
+   "input": "https://docs.example.com/docs/%2e./checkout/pay",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/checkout/pay"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+  },
+  {
+   "input": "https://docs.example.com/docs/..\\checkout/pay",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/checkout/pay"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+  },
+  {
+   "input": "https://docs.example.com/docs/./ok",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/ok"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": "https://docs.example.com/docs/%2e/ok",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/ok"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": "https://docs.example.com/docs/..",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+  },
+  {
+   "input": "https://docs.example.com/docs/%2e%2e%2fcheckout",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/..%2fcheckout"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"
+  },
+  {
+   "input": "https://docs.example.com/docs/%2e%2e%5ccheckout",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/..%5ccheckout"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"
+  },
+  {
+   "input": "https://docs.example.com./docs/ok",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/ok"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": "https://DOCS.Example.COM/docs/ok",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/ok"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": "HTTPS://docs.example.com/docs/ok",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/ok"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": "https://docs.example.com:443/docs/ok",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/ok"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": "http://docs.example.com:80/docs/ok",
+   "base": null,
+   "parsed": {
+    "origin": "http://docs.example.com",
+    "path": "/docs/ok"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE"
+  },
+  {
+   "input": "https://docs.example.com:8443/docs/ok",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com:8443",
+    "path": "/docs/ok"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE"
+  },
+  {
+   "input": "https://user:pw@docs.example.com/docs/ok",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/ok"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": "https://docs.example.com@evil.example.net/docs/ok",
+   "base": null,
+   "parsed": {
+    "origin": "https://evil.example.net",
+    "path": "/docs/ok"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE"
+  },
+  {
+   "input": "https://docs.example.com\\@evil.example.net/docs/ok",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/@evil.example.net/docs/ok"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+  },
+  {
+   "input": "https://evil.example.net\\@docs.example.com/docs/ok",
+   "base": null,
+   "parsed": {
+    "origin": "https://evil.example.net",
+    "path": "/@docs.example.com/docs/ok"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE"
+  },
+  {
+   "input": "https://docs.example.com%2eevil.example.net/docs/ok",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com.evil.example.net",
+    "path": "/docs/ok"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE"
+  },
+  {
+   "input": "https://www.docs.example.com/docs/ok",
+   "base": null,
+   "parsed": {
+    "origin": "https://www.docs.example.com",
+    "path": "/docs/ok"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE"
+  },
+  {
+   "input": "https:\\\\docs.example.com/docs/ok",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/ok"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": " https://docs.example.com/docs/../checkout",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/checkout"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+  },
+  {
+   "input": "https://docs.example.com/docs/\t../checkout",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/checkout"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+  },
+  {
+   "input": "https://docs.ex\nample.com/docs/ok",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/ok"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": "https://docs.example.com/docs/a b",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/a%20b"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": "https://docs.example.com/docs/ok?x=1#frag",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/ok"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": "https:docs.example.com/docs/ok",
+   "base": null,
+   "parsed": null,
+   "violation_docs_scope": "TASK_SCOPE_PAGE_URL_INVALID"
+  },
+  {
+   "input": "https:///docs.example.com/docs/ok",
+   "base": null,
+   "parsed": null,
+   "violation_docs_scope": "TASK_SCOPE_PAGE_URL_INVALID"
+  },
+  {
+   "input": "https://[::1]/docs/ok",
+   "base": null,
+   "parsed": null,
+   "violation_docs_scope": "TASK_SCOPE_PAGE_URL_INVALID"
+  },
+  {
+   "input": "javascript:pay()",
+   "base": null,
+   "parsed": null,
+   "violation_docs_scope": "TASK_SCOPE_PAGE_URL_NOT_HTTP"
+  },
+  {
+   "input": "data:text/html,x",
+   "base": null,
+   "parsed": null,
+   "violation_docs_scope": "TASK_SCOPE_PAGE_URL_NOT_HTTP"
+  },
+  {
+   "input": "",
+   "base": null,
+   "parsed": null,
+   "violation_docs_scope": "TASK_SCOPE_PAGE_URL_UNKNOWN"
+  },
+  {
+   "input": "/docs/next",
+   "base": "https://docs.example.com/docs/guide/page",
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/next"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": "/checkout/pay",
+   "base": "https://docs.example.com/docs/guide/page",
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/checkout/pay"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+  },
+  {
+   "input": "../../checkout/pay",
+   "base": "https://docs.example.com/docs/guide/page",
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/checkout/pay"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+  },
+  {
+   "input": "../x",
+   "base": "https://docs.example.com/docs/guide/page",
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/x"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": "x/../../y",
+   "base": "https://docs.example.com/docs/guide/page",
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/y"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": "%2e%2e/%2e%2e/checkout",
+   "base": "https://docs.example.com/docs/guide/page",
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/checkout"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+  },
+  {
+   "input": "..\\..\\checkout",
+   "base": "https://docs.example.com/docs/guide/page",
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/checkout"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+  },
+  {
+   "input": "?q=1",
+   "base": "https://docs.example.com/docs/guide/page",
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/guide/page"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": "#top",
+   "base": "https://docs.example.com/docs/guide/page",
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/guide/page"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": "",
+   "base": "https://docs.example.com/docs/guide/page",
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/guide/page"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_URL_UNKNOWN"
+  },
+  {
+   "input": "//docs.example.com/docs/ok",
+   "base": "https://docs.example.com/docs/guide/page",
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/ok"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": "\\\\evil.example.net/x",
+   "base": "https://docs.example.com/docs/guide/page",
+   "parsed": {
+    "origin": "https://evil.example.net",
+    "path": "/x"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE"
+  },
+  {
+   "input": "///evil.example.net/x",
+   "base": "https://docs.example.com/docs/guide/page",
+   "parsed": null,
+   "violation_docs_scope": "TASK_SCOPE_PAGE_URL_INVALID"
+  },
+  {
+   "input": "https://docs.example.com/docs/%2F",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/%2F"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"
+  },
+  {
+   "input": "https://docs.example.com/%64ocs/%2E%2E/y",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/y"
+   },
+   "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+  },
+  {
+   "input": "https://docs.example.com/docs/a%2Eb",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/a.b"
+   },
+   "violation_docs_scope": null
+  },
+  {
+   "input": "https://docs.example.com/docs/%41%7e",
+   "base": null,
+   "parsed": {
+    "origin": "https://docs.example.com",
+    "path": "/docs/%41%7e"
+   },
+   "violation_docs_scope": null
+  }
+ ]
+}

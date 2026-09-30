@@ -53,7 +53,9 @@ class RecordingTransport(httpx.AsyncBaseTransport):
     async def handle_async_request(self, request):
         body = json.loads(request.content or b"{}")
         self.requests.append((request.url.path, body.get("lease_generation")))
-        return httpx.Response(200, json={"url": "https://docs.example.com/", "title": "x", "elements": []})
+        # The task's own origin (t.DOMAIN): review I6 M3 — the gateway refuses a reply
+        # that reports a page outside the task scope.
+        return httpx.Response(200, json={"url": "https://portal.example.com/", "title": "x", "elements": []})
 
 
 class GateThenHarness:
