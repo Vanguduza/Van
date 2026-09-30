@@ -39,6 +39,7 @@ import ipaddress
 import re
 import socket
 import threading
+import time
 from collections.abc import Callable, Iterable, Mapping
 from pathlib import Path
 from typing import Any
@@ -82,31 +83,85 @@ OVERLAY_NETWORKS: tuple[ipaddress.IPv4Network | ipaddress.IPv6Network, ...] = tu
 )
 #: getaddrinfo has no timeout of its own; a resolution slower than this fails closed.
 DNS_RESOLVE_TIMEOUT_S = 2.0
+#: Review I5 P2 — at most this many resolver threads exist at once, however many gate
+#: evaluations are waiting (one lookup per name is shared by every waiter). With none free
+#: a lookup fails closed at once instead of starting another thread.
+DNS_MAX_THREADS = 2
+#: Review I5 P1/P2 — how long an answer is reused. Within it the gate and the connection
+#: read the same answer (no second resolution to rebind); a failure is remembered briefly
+#: so a hung resolver is not asked again on every evaluation.
+DNS_CACHE_TTL_S = 30.0
+DNS_NEGATIVE_TTL_S = 5.0
 
 #: ``resolver(host) -> addresses`` (textual IPs). Raising, returning nothing or timing out is
 #: unresolvable, which fails closed. Injected by tests so they never need the network.
 Resolver = Callable[[str], Iterable[str]]
 
 
-def _getaddrinfo_resolver(host: str) -> list[str]:
-    """Every address ``host`` resolves to, bounded by ``DNS_RESOLVE_TIMEOUT_S``."""
-    box: dict[str, Any] = {}
+class _BoundedCachingResolver:
+    """getaddrinfo on at most ``DNS_MAX_THREADS`` daemon threads, de-duplicated per name,
+    bounded by ``DNS_RESOLVE_TIMEOUT_S`` per caller, with a short TTL cache.
 
-    def run() -> None:
+    Daemon threads, not an executor: a hung lookup must not hold interpreter shutdown.
+    Entries are keyed by the ``socket.getaddrinfo`` that produced them as well as the name,
+    so replacing the system resolver (tests do) never serves an answer it did not give.
+    """
+
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+        self._slots = threading.BoundedSemaphore(DNS_MAX_THREADS)
+        self._cache: dict[tuple[str, Any], tuple[float, list[str] | None, BaseException | None]] = {}
+        self._inflight: dict[tuple[str, Any], tuple[threading.Event, float]] = {}
+
+    def clear(self) -> None:
+        with self._lock:
+            self._cache.clear()
+
+    def _lookup(self, key: tuple[str, Any], getaddrinfo: Any, done: threading.Event) -> None:
         try:
-            box["infos"] = socket.getaddrinfo(host, None, type=socket.SOCK_STREAM)
+            infos = getaddrinfo(key[0], None, type=socket.SOCK_STREAM)
+            entry = (time.monotonic() + DNS_CACHE_TTL_S, [str(info[4][0]) for info in infos], None)
         except Exception as exc:  # noqa: BLE001 — any failure is unresolvable
-            box["error"] = exc
+            entry = (time.monotonic() + DNS_NEGATIVE_TTL_S, None, exc)
+        finally:
+            self._slots.release()
+        with self._lock:
+            self._cache[key] = entry
+            self._inflight.pop(key, None)
+        done.set()
 
-    # A daemon thread, not an executor: a hung lookup must not hold interpreter shutdown.
-    worker = threading.Thread(target=run, name="stagehand-placement-dns", daemon=True)
-    worker.start()
-    worker.join(DNS_RESOLVE_TIMEOUT_S)
-    if worker.is_alive():
-        raise TimeoutError(f"resolving {host!r} took longer than {DNS_RESOLVE_TIMEOUT_S}s")
-    if "error" in box:
-        raise box["error"]
-    return [str(info[4][0]) for info in box["infos"]]
+    def __call__(self, host: str) -> list[str]:
+        getaddrinfo = socket.getaddrinfo
+        key = (host, getaddrinfo)  # the function itself: an id could be reused
+        with self._lock:
+            cached = self._cache.get(key)
+            if cached is not None and cached[0] > time.monotonic():
+                if cached[2] is not None:
+                    raise cached[2]
+                return list(cached[1] or [])
+            inflight = self._inflight.get(key)
+            if inflight is None:
+                if not self._slots.acquire(blocking=False):
+                    raise TimeoutError("no resolver thread free")
+                inflight = (threading.Event(), time.monotonic())
+                self._inflight[key] = inflight
+                threading.Thread(target=self._lookup, args=(key, getaddrinfo, inflight[0]),
+                                 name="stagehand-placement-dns", daemon=True).start()
+        done, started = inflight
+        # A shared lookup already past the bound fails this caller at once.
+        remaining = DNS_RESOLVE_TIMEOUT_S - (time.monotonic() - started)
+        if remaining <= 0 or not done.wait(remaining):
+            raise TimeoutError(f"resolving {host!r} took longer than {DNS_RESOLVE_TIMEOUT_S}s")
+        with self._lock:
+            cached = self._cache.get(key)
+        if cached is None:
+            raise TimeoutError(host)
+        if cached[2] is not None:
+            raise cached[2]
+        return list(cached[1] or [])
+
+
+_getaddrinfo_resolver = _BoundedCachingResolver()
 
 
 DEFAULT_RESOLVER: Resolver = _getaddrinfo_resolver
@@ -192,6 +247,25 @@ def _endpoint_refusal(hostname: str | None, resolver: Resolver) -> str | None:
         if _address_refused(ip):
             return "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS"
     return None
+
+
+def checked_connect_addresses(hostname: str | None, resolver: Resolver | None = None) -> list[str]:
+    """Review I5 P1 — the addresses a connection to ``hostname`` may use.
+
+    The same classification as the placement gate, through the same (cached) resolver, so
+    within the cache TTL the connection uses the very answer the gate approved, and after it
+    a fresh answer is re-checked before any socket opens. Raises ``PermissionError`` with
+    the refusal reason when the host (or any answer) is not a possible cross-zone edge.
+    """
+    resolver = resolver or DEFAULT_RESOLVER
+    refusal = _endpoint_refusal(hostname, resolver)
+    if refusal is not None:
+        raise PermissionError(refusal)
+    host = (hostname or "").strip().lower().strip("[]").rstrip(".")
+    literal = _ip_of(host)
+    if literal is not None:
+        return [str(literal)]
+    return [str(a).split("%", 1)[0] for a in resolver(host)]
 
 
 def _norm(value: Any) -> str:

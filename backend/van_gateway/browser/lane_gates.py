@@ -14,6 +14,7 @@ imports are unchanged.
 
 from __future__ import annotations
 
+import asyncio
 import contextlib
 import contextvars
 import time
@@ -134,11 +135,13 @@ def load_stagehand_production_gate(settings: Any, stagehand: Any = None) -> Call
         # a missing mTLS identity or a non-decided model is closed on settings alone, without
         # contacting the endpoint. Only when fresh worker health is the one thing missing is
         # the worker's /health read.
-        permitted, reason = fn(settings, worker_health=None)
+        # Review I5 P2 — the placement check resolves the endpoint name, which blocks: it runs
+        # on a worker thread so the event loop is never stalled by DNS.
+        permitted, reason = await asyncio.to_thread(fn, settings, worker_health=None)
         if permitted is not True and not str(reason).startswith(WORKER_HEALTH_PENDING_PREFIX):
             return False, str(reason or "PRODUCTION_DISABLED")
         health = await _fetch_stagehand_worker_health(stagehand) if stagehand is not None else None
-        permitted, reason = fn(settings, worker_health=health)
+        permitted, reason = await asyncio.to_thread(fn, settings, worker_health=health)
         if permitted is not True:
             return False, str(reason or "PRODUCTION_DISABLED")
         try:

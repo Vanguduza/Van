@@ -12,6 +12,7 @@ production activation as permitted only when every gate in the explicit gate mod
 
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 from typing import Any
@@ -233,7 +234,8 @@ class AutomationHealthApi:
             placement = {"state": "PRODUCTION_DISABLED", "reason": "PLACEMENT_GATE_MISSING"}
         else:
             health = await _fetch_stagehand_worker_health(self.stagehand)
-            placement = stagehand_production_state(self.settings, worker_health=health)
+            # Review I5 P2 — resolves the endpoint name; never on the event loop.
+            placement = await asyncio.to_thread(stagehand_production_state, self.settings, worker_health=health)
         gates = governance["capabilities"]["stagehand"]
         return {
             **placement,

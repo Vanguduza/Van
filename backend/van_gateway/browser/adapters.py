@@ -248,6 +248,50 @@ def _error_code(response: httpx.Response) -> str | None:
     return str(body.get("error")) if isinstance(body, dict) and body.get("error") else None
 
 
+class _PinnedNetworkBackend:
+    """Review I5 P1 — connect only to an address the placement check approved.
+
+    httpcore asks the backend to ``connect_tcp(host, port)`` with the URL's host name; this
+    resolves it through ``placement.checked_connect_addresses`` (the gate's own cached,
+    classified answer) and opens the socket to that address. TLS is then started by
+    httpcore with the URL's host as SNI and as the name the certificate is verified against,
+    and the Host header is unchanged, so mTLS verification stays on the name while a DNS
+    answer that changed after the check (rebinding) is never connected to.
+    """
+
+    def __init__(self, inner: Any) -> None:
+        self._inner = inner
+
+    async def connect_tcp(self, host: str, port: int, timeout: float | None = None,
+                          local_address: str | None = None, socket_options: Any = None) -> Any:
+        from van_gateway.automation.placement import checked_connect_addresses
+
+        try:
+            addresses = await asyncio.to_thread(checked_connect_addresses, host)
+        except PermissionError as exc:
+            raise httpx.ConnectError(f"endpoint refused by placement: {exc}") from exc
+        except Exception as exc:  # noqa: BLE001 - unresolvable fails closed
+            raise httpx.ConnectError(f"endpoint unresolvable: {type(exc).__name__}") from exc
+        if not addresses:
+            raise httpx.ConnectError("endpoint unresolvable")
+        return await self._inner.connect_tcp(addresses[0], port, timeout=timeout,
+                                             local_address=local_address, socket_options=socket_options)
+
+    async def connect_unix_socket(self, *args: Any, **kwargs: Any) -> Any:
+        raise httpx.ConnectError("unix sockets are not a cross-zone endpoint")
+
+    async def sleep(self, seconds: float) -> None:
+        await self._inner.sleep(seconds)
+
+
+def pinned_transport(**kwargs: Any) -> httpx.AsyncHTTPTransport:
+    """An httpx transport whose connections go only to placement-checked addresses (I5 P1)."""
+    transport = httpx.AsyncHTTPTransport(**kwargs)
+    pool = transport._pool  # httpcore.AsyncConnectionPool (httpx 0.28 / httpcore 1.0)
+    pool._network_backend = _PinnedNetworkBackend(pool._network_backend)
+    return transport
+
+
 class _PrivateWorkerClient:
     """Shared plumbing for the two loopback worker processes.
 
@@ -258,6 +302,8 @@ class _PrivateWorkerClient:
     """
 
     CAPABILITY = "worker"
+    #: Review I5 P1 — connect only to the addresses the placement gate approved (HTTPS).
+    PIN_ENDPOINT_DNS = False
 
     def __init__(
         self,
@@ -301,6 +347,16 @@ class _PrivateWorkerClient:
                 kwargs["verify"] = ca
             if cert and key:
                 kwargs["cert"] = (cert, key)
+            if self.PIN_ENDPOINT_DNS:
+                # A client given a transport ignores its own verify/cert: they move onto it.
+                import ssl
+
+                context = ssl.create_default_context(cafile=ca or None)
+                if cert and key:
+                    context.load_cert_chain(cert, key)
+                kwargs.pop("verify", None)
+                kwargs.pop("cert", None)
+                kwargs["transport"] = pinned_transport(verify=context)
         return kwargs
 
     def _assert_usable(self) -> None:
@@ -505,6 +561,7 @@ class StagehandAdapter(_PrivateWorkerClient):
     """
 
     CAPABILITY = "stagehand"
+    PIN_ENDPOINT_DNS = True
 
     def __init__(
         self,
@@ -688,5 +745,6 @@ __all__ = [
     "HttpBrowserHarnessAdapter",
     "current_harness_lease_fence",
     "harness_lease_fence",
+    "pinned_transport",
     "StagehandAdapter",
 ]
