@@ -46,6 +46,8 @@ from van_gateway.browser.service import (
     BrowserTaskRunInFlight,
     BrowserTaskService,
     BrowserTaskTransitionRefused,
+    TERMINAL_TASK_STATUSES,
+    network_owner_code,
 )
 from van_gateway.automation.canonical import digest
 from van_gateway.automation.verifier import PostconditionSpec
@@ -331,6 +333,25 @@ class BrowserApi:
                 (int(time.time() * 1000), task.profile_alias, lease_ref),
             )
         return lease_ref
+
+    async def _hand_late_block_to_owner(self, task_id: str, code: str) -> str:
+        """Unit G15 (review I8 MAJOR-2) — a write the lease's guard blocked (or detected, or a
+        guard it lost) that the Harness reported only when the lease was given back goes to
+        the owner, as ``/interaction/step`` does: WAITING_FOR_OWNER with ``OWNER_TAKEOVER:
+        <code>`` through the guarded writer. A task already in an end state stays there (the
+        writer refuses); callers order their release before any end state they write. Returns
+        the task's status afterwards."""
+        from van_gateway.browser.models import BrowserTaskStatus as _Status
+
+        try:
+            await self.tasks.set_working_status(
+                task_id=task_id, status=_Status.WAITING_FOR_OWNER,
+                error_code=f"OWNER_TAKEOVER:{code}"[:200],
+            )
+        except BrowserTaskTransitionRefused as exc:
+            return exc.current or "UNKNOWN"
+        instruments.record_browser_task(_Status.WAITING_FOR_OWNER)
+        return _Status.WAITING_FOR_OWNER.value
 
     async def _terminate_without_asking(
         self, task: BrowserTask, result, *, boundary_type: BrowserBoundaryType
@@ -896,13 +917,24 @@ class BrowserApi:
             self._require_internal(x_van_internal_token)
             from van_gateway.browser.models import PageLease
 
-            await self.broker.release_lease(
+            released = await self.broker.release_lease(
                 PageLease(
                     lease_id=body.lease_id, profile_alias=body.profile_alias,
                     task_id=body.task_id, acquired_at_ms=0, expires_at_ms=0,
                 )
             )
-            return {"released": True, "lease_id": body.lease_id}
+            out: dict[str, Any] = {"released": True, "lease_id": body.lease_id}
+            code = released.owner_code
+            if code is not None:
+                # Unit G15 (review I8 MAJOR-2): what the guard blocked after the lease's last
+                # call is the owner's, whoever gives the lease back.
+                out["blocked"] = code
+                row = await self.store.fetchone(
+                    "SELECT task_id FROM browser_tasks WHERE task_id = ?", (body.task_id,)
+                )
+                if row is not None:
+                    out["task_status"] = await self._hand_late_block_to_owner(body.task_id, code)
+            return out
 
         @router.post("/tasks")
         async def create_task(
@@ -980,7 +1012,17 @@ class BrowserApi:
             x_van_internal_token: str | None = Header(default=None),
         ):
             self._require_internal(x_van_internal_token)
-            await self._load_task(task_id)
+            task = await self._load_task(task_id)
+            if body.status is BrowserTaskStatus.COMPLETED and task.status not in TERMINAL_TASK_STATUSES:
+                # Unit G15 (review I8 MAJOR-2): an end state is final, so a page lease the task
+                # still holds is ended first — a write its guard blocked after the task's last
+                # call must reach the owner before COMPLETED could stand over it.
+                code = await self._end_held_page(task)
+                if code is not None:
+                    status = await self._hand_late_block_to_owner(task_id, code)
+                    raise HTTPException(
+                        status_code=409, detail=f"BROWSER_TASK_HANDED_TO_OWNER:{code}:{status}",
+                    )
             try:
                 await self.tasks.complete(
                     task_id=task_id, status=body.status,
@@ -1074,22 +1116,31 @@ class BrowserApi:
             )
         except BrowserPolicyError as exc:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
+        page_end: dict[str, Any] | None = None
         try:
-            with harness_lease_fence(broker_lease_fence(self.broker, lease)):
-                result = await self.runner.run(
-                    assignment=assignment, worker=worker, task=task,
-                    verifier=self.verifier, postcondition=body.postcondition,
-                )
+            try:
+                with harness_lease_fence(broker_lease_fence(self.broker, lease)):
+                    result = await self.runner.run(
+                        assignment=assignment, worker=worker, task=task,
+                        verifier=self.verifier, postcondition=body.postcondition,
+                    )
+            finally:
+                page_end = await self._end_run_page(acquired, lease)
         except SemanticWorkerUnavailable as exc:
+            await self._late_block_before_raising(task, page_end)
             # An L2+ assignment asked for judgement about a page and no semantic
             # runtime is configured. Walking the deterministic plan instead would be
             # answering a different question and reporting success on this one.
             raise HTTPException(
                 status_code=503, detail=f"BROWSER_SEMANTIC_RUNTIME_UNAVAILABLE:{exc}"
             ) from exc
-        finally:
-            if acquired is not None:
-                await self.broker.release_lease_if_held(acquired)
+        except Exception:
+            await self._late_block_before_raising(task, page_end)
+            raise
+        # Unit G15 (review I8 MAJOR-2): the page ended before any outcome is written, so a write
+        # the guard blocked after the run's last Harness call hands the task to the owner
+        # instead of letting COMPLETED (or any end state) stand over it.
+        result = self._with_late_block(result, page_end)
 
         if result.verification_outcome is not None:
             # The verifier's verdict on the worker's "done" claim goes on record for
@@ -1113,6 +1164,49 @@ class BrowserApi:
         if escalation is not None:
             instruments.record_browser_task("ESCALATED")
         return self._assignment_response(assignment, task, result, escalation)
+
+    async def _end_run_page(self, acquired: Any, lease: Any) -> dict[str, Any] | None:
+        """Unit G15 — end the run's page and return the Harness's ``/release`` answer.
+
+        A lease the run took is given back (only while it is still the holding). A lease the
+        task already held outlives the run in the broker, but the run is the last one on it —
+        every outcome ends the task, holds it for verification or hands it to the owner, and
+        none of those runs again on this lease — so its page is ended here too, before the
+        outcome is written."""
+        if acquired is not None:
+            return (await self.broker.release_lease_if_held(acquired)).page
+        return await self.broker.release_page(profile_alias=lease.profile_alias, lease_id=lease.lease_id)
+
+    async def _end_held_page(self, task: BrowserTask) -> str | None:
+        """Unit G15 — end the page of the live lease ``task`` holds (if any) and return the
+        owner code its ``/release`` answer carries."""
+        row = await self.store.fetchone(
+            "SELECT lease_holder, lease_expires_at_ms, lease_holder_id FROM browser_profiles "
+            "WHERE profile_alias = ?",
+            (task.profile_alias,),
+        )
+        if row is None or not row["lease_holder"] or row["lease_holder_id"] != task.task_id:
+            return None
+        return network_owner_code(
+            await self.broker.release_page(profile_alias=task.profile_alias, lease_id=str(row["lease_holder"]))
+        )
+
+    async def _late_block_before_raising(self, task: BrowserTask, page_end: Any) -> None:
+        """A run that raised still hands a late block to the owner before the error goes up."""
+        code = network_owner_code(page_end)
+        if code is not None:
+            await self._hand_late_block_to_owner(task.task_id, code)
+
+    @staticmethod
+    def _with_late_block(result, page_end: Any):
+        """The run's result with a late block applied: OWNER_TAKEOVER (lane 4), never success.
+        A run that already handed over keeps its own reason."""
+        code = network_owner_code(page_end)
+        if code is None or result.stop_reason is SubagentStop.OWNER_TAKEOVER:
+            return result
+        return result.model_copy(update={
+            "stop_reason": SubagentStop.OWNER_TAKEOVER, "detail": f"HARNESS_REFUSED:{code}",
+        })
 
     async def _record_run_outcome(
         self, task: BrowserTask, assignment: SubagentAssignment, result, run_token: str

@@ -18,7 +18,7 @@ from van_gateway.browser.adapters import (
     BrowserAdapterError, HttpBrowserHarnessAdapter, StagehandAdapter, broker_lease_fence, harness_lease_fence,
 )
 from van_gateway.browser.models import AutonomyTier, BrowserStrategy, BrowserTask, BrowserTaskStatus, PageLease
-from van_gateway.browser.service import BrowserTaskService
+from van_gateway.browser.service import BrowserTaskService, BrowserTaskTransitionRefused
 from van_gateway.browser.policy import BrowserPolicyError
 from van_gateway.models import ActionClass
 from van_gateway.knowledge.evidence import KnowledgeEvidenceStore
@@ -639,6 +639,9 @@ class NotebookConsumerProvider:
         self.base_url = base_url.rstrip("/")
         self.timeout_seconds = timeout_seconds
         self.operations = NotebookOperationStore(store)
+        #: Unit G15 — tasks handed to the owner when their lease was given back; a later close
+        #: of the same task (the error path after a success path's close raised) writes nothing.
+        self._handed_to_owner: set[str] = set()
 
     def unavailable_reason(self) -> str | None:
         """Why the consumer cannot run even when fully wired. None would mean it can."""
@@ -743,10 +746,27 @@ class NotebookConsumerProvider:
         error_code: str | None = None,
     ) -> None:
         tasks, _harness, _stagehand = self._require_transport()
-        try:
-            await tasks.complete(task_id=task.task_id, status=status, error_code=error_code)
-        finally:
-            await tasks.broker.release_lease(lease)
+        if task.task_id in self._handed_to_owner:
+            return
+        # Unit G15 (review I8 MAJOR-2): the lease (and its page) is given back before the end
+        # state is written — an end state is final, and a write the lease's guard blocked
+        # after the last Harness call is reported only by the release. It goes to the owner
+        # (WAITING_FOR_OWNER, OWNER_TAKEOVER:<code>), and a success does not stand over it.
+        released = await tasks.broker.release_lease(lease)
+        code = released.owner_code
+        if code is not None:
+            self._handed_to_owner.add(task.task_id)
+            try:
+                await tasks.set_working_status(
+                    task_id=task.task_id, status=BrowserTaskStatus.WAITING_FOR_OWNER,
+                    error_code=f"OWNER_TAKEOVER:{code}"[:200],
+                )
+            except BrowserTaskTransitionRefused:
+                pass  # the task ended elsewhere meanwhile; it stays ended
+            if status is BrowserTaskStatus.COMPLETED:
+                raise NotebookProviderError(f"notebook_consumer_owner_takeover:{code}")
+            return
+        await tasks.complete(task_id=task.task_id, status=status, error_code=error_code)
 
     async def _seal_browser_evidence(
         self,

@@ -240,10 +240,10 @@ async def test_release_if_held_never_drops_another_holders_lease(tmp_path):
     mine = await broker.acquire_lease(profile_alias="public_research", task_id="task-a", now_ms=1_000)
     # Lapsed, and the profile was leased again to someone else.
     theirs = await broker.acquire_lease(profile_alias="public_research", task_id="task-b", now_ms=10_000_000)
-    assert await broker.release_lease_if_held(mine) is False
+    assert (await broker.release_lease_if_held(mine)).released is False
     row = await _lease_row(store)
     assert (row["lease_holder"], row["lease_holder_id"]) == (theirs.lease_id, "task-b")
-    assert await broker.release_lease_if_held(theirs) is True
+    assert (await broker.release_lease_if_held(theirs)).released is True
     assert (await _lease_row(store))["lease_holder"] is None
 
 

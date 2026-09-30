@@ -10,8 +10,10 @@ material — a leak fails loudly rather than being quietly redacted.
 
 from __future__ import annotations
 
+import re
 import time
 import uuid
+from dataclasses import dataclass
 from typing import Any
 
 from van_gateway.automation.canonical import digest, new_id
@@ -86,6 +88,42 @@ class BrowserTaskTransitionRefused(BrowserPolicyError):
         self.current = current
         self.requested = requested
         self.why = why
+
+
+#: Codes the Harness's ``/release`` answer (``blocked``) carries that hand the task to the
+#: owner (owner decision 2026-09-30, network-effect guard: "A blocked request goes to you"): a
+#: write the lease's guard blocked, one it detected but could not block, or a guard that could
+#: not be kept on (unit G15). Each has frozen the page.
+NETWORK_OWNER_CODES = ("NETWORK_WRITE_BLOCKED", "NETWORK_WRITE_DETECTED", "NETWORK_GUARD_")
+
+
+def network_owner_code(page_end: Any) -> str | None:
+    """The owner code in a Harness ``/release`` answer, or None. Only the closed vocabulary
+    (upper-case tokens joined by ``:``) is passed on; anything else under an owner prefix is
+    still the owner's, as NETWORK_GUARD_UNAVAILABLE."""
+    code = page_end.get("blocked") if isinstance(page_end, dict) else None
+    if not isinstance(code, str) or not code.startswith(NETWORK_OWNER_CODES):
+        return None
+    if len(code) > 120 or not re.fullmatch(r"[A-Z0-9_]+(?::[A-Z0-9_]+)*", code):
+        return "NETWORK_GUARD_UNAVAILABLE"
+    return code
+
+
+@dataclass(frozen=True)
+class LeaseRelease:
+    """Unit G15 (review I8 MAJOR-2) — what giving a page lease back returned.
+
+    ``released``: the broker gave the lease back (``release_lease_if_held``: it was still the
+    profile's holding). ``page``: the Harness's ``/release`` answer (None without a Harness, or
+    when the caller had already ended the page). A write the lease's guard blocked after the
+    caller's last Harness call is reported only here, so every caller reads ``owner_code``."""
+
+    released: bool
+    page: dict[str, Any] | None = None
+
+    @property
+    def owner_code(self) -> str | None:
+        return network_owner_code(self.page)
 
 
 class BrowserTaskRunInFlight(BrowserPolicyError):
@@ -355,30 +393,37 @@ class BrowserSessionBroker:
         lease = await self.acquire_lease(profile_alias=profile_alias, task_id=task_id, now_ms=now)
         return lease, lease
 
-    async def release_lease(self, lease: PageLease, *, now_ms: int | None = None) -> None:
+    async def release_lease(self, lease: PageLease, *, now_ms: int | None = None) -> LeaseRelease:
+        """Give ``lease`` back. Returns the Harness's ``/release`` answer with it (unit G15):
+        the caller routes ``owner_code`` to the owner."""
         now = int(time.time() * 1000) if now_ms is None else now_ms
-        await self.release_page(profile_alias=lease.profile_alias, lease_id=lease.lease_id)
-        await self.store.execute(
-            "UPDATE browser_profiles SET lease_holder = NULL, lease_expires_at_ms = NULL, "
-            "lease_holder_kind = NULL, lease_holder_id = NULL, updated_at_ms = ? "
-            "WHERE profile_alias = ? AND lease_holder = ?",
-            (now, lease.profile_alias, lease.lease_id),
-        )
+        page = await self.release_page(profile_alias=lease.profile_alias, lease_id=lease.lease_id)
+        async with self.store.connection() as db:
+            cur = await db.execute(
+                "UPDATE browser_profiles SET lease_holder = NULL, lease_expires_at_ms = NULL, "
+                "lease_holder_kind = NULL, lease_holder_id = NULL, updated_at_ms = ? "
+                "WHERE profile_alias = ? AND lease_holder = ?",
+                (now, lease.profile_alias, lease.lease_id),
+            )
+            await db.commit()
+            return LeaseRelease(released=cur.rowcount == 1, page=page)
 
 
     async def release_lease_if_held(
         self, lease: PageLease, *, now_ms: int | None = None, page_released: bool = False,
-    ) -> bool:
+    ) -> LeaseRelease:
         """Release ``lease`` only if it is still the profile's live holding (review I3 MAJOR-3).
 
         Lease id, holder and generation must all still match. A lease that lapsed and was
         taken by someone else is left alone, so a finishing step can never drop another
-        holder's lease. Returns whether anything was released. ``page_released``: the caller
-        already ended the lease's page (``release_page``).
+        holder's lease. Returns whether anything was released (``released``) and the Harness's
+        ``/release`` answer (``page``, unit G15). ``page_released``: the caller already ended
+        the lease's page (``release_page``) and holds its answer.
         """
         now = int(time.time() * 1000) if now_ms is None else now_ms
+        page = None
         if not page_released:
-            await self.release_page(profile_alias=lease.profile_alias, lease_id=lease.lease_id)
+            page = await self.release_page(profile_alias=lease.profile_alias, lease_id=lease.lease_id)
         async with self.store.connection() as db:
             cur = await db.execute(
                 "UPDATE browser_profiles SET lease_holder = NULL, lease_expires_at_ms = NULL, "
@@ -388,7 +433,7 @@ class BrowserSessionBroker:
                 (now, lease.profile_alias, lease.lease_id, lease.holder_id, int(lease.generation)),
             )
             await db.commit()
-            return cur.rowcount == 1
+            return LeaseRelease(released=cur.rowcount == 1, page=page)
 
 
 class BrowserTaskService:
@@ -765,6 +810,8 @@ class BrowserTaskService:
 
 __all__ = [
     "COMPLETABLE_TASK_STATUSES",
+    "LeaseRelease",
+    "NETWORK_OWNER_CODES",
     "RESERVED_EVIDENCE_KINDS",
     "ROUTER_STEP_EVIDENCE_KIND",
     "TERMINAL_TASK_STATUSES",
