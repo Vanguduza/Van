@@ -424,6 +424,40 @@ def redact_url(value: str) -> str:
     return _clip(origin + "/".join(segments) + ("?" + "&".join(names) if names else ""))
 
 
+def mask_secret_runs(value: str) -> str:
+    """Integration G8 — mask_digit_runs plus token-like runs (the secret_like rules), words kept.
+
+    Applied to the G6a fields that carry page text (``text``, ``media``, the form owner's
+    names). The gateway reads a masked text/media entry as A4 (action_risk ``R11``)."""
+    value = mask_digit_runs(value)
+    return _TOKEN_RUN_RE.sub(
+        lambda m: REDACTED if len(m.group()) >= 32 or (re.search(r"\d", m.group()) and re.search(r"[A-Za-z]", m.group())) else m.group(),
+        value,
+    )
+
+
+#: el.type values the Harness reports as ``effective_type`` (a page can redefine el.type).
+EFFECTIVE_TYPES = frozenset({
+    "button", "checkbox", "color", "date", "datetime-local", "email", "file", "hidden", "image",
+    "month", "number", "password", "radio", "range", "reset", "search", "select-multiple",
+    "select-one", "submit", "tel", "text", "textarea", "time", "url", "week",
+})
+FORM_METHODS = frozenset({"get", "post", "dialog", "other"})
+
+
+def sanitize_form(form: Any) -> dict[str, str] | None:
+    if not isinstance(form, dict):
+        return None
+    out = {k: _clip(form.get(k) if isinstance(form.get(k), str) else "") for k in ELEMENT_FORM_KEYS}
+    for key in ("action", "formaction"):
+        out[key] = redact_url(out[key]) if out[key] else ""
+    for key in ("method", "formmethod"):
+        out[key] = out[key].lower() if out[key].lower() in FORM_METHODS else ("other" if out[key] else "")
+    for key in ("target", "id", "name"):
+        out[key] = mask_secret_runs(out[key])
+    return out
+
+
 def sanitize_attribute(name: str, value: str) -> str:
     if name in URL_ATTRIBUTES:
         return redact_url(value)
@@ -480,6 +514,25 @@ ELEMENTS_JS = r"""
       if (df.length >= 4 && dv.includes(df)) return true;
     }
     return false;
+  }
+  // Integration G8 — G6b's E1 redaction extended to the G6a fields that carry page text
+  // (text, media, the form owner's names): a card/account digit run, a token-like run or a
+  // field's value is replaced where it appears, and the words around it are kept. The
+  // gateway treats a redacted text/media entry as A4 (R11), so a redaction can never hide
+  // a risk word from the classifier.
+  const DIGIT_RUN = /\d[\d \-.\/]*\d/g;
+  const TOKEN_RUN = /[A-Za-z0-9_\-+\/=.~%]{16,}/g;
+  const reEsc = (v) => v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  function maskSecrets(v) {
+    let s = String(v == null ? '' : v);
+    if (!s) return s;
+    s = s.replace(DIGIT_RUN, (m) => digitsOf(m).length >= 6 ? '[REDACTED]' : m);
+    s = s.replace(TOKEN_RUN, (m) => (m.length >= 32 || (/\d/.test(m) && /[A-Za-z]/.test(m))) ? '[REDACTED]' : m);
+    for (const f of FIELD_VALUES) {
+      if (f.length < 4) continue;
+      s = s.replace(new RegExp(reEsc(f), 'gi'), '[REDACTED]');
+    }
+    return s;
   }
   const esc = (s) => (window.CSS && CSS.escape) ? CSS.escape(s) : String(s).replace(/[^a-zA-Z0-9_-]/g, (c) => '\\' + c);
   const unique = (sel, el) => { try { const n = document.querySelectorAll(sel); return n.length === 1 && n[0] === el; } catch (e) { return false; } };
@@ -569,19 +622,25 @@ ELEMENTS_JS = r"""
       return ' ';
     }
     if (node.isContentEditable) return ' ';
+    // An ARIA field's content is its value (integration G8): never a container's text either.
+    if (FIELD_ROLES.has((node.getAttribute('role') || '').trim().toLowerCase().split(/\s+/)[0])) return ' ';
     if (tag === 'IMG') return ' ' + (node.getAttribute('alt') || '') + ' ';
     let out = '';
     const kids = node.shadowRoot ? [node.shadowRoot, ...node.childNodes] : node.childNodes;
     for (const c of kids) { out += rawText(c, depth + 1); if (out.length > TEXT * 2) break; }
     return out;
   }
+  // An ARIA field (role textbox/searchbox/spinbutton/combobox) shows its value as its text
+  // content: rawText() reads it as nothing, on its own or inside a container (integration G8,
+  // E1 x MAJOR-1).
+  const FIELD_ROLES = new Set(['textbox', 'searchbox', 'spinbutton', 'combobox']);
   function isFieldEl(el) {
     const tag = el.localName, t = (el.getAttribute('type') || '').toLowerCase();
     return (tag === 'input' && !['button', 'submit', 'reset', 'image'].includes(t)) || tag === 'textarea' || tag === 'select' || el.isContentEditable;
   }
   function contentText(el) {
-    if (isFieldEl(el)) return clip(el.labels && el.labels.length ? Array.from(el.labels).map((l) => rawText(l, 0)).join(' ') : '');
-    return clip(rawText(el, 0));
+    if (isFieldEl(el)) return clip(maskSecrets(el.labels && el.labels.length ? Array.from(el.labels).map((l) => rawText(l, 0)).join(' ') : ''));
+    return clip(maskSecrets(String(rawText(el, 0)).replace(/\s+/g, ' ').trim()));
   }
   function fileName(u) {
     try {
@@ -625,7 +684,7 @@ ELEMENTS_JS = r"""
       for (const c of node.children) visit(c, depth + 1);
     };
     visit(el, 0);
-    return Array.from(new Set(out.filter(Boolean))).slice(0, 16);
+    return Array.from(new Set(out.filter(Boolean).map((m) => clip(maskSecrets(m))))).slice(0, 16);
   }
   const FRAME_TAGS = new Set(['iframe', 'frame', 'object', 'embed', 'portal', 'fencedframe']);
   // Review I5 MAJOR-4 — the element's effective type and what activating it submits.
@@ -633,6 +692,12 @@ ELEMENTS_JS = r"""
     const tag = el.localName, t = String(el.type || '').toLowerCase();
     return !!el.form && ((tag === 'button' && t === 'submit') || (tag === 'input' && (t === 'submit' || t === 'image')));
   }
+  // Only the enumerated values are reported (a page can put anything in these attributes, or
+  // redefine el.type): anything else is ''.
+  const FORM_METHODS = new Set(['get', 'post', 'dialog']);
+  const formMethod = (v) => { v = String(v || '').trim().toLowerCase(); return FORM_METHODS.has(v) ? v : (v ? 'other' : ''); };
+  const EFFECTIVE_TYPES = new Set(__EFFECTIVE_TYPES__);
+  const effectiveType = (el) => { let t = ''; try { t = String(el.type || '').toLowerCase(); } catch (e) { t = ''; } return EFFECTIVE_TYPES.has(t) ? t : ''; };
   function formOf(el) {
     const f = el.form;
     if (!f || typeof HTMLFormElement === 'undefined' || !(f instanceof HTMLFormElement)) return null;
@@ -640,10 +705,10 @@ ELEMENTS_JS = r"""
     const abs = (v) => { try { return new URL(v == null ? location.href : v, document.baseURI).href; } catch (e) { return ''; } };
     const sub = submitsOf(el);
     return {
-      action: safeUrl(abs(attr(f, 'action'))), method: clip((attr(f, 'method') || 'get').toLowerCase()),
+      action: safeUrl(abs(attr(f, 'action'))), method: formMethod(attr(f, 'method') || 'get'),
       formaction: sub && el.hasAttribute('formaction') ? safeUrl(abs(el.getAttribute('formaction'))) : '',
-      formmethod: sub ? clip((el.getAttribute('formmethod') || '').toLowerCase()) : '',
-      target: clip(attr(f, 'target') || ''), id: clip(attr(f, 'id') || ''), name: clip(attr(f, 'name') || ''),
+      formmethod: sub ? formMethod(el.getAttribute('formmethod') || '') : '',
+      target: clip(maskSecrets(attr(f, 'target') || '')), id: clip(maskSecrets(attr(f, 'id') || '')), name: clip(maskSecrets(attr(f, 'name') || '')),
     };
   }
   const byIds = (el, attr) => (el.getAttribute(attr) || '').split(/\s+/).filter(Boolean).map((id) => {
@@ -732,7 +797,7 @@ ELEMENTS_JS = r"""
     return {
       locator, locator_kind: kind, role, name, description,
       text: contentText(el), media: mediaOf(el),
-      effective_type: isCtl ? clip(String(el.type || '').toLowerCase()) : '',
+      effective_type: isCtl ? effectiveType(el) : '',
       submits: submitsOf(el), form: formOf(el), frame: FRAME_TAGS.has(tag),
       attributes: attrsOf(el), type, autocomplete, placeholder,
       inputmode: clip((el.getAttribute('inputmode') || '').toLowerCase()),
@@ -798,7 +863,7 @@ ELEMENTS_JS = r"""
     storage_entries: storage, indexeddb_databases: idb, document_cookie_present: docCookie,
   };
 })
-"""
+""".replace("__EFFECTIVE_TYPES__", json.dumps(sorted(EFFECTIVE_TYPES)))
 
 
 def elements_expression(mode: str, target: str | None = None) -> str:
@@ -848,9 +913,13 @@ def sanitize_element(raw: Any) -> dict[str, Any] | None:
             attributes[name] = sanitize_attribute(name, value)
     out["attributes"] = attributes
     media = raw.get("media")
-    out["media"] = [_clip(m) for m in media if isinstance(m, str) and m.strip()][:MAX_ELEMENT_MEDIA] if isinstance(media, list) else []
-    form = raw.get("form")
-    out["form"] = {k: _clip(form.get(k) if isinstance(form.get(k), str) else "") for k in ELEMENT_FORM_KEYS} if isinstance(form, dict) else None
+    out["media"] = [mask_secret_runs(_clip(m)) for m in media if isinstance(m, str) and m.strip()][:MAX_ELEMENT_MEDIA] if isinstance(media, list) else []
+    out["form"] = sanitize_form(raw.get("form"))
+    # Integration G8 — G6b's E1 redaction on the G6a fields: visible text is masked like the
+    # description, and effective_type is one of the enumerated el.type values or "".
+    out["text"] = mask_secret_runs(out["text"])
+    if out["effective_type"] not in EFFECTIVE_TYPES:
+        out["effective_type"] = ""
     if out["type"] == "password" or out["autocomplete"].startswith(("cc-", "current-password", "new-password", "one-time-code")):
         out["sensitive"] = True
     return out

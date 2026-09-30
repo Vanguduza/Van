@@ -49,7 +49,11 @@ Review I5 additions (defence in depth; the task scope is the primary control)
 * ``press_key`` is classified against the focused element (``assess_key_press``: ``R6``
   unknown focus, ``R9`` Enter/Space on a non-control, ``R10`` a non-navigation key outside a
   field);
-* MAJOR-6 money/trading/commitment verbs in ``_RISK_STEMS`` / ``_RISK_WORDS``.
+* MAJOR-6 money/trading/commitment verbs in ``_RISK_STEMS`` / ``_RISK_WORDS``;
+* ``R11`` (integration G8) the Harness redacted part of what the control shows (its
+  ``text``, a ``media`` entry, or its form's ``action``/``formaction``): review I5 E1
+  masks card/account digit runs, token-like runs and field values there, and a masked span
+  may have held a risk word, so the target is never positively low-risk.
 
 Defence in depth — the denylist (``_RISK_STEMS``, ``_PAYMENT_FIELD_STEMS``)
 ============================================================================
@@ -520,6 +524,24 @@ def _norm(text: Any) -> str:
     return " ".join(words(fold(text)).lower().split())
 
 
+#: The Harness's redaction marker (harness_service.REDACTED).
+REDACTION_MARKER = "[REDACTED]"
+
+
+def redacted_content(element: dict[str, Any] | None) -> bool:
+    """Integration G8 — True when the Harness masked part of the element's shown content."""
+    if not isinstance(element, dict):
+        return False
+    shown: list[Any] = [element.get("text")]
+    media = element.get("media")
+    if isinstance(media, (list, tuple)):
+        shown.extend(media)
+    form = element.get("form")
+    if isinstance(form, dict):
+        shown.extend([form.get("action"), form.get("formaction")])
+    return any(isinstance(v, str) and REDACTION_MARKER in v for v in shown)
+
+
 def content_rules(operation: str, element: dict[str, Any] | None) -> list[str]:
     """Review I5 MAJOR-1/-5 — the accessible name is not the only thing a control shows.
 
@@ -582,6 +604,8 @@ def assess_action(
         rules.append(f"R3_RISKY_ROLE:{','.join(sorted(risky_roles))}")
     if resolved:
         rules.extend(content_rules(operation, element))
+        if operation in TARGETED_OPERATIONS and redacted_content(element):
+            rules.append("R11_REDACTED_CONTENT")
     if operation in WRITE_OPERATIONS:
         field_hits = payment_field_text_hits(texts) + (structural_field_hits(element) if resolved else [])
         if field_hits:
