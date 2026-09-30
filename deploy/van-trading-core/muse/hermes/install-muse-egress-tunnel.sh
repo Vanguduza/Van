@@ -12,7 +12,7 @@ ssh -o BatchMode=yes -o ConnectTimeout=10 "$TRADING_HOST" 'sudo -n true' >/dev/n
 identity="$(ssh -o BatchMode=yes "$TRADING_HOST"   "sudo -n awk -F= '/^MUSE_EXPECTED_EGRESS_IP=|^MUSE_EXPECTED_COUNTRY=/ {print}' /etc/van-muse-egress.env")"
 grep -q '^MUSE_EXPECTED_EGRESS_IP=' <<<"$identity"
 grep -Eq '^MUSE_EXPECTED_COUNTRY=(US|CA)$' <<<"$identity"
-printf '%s\n' "$identity" >"$BASE/muse-egress.env"
+{ printf '%s\n' "$identity"; printf 'VAN_MUSE_LOCAL_PORT=%s\n' "$LOCAL_PORT"; } >"$BASE/muse-egress.env"
 chmod 0600 "$BASE/muse-egress.env"
 
 cat >"$UNIT_DIR/van-muse-egress-tunnel.service" <<UNIT
