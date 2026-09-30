@@ -94,6 +94,10 @@ PAGES = {
                         "<script>window.__alive=[];addEventListener('message',e=>window.__alive.push(e.data))</script>",
     "/docs/shared": "<button id=\"b\" onclick=\"try{new SharedWorker('/docs/shared.js')}catch(e){document.title='no-shared-worker'}\">Next</button>",
     "/docs/shared.js": ("text/javascript", f"{PAY}"),
+    # A link to an in-scope page that writes 1.2 s after it loads: after the action's own
+    # settle window, during the landing check (G9b), which runs under the handed-over guard.
+    "/docs/to_late_writer": '<a id="b" href="/docs/late_writer">Read guide</a>',
+    "/docs/late_writer": f"<p>guide</p><script>setTimeout(()=>{PAY},1200)</script>",
     "/docs/get_only": "<button id=\"b\" onclick=\"fetch('/docs/data').then(r=>r.text()).then(t=>document.title='got')\">Next</button>",
     "/docs/link": '<a id="b" href="/docs/next">Read guide</a>',
     # A plain button whose handler submits its form (a submit-role control is A4 for the
@@ -286,6 +290,16 @@ async def test_frames_created_after_the_guard_are_not_left_paused(g):
             break
         time.sleep(0.1)
     assert rig.session.js("window.__alive") == ["alive"]
+
+
+async def test_the_guard_covers_the_landing_check_after_the_action(g):
+    """Unit G9b's landing check follows every click/press/fill/navigate; the action hands its
+    guard over, so a write made while the browser is landing is blocked too."""
+    module, rig, _h, _b = g
+    result, writes, _seen = await _route(g, "/docs/to_late_writer")
+    _blocked(result, "POST")
+    time.sleep(1.0)
+    assert rig.server.writes() == [] and writes == []
 
 
 async def test_a_custom_method_is_reported_in_the_closed_vocabulary_only(g):

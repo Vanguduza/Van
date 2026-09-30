@@ -262,6 +262,11 @@ def _classify_owner_reference(
         return GateStatus.UNKNOWN, f"authorization record does not state authorization_id {auth_id!r}"
     if auth.get("revoked") is not False:
         return GateStatus.UNKNOWN, "authorization record is revoked or does not say it is not"
+    # Review I6 m8 — an authorization that states an expiry is honoured: expired, or an
+    # expiry that cannot be read, is not GREEN (fail closed).
+    expired = _authorization_expired(auth)
+    if expired is not None:
+        return GateStatus.UNKNOWN, expired
     if auth.get("authority") not in spec["authorization_authority"]:
         return GateStatus.UNKNOWN, f"authorization authority {auth.get('authority')!r} is not accepted"
     if auth.get("owner_instruction_record") != raw:
@@ -284,6 +289,35 @@ def _classify_owner_reference(
         if head and (head[0] == record_source or fnmatch.fnmatchcase(record_source, head[0])):
             return GateStatus.UNKNOWN, f"authorization record excludes {record_source}"
     return GateStatus.GREEN, None
+
+
+#: Expiry fields an authorization record may carry (any one present is honoured).
+AUTHORIZATION_EXPIRY_FIELDS = ("expires_at", "expires_at_utc", "not_after", "not_after_utc")
+
+
+def _authorization_expired(auth: dict[str, Any], now: Any = None) -> str | None:
+    """None when no expiry field is present or every present one is in the future; else why
+    the authorization is not usable (expired, or an unreadable/naive timestamp)."""
+    from datetime import datetime, timezone
+
+    current = now or datetime.now(timezone.utc)
+    for field in AUTHORIZATION_EXPIRY_FIELDS:
+        if field not in auth:
+            continue
+        value = auth[field]
+        if value is None:
+            continue
+        if not isinstance(value, str):
+            return f"authorization {field} is not an ISO-8601 timestamp"
+        try:
+            moment = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+        except ValueError:
+            return f"authorization {field} is not an ISO-8601 timestamp"
+        if moment.tzinfo is None:
+            return f"authorization {field} has no time zone"
+        if moment <= current:
+            return f"authorization expired ({field} {value})"
+    return None
 
 
 def _gate_spec_problem(spec: Any) -> str | None:

@@ -201,8 +201,9 @@ async def test_the_profile_lock_covers_the_bound_click(chromium, tmp_path):
     second = post("/page_info", lease_generation=2, lease_holder_id="task-b")
     th.join(20)
     assert first["r"] == (200, None) and second == (200, None)
-    # The bound click, its own page_info read, then generation 2.
-    assert events == ["start:bound-click", "end:bound-click"] + ["start:other", "end:other"] * 2, events
+    # The bound click, its landing check (review I6 M3) and its own page_info read, then
+    # generation 2 — none of them interleaved.
+    assert events == ["start:bound-click", "end:bound-click"] + ["start:other", "end:other"] * 3, events
     assert post("/click", locator="#plain", binding=plain["binding"], lease_generation=1,
                 lease_holder_id="task-a") == (409, "LEASE_GENERATION_STALE")
     assert _seen(pw) == ["benign:plain"]

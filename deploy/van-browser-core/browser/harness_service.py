@@ -97,10 +97,15 @@ def safe_domain(value: Any) -> str:
 
 
 def assert_url_in_domain(url: str, domain: str) -> str:
+    """The URL's host, as the browser parses it (review I6 M3: the shared ``_vs_parse``
+    below, not ``urlparse``), is the task's domain or a subdomain of it."""
     parsed = urlparse(url)
     if parsed.scheme not in {"http", "https"}:
         raise WorkerError("URL_SCHEME_FORBIDDEN", 422)
-    host = (parsed.hostname or "").lower().rstrip(".")
+    parts = _vs_parse(url)
+    if parts is None:
+        raise WorkerError("URL_INVALID", 422)
+    host = parts[1]
     if host != domain and not host.endswith("." + domain):
         raise WorkerError("URL_OUTSIDE_TASK_DOMAIN", 403)
     return url
@@ -776,9 +781,13 @@ ELEMENTS_JS = r"""
     const [locator, kind] = given ? [given, 'given'] : locatorFor(el);
     if (!locator) return null;
     const role = roleOf(el);
-    const [name, titleUsed] = nameOf(el, role);
+    // Review I6 m3 — the accessible name and description are masked like the visible text
+    // (a token or account number in link text never leaves the page as a label).
+    const [rawName, titleUsed] = nameOf(el, role);
+    const name = clip(maskSecrets(rawName));
     let description = clip(byIds(el, 'aria-describedby'));
     if (!description && !titleUsed) description = clip(el.getAttribute('title'));
+    description = clip(maskSecrets(description));
     const tag = el.localName, type = (el.getAttribute('type') || (tag === 'input' ? 'text' : '')).toLowerCase();
     const autocomplete = clip((el.getAttribute('autocomplete') || '').toLowerCase());
     const placeholder = clip(el.getAttribute('placeholder'));
@@ -896,8 +905,11 @@ def sanitize_element(raw: Any) -> dict[str, Any] | None:
     for key in ELEMENT_STRING_KEYS:
         value = raw.get(key)
         out[key] = value if key == "locator" else _clip(value if isinstance(value, str) else "")
-    # Review I5 E1 — a title used as the description can carry a card number.
-    out["description"] = mask_digit_runs(out["description"])
+    # Review I5 E1 / I6 m3 — the accessible name and the description (a title used as the
+    # description can carry a card number) are masked like the visible text: digit runs and
+    # token-like runs, words kept.
+    out["name"] = mask_secret_runs(out["name"])
+    out["description"] = mask_secret_runs(out["description"])
     for key in ELEMENT_BOOL_KEYS:
         out[key] = raw.get(key) is True
     # Unknown visibility is hidden: the gateway refuses to act on a hidden target.
@@ -989,13 +1001,16 @@ def session_facts(snapshot: dict[str, Any], identity: str, cookies: bool | None)
 #   _van_digest(el)        digest of the fields the gateway classifies; /describe returns it in
 #                          ``binding`` and /click, /press, /fill refuse when the bound node no
 #                          longer produces it (TARGET_CHANGED)
-#   _van_scope_violation   the task-scope rule of backend/van_gateway/browser/task_scope.py
-#                          (origin exact, path prefix on a segment boundary); the gateway sends
-#                          the task's scope with every action and the Harness re-checks the
-#                          page at the moment it acts
+#   _van_scope_violation   the task-scope rule of backend/van_gateway/browser/task_scope.py:
+#                          the shared ``_vs_*`` block (WHATWG URL normalisation, origin exact,
+#                          path prefix on a segment boundary; review I6 M3), byte-identical in
+#                          both files; the gateway sends the task's scope with every action and
+#                          the Harness re-checks the page at the moment it acts and where the
+#                          browser lands after it
+#   _van_frame_url         the committed main-frame URL over CDP (never page JS)
+#   _van_world             a CDP isolated world for the describe/bind scripts
 VAN_HELPERS_PY = r"""
 import hashlib as _vh_hashlib, json as _vh_json
-from urllib.parse import urlsplit as _vh_urlsplit
 
 def _van_digest(el):
     el = el or {}
@@ -1006,34 +1021,204 @@ def _van_digest(el):
     keep["attributes"] = attrs
     return _vh_hashlib.sha256(_vh_json.dumps(keep, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()).hexdigest()
 
-def _van_origin(parts):
-    scheme = (parts.scheme or "").lower()
-    host = (parts.hostname or "").lower().rstrip(".")
-    port = parts.port
-    default = {"http": 80, "https": 443}.get(scheme)
-    return scheme + "://" + host + ((":" + str(port)) if port and port != default else "")
+# --- VAN shared URL scope rule: begin (review I6 M3) ---
+# Byte-identical in backend/van_gateway/browser/task_scope.py and in the Harness helpers
+# (deploy/van-browser-core/browser/harness_service.py VAN_HELPERS_PY): tests/contracts
+# pins that, and both sides run backend/tests/fixtures/task_scope/url_vectors.v1.json.
+# A URL is parsed the way the WHATWG URL parser parses an http(s) URL (the parser the
+# browser uses), so the check sees the page the browser will load: tab/newline removed,
+# C0/space trimmed, scheme and host lower-cased, host percent-decoded, a trailing host dot
+# dropped, the default port dropped, userinfo ignored, backslash read as slash, %2E read as
+# "." (as Chromium does), and dot segments (".", "..") removed. Anything the rule does
+# not model exactly (IPv6, non-ASCII hosts, other than two slashes after the scheme) is
+# not parsed: it is out of scope (fail closed). A path whose segment percent-decodes to a
+# slash, a backslash, a NUL or a dot segment is ambiguous (a server may decode it before
+# resolving): also out of scope.
+import re as _vs_re
+from urllib.parse import unquote as _vs_unquote
 
-def _van_scope_violation(scope, url, what="PAGE"):
-    entries = (scope or {}).get("entries") if isinstance(scope, dict) else None
-    if not entries:
-        return "TASK_SCOPE_MISSING"
+_VS_TRIM = "".join(chr(_c) for _c in range(0x21))
+_VS_DOT = (".", "%2e")
+_VS_DOTDOT = ("..", ".%2e", "%2e.", "%2e%2e")
+_VS_PATH_ENCODE = frozenset(' "<>`{}')
+_VS_SCHEME = _vs_re.compile(r"([A-Za-z][A-Za-z0-9+.\-]*):")
+_VS_HOST = _vs_re.compile(r"[a-z0-9\-]+(?:\.[a-z0-9\-]+)*")
+
+
+def _vs_path(path):
+    path = path.replace("\\", "/")
+    if not path.startswith("/"):
+        path = "/" + path
+    encoded = []
+    for ch in path:
+        code = ord(ch)
+        if code < 0x20 or code == 0x7F or ch in _VS_PATH_ENCODE:
+            encoded.append("%%%02X" % code)
+        elif code > 0x7E:
+            encoded.extend("%%%02X" % b for b in ch.encode("utf-8"))
+        else:
+            encoded.append(ch)
+    # Chromium (the browser the Harness drives) also decodes %2E to "." anywhere in a path
+    # (checked against it in backend/tests/test_browser_review_i6_scope.py).
+    segments = _vs_re.sub(r"%2[eE]", ".", "".join(encoded)).split("/")[1:]
+    out = []
+    for i, seg in enumerate(segments):
+        last = i == len(segments) - 1
+        low = seg.lower()
+        if low in _VS_DOTDOT:
+            if out:
+                out.pop()
+            if last:
+                out.append("")
+        elif low in _VS_DOT:
+            if last:
+                out.append("")
+        else:
+            out.append(seg)
+    return "/" + "/".join(out)
+
+
+def _vs_authority(scheme, rest):
+    end = len(rest)
+    for i, ch in enumerate(rest):
+        if ch in "/\\?#":
+            end = i
+            break
+    hostport, tail = rest[:end].rsplit("@", 1)[-1], rest[end:]
+    if hostport.startswith("["):
+        return None
+    host, _sep, port = hostport.partition(":")
     try:
-        parts = _vh_urlsplit(str(url or ""))
-        parts.port
-    except ValueError:
+        host = _vs_unquote(host, errors="strict").lower()
+    except UnicodeDecodeError:
+        return None
+    if host.endswith("."):
+        host = host[:-1]
+    if not host or not _VS_HOST.fullmatch(host):
+        return None
+    if port:
+        if not _vs_re.fullmatch(r"[0-9]+", port) or int(port) > 65535:
+            return None
+        port = int(port)
+        if port == {"http": 80, "https": 443}[scheme]:
+            port = None
+    else:
+        port = None
+    return (scheme, host, port, _vs_path(_vs_re.split(r"[?#]", tail, maxsplit=1)[0] or "/"))
+
+
+def _vs_parse(raw, base=None):
+    # (scheme, host, port|None, path) of an http(s) URL, resolved against ``base``; None
+    # when it is not an http(s) URL this rule parses exactly.
+    s = "" if raw is None else str(raw)
+    try:
+        s.encode("utf-8")
+    except UnicodeEncodeError:
+        return None
+    s = s.strip(_VS_TRIM).replace("\t", "").replace("\n", "").replace("\r", "")
+    m = _VS_SCHEME.match(s)
+    if m:
+        scheme = m.group(1).lower()
+        rest = s[m.end():]
+        if scheme not in ("http", "https") or len(rest) - len(rest.lstrip("/\\")) != 2:
+            return None
+        return _vs_authority(scheme, rest[2:])
+    b = base if isinstance(base, tuple) else (_vs_parse(base) if base is not None else None)
+    if b is None:
+        return None
+    lead = len(s) - len(s.lstrip("/\\"))
+    if lead >= 2:
+        return _vs_authority(b[0], s[2:]) if lead == 2 else None
+    rel = _vs_re.split(r"[?#]", s, maxsplit=1)[0]
+    if lead == 1:
+        path = rel
+    elif rel == "":
+        path = b[3]
+    else:
+        path = b[3][: b[3].rfind("/") + 1] + rel
+    return (b[0], b[1], b[2], _vs_path(path))
+
+
+def _vs_origin(parts):
+    return parts[0] + "://" + parts[1] + ("" if parts[2] is None else ":" + str(parts[2]))
+
+
+def _vs_ambiguous(path):
+    for seg in path.split("/"):
+        if "%" not in seg:
+            continue
+        try:
+            decoded = _vs_unquote(seg, errors="strict")
+        except UnicodeDecodeError:
+            return True
+        if "/" in decoded or "\\" in decoded or "\x00" in decoded or decoded in (".", ".."):
+            return True
+    return False
+
+
+def _vs_normal_prefix(prefix):
+    # A recorded path prefix is used only when it is already in normal form.
+    if not isinstance(prefix, str) or not prefix.startswith("/"):
+        return False
+    parts = _vs_parse("http://h" + prefix)
+    return parts is not None and parts[3] == prefix and not _vs_ambiguous(prefix)
+
+
+def _vs_scope_violation(entries, url, what="PAGE", base=None):
+    # None when ``url`` (resolved against ``base``) is inside one of ``entries``
+    # ({"origin", "path_prefix"} dicts); otherwise the typed reason.
+    if not isinstance(entries, (list, tuple)) or not entries:
+        return "TASK_SCOPE_MISSING"
+    raw = "" if url is None else str(url)
+    if not raw.strip(_VS_TRIM):
+        return "TASK_SCOPE_" + what + "_URL_UNKNOWN"
+    parts = _vs_parse(raw, base)
+    if parts is None:
+        m = _VS_SCHEME.match(raw.strip(_VS_TRIM).replace("\t", "").replace("\n", "").replace("\r", ""))
+        if m and m.group(1).lower() not in ("http", "https"):
+            return "TASK_SCOPE_" + what + "_URL_NOT_HTTP"
         return "TASK_SCOPE_" + what + "_URL_INVALID"
-    if parts.scheme not in ("http", "https") or not parts.hostname:
-        return "TASK_SCOPE_" + what + "_URL_NOT_HTTP"
-    origin, path = _van_origin(parts), parts.path or "/"
-    same_origin = False
+    if _vs_ambiguous(parts[3]):
+        return "TASK_SCOPE_" + what + "_PATH_AMBIGUOUS"
+    origin, path, same_origin = _vs_origin(parts), parts[3], False
     for entry in entries:
-        if not isinstance(entry, dict) or entry.get("origin") != origin:
+        entry_origin = entry.get("origin") if isinstance(entry, dict) else None
+        declared = _vs_parse(entry_origin) if isinstance(entry_origin, str) else None
+        if declared is None or declared[3] != "/" or _vs_origin(declared) != origin:
             continue
         same_origin = True
         prefix = entry.get("path_prefix")
-        if not prefix or (path.startswith(prefix) if prefix.endswith("/") else (path == prefix or path.startswith(prefix + "/"))):
+        if not prefix:
+            return None
+        if not _vs_normal_prefix(prefix):
+            continue
+        if path.startswith(prefix) if prefix.endswith("/") else (path == prefix or path.startswith(prefix + "/")):
             return None
     return "TASK_SCOPE_" + what + ("_PATH_OUTSIDE" if same_origin else "_ORIGIN_OUTSIDE")
+# --- VAN shared URL scope rule: end ---
+
+
+def _van_scope_violation(scope, url, what="PAGE"):
+    entries = scope.get("entries") if isinstance(scope, dict) else None
+    return _vs_scope_violation(entries, url, what)
+
+def _van_frame_url():
+    # Review I6 M3 — the main frame's committed URL as the browser reports it over CDP;
+    # never page JS (a page can shadow what its own scripts read).
+    try:
+        frame = ((cdp("Page.getFrameTree") or {}).get("frameTree") or {}).get("frame") or {}
+    except Exception:
+        return ""
+    return str(frame.get("url") or "") + str(frame.get("urlFragment") or "")
+
+def _van_world():
+    # Review I6 M3 — a CDP isolated world on the main frame. The element-describe script,
+    # the hit test and the bound-node checks run there, so page-poisoned built-ins
+    # (window.URL, Element.prototype.getAttribute, querySelector, activeElement...) cannot
+    # make them report something other than what the DOM holds.
+    frame = cdp("Page.getFrameTree")["frameTree"]["frame"]
+    return cdp("Page.createIsolatedWorld", frameId=frame["id"], worldName="van-harness-describe",
+               grantUniveralAccess=False)["executionContextId"]
 """
 exec(compile(VAN_HELPERS_PY, "<van-helpers>", "exec"))  # noqa: S102 - the fixed helper source above
 
@@ -1111,6 +1296,8 @@ def _van_call(object_id, fn, args=None, by_value=True):
         raise _VanRefused("TARGET_SCRIPT_FAILED")
     return r.get("result") or {}
 
+_VAN_CTX = []
+
 def _van_bind(binding, scope):
     if not isinstance(binding, dict) or not isinstance(binding.get("backend_node_id"), int) or not binding.get("digest"):
         raise _VanRefused("TARGET_BINDING_REQUIRED")
@@ -1119,14 +1306,18 @@ def _van_bind(binding, scope):
     info = page_info()
     if "dialog" in info:
         raise _VanRefused("PAGE_DIALOG_OPEN")
+    # Review I6 M3: the node is re-described in a CDP isolated world (as /describe did), and
+    # the page is judged by the main frame's committed URL over CDP.
     try:
-        obj = cdp("DOM.resolveNode", backendNodeId=int(binding["backend_node_id"]))["object"]["objectId"]
+        ctx = _van_world()
+        _VAN_CTX[:] = [ctx]
+        obj = cdp("DOM.resolveNode", backendNodeId=int(binding["backend_node_id"]), executionContextId=ctx)["object"]["objectId"]
     except Exception:
         raise _VanRefused("TARGET_BINDING_LOST")
     el = (_van_call(obj, _PREP_FN).get("value") or {}).get("element")
     if not isinstance(el, dict):
         raise _VanRefused("TARGET_BINDING_LOST")
-    violation = _van_scope_violation(scope, el.get("_url"))
+    violation = _van_scope_violation(scope, _van_frame_url())
     if violation:
         raise _VanRefused(violation)
     if _van_digest(el) != binding["digest"]:
@@ -1142,7 +1333,7 @@ def _van_hit(obj, el):
     x, y = float(box["x"]), float(box["y"])
     try:
         at = cdp("DOM.getNodeForLocation", x=int(x), y=int(y), includeUserAgentShadowDOM=False)
-        hit = cdp("DOM.resolveNode", backendNodeId=int(at["backendNodeId"]))["object"]["objectId"]
+        hit = cdp("DOM.resolveNode", backendNodeId=int(at["backendNodeId"]), executionContextId=_VAN_CTX[0])["object"]["objectId"]
     except Exception:
         raise _VanRefused("TARGET_HIT_TEST_FAILED")
     verdict = _van_call(obj, __HIT_FN__, [{"objectId": hit}]).get("value")
@@ -1176,6 +1367,10 @@ def _van_finish_after_net(guard, net):
     return done
 
 def _van_emit(payload):
+    # A network guard handed to the landing check travels with the result (unit G9c).
+    handoff = globals().get("_VAN_GUARD_HANDOFF")
+    if handoff:
+        payload = {**payload, "__guard__": handoff[-1]}
     print("__VAN_JSON__" + json.dumps(payload))
 """
 
@@ -1268,6 +1463,28 @@ class _VanNetGuard:
 
     def _in_scope(self, url):
         return _van_scope_violation(self.scope, url, "WRITE") is None
+
+    def export(self):
+        # Handed from an action script to the landing check that follows it: interception
+        # stays enabled in between (requests made then wait, paused, for the next script).
+        return {"browser_sid": self.browser_sid, "main_frame": self.main_frame,
+                "children": {k: list(v) for k, v in self.children.items()},
+                "form_frames": sorted(f for f in self.form_frames if isinstance(f, str))}
+
+    def adopt(self, state):
+        try:
+            self.browser_sid = str(state["browser_sid"])
+            self.main_frame = str(state["main_frame"])
+            self.children = {str(k): (v[0], str(v[1])) for k, v in dict(state["children"]).items()}
+            self.form_frames = set(state.get("form_frames") or [])
+            self.enabled_page = True
+            # Still the same page. Interception was never disabled (nothing is re-enabled:
+            # the requests paused since the action script ended are in the event buffer).
+            if cdp("Page.getFrameTree")["frameTree"]["frame"]["id"] != self.main_frame:
+                raise ValueError("frame")
+        except Exception:
+            self.stop()
+            raise _VanRefused("NETWORK_GUARD_UNAVAILABLE")
 
     def start(self):
         try:
@@ -1477,21 +1694,37 @@ class _VanNetGuard:
             except Exception:
                 pass
 
-def _van_net_run(action):
+_VAN_GUARD_HANDOFF = []
+
+def _van_net_run(action, handoff=False):
     '''Run ``action`` (the input dispatch) under the network-effect guard. Returns the guard;
-    ``_van_net_verdict`` turns what it saw into the typed refusal.'''
+    ``_van_net_verdict`` turns what it saw into the typed refusal.
+
+    ``handoff``: the guard is not stopped; its state is emitted with the script's result
+    (``__guard__``) and the landing check that follows adopts and ends it, so interception
+    covers the whole action-then-land window. ``VAN_BH_NETGUARD_STATE`` set: this script
+    adopts a handed-over guard instead of starting one.'''
     try:
         policy = json.loads(os.environ.get("VAN_BH_NETGUARD") or "null")
+        adopted = json.loads(os.environ.get("VAN_BH_NETGUARD_STATE") or "null")
     except ValueError:
-        policy = None
+        policy, adopted = None, None
     if not isinstance(policy, dict) or "drain_events" not in globals():
         raise _VanRefused("NETWORK_GUARD_UNAVAILABLE")
     guard = _VanNetGuard(policy)
-    guard.start()
+    if isinstance(adopted, dict):
+        guard.adopt(adopted)
+    else:
+        guard.start()
+    handed = False
     try:
         guard.error = guard.run(action)
+        if handoff and not guard.broken:
+            _VAN_GUARD_HANDOFF.append(guard.export())
+            handed = True
     finally:
-        guard.stop()
+        if not handed:
+            guard.stop()
     return guard
 
 def _van_net_verdict(guard):
@@ -1638,19 +1871,22 @@ if "dialog" in info:
 else:
     # Review I5 MAJOR-2: the node is found once, bound by its CDP backendNodeId, and described
     # through that binding; /click, /press and /fill act on the same node, never a re-query.
+    # Review I6 M3: everything below runs in a CDP isolated world (_van_world), so the page's
+    # own scripts cannot redefine what the describe script reads.
     focus = os.environ.get("VAN_BH_FOCUS") == "1"
     loc = os.environ.get("VAN_BH_LOCATOR", "")
+    ctx = _van_world()
     matches = 1
     if focus:
         expr = __FOCUS_JS__
     else:
-        counted = cdp("Runtime.evaluate", expression="document.querySelectorAll(" + json.dumps(loc) + ").length", returnByValue=True)
+        counted = cdp("Runtime.evaluate", expression="document.querySelectorAll(" + json.dumps(loc) + ").length", returnByValue=True, contextId=ctx)
         if counted.get("exceptionDetails"):
             out["describe"] = {"error": "LOCATOR_INVALID"}
         matches = (counted.get("result") or {}).get("value") or 0
         expr = "document.querySelector(" + json.dumps(loc) + ")"
     if "describe" not in out:
-        found = cdp("Runtime.evaluate", expression=expr, returnByValue=False)
+        found = cdp("Runtime.evaluate", expression=expr, returnByValue=False, contextId=ctx)
         obj = (found.get("result") or {}).get("objectId")
         if found.get("exceptionDetails"):
             out["describe"] = {"error": "LOCATOR_INVALID"}
@@ -1671,7 +1907,7 @@ else:
                 if box.get("in_viewport"):
                     try:
                         at = cdp("DOM.getNodeForLocation", x=int(box["x"]), y=int(box["y"]), includeUserAgentShadowDOM=False)
-                        hit = cdp("DOM.resolveNode", backendNodeId=int(at["backendNodeId"]))["object"]["objectId"]
+                        hit = cdp("DOM.resolveNode", backendNodeId=int(at["backendNodeId"]), executionContextId=ctx)["object"]["objectId"]
                         v = cdp("Runtime.callFunctionOn", objectId=obj, functionDeclaration=__HIT_FN__,
                                 arguments=[{"objectId": hit}], returnByValue=True)
                         occluded = ((v.get("result") or {}).get("value")) not in ("SELF", "DESCENDANT")
@@ -1679,7 +1915,7 @@ else:
                         occluded = True
                 el["occluded"] = occluded
                 out["describe"] = {
-                    "element": el, "matches": matches, "page_url": el.get("_url"),
+                    "element": el, "matches": matches, "page_url": _van_frame_url() or el.get("_url"),
                     "binding": {"backend_node_id": int(node["backendNodeId"]), "digest": _van_digest(el)},
                 }
 print("__VAN_JSON__" + json.dumps(out))
@@ -1768,8 +2004,11 @@ def _guarded_script(body: str) -> str:
     prologue = ("import json, os\n" + VAN_HELPERS_PY + "\nclass _VanRefused(Exception):\n    pass\n"
                 + NETWORK_GUARD_PY)
     indented = "\n".join("    " + line for line in body.strip().splitlines())
-    return (prologue + "try:\n" + indented + "\nexcept _VanRefused as _exc:\n"
-            "    print(\"__VAN_JSON__\" + json.dumps({\"refused\": str(_exc)}))\n")
+    emit = ("\ndef _van_emit(payload):\n    handoff = globals().get(\"_VAN_GUARD_HANDOFF\")\n"
+            "    if handoff:\n        payload = {**payload, \"__guard__\": handoff[-1]}\n"
+            "    print(\"__VAN_JSON__\" + json.dumps(payload))\n")
+    return (prologue + emit + "try:\n" + indented + "\nexcept _VanRefused as _exc:\n"
+            "    _van_emit({\"refused\": str(_exc)})\n")
 
 
 NAVIGATE_SCRIPT = _guarded_script(r"""
@@ -1779,8 +2018,8 @@ def _go():
     # a new tab would be outside the guard, which fails its document as a POPUP.
     goto_url(url)
     wait_for_load()
-_van_net_verdict(_van_net_run(_go))
-print("__VAN_JSON__" + json.dumps({"navigated": True}))
+_van_net_verdict(_van_net_run(_go, handoff=True))
+_van_emit({"navigated": True})
 """)
 
 SCROLL_SCRIPT = _guarded_script(r"""
@@ -1805,7 +2044,10 @@ print("__VAN_JSON__" + json.dumps({"uploaded": True}))
 def navigate(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
     url = assert_url_in_domain(str(body.get("url") or ""), domain)
     _assert_scope(body, url, "NAVIGATE")
-    _refused(run_harness(alias, NAVIGATE_SCRIPT, {"VAN_BH_URL": url, **network_guard_env(body, alias)}))
+    # Unit G9c: the navigation runs under the network-effect guard, which the landing check
+    # (review I6 M3: judged where it lands) adopts and ends.
+    _act_then_land(alias, NAVIGATE_SCRIPT, {"VAN_BH_URL": url, **network_guard_env(body, alias)}, body,
+                   land_after_any_refusal=True)
     return page_info_result(alias, domain)
 
 
@@ -1834,13 +2076,120 @@ def _refused(result: Any) -> None:
         raise WorkerError(_refusal_code(result["refused"]), 409)
 
 
+#: Review I6 M3 — where the browser actually lands. After every navigate, click, press and
+#: fill the Harness waits for the main frame's committed URL (CDP, never page JS) to stop
+#: changing, then checks it against the task scope. A page that navigated itself out of
+#: scope (an onclick ``location=``, an href swapped on pointerdown, a redirect, a link whose
+#: href the page's own scripts lied about) is closed — the tab is navigated to about:blank,
+#: so nothing further runs on it — and the action is reported as TASK_SCOPE_LANDED_*: the
+#: router's lane 4, never a success. about:blank itself is not a page and is not refused.
+LANDING_SETTLE_MAX_SECONDS = 3.0
+LANDING_SETTLE_QUIET_SECONDS = 0.4
+LANDING_SCRIPT = r"""
+import json, os, time
+__VAN_HELPERS__
+scope = json.loads(os.environ["VAN_BH_SCOPE"])
+deadline = time.monotonic() + __SETTLE_MAX__
+quiet = __SETTLE_QUIET__
+last, since = None, time.monotonic()
+while True:
+    url, now = _van_frame_url(), time.monotonic()
+    if url != last:
+        last, since = url, now
+    elif now - since >= quiet or now >= deadline:
+        break
+    time.sleep(0.05)
+violation = None if last == "about:blank" else _van_scope_violation(scope, last, "LANDED")
+closed = False
+if violation:
+    try:
+        cdp("Page.navigate", url="about:blank")
+        until = time.monotonic() + 2.0
+        while not closed and time.monotonic() < until:
+            closed = _van_frame_url() == "about:blank"
+            if not closed:
+                time.sleep(0.05)
+    except Exception:
+        closed = False
+print("__VAN_JSON__" + json.dumps({"landed_in_scope": violation is None, "violation": violation, "closed": closed}))
+""".replace("__VAN_HELPERS__", VAN_HELPERS_PY).replace(
+    "__SETTLE_MAX__", repr(LANDING_SETTLE_MAX_SECONDS)).replace("__SETTLE_QUIET__", repr(LANDING_SETTLE_QUIET_SECONDS))
+
+#: Refusals raised after the page may already have received the input.
+POST_ACTUATION_REFUSALS = frozenset({"TARGET_MOVED_DURING_ACTUATION", "TARGET_NOT_ACTIVATED"})
+
+
+#: Unit G9c — the landing check runs under the network-effect guard the action handed over
+#: (adopted, then ended here), so interception covers the whole action-then-land window:
+#: the landing settle included. Without a handed-over guard it starts its own.
+GUARDED_LANDING_SCRIPT = (
+    "import json, os\n" + VAN_HELPERS_PY + "\nclass _VanRefused(Exception):\n    pass\n" + NETWORK_GUARD_PY
+    + "\n_LANDING_SRC = " + json.dumps(LANDING_SCRIPT) + "\n"
+    + "try:\n"
+    + "    _van_net_verdict(_van_net_run(lambda: exec(compile(_LANDING_SRC, '<van-landing>', 'exec'), globals())))\n"
+    + "except _VanRefused as _exc:\n"
+    + "    print(\"__VAN_JSON__\" + json.dumps({\"refused\": str(_exc)}))\n"
+)
+
+
+def _landing_check(alias: str, body: dict[str, Any], guard_state: Any = None) -> None:
+    """Raise TASK_SCOPE_LANDED_* (409) when the page the action left the browser on is
+    outside the task scope (it has been closed), or when that cannot be established.
+    Unit G9c: runs under the network-effect guard (``guard_state``: the one the action handed
+    over); a write blocked while landing is NETWORK_WRITE_BLOCKED:<kind>."""
+    scope = body.get("task_scope") if isinstance(body.get("task_scope"), dict) else None
+    env = {"VAN_BH_SCOPE": json.dumps(scope), **network_guard_env(body, alias)}
+    if isinstance(guard_state, dict):
+        env["VAN_BH_NETGUARD_STATE"] = json.dumps(guard_state)
+    result = run_harness(alias, GUARDED_LANDING_SCRIPT, env)
+    _refused(result)
+    if isinstance(result, dict) and result.get("landed_in_scope") is True:
+        return
+    violation = result.get("violation") if isinstance(result, dict) else None
+    code = violation if isinstance(violation, str) and violation.startswith("TASK_SCOPE_") else "TASK_SCOPE_LANDED_URL_UNKNOWN"
+    raise WorkerError(code[:64], 409)
+
+
+def _act_then_land(alias: str, script: str, env: dict[str, str], body: dict[str, Any],
+                   *, land_after_any_refusal: bool = False) -> None:
+    """Run a bound action script, then check where the browser landed. A refusal before any
+    input reached the page is returned as is; after one that may have (or a failed script)
+    an out-of-scope landing is the more serious fact and is reported instead.
+
+    Unit G9c: the action's network-effect guard is handed to the landing check (``__guard__``
+    in the script's result), which adopts and ends it. Whenever a guard was handed over the
+    landing check runs, so the guard is always ended. After a blocked write
+    (NETWORK_WRITE_BLOCKED) the landing check still runs and closes any page outside the scope.
+    A landing on an http(s) page outside the scope is reported as the more serious fact, as for
+    any refusal after input. A blocked navigation leaves the frame on Chromium's error page
+    (not http): that page is closed too, and the blocked write is what is reported."""
+    state = None
+    try:
+        result = run_harness(alias, script, env)
+        if isinstance(result, dict):
+            state = result.pop("__guard__", None)
+        _refused(result)
+    except WorkerError as exc:
+        if exc.code.startswith("NETWORK_WRITE_BLOCKED"):
+            try:
+                _landing_check(alias, body, state)
+            except WorkerError as landed:
+                if landed.code not in ("TASK_SCOPE_LANDED_URL_NOT_HTTP", "TASK_SCOPE_LANDED_URL_UNKNOWN"):
+                    raise
+            raise
+        if land_after_any_refusal or state is not None or exc.code in POST_ACTUATION_REFUSALS or exc.status >= 500:
+            _landing_check(alias, body, state)
+        raise
+    _landing_check(alias, body, state)
+
+
 CLICK_SCRIPT = _bound_script(r"""
 binding = json.loads(os.environ["VAN_BH_BINDING"])
 scope = json.loads(os.environ["VAN_BH_SCOPE"])
 obj, el = _van_bind(binding, scope)
 x, y = _van_hit(obj, el)
 guard = _van_guard(obj)
-net = _van_net_run(lambda: click_at_xy(x, y))
+net = _van_net_run(lambda: click_at_xy(x, y), handoff=True)
 done = _van_finish_after_net(guard, net)
 if not done.get("navigated") and "click" not in (done.get("seen") or []):
     raise _VanRefused("TARGET_NOT_ACTIVATED")
@@ -1864,7 +2213,7 @@ def click(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
     locator = str(body.get("locator") or "")
     if not locator or len(locator) > 2048:
         raise WorkerError("LOCATOR_REQUIRED", 422)
-    _refused(run_harness(alias, CLICK_SCRIPT, {"VAN_BH_LOCATOR": locator, **_binding_env(body), **network_guard_env(body, alias)}))
+    _act_then_land(alias, CLICK_SCRIPT, {"VAN_BH_LOCATOR": locator, **_binding_env(body), **network_guard_env(body, alias)}, body)
     return page_info_result(alias, domain)
 
 
@@ -1876,7 +2225,7 @@ focused = _van_call(obj, "function(){ this.focus(); let a = document.activeEleme
 if focused is not True:
     raise _VanRefused("TARGET_NOT_FOCUSABLE")
 guard = _van_guard(obj)
-net = _van_net_run(lambda: cdp("Input.insertText", text=os.environ["VAN_BH_SECRET"]))
+net = _van_net_run(lambda: cdp("Input.insertText", text=os.environ["VAN_BH_SECRET"]), handoff=True)
 _van_finish_after_net(guard, net)
 _van_emit({"filled": True})
 """)
@@ -1890,7 +2239,7 @@ def fill(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
     if not locator or len(locator) > 2048:
         raise WorkerError("LOCATOR_REQUIRED", 422)
     secret = resolve_secret(body.get("value_ref"))
-    _refused(run_harness(alias, FILL_SCRIPT, {"VAN_BH_LOCATOR": locator, "VAN_BH_SECRET": secret, **_binding_env(body), **network_guard_env(body, alias)}))
+    _act_then_land(alias, FILL_SCRIPT, {"VAN_BH_LOCATOR": locator, "VAN_BH_SECRET": secret, **_binding_env(body), **network_guard_env(body, alias)}, body)
     return page_info_result(alias, domain)
 
 
@@ -1902,7 +2251,7 @@ still = _van_call(obj, "function(){ let a = document.activeElement; while (a && 
 if still is not True:
     raise _VanRefused("FOCUS_CHANGED")
 guard = _van_guard(obj)
-net = _van_net_run(lambda: press_key(os.environ["VAN_BH_KEY"]))
+net = _van_net_run(lambda: press_key(os.environ["VAN_BH_KEY"]), handoff=True)
 _van_finish_after_net(guard, net)
 _van_emit({"pressed": True})
 """)
@@ -1919,19 +2268,42 @@ def press(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
     key = str(body.get("key") or "")
     if not key or len(key) > 64:
         raise WorkerError("KEY_REQUIRED", 422)
-    _refused(run_harness(alias, PRESS_SCRIPT, {"VAN_BH_KEY": key, **_binding_env(body), **network_guard_env(body, alias)}))
+    _act_then_land(alias, PRESS_SCRIPT, {"VAN_BH_KEY": key, **_binding_env(body), **network_guard_env(body, alias)}, body)
     return page_info_result(alias, domain)
 
 
-def _assert_scope(body: dict[str, Any], url: str, what: str) -> None:
-    """Owner decision 2026-09-30 — when the gateway sends the task scope with a navigate or
-    scroll, the Harness re-checks the destination/page against it."""
+def _require_scope(body: dict[str, Any]) -> dict[str, Any]:
+    """Review I6 m2 — every mutating operation carries the task scope. Absent (or empty), the
+    Harness refuses before touching the page (it no longer fails open on /navigate,
+    /scroll or /upload; /click, /press and /fill already refused in the bound script)."""
     scope = body.get("task_scope")
-    if scope is None:
-        return
-    violation = _van_scope_violation(scope if isinstance(scope, dict) else {}, url, what)
+    if not isinstance(scope, dict) or not isinstance(scope.get("entries"), list) or not scope["entries"]:
+        raise WorkerError("TASK_SCOPE_REQUIRED", 409)
+    return scope
+
+
+def _assert_scope(body: dict[str, Any], url: str, what: str) -> None:
+    """Task-scope rule (integrator's interpretation of the owner's 2026-09-30 answer, pending
+    confirmation) — the Harness re-checks the destination/page of a
+    navigate, scroll or upload against the task scope it must receive with the call."""
+    violation = _van_scope_violation(_require_scope(body), url, what)
     if violation:
         raise WorkerError(violation, 409)
+
+
+#: The committed main-frame URL over CDP (review I6 M3), for the page checks of /scroll and
+#: /upload.
+FRAME_URL_SCRIPT = r"""
+import json
+__VAN_HELPERS__
+print("__VAN_JSON__" + json.dumps({"url": _van_frame_url()}))
+""".replace("__VAN_HELPERS__", VAN_HELPERS_PY)
+
+
+def _assert_page_in_scope(body: dict[str, Any], alias: str) -> None:
+    _require_scope(body)
+    result = run_harness(alias, FRAME_URL_SCRIPT)
+    _assert_scope(body, str((result or {}).get("url") or "") if isinstance(result, dict) else "", "PAGE")
 
 
 def scroll_page(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
@@ -1940,8 +2312,7 @@ def scroll_page(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]
     dy = int(request.get("y", request.get("delta_y", 0)) or 0)
     if abs(dx) > 20000 or abs(dy) > 20000:
         raise WorkerError("SCROLL_DELTA_OUT_OF_RANGE", 422)
-    if body.get("task_scope") is not None:
-        _assert_scope(body, str(run_harness(alias, 'import json\nprint("__VAN_JSON__"+json.dumps({"url": page_info().get("url")}))\n').get("url") or ""), "PAGE")
+    _assert_page_in_scope(body, alias)
     _refused(run_harness(alias, SCROLL_SCRIPT, {"VAN_BH_DX": str(dx), "VAN_BH_DY": str(dy), **network_guard_env(body, alias)}))
     return page_info_result(alias, domain)
 
@@ -1987,6 +2358,7 @@ def upload(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
     locator = str(body.get("locator") or "")
     if not locator or len(locator) > 2048:
         raise WorkerError("LOCATOR_REQUIRED", 422)
+    _assert_page_in_scope(body, alias)
     path = resolve_upload(body.get("file_ref"))
     _refused(run_harness(alias, UPLOAD_SCRIPT, {"VAN_BH_LOCATOR": locator, "VAN_BH_UPLOAD": str(path), **network_guard_env(body, alias)}))
     return page_info_result(alias, domain)

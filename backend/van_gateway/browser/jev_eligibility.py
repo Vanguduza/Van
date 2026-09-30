@@ -514,6 +514,10 @@ def private_data_findings(text: str, *, owner_terms: Sequence[str] = ()) -> list
     return sorted(found)
 
 
+#: The Harness's redaction marker (``harness_service.REDACTED``).
+HARNESS_REDACTION_MARKER = "[REDACTED]"
+
+
 # ----------------------------------------------------------------------------- helpers
 
 
@@ -834,6 +838,10 @@ def classify_observation(
         codes: set[str] = set()
         for t in (e.label, e.aria_label, e.placeholder, e.title):
             codes.update(private_data_findings(t, owner_terms=terms))
+            # Review I6 m3 — the Harness masks a token or number run in a name
+            # ("Code [REDACTED]"): what it hid was private data, so the page stays ineligible.
+            if t and HARNESS_REDACTION_MARKER in t:
+                codes.add("HARNESS_REDACTED")
         if codes:
             f.add(OWNER, "OWNER_PRIVATE_LABEL:" + ",".join(sorted(codes)))
         elif any(_GREETING_NAME_RE.search(_normalise(t).translate(_CONFUSABLES))

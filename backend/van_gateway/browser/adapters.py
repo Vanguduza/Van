@@ -522,9 +522,8 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
         return await asyncio.shield(call)
 
     async def navigate(self, task: BrowserTask, url: str) -> dict[str, Any]:
-        scope = _scope_wire(task)
-        extra = {"task_scope": scope} if scope is not None else {}
-        return await self._call("/navigate", self._envelope(task, url=url, **extra))
+        """Review I6 m2 — always under the task's scope (None: the Harness refuses)."""
+        return await self._call("/navigate", self._envelope(task, url=url, task_scope=_scope_wire(task)))
 
     async def page_info(self, task: BrowserTask) -> dict[str, Any]:
         return await self._call("/page_info", self._envelope(task))
@@ -550,9 +549,7 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
             task, key=key, binding=binding, task_scope=_scope_wire(task)))
 
     async def scroll(self, task: BrowserTask, request: dict[str, Any]) -> dict[str, Any]:
-        scope = _scope_wire(task)
-        extra = {"task_scope": scope} if scope is not None else {}
-        return await self._call("/scroll", self._envelope(task, request=request, **extra))
+        return await self._call("/scroll", self._envelope(task, request=request, task_scope=_scope_wire(task)))
 
     async def screenshot(self, task: BrowserTask) -> dict[str, Any]:
         return await self._call("/screenshot", self._envelope(task))
@@ -561,7 +558,8 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
         return await self._call("/wait", self._envelope(task, condition=condition))
 
     async def upload(self, task: BrowserTask, locator: str, file_ref: str) -> dict[str, Any]:
-        return await self._call("/upload", self._envelope(task, locator=locator, file_ref=file_ref))
+        return await self._call("/upload", self._envelope(
+            task, locator=locator, file_ref=file_ref, task_scope=_scope_wire(task)))
 
     async def tabs(self, task: BrowserTask) -> dict[str, Any]:
         return await self._call("/tabs", self._envelope(task))

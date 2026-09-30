@@ -84,7 +84,7 @@ from van_gateway.browser.action_risk import (
     judged_text,
     key_activates,
 )
-from van_gateway.browser.task_scope import BOUND_OPERATIONS, task_scope_gate
+from van_gateway.browser.task_scope import BOUND_OPERATIONS, task_scope_gate, url_scope_violation
 from van_gateway.browser.action_risk import fold as _risk_fold
 from van_gateway.browser.action_risk import words as _risk_words
 from van_gateway.browser.models import BrowserTask, BrowserTaskStatus
@@ -462,6 +462,23 @@ class HarnessTargetResolver:
         return self._bound(await describe_focus(task), None)
 
 
+#: Review I6 m4 — the WAI-ARIA 1.2 roles (and ``generic``). A page's role attribute is reported
+#: in a reason only when it is one of these; anything else is ``UNKNOWN_ROLE``, so no page
+#: string ("acct-0012345678", an e-mail address) reaches a reason or the step ledger.
+ARIA_ROLES: frozenset[str] = frozenset({
+    "alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption",
+    "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo",
+    "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure",
+    "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list",
+    "listbox", "listitem", "log", "main", "mark", "marquee", "math", "menu", "menubar", "menuitem",
+    "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option",
+    "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row",
+    "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider",
+    "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table",
+    "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree",
+    "treegrid", "treeitem",
+})
+
 #: The element fields any one of which names the target well enough to classify it.
 TARGET_NAME_KEYS: tuple[str, ...] = ("role", "label", "name", "accessible_name", "aria_label", "text")
 
@@ -507,7 +524,9 @@ def unresolved_reason(element: dict[str, Any], *, focus: bool = False) -> str | 
         return "TARGET_OCCLUDED"
     role = element.get("role")
     if not focus and isinstance(role, str) and role and role.strip().lower() not in INTERACTIVE_ROLES:
-        return f"TARGET_NOT_A_CONTROL:{role.strip().lower()[:32]}"
+        # Review I6 m4 — the role is page-controlled: named only when it is an ARIA role.
+        named = role.strip().lower()
+        return f"TARGET_NOT_A_CONTROL:{named if named in ARIA_ROLES else 'UNKNOWN_ROLE'}"
     if not focus and not any(isinstance(element.get(k), str) and element.get(k) for k in TARGET_NAME_KEYS):
         return "TARGET_HAS_NO_ROLE_OR_NAME"
     return None
@@ -1582,6 +1601,20 @@ class BrowserInteractionRouter:
             reasons=reasons + [f"TASK_SCOPE:{violation}"], action=action, escalated=True,
         )
 
+    def _landed_outside(
+        self, trail: list[str], reasons: list[str], action: RouterAction, violation: str,
+        verification: VerificationResult | None = None,
+    ) -> StepResult:
+        """Review I6 M3 — the action ran, and the browser landed outside the task scope (the
+        Harness has closed that page). Not satisfied, and no further lane acts: lane 4."""
+        self.metrics.inc("owner_takeovers")
+        return StepResult(
+            lane=RouterLane.OWNER_TAKEOVER, state=StepState.OWNER_TAKEOVER,
+            trail=trail + [StepState.NOT_SATISFIED.value, StepState.OWNER_TAKEOVER.value],
+            reasons=reasons + [f"TASK_SCOPE:{closed_code(violation)}"], action=action,
+            verification=verification, escalated=True,
+        )
+
     # ----------------------------------------------------------- execute + verify
 
     async def _execute_and_verify(
@@ -1627,9 +1660,12 @@ class BrowserInteractionRouter:
                 return StepResult(
                     lane=RouterLane.POLICY_REFUSAL, state=StepState.POLICY_REFUSED,
                     trail=trail + [StepState.POLICY_REFUSED.value],
-                    reasons=reasons + [f"POLICY_REFUSED:{exc}"], action=action,
+                    # Review I6 m4 — the exception's class, never its message.
+                    reasons=reasons + [f"POLICY_REFUSED:{type(exc).__name__}"], action=action,
                 )
             except BrowserAdapterError as exc:
+                if exc.code.endswith("_REFUSED") and str(exc.detail or "").startswith(LANDED_PREFIX):
+                    return self._landed_outside(trail, reasons, action, str(exc.detail))
                 if exc.code.endswith("_REFUSED"):
                     # Review I5 / owner decision 2026-09-30: the Harness refused to act on the
                     # bound target (it moved, changed, was covered, focus moved, or the page
@@ -1638,7 +1674,7 @@ class BrowserInteractionRouter:
                     return StepResult(
                         lane=RouterLane.OWNER_TAKEOVER, state=StepState.OWNER_TAKEOVER,
                         trail=trail + [StepState.OWNER_TAKEOVER.value],
-                        reasons=reasons + [f"HARNESS_REFUSED:{exc.detail or exc.code}"],
+                        reasons=reasons + [f"HARNESS_REFUSED:{closed_code(exc.detail or exc.code)}"],
                         action=action, escalated=True,
                     )
                 return StepResult(
@@ -1668,6 +1704,11 @@ class BrowserInteractionRouter:
                 state = StepState.NOT_SATISFIED
             else:
                 state = StepState.UNVERIFIABLE
+        if (
+            state is StepState.NOT_SATISFIED and verification is not None
+            and str(verification.detail or "").startswith(LANDED_PREFIX)
+        ):
+            return self._landed_outside(trail, reasons, action, str(verification.detail), verification)
         trail.append(state.value)
         if state is StepState.UNVERIFIABLE:
             reasons = reasons + ["ESCALATED:UNVERIFIABLE"]
@@ -1678,6 +1719,69 @@ class BrowserInteractionRouter:
 
 
 # ------------------------------------------------------------------------ step ledger
+
+#: Review I6 M3 — operations after which the browser may have navigated, and the typed
+#: reason prefix of an out-of-scope landing (Harness ``_landing_check``).
+LANDING_OPERATIONS = frozenset({"click", "fill", "press_key"})
+LANDED_PREFIX = "TASK_SCOPE_LANDED_"
+
+_CODE_TOKEN = re.compile(r"[A-Z][A-Z0-9_]*")
+_CLASS_NAME_TOKEN = re.compile(r"[A-Z][a-z][A-Za-z0-9]*")
+_CLASS_STEP_TOKEN = re.compile(r"A[0-5]->A[0-5]")
+#: Lower-case codes the payment boundary (``automation/payments.py``) raises with, and the
+#: contexts the router passes it — code-built, never page text.
+_PAYMENT_CODE_TOKEN = re.compile(
+    r"(?:automated_payment_prohibited_in|payment_instrument_in|payment_requires_a4|"
+    r"payment_requires_fresh_owner_approval|payment_approval_binding_incomplete)(?:_[a-z_]+)?|"
+    r"interaction_router_[a-z_]+|declared_effect|payment_intent_in_text|"
+    r"instrument_persistence_in_text|payment_provider_endpoint|payment_api_path"
+)
+
+
+def _lower_vocabulary() -> frozenset[str]:
+    from van_gateway.browser import action_risk as ar
+
+    words = set(ARIA_ROLES) | set(ar._RISK_STEMS) | set(ar._RISK_WORDS) | set(ar._PAYMENT_FIELD_STEMS)
+    words |= set(getattr(ar, "_PAYMENT_FIELD_TOKENS", ())) | set(ar._RISKY_ROLES)
+    words |= {"word", "money_amount", "cc-autocomplete", "mm/yy", "digit_groups"}
+    return frozenset(w for w in words if isinstance(w, str))
+
+
+_LOWER_VOCABULARY: frozenset[str] | None = None
+
+
+def _closed_token(token: str) -> bool:
+    global _LOWER_VOCABULARY
+    if token == "" or _CODE_TOKEN.fullmatch(token) or _CLASS_STEP_TOKEN.fullmatch(token):
+        return True
+    if _CLASS_NAME_TOKEN.fullmatch(token) or _PAYMENT_CODE_TOKEN.fullmatch(token):
+        return True
+    if _LOWER_VOCABULARY is None:
+        _LOWER_VOCABULARY = _lower_vocabulary()
+    return token in _LOWER_VOCABULARY
+
+
+def closed_code(value: Any) -> str:
+    """One reason code, or ``OMITTED`` when any part of it is not in the closed vocabulary."""
+    text = str(value or "")
+    return text if text and all(_closed_token(t) for t in re.split(r"[:;,]", text)) else "OMITTED"
+
+
+def ledger_reasons(reasons: list[str]) -> list[str]:
+    """Review I6 m4 — the step ledger keeps reason codes from a closed vocabulary only.
+
+    A reason is split on ``:``, ``;`` and ``,``; each part is kept when it is an upper-case
+    code (``TARGET_NOT_A_CONTROL``), an exception class name, an action-class step
+    (``A3->A2``), a payment-boundary code, or a word of the classifier's own vocabulary (risk
+    stems, ARIA roles). Anything else — a page string (a role attribute, an e-mail address,
+    a locator), an exception message, unmapped page characters — is replaced by ``OMITTED``.
+    """
+    out: list[str] = []
+    for reason in reasons:
+        parts = re.split(r"([:;,])", str(reason))
+        out.append("".join(p if i % 2 or _closed_token(p) else "OMITTED" for i, p in enumerate(parts)))
+    return out
+
 
 # Defined beside the verdict kind in the task service, which refuses both from callers.
 from van_gateway.browser.service import ROUTER_STEP_EVIDENCE_KIND  # noqa: E402
@@ -1711,7 +1815,8 @@ class RouterStepLedger:
             "lane": body["lane"],
             "state": body["state"],
             "trail": body["trail"],
-            "reasons": body["reasons"],
+            # Review I6 m4 — codes from a closed vocabulary only (``ledger_reasons``).
+            "reasons": ledger_reasons(body["reasons"]),
             "action": body["action"],
             "verification": body["verification"],
             "attempts": [
@@ -1829,6 +1934,17 @@ class HarnessActionExecutor:
         self.harness = harness
 
     async def execute(self, task: BrowserTask, action: RouterAction) -> dict[str, Any]:
+        page = await self._execute(task, action)
+        # Review I6 M3 — the Harness checks where the browser landed (CDP frame URL) and
+        # refuses TASK_SCOPE_LANDED_*; the gateway checks the page it reports back too.
+        url = page.get("url") if isinstance(page, dict) else None
+        if action.operation in LANDING_OPERATIONS and isinstance(url, str) and url and url != "about:blank":
+            violation = url_scope_violation(getattr(task, "scope", None), url, what="LANDED")
+            if violation is not None:
+                raise BrowserAdapterError("BROWSER_HARNESS_REFUSED", violation)
+        return page
+
+    async def _execute(self, task: BrowserTask, action: RouterAction) -> dict[str, Any]:
         op = action.operation
         # Review I5 MAJOR-2/-3: the Harness acts on the node it bound when it described the
         # target (or the focus) — never on a re-queried selector.
@@ -1921,10 +2037,19 @@ class IndependentPostconditionVerifier:
         self, task: BrowserTask, action: RouterAction,
         postcondition: PostconditionSpec | None, *, claimed_done: bool,
     ) -> VerificationResult:
-        return await self.workflow.verify(
+        result = await self.workflow.verify(
             spec=postcondition, verifier_type=VerifierType.READ_BACK,
             engine_reported_success=claimed_done, context={"task": task},
         )
+        # Review I6 M3 — the read-back is of the page the browser is on. If that page is
+        # outside the task scope (a navigation that committed after the Harness settled),
+        # the postcondition is not satisfied there, whatever it observed.
+        url = (result.observed or {}).get("url")
+        if result.outcome is VerificationOutcome.VERIFIED and isinstance(url, str) and url != "about:blank":
+            violation = url_scope_violation(getattr(task, "scope", None), url, what="LANDED")
+            if violation is not None:
+                return result.model_copy(update={"outcome": VerificationOutcome.FAILED, "detail": violation})
+        return result
 
 
 def load_owner_private_terms(path: str) -> tuple[str, ...]:

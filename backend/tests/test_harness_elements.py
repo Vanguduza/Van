@@ -111,7 +111,8 @@ def test_shape_bounds_the_list_and_never_carries_a_value(hs):
         _raw(0, type="password", value="hunter2", attributes={
             "id": "pw", "value": "hunter2", "onclick": "steal()", "style": "x",
             "data-session-token": "tok_live_1", "data-kind": "login"}),
-        _raw(1, name="N" * 10_000, autocomplete="cc-number", value="4111111111111111"),
+        # Words, not one 10,000-character run: a token-like run is masked (review I6 m3).
+        _raw(1, name="Nn " * 5_000, autocomplete="cc-number", value="4111111111111111"),
         _raw(2, hidden="yes"),  # not a real bool: unknown visibility is hidden
         {"locator": "", "role": "button"},  # no locator: dropped
         "not-an-element",
@@ -138,7 +139,7 @@ def test_both_bounds_hold(hs):
     small, truncated = hs.sanitize_elements([{"locator": f"#e{i}", "hidden": False} for i in range(400)])
     assert (len(small), truncated) == (hs.MAX_ELEMENTS, True)  # the count bound
     big, truncated = hs.sanitize_elements(
-        [{"locator": f"#e{i}", "name": "x" * 999, "description": "y" * 999, "hidden": False} for i in range(400)])
+        [{"locator": f"#e{i}", "name": "x " * 500, "description": "y " * 500, "hidden": False} for i in range(400)])
     assert truncated and len(big) < hs.MAX_ELEMENTS  # the size bound, first
     assert len(json.dumps(big, separators=(",", ":"))) <= hs.MAX_ELEMENTS_BYTES
 
