@@ -522,10 +522,15 @@ async def test_the_terminal_triggers_name_exactly_the_terminal_statuses(tmp_path
     rows = await store.fetchall(
         "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' AND tbl_name = 'browser_tasks'")
     by_name = {r["name"]: r["sql"] for r in rows}
-    assert set(by_name) == {"browser_tasks_terminal_status_sticky", "browser_tasks_terminal_not_replaced"}
+    # Review I5 D1 (migration 35) added the tombstone, identity and frozen-row triggers.
+    status_lists = {"browser_tasks_terminal_status_sticky", "browser_tasks_terminal_not_replaced",
+                    "browser_tasks_tombstone_on_terminal_insert", "browser_tasks_tombstone_on_terminal_update",
+                    "browser_tasks_terminal_evidence_frozen"}
+    assert set(by_name) == status_lists | {"browser_tasks_tombstoned_id_not_reinserted",
+                                           "browser_tasks_identity_immutable"}
     expected = {s.value for s in TERMINAL_TASK_STATUSES}
-    for name, sql in by_name.items():
-        assert _terminal_trigger_statuses(sql) == expected, name
+    for name in status_lists:
+        assert _terminal_trigger_statuses(by_name[name]) == expected, name
 
 
 @pytest.mark.parametrize("sql", [
@@ -649,8 +654,9 @@ AUTH_ID = "auth-20261001-owner-jev-browser-effect"
 
 
 def _authorization(**overrides) -> dict:
+    # Review I5 J1: a valid authorization pins the owner decision's bytes too.
     record = {"authorization_id": AUTH_ID, "authority": "OWNER_EXPLICIT",
-              "owner_instruction_record": REF, "revoked": False,
+              "owner_instruction_record": REF, "owner_instruction_sha256": REF_SHA, "revoked": False,
               "authorized_paths": ["docs/decisions/VAN-JEV-BROWSER-EFFECT-001.yaml (append-only)"]}
     record.update(overrides)
     return record
@@ -754,6 +760,10 @@ def test_jev_effect_needs_an_owner_signature_and_decision_reference(tmp_path, la
     ("authorization does not name this decision record", True,
      _authorization(authorized_paths=["docs/decisions/VAN-ADOPT-STAGEHAND-001.yaml (append-only)"])),
     ("authorization names it only by a glob", True, _authorization(authorized_paths=["docs/decisions/**"])),
+    ("review I5 J1: authorization pins other owner text", True,
+     _authorization(owner_instruction_sha256=hashlib.sha256(b"other text").hexdigest())),
+    ("review I5 J1: authorization excludes the record", True,
+     _authorization(excluded_paths=["docs/decisions/VAN-JEV-BROWSER-EFFECT-001.yaml"])),
 ])
 def test_jev_effect_reference_must_resolve_and_be_authorized(tmp_path, label, reference, authorization):
     """Review I4 MINOR-B. Everything else fully written; only the named part is wrong."""
