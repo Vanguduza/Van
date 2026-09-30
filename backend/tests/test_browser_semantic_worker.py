@@ -36,11 +36,19 @@ class FakeHarness:
         #: a click to run has to say what the Harness sees there. None = reports nothing.
         self.elements = elements
 
-    async def click(self, task, locator):
+    async def describe(self, task, locator):
+        """Review I5: the Harness /describe reports the element bound to its node."""
+        for e in self.elements or ():
+            if locator in (e.get("locator"), e.get("ref")):
+                return {"element": dict(e), "matches": 1, "page_url": f"https://{DOMAIN}/report",
+                        "binding": {"backend_node_id": 5, "digest": "0" * 64}}
+        return {"element": None, "matches": 0}
+
+    async def click(self, task, locator, *, binding=None):
         self.calls.append(f"click:{locator}")
         return {}
 
-    async def press(self, task, key):
+    async def press(self, task, key, *, binding=None):
         self.calls.append(f"press:{key}")
         return {}
 
@@ -148,8 +156,9 @@ async def test_semantic_assignment_is_one_stagehand_action_per_gateway_step(tmp_
     assert result.step_count == 1
     # Owner decision 2026-09-29 §8: Stagehand proposed, the Harness executed.
     assert stagehand.acted == []
-    # The resolver's read, the Harness click, then the read-back.
-    assert harness.calls == ["page_info", "click:xpath=//a[@id='quarterly-report']", "page_info"]
+    # The Harness click on the node /describe bound (review I5: the resolver always
+    # describes; the page_info list carries no binding), then the read-back.
+    assert harness.calls == ["click:xpath=//a[@id='quarterly-report']", "page_info"]
     assert result.steps[0].action_class is ActionClass.A2
     assert len(stagehand.observed) == 2
     assert "Step: 1 of 5" in stagehand.observed[0]

@@ -158,7 +158,9 @@ def test_zone_unit_env_config_references_no_forbidden_authority(path):
 def test_zone_workers_read_only_declared_env():
     declared = _env_keys(ZONE_DIR / "runtime.env.example")
     # Harness child-process variables the worker itself sets for browser-harness.
-    child = {"VAN_BH_URL", "VAN_BH_LOCATOR", "VAN_BH_SECRET", "VAN_BH_KEY", "VAN_BH_DY", "VAN_BH_DX", "VAN_BH_UPLOAD"}
+    child = {"VAN_BH_URL", "VAN_BH_LOCATOR", "VAN_BH_SECRET", "VAN_BH_KEY", "VAN_BH_DY", "VAN_BH_DX", "VAN_BH_UPLOAD",
+             # Review I5 (unit G6a): the bound node, the task scope and describe-the-focus.
+             "VAN_BH_BINDING", "VAN_BH_SCOPE", "VAN_BH_FOCUS"}
     # Explicit development-only escape, refused in production by the worker itself.
     allowed = declared | child | {"VAN_BROWSER_HISTORICAL_DEV_ONLY"}
     harness = (ZONE_DIR / "browser" / "harness_service.py").read_text(encoding="utf-8")

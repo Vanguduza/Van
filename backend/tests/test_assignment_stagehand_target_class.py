@@ -100,6 +100,9 @@ async def test_a_resolver_fault_is_owner_takeover(tmp_path):
         async def page_info(self, task):
             raise RuntimeError("harness down")
 
+        async def describe(self, task, locator):  # review I5: the resolver describes
+            raise RuntimeError("harness down")
+
     task = await _task(tmp_path)
     harness = _Broken()
     stagehand = FakeStagehand([[{"method": "click", "selector": PAY, "description": "Continue"}]])

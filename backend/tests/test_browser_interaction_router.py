@@ -53,6 +53,7 @@ from van_gateway.jev.client import (
     ProposeActionResponse,
     parse_propose_action_response,
 )
+from van_gateway.browser.task_scope import scope_for_new_task
 from van_gateway.models import ActionClass
 
 T_SEARCH = "t_00000000000000a1"
@@ -63,13 +64,23 @@ INTERNAL = "test-internal-token"
 HEADERS = {"X-Van-Internal-Token": INTERNAL}
 
 
+#: Owner decision 2026-09-30 — the scope recorded with the fixture task (its target domain).
+SCOPE = scope_for_new_task("docs.example.com", None)
+PAGE_URL = "https://docs.example.com/install"
+
+
 def _task() -> BrowserTask:
     return BrowserTask(
         task_id="browser_task_1", profile_alias="public", strategy=list(BrowserStrategy)[0],
         autonomy_tier=AutonomyTier.L1_HARNESS_DETERMINISTIC, action_class=ActionClass.A2,
-        target_domain="docs.example.com", goal="find the install page",
+        target_domain="docs.example.com", goal="find the install page", scope=SCOPE,
         status=BrowserTaskStatus.PENDING, started_at_ms=0,
     )
+
+
+def bound(element: dict[str, Any], *, node: int = 7, page_url: str = PAGE_URL) -> dict[str, Any]:
+    """What the Harness /describe returns for an element: bound to a node, on a page (I5)."""
+    return {**element, "binding": {"backend_node_id": node, "digest": "0" * 64}, "page_url": page_url}
 
 
 def _payload(**overrides: Any) -> dict[str, Any]:
@@ -201,20 +212,38 @@ HARNESS_ELEMENTS: dict[str, dict[str, Any]] = {
     "a.install": {"ref": "a.install", "role": "link", "label": "Install guide", "href": "/install"},
     "a#install": {"ref": "a#install", "role": "link", "label": "Install guide", "href": "/install"},
     "#pay": {"ref": "#pay", "role": "button", "label": "Pay now"},
+    "#go": {"ref": "#go", "role": "button", "label": "Go"},
 }
 
 
 class FakeResolver:
-    def __init__(self, elements: dict[str, dict[str, Any]] | None = None, error: Exception | None = None) -> None:
+    """The Harness /describe, faked: it binds whatever it reports (review I5), unless the
+    element says ``"binding": None``. ``focus`` is what /describe ``focus`` reports."""
+
+    def __init__(self, elements: dict[str, dict[str, Any]] | None = None, error: Exception | None = None,
+                 focus: dict[str, Any] | None = None) -> None:
         self.elements = HARNESS_ELEMENTS if elements is None else elements
         self.error = error
+        self.focus = focus
         self.calls: list[str] = []
 
     async def __call__(self, task, locator):
         self.calls.append(locator)
         if self.error is not None:
             raise self.error
-        return self.elements.get(locator)
+        element = self.elements.get(locator)
+        if isinstance(element, dict) and "binding" not in element:
+            # The fake page is on the task's own domain unless a test binds it elsewhere.
+            return bound(element, page_url=f"https://{task.target_domain}/install")
+        return element
+
+    async def focused(self, task):
+        self.calls.append("(focused)")
+        if self.error is not None:
+            raise self.error
+        if isinstance(self.focus, dict) and "binding" not in self.focus:
+            return bound(self.focus, page_url=f"https://{task.target_domain}/install")
+        return self.focus
 
 
 def make_router(**kw: Any) -> BrowserInteractionRouter:
@@ -384,16 +413,16 @@ async def test_harness_executor_maps_operations_to_the_typed_harness_surface():
     calls = []
 
     class Harness:
-        async def click(self, task, locator):
-            calls.append(("click", locator))
+        async def click(self, task, locator, *, binding):
+            calls.append(("click", locator, binding))
             return {}
 
-        async def fill_ref(self, task, locator, value_ref):
-            calls.append(("fill", locator, value_ref))
+        async def fill_ref(self, task, locator, value_ref, *, binding):
+            calls.append(("fill", locator, value_ref, binding))
             return {}
 
-        async def press(self, task, key):
-            calls.append(("press", key))
+        async def press(self, task, key, *, binding):
+            calls.append(("press", key, binding))
             return {}
 
         async def scroll(self, task, request):
@@ -401,11 +430,14 @@ async def test_harness_executor_maps_operations_to_the_typed_harness_surface():
             return {}
 
     ex = HarnessActionExecutor(Harness())
+    # Review I5 MAJOR-2/-3: every actuation carries the binding of the element it classified.
+    el = bound({"ref": "#a", "role": "button", "label": "A"}, node=41)
     for op, loc, val in [("click", "#a", None), ("fill", "#b", "secretref://x"), ("press_key", None, "Enter"),
                          ("scroll", None, None)]:
         await ex.execute(_task(), RouterAction(lane=RouterLane.JEV, operation=op, locator=loc,
-                                               value_ref=val, action_class="A1"))
-    assert calls == [("click", "#a"), ("fill", "#b", "secretref://x"), ("press", "Enter"), ("scroll",)]
+                                               value_ref=val, action_class="A1", element=el))
+    b = el["binding"]
+    assert calls == [("click", "#a", b), ("fill", "#b", "secretref://x", b), ("press", "Enter", b), ("scroll",)]
     with pytest.raises(BrowserAdapterError):
         await ex.execute(_task(), RouterAction(lane=RouterLane.JEV, operation="select", locator="#s",
                                                value_ref=None, action_class="A1"))
@@ -1004,6 +1036,10 @@ def real_b2_router(pages, jev, **kw):
         return harness_page_to_jev_observation(page, profile_alias="public_research")
 
     kw.setdefault("semantic_fallback", FakeStagehand(None))
+    # Review I5: a Jev target is acted on only once the Harness has bound it (lane 2 is
+    # resolved through /describe before it executes), on a page inside the task scope.
+    kw.setdefault("target_resolver", FakeResolver({
+        e["ref"]: bound(e, page_url=PUBLIC_PAGE["url"]) for e in PUBLIC_PAGE["elements"]}))
     return make_router(
         eligibility_classifier=classify_observation, jev_client=jev, observer=observer,
         epoch_source=None, **kw,
@@ -1012,7 +1048,11 @@ def real_b2_router(pages, jev, **kw):
 
 def _real_step(**kw):
     kw.setdefault("closed_operation_set", ("click", "scroll", "done", "abstain"))
-    return step(observation=None, **kw)
+    s = step(observation=None, **kw)
+    # The page is docs.python.org: the task truth records that domain as its scope.
+    s.task = s.task.model_copy(update={
+        "target_domain": "docs.python.org", "scope": scope_for_new_task("docs.python.org", None)})
+    return s
 
 
 async def test_real_b2_harness_page_without_auth_state_never_reaches_jev():
@@ -1413,6 +1453,7 @@ def _fill_router():
         eligibility_classifier=eligible(action_class_ceiling="A3", closed_operation_set=["click", "fill", "abstain"],
                                         value_slots=["v_q"]),
         jev_client=FakeJev(proposes("fill", T_SEARCH, "v_q")), semantic_fallback=FakeStagehand(None),
+        target_resolver=FakeResolver({"#q": {"ref": "#q", "role": "searchbox", "label": "Search docs"}}),
     )
 
 

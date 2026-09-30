@@ -216,7 +216,8 @@ def test_r1_a_fully_confusable_cyrillic_label_is_still_non_latin():
 
 
 def test_r1_unmapped_symbol_is_a4():
-    assert explain_action_class("click", observed_target("click", _btn("Continue €10"), "#b")).rules == (
+    # ("Continue" became a risk word in review I5 MAJOR-6; "Next" keeps R1 alone deciding.)
+    assert explain_action_class("click", observed_target("click", _btn("Next €10"), "#b")).rules == (
         "R1_NON_LATIN_OR_UNMAPPED:€",
     )
 
@@ -261,19 +262,22 @@ def test_r4_structure_decides_whatever_the_label_says():
 def test_r5_no_evidence_is_a4():
     assert assess_action("click", element=None, locator=None, resolved=False).action_class == "A4"
     assert default_action_classifier("click", None, None) == "A4"
-    # A target that carries no text at all: R5 alone decides.
-    assert explain_action_class("click", {"label": ""}).rules == ("R5_NO_EVIDENCE",)
+    # A target that carries no text at all: R5 decides (and, review I5 MAJOR-5, a click
+    # with an empty name is A4 on its own).
+    assert explain_action_class("click", {"label": ""}).rules == ("R8_EMPTY_NAME", "R5_NO_EVIDENCE")
     assert default_action_classifier("click", {"label": ""}, None) == "A4"
 
 
 def test_r6_unresolved_target_decision():
-    """Click: A2 only on a plain-ASCII locator with no risk stem. Fill/select: always A4."""
+    """Review I5 / owner decision 2026-09-30: an unresolved target is A4 for every targeted
+    operation. I4 let a plain-ASCII click run as A2; only the element the Harness bound and
+    re-verifies at the moment it acts may be acted on now."""
     unresolved = "TARGET_NOT_RESOLVED_BY_HARNESS"
-    assert explain_action_class("click", observed_target("click", unresolved, "#next")).action_class == "A2"
+    assert explain_action_class("click", observed_target("click", unresolved, "#next")).rules == ("R6_UNRESOLVED_TARGET",)
     assert explain_action_class("fill", observed_target("fill", unresolved, "#email")).rules == ("R6_UNRESOLVED_WRITE",)
     assert explain_action_class("select", observed_target("select", unresolved, "#sort")).rules == ("R6_UNRESOLVED_WRITE",)
     rules = explain_action_class("click", observed_target("click", unresolved, "#café")).rules
-    assert "R6_UNRESOLVED_LOCATOR_NOT_PLAIN_ASCII" in rules
+    assert "R6_UNRESOLVED_TARGET" in rules
 
 
 def test_payment_boundary_reads_folded_text():
@@ -392,9 +396,12 @@ async def test_lane1_benign_clicks_execute_at_a2(element):
     assert any(r.startswith("DETERMINISTIC_ACTION_RISK:LOW_RISK") for r in result.reasons)
 
 
-async def test_lane1_unresolved_plain_click_runs_and_unresolved_fill_does_not():
+async def test_lane1_unresolved_click_and_fill_do_not_run():
+    """Review I5: I4's "unresolved plain-ASCII click runs" is withdrawn (see R6)."""
     router, ex, s = _lane1("click", "#next", {}, ceiling="A2")
-    assert (await router.route(s)).state is StepState.VERIFIED_SUCCESS
+    result = await router.route(s)
+    assert result.state is StepState.OWNER_TAKEOVER and ex.executed == []
+    assert "DETERMINISTIC_ACTION_RISK:R6_UNRESOLVED_TARGET" in result.reasons
     router, ex, s = _lane1("fill", "#email", {})
     result = await router.route(s)
     assert result.state is StepState.OWNER_TAKEOVER and ex.executed == []
@@ -442,11 +449,19 @@ class _PlanHarness:
             page["elements"] = [dict(e) for e in self.elements]
         return page
 
-    async def click(self, task, loc):
+    async def describe(self, task, loc):
+        """Review I5: the Harness /describe binds the element it reports."""
+        for e in self.elements or ():
+            if e.get("locator") == loc:
+                return {"element": dict(e), "matches": 1, "page_url": f"https://{t.DOMAIN}/x",
+                        "binding": {"backend_node_id": 9, "digest": "0" * 64}}
+        return {"element": None, "matches": 0}
+
+    async def click(self, task, loc, *, binding=None):
         self.calls.append(("click", loc))
         return {}
 
-    async def fill_ref(self, task, loc, ref):
+    async def fill_ref(self, task, loc, ref, *, binding=None):
         self.calls.append(("fill", loc))
         return {}
 

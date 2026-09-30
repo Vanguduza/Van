@@ -137,6 +137,18 @@ class BrowserHarnessAdapter(Protocol):
     async def upload(self, task: BrowserTask, locator: str, file_ref: str) -> dict[str, Any]: ...
     async def tabs(self, task: BrowserTask) -> dict[str, Any]: ...
     async def describe(self, task: BrowserTask, locator: str) -> dict[str, Any]: ...
+    async def describe_focus(self, task: BrowserTask) -> dict[str, Any]: ...
+
+
+#: Harness refusal codes (409) that mean "the target is not the one VAN classified, or the
+#: page is outside the task scope" — nothing was actuated. Mapped to lane 4 by the router.
+HARNESS_REFUSAL_PREFIXES = ("TARGET_", "TASK_SCOPE_", "FOCUS_", "PAGE_DIALOG")
+
+
+def _scope_wire(task: BrowserTask) -> dict[str, Any] | None:
+    """The task's recorded scope as the Harness receives it (None: the Harness refuses)."""
+    scope = getattr(task, "scope", None)
+    return scope.to_wire() if scope is not None else None
 
 
 def _error_code(response: httpx.Response) -> str | None:
@@ -221,6 +233,12 @@ class _PrivateWorkerClient:
                 raise BrowserAdapterError(f"{self.CAPABILITY.upper()}_LEASE_GENERATION_STALE")
             if response.status_code == 428 and _error_code(response) == "LEASE_FENCE_REQUIRED":
                 raise BrowserAdapterError(f"{self.CAPABILITY.upper()}_LEASE_FENCE_REQUIRED")
+            refusal = _error_code(response) if response.status_code == 409 else None
+            if refusal and refusal.startswith(HARNESS_REFUSAL_PREFIXES):
+                # Review I5 / owner decision 2026-09-30: the Harness refused to actuate the
+                # bound target (binding, hit test, focus, task scope). Typed, so the router
+                # hands the step to the owner rather than calling it an execution failure.
+                raise BrowserAdapterError(f"{self.CAPABILITY.upper()}_REFUSED", refusal)
             raise BrowserAdapterError(
                 f"{self.CAPABILITY.upper()}_REQUEST_FAILED", str(response.status_code)
             )
@@ -300,25 +318,37 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
         return await super()._call(path, payload)
 
     async def navigate(self, task: BrowserTask, url: str) -> dict[str, Any]:
-        return await self._call("/navigate", self._envelope(task, url=url))
+        scope = _scope_wire(task)
+        extra = {"task_scope": scope} if scope is not None else {}
+        return await self._call("/navigate", self._envelope(task, url=url, **extra))
 
     async def page_info(self, task: BrowserTask) -> dict[str, Any]:
         return await self._call("/page_info", self._envelope(task))
 
-    async def click(self, task: BrowserTask, locator: str) -> dict[str, Any]:
-        return await self._call("/click", self._envelope(task, locator=locator))
+    async def click(self, task: BrowserTask, locator: str, *, binding: dict[str, Any] | None = None) -> dict[str, Any]:
+        """Review I5 MAJOR-2 — acts on the node ``binding`` names (from ``describe``), under
+        the task's scope; the Harness refuses without either."""
+        return await self._call("/click", self._envelope(
+            task, locator=locator, binding=binding, task_scope=_scope_wire(task)))
 
-    async def fill_ref(self, task: BrowserTask, locator: str, value_ref: str) -> dict[str, Any]:
+    async def fill_ref(
+        self, task: BrowserTask, locator: str, value_ref: str, *, binding: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """§407 — a *reference*, resolved inside the worker. The value never transits VAN."""
         if not value_ref.startswith("secretref://"):
             raise BrowserPolicyError("browser_fill_requires_secret_reference")
-        return await self._call("/fill", self._envelope(task, locator=locator, value_ref=value_ref))
+        return await self._call("/fill", self._envelope(
+            task, locator=locator, value_ref=value_ref, binding=binding, task_scope=_scope_wire(task)))
 
-    async def press(self, task: BrowserTask, key: str) -> dict[str, Any]:
-        return await self._call("/press", self._envelope(task, key=key))
+    async def press(self, task: BrowserTask, key: str, *, binding: dict[str, Any] | None = None) -> dict[str, Any]:
+        """Review I5 MAJOR-3 — ``binding`` is the focused element ``describe_focus`` bound."""
+        return await self._call("/press", self._envelope(
+            task, key=key, binding=binding, task_scope=_scope_wire(task)))
 
     async def scroll(self, task: BrowserTask, request: dict[str, Any]) -> dict[str, Any]:
-        return await self._call("/scroll", self._envelope(task, request=request))
+        scope = _scope_wire(task)
+        extra = {"task_scope": scope} if scope is not None else {}
+        return await self._call("/scroll", self._envelope(task, request=request, **extra))
 
     async def screenshot(self, task: BrowserTask) -> dict[str, Any]:
         return await self._call("/screenshot", self._envelope(task))
@@ -336,6 +366,12 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
         """Review I4 — the element the Harness would act on for ``locator``, in the same
         shape as a ``page_info`` ``elements`` entry, for targets the bounded list omitted."""
         return await self._call("/describe", self._envelope(task, locator=locator))
+
+    async def describe_focus(self, task: BrowserTask) -> dict[str, Any]:
+        """Review I5 MAJOR-3 — ``document.activeElement`` (through open shadow roots), in
+        the ``describe`` shape and bound the same way, so a key press is classified against
+        the element that will receive it."""
+        return await self._call("/describe", self._envelope(task, focus=True))
 
     async def status(self) -> ExternalRuntimeStatus:  # type: ignore[override]
         return await super().status("BROWSER_HARNESS_UNAVAILABLE")

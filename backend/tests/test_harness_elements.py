@@ -49,6 +49,8 @@ ELEMENT_KEYS = {
     "locator", "locator_kind", "role", "name", "description", "attributes", "type",
     "autocomplete", "placeholder", "inputmode", "maxlength", "pattern", "hidden", "tag",
     "landmark", "disabled", "checked", "sensitive", "value_present",
+    # Review I5 (unit G6a): what the element shows and does.
+    "text", "media", "effective_type", "submits", "form", "frame",
 }
 
 
@@ -199,23 +201,39 @@ class _Harness:
 
     async def describe(self, task, locator):
         self.describe_calls.append(locator)
-        return {"element": self.described}
+        return {"element": self.described, "binding": getattr(self, "binding", None), "url": f"https://{DOMAIN}/"}
 
 
-async def test_resolver_uses_the_reported_locator_then_describe():
+_describe = _Harness.describe
+
+
+async def test_resolver_always_describes_and_carries_the_binding():
+    """Review I5 MAJOR-2: the page_info list carries no binding, so the resolver always goes
+    through /describe (the element classified must be the node acted on)."""
     listed = _raw(1, locator="#pay", name="Pay now")
     harness = _Harness([listed], described=_raw(9, locator="main > button:nth-of-type(3)", name="Read more"))
+    harness.binding = {"backend_node_id": 12, "digest": "a" * 64}
     resolver = HarnessTargetResolver(harness)
-    assert await resolver(_task(), "#pay") is listed
-    assert harness.describe_calls == []
+    assert await resolver(_task(), "#pay") is None  # describe reported another locator
+    assert harness.describe_calls == ["#pay"]
     found = await resolver(_task(), "main > button:nth-of-type(3)")
-    assert found["name"] == "Read more" and harness.describe_calls == ["main > button:nth-of-type(3)"]
+    assert found["name"] == "Read more" and harness.describe_calls[-1] == "main > button:nth-of-type(3)"
+    assert found["binding"] == {"backend_node_id": 12, "digest": "a" * 64}
+    assert found["page_url"] == f"https://{DOMAIN}/"
+    # A Harness without /describe: the listed element is found but carries no binding, which
+    # the task-scope gate refuses to act on.
+    del _Harness.describe
+    try:
+        unbound = await HarnessTargetResolver(_Harness([listed]))(_task(), "#pay")
+    finally:
+        _Harness.describe = _describe
+    assert unbound is listed and "binding" not in unbound
     # describe echoing another locator is not this target.
     harness.described = _raw(9, locator="#other")
     assert await resolver(_task(), "#missing") is None
     harness.described = None
     assert await resolver(_task(), "#missing") is None
-    hidden = HarnessTargetResolver(_Harness([_raw(2, locator="#ghost", hidden=True)]))
+    hidden = HarnessTargetResolver(_Harness([], described=_raw(2, locator="#ghost", hidden=True)))
     assert await resolve_stagehand_target(hidden, _task(), "#ghost") == "TARGET_HIDDEN"
 
 

@@ -39,6 +39,7 @@ from van_gateway.browser.models import (
     BrowserTaskStatus,
 )
 from van_gateway.browser.policy import BrowserPolicyEngine, BrowserPolicyError
+from van_gateway.browser.task_scope import TaskScope, load_scope
 from van_gateway.browser.service import (
     BrowserSessionBroker,
     BrowserTaskNotVerified,
@@ -84,6 +85,10 @@ class CreateTaskBody(BaseModel):
     #: intentions while the real execution sits in browser_tasks.
     mission_id: str | None = None
     inputs: dict[str, Any] = Field(default_factory=dict)
+    #: Owner decision 2026-09-30 — the pages this task may act on, as URL prefixes
+    #: (``https://host[:port][/path/]``), each inside ``target_domain``. Omitted: the task's
+    #: ``target_domain`` origin is recorded. See ``browser/task_scope.py``.
+    scope: list[str] | None = Field(default=None, max_length=32)
 
 
 class LeaseBody(BaseModel):
@@ -187,6 +192,30 @@ class BrowserApi:
         if not self.settings.browser_enabled:
             raise HTTPException(status_code=503, detail="BROWSER_FABRIC_DISABLED")
 
+    async def _task_scope(self, row) -> TaskScope | None:
+        """Owner decision 2026-09-30 — the scope in the task's truth: what was recorded at
+        creation, widened by the domains the owner approved for *this* task
+        (``browser_scope_authorizations``, the record the owner's decision produced).
+        Missing or unreadable recorded scope stays None — an approval does not invent the
+        rest of a scope — and every action on the task is refused."""
+        scope = load_scope(row["scope_json"] if "scope_json" in row.keys() else None)
+        if scope is None:
+            return None
+        grants = await self.store.fetchall(
+            "SELECT authorization_id, approved_domains_json FROM browser_scope_authorizations "
+            "WHERE task_id = ? ORDER BY issued_at_ms",
+            (str(row["task_id"]),),
+        )
+        for grant in grants:
+            try:
+                domains = json.loads(str(grant["approved_domains_json"]))
+            except ValueError:
+                continue
+            for domain in domains if isinstance(domains, list) else ():
+                if isinstance(domain, str) and domain.strip():
+                    scope = scope.with_origin(domain, f"OWNER_APPROVED:{grant['authorization_id']}")
+        return scope
+
     async def _load_task(self, task_id: str) -> BrowserTask:
         row = await self.store.fetchone(
             "SELECT * FROM browser_tasks WHERE task_id = ?", (task_id,)
@@ -204,6 +233,7 @@ class BrowserApi:
             action_class=ActionClass(str(row["action_class"])),
             target_domain=str(row["target_domain"]),
             goal=str(row["goal"]),
+            scope=await self._task_scope(row),
             status=BrowserTaskStatus(str(row["status"])),
             evidence_pointer=row["evidence_pointer"],
             error_code=row["error_code"],
@@ -861,7 +891,7 @@ class BrowserApi:
                     autonomy_tier=body.autonomy_tier, action_class=body.action_class,
                     target_domain=body.target_domain, goal=body.goal, mutating=body.mutating,
                     command_id=body.command_id, execution_id=body.execution_id,
-                    capability_id=body.capability_id, inputs=body.inputs,
+                    capability_id=body.capability_id, inputs=body.inputs, scope=body.scope,
                 )
             except BrowserPolicyError as exc:
                 raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -995,6 +1025,11 @@ class BrowserApi:
         )
         if status is BrowserTaskStatus.RESUME_AUTHORIZED:
             await self._enforce_resume_authorization(task, assignment)
+        # Owner decision 2026-09-30 — the run acts within the task's recorded scope, narrowed
+        # to the hosts this assignment allows (an assignment can narrow, never widen it). A
+        # task with no recorded scope keeps None and every action is handed to the owner.
+        if task.scope is not None:
+            task = task.model_copy(update={"scope": task.scope.narrowed_to_hosts(assignment.allowed_domains)})
         # P2-BROW-001 — the worker is bound to *this* task and its plan before it
         # runs. A long-lived worker mutated per assignment would let two concurrent
         # assignments overwrite each other's task id, and the adapter is the only part

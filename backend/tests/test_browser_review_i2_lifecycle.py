@@ -70,7 +70,11 @@ async def _setup(tmp_path, actions=None):
     async def observe(task):
         return {"url": "https://docs.example.com"}
 
-    router = tr.make_router(executor=ex, observer=observe, semantic_fallback=tr.FakeStagehand(None))
+    # Review I5: the Harness binds "#go" on a page of the task's own domain (its scope).
+    resolver = tr.FakeResolver({"#go": tr.bound({"ref": "#go", "role": "button", "label": "Go"},
+                                                page_url=f"https://{t.DOMAIN}/statement")})
+    router = tr.make_router(executor=ex, observer=observe, semantic_fallback=tr.FakeStagehand(None),
+                            target_resolver=resolver)
     app = FastAPI()
     app.include_router(api.router)
     app.include_router(build_interaction_routes(api, router))

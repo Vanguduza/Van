@@ -45,15 +45,19 @@ from van_gateway.browser.models import (
     BrowserTask,
     InjectionAssessment,
 )
+from van_gateway.browser.action_risk import assess_key_press, key_activates
 from van_gateway.browser.interaction_router import (
     TARGETLESS_OPERATIONS,
     HarnessTargetResolver,
     default_action_classifier,
     judged_text,
+    observed_element_text,
     observed_target,
+    resolve_focused_target,
     resolve_stagehand_target,
     supplementary_action_class,
 )
+from van_gateway.browser.task_scope import task_scope_gate
 from van_gateway.browser.policy import BrowserPolicyError
 from van_gateway.browser.stagehand_proposal import (
     SemanticProposalRefused,
@@ -97,6 +101,45 @@ def classify_target(
         raise OwnerTakeoverRequired(f"ACTION_UNCLASSIFIABLE:CLASS:{classes}")
     strictest = max(classes, key=ranks.__getitem__)
     return ActionClass.A1 if strictest == "A0" else ActionClass(strictest)
+
+
+def _within_ceiling(action_class: ActionClass, ceiling: ActionClass) -> bool:
+    """Below A4 and within the assignment ceiling: the runner's own refusals (payment first,
+    then ACTION_CLASS_VIOLATION) decide everything else before the task-scope gate."""
+    order = list(ActionClass)
+    return action_class not in (ActionClass.A4, ActionClass.A5) and order.index(action_class) <= order.index(ceiling)
+
+
+def _binding_of(element: Any) -> dict[str, Any] | None:
+    binding = element.get("binding") if isinstance(element, dict) else None
+    return binding if isinstance(binding, dict) else None
+
+
+def enforce_task_scope(
+    task: BrowserTask | None, *, operation: str, element: dict[str, Any] | None = None,
+    navigate_url: str | None = None, key: str | None = None,
+) -> None:
+    """Owner decision 2026-09-30 — the task-scope gate on the /assignments path. A step on a
+    page (or to a destination) outside the task's recorded scope, or on a target the Harness
+    did not bind, is handed to the owner (lane 4); a task with no scope fails closed."""
+    violation = task_scope_gate(
+        getattr(task, "scope", None), operation=operation, element=element,
+        navigate_url=navigate_url, activates=key_activates(key) if operation == "press_key" else True,
+    )
+    if violation is not None:
+        raise OwnerTakeoverRequired(f"TASK_SCOPE:{violation}")
+
+
+async def _harness_act(harness: Any, method: str, *args: Any, binding: dict[str, Any] | None) -> Any:
+    """Call a bound Harness actuation; a Harness refusal (the target moved, changed, was
+    covered, lost focus, or the page left the task scope) is an owner takeover, not a
+    worker error — nothing was actuated."""
+    try:
+        return await getattr(harness, method)(*args, binding=binding)
+    except BrowserAdapterError as exc:
+        if exc.code.endswith("_REFUSED"):
+            raise OwnerTakeoverRequired(f"HARNESS_REFUSED:{exc.detail or exc.code}") from exc
+        raise
 
 
 class SemanticWorkerUnavailable(RuntimeError):
@@ -183,6 +226,10 @@ class AdapterBackedWorker:
                 rationale="every planned step has run",
             )
         step = self.plan.steps[index]
+        if step.kind == "navigate" and step.domain in assignment.allowed_domains:
+            # (A step declaring a domain outside the assignment is the runner's
+            # SCOPE_VIOLATION, which may ask the owner to widen the task.)
+            enforce_task_scope(self.task, operation="navigate", navigate_url=step.url)
         if step.kind not in TARGETED_PLAN_KINDS:
             return ProposedAction(
                 kind=step.kind,
@@ -216,6 +263,11 @@ class AdapterBackedWorker:
             raise OwnerTakeoverRequired(
                 f"PLANNED_ACTION_REQUIRES_OWNER:{action_class.value}:step {index + 1}"
             )
+        if _within_ceiling(action_class, assignment.action_class_ceiling):
+            # A payment (A4 the boundary reads) is left to the runner, which refuses it as
+            # PAYMENT_REFUSED first, and a class above the ceiling to its
+            # ACTION_CLASS_VIOLATION; everything else must be a bound target in scope.
+            enforce_task_scope(self.task, operation=step.kind, element=target.get("element"))
         return ProposedAction(
             kind=step.kind,
             domain=step.domain,
@@ -225,7 +277,10 @@ class AdapterBackedWorker:
             url=step.url,
             instruction=judged or None,
             rationale=step.rationale or f"planned step {index + 1}",
-            payload={"plan_index": index, "harness_observed_target": observed_text or None},
+            payload={
+                "plan_index": index, "harness_observed_target": observed_text or None,
+                "binding": _binding_of(target.get("element")),
+            },
         )
 
     async def _observed_target(self, operation: str, locator: str | None) -> dict[str, Any]:
@@ -262,6 +317,8 @@ class AdapterBackedWorker:
 
         try:
             payload = await self._dispatch(task, action, step)
+        except OwnerTakeoverRequired:
+            raise
         except BrowserAdapterError as exc:
             # A browser that could not act did not act. Reporting an empty-but-successful
             # observation is how "the task completed" comes to mean nothing.
@@ -283,10 +340,11 @@ class AdapterBackedWorker:
                 raise BrowserAdapterError("BROWSER_NAVIGATE_URL_MISSING", action.kind)
             await self.adapter.navigate(task, action.url)
             return await self.adapter.page_info(task)
+        binding = (action.payload or {}).get("binding") if action.payload else None
         if kind == "click":
             if step is None or not step.locator:
                 raise BrowserAdapterError("BROWSER_LOCATOR_MISSING", kind)
-            await self.adapter.click(task, step.locator)
+            await _harness_act(self.adapter, "click", task, step.locator, binding=binding)
             return await self.adapter.page_info(task)
         if kind == "fill":
             if step is None or not step.locator or not step.value_ref:
@@ -294,7 +352,7 @@ class AdapterBackedWorker:
             # `fill_ref`, never a literal: §367.3 forbids secret material crossing this
             # boundary, and a reference the session broker resolves is how a password is
             # typed without VAN ever holding it.
-            await self.adapter.fill_ref(task, step.locator, step.value_ref)
+            await _harness_act(self.adapter, "fill_ref", task, step.locator, step.value_ref, binding=binding)
             return await self.adapter.page_info(task)
         if kind == "read" or kind == "observe" or kind == "finish":
             return await self.adapter.page_info(task)
@@ -405,14 +463,33 @@ class HybridBrowserWorker:
         # the locator words; the description can only make the answer stricter.
         observed_text = ""
         target = None
-        if typed.operation not in TARGETLESS_OPERATIONS:
-            element = await self._resolve_target(task, typed.selector)
-            target = observed_target(typed.operation, element, typed.selector)
-            observed_text = target["label"]
-        action_class = self._classify(typed.operation, observed_text, description, target=target)
+        bound: dict[str, Any] | None = None
+        if typed.operation == "press_key":
+            # Review I5 MAJOR-3: the key goes to the focused element; classify against it.
+            focused = await resolve_focused_target(HarnessTargetResolver(self.harness), task)
+            if isinstance(focused, str):
+                raise OwnerTakeoverRequired(f"STAGEHAND_ACTION_UNCLASSIFIABLE:{focused}")
+            bound = focused
+            observed_text = observed_element_text(focused, None)
+            key_class = assess_key_press(typed.key, focused, resolved=True).action_class
+            action_class = classify_target("click", observed_text, description, target=None)
+            ranks = {c.value: i for i, c in enumerate(ActionClass)}
+            if key_class not in ranks:
+                raise OwnerTakeoverRequired(f"ACTION_UNCLASSIFIABLE:KEY:{key_class}")
+            if ranks[key_class] > ranks[action_class.value]:
+                action_class = ActionClass(key_class)
+        else:
+            if typed.operation not in TARGETLESS_OPERATIONS:
+                element = await self._resolve_target(task, typed.selector)
+                bound = element
+                target = observed_target(typed.operation, element, typed.selector)
+                observed_text = target["label"]
+            action_class = self._classify(typed.operation, observed_text, description, target=target)
         # The payment boundary in BrowserSubagentRunner._check reads `instruction`, so it runs
         # over the same Harness-observed text the class was judged on, raw and folded.
         judged = judged_text(description, observed_text)
+        if _within_ceiling(action_class, assignment.action_class_ceiling):
+            enforce_task_scope(task, operation=typed.operation, element=bound, key=typed.key)
         return ProposedAction(
             kind=typed.operation,
             domain=task.target_domain,
@@ -425,6 +502,7 @@ class HybridBrowserWorker:
                 "stagehand_action": candidate,
                 "typed": {"operation": typed.operation, "selector": typed.selector, "key": typed.key},
                 "harness_observed_target": observed_text or None,
+                "binding": _binding_of(bound),
             },
         )
 
@@ -460,11 +538,13 @@ class HybridBrowserWorker:
         if not isinstance(typed, dict) or not typed.get("operation"):
             raise BrowserAdapterError("STAGEHAND_TYPED_ACTION_MISSING", action.kind)
         operation = typed["operation"]
-        # The Harness is the single executor; Stagehand only proposed.
+        binding = action.payload.get("binding")
+        # The Harness is the single executor; Stagehand only proposed. It acts on the node it
+        # bound when VAN classified the target (review I5 MAJOR-2/-3).
         if operation == "click":
-            await self.harness.click(task, str(typed["selector"]))
+            await _harness_act(self.harness, "click", task, str(typed["selector"]), binding=binding)
         elif operation == "press_key":
-            await self.harness.press(task, str(typed["key"]))
+            await _harness_act(self.harness, "press", task, str(typed["key"]), binding=binding)
         elif operation == "scroll":
             await self.harness.scroll(task, {"selector": typed.get("selector"), "direction": "down"})
         else:

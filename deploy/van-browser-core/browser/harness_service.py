@@ -308,6 +308,25 @@ def run_harness(alias: str, script: str, extra: dict[str, str] | None = None) ->
 #   type, autocomplete, placeholder, inputmode, maxlength (int|None), pattern, hidden (bool)
 #   tag, landmark (bool), disabled (bool), checked (bool|None), sensitive (bool),
 #   value_present (bool)
+# Review I5 (unit G6a) — what the element *shows* and *does*, not only its accessible name:
+#   text          the visible text content, its own field (MAJOR-1): aria-hidden text, text
+#                 in an open shadow root, img alt and button-like input values included;
+#                 for a form field, its label text. Never a field's value or contenteditable
+#                 contents. Classified by the gateway like the name, and a name-from-content
+#                 role whose name differs from its text is A4.
+#   media         img alt/src/srcset file names, background-image file names, CSS ::before/
+#                 ::after content, svg title/desc, descendant aria-label/title (MAJOR-5)
+#   effective_type el.type (a <button> with no type is "submit")
+#   submits       the element submits a form when activated (MAJOR-4)
+#   form          {action, method, formaction, formmethod, target, id, name} of the form
+#                 owner (origin+path and query names only), or None
+#   frame         the element is an iframe/frame/object/embed (never a resolved target)
+#   occluded      /describe only: the hit test at its centre lands on something else
+#   shadow_host   /describe only: it hosts a shadow root (open or closed)
+# /describe also returns ``binding`` {backend_node_id, digest}: the CDP backendNodeId of the
+# very node described and a digest of what was classified. /click, /press and /fill act on
+# that node (never a re-queried selector) and refuse when it is gone, changed, not the node
+# at the click point, or outside the task scope (MAJOR-2, owner decision 2026-09-30).
 #
 # Redaction: no element ever carries a ``value``. Input, textarea, select and contenteditable
 # contents are never read into a name or description (a textarea's text is its value). Every
@@ -318,16 +337,20 @@ def run_harness(alias: str, script: str, extra: dict[str, str] | None = None) ->
 # reports ``cookies_present`` and ``authenticated`` as booleans or None (unknown) only.
 
 MAX_ELEMENTS = 200
-MAX_ELEMENTS_BYTES = 65536
+#: Review I5: each element now also reports text, media, form and effective type.
+MAX_ELEMENTS_BYTES = 98304
 MAX_ELEMENT_TEXT = 256
 MAX_LOCATOR_LEN = 1024
 MAX_ELEMENT_ATTRIBUTES = 32
 REDACTED = "[REDACTED]"
 ELEMENT_STRING_KEYS = (
     "locator", "locator_kind", "role", "name", "description", "type", "autocomplete",
-    "placeholder", "inputmode", "pattern", "tag",
+    "placeholder", "inputmode", "pattern", "tag", "text", "effective_type",
 )
-ELEMENT_BOOL_KEYS = ("hidden", "landmark", "disabled", "sensitive", "value_present")
+ELEMENT_BOOL_KEYS = ("hidden", "landmark", "disabled", "sensitive", "value_present", "submits", "frame")
+#: Review I5 — the element's form owner, reported as these string keys only.
+ELEMENT_FORM_KEYS = ("action", "method", "formaction", "formmethod", "target", "id", "name")
+MAX_ELEMENT_MEDIA = 16
 ATTRIBUTE_NAME_RE = re.compile(r"^(?:id|name|type|class|role|href|action|formaction|aria-label|title|alt|target|data-[a-z0-9_.:-]{1,48})$")
 SENSITIVE_NAME_RE = re.compile(
     r"pass(?:word|code|phrase)?|pwd|secret|token|otp|one[-_ ]?time|2fa|mfa|\bpin\b|cvv|cvc|csc|"
@@ -339,7 +362,7 @@ SENSITIVE_NAME_RE = re.compile(
 
 ELEMENTS_JS = r"""
 (async (mode, target) => {
-  const MAX = 200, MAX_BYTES = 60000, TEXT = 256, SCAN = 3000;
+  const MAX = 200, MAX_BYTES = 92000, TEXT = 256, SCAN = 3000;
   const SENSITIVE = /pass(word|code|phrase)?|pwd|secret|token|otp|one[-_ ]?time|2fa|mfa|\bpin\b|cvv|cvc|csc|security[-_ ]?code|card|cc[-_]?(num|number|exp|csc|name)|iban|sort[-_ ]?code|routing|account[-_ ]?(no|num|number)|acct|ssn|social[-_ ]?security|passport|expiry|auth|session|csrf|xsrf|api[-_ ]?key|private[-_ ]?key|credential/i;
   const SENSITIVE_AUTOCOMPLETE = /^(cc-|current-password|new-password|one-time-code)/;
   const SIGN_OUT = /^\s*(sign|log)[\s-]?out\b|^\s*logout\b/i;
@@ -421,6 +444,100 @@ ELEMENTS_JS = r"""
     for (const c of node.childNodes) { out += textOf(c, depth + 1); if (out.length > TEXT * 2) break; }
     return out;
   }
+  // Review I5 MAJOR-1/-5 — what the element shows: text content (aria-hidden and open
+  // shadow content included, field values and contenteditable contents never), and the
+  // file names / alt text of the images it renders.
+  function rawText(node, depth) {
+    if (!node || depth > 12) return '';
+    if (node.nodeType === 3) return node.nodeValue || '';
+    if (node.nodeType === 11) { let o = ''; for (const c of node.childNodes) { o += rawText(c, depth + 1); if (o.length > TEXT * 2) break; } return o; }
+    if (node.nodeType !== 1) return '';
+    const tag = node.tagName;
+    if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT' || tag === 'TEMPLATE' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'OPTION') return ' ';
+    if (tag === 'INPUT') {
+      const t = (node.getAttribute('type') || '').toLowerCase();
+      if (['button', 'submit', 'reset'].includes(t)) return ' ' + (node.getAttribute('value') || (t === 'submit' ? 'Submit' : t === 'reset' ? 'Reset' : '')) + ' ';
+      if (t === 'image') return ' ' + (node.getAttribute('alt') || '') + ' ';
+      return ' ';
+    }
+    if (node.isContentEditable) return ' ';
+    if (tag === 'IMG') return ' ' + (node.getAttribute('alt') || '') + ' ';
+    let out = '';
+    const kids = node.shadowRoot ? [node.shadowRoot, ...node.childNodes] : node.childNodes;
+    for (const c of kids) { out += rawText(c, depth + 1); if (out.length > TEXT * 2) break; }
+    return out;
+  }
+  function isFieldEl(el) {
+    const tag = el.localName, t = (el.getAttribute('type') || '').toLowerCase();
+    return (tag === 'input' && !['button', 'submit', 'reset', 'image'].includes(t)) || tag === 'textarea' || tag === 'select' || el.isContentEditable;
+  }
+  function contentText(el) {
+    if (isFieldEl(el)) return clip(el.labels && el.labels.length ? Array.from(el.labels).map((l) => rawText(l, 0)).join(' ') : '');
+    return clip(rawText(el, 0));
+  }
+  function fileName(u) {
+    try {
+      if (/^\s*data:/i.test(u)) return 'data-url';
+      const x = new URL(u, location.href);
+      const seg = x.pathname.split('/').filter(Boolean).pop() || x.hostname;
+      try { return clip(decodeURIComponent(seg)); } catch (e) { return clip(seg); }
+    } catch (e) { return clip(String(u).slice(-64)); }
+  }
+  function cssNames(node, pseudo) {
+    const out = [];
+    try {
+      const cs = getComputedStyle(node, pseudo);
+      (cs.backgroundImage || '').replace(/url\(\s*(['"]?)(.*?)\1\s*\)/g, (m, q, u) => { out.push(fileName(u)); return m; });
+      if (pseudo) { const c = cs.content || ''; if (c && c !== 'none' && c !== 'normal') out.push(clip(c.replace(/^["']|["']$/g, ''))); }
+    } catch (e) { /* unreadable style: nothing */ }
+    return out;
+  }
+  function mediaOf(el) {
+    const out = []; let seen = 0;
+    const visit = (node, depth) => {
+      if (!node || depth > 8 || seen > 60 || out.length >= 32) return;
+      if (node.nodeType === 11) { for (const c of node.children) visit(c, depth + 1); return; }
+      if (node.nodeType !== 1) return;
+      seen++;
+      const tag = node.localName;
+      if (tag === 'img' || (tag === 'input' && (node.getAttribute('type') || '').toLowerCase() === 'image')) {
+        const alt = node.getAttribute('alt'); if (alt) out.push(clip(alt));
+        const src = node.getAttribute('src'); if (src) out.push(fileName(src));
+        const set = node.getAttribute('srcset');
+        if (set) set.split(',').forEach((part) => { const u = part.trim().split(/\s+/)[0]; if (u) out.push(fileName(u)); });
+      }
+      if ((tag === 'title' || tag === 'desc') && node.namespaceURI === 'http://www.w3.org/2000/svg') out.push(clip(node.textContent));
+      if (tag === 'use') { const h = node.getAttribute('href') || node.getAttribute('xlink:href'); if (h) out.push(fileName(h)); }
+      if (node !== el) {
+        const al = node.getAttribute('aria-label'); if (al) out.push(clip(al));
+        const ti = node.getAttribute('title'); if (ti) out.push(clip(ti));
+      }
+      for (const pseudo of [null, '::before', '::after']) out.push(...cssNames(node, pseudo));
+      if (node.shadowRoot) visit(node.shadowRoot, depth + 1);
+      for (const c of node.children) visit(c, depth + 1);
+    };
+    visit(el, 0);
+    return Array.from(new Set(out.filter(Boolean))).slice(0, 16);
+  }
+  const FRAME_TAGS = new Set(['iframe', 'frame', 'object', 'embed', 'portal', 'fencedframe']);
+  // Review I5 MAJOR-4 — the element's effective type and what activating it submits.
+  function submitsOf(el) {
+    const tag = el.localName, t = String(el.type || '').toLowerCase();
+    return !!el.form && ((tag === 'button' && t === 'submit') || (tag === 'input' && (t === 'submit' || t === 'image')));
+  }
+  function formOf(el) {
+    const f = el.form;
+    if (!f || typeof HTMLFormElement === 'undefined' || !(f instanceof HTMLFormElement)) return null;
+    const attr = (n, a) => HTMLElement.prototype.getAttribute.call(n, a);
+    const abs = (v) => { try { return new URL(v == null ? location.href : v, document.baseURI).href; } catch (e) { return ''; } };
+    const sub = submitsOf(el);
+    return {
+      action: safeUrl(abs(attr(f, 'action'))), method: clip((attr(f, 'method') || 'get').toLowerCase()),
+      formaction: sub && el.hasAttribute('formaction') ? safeUrl(abs(el.getAttribute('formaction'))) : '',
+      formmethod: sub ? clip((el.getAttribute('formmethod') || '').toLowerCase()) : '',
+      target: clip(attr(f, 'target') || ''), id: clip(attr(f, 'id') || ''), name: clip(attr(f, 'name') || ''),
+    };
+  }
   const byIds = (el, attr) => (el.getAttribute(attr) || '').split(/\s+/).filter(Boolean).map((id) => {
     const r = document.getElementById(id); return r ? (r.getAttribute('aria-label') || textOf(r, 0)) : '';
   }).join(' ');
@@ -496,8 +613,12 @@ ELEMENTS_JS = r"""
       type === 'password' || SENSITIVE_AUTOCOMPLETE.test(autocomplete) ||
       SENSITIVE.test([el.getAttribute('name'), el.id, name, placeholder, autocomplete, el.getAttribute('aria-label')].filter(Boolean).join(' '))
     );
+    const isCtl = ['button', 'input', 'select', 'textarea'].includes(tag);
     return {
       locator, locator_kind: kind, role, name, description,
+      text: contentText(el), media: mediaOf(el),
+      effective_type: isCtl ? clip(String(el.type || '').toLowerCase()) : '',
+      submits: submitsOf(el), form: formOf(el), frame: FRAME_TAGS.has(tag),
       attributes: attrsOf(el), type, autocomplete, placeholder,
       inputmode: clip((el.getAttribute('inputmode') || '').toLowerCase()),
       maxlength: Number.isFinite(ml) && ml >= 0 ? ml : null,
@@ -507,6 +628,18 @@ ELEMENTS_JS = r"""
       checked: (type === 'checkbox' || type === 'radio') ? !!el.checked : null,
       sensitive: !!sensitive, value_present: !!valuePresent,
     };
+  }
+  if (mode === 'element') {
+    // Review I5 MAJOR-2 — the node itself (CDP-bound, ``this`` of Runtime.callFunctionOn),
+    // never a re-queried selector. ``_box`` is the centre the Harness hit-tests and clicks.
+    if (!target || !target.isConnected) return { element: null };
+    const d = describe(target, '(bound)');
+    const r = target.getBoundingClientRect();
+    d._box = { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height,
+               in_viewport: r.width > 0 && r.height > 0 && r.left + r.width / 2 >= 0 && r.top + r.height / 2 >= 0 &&
+                            r.left + r.width / 2 < innerWidth && r.top + r.height / 2 < innerHeight };
+    d._url = String(location.href);
+    return { element: d };
   }
   if (mode === 'describe') {
     let matches = 0, el = null;
@@ -597,6 +730,10 @@ def sanitize_element(raw: Any) -> dict[str, Any] | None:
                 continue
             attributes[name] = REDACTED if name.startswith("data-") and SENSITIVE_NAME_RE.search(name) else _clip(value)
     out["attributes"] = attributes
+    media = raw.get("media")
+    out["media"] = [_clip(m) for m in media if isinstance(m, str) and m.strip()][:MAX_ELEMENT_MEDIA] if isinstance(media, list) else []
+    form = raw.get("form")
+    out["form"] = {k: _clip(form.get(k) if isinstance(form.get(k), str) else "") for k in ELEMENT_FORM_KEYS} if isinstance(form, dict) else None
     if out["type"] == "password" or out["autocomplete"].startswith(("cc-", "current-password", "new-password", "one-time-code")):
         out["sensitive"] = True
     return out
@@ -652,6 +789,204 @@ def session_facts(snapshot: dict[str, Any], identity: str, cookies: bool | None)
     return {"authenticated": authenticated, "cookies_present": cookies, "authentication_basis": basis}
 
 
+# --------------------------------------------------------------------- binding + task scope
+#
+# Review I5 MAJOR-2 / owner decision 2026-09-30. Shared, verbatim, by this module and by the
+# fixed scripts below (which run inside browser-harness and cannot import this module):
+#   _van_digest(el)        digest of the fields the gateway classifies; /describe returns it in
+#                          ``binding`` and /click, /press, /fill refuse when the bound node no
+#                          longer produces it (TARGET_CHANGED)
+#   _van_scope_violation   the task-scope rule of backend/van_gateway/browser/task_scope.py
+#                          (origin exact, path prefix on a segment boundary); the gateway sends
+#                          the task's scope with every action and the Harness re-checks the
+#                          page at the moment it acts
+VAN_HELPERS_PY = r"""
+import hashlib as _vh_hashlib, json as _vh_json
+from urllib.parse import urlsplit as _vh_urlsplit
+
+def _van_digest(el):
+    el = el or {}
+    keep = {k: el.get(k) for k in ("role", "name", "text", "media", "description", "type",
+                                     "effective_type", "tag", "form", "submits", "frame")}
+    attrs = dict(el.get("attributes") or {})
+    attrs.pop("class", None)
+    keep["attributes"] = attrs
+    return _vh_hashlib.sha256(_vh_json.dumps(keep, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()).hexdigest()
+
+def _van_origin(parts):
+    scheme = (parts.scheme or "").lower()
+    host = (parts.hostname or "").lower().rstrip(".")
+    port = parts.port
+    default = {"http": 80, "https": 443}.get(scheme)
+    return scheme + "://" + host + ((":" + str(port)) if port and port != default else "")
+
+def _van_scope_violation(scope, url, what="PAGE"):
+    entries = (scope or {}).get("entries") if isinstance(scope, dict) else None
+    if not entries:
+        return "TASK_SCOPE_MISSING"
+    try:
+        parts = _vh_urlsplit(str(url or ""))
+        parts.port
+    except ValueError:
+        return "TASK_SCOPE_" + what + "_URL_INVALID"
+    if parts.scheme not in ("http", "https") or not parts.hostname:
+        return "TASK_SCOPE_" + what + "_URL_NOT_HTTP"
+    origin, path = _van_origin(parts), parts.path or "/"
+    same_origin = False
+    for entry in entries:
+        if not isinstance(entry, dict) or entry.get("origin") != origin:
+            continue
+        same_origin = True
+        prefix = entry.get("path_prefix")
+        if not prefix or (path.startswith(prefix) if prefix.endswith("/") else (path == prefix or path.startswith(prefix + "/"))):
+            return None
+    return "TASK_SCOPE_" + what + ("_PATH_OUTSIDE" if same_origin else "_ORIGIN_OUTSIDE")
+"""
+exec(compile(VAN_HELPERS_PY, "<van-helpers>", "exec"))  # noqa: S102 - the fixed helper source above
+
+#: Interactive nodes a click must not pass through on its way from the hit node up to the
+#: bound element (a wrapper whose centre is a pay button is not "the wrapper").
+INTERACTIVE_SELECTOR = (
+    'a[href],area[href],button,input,select,textarea,summary,label,[role=button],[role=link],'
+    '[role=checkbox],[role=radio],[role=menuitem],[role=menuitemcheckbox],[role=menuitemradio],'
+    '[role=tab],[role=option],[role=switch],[role=treeitem],[role=gridcell],[onclick],'
+    '[tabindex]:not([tabindex="-1"]),[contenteditable=""],[contenteditable="true" i],iframe,frame,object,embed'
+)
+
+#: this = the bound element, hit = the node at the click point (DOM.getNodeForLocation, which
+#: pierces open and closed shadow roots). Walks the composed tree from the hit node up.
+HIT_FN = r"""function (hit) {
+  const INTER = __INTER__;
+  let n = hit; if (n && n.nodeType === 3) n = n.parentNode;
+  if (n === this) return 'SELF';
+  let crossed = false;
+  while (n) {
+    if (n === this) return crossed ? 'INTERACTIVE_DESCENDANT' : 'DESCENDANT';
+    if (n.nodeType === 1 && n.matches && n.matches(INTER)) crossed = true;
+    n = n.parentNode || n.host || null;
+  }
+  return 'OTHER';
+}""".replace("__INTER__", json.dumps(INTERACTIVE_SELECTOR))
+
+#: this = the bound element. Installs window-capture listeners for the duration of the
+#: actuation: any pointer/mouse/click/key/submit event whose composed path does not reach the
+#: bound element (without passing another interactive node) is cancelled before the page sees
+#: it — the element swapped, moved or was overlaid between the hit test and the click. A
+#: submit counts only when the bound element is its submitter (or, for a field, its form).
+GUARD_FN = r"""function () {
+  const el = this, INTER = __INTER__, blocked = [], seen = [];
+  const isField = (n) => { const t = (n.getAttribute('type') || '').toLowerCase(), g = n.localName;
+    return (g === 'input' && !['button', 'submit', 'reset', 'image'].includes(t)) || g === 'textarea' || g === 'select' || n.isContentEditable; };
+  const within = (path) => {
+    const i = path.indexOf(el); if (i < 0) return false;
+    for (let k = 0; k < i; k++) { const n = path[k]; if (n.nodeType === 1 && n.matches && n.matches(INTER)) return false; }
+    return true;
+  };
+  const on = (e) => {
+    if (e.type === 'submit') {
+      if (e.submitter === el || (el.form && e.target === el.form && isField(el))) { seen.push('submit'); return; }
+    } else if (within(e.composedPath())) { seen.push(e.type); return; }
+    const t = e.composedPath()[0];
+    blocked.push(e.type + ':' + ((t && (t.id || t.localName)) || '?'));
+    e.preventDefault(); e.stopImmediatePropagation();
+  };
+  // keyup is not guarded: after Tab it fires, legitimately, on the element focus moved to.
+  const types = ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'auxclick', 'dblclick',
+                 'keydown', 'keypress', 'submit'];
+  types.forEach((t) => window.addEventListener(t, on, true));
+  return { finish() { types.forEach((t) => window.removeEventListener(t, on, true)); return { blocked, seen }; } };
+}""".replace("__INTER__", json.dumps(INTERACTIVE_SELECTOR))
+
+#: The focused element, through open shadow roots (a closed one stops at its host, which is
+#: then an unresolved target).
+FOCUS_JS = r"""(() => { let a = document.activeElement; while (a && a.shadowRoot && a.shadowRoot.activeElement) a = a.shadowRoot.activeElement; return a || document.body; })()"""
+
+#: Script prologue: bind a CDP node, re-describe it, and refuse with a typed code.
+BOUND_PROLOGUE_PY = r"""
+import json, os
+__VAN_HELPERS__
+_ELEMENT_FN = "function(){ return (" + __ELEMENTS_JS__ + ")('element', this); }"
+_PREP_FN = "function(){ if (!this.isConnected) return {element: null}; try { this.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'}); } catch (e) {} return (" + __ELEMENTS_JS__ + ")('element', this); }"
+
+class _VanRefused(Exception):
+    pass
+
+def _van_call(object_id, fn, args=None, by_value=True):
+    r = cdp("Runtime.callFunctionOn", objectId=object_id, functionDeclaration=fn,
+            arguments=args or [], awaitPromise=True, returnByValue=by_value)
+    if r.get("exceptionDetails"):
+        raise _VanRefused("TARGET_SCRIPT_FAILED")
+    return r.get("result") or {}
+
+def _van_bind(binding, scope):
+    if not isinstance(binding, dict) or not isinstance(binding.get("backend_node_id"), int) or not binding.get("digest"):
+        raise _VanRefused("TARGET_BINDING_REQUIRED")
+    if not isinstance(scope, dict) or not scope.get("entries"):
+        raise _VanRefused("TASK_SCOPE_REQUIRED")
+    info = page_info()
+    if "dialog" in info:
+        raise _VanRefused("PAGE_DIALOG_OPEN")
+    try:
+        obj = cdp("DOM.resolveNode", backendNodeId=int(binding["backend_node_id"]))["object"]["objectId"]
+    except Exception:
+        raise _VanRefused("TARGET_BINDING_LOST")
+    el = (_van_call(obj, _PREP_FN).get("value") or {}).get("element")
+    if not isinstance(el, dict):
+        raise _VanRefused("TARGET_BINDING_LOST")
+    violation = _van_scope_violation(scope, el.get("_url"))
+    if violation:
+        raise _VanRefused(violation)
+    if _van_digest(el) != binding["digest"]:
+        raise _VanRefused("TARGET_CHANGED")
+    if el.get("hidden"):
+        raise _VanRefused("TARGET_HIDDEN")
+    return obj, el
+
+def _van_hit(obj, el):
+    box = el.get("_box") or {}
+    if not box.get("in_viewport") or box.get("w", 0) <= 0 or box.get("h", 0) <= 0:
+        raise _VanRefused("TARGET_NOT_VISIBLE")
+    x, y = float(box["x"]), float(box["y"])
+    try:
+        at = cdp("DOM.getNodeForLocation", x=int(x), y=int(y), includeUserAgentShadowDOM=False)
+        hit = cdp("DOM.resolveNode", backendNodeId=int(at["backendNodeId"]))["object"]["objectId"]
+    except Exception:
+        raise _VanRefused("TARGET_HIT_TEST_FAILED")
+    verdict = _van_call(obj, __HIT_FN__, [{"objectId": hit}]).get("value")
+    if verdict not in ("SELF", "DESCENDANT"):
+        raise _VanRefused("TARGET_NOT_HIT:" + str(verdict))
+    return x, y
+
+def _van_guard(obj):
+    return _van_call(obj, __GUARD_FN__, by_value=False).get("objectId")
+
+def _van_finish(guard):
+    try:
+        out = _van_call(guard, "function(){ return this.finish(); }").get("value") or {}
+    except Exception:
+        # The page navigated during the actuation (the guard's context is gone). A blocked
+        # event is cancelled, so a navigation means the bound element's activation ran.
+        return {"blocked": [], "seen": [], "navigated": True}
+    if out.get("blocked"):
+        raise _VanRefused("TARGET_MOVED_DURING_ACTUATION:" + ",".join(out["blocked"][:4]))
+    return out
+
+def _van_emit(payload):
+    print("__VAN_JSON__" + json.dumps(payload))
+"""
+
+def _bound_script(body: str) -> str:
+    """A fixed script: the bound prologue, then ``body`` run with typed refusals."""
+    prologue = (
+        BOUND_PROLOGUE_PY.replace("__VAN_HELPERS__", VAN_HELPERS_PY)
+        .replace("__ELEMENTS_JS__", json.dumps(ELEMENTS_JS.strip()))
+        .replace("__HIT_FN__", json.dumps(HIT_FN))
+        .replace("__GUARD_FN__", json.dumps(GUARD_FN))
+    )
+    indented = "\n".join("    " + line for line in body.strip().splitlines())
+    return prologue + "try:\n" + indented + "\nexcept _VanRefused as _exc:\n    _van_emit({\"refused\": str(_exc)})\n"
+
+
 PAGE_INFO_SCRIPT = r"""
 import json
 info = page_info()
@@ -679,15 +1014,61 @@ print("__VAN_JSON__" + json.dumps(info))
 
 DESCRIBE_SCRIPT = r"""
 import json, os
+__VAN_HELPERS__
 info = page_info()
 out = {"url": info.get("url"), "title": info.get("title")}
 if "dialog" in info:
     out["dialog"] = True
 else:
-    expr = __DESCRIBE_JS__ + "(" + json.dumps("describe") + "," + json.dumps(os.environ["VAN_BH_LOCATOR"]) + ")"
-    out["describe"] = js(expr)
+    # Review I5 MAJOR-2: the node is found once, bound by its CDP backendNodeId, and described
+    # through that binding; /click, /press and /fill act on the same node, never a re-query.
+    focus = os.environ.get("VAN_BH_FOCUS") == "1"
+    loc = os.environ.get("VAN_BH_LOCATOR", "")
+    matches = 1
+    if focus:
+        expr = __FOCUS_JS__
+    else:
+        counted = cdp("Runtime.evaluate", expression="document.querySelectorAll(" + json.dumps(loc) + ").length", returnByValue=True)
+        if counted.get("exceptionDetails"):
+            out["describe"] = {"error": "LOCATOR_INVALID"}
+        matches = (counted.get("result") or {}).get("value") or 0
+        expr = "document.querySelector(" + json.dumps(loc) + ")"
+    if "describe" not in out:
+        found = cdp("Runtime.evaluate", expression=expr, returnByValue=False)
+        obj = (found.get("result") or {}).get("objectId")
+        if found.get("exceptionDetails"):
+            out["describe"] = {"error": "LOCATOR_INVALID"}
+        elif not obj:
+            out["describe"] = {"element": None, "matches": 0}
+        else:
+            node = cdp("DOM.describeNode", objectId=obj)["node"]
+            r = cdp("Runtime.callFunctionOn", objectId=obj, awaitPromise=True, returnByValue=True,
+                    functionDeclaration="function(){ return (" + __ELEMENTS_JS__ + ")('element', this); }")
+            el = ((r.get("result") or {}).get("value") or {}).get("element") if not r.get("exceptionDetails") else None
+            if not isinstance(el, dict):
+                out["describe"] = {"element": None, "matches": 0}
+            else:
+                # Author shadow roots only: <input>, <video> ... carry a user-agent one.
+                el["shadow_host"] = any(r.get("shadowRootType") in ("open", "closed") for r in node.get("shadowRoots") or [])
+                box = el.get("_box") or {}
+                occluded = None
+                if box.get("in_viewport"):
+                    try:
+                        at = cdp("DOM.getNodeForLocation", x=int(box["x"]), y=int(box["y"]), includeUserAgentShadowDOM=False)
+                        hit = cdp("DOM.resolveNode", backendNodeId=int(at["backendNodeId"]))["object"]["objectId"]
+                        v = cdp("Runtime.callFunctionOn", objectId=obj, functionDeclaration=__HIT_FN__,
+                                arguments=[{"objectId": hit}], returnByValue=True)
+                        occluded = ((v.get("result") or {}).get("value")) not in ("SELF", "DESCENDANT")
+                    except Exception:
+                        occluded = True
+                el["occluded"] = occluded
+                out["describe"] = {
+                    "element": el, "matches": matches, "page_url": el.get("_url"),
+                    "binding": {"backend_node_id": int(node["backendNodeId"]), "digest": _van_digest(el)},
+                }
 print("__VAN_JSON__" + json.dumps(out))
-""".replace("__DESCRIBE_JS__", json.dumps(ELEMENTS_JS.strip()))
+""".replace("__VAN_HELPERS__", VAN_HELPERS_PY).replace("__ELEMENTS_JS__", json.dumps(ELEMENTS_JS.strip())).replace(
+    "__FOCUS_JS__", json.dumps(FOCUS_JS)).replace("__HIT_FN__", json.dumps(HIT_FN))
 
 
 def shape_page_info(result: dict[str, Any]) -> dict[str, Any]:
@@ -720,15 +1101,20 @@ def page_info_result(alias: str, domain: str) -> dict[str, Any]:
 
 
 def describe(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
-    """Resolve one locator to the element shape page_info reports (review I4).
+    """Resolve one locator — or, with ``focus: true``, the focused element — to the element
+    shape page_info reports, bound to that node (review I4, I5 MAJOR-2/-3).
 
-    For a target the bounded page_info list did not include. The element is the one the
-    Harness would act on for this locator, reported under the locator exactly as given.
+    The element is the one the Harness acts on for this locator (querySelector's first
+    match), reported under the locator exactly as given, with ``binding`` (its CDP
+    backendNodeId and the digest of what was classified) and ``page_url``. /click, /press
+    and /fill take the binding back and act on that node only.
     """
-    locator = str(body.get("locator") or "")
+    focus = body.get("focus") is True
+    locator = "(focused)" if focus else str(body.get("locator") or "")
     if not locator or len(locator) > MAX_LOCATOR_LEN:
         raise WorkerError("LOCATOR_REQUIRED", 422)
-    result = run_harness(alias, DESCRIBE_SCRIPT, {"VAN_BH_LOCATOR": locator})
+    env = {"VAN_BH_FOCUS": "1"} if focus else {"VAN_BH_LOCATOR": locator}
+    result = run_harness(alias, DESCRIBE_SCRIPT, env)
     if not isinstance(result, dict):
         raise WorkerError("BROWSER_DESCRIBE_INVALID", 502)
     current = str(result.get("url") or "")
@@ -737,19 +1123,33 @@ def describe(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
     described = result.get("describe") if isinstance(result.get("describe"), dict) else {}
     if described.get("error") == "LOCATOR_INVALID":
         raise WorkerError("LOCATOR_INVALID", 422)
-    element = sanitize_element(described.get("element"))
+    raw = described.get("element")
+    element = sanitize_element({**raw, "locator": locator} if isinstance(raw, dict) else raw)
+    binding = described.get("binding") if isinstance(described.get("binding"), dict) else None
     if element is not None:
         element["locator"] = locator
+        # Unknown (off-screen) is not "occluded"; the click-time hit test is authoritative.
+        element["occluded"] = raw.get("occluded") is True
+        element["shadow_host"] = raw.get("shadow_host") is not False
+    node_id = binding.get("backend_node_id") if binding else None
+    digest = binding.get("digest") if binding else None
     matches = described.get("matches")
     return {
         "url": result.get("url"), "title": result.get("title"), "element": element,
         "matches": matches if isinstance(matches, int) and not isinstance(matches, bool) else 0,
+        "binding": (
+            {"backend_node_id": node_id, "digest": digest}
+            if element is not None and isinstance(node_id, int) and not isinstance(node_id, bool)
+            and isinstance(digest, str) and re.fullmatch(r"[0-9a-f]{64}", digest) else None
+        ),
+        "page_url": described.get("page_url") if isinstance(described.get("page_url"), str) else None,
         "harness_version": HARNESS_VERSION,
     }
 
 
 def navigate(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
     url = assert_url_in_domain(str(body.get("url") or ""), domain)
+    _assert_scope(body, url, "NAVIGATE")
     script = r"""
 import json, os
 url = os.environ["VAN_BH_URL"]
@@ -765,48 +1165,120 @@ print("__VAN_JSON__" + json.dumps({"navigated": True}))
     return page_info_result(alias, domain)
 
 
+def _binding_env(body: dict[str, Any]) -> dict[str, str]:
+    """The bound node and the task scope an actuation carries (review I5 MAJOR-2, owner
+    decision 2026-09-30). Absent either, the script refuses (TARGET_BINDING_REQUIRED /
+    TASK_SCOPE_REQUIRED) before touching the page."""
+    binding = body.get("binding") if isinstance(body.get("binding"), dict) else None
+    scope = body.get("task_scope") if isinstance(body.get("task_scope"), dict) else None
+    return {"VAN_BH_BINDING": json.dumps(binding), "VAN_BH_SCOPE": json.dumps(scope)}
+
+
+def _refused(result: Any) -> None:
+    """A bound script's typed refusal becomes a 409 carrying the code (nothing was actuated,
+    or the actuation was cancelled by the guard before the page saw it)."""
+    if isinstance(result, dict) and isinstance(result.get("refused"), str):
+        raise WorkerError(result["refused"].split(":", 1)[0][:64], 409)
+
+
+CLICK_SCRIPT = _bound_script(r"""
+binding = json.loads(os.environ["VAN_BH_BINDING"])
+scope = json.loads(os.environ["VAN_BH_SCOPE"])
+obj, el = _van_bind(binding, scope)
+x, y = _van_hit(obj, el)
+guard = _van_guard(obj)
+click_at_xy(x, y)
+done = _van_finish(guard)
+if not done.get("navigated") and "click" not in (done.get("seen") or []):
+    raise _VanRefused("TARGET_NOT_ACTIVATED")
+_van_emit({"clicked": True})
+""")
+
+
 def click(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
+    """Review I5 MAJOR-2 — click the *bound* node, at a point where it is the node hit.
+
+    The node comes from the ``binding`` /describe returned (CDP backendNodeId), not from the
+    locator: re-querying the selector let the page swap which element matched between the
+    classification and the click. Before the click the Harness re-describes the node and
+    refuses when it is detached (TARGET_BINDING_LOST), no longer what was classified
+    (TARGET_CHANGED), hidden or off-screen, the page is outside the task scope
+    (TASK_SCOPE_*), or the node at its centre — through open and closed shadow roots — is
+    neither it nor a non-interactive descendant of it (TARGET_NOT_HIT: an overlay, a wrapper
+    around another control, a shadow host). During the click a guard cancels any event that
+    does not reach the bound node (TARGET_MOVED_DURING_ACTUATION).
+    """
     locator = str(body.get("locator") or "")
     if not locator or len(locator) > 2048:
         raise WorkerError("LOCATOR_REQUIRED", 422)
-    script = r"""
-import json, os
-sel = os.environ["VAN_BH_LOCATOR"]
-expr = "(()=>{const e=document.querySelector(" + json.dumps(sel) + ");if(!e)return null;const r=e.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2,w:r.width,h:r.height};})()"
-box = js(expr)
-if not box or box.get("w", 0) <= 0 or box.get("h", 0) <= 0:
-    raise RuntimeError("locator not found or not visible")
-click_at_xy(float(box["x"]), float(box["y"]))
-print("__VAN_JSON__" + json.dumps({"clicked": True}))
-"""
-    run_harness(alias, script, {"VAN_BH_LOCATOR": locator})
+    _refused(run_harness(alias, CLICK_SCRIPT, {"VAN_BH_LOCATOR": locator, **_binding_env(body)}))
     return page_info_result(alias, domain)
 
 
+FILL_SCRIPT = _bound_script(r"""
+binding = json.loads(os.environ["VAN_BH_BINDING"])
+scope = json.loads(os.environ["VAN_BH_SCOPE"])
+obj, el = _van_bind(binding, scope)
+focused = _van_call(obj, "function(){ this.focus(); let a = document.activeElement; while (a && a.shadowRoot && a.shadowRoot.activeElement) a = a.shadowRoot.activeElement; if (a !== this) return false; if (typeof this.select === 'function') this.select(); else { const r = document.createRange(); r.selectNodeContents(this); const s = getSelection(); s.removeAllRanges(); s.addRange(r); } return true; }").get("value")
+if focused is not True:
+    raise _VanRefused("TARGET_NOT_FOCUSABLE")
+guard = _van_guard(obj)
+cdp("Input.insertText", text=os.environ["VAN_BH_SECRET"])
+_van_finish(guard)
+_van_emit({"filled": True})
+""")
+
+
 def fill(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
+    """Fill the *bound* field (review I5 MAJOR-2): focused through its binding, verified to
+    hold focus, then the referenced secret inserted — never typed into whatever a re-queried
+    selector matches."""
     locator = str(body.get("locator") or "")
     if not locator or len(locator) > 2048:
         raise WorkerError("LOCATOR_REQUIRED", 422)
     secret = resolve_secret(body.get("value_ref"))
-    script = r"""
-import json, os
-fill_input(os.environ["VAN_BH_LOCATOR"], os.environ["VAN_BH_SECRET"], clear_first=True, timeout=5)
-print("__VAN_JSON__" + json.dumps({"filled": True}))
-"""
-    run_harness(alias, script, {"VAN_BH_LOCATOR": locator, "VAN_BH_SECRET": secret})
+    _refused(run_harness(alias, FILL_SCRIPT, {"VAN_BH_LOCATOR": locator, "VAN_BH_SECRET": secret, **_binding_env(body)}))
     return page_info_result(alias, domain)
+
+
+PRESS_SCRIPT = _bound_script(r"""
+binding = json.loads(os.environ["VAN_BH_BINDING"])
+scope = json.loads(os.environ["VAN_BH_SCOPE"])
+obj, el = _van_bind(binding, scope)
+still = _van_call(obj, "function(){ let a = document.activeElement; while (a && a.shadowRoot && a.shadowRoot.activeElement) a = a.shadowRoot.activeElement; return (a || document.body) === this; }").get("value")
+if still is not True:
+    raise _VanRefused("FOCUS_CHANGED")
+guard = _van_guard(obj)
+press_key(os.environ["VAN_BH_KEY"])
+_van_finish(guard)
+_van_emit({"pressed": True})
+""")
 
 
 def press(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
+    """Review I5 MAJOR-3 — press a key into the *bound* focused element.
+
+    The gateway classified the key against ``document.activeElement`` (/describe with
+    ``focus: true``): Enter/Space as a click on it, other keys in a field as a fill. The
+    Harness refuses when focus has moved off that node (FOCUS_CHANGED), it changed, or the
+    page left the task scope, and cancels any activation that does not reach it.
+    """
     key = str(body.get("key") or "")
     if not key or len(key) > 64:
         raise WorkerError("KEY_REQUIRED", 422)
-    run_harness(
-        alias,
-        'import json,os\npress_key(os.environ["VAN_BH_KEY"])\nprint("__VAN_JSON__"+json.dumps({"pressed":True}))\n',
-        {"VAN_BH_KEY": key},
-    )
+    _refused(run_harness(alias, PRESS_SCRIPT, {"VAN_BH_KEY": key, **_binding_env(body)}))
     return page_info_result(alias, domain)
+
+
+def _assert_scope(body: dict[str, Any], url: str, what: str) -> None:
+    """Owner decision 2026-09-30 — when the gateway sends the task scope with a navigate or
+    scroll, the Harness re-checks the destination/page against it."""
+    scope = body.get("task_scope")
+    if scope is None:
+        return
+    violation = _van_scope_violation(scope if isinstance(scope, dict) else {}, url, what)
+    if violation:
+        raise WorkerError(violation, 409)
 
 
 def scroll_page(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
@@ -815,6 +1287,8 @@ def scroll_page(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]
     dy = int(request.get("y", request.get("delta_y", 0)) or 0)
     if abs(dx) > 20000 or abs(dy) > 20000:
         raise WorkerError("SCROLL_DELTA_OUT_OF_RANGE", 422)
+    if body.get("task_scope") is not None:
+        _assert_scope(body, str(run_harness(alias, 'import json\nprint("__VAN_JSON__"+json.dumps({"url": page_info().get("url")}))\n').get("url") or ""), "PAGE")
     run_harness(
         alias,
         'import json,os\ninfo=page_info()\nx=max(0,int(info.get("w",0))//2)\ny=max(0,int(info.get("h",0))//2)\nscroll(x,y,dy=int(os.environ["VAN_BH_DY"]),dx=int(os.environ["VAN_BH_DX"]))\nprint("__VAN_JSON__"+json.dumps({"scrolled":True}))\n',

@@ -26,6 +26,7 @@ from van_gateway.browser.models import (
     ProfileLeaseHolderKind,
 )
 from van_gateway.browser.policy import BrowserPolicyEngine, BrowserPolicyError
+from van_gateway.browser.task_scope import TaskScopeError, scope_for_new_task
 from van_gateway.models import ActionClass
 from van_gateway.storage.db import Store
 
@@ -381,7 +382,12 @@ class BrowserTaskService:
         capability_id: str | None = None,
         inputs: dict[str, Any] | None = None,
         now_ms: int | None = None,
+        scope: list[str] | None = None,
     ) -> BrowserTask:
+        """``scope``: owner decision 2026-09-30 — the URL prefixes Hermes declares this task
+        may act on (``task_scope``). Omitted, the task's own ``target_domain`` origin is
+        recorded. Either way a scope is recorded with the row; a scope outside the target
+        domain is refused like any other policy failure."""
         self.policy.check_task(
             profile_alias=profile_alias, strategy=strategy, tier=autonomy_tier,
             action_class=action_class, target_domain=target_domain, mutating=mutating,
@@ -390,26 +396,32 @@ class BrowserTaskService:
         # §407 — a literal secret in task inputs is a policy failure, not a warning.
         self.policy.assert_no_secrets(inputs, context="task_inputs")
 
+        try:
+            task_scope = scope_for_new_task(target_domain, scope)
+        except TaskScopeError as exc:
+            raise BrowserPolicyError(f"browser_task_scope_invalid:{exc.code}") from exc
+
         now = int(time.time() * 1000) if now_ms is None else now_ms
         task = BrowserTask(
             task_id=new_id("browser_task"), command_id=command_id, execution_id=execution_id,
             capability_id=capability_id, profile_alias=profile_alias, strategy=strategy,
             autonomy_tier=autonomy_tier, action_class=action_class, target_domain=target_domain,
-            goal=goal, inputs=inputs, status=BrowserTaskStatus.PENDING, started_at_ms=now,
+            goal=goal, inputs=inputs, scope=task_scope, status=BrowserTaskStatus.PENDING,
+            started_at_ms=now,
         )
         await self.store.execute(
             """
             INSERT INTO browser_tasks(
               task_id, command_id, execution_id, capability_id, profile_alias, strategy,
               autonomy_tier, action_class, target_domain, goal, status, evidence_pointer,
-              error_code, started_at_ms, completed_at_ms, updated_at_ms
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, NULL, ?)
+              error_code, started_at_ms, completed_at_ms, updated_at_ms, scope_json
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, NULL, ?, ?)
             """,
             (
                 task.task_id, task.command_id, task.execution_id, task.capability_id,
                 task.profile_alias, task.strategy.value, task.autonomy_tier.value,
                 task.action_class.value, task.target_domain, task.goal, task.status.value,
-                task.started_at_ms, now,
+                task.started_at_ms, now, task_scope.to_json(),
             ),
         )
         return task
