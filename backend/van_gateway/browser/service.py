@@ -115,6 +115,37 @@ class BrowserSessionBroker:
     def __init__(self, store: Store, policy: BrowserPolicyEngine | None = None) -> None:
         self.store = store
         self.policy = policy or BrowserPolicyEngine()
+        #: Unit G11 (review I7 MAJOR-1) — called before a page lease is given back, with the
+        #: profile alias, holder and generation: the Harness freezes the lease's page and
+        #: removes its network interception (``HttpBrowserHarnessAdapter.release_page``). Set
+        #: by create_app; None (the fabric alone, tests) gives leases back without it.
+        self.page_release_hook: Any | None = None
+
+    async def release_page(self, *, profile_alias: str, lease_id: str) -> dict[str, Any] | None:
+        """Tell the Harness the page lease ``lease_id`` ends (while it is still the holding),
+        so its page is frozen and nothing it started keeps running unintercepted. Never
+        prevents the release: a failure is logged and the lease is given back regardless (a
+        later lease's first call, or the Harness's idle limit, ends the guard then)."""
+        hook = self.page_release_hook
+        if hook is None:
+            return None
+        row = await self.store.fetchone(
+            "SELECT lease_holder_id, lease_generation FROM browser_profiles "
+            "WHERE profile_alias = ? AND lease_holder = ?",
+            (profile_alias, lease_id),
+        )
+        if row is None or not row["lease_holder_id"]:
+            return None
+        try:
+            return await hook(
+                profile_alias=profile_alias, holder_id=str(row["lease_holder_id"]),
+                generation=int(row["lease_generation"] or 0),
+            )
+        except Exception as exc:  # noqa: BLE001 - the release itself must still happen
+            import logging
+
+            logging.getLogger(__name__).warning("BROWSER_PAGE_RELEASE_FAILED:%s", type(exc).__name__)
+            return None
 
     async def register_profile(
         self,
@@ -326,6 +357,7 @@ class BrowserSessionBroker:
 
     async def release_lease(self, lease: PageLease, *, now_ms: int | None = None) -> None:
         now = int(time.time() * 1000) if now_ms is None else now_ms
+        await self.release_page(profile_alias=lease.profile_alias, lease_id=lease.lease_id)
         await self.store.execute(
             "UPDATE browser_profiles SET lease_holder = NULL, lease_expires_at_ms = NULL, "
             "lease_holder_kind = NULL, lease_holder_id = NULL, updated_at_ms = ? "
@@ -334,14 +366,19 @@ class BrowserSessionBroker:
         )
 
 
-    async def release_lease_if_held(self, lease: PageLease, *, now_ms: int | None = None) -> bool:
+    async def release_lease_if_held(
+        self, lease: PageLease, *, now_ms: int | None = None, page_released: bool = False,
+    ) -> bool:
         """Release ``lease`` only if it is still the profile's live holding (review I3 MAJOR-3).
 
         Lease id, holder and generation must all still match. A lease that lapsed and was
         taken by someone else is left alone, so a finishing step can never drop another
-        holder's lease. Returns whether anything was released.
+        holder's lease. Returns whether anything was released. ``page_released``: the caller
+        already ended the lease's page (``release_page``).
         """
         now = int(time.time() * 1000) if now_ms is None else now_ms
+        if not page_released:
+            await self.release_page(profile_alias=lease.profile_alias, lease_id=lease.lease_id)
         async with self.store.connection() as db:
             cur = await db.execute(
                 "UPDATE browser_profiles SET lease_holder = NULL, lease_expires_at_ms = NULL, "

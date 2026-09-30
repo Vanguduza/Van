@@ -500,6 +500,13 @@ async def resolve_stagehand_target(
         return "NO_TARGET_RESOLVER"
     try:
         element = await resolver(task, locator)
+    except BrowserAdapterError as exc:
+        detail = str(exc.detail or "")
+        if exc.code.endswith("_REFUSED") and detail.startswith(NETWORK_OWNER_CODES):
+            # Unit G11: the lease's network guard blocked a write between two calls and froze
+            # the page; the next read of the lease says so. The owner's, not a resolver fault.
+            return f"HARNESS_REFUSED:{closed_code(detail)}"
+        return f"RESOLVER_FAILED:{type(exc).__name__}"
     except Exception as exc:  # noqa: BLE001 - cannot observe the target = cannot classify it
         return f"RESOLVER_FAILED:{type(exc).__name__}"
     if not isinstance(element, dict) or not element:
@@ -2128,6 +2135,11 @@ class InteractionStepBody(BaseModel):
     value_slots: dict[str, str] = Field(default_factory=dict)
 
 
+#: Harness refusals that hand the task to the owner: a write the network-effect guard blocked,
+#: one it detected but could not block (a WebSocket open, review I7 minor 1), or a guard that
+#: could not be kept on. Each has frozen the page.
+NETWORK_OWNER_CODES = ("NETWORK_WRITE_BLOCKED", "NETWORK_WRITE_DETECTED", "NETWORK_GUARD_")
+
 #: Review I4 MINOR-A — a step ends this long before its page lease would lapse, at most.
 STEP_LEASE_MARGIN_MS = 30_000
 
@@ -2275,12 +2287,37 @@ def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter)
             # sent under it has ended; if one ended without a response its outcome is unknown,
             # so the lease is left to expire rather than handed to the next holder early.
             settled = await fence.inflight.settle(keepalive=fence.guard)
+            page_end = None
             if acquired is not None and settled:
+                # Unit G11 (review I7 MAJOR-1): the page is frozen and its network interception
+                # removed as the lease ends, so nothing it started runs on unintercepted. What
+                # the guard blocked since the step's last call comes back with it.
+                page_end = await browser_api.broker.release_page(
+                    profile_alias=acquired.profile_alias, lease_id=acquired.lease_id)
                 # Only the lease this step took, and only while it still holds it (lease id,
                 # holder and generation must all match): never another holder's.
-                await browser_api.broker.release_lease_if_held(acquired)
+                await browser_api.broker.release_lease_if_held(acquired, page_released=True)
+        result = _with_late_block(result, page_end)
         await _hand_blocked_write_to_owner(task, result)
         return {"task_id": task.task_id, "at_ms": int(time.time() * 1000), **result.to_json()}
+
+    def _with_late_block(result: StepResult, page_end: Any) -> StepResult:
+        """A write the lease's guard blocked after the step's own last call (between it and
+        the lease's end) is the owner's too: the step is not a success."""
+        code = page_end.get("blocked") if isinstance(page_end, dict) else None
+        if not isinstance(code, str) or not code.startswith(NETWORK_OWNER_CODES):
+            # Or the lease's first read of this step said so (the target could not be read).
+            marker = ":HARNESS_REFUSED:"
+            code = next((r.split(marker, 1)[1] for r in result.reasons if marker in r
+                         and r.split(marker, 1)[1].startswith(NETWORK_OWNER_CODES)), None)
+        if not isinstance(code, str) or not code.startswith(NETWORK_OWNER_CODES):
+            return result
+        if any(r.startswith(tuple("HARNESS_REFUSED:" + p for p in NETWORK_OWNER_CODES)) for r in result.reasons):
+            return result
+        result.reasons = result.reasons + [f"HARNESS_REFUSED:{closed_code(code)}"]
+        result.trail = result.trail + [StepState.OWNER_TAKEOVER.value]
+        result.state, result.lane, result.escalated = StepState.OWNER_TAKEOVER, RouterLane.OWNER_TAKEOVER, True
+        return result
 
     async def _hand_blocked_write_to_owner(task: BrowserTask, result: StepResult) -> None:
         """Owner decision 2026-09-30 (network-effect guard): "A blocked request goes to you."
@@ -2293,7 +2330,7 @@ def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter)
         task is refused until the owner's decision resumes it."""
         code = next(
             (r.split(":", 1)[1] for r in result.reasons
-             if r.startswith(("HARNESS_REFUSED:NETWORK_WRITE_BLOCKED", "HARNESS_REFUSED:NETWORK_GUARD_"))),
+             if r.startswith(tuple("HARNESS_REFUSED:" + p for p in NETWORK_OWNER_CODES))),
             None,
         )
         if code is None or result.state is not StepState.OWNER_TAKEOVER:

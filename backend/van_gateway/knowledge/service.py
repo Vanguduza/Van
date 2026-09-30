@@ -95,6 +95,9 @@ class KnowledgeRuntime:
             timeout_seconds=settings.notebook_consumer_timeout_seconds,
             fence_key=harness_fence_key_from_settings(settings),
         )
+        # Unit G11 (review I7 MAJOR-1): a page lease the notebook consumer gives back ends the
+        # Harness's network guard for it (page frozen, interception removed).
+        browser_tasks.broker.page_release_hook = browser_harness.release_page
         browser_stagehand = StagehandAdapter(
             browser_registry,
             base_url=settings.browser_stagehand_base_url,

@@ -804,9 +804,27 @@ def test_ci_runs_the_base_refs_checker_against_the_head():
         assert "path: trusted" in job and "path: head" in job and "fetch-depth: 0" in job
         assert "python trusted/tools/ci/project_truth_ledger.py --repo head verify-pr" in job
         assert "run: python tools/ci/project_truth_ledger.py" not in job, "the gate must not run the PR's own checker"
-        assert "github.event.pull_request.base.sha" in job and "github.event.before" in job
+        assert "github.event.pull_request.base.sha" in job
         on_push = text.split("  push:", 1)[1].split("  pull_request:", 1)[0]
         assert "'gpt/**'" in on_push, "programme branches are verified on push too"
+
+
+def test_a_push_is_judged_from_a_protected_ref_not_the_pushed_history():
+    """Review I7 minor 9: the push path took its trusted checker from github.event.before — the
+    branch's previous head, which on an unprotected branch whoever pushes controls (push a
+    checker edit, then push again). The trusted side of a push is now a protected ref."""
+    for wf in (ROOT / ".github" / "workflows" / "van-ci.yml", ROOT / "tools" / "ci" / "github-actions-ci.yml"):
+        text = wf.read_text(encoding="utf-8")
+        job = text.split("  project-truth-ledger:", 1)[1].split("\n  backend:", 1)[0]
+        env = job.split("    env:", 1)[1].split("    steps:", 1)[0]
+        assert "TRUSTED_SHA" not in env, "the trusted SHA is computed, never taken from the event"
+        step = job.split("name: Trusted ref", 1)[1].split("- uses: actions/checkout@v4", 1)[0]
+        assert "refs/protected/" in step and "git merge-base HEAD" in step
+        assert "git merge-base --is-ancestor \"$trusted\" HEAD" in step  # a protected branch: fast-forward only
+        assert '"$DEFAULT_BRANCH"|gpt/*)' in step  # only protected branches may use their previous head
+        assert 'echo "TRUSTED_SHA=$trusted" >> "$GITHUB_ENV"' in step
+        order = [job.index("path: head"), job.index("name: Trusted ref"), job.index("path: trusted")]
+        assert order == sorted(order), "the trusted ref is computed before the trusted side is checked out"
 
 
 def test_codeowners_guard_the_governance_paths():

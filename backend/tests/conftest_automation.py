@@ -55,6 +55,20 @@ async def make_store(tmp_path) -> Store:
     return store
 
 
+async def rewrite_task_truth(store: Store, sql: str, params: tuple = ()) -> None:
+    """Test setup only — rewrite a browser_tasks row's task truth (``scope_json``, ``mutating``)
+    the way a store written before migration 38 could hold it (a legacy row with no scope, a
+    malformed flag). Migration 38's identity trigger refuses such an edit; it is dropped for the
+    one statement and re-created from the migration itself."""
+    from van_gateway.storage.db import MIGRATION_38
+
+    async with store.connection() as db:
+        await db.execute("DROP TRIGGER IF EXISTS browser_tasks_identity_immutable")
+        await db.execute(sql, params)
+        await db.commit()
+        await db.executescript(MIGRATION_38)
+
+
 async def enroll_device(store: Store, device_id: str = DEVICE_ID) -> str:
     await store.execute(
         "INSERT INTO devices(device_id, public_key_pem, enrolled_at_unix, revoked_at_unix, label) "

@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 37
+SCHEMA_VERSION = 38
 
 
 MIGRATION_17 = """
@@ -974,6 +974,33 @@ MIGRATION_37 = """
 -- automated action unless the task is admitted as mutating. 0 (every task created before
 -- this migration) is non-mutating: fail closed.
 ALTER TABLE browser_tasks ADD COLUMN mutating INTEGER NOT NULL DEFAULT 0;
+"""
+
+MIGRATION_38 = """
+-- Review I7 minor 8 (unit G11). browser_tasks.mutating (whether the Harness's network-effect
+-- guard lets the task write) and browser_tasks.scope_json (the pages it may act on) are task
+-- truth set at creation. Neither may change afterwards: the identity trigger now covers both,
+-- so a running task cannot be flipped to mutating or have its scope rewritten in place. Owner
+-- widening stays what it was: an approval row read at load time, never an edit of the task.
+DROP TRIGGER IF EXISTS browser_tasks_identity_immutable;
+CREATE TRIGGER browser_tasks_identity_immutable
+BEFORE UPDATE ON browser_tasks
+WHEN NEW.task_id IS NOT OLD.task_id
+  OR NEW.command_id IS NOT OLD.command_id
+  OR NEW.execution_id IS NOT OLD.execution_id
+  OR NEW.capability_id IS NOT OLD.capability_id
+  OR NEW.profile_alias IS NOT OLD.profile_alias
+  OR NEW.strategy IS NOT OLD.strategy
+  OR NEW.autonomy_tier IS NOT OLD.autonomy_tier
+  OR NEW.action_class IS NOT OLD.action_class
+  OR NEW.target_domain IS NOT OLD.target_domain
+  OR NEW.goal IS NOT OLD.goal
+  OR NEW.started_at_ms IS NOT OLD.started_at_ms
+  OR NEW.mutating IS NOT OLD.mutating
+  OR NEW.scope_json IS NOT OLD.scope_json
+BEGIN
+  SELECT RAISE(ABORT, 'browser_task_identity_immutable');
+END;
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -2315,6 +2342,7 @@ MIGRATIONS: dict[int, str] = {
     35: MIGRATION_35,
     36: MIGRATION_36,
     37: MIGRATION_37,
+    38: MIGRATION_38,
 }
 
 

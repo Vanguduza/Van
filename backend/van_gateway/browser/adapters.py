@@ -267,7 +267,8 @@ class BrowserHarnessAdapter(Protocol):
 
 #: Harness refusal codes (409) that mean "the target is not the one VAN classified, or the
 #: page is outside the task scope" — nothing was actuated. Mapped to lane 4 by the router.
-HARNESS_REFUSAL_PREFIXES = ("TARGET_", "TASK_SCOPE_", "FOCUS_", "PAGE_DIALOG", "NETWORK_WRITE_BLOCKED", "NETWORK_GUARD_")
+HARNESS_REFUSAL_PREFIXES = ("TARGET_", "TASK_SCOPE_", "FOCUS_", "PAGE_DIALOG", "NETWORK_WRITE_BLOCKED",
+                            "NETWORK_WRITE_DETECTED", "NETWORK_GUARD_")
 
 
 def _scope_wire(task: BrowserTask) -> dict[str, Any] | None:
@@ -478,6 +479,9 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
             "allow_helper_authoring": False,
             **extra,
         }
+        # Unit G11 — reads carry the task scope too: the Harness's lease-long network guard
+        # judges the page's own navigations between actions by it.
+        envelope.setdefault("task_scope", _scope_wire(task))
         fence = _HARNESS_LEASE_FENCE.get()
         if fence is not None and fence.profile_alias == task.profile_alias:
             # Review I3 MAJOR-3: the lease this call runs under; the worker refuses a
@@ -520,6 +524,20 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
         call = asyncio.ensure_future(super()._call(path, payload))
         fence.inflight.track(call)
         return await asyncio.shield(call)
+
+    async def release_page(self, *, profile_alias: str, holder_id: str, generation: int) -> dict[str, Any]:
+        """Unit G11 (review I7 MAJOR-1) — the page lease ``holder_id``/``generation`` is being
+        given back: the Harness freezes the page (popups closed, service workers stopped, the
+        tab on about:blank) and removes that lease's network interception, so nothing the
+        lease's page started keeps running unintercepted. Returns ``blocked``: a write the
+        guard blocked since the last call (a closed-vocabulary code), or None."""
+        envelope: dict[str, Any] = {
+            "profile_alias": profile_alias, "mode": "PRODUCTION_ACTUATOR", "allow_helper_authoring": False,
+            "lease_holder_id": holder_id, "lease_generation": int(generation),
+        }
+        if self.fence_key is not None:
+            envelope["lease_mac"] = harness_fence_mac(self.fence_key, profile_alias, int(generation), holder_id)
+        return await _PrivateWorkerClient._call(self, "/release", envelope)
 
     async def navigate(self, task: BrowserTask, url: str) -> dict[str, Any]:
         """Review I6 m2 — always under the task's scope (None: the Harness refuses)."""

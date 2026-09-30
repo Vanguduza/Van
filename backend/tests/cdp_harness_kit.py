@@ -118,6 +118,19 @@ class FixtureServer:
         self.httpd.server_close()
 
 
+def _merge_disable_features(flags: list[str]) -> list[str]:
+    """Chromium honours only the last ``--disable-features`` (review I7 minor 4): the kit's own
+    and the worker's are merged into one, as the worker's ``chromium_argv`` does."""
+    names: list[str] = []
+    out: list[str] = []
+    for flag in flags:
+        if flag.startswith("--disable-features="):
+            names += [n for n in flag.split("=", 1)[1].split(",") if n and n not in names]
+        else:
+            out.append(flag)
+    return out + (["--disable-features=" + ",".join(names)] if names else [])
+
+
 class Chromium:
     """Headless Chromium launched with the Harness worker's guard flags."""
 
@@ -127,8 +140,8 @@ class Chromium:
             [CHROMIUM, "--headless=new", "--remote-debugging-port=0", f"--user-data-dir={self.dir}",
              "--no-first-run", "--no-default-browser-check", "--disable-dev-shm-usage",
              "--disable-background-networking", "--disable-component-update", "--no-sandbox",
-             "--no-proxy-server", "--ignore-certificate-errors", "--disable-features=DnsOverHttps",
-             f"--host-resolver-rules=MAP * 127.0.0.1:{port}", *flags, "about:blank"],
+             *_merge_disable_features(["--no-proxy-server", "--ignore-certificate-errors", "--disable-features=DnsOverHttps",
+                                       f"--host-resolver-rules=MAP * 127.0.0.1:{port}", *flags]), "about:blank"],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         )
         active = Path(self.dir) / "DevToolsActivePort"
@@ -209,11 +222,24 @@ class HarnessSession:
         sid = None if method.startswith("Target.") else (session_id or self.session)
         return self.send(method, params, session_id=sid)
 
-    def drain_events(self) -> list[dict]:
+    def _drain_all(self) -> list[dict]:
         out = []
         while self.events:
             out.append(self.events.popleft())
         return out
+
+    #: What the Harness guard needs to see (unit G11). A test's own drain (to start from a quiet
+    #: buffer) must not swallow them: in production only the Harness scripts drain the daemon.
+    GUARD_EVENTS = ("Fetch.", "Target.", "Page.frameNavigated", "Page.navigatedWithinDocument",
+                    "Page.frameRequestedNavigation", "ServiceWorker.", "Network.webSocketCreated")
+
+    def drain_events(self) -> list[dict]:
+        """Test-side drain: discards noise, keeps what a Harness guard must still see."""
+        out = self._drain_all()
+        keep = [e for e in out if str(e.get("method") or "").startswith(self.GUARD_EVENTS)]
+        for event in reversed(keep):
+            self.events.appendleft(event)
+        return [e for e in out if e not in keep]
 
     def js(self, expression: str) -> Any:
         r = self.cdp("Runtime.evaluate", expression=expression, returnByValue=True, awaitPromise=True)
@@ -261,8 +287,8 @@ class HarnessSession:
 
     def namespace(self) -> dict[str, Any]:
         return {name: getattr(self, name) for name in (
-            "cdp", "drain_events", "js", "page_info", "click_at_xy", "press_key", "scroll", "goto_url",
-            "wait_for_load", "current_tab")} | {"new_tab": self.goto_url}
+            "cdp", "js", "page_info", "click_at_xy", "press_key", "scroll", "goto_url",
+            "wait_for_load", "current_tab")} | {"new_tab": self.goto_url, "drain_events": self._drain_all}
 
     # -- test-side conveniences
     def goto(self, url: str) -> None:
@@ -289,9 +315,18 @@ def exec_script(session: HarnessSession, script: str, extra: dict[str, str] | No
     saved = {k: os.environ.get(k) for k in (extra or {})}
     os.environ.update(extra or {})
     out = io.StringIO()
+
+    def _print(*args: Any, **kwargs: Any) -> None:
+        # The script's own stdout, captured through its ``print`` rather than by redirecting
+        # sys.stdout: other threads (a test printing its result, the worker's guard thread)
+        # keep theirs while a script runs.
+        if kwargs.get("file") is None:
+            out.write(kwargs.get("sep", " ").join(str(a) for a in args) + kwargs.get("end", "\n"))
+        else:
+            print(*args, **kwargs)
+
     try:
-        with contextlib.redirect_stdout(out):
-            exec(compile(script, "<harness-script>", "exec"), dict(session.namespace()))  # noqa: S102
+        exec(compile(script, "<harness-script>", "exec"), {**session.namespace(), "print": _print})  # noqa: S102
     finally:
         for key, value in saved.items():
             if value is None:
