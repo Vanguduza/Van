@@ -64,13 +64,15 @@ for u in van-muse-netns.service van-muse-socks.service van-muse-bridge.service  
   install -m 0644 "$HERE/systemd/$u" "/etc/systemd/system/$u"
 done
 systemctl daemon-reload
-systemctl enable van-muse-netns.service van-muse-socks.service   van-muse-bridge.service van-muse-egress-health.timer >/dev/null
 
 printf 'MUSE_CLIENT_PUBLIC_KEY=%s\n' "$CLIENT_PUBLIC_KEY"
 if [[ "$MUSE_WG_PEER_PUBLIC_KEY" == "REPLACE_ME" || "$MUSE_WG_ENDPOINT" == 203.0.113.10:* ]]; then
-  log "staged but not started: provision the US/Canada exit with the client public key, update $CONFIG, then rerun"
+  systemctl disable van-muse-netns.service van-muse-socks.service van-muse-bridge.service van-muse-egress-health.timer >/dev/null 2>&1 || true
+  log "staged but not enabled: provision the US/Canada exit with the client public key, update $CONFIG, then rerun"
   exit 20
 fi
+
+systemctl enable van-muse-netns.service van-muse-socks.service van-muse-bridge.service van-muse-egress-health.timer >/dev/null
 
 HOST_DEFAULT_BEFORE="$(ip -4 route show default)"
 systemctl restart van-muse-netns.service
