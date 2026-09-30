@@ -13,6 +13,8 @@ on:
       # Character Forge candidates pushed by the bounded worker (`forge-push`); without this
       # a staged candidate would never reach RiveContractTest or character-forge-gate.
       - 'forge/**'
+      # Programme branches (review I6 m7): the ledger job verifies what was pushed, not only PRs.
+      - 'gpt/**'
   pull_request:
 
 concurrency:
@@ -20,24 +22,45 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Owner decision 2026-09-30 ("enforce van's ledger"). Every commit a pull request adds must
-  # carry a LOCAL_CHANGE_LEDGER.jsonl row whose diff digest matches the commit and whose owner
-  # authorization records cover every file it changes. Checks out the PR head (not GitHub's
-  # synthetic merge commit, which has no row) with full history, since the check walks commits.
+  # Owner decision 2026-09-30 ("enforce van's ledger"). Every commit a pull request (or a push to
+  # a programme branch) adds must carry a LOCAL_CHANGE_LEDGER.jsonl row whose diff digest matches
+  # the commit and whose owner authorization records cover every file it changes.
+  # Review I6 M2: the gate runs the TRUSTED side's checker — the PR base, or the branch head
+  # before the push — checked out into trusted/, against the pushed/PR head checked out into
+  # head/ (its real commits, not GitHub's synthetic merge commit, with full history). The
+  # checker reads its config, baselines and authorization records from that trusted ref, so a
+  # PR cannot edit the checker, its baseline, its authority set or its own authorization.
+  # This is only a gate if branch protection requires this job and code-owner review
+  # (.github/CODEOWNERS); that is a GitHub setting the owner enables, see tools/ci/README.md.
   project-truth-ledger:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
     runs-on: ubuntu-latest
+    env:
+      TRUSTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+      HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
     steps:
+      - name: Refuse a push with no trusted previous head
+        if: github.event_name == 'push' && github.event.before == '0000000000000000000000000000000000000000'
+        run: |
+          echo "branch creation: no previous head to take a trusted checker from; open a PR instead" >&2
+          exit 1
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ env.HEAD_SHA }}
+          path: head
           fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TRUSTED_SHA }}
+          path: trusted
+          fetch-depth: 1
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Project Truth ledger (every PR commit has an authorized row)
-        run: python tools/ci/project_truth_ledger.py verify-pr --base ${{ github.event.pull_request.base.sha }}
-      - name: Project Truth ledger self-test
+      - name: Project Truth ledger (trusted checker, every new commit has an authorized row)
+        run: python trusted/tools/ci/project_truth_ledger.py --repo head verify-pr --base "$TRUSTED_SHA" --head "$HEAD_SHA"
+      - name: Project Truth ledger self-test (the head's own tests; informative, not the gate)
+        working-directory: head
         run: pip install pytest && pytest -q tests/contracts/test_project_truth_ledger.py
 
   backend:
