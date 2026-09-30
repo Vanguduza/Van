@@ -43,7 +43,10 @@ export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a
 apt-get -o Acquire::Retries=3 update -qq
 apt-get -o Acquire::Retries=3 install -y -qq --no-install-recommends   wireguard-tools nftables dante-server socat curl jq iproute2 ca-certificates >/dev/null
 
-install -d -m 0755 /etc/van-muse-egress /opt/van-muse-egress/secrets /var/lib/van-muse-egress
+install -d -m 0755 /etc/van-muse-egress /var/lib/van-muse-egress
+install -d -m 0700 /opt/van-muse-egress/secrets
+id vanmuse >/dev/null 2>&1 || useradd --system --home-dir /var/lib/van-muse --create-home --shell /usr/sbin/nologin vanmuse
+chmod 0700 /var/lib/van-muse
 if [[ ! -s "$MUSE_WG_PRIVATE_KEY_FILE" ]]; then
   install -d -m 0700 "$(dirname "$MUSE_WG_PRIVATE_KEY_FILE")"
   umask 077
