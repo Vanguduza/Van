@@ -1,73 +1,162 @@
-# VAN Trading Core — hardened Meta Muse egress enclave
+# VAN Trading Core — hardened Meta Muse enclave
 
-This module gives Hermes/VAN a persistent US or Canadian network identity for the official Meta Muse client while keeping Meta credentials, web content, and the Muse browser **outside VATI's trading authority boundary**.
+This module gives VAN/Hermes a persistent Muse browser on the existing ARM64 Trading Core while keeping Muse outside VATI authority and forcing all browser Internet traffic through one fixed US/Canada egress.
 
-## Canonical boundary
+## Canonical execution path
 
 ```text
-Muse browser on dial-control / Hermes
-        |
-        | local SOCKS5 127.0.0.1:17891
-        v
-persistent SSH local-forward
-        |
-        v
-van-trading-core 127.0.0.1:17890
-        |
-        v
-van-muse network namespace
-  ├─ Dante SOCKS5 169.254.77.2:1080
-  ├─ no trading/LAN NIC
-  ├─ no IPv6 default path
-  ├─ private/link-local destinations blocked
-  └─ default route = wg-muse only
-        |
-        v
-WireGuard
-        |
-        v
-dedicated static US/Canada exit VPS
-        |
-        v
-muse.ai / Meta
+Hermes
+  |
+  v
+VAN Browser Gateway / BrowserSubagentRunner
+  |
+  +--> Browser Harness 0.1.13        deterministic actuator + verifier
+  |
+  +--> Stagehand 4.1.0               semantic/deep worker
+  |
+  +--> Jev fast lane                  staged separately; same authority envelope
+  |
+  v
+127.0.0.1:17922  (host-loopback CDP handoff)
+  |
+  v
+gVisor / Systrap Muse sandbox
+  |
+  +-- root supervisor                lifecycle only; no shell/exec endpoint
+  |
+  +-- Chromium uid 10001             retains Chromium's own sandbox
+  |
+  +-- persistent muse_owner profile
+  |
+  v
+172.31.77.1:17892  (sandbox-only SOCKS bridge)
+  |
+  v
+127.0.0.1:17890   (hardened Trading Core egress bridge)
+  |
+  v
+van-muse netns -> wg-muse only
+  |
+  v
+fixed US/Canada exit
+  |
+  v
+muse.ai
 ```
 
-The trading host's own default route, VATI sessions, broker connectivity, Commander principals, Supabase, and trading credentials are not changed.
+The former design with a Muse browser on dial-control and an SSH SOCKS hop into Trading Core was removed from this branch. Trading Core's gVisor sandbox is the single Muse browser runtime.
 
-## Security properties
+## Authority boundary
 
-- The Muse SOCKS bridge is bound only to `127.0.0.1:17890` on trading core.
-- The namespace has exactly `lo`, `muse-ns`, and `wg-muse`.
-- Namespace Internet traffic can leave only through `wg-muse`.
-- RFC1918, CGNAT, loopback, link-local/metadata, multicast, and reserved IPv4 destinations are blocked before encryption.
-- IPv6 is disabled inside the namespace until an explicitly governed IPv6 peer exists.
-- The US/Canada exit also blocks private destinations and drops traffic aimed at the exit VPS itself.
-- DNS is performed behind the SOCKS5/WireGuard path. Consumers must use `socks5h` or Chromium remote DNS.
-- The health check verifies both a fixed public IP and country code (`US` or `CA`). A mismatch stops the bridge.
-- Installation actively proves the kill switch by taking `wg-muse` down and confirming that no public connection succeeds.
-- Installation snapshots the trading host default route before/after and removes the enclave if it changes.
-- No Meta password, cookie, or Muse profile is stored on the trading VM.
+Hermes has full browser-operational control through the existing Browser Gateway, Harness, Stagehand and the sandbox supervisor. It does **not** receive Docker-group access or host root.
 
-## 1. Stage the trading-core client
+The root supervisor exists only inside the gVisor sandbox. It can start, stop and restart Chromium. Chromium itself runs as uid 10001 and is never launched with `--no-sandbox`.
 
-From this directory on `van-trading-core`:
+There is deliberately no supervisor endpoint for:
+- shell;
+- arbitrary exec;
+- host filesystem access;
+- Docker access;
+- VATI commands;
+- broker access;
+- authority or mandate mutation.
+
+## Sandbox isolation
+
+The sandbox uses:
+- gVisor `runsc`, pinned to `release-20260928.0`;
+- Systrap, so the ARM64 OCI VM does not require nested KVM;
+- an internal-only Docker bridge;
+- read-only container root filesystem;
+- only three bind mounts: Muse profile, downloads, and the control token;
+- no Docker socket;
+- no privileged mode;
+- Linux capabilities dropped except `SETUID`, `SETGID`, and `KILL` for the in-sandbox supervisor;
+- CPU, memory, PID and file-descriptor limits;
+- no swap beyond the memory limit;
+- an increased OOM score so the Muse sandbox is reclaimed before trading-critical workloads under memory pressure.
+
+Default resource ceiling:
+
+```text
+CPU                  0.75 OCPU
+memory max           4 GiB
+memory reservation   2 GiB
+PIDs                  512
+profile               8 GiB
+downloads             2 GiB
+```
+
+VATI remains outside these limits and retains resource precedence.
+
+## Network fail-closed properties
+
+The sandbox Docker network is created with `--internal`.
+
+A host nftables policy additionally proves:
+- packets from the sandbox cannot be forwarded;
+- the sandbox may reach the host only on its dedicated SOCKS port;
+- host processes may reach sandbox CDP only through the dedicated control principal;
+- sandbox supervisor control is not publicly published.
+
+The live qualifier explicitly attempts and requires failure for:
+- direct `1.1.1.1:443`;
+- cloud metadata `169.254.169.254:80`;
+- VAN Trading Core control port `10.0.1.233:9133`.
+
+It then performs a SOCKS5 handshake through the admitted proxy to prove there is exactly one usable network path.
+
+The upstream egress layer separately verifies:
+- WireGuard-only namespace default route;
+- fixed public egress IP;
+- expected `US` or `CA` country code;
+- no IPv6 fallback;
+- no private/link-local destination access;
+- kill-switch behavior when `wg-muse` is taken down.
+
+An identity mismatch stops the egress bridge.
+
+## Existing VAN browser reuse
+
+`muse_owner` is an admitted managed browser profile.
+
+The existing Browser Harness now supports one pinned external-CDP mapping:
+
+```text
+muse_owner=http://127.0.0.1:17922
+```
+
+For that profile only, Harness attaches to the gVisor Chromium rather than starting a native Chromium process.
+
+Stagehand already consumes the same `cdp-endpoint.json` handoff, so it is reused unchanged.
+
+Other profiles such as `public_research` and `authenticated_owner` continue using the existing browser runtime.
+
+## Persistent state
+
+Only these browser-owned paths survive sandbox recreation:
+
+```text
+/var/lib/van-muse-sandbox/profile
+/var/lib/van-muse-sandbox/downloads
+```
+
+The browser root filesystem and temporary process state are disposable. Meta cookies/session material stay inside the profile and are never exported through Browser Gateway evidence.
+
+## Installation sequence
+
+### 1. Configure hardened US/Canada egress
+
+Stage the Trading Core side:
 
 ```bash
 sudo install -m 0600 muse-egress.env.example /etc/van-muse-egress.env
 sudo bash install-muse-egress.sh
 ```
 
-The first run generates the WireGuard client private key and prints:
+The first run generates the WireGuard client key and refuses to enable placeholder peer values.
 
-```text
-MUSE_CLIENT_PUBLIC_KEY=...
-```
-
-It deliberately exits staged/not-started until a real exit peer is configured.
-
-## 2. Provision a dedicated US/Canada exit
-
-Use a small **dedicated** Ubuntu 24.04 VPS with a static public IPv4 in the US or Canada. Copy only `install-us-ca-exit.sh` to it and run:
+Provision a dedicated static US/Canada exit with:
 
 ```bash
 sudo env \
@@ -76,64 +165,60 @@ sudo env \
   bash install-us-ca-exit.sh
 ```
 
-For Canada use `MUSE_EXIT_EXPECTED_COUNTRY=CA`.
+Use `CA` for Canada.
 
-The installer refuses a country mismatch and prints the exact values to place in trading core:
-
-```text
-MUSE_WG_PEER_PUBLIC_KEY=...
-MUSE_WG_ENDPOINT=<fixed-ip>:51820
-MUSE_EXPECTED_EGRESS_IP=<fixed-ip>
-MUSE_EXPECTED_COUNTRY=US
-```
-
-At the VPS/provider firewall expose WireGuard UDP only. Restrict the source to trading core's public source IP when the provider supports it. Keep SSH administration separately restricted.
-
-## 3. Activate trading-core egress
-
-Edit `/etc/van-muse-egress.env` on trading core with the returned values, then:
+Place the returned peer key, endpoint, expected IP and country in `/etc/van-muse-egress.env`, then rerun:
 
 ```bash
 sudo bash install-muse-egress.sh
 sudo qualify-muse-egress
 ```
 
-A successful install emits `MUSE_EGRESS_GREEN`. The normal `deploy/van-trading-core/qualify.sh` also becomes RED if Muse is configured but this enclave fails qualification.
+### 2. Install the gVisor Muse sandbox
 
-## 4. Give Hermes the persistent path
-
-On `dial-control` / Hermes:
+After the existing Browser Harness/Stagehand runtime exists:
 
 ```bash
-bash deploy/van-trading-core/muse/hermes/install-muse-egress-tunnel.sh
+sudo bash sandbox/install-muse-sandbox.sh
 ```
 
-This creates a persistent systemd user tunnel:
+The installer:
+1. verifies ARM64;
+2. downloads the exact pinned gVisor archive and verifies SHA-256;
+3. merges only the `runsc-muse` Docker runtime entry;
+4. validates `daemon.json`;
+5. reloads Docker rather than restarting it;
+6. rolls the Docker config back if runtime registration fails;
+7. creates the internal-only Muse network;
+8. builds and records an immutable local image ID;
+9. installs the systemd/network policies;
+10. starts the sandbox only if the US/Canada egress is already GREEN;
+11. runs the adversarial qualification.
 
-```text
-127.0.0.1:17891  -> SSH ->  van-trading-core:127.0.0.1:17890
-```
-
-The Hermes check is:
+## Qualification
 
 ```bash
-~/.local/bin/van-muse-egress-check
+sudo qualify-muse-egress
+sudo qualify-muse-sandbox
+sudo env VAN_EXPECTED_REPOSITORY_SHA=<exact-sha> bash deploy/van-trading-core/qualify.sh
 ```
 
-It must return the configured fixed IP and `US` or `CA`.
+A configured Muse runtime is not accepted unless all required sandbox and egress checks are GREEN.
 
-## 5. Persistent Muse browser
+## Security rule
 
-Launch the dedicated profile with:
+Muse, Stagehand, Jev, Browser Harness and page content are all subordinate to Hermes and the VAN Browser Gateway.
 
-```bash
-bash deploy/van-trading-core/muse/hermes/launch-muse-browser.sh
-```
+They cannot:
+- create owner authority;
+- increase a task action class;
+- extend their own step/deadline/domain budget;
+- place, modify or cancel a trade;
+- access broker credentials;
+- access VATI control endpoints;
+- perform a payment;
+- certify their own success.
 
-The launcher uses a persistent profile, SOCKS5 only, proxy-side DNS, disables QUIC, and disables non-proxied WebRTC UDP. The profile should be dedicated to Muse rather than mixed with unrelated browsing.
+A worker result is a claim until the existing independent browser evidence path verifies it.
 
-## Operational rule
-
-**VAN/Hermes remains the authority.** This enclave supplies a stable network execution path only. It does not grant Muse trading authority, infrastructure credentials, or access to VATI secrets, and it does not guarantee Meta account eligibility.
-
-Do not falsify age, identity, billing, or other account information. The purpose of this module is deterministic network isolation and region-stable egress, not identity spoofing.
+The egress mechanism provides deterministic network isolation and a stable regional exit. It does not falsify age, identity, billing or other account information and does not guarantee Meta account eligibility.
