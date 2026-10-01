@@ -5,8 +5,8 @@ After=van-muse-bridge.service van-muse-sandbox-firewall.service
 
 [Service]
 Type=simple
-User=nobody
-Group=nogroup
+User=vanmuseproxy
+Group=vanmuseproxy
 EnvironmentFile=/etc/van-muse-sandbox.env
 ExecStart=/usr/bin/socat TCP4-LISTEN:${MUSE_SANDBOX_PROXY_PORT},bind=${MUSE_SANDBOX_GATEWAY},reuseaddr,fork TCP4:127.0.0.1:17890
 Restart=always
