@@ -132,11 +132,16 @@ def _validate_page(raw: Any, domain: str) -> dict[str, Any]:
         kind = str(item.get("kind") or "")
         if kind not in {"click", "fill", "select", "scroll", "wait"}:
             raise WorkerError("JEV_ACTION_KIND_INVALID", 422)
-        safe_actions.append(dict(item))
+        safe = dict(item)
+        # Jev's fast lane never types. Do not disclose current textbox/prompt contents.
+        if kind == "fill":
+            safe["value"] = "__NONEMPTY__" if bool(str(item.get("value") or "")) else ""
+        safe_actions.append(safe)
     page = {
         "url": url,
-        "title": str(raw.get("title") or "")[:1000],
-        "text": str(raw.get("text") or "")[:MAX_TEXT],
+        # Muse conversation/task text is for Stagehand's deep lane, not Jev's fast selector.
+        "title": "Muse",
+        "text": "",
         "actions": safe_actions,
         "fingerprint": str(raw.get("fingerprint") or "")[:128],
     }
