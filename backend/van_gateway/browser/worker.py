@@ -304,6 +304,7 @@ class HybridBrowserWorker:
         jev_ui_goal = task.inputs.get("jev_ui_goal")
         if (
             self.jev is not None
+            and not self._jev_degraded_for_task
             and task.profile_alias == "muse_owner"
             and isinstance(jev_ui_goal, str)
             and 0 < len(jev_ui_goal.strip()) <= 500
