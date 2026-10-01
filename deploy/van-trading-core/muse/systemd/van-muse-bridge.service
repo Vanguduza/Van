@@ -5,8 +5,8 @@ After=van-muse-socks.service
 
 [Service]
 Type=simple
-User=nobody
-Group=nogroup
+User=vanmuseproxy
+Group=vanmuseproxy
 ExecStart=/usr/bin/socat TCP4-LISTEN:17890,bind=127.0.0.1,reuseaddr,fork TCP4:169.254.77.2:1080
 Restart=always
 RestartSec=2
