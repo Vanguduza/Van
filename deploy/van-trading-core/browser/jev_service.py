@@ -11,9 +11,11 @@ Version: 0.1.0
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
@@ -31,7 +33,7 @@ MAX_GOAL = 8000
 
 BIND = os.getenv("VAN_JEV_BIND", "127.0.0.1")
 PORT = int(os.getenv("VAN_JEV_PORT", "9142"))
-MODEL = os.getenv("VAN_JEV_TYPESAFE_MODEL", "jev-latest")
+MODEL = os.getenv("VAN_JEV_TYPESAFE_MODEL", "jev-1.13.0")\nREQUIRE_STARTUP_QUALIFICATION = os.getenv("VAN_JEV_REQUIRE_STARTUP_QUALIFICATION", "1") == "1"\nQUALIFICATION_FILE = Path(os.getenv("VAN_JEV_QUALIFICATION_FILE", "/run/van-browser/jev-qualified.json"))
 SECRET_ROOT = Path(os.getenv("VAN_JEV_SECRET_ROOT", "/var/lib/van-trading/browser/jev-secrets"))
 KEY_REF = os.getenv("VAN_JEV_TYPESAFE_KEY_REF", "secretref://browser/jev-typesafe")
 
@@ -141,6 +143,9 @@ def _choose(body: dict[str, Any]) -> dict[str, Any]:
     os.environ["TYPESAFE_MODEL"] = MODEL
     # Intentionally absent: TEXT_MODEL_API_KEY. This process never calls field_text().
     decision = choose(page, goal, history)
+    resolved_model = str(decision.get("model") or "")
+    if resolved_model != MODEL:
+        raise WorkerError("JEV_MODEL_DRIFT", 503)
 
     choice = str(decision.get("choice") or "")
     operation = str(decision.get("operation") or "")
@@ -154,6 +159,7 @@ def _choose(body: dict[str, Any]) -> dict[str, Any]:
         "ok": True,
         "runtime_version": UPSTREAM_VERSION,
         "upstream_commit": UPSTREAM_COMMIT,
+        "model": resolved_model,
         "choice": choice,
         "operation": operation,
         "action": action,
@@ -191,6 +197,8 @@ class Handler(BaseHTTPRequestHandler):
                 "bind": BIND,
                 "model": MODEL,
                 "model_key_present": key_present,
+                "startup_qualified": _QUALIFIED,
+                "qualification": dict(_QUALIFICATION),
                 "text_generation": False,
                 "executes_actions": False,
                 "autonomous_loop": False,
@@ -200,7 +208,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802
         try:
-            if self.path != "/choose":
+            if self.path not in {"/choose", "/qualify"}:
                 raise WorkerError("OPERATION_NOT_ALLOWED", 404)
             raw_len = self.headers.get("content-length")
             if raw_len is None:
@@ -211,6 +219,11 @@ class Handler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(length) or b"{}")
             if not isinstance(body, dict):
                 raise WorkerError("REQUEST_BODY_NOT_OBJECT", 422)
+            if self.path == "/qualify":
+                self._send(200, {"ok": True, **_run_live_qualification()})
+                return
+            if REQUIRE_STARTUP_QUALIFICATION and not _QUALIFIED:
+                raise WorkerError("JEV_NOT_STARTUP_QUALIFIED", 503)
             self._send(200, _choose(body))
         except WorkerError as exc:
             self._send(exc.status, {"ok": False, "error": exc.code})
@@ -223,5 +236,11 @@ class Handler(BaseHTTPRequestHandler):
         return
 
 
-if __name__ == "__main__":
+def main() -> None:
+    if REQUIRE_STARTUP_QUALIFICATION:
+        _run_live_qualification()
     ThreadingHTTPServer((BIND, PORT), Handler).serve_forever()
+
+
+if __name__ == "__main__":
+    main()
