@@ -163,7 +163,11 @@ class BrowserSessionBroker:
         """Tell the Harness the page lease ``lease_id`` ends (while it is still the holding),
         so its page is frozen and nothing it started keeps running unintercepted. Never
         prevents the release: a failure is logged and the lease is given back regardless (a
-        later lease's first call, or the Harness's idle limit, ends the guard then)."""
+        later lease's first call, or the Harness's idle limit, ends the guard then).
+
+        Review I9 MINOR-1: a failed ``/release`` is never read as clean. What the lease's guard
+        blocked after the caller's last call is then unknown, so the answer carries
+        ``NETWORK_GUARD_UNAVAILABLE`` and every caller hands the task to the owner."""
         hook = self.page_release_hook
         if hook is None:
             return None
@@ -183,7 +187,7 @@ class BrowserSessionBroker:
             import logging
 
             logging.getLogger(__name__).warning("BROWSER_PAGE_RELEASE_FAILED:%s", type(exc).__name__)
-            return None
+            return {"released": False, "blocked": "NETWORK_GUARD_UNAVAILABLE", "release_failed": type(exc).__name__}
 
     async def register_profile(
         self,

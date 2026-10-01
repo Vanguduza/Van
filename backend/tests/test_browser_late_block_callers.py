@@ -405,3 +405,51 @@ async def test_assignments_real_harness_late_write_goes_to_the_owner(monkeypatch
         assert after["status"] == "WAITING_FOR_OWNER" and "NETWORK_WRITE_BLOCKED" in (after.get("error_code") or "")
     finally:
         close()
+
+
+async def test_a_release_the_harness_never_answered_goes_to_the_owner(tmp_path):
+    """Review I9 MINOR-1: ``release_page`` swallowed a failed ``/release`` (a timeout on the
+    busy renderer of review I8 MAJOR-1) and returned None, which reads as clean: the task
+    COMPLETED and a write the guard blocked after the last call was never reported. What the
+    guard saw is unknown, so the owner gets it as NETWORK_GUARD_UNAVAILABLE; the lease is still
+    given back."""
+    calls: list = []
+    api, store = await _api(tmp_path, CLEAN, calls)
+
+    async def timeout(**kw):
+        calls.append(kw)
+        raise TimeoutError("release timed out")
+
+    api.broker.page_release_hook = timeout
+    app = FastAPI(); app.include_router(api.router)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        task = await t._make_task(ac)
+        r = await ac.post("/v1/browser/assignments", headers=t.HEADERS, json={"task_id": task["task_id"], **ASSIGNMENT})
+        after = await _task(ac, task["task_id"])
+    body = r.json()
+    print(f"\nI9 /assignments release=TimeoutError http={r.status_code} stop={body.get('stop_reason')} "
+          f"task=({after['status']},{after.get('error_code')})")
+    assert calls and r.status_code == 200
+    assert body["stop_reason"] == "OWNER_TAKEOVER" and body["needs_owner"] is True
+    assert after["status"] == "WAITING_FOR_OWNER"
+    assert after["error_code"].endswith("NETWORK_GUARD_UNAVAILABLE")
+    held = await store.fetchone("SELECT lease_holder FROM browser_profiles WHERE profile_alias = ?", ("public_research",))
+    assert held is None or held["lease_holder"] is None
+
+
+async def test_a_failed_release_is_never_read_as_clean_by_the_broker(tmp_path):
+    store = await make_store(tmp_path)
+    broker = BrowserSessionBroker(store)
+    await broker.register_profile(profile_alias="public_research")
+
+    async def refuse(**_kw):
+        raise ConnectionError("harness down")
+
+    broker.page_release_hook = refuse
+    lease = await broker.acquire_lease(profile_alias="public_research", task_id="task-i9")
+    out = await broker.release_lease_if_held(lease)
+    assert out.released is True and out.owner_code == "NETWORK_GUARD_UNAVAILABLE"
+    # Without a Harness there is no guard and nothing to report.
+    broker.page_release_hook = None
+    lease = await broker.acquire_lease(profile_alias="public_research", task_id="task-i9b")
+    assert (await broker.release_lease_if_held(lease)).owner_code is None
