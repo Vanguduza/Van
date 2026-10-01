@@ -424,7 +424,10 @@ def test_hermes_gateway_reaches_private_browser_workers_through_bounded_transpor
     assert "-L 127.0.0.1:$HARNESS_LOCAL_PORT:127.0.0.1:9141" in transport
     assert "-L 127.0.0.1:$JEV_LOCAL_PORT:127.0.0.1:9142" in transport
     assert "ExitOnForwardFailure=yes" in transport
-    assert "ClearAllForwardings=yes" in transport
+    assert "-F /dev/null" in transport
+    assert "StrictHostKeyChecking=yes" in transport
+    assert "ForwardAgent=no" in transport
+    assert "ForwardX11=no" in transport
 
     # The real Gateway is explicitly wired to the forwarded workers.
     assert '"VAN_BROWSER_ENABLED": "true"' in transport
