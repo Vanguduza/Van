@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Rev 1.3 §§384-387 — live certification for the Browser Fabric.
 
-Four canaries, each mapping to an external gate:
+Five canaries, each mapping to an external gate:
 
   harness    §384 — start/attach the managed browser, act deterministically, seal evidence
   profile    §385 — a restored authenticated profile proves identity without leaking secrets
   stagehand  §386 — real semantic generation, not merely an SDK import
+  jev        — exact-model, side-effect-free one-step proposal qualification
   injection  §387 — an adversarial page gains no authority and exfiltrates nothing
 
 Requires live workers on the Trading Core VM. Without them the script exits
@@ -97,6 +98,7 @@ def _jev(store: Store) -> JevAdapter:
         enabled=settings.browser_enabled and settings.browser_jev_enabled,
         expected_version=settings.browser_jev_expected_version or _manifest("jev_ultrafast"),
         expected_model=settings.browser_jev_model,
+        expected_min_confidence=settings.browser_jev_min_confidence,
     )
 
 
