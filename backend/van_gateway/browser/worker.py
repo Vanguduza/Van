@@ -36,6 +36,7 @@ from pydantic import BaseModel, Field
 from van_gateway.browser.adapters import (
     BrowserAdapterError,
     BrowserHarnessAdapter,
+    JevAdapter,
     StagehandAdapter,
 )
 from van_gateway.browser.models import (
@@ -246,19 +247,21 @@ class HybridBrowserWorker:
         self,
         harness: BrowserHarnessAdapter,
         stagehand: StagehandAdapter,
+        jev: JevAdapter | None = None,
         *,
         plan: BrowserTaskPlan | None = None,
         task: BrowserTask | None = None,
     ) -> None:
         self.harness = harness
         self.stagehand = stagehand
+        self.jev = jev
         self.plan = plan or BrowserTaskPlan()
         self.task = task
         self._deterministic = AdapterBackedWorker(harness, plan=self.plan, task=task)
 
     def for_task(self, task: BrowserTask, plan: BrowserTaskPlan | None) -> "HybridBrowserWorker":
         return HybridBrowserWorker(
-            self.harness, self.stagehand, plan=plan, task=task
+            self.harness, self.stagehand, self.jev, plan=plan, task=task
         )
 
     async def propose(
@@ -292,6 +295,46 @@ class HybridBrowserWorker:
                 "BROWSER_INJECTION_REFUSED_PRE_ACTION",
                 "confirmed injection detected before semantic proposal",
             )
+
+        # Muse gets an optional Jev fast lane. Jev is proposal-only and cannot generate
+        # text. Terminal choices, text-bearing actions, uncertainty, or any runtime error
+        # fall through to Stagehand without consuming a browser step.
+        if self.jev is not None and task.profile_alias == "muse_owner":
+            try:
+                page = await self.harness.jev_observe(task)
+                decision = await self.jev.choose(
+                    task,
+                    goal=assignment.goal,
+                    page=page,
+                    history=[
+                        {
+                            "kind": step.kind,
+                            "domain": step.domain,
+                            "rationale": step.rationale,
+                        }
+                        for step in history[-10:]
+                    ],
+                )
+                operation = str(decision.get("operation") or "").upper()
+                observed = decision.get("action")
+                if operation in {"CLICK", "SELECT", "SCROLL_UP", "SCROLL_DOWN", "WAIT"} and isinstance(observed, dict):
+                    kind = str(observed.get("kind") or "").lower()
+                    if kind in {"click", "select", "scroll", "wait"}:
+                        confidence = float(decision.get("confidence") or 0.0)
+                        return ProposedAction(
+                            kind=kind,
+                            domain=task.target_domain,
+                            action_class=assignment.action_class_ceiling,
+                            instruction=str(observed.get("label") or "")[:2000],
+                            rationale=f"Jev Ultrafast {operation} confidence={confidence:.3f}",
+                            payload={
+                                "semantic_lane": "JEV_ULTRAFAST",
+                                "jev_action": dict(observed),
+                                "jev_fingerprint": str(decision.get("fingerprint") or ""),
+                            },
+                        )
+            except (BrowserAdapterError, BrowserPolicyError, ValueError, TypeError):
+                pass
 
         instruction = (
             "Choose the single best next browser action for this assigned goal. "
@@ -336,12 +379,31 @@ class HybridBrowserWorker:
         task = self.task
         if task is None:
             raise BrowserAdapterError("BROWSER_WORKER_TASK_MISSING", assignment.task_id)
+        jev_action = action.payload.get("jev_action")
+        if isinstance(jev_action, dict):
+            fingerprint = str(action.payload.get("jev_fingerprint") or "")
+            if not fingerprint:
+                raise BrowserAdapterError("JEV_FINGERPRINT_MISSING", action.kind)
+            await self.harness.jev_act(
+                task,
+                action=dict(jev_action),
+                fingerprint=fingerprint,
+            )
+            payload = await self.harness.page_info(task)
+            extraction = dict(payload.get("extraction") or {})
+            extraction["semantic_lane"] = "JEV_ULTRAFAST"
+            payload = {**payload, "extraction": extraction}
+            return AdapterBackedWorker._observation(task, action, payload)
+
         observed = action.payload.get("stagehand_action")
         if not isinstance(observed, dict) or not observed:
             raise BrowserAdapterError("STAGEHAND_OBSERVED_ACTION_MISSING", action.kind)
 
         await self.stagehand.act(task, dict(observed))
         payload = await self.harness.page_info(task)
+        extraction = dict(payload.get("extraction") or {})
+        extraction["semantic_lane"] = "STAGEHAND"
+        payload = {**payload, "extraction": extraction}
         return AdapterBackedWorker._observation(task, action, payload)
 
 
