@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+[[ -f /etc/van-muse-sandbox.env ]] || { echo "missing /etc/van-muse-sandbox.env" >&2; exit 2; }
+# shellcheck disable=SC1091
+set -a; . /etc/van-muse-sandbox.env; set +a
+[[ "$(id -u)" == "$(id -u vanmusectl)" || $EUID -eq 0 ]] || {
+  echo "must run as vanmusectl or root" >&2; exit 3;
+}
+TOKEN="$(cat "$MUSE_SANDBOX_CONTROL_TOKEN_FILE")"
+verb="${1:-health}"
+case "$verb" in
+  health) method=GET; path=/health ;;
+  profile) method=GET; path=/profile ;;
+  start) method=POST; path=/browser/start ;;
+  stop) method=POST; path=/browser/stop ;;
+  restart) method=POST; path=/browser/restart ;;
+  *) echo "usage: $0 {health|profile|start|stop|restart}" >&2; exit 2 ;;
+esac
+curl -fsS --max-time 8 -X "$method"   -H "Authorization: Bearer $TOKEN"   "http://$MUSE_SANDBOX_IP:$MUSE_SANDBOX_CONTROL_PORT$path"
+printf '\n'
