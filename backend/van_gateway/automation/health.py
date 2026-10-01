@@ -211,6 +211,7 @@ class AutomationHealthApi:
 
         self._sync_degraded(harness.state, DegradedCode.BROWSER_HARNESS_UNAVAILABLE)
         self._sync_degraded(stagehand.state, DegradedCode.BROWSER_SEMANTIC_UNAVAILABLE)
+        self._sync_degraded(jev.state, DegradedCode.BROWSER_JEV_FAST_LANE_UNAVAILABLE)
 
         return {
             "capability": "browser_fabric",
