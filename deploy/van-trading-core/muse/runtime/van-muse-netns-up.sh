@@ -83,3 +83,17 @@ table inet van_muse_ns {
 NFT
 
 sysctl -q -w net.ipv4.conf.muse-host.forwarding=0 || true
+
+# The loopback SOCKS bridge is a capability, not a general host proxy. Only root
+# qualification and the dedicated sandbox proxy principal may consume it.
+PROXY_UID="$(id -u vanmuseproxy)"
+nft delete table inet van_muse_host 2>/dev/null || true
+nft -f - <<NFT
+table inet van_muse_host {
+  chain output {
+    type filter hook output priority -160; policy accept;
+    ip daddr 127.0.0.1 tcp dport 17890 meta skuid { 0, $PROXY_UID } accept
+    ip daddr 127.0.0.1 tcp dport 17890 reject with tcp reset
+  }
+}
+NFT
