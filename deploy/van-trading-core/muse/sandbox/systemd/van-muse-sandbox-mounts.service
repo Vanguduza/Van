@@ -7,8 +7,6 @@ After=local-fs.target
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/usr/local/sbin/van-muse-sandbox-mounts
-ExecStop=-/usr/bin/umount /var/lib/van-muse-sandbox/downloads
-ExecStop=-/usr/bin/umount /var/lib/van-muse-sandbox/profile
 
 [Install]
 WantedBy=multi-user.target
