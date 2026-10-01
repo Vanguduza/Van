@@ -46,6 +46,7 @@ SECRET_ROOT = Path(
     os.getenv("VAN_BROWSER_SECRET_ROOT", "/var/lib/van-trading/browser/secrets")
 )
 RUNTIME_ROOT = Path(os.getenv("VAN_BROWSER_RUNTIME_ROOT", "/run/van-browser"))
+JEV_SNAPSHOT_PATH = Path(os.getenv("VAN_JEV_SNAPSHOT_PATH", "/opt/van-browser-runtime/jev/snapshot.js"))
 REQUEST_TIMEOUT_SECONDS = float(
     os.getenv("VAN_BROWSER_WORKER_TIMEOUT_SECONDS", "45")
 )
@@ -512,6 +513,109 @@ print("__VAN_JSON__" + json.dumps({"tabs": items}))
     return {"tabs": safe, "harness_version": HARNESS_VERSION}
 
 
+def jev_observe(alias: str, domain: str) -> dict[str, Any]:
+    """Read Jev's pinned observed-action space through the already-owned Harness session."""
+    if not JEV_SNAPSHOT_PATH.is_file():
+        raise WorkerError("JEV_SNAPSHOT_UNAVAILABLE", 503)
+    script = r"""
+import hashlib, json, os
+snapshot = open(os.environ["VAN_JEV_SNAPSHOT_PATH"], encoding="utf-8").read()
+state = js(snapshot)
+if not isinstance(state, dict):
+    raise RuntimeError("jev snapshot unavailable")
+content = {k: state.get(k) for k in ("url", "text", "actions", "scroll")}
+state["fingerprint"] = hashlib.sha256(
+    json.dumps(content, sort_keys=True, ensure_ascii=False).encode()
+).hexdigest()
+print("__VAN_JSON__" + json.dumps(state))
+"""
+    result = run_harness(
+        alias,
+        script,
+        {"VAN_JEV_SNAPSHOT_PATH": str(JEV_SNAPSHOT_PATH)},
+    )
+    if not isinstance(result, dict):
+        raise WorkerError("JEV_SNAPSHOT_INVALID", 502)
+    current = str(result.get("url") or "")
+    if current and current != "about:blank":
+        assert_url_in_domain(current, domain)
+    actions = result.get("actions")
+    if not isinstance(actions, list) or len(actions) > 260:
+        raise WorkerError("JEV_ACTION_SPACE_INVALID", 502)
+    return result
+
+
+def jev_act(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
+    """Execute exactly one Jev-observed action after a freshness and identity re-check."""
+    fingerprint = str(body.get("fingerprint") or "")
+    proposed = body.get("action")
+    if not fingerprint or not isinstance(proposed, dict):
+        raise WorkerError("JEV_OBSERVED_ACTION_REQUIRED", 422)
+
+    current = jev_observe(alias, domain)
+    if current.get("fingerprint") != fingerprint:
+        raise WorkerError("JEV_PAGE_STALE", 409)
+    action_id = str(proposed.get("id") or "")
+    observed = next(
+        (a for a in current.get("actions", []) if str(a.get("id") or "") == action_id),
+        None,
+    )
+    if not isinstance(observed, dict):
+        raise WorkerError("JEV_ACTION_STALE", 409)
+
+    # The model may return only an id, but it may not mutate the semantics attached to
+    # that id. Compare every execution-bearing field against the fresh observation.
+    for key in ("kind", "node", "value", "delta", "label"):
+        if proposed.get(key) != observed.get(key):
+            raise WorkerError("JEV_ACTION_TAMPERED", 409)
+
+    kind = str(observed.get("kind") or "")
+    if kind == "fill":
+        # VAN intentionally does not use Jev's upstream text helper. Stagehand/Hermes
+        # handles text-bearing steps until a first-class textref contract is admitted.
+        raise WorkerError("JEV_TEXT_FAST_PATH_FORBIDDEN", 409)
+    if kind not in {"click", "select", "scroll", "wait"}:
+        raise WorkerError("JEV_ACTION_KIND_FORBIDDEN", 403)
+
+    script = r"""
+import json, os, time
+action = json.loads(os.environ["VAN_JEV_ACTION"])
+kind = action["kind"]
+if kind == "wait":
+    time.sleep(0.1)
+elif kind == "scroll":
+    info = page_info()
+    x=max(0,int(info.get("w",0))//2)
+    y=max(0,int(info.get("h",0))//2)
+    scroll(x,y,dy=int(action.get("delta",0)),dx=0)
+else:
+    expr = r"""(action => {
+      const e=window.__jevFast?.nodes.get(action.node);
+      if (!e?.isConnected || e.matches(':disabled') ||
+          e.closest('[aria-disabled="true"],[inert]') ||
+          !e.checkVisibility({checkOpacity:true,checkVisibilityCSS:true})) return null;
+      const r=e.getBoundingClientRect(), x=r.x+r.width/2, y=r.y+r.height/2;
+      if (!r.width || !r.height || x<0 || y<0 || x>=innerWidth || y>=innerHeight) return null;
+      if (!e.contains(document.elementFromPoint(x,y))) return null;
+      if (action.kind==='select') {
+        if (e.tagName!=='SELECT' || ![...e.options].some(o=>o.value===action.value &&
+            !o.disabled && !o.closest('optgroup[disabled]'))) return null;
+        e.value=action.value;
+        e.dispatchEvent(new Event('input',{bubbles:true}));
+        e.dispatchEvent(new Event('change',{bubbles:true}));
+      }
+      return {x,y};
+    })""" + json.dumps(action) + ")"
+    target = js(expr)
+    if target is None:
+        raise RuntimeError("Jev target changed or is covered")
+    if kind == "click":
+        click_at_xy(float(target["x"]), float(target["y"]))
+print("__VAN_JSON__" + json.dumps({"executed": action["id"], "kind": kind}))
+"""
+    return run_harness(alias, script, {"VAN_JEV_ACTION": json.dumps(observed, separators=(",", ":"))})
+
+
 OPERATIONS = {
     "/navigate": navigate,
     "/click": click,
@@ -574,6 +678,10 @@ class Handler(BaseHTTPRequestHandler):
                 result = screenshot(alias, domain)
             elif self.path == "/tabs":
                 result = tabs(alias, domain)
+            elif self.path == "/jev/observe":
+                result = jev_observe(alias, domain)
+            elif self.path == "/jev/act":
+                result = jev_act(body, alias, domain)
             else:
                 operation = OPERATIONS.get(self.path)
                 if operation is None:
