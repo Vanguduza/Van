@@ -45,7 +45,7 @@ from van_gateway.browser.models import (
     BrowserTask,
     InjectionAssessment,
 )
-from van_gateway.browser.policy import BrowserPolicyEngine
+from van_gateway.browser.policy import BrowserPolicyEngine, BrowserPolicyError
 from van_gateway.browser.subagent import ProposedAction, SubagentAssignment, SubagentStep
 
 
