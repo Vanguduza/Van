@@ -24,7 +24,7 @@ from van_gateway.automation.policy import load_automation_policy, load_browser_p
 from van_gateway.automation.registry import HotWorkflowIndex
 from van_gateway.automation.telemetry import TelemetryService
 from van_gateway.automation.workflow_health import WorkflowHealthService
-from van_gateway.browser.adapters import HttpBrowserHarnessAdapter, StagehandAdapter
+from van_gateway.browser.adapters import HttpBrowserHarnessAdapter, JevAdapter, StagehandAdapter
 from van_gateway.computer_use.fabric import ComputerInteractionFabric
 from van_gateway.config import Settings
 from van_gateway.degraded.registry import DegradedRegistry
@@ -107,6 +107,15 @@ class AutomationHealthApi:
             or self._manifest("stagehand"),
             model_provider=settings.browser_stagehand_model_provider,
             model_name=settings.browser_stagehand_model_name,
+        )
+        self.jev = JevAdapter(
+            self.runtime,
+            base_url=settings.browser_jev_base_url,
+            enabled=settings.browser_enabled and settings.browser_jev_enabled,
+            expected_version=settings.browser_jev_expected_version
+            or self._manifest("jev_ultrafast"),
+            expected_model=settings.browser_jev_model,
+            expected_min_confidence=settings.browser_jev_min_confidence,
         )
         # P2-CU-001 — the fabric is constructed in production for the first time. Its
         # health surface is here rather than in its own module because the three fabrics
@@ -198,15 +207,18 @@ class AutomationHealthApi:
     async def browser_health(self) -> dict[str, Any]:
         harness = await self.harness.status()
         stagehand = await self.stagehand.status()
+        jev = await self.jev.status()
         policy = load_browser_policy()
 
         self._sync_degraded(harness.state, DegradedCode.BROWSER_HARNESS_UNAVAILABLE)
         self._sync_degraded(stagehand.state, DegradedCode.BROWSER_SEMANTIC_UNAVAILABLE)
+        self._sync_degraded(jev.state, DegradedCode.BROWSER_JEV_FAST_LANE_UNAVAILABLE)
 
         return {
             "capability": "browser_fabric",
             "harness": harness.model_dump(mode="json"),
             "stagehand": stagehand.model_dump(mode="json"),
+            "jev_fast_lane": jev.model_dump(mode="json"),
             "governance": governance_state(),
             "policy_version": policy.policy_version,
             "max_autonomy_tier": policy.max_autonomy_tier,
@@ -216,6 +228,8 @@ class AutomationHealthApi:
             "degradation_scope": {
                 "harness_unavailable_affects": ["deterministic browser workflows"],
                 "stagehand_unavailable_affects": ["semantic observation", "workflow discovery"],
+                "jev_unavailable_affects": ["Muse fast semantic selection only"],
+                "jev_fallback": "Stagehand",
                 "native_and_automation_paths_unaffected": True,
                 "vati_t0_unaffected": True,
             },

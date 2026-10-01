@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import ast
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SERVICE = ROOT / "deploy/van-trading-core/browser/harness_service.py"
+JEV_SERVICE = ROOT / "deploy/van-trading-core/browser/jev_service.py"
 BOOTSTRAP = ROOT / "deploy/van-trading-core/browser/bootstrap-browser-runtime.sh"
 UNIT = ROOT / "deploy/van-trading-core/systemd/vati-browser-harness.service"
 ADAPTER = ROOT / "backend/van_gateway/browser/adapters.py"
@@ -66,3 +68,35 @@ def test_bootstrap_pins_and_health_checks_harness_worker():
     assert "vati-browser-harness.service" in text
     assert "127.0.0.1:${VAN_HARNESS_PORT:-9141}/health" in text
     assert "BROWSER_HARNESS_RUNTIME_GREEN" in text
+
+
+
+def test_jev_worker_and_browser_bootstrap_are_parseable():
+    ast.parse(JEV_SERVICE.read_text(encoding="utf-8"))
+    for script in (
+        ROOT / "deploy/van-trading-core/browser/bootstrap-browser-runtime.sh",
+        ROOT / "deploy/van-trading-core/qualify.sh",
+    ):
+        completed = subprocess.run(
+            ["bash", "-n", str(script)],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        assert completed.returncode == 0, f"{script}: {completed.stderr}"
+
+
+def test_jev_deployment_is_qualified_default_with_stagehand_fallback():
+    service = JEV_SERVICE.read_text(encoding="utf-8")
+    bootstrap = BOOTSTRAP.read_text(encoding="utf-8")
+    unit = (
+        ROOT / "deploy/van-trading-core/systemd/vati-jev.service"
+    ).read_text(encoding="utf-8")
+
+    assert 'MODEL = os.getenv("VAN_JEV_TYPESAFE_MODEL", "jev-1.13.0")' in service
+    assert 'VAN_JEV_MIN_CONFIDENCE' in service
+    assert "JEV_NOT_LIVE_QUALIFIED" in service
+    assert "JEV_TARGET_CONFIDENCE_BELOW_THRESHOLD" in service
+    assert "JEV_ULTRAFAST_DEGRADED_STAGEHAND_FALLBACK" in bootstrap
+    assert "User=van-jev" in unit
+    assert "Group=van-jev" in unit

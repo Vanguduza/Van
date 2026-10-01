@@ -246,7 +246,24 @@ def configure_hermes_access(repo):
     unit='''[Unit]\nDescription=VAN Trading Core n8n management tunnel\nAfter=network-online.target\nWants=network-online.target\n\n[Service]\nExecStart=/usr/bin/ssh -N -o BatchMode=yes -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -L 127.0.0.1:15678:127.0.0.1:5678 van-trading-core\nRestart=always\nRestartSec=5\n\n[Install]\nWantedBy=default.target\n'''
     remote_write('hermes','/home/ubuntu/.config/systemd/user/van-trading-core-n8n-tunnel.service',unit,'0644')
     ssh('hermes','systemctl --user daemon-reload && systemctl --user enable --now van-trading-core-n8n-tunnel.service',timeout=60)
-    env='VAN_TRADING_CORE_HOST=10.0.1.233\nVAN_COMMANDER_URL=https://10.0.1.233:9133\nVAN_N8N_API_URL=http://127.0.0.1:15678/api/v1\n'
+
+    # Browser workers remain loopback-only on Trading Core. Hermes/Gateway reaches them
+    # only through a separate bounded SSH transport, which also writes readiness evidence
+    # into the Gateway's own state store rather than Trading Core.
+    browser_transport=(
+        f'cd {shlex.quote(repo)} && VAN_REPO={shlex.quote(repo)} '
+        'bash deploy/van-trading-core/hermes/install-browser-runtime-transport.sh'
+    )
+    ssh('hermes',browser_transport,timeout=180)
+
+    env=(
+        'VAN_TRADING_CORE_HOST=10.0.1.233\n'
+        'VAN_COMMANDER_URL=https://10.0.1.233:9133\n'
+        'VAN_N8N_API_URL=http://127.0.0.1:15678/api/v1\n'
+        'VAN_BROWSER_STAGEHAND_URL=http://127.0.0.1:19140\n'
+        'VAN_BROWSER_HARNESS_URL=http://127.0.0.1:19141\n'
+        'VAN_BROWSER_JEV_URL=http://127.0.0.1:19142\n'
+    )
     remote_write('hermes','/home/ubuntu/.van/trading-core.env',env,'0600')
     # Re-read the isolated commander environment immediately. A deployment that
     # provisions the mutation credential but leaves the gateway on LocalAccountControl
@@ -256,6 +273,20 @@ def configure_hermes_access(repo):
 def verify_hermes_access(repo):
     p=ssh('hermes',"curl -fsS -H \"X-N8N-API-KEY: $(cat /home/ubuntu/.van/n8n-api.key)\" 'http://127.0.0.1:15678/api/v1/workflows?limit=1' >/dev/null && echo N8N_HERMES_GREEN",timeout=30)
     if 'N8N_HERMES_GREEN' not in p.stdout: raise RuntimeError('Hermes n8n management canary failed')
+
+    browser_probe=(
+        "set -e; "
+        "curl -fsS --max-time 5 http://127.0.0.1:19141/health | jq -e '.ok==true and .runtime_version==\"0.1.13\"' >/dev/null; "
+        "curl -fsS --max-time 5 http://127.0.0.1:19140/health | jq -e '.ok==true and .runtime_version==\"4.1.0\"' >/dev/null; "
+        "curl -fsS --max-time 5 http://127.0.0.1:19142/health | jq -e '.ok==true and .runtime_version==\"0.1.0\" and .model==\"jev-1.13.0\"' >/dev/null; "
+        "systemctl --user is-active --quiet van-trading-core-browser-tunnel.service; "
+        "echo BROWSER_FABRIC_TRANSPORT_GREEN"
+    )
+    bp=ssh('hermes',browser_probe,check=False,timeout=30)
+    if bp.returncode or 'BROWSER_FABRIC_TRANSPORT_GREEN' not in bp.stdout:
+        raise RuntimeError('Hermes Browser Fabric transport canary failed: '+bp.stdout[-500:]+bp.stderr[-300:])
+    print('BROWSER_FABRIC_TRANSPORT_GREEN',flush=True)
+
     live=("printf '%s\\n' '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{}}' "
           "'{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"status\",\"arguments\":{}}}' | "
           f"VAN_COMMANDER_URL=https://{PRIVATE_IP}:9133 VAN_COMMANDER_TOKEN_FILE=/home/ubuntu/.van/commander.hermes.token "

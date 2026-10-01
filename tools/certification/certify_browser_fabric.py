@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Rev 1.3 §§384-387 — live certification for the Browser Fabric.
 
-Four canaries, each mapping to an external gate:
+Five canaries, each mapping to an external gate:
 
   harness    §384 — start/attach the managed browser, act deterministically, seal evidence
   profile    §385 — a restored authenticated profile proves identity without leaking secrets
   stagehand  §386 — real semantic generation, not merely an SDK import
+  jev        — exact-model, side-effect-free one-step proposal qualification
   injection  §387 — an adversarial page gains no authority and exfiltrates nothing
 
 Requires live workers on the Trading Core VM. Without them the script exits
@@ -34,6 +35,7 @@ from van_gateway.automation.external_runtime import (  # noqa: E402
 from van_gateway.browser.adapters import (  # noqa: E402
     BrowserAdapterError,
     HttpBrowserHarnessAdapter,
+    JevAdapter,
     StagehandAdapter,
 )
 from van_gateway.browser.models import (  # noqa: E402
@@ -84,6 +86,19 @@ def _stagehand(store: Store) -> StagehandAdapter:
         model_provider=settings.browser_stagehand_model_provider,
         model_name=settings.browser_stagehand_model_name,
         max_tier=BrowserPolicyEngine().max_tier,
+    )
+
+
+
+def _jev(store: Store) -> JevAdapter:
+    settings = get_settings()
+    return JevAdapter(
+        ExternalRuntimeRegistry(store),
+        base_url=settings.browser_jev_base_url,
+        enabled=settings.browser_enabled and settings.browser_jev_enabled,
+        expected_version=settings.browser_jev_expected_version or _manifest("jev_ultrafast"),
+        expected_model=settings.browser_jev_model,
+        expected_min_confidence=settings.browser_jev_min_confidence,
     )
 
 
@@ -227,6 +242,64 @@ async def canary_stagehand(store: Store, target: str) -> int:
     return 0
 
 
+async def canary_jev(store: Store, target: str) -> int:
+    """Live Jev one-step proposal canary; it must not execute or generate text."""
+    settings = get_settings()
+    adapter = _jev(store)
+    if not settings.browser_jev_enabled:
+        print("FAIL Jev canary: VAN_BROWSER_JEV_ENABLED is false")
+        return 1
+    try:
+        result = await adapter.qualify()
+    except (BrowserAdapterError, BrowserPolicyError) as exc:
+        print(f"FAIL Jev canary: {exc}")
+        return 1
+
+    if result.get("qualified") is not True:
+        print("FAIL Jev canary: worker did not report startup-qualified")
+        return 1
+    if str(result.get("runtime_version") or "") != _manifest("jev_ultrafast"):
+        print("FAIL Jev canary: runtime version mismatch")
+        return 1
+    if str(result.get("model") or "") != settings.browser_jev_model:
+        print("FAIL Jev canary: decision model mismatch")
+        return 1
+    if result.get("text_generation") is not False or result.get("executes_actions") is not False:
+        print("FAIL Jev canary: side-effect boundary mismatch")
+        return 1
+
+    pointer = f"gateway://browser/certification/jev/{result.get('receipt_sha256','missing')}"
+    await ExternalRuntimeRegistry(store).record_evidence(
+        ReadinessEvidence(
+            capability="jev_ultrafast",
+            evidence_pointer=pointer,
+            runtime_version=_manifest("jev_ultrafast"),
+        )
+    )
+    receipt = _write_receipt(
+        "van_browser_jev_attestation.json",
+        {
+            "capability": "jev_ultrafast",
+            "check": "live_single_step_proposal",
+            "runtime_version": _manifest("jev_ultrafast"),
+            "model": settings.browser_jev_model,
+            "upstream_commit": result.get("upstream_commit"),
+            "worker_receipt_sha256": result.get("receipt_sha256"),
+            "evidence_pointer": pointer,
+            "text_generation": False,
+            "executes_actions": False,
+            "contains_secrets": False,
+            "verified_at_unix": int(time.time()),
+        },
+    )
+    status = await adapter.status()
+    if not status.ready:
+        print(f"FAIL Jev canary: durable evidence recorded but live status is {status.state.value}")
+        return 1
+    print(f"PASS Jev canary; receipt {receipt.relative_to(ROOT)}")
+    return 0
+
+
 async def canary_injection(store: Store, target: str) -> int:
     """§387 — an adversarial page must gain nothing."""
     service = BrowserTaskService(store)
@@ -271,6 +344,7 @@ async def canary_injection(store: Store, target: str) -> int:
 
 CANARIES = {
     "harness": canary_harness,
+    "jev": canary_jev,
     "profile": canary_profile,
     "stagehand": canary_stagehand,
     "injection": canary_injection,

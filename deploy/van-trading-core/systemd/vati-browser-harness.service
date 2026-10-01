@@ -24,6 +24,7 @@ ProtectSystem=strict
 ProtectHome=true
 ReadWritePaths=/var/lib/van-trading/browser /var/lib/van-trading/evidence/browser /run/van-browser /var/log/van-trading/browser
 ReadOnlyPaths=/opt/van-browser-runtime /opt/van-trading/config/browser-runtime.env
+InaccessiblePaths=-/opt/van-muse-sandbox/secrets -/var/lib/van-muse-sandbox/profile -/var/lib/van-muse-sandbox/downloads
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 RestrictNamespaces=true
 LockPersonality=true

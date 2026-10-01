@@ -1,0 +1,55 @@
+[Unit]
+Description=VAN private Jev Ultrafast proposal worker
+After=network-online.target vati-jev-egress-proxy.service
+Wants=network-online.target
+Requires=vati-jev-egress-proxy.service
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=van-jev
+Group=van-jev
+EnvironmentFile=/opt/van-trading/config/browser-runtime.env
+Environment=HTTPS_PROXY=http://127.0.0.1:9143
+Environment=HTTP_PROXY=http://127.0.0.1:9143
+Environment=ALL_PROXY=http://127.0.0.1:9143
+Environment=NO_PROXY=127.0.0.1,localhost,::1
+WorkingDirectory=/opt/van-jev-runtime
+RuntimeDirectory=van-jev
+RuntimeDirectoryMode=0700
+ExecStart=/opt/van-jev-runtime/venv/bin/python /opt/van-jev-runtime/jev_service.py
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=45
+TimeoutStopSec=15
+
+# Jev is proposal-only. It needs outbound HTTPS to TypeSafe and its own single key.
+# It cannot read generic browser secrets, Muse profile state, downloads, or sandbox control.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/opt/van-jev-runtime /opt/van-trading/config/browser-runtime.env /var/lib/van-trading/browser/jev-secrets
+ReadWritePaths=/run/van-jev
+InaccessiblePaths=-/var/lib/van-trading/browser/secrets -/opt/van-muse-sandbox/secrets -/var/lib/van-muse-sandbox/profile -/var/lib/van-muse-sandbox/downloads -/var/lib/van-trading/browser/profiles -/var/lib/van-trading/browser/downloads
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+IPAddressDeny=any
+IPAddressAllow=localhost
+RestrictNamespaces=true
+LockPersonality=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077
+
+CPUWeight=10
+IOWeight=10
+MemoryAccounting=true
+CPUAccounting=true
+TasksAccounting=true
+MemoryMax=512M
+TasksMax=128
+
+[Install]
+WantedBy=multi-user.target

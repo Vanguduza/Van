@@ -1,0 +1,42 @@
+[Unit]
+Description=VAN Jev domain-allowlisted TypeSafe CONNECT proxy
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=van-jev-proxy
+Group=van-jev-proxy
+Environment=VAN_JEV_PROXY_BIND=127.0.0.1
+Environment=VAN_JEV_PROXY_PORT=9143
+WorkingDirectory=/opt/van-jev-proxy
+ExecStart=/usr/bin/python3 /opt/van-jev-proxy/egress_proxy.py
+Restart=on-failure
+RestartSec=3
+
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+InaccessiblePaths=-/var/lib/van-trading/browser/secrets -/var/lib/van-trading/browser/jev-secrets -/opt/van-muse-sandbox/secrets -/var/lib/van-muse-sandbox/profile -/var/lib/van-muse-sandbox/downloads
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+UMask=0077
+
+CPUWeight=5
+IOWeight=5
+MemoryMax=64M
+TasksMax=64
+
+[Install]
+WantedBy=multi-user.target

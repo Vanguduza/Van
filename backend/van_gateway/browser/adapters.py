@@ -13,6 +13,8 @@ from __future__ import annotations
 
 from typing import Any, Protocol
 
+import math
+
 import httpx
 
 from van_gateway.automation.external_runtime import (
@@ -50,6 +52,10 @@ class BrowserHarnessAdapter(Protocol):
     async def wait(self, task: BrowserTask, condition: dict[str, Any]) -> dict[str, Any]: ...
     async def upload(self, task: BrowserTask, locator: str, file_ref: str) -> dict[str, Any]: ...
     async def tabs(self, task: BrowserTask) -> dict[str, Any]: ...
+    async def jev_observe(self, task: BrowserTask) -> dict[str, Any]: ...
+    async def jev_act(
+        self, task: BrowserTask, *, action: dict[str, Any], fingerprint: str
+    ) -> dict[str, Any]: ...
 
 
 class _PrivateWorkerClient:
@@ -188,8 +194,134 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
     async def tabs(self, task: BrowserTask) -> dict[str, Any]:
         return await self._call("/tabs", self._envelope(task))
 
+    async def jev_observe(self, task: BrowserTask) -> dict[str, Any]:
+        return await self._call("/jev/observe", self._envelope(task))
+
+    async def jev_act(
+        self, task: BrowserTask, *, action: dict[str, Any], fingerprint: str
+    ) -> dict[str, Any]:
+        return await self._call(
+            "/jev/act",
+            self._envelope(task, action=action, fingerprint=fingerprint),
+        )
+
     async def status(self) -> ExternalRuntimeStatus:  # type: ignore[override]
         return await super().status("BROWSER_HARNESS_UNAVAILABLE")
+
+
+class JevAdapter(_PrivateWorkerClient):
+    """Fast semantic action selector; proposal-only and Muse-profile scoped.
+
+    Jev never executes, never generates field text, and never receives authority.
+    BrowserSubagentRunner evaluates the proposal before Browser Harness acts.
+    """
+
+    CAPABILITY = "jev_ultrafast"
+
+    def __init__(
+        self,
+        registry: ExternalRuntimeRegistry,
+        *,
+        base_url: str = "",
+        enabled: bool = False,
+        expected_version: str | None = None,
+        expected_model: str = "jev-1.13.0",
+        expected_min_confidence: float = 0.80,
+        timeout_seconds: float = 30.0,
+        transport: httpx.AsyncBaseTransport | None = None,
+    ) -> None:
+        super().__init__(
+            registry,
+            base_url=base_url,
+            enabled=enabled,
+            expected_version=expected_version,
+            timeout_seconds=timeout_seconds,
+            transport=transport,
+        )
+        self.expected_model = expected_model
+        self.expected_min_confidence = float(expected_min_confidence)
+
+    async def qualify(self) -> dict[str, Any]:
+        """Run the side-effect-free live Jev canary before READY evidence exists."""
+        return await self._call(
+            "/qualify",
+            {
+                "allow_text_generation": False,
+                "allow_unbounded_agent_loop": False,
+            },
+        )
+
+    async def choose(
+        self,
+        task: BrowserTask,
+        *,
+        goal: str,
+        page: dict[str, Any],
+        history: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        if task.profile_alias != "muse_owner":
+            raise BrowserPolicyError("jev_profile_not_admitted")
+        readiness = await self.status()
+        if not readiness.ready:
+            raise BrowserAdapterError(
+                "JEV_ULTRAFAST_NOT_READY",
+                readiness.state.value,
+            )
+        return await self._call(
+            "/choose",
+            {
+                "task_id": task.task_id,
+                "profile_alias": task.profile_alias,
+                "target_domain": task.target_domain,
+                "goal": goal,
+                "page": page,
+                "history": history[-10:],
+                "allow_text_generation": False,
+                "allow_unbounded_agent_loop": False,
+            },
+        )
+
+    async def status(self) -> ExternalRuntimeStatus:  # type: ignore[override]
+        status = await super().status("BROWSER_JEV_FAST_LANE_UNAVAILABLE")
+        if not status.ready:
+            return status
+        try:
+            async with httpx.AsyncClient(
+                base_url=self.base_url,
+                timeout=min(self.timeout_seconds, 5.0),
+                transport=self.transport,
+            ) as client:
+                response = await client.get("/health")
+            response.raise_for_status()
+            health = dict(response.json())
+        except (httpx.HTTPError, ValueError, TypeError) as exc:
+            return status.model_copy(
+                update={
+                    "state": RuntimeState.DEGRADED,
+                    "detail": f"live Jev health unavailable: {type(exc).__name__}",
+                }
+            )
+        try:
+            observed_min_confidence = float(health.get("min_confidence", -1.0))
+        except (TypeError, ValueError):
+            observed_min_confidence = -1.0
+        if (
+            health.get("startup_qualified") is not True
+            or str(health.get("runtime_version") or "") != str(self.expected_version or "")
+            or str(health.get("model") or "") != self.expected_model
+            or not math.isfinite(observed_min_confidence)
+            or abs(observed_min_confidence - self.expected_min_confidence) > 1e-9
+            or health.get("text_generation") is not False
+            or health.get("executes_actions") is not False
+            or health.get("autonomous_loop") is not False
+        ):
+            return status.model_copy(
+                update={
+                    "state": RuntimeState.DEGRADED,
+                    "detail": "Jev live qualification/model contract mismatch",
+                }
+            )
+        return status
 
 
 class StagehandAdapter(_PrivateWorkerClient):
@@ -298,5 +430,6 @@ __all__ = [
     "BrowserAdapterError",
     "BrowserHarnessAdapter",
     "HttpBrowserHarnessAdapter",
+    "JevAdapter",
     "StagehandAdapter",
 ]

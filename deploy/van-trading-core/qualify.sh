@@ -165,6 +165,21 @@ curl -fsSk --max-time 5 "https://127.0.0.1:${VAN_COMMANDER_PORT:-9133}/health" >
 if "$BASE/automation/qualify-automation-runtime.sh" >/tmp/automation-qualify.log 2>&1; then add automation_fabric GREEN "$(tail -n 1 /tmp/automation-qualify.log)"; else add automation_fabric RED "$(tail -c 500 /tmp/automation-qualify.log)"; fi
 if "$BASE/app/deploy/van-trading-core/supabase/qualify-supabase-runtime.sh" >/tmp/supabase-qualify.log 2>&1; then add supabase_runtime GREEN "$(tail -n 1 /tmp/supabase-qualify.log)"; else add supabase_runtime RED "$(tail -c 500 /tmp/supabase-qualify.log)"; fi
 if [[ -f "$DATA/evidence/browser/runtime-manifest.json" ]] && jq -e '.stagehand=="4.1.0" and .playwright=="1.63.0" and .temporalio=="1.33.0"' "$DATA/evidence/browser/runtime-manifest.json" >/dev/null; then add browser_runtime GREEN "Stagehand 4.1.0 / Playwright 1.63.0 / Temporal 1.33.0"; else add browser_runtime RED "browser runtime manifest missing or mismatched"; fi
+# Trading Core can prove only its local worker. Durable Browser Fabric readiness belongs
+# to the VAN Gateway database on Hermes and is recorded there through the private tunnel.
+if curl -fsS --max-time 5 "http://127.0.0.1:${VAN_JEV_PORT:-9142}/health" >/tmp/van-jev-host-health.json 2>/dev/null; then
+  if jq -e '.ok==true and .runtime_version=="0.1.0" and .model=="jev-1.13.0" and .text_generation==false and .executes_actions==false and .autonomous_loop==false' /tmp/van-jev-host-health.json >/dev/null; then
+    if jq -e '.startup_qualified==true and .model_key_present==true' /tmp/van-jev-host-health.json >/dev/null; then
+      add jev_worker_local GREEN "worker live-qualified locally; Gateway readiness must be certified on Hermes" 0
+    else
+      add jev_worker_local AMBER "worker reachable but provider/startup qualification is not GREEN; Stagehand may be used when separately qualified" 0
+    fi
+  else
+    add jev_worker_local AMBER "Jev worker health contract mismatch; Gateway must not route to it" 0
+  fi
+else
+  add jev_worker_local AMBER "Jev worker unavailable; semantic fast lane degrades independently" 0
+fi
 if [[ -n "${VAN_COMMANDER_LEDGER:-}" ]]; then PYTHONPATH="$BASE/app/trading" "$BASE/venv/bin/python" - <<PY >/tmp/ledger.json 2>/tmp/ledger.err && add ledger GREEN "$(cat /tmp/ledger.json)" || add ledger RED "$(tail -c 300 /tmp/ledger.err)"
 import json
 from vati.core.ledger_pg import open_ledger
@@ -173,6 +188,24 @@ PY
 fi
 if ufw status 2>/dev/null | grep -q "Status: active"; then ufw status | grep -q "9133" && add firewall GREEN "ufw active, 9133 scoped" || add firewall RED "9133 rule missing"; else add firewall RED "ufw inactive"; fi
 if VAN_ADMIN_CIDRS="${VAN_ADMIN_CIDRS:-10.0.0.123/32}" VAN_PUBLIC_HOST="${VAN_PUBLIC_HOST:-}" bash "$BASE/app/deploy/van-trading-core/oci/harden-oracle-image-firewall.sh" --verify >/tmp/oracle-firewall.log 2>&1; then add oracle_image_firewall GREEN "$(tail -n 1 /tmp/oracle-firewall.log)"; else add oracle_image_firewall RED "$(tail -c 500 /tmp/oracle-firewall.log)"; fi
+if [[ -f /etc/van-muse-egress.env ]]; then
+  if /usr/local/bin/qualify-muse-egress >/tmp/muse-egress-qualify.json 2>/tmp/muse-egress-qualify.err && jq -e '.status=="GREEN" and .required_failures==0' /tmp/muse-egress-qualify.json >/dev/null; then
+    add muse_egress GREEN "$(jq -c '{status,checks}' /tmp/muse-egress-qualify.json)"
+  else
+    add muse_egress RED "$(tail -c 600 /tmp/muse-egress-qualify.err; tail -c 1200 /tmp/muse-egress-qualify.json)"
+  fi
+else
+  add muse_egress AMBER "hardened Muse egress not configured on this host" 0
+fi
+if [[ -f /etc/van-muse-sandbox.env ]]; then
+  if /usr/local/bin/qualify-muse-sandbox >/tmp/muse-sandbox-qualify.json 2>/tmp/muse-sandbox-qualify.err && jq -e '.status=="GREEN" and .required_failures==0' /tmp/muse-sandbox-qualify.json >/dev/null; then
+    add muse_sandbox GREEN "$(jq -c '{status,checks}' /tmp/muse-sandbox-qualify.json)"
+  else
+    add muse_sandbox RED "$(tail -c 600 /tmp/muse-sandbox-qualify.err; tail -c 1800 /tmp/muse-sandbox-qualify.json)"
+  fi
+else
+  add muse_sandbox AMBER "gVisor Muse sandbox not configured on this host" 0
+fi
 listeners="$(ss -ltnH 2>/dev/null | awk '{print $4}' | grep -E ':(3000|5432|5433|6543|8000)$' || true)"
 bad_listeners="$(printf '%s
 ' "$listeners" | grep -Ev '^(127\.0\.0\.1|\[::1\]):' || true)"

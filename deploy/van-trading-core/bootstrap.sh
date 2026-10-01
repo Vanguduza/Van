@@ -14,17 +14,17 @@
 # Linux. The MT5 bridge worker runs on a Windows host (windows/mt5_worker) and this VM holds only
 # the bridge CLIENT (mTLS). The script records that fact instead of pretending.
 #
-# Usage:  sudo bash bootstrap.sh [--dry-run] [--with-nautilus] [--repo-url URL] [--branch NAME] [--commit-sha=40HEX] [--skip-supabase] [--skip-docker]
+# Usage:  sudo bash bootstrap.sh [--dry-run] [--with-nautilus] [--with-muse] [--repo-url URL] [--branch NAME] [--commit-sha=40HEX] [--skip-supabase] [--skip-docker]
 # Re-running is safe; each step checks its own state.
 # =============================================================================
 set -euo pipefail
 
-DRY_RUN=0; WITH_NAUTILUS=0; SKIP_SUPABASE=0; SKIP_DOCKER=0; PUBLIC_HOST="${VAN_PUBLIC_HOST:-}"
+DRY_RUN=0; WITH_NAUTILUS=0; WITH_MUSE=0; SKIP_SUPABASE=0; SKIP_DOCKER=0; PUBLIC_HOST="${VAN_PUBLIC_HOST:-}"
 REPO_URL="${VAN_REPO_URL:-https://github.com/Vanguduza/Van.git}"
 BRANCH="${VAN_BRANCH:-main}"
 COMMIT_SHA="${VAN_COMMIT_SHA:-}"
 for a in "$@"; do case "$a" in
-  --dry-run) DRY_RUN=1;; --with-nautilus) WITH_NAUTILUS=1;; --skip-supabase) SKIP_SUPABASE=1;; --skip-docker) SKIP_DOCKER=1;;
+  --dry-run) DRY_RUN=1;; --with-nautilus) WITH_NAUTILUS=1;; --with-muse) WITH_MUSE=1;; --skip-supabase) SKIP_SUPABASE=1;; --skip-docker) SKIP_DOCKER=1;;
   --repo-url=*) REPO_URL="${a#*=}";; --branch=*) BRANCH="${a#*=}";; --commit-sha=*) COMMIT_SHA="${a#*=}";; --public-host=*) PUBLIC_HOST="${a#*=}";;
   *) echo "unknown arg $a" >&2; exit 2;; esac; done
 
@@ -318,9 +318,33 @@ if (( ! DRY_RUN )); then
 else plan "ufw + OCI image firewall: allow 22/tcp and 9133/tcp from $ADMIN_CIDRS; public 80/443 only when configured"; fi
 ok "firewall"
 
+# ---------------------------------------------------------------- optional hardened Meta Muse enclave
+# Run only after UFW/OCI image firewall convergence. The nftables state certified below
+# must be the final host-firewall state, not a pre-firewall intermediate.
+if (( WITH_MUSE )); then
+  if (( SKIP_DOCKER )); then
+    die "--with-muse requires Docker; remove --skip-docker"
+  fi
+  if (( DRY_RUN )); then
+    plan "converge hardened Muse WireGuard egress after final host firewall"
+    plan "install gVisor/Systrap Muse sandbox and run adversarial qualification"
+  else
+    [[ -f /etc/van-muse-egress.env ]] || die "--with-muse requires a provisioned /etc/van-muse-egress.env; stage it first to obtain the client public key"
+    bash "$HERE/muse/install-muse-egress.sh"
+    bash "$HERE/muse/sandbox/install-muse-sandbox.sh"
+    /usr/local/bin/qualify-muse-egress >/tmp/bootstrap-muse-egress.json
+    /usr/local/bin/qualify-muse-sandbox >/tmp/bootstrap-muse-sandbox.json
+    jq -e '.status=="GREEN" and .required_failures==0' /tmp/bootstrap-muse-egress.json >/dev/null || die "Muse egress did not qualify after final firewall"
+    jq -e '.status=="GREEN" and .required_failures==0' /tmp/bootstrap-muse-sandbox.json >/dev/null || die "Muse sandbox did not qualify after final firewall"
+  fi
+  ok "hardened Meta Muse enclave (post-firewall)"
+else
+  skip "Meta Muse enclave (pass --with-muse after provisioning its US/Canada egress peer)"
+fi
+
 # ---------------------------------------------------------------- record
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
-REPORT="{\"host\":\"$(hostname)\",\"arch\":\"$ARCH\",\"dry_run\":$DRY_RUN,\"mt5_native\":$MT5_NATIVE,\"branch\":\"$BRANCH\",\"with_nautilus\":$WITH_NAUTILUS,\"steps\":$(printf '%s\n' "${STEPS[@]}" | jq -R . | jq -s .),\"at\":\"$STAMP\"}"
+REPORT="{\"host\":\"$(hostname)\",\"arch\":\"$ARCH\",\"dry_run\":$DRY_RUN,\"mt5_native\":$MT5_NATIVE,\"branch\":\"$BRANCH\",\"with_nautilus\":$WITH_NAUTILUS,\"with_muse\":$WITH_MUSE,\"steps\":$(printf '%s\n' "${STEPS[@]}" | jq -R . | jq -s .),\"at\":\"$STAMP\"}"
 if (( ! DRY_RUN )); then echo "$REPORT" > "$DATA/bootstrap-$STAMP.json"; chown vati:vati "$DATA/bootstrap-$STAMP.json"; fi
 echo "$REPORT" | jq .
 echo "[bootstrap] next: 1) copy $SECRETS/pki/mt5-worker.{crt,key} + ca.crt to the Windows worker and run windows/mt5_worker/install.ps1"

@@ -10,6 +10,11 @@ profiles:
     authentication: external_secret_reference
     mutation: gateway_authorized_only
     download_policy: evidence_scoped
+  muse_owner:
+    persistence: managed
+    authentication: external_secret_reference
+    mutation: gateway_authorized_only
+    download_policy: evidence_scoped
 runtime:
   profile_root: /var/lib/van-trading/browser/profiles
   download_root: /var/lib/van-trading/browser/downloads

@@ -98,6 +98,7 @@ async def test_browser_health_reports_ladder_cap_and_scope(client):
     assert body["raw_cookie_export_forbidden"] is True
     assert body["harness"]["state"] != "READY"
     assert body["stagehand"]["state"] != "READY"
+    assert body["jev_fast_lane"]["state"] != "READY"
     assert body["degradation_scope"]["vati_t0_unaffected"] is True
     assert body["degradation_scope"]["native_and_automation_paths_unaffected"] is True
 
@@ -111,6 +112,7 @@ async def test_degraded_registry_reflects_unavailable_fabric(client):
     assert "AUTOMATION_FABRIC_UNAVAILABLE" in codes
     assert "BROWSER_HARNESS_UNAVAILABLE" in codes
     assert "BROWSER_SEMANTIC_UNAVAILABLE" in codes
+    assert "BROWSER_JEV_FAST_LANE_UNAVAILABLE" in codes
     assert "AUTOMATION_INGRESS_DISABLED" in codes
 
     snapshot = {entry.code.value: entry for entry in app.state.degraded.snapshot()}

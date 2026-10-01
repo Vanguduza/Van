@@ -184,6 +184,13 @@ CATALOG: dict[DegradedCode, DegradedCapability] = {
         will_not_do="Semantic observation, typed extraction and workflow discovery",
         restore_action="Configure the gateway-held model provider and start the pinned Stagehand worker",
     ),
+    DegradedCode.BROWSER_JEV_FAST_LANE_UNAVAILABLE: DegradedCapability(
+        code=DegradedCode.BROWSER_JEV_FAST_LANE_UNAVAILABLE,
+        broken="Jev Ultrafast fast semantic lane is unqualified, unreachable or model-drifted",
+        still_works="Stagehand semantic browser, deterministic Browser Harness, API/n8n/native paths and VATI T0",
+        will_not_do="Use Jev as the preferred low-latency Muse action selector until its live canary is GREEN",
+        restore_action="Restore the dedicated Jev credential/model, start vati-jev.service and run certify_browser_fabric.py --canary jev",
+    ),
     DegradedCode.BROWSER_PROFILE_AUTH_REQUIRED: DegradedCapability(
         code=DegradedCode.BROWSER_PROFILE_AUTH_REQUIRED,
         broken="A managed browser profile lost its authenticated session",

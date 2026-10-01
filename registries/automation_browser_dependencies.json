@@ -50,6 +50,21 @@
       "licence_class": "PERMISSIVE",
       "pin_status": "PINNED",
       "source_of_truth": "deploy/van-trading-core/browser/package.json"
+    },
+    "jev_ultrafast": {
+      "version": "0.1.0",
+      "commit": "1231850a0bf1a0c0341fe408ef1668dbbfdfac46",
+      "upstream_repository": "browser-use/jev-ultrafast",
+      "licence": "MIT",
+      "licence_class": "PERMISSIVE",
+      "pin_status": "PINNED_COMMIT",
+      "production_mode": "PROPOSAL_ONLY",
+      "text_generation": "forbidden_in_van_fast_lane",
+      "executes_actions": false,
+      "source_of_truth": "deploy/van-trading-core/browser/bootstrap-browser-runtime.sh",
+      "decision_model": "jev-1.13.0",
+      "startup_qualification": "required",
+      "minimum_confidence": 0.8
     }
   }
 }

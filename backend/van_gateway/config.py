@@ -129,6 +129,11 @@ class Settings(BaseSettings):
     browser_stagehand_expected_version: str = ""
     browser_stagehand_model_provider: str = ""
     browser_stagehand_model_name: str = ""
+    browser_jev_enabled: bool = True
+    browser_jev_base_url: str = "http://127.0.0.1:9142"
+    browser_jev_expected_version: str = ""
+    browser_jev_model: str = "jev-1.13.0"
+    browser_jev_min_confidence: float = Field(default=0.80, gt=0.0, le=1.0)
 
     # Hermes-governed ARTEMIS Android console. The raw UI remains on Netcup loopback;
     # VAN Gateway reaches only the authenticated private-overlay proxy. Android never
