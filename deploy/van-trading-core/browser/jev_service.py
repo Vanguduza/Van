@@ -341,8 +341,8 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
-    if REQUIRE_STARTUP_QUALIFICATION:
-        _run_live_qualification()
+    # Start observable but unroutable. The bootstrap/certification plane invokes
+    # /qualify once the dedicated key exists. /choose stays fail-closed until then.
     ThreadingHTTPServer((BIND, PORT), Handler).serve_forever()
 
 
