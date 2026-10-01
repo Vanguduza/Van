@@ -32,6 +32,7 @@ MAX_BODY_BYTES = 256 * 1024
 MAX_ACTIONS = 260
 MAX_TEXT = 6000
 MAX_GOAL = 8000
+MIN_CONFIDENCE = float(os.getenv("VAN_JEV_MIN_CONFIDENCE", "0.80"))
 
 BIND = os.getenv("VAN_JEV_BIND", "127.0.0.1")
 PORT = int(os.getenv("VAN_JEV_PORT", "9142"))
@@ -103,7 +104,7 @@ def _same_domain(url: str, domain: str) -> bool:
     except ValueError:
         return False
     host = (parsed.hostname or "").lower().rstrip(".")
-    return parsed.scheme in {"https", "http"} and (
+    return parsed.scheme == "https" and (
         host == domain or host.endswith("." + domain)
     )
 
@@ -192,6 +193,11 @@ def _choose(body: dict[str, Any]) -> dict[str, Any]:
 
     choice = str(decision.get("choice") or "")
     operation = str(decision.get("operation") or "")
+    operation_confidence = float(decision.get("confidence") or 0.0)
+    target_raw = decision.get("target_confidence")
+    target_confidence = (
+        float(target_raw) if isinstance(target_raw, (int, float)) else None
+    )
     action = next(
         (a for a in page["actions"] if str(a.get("id")) == choice),
         None,
@@ -200,6 +206,10 @@ def _choose(body: dict[str, Any]) -> dict[str, Any]:
         action = None
     elif action is None:
         raise WorkerError("JEV_DECISION_ACTION_MISSING", 502)
+    elif operation_confidence < MIN_CONFIDENCE:
+        raise WorkerError("JEV_OPERATION_CONFIDENCE_BELOW_THRESHOLD", 409)
+    elif target_confidence is not None and target_confidence < MIN_CONFIDENCE:
+        raise WorkerError("JEV_TARGET_CONFIDENCE_BELOW_THRESHOLD", 409)
 
     return {
         "ok": True,
@@ -210,7 +220,9 @@ def _choose(body: dict[str, Any]) -> dict[str, Any]:
         "operation": operation,
         "action": action,
         "fingerprint": page["fingerprint"],
-        "confidence": float(decision.get("confidence") or 0.0),
+        "confidence": operation_confidence,
+        "target_confidence": target_confidence,
+        "min_confidence": MIN_CONFIDENCE,
         "latency_ms": int(decision.get("latency_ms") or 0),
         "text_generation": False,
         "executes_actions": False,
@@ -315,6 +327,7 @@ class Handler(BaseHTTPRequestHandler):
                 "upstream_commit": UPSTREAM_COMMIT,
                 "bind": BIND,
                 "model": MODEL,
+                "min_confidence": MIN_CONFIDENCE,
                 "model_key_present": key_present,
                 "startup_qualified": _QUALIFIED,
                 "qualification": dict(_QUALIFICATION),
