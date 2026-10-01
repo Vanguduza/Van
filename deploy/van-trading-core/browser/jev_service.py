@@ -326,8 +326,8 @@ class Handler(BaseHTTPRequestHandler):
             if self.path == "/qualify":
                 self._send(200, {"ok": True, **_run_live_qualification()})
                 return
-            if REQUIRE_STARTUP_QUALIFICATION and not _QUALIFIED:
-                raise WorkerError("JEV_NOT_STARTUP_QUALIFIED", 503)
+            if not _QUALIFIED:
+                raise WorkerError("JEV_NOT_LIVE_QUALIFIED", 503)
             self._send(200, _choose(body))
         except WorkerError as exc:
             self._send(exc.status, {"ok": False, "error": exc.code})
