@@ -299,21 +299,20 @@ class HybridBrowserWorker:
         # Muse gets an optional Jev fast lane. Jev is proposal-only and cannot generate
         # text. Terminal choices, text-bearing actions, uncertainty, or any runtime error
         # fall through to Stagehand without consuming a browser step.
-        if self.jev is not None and task.profile_alias == "muse_owner":
+        jev_ui_goal = task.inputs.get("jev_ui_goal")
+        if (
+            self.jev is not None
+            and task.profile_alias == "muse_owner"
+            and isinstance(jev_ui_goal, str)
+            and 0 < len(jev_ui_goal.strip()) <= 500
+        ):
             try:
                 page = await self.harness.jev_observe(task)
                 decision = await self.jev.choose(
                     task,
-                    goal=assignment.goal,
+                    goal=jev_ui_goal.strip(),
                     page=page,
-                    history=[
-                        {
-                            "kind": step.kind,
-                            "domain": step.domain,
-                            "rationale": step.rationale,
-                        }
-                        for step in history[-10:]
-                    ],
+                    history=[{"kind": step.kind} for step in history[-10:]],
                 )
                 operation = str(decision.get("operation") or "").upper()
                 observed = decision.get("action")
