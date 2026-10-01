@@ -165,6 +165,22 @@ curl -fsSk --max-time 5 "https://127.0.0.1:${VAN_COMMANDER_PORT:-9133}/health" >
 if "$BASE/automation/qualify-automation-runtime.sh" >/tmp/automation-qualify.log 2>&1; then add automation_fabric GREEN "$(tail -n 1 /tmp/automation-qualify.log)"; else add automation_fabric RED "$(tail -c 500 /tmp/automation-qualify.log)"; fi
 if "$BASE/app/deploy/van-trading-core/supabase/qualify-supabase-runtime.sh" >/tmp/supabase-qualify.log 2>&1; then add supabase_runtime GREEN "$(tail -n 1 /tmp/supabase-qualify.log)"; else add supabase_runtime RED "$(tail -c 500 /tmp/supabase-qualify.log)"; fi
 if [[ -f "$DATA/evidence/browser/runtime-manifest.json" ]] && jq -e '.stagehand=="4.1.0" and .playwright=="1.63.0" and .temporalio=="1.33.0"' "$DATA/evidence/browser/runtime-manifest.json" >/dev/null; then add browser_runtime GREEN "Stagehand 4.1.0 / Playwright 1.63.0 / Temporal 1.33.0"; else add browser_runtime RED "browser runtime manifest missing or mismatched"; fi
+browser_enabled="${VAN_BROWSER_ENABLED:-0}"
+jev_enabled="${VAN_BROWSER_JEV_ENABLED:-1}"
+if [[ "$browser_enabled" =~ ^(1|true|TRUE|yes|YES|on|ON)$ && "$jev_enabled" =~ ^(1|true|TRUE|yes|YES|on|ON)$ ]]; then
+  if curl -fsS --max-time 5 "http://127.0.0.1:${VAN_JEV_PORT:-9142}/health" >/tmp/van-jev-host-health.json 2>/dev/null \
+     && jq -e '.ok==true and .startup_qualified==true and .runtime_version=="0.1.0" and .model=="jev-1.13.0" and .text_generation==false and .executes_actions==false' /tmp/van-jev-host-health.json >/dev/null; then
+    if PYTHONPATH="$APP/backend" "$BASE/venv/bin/python" "$APP/tools/certification/certify_browser_fabric.py" --canary jev --target muse.ai >/tmp/jev-cert.log 2>&1; then
+      add jev_fast_lane GREEN "$(tail -n 1 /tmp/jev-cert.log)" 0
+    else
+      add jev_fast_lane AMBER "startup-qualified but durable Jev canary failed: $(tail -c 500 /tmp/jev-cert.log)" 0
+    fi
+  else
+    add jev_fast_lane AMBER "Jev unqualified/unavailable; Stagehand is the semantic fallback" 0
+  fi
+else
+  add jev_fast_lane AMBER "Browser/Jev fast lane disabled by deployment policy" 0
+fi
 if [[ -n "${VAN_COMMANDER_LEDGER:-}" ]]; then PYTHONPATH="$BASE/app/trading" "$BASE/venv/bin/python" - <<PY >/tmp/ledger.json 2>/tmp/ledger.err && add ledger GREEN "$(cat /tmp/ledger.json)" || add ledger RED "$(tail -c 300 /tmp/ledger.err)"
 import json
 from vati.core.ledger_pg import open_ledger
