@@ -138,6 +138,9 @@ def _choose(body: dict[str, Any]) -> dict[str, Any]:
     page = _validate_page(body.get("page"), domain)
     history = body.get("history") if isinstance(body.get("history"), list) else []
     history = [dict(x) for x in history[-10:] if isinstance(x, dict)]
+    # Everything crossing the external decision boundary is scanned, not only the
+    # current page. A prior-step rationale or owner goal must not become a secret side channel.
+    _scan_sensitive({"goal": goal, "history": history})
 
     os.environ["TYPESAFE_API_KEY"] = _secret(KEY_REF)
     os.environ["TYPESAFE_MODEL"] = MODEL
