@@ -302,6 +302,7 @@ def test_jev_ultrafast_is_exact_pinned_proposal_only_and_stagehand_fallback():
 
 def test_jev_has_dedicated_principal_and_cannot_read_muse_or_general_browser_secrets():
     unit = (ROOT / "deploy/van-trading-core/systemd/vati-jev.service").read_text(encoding="utf-8")
+    service = (ROOT / "deploy/van-trading-core/browser/jev_service.py").read_text(encoding="utf-8")
     runtime = (ROOT / "deploy/van-trading-core/browser/runtime.env.example").read_text(encoding="utf-8")
     bootstrap = (ROOT / "deploy/van-trading-core/browser/bootstrap-browser-runtime.sh").read_text(encoding="utf-8")
 
