@@ -88,8 +88,11 @@ def start_browser() -> dict:
         PROFILE.mkdir(parents=True, exist_ok=True)
         DOWNLOADS.mkdir(parents=True, exist_ok=True)
         for path in (PROFILE, DOWNLOADS):
-            os.chown(path, CHROME_UID, CHROME_GID)
-            os.chmod(path, 0o700)
+            st = path.stat()
+            if st.st_uid != CHROME_UID or st.st_gid != CHROME_GID:
+                raise RuntimeError(f"persistent volume ownership mismatch: {path}")
+            if st.st_mode & 0o077:
+                raise RuntimeError(f"persistent volume permissions too broad: {path}")
         child_env = dict(os.environ)
         child_env.update(
             HOME="/home/muse",
