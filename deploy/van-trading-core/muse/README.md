@@ -14,7 +14,7 @@ VAN Browser Gateway / BrowserSubagentRunner
   |
   +--> Stagehand 4.1.0               semantic/deep worker
   |
-  +--> Jev fast lane                  staged separately; same authority envelope
+  +--> Jev Ultrafast 0.1.0          preferred qualified fast lane
   |
   v
 127.0.0.1:17922  (host-loopback CDP handoff)
@@ -129,6 +129,53 @@ muse_owner=http://127.0.0.1:17922
 For that profile only, Harness attaches to the gVisor Chromium rather than starting a native Chromium process.
 
 Stagehand already consumes the same `cdp-endpoint.json` handoff, so it is reused unchanged.
+
+### Jev qualified-default fast lane
+
+Jev Ultrafast is enabled by default for `muse_owner`, but **configuration is not readiness**. It enters the routing ladder only after both its live startup qualification and durable VAN readiness evidence are GREEN.
+
+The pinned contract is:
+
+```text
+jev-ultrafast          0.1.0
+upstream commit        1231850a0bf1a0c0341fe408ef1668dbbfdfac46
+decision model         jev-1.13.0
+minimum confidence     0.80
+text generation        forbidden
+browser execution      forbidden
+autonomous loop        forbidden
+OS principal           van-jev
+```
+
+Jev receives an action-space projection, not the raw Muse session. The fast lane strips Muse conversation/task body text, does not send screenshots, replaces current textbox contents with only an empty/non-empty marker, and rejects secret-shaped material before calling TypeSafe. It cannot type. Text-bearing work therefore falls through to the deeper governed path.
+
+Routing is:
+
+```text
+Jev qualified + confidence >= 0.80
+  -> one proposal
+  -> BrowserSubagentRunner authority check
+  -> Browser Harness fingerprint/guard revalidation
+  -> one action
+  -> Browser Harness independent observation
+
+Jev unqualified / model drift / low confidence / unsupported action
+  -> Stagehand
+
+Stagehand unavailable
+  -> deterministic Harness workflows remain available;
+     semantic work fails closed rather than inventing a decision
+```
+
+The TypeSafe credential is isolated from normal browser secrets:
+
+```text
+/var/lib/van-trading/browser/jev-secrets/jev-typesafe
+owner: van-jev
+mode: 0400 or 0600
+```
+
+After securely installing that key, restart `vati-jev.service`. Browser bootstrap invokes the side-effect-free one-step proposal canary when the key is present; `deploy/van-trading-core/qualify.sh` then records durable Jev readiness evidence. A failed Jev qualification is AMBER for the fast lane and does not make Stagehand, Browser Harness or VATI unavailable.
 
 Other profiles such as `public_research` and `authenticated_owner` continue using the existing browser runtime.
 
