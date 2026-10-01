@@ -366,3 +366,39 @@ def test_jev_provider_payload_is_data_minimized_and_requires_explicit_ui_goal():
     assert "goal=jev_ui_goal.strip()" in worker
     assert 'history=[{"kind": step.kind}' in worker
     assert "goal=assignment.goal" not in worker[worker.index('task.inputs.get("jev_ui_goal")'):worker.index("instruction = (")]
+
+
+
+def test_jev_worker_has_domain_allowlisted_loopback_only_egress():
+    import ast
+
+    unit = (ROOT / "deploy/van-trading-core/systemd/vati-jev.service").read_text(encoding="utf-8")
+    proxy_unit = (
+        ROOT / "deploy/van-trading-core/systemd/vati-jev-egress-proxy.service"
+    ).read_text(encoding="utf-8")
+    proxy = (
+        ROOT / "deploy/van-trading-core/browser/jev_egress_proxy.py"
+    ).read_text(encoding="utf-8")
+    bootstrap = (
+        ROOT / "deploy/van-trading-core/browser/bootstrap-browser-runtime.sh"
+    ).read_text(encoding="utf-8")
+
+    ast.parse(proxy)
+    assert 'UPSTREAM_HOST = "api.typesafe.ai"' in proxy
+    assert "UPSTREAM_PORT = 443" in proxy
+    assert 'method != "CONNECT"' in proxy
+    assert 'authority.lower() != f"{UPSTREAM_HOST}:{UPSTREAM_PORT}"' in proxy
+    assert "addr.is_global" in proxy
+
+    assert "Requires=vati-jev-egress-proxy.service" in unit
+    assert "HTTPS_PROXY=http://127.0.0.1:9143" in unit
+    assert "IPAddressDeny=any" in unit
+    assert "IPAddressAllow=localhost" in unit
+    assert "User=van-jev-proxy" in proxy_unit
+    assert "/var/lib/van-trading/browser/jev-secrets" in proxy_unit
+    assert "InaccessiblePaths=" in proxy_unit
+
+    assert "useradd --system --home-dir /var/lib/van-jev-proxy" in bootstrap
+    assert "JEV_TYPESAFE_EGRESS_PROXY_GREEN" in bootstrap
+    assert "CONNECT example.com:443" in bootstrap
+    assert "403 Forbidden" in bootstrap
