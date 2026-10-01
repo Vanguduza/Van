@@ -448,3 +448,12 @@ def test_hermes_gateway_reaches_private_browser_workers_through_bounded_transpor
     # OCI recovery re-converges and verifies the transport automatically.
     assert "install-browser-runtime-transport.sh" in rebuild
     assert "BROWSER_FABRIC_TRANSPORT_GREEN" in rebuild
+
+    transport_script = ROOT / "deploy/van-trading-core/hermes/install-browser-runtime-transport.sh"
+    parsed = subprocess.run(
+        ["bash", "-n", str(transport_script)],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert parsed.returncode == 0, parsed.stderr
