@@ -316,7 +316,8 @@ def test_jev_has_dedicated_principal_and_cannot_read_muse_or_general_browser_sec
     assert "VAN_JEV_SECRET_ROOT=/var/lib/van-trading/browser/jev-secrets" in runtime
     assert "VAN_JEV_TYPESAFE_MODEL=jev-1.13.0" in runtime
     assert "VAN_JEV_MIN_CONFIDENCE=0.80" in runtime
-    assert "VAN_JEV_REQUIRE_STARTUP_QUALIFICATION=1" in runtime
+    assert "VAN_JEV_REQUIRE_STARTUP_QUALIFICATION" not in runtime
+    assert "if not _QUALIFIED:" in service
     assert "useradd --system --home-dir /var/lib/van-jev" in bootstrap
     assert "install -d -o van-jev -g van-jev -m 0700 /var/lib/van-trading/browser/jev-secrets" in bootstrap
 
