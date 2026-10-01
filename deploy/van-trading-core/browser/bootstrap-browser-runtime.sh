@@ -182,8 +182,26 @@ done
 jev_green=0
 systemctl restart vati-jev.service >/dev/null 2>&1 || true
 for attempt in 1 2 3 4 5; do
-  if curl -fsS --max-time 3 "http://127.0.0.1:${VAN_JEV_PORT:-9142}/health" >/tmp/van-jev-health.json 2>/dev/null \
-     && python3 - /tmp/van-jev-health.json "$JEV_COMMIT" "jev-1.13.0" <<'PY'
+  if curl -fsS --max-time 3 "http://127.0.0.1:${VAN_JEV_PORT:-9142}/health" >/tmp/van-jev-health.json 2>/dev/null; then
+    break
+  fi
+  sleep 2
+done
+
+# Qualify only when the dedicated key exists. The canary is side-effect-free but paid;
+# service startup itself must never spend money or block Harness/Stagehand availability.
+if python3 - /tmp/van-jev-health.json <<'PY' >/dev/null 2>&1
+import json,sys
+d=json.load(open(sys.argv[1],encoding="utf-8"))
+assert d.get("model_key_present") is True
+PY
+then
+  curl -fsS --max-time 30 -X POST -H 'content-type: application/json' -d '{}' \
+    "http://127.0.0.1:${VAN_JEV_PORT:-9142}/qualify" >/tmp/van-jev-qualify.json 2>/dev/null || true
+fi
+
+if curl -fsS --max-time 3 "http://127.0.0.1:${VAN_JEV_PORT:-9142}/health" >/tmp/van-jev-health.json 2>/dev/null \
+   && python3 - /tmp/van-jev-health.json "$JEV_COMMIT" "jev-1.13.0" <<'PY'
 import json, sys
 d = json.load(open(sys.argv[1], encoding="utf-8"))
 assert d["ok"] is True
@@ -198,16 +216,11 @@ assert d["text_generation"] is False
 assert d["executes_actions"] is False
 assert d["autonomous_loop"] is False
 PY
-  then
-    jev_green=1
-    echo JEV_ULTRAFAST_RUNTIME_GREEN
-    break
-  fi
-  sleep 2
-done
-if (( jev_green == 0 )); then
+then
+  jev_green=1
+  echo JEV_ULTRAFAST_RUNTIME_GREEN
+else
   echo "JEV_ULTRAFAST_DEGRADED_STAGEHAND_FALLBACK" >&2
-  journalctl -u vati-jev.service -n 50 --no-pager >&2 || true
 fi
 
 /opt/van-trading/venv/bin/python - <<'PY'
