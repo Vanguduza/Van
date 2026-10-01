@@ -46,6 +46,7 @@ apt-get -o Acquire::Retries=3 install -y -qq --no-install-recommends   wireguard
 install -d -m 0755 /etc/van-muse-egress /var/lib/van-muse-egress
 install -d -m 0700 /opt/van-muse-egress/secrets
 id vanmuse >/dev/null 2>&1 || useradd --system --home-dir /var/lib/van-muse --create-home --shell /usr/sbin/nologin vanmuse
+id vanmuseproxy >/dev/null 2>&1 || useradd --system --home-dir /var/lib/van-muse-proxy --create-home --shell /usr/sbin/nologin vanmuseproxy
 chmod 0700 /var/lib/van-muse
 if [[ ! -s "$MUSE_WG_PRIVATE_KEY_FILE" ]]; then
   install -d -m 0700 "$(dirname "$MUSE_WG_PRIVATE_KEY_FILE")"
