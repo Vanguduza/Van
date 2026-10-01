@@ -1,7 +1,7 @@
 [Unit]
 Description=VAN Meta Muse Chromium sandbox (gVisor/Systrap)
-Requires=docker.service van-muse-sandbox-firewall.service van-muse-sandbox-proxy.service
-After=docker.service van-muse-sandbox-firewall.service van-muse-sandbox-proxy.service
+Requires=docker.service van-muse-sandbox-mounts.service van-muse-sandbox-firewall.service van-muse-sandbox-proxy.service
+After=docker.service van-muse-sandbox-mounts.service van-muse-sandbox-firewall.service van-muse-sandbox-proxy.service
 BindsTo=van-muse-sandbox-proxy.service
 
 [Service]
