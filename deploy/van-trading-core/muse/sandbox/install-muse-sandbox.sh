@@ -27,7 +27,6 @@ fi
 
 install -d -m 0755 /opt/van-muse-sandbox /var/lib/van-muse-sandbox
 install -d -m 0700 /opt/van-muse-sandbox/secrets
-install -d -m 0700 -o 10001 -g 100 "$HERE/.empty" 2>/dev/null || true
 install -d -m 0700 -o 10001 -g 100 /var/lib/van-muse-sandbox/profile /var/lib/van-muse-sandbox/downloads
 if [[ ! -s /opt/van-muse-sandbox/secrets/control.token ]]; then
   umask 077
@@ -82,6 +81,9 @@ fi
 docker build --pull=false -t van-muse-browser:rev1 "$HERE" >/dev/null
 image_id="$(docker image inspect -f '{{.Id}}' van-muse-browser:rev1)"
 [[ "$image_id" == sha256:* ]] || die "failed to resolve immutable sandbox image id"
+image_arch="$(docker image inspect -f '{{.Architecture}}' "$image_id")"
+[[ "$image_arch" == "arm64" ]] || die "sandbox image architecture mismatch: $image_arch"
+docker run --rm --runtime=runsc-muse --network=none --read-only   --tmpfs=/tmp:rw,noexec,nosuid,nodev,size=16m   --entrypoint=/usr/bin/python3 "$image_id"   -c 'import os,platform; assert platform.machine() in ("aarch64","arm64"); assert os.geteuid()==0'   >/dev/null || die "gVisor Systrap smoke container failed"
 python3 - "$ENVF" "$image_id" <<'PY'
 import re,sys
 p,image=sys.argv[1:]
@@ -103,15 +105,17 @@ for u in van-muse-sandbox-firewall.service van-muse-sandbox-proxy.service van-mu
   install -m 0644 "$HERE/systemd/$u" "/etc/systemd/system/$u"
 done
 systemctl daemon-reload
-systemctl enable van-muse-sandbox-firewall.service van-muse-sandbox-proxy.service van-muse-sandbox.service van-muse-cdp-bridge.service van-muse-sandbox-health.timer >/dev/null
 
-# Do not make a half-connected browser live. The already-hardened egress must prove its
-# fixed US/CA identity before the sandbox is started.
+# Do not enable boot persistence until the already-hardened egress proves its fixed
+# regional identity. A staged sandbox must remain inert across reboot.
 if ! /usr/local/bin/van-muse-egress-check >/dev/null 2>&1; then
-  log "sandbox staged but not started: hardened US/CA egress is not GREEN"
+  systemctl disable van-muse-sandbox-firewall.service van-muse-sandbox-proxy.service van-muse-sandbox.service van-muse-cdp-bridge.service van-muse-sandbox-health.timer >/dev/null 2>&1 || true
+  systemctl stop van-muse-cdp-bridge.service van-muse-sandbox.service van-muse-sandbox-proxy.service van-muse-sandbox-firewall.service >/dev/null 2>&1 || true
+  log "sandbox staged but disabled: hardened US/CA egress is not GREEN"
   exit 20
 fi
 
+systemctl enable van-muse-sandbox-firewall.service van-muse-sandbox-proxy.service van-muse-sandbox.service van-muse-cdp-bridge.service van-muse-sandbox-health.timer >/dev/null
 systemctl restart van-muse-sandbox-firewall.service
 systemctl restart van-muse-sandbox-proxy.service
 systemctl restart van-muse-sandbox.service
