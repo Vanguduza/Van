@@ -18,6 +18,7 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
+from urllib.request import urlopen
 
 CONTROL_BIND = os.environ.get("VAN_MUSE_CONTROL_BIND", "0.0.0.0")
 CONTROL_PORT = int(os.environ.get("VAN_MUSE_CONTROL_PORT", "9230"))
@@ -112,12 +113,15 @@ def start_browser() -> dict:
     while time.monotonic() < deadline:
         if _proc is None or _proc.poll() is not None:
             raise RuntimeError("chromium exited during start")
-        active = PROFILE / "DevToolsActivePort"
-        if active.exists():
-            return status()
+        try:
+            with urlopen("http://127.0.0.1:9222/json/version", timeout=0.5) as response:
+                if response.status == 200:
+                    return status()
+        except Exception:
+            pass
         time.sleep(0.1)
     stop_browser()
-    raise RuntimeError("chromium DevTools endpoint did not become ready")
+    raise RuntimeError("chromium CDP endpoint did not become ready")
 
 
 def stop_browser() -> dict:
@@ -154,6 +158,7 @@ def status() -> dict:
         "uptime_seconds": uptime,
         "profile": "/home/muse/profile",
         "downloads": "/home/muse/downloads",
+        "cdp_url": "http://127.0.0.1:9222" if alive else None,
         "shell_endpoint": False,
         "arbitrary_exec": False,
     }
