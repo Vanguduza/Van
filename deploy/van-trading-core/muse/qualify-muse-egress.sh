@@ -33,8 +33,43 @@ v6default="$(ip -n van-muse -6 route show default 2>/dev/null)"
 
 nslisten="$(ip netns exec van-muse ss -ltnH 2>/dev/null | awk '{print $4}' | grep ':1080$' || true)"
 [[ "$nslisten" == "169.254.77.2:1080" ]] && add socks_bind GREEN "$nslisten" || add socks_bind RED "${nslisten:-missing}"
-hostlisten="$(ss -ltnH 2>/dev/null | awk '{print $4}' | grep ':17890$' || true)"
+hostlisten="$(ss -ltnH 2>/dev/null | awk '{print $4}' | grep ':17890"$(/usr/local/bin/van-muse-egress-check 2>/dev/null)"; then
+  add egress_identity GREEN "$observed"
+else
+  add egress_identity RED "expected $MUSE_EXPECTED_EGRESS_IP $MUSE_EXPECTED_COUNTRY"
+fi
+
+latest="$(ip netns exec van-muse wg show wg-muse latest-handshakes 2>/dev/null | awk '{print $2}' | head -1)"
+now="$(date +%s)"
+if [[ "$latest" =~ ^[0-9]+$ ]] && (( latest > 0 && now-latest < 180 )); then
+  add wireguard_handshake GREEN "age=$((now-latest))s"
+else
+  add wireguard_handshake RED "latest=${latest:-none}"
+fi
+
+rules="$(ip netns exec van-muse nft list table inet van_muse_ns 2>/dev/null || true)"
+grep -q '169.254.0.0/16' <<<"$rules" && grep -q '10.0.0.0/8' <<<"$rules" &&   add private_destination_policy GREEN present || add private_destination_policy RED missing
+
+if ip netns exec van-muse curl -fsS --max-time 3 http://169.254.169.254/ >/dev/null 2>&1; then add metadata_block RED reachable; else add metadata_block GREEN blocked; fi
+if ip netns exec van-muse curl -fsS --max-time 3 http://10.0.1.233/ >/dev/null 2>&1; then add trading_lan_block RED reachable; else add trading_lan_block GREEN blocked; fi
+
+status=GREEN; ((fails)) && status=RED
+jq -n --arg status "$status" --arg at "$(date -u +%Y-%m-%dT%H:%M:%SZ)"   --argjson failures "$fails" --argjson checks "[$(IFS=,; echo "${checks[*]}")]"   '{status:$status,required_failures:$failures,at:$at,checks:$checks}'
+((fails==0))
+ || true)"
 [[ "$hostlisten" == "127.0.0.1:17890" ]] && add bridge_bind GREEN "$hostlisten" || add bridge_bind RED "${hostlisten:-missing-or-not-loopback}"
+
+host_rules="$(nft list table inet van_muse_host 2>/dev/null || true)"
+if grep -q 'tcp dport 17890' <<<"$host_rules" && grep -q 'meta skuid' <<<"$host_rules"; then
+  add host_proxy_policy GREEN present
+else
+  add host_proxy_policy RED missing
+fi
+if sudo -u nobody curl --proxy socks5h://127.0.0.1:17890 -fsS --max-time 3 https://www.cloudflare.com/cdn-cgi/trace >/dev/null 2>&1; then
+  add unauthorized_host_proxy RED "nobody reached Muse egress"
+else
+  add unauthorized_host_proxy GREEN blocked
+fi
 
 if observed="$(/usr/local/bin/van-muse-egress-check 2>/dev/null)"; then
   add egress_identity GREEN "$observed"
