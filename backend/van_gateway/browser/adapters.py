@@ -13,6 +13,8 @@ from __future__ import annotations
 
 from typing import Any, Protocol
 
+import math
+
 import httpx
 
 from van_gateway.automation.external_runtime import (
@@ -299,11 +301,16 @@ class JevAdapter(_PrivateWorkerClient):
                     "detail": f"live Jev health unavailable: {type(exc).__name__}",
                 }
             )
+        try:
+            observed_min_confidence = float(health.get("min_confidence", -1.0))
+        except (TypeError, ValueError):
+            observed_min_confidence = -1.0
         if (
             health.get("startup_qualified") is not True
             or str(health.get("runtime_version") or "") != str(self.expected_version or "")
             or str(health.get("model") or "") != self.expected_model
-            or abs(float(health.get("min_confidence", -1.0)) - self.expected_min_confidence) > 1e-9
+            or not math.isfinite(observed_min_confidence)
+            or abs(observed_min_confidence - self.expected_min_confidence) > 1e-9
             or health.get("text_generation") is not False
             or health.get("executes_actions") is not False
             or health.get("autonomous_loop") is not False
