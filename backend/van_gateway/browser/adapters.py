@@ -224,6 +224,7 @@ class JevAdapter(_PrivateWorkerClient):
         enabled: bool = False,
         expected_version: str | None = None,
         expected_model: str = "jev-1.13.0",
+        expected_min_confidence: float = 0.80,
         timeout_seconds: float = 30.0,
         transport: httpx.AsyncBaseTransport | None = None,
     ) -> None:
@@ -236,6 +237,7 @@ class JevAdapter(_PrivateWorkerClient):
             transport=transport,
         )
         self.expected_model = expected_model
+        self.expected_min_confidence = float(expected_min_confidence)
 
     async def qualify(self) -> dict[str, Any]:
         """Run the side-effect-free live Jev canary before READY evidence exists."""
@@ -301,6 +303,7 @@ class JevAdapter(_PrivateWorkerClient):
             health.get("startup_qualified") is not True
             or str(health.get("runtime_version") or "") != str(self.expected_version or "")
             or str(health.get("model") or "") != self.expected_model
+            or abs(float(health.get("min_confidence", -1.0)) - self.expected_min_confidence) > 1e-9
             or health.get("text_generation") is not False
             or health.get("executes_actions") is not False
             or health.get("autonomous_loop") is not False
