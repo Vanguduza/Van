@@ -20,6 +20,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
+from urllib.request import urlopen
 
 HARNESS_VERSION = "0.1.13"
 SERVICE_VERSION = "van-browser-harness-worker/1"
@@ -48,6 +49,37 @@ RUNTIME_ROOT = Path(os.getenv("VAN_BROWSER_RUNTIME_ROOT", "/run/van-browser"))
 REQUEST_TIMEOUT_SECONDS = float(
     os.getenv("VAN_BROWSER_WORKER_TIMEOUT_SECONDS", "45")
 )
+
+
+def _load_external_cdp_map() -> dict[str, str]:
+    """Pinned external CDP endpoints for specially managed browser profiles.
+
+    The value is intentionally static configuration, not caller input. Only literal
+    loopback HTTP endpoints are accepted so a profile cannot redirect Harness to another host.
+    """
+    raw = os.getenv("VAN_BROWSER_EXTERNAL_CDP_MAP", "").strip()
+    result: dict[str, str] = {}
+    if not raw:
+        return result
+    for item in raw.split(","):
+        if not item.strip():
+            continue
+        if "=" not in item:
+            raise SystemExit("invalid VAN_BROWSER_EXTERNAL_CDP_MAP entry")
+        alias, endpoint = item.split("=", 1)
+        alias, endpoint = alias.strip(), endpoint.strip().rstrip("/")
+        if not PROFILE_RE.fullmatch(alias):
+            raise SystemExit("invalid external CDP profile alias")
+        parsed = urlparse(endpoint)
+        if parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1", "::1", "localhost"}:
+            raise SystemExit("external CDP endpoint must be literal/local loopback HTTP")
+        if not parsed.port:
+            raise SystemExit("external CDP endpoint requires an explicit port")
+        result[alias] = endpoint
+    return result
+
+
+EXTERNAL_CDP = _load_external_cdp_map()
 
 if BIND not in {"127.0.0.1", "::1", "localhost"}:
     raise SystemExit("browser harness worker refuses a non-loopback bind")
@@ -127,6 +159,30 @@ class ChromeSession:
 
     def ensure(self) -> str:
         with self.lock:
+            external = EXTERNAL_CDP.get(self.alias)
+            if external:
+                marker = self.runtime_dir / "cdp-endpoint.json"
+                try:
+                    data = json.loads(marker.read_text(encoding="utf-8"))
+                except (OSError, json.JSONDecodeError) as exc:
+                    raise WorkerError("EXTERNAL_CDP_HANDOFF_UNAVAILABLE", 503) from exc
+                if (
+                    data.get("profile_alias") != self.alias
+                    or data.get("cdp_url") != external
+                    or data.get("external_managed") is not True
+                ):
+                    raise WorkerError("EXTERNAL_CDP_HANDOFF_INVALID", 503)
+                try:
+                    with urlopen(external + "/json/version", timeout=2) as response:
+                        if response.status != 200:
+                            raise WorkerError("EXTERNAL_CDP_UNAVAILABLE", 503)
+                except WorkerError:
+                    raise
+                except Exception as exc:
+                    raise WorkerError("EXTERNAL_CDP_UNAVAILABLE", 503) from exc
+                self.cdp_url = external
+                return external
+
             if self.process is not None and self.process.poll() is None and self.cdp_url:
                 self._publish_cdp()
                 return self.cdp_url
@@ -190,6 +246,12 @@ class ChromeSession:
 
     def stop(self) -> None:
         with self.lock:
+            if self.alias in EXTERNAL_CDP:
+                # Lifecycle belongs to the sandbox supervisor. Harness may detach but must
+                # never kill or delete the externally managed browser handoff.
+                self.process = None
+                self.cdp_url = None
+                return
             proc, self.process = self.process, None
             self.cdp_url = None
             (self.runtime_dir / "cdp-endpoint.json").unlink(missing_ok=True)
