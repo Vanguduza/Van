@@ -14,17 +14,17 @@
 # Linux. The MT5 bridge worker runs on a Windows host (windows/mt5_worker) and this VM holds only
 # the bridge CLIENT (mTLS). The script records that fact instead of pretending.
 #
-# Usage:  sudo bash bootstrap.sh [--dry-run] [--with-nautilus] [--repo-url URL] [--branch NAME] [--commit-sha=40HEX] [--skip-supabase] [--skip-docker]
+# Usage:  sudo bash bootstrap.sh [--dry-run] [--with-nautilus] [--with-muse] [--repo-url URL] [--branch NAME] [--commit-sha=40HEX] [--skip-supabase] [--skip-docker]
 # Re-running is safe; each step checks its own state.
 # =============================================================================
 set -euo pipefail
 
-DRY_RUN=0; WITH_NAUTILUS=0; SKIP_SUPABASE=0; SKIP_DOCKER=0; PUBLIC_HOST="${VAN_PUBLIC_HOST:-}"
+DRY_RUN=0; WITH_NAUTILUS=0; WITH_MUSE=0; SKIP_SUPABASE=0; SKIP_DOCKER=0; PUBLIC_HOST="${VAN_PUBLIC_HOST:-}"
 REPO_URL="${VAN_REPO_URL:-https://github.com/Vanguduza/Van.git}"
 BRANCH="${VAN_BRANCH:-main}"
 COMMIT_SHA="${VAN_COMMIT_SHA:-}"
 for a in "$@"; do case "$a" in
-  --dry-run) DRY_RUN=1;; --with-nautilus) WITH_NAUTILUS=1;; --skip-supabase) SKIP_SUPABASE=1;; --skip-docker) SKIP_DOCKER=1;;
+  --dry-run) DRY_RUN=1;; --with-nautilus) WITH_NAUTILUS=1;; --with-muse) WITH_MUSE=1;; --skip-supabase) SKIP_SUPABASE=1;; --skip-docker) SKIP_DOCKER=1;;
   --repo-url=*) REPO_URL="${a#*=}";; --branch=*) BRANCH="${a#*=}";; --commit-sha=*) COMMIT_SHA="${a#*=}";; --public-host=*) PUBLIC_HOST="${a#*=}";;
   *) echo "unknown arg $a" >&2; exit 2;; esac; done
 
@@ -277,6 +277,28 @@ if [[ -n "$VEKL_WORKER_HOST" ]]; then
   ok "browser development runtime foundation"
 else
   (( DRY_RUN )) || die "VAN_VEKL_WORKER_HOST is required for complete production bootstrap"
+fi
+
+# ---------------------------------------------------------------- optional hardened Meta Muse enclave
+if (( WITH_MUSE )); then
+  if (( SKIP_DOCKER )); then
+    die "--with-muse requires Docker; remove --skip-docker"
+  fi
+  if (( DRY_RUN )); then
+    plan "converge hardened Muse WireGuard egress from /etc/van-muse-egress.env"
+    plan "install gVisor/Systrap Muse sandbox and run adversarial qualification"
+  else
+    [[ -f /etc/van-muse-egress.env ]] || die "--with-muse requires a provisioned /etc/van-muse-egress.env; stage it first to obtain the client public key"
+    bash "$HERE/muse/install-muse-egress.sh"
+    bash "$HERE/muse/sandbox/install-muse-sandbox.sh"
+    /usr/local/bin/qualify-muse-egress >/tmp/bootstrap-muse-egress.json
+    /usr/local/bin/qualify-muse-sandbox >/tmp/bootstrap-muse-sandbox.json
+    jq -e '.status=="GREEN" and .required_failures==0' /tmp/bootstrap-muse-egress.json >/dev/null || die "Muse egress did not qualify"
+    jq -e '.status=="GREEN" and .required_failures==0' /tmp/bootstrap-muse-sandbox.json >/dev/null || die "Muse sandbox did not qualify"
+  fi
+  ok "hardened Meta Muse enclave"
+else
+  skip "Meta Muse enclave (pass --with-muse after provisioning its US/Canada egress peer)"
 fi
 
 # ---------------------------------------------------------------- public TLS front for the MT5 pull bridge (optional)
