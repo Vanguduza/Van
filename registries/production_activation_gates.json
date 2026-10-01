@@ -193,7 +193,7 @@
           "zone": "van-browser-core",
           "max_age_hours": 168,
           "artifacts": {"harness_service.py": "deploy/van-browser-core/browser/harness_service.py", "egress_proxy.py": "deploy/van-browser-core/browser/egress_proxy.py", "van-browser-core.nft": "deploy/van-browser-core/firewall/van-browser-core.nft"},
-          "required_checks": ["firewall_loaded", "browser_udp_blocked", "browser_tcp_bypass_blocked", "egress_proxy_active", "egress_refuses_without_policy", "egress_policy_mac_enforced", "egress_refuses_websocket_and_write", "harness_uses_egress_proxy", "network_guard_canary", "egress_refuses_smuggling", "egress_refuses_other_users", "stagehand_isolated"]
+          "required_checks": ["firewall_loaded", "browser_udp_blocked", "browser_tcp_bypass_blocked", "egress_proxy_active", "egress_refuses_without_policy", "egress_policy_mac_enforced", "egress_refuses_websocket_and_write", "harness_uses_egress_proxy", "network_guard_canary", "egress_refuses_smuggling", "egress_refuses_other_users", "stagehand_isolated", "services_run_installed_code"]
         }
       ]
     }

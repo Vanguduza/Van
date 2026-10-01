@@ -464,6 +464,7 @@ partly closed. Each finding below was reproduced on this branch before the fix.
 | NIT-1 | `_handed_to_owner` unbounded | most recent 256 kept | — |
 | NIT-2 | the numeric-uid isolation probe cleared supplementary groups | the probe takes the running Stagehand's groups from `/proc/<pid>/status` | — |
 | NIT-3 | `ipaddress` (3.11.15): `64:ff9b::7f00:1` and `::127.0.0.1` `is_global` True | IPv4-mapped, NAT64 `/96` and IPv4-compatible addresses judged by their IPv4 address | refused |
+| I9b observation | the artifact digests measure files on disk; a file replaced after its service started would pass | new required check `services_run_installed_code`: the Harness's and the egress proxy's main processes started after their installed files were written; the Stagehand probe tolerates a missing `Groups:` line | induced: a file touched after the process start gives `stale` (RED) |
 
 Induced failures: with the gate's binding check disabled, the 6 binding cases fail; the I9
 proxy and release tests failed on `28be6c42` (2 of 3, and 2 of 2).

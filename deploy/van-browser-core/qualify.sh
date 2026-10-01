@@ -294,7 +294,8 @@ code = ("import errno, socket, sys\n"
 groups = ["--init-groups"] if not sys.argv[1].isdigit() else ["--clear-groups"]
 if running:
     status = open(f"/proc/{found.stdout.split()[0]}/status", encoding="utf-8").read()
-    held = re.search(r"^Groups:\s*(.*)$", status, re.M).group(1).split()
+    line = re.search(r"^Groups:[ \t]*(.*)$", status, re.M)
+    held = line.group(1).split() if line else []
     groups = [f"--groups={','.join(held)}"] if held else ["--clear-groups"]
 probe = subprocess.run(["setpriv", f"--reuid={uid}", f"--regid={gid}", *groups, sys.executable, "-c", code,
                         env.get("VAN_HARNESS_FENCE_KEY_FILE", ""), env.get("VAN_EGRESS_FENCE_KEY_FILE", ""),
@@ -304,6 +305,38 @@ PY
 )"
 [[ "$iso" == "running separate DENIED,DENIED,DENIED" ]] && add stagehand_isolated GREEN "Stagehand runs as $STAGEHAND_USER; fence keys and control socket denied" \
   || add stagehand_isolated RED "Stagehand isolation: ${iso:-probe did not run: $(tail -c 300 /tmp/vbcq-iso.err 2>/dev/null)} (want: running separate DENIED,DENIED,DENIED)"
+
+# Review I9b: the report's artifact digests are of the installed files. A file replaced after its
+# service started is not what runs, so each worker must have started after its file was written.
+RUNTIME_DIR="${VAN_BROWSER_CORE_RUNTIME:-/opt/van-browser-core/runtime}"
+fresh="$(python3 - "$RUNTIME_DIR" 2>&1 <<'PY'
+import os, subprocess, sys
+runtime = sys.argv[1]
+btime = next(int(l.split()[1]) for l in open("/proc/stat") if l.startswith("btime "))
+tick = os.sysconf("SC_CLK_TCK")
+out = []
+for unit, name in (("van-browser-harness.service", "harness_service.py"), ("van-browser-egress.service", "egress_proxy.py")):
+    try:
+        pid = int(subprocess.run(["systemctl", "show", "-p", "MainPID", "--value", unit],
+                                 capture_output=True, text=True, timeout=10).stdout.strip() or 0)
+    except (OSError, ValueError, subprocess.SubprocessError):
+        pid = 0
+    if pid <= 0:
+        out.append(f"{unit}:notrunning")
+        continue
+    try:
+        started = btime + int(open(f"/proc/{pid}/stat").read().rsplit(")", 1)[1].split()[19]) / tick
+        written = os.stat(os.path.join(runtime, name)).st_mtime
+    except (OSError, ValueError, IndexError):
+        out.append(f"{unit}:unreadable")
+        continue
+    out.append(f"{unit}:{'current' if started >= written else 'stale'}")
+print(" ".join(out))
+PY
+)"
+if [[ "$fresh" == "van-browser-harness.service:current van-browser-egress.service:current" ]]; then
+  add services_run_installed_code GREEN "Harness and egress proxy started after their installed files were written"
+else add services_run_installed_code RED "running code vs installed files: ${fresh:-probe did not run} (want both current)"; fi
 
 # 7. Model pin status (§4): informational, required=0. UNVERIFIED is not GREEN.
 add model_immutable_snapshot UNKNOWN "immutable provider revision for claude-sonnet-5 not established" 0

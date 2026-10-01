@@ -347,7 +347,7 @@ def test_real_model_gates_every_browser_capability_on_egress_qualification_and_i
         "firewall_loaded", "browser_udp_blocked", "browser_tcp_bypass_blocked", "egress_proxy_active",
         "egress_refuses_without_policy", "egress_policy_mac_enforced", "egress_refuses_websocket_and_write",
         "harness_uses_egress_proxy", "network_guard_canary", "egress_refuses_smuggling", "egress_refuses_other_users",
-        "stagehand_isolated"}
+        "stagehand_isolated", "services_run_installed_code"}
     state = evaluate_production_gates()
     gates = {(g["decision"], g["gate"]): g for g in state["capability_gates"]}
     assert gates[(EGRESS, "egress_qualification")]["status"] == "PENDING"
