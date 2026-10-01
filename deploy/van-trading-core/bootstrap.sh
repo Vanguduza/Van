@@ -279,28 +279,6 @@ else
   (( DRY_RUN )) || die "VAN_VEKL_WORKER_HOST is required for complete production bootstrap"
 fi
 
-# ---------------------------------------------------------------- optional hardened Meta Muse enclave
-if (( WITH_MUSE )); then
-  if (( SKIP_DOCKER )); then
-    die "--with-muse requires Docker; remove --skip-docker"
-  fi
-  if (( DRY_RUN )); then
-    plan "converge hardened Muse WireGuard egress from /etc/van-muse-egress.env"
-    plan "install gVisor/Systrap Muse sandbox and run adversarial qualification"
-  else
-    [[ -f /etc/van-muse-egress.env ]] || die "--with-muse requires a provisioned /etc/van-muse-egress.env; stage it first to obtain the client public key"
-    bash "$HERE/muse/install-muse-egress.sh"
-    bash "$HERE/muse/sandbox/install-muse-sandbox.sh"
-    /usr/local/bin/qualify-muse-egress >/tmp/bootstrap-muse-egress.json
-    /usr/local/bin/qualify-muse-sandbox >/tmp/bootstrap-muse-sandbox.json
-    jq -e '.status=="GREEN" and .required_failures==0' /tmp/bootstrap-muse-egress.json >/dev/null || die "Muse egress did not qualify"
-    jq -e '.status=="GREEN" and .required_failures==0' /tmp/bootstrap-muse-sandbox.json >/dev/null || die "Muse sandbox did not qualify"
-  fi
-  ok "hardened Meta Muse enclave"
-else
-  skip "Meta Muse enclave (pass --with-muse after provisioning its US/Canada egress peer)"
-fi
-
 # ---------------------------------------------------------------- public TLS front for the MT5 pull bridge (optional)
 if [[ -n "$PUBLIC_HOST" ]]; then
   if ! command -v caddy >/dev/null 2>&1; then
@@ -339,6 +317,30 @@ if (( ! DRY_RUN )); then
   VAN_ADMIN_CIDRS="$ADMIN_CIDRS" VAN_PUBLIC_HOST="$PUBLIC_HOST" bash "$HERE/oci/harden-oracle-image-firewall.sh"
 else plan "ufw + OCI image firewall: allow 22/tcp and 9133/tcp from $ADMIN_CIDRS; public 80/443 only when configured"; fi
 ok "firewall"
+
+# ---------------------------------------------------------------- optional hardened Meta Muse enclave
+# Run only after UFW/OCI image firewall convergence. The nftables state certified below
+# must be the final host-firewall state, not a pre-firewall intermediate.
+if (( WITH_MUSE )); then
+  if (( SKIP_DOCKER )); then
+    die "--with-muse requires Docker; remove --skip-docker"
+  fi
+  if (( DRY_RUN )); then
+    plan "converge hardened Muse WireGuard egress after final host firewall"
+    plan "install gVisor/Systrap Muse sandbox and run adversarial qualification"
+  else
+    [[ -f /etc/van-muse-egress.env ]] || die "--with-muse requires a provisioned /etc/van-muse-egress.env; stage it first to obtain the client public key"
+    bash "$HERE/muse/install-muse-egress.sh"
+    bash "$HERE/muse/sandbox/install-muse-sandbox.sh"
+    /usr/local/bin/qualify-muse-egress >/tmp/bootstrap-muse-egress.json
+    /usr/local/bin/qualify-muse-sandbox >/tmp/bootstrap-muse-sandbox.json
+    jq -e '.status=="GREEN" and .required_failures==0' /tmp/bootstrap-muse-egress.json >/dev/null || die "Muse egress did not qualify after final firewall"
+    jq -e '.status=="GREEN" and .required_failures==0' /tmp/bootstrap-muse-sandbox.json >/dev/null || die "Muse sandbox did not qualify after final firewall"
+  fi
+  ok "hardened Meta Muse enclave (post-firewall)"
+else
+  skip "Meta Muse enclave (pass --with-muse after provisioning its US/Canada egress peer)"
+fi
 
 # ---------------------------------------------------------------- record
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
