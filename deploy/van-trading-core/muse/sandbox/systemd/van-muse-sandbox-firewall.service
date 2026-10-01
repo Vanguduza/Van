@@ -1,0 +1,15 @@
+[Unit]
+Description=VAN Muse sandbox host firewall
+Requires=docker.service
+After=docker.service
+Before=van-muse-sandbox-proxy.service van-muse-sandbox.service van-muse-cdp-bridge.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/van-muse-sandbox-firewall
+ExecReload=/usr/local/sbin/van-muse-sandbox-firewall
+ExecStop=-/usr/sbin/nft delete table inet van_muse_sandbox
+
+[Install]
+WantedBy=multi-user.target
