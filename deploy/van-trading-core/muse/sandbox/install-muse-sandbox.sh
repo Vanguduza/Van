@@ -16,7 +16,7 @@ id van-browser >/dev/null 2>&1 || die "existing VAN browser runtime must be inst
 
 export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a
 apt-get -o Acquire::Retries=3 update -qq
-apt-get -o Acquire::Retries=3 install -y -qq --no-install-recommends curl jq zstd nftables socat ca-certificates >/dev/null
+apt-get -o Acquire::Retries=3 install -y -qq --no-install-recommends curl jq zstd nftables socat ca-certificates openssl >/dev/null
 
 if ! id vanmusectl >/dev/null 2>&1; then
   useradd --system --home-dir /var/lib/van-muse-control --create-home --shell /usr/sbin/nologin vanmusectl
