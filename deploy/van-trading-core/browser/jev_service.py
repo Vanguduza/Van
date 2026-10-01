@@ -132,10 +132,19 @@ def _validate_page(raw: Any, domain: str) -> dict[str, Any]:
         kind = str(item.get("kind") or "")
         if kind not in {"click", "fill", "select", "scroll", "wait"}:
             raise WorkerError("JEV_ACTION_KIND_INVALID", 422)
-        safe = dict(item)
+        allowed_keys = {
+            "id", "node", "kind", "role", "label", "value", "current_value",
+            "checked", "selected", "expanded", "delta",
+        }
+        safe = {key: item[key] for key in allowed_keys if key in item}
+        safe["label"] = str(safe.get("label") or "")[:256]
+        if "current_value" in safe:
+            safe["current_value"] = str(safe.get("current_value") or "")[:256]
         # Jev's fast lane never types. Do not disclose current textbox/prompt contents.
         if kind == "fill":
             safe["value"] = "__NONEMPTY__" if bool(str(item.get("value") or "")) else ""
+        elif "value" in safe:
+            safe["value"] = str(safe.get("value") or "")[:256]
         safe_actions.append(safe)
     page = {
         "url": url,
