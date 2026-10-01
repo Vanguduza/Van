@@ -182,6 +182,15 @@ if [[ -f /etc/van-muse-egress.env ]]; then
 else
   add muse_egress AMBER "hardened Muse egress not configured on this host" 0
 fi
+if [[ -f /etc/van-muse-sandbox.env ]]; then
+  if /usr/local/bin/qualify-muse-sandbox >/tmp/muse-sandbox-qualify.json 2>/tmp/muse-sandbox-qualify.err && jq -e '.status=="GREEN" and .required_failures==0' /tmp/muse-sandbox-qualify.json >/dev/null; then
+    add muse_sandbox GREEN "$(jq -c '{status,checks}' /tmp/muse-sandbox-qualify.json)"
+  else
+    add muse_sandbox RED "$(tail -c 600 /tmp/muse-sandbox-qualify.err; tail -c 1800 /tmp/muse-sandbox-qualify.json)"
+  fi
+else
+  add muse_sandbox AMBER "gVisor Muse sandbox not configured on this host" 0
+fi
 listeners="$(ss -ltnH 2>/dev/null | awk '{print $4}' | grep -E ':(3000|5432|5433|6543|8000)$' || true)"
 bad_listeners="$(printf '%s
 ' "$listeners" | grep -Ev '^(127\.0\.0\.1|\[::1\]):' || true)"
