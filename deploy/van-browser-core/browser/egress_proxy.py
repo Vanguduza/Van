@@ -349,6 +349,24 @@ def client_allowed(writer: asyncio.StreamWriter, uid: str) -> bool:
     return owner is not None and str(owner) == uid.strip()
 
 
+#: IPv6 ranges that carry an IPv4 address in their low 32 bits and that ``ipaddress`` (3.11)
+#: reports as global whatever that address is: the NAT64 well-known prefix and the deprecated
+#: IPv4-compatible range (``64:ff9b::7f00:1`` is 127.0.0.1 behind a NAT64 gateway).
+_EMBEDDED_V4 = (ipaddress.ip_network("64:ff9b::/96"), ipaddress.ip_network("::/96"))
+
+
+def upstream_address_global(address: str) -> bool:
+    """Whether an upstream address is globally routable, judging an IPv6 address that embeds
+    an IPv4 one by that IPv4 address (review I9 NIT-3)."""
+    ip = ipaddress.ip_address(address)
+    if ip.version == 6:
+        if ip.ipv4_mapped is not None:
+            return ip.ipv4_mapped.is_global
+        if any(ip in net for net in _EMBEDDED_V4):
+            return ipaddress.IPv4Address(int(ip) & 0xFFFFFFFF).is_global
+    return ip.is_global
+
+
 class Refused(Exception):
     def __init__(self, code: str) -> None:
         super().__init__(code)
@@ -904,8 +922,7 @@ class EgressProxy:
                 raise Refused("EGRESS_UPSTREAM_UNAVAILABLE") from exc
             addresses = []
             for info in infos:
-                ip = ipaddress.ip_address(info[4][0])
-                if not ip.is_global:
+                if not upstream_address_global(info[4][0]):
                     # A scope name must not reach the zone's own loopback or a private network.
                     raise Refused("EGRESS_UPSTREAM_ADDRESS_REFUSED")
                 addresses.append((info[4][0], port))

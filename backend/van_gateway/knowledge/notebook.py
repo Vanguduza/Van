@@ -6,6 +6,7 @@ import json
 import re
 import time
 import uuid
+from collections import OrderedDict
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
@@ -589,6 +590,8 @@ class NotebookEnterpriseProvider:
 
 
 #: Review I M-7 — why the consumer cannot run today. Stable, machine-readable.
+#: Review I9 NIT-1 — how many owner hand-offs the notebook consumer remembers (see _close_task).
+NOTEBOOK_HANDED_TO_OWNER_KEPT = 256
 NOTEBOOK_CONSUMER_UNAVAILABLE_REASON = "NOTEBOOK_CONSUMER_REQUIRES_STAGEHAND_ACTUATION_AND_SELF_VERIFICATION"
 
 
@@ -641,7 +644,9 @@ class NotebookConsumerProvider:
         self.operations = NotebookOperationStore(store)
         #: Unit G15 — tasks handed to the owner when their lease was given back; a later close
         #: of the same task (the error path after a success path's close raised) writes nothing.
-        self._handed_to_owner: set[str] = set()
+        #: That second close comes from the same operation, so only the most recent
+        #: NOTEBOOK_HANDED_TO_OWNER_KEPT are kept (review I9 NIT-1: the set grew without bound).
+        self._handed_to_owner: OrderedDict[str, None] = OrderedDict()
 
     def unavailable_reason(self) -> str | None:
         """Why the consumer cannot run even when fully wired. None would mean it can."""
@@ -755,7 +760,9 @@ class NotebookConsumerProvider:
         released = await tasks.broker.release_lease(lease)
         code = released.owner_code
         if code is not None:
-            self._handed_to_owner.add(task.task_id)
+            self._handed_to_owner[task.task_id] = None
+            while len(self._handed_to_owner) > NOTEBOOK_HANDED_TO_OWNER_KEPT:
+                self._handed_to_owner.popitem(last=False)
             try:
                 await tasks.set_working_status(
                     task_id=task.task_id, status=BrowserTaskStatus.WAITING_FOR_OWNER,

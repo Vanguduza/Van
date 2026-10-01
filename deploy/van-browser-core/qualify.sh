@@ -272,7 +272,8 @@ if sys.argv[1].isdigit():
 else:
     entry = pwd.getpwnam(sys.argv[1])
     uid, gid = entry.pw_uid, entry.pw_gid
-running = subprocess.run(["pgrep", "-u", str(uid), "-f", "stagehand_service.mjs"], capture_output=True).returncode == 0
+found = subprocess.run(["pgrep", "-u", str(uid), "-f", "stagehand_service.mjs"], capture_output=True, text=True)
+running = found.returncode == 0
 as_browser = subprocess.run(["pgrep", "-u", sys.argv[3], "-f", "stagehand_service.mjs"],
                             capture_output=True).returncode == 0
 code = ("import errno, socket, sys\n"
@@ -288,7 +289,13 @@ code = ("import errno, socket, sys\n"
         "except OSError as e:\n"
         "    out.append('DENIED' if e.errno in (errno.EACCES, errno.EPERM) else 'ERR%d' % e.errno)\n"
         "print(','.join(out))\n")
+# Review I9 NIT-2: the probe holds exactly the running Stagehand's supplementary groups (it is
+# in van-browser), not a cleared or freshly initialised set that production does not have.
 groups = ["--init-groups"] if not sys.argv[1].isdigit() else ["--clear-groups"]
+if running:
+    status = open(f"/proc/{found.stdout.split()[0]}/status", encoding="utf-8").read()
+    held = re.search(r"^Groups:\s*(.*)$", status, re.M).group(1).split()
+    groups = [f"--groups={','.join(held)}"] if held else ["--clear-groups"]
 probe = subprocess.run(["setpriv", f"--reuid={uid}", f"--regid={gid}", *groups, sys.executable, "-c", code,
                         env.get("VAN_HARNESS_FENCE_KEY_FILE", ""), env.get("VAN_EGRESS_FENCE_KEY_FILE", ""),
                         env.get("VAN_EGRESS_CONTROL_SOCKET", "")], capture_output=True, text=True, timeout=20).stdout.strip()

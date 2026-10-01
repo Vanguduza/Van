@@ -175,3 +175,21 @@ def test_an_upgrade_to_a_protocol_the_proxy_does_not_read_never_opens_a_tunnel(m
     time.sleep(0.5)
     assert https.requests() == [("GET", "docs.example.com", "/docs/ws")]
     assert https.raw() == b""
+
+
+@pytest.mark.parametrize("address, allowed", [
+    ("64:ff9b::7f00:1", False),   # NAT64 of 127.0.0.1: ipaddress (3.11) calls it global
+    ("64:ff9b::a00:1", False),    # NAT64 of 10.0.0.1
+    ("::127.0.0.1", False),       # IPv4-compatible loopback: also "global" to ipaddress
+    ("::ffff:192.168.1.1", False),
+    ("64:ff9b::808:808", True),   # NAT64 of 8.8.8.8 is as global as 8.8.8.8
+    ("2606:4700::1111", True),
+    ("8.8.8.8", True),
+    ("127.0.0.1", False),
+])
+def test_review_i9_an_ipv6_address_embedding_a_private_ipv4_is_not_global(address, allowed):
+    """Review I9 NIT-3: a scope name whose AAAA record is NAT64 or IPv4-compatible loopback
+    passed the proxy's non-global upstream refusal."""
+    from test_browser_egress_proxy_i8 import ep
+
+    assert ep.upstream_address_global(address) is allowed
