@@ -79,10 +79,34 @@ PY
 harness_freeze_sha="$(sha256sum "$BASE/harness-freeze.txt" | awk '{print $1}')"
 harness_ver="$("$BASE/harness-venv/bin/python" -c 'import importlib.metadata as m; print(m.version("browser-harness"))')"
 
+# Jev Ultrafast is optional at runtime but exact-pinned at install. It is proposal-only:
+# VAN does not expose upstream's text-helper path or autonomous loop.
+JEV_COMMIT=1231850a0bf1a0c0341fe408ef1668dbbfdfac46
+python3.12 -m venv "$BASE/jev-venv"
+"$BASE/jev-venv/bin/python" -m pip install --disable-pip-version-check --no-cache-dir   "git+https://github.com/browser-use/jev-ultrafast.git@$JEV_COMMIT"
+"$BASE/jev-venv/bin/python" - "$JEV_COMMIT" <<'PY'
+import importlib.metadata as m, json, pathlib, sys
+commit=sys.argv[1]
+assert m.version("jev-ultrafast") == "0.1.0"
+dist=m.distribution("jev-ultrafast")
+direct=pathlib.Path(dist.locate_file("jev_ultrafast-0.1.0.dist-info/direct_url.json"))
+data=json.loads(direct.read_text(encoding="utf-8"))
+observed=(data.get("vcs_info") or {}).get("commit_id")
+assert observed == commit, (observed, commit)
+assert m.version("browser-harness") == "0.1.13"
+PY
+"$BASE/jev-venv/bin/python" -m pip freeze --all | LC_ALL=C sort > "$BASE/jev-freeze.txt"
+jev_freeze_sha="$(sha256sum "$BASE/jev-freeze.txt" | awk '{print $1}')"
+jev_ver="$("$BASE/jev-venv/bin/python" -c 'import importlib.metadata as m; print(m.version("jev-ultrafast"))')"
+
 install -o root -g root -m 0755 "$HERE/harness_service.py" "$BASE/harness_service.py"
 install -o root -g root -m 0755 "$HERE/stagehand_service.mjs" "$BASE/stagehand_service.mjs"
+install -o root -g root -m 0755 "$HERE/jev_service.py" "$BASE/jev_service.py"
+install -d -o root -g root -m 0755 "$BASE/jev"
+install -o root -g root -m 0444 "$HERE/jev/snapshot.js" "$BASE/jev/snapshot.js"
 install -o root -g root -m 0644 "$HERE/../systemd/vati-browser-harness.service" /etc/systemd/system/vati-browser-harness.service
 install -o root -g root -m 0644 "$HERE/../systemd/vati-stagehand.service" /etc/systemd/system/vati-stagehand.service
+install -o root -g root -m 0644 "$HERE/../systemd/vati-jev.service" /etc/systemd/system/vati-jev.service
 
 python3 - "$CONFIG" "$chromium_path" "$BASE/harness-venv/bin/browser-harness" <<'PY'
 import re, sys
@@ -103,7 +127,7 @@ PY
 chmod 0644 "$CONFIG"
 
 systemctl daemon-reload
-systemctl enable vati-browser-harness.service vati-stagehand.service
+systemctl enable vati-browser-harness.service vati-stagehand.service vati-jev.service
 systemctl restart vati-browser-harness.service
 for attempt in 1 2 3 4 5; do
   if curl -fsS --max-time 3 "http://127.0.0.1:${VAN_HARNESS_PORT:-9141}/health" >/tmp/van-harness-health.json 2>/dev/null \
@@ -148,6 +172,29 @@ PY
   sleep 2
 done
 
+systemctl restart vati-jev.service
+for attempt in 1 2 3 4 5; do
+  if curl -fsS --max-time 3 "http://127.0.0.1:${VAN_JEV_PORT:-9142}/health" >/tmp/van-jev-health.json 2>/dev/null      && python3 - /tmp/van-jev-health.json "$JEV_COMMIT" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+assert d["ok"] is True
+assert d["runtime_version"] == "0.1.0"
+assert d["upstream_commit"] == sys.argv[2]
+assert d["text_generation"] is False
+assert d["executes_actions"] is False
+assert d["autonomous_loop"] is False
+PY
+  then
+    echo JEV_ULTRAFAST_RUNTIME_GREEN
+    break
+  fi
+  if [[ "$attempt" == 5 ]]; then
+    journalctl -u vati-jev.service -n 100 --no-pager >&2 || true
+    exit 48
+  fi
+  sleep 2
+done
+
 /opt/van-trading/venv/bin/python - <<'PY'
 import temporalio
 assert temporalio.__version__ == '1.33.0', temporalio.__version__
@@ -159,6 +206,9 @@ cat > /var/lib/van-trading/evidence/browser/runtime-manifest.json <<JSON
   "stagehand": "$stagehand_ver",
   "browser_harness": "$harness_ver",
   "browser_harness_freeze_sha256": "$harness_freeze_sha",
+  "jev_ultrafast": "$jev_ver",
+  "jev_ultrafast_commit": "$JEV_COMMIT",
+  "jev_freeze_sha256": "$jev_freeze_sha",
   "playwright": "$playwright_ver",
   "chromium_executable": "$chromium_path",
   "node": "$(node -v)",
@@ -166,8 +216,11 @@ cat > /var/lib/van-trading/evidence/browser/runtime-manifest.json <<JSON
   "temporalio": "1.33.0",
   "stagehand_bind": "127.0.0.1:9140",
   "harness_bind": "127.0.0.1:9141",
+  "jev_bind": "127.0.0.1:9142",
+  "jev_text_generation": false,
+  "jev_executes_actions": false,
   "vekl_worker": "$VEKL_WORKER_HOST",
-  "service_state": "HARNESS_AND_STAGEHAND_IMPLEMENTED_PENDING_LIVE_QUALIFICATION",
+  "service_state": "HARNESS_STAGEHAND_JEV_IMPLEMENTED_PENDING_LIVE_QUALIFICATION",
   "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
 JSON
