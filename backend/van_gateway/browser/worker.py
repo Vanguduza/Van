@@ -44,6 +44,7 @@ from van_gateway.browser.models import (
     BrowserTask,
     InjectionAssessment,
 )
+from van_gateway.browser.policy import BrowserPolicyEngine
 from van_gateway.browser.subagent import ProposedAction, SubagentAssignment, SubagentStep
 
 
@@ -268,6 +269,29 @@ class HybridBrowserWorker:
         task = self.task
         if task is None:
             raise BrowserAdapterError("BROWSER_WORKER_TASK_MISSING", assignment.task_id)
+
+        # Semantic selection must never happen before VAN has inspected the page.
+        # Otherwise a prompt-injected page can influence Stagehand/Jev and only be
+        # classified *after* the chosen action has already executed.
+        pre_payload = await self.harness.page_info(task)
+        pre_observation = AdapterBackedWorker._observation(
+            task,
+            ProposedAction(
+                kind="observe",
+                domain=task.target_domain,
+                action_class=assignment.action_class_ceiling,
+            ),
+            pre_payload,
+        )
+        pre_observation = BrowserPolicyEngine().sanitize_observation(
+            pre_observation,
+            task_action_class=assignment.action_class_ceiling,
+        )
+        if pre_observation.injection_assessment is InjectionAssessment.CONFIRMED_INJECTION:
+            raise BrowserAdapterError(
+                "BROWSER_INJECTION_REFUSED_PRE_ACTION",
+                "confirmed injection detected before semantic proposal",
+            )
 
         instruction = (
             "Choose the single best next browser action for this assigned goal. "
