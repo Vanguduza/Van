@@ -249,7 +249,7 @@ cat > /var/lib/van-trading/evidence/browser/runtime-manifest.json <<JSON
   "jev_executes_actions": false,
   "jev_startup_qualified": $jev_green,
   "vekl_worker": "$VEKL_WORKER_HOST",
-  "service_state": "HARNESS_STAGEHAND_JEV_IMPLEMENTED_PENDING_LIVE_QUALIFICATION",
+  "service_state": "HARNESS_STAGEHAND_READY_JEV_QUALIFIED_OR_DEGRADED",
   "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
 JSON
