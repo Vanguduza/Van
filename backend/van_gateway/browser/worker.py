@@ -255,6 +255,8 @@ class HybridBrowserWorker:
         self.harness = harness
         self.stagehand = stagehand
         self.jev = jev
+        self._jev_degraded_for_task = False
+        self._jev_fallback_reason: str | None = None
         self.plan = plan or BrowserTaskPlan()
         self.task = task
         self._deterministic = AdapterBackedWorker(harness, plan=self.plan, task=task)
@@ -332,8 +334,14 @@ class HybridBrowserWorker:
                                 "jev_fingerprint": str(decision.get("fingerprint") or ""),
                             },
                         )
-            except (BrowserAdapterError, BrowserPolicyError, ValueError, TypeError):
-                pass
+            except (BrowserAdapterError, BrowserPolicyError, ValueError, TypeError) as exc:
+                # One failed fast-lane attempt is enough for this task. Repeatedly probing
+                # an unavailable/model-drifted/low-confidence Jev adds cost and latency
+                # without adding authority or information.
+                self._jev_degraded_for_task = True
+                self._jev_fallback_reason = (
+                    exc.code if isinstance(exc, BrowserAdapterError) else type(exc).__name__
+                )
 
         instruction = (
             "Choose the single best next browser action for this assigned goal. "
@@ -402,6 +410,8 @@ class HybridBrowserWorker:
         payload = await self.harness.page_info(task)
         extraction = dict(payload.get("extraction") or {})
         extraction["semantic_lane"] = "STAGEHAND"
+        if self._jev_fallback_reason:
+            extraction["jev_fallback_reason"] = self._jev_fallback_reason
         payload = {**payload, "extraction": extraction}
         return AdapterBackedWorker._observation(task, action, payload)
 
