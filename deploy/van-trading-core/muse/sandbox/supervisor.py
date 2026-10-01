@@ -90,12 +90,19 @@ def start_browser() -> dict:
         for path in (PROFILE, DOWNLOADS):
             os.chown(path, CHROME_UID, CHROME_GID)
             os.chmod(path, 0o700)
+        child_env = dict(os.environ)
+        child_env.update(
+            HOME="/home/muse",
+            XDG_CONFIG_HOME="/home/muse/profile/config",
+            XDG_CACHE_HOME="/tmp/chromium-cache",
+        )
         _proc = subprocess.Popen(
             _chrome_command(),
             stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             start_new_session=True,
+            env=child_env,
         )
         _started_at = time.monotonic()
     deadline = time.monotonic() + 15
