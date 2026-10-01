@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 from conftest_automation import make_store
+from van_gateway.browser.adapters import BrowserAdapterError
 from van_gateway.browser.models import (
     AutonomyTier,
     BrowserObservation,
@@ -377,3 +378,38 @@ async def test_muse_without_sanitized_jev_ui_goal_skips_fast_lane(tmp_path):
     assert proposal.payload.get("stagehand_action") == stage_action
     assert jev.calls == []
     assert "jev_observe" not in harness.calls
+
+
+
+@pytest.mark.asyncio
+async def test_jev_failure_trips_task_scoped_circuit_breaker(tmp_path):
+    task = await _muse_task(tmp_path)
+    harness = FakeHarness()
+
+    class FailingJev(FakeJev):
+        async def choose(self, task, *, goal, page, history):
+            self.calls.append({"goal": goal, "page": page, "history": history})
+            raise BrowserAdapterError("JEV_ULTRAFAST_NOT_READY", "DEGRADED")
+
+    jev = FailingJev([])
+    stage_action_1 = {
+        "description": "Open the current task",
+        "method": "click",
+        "selector": "button.current-task",
+    }
+    stage_action_2 = {
+        "description": "Inspect the result",
+        "method": "click",
+        "selector": "button.result",
+    }
+    stagehand = FakeStagehand([[stage_action_1], [stage_action_2]])
+    worker = HybridBrowserWorker(harness, stagehand, jev, task=task)  # type: ignore[arg-type]
+
+    first = await worker.propose(_muse_assignment(task), [])
+    second = await worker.propose(_muse_assignment(task), [])
+
+    assert first.payload["stagehand_action"] == stage_action_1
+    assert second.payload["stagehand_action"] == stage_action_2
+    assert len(jev.calls) == 1
+    assert worker._jev_degraded_for_task is True
+    assert worker._jev_fallback_reason == "JEV_ULTRAFAST_NOT_READY"
