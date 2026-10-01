@@ -8,7 +8,7 @@ add(){ local n="$1" s="$2" d="$3"; checks+=("{\"check\":\"$n\",\"status\":\"$s\"
 set -a; . /etc/van-muse-sandbox.env; set +a
 CORE_IP="${VAN_CORE_IP:-10.0.1.233}"
 
-for u in van-muse-sandbox-firewall.service van-muse-sandbox-proxy.service van-muse-sandbox.service van-muse-cdp-bridge.service; do
+for u in van-muse-sandbox-mounts.service van-muse-sandbox-firewall.service van-muse-sandbox-proxy.service van-muse-sandbox.service van-muse-cdp-bridge.service; do
   systemctl is-active --quiet "$u" && add "$u" GREEN active || add "$u" RED "$(systemctl is-active "$u" 2>&1)"
 done
 
@@ -33,6 +33,14 @@ grep -q 'no-new-privileges' <<<"$nnp" && add no_new_privileges GREEN "$nnp" || a
 network_internal="$(docker network inspect -f '{{.Internal}}' "$MUSE_SANDBOX_NETWORK" 2>/dev/null || true)"
 bridge="$(docker network inspect -f '{{index .Options "com.docker.network.bridge.name"}}' "$MUSE_SANDBOX_NETWORK" 2>/dev/null || true)"
 [[ "$network_internal" == true && "$bridge" == "$MUSE_SANDBOX_BRIDGE" ]] && add internal_network GREEN "internal=$network_internal bridge=$bridge" || add internal_network RED "internal=$network_internal bridge=$bridge"
+members="$(docker network inspect -f '{{json .Containers}}' "$MUSE_SANDBOX_NETWORK" 2>/dev/null || true)"
+python3 - "$members" <<'PY' >/dev/null 2>&1
+import json,sys
+v=json.loads(sys.argv[1] or "{}")
+assert len(v) == 1, v
+assert next(iter(v.values())).get("Name") == "van-muse-browser", v
+PY
+[[ $? -eq 0 ]] && add isolated_network_membership GREEN "van-muse-browser only" || add isolated_network_membership RED "$members"
 
 ip="$(docker inspect -f "{{with index .NetworkSettings.Networks \"$MUSE_SANDBOX_NETWORK\"}}{{.IPAddress}}{{end}}" van-muse-browser 2>/dev/null || true)"
 [[ "$ip" == "$MUSE_SANDBOX_IP" ]] && add sandbox_ip GREEN "$ip" || add sandbox_ip RED "${ip:-missing}"
@@ -92,6 +100,15 @@ assert len(r)>=2 and r[0]==5 and r[1]==0, r
 s.close()
 PY
 then add socks_only_path GREEN admitted; else add socks_only_path RED failed; fi
+
+for d in "$MUSE_SANDBOX_PROFILE_DIR" "$MUSE_SANDBOX_DOWNLOAD_DIR"; do
+  opts="$(findmnt -no OPTIONS --target "$d" 2>/dev/null || true)"
+  good=1
+  for required in rw nosuid nodev noexec; do
+    grep -qw "$required" <<<"${opts//,/ }" || good=0
+  done
+  [[ $good -eq 1 ]] && add "persistent_mount:$(basename "$d")" GREEN "$opts" || add "persistent_mount:$(basename "$d")" RED "${opts:-not-a-mount}"
+done
 
 profile_mib="$(du -sm "$MUSE_SANDBOX_PROFILE_DIR" 2>/dev/null | awk '{print $1}' || echo 0)"
 download_mib="$(du -sm "$MUSE_SANDBOX_DOWNLOAD_DIR" 2>/dev/null | awk '{print $1}' || echo 0)"
