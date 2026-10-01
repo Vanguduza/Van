@@ -325,7 +325,9 @@ def test_private_browser_workers_are_real_and_fail_closed():
     assert "VAN_STAGEHAND_MODEL_KEY_REF" in env
     assert "secretref://browser/stagehand-model" in env
     assert "STAGEHAND_RUNTIME_GREEN" in bootstrap
-    assert "HARNESS_AND_STAGEHAND_IMPLEMENTED_PENDING_LIVE_QUALIFICATION" in bootstrap
+    assert "JEV_ULTRAFAST_RUNTIME_GREEN" in bootstrap
+    assert "JEV_ULTRAFAST_DEGRADED_STAGEHAND_FALLBACK" in bootstrap
+    assert "HARNESS_STAGEHAND_READY_JEV_QUALIFIED_OR_DEGRADED" in bootstrap
     assert "User=van-browser" in stagehand_unit
     assert "Requires=vati-browser-harness.service" in stagehand_unit
     assert "NoNewPrivileges=true" in stagehand_unit
