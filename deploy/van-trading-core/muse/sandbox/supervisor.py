@@ -20,9 +20,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
-CONTROL_BIND = os.environ.get("VAN_MUSE_CONTROL_BIND", "0.0.0.0")
-CONTROL_PORT = int(os.environ.get("VAN_MUSE_CONTROL_PORT", "9230"))
-TOKEN_FILE = Path(os.environ.get("VAN_MUSE_CONTROL_TOKEN_FILE", "/run/secrets/control-token"))
+CONTROL_BIND = os.environ.get("VAN_MUSE_CONTROL_BIND", "172.31.77.2")\nCONTROL_PORT = int(os.environ.get("VAN_MUSE_CONTROL_PORT", "9230"))\nBROWSER_BIND = os.environ.get("VAN_MUSE_BROWSER_BIND", "172.31.77.2")\nTOKEN_FILE = Path(os.environ.get("VAN_MUSE_CONTROL_TOKEN_FILE", "/run/secrets/control-token"))
 PROFILE = Path("/home/muse/profile")
 DOWNLOADS = Path("/home/muse/downloads")
 CHROME_UID = 10001
@@ -62,10 +60,8 @@ def _chrome_command() -> list[str]:
         "/usr/bin/chromium",
         "--headless=new",
         "--user-data-dir=/home/muse/profile",
-        "--remote-debugging-address=0.0.0.0",
-        "--remote-debugging-port=9222",
-        "--proxy-server=socks5://172.31.77.1:17892",
-        "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 172.31.77.1",
+        f"--remote-debugging-address={BROWSER_BIND}",\n        "--remote-debugging-port=9222",
+        "--proxy-server=socks5://172.31.77.1:17892",\n        "--proxy-bypass-list=<-loopback>",\n        "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 172.31.77.1",
         "--disable-quic",
         "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
         "--disable-background-networking",
@@ -114,7 +110,7 @@ def start_browser() -> dict:
         if _proc is None or _proc.poll() is not None:
             raise RuntimeError("chromium exited during start")
         try:
-            with urlopen("http://127.0.0.1:9222/json/version", timeout=0.5) as response:
+            with urlopen(f"http://{BROWSER_BIND}:9222/json/version", timeout=0.5) as response:
                 if response.status == 200:
                     return status()
         except Exception:
@@ -158,8 +154,7 @@ def status() -> dict:
         "uptime_seconds": uptime,
         "profile": "/home/muse/profile",
         "downloads": "/home/muse/downloads",
-        "cdp_url": "http://127.0.0.1:9222" if alive else None,
-        "shell_endpoint": False,
+        "cdp_url": f"http://{BROWSER_BIND}:9222" if alive else None,\n        "control_bind": CONTROL_BIND,\n        "shell_endpoint": False,
         "arbitrary_exec": False,
     }
 
