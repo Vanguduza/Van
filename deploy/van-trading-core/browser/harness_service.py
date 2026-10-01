@@ -589,7 +589,7 @@ elif kind == "scroll":
     y=max(0,int(info.get("h",0))//2)
     scroll(x,y,dy=int(action.get("delta",0)),dx=0)
 else:
-    expr = r"""(action => {
+    expr = r'''(action => {
       const e=window.__jevFast?.nodes.get(action.node);
       if (!e?.isConnected || e.matches(':disabled') ||
           e.closest('[aria-disabled="true"],[inert]') ||
@@ -605,7 +605,7 @@ else:
         e.dispatchEvent(new Event('change',{bubbles:true}));
       }
       return {x,y};
-    })""" + json.dumps(action) + ")"
+    })''' + json.dumps(action) + ")"
     target = js(expr)
     if target is None:
         raise RuntimeError("Jev target changed or is covered")
