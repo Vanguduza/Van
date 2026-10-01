@@ -176,28 +176,39 @@ PY
   sleep 2
 done
 
-systemctl restart vati-jev.service
+# Jev is preferred when qualified, never a prerequisite for the Browser Fabric.
+# Missing credentials/provider/model drift degrades only the fast lane; Stagehand and
+# deterministic Harness remain online.
+jev_green=0
+systemctl restart vati-jev.service >/dev/null 2>&1 || true
 for attempt in 1 2 3 4 5; do
-  if curl -fsS --max-time 3 "http://127.0.0.1:${VAN_JEV_PORT:-9142}/health" >/tmp/van-jev-health.json 2>/dev/null      && python3 - /tmp/van-jev-health.json "$JEV_COMMIT" <<'PY'
+  if curl -fsS --max-time 3 "http://127.0.0.1:${VAN_JEV_PORT:-9142}/health" >/tmp/van-jev-health.json 2>/dev/null \
+     && python3 - /tmp/van-jev-health.json "$JEV_COMMIT" "jev-1.13.0" <<'PY'
 import json, sys
 d = json.load(open(sys.argv[1], encoding="utf-8"))
 assert d["ok"] is True
 assert d["runtime_version"] == "0.1.0"
 assert d["upstream_commit"] == sys.argv[2]
+assert d["model"] == sys.argv[3]
+assert d["model_key_present"] is True
+assert d["startup_qualified"] is True
+assert d["qualification"]["qualified"] is True
+assert d["qualification"]["model"] == sys.argv[3]
 assert d["text_generation"] is False
 assert d["executes_actions"] is False
 assert d["autonomous_loop"] is False
 PY
   then
+    jev_green=1
     echo JEV_ULTRAFAST_RUNTIME_GREEN
     break
   fi
-  if [[ "$attempt" == 5 ]]; then
-    journalctl -u vati-jev.service -n 100 --no-pager >&2 || true
-    exit 48
-  fi
   sleep 2
 done
+if (( jev_green == 0 )); then
+  echo "JEV_ULTRAFAST_DEGRADED_STAGEHAND_FALLBACK" >&2
+  journalctl -u vati-jev.service -n 50 --no-pager >&2 || true
+fi
 
 /opt/van-trading/venv/bin/python - <<'PY'
 import temporalio
@@ -223,6 +234,7 @@ cat > /var/lib/van-trading/evidence/browser/runtime-manifest.json <<JSON
   "jev_bind": "127.0.0.1:9142",
   "jev_text_generation": false,
   "jev_executes_actions": false,
+  "jev_startup_qualified": $jev_green,
   "vekl_worker": "$VEKL_WORKER_HOST",
   "service_state": "HARNESS_STAGEHAND_JEV_IMPLEMENTED_PENDING_LIVE_QUALIFICATION",
   "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
