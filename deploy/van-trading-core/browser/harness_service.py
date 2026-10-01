@@ -523,9 +523,11 @@ snapshot = open(os.environ["VAN_JEV_SNAPSHOT_PATH"], encoding="utf-8").read()
 state = js(snapshot)
 if not isinstance(state, dict):
     raise RuntimeError("jev snapshot unavailable")
-content = {k: state.get(k) for k in ("url", "text", "actions", "scroll")}
+content = {k: state.get(k) for k in (
+    "url", "title", "text", "actions", "scroll", "marker", "page_key", "guards"
+)}
 state["fingerprint"] = hashlib.sha256(
-    json.dumps(content, sort_keys=True, ensure_ascii=False).encode()
+    json.dumps(content, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()
 ).hexdigest()
 print("__VAN_JSON__" + json.dumps(state))
 """
