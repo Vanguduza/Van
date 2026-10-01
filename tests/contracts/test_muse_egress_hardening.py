@@ -121,7 +121,9 @@ def test_sandbox_rootfs_mounts_and_resources_are_bounded():
     assert "--pids-limit=${MUSE_SANDBOX_PIDS}" in service
     assert "--memory=${MUSE_SANDBOX_MEMORY}" in service
     assert "--cpus=${MUSE_SANDBOX_CPU}" in service
-    assert "dst=/home/muse/profile" in service\n    assert "dst=/home/muse/downloads" in service\n    assert "control-token" in service
+    assert "dst=/home/muse/profile" in service
+    assert "dst=/home/muse/downloads" in service
+    assert "control-token" in service
     assert "bind_mount_allowlist" in qualifier
     assert "MUSE_SANDBOX_PROFILE_MAX_MIB=8192" in env
     assert "MUSE_SANDBOX_DOWNLOAD_MAX_MIB=2048" in env
