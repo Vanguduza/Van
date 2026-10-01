@@ -449,3 +449,26 @@ is in the commit after 8921882c, and the probe's stderr now reaches the check's 
 are accepted by construction but untested (the sandbox has no IPv6); a loopback resolver
 (e.g. 127.0.0.53) stays reachable over TCP like every loopback port; everything here is
 sandbox evidence, not host qualification.
+
+### 8.8 Review I9 remediation (unit G16, 2026-10-01)
+
+Independent review I9 of `28be6c42` (G14 + G15 against I8 at `17fec5d8`) closed I8 MAJOR-1,
+MAJOR-2, MAJOR-4, MINOR-1, -2, -4, -5 and -7 with mutation evidence, and found MAJOR-3 only
+partly closed. Each finding below was reproduced on this branch before the fix.
+
+| Finding | Reproduced | Fix | After |
+|---|---|---|---|
+| MAJOR-1 Upgrade desync | mutating policy, `GET /docs/ws` with `Upgrade: websocket` then a pipelined `DELETE /admin/all`: the upstream that ignored the upgrade answered both (two 200s); `Upgrade: websocket, h2c` let the upstream switch to h2c and the DELETE bytes reached it | only `Upgrade: websocket` alone is admitted; the client's later bytes are relayed only after a `HTTP/1.1 101` naming `websocket`; a 101 to anything else is `EGRESS_UPGRADE_REFUSED`; any other answer is the only one the connection carries | one 200, the DELETE never upstream; a real 101 still carries frames both ways |
+| MINOR-1 failed release | `/release` raising `TimeoutError`: `/assignments` GOAL_ACHIEVED, task COMPLETED | a failed release answers `blocked: NETWORK_GUARD_UNAVAILABLE`; the lease is still given back | WAITING_FOR_OWNER, `OWNER_TAKEOVER:HARNESS_REFUSED:NETWORK_GUARD_UNAVAILABLE` |
+| MINOR-2 stale report | (by reading) a report carried no time, host or code identity | qualify.sh emits `generated_at_utc`, `host` and the sha256 of the installed Harness, proxy and ruleset; the gate requires `max_age_hours` (168) and matching digests | an old, future-dated, hostless or other-code report is UNKNOWN |
+| NIT-1 | `_handed_to_owner` unbounded | most recent 256 kept | — |
+| NIT-2 | the numeric-uid isolation probe cleared supplementary groups | the probe takes the running Stagehand's groups from `/proc/<pid>/status` | — |
+| NIT-3 | `ipaddress` (3.11.15): `64:ff9b::7f00:1` and `::127.0.0.1` `is_global` True | IPv4-mapped, NAT64 `/96` and IPv4-compatible addresses judged by their IPv4 address | refused |
+
+Induced failures: with the gate's binding check disabled, the 6 binding cases fail; the I9
+proxy and release tests failed on `28be6c42` (2 of 3, and 2 of 2).
+
+I8 MINOR-3 and MINOR-6 are not traceable: neither G14/G15's records nor any commit message
+numbers them, and I8's report is not in the repository. The one unnumbered I8 change,
+`6fbbb1d7` (the ledger job trusts a `gpt/**` branch's previous head), depends on the owner's
+GitHub rulesets and stays open until they are set. Nothing is claimed about the other.
