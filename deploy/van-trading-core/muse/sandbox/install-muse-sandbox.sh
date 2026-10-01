@@ -96,12 +96,11 @@ else:
 open(p,"w",encoding="utf-8").write(s)
 PY
 
-install -m 0755 "$HERE/runtime/van-muse-sandbox-firewall.sh" /usr/local/sbin/van-muse-sandbox-firewall
-install -m 0755 "$HERE/runtime/van-muse-publish-cdp.sh" /usr/local/sbin/van-muse-publish-cdp
+install -m 0755 "$HERE/runtime/van-muse-sandbox-mounts.sh" /usr/local/sbin/van-muse-sandbox-mounts\ninstall -m 0755 "$HERE/runtime/van-muse-sandbox-firewall.sh" /usr/local/sbin/van-muse-sandbox-firewall\ninstall -m 0755 "$HERE/runtime/van-muse-publish-cdp.sh" /usr/local/sbin/van-muse-publish-cdp
 install -m 0755 "$HERE/runtime/van-muse-sandbox-health.sh" /usr/local/sbin/van-muse-sandbox-health
 install -m 0755 "$HERE/van-muse-sandboxctl" /usr/local/bin/van-muse-sandboxctl
 install -m 0755 "$HERE/qualify-muse-sandbox.sh" /usr/local/bin/qualify-muse-sandbox
-for u in van-muse-sandbox-firewall.service van-muse-sandbox-proxy.service van-muse-sandbox.service van-muse-cdp-bridge.service van-muse-sandbox-health.service van-muse-sandbox-health.timer; do
+for u in van-muse-sandbox-mounts.service van-muse-sandbox-firewall.service van-muse-sandbox-proxy.service van-muse-sandbox.service van-muse-cdp-bridge.service van-muse-sandbox-health.service van-muse-sandbox-health.timer; do
   install -m 0644 "$HERE/systemd/$u" "/etc/systemd/system/$u"
 done
 systemctl daemon-reload
@@ -109,13 +108,13 @@ systemctl daemon-reload
 # Do not enable boot persistence until the already-hardened egress proves its fixed
 # regional identity. A staged sandbox must remain inert across reboot.
 if ! /usr/local/bin/van-muse-egress-check >/dev/null 2>&1; then
-  systemctl disable van-muse-sandbox-firewall.service van-muse-sandbox-proxy.service van-muse-sandbox.service van-muse-cdp-bridge.service van-muse-sandbox-health.timer >/dev/null 2>&1 || true
+  systemctl disable van-muse-sandbox-mounts.service van-muse-sandbox-firewall.service van-muse-sandbox-proxy.service van-muse-sandbox.service van-muse-cdp-bridge.service van-muse-sandbox-health.timer >/dev/null 2>&1 || true
   systemctl stop van-muse-cdp-bridge.service van-muse-sandbox.service van-muse-sandbox-proxy.service van-muse-sandbox-firewall.service >/dev/null 2>&1 || true
   log "sandbox staged but disabled: hardened US/CA egress is not GREEN"
   exit 20
 fi
 
-systemctl enable van-muse-sandbox-firewall.service van-muse-sandbox-proxy.service van-muse-sandbox.service van-muse-cdp-bridge.service van-muse-sandbox-health.timer >/dev/null
+systemctl enable van-muse-sandbox-mounts.service van-muse-sandbox-firewall.service van-muse-sandbox-proxy.service van-muse-sandbox.service van-muse-cdp-bridge.service van-muse-sandbox-health.timer >/dev/null
 systemctl restart van-muse-sandbox-firewall.service
 systemctl restart van-muse-sandbox-proxy.service
 systemctl restart van-muse-sandbox.service
