@@ -39,9 +39,6 @@ MIN_CONFIDENCE = float(os.getenv("VAN_JEV_MIN_CONFIDENCE", "0.80"))
 BIND = os.getenv("VAN_JEV_BIND", "127.0.0.1")
 PORT = int(os.getenv("VAN_JEV_PORT", "9142"))
 MODEL = os.getenv("VAN_JEV_TYPESAFE_MODEL", "jev-1.13.0")
-REQUIRE_STARTUP_QUALIFICATION = os.getenv(
-    "VAN_JEV_REQUIRE_STARTUP_QUALIFICATION", "1"
-) == "1"
 QUALIFICATION_FILE = Path(
     os.getenv("VAN_JEV_QUALIFICATION_FILE", "/run/van-jev/qualified.json")
 )
