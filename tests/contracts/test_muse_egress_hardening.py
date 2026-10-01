@@ -256,7 +256,7 @@ def test_muse_bootstrap_runs_after_final_firewall():
     muse = bootstrap.index('# ---------------------------------------------------------------- optional hardened Meta Muse enclave')
     record = bootstrap.index('# ---------------------------------------------------------------- record')
     assert firewall < muse < record
-    assert '"with_muse":$WITH_MUSE' in bootstrap
+    assert '\\"with_muse\\":$WITH_MUSE' in bootstrap
 
 
 def test_live_qualifiers_prove_host_cannot_borrow_muse_proxies():
