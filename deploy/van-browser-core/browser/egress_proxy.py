@@ -35,7 +35,10 @@ evaluated and cannot refuse ``wss://<in-scope host>/ws-pay``; see
 * each decrypted (or plain-HTTP) request: its origin must be a scope origin; ``GET``/``HEAD``/``OPTIONS``
   without a body pass; any other method, any request body, any ``Upgrade: websocket`` is
   refused unless the task is admitted as mutating *and* the URL is inside the task scope
-  (the shared URL scope rule below, ``WRITE``); any other ``Upgrade`` is refused;
+  (the shared URL scope rule below, ``WRITE``); any other ``Upgrade`` (including a list
+  naming ``websocket`` among others) is refused. After an admitted handshake the client's
+  later bytes are relayed only once the upstream answers ``101`` naming ``websocket``;
+  otherwise that one response is all the connection carries (review I9 MAJOR-1);
 * upstream addresses that are not globally routable (loopback, private, link-local...) are
   refused, so an in-scope name cannot be pointed at the zone's own loopback services. The one
   exception (unit G14, owner answer "In-zone canary origin"): the guard canary's own
@@ -817,8 +820,10 @@ def classify(policy: Policy | None, req: Request, scheme: str, host: str, port: 
     if req.header("transfer-encoding") or len(lengths) > 1 or (lengths and not lengths[0].isdigit()):
         return "EGRESS_REQUEST_INVALID", url
     has_body = bool(lengths) and int(lengths[0]) > 0
-    upgrades = [u.lower() for u in req.header("upgrade")]
-    if upgrades and not all("websocket" in u for u in upgrades):
+    upgrades = [u.strip().lower() for u in req.header("upgrade")]
+    # Review I9 MAJOR-1: the one protocol the proxy admits is ``websocket``, alone. A list
+    # (``websocket, h2c``) let the upstream pick a protocol this proxy never reads.
+    if upgrades and upgrades != ["websocket"]:
         return "EGRESS_UPGRADE_REFUSED", url
     websocket = bool(upgrades)
     if websocket or has_body or req.method not in READ_METHODS:
@@ -932,6 +937,24 @@ class EgressProxy:
             except (OSError, RuntimeError):
                 pass
 
+    @staticmethod
+    async def _upstream_head(up_reader: asyncio.StreamReader) -> tuple[bytes, bool]:
+        """The upstream's answer head to an ``Upgrade`` request and whether it switched to
+        ``websocket``. A switch to anything else is refused: the proxy reads no other protocol."""
+        try:
+            head = await asyncio.wait_for(up_reader.readuntil(b"\r\n\r\n"), IO_TIMEOUT_SECONDS)
+        except (asyncio.LimitOverrunError, asyncio.IncompleteReadError) as exc:
+            raise Refused("EGRESS_UPSTREAM_UNAVAILABLE") from exc
+        lines = head[:-4].decode("latin-1").split("\r\n")
+        status = lines[0].split(" ")
+        if len(status) < 2 or status[1] != "101":
+            return head, False
+        upgrades = [value.strip().lower() for name, _, value in (line.partition(":") for line in lines[1:])
+                    if name.strip().lower() == "upgrade"]
+        if status[0] != "HTTP/1.1" or upgrades != ["websocket"]:
+            raise Refused("EGRESS_UPGRADE_REFUSED")
+        return head, True
+
     async def _forward(self, req: Request, reader, writer, scheme: str, host: str, port: int, url: str,
                        alias: str = "", canary_ok: bool = False) -> None:
         try:
@@ -962,7 +985,19 @@ class EgressProxy:
                 up_writer.write(await asyncio.wait_for(reader.readexactly(length), IO_TIMEOUT_SECONDS))
             await up_writer.drain()
             if websocket:
-                await asyncio.gather(self._pipe(reader, up_writer), self._pipe(up_reader, writer))
+                # Review I9 MAJOR-1: the client's later bytes are frames only once the upstream
+                # has switched to WebSocket. An upstream that ignores the upgrade answers with an
+                # ordinary response on a live connection, and a request the client pipelined
+                # behind the handshake would reach it unjudged. Until a ``101`` naming
+                # ``websocket`` arrives nothing more of the client's is relayed; without one,
+                # that one response is all this connection carries.
+                head, switched = await self._upstream_head(up_reader)
+                writer.write(head)
+                await writer.drain()
+                if switched:
+                    await asyncio.gather(self._pipe(reader, up_writer), self._pipe(up_reader, writer))
+                else:
+                    await self._pipe(up_reader, writer)
             else:
                 # The response only; nothing more the client sends reaches upstream on this
                 # connection (one request per connection).
