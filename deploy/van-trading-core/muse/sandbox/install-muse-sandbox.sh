@@ -84,6 +84,21 @@ image_id="$(docker image inspect -f '{{.Id}}' van-muse-browser:rev1)"
 image_arch="$(docker image inspect -f '{{.Architecture}}' "$image_id")"
 [[ "$image_arch" == "arm64" ]] || die "sandbox image architecture mismatch: $image_arch"
 docker run --rm --runtime=runsc-muse --network=none --read-only   --tmpfs=/tmp:rw,noexec,nosuid,nodev,size=16m   --entrypoint=/usr/bin/python3 "$image_id"   -c 'import os,platform; assert platform.machine() in ("aarch64","arm64"); assert os.geteuid()==0'   >/dev/null || die "gVisor Systrap smoke container failed"
+docker run --rm --runtime=runsc-muse --network=none --read-only \
+  --user=10001:100 \
+  --tmpfs=/tmp:rw,nosuid,nodev,size=256m \
+  --tmpfs=/dev/shm:rw,nosuid,nodev,size=256m \
+  --entrypoint=/usr/bin/chromium "$image_id" \
+  --headless=new \
+  --user-data-dir=/tmp/chromium-smoke-profile \
+  --disable-background-networking \
+  --disable-component-update \
+  --no-first-run \
+  --no-default-browser-check \
+  --dump-dom about:blank >/tmp/van-muse-chromium-smoke.html 2>/tmp/van-muse-chromium-smoke.err \
+  || { tail -c 2000 /tmp/van-muse-chromium-smoke.err >&2 || true; die "Chromium failed inside gVisor without --no-sandbox"; }
+grep -qi '<html' /tmp/van-muse-chromium-smoke.html || die "Chromium gVisor smoke returned no DOM"
+rm -f /tmp/van-muse-chromium-smoke.html /tmp/van-muse-chromium-smoke.err
 python3 - "$ENVF" "$image_id" <<'PY'
 import re,sys
 p,image=sys.argv[1:]
