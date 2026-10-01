@@ -4,6 +4,7 @@ set -Eeuo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BASE=/opt/van-browser-runtime
+JEV_BASE=/opt/van-jev-runtime
 CONFIG=/opt/van-trading/config/browser-runtime.env
 VEKL_WORKER_HOST="${VAN_VEKL_WORKER_HOST:-}"
 [[ -n "$VEKL_WORKER_HOST" ]] || { echo 'VAN_VEKL_WORKER_HOST is required' >&2; exit 41; }
@@ -23,6 +24,7 @@ if ! id van-jev >/dev/null 2>&1; then
   useradd --system --home-dir /var/lib/van-jev --create-home --shell /usr/sbin/nologin van-jev
 fi
 install -d -o van-browser -g van-browser -m 0750 "$BASE" "$BASE/browsers"
+install -d -o root -g van-jev -m 0750 "$JEV_BASE"
 install -d -o van-browser -g van-browser -m 0700 /var/lib/van-trading/browser/profiles
 install -d -o van-browser -g van-browser -m 0700 /var/lib/van-trading/browser/secrets
 install -d -o van-jev -g van-jev -m 0700 /var/lib/van-trading/browser/jev-secrets
@@ -86,9 +88,9 @@ harness_ver="$("$BASE/harness-venv/bin/python" -c 'import importlib.metadata as 
 # Jev Ultrafast is optional at runtime but exact-pinned at install. It is proposal-only:
 # VAN does not expose upstream's text-helper path or autonomous loop.
 JEV_COMMIT=1231850a0bf1a0c0341fe408ef1668dbbfdfac46
-python3.12 -m venv "$BASE/jev-venv"
-"$BASE/jev-venv/bin/python" -m pip install --disable-pip-version-check --no-cache-dir   "git+https://github.com/browser-use/jev-ultrafast.git@$JEV_COMMIT"
-"$BASE/jev-venv/bin/python" - "$JEV_COMMIT" <<'PY'
+python3.12 -m venv "$JEV_BASE/venv"
+"$JEV_BASE/venv/bin/python" -m pip install --disable-pip-version-check --no-cache-dir   "git+https://github.com/browser-use/jev-ultrafast.git@$JEV_COMMIT"
+"$JEV_BASE/venv/bin/python" - "$JEV_COMMIT" <<'PY'
 import importlib.metadata as m, json, pathlib, sys
 commit=sys.argv[1]
 assert m.version("jev-ultrafast") == "0.1.0"
@@ -99,13 +101,13 @@ observed=(data.get("vcs_info") or {}).get("commit_id")
 assert observed == commit, (observed, commit)
 assert m.version("browser-harness") == "0.1.13"
 PY
-"$BASE/jev-venv/bin/python" -m pip freeze --all | LC_ALL=C sort > "$BASE/jev-freeze.txt"
-jev_freeze_sha="$(sha256sum "$BASE/jev-freeze.txt" | awk '{print $1}')"
-jev_ver="$("$BASE/jev-venv/bin/python" -c 'import importlib.metadata as m; print(m.version("jev-ultrafast"))')"
+"$JEV_BASE/venv/bin/python" -m pip freeze --all | LC_ALL=C sort > "$JEV_BASE/jev-freeze.txt"
+jev_freeze_sha="$(sha256sum "$JEV_BASE/jev-freeze.txt" | awk '{print $1}')"
+jev_ver="$("$JEV_BASE/venv/bin/python" -c 'import importlib.metadata as m; print(m.version("jev-ultrafast"))')"
 
 install -o root -g root -m 0755 "$HERE/harness_service.py" "$BASE/harness_service.py"
 install -o root -g root -m 0755 "$HERE/stagehand_service.mjs" "$BASE/stagehand_service.mjs"
-install -o root -g root -m 0755 "$HERE/jev_service.py" "$BASE/jev_service.py"
+install -o root -g van-jev -m 0550 "$HERE/jev_service.py" "$JEV_BASE/jev_service.py"
 install -d -o root -g root -m 0755 "$BASE/jev"
 install -o root -g root -m 0444 "$HERE/jev/snapshot.js" "$BASE/jev/snapshot.js"
 install -o root -g root -m 0644 "$HERE/../systemd/vati-browser-harness.service" /etc/systemd/system/vati-browser-harness.service
