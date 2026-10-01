@@ -23,7 +23,7 @@ PrivateTmp=true
 PrivateDevices=true
 ProtectSystem=strict
 ProtectHome=true
-ReadOnlyPaths=/opt/van-browser-runtime /opt/van-trading/config/browser-runtime.env /var/lib/van-trading/browser/secrets
+ReadOnlyPaths=/opt/van-browser-runtime /opt/van-trading/config/browser-runtime.env /var/lib/van-trading/browser/jev-secrets\nInaccessiblePaths=-/var/lib/van-trading/browser/secrets -/opt/van-muse-sandbox/secrets -/var/lib/van-muse-sandbox/profile -/var/lib/van-muse-sandbox/downloads
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 RestrictNamespaces=true
 LockPersonality=true
