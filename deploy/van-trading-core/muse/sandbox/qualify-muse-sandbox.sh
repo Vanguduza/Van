@@ -87,7 +87,15 @@ if docker exec van-muse-browser python3 -c "$probe_py" 1.1.1.1 443 >/dev/null 2>
 if docker exec van-muse-browser python3 -c "$probe_py" 169.254.169.254 80 >/dev/null 2>&1; then add metadata RED reachable; else add metadata GREEN blocked; fi
 if docker exec van-muse-browser python3 -c "$probe_py" "$CORE_IP" 9133 >/dev/null 2>&1; then add vati_control RED reachable; else add vati_control GREEN blocked; fi
 
-# Prove the one admitted network path: SOCKS5 handshake through the host-only proxy.
+# The sandbox-facing proxy is not a host capability. Even root on the host must use
+# the namespace qualifier rather than silently borrowing the sandbox's regional identity.
+if curl --proxy "socks5h://$MUSE_SANDBOX_GATEWAY:$MUSE_SANDBOX_PROXY_PORT" -fsS --max-time 3 https://www.cloudflare.com/cdn-cgi/trace >/dev/null 2>&1; then
+  add host_sandbox_proxy_borrow RED reachable
+else
+  add host_sandbox_proxy_borrow GREEN blocked
+fi
+
+# Prove the one admitted network path: SOCKS5 handshake originating inside the sandbox.
 if docker exec van-muse-browser python3 - <<'PY' >/dev/null 2>&1
 import socket
 s=socket.create_connection(("172.31.77.1",17892),3)
