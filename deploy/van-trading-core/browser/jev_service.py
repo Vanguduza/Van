@@ -32,7 +32,7 @@ MAX_GOAL = 8000
 BIND = os.getenv("VAN_JEV_BIND", "127.0.0.1")
 PORT = int(os.getenv("VAN_JEV_PORT", "9142"))
 MODEL = os.getenv("VAN_JEV_TYPESAFE_MODEL", "jev-latest")
-SECRET_ROOT = Path(os.getenv("VAN_BROWSER_SECRET_ROOT", "/var/lib/van-trading/browser/secrets"))
+SECRET_ROOT = Path(os.getenv("VAN_JEV_SECRET_ROOT", "/var/lib/van-trading/browser/jev-secrets"))
 KEY_REF = os.getenv("VAN_JEV_TYPESAFE_KEY_REF", "secretref://browser/jev-typesafe")
 
 if BIND not in {"127.0.0.1", "::1", "localhost"}:
