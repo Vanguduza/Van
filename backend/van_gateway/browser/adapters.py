@@ -50,6 +50,10 @@ class BrowserHarnessAdapter(Protocol):
     async def wait(self, task: BrowserTask, condition: dict[str, Any]) -> dict[str, Any]: ...
     async def upload(self, task: BrowserTask, locator: str, file_ref: str) -> dict[str, Any]: ...
     async def tabs(self, task: BrowserTask) -> dict[str, Any]: ...
+    async def jev_observe(self, task: BrowserTask) -> dict[str, Any]: ...
+    async def jev_act(
+        self, task: BrowserTask, *, action: dict[str, Any], fingerprint: str
+    ) -> dict[str, Any]: ...
 
 
 class _PrivateWorkerClient:
@@ -188,8 +192,75 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
     async def tabs(self, task: BrowserTask) -> dict[str, Any]:
         return await self._call("/tabs", self._envelope(task))
 
+    async def jev_observe(self, task: BrowserTask) -> dict[str, Any]:
+        return await self._call("/jev/observe", self._envelope(task))
+
+    async def jev_act(
+        self, task: BrowserTask, *, action: dict[str, Any], fingerprint: str
+    ) -> dict[str, Any]:
+        return await self._call(
+            "/jev/act",
+            self._envelope(task, action=action, fingerprint=fingerprint),
+        )
+
     async def status(self) -> ExternalRuntimeStatus:  # type: ignore[override]
         return await super().status("BROWSER_HARNESS_UNAVAILABLE")
+
+
+class JevAdapter(_PrivateWorkerClient):
+    """Fast semantic action selector; proposal-only and Muse-profile scoped.
+
+    Jev never executes, never generates field text, and never receives authority.
+    BrowserSubagentRunner evaluates the proposal before Browser Harness acts.
+    """
+
+    CAPABILITY = "jev_ultrafast"
+
+    def __init__(
+        self,
+        registry: ExternalRuntimeRegistry,
+        *,
+        base_url: str = "",
+        enabled: bool = False,
+        expected_version: str | None = None,
+        timeout_seconds: float = 30.0,
+        transport: httpx.AsyncBaseTransport | None = None,
+    ) -> None:
+        super().__init__(
+            registry,
+            base_url=base_url,
+            enabled=enabled,
+            expected_version=expected_version,
+            timeout_seconds=timeout_seconds,
+            transport=transport,
+        )
+
+    async def choose(
+        self,
+        task: BrowserTask,
+        *,
+        goal: str,
+        page: dict[str, Any],
+        history: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        if task.profile_alias != "muse_owner":
+            raise BrowserPolicyError("jev_profile_not_admitted")
+        return await self._call(
+            "/choose",
+            {
+                "task_id": task.task_id,
+                "profile_alias": task.profile_alias,
+                "target_domain": task.target_domain,
+                "goal": goal,
+                "page": page,
+                "history": history[-10:],
+                "allow_text_generation": False,
+                "allow_unbounded_agent_loop": False,
+            },
+        )
+
+    async def status(self) -> ExternalRuntimeStatus:  # type: ignore[override]
+        return await super().status("BROWSER_JEV_FAST_LANE_UNAVAILABLE")
 
 
 class StagehandAdapter(_PrivateWorkerClient):
@@ -298,5 +369,6 @@ __all__ = [
     "BrowserAdapterError",
     "BrowserHarnessAdapter",
     "HttpBrowserHarnessAdapter",
+    "JevAdapter",
     "StagehandAdapter",
 ]
