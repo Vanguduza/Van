@@ -343,3 +343,18 @@ def test_chromium_policy_allows_only_the_controlled_cdp_runtime():
     assert "cdp_protocol" in qualifier
     assert "/json/version" in qualifier
     assert 'ws://127.0.0.1:{port}/devtools/browser/' in qualifier
+
+
+def test_jev_provider_payload_is_data_minimized_and_requires_explicit_ui_goal():
+    service = (ROOT / "deploy/van-trading-core/browser/jev_service.py").read_text(encoding="utf-8")
+    worker = (ROOT / "backend/van_gateway/browser/worker.py").read_text(encoding="utf-8")
+
+    assert '"text": ""' in service
+    assert '"title": "Muse"' in service
+    assert '"__NONEMPTY__"' in service
+    assert "allowed_keys = {" in service
+    assert '"rect"' not in service[service.index("allowed_keys = {"):service.index("safe_actions.append(safe)")]
+    assert 'task.inputs.get("jev_ui_goal")' in worker
+    assert "goal=jev_ui_goal.strip()" in worker
+    assert 'history=[{"kind": step.kind}' in worker
+    assert "goal=assignment.goal" not in worker[worker.index('task.inputs.get("jev_ui_goal")'):worker.index("instruction = (")]
