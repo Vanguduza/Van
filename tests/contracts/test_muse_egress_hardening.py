@@ -405,3 +405,46 @@ def test_jev_worker_has_domain_allowlisted_loopback_only_egress():
     assert "JEV_TYPESAFE_EGRESS_PROXY_GREEN" in bootstrap
     assert "CONNECT example.com:443" in bootstrap
     assert "403 Forbidden" in bootstrap
+
+
+
+def test_hermes_gateway_reaches_private_browser_workers_through_bounded_transport():
+    transport = (
+        ROOT / "deploy/van-trading-core/hermes/install-browser-runtime-transport.sh"
+    ).read_text(encoding="utf-8")
+    rebuild = (
+        ROOT / "deploy/van-trading-core/oci/rebuild-van-trading-core.py"
+    ).read_text(encoding="utf-8")
+    qualify = (
+        ROOT / "deploy/van-trading-core/qualify.sh"
+    ).read_text(encoding="utf-8")
+
+    # Workers stay remote-loopback only; Hermes receives three explicit local forwards.
+    assert "-L 127.0.0.1:$STAGEHAND_LOCAL_PORT:127.0.0.1:9140" in transport
+    assert "-L 127.0.0.1:$HARNESS_LOCAL_PORT:127.0.0.1:9141" in transport
+    assert "-L 127.0.0.1:$JEV_LOCAL_PORT:127.0.0.1:9142" in transport
+    assert "ExitOnForwardFailure=yes" in transport
+    assert "ClearAllForwardings=yes" in transport
+
+    # The real Gateway is explicitly wired to the forwarded workers.
+    assert '"VAN_BROWSER_ENABLED": "true"' in transport
+    assert '"VAN_BROWSER_HARNESS_BASE_URL"' in transport
+    assert '"VAN_BROWSER_STAGEHAND_BASE_URL"' in transport
+    assert '"VAN_BROWSER_JEV_ENABLED": "true"' in transport
+    assert '"VAN_BROWSER_JEV_BASE_URL"' in transport
+    assert '"VAN_BROWSER_JEV_MODEL": "jev-1.13.0"' in transport
+    assert '"VAN_BROWSER_JEV_MIN_CONFIDENCE": "0.80"' in transport
+    assert '"VAN_BROWSER_STAGEHAND_MODEL_PROVIDER": "anthropic"' in transport
+    assert '"VAN_BROWSER_STAGEHAND_MODEL_NAME": "claude-sonnet-5"' in transport
+    assert "systemctl --user restart van-gateway.service" in transport
+
+    # Durable readiness is recorded against the Gateway state on Hermes, never from
+    # the Trading Core qualifier with an unrelated/default database.
+    assert 'certify_browser_fabric.py" \\\n  --canary harness' in transport
+    assert '--canary jev --target muse.ai' in transport
+    assert "--canary jev" not in qualify
+    assert "Gateway readiness must be certified on Hermes" in qualify
+
+    # OCI recovery re-converges and verifies the transport automatically.
+    assert "install-browser-runtime-transport.sh" in rebuild
+    assert "BROWSER_FABRIC_TRANSPORT_GREEN" in rebuild
