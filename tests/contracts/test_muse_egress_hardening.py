@@ -8,6 +8,7 @@ The tests intentionally check source/deployment contracts only. Live qualificati
 to qualify-muse-egress and qualify-muse-sandbox on VAN Trading Core.
 """
 from pathlib import Path
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
 MUSE = ROOT / "deploy" / "van-trading-core" / "muse"
@@ -178,3 +179,71 @@ def test_socks_daemon_is_unprivileged_and_uses_namespace_dns():
     assert "CapabilityBoundingSet=" in service
     assert "user.privileged: vanmuse" in dante
     assert "user.unprivileged: vanmuse" in dante
+
+
+def test_all_muse_shell_scripts_are_parseable_by_bash():
+    scripts = sorted(MUSE.rglob("*.sh"))
+    assert scripts
+    for script in scripts:
+        completed = subprocess.run(
+            ["bash", "-n", str(script)],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        assert completed.returncode == 0, f"{script}: {completed.stderr}"
+
+
+def test_loopback_egress_proxy_has_a_dedicated_consumer_principal():
+    installer = _read("install-muse-egress.sh")
+    bridge = _read("systemd/van-muse-bridge.service")
+    sandbox_proxy = _read("sandbox/systemd/van-muse-sandbox-proxy.service")
+    netns = _read("runtime/van-muse-netns-up.sh")
+    firewall = _read("sandbox/runtime/van-muse-sandbox-firewall.sh")
+
+    assert "id vanmuseproxy" in installer
+    assert "User=vanmuseproxy" in bridge
+    assert "Group=vanmuseproxy" in bridge
+    assert "User=vanmuseproxy" in sandbox_proxy
+    assert "Group=vanmuseproxy" in sandbox_proxy
+    assert 'PROXY_UID="$(id -u vanmuseproxy)"' in netns
+    assert "tcp dport 17890 meta skuid { 0, $PROXY_UID } accept" in netns
+    assert "tcp dport 17890 reject with tcp reset" in netns
+    assert "MUSE_SANDBOX_PROXY_PORT reject with tcp reset" in firewall
+
+
+def test_persistent_state_is_bounded_by_filesystem_and_noexec_mounts():
+    mounts = _read("sandbox/runtime/van-muse-sandbox-mounts.sh")
+    installer = _read("sandbox/install-muse-sandbox.sh")
+    service = _read("sandbox/systemd/van-muse-sandbox.service")
+    qualifier = _read("sandbox/qualify-muse-sandbox.sh")
+
+    assert "truncate -s" in mounts
+    assert "mkfs.ext4" in mounts
+    assert "expected_bytes" in mounts
+    assert "size drift" in mounts
+    assert "loop,rw,nosuid,nodev,noexec" in mounts
+    assert "van-muse-sandbox-mounts.service" in installer
+    assert "Requires=docker.service van-muse-sandbox-mounts.service" in service
+    assert "persistent_mount:" in qualifier
+
+
+def test_muse_sandbox_is_an_explicit_exact_sha_bootstrap_option():
+    bootstrap = (ROOT / "deploy/van-trading-core/bootstrap.sh").read_text(encoding="utf-8")
+    assert "--with-muse" in bootstrap
+    assert "bash \"$HERE/muse/install-muse-egress.sh\"" in bootstrap
+    assert "bash \"$HERE/muse/sandbox/install-muse-sandbox.sh\"" in bootstrap
+    assert "/usr/local/bin/qualify-muse-egress" in bootstrap
+    assert "/usr/local/bin/qualify-muse-sandbox" in bootstrap
+
+
+def test_browser_workers_cannot_read_muse_profile_or_supervisor_secret():
+    for relative in (
+        "deploy/van-trading-core/systemd/vati-browser-harness.service",
+        "deploy/van-trading-core/systemd/vati-stagehand.service",
+    ):
+        text = (ROOT / relative).read_text(encoding="utf-8")
+        assert "InaccessiblePaths=" in text
+        assert "/opt/van-muse-sandbox/secrets" in text
+        assert "/var/lib/van-muse-sandbox/profile" in text
+        assert "/var/lib/van-muse-sandbox/downloads" in text
