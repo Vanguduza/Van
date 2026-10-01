@@ -61,7 +61,9 @@
       "production_mode": "PROPOSAL_ONLY",
       "text_generation": "forbidden_in_van_fast_lane",
       "executes_actions": false,
-      "source_of_truth": "deploy/van-trading-core/browser/bootstrap-browser-runtime.sh"
+      "source_of_truth": "deploy/van-trading-core/browser/bootstrap-browser-runtime.sh",
+      "decision_model": "jev-1.13.0",
+      "startup_qualification": "required"
     }
   }
 }
