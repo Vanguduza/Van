@@ -14,6 +14,7 @@ Pinned upstream:
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 import os
 import re
@@ -67,6 +68,7 @@ _SENSITIVE = (
 )
 
 _QUALIFIED = False
+_QUALIFIED_KEY_SHA256 = ""
 _QUALIFICATION: dict[str, Any] = {}
 
 
@@ -231,7 +233,7 @@ def _choose(body: dict[str, Any]) -> dict[str, Any]:
 
 def _run_live_qualification() -> dict[str, Any]:
     """Paid, side-effect-free Jev canary. No browser operation is executed."""
-    global _QUALIFIED, _QUALIFICATION
+    global _QUALIFIED, _QUALIFIED_KEY_SHA256, _QUALIFICATION
 
     result = _choose(
         {
@@ -291,6 +293,7 @@ def _run_live_qualification() -> dict[str, Any]:
     os.chmod(tmp, 0o600)
     os.replace(tmp, QUALIFICATION_FILE)
 
+    _QUALIFIED_KEY_SHA256 = hashlib.sha256(_secret(KEY_REF).encode()).hexdigest()
     _QUALIFIED = True
     _QUALIFICATION = receipt
     return dict(receipt)
@@ -353,7 +356,15 @@ class Handler(BaseHTTPRequestHandler):
             if self.path == "/qualify":
                 self._send(200, {"ok": True, **_run_live_qualification()})
                 return
-            if not _QUALIFIED:
+            try:
+                current_key_sha256 = hashlib.sha256(_secret(KEY_REF).encode()).hexdigest()
+            except WorkerError:
+                current_key_sha256 = ""
+            if (
+                not _QUALIFIED
+                or not _QUALIFIED_KEY_SHA256
+                or not hmac.compare_digest(current_key_sha256, _QUALIFIED_KEY_SHA256)
+            ):
                 raise WorkerError("JEV_NOT_LIVE_QUALIFIED", 503)
             self._send(200, _choose(body))
         except WorkerError as exc:
