@@ -19,6 +19,7 @@ from van_gateway.automation.external_runtime import (
 from van_gateway.browser.adapters import (
     BrowserAdapterError,
     HttpBrowserHarnessAdapter,
+    JevAdapter,
     StagehandAdapter,
 )
 from van_gateway.browser.models import (
@@ -391,3 +392,139 @@ async def test_browser_runtime_ready_requires_evidence(tmp_path):
         )
     )
     assert (await adapter.status()).state is RuntimeState.READY
+
+
+
+async def test_jev_requires_durable_and_live_qualification_before_choose(tmp_path):
+    store = await make_store(tmp_path)
+    registry = ExternalRuntimeRegistry(store)
+    service = BrowserTaskService(store)
+    await service.broker.register_profile(profile_alias="muse_owner")
+    task = await service.create_task(
+        profile_alias="muse_owner",
+        strategy=BrowserStrategy.STAGEHAND,
+        autonomy_tier=AutonomyTier.L5_STAGEHAND_AGENT,
+        action_class=ActionClass.A2,
+        target_domain="muse.ai",
+        goal="open the Muse workspace",
+    )
+
+    calls: list[tuple[str, str]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append((request.method, request.url.path))
+        if request.method == "GET" and request.url.path == "/health":
+            return httpx.Response(
+                200,
+                json={
+                    "ok": True,
+                    "runtime_version": "0.1.0",
+                    "model": "jev-1.13.0",
+                    "startup_qualified": True,
+                    "text_generation": False,
+                    "executes_actions": False,
+                    "autonomous_loop": False,
+                },
+            )
+        if request.method == "POST" and request.url.path == "/choose":
+            return httpx.Response(
+                200,
+                json={
+                    "ok": True,
+                    "runtime_version": "0.1.0",
+                    "model": "jev-1.13.0",
+                    "operation": "CLICK",
+                    "action": {
+                        "id": "e1",
+                        "kind": "click",
+                        "node": 1,
+                        "role": "button",
+                        "label": "Open Muse workspace",
+                    },
+                    "fingerprint": "fp1",
+                    "confidence": 0.99,
+                    "text_generation": False,
+                    "executes_actions": False,
+                },
+            )
+        return httpx.Response(404)
+
+    adapter = JevAdapter(
+        registry,
+        base_url="http://127.0.0.1:9142",
+        enabled=True,
+        expected_version="0.1.0",
+        expected_model="jev-1.13.0",
+        transport=httpx.MockTransport(handler),
+    )
+    page = {
+        "url": "https://muse.ai/",
+        "title": "Muse",
+        "text": "Open Muse workspace",
+        "actions": [
+            {
+                "id": "e1",
+                "kind": "click",
+                "node": 1,
+                "role": "button",
+                "label": "Open Muse workspace",
+            }
+        ],
+        "fingerprint": "fp1",
+    }
+
+    with pytest.raises(BrowserAdapterError, match="JEV_ULTRAFAST_NOT_READY"):
+        await adapter.choose(task, goal=task.goal, page=page, history=[])
+    # No durable evidence means the proposal endpoint is not even contacted.
+    assert calls == []
+
+    await registry.record_evidence(
+        ReadinessEvidence(
+            capability="jev_ultrafast",
+            evidence_pointer="gateway://browser/certification/jev/test",
+            runtime_version="0.1.0",
+        )
+    )
+    assert (await adapter.status()).state is RuntimeState.READY
+    result = await adapter.choose(task, goal=task.goal, page=page, history=[])
+    assert result["operation"] == "CLICK"
+    assert ("POST", "/choose") in calls
+
+
+async def test_jev_live_model_drift_degrades_even_with_durable_evidence(tmp_path):
+    store = await make_store(tmp_path)
+    registry = ExternalRuntimeRegistry(store)
+    await registry.record_evidence(
+        ReadinessEvidence(
+            capability="jev_ultrafast",
+            evidence_pointer="gateway://browser/certification/jev/test",
+            runtime_version="0.1.0",
+        )
+    )
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        return httpx.Response(
+            200,
+            json={
+                "ok": True,
+                "runtime_version": "0.1.0",
+                "model": "jev-1.14.0",
+                "startup_qualified": True,
+                "text_generation": False,
+                "executes_actions": False,
+                "autonomous_loop": False,
+            },
+        )
+
+    adapter = JevAdapter(
+        registry,
+        base_url="http://127.0.0.1:9142",
+        enabled=True,
+        expected_version="0.1.0",
+        expected_model="jev-1.13.0",
+        transport=httpx.MockTransport(handler),
+    )
+    status = await adapter.status()
+    assert status.state is RuntimeState.DEGRADED
+    assert "model contract mismatch" in (status.detail or "")
