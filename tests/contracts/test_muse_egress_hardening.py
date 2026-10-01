@@ -307,6 +307,10 @@ def test_jev_has_dedicated_principal_and_cannot_read_muse_or_general_browser_sec
 
     assert "User=van-jev" in unit
     assert "Group=van-jev" in unit
+    assert "WorkingDirectory=/opt/van-jev-runtime" in unit
+    assert "ExecStart=/opt/van-jev-runtime/venv/bin/python /opt/van-jev-runtime/jev_service.py" in unit
+    assert "JEV_BASE=/opt/van-jev-runtime" in bootstrap
+    assert 'install -d -o root -g van-jev -m 0750 "$JEV_BASE"' in bootstrap
     assert "/var/lib/van-trading/browser/jev-secrets" in unit
     assert "InaccessiblePaths=" in unit
     assert "/var/lib/van-trading/browser/secrets" in unit
