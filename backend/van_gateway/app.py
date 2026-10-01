@@ -494,6 +494,7 @@ def create_app() -> FastAPI:
         worker=HybridBrowserWorker(
             automation_health.harness,
             automation_health.stagehand,
+            automation_health.jev,
         ),
     )
 
