@@ -1,0 +1,14 @@
+[Unit]
+Description=VAN Muse persistent-directory noexec mounts
+Before=van-muse-sandbox.service
+After=local-fs.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/van-muse-sandbox-mounts
+ExecStop=-/usr/bin/umount /var/lib/van-muse-sandbox/downloads
+ExecStop=-/usr/bin/umount /var/lib/van-muse-sandbox/profile
+
+[Install]
+WantedBy=multi-user.target
