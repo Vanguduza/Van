@@ -1,7 +1,8 @@
 [Unit]
 Description=VAN private Jev Ultrafast proposal worker
-After=network-online.target
+After=network-online.target vati-jev-egress-proxy.service
 Wants=network-online.target
+Requires=vati-jev-egress-proxy.service
 StartLimitIntervalSec=300
 StartLimitBurst=5
 
@@ -10,6 +11,10 @@ Type=simple
 User=van-jev
 Group=van-jev
 EnvironmentFile=/opt/van-trading/config/browser-runtime.env
+Environment=HTTPS_PROXY=http://127.0.0.1:9143
+Environment=HTTP_PROXY=http://127.0.0.1:9143
+Environment=ALL_PROXY=http://127.0.0.1:9143
+Environment=NO_PROXY=127.0.0.1,localhost,::1
 WorkingDirectory=/opt/van-jev-runtime
 RuntimeDirectory=van-jev
 RuntimeDirectoryMode=0700
@@ -30,6 +35,8 @@ ReadOnlyPaths=/opt/van-jev-runtime /opt/van-trading/config/browser-runtime.env /
 ReadWritePaths=/run/van-jev
 InaccessiblePaths=-/var/lib/van-trading/browser/secrets -/opt/van-muse-sandbox/secrets -/var/lib/van-muse-sandbox/profile -/var/lib/van-muse-sandbox/downloads -/var/lib/van-trading/browser/profiles -/var/lib/van-trading/browser/downloads
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+IPAddressDeny=any
+IPAddressAllow=localhost
 RestrictNamespaces=true
 LockPersonality=true
 CapabilityBoundingSet=
