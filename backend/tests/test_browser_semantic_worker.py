@@ -238,7 +238,8 @@ async def _muse_task(tmp_path):
         autonomy_tier=AutonomyTier.L5_STAGEHAND_AGENT,
         action_class=ActionClass.A2,
         target_domain="muse.ai",
-        goal="open the current Muse task",
+        goal="open the current Muse task with private mission context",
+        inputs={"jev_ui_goal": "Open the current Muse task"},
     )
 
 
@@ -340,3 +341,39 @@ async def test_jev_type_text_never_executes_and_falls_back_to_stagehand(tmp_path
     assert "jev_action" not in proposal.payload
     assert harness.jev_acted == []
     assert len(stagehand.observed) == 1
+
+
+@pytest.mark.asyncio
+async def test_muse_without_sanitized_jev_ui_goal_skips_fast_lane(tmp_path):
+    store = await make_store(tmp_path)
+    service = BrowserTaskService(store)
+    await service.broker.register_profile(profile_alias="muse_owner")
+    task = await service.create_task(
+        profile_alias="muse_owner",
+        strategy=BrowserStrategy.STAGEHAND,
+        autonomy_tier=AutonomyTier.L5_STAGEHAND_AGENT,
+        action_class=ActionClass.A2,
+        target_domain="muse.ai",
+        goal="private mission details that must not be sent to the Jev provider",
+    )
+    harness = FakeHarness()
+    jev = FakeJev([{
+        "operation": "CLICK",
+        "action": {"id": "e1", "kind": "click", "node": 1, "label": "Open"},
+        "fingerprint": "fp",
+        "confidence": 1.0,
+    }])
+    stage_action = {
+        "description": "Open the current task",
+        "method": "click",
+        "arguments": [],
+        "selector": "button",
+    }
+    stagehand = FakeStagehand([[stage_action]])
+    worker = HybridBrowserWorker(harness, stagehand, jev, task=task)  # type: ignore[arg-type]
+
+    proposal = await worker.propose(_muse_assignment(task), [])
+
+    assert proposal.payload.get("stagehand_action") == stage_action
+    assert jev.calls == []
+    assert "jev_observe" not in harness.calls
