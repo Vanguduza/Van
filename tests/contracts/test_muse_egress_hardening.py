@@ -247,3 +247,23 @@ def test_browser_workers_cannot_read_muse_profile_or_supervisor_secret():
         assert "/opt/van-muse-sandbox/secrets" in text
         assert "/var/lib/van-muse-sandbox/profile" in text
         assert "/var/lib/van-muse-sandbox/downloads" in text
+
+
+def test_muse_bootstrap_runs_after_final_firewall():
+    bootstrap = (ROOT / "deploy/van-trading-core/bootstrap.sh").read_text(encoding="utf-8")
+    firewall = bootstrap.index('# ---------------------------------------------------------------- firewall')
+    muse = bootstrap.index('# ---------------------------------------------------------------- optional hardened Meta Muse enclave')
+    record = bootstrap.index('# ---------------------------------------------------------------- record')
+    assert firewall < muse < record
+    assert '"with_muse":$WITH_MUSE' in bootstrap
+
+
+def test_live_qualifiers_prove_host_cannot_borrow_muse_proxies():
+    egress = _read("qualify-muse-egress.sh")
+    sandbox = _read("sandbox/qualify-muse-sandbox.sh")
+
+    assert "unauthorized_host_proxy" in egress
+    assert "sudo -u nobody" in egress
+    assert "host_proxy_policy" in egress
+    assert "host_sandbox_proxy_borrow" in sandbox
+    assert 'socks5h://$MUSE_SANDBOX_GATEWAY:$MUSE_SANDBOX_PROXY_PORT' in sandbox
