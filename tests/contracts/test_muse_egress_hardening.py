@@ -241,6 +241,7 @@ def test_browser_workers_cannot_read_muse_profile_or_supervisor_secret():
     for relative in (
         "deploy/van-trading-core/systemd/vati-browser-harness.service",
         "deploy/van-trading-core/systemd/vati-stagehand.service",
+        "deploy/van-trading-core/systemd/vati-jev.service",
     ):
         text = (ROOT / relative).read_text(encoding="utf-8")
         assert "InaccessiblePaths=" in text
@@ -267,3 +268,54 @@ def test_live_qualifiers_prove_host_cannot_borrow_muse_proxies():
     assert "host_proxy_policy" in egress
     assert "host_sandbox_proxy_borrow" in sandbox
     assert 'socks5h://$MUSE_SANDBOX_GATEWAY:$MUSE_SANDBOX_PROXY_PORT' in sandbox
+
+
+def test_jev_ultrafast_is_exact_pinned_proposal_only_and_stagehand_fallback():
+    manifest = (ROOT / "registries/automation_browser_dependencies.json").read_text(encoding="utf-8")
+    service = (ROOT / "deploy/van-trading-core/browser/jev_service.py").read_text(encoding="utf-8")
+    bootstrap = (ROOT / "deploy/van-trading-core/browser/bootstrap-browser-runtime.sh").read_text(encoding="utf-8")
+    worker = (ROOT / "backend/van_gateway/browser/worker.py").read_text(encoding="utf-8")
+    harness = (ROOT / "deploy/van-trading-core/browser/harness_service.py").read_text(encoding="utf-8")
+
+    assert '"version": "0.1.0"' in manifest
+    assert '"commit": "1231850a0bf1a0c0341fe408ef1668dbbfdfac46"' in manifest
+    assert '"production_mode": "PROPOSAL_ONLY"' in manifest
+    assert "1231850a0bf1a0c0341fe408ef1668dbbfdfac46" in bootstrap
+    assert "direct_url.json" in bootstrap
+    assert '"allow_text_generation": False' in (ROOT / "backend/van_gateway/browser/adapters.py").read_text(encoding="utf-8")
+    assert "TEXT_MODEL_API_KEY" not in service
+    assert '"executes_actions": False' in service
+    assert '"text_generation": False' in service
+    assert 'operation in {"CLICK", "SELECT", "SCROLL_UP", "SCROLL_DOWN", "WAIT"}' in worker
+    assert 'kind in {"click", "select", "scroll", "wait"}' in worker
+    assert "JEV_TEXT_FAST_PATH_FORBIDDEN" in harness
+    assert "self.stagehand.observe" in worker
+
+
+def test_jev_has_dedicated_principal_and_cannot_read_muse_or_general_browser_secrets():
+    unit = (ROOT / "deploy/van-trading-core/systemd/vati-jev.service").read_text(encoding="utf-8")
+    runtime = (ROOT / "deploy/van-trading-core/browser/runtime.env.example").read_text(encoding="utf-8")
+    bootstrap = (ROOT / "deploy/van-trading-core/browser/bootstrap-browser-runtime.sh").read_text(encoding="utf-8")
+
+    assert "User=van-jev" in unit
+    assert "Group=van-jev" in unit
+    assert "/var/lib/van-trading/browser/jev-secrets" in unit
+    assert "InaccessiblePaths=" in unit
+    assert "/var/lib/van-trading/browser/secrets" in unit
+    assert "/opt/van-muse-sandbox/secrets" in unit
+    assert "/var/lib/van-muse-sandbox/profile" in unit
+    assert "/var/lib/van-muse-sandbox/downloads" in unit
+    assert "VAN_JEV_SECRET_ROOT=/var/lib/van-trading/browser/jev-secrets" in runtime
+    assert "useradd --system --home-dir /var/lib/van-jev" in bootstrap
+    assert "install -d -o van-jev -g van-jev -m 0700 /var/lib/van-trading/browser/jev-secrets" in bootstrap
+
+
+def test_jev_harness_action_is_fingerprint_guarded_and_cannot_type():
+    harness = (ROOT / "deploy/van-trading-core/browser/harness_service.py").read_text(encoding="utf-8")
+    assert "def jev_observe" in harness
+    assert "def jev_act" in harness
+    assert 'current.get("fingerprint") != fingerprint' in harness
+    assert "JEV_PAGE_STALE" in harness
+    assert "JEV_ACTION_TAMPERED" in harness
+    assert "JEV_TEXT_FAST_PATH_FORBIDDEN" in harness
+    assert 'kind not in {"click", "select", "scroll", "wait"}' in harness
