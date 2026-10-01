@@ -5,6 +5,7 @@ set -Eeuo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BASE=/opt/van-browser-runtime
 JEV_BASE=/opt/van-jev-runtime
+JEV_PROXY_BASE=/opt/van-jev-proxy
 CONFIG=/opt/van-trading/config/browser-runtime.env
 VEKL_WORKER_HOST="${VAN_VEKL_WORKER_HOST:-}"
 [[ -n "$VEKL_WORKER_HOST" ]] || { echo 'VAN_VEKL_WORKER_HOST is required' >&2; exit 41; }
@@ -23,8 +24,12 @@ fi
 if ! id van-jev >/dev/null 2>&1; then
   useradd --system --home-dir /var/lib/van-jev --create-home --shell /usr/sbin/nologin van-jev
 fi
+if ! id van-jev-proxy >/dev/null 2>&1; then
+  useradd --system --home-dir /var/lib/van-jev-proxy --create-home --shell /usr/sbin/nologin van-jev-proxy
+fi
 install -d -o van-browser -g van-browser -m 0750 "$BASE" "$BASE/browsers"
 install -d -o root -g van-jev -m 0750 "$JEV_BASE"
+install -d -o root -g van-jev-proxy -m 0750 "$JEV_PROXY_BASE"
 install -d -o van-browser -g van-browser -m 0700 /var/lib/van-trading/browser/profiles
 install -d -o van-browser -g van-browser -m 0700 /var/lib/van-trading/browser/secrets
 install -d -o van-jev -g van-jev -m 0700 /var/lib/van-trading/browser/jev-secrets
@@ -108,11 +113,13 @@ jev_ver="$("$JEV_BASE/venv/bin/python" -c 'import importlib.metadata as m; print
 install -o root -g root -m 0755 "$HERE/harness_service.py" "$BASE/harness_service.py"
 install -o root -g root -m 0755 "$HERE/stagehand_service.mjs" "$BASE/stagehand_service.mjs"
 install -o root -g van-jev -m 0550 "$HERE/jev_service.py" "$JEV_BASE/jev_service.py"
+install -o root -g van-jev-proxy -m 0550 "$HERE/jev_egress_proxy.py" "$JEV_PROXY_BASE/egress_proxy.py"
 install -d -o root -g root -m 0755 "$BASE/jev"
 install -o root -g root -m 0444 "$HERE/jev/snapshot.js" "$BASE/jev/snapshot.js"
 install -o root -g root -m 0644 "$HERE/../systemd/vati-browser-harness.service" /etc/systemd/system/vati-browser-harness.service
 install -o root -g root -m 0644 "$HERE/../systemd/vati-stagehand.service" /etc/systemd/system/vati-stagehand.service
 install -o root -g root -m 0644 "$HERE/../systemd/vati-jev.service" /etc/systemd/system/vati-jev.service
+install -o root -g root -m 0644 "$HERE/../systemd/vati-jev-egress-proxy.service" /etc/systemd/system/vati-jev-egress-proxy.service
 
 python3 - "$CONFIG" "$chromium_path" "$BASE/harness-venv/bin/browser-harness" <<'PY'
 import re, sys
@@ -133,7 +140,7 @@ PY
 chmod 0644 "$CONFIG"
 
 systemctl daemon-reload
-systemctl enable vati-browser-harness.service vati-stagehand.service vati-jev.service
+systemctl enable vati-browser-harness.service vati-stagehand.service vati-jev-egress-proxy.service vati-jev.service
 systemctl restart vati-browser-harness.service
 for attempt in 1 2 3 4 5; do
   if curl -fsS --max-time 3 "http://127.0.0.1:${VAN_HARNESS_PORT:-9141}/health" >/tmp/van-harness-health.json 2>/dev/null \
@@ -176,6 +183,28 @@ PY
     exit 47
   fi
   sleep 2
+done
+
+systemctl restart vati-jev-egress-proxy.service
+for attempt in 1 2 3 4 5; do
+  if systemctl is-active --quiet vati-jev-egress-proxy.service \
+     && python3 - <<'PY'
+import socket
+s=socket.create_connection(("127.0.0.1",9143),2)
+s.sendall(b"CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n")
+data=s.recv(128)
+s.close()
+assert b"403 Forbidden" in data, data
+PY
+  then
+    echo JEV_TYPESAFE_EGRESS_PROXY_GREEN
+    break
+  fi
+  if [[ "$attempt" == 5 ]]; then
+    journalctl -u vati-jev-egress-proxy.service -n 50 --no-pager >&2 || true
+    echo "JEV_EGRESS_PROXY_DEGRADED_STAGEHAND_FALLBACK" >&2
+  fi
+  sleep 1
 done
 
 # Jev is preferred when qualified, never a prerequisite for the Browser Fabric.
