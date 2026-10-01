@@ -223,6 +223,7 @@ class JevAdapter(_PrivateWorkerClient):
         base_url: str = "",
         enabled: bool = False,
         expected_version: str | None = None,
+        expected_model: str = "jev-1.13.0",
         timeout_seconds: float = 30.0,
         transport: httpx.AsyncBaseTransport | None = None,
     ) -> None:
@@ -233,6 +234,17 @@ class JevAdapter(_PrivateWorkerClient):
             expected_version=expected_version,
             timeout_seconds=timeout_seconds,
             transport=transport,
+        )
+        self.expected_model = expected_model
+
+    async def qualify(self) -> dict[str, Any]:
+        """Run the side-effect-free live Jev canary before READY evidence exists."""
+        return await self._call(
+            "/qualify",
+            {
+                "allow_text_generation": False,
+                "allow_unbounded_agent_loop": False,
+            },
         )
 
     async def choose(
@@ -245,6 +257,12 @@ class JevAdapter(_PrivateWorkerClient):
     ) -> dict[str, Any]:
         if task.profile_alias != "muse_owner":
             raise BrowserPolicyError("jev_profile_not_admitted")
+        readiness = await self.status()
+        if not readiness.ready:
+            raise BrowserAdapterError(
+                "JEV_ULTRAFAST_NOT_READY",
+                readiness.state.value,
+            )
         return await self._call(
             "/choose",
             {
@@ -260,7 +278,40 @@ class JevAdapter(_PrivateWorkerClient):
         )
 
     async def status(self) -> ExternalRuntimeStatus:  # type: ignore[override]
-        return await super().status("BROWSER_JEV_FAST_LANE_UNAVAILABLE")
+        status = await super().status("BROWSER_JEV_FAST_LANE_UNAVAILABLE")
+        if not status.ready:
+            return status
+        try:
+            async with httpx.AsyncClient(
+                base_url=self.base_url,
+                timeout=min(self.timeout_seconds, 5.0),
+                transport=self.transport,
+            ) as client:
+                response = await client.get("/health")
+            response.raise_for_status()
+            health = dict(response.json())
+        except (httpx.HTTPError, ValueError, TypeError) as exc:
+            return status.model_copy(
+                update={
+                    "state": RuntimeState.DEGRADED,
+                    "detail": f"live Jev health unavailable: {type(exc).__name__}",
+                }
+            )
+        if (
+            health.get("startup_qualified") is not True
+            or str(health.get("runtime_version") or "") != str(self.expected_version or "")
+            or str(health.get("model") or "") != self.expected_model
+            or health.get("text_generation") is not False
+            or health.get("executes_actions") is not False
+            or health.get("autonomous_loop") is not False
+        ):
+            return status.model_copy(
+                update={
+                    "state": RuntimeState.DEGRADED,
+                    "detail": "Jev live qualification/model contract mismatch",
+                }
+            )
+        return status
 
 
 class StagehandAdapter(_PrivateWorkerClient):
