@@ -301,5 +301,16 @@ PY
 # 7. Model pin status (§4): informational, required=0. UNVERIFIED is not GREEN.
 add model_immutable_snapshot UNKNOWN "immutable provider revision for claude-sonnet-5 not established" 0
 
-printf '{"zone":"van-browser-core","fails":%d,"checks":[%s]}\n' "$fails" "$(IFS=,; echo "${checks[*]}")"
+# Review I9 MINOR-2: the report says when, where and for which code it was measured. The
+# gateway's egress gate accepts it only while it is fresh and only when these digests are
+# the repository's own files (a GREEN report of older code never stays GREEN).
+RUNTIME="${VAN_BROWSER_CORE_RUNTIME:-/opt/van-browser-core/runtime}"
+artifacts="$(for pair in "harness_service.py=$RUNTIME/harness_service.py" "egress_proxy.py=$RUNTIME/egress_proxy.py" \
+                         "van-browser-core.nft=$ETC/firewall.nft"; do
+  digest="$(sha256sum "${pair#*=}" 2>/dev/null | cut -d' ' -f1)"
+  printf '"%s":"%s"\n' "${pair%%=*}" "${digest:-missing}"
+done | paste -sd, -)"
+printf '{"zone":"van-browser-core","generated_at_utc":"%s","host":%s,"artifacts":{%s},"fails":%d,"checks":[%s]}\n' \
+  "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$( (hostname -f 2>/dev/null || hostname) | head -n1 | jq -R .)" "$artifacts" \
+  "$fails" "$(IFS=,; echo "${checks[*]}")"
 [[ "$fails" == 0 ]]

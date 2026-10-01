@@ -28,6 +28,7 @@ import hashlib
 import json
 import re
 from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -87,6 +88,9 @@ class GateKind(str, Enum):
     #: report: the record names a report file under ``report_dir`` and pins its sha256, the
     #: report is for the declared zone, and every ``required_checks`` entry is in it, required
     #: and GREEN. A GREEN word without that report is UNKNOWN; a required check RED is BLOCKED.
+    #: Review I9 MINOR-2: the report must also be fresh (``generated_at_utc`` no older than
+    #: ``max_age_hours``, not in the future) and measured on the repository's own code (each
+    #: ``artifacts`` digest equals the sha256 of the named repository file); else UNKNOWN.
     QUALIFY_REPORT = "qualify_report"
 
 
@@ -303,8 +307,39 @@ def _classify_owner_reference(
     return GateStatus.GREEN, None
 
 
+#: A report stamped this far ahead of the gateway's clock is still accepted (clock skew).
+QUALIFY_REPORT_SKEW_SECONDS = 300
+
+
+def _qualify_report_unbound(spec: dict[str, Any], report: dict[str, Any], root: Path, now: Any) -> str | None:
+    """Why ``report`` is not bound to now and to this repository's code, or None."""
+    stamp = report.get("generated_at_utc")
+    try:
+        taken = datetime.strptime(stamp, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+    except (TypeError, ValueError):
+        return "qualify report has no valid generated_at_utc"
+    current = now or datetime.now(timezone.utc)
+    if taken - current > timedelta(seconds=QUALIFY_REPORT_SKEW_SECONDS):
+        return f"qualify report generated_at_utc {stamp} is in the future"
+    if current - taken > timedelta(hours=spec["max_age_hours"]):
+        return f"qualify report generated_at_utc {stamp} is older than {spec['max_age_hours']} h"
+    if not isinstance(report.get("host"), str) or not report["host"].strip():
+        return "qualify report names no host"
+    measured = report.get("artifacts")
+    if not isinstance(measured, dict):
+        return "qualify report has no artifact digests"
+    for name, source in sorted(spec["artifacts"].items()):
+        target = root / source
+        if not _inside(target, root) or not target.is_file():
+            return f"qualify artifact {name}: repository file {source!r} is missing"
+        expected = hashlib.sha256(target.read_bytes()).hexdigest()
+        if measured.get(name) != expected:
+            return f"qualify report measured {name} {measured.get(name)!r}, repository has {expected}"
+    return None
+
+
 def _classify_qualify_report(
-    spec: dict[str, Any], record: dict[str, Any], raw: Any, root: Path
+    spec: dict[str, Any], record: dict[str, Any], raw: Any, root: Path, now: Any = None
 ) -> tuple[GateStatus, str | None]:
     """Unit G12. GREEN needs the report, not the word (see ``GateKind.QUALIFY_REPORT``)."""
     status, reason = _classify(spec, raw)
@@ -355,6 +390,10 @@ def _classify_qualify_report(
                  if checks[name].get("status") != "GREEN" or checks[name].get("required") != 1]
     if not_green:
         return GateStatus.UNKNOWN, f"qualify report checks not GREEN and required: {', '.join(not_green)}"
+    # Review I9 MINOR-2: a GREEN report of older code, or one taken long ago, is not a pass now.
+    stale = _qualify_report_unbound(spec, report, root, now)
+    if stale:
+        return GateStatus.UNKNOWN, stale
     return GateStatus.GREEN, None
 
 
@@ -415,6 +454,13 @@ def _gate_spec_problem(spec: Any) -> str | None:
         checks = spec.get("required_checks")
         if not isinstance(checks, list) or not checks or not all(isinstance(c, str) and c for c in checks):
             return "qualify_report gate lacks required_checks"
+        age = spec.get("max_age_hours")
+        if isinstance(age, bool) or not isinstance(age, int) or age <= 0:
+            return "qualify_report gate lacks a positive max_age_hours"
+        artifacts = spec.get("artifacts")
+        if not isinstance(artifacts, dict) or not artifacts or not all(
+                isinstance(k, str) and k and isinstance(v, str) and v for k, v in artifacts.items()):
+            return "qualify_report gate lacks artifacts"
     # Review I4 MINOR-B: a pattern match is a shape, never a GREEN on its own. Only an
     # owner_reference gate, which also resolves and pins the file, may declare one.
     if spec.get("green_pattern") is not None:

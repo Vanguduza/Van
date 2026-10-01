@@ -361,16 +361,28 @@ def test_real_model_gates_every_browser_capability_on_egress_qualification_and_i
 
 
 def _egress_repo(tmp_path: Path, *, status="QUALIFIED", checks=None, zone="van-browser-core",
-                 reference=None, pin=None, gate=None, fails=0) -> dict:
+                 reference=None, pin=None, gate=None, fails=0, generated=None, host="vbc-1",
+                 measured=None) -> dict:
+    import hashlib
+    from datetime import datetime, timezone
+
     gate = gate or _egress_gate()
+    digests = {}
+    for name, source in gate.get("artifacts", {}).items():
+        target = tmp_path / source
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(f"code of {name}\n", encoding="utf-8")
+        digests[name] = hashlib.sha256(target.read_bytes()).hexdigest()
+    digests.update(measured or {})
+    stamp = generated if generated is not None else datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     decisions = tmp_path / "docs" / "decisions"
     decisions.mkdir(parents=True)
     report = tmp_path / gate["report_dir"] / "qualify-20261001.json"
     report.parent.mkdir(parents=True)
     rows = checks if checks is not None else [
         {"check": c, "status": "GREEN", "required": 1, "detail": ""} for c in gate["required_checks"]]
-    report.write_text(json.dumps({"zone": zone, "fails": fails, "checks": rows}), encoding="utf-8")
-    import hashlib
+    report.write_text(json.dumps({"zone": zone, "generated_at_utc": stamp, "host": host, "artifacts": digests,
+                                  "fails": fails, "checks": rows}), encoding="utf-8")
 
     sha = hashlib.sha256(report.read_bytes()).hexdigest()
     ref = reference if reference is not None else report.relative_to(tmp_path).as_posix()
@@ -435,3 +447,38 @@ def test_a_qualify_report_gate_without_required_checks_is_unknown(tmp_path):
     gate = dict(_egress_gate(), required_checks=[])
     result = _egress_repo(tmp_path, gate=gate)
     assert result["status"] == "UNKNOWN" and "required_checks" in result["reason"]
+
+
+@pytest.mark.parametrize("label, kwargs", [
+    ("taken longer ago than max_age_hours", {"generated": "2026-01-01T00:00:00Z"}),
+    ("stamped in the future", {"generated": "2099-01-01T00:00:00Z"}),
+    ("no timestamp", {"generated": ""}),
+    ("no host", {"host": ""}),
+    ("measured on other code", {"measured": {"egress_proxy.py": "0" * 64}}),
+    ("an artifact it could not read", {"measured": {"van-browser-core.nft": "missing"}}),
+])
+def test_review_i9_an_all_green_report_not_bound_to_now_and_this_code_is_unknown(tmp_path, label, kwargs):
+    """Review I9 MINOR-2: the report was pinned by sha256 only, so a GREEN report of older
+    code stayed GREEN forever. Now it must be fresh, name its host and have measured the
+    repository's own proxy, Harness and firewall."""
+    result = _egress_repo(tmp_path, **kwargs)
+    assert result["status"] == "UNKNOWN", (label, result)
+
+
+def test_review_i9_the_real_egress_gate_binds_freshness_and_the_zone_code():
+    gate = _egress_gate()
+    assert gate["max_age_hours"] == 168
+    assert set(gate["artifacts"]) == {"harness_service.py", "egress_proxy.py", "van-browser-core.nft"}
+    root = GATE_MODEL.parents[1]
+    assert all((root / source).is_file() for source in gate["artifacts"].values())
+    qualify = (root / "deploy/van-browser-core/qualify.sh").read_text(encoding="utf-8")
+    assert '"generated_at_utc"' in qualify and '"host"' in qualify and '"artifacts"' in qualify
+    for name in gate["artifacts"]:
+        assert f'"{name}=' in qualify, name
+
+
+@pytest.mark.parametrize("missing", ["max_age_hours", "artifacts"])
+def test_review_i9_a_qualify_gate_without_freshness_or_artifacts_is_a_model_error(tmp_path, missing):
+    gate = dict(_egress_gate())
+    gate.pop(missing)
+    assert _egress_repo(tmp_path, gate=gate)["status"] != "GREEN"
