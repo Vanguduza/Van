@@ -344,7 +344,7 @@ fi
 
 # ---------------------------------------------------------------- record
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
-REPORT="{\"host\":\"$(hostname)\",\"arch\":\"$ARCH\",\"dry_run\":$DRY_RUN,\"mt5_native\":$MT5_NATIVE,\"branch\":\"$BRANCH\",\"with_nautilus\":$WITH_NAUTILUS,\"steps\":$(printf '%s\n' "${STEPS[@]}" | jq -R . | jq -s .),\"at\":\"$STAMP\"}"
+REPORT="{\"host\":\"$(hostname)\",\"arch\":\"$ARCH\",\"dry_run\":$DRY_RUN,\"mt5_native\":$MT5_NATIVE,\"branch\":\"$BRANCH\",\"with_nautilus\":$WITH_NAUTILUS,\"with_muse\":$WITH_MUSE,\"steps\":$(printf '%s\n' "${STEPS[@]}" | jq -R . | jq -s .),\"at\":\"$STAMP\"}"
 if (( ! DRY_RUN )); then echo "$REPORT" > "$DATA/bootstrap-$STAMP.json"; chown vati:vati "$DATA/bootstrap-$STAMP.json"; fi
 echo "$REPORT" | jq .
 echo "[bootstrap] next: 1) copy $SECRETS/pki/mt5-worker.{crt,key} + ca.crt to the Windows worker and run windows/mt5_worker/install.ps1"
