@@ -319,3 +319,19 @@ def test_jev_harness_action_is_fingerprint_guarded_and_cannot_type():
     assert "JEV_ACTION_TAMPERED" in harness
     assert "JEV_TEXT_FAST_PATH_FORBIDDEN" in harness
     assert 'kind not in {"click", "select", "scroll", "wait"}' in harness
+
+
+def test_chromium_policy_allows_only_the_controlled_cdp_runtime():
+    import json
+
+    policy = json.loads(_read("sandbox/policy.json"))
+    qualifier = _read("sandbox/qualify-muse-sandbox.sh")
+
+    # Chromium's current policy semantics apply DeveloperToolsAvailability to direct
+    # CDP access. Value 2 would make the sandbox look healthy while refusing Harness.
+    assert policy["DeveloperToolsAvailability"] == 1
+    assert policy["RemoteDebuggingAllowed"] is True
+    assert policy["HeadlessMode"] == 1
+    assert "cdp_protocol" in qualifier
+    assert "/json/version" in qualifier
+    assert 'ws://127.0.0.1:{port}/devtools/browser/' in qualifier
