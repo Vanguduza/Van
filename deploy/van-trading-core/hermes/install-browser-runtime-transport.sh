@@ -5,7 +5,10 @@
 # van-trading-core; SSH is the transport, not an authority boundary.
 set -euo pipefail
 
-TRADING_HOST="${VAN_TRADING_CORE_SSH_HOST:-van-trading-core}"
+TRADING_HOST="${VAN_TRADING_CORE_SSH_HOST:-10.0.1.233}"
+TRADING_USER="${VAN_TRADING_CORE_SSH_USER:-ubuntu}"
+TRADING_KEY="${VAN_TRADING_CORE_SSH_KEY:-$HOME/.ssh/node-hermes-to-trading}"
+KNOWN_HOSTS="${VAN_TRADING_CORE_KNOWN_HOSTS:-$HOME/.ssh/known_hosts}"
 GATEWAY_ENV="${VAN_GATEWAY_ENV:-$HOME/.config/van/gateway.env}"
 REPO="${VAN_REPO:-$HOME/work/van-google-runtime-closure}"
 UNIT_DIR="$HOME/.config/systemd/user"
@@ -20,7 +23,12 @@ log(){ printf '[browser-transport] %s\n' "$*"; }
 
 [[ -f "$GATEWAY_ENV" ]] || die "gateway env missing: $GATEWAY_ENV"
 [[ -d "$REPO/.git" ]] || die "VAN repository missing: $REPO"
-ssh -o BatchMode=yes -o ConnectTimeout=10 "$TRADING_HOST" true >/dev/null
+[[ -r "$TRADING_KEY" ]] || die "Trading Core SSH key missing: $TRADING_KEY"
+[[ -r "$KNOWN_HOSTS" ]] || die "known_hosts missing: $KNOWN_HOSTS"
+ssh -F /dev/null -i "$TRADING_KEY" \
+  -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+  -o UserKnownHostsFile="$KNOWN_HOSTS" -o ForwardAgent=no -o ForwardX11=no \
+  -o ConnectTimeout=10 "$TRADING_USER@$TRADING_HOST" true >/dev/null
 
 for spec in   "$STAGEHAND_LOCAL_PORT:9140"   "$HARNESS_LOCAL_PORT:9141"   "$JEV_LOCAL_PORT:9142"
 do
@@ -38,16 +46,22 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/ssh -NT \
+ExecStart=/usr/bin/ssh -NT -F /dev/null \
+  -i %h/.ssh/node-hermes-to-trading \
   -o BatchMode=yes \
+  -o IdentitiesOnly=yes \
+  -o StrictHostKeyChecking=yes \
+  -o UserKnownHostsFile=%h/.ssh/known_hosts \
   -o ExitOnForwardFailure=yes \
+  -o ForwardAgent=no \
+  -o ForwardX11=no \
+  -o RequestTTY=no \
   -o ServerAliveInterval=30 \
   -o ServerAliveCountMax=3 \
-  -o ClearAllForwardings=yes \
   -L 127.0.0.1:$STAGEHAND_LOCAL_PORT:127.0.0.1:9140 \
   -L 127.0.0.1:$HARNESS_LOCAL_PORT:127.0.0.1:9141 \
   -L 127.0.0.1:$JEV_LOCAL_PORT:127.0.0.1:9142 \
-  $TRADING_HOST
+  $TRADING_USER@$TRADING_HOST
 Restart=always
 RestartSec=3
 TimeoutStartSec=20
