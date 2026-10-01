@@ -6,8 +6,10 @@
   "DefaultGeolocationSetting": 2,
   "DefaultNotificationsSetting": 2,
   "DeveloperToolsAvailability": 2,
+  "DownloadDirectory": "/home/muse/downloads",
   "ExtensionInstallBlocklist": ["*"],
   "PasswordManagerEnabled": false,
+  "PromptForDownloadLocation": false,
   "SafeBrowsingProtectionLevel": 2,
   "SyncDisabled": true
 }
