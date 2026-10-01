@@ -96,7 +96,9 @@ else:
 open(p,"w",encoding="utf-8").write(s)
 PY
 
-install -m 0755 "$HERE/runtime/van-muse-sandbox-mounts.sh" /usr/local/sbin/van-muse-sandbox-mounts\ninstall -m 0755 "$HERE/runtime/van-muse-sandbox-firewall.sh" /usr/local/sbin/van-muse-sandbox-firewall\ninstall -m 0755 "$HERE/runtime/van-muse-publish-cdp.sh" /usr/local/sbin/van-muse-publish-cdp
+install -m 0755 "$HERE/runtime/van-muse-sandbox-mounts.sh" /usr/local/sbin/van-muse-sandbox-mounts
+install -m 0755 "$HERE/runtime/van-muse-sandbox-firewall.sh" /usr/local/sbin/van-muse-sandbox-firewall
+install -m 0755 "$HERE/runtime/van-muse-publish-cdp.sh" /usr/local/sbin/van-muse-publish-cdp
 install -m 0755 "$HERE/runtime/van-muse-sandbox-health.sh" /usr/local/sbin/van-muse-sandbox-health
 install -m 0755 "$HERE/van-muse-sandboxctl" /usr/local/bin/van-muse-sandboxctl
 install -m 0755 "$HERE/qualify-muse-sandbox.sh" /usr/local/bin/qualify-muse-sandbox
