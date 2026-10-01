@@ -74,6 +74,21 @@ PY
 listener="$(ss -ltnH | awk '{print $4}' | grep ":$MUSE_SANDBOX_CDP_PORT$" || true)"
 [[ "$listener" == "127.0.0.1:$MUSE_SANDBOX_CDP_PORT" ]] && add cdp_loopback GREEN "$listener" || add cdp_loopback RED "${listener:-missing}"
 
+cdp_json="$(curl -fsS --max-time 4 "http://127.0.0.1:$MUSE_SANDBOX_CDP_PORT/json/version" 2>/dev/null || true)"
+if python3 - "$cdp_json" "$MUSE_SANDBOX_CDP_PORT" <<'PY' >/dev/null 2>&1
+import json,sys
+d=json.loads(sys.argv[1])
+port=sys.argv[2]
+ws=str(d.get("webSocketDebuggerUrl") or "")
+assert d.get("Browser"), d
+assert ws.startswith(f"ws://127.0.0.1:{port}/devtools/browser/"), ws
+PY
+then
+  add cdp_protocol GREEN "loopback /json/version and websocket handoff verified"
+else
+  add cdp_protocol RED "${cdp_json:-unavailable}"
+fi
+
 cdp_file=/run/van-browser/muse_owner/cdp-endpoint.json
 if [[ -f "$cdp_file" ]] && jq -e --arg u "http://127.0.0.1:$MUSE_SANDBOX_CDP_PORT" '.profile_alias=="muse_owner" and .external_managed==true and .cdp_url==$u' "$cdp_file" >/dev/null; then
   add cdp_handoff GREEN "$(cat "$cdp_file")"
