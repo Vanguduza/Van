@@ -1,0 +1,43 @@
+[Unit]
+Description=VAN private Jev Ultrafast proposal worker
+After=network-online.target vati-browser-harness.service
+Wants=network-online.target
+Requires=vati-browser-harness.service
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=van-browser
+Group=van-browser
+EnvironmentFile=/opt/van-trading/config/browser-runtime.env
+WorkingDirectory=/opt/van-browser-runtime
+ExecStart=/opt/van-browser-runtime/jev-venv/bin/python /opt/van-browser-runtime/jev_service.py
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=45
+TimeoutStopSec=15
+
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/opt/van-browser-runtime /opt/van-trading/config/browser-runtime.env /var/lib/van-trading/browser/secrets
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=true
+LockPersonality=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077
+
+CPUWeight=10
+IOWeight=10
+MemoryAccounting=true
+CPUAccounting=true
+TasksAccounting=true
+MemoryMax=512M
+TasksMax=128
+
+[Install]
+WantedBy=multi-user.target
