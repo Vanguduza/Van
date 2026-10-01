@@ -16,7 +16,7 @@ id van-browser >/dev/null 2>&1 || die "existing VAN browser runtime must be inst
 
 export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a
 apt-get -o Acquire::Retries=3 update -qq
-apt-get -o Acquire::Retries=3 install -y -qq --no-install-recommends curl jq zstd nftables socat ca-certificates openssl >/dev/null
+apt-get -o Acquire::Retries=3 install -y -qq --no-install-recommends curl jq zstd nftables socat ca-certificates openssl e2fsprogs util-linux >/dev/null
 
 if ! id vanmusectl >/dev/null 2>&1; then
   useradd --system --home-dir /var/lib/van-muse-control --create-home --shell /usr/sbin/nologin vanmusectl
@@ -107,6 +107,21 @@ for u in van-muse-sandbox-mounts.service van-muse-sandbox-firewall.service van-m
 done
 systemctl daemon-reload
 
+BROWSER_ENV=/opt/van-trading/config/browser-runtime.env
+[[ -f "$BROWSER_ENV" ]] || die "existing VAN browser runtime config missing: $BROWSER_ENV"
+python3 - "$BROWSER_ENV" "$MUSE_SANDBOX_CDP_PORT" <<'PY'
+import re,sys
+p,port=sys.argv[1:]
+s=open(p,encoding="utf-8").read()
+line=f"VAN_BROWSER_EXTERNAL_CDP_MAP=muse_owner=http://127.0.0.1:{port}"
+if re.search(r"^VAN_BROWSER_EXTERNAL_CDP_MAP=",s,re.M):
+    s=re.sub(r"^VAN_BROWSER_EXTERNAL_CDP_MAP=.*$",line,s,flags=re.M)
+else:
+    s += "\n"+line+"\n"
+open(p,"w",encoding="utf-8").write(s)
+PY
+chmod 0644 "$BROWSER_ENV"
+
 # Do not enable boot persistence until the already-hardened egress proves its fixed
 # regional identity. A staged sandbox must remain inert across reboot.
 if ! /usr/local/bin/van-muse-egress-check >/dev/null 2>&1; then
@@ -121,6 +136,14 @@ systemctl restart van-muse-sandbox-firewall.service
 systemctl restart van-muse-sandbox-proxy.service
 systemctl restart van-muse-sandbox.service
 systemctl restart van-muse-cdp-bridge.service
+
+# Reuse the already-built VAN workers. They now see muse_owner as an externally managed
+# loopback CDP profile while every other browser profile keeps its native runtime.
+systemctl restart vati-browser-harness.service
+systemctl restart vati-stagehand.service
+curl -fsS --max-time 5 http://127.0.0.1:9141/health >/dev/null || die "Browser Harness failed after Muse CDP handoff"
+curl -fsS --max-time 5 http://127.0.0.1:9140/health >/dev/null || die "Stagehand failed after Muse CDP handoff"
+
 systemctl enable --now van-muse-sandbox-health.timer >/dev/null
 /usr/local/bin/qualify-muse-sandbox | tee /var/lib/van-muse-sandbox/qualification-latest.json
 jq -e '.status=="GREEN" and .required_failures==0' /var/lib/van-muse-sandbox/qualification-latest.json >/dev/null
