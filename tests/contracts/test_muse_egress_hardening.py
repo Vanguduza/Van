@@ -289,6 +289,8 @@ def test_jev_ultrafast_is_exact_pinned_proposal_only_and_stagehand_fallback():
     assert "field_text" not in service
     assert 'MODEL = os.getenv("VAN_JEV_TYPESAFE_MODEL", "jev-1.13.0")' in service
     assert "JEV_MODEL_DRIFT" in service
+    assert "JEV_OPERATION_CONFIDENCE_BELOW_THRESHOLD" in service
+    assert "JEV_TARGET_CONFIDENCE_BELOW_THRESHOLD" in service
     assert "_run_live_qualification" in service
     assert '"executes_actions": False' in service
     assert '"text_generation": False' in service
@@ -313,6 +315,7 @@ def test_jev_has_dedicated_principal_and_cannot_read_muse_or_general_browser_sec
     assert "/var/lib/van-muse-sandbox/downloads" in unit
     assert "VAN_JEV_SECRET_ROOT=/var/lib/van-trading/browser/jev-secrets" in runtime
     assert "VAN_JEV_TYPESAFE_MODEL=jev-1.13.0" in runtime
+    assert "VAN_JEV_MIN_CONFIDENCE=0.80" in runtime
     assert "VAN_JEV_REQUIRE_STARTUP_QUALIFICATION=1" in runtime
     assert "useradd --system --home-dir /var/lib/van-jev" in bootstrap
     assert "install -d -o van-jev -g van-jev -m 0700 /var/lib/van-trading/browser/jev-secrets" in bootstrap
