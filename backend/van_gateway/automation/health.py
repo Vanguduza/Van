@@ -115,6 +115,7 @@ class AutomationHealthApi:
             expected_version=settings.browser_jev_expected_version
             or self._manifest("jev_ultrafast"),
             expected_model=settings.browser_jev_model,
+            expected_min_confidence=settings.browser_jev_min_confidence,
         )
         # P2-CU-001 — the fabric is constructed in production for the first time. Its
         # health surface is here rather than in its own module because the three fabrics
