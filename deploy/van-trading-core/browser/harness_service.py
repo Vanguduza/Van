@@ -71,7 +71,7 @@ def _load_external_cdp_map() -> dict[str, str]:
         if not PROFILE_RE.fullmatch(alias):
             raise SystemExit("invalid external CDP profile alias")
         parsed = urlparse(endpoint)
-        if parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1", "::1", "localhost"}:
+        if parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1", "::1"}:
             raise SystemExit("external CDP endpoint must be literal/local loopback HTTP")
         if not parsed.port:
             raise SystemExit("external CDP endpoint requires an explicit port")
