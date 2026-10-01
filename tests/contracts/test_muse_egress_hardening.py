@@ -282,8 +282,14 @@ def test_jev_ultrafast_is_exact_pinned_proposal_only_and_stagehand_fallback():
     assert '"production_mode": "PROPOSAL_ONLY"' in manifest
     assert "1231850a0bf1a0c0341fe408ef1668dbbfdfac46" in bootstrap
     assert "direct_url.json" in bootstrap
+    assert "JEV_ULTRAFAST_DEGRADED_STAGEHAND_FALLBACK" in bootstrap
+    assert "jev_startup_qualified" in bootstrap
     assert '"allow_text_generation": False' in (ROOT / "backend/van_gateway/browser/adapters.py").read_text(encoding="utf-8")
-    assert "TEXT_MODEL_API_KEY" not in service
+    assert 'os.environ.pop("TEXT_MODEL_API_KEY", None)' in service
+    assert "field_text" not in service
+    assert 'MODEL = os.getenv("VAN_JEV_TYPESAFE_MODEL", "jev-1.13.0")' in service
+    assert "JEV_MODEL_DRIFT" in service
+    assert "_run_live_qualification" in service
     assert '"executes_actions": False' in service
     assert '"text_generation": False' in service
     assert 'operation in {"CLICK", "SELECT", "SCROLL_UP", "SCROLL_DOWN", "WAIT"}' in worker
@@ -306,6 +312,8 @@ def test_jev_has_dedicated_principal_and_cannot_read_muse_or_general_browser_sec
     assert "/var/lib/van-muse-sandbox/profile" in unit
     assert "/var/lib/van-muse-sandbox/downloads" in unit
     assert "VAN_JEV_SECRET_ROOT=/var/lib/van-trading/browser/jev-secrets" in runtime
+    assert "VAN_JEV_TYPESAFE_MODEL=jev-1.13.0" in runtime
+    assert "VAN_JEV_REQUIRE_STARTUP_QUALIFICATION=1" in runtime
     assert "useradd --system --home-dir /var/lib/van-jev" in bootstrap
     assert "install -d -o van-jev -g van-jev -m 0700 /var/lib/van-trading/browser/jev-secrets" in bootstrap
 
