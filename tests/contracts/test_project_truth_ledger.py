@@ -843,3 +843,25 @@ def test_the_baselines_are_declared_with_the_gap_recorded():
         "programme-a-memory-fabric-rev1-2": "12feb9033dfc1dd68d7b4d41ac477f0d9dbbc4af",
     }
     assert config["unenforced_history"]["status"] == "KNOWN_GAP_NOT_ENFORCED"
+
+
+def test_the_digest_does_not_depend_on_the_clones_hash_abbreviation(repo, capsys):
+    """Review I9 follow-up (unit G16): git abbreviates the ``index`` line's blob ids to a length
+    it picks from the object count (core.abbrev=auto), so a shallow clone and a full one hashed
+    the same change differently: 178 rows of this ledger failed in a shallow clone (7 hex) and
+    passed in a full one (8). The checker pins the length the existing rows were recorded with."""
+    reusable_commit(repo, "auth-test-abbrev", {"src/a.py": "a = 1\n"}, "one")
+    sha = git(repo, "rev-parse", "HEAD")
+    digests = set()
+    for length in ("7", "12", "auto"):
+        git(repo, "config", "core.abbrev", length)
+        digests.add(ptl.commit_digest(ptl.Repo(repo), sha))
+    assert len(digests) == 1
+    raw = subprocess.run(["git", "-c", "core.abbrev=8", "diff", "--binary", "--no-ext-diff", "--no-renames",
+                          f"{sha}^", sha, "--", ".", f":(exclude){LEDGER}"], cwd=repo, check=True,
+                         stdout=subprocess.PIPE).stdout
+    import hashlib
+    assert digests == {hashlib.sha256(raw).hexdigest()}
+    git(repo, "config", "core.abbrev", "7")
+    rc, out = verify(repo, capsys)
+    assert rc == 0, out

@@ -118,7 +118,8 @@ APPEND_ONLY_ANNOTATIONS = frozenset({"append-only", "append-only rows"})
 EMPTY_TREE = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
 DIFF_RECIPE = (
     "sha256(git diff --binary --no-ext-diff --no-renames <parent_sha> <commit_sha> -- . "
-    "':(exclude)docs/project-state/LOCAL_CHANGE_LEDGER.jsonl'); first parent for merges"
+    "':(exclude)docs/project-state/LOCAL_CHANGE_LEDGER.jsonl'); first parent for merges; "
+    "git run with core.abbrev=8 and the other GIT_PIN options"
 )
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 RANGE_RE = re.compile(r"^([0-9a-f]{40})\.\.([0-9a-f]{40})$")
@@ -131,6 +132,10 @@ GIT_PIN = [
     "-c", "diff.relative=false",
     "-c", "core.quotePath=true",
     "-c", "color.ui=never",
+    # The diff's ``index`` line abbreviates blob ids to a length git derives from the object
+    # count (core.abbrev=auto): a shallow clone gave 7 hex digits where the full clone that
+    # recorded this ledger gave 8, and every digest differed. Pinned to that 8.
+    "-c", "core.abbrev=8",
 ]
 INDEX = ":"  # pseudo-ref: the staged content
 
