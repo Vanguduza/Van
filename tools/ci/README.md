@@ -37,8 +37,9 @@ What is required of every commit after the baseline (ledger-only commits excepte
   before the SHA existed, `parent_sha` equal to its first parent and `commit_diff_sha256`
   equal to its digest;
 - the digest `sha256(git diff --binary --no-ext-diff --no-renames <first parent> <commit> -- .
-  ':(exclude)docs/project-state/LOCAL_CHANGE_LEDGER.jsonl')` matches every row that names the
-  commit;
+  ':(exclude)docs/project-state/LOCAL_CHANGE_LEDGER.jsonl')`, git run with `core.abbrev=8` (a
+  shallow clone abbreviates the diff's blob ids to fewer digits) and the checker's other pinned
+  diff options, matches every row that names the commit;
 - every changed file is covered by an authorization id on those rows whose record exists in the
   trusted tree, is not revoked, has an allowed authority (the config can only narrow
   OWNER_EXPLICIT / OWNER_DERIVED / OWNER_DELEGATED_AUTONOMY), **covers this commit**, and lists
