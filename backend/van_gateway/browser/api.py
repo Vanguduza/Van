@@ -167,6 +167,7 @@ class AcquisitionExecuteBody(AcquisitionLeaseMutationBody):
     crawl_max_depth: int = Field(default=3, ge=0, le=6)
     crawl_max_concurrency: int = Field(default=6, ge=1, le=12)
     crawl_max_tasks_per_minute: int = Field(default=120, ge=1, le=240)
+    crawl_timeout_seconds: int = Field(default=300, ge=30, le=1800)
     crawl_respect_robots_txt: bool = True
 
 
@@ -964,8 +965,14 @@ class BrowserApi:
                     worker_id=body.worker_id, lease_token=body.lease_token,
                 )
                 await self.acquisition.renew_lease(
-                    item_id, worker_id=body.worker_id, lease_token=body.lease_token,
-                    lease_seconds=180,
+                    item_id,
+                    worker_id=body.worker_id,
+                    lease_token=body.lease_token,
+                    lease_seconds=(
+                        min(3600, body.crawl_timeout_seconds + 60)
+                        if decision.route is AcquisitionRoute.CRAWLEE_CRAWL
+                        else 180
+                    ),
                 )
                 await self.acquisition.start(
                     item_id, worker_id=body.worker_id, lease_token=body.lease_token
@@ -993,22 +1000,22 @@ class BrowserApi:
                         max_depth=body.crawl_max_depth,
                         max_concurrency=body.crawl_max_concurrency,
                         max_tasks_per_minute=body.crawl_max_tasks_per_minute,
+                        timeout_seconds=body.crawl_timeout_seconds,
                         respect_robots_txt=body.crawl_respect_robots_txt,
                     )
-                    for discovered_url in result.get("discovered_urls", []):
-                        try:
-                            await self.acquisition.enqueue(
-                                str(discovered_url),
-                                profile_alias=item.profile_alias,
-                                source="CRAWLEE_DISCOVERY",
-                                parent_item_id=item.item_id,
-                                depth=item.depth + 1,
-                                priority=max(0, item.priority - 1),
-                                max_attempts=item.max_attempts,
-                                metadata={"discovered_by": "CRAWLEE_CRAWL"},
-                            )
-                        except ValueError:
-                            continue
+                    handoff = await self.acquisition.enqueue_many(
+                        [str(url) for url in result.get("discovered_urls", [])],
+                        profile_alias=item.profile_alias,
+                        source="CRAWLEE_DISCOVERY",
+                        parent_item_id=item.item_id,
+                        depth=item.depth + 1,
+                        priority=max(0, item.priority - 1),
+                        max_attempts=item.max_attempts,
+                        metadata={"discovered_by": "CRAWLEE_CRAWL"},
+                        expected_domain=item.domain,
+                        max_urls=2000,
+                    )
+                    result["frontier_handoff"] = handoff
                 else:
                     raise AcquisitionRuntimeError(
                         "WEB_ACQUISITION_ROUTE_NOT_EXECUTABLE",
@@ -1037,7 +1044,11 @@ class BrowserApi:
                     success=True,
                     latency_ms=elapsed,
                     byte_count=byte_count,
-                    verified_records=0,
+                    verified_records=(
+                        int(result.get("visited_count") or 0)
+                        if decision.route is AcquisitionRoute.CRAWLEE_CRAWL
+                        else 0
+                    ),
                     cost_micros=0,
                 )
                 await self.acquisition.complete(
@@ -1046,11 +1057,19 @@ class BrowserApi:
                     lease_token=body.lease_token,
                     checkpoint_ref=f"web-acquisition-evidence://{evidence.evidence_id}",
                 )
+                response_result = result
+                if decision.route is AcquisitionRoute.CRAWLEE_CRAWL:
+                    response_result = dict(result)
+                    discovered_urls = list(response_result.pop("discovered_urls", []))
+                    response_result["discovered_url_sample"] = discovered_urls[:100]
+                    response_result["discovered_urls_returned"] = len(
+                        response_result["discovered_url_sample"]
+                    )
                 return {
                     "route": decision.route.value,
                     "reason": decision.reason,
                     "evidence_ref": f"web-acquisition-evidence://{evidence.evidence_id}",
-                    "result": result,
+                    "result": response_result,
                 }
             except AcquisitionRuntimeError as exc:
                 elapsed = max(0, int(time.time() * 1000) - started)
