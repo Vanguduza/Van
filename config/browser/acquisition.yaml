@@ -16,6 +16,14 @@ routes:
     mode: http
   KATANA_RECON:
     executor: katana
+  CRAWLEE_CRAWL:
+    executor: crawlee
+    mode: public_bulk_crawl
+    authority: van_frontier
+    max_pages: 1000
+    max_depth: 6
+    max_concurrency: 12
+    max_tasks_per_minute: 240
   SCRAPLING_BROWSER:
     executor: scrapling
     mode: browser
