@@ -35,7 +35,7 @@ def test_runtime_dependencies_are_exactly_pinned():
     requirements = REQUIREMENTS.read_text(encoding="utf-8").splitlines()
     assert requirements == [
         "scrapling[rag]==0.4.15",
-        "crawlee[beautifulsoup,httpx]==1.10.2",
+        "crawlee[beautifulsoup]==1.10.2",
     ]
 
 
