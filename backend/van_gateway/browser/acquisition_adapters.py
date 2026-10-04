@@ -90,6 +90,30 @@ class HttpAcquisitionRuntimeAdapter:
             raise AcquisitionRuntimeError("WEB_ACQUISITION_SECRET_BOUNDARY_VIOLATION")
         return dict(data)
 
+    async def probe_health(self) -> dict[str, Any]:
+        self._assert_usable()
+        try:
+            async with httpx.AsyncClient(
+                base_url=self.base_url,
+                timeout=min(self.timeout_seconds, 10.0),
+                transport=self.transport,
+            ) as client:
+                response = await client.get("/health")
+        except httpx.HTTPError as exc:
+            raise AcquisitionRuntimeError("WEB_ACQUISITION_UNAVAILABLE", str(exc)) from exc
+        if response.status_code >= 400:
+            raise AcquisitionRuntimeError(
+                "WEB_ACQUISITION_HEALTH_FAILED", str(response.status_code)
+            )
+        data = response.json()
+        if not isinstance(data, dict) or data.get("ok") is not True:
+            raise AcquisitionRuntimeError("WEB_ACQUISITION_HEALTH_INVALID")
+        if data.get("auth_surface") is not False:
+            raise AcquisitionRuntimeError("WEB_ACQUISITION_AUTH_SURFACE_FORBIDDEN")
+        if data.get("challenge_solver_enabled") is not False:
+            raise AcquisitionRuntimeError("WEB_ACQUISITION_CHALLENGE_SOLVER_FORBIDDEN")
+        return dict(data)
+
     async def fetch_http(self, item: WebWorkItem) -> dict[str, Any]:
         return await self._call("/fetch/http", self._envelope(item))
 
