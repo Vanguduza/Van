@@ -299,3 +299,82 @@ async def test_authenticated_execute_requires_managed_browser(tmp_path):
     )
     assert row["state"] == "CLAIMED"
     assert row["route"] is None
+
+
+async def test_crawlee_execute_reimports_discoveries_into_van_frontier(tmp_path):
+    store = await make_store(tmp_path)
+    api = BrowserApi(store, get_settings())
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/crawl/crawlee":
+            return httpx.Response(
+                200,
+                json={
+                    "ok": True,
+                    "pages": [
+                        {
+                            "url": "https://example.com/catalog",
+                            "title": "Catalog",
+                            "content_digest": "sha256:" + "c" * 64,
+                            "byte_size": 100,
+                        }
+                    ],
+                    "discovered_urls": [
+                        "https://example.com/catalog/a",
+                        "https://example.com/catalog/b",
+                    ],
+                    "visited_count": 1,
+                    "discovered_count": 2,
+                    "rejected_count": 0,
+                    "content_digest": "sha256:" + "d" * 64,
+                    "byte_size": 100,
+                    "contains_secrets": False,
+                },
+            )
+        return httpx.Response(404, json={"error": "NOT_FOUND"})
+
+    api.acquisition_runtime.transport = httpx.MockTransport(handler)
+    app = FastAPI()
+    app.include_router(api.router)
+    client = AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
+
+    async with client:
+        created = await client.post(
+            "/v1/browser/acquisition/items",
+            headers=HEADERS,
+            json={"url": "https://example.com/catalog", "priority": 80},
+        )
+        item = created.json()
+        claimed = await client.post(
+            "/v1/browser/acquisition/claim",
+            headers=HEADERS,
+            json={"worker_id": "worker-crawlee"},
+        )
+        claim = claimed.json()
+        executed = await client.post(
+            f"/v1/browser/acquisition/items/{item['item_id']}/execute",
+            headers=HEADERS,
+            json={
+                "worker_id": "worker-crawlee",
+                "lease_token": claim["lease_token"],
+                "signals": {"bulk_crawl_required": True},
+                "crawl_max_pages": 50,
+                "crawl_max_depth": 3,
+                "crawl_max_concurrency": 4,
+                "crawl_max_tasks_per_minute": 60,
+            },
+        )
+        assert executed.status_code == 200
+        assert executed.json()["route"] == "CRAWLEE_CRAWL"
+
+    children = await store.fetchall(
+        "SELECT canonical_url, source, parent_item_id, depth FROM web_acquisition_items "
+        "WHERE parent_item_id=? ORDER BY canonical_url",
+        (item["item_id"],),
+    )
+    assert [str(row["canonical_url"]) for row in children] == [
+        "https://example.com/catalog/a",
+        "https://example.com/catalog/b",
+    ]
+    assert all(row["source"] == "CRAWLEE_DISCOVERY" for row in children)
+    assert all(row["depth"] == 1 for row in children)
