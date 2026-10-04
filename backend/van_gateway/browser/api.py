@@ -804,6 +804,7 @@ class BrowserApi:
             self._require_internal(x_van_internal_token)
             self._require_enabled()
             try:
+                self.policy.check_profile(body.profile_alias)
                 item = await self.acquisition.enqueue(**body.model_dump())
             except ValueError as exc:
                 raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -1063,6 +1064,9 @@ class BrowserApi:
             if row is None:
                 raise HTTPException(status_code=404, detail="UNKNOWN_WEB_ACQUISITION_ITEM")
             try:
+                self.policy.assert_no_secrets(
+                    body.detail, context="acquisition_evidence_detail"
+                )
                 evidence = await self.acquisition_evidence.record(
                     item_id=item_id, **body.model_dump()
                 )
