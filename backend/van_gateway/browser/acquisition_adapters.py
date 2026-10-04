@@ -124,6 +124,28 @@ class HttpAcquisitionRuntimeAdapter:
         depth = max(1, min(int(depth), 3))
         return await self._call("/recon/katana", self._envelope(item, depth=depth))
 
+    async def crawl(
+        self,
+        item: WebWorkItem,
+        *,
+        max_pages: int = 100,
+        max_depth: int = 3,
+        max_concurrency: int = 6,
+        max_tasks_per_minute: int = 120,
+        respect_robots_txt: bool = True,
+    ) -> dict[str, Any]:
+        return await self._call(
+            "/crawl/crawlee",
+            self._envelope(
+                item,
+                max_pages=max(1, min(int(max_pages), 1000)),
+                max_depth=max(0, min(int(max_depth), 6)),
+                max_concurrency=max(1, min(int(max_concurrency), 12)),
+                max_tasks_per_minute=max(1, min(int(max_tasks_per_minute), 240)),
+                respect_robots_txt=bool(respect_robots_txt),
+            ),
+        )
+
     async def status(self) -> ExternalRuntimeStatus:
         return await self.registry.resolve(
             capability=self.CAPABILITY,
