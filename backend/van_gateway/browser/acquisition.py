@@ -107,6 +107,31 @@ class WebWorkItem(BaseModel):
     completed_at_ms: int | None = None
 
 
+class DomainSkillState(str, Enum):
+    CANDIDATE = "CANDIDATE"
+    QUALIFIED = "QUALIFIED"
+    QUARANTINED = "QUARANTINED"
+    SUPERSEDED = "SUPERSEDED"
+
+
+class DomainSkill(BaseModel):
+    skill_id: str
+    domain: str
+    goal_class: str
+    version: int
+    state: DomainSkillState
+    route: AcquisitionRoute
+    artifact_ref: str
+    site_fingerprint: str | None = None
+    success_assertions: list[dict[str, Any]] = Field(default_factory=list)
+    failure_signatures: list[dict[str, Any]] = Field(default_factory=list)
+    evidence_refs: list[str] = Field(default_factory=list)
+    qualified_at_ms: int | None = None
+    superseded_by: str | None = None
+    created_at_ms: int
+    updated_at_ms: int
+
+
 class AcquisitionSession(BaseModel):
     session_id: str
     profile_alias: str
@@ -169,6 +194,184 @@ class AcquisitionRouter:
         if signals.jev_hint is not None:
             return RouteDecision(route=signals.jev_hint, reason="jev_advisory_hint")
         return RouteDecision(route=AcquisitionRoute.SCRAPLING_HTTP, reason="default_lightweight_path")
+
+
+class DomainSkillRegistry:
+    """Versioned learned website skills with deterministic replay qualification.
+
+    Learning may improve efficiency; it may never widen browser authority. The
+    registry stores an artifact reference and qualification evidence, not an
+    executable secret or hidden model state.
+    """
+
+    def __init__(self, store: Store) -> None:
+        self.store = store
+
+    @staticmethod
+    def _row(row: Any) -> DomainSkill:
+        return DomainSkill(
+            skill_id=str(row["skill_id"]),
+            domain=str(row["domain"]),
+            goal_class=str(row["goal_class"]),
+            version=int(row["version"]),
+            state=DomainSkillState(str(row["state"])),
+            route=AcquisitionRoute(str(row["route"])),
+            artifact_ref=str(row["artifact_ref"]),
+            site_fingerprint=row["site_fingerprint"],
+            success_assertions=json.loads(str(row["success_assertions_json"] or "[]")),
+            failure_signatures=json.loads(str(row["failure_signatures_json"] or "[]")),
+            evidence_refs=json.loads(str(row["evidence_refs_json"] or "[]")),
+            qualified_at_ms=row["qualified_at_ms"],
+            superseded_by=row["superseded_by"],
+            created_at_ms=int(row["created_at_ms"]),
+            updated_at_ms=int(row["updated_at_ms"]),
+        )
+
+    async def propose(
+        self,
+        *,
+        domain: str,
+        goal_class: str,
+        route: AcquisitionRoute,
+        artifact_ref: str,
+        site_fingerprint: str | None = None,
+        success_assertions: list[dict[str, Any]] | None = None,
+        failure_signatures: list[dict[str, Any]] | None = None,
+        evidence_refs: list[str] | None = None,
+        now_ms: int | None = None,
+    ) -> DomainSkill:
+        if not artifact_ref.strip():
+            raise ValueError("web_domain_skill_artifact_required")
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        row = await self.store.fetchone(
+            "SELECT COALESCE(MAX(version), 0) AS v FROM web_domain_skills "
+            "WHERE domain=? AND goal_class=?",
+            (domain.lower(), goal_class),
+        )
+        version = int(row["v"] or 0) + 1
+        skill_id = new_id("wskill")
+        await self.store.execute(
+            """
+            INSERT INTO web_domain_skills(
+              skill_id, domain, goal_class, version, state, route, artifact_ref,
+              site_fingerprint, success_assertions_json, failure_signatures_json,
+              evidence_refs_json, qualified_at_ms, superseded_by, created_at_ms, updated_at_ms
+            ) VALUES (?, ?, ?, ?, 'CANDIDATE', ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?)
+            """,
+            (
+                skill_id, domain.lower(), goal_class, version, route.value, artifact_ref,
+                site_fingerprint,
+                json.dumps(success_assertions or [], sort_keys=True),
+                json.dumps(failure_signatures or [], sort_keys=True),
+                json.dumps(evidence_refs or [], sort_keys=True),
+                now, now,
+            ),
+        )
+        row = await self.store.fetchone(
+            "SELECT * FROM web_domain_skills WHERE skill_id=?", (skill_id,)
+        )
+        assert row is not None
+        return self._row(row)
+
+    async def qualify(
+        self,
+        skill_id: str,
+        *,
+        replay_passed: bool,
+        evidence_refs: list[str],
+        now_ms: int | None = None,
+    ) -> DomainSkill:
+        if not replay_passed:
+            raise ValueError("web_domain_skill_replay_not_passed")
+        if not evidence_refs:
+            raise ValueError("web_domain_skill_qualification_requires_evidence")
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        row = await self.store.fetchone(
+            "SELECT * FROM web_domain_skills WHERE skill_id=?", (skill_id,)
+        )
+        if row is None:
+            raise KeyError("unknown_web_domain_skill")
+        if str(row["state"]) not in {"CANDIDATE", "QUARANTINED"}:
+            raise ValueError("web_domain_skill_not_qualifiable")
+
+        existing = json.loads(str(row["evidence_refs_json"] or "[]"))
+        merged = list(dict.fromkeys([*existing, *evidence_refs]))
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            await db.execute(
+                """
+                UPDATE web_domain_skills
+                SET state='SUPERSEDED', superseded_by=?, updated_at_ms=?
+                WHERE domain=? AND goal_class=? AND state='QUALIFIED' AND skill_id<>?
+                """,
+                (skill_id, now, row["domain"], row["goal_class"], skill_id),
+            )
+            cur = await db.execute(
+                """
+                UPDATE web_domain_skills
+                SET state='QUALIFIED', evidence_refs_json=?, qualified_at_ms=?,
+                    superseded_by=NULL, updated_at_ms=?
+                WHERE skill_id=? AND state IN ('CANDIDATE','QUARANTINED')
+                """,
+                (json.dumps(merged, sort_keys=True), now, now, skill_id),
+            )
+            if cur.rowcount != 1:
+                await db.rollback()
+                raise RuntimeError("web_domain_skill_qualification_race")
+            await db.commit()
+        fresh = await self.store.fetchone(
+            "SELECT * FROM web_domain_skills WHERE skill_id=?", (skill_id,)
+        )
+        assert fresh is not None
+        return self._row(fresh)
+
+    async def hot(self, *, domain: str, goal_class: str) -> DomainSkill | None:
+        row = await self.store.fetchone(
+            """
+            SELECT * FROM web_domain_skills
+            WHERE domain=? AND goal_class=? AND state='QUALIFIED'
+            ORDER BY version DESC LIMIT 1
+            """,
+            (domain.lower(), goal_class),
+        )
+        return None if row is None else self._row(row)
+
+    async def quarantine(
+        self,
+        skill_id: str,
+        *,
+        reason: str,
+        evidence_ref: str | None = None,
+        now_ms: int | None = None,
+    ) -> DomainSkill:
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        row = await self.store.fetchone(
+            "SELECT * FROM web_domain_skills WHERE skill_id=?", (skill_id,)
+        )
+        if row is None:
+            raise KeyError("unknown_web_domain_skill")
+        evidence = json.loads(str(row["evidence_refs_json"] or "[]"))
+        if evidence_ref:
+            evidence.append(evidence_ref)
+        failures = json.loads(str(row["failure_signatures_json"] or "[]"))
+        failures.append({"kind": "DRIFT", "reason": reason, "at_ms": now})
+        await self.store.execute(
+            """
+            UPDATE web_domain_skills
+            SET state='QUARANTINED', failure_signatures_json=?, evidence_refs_json=?,
+                updated_at_ms=? WHERE skill_id=?
+            """,
+            (
+                json.dumps(failures, sort_keys=True),
+                json.dumps(list(dict.fromkeys(evidence)), sort_keys=True),
+                now, skill_id,
+            ),
+        )
+        fresh = await self.store.fetchone(
+            "SELECT * FROM web_domain_skills WHERE skill_id=?", (skill_id,)
+        )
+        assert fresh is not None
+        return self._row(fresh)
 
 
 class AcquisitionSessionPool:
@@ -683,6 +886,9 @@ __all__ = [
     "AcquisitionRouter",
     "AcquisitionSession",
     "AcquisitionSessionPool",
+    "DomainSkill",
+    "DomainSkillRegistry",
+    "DomainSkillState",
     "AcquisitionSignals",
     "AcquisitionState",
     "RouteDecision",
