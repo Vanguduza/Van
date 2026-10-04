@@ -106,6 +106,8 @@ def test_crawlee_is_bulk_public_orchestration_not_authority():
     assert "CRAWLEE_HOST_BUDGET_EXCEEDED" in source
     assert "discovered_urls_truncated" in source
     assert "page_summaries_truncated" in source
+    assert "NON_HTML_CRAWL_EXTENSIONS" in source
+    assert "discovered_only_count" in source
     assert "RequestQueue.open(alias=queue_alias)" in source
     assert "request_manager=request_queue" in source
     assert "await request_queue.purge()" in source
