@@ -9,10 +9,12 @@ plane; this worker has no credential API and no access to browser profile data.
 from __future__ import annotations
 
 import hashlib
+import ipaddress
 import importlib.metadata
 import json
 import os
 import re
+import socket
 import subprocess
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -49,6 +51,60 @@ def safe_domain(value: Any) -> str:
     if not DOMAIN_RE.fullmatch(domain) or ".." in domain:
         raise WorkerError("TARGET_DOMAIN_INVALID", 422)
     return domain
+
+
+def assert_public_resolution(url: str) -> None:
+    """Refuse loopback/private/link-local/reserved destinations before egress."""
+    parsed = urlparse(url)
+    host = (parsed.hostname or "").lower().rstrip(".")
+    if not host or host == "localhost" or host.endswith((".localhost", ".local", ".internal")):
+        raise WorkerError("NON_PUBLIC_DESTINATION_FORBIDDEN", 403)
+    try:
+        literal = ipaddress.ip_address(host)
+        addresses = {literal}
+    except ValueError:
+        try:
+            addresses = {
+                ipaddress.ip_address(info[4][0].split("%", 1)[0])
+                for info in socket.getaddrinfo(host, parsed.port or (443 if parsed.scheme == "https" else 80))
+            }
+        except (OSError, ValueError) as exc:
+            raise WorkerError("PUBLIC_DNS_RESOLUTION_FAILED", 502) from exc
+    if not addresses or any(not address.is_global for address in addresses):
+        raise WorkerError("NON_PUBLIC_DESTINATION_FORBIDDEN", 403)
+
+
+def assert_scoped_final(url: str, domain: str) -> None:
+    parsed = urlparse(url)
+    host = (parsed.hostname or "").lower().rstrip(".")
+    if host != domain and not host.endswith("." + domain):
+        raise WorkerError("CROSS_DOMAIN_REDIRECT_REQUIRES_RECON", 409)
+    assert_public_resolution(url)
+
+
+def browser_public_guard(domain: str):
+    """Return a Playwright page setup that blocks private egress and scope-changing navigation."""
+    def setup(page):
+        def route_handler(route):
+            request = route.request
+            try:
+                target = request.url
+                parsed = urlparse(target)
+                if parsed.scheme not in {"http", "https"}:
+                    route.abort()
+                    return
+                assert_public_resolution(target)
+                host = (parsed.hostname or "").lower().rstrip(".")
+                if request.is_navigation_request() and (
+                    host != domain and not host.endswith("." + domain)
+                ):
+                    route.abort()
+                    return
+                route.continue_()
+            except Exception:
+                route.abort()
+        page.route("**/*", route_handler)
+    return setup
 
 
 def safe_url(value: Any, domain: str) -> str:
@@ -140,17 +196,23 @@ def _page_payload(page: Any, requested_url: str) -> dict[str, Any]:
 
 def scrapling_http(body: dict[str, Any], domain: str) -> dict[str, Any]:
     url = safe_url(body.get("url"), domain)
+    assert_public_resolution(url)
     try:
         from scrapling.fetchers import Fetcher
-        page = Fetcher.get(url)
+        page = Fetcher.get(
+            url, follow_redirects="safe", max_redirects=10, timeout=30, retries=1
+        )
     except Exception as exc:
         raise WorkerError("SCRAPLING_HTTP_FAILED", 502) from exc
+    final_url = str(getattr(page, "url", url) or url)
+    assert_scoped_final(final_url, domain)
     return _page_payload(page, url)
 
 
 def scrapling_browser(body: dict[str, Any], domain: str) -> dict[str, Any]:
     """Public dynamic fallback only; no profile, cookie or credential input exists."""
     url = safe_url(body.get("url"), domain)
+    assert_public_resolution(url)
     if not CHROMIUM or not Path(CHROMIUM).is_file():
         raise WorkerError("CHROMIUM_EXECUTABLE_UNAVAILABLE", 503)
     timeout_ms = max(1_000, min(int(body.get("timeout_ms", 30_000)), 60_000))
@@ -161,9 +223,12 @@ def scrapling_browser(body: dict[str, Any], domain: str) -> dict[str, Any]:
             executable_path=CHROMIUM,
             timeout=timeout_ms,
             network_idle=bool(body.get("network_idle", True)),
+            page_setup=browser_public_guard(domain),
         )
     except Exception as exc:
         raise WorkerError("SCRAPLING_BROWSER_FAILED", 502) from exc
+    final_url = str(getattr(page, "url", url) or url)
+    assert_scoped_final(final_url, domain)
     return _page_payload(page, url)
 
 
@@ -187,6 +252,7 @@ def _collect_urls(value: Any, out: set[str]) -> None:
 
 def katana_recon(body: dict[str, Any], domain: str) -> dict[str, Any]:
     url = safe_url(body.get("url"), domain)
+    assert_public_resolution(url)
     version = _katana_version()
     if version != KATANA_EXPECTED:
         raise WorkerError("KATANA_RUNTIME_UNAVAILABLE", 503)
@@ -195,6 +261,8 @@ def katana_recon(body: dict[str, Any], domain: str) -> dict[str, Any]:
     cmd = [
         KATANA_BIN, "-u", url, "-d", str(depth), "-ct", f"{duration}s",
         "-jc", "-jsonl", "-omit-raw", "-omit-body", "-silent",
+        "-e", "private-ips", "-fs", "rdn", "-c", "2", "-p", "1",
+        "-rl", "5", "-mdp", "500", "-duc",
         "-mrs", str(2 * 1024 * 1024), "-timeout", "10", "-retry", "1",
     ]
     try:
