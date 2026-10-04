@@ -135,3 +135,39 @@ def test_bootstrap_verifies_exact_worker_dependency_versions():
     assert "configure a loopback resolver before enabling the worker" in script
     assert "/var/lib/van-acquisition/storage" in script
     assert 'install -d -o root -g van-acquisition -m 0750 "$BASE" "$CONFIG_DIR"' not in script
+
+
+def test_public_resolution_rejects_private_loopback_and_metadata(monkeypatch):
+    spec = importlib.util.spec_from_file_location("van_acquisition_worker_private", SERVICE)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    for url in (
+        "http://127.0.0.1/",
+        "http://10.77.0.1/",
+        "http://169.254.169.254/latest/meta-data/",
+        "http://[fc00::1]/",
+    ):
+        with pytest.raises(module.WorkerError, match="NON_PUBLIC_DESTINATION_FORBIDDEN"):
+            module.assert_public_resolution(url)
+
+    monkeypatch.setattr(
+        module.socket,
+        "getaddrinfo",
+        lambda *args, **kwargs: [(2, 1, 6, "", ("10.77.0.4", 443))],
+    )
+    with pytest.raises(module.WorkerError, match="NON_PUBLIC_DESTINATION_FORBIDDEN"):
+        module.assert_public_resolution("https://public-looking.example/")
+
+
+def test_url_boundary_rejects_sensitive_query_and_excess_length():
+    spec = importlib.util.spec_from_file_location("van_acquisition_worker_sensitive", SERVICE)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    with pytest.raises(module.WorkerError, match="SENSITIVE_QUERY_FORBIDDEN"):
+        module.safe_url("https://example.com/a?access_token=secret", "example.com")
+    with pytest.raises(module.WorkerError, match="URL_LENGTH_INVALID"):
+        module.safe_url("https://example.com/" + ("x" * 5000), "example.com")
