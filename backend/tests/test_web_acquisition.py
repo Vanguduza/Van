@@ -385,3 +385,58 @@ async def test_jev_cannot_select_crawlee_without_bulk_signal():
         item, AcquisitionSignals(jev_hint=AcquisitionRoute.CRAWLEE_CRAWL)
     )
     assert decision.route is AcquisitionRoute.SCRAPLING_HTTP
+
+
+async def test_bulk_crawl_does_not_override_browser_or_semantic_requirement():
+    item = type(
+        "I", (), {"preferred_route": None, "profile_alias": "public_research"}
+    )()
+    browser = AcquisitionRouter.decide(
+        item,
+        AcquisitionSignals(
+            bulk_crawl_required=True,
+            javascript_required=True,
+        ),
+    )
+    assert browser.route is AcquisitionRoute.SCRAPLING_BROWSER
+
+    semantic = AcquisitionRouter.decide(
+        item,
+        AcquisitionSignals(
+            bulk_crawl_required=True,
+            semantic_interaction_required=True,
+        ),
+    )
+    assert semantic.route is AcquisitionRoute.STAGEHAND
+
+
+async def test_crawlee_batch_handoff_is_deduped_and_scope_checked(tmp_path):
+    store = await make_store(tmp_path)
+    frontier = AcquisitionFrontier(store)
+    parent = await frontier.enqueue("https://example.com/catalog", now_ms=1000)
+    stats = await frontier.enqueue_many(
+        [
+            "https://example.com/a",
+            "https://example.com/a#fragment",
+            "https://shop.example.com/b",
+            "https://attacker.example.net/c",
+            "https://example.com/x?access_token=do-not-store",
+        ],
+        profile_alias="public_research",
+        source="CRAWLEE_DISCOVERY",
+        parent_item_id=parent.item_id,
+        depth=1,
+        priority=49,
+        expected_domain="example.com",
+        now_ms=2000,
+    )
+    assert stats == {"received": 5, "unique_admitted": 2, "rejected": 2}
+    rows = await store.fetchall(
+        "SELECT canonical_url FROM web_acquisition_items WHERE parent_item_id=? "
+        "ORDER BY canonical_url",
+        (parent.item_id,),
+    )
+    assert [str(row["canonical_url"]) for row in rows] == [
+        "https://example.com/a",
+        "https://shop.example.com/b",
+    ]
