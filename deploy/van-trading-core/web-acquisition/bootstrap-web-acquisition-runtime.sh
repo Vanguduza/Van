@@ -14,9 +14,11 @@ if ! id van-acquisition >/dev/null 2>&1; then
   useradd --system --home-dir "$BASE" --shell /usr/sbin/nologin van-acquisition
 fi
 
-install -d -o root -g van-acquisition -m 0750 "$BASE" "$CONFIG_DIR"
+[[ -d "$CONFIG_DIR" ]] || { echo "missing existing VAN config directory: $CONFIG_DIR" >&2; exit 41; }
+install -d -o root -g van-acquisition -m 0750 "$BASE"
 install -d -o van-acquisition -g van-acquisition -m 0700 /run/van-acquisition
 install -d -o van-acquisition -g van-acquisition -m 0750 /var/log/van-trading/acquisition
+install -d -o van-acquisition -g van-acquisition -m 0700 /var/lib/van-acquisition/storage
 
 install -o root -g root -m 0755 "$HERE/acquisition_service.py" "$BASE/acquisition_service.py"
 install -o root -g root -m 0644 "$HERE/requirements.txt" "$BASE/requirements.txt"
