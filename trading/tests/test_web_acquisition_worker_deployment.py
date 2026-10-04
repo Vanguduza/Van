@@ -88,3 +88,10 @@ def test_crawlee_is_bulk_public_orchestration_not_authority():
     assert "VAN_CRAWLEE_MAX_DEPTH=6" in env
     assert "VAN_CRAWLEE_MAX_CONCURRENCY=12" in env
     assert "VAN_CRAWLEE_MAX_TASKS_PER_MINUTE=240" in env
+    assert "VAN_CRAWLEE_MAX_SECONDS=300" in env
+    assert "VAN_CRAWLEE_MAX_JOBS=1" in env
+    assert "VAN_CRAWLEE_MAX_DISCOVERED_URLS=2000" in env
+    assert "CRAWLEE_JOB_SLOTS" in source
+    assert "asyncio.wait_for" in source
+    assert "request_handler_timeout=timedelta(seconds=30)" in source
+    assert "navigation_timeout=timedelta(seconds=20)" in source
