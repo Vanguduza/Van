@@ -95,6 +95,11 @@ def test_crawlee_is_bulk_public_orchestration_not_authority():
     assert "VAN_CRAWLEE_MAX_DISCOVERED_URLS=2000" in env
     assert "CRAWLEE_STORAGE_DIR=/var/lib/van-acquisition/storage" in env
     assert "CRAWLEE_JOB_SLOTS" in source
+    assert "RequestQueue.open(alias=queue_alias)" in source
+    assert "request_manager=request_queue" in source
+    assert "await request_queue.purge()" in source
+    assert "await request_queue.drop()" in source
+    assert "purge_request_queue=False" in source
     assert "asyncio.wait_for" in source
     assert "request_handler_timeout=timedelta(seconds=30)" in source
     assert "navigation_timeout=timedelta(seconds=20)" in source
