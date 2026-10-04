@@ -122,7 +122,7 @@ async def test_rate_limit_backs_off_and_cools_domain(tmp_path):
 
 
 async def test_router_prefers_cheapest_known_route():
-    item = type("I", (), {"preferred_route": None})()
+    item = type("I", (), {"preferred_route": None, "profile_alias": "public_research"})()
     decision = AcquisitionRouter.decide(
         item,
         AcquisitionSignals(structured_endpoint_available=True),
