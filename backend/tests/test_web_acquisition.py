@@ -440,3 +440,31 @@ async def test_crawlee_batch_handoff_is_deduped_and_scope_checked(tmp_path):
         "https://example.com/a",
         "https://shop.example.com/b",
     ]
+
+
+async def test_local_capacity_retry_does_not_cool_supplier_domain(tmp_path):
+    store = await make_store(tmp_path)
+    frontier = AcquisitionFrontier(store)
+    await frontier.enqueue("https://example.com/a", max_attempts=3, now_ms=1000)
+    item = await frontier.claim(worker_id="one", now_ms=2000)
+    state = await frontier.fail(
+        item.item_id,
+        worker_id="one",
+        lease_token=item.lease_token,
+        failure=AcquisitionFailure.CAPACITY,
+        error_code="CRAWLEE_BUSY",
+        retry_after_ms=15_000,
+        now_ms=2001,
+    )
+    assert state is AcquisitionState.RETRY_WAIT
+    row = await store.fetchone(
+        "SELECT next_eligible_at_ms FROM web_acquisition_items WHERE item_id=?",
+        (item.item_id,),
+    )
+    assert int(row["next_eligible_at_ms"]) >= 17_001
+    control = await store.fetchone(
+        "SELECT * FROM web_domain_controls WHERE domain='example.com'"
+    )
+    assert control is not None
+    assert control["cooldown_until_ms"] is None
+    assert int(control["error_score"]) == 0
