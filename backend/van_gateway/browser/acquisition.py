@@ -474,12 +474,12 @@ class AcquisitionRouter:
             return RouteDecision(route=AcquisitionRoute.KATANA_RECON, reason="unknown_site_recon")
         if signals.domain_skill_available and not signals.selector_drift:
             return RouteDecision(route=AcquisitionRoute.HARNESS, reason="qualified_domain_skill")
-        if signals.bulk_crawl_required:
-            return RouteDecision(route=AcquisitionRoute.CRAWLEE_CRAWL, reason="bulk_crawl_orchestration")
         if signals.semantic_interaction_required:
             return RouteDecision(route=AcquisitionRoute.STAGEHAND, reason="semantic_ui_required")
         if signals.browser_required or signals.javascript_required or signals.selector_drift:
             return RouteDecision(route=AcquisitionRoute.SCRAPLING_BROWSER, reason="browser_required")
+        if signals.bulk_crawl_required:
+            return RouteDecision(route=AcquisitionRoute.CRAWLEE_CRAWL, reason="bulk_crawl_orchestration")
         if signals.jev_hint is not None and signals.jev_hint in cls.admissible_routes(item, signals):
             return RouteDecision(route=signals.jev_hint, reason="jev_advisory_hint")
         return RouteDecision(route=AcquisitionRoute.SCRAPLING_HTTP, reason="default_lightweight_path")
