@@ -29,6 +29,7 @@ from pydantic import BaseModel, Field
 from van_gateway.auth.control_scopes import ControlScope, require_scoped_internal
 from van_gateway.observability import instruments
 from van_gateway.browser.acquisition import (
+    AcquisitionEvidenceLedger,
     AcquisitionFailure,
     AcquisitionFrontier,
     AcquisitionRoute,
@@ -163,6 +164,7 @@ class DomainSkillProposeBody(BaseModel):
     success_assertions: list[dict[str, Any]] = Field(default_factory=list)
     failure_signatures: list[dict[str, Any]] = Field(default_factory=list)
     evidence_refs: list[str] = Field(default_factory=list)
+    golden_case_refs: list[str] = Field(default_factory=list)
 
 
 class DomainSkillQualifyBody(BaseModel):
@@ -173,6 +175,33 @@ class DomainSkillQualifyBody(BaseModel):
 class DomainSkillQuarantineBody(BaseModel):
     reason: str = Field(min_length=1, max_length=1000)
     evidence_ref: str | None = Field(default=None, max_length=2048)
+
+
+class DomainSkillCanaryBody(BaseModel):
+    passed: bool
+    evidence_ref: str = Field(min_length=1, max_length=2048)
+    observed_fingerprint: str | None = Field(default=None, max_length=512)
+    latency_ms: int | None = Field(default=None, ge=0, le=3_600_000)
+
+
+class AcquisitionEvidenceBody(BaseModel):
+    kind: str = Field(min_length=1, max_length=128)
+    content_digest: str = Field(min_length=71, max_length=71)
+    source_url: str
+    route: AcquisitionRoute | None = None
+    artifact_ref: str | None = Field(default=None, max_length=2048)
+    signature_ref: str | None = Field(default=None, max_length=2048)
+    byte_size: int = Field(default=0, ge=0)
+    detail: dict[str, Any] = Field(default_factory=dict)
+
+
+class AcquisitionTelemetryBody(BaseModel):
+    route: AcquisitionRoute
+    success: bool
+    latency_ms: int = Field(default=0, ge=0)
+    byte_count: int = Field(default=0, ge=0)
+    verified_records: int = Field(default=0, ge=0)
+    cost_micros: int = Field(default=0, ge=0)
 
 
 class AssignmentBody(BaseModel):
@@ -225,6 +254,7 @@ class BrowserApi:
         self.broker = BrowserSessionBroker(store, self.policy)
         self.tasks = BrowserTaskService(store, self.broker, self.policy)
         self.acquisition = AcquisitionFrontier(store)
+        self.acquisition_evidence = AcquisitionEvidenceLedger(store)
         self.domain_skills = DomainSkillRegistry(store)
         self.runner = BrowserSubagentRunner(self.policy)
         self.worker = worker
@@ -869,6 +899,50 @@ class BrowserApi:
                 raise HTTPException(status_code=409, detail=str(exc)) from exc
             return {"state": state.value}
 
+        @router.post("/acquisition/items/{item_id}/evidence")
+        async def acquisition_evidence_record(
+            item_id: str,
+            body: AcquisitionEvidenceBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            row = await self.store.fetchone(
+                "SELECT item_id FROM web_acquisition_items WHERE item_id=?", (item_id,)
+            )
+            if row is None:
+                raise HTTPException(status_code=404, detail="UNKNOWN_WEB_ACQUISITION_ITEM")
+            try:
+                evidence = await self.acquisition_evidence.record(
+                    item_id=item_id, **body.model_dump()
+                )
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+            return evidence.model_dump(mode="json")
+
+        @router.get("/acquisition/evidence/verify")
+        async def acquisition_evidence_verify(
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            return await self.acquisition_evidence.verify_chain()
+
+        @router.post("/acquisition/items/{item_id}/telemetry")
+        async def acquisition_telemetry_record(
+            item_id: str,
+            body: AcquisitionTelemetryBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            try:
+                record = await self.acquisition.record_telemetry(
+                    item_id, **body.model_dump()
+                )
+            except KeyError as exc:
+                raise HTTPException(status_code=404, detail=str(exc)) from exc
+            return record.model_dump(mode="json")
+
         @router.post("/acquisition/skills")
         async def domain_skill_propose(
             body: DomainSkillProposeBody,
@@ -895,6 +969,22 @@ class BrowserApi:
             except KeyError as exc:
                 raise HTTPException(status_code=404, detail=str(exc)) from exc
             except (ValueError, RuntimeError) as exc:
+                raise HTTPException(status_code=409, detail=str(exc)) from exc
+            return skill.model_dump(mode="json")
+
+        @router.post("/acquisition/skills/{skill_id}/canary")
+        async def domain_skill_canary(
+            skill_id: str,
+            body: DomainSkillCanaryBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            try:
+                skill = await self.domain_skills.record_canary(skill_id, **body.model_dump())
+            except KeyError as exc:
+                raise HTTPException(status_code=404, detail=str(exc)) from exc
+            except ValueError as exc:
                 raise HTTPException(status_code=409, detail=str(exc)) from exc
             return skill.model_dump(mode="json")
 
