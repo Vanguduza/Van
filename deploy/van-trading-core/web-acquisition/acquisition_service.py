@@ -309,6 +309,8 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
     pages: list[dict[str, Any]] = []
     discovered: set[str] = set()
     rejected = 0
+    redirects_admitted = 0
+    redirects_rejected = 0
     resolved_hosts: set[str] = set()
 
     def assert_crawl_public(candidate: str) -> None:
@@ -354,6 +356,35 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
             return
         requested_url = safe_url(str(context.request.url), domain)
         assert_crawl_public(requested_url)
+
+        # Redirects are handled explicitly because Impit is configured with
+        # follow_redirects=False. This prevents a scope-changing redirect from
+        # being contacted before VAN validates it.
+        status_code = int(context.http_response.status_code)
+        if 300 <= status_code < 400:
+            nonlocal redirects_admitted, redirects_rejected
+            location = None
+            for header_name in context.http_response.headers:
+                if str(header_name).lower() == "location":
+                    location = str(context.http_response.headers[header_name])
+                    break
+            if location:
+                redirected = urljoin(requested_url, location)
+                try:
+                    safe_url(redirected, domain)
+                    assert_crawl_public(redirected)
+                except WorkerError:
+                    redirects_rejected += 1
+                    return
+                redirects_admitted += 1
+                discovered.add(redirected)
+                await context.add_requests(
+                    [redirected],
+                    strategy="same-domain",
+                    limit=1,
+                )
+            return
+
         loaded_url = str(getattr(context.request, "loaded_url", None) or requested_url)
         assert_scoped_final(loaded_url, domain)
         assert_crawl_public(loaded_url)
@@ -439,6 +470,8 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
         "visited_count": len(pages),
         "discovered_count": len(discovered),
         "rejected_count": rejected,
+        "redirects_admitted": redirects_admitted,
+        "redirects_rejected": redirects_rejected,
         "resolved_host_count": len(resolved_hosts),
         "max_hosts": max(1, MAX_CRAWLEE_HOSTS),
         "max_pages": max_pages,
