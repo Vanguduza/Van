@@ -28,6 +28,11 @@ from pydantic import BaseModel, Field
 
 from van_gateway.auth.control_scopes import ControlScope, require_scoped_internal
 from van_gateway.observability import instruments
+from van_gateway.automation.external_runtime import ExternalRuntimeRegistry
+from van_gateway.browser.acquisition_adapters import (
+    AcquisitionRuntimeError,
+    HttpAcquisitionRuntimeAdapter,
+)
 from van_gateway.browser.acquisition import (
     AcquisitionEvidenceLedger,
     AcquisitionFailure,
@@ -155,6 +160,11 @@ class AcquisitionFailBody(AcquisitionLeaseMutationBody):
     retry_after_ms: int | None = Field(default=None, ge=0, le=86_400_000)
 
 
+class AcquisitionExecuteBody(AcquisitionLeaseMutationBody):
+    signals: AcquisitionSignals = Field(default_factory=AcquisitionSignals)
+    recon_depth: int = Field(default=2, ge=1, le=3)
+
+
 class DomainSkillProposeBody(BaseModel):
     domain: str = Field(min_length=1, max_length=253)
     goal_class: str = Field(min_length=1, max_length=160)
@@ -256,6 +266,12 @@ class BrowserApi:
         self.acquisition = AcquisitionFrontier(store)
         self.acquisition_evidence = AcquisitionEvidenceLedger(store)
         self.domain_skills = DomainSkillRegistry(store)
+        self.acquisition_runtime = HttpAcquisitionRuntimeAdapter(
+            ExternalRuntimeRegistry(store),
+            base_url=settings.browser_acquisition_base_url,
+            enabled=settings.browser_enabled,
+            expected_version=settings.browser_acquisition_expected_version or None,
+        )
         self.runner = BrowserSubagentRunner(self.policy)
         self.worker = worker
         self.decisions = decisions
@@ -755,9 +771,11 @@ class BrowserApi:
                 "ORDER BY profile_alias"
             )
             acquisition_counts = await self.acquisition.stats()
+            acquisition_runtime = await self.acquisition_runtime.status()
             return {
                 "enabled": self.settings.browser_enabled,
                 "acquisition_by_state": acquisition_counts,
+                "acquisition_runtime": acquisition_runtime.model_dump(mode="json"),
                 "worker_configured": self.worker is not None,
                 "tasks_by_status": counts,
                 "waiting_for_owner": int(waiting["count"]) if waiting else 0,
@@ -898,6 +916,138 @@ class BrowserApi:
             except RuntimeError as exc:
                 raise HTTPException(status_code=409, detail=str(exc)) from exc
             return {"state": state.value}
+
+        @router.post("/acquisition/items/{item_id}/execute")
+        async def acquisition_execute(
+            item_id: str,
+            body: AcquisitionExecuteBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            """Execute one leased public acquisition item through a qualified worker.
+
+            Authenticated/account-visible items intentionally stop here: they are
+            transformed into normal Browser Fabric work by Hermes so existing
+            profile leases, secret indirection and subagent bounds remain authoritative.
+            """
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            row = await self.store.fetchone(
+                "SELECT * FROM web_acquisition_items WHERE item_id = ?", (item_id,)
+            )
+            if row is None:
+                raise HTTPException(status_code=404, detail="UNKNOWN_WEB_ACQUISITION_ITEM")
+            item = self.acquisition._row_to_item(row)
+            try:
+                decision = AcquisitionRouter.decide(item, body.signals)
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+            if decision.route in {AcquisitionRoute.HARNESS, AcquisitionRoute.STAGEHAND}:
+                raise HTTPException(
+                    status_code=409,
+                    detail={
+                        "code": "ACQUISITION_MANAGED_BROWSER_REQUIRED",
+                        "route": decision.route.value,
+                        "profile_alias": item.profile_alias,
+                    },
+                )
+
+            try:
+                await self.acquisition.set_route(
+                    item_id, route=decision.route,
+                    worker_id=body.worker_id, lease_token=body.lease_token,
+                )
+                await self.acquisition.renew_lease(
+                    item_id, worker_id=body.worker_id, lease_token=body.lease_token,
+                    lease_seconds=180,
+                )
+                await self.acquisition.start(
+                    item_id, worker_id=body.worker_id, lease_token=body.lease_token
+                )
+            except RuntimeError as exc:
+                raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+            started = int(time.time() * 1000)
+            try:
+                if decision.route in {
+                    AcquisitionRoute.DIRECT_HTTP,
+                    AcquisitionRoute.SCRAPLING_HTTP,
+                }:
+                    result = await self.acquisition_runtime.fetch_http(item)
+                elif decision.route is AcquisitionRoute.SCRAPLING_BROWSER:
+                    result = await self.acquisition_runtime.fetch_browser(item)
+                elif decision.route is AcquisitionRoute.KATANA_RECON:
+                    result = await self.acquisition_runtime.recon(
+                        item, depth=body.recon_depth
+                    )
+                else:
+                    raise AcquisitionRuntimeError(
+                        "WEB_ACQUISITION_ROUTE_NOT_EXECUTABLE",
+                        decision.route.value,
+                    )
+
+                content_digest = str(result.get("content_digest") or digest(result))
+                byte_count = int(result.get("byte_size") or len(Store.dumps(result).encode("utf-8")))
+                evidence = await self.acquisition_evidence.record(
+                    item_id=item_id,
+                    kind="PUBLIC_WEB_ACQUISITION",
+                    content_digest=content_digest,
+                    source_url=item.canonical_url,
+                    route=decision.route,
+                    byte_size=byte_count,
+                    detail={
+                        "runtime": "web_acquisition",
+                        "representation": result.get("representation"),
+                        "status": result.get("status"),
+                    },
+                )
+                elapsed = max(0, int(time.time() * 1000) - started)
+                await self.acquisition.record_telemetry(
+                    item_id,
+                    route=decision.route,
+                    success=True,
+                    latency_ms=elapsed,
+                    byte_count=byte_count,
+                    verified_records=0,
+                    cost_micros=0,
+                )
+                await self.acquisition.complete(
+                    item_id,
+                    worker_id=body.worker_id,
+                    lease_token=body.lease_token,
+                    checkpoint_ref=f"web-acquisition-evidence://{evidence.evidence_id}",
+                )
+                return {
+                    "route": decision.route.value,
+                    "reason": decision.reason,
+                    "evidence_ref": f"web-acquisition-evidence://{evidence.evidence_id}",
+                    "result": result,
+                }
+            except AcquisitionRuntimeError as exc:
+                elapsed = max(0, int(time.time() * 1000) - started)
+                try:
+                    await self.acquisition.record_telemetry(
+                        item_id,
+                        route=decision.route,
+                        success=False,
+                        latency_ms=elapsed,
+                    )
+                    state = await self.acquisition.fail(
+                        item_id,
+                        worker_id=body.worker_id,
+                        lease_token=body.lease_token,
+                        failure=AcquisitionFailure.RUNTIME,
+                        error_code=exc.code,
+                    )
+                except RuntimeError:
+                    state = None
+                raise HTTPException(
+                    status_code=502,
+                    detail={
+                        "code": exc.code,
+                        "state": state.value if state else "LEASE_LOST",
+                    },
+                ) from exc
 
         @router.post("/acquisition/items/{item_id}/evidence")
         async def acquisition_evidence_record(
