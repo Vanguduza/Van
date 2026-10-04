@@ -1375,7 +1375,7 @@ class AcquisitionFrontier:
 
             delay = (
                 max(int(retry_after_ms or 0), self._backoff_ms(attempts))
-                if failure is AcquisitionFailure.RATE_LIMIT
+                if failure in {AcquisitionFailure.RATE_LIMIT, AcquisitionFailure.CAPACITY}
                 else self._backoff_ms(attempts)
             )
             next_at = now + delay
