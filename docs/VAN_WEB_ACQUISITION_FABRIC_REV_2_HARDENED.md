@@ -10,7 +10,7 @@ VAN owns the acquisition control plane and treats fetch/crawl tools as replaceab
 
 The near-term estate uses the existing SQLite store, Browser Session Broker, Browser Harness, Stagehand and existing durable automation/Temporal facilities. Postgres/Valkey/Redpanda/DBOS are deferred until measured scale proves they are necessary. Steel is deferred because VAN already has an authoritative session broker and browser worker plane.
 
-Crawlee is not a mandatory dependency. Its durable-frontier patterns are implemented in VAN core; Crawlee remains eligible as a scale-out plugin behind explicit benchmark triggers.
+Crawlee is an optional first-class execution backend now for broad public multi-page crawls. VAN still owns the authoritative frontier. Crawlee's internal request queue, adaptive concurrency, session pool, retry machinery and link expansion are used inside one bounded crawl job; discovered URLs are then re-imported into the VAN frontier.
 
 ## 2. Exact stack
 
@@ -26,7 +26,7 @@ Crawlee is not a mandatory dependency. Its durable-frontier patterns are impleme
 | Stagehand 4.1.0 | semantic recovery/exploration when deterministic paths are insufficient | existing |
 | n8n | slow schedules/deferred orchestration only | existing |
 | Temporal | durable cross-step mission workflow where needed | existing/deferred by workload |
-| Crawlee | future scale-out plugin only | deferred |
+| Crawlee 1.10.2 | bounded public bulk crawl, adaptive concurrency, local queue/dedupe, sessions, retries, link expansion | available optional backend |
 | Steel | no canonical role unless benchmark proves value | deferred |
 
 ## 3. Trust zones
@@ -37,7 +37,7 @@ ACCOUNT_VISIBLE uses an admitted non-public Browser Fabric profile. Scrapling/Ka
 
 ## 4. Deterministic routing
 
-JEV may select only among independently admissible routes and can never create a capability or authority. Authenticated profile work routes to Harness/Stagehand. Public structured data uses the cheapest direct/HTTP path. Unknown public sites use Katana reconnaissance. Qualified skills use deterministic replay. Dynamic public pages use Scrapling browser. Semantic uncertainty uses Stagehand.
+JEV may select only among independently admissible routes and can never create a capability or authority. Authenticated profile work routes to Harness/Stagehand. Public structured data uses the cheapest direct/HTTP path. Unknown public sites use Katana reconnaissance. Qualified skills use deterministic replay. Broad public multi-page discovery uses Crawlee. Dynamic public pages use Scrapling browser. Semantic uncertainty uses Stagehand. A caller may explicitly request CRAWLEE_CRAWL for a public work item; JEV may suggest it only when bulk_crawl_required is independently true.
 
 ## 5. Perception ladder
 
@@ -67,17 +67,34 @@ The van-web-acquisition-worker/1.0.0 process is loopback-only and public/read-on
 
 Katana is optional and pinned to 1.4.0 when installed. It runs without authenticated crawling, custom credential headers, headless browser attachment, XHR extraction or CAPTCHA-solver options. Depth, duration, pages, concurrency, rate and private-IP access are bounded.
 
+## 9A. Crawlee bounded-role contract
+
+Crawlee 1.10.2 is selected where it is stronger than a single-page extractor:
+
+- catalog, documentation and site-wide public link expansion;
+- tens to hundreds of related pages from one seed;
+- adaptive concurrency based on resource pressure;
+- per-crawl request deduplication and retries;
+- public session rotation;
+- bounded crawl depth, page and rate budgets.
+
+The worker uses BeautifulSoupCrawler with Crawlee autoscaling, RequestQueue deduplication and SessionPool behavior. Redirects are not followed implicitly. Child URLs are checked for target-domain and public-network admissibility before being added.
+
+Crawlee returns a sanitized crawl summary and discovered URLs. VAN persists those URLs as CRAWLEE_DISCOVERY child WebWorkItems. This preserves the hard boundary between Crawlee orchestration inside a job and VAN authority across jobs.
+
+Crawlee is not used for authenticated supplier sessions, semantic UI work, JavaScript execution or authority decisions. Those remain Harness, Stagehand and Scrapling-browser responsibilities.
+
 ## 10. P0 corrections incorporated
 
 Muse correctly found three P0 issues and all are addressed in this revision: long-job lease renewal; fail() lease-fence TOCTOU; and JEV route-admissibility leakage. Additional hardening adds public/authenticated route separation, last-known-good skill fallback, deterministic golden-case qualification, canary quarantine, content-addressed evidence, typed Hermes controls, sensitive-URL rejection, SSRF controls, network-candidate observation, and route telemetry.
 
 ## 11. Deliberately deferred
 
-Do not add Steel, Postgres/Valkey/Redpanda/DBOS, mandatory Crawlee, Katana authenticated crawling/CAPTCHA solving, Scrapling challenge solving, raw generic CDP, or arbitrary proxy/credential headers to the public worker without new evidence and authority review.
+Do not add Steel, Postgres/Valkey/Redpanda/DBOS, make Crawlee mandatory, move VAN frontier authority into Crawlee, use Katana authenticated crawling/CAPTCHA solving, use Scrapling challenge solving, expose raw generic CDP, or accept arbitrary proxy/credential headers in the public worker without new evidence and authority review.
 
 ## 12. Scale-out triggers
 
-Reconsider a distributed frontier only after measured queue latency, SQLite contention, multi-host requirements, recovery time or supplier freshness SLOs demonstrate that the current store cannot meet demand after tuning. Crawlee is the first scale-out plugin candidate because it does not require changing VAN authority.
+Reconsider a distributed VAN frontier only after measured queue latency, SQLite contention, multi-host requirements, recovery time or supplier freshness SLOs demonstrate that the current store cannot meet demand after tuning. Crawlee is already usable inside a bounded crawl job; that does not imply that Crawlee's queue should replace VAN's durable frontier.
 
 ## 13. Acceptance gates
 
