@@ -124,6 +124,7 @@ async def test_crawlee_runtime_is_bounded_and_public_only(tmp_path):
         max_depth=99,
         max_concurrency=99,
         max_tasks_per_minute=9999,
+        timeout_seconds=9999,
         respect_robots_txt=True,
     )
     assert result["ok"] is True
@@ -132,6 +133,7 @@ async def test_crawlee_runtime_is_bounded_and_public_only(tmp_path):
     assert seen["max_depth"] == 6
     assert seen["max_concurrency"] == 12
     assert seen["max_tasks_per_minute"] == 240
+    assert seen["timeout_seconds"] == 1800
     assert seen["respect_robots_txt"] is True
     assert "profile_alias" not in seen
     assert "headers" not in seen
