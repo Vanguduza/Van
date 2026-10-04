@@ -129,6 +129,8 @@ class Settings(BaseSettings):
     browser_stagehand_expected_version: str = ""
     browser_stagehand_model_provider: str = ""
     browser_stagehand_model_name: str = ""
+    browser_acquisition_base_url: str = "http://127.0.0.1:9143"
+    browser_acquisition_expected_version: str = ""
 
     # Hermes-governed ARTEMIS Android console. The raw UI remains on Netcup loopback;
     # VAN Gateway reaches only the authenticated private-overlay proxy. Android never
