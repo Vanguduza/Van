@@ -44,6 +44,7 @@ MAX_CRAWLEE_TASKS_PER_MINUTE = int(os.getenv("VAN_CRAWLEE_MAX_TASKS_PER_MINUTE",
 MAX_CRAWLEE_SECONDS = int(os.getenv("VAN_CRAWLEE_MAX_SECONDS", "300"))
 MAX_CRAWLEE_JOBS = int(os.getenv("VAN_CRAWLEE_MAX_JOBS", "1"))
 MAX_CRAWLEE_DISCOVERED_URLS = int(os.getenv("VAN_CRAWLEE_MAX_DISCOVERED_URLS", "2000"))
+MAX_CRAWLEE_HOSTS = int(os.getenv("VAN_CRAWLEE_MAX_HOSTS", "32"))
 CRAWLEE_JOB_SLOTS = threading.BoundedSemaphore(max(1, MAX_CRAWLEE_JOBS))
 DOMAIN_RE = re.compile(r"^[a-z0-9.-]{1,253}$")
 SENSITIVE_QUERY_KEYS = {
@@ -306,6 +307,15 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
     pages: list[dict[str, Any]] = []
     discovered: set[str] = set()
     rejected = 0
+    resolved_hosts: set[str] = set()
+
+    def assert_crawl_public(candidate: str) -> None:
+        host = (urlparse(candidate).hostname or "").lower().rstrip(".")
+        if host not in resolved_hosts:
+            if len(resolved_hosts) >= max(1, MAX_CRAWLEE_HOSTS):
+                raise WorkerError("CRAWLEE_HOST_BUDGET_EXCEEDED", 422)
+            assert_public_resolution(candidate)
+            resolved_hosts.add(host)
 
     # Never share Crawlee's implicit default queue between VAN jobs. The VAN
     # item id is sanitized into a run-scoped alias; the queue is dropped after
@@ -314,6 +324,7 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
     queue_alias = "van-" + re.sub(r"[^a-z0-9]+", "-", raw_item_id).strip("-")[:80]
     request_queue = await RequestQueue.open(alias=queue_alias)
     await request_queue.purge()
+    assert_crawl_public(seed)
 
     crawler = BeautifulSoupCrawler(
         request_manager=request_queue,
@@ -340,9 +351,10 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
             crawler.stop("VAN max_pages reached")
             return
         requested_url = safe_url(str(context.request.url), domain)
-        assert_public_resolution(requested_url)
+        assert_crawl_public(requested_url)
         loaded_url = str(getattr(context.request, "loaded_url", None) or requested_url)
         assert_scoped_final(loaded_url, domain)
+        assert_crawl_public(loaded_url)
 
         html = str(context.soup)
         raw = html.encode("utf-8", errors="replace")
@@ -367,7 +379,7 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
             candidate = urljoin(loaded_url, href)
             try:
                 safe_url(candidate, domain)
-                assert_public_resolution(candidate)
+                assert_crawl_public(candidate)
             except WorkerError:
                 rejected += 1
                 continue
@@ -413,6 +425,8 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
         "visited_count": len(pages),
         "discovered_count": len(discovered),
         "rejected_count": rejected,
+        "resolved_host_count": len(resolved_hosts),
+        "max_hosts": max(1, MAX_CRAWLEE_HOSTS),
         "max_pages": max_pages,
         "max_depth": max_depth,
         "max_concurrency": max_concurrency,
