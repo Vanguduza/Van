@@ -95,10 +95,14 @@ def test_crawlee_is_bulk_public_orchestration_not_authority():
     assert "VAN_CRAWLEE_MAX_JOBS=1" in env
     assert "VAN_CRAWLEE_MAX_DISCOVERED_URLS=2000" in env
     assert "VAN_CRAWLEE_MAX_HOSTS=32" in env
+    assert "VAN_CRAWLEE_MAX_PAGE_SUMMARIES=250" in env
+    assert "VAN_CRAWLEE_MAX_DISCOVERY_BYTES=1048576" in env
     assert "CRAWLEE_STORAGE_DIR=/var/lib/van-acquisition/storage" in env
     assert "CRAWLEE_JOB_SLOTS" in source
     assert "resolved_hosts" in source
     assert "CRAWLEE_HOST_BUDGET_EXCEEDED" in source
+    assert "discovered_urls_truncated" in source
+    assert "page_summaries_truncated" in source
     assert "RequestQueue.open(alias=queue_alias)" in source
     assert "request_manager=request_queue" in source
     assert "await request_queue.purge()" in source
