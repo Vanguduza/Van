@@ -11,6 +11,7 @@ profile material stay inside the existing Browser Session Broker / runtime.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import time
 import uuid
@@ -126,6 +127,10 @@ class DomainSkill(BaseModel):
     success_assertions: list[dict[str, Any]] = Field(default_factory=list)
     failure_signatures: list[dict[str, Any]] = Field(default_factory=list)
     evidence_refs: list[str] = Field(default_factory=list)
+    golden_case_refs: list[str] = Field(default_factory=list)
+    canary_pass_count: int = 0
+    canary_fail_count: int = 0
+    last_canary_at_ms: int | None = None
     qualified_at_ms: int | None = None
     superseded_by: str | None = None
     created_at_ms: int
@@ -148,6 +153,223 @@ class AcquisitionSession(BaseModel):
 class RouteDecision(BaseModel):
     route: AcquisitionRoute
     reason: str
+
+
+class AcquisitionEvidence(BaseModel):
+    evidence_id: str
+    item_id: str
+    chain_seq: int
+    prev_hash: str
+    entry_hash: str
+    kind: str
+    content_digest: str
+    source_url_digest: str
+    route: AcquisitionRoute | None = None
+    artifact_ref: str | None = None
+    manifest_digest: str
+    signature_ref: str | None = None
+    integrity_state: str
+    byte_size: int
+    created_at_ms: int
+
+
+class AcquisitionTelemetry(BaseModel):
+    telemetry_id: str
+    item_id: str
+    route: AcquisitionRoute
+    success: bool
+    latency_ms: int = 0
+    byte_count: int = 0
+    verified_records: int = 0
+    cost_micros: int = 0
+    recorded_at_ms: int
+
+
+ACQUISITION_EVIDENCE_GENESIS = "0" * 64
+
+
+def _is_sha256_ref(value: str) -> bool:
+    if not value.startswith("sha256:") or len(value) != 71:
+        return False
+    try:
+        int(value[7:], 16)
+    except ValueError:
+        return False
+    return True
+
+
+class AcquisitionEvidenceLedger:
+    """Content-addressed, hash-chained custody records.
+
+    Payload bytes stay in the evidence/artifact store. This ledger stores only
+    their digest plus a manifest and optional signature reference, preventing
+    crawl content (including account-visible data) from leaking into SQLite.
+    """
+
+    def __init__(self, store: Store) -> None:
+        self.store = store
+
+    @staticmethod
+    def entry_digest(
+        *,
+        chain_seq: int,
+        prev_hash: str,
+        evidence_id: str,
+        item_id: str,
+        kind: str,
+        content_digest: str,
+        source_url_digest: str,
+        route: str,
+        artifact_ref: str,
+        manifest_digest: str,
+        signature_ref: str,
+        integrity_state: str,
+        byte_size: int,
+        created_at_ms: int,
+    ) -> str:
+        material = "|".join(
+            [
+                str(chain_seq), prev_hash, evidence_id, item_id, kind, content_digest,
+                source_url_digest, route, artifact_ref, manifest_digest, signature_ref,
+                integrity_state, str(byte_size), str(created_at_ms),
+            ]
+        )
+        return hashlib.sha256(material.encode("utf-8")).hexdigest()
+
+    async def record(
+        self,
+        *,
+        item_id: str,
+        kind: str,
+        content_digest: str,
+        source_url: str,
+        route: AcquisitionRoute | None = None,
+        artifact_ref: str | None = None,
+        signature_ref: str | None = None,
+        byte_size: int = 0,
+        detail: dict[str, Any] | None = None,
+        now_ms: int | None = None,
+    ) -> AcquisitionEvidence:
+        if not _is_sha256_ref(content_digest):
+            raise ValueError("web_acquisition_evidence_requires_sha256_digest")
+        if byte_size < 0:
+            raise ValueError("web_acquisition_evidence_negative_size")
+        _canonical, _domain = canonicalize_url(source_url)
+        source_url_digest = digest({"url": _canonical})
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        evidence_id = new_id("wacqev")
+        manifest = {
+            "schema_version": 1,
+            "evidence_id": evidence_id,
+            "item_id": item_id,
+            "kind": kind,
+            "content_digest": content_digest,
+            "source_url_digest": source_url_digest,
+            "route": route.value if route else None,
+            "artifact_ref": artifact_ref,
+            "byte_size": byte_size,
+            "detail": detail or {},
+            "created_at_ms": now,
+        }
+        manifest_digest = digest(manifest)
+        integrity_state = "SIGNED_HASH_CHAINED" if signature_ref else "HASH_CHAINED"
+
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            cur = await db.execute(
+                "SELECT chain_seq, entry_hash FROM web_acquisition_evidence "
+                "ORDER BY chain_seq DESC LIMIT 1"
+            )
+            tip = await cur.fetchone()
+            chain_seq = int(tip["chain_seq"]) + 1 if tip else 1
+            prev_hash = str(tip["entry_hash"]) if tip else ACQUISITION_EVIDENCE_GENESIS
+            entry_hash = self.entry_digest(
+                chain_seq=chain_seq,
+                prev_hash=prev_hash,
+                evidence_id=evidence_id,
+                item_id=item_id,
+                kind=kind,
+                content_digest=content_digest,
+                source_url_digest=source_url_digest,
+                route=route.value if route else "",
+                artifact_ref=artifact_ref or "",
+                manifest_digest=manifest_digest,
+                signature_ref=signature_ref or "",
+                integrity_state=integrity_state,
+                byte_size=byte_size,
+                created_at_ms=now,
+            )
+            await db.execute(
+                """
+                INSERT INTO web_acquisition_evidence(
+                  evidence_id, item_id, chain_seq, prev_hash, entry_hash, kind,
+                  content_digest, source_url_digest, route, artifact_ref,
+                  manifest_digest, signature_ref, integrity_state, byte_size,
+                  manifest_json, created_at_ms
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    evidence_id, item_id, chain_seq, prev_hash, entry_hash, kind,
+                    content_digest, source_url_digest, route.value if route else None,
+                    artifact_ref, manifest_digest, signature_ref, integrity_state,
+                    byte_size, Store.dumps(manifest), now,
+                ),
+            )
+            await db.commit()
+        return AcquisitionEvidence(
+            evidence_id=evidence_id,
+            item_id=item_id,
+            chain_seq=chain_seq,
+            prev_hash=prev_hash,
+            entry_hash=entry_hash,
+            kind=kind,
+            content_digest=content_digest,
+            source_url_digest=source_url_digest,
+            route=route,
+            artifact_ref=artifact_ref,
+            manifest_digest=manifest_digest,
+            signature_ref=signature_ref,
+            integrity_state=integrity_state,
+            byte_size=byte_size,
+            created_at_ms=now,
+        )
+
+    async def verify_chain(self) -> dict[str, Any]:
+        rows = await self.store.fetchall(
+            "SELECT * FROM web_acquisition_evidence ORDER BY chain_seq ASC"
+        )
+        expected_seq = 1
+        expected_prev = ACQUISITION_EVIDENCE_GENESIS
+        for row in rows:
+            seq = int(row["chain_seq"])
+            if seq != expected_seq:
+                return {"ok": False, "checked": expected_seq - 1, "broken_at": seq,
+                        "reason": "sequence_gap"}
+            if str(row["prev_hash"]) != expected_prev:
+                return {"ok": False, "checked": expected_seq - 1, "broken_at": seq,
+                        "reason": "prev_hash_mismatch"}
+            expected = self.entry_digest(
+                chain_seq=seq,
+                prev_hash=str(row["prev_hash"]),
+                evidence_id=str(row["evidence_id"]),
+                item_id=str(row["item_id"]),
+                kind=str(row["kind"]),
+                content_digest=str(row["content_digest"]),
+                source_url_digest=str(row["source_url_digest"]),
+                route=str(row["route"] or ""),
+                artifact_ref=str(row["artifact_ref"] or ""),
+                manifest_digest=str(row["manifest_digest"]),
+                signature_ref=str(row["signature_ref"] or ""),
+                integrity_state=str(row["integrity_state"]),
+                byte_size=int(row["byte_size"]),
+                created_at_ms=int(row["created_at_ms"]),
+            )
+            if expected != str(row["entry_hash"]):
+                return {"ok": False, "checked": expected_seq - 1, "broken_at": seq,
+                        "reason": "entry_hash_mismatch"}
+            expected_prev = str(row["entry_hash"])
+            expected_seq += 1
+        return {"ok": True, "checked": expected_seq - 1, "broken_at": None, "reason": None}
 
 
 def canonicalize_url(url: str) -> tuple[str, str]:
@@ -241,6 +463,10 @@ class DomainSkillRegistry:
             success_assertions=json.loads(str(row["success_assertions_json"] or "[]")),
             failure_signatures=json.loads(str(row["failure_signatures_json"] or "[]")),
             evidence_refs=json.loads(str(row["evidence_refs_json"] or "[]")),
+            golden_case_refs=json.loads(str(row["golden_case_refs_json"] or "[]")),
+            canary_pass_count=int(row["canary_pass_count"] or 0),
+            canary_fail_count=int(row["canary_fail_count"] or 0),
+            last_canary_at_ms=row["last_canary_at_ms"],
             qualified_at_ms=row["qualified_at_ms"],
             superseded_by=row["superseded_by"],
             created_at_ms=int(row["created_at_ms"]),
@@ -258,6 +484,7 @@ class DomainSkillRegistry:
         success_assertions: list[dict[str, Any]] | None = None,
         failure_signatures: list[dict[str, Any]] | None = None,
         evidence_refs: list[str] | None = None,
+        golden_case_refs: list[str] | None = None,
         now_ms: int | None = None,
     ) -> DomainSkill:
         if not artifact_ref.strip():
@@ -275,8 +502,9 @@ class DomainSkillRegistry:
             INSERT INTO web_domain_skills(
               skill_id, domain, goal_class, version, state, route, artifact_ref,
               site_fingerprint, success_assertions_json, failure_signatures_json,
-              evidence_refs_json, qualified_at_ms, superseded_by, created_at_ms, updated_at_ms
-            ) VALUES (?, ?, ?, ?, 'CANDIDATE', ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?)
+              evidence_refs_json, golden_case_refs_json, qualified_at_ms, superseded_by,
+              created_at_ms, updated_at_ms
+            ) VALUES (?, ?, ?, ?, 'CANDIDATE', ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?)
             """,
             (
                 skill_id, domain.lower(), goal_class, version, route.value, artifact_ref,
@@ -284,6 +512,7 @@ class DomainSkillRegistry:
                 json.dumps(success_assertions or [], sort_keys=True),
                 json.dumps(failure_signatures or [], sort_keys=True),
                 json.dumps(evidence_refs or [], sort_keys=True),
+                json.dumps(golden_case_refs or [], sort_keys=True),
                 now, now,
             ),
         )
@@ -313,6 +542,10 @@ class DomainSkillRegistry:
             raise KeyError("unknown_web_domain_skill")
         if str(row["state"]) not in {"CANDIDATE", "QUARANTINED"}:
             raise ValueError("web_domain_skill_not_qualifiable")
+        golden = json.loads(str(row["golden_case_refs_json"] or "[]"))
+        assertions = json.loads(str(row["success_assertions_json"] or "[]"))
+        if not golden and not assertions:
+            raise ValueError("web_domain_skill_requires_golden_case_or_success_assertion")
 
         existing = json.loads(str(row["evidence_refs_json"] or "[]"))
         merged = list(dict.fromkeys([*existing, *evidence_refs]))
@@ -364,6 +597,89 @@ class DomainSkillRegistry:
             (domain.lower(), goal_class),
         )
         return None if row is None else self._row(row)
+
+    async def record_canary(
+        self,
+        skill_id: str,
+        *,
+        passed: bool,
+        evidence_ref: str,
+        observed_fingerprint: str | None = None,
+        latency_ms: int | None = None,
+        now_ms: int | None = None,
+    ) -> DomainSkill:
+        if not evidence_ref:
+            raise ValueError("web_domain_skill_canary_requires_evidence")
+        if latency_ms is not None and latency_ms < 0:
+            raise ValueError("web_domain_skill_canary_negative_latency")
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            cur = await db.execute(
+                "SELECT * FROM web_domain_skills WHERE skill_id=?", (skill_id,)
+            )
+            row = await cur.fetchone()
+            if row is None:
+                await db.rollback()
+                raise KeyError("unknown_web_domain_skill")
+            if str(row["state"]) not in {"QUALIFIED", "QUARANTINED"}:
+                await db.rollback()
+                raise ValueError("web_domain_skill_canary_requires_qualified_skill")
+            canary_id = new_id("wcanary")
+            await db.execute(
+                """
+                INSERT INTO web_domain_skill_canaries(
+                  canary_id, skill_id, passed, observed_fingerprint,
+                  evidence_ref, latency_ms, created_at_ms
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    canary_id, skill_id, 1 if passed else 0, observed_fingerprint,
+                    evidence_ref, latency_ms, now,
+                ),
+            )
+            if passed:
+                await db.execute(
+                    """
+                    UPDATE web_domain_skills
+                    SET canary_pass_count=canary_pass_count+1,
+                        last_canary_at_ms=?, updated_at_ms=?
+                    WHERE skill_id=?
+                    """,
+                    (now, now, skill_id),
+                )
+            else:
+                failures = json.loads(str(row["failure_signatures_json"] or "[]"))
+                failures.append({
+                    "kind": "CANARY_FAILED",
+                    "observed_fingerprint": observed_fingerprint,
+                    "at_ms": now,
+                })
+                evidence = json.loads(str(row["evidence_refs_json"] or "[]"))
+                evidence.append(evidence_ref)
+                await db.execute(
+                    """
+                    UPDATE web_domain_skills
+                    SET state='QUARANTINED',
+                        canary_fail_count=canary_fail_count+1,
+                        last_canary_at_ms=?,
+                        failure_signatures_json=?,
+                        evidence_refs_json=?,
+                        updated_at_ms=?
+                    WHERE skill_id=?
+                    """,
+                    (
+                        now, json.dumps(failures, sort_keys=True),
+                        json.dumps(list(dict.fromkeys(evidence)), sort_keys=True),
+                        now, skill_id,
+                    ),
+                )
+            await db.commit()
+        fresh = await self.store.fetchone(
+            "SELECT * FROM web_domain_skills WHERE skill_id=?", (skill_id,)
+        )
+        assert fresh is not None
+        return self._row(fresh)
 
     async def quarantine(
         self,
@@ -975,6 +1291,50 @@ class AcquisitionFrontier:
             await db.commit()
             return AcquisitionState.RETRY_WAIT
 
+    async def record_telemetry(
+        self,
+        item_id: str,
+        *,
+        route: AcquisitionRoute,
+        success: bool,
+        latency_ms: int = 0,
+        byte_count: int = 0,
+        verified_records: int = 0,
+        cost_micros: int = 0,
+        now_ms: int | None = None,
+    ) -> AcquisitionTelemetry:
+        for value, code in (
+            (latency_ms, "latency"), (byte_count, "bytes"),
+            (verified_records, "verified_records"), (cost_micros, "cost"),
+        ):
+            if value < 0:
+                raise ValueError(f"web_acquisition_negative_{code}")
+        row = await self.store.fetchone(
+            "SELECT item_id FROM web_acquisition_items WHERE item_id=?", (item_id,)
+        )
+        if row is None:
+            raise KeyError("unknown_web_acquisition_item")
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        telemetry_id = new_id("wtelemetry")
+        await self.store.execute(
+            """
+            INSERT INTO web_acquisition_telemetry(
+              telemetry_id, item_id, route, success, latency_ms, byte_count,
+              verified_records, cost_micros, recorded_at_ms
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                telemetry_id, item_id, route.value, 1 if success else 0, latency_ms,
+                byte_count, verified_records, cost_micros, now,
+            ),
+        )
+        return AcquisitionTelemetry(
+            telemetry_id=telemetry_id, item_id=item_id, route=route, success=success,
+            latency_ms=latency_ms, byte_count=byte_count,
+            verified_records=verified_records, cost_micros=cost_micros,
+            recorded_at_ms=now,
+        )
+
     async def stats(self) -> dict[str, int]:
         rows = await self.store.fetchall(
             "SELECT state, COUNT(*) AS n FROM web_acquisition_items GROUP BY state"
@@ -983,6 +1343,8 @@ class AcquisitionFrontier:
 
 
 __all__ = [
+    "AcquisitionEvidence",
+    "AcquisitionEvidenceLedger",
     "AcquisitionFailure",
     "AcquisitionFrontier",
     "AcquisitionRoute",
@@ -994,6 +1356,7 @@ __all__ = [
     "DomainSkillState",
     "AcquisitionSignals",
     "AcquisitionState",
+    "AcquisitionTelemetry",
     "RouteDecision",
     "WebWorkItem",
     "canonicalize_url",
