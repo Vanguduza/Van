@@ -1,0 +1,40 @@
+[Unit]
+Description=VAN read-only public web acquisition worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=van-acquisition
+Group=van-acquisition
+EnvironmentFile=/opt/van-trading/config/web-acquisition.env
+WorkingDirectory=/opt/van-web-acquisition
+ExecStart=/opt/van-web-acquisition/venv/bin/python /opt/van-web-acquisition/acquisition_service.py
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=45
+TimeoutStopSec=15
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/run/van-acquisition /var/log/van-trading/acquisition
+ReadOnlyPaths=/opt/van-web-acquisition /opt/van-trading/config/web-acquisition.env
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=true
+LockPersonality=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077
+
+CPUWeight=10
+IOWeight=10
+MemoryAccounting=true
+CPUAccounting=true
+TasksAccounting=true
+MemoryMax=1024M
+TasksMax=256
+
+[Install]
+WantedBy=multi-user.target
