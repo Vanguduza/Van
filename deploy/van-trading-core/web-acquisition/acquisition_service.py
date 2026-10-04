@@ -318,6 +318,7 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
     redirects_admitted = 0
     redirects_rejected = 0
     discovered_only_count = 0
+    failed_urls: list[str] = []
     resolved_hosts: set[str] = set()
 
     def assert_crawl_public(candidate: str) -> None:
@@ -441,9 +442,14 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
                 limit=remaining,
             )
 
+    @crawler.failed_request_handler
+    async def failed_request_handler(context: Any, error: Exception) -> None:
+        if len(failed_urls) < 100:
+            failed_urls.append(scrub_url(str(context.request.url)))
+
     try:
         try:
-            await asyncio.wait_for(
+            final_statistics = await asyncio.wait_for(
                 crawler.run([seed], purge_request_queue=False),
                 timeout=crawl_timeout,
             )
@@ -460,6 +466,9 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
             # Cleanup failure must not change crawl truth; the next job uses a
             # distinct alias and the service storage directory is bounded.
             pass
+
+    if not pages or int(final_statistics.requests_finished) < 1:
+        raise WorkerError("CRAWLEE_NO_PAGES", 502)
 
     bounded_discovered: list[str] = []
     discovery_bytes = 0
@@ -483,6 +492,12 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
         "redirects_admitted": redirects_admitted,
         "redirects_rejected": redirects_rejected,
         "discovered_only_count": discovered_only_count,
+        "requests_total": int(final_statistics.requests_total),
+        "requests_finished": int(final_statistics.requests_finished),
+        "requests_failed": int(final_statistics.requests_failed),
+        "retry_histogram": list(final_statistics.retry_histogram),
+        "partial": int(final_statistics.requests_failed) > 0,
+        "failed_urls": failed_urls,
         "resolved_host_count": len(resolved_hosts),
         "max_hosts": max(1, MAX_CRAWLEE_HOSTS),
         "max_pages": max_pages,
