@@ -25,6 +25,7 @@ from van_gateway.automation.external_runtime import (  # noqa: E402
 from van_gateway.browser.acquisition import (  # noqa: E402
     AcquisitionEvidenceLedger,
     AcquisitionFrontier,
+    AcquisitionRoute,
 )
 from van_gateway.browser.acquisition_adapters import (  # noqa: E402
     AcquisitionRuntimeError,
@@ -175,7 +176,7 @@ async def run(target_url: str, crawl_url: str | None = None) -> int:
             kind="WEB_ACQUISITION_CRAWLEE_CERTIFICATION",
             content_digest=crawl_digest,
             source_url=crawl_url,
-            route=None,
+            route=AcquisitionRoute.CRAWLEE_CRAWL,
             byte_size=int(crawl.get("byte_size") or 0),
             detail={
                 "crawlee_version": crawl.get("crawlee_version"),
