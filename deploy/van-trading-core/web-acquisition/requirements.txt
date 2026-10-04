@@ -1,1 +1,2 @@
 scrapling[rag]==0.4.15
+crawlee[beautifulsoup,httpx]==1.10.2
