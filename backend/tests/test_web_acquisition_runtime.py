@@ -88,3 +88,51 @@ async def test_runtime_refuses_secret_bearing_response(tmp_path):
     )
     with pytest.raises(AcquisitionRuntimeError, match="SECRET_BOUNDARY"):
         await adapter.fetch_http(item)
+
+
+async def test_crawlee_runtime_is_bounded_and_public_only(tmp_path):
+    store, item = await _item(tmp_path)
+    seen = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        import json
+        seen.update(json.loads(request.content))
+        assert request.url.path == "/crawl/crawlee"
+        return httpx.Response(
+            200,
+            json={
+                "ok": True,
+                "pages": [],
+                "discovered_urls": ["https://example.com/a"],
+                "visited_count": 1,
+                "discovered_count": 1,
+                "content_digest": "sha256:" + "b" * 64,
+                "byte_size": 10,
+                "contains_secrets": False,
+            },
+        )
+
+    adapter = HttpAcquisitionRuntimeAdapter(
+        ExternalRuntimeRegistry(store),
+        base_url="http://127.0.0.1:9143",
+        enabled=True,
+        transport=httpx.MockTransport(handler),
+    )
+    result = await adapter.crawl(
+        item,
+        max_pages=9999,
+        max_depth=99,
+        max_concurrency=99,
+        max_tasks_per_minute=9999,
+        respect_robots_txt=True,
+    )
+    assert result["ok"] is True
+    assert seen["mode"] == "READ_ONLY_ACQUISITION"
+    assert seen["max_pages"] == 1000
+    assert seen["max_depth"] == 6
+    assert seen["max_concurrency"] == 12
+    assert seen["max_tasks_per_minute"] == 240
+    assert seen["respect_robots_txt"] is True
+    assert "profile_alias" not in seen
+    assert "headers" not in seen
+    assert "cookie" not in seen
