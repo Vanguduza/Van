@@ -17,6 +17,8 @@ import os
 import re
 import socket
 import subprocess
+import threading
+from datetime import timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
@@ -39,6 +41,10 @@ MAX_CRAWLEE_PAGES = int(os.getenv("VAN_CRAWLEE_MAX_PAGES", "1000"))
 MAX_CRAWLEE_DEPTH = int(os.getenv("VAN_CRAWLEE_MAX_DEPTH", "6"))
 MAX_CRAWLEE_CONCURRENCY = int(os.getenv("VAN_CRAWLEE_MAX_CONCURRENCY", "12"))
 MAX_CRAWLEE_TASKS_PER_MINUTE = int(os.getenv("VAN_CRAWLEE_MAX_TASKS_PER_MINUTE", "240"))
+MAX_CRAWLEE_SECONDS = int(os.getenv("VAN_CRAWLEE_MAX_SECONDS", "300"))
+MAX_CRAWLEE_JOBS = int(os.getenv("VAN_CRAWLEE_MAX_JOBS", "1"))
+MAX_CRAWLEE_DISCOVERED_URLS = int(os.getenv("VAN_CRAWLEE_MAX_DISCOVERED_URLS", "2000"))
+CRAWLEE_JOB_SLOTS = threading.BoundedSemaphore(max(1, MAX_CRAWLEE_JOBS))
 DOMAIN_RE = re.compile(r"^[a-z0-9.-]{1,253}$")
 SENSITIVE_QUERY_KEYS = {
     "access_token", "api_key", "apikey", "authorization", "auth",
@@ -120,6 +126,8 @@ def browser_public_guard(domain: str):
 
 def safe_url(value: Any, domain: str) -> str:
     url = str(value or "").strip()
+    if not url or len(url) > 4096:
+        raise WorkerError("URL_LENGTH_INVALID", 422)
     parsed = urlparse(url)
     if parsed.scheme not in {"http", "https"}:
         raise WorkerError("URL_SCHEME_FORBIDDEN", 422)
@@ -302,6 +310,8 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
             max_concurrency=max_concurrency,
             max_tasks_per_minute=max_tasks_per_minute,
         ),
+        navigation_timeout=timedelta(seconds=20),
+        request_handler_timeout=timedelta(seconds=30),
         respect_robots_txt_file=bool(body.get("respect_robots_txt", True)),
     )
 
@@ -340,8 +350,9 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
             except WorkerError:
                 rejected += 1
                 continue
-            discovered.add(candidate)
-            candidates.append(candidate)
+            if len(discovered) < MAX_CRAWLEE_DISCOVERED_URLS:
+                discovered.add(candidate)
+                candidates.append(candidate)
 
         if candidates:
             await context.add_requests(
@@ -351,7 +362,12 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
             )
 
     try:
-        await crawler.run([seed])
+        await asyncio.wait_for(
+            crawler.run([seed]),
+            timeout=max(30, min(MAX_CRAWLEE_SECONDS, 3600)),
+        )
+    except TimeoutError as exc:
+        raise WorkerError("CRAWLEE_TIMEOUT", 504) from exc
     except WorkerError:
         raise
     except Exception as exc:
@@ -360,7 +376,7 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
     summary = {
         "seed": scrub_url(seed),
         "pages": pages[:max_pages],
-        "discovered_urls": sorted(discovered)[: max_pages * 20],
+        "discovered_urls": sorted(discovered)[:MAX_CRAWLEE_DISCOVERED_URLS],
         "visited_count": len(pages),
         "discovered_count": len(discovered),
         "rejected_count": rejected,
@@ -379,7 +395,12 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
 
 
 def crawlee_crawl(body: dict[str, Any], domain: str) -> dict[str, Any]:
-    return asyncio.run(_crawlee_crawl_async(body, domain))
+    if not CRAWLEE_JOB_SLOTS.acquire(blocking=False):
+        raise WorkerError("CRAWLEE_BUSY", 429)
+    try:
+        return asyncio.run(_crawlee_crawl_async(body, domain))
+    finally:
+        CRAWLEE_JOB_SLOTS.release()
 
 
 def _collect_urls(value: Any, out: set[str]) -> None:
