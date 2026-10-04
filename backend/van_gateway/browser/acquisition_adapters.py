@@ -132,6 +132,7 @@ class HttpAcquisitionRuntimeAdapter:
         max_depth: int = 3,
         max_concurrency: int = 6,
         max_tasks_per_minute: int = 120,
+        timeout_seconds: int = 300,
         respect_robots_txt: bool = True,
     ) -> dict[str, Any]:
         return await self._call(
@@ -142,6 +143,7 @@ class HttpAcquisitionRuntimeAdapter:
                 max_depth=max(0, min(int(max_depth), 6)),
                 max_concurrency=max(1, min(int(max_concurrency), 12)),
                 max_tasks_per_minute=max(1, min(int(max_tasks_per_minute), 240)),
+                timeout_seconds=max(30, min(int(timeout_seconds), 1800)),
                 respect_robots_txt=bool(respect_robots_txt),
             ),
         )
