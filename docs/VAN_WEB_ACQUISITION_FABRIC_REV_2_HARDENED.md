@@ -63,7 +63,7 @@ An external signature reference is not falsely treated as a verified signature. 
 
 ## 9. Runtime boundary
 
-The van-web-acquisition-worker/1.0.0 process is loopback-only and public/read-only. Scrapling is pinned to 0.4.15. Static requests use safe redirect behavior. Dynamic requests use the pinned Chromium executable with a public-egress pre-navigation guard. The worker has no managed browser profile input.
+The van-web-acquisition-worker/1.1.0 process is loopback-only and public/read-only. Scrapling is pinned to 0.4.15. Static requests use safe redirect behavior. Dynamic requests use the pinned Chromium executable with a public-egress pre-navigation guard. The worker has no managed browser profile input.
 
 Katana is optional and pinned to 1.4.0 when installed. It runs without authenticated crawling, custom credential headers, headless browser attachment, XHR extraction or CAPTCHA-solver options. Depth, duration, pages, concurrency, rate and private-IP access are bounded.
 
@@ -78,9 +78,9 @@ Crawlee 1.10.2 is selected where it is stronger than a single-page extractor:
 - public session rotation;
 - bounded crawl depth, page and rate budgets.
 
-The worker uses BeautifulSoupCrawler with Crawlee autoscaling, RequestQueue deduplication and SessionPool behavior. Redirects are not followed implicitly. Child URLs are checked for target-domain and public-network admissibility before being added.
+The worker uses BeautifulSoupCrawler with Crawlee autoscaling, RequestQueue deduplication and SessionPool behavior. Redirects are not followed implicitly. Child URLs are checked for target-domain and public-network admissibility before being added. Process-wide crawl slots, request/handler timeouts, total crawl duration, discovered-URL count, depth, page count, concurrency and tasks-per-minute are all bounded.
 
-Crawlee returns a sanitized crawl summary and discovered URLs. VAN persists those URLs as CRAWLEE_DISCOVERY child WebWorkItems. This preserves the hard boundary between Crawlee orchestration inside a job and VAN authority across jobs.
+Crawlee returns a sanitized crawl summary and discovered URLs. VAN revalidates and batch-persists those URLs as CRAWLEE_DISCOVERY child WebWorkItems in one frontier transaction; the API returns only a bounded discovery sample after handoff. This preserves the hard boundary between Crawlee orchestration inside a job and VAN authority across jobs.
 
 Crawlee is not used for authenticated supplier sessions, semantic UI work, JavaScript execution or authority decisions. Those remain Harness, Stagehand and Scrapling-browser responsibilities.
 
