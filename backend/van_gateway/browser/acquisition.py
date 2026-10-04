@@ -55,6 +55,7 @@ class AcquisitionFailure(str, Enum):
     CHALLENGE = "CHALLENGE"
     EXTRACTION = "EXTRACTION"
     RUNTIME = "RUNTIME"
+    CAPACITY = "CAPACITY"
     POLICY = "POLICY"
     UNSAFE = "UNSAFE"
     UNKNOWN = "UNKNOWN"
