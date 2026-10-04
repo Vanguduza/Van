@@ -163,6 +163,11 @@ class AcquisitionFailBody(AcquisitionLeaseMutationBody):
 class AcquisitionExecuteBody(AcquisitionLeaseMutationBody):
     signals: AcquisitionSignals = Field(default_factory=AcquisitionSignals)
     recon_depth: int = Field(default=2, ge=1, le=3)
+    crawl_max_pages: int = Field(default=100, ge=1, le=1000)
+    crawl_max_depth: int = Field(default=3, ge=0, le=6)
+    crawl_max_concurrency: int = Field(default=6, ge=1, le=12)
+    crawl_max_tasks_per_minute: int = Field(default=120, ge=1, le=240)
+    crawl_respect_robots_txt: bool = True
 
 
 class DomainSkillProposeBody(BaseModel):
@@ -981,6 +986,29 @@ class BrowserApi:
                     result = await self.acquisition_runtime.recon(
                         item, depth=body.recon_depth
                     )
+                elif decision.route is AcquisitionRoute.CRAWLEE_CRAWL:
+                    result = await self.acquisition_runtime.crawl(
+                        item,
+                        max_pages=body.crawl_max_pages,
+                        max_depth=body.crawl_max_depth,
+                        max_concurrency=body.crawl_max_concurrency,
+                        max_tasks_per_minute=body.crawl_max_tasks_per_minute,
+                        respect_robots_txt=body.crawl_respect_robots_txt,
+                    )
+                    for discovered_url in result.get("discovered_urls", []):
+                        try:
+                            await self.acquisition.enqueue(
+                                str(discovered_url),
+                                profile_alias=item.profile_alias,
+                                source="CRAWLEE_DISCOVERY",
+                                parent_item_id=item.item_id,
+                                depth=item.depth + 1,
+                                priority=max(0, item.priority - 1),
+                                max_attempts=item.max_attempts,
+                                metadata={"discovered_by": "CRAWLEE_CRAWL"},
+                            )
+                        except ValueError:
+                            continue
                 else:
                     raise AcquisitionRuntimeError(
                         "WEB_ACQUISITION_ROUTE_NOT_EXECUTABLE",
