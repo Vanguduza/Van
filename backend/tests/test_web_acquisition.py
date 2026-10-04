@@ -131,7 +131,7 @@ async def test_router_prefers_cheapest_known_route():
 
 
 async def test_router_recon_then_domain_skill_then_semantic():
-    item = type("I", (), {"preferred_route": None})()
+    item = type("I", (), {"preferred_route": None, "profile_alias": "public_research"})()
     assert AcquisitionRouter.decide(
         item, AcquisitionSignals(unknown_site=True)
     ).route is AcquisitionRoute.KATANA_RECON
@@ -224,7 +224,7 @@ async def test_stale_worker_cannot_fail_reclaimed_item(tmp_path):
 
 
 async def test_jev_hint_cannot_create_semantic_route():
-    item = type("I", (), {"preferred_route": None})()
+    item = type("I", (), {"preferred_route": None, "profile_alias": "public_research"})()
     decision = AcquisitionRouter.decide(
         item,
         AcquisitionSignals(jev_hint=AcquisitionRoute.STAGEHAND),
@@ -357,3 +357,31 @@ async def test_evidence_chain_detects_manifest_tampering(tmp_path):
     verdict = await ledger.verify_chain()
     assert verdict["ok"] is False
     assert verdict["reason"] == "manifest_digest_mismatch"
+
+
+async def test_router_uses_crawlee_only_for_public_bulk_crawl():
+    public_item = type(
+        "I", (), {"preferred_route": None, "profile_alias": "public_research"}
+    )()
+    decision = AcquisitionRouter.decide(
+        public_item, AcquisitionSignals(bulk_crawl_required=True)
+    )
+    assert decision.route is AcquisitionRoute.CRAWLEE_CRAWL
+
+    authenticated_item = type(
+        "I", (), {"preferred_route": None, "profile_alias": "authenticated_owner"}
+    )()
+    managed = AcquisitionRouter.decide(
+        authenticated_item, AcquisitionSignals(bulk_crawl_required=True)
+    )
+    assert managed.route is AcquisitionRoute.HARNESS
+
+
+async def test_jev_cannot_select_crawlee_without_bulk_signal():
+    item = type(
+        "I", (), {"preferred_route": None, "profile_alias": "public_research"}
+    )()
+    decision = AcquisitionRouter.decide(
+        item, AcquisitionSignals(jev_hint=AcquisitionRoute.CRAWLEE_CRAWL)
+    )
+    assert decision.route is AcquisitionRoute.SCRAPLING_HTTP
