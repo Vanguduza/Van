@@ -126,5 +126,7 @@ def test_bootstrap_verifies_exact_worker_dependency_versions():
     assert "challenge_solver_enabled" in script
     assert "systemctl enable vati-web-acquisition.service" in script
     assert "missing existing VAN config directory" in script
+    assert "DNS_EGRESS_PREFLIGHT_OK" in script
+    assert "configure a loopback resolver before enabling the worker" in script
     assert "/var/lib/van-acquisition/storage" in script
     assert 'install -d -o root -g van-acquisition -m 0750 "$BASE" "$CONFIG_DIR"' not in script
