@@ -14,6 +14,34 @@ if ! id van-acquisition >/dev/null 2>&1; then
   useradd --system --home-dir "$BASE" --shell /usr/sbin/nologin van-acquisition
 fi
 
+# The systemd sandbox denies RFC1918/link-local egress. If the host points
+# directly at a private cloud DNS resolver, enabling the service would either
+# break DNS or require allowing a sensitive metadata/private address. Require a
+# loopback/public resolver and let the estate deployment configure a local stub
+# first when necessary.
+python3 - /etc/resolv.conf <<'PY'
+import ipaddress, re, sys
+text=open(sys.argv[1], encoding="utf-8", errors="replace").read()
+servers=[]
+for line in text.splitlines():
+    m=re.match(r"\s*nameserver\s+(\S+)", line)
+    if m:
+        servers.append(m.group(1).split("%",1)[0])
+if not servers:
+    raise SystemExit("no DNS nameserver configured")
+for value in servers:
+    try:
+        ip=ipaddress.ip_address(value)
+    except ValueError:
+        raise SystemExit(f"non-IP DNS resolver is unsupported by this preflight: {value}")
+    if not (ip.is_loopback or ip.is_global):
+        raise SystemExit(
+            f"private/link-local DNS resolver {value} conflicts with acquisition egress sandbox; "
+            "configure a loopback resolver before enabling the worker"
+        )
+print("DNS_EGRESS_PREFLIGHT_OK")
+PY
+
 [[ -d "$CONFIG_DIR" ]] || { echo "missing existing VAN config directory: $CONFIG_DIR" >&2; exit 41; }
 install -d -o root -g van-acquisition -m 0750 "$BASE"
 install -d -o van-acquisition -g van-acquisition -m 0700 /run/van-acquisition
