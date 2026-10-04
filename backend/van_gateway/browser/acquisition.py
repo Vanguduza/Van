@@ -346,11 +346,20 @@ class DomainSkillRegistry:
         return self._row(fresh)
 
     async def hot(self, *, domain: str, goal_class: str) -> DomainSkill | None:
+        """Return the active skill, or the most recent previously-qualified fallback.
+
+        A quarantined newest version must not strand the domain. SUPERSEDED
+        versions are eligible only because qualification proves they were once
+        replay-verified; an unqualified CANDIDATE is never served.
+        """
         row = await self.store.fetchone(
             """
             SELECT * FROM web_domain_skills
-            WHERE domain=? AND goal_class=? AND state='QUALIFIED'
-            ORDER BY version DESC LIMIT 1
+            WHERE domain=? AND goal_class=?
+              AND state IN ('QUALIFIED','SUPERSEDED')
+              AND qualified_at_ms IS NOT NULL
+            ORDER BY CASE state WHEN 'QUALIFIED' THEN 0 ELSE 1 END, version DESC
+            LIMIT 1
             """,
             (domain.lower(), goal_class),
         )
