@@ -405,7 +405,14 @@ class AcquisitionRouter:
     """
 
     @staticmethod
-    def admissible_routes(signals: AcquisitionSignals) -> set[AcquisitionRoute]:
+    def admissible_routes(
+        item: WebWorkItem, signals: AcquisitionSignals
+    ) -> set[AcquisitionRoute]:
+        if item.profile_alias != "public_research":
+            routes = {AcquisitionRoute.HARNESS}
+            if signals.semantic_interaction_required:
+                routes.add(AcquisitionRoute.STAGEHAND)
+            return routes
         routes = {AcquisitionRoute.SCRAPLING_HTTP}
         if signals.structured_endpoint_available:
             routes.add(AcquisitionRoute.DIRECT_HTTP)
@@ -422,7 +429,13 @@ class AcquisitionRouter:
     @classmethod
     def decide(cls, item: WebWorkItem, signals: AcquisitionSignals) -> RouteDecision:
         if item.preferred_route is not None:
+            if item.preferred_route not in cls.admissible_routes(item, signals):
+                raise ValueError("web_acquisition_preferred_route_not_admissible")
             return RouteDecision(route=item.preferred_route, reason="owner_or_caller_preference")
+        if item.profile_alias != "public_research":
+            if signals.semantic_interaction_required:
+                return RouteDecision(route=AcquisitionRoute.STAGEHAND, reason="authenticated_semantic_session")
+            return RouteDecision(route=AcquisitionRoute.HARNESS, reason="authenticated_session")
         if signals.structured_endpoint_available:
             return RouteDecision(route=AcquisitionRoute.DIRECT_HTTP, reason="structured_endpoint")
         if signals.unknown_site and not signals.reconnaissance_complete:
@@ -433,7 +446,7 @@ class AcquisitionRouter:
             return RouteDecision(route=AcquisitionRoute.STAGEHAND, reason="semantic_ui_required")
         if signals.browser_required or signals.javascript_required or signals.selector_drift:
             return RouteDecision(route=AcquisitionRoute.SCRAPLING_BROWSER, reason="browser_required")
-        if signals.jev_hint is not None and signals.jev_hint in cls.admissible_routes(signals):
+        if signals.jev_hint is not None and signals.jev_hint in cls.admissible_routes(item, signals):
             return RouteDecision(route=signals.jev_hint, reason="jev_advisory_hint")
         return RouteDecision(route=AcquisitionRoute.SCRAPLING_HTTP, reason="default_lightweight_path")
 
