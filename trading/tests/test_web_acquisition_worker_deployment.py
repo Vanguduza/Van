@@ -43,6 +43,11 @@ def test_katana_is_bounded_shallow_recon_not_authenticated_browser():
     assert '"-omit-body"' in source
     assert "MAX_KATANA_DEPTH" in source
     assert "MAX_KATANA_SECONDS" in source
+    assert '"private-ips"' in source
+    assert '"-fs", "rdn"' in source
+    assert '"-rl", "5"' in source
+    assert "assert_public_resolution" in source
+    assert "browser_public_guard" in source
     assert '"-H"' not in source
     assert "Cookie:" not in source
     assert '"-headless"' not in source
