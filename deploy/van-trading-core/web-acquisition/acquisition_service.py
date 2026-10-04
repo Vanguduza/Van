@@ -336,6 +336,9 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
     @crawler.router.default_handler
     async def request_handler(context: BeautifulSoupCrawlingContext) -> None:
         nonlocal rejected
+        if len(pages) >= max_pages:
+            crawler.stop("VAN max_pages reached")
+            return
         requested_url = safe_url(str(context.request.url), domain)
         assert_public_resolution(requested_url)
         loaded_url = str(getattr(context.request, "loaded_url", None) or requested_url)
@@ -372,11 +375,15 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
                 discovered.add(candidate)
                 candidates.append(candidate)
 
+        remaining = max_pages - len(pages)
+        if remaining <= 0:
+            crawler.stop("VAN max_pages reached")
+            return
         if candidates:
             await context.add_requests(
                 candidates,
                 strategy="same-domain",
-                limit=max(0, max_pages - len(pages)),
+                limit=remaining,
             )
 
     try:
