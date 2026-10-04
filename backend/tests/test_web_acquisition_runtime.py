@@ -138,3 +138,18 @@ async def test_crawlee_runtime_is_bounded_and_public_only(tmp_path):
     assert "profile_alias" not in seen
     assert "headers" not in seen
     assert "cookie" not in seen
+
+
+async def test_crawlee_busy_is_preserved_as_typed_retry_signal(tmp_path):
+    store, item = await _item(tmp_path)
+    adapter = HttpAcquisitionRuntimeAdapter(
+        ExternalRuntimeRegistry(store),
+        base_url="http://127.0.0.1:9143",
+        enabled=True,
+        transport=httpx.MockTransport(
+            lambda request: httpx.Response(429, json={"error": "CRAWLEE_BUSY"})
+        ),
+    )
+    with pytest.raises(AcquisitionRuntimeError) as exc:
+        await adapter.crawl(item, timeout_seconds=60)
+    assert exc.value.code == "CRAWLEE_BUSY"
