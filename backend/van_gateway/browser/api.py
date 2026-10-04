@@ -28,6 +28,14 @@ from pydantic import BaseModel, Field
 
 from van_gateway.auth.control_scopes import ControlScope, require_scoped_internal
 from van_gateway.observability import instruments
+from van_gateway.browser.acquisition import (
+    AcquisitionFailure,
+    AcquisitionFrontier,
+    AcquisitionRoute,
+    AcquisitionRouter,
+    AcquisitionSignals,
+    DomainSkillRegistry,
+)
 from van_gateway.browser.models import (
     AutonomyTier,
     BrowserBoundaryType,
@@ -102,6 +110,71 @@ class CompleteTaskBody(BaseModel):
     error_code: str | None = None
 
 
+class AcquisitionEnqueueBody(BaseModel):
+    url: str
+    profile_alias: str = "public_research"
+    source: str = "HERMES"
+    parent_item_id: str | None = None
+    depth: int = Field(default=0, ge=0)
+    priority: int = Field(default=50, ge=0, le=100)
+    preferred_route: AcquisitionRoute | None = None
+    max_attempts: int = Field(default=5, ge=1, le=20)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class AcquisitionClaimBody(BaseModel):
+    worker_id: str = Field(min_length=1, max_length=160)
+    lease_seconds: int = Field(default=120, ge=30, le=3600)
+
+
+class AcquisitionLeaseMutationBody(BaseModel):
+    worker_id: str = Field(min_length=1, max_length=160)
+    lease_token: str = Field(min_length=8, max_length=256)
+
+
+class AcquisitionRenewBody(AcquisitionLeaseMutationBody):
+    lease_seconds: int = Field(default=120, ge=30, le=3600)
+
+
+class AcquisitionCheckpointBody(AcquisitionLeaseMutationBody):
+    checkpoint_ref: str = Field(min_length=1, max_length=2048)
+
+
+class AcquisitionRouteBody(AcquisitionLeaseMutationBody):
+    signals: AcquisitionSignals
+
+
+class AcquisitionCompleteBody(AcquisitionLeaseMutationBody):
+    checkpoint_ref: str | None = Field(default=None, max_length=2048)
+
+
+class AcquisitionFailBody(AcquisitionLeaseMutationBody):
+    failure: AcquisitionFailure
+    error_code: str = Field(min_length=1, max_length=256)
+    retry_after_ms: int | None = Field(default=None, ge=0, le=86_400_000)
+
+
+class DomainSkillProposeBody(BaseModel):
+    domain: str = Field(min_length=1, max_length=253)
+    goal_class: str = Field(min_length=1, max_length=160)
+    route: AcquisitionRoute
+    artifact_ref: str = Field(min_length=1, max_length=2048)
+    site_fingerprint: str | None = Field(default=None, max_length=512)
+    success_assertions: list[dict[str, Any]] = Field(default_factory=list)
+    failure_signatures: list[dict[str, Any]] = Field(default_factory=list)
+    evidence_refs: list[str] = Field(default_factory=list)
+
+
+class DomainSkillQualifyBody(BaseModel):
+    replay_passed: bool
+    evidence_refs: list[str] = Field(min_length=1)
+
+
+class DomainSkillQuarantineBody(BaseModel):
+    reason: str = Field(min_length=1, max_length=1000)
+    evidence_ref: str | None = Field(default=None, max_length=2048)
+
+
 class AssignmentBody(BaseModel):
     """§379 — what Hermes hands a worker, and the only way a worker starts.
 
@@ -151,6 +224,8 @@ class BrowserApi:
         self.binder = binder
         self.broker = BrowserSessionBroker(store, self.policy)
         self.tasks = BrowserTaskService(store, self.broker, self.policy)
+        self.acquisition = AcquisitionFrontier(store)
+        self.domain_skills = DomainSkillRegistry(store)
         self.runner = BrowserSubagentRunner(self.policy)
         self.worker = worker
         self.decisions = decisions
@@ -649,8 +724,10 @@ class BrowserApi:
                 "lease_holder, lease_expires_at_ms, last_verified_at_ms FROM browser_profiles "
                 "ORDER BY profile_alias"
             )
+            acquisition_counts = await self.acquisition.stats()
             return {
                 "enabled": self.settings.browser_enabled,
+                "acquisition_by_state": acquisition_counts,
                 "worker_configured": self.worker is not None,
                 "tasks_by_status": counts,
                 "waiting_for_owner": int(waiting["count"]) if waiting else 0,
@@ -658,6 +735,193 @@ class BrowserApi:
                 "admitted_automation_capabilities": int(admitted["count"]) if admitted else 0,
                 "profiles": [dict(r) for r in profiles],
             }
+
+        @router.get("/acquisition/items/{item_id}")
+        async def acquisition_item(
+            item_id: str, x_van_internal_token: str | None = Header(default=None)
+        ):
+            self._require_internal(x_van_internal_token)
+            row = await self.store.fetchone(
+                "SELECT * FROM web_acquisition_items WHERE item_id = ?", (item_id,)
+            )
+            if row is None:
+                raise HTTPException(status_code=404, detail="UNKNOWN_WEB_ACQUISITION_ITEM")
+            return self.acquisition._row_to_item(row).model_dump(mode="json")
+
+        @router.post("/acquisition/items")
+        async def acquisition_enqueue(
+            body: AcquisitionEnqueueBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            try:
+                item = await self.acquisition.enqueue(**body.model_dump())
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+            return item.model_dump(mode="json")
+
+        @router.post("/acquisition/claim")
+        async def acquisition_claim(
+            body: AcquisitionClaimBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            item = await self.acquisition.claim(
+                worker_id=body.worker_id, lease_seconds=body.lease_seconds
+            )
+            return None if item is None else item.model_dump(mode="json")
+
+        @router.post("/acquisition/items/{item_id}/start")
+        async def acquisition_start(
+            item_id: str,
+            body: AcquisitionLeaseMutationBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            try:
+                await self.acquisition.start(item_id, **body.model_dump())
+            except RuntimeError as exc:
+                raise HTTPException(status_code=409, detail=str(exc)) from exc
+            return {"ok": True}
+
+        @router.post("/acquisition/items/{item_id}/renew")
+        async def acquisition_renew(
+            item_id: str,
+            body: AcquisitionRenewBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            try:
+                item = await self.acquisition.renew_lease(item_id, **body.model_dump())
+            except RuntimeError as exc:
+                raise HTTPException(status_code=409, detail=str(exc)) from exc
+            return item.model_dump(mode="json")
+
+        @router.post("/acquisition/items/{item_id}/route")
+        async def acquisition_route(
+            item_id: str,
+            body: AcquisitionRouteBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            row = await self.store.fetchone(
+                "SELECT * FROM web_acquisition_items WHERE item_id = ?", (item_id,)
+            )
+            if row is None:
+                raise HTTPException(status_code=404, detail="UNKNOWN_WEB_ACQUISITION_ITEM")
+            item = self.acquisition._row_to_item(row)
+            decision = AcquisitionRouter.decide(item, body.signals)
+            try:
+                await self.acquisition.set_route(
+                    item_id, route=decision.route, worker_id=body.worker_id,
+                    lease_token=body.lease_token,
+                )
+            except RuntimeError as exc:
+                raise HTTPException(status_code=409, detail=str(exc)) from exc
+            return {"route": decision.route.value, "reason": decision.reason}
+
+        @router.post("/acquisition/items/{item_id}/checkpoint")
+        async def acquisition_checkpoint(
+            item_id: str,
+            body: AcquisitionCheckpointBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            try:
+                await self.acquisition.checkpoint(item_id, **body.model_dump())
+            except RuntimeError as exc:
+                raise HTTPException(status_code=409, detail=str(exc)) from exc
+            return {"ok": True}
+
+        @router.post("/acquisition/items/{item_id}/complete")
+        async def acquisition_complete(
+            item_id: str,
+            body: AcquisitionCompleteBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            try:
+                await self.acquisition.complete(item_id, **body.model_dump())
+            except RuntimeError as exc:
+                raise HTTPException(status_code=409, detail=str(exc)) from exc
+            return {"ok": True}
+
+        @router.post("/acquisition/items/{item_id}/fail")
+        async def acquisition_fail(
+            item_id: str,
+            body: AcquisitionFailBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            try:
+                state = await self.acquisition.fail(item_id, **body.model_dump())
+            except KeyError as exc:
+                raise HTTPException(status_code=404, detail=str(exc)) from exc
+            except RuntimeError as exc:
+                raise HTTPException(status_code=409, detail=str(exc)) from exc
+            return {"state": state.value}
+
+        @router.post("/acquisition/skills")
+        async def domain_skill_propose(
+            body: DomainSkillProposeBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            try:
+                skill = await self.domain_skills.propose(**body.model_dump())
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+            return skill.model_dump(mode="json")
+
+        @router.post("/acquisition/skills/{skill_id}/qualify")
+        async def domain_skill_qualify(
+            skill_id: str,
+            body: DomainSkillQualifyBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            try:
+                skill = await self.domain_skills.qualify(skill_id, **body.model_dump())
+            except KeyError as exc:
+                raise HTTPException(status_code=404, detail=str(exc)) from exc
+            except (ValueError, RuntimeError) as exc:
+                raise HTTPException(status_code=409, detail=str(exc)) from exc
+            return skill.model_dump(mode="json")
+
+        @router.post("/acquisition/skills/{skill_id}/quarantine")
+        async def domain_skill_quarantine(
+            skill_id: str,
+            body: DomainSkillQuarantineBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            try:
+                skill = await self.domain_skills.quarantine(skill_id, **body.model_dump())
+            except KeyError as exc:
+                raise HTTPException(status_code=404, detail=str(exc)) from exc
+            return skill.model_dump(mode="json")
+
+        @router.get("/acquisition/skills/hot/{domain}/{goal_class}")
+        async def domain_skill_hot(
+            domain: str,
+            goal_class: str,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            skill = await self.domain_skills.hot(domain=domain, goal_class=goal_class)
+            return None if skill is None else skill.model_dump(mode="json")
 
         @router.get("/policy")
         async def browser_policy():
