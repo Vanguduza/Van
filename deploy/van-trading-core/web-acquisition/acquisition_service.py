@@ -299,6 +299,7 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
         from crawlee import ConcurrencySettings
         from crawlee.crawlers import BeautifulSoupCrawler, BeautifulSoupCrawlingContext
         from crawlee.http_clients import ImpitHttpClient
+        from crawlee.storages import RequestQueue
     except Exception as exc:
         raise WorkerError("CRAWLEE_RUNTIME_UNAVAILABLE", 503) from exc
 
@@ -306,7 +307,16 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
     discovered: set[str] = set()
     rejected = 0
 
+    # Never share Crawlee's implicit default queue between VAN jobs. The VAN
+    # item id is sanitized into a run-scoped alias; the queue is dropped after
+    # this bounded crawl. Cross-job durability belongs to the VAN frontier.
+    raw_item_id = str(body.get("item_id") or "anonymous").lower()
+    queue_alias = "van-" + re.sub(r"[^a-z0-9]+", "-", raw_item_id).strip("-")[:80]
+    request_queue = await RequestQueue.open(alias=queue_alias)
+    await request_queue.purge()
+
     crawler = BeautifulSoupCrawler(
+        request_manager=request_queue,
         http_client=ImpitHttpClient(follow_redirects=False),
         max_requests_per_crawl=max_pages,
         max_crawl_depth=max_depth,
@@ -370,16 +380,24 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
             )
 
     try:
-        await asyncio.wait_for(
-            crawler.run([seed]),
-            timeout=crawl_timeout,
-        )
-    except TimeoutError as exc:
-        raise WorkerError("CRAWLEE_TIMEOUT", 504) from exc
-    except WorkerError:
-        raise
-    except Exception as exc:
-        raise WorkerError("CRAWLEE_CRAWL_FAILED", 502) from exc
+        try:
+            await asyncio.wait_for(
+                crawler.run([seed], purge_request_queue=False),
+                timeout=crawl_timeout,
+            )
+        except TimeoutError as exc:
+            raise WorkerError("CRAWLEE_TIMEOUT", 504) from exc
+        except WorkerError:
+            raise
+        except Exception as exc:
+            raise WorkerError("CRAWLEE_CRAWL_FAILED", 502) from exc
+    finally:
+        try:
+            await request_queue.drop()
+        except Exception:
+            # Cleanup failure must not change crawl truth; the next job uses a
+            # distinct alias and the service storage directory is bounded.
+            pass
 
     summary = {
         "seed": scrub_url(seed),
