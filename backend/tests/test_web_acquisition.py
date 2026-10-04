@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from conftest_automation import make_store
 from van_gateway.browser.acquisition import (
+    AcquisitionEvidenceLedger,
     AcquisitionFailure,
     AcquisitionFrontier,
     AcquisitionRoute,
@@ -316,3 +317,43 @@ async def test_failed_canary_quarantines_and_falls_back(tmp_path):
     assert failed.state.value == "QUARANTINED"
     fallback = await registry.hot(domain="example.com", goal_class="catalog")
     assert fallback is not None and fallback.skill_id == first.skill_id
+
+
+async def test_sensitive_query_credentials_are_not_persisted(tmp_path):
+    import pytest
+    store = await make_store(tmp_path)
+    frontier = AcquisitionFrontier(store)
+    with pytest.raises(ValueError, match="sensitive_query"):
+        await frontier.enqueue(
+            "https://example.com/export?access_token=do-not-store",
+            now_ms=1000,
+        )
+    with pytest.raises(ValueError, match="userinfo"):
+        await frontier.enqueue(
+            "https://user:password@example.com/export",
+            now_ms=1000,
+        )
+
+
+async def test_evidence_chain_detects_manifest_tampering(tmp_path):
+    store = await make_store(tmp_path)
+    frontier = AcquisitionFrontier(store)
+    item = await frontier.enqueue("https://example.com/catalog", now_ms=1000)
+    ledger = AcquisitionEvidenceLedger(store)
+    evidence = await ledger.record(
+        item_id=item.item_id,
+        kind="PUBLIC_WEB_ACQUISITION",
+        content_digest="sha256:" + "a" * 64,
+        source_url=item.canonical_url,
+        byte_size=42,
+        detail={"representation": "MARKDOWN_MAIN_CONTENT"},
+        now_ms=2000,
+    )
+    assert (await ledger.verify_chain())["ok"] is True
+    await store.execute(
+        "UPDATE web_acquisition_evidence SET manifest_json=? WHERE evidence_id=?",
+        ('{"tampered":true}', evidence.evidence_id),
+    )
+    verdict = await ledger.verify_chain()
+    assert verdict["ok"] is False
+    assert verdict["reason"] == "manifest_digest_mismatch"
