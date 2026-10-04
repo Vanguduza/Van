@@ -45,6 +45,8 @@ MAX_CRAWLEE_SECONDS = int(os.getenv("VAN_CRAWLEE_MAX_SECONDS", "300"))
 MAX_CRAWLEE_JOBS = int(os.getenv("VAN_CRAWLEE_MAX_JOBS", "1"))
 MAX_CRAWLEE_DISCOVERED_URLS = int(os.getenv("VAN_CRAWLEE_MAX_DISCOVERED_URLS", "2000"))
 MAX_CRAWLEE_HOSTS = int(os.getenv("VAN_CRAWLEE_MAX_HOSTS", "32"))
+MAX_CRAWLEE_PAGE_SUMMARIES = int(os.getenv("VAN_CRAWLEE_MAX_PAGE_SUMMARIES", "250"))
+MAX_CRAWLEE_DISCOVERY_BYTES = int(os.getenv("VAN_CRAWLEE_MAX_DISCOVERY_BYTES", str(1024 * 1024)))
 CRAWLEE_JOB_SLOTS = threading.BoundedSemaphore(max(1, MAX_CRAWLEE_JOBS))
 DOMAIN_RE = re.compile(r"^[a-z0-9.-]{1,253}$")
 SENSITIVE_QUERY_KEYS = {
@@ -418,10 +420,22 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
             # distinct alias and the service storage directory is bounded.
             pass
 
+    bounded_discovered: list[str] = []
+    discovery_bytes = 0
+    for candidate in sorted(discovered):
+        encoded_len = len(candidate.encode("utf-8", errors="replace"))
+        if discovery_bytes + encoded_len > max(1024, MAX_CRAWLEE_DISCOVERY_BYTES):
+            break
+        bounded_discovered.append(candidate)
+        discovery_bytes += encoded_len
+
     summary = {
         "seed": scrub_url(seed),
-        "pages": pages[:max_pages],
-        "discovered_urls": sorted(discovered)[:MAX_CRAWLEE_DISCOVERED_URLS],
+        "pages": pages[: max(1, MAX_CRAWLEE_PAGE_SUMMARIES)],
+        "page_summaries_truncated": len(pages) > max(1, MAX_CRAWLEE_PAGE_SUMMARIES),
+        "discovered_urls": bounded_discovered,
+        "discovered_urls_truncated": len(bounded_discovered) < len(discovered),
+        "discovery_url_bytes": discovery_bytes,
         "visited_count": len(pages),
         "discovered_count": len(discovered),
         "rejected_count": rejected,
