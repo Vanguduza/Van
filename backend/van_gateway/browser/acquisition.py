@@ -272,7 +272,9 @@ class AcquisitionEvidenceLedger:
             "created_at_ms": now,
         }
         manifest_digest = digest(manifest)
-        integrity_state = "SIGNED_HASH_CHAINED" if signature_ref else "HASH_CHAINED"
+        integrity_state = (
+            "EXTERNAL_SIGNATURE_REFERENCED_HASH_CHAINED" if signature_ref else "HASH_CHAINED"
+        )
 
         async with self.store.connection() as db:
             await db.execute("BEGIN IMMEDIATE")
@@ -348,6 +350,14 @@ class AcquisitionEvidenceLedger:
             if str(row["prev_hash"]) != expected_prev:
                 return {"ok": False, "checked": expected_seq - 1, "broken_at": seq,
                         "reason": "prev_hash_mismatch"}
+            try:
+                manifest = json.loads(str(row["manifest_json"]))
+            except (TypeError, ValueError):
+                return {"ok": False, "checked": expected_seq - 1, "broken_at": seq,
+                        "reason": "manifest_invalid"}
+            if digest(manifest) != str(row["manifest_digest"]):
+                return {"ok": False, "checked": expected_seq - 1, "broken_at": seq,
+                        "reason": "manifest_digest_mismatch"}
             expected = self.entry_digest(
                 chain_seq=seq,
                 prev_hash=str(row["prev_hash"]),
