@@ -193,12 +193,22 @@ async def run(target_url: str, crawl_url: str | None = None) -> int:
         if chain.get("ok") is not True:
             print(f"FAIL Crawlee evidence chain: {chain}")
             return 1
+        crawl_pointer = f"web-acquisition-evidence://{crawl_evidence.evidence_id}"
+        await registry.record_evidence(
+            ReadinessEvidence(
+                capability="web_acquisition_crawlee",
+                evidence_pointer=crawl_pointer,
+                runtime_version=str(crawl.get("crawlee_version") or ""),
+                contains_secrets=False,
+            )
+        )
         crawl_receipt = {
             "url_digest": crawl_item.url_digest,
             "visited_count": int(crawl.get("visited_count") or 0),
             "discovered_count": int(crawl.get("discovered_count") or 0),
-            "evidence_pointer": f"web-acquisition-evidence://{crawl_evidence.evidence_id}",
+            "evidence_pointer": crawl_pointer,
             "content_digest": crawl_digest,
+            "live_qualified": True,
         }
 
     pointer = f"web-acquisition-evidence://{evidence.evidence_id}"
