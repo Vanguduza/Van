@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 31
+SCHEMA_VERSION = 32
 
 
 MIGRATION_17 = """
@@ -716,6 +716,70 @@ CREATE TABLE IF NOT EXISTS web_acquisition_events (
 
 CREATE INDEX IF NOT EXISTS idx_web_acquisition_events_item
   ON web_acquisition_events(item_id, occurred_at_ms);
+"""
+
+
+MIGRATION_32 = """
+-- VAN Web Acquisition hardening: content-addressed custody, skill canaries and cost telemetry.
+ALTER TABLE web_domain_skills ADD COLUMN golden_case_refs_json TEXT NOT NULL DEFAULT '[]';
+ALTER TABLE web_domain_skills ADD COLUMN canary_pass_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE web_domain_skills ADD COLUMN canary_fail_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE web_domain_skills ADD COLUMN last_canary_at_ms INTEGER;
+
+CREATE TABLE IF NOT EXISTS web_acquisition_evidence (
+  evidence_id TEXT PRIMARY KEY,
+  item_id TEXT NOT NULL,
+  chain_seq INTEGER NOT NULL UNIQUE,
+  prev_hash TEXT NOT NULL,
+  entry_hash TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  content_digest TEXT NOT NULL,
+  source_url_digest TEXT NOT NULL,
+  route TEXT,
+  artifact_ref TEXT,
+  manifest_digest TEXT NOT NULL,
+  signature_ref TEXT,
+  integrity_state TEXT NOT NULL,
+  byte_size INTEGER NOT NULL DEFAULT 0,
+  manifest_json TEXT NOT NULL,
+  created_at_ms INTEGER NOT NULL,
+  FOREIGN KEY(item_id) REFERENCES web_acquisition_items(item_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_web_acquisition_evidence_item
+  ON web_acquisition_evidence(item_id, created_at_ms);
+CREATE INDEX IF NOT EXISTS idx_web_acquisition_evidence_digest
+  ON web_acquisition_evidence(content_digest);
+
+CREATE TABLE IF NOT EXISTS web_domain_skill_canaries (
+  canary_id TEXT PRIMARY KEY,
+  skill_id TEXT NOT NULL,
+  passed INTEGER NOT NULL,
+  observed_fingerprint TEXT,
+  evidence_ref TEXT NOT NULL,
+  latency_ms INTEGER,
+  created_at_ms INTEGER NOT NULL,
+  FOREIGN KEY(skill_id) REFERENCES web_domain_skills(skill_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_web_domain_skill_canaries_skill
+  ON web_domain_skill_canaries(skill_id, created_at_ms DESC);
+
+CREATE TABLE IF NOT EXISTS web_acquisition_telemetry (
+  telemetry_id TEXT PRIMARY KEY,
+  item_id TEXT NOT NULL,
+  route TEXT NOT NULL,
+  success INTEGER NOT NULL,
+  latency_ms INTEGER NOT NULL DEFAULT 0,
+  byte_count INTEGER NOT NULL DEFAULT 0,
+  verified_records INTEGER NOT NULL DEFAULT 0,
+  cost_micros INTEGER NOT NULL DEFAULT 0,
+  recorded_at_ms INTEGER NOT NULL,
+  FOREIGN KEY(item_id) REFERENCES web_acquisition_items(item_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_web_acquisition_telemetry_route
+  ON web_acquisition_telemetry(route, recorded_at_ms);
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -2051,6 +2115,7 @@ MIGRATIONS: dict[int, str] = {
     29: MIGRATION_29,
     30: MIGRATION_30,
     31: MIGRATION_31,
+    32: MIGRATION_32,
 }
 
 
