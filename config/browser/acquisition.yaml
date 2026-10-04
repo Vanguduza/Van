@@ -1,0 +1,31 @@
+schema_version: 1
+authority: VAN_BROWSER_FABRIC
+frontier:
+  lease_seconds: 120
+  default_max_attempts: 5
+  default_priority: 50
+  candidate_scan_limit: 64
+domain_defaults:
+  max_concurrency: 2
+  min_delay_ms: 0
+routes:
+  DIRECT_HTTP:
+    executor: direct_http
+  SCRAPLING_HTTP:
+    executor: scrapling
+    mode: http
+  KATANA_RECON:
+    executor: katana
+  SCRAPLING_BROWSER:
+    executor: scrapling
+    mode: browser
+  HARNESS:
+    executor: browser_harness
+  STAGEHAND:
+    executor: stagehand
+policies:
+  semantic_last_resort: true
+  jev_authority_effect: NONE
+  secrets_in_work_items: FORBIDDEN
+  dead_letter_sink: automation_dead_letter
+  supplier_default_access_model: OUTSIDE_IN
