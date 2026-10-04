@@ -175,10 +175,30 @@ def canonicalize_url(url: str) -> tuple[str, str]:
 
 
 class AcquisitionRouter:
-    """Cheap deterministic routing first; semantic browsing is the last resort."""
+    """Cheap deterministic routing first; semantic browsing is the last resort.
+
+    JEV is an advisory classifier only. It may choose among routes that the
+    independently observed signals already make admissible; it cannot create a
+    browser/semantic capability merely by naming it.
+    """
 
     @staticmethod
-    def decide(item: WebWorkItem, signals: AcquisitionSignals) -> RouteDecision:
+    def admissible_routes(signals: AcquisitionSignals) -> set[AcquisitionRoute]:
+        routes = {AcquisitionRoute.SCRAPLING_HTTP}
+        if signals.structured_endpoint_available:
+            routes.add(AcquisitionRoute.DIRECT_HTTP)
+        if signals.unknown_site and not signals.reconnaissance_complete:
+            routes.add(AcquisitionRoute.KATANA_RECON)
+        if signals.domain_skill_available and not signals.selector_drift:
+            routes.add(AcquisitionRoute.HARNESS)
+        if signals.semantic_interaction_required:
+            routes.add(AcquisitionRoute.STAGEHAND)
+        if signals.browser_required or signals.javascript_required or signals.selector_drift:
+            routes.add(AcquisitionRoute.SCRAPLING_BROWSER)
+        return routes
+
+    @classmethod
+    def decide(cls, item: WebWorkItem, signals: AcquisitionSignals) -> RouteDecision:
         if item.preferred_route is not None:
             return RouteDecision(route=item.preferred_route, reason="owner_or_caller_preference")
         if signals.structured_endpoint_available:
@@ -191,7 +211,7 @@ class AcquisitionRouter:
             return RouteDecision(route=AcquisitionRoute.STAGEHAND, reason="semantic_ui_required")
         if signals.browser_required or signals.javascript_required or signals.selector_drift:
             return RouteDecision(route=AcquisitionRoute.SCRAPLING_BROWSER, reason="browser_required")
-        if signals.jev_hint is not None:
+        if signals.jev_hint is not None and signals.jev_hint in cls.admissible_routes(signals):
             return RouteDecision(route=signals.jev_hint, reason="jev_advisory_hint")
         return RouteDecision(route=AcquisitionRoute.SCRAPLING_HTTP, reason="default_lightweight_path")
 
@@ -463,6 +483,7 @@ class AcquisitionFrontier:
     """Durable Crawlee-style frontier implemented inside VAN's authority boundary."""
 
     DEFAULT_LEASE_SECONDS = 120
+    MAX_LEASE_SECONDS = 3600
 
     def __init__(self, store: Store) -> None:
         self.store = store
@@ -707,6 +728,43 @@ class AcquisitionFrontier:
             if cur.rowcount != 1:
                 raise RuntimeError("web_acquisition_lease_not_active")
 
+    async def renew_lease(
+        self,
+        item_id: str,
+        *,
+        worker_id: str,
+        lease_token: str,
+        lease_seconds: int | None = None,
+        now_ms: int | None = None,
+    ) -> WebWorkItem:
+        """Heartbeat a live claim without changing its fencing token.
+
+        Renewal extends from *now*, not from the previous expiry, so repeated
+        heartbeats cannot accumulate an arbitrarily long lease. A worker whose
+        lease already expired must lose rather than silently reacquire.
+        """
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        ttl = max(30, min(self.MAX_LEASE_SECONDS, int(lease_seconds or self.DEFAULT_LEASE_SECONDS)))
+        expires = now + ttl * 1000
+        async with self.store.connection() as db:
+            cur = await db.execute(
+                """
+                UPDATE web_acquisition_items
+                SET lease_expires_at_ms=?, updated_at_ms=?
+                WHERE item_id=? AND state IN ('CLAIMED','RUNNING')
+                  AND lease_owner=? AND lease_token=? AND lease_expires_at_ms > ?
+                """,
+                (expires, now, item_id, worker_id, lease_token, now),
+            )
+            await db.commit()
+            if cur.rowcount != 1:
+                raise RuntimeError("web_acquisition_lease_not_renewable")
+        row = await self.store.fetchone(
+            "SELECT * FROM web_acquisition_items WHERE item_id=?", (item_id,)
+        )
+        assert row is not None
+        return self._row_to_item(row)
+
     async def checkpoint(
         self,
         item_id: str,
@@ -794,83 +852,119 @@ class AcquisitionFrontier:
         retry_after_ms: int | None = None,
         now_ms: int | None = None,
     ) -> AcquisitionState:
+        """Record failure under the same lease fence that owned the work.
+
+        Selection, fence validation, state transition and dead-letter insertion
+        happen under one IMMEDIATE transaction. A stale worker therefore cannot
+        observe its old lease, lose it to reclamation, and then overwrite the
+        new owner's state.
+        """
         now = int(time.time() * 1000) if now_ms is None else now_ms
-        row = await self.store.fetchone(
-            "SELECT * FROM web_acquisition_items WHERE item_id = ?", (item_id,)
-        )
-        if row is None:
-            raise KeyError("unknown_web_acquisition_item")
-        if row["lease_owner"] != worker_id or row["lease_token"] != lease_token:
-            raise RuntimeError("web_acquisition_failure_without_active_lease")
-        if int(row["lease_expires_at_ms"] or 0) <= now:
-            raise RuntimeError("web_acquisition_failure_after_lease_expiry")
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            cur = await db.execute(
+                "SELECT * FROM web_acquisition_items WHERE item_id = ?", (item_id,)
+            )
+            row = await cur.fetchone()
+            if row is None:
+                await db.rollback()
+                raise KeyError("unknown_web_acquisition_item")
+            if row["lease_owner"] != worker_id or row["lease_token"] != lease_token:
+                await db.rollback()
+                raise RuntimeError("web_acquisition_failure_without_active_lease")
+            if int(row["lease_expires_at_ms"] or 0) <= now:
+                await db.rollback()
+                raise RuntimeError("web_acquisition_failure_after_lease_expiry")
+            if str(row["state"]) not in {
+                AcquisitionState.CLAIMED.value,
+                AcquisitionState.RUNNING.value,
+            }:
+                await db.rollback()
+                raise RuntimeError("web_acquisition_failure_invalid_state")
 
-        attempts = int(row["attempt_count"])
-        max_attempts = int(row["max_attempts"])
-        terminal = failure in PERMANENT_FAILURES or attempts >= max_attempts
+            attempts = int(row["attempt_count"])
+            max_attempts = int(row["max_attempts"])
+            terminal = failure in PERMANENT_FAILURES or attempts >= max_attempts
 
-        if terminal:
-            await self.store.execute(
+            if terminal:
+                cur = await db.execute(
+                    """
+                    UPDATE web_acquisition_items
+                    SET state='DEAD_LETTER', last_failure_class=?, last_error_code=?,
+                        lease_owner=NULL, lease_token=NULL, lease_expires_at_ms=NULL,
+                        completed_at_ms=?, updated_at_ms=?
+                    WHERE item_id=? AND state IN ('CLAIMED','RUNNING')
+                      AND lease_owner=? AND lease_token=? AND lease_expires_at_ms > ?
+                    """,
+                    (
+                        failure.value, error_code, now, now, item_id,
+                        worker_id, lease_token, now,
+                    ),
+                )
+                if cur.rowcount != 1:
+                    await db.rollback()
+                    raise RuntimeError("web_acquisition_failure_fence_lost")
+                dead_letter_id = new_id("wacqdl")
+                await db.execute(
+                    """
+                    INSERT OR IGNORE INTO automation_dead_letter(
+                      dead_letter_id, run_id, event_id, capability_id, failure_class,
+                      last_error_code, attempt_count, evidence_refs_json, next_action,
+                      detail_json, created_at_ms, updated_at_ms, resolved_at_ms, resolution
+                    ) VALUES (?, ?, NULL, 'van.web-acquisition', ?, ?, ?, '[]',
+                              'REVIEW_OR_REQUEUE', ?, ?, ?, NULL, NULL)
+                    """,
+                    (
+                        dead_letter_id, item_id, failure.value, error_code, attempts,
+                        json.dumps({"url_digest": row["url_digest"], "domain": row["domain"]}),
+                        now, now,
+                    ),
+                )
+                await db.commit()
+                return AcquisitionState.DEAD_LETTER
+
+            delay = (
+                max(int(retry_after_ms or 0), self._backoff_ms(attempts))
+                if failure is AcquisitionFailure.RATE_LIMIT
+                else self._backoff_ms(attempts)
+            )
+            next_at = now + delay
+            cur = await db.execute(
                 """
                 UPDATE web_acquisition_items
-                SET state='DEAD_LETTER', last_failure_class=?, last_error_code=?,
-                    lease_owner=NULL, lease_token=NULL, lease_expires_at_ms=NULL,
-                    completed_at_ms=?, updated_at_ms=?
-                WHERE item_id=?
-                """,
-                (failure.value, error_code, now, now, item_id),
-            )
-            dead_letter_id = new_id("wacqdl")
-            await self.store.execute(
-                """
-                INSERT OR IGNORE INTO automation_dead_letter(
-                  dead_letter_id, run_id, event_id, capability_id, failure_class,
-                  last_error_code, attempt_count, evidence_refs_json, next_action,
-                  detail_json, created_at_ms, updated_at_ms, resolved_at_ms, resolution
-                ) VALUES (?, ?, NULL, 'van.web-acquisition', ?, ?, ?, '[]',
-                          'REVIEW_OR_REQUEUE', ?, ?, ?, NULL, NULL)
+                SET state='RETRY_WAIT', last_failure_class=?, last_error_code=?,
+                    next_eligible_at_ms=?, lease_owner=NULL, lease_token=NULL,
+                    lease_expires_at_ms=NULL, updated_at_ms=?
+                WHERE item_id=? AND state IN ('CLAIMED','RUNNING')
+                  AND lease_owner=? AND lease_token=? AND lease_expires_at_ms > ?
                 """,
                 (
-                    dead_letter_id, item_id, failure.value, error_code, attempts,
-                    json.dumps({"url_digest": row["url_digest"], "domain": row["domain"]}),
-                    now, now,
+                    failure.value, error_code, next_at, now, item_id,
+                    worker_id, lease_token, now,
                 ),
             )
-            return AcquisitionState.DEAD_LETTER
+            if cur.rowcount != 1:
+                await db.rollback()
+                raise RuntimeError("web_acquisition_failure_fence_lost")
 
-        delay = (
-            max(int(retry_after_ms or 0), self._backoff_ms(attempts))
-            if failure is AcquisitionFailure.RATE_LIMIT
-            else self._backoff_ms(attempts)
-        )
-        next_at = now + delay
-        await self.store.execute(
-            """
-            UPDATE web_acquisition_items
-            SET state='RETRY_WAIT', last_failure_class=?, last_error_code=?,
-                next_eligible_at_ms=?, lease_owner=NULL, lease_token=NULL,
-                lease_expires_at_ms=NULL, updated_at_ms=?
-            WHERE item_id=?
-            """,
-            (failure.value, error_code, next_at, now, item_id),
-        )
-        if failure is AcquisitionFailure.RATE_LIMIT:
-            await self.store.execute(
-                """
-                INSERT INTO web_domain_controls(
-                  domain, max_concurrency, min_delay_ms, cooldown_until_ms,
-                  last_claimed_at_ms, error_score, updated_at_ms
-                ) VALUES (?, 1, 1000, ?, NULL, 1, ?)
-                ON CONFLICT(domain) DO UPDATE SET
-                  cooldown_until_ms=MAX(COALESCE(web_domain_controls.cooldown_until_ms, 0),
-                                        excluded.cooldown_until_ms),
-                  max_concurrency=MAX(1, web_domain_controls.max_concurrency - 1),
-                  error_score=web_domain_controls.error_score + 1,
-                  updated_at_ms=excluded.updated_at_ms
-                """,
-                (str(row["domain"]), next_at, now),
-            )
-        return AcquisitionState.RETRY_WAIT
+            if failure is AcquisitionFailure.RATE_LIMIT:
+                await db.execute(
+                    """
+                    INSERT INTO web_domain_controls(
+                      domain, max_concurrency, min_delay_ms, cooldown_until_ms,
+                      last_claimed_at_ms, error_score, updated_at_ms
+                    ) VALUES (?, 1, 1000, ?, NULL, 1, ?)
+                    ON CONFLICT(domain) DO UPDATE SET
+                      cooldown_until_ms=MAX(COALESCE(web_domain_controls.cooldown_until_ms, 0),
+                                            excluded.cooldown_until_ms),
+                      max_concurrency=MAX(1, web_domain_controls.max_concurrency - 1),
+                      error_score=web_domain_controls.error_score + 1,
+                      updated_at_ms=excluded.updated_at_ms
+                    """,
+                    (str(row["domain"]), next_at, now),
+                )
+            await db.commit()
+            return AcquisitionState.RETRY_WAIT
 
     async def stats(self) -> dict[str, int]:
         rows = await self.store.fetchall(
