@@ -1080,12 +1080,18 @@ class BrowserApi:
                         success=False,
                         latency_ms=elapsed,
                     )
+                    failure_class = (
+                        AcquisitionFailure.RATE_LIMIT
+                        if exc.code == "CRAWLEE_BUSY"
+                        else AcquisitionFailure.RUNTIME
+                    )
                     state = await self.acquisition.fail(
                         item_id,
                         worker_id=body.worker_id,
                         lease_token=body.lease_token,
-                        failure=AcquisitionFailure.RUNTIME,
+                        failure=failure_class,
                         error_code=exc.code,
+                        retry_after_ms=15_000 if exc.code == "CRAWLEE_BUSY" else None,
                     )
                 except RuntimeError:
                     state = None
