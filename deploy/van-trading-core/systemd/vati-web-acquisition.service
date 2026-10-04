@@ -22,6 +22,17 @@ ProtectHome=true
 ReadWritePaths=/run/van-acquisition /var/log/van-trading/acquisition
 ReadOnlyPaths=/opt/van-web-acquisition /opt/van-trading/config/web-acquisition.env
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+# Defense in depth: public acquisition cannot reach estate/private/metadata ranges.
+# Loopback is retained only because the service itself listens on 127.0.0.1 and
+# the host may use a loopback DNS stub; application-level destination checks
+# separately reject loopback URLs.
+IPAddressDeny=10.0.0.0/8
+IPAddressDeny=172.16.0.0/12
+IPAddressDeny=192.168.0.0/16
+IPAddressDeny=169.254.0.0/16
+IPAddressDeny=100.64.0.0/10
+IPAddressDeny=fc00::/7
+IPAddressDeny=fe80::/10
 RestrictNamespaces=true
 LockPersonality=true
 CapabilityBoundingSet=
