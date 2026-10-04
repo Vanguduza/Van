@@ -11,6 +11,8 @@ ROOT = Path(__file__).resolve().parents[2]
 SERVICE = ROOT / "deploy/van-trading-core/web-acquisition/acquisition_service.py"
 RUNTIME_ENV = ROOT / "deploy/van-trading-core/web-acquisition/runtime.env.example"
 REQUIREMENTS = ROOT / "deploy/van-trading-core/web-acquisition/requirements.txt"
+SYSTEMD_UNIT = ROOT / "deploy/van-trading-core/systemd/vati-web-acquisition.service"
+BOOTSTRAP = ROOT / "deploy/van-trading-core/web-acquisition/bootstrap-web-acquisition-runtime.sh"
 
 
 def _source() -> str:
@@ -95,3 +97,29 @@ def test_crawlee_is_bulk_public_orchestration_not_authority():
     assert "asyncio.wait_for" in source
     assert "request_handler_timeout=timedelta(seconds=30)" in source
     assert "navigation_timeout=timedelta(seconds=20)" in source
+
+
+def test_acquisition_service_is_least_privilege_and_resource_bounded():
+    unit = SYSTEMD_UNIT.read_text(encoding="utf-8")
+    assert "User=van-acquisition" in unit
+    assert "Group=van-acquisition" in unit
+    assert "NoNewPrivileges=true" in unit
+    assert "ProtectSystem=strict" in unit
+    assert "ProtectHome=true" in unit
+    assert "MemoryMax=1024M" in unit
+    assert "TasksMax=256" in unit
+    assert "CPUWeight=10" in unit
+    assert "IPAddressDeny=10.0.0.0/8" in unit
+    assert "IPAddressDeny=169.254.0.0/16" in unit
+    assert "IPAddressDeny=fc00::/7" in unit
+
+
+def test_bootstrap_verifies_exact_worker_dependency_versions():
+    script = BOOTSTRAP.read_text(encoding="utf-8")
+    assert "python3.12 -m venv" in script
+    assert '"scrapling":"0.4.15"' in script
+    assert '"crawlee":"1.10.2"' in script
+    assert "van-web-acquisition-worker/1.1.0" in script
+    assert "crawlee_ready" in script
+    assert "challenge_solver_enabled" in script
+    assert "systemctl enable vati-web-acquisition.service" in script
