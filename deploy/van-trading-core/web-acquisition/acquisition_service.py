@@ -350,7 +350,7 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
 
     @crawler.router.default_handler
     async def request_handler(context: BeautifulSoupCrawlingContext) -> None:
-        nonlocal rejected
+        nonlocal rejected, redirects_admitted, redirects_rejected
         if len(pages) >= max_pages:
             crawler.stop("VAN max_pages reached")
             return
@@ -362,7 +362,6 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
         # being contacted before VAN validates it.
         status_code = int(context.http_response.status_code)
         if 300 <= status_code < 400:
-            nonlocal redirects_admitted, redirects_rejected
             location = None
             for header_name in context.http_response.headers:
                 if str(header_name).lower() == "location":
