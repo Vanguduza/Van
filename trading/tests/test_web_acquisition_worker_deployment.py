@@ -84,6 +84,7 @@ def test_crawlee_is_bulk_public_orchestration_not_authority():
     assert "retry_on_blocked=False" in source
     assert "ImpitHttpClient(follow_redirects=False)" in source
     assert "max_requests_per_crawl=max_pages" in source
+    assert 'crawler.stop("VAN max_pages reached")' in source
     assert "max_crawl_depth=max_depth" in source
     assert "max_tasks_per_minute=max_tasks_per_minute" in source
     assert "VAN_CRAWLEE_MAX_PAGES=1000" in env
