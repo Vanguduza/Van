@@ -33,7 +33,7 @@ from van_gateway.browser.acquisition_adapters import (  # noqa: E402
 from van_gateway.config import get_settings  # noqa: E402
 from van_gateway.storage.db import Store  # noqa: E402
 
-SERVICE_VERSION = "van-web-acquisition-worker/1.0.0"
+SERVICE_VERSION = "van-web-acquisition-worker/1.1.0"
 EVIDENCE_DIR = ROOT / "artifacts" / "runtime"
 
 
@@ -71,6 +71,9 @@ async def run(target_url: str) -> int:
     if str(health.get("scrapling") or "") != "0.4.15":
         print("FAIL Scrapling runtime is not pinned to 0.4.15")
         return 1
+    if str(health.get("crawlee") or "") != "1.10.2":
+        print("FAIL Crawlee runtime is not pinned to 1.10.2")
+        return 1
 
     frontier = AcquisitionFrontier(store)
     item = await frontier.enqueue(
@@ -104,6 +107,7 @@ async def run(target_url: str) -> int:
         detail={
             "service": observed_service,
             "scrapling": health.get("scrapling"),
+            "crawlee": health.get("crawlee"),
             "katana": health.get("katana"),
             "auth_surface": health.get("auth_surface"),
             "challenge_solver_enabled": health.get("challenge_solver_enabled"),
@@ -131,6 +135,8 @@ async def run(target_url: str) -> int:
         "certified_at_unix": int(time.time()),
         "runtime_version": observed_service,
         "scrapling_version": health.get("scrapling"),
+        "crawlee_version": health.get("crawlee"),
+        "crawlee_ready": bool(health.get("crawlee_ready")),
         "katana_version": health.get("katana"),
         "katana_ready": bool(health.get("katana_ready")),
         "auth_surface": False,
