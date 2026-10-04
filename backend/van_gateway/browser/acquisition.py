@@ -17,7 +17,7 @@ import time
 import uuid
 from enum import Enum
 from typing import Any
-from urllib.parse import SplitResult, urlsplit, urlunsplit
+from urllib.parse import SplitResult, parse_qsl, urlsplit, urlunsplit
 
 from pydantic import BaseModel, Field
 
@@ -186,6 +186,11 @@ class AcquisitionTelemetry(BaseModel):
 
 
 ACQUISITION_EVIDENCE_GENESIS = "0" * 64
+SENSITIVE_URL_QUERY_KEYS = {
+    "access_token", "api_key", "apikey", "authorization", "auth",
+    "credential", "password", "passwd", "session", "sessionid",
+    "signature", "sig", "token", "x-amz-credential", "x-amz-signature",
+}
 
 
 def _is_sha256_ref(value: str) -> bool:
@@ -392,6 +397,11 @@ def canonicalize_url(url: str) -> tuple[str, str]:
     parts = urlsplit(url.strip())
     if parts.scheme.lower() not in {"http", "https"} or not parts.hostname:
         raise ValueError("web_acquisition_requires_http_url")
+    if parts.username is not None or parts.password is not None:
+        raise ValueError("web_acquisition_url_userinfo_forbidden")
+    for key, _value in parse_qsl(parts.query, keep_blank_values=True):
+        if key.strip().lower() in SENSITIVE_URL_QUERY_KEYS:
+            raise ValueError("web_acquisition_sensitive_query_forbidden")
 
     scheme = parts.scheme.lower()
     host = parts.hostname.lower()
