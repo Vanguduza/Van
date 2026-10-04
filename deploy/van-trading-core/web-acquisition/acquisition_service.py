@@ -8,6 +8,7 @@ plane; this worker has no credential API and no access to browser profile data.
 """
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import ipaddress
 import importlib.metadata
@@ -19,10 +20,11 @@ import subprocess
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import parse_qsl, urljoin, urlparse
 
-SERVICE_VERSION = "van-web-acquisition-worker/1.0.0"
+SERVICE_VERSION = "van-web-acquisition-worker/1.1.0"
 SCRAPLING_EXPECTED = os.getenv("VAN_SCRAPLING_VERSION", "0.4.15")
+CRAWLEE_EXPECTED = os.getenv("VAN_CRAWLEE_VERSION", "1.10.2")
 KATANA_EXPECTED = os.getenv("VAN_KATANA_VERSION", "1.4.0")
 BIND = os.getenv("VAN_WEB_ACQUISITION_BIND", "127.0.0.1")
 PORT = int(os.getenv("VAN_WEB_ACQUISITION_PORT", "9143"))
@@ -33,7 +35,16 @@ MAX_RESULT_TEXT = int(os.getenv("VAN_WEB_ACQUISITION_MAX_TEXT_BYTES", str(512 * 
 MAX_KATANA_ENDPOINTS = int(os.getenv("VAN_KATANA_MAX_ENDPOINTS", "2000"))
 MAX_KATANA_DEPTH = int(os.getenv("VAN_KATANA_MAX_DEPTH", "3"))
 MAX_KATANA_SECONDS = int(os.getenv("VAN_KATANA_MAX_SECONDS", "30"))
+MAX_CRAWLEE_PAGES = int(os.getenv("VAN_CRAWLEE_MAX_PAGES", "1000"))
+MAX_CRAWLEE_DEPTH = int(os.getenv("VAN_CRAWLEE_MAX_DEPTH", "6"))
+MAX_CRAWLEE_CONCURRENCY = int(os.getenv("VAN_CRAWLEE_MAX_CONCURRENCY", "12"))
+MAX_CRAWLEE_TASKS_PER_MINUTE = int(os.getenv("VAN_CRAWLEE_MAX_TASKS_PER_MINUTE", "240"))
 DOMAIN_RE = re.compile(r"^[a-z0-9.-]{1,253}$")
+SENSITIVE_QUERY_KEYS = {
+    "access_token", "api_key", "apikey", "authorization", "auth",
+    "credential", "password", "passwd", "session", "sessionid",
+    "signature", "sig", "token", "x-amz-credential", "x-amz-signature",
+}
 
 if BIND not in {"127.0.0.1", "::1", "localhost"}:
     raise SystemExit("web acquisition worker refuses non-loopback bind")
@@ -117,6 +128,9 @@ def safe_url(value: Any, domain: str) -> str:
         raise WorkerError("URL_OUTSIDE_TARGET_DOMAIN", 403)
     if parsed.username or parsed.password:
         raise WorkerError("URL_USERINFO_FORBIDDEN", 422)
+    for key, _value in parse_qsl(parsed.query, keep_blank_values=True):
+        if key.strip().lower() in SENSITIVE_QUERY_KEYS:
+            raise WorkerError("SENSITIVE_QUERY_FORBIDDEN", 422)
     return url
 
 
@@ -132,6 +146,13 @@ def scrub_url(value: str) -> str:
 def _scrapling_version() -> str | None:
     try:
         return importlib.metadata.version("scrapling")
+    except importlib.metadata.PackageNotFoundError:
+        return None
+
+
+def _crawlee_version() -> str | None:
+    try:
+        return importlib.metadata.version("crawlee")
     except importlib.metadata.PackageNotFoundError:
         return None
 
@@ -153,12 +174,16 @@ def _katana_version() -> str | None:
 
 def health() -> dict[str, Any]:
     scrapling = _scrapling_version()
+    crawlee = _crawlee_version()
     katana = _katana_version()
     return {
-        "ok": scrapling == SCRAPLING_EXPECTED,
+        "ok": scrapling == SCRAPLING_EXPECTED and crawlee == CRAWLEE_EXPECTED,
         "service": SERVICE_VERSION,
         "scrapling": scrapling,
         "scrapling_expected": SCRAPLING_EXPECTED,
+        "crawlee": crawlee,
+        "crawlee_expected": CRAWLEE_EXPECTED,
+        "crawlee_ready": crawlee == CRAWLEE_EXPECTED,
         "katana": katana,
         "katana_expected": KATANA_EXPECTED,
         "katana_ready": katana == KATANA_EXPECTED,
@@ -230,6 +255,129 @@ def scrapling_browser(body: dict[str, Any], domain: str) -> dict[str, Any]:
     final_url = str(getattr(page, "url", url) or url)
     assert_scoped_final(final_url, domain)
     return _page_payload(page, url)
+
+
+async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, Any]:
+    """Bounded public multi-page crawl.
+
+    Crawlee supplies adaptive concurrency, request queue/deduplication, retry and
+    public-session rotation. VAN remains authoritative: this returns sanitized
+    page/discovery summaries for the gateway to persist into the VAN frontier.
+    """
+    seed = safe_url(body.get("url"), domain)
+    assert_public_resolution(seed)
+    max_pages = max(1, min(int(body.get("max_pages", 100)), MAX_CRAWLEE_PAGES))
+    max_depth = max(0, min(int(body.get("max_depth", 3)), MAX_CRAWLEE_DEPTH))
+    max_concurrency = max(
+        1, min(int(body.get("max_concurrency", 6)), MAX_CRAWLEE_CONCURRENCY)
+    )
+    max_tasks_per_minute = max(
+        1,
+        min(
+            int(body.get("max_tasks_per_minute", 120)),
+            MAX_CRAWLEE_TASKS_PER_MINUTE,
+        ),
+    )
+
+    try:
+        from crawlee import ConcurrencySettings
+        from crawlee.crawlers import BeautifulSoupCrawler, BeautifulSoupCrawlingContext
+    except Exception as exc:
+        raise WorkerError("CRAWLEE_RUNTIME_UNAVAILABLE", 503) from exc
+
+    pages: list[dict[str, Any]] = []
+    discovered: set[str] = set()
+    rejected = 0
+
+    crawler = BeautifulSoupCrawler(
+        max_requests_per_crawl=max_pages,
+        max_crawl_depth=max_depth,
+        max_request_retries=2,
+        use_session_pool=True,
+        retry_on_blocked=False,
+        concurrency_settings=ConcurrencySettings(
+            min_concurrency=1,
+            max_concurrency=max_concurrency,
+            max_tasks_per_minute=max_tasks_per_minute,
+        ),
+        respect_robots_txt_file=bool(body.get("respect_robots_txt", True)),
+    )
+
+    @crawler.router.default_handler
+    async def request_handler(context: BeautifulSoupCrawlingContext) -> None:
+        nonlocal rejected
+        requested_url = safe_url(str(context.request.url), domain)
+        assert_public_resolution(requested_url)
+        loaded_url = str(getattr(context.request, "loaded_url", None) or requested_url)
+        assert_scoped_final(loaded_url, domain)
+
+        html = str(context.soup)
+        raw = html.encode("utf-8", errors="replace")
+        pages.append(
+            {
+                "url": scrub_url(loaded_url),
+                "title": (
+                    str(context.soup.title.string)[:512]
+                    if context.soup.title and context.soup.title.string
+                    else None
+                ),
+                "content_digest": "sha256:" + hashlib.sha256(raw).hexdigest(),
+                "byte_size": len(raw),
+            }
+        )
+
+        candidates: list[str] = []
+        for link in context.soup.find_all("a", href=True)[:5000]:
+            href = str(link.get("href") or "").strip()
+            if not href:
+                continue
+            candidate = urljoin(loaded_url, href)
+            try:
+                safe_url(candidate, domain)
+                assert_public_resolution(candidate)
+            except WorkerError:
+                rejected += 1
+                continue
+            discovered.add(candidate)
+            candidates.append(candidate)
+
+        if candidates:
+            await context.add_requests(
+                candidates,
+                strategy="same-domain",
+                limit=max(0, max_pages - len(pages)),
+            )
+
+    try:
+        await crawler.run([seed])
+    except WorkerError:
+        raise
+    except Exception as exc:
+        raise WorkerError("CRAWLEE_CRAWL_FAILED", 502) from exc
+
+    summary = {
+        "seed": scrub_url(seed),
+        "pages": pages[:max_pages],
+        "discovered_urls": sorted(discovered)[: max_pages * 20],
+        "visited_count": len(pages),
+        "discovered_count": len(discovered),
+        "rejected_count": rejected,
+        "max_pages": max_pages,
+        "max_depth": max_depth,
+        "max_concurrency": max_concurrency,
+        "max_tasks_per_minute": max_tasks_per_minute,
+        "crawlee_version": _crawlee_version(),
+    }
+    encoded = json.dumps(summary, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    summary["content_digest"] = "sha256:" + hashlib.sha256(encoded).hexdigest()
+    summary["byte_size"] = sum(int(page["byte_size"]) for page in pages)
+    summary["contains_secrets"] = False
+    summary["ok"] = True
+    return summary
+
+
+def crawlee_crawl(body: dict[str, Any], domain: str) -> dict[str, Any]:
+    return asyncio.run(_crawlee_crawl_async(body, domain))
 
 
 def _collect_urls(value: Any, out: set[str]) -> None:
@@ -350,6 +498,8 @@ class Handler(BaseHTTPRequestHandler):
                 result = scrapling_browser(payload, domain)
             elif self.path == "/recon/katana":
                 result = katana_recon(payload, domain)
+            elif self.path == "/crawl/crawlee":
+                result = crawlee_crawl(payload, domain)
             else:
                 raise WorkerError("OPERATION_NOT_ALLOWED", 404)
             self.send_json(200, result)
