@@ -29,6 +29,7 @@ class AcquisitionRoute(str, Enum):
     DIRECT_HTTP = "DIRECT_HTTP"
     SCRAPLING_HTTP = "SCRAPLING_HTTP"
     KATANA_RECON = "KATANA_RECON"
+    CRAWLEE_CRAWL = "CRAWLEE_CRAWL"
     SCRAPLING_BROWSER = "SCRAPLING_BROWSER"
     HARNESS = "HARNESS"
     STAGEHAND = "STAGEHAND"
@@ -77,6 +78,7 @@ class AcquisitionSignals(BaseModel):
     semantic_interaction_required: bool = False
     selector_drift: bool = False
     domain_skill_available: bool = False
+    bulk_crawl_required: bool = False
     jev_hint: AcquisitionRoute | None = None
 
 
@@ -440,6 +442,8 @@ class AcquisitionRouter:
             routes.add(AcquisitionRoute.KATANA_RECON)
         if signals.domain_skill_available and not signals.selector_drift:
             routes.add(AcquisitionRoute.HARNESS)
+        if signals.bulk_crawl_required:
+            routes.add(AcquisitionRoute.CRAWLEE_CRAWL)
         if signals.semantic_interaction_required:
             routes.add(AcquisitionRoute.STAGEHAND)
         if signals.browser_required or signals.javascript_required or signals.selector_drift:
@@ -462,6 +466,8 @@ class AcquisitionRouter:
             return RouteDecision(route=AcquisitionRoute.KATANA_RECON, reason="unknown_site_recon")
         if signals.domain_skill_available and not signals.selector_drift:
             return RouteDecision(route=AcquisitionRoute.HARNESS, reason="qualified_domain_skill")
+        if signals.bulk_crawl_required:
+            return RouteDecision(route=AcquisitionRoute.CRAWLEE_CRAWL, reason="bulk_crawl_orchestration")
         if signals.semantic_interaction_required:
             return RouteDecision(route=AcquisitionRoute.STAGEHAND, reason="semantic_ui_required")
         if signals.browser_required or signals.javascript_required or signals.selector_drift:
