@@ -92,6 +92,7 @@ class HttpAcquisitionRuntimeAdapter:
                 "CRAWLEE_BUSY",
                 "CRAWLEE_TIMEOUT",
                 "CRAWLEE_CRAWL_FAILED",
+                "CRAWLEE_NO_PAGES",
                 "CRAWLEE_RUNTIME_UNAVAILABLE",
                 "SCRAPLING_HTTP_FAILED",
                 "SCRAPLING_BROWSER_FAILED",
