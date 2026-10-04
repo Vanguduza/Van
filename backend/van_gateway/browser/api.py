@@ -1092,7 +1092,7 @@ class BrowserApi:
                         latency_ms=elapsed,
                     )
                     failure_class = (
-                        AcquisitionFailure.RATE_LIMIT
+                        AcquisitionFailure.CAPACITY
                         if exc.code == "CRAWLEE_BUSY"
                         else AcquisitionFailure.RUNTIME
                     )
