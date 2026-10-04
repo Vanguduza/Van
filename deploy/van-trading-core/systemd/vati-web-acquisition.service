@@ -19,7 +19,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/run/van-acquisition /var/log/van-trading/acquisition
+ReadWritePaths=/run/van-acquisition /var/log/van-trading/acquisition /var/lib/van-acquisition
 ReadOnlyPaths=/opt/van-web-acquisition /opt/van-trading/config/web-acquisition.env
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 # Defense in depth: public acquisition cannot reach estate/private/metadata ranges.
