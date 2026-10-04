@@ -286,6 +286,14 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
             MAX_CRAWLEE_TASKS_PER_MINUTE,
         ),
     )
+    crawl_timeout = max(
+        30,
+        min(
+            int(body.get("timeout_seconds", 300)),
+            MAX_CRAWLEE_SECONDS,
+            1800,
+        ),
+    )
 
     try:
         from crawlee import ConcurrencySettings
@@ -364,7 +372,7 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
     try:
         await asyncio.wait_for(
             crawler.run([seed]),
-            timeout=max(30, min(MAX_CRAWLEE_SECONDS, 3600)),
+            timeout=crawl_timeout,
         )
     except TimeoutError as exc:
         raise WorkerError("CRAWLEE_TIMEOUT", 504) from exc
@@ -384,6 +392,7 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
         "max_depth": max_depth,
         "max_concurrency": max_concurrency,
         "max_tasks_per_minute": max_tasks_per_minute,
+        "timeout_seconds": crawl_timeout,
         "crawlee_version": _crawlee_version(),
     }
     encoded = json.dumps(summary, sort_keys=True, separators=(",", ":")).encode("utf-8")
