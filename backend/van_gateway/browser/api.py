@@ -778,10 +778,21 @@ class BrowserApi:
             )
             acquisition_counts = await self.acquisition.stats()
             acquisition_runtime = await self.acquisition_runtime.status()
+            crawlee_evidence = await self.acquisition_runtime.registry.get_evidence(
+                "web_acquisition_crawlee"
+            )
             return {
                 "enabled": self.settings.browser_enabled,
                 "acquisition_by_state": acquisition_counts,
                 "acquisition_runtime": acquisition_runtime.model_dump(mode="json"),
+                "crawlee_live_qualified": (
+                    crawlee_evidence is not None
+                    and crawlee_evidence.runtime_version == "1.10.2"
+                    and not crawlee_evidence.contains_secrets
+                ),
+                "crawlee_evidence_pointer": (
+                    crawlee_evidence.evidence_pointer if crawlee_evidence else None
+                ),
                 "worker_configured": self.worker is not None,
                 "tasks_by_status": counts,
                 "waiting_for_owner": int(waiting["count"]) if waiting else 0,
