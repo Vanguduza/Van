@@ -282,6 +282,7 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
     try:
         from crawlee import ConcurrencySettings
         from crawlee.crawlers import BeautifulSoupCrawler, BeautifulSoupCrawlingContext
+        from crawlee.http_clients import ImpitHttpClient
     except Exception as exc:
         raise WorkerError("CRAWLEE_RUNTIME_UNAVAILABLE", 503) from exc
 
@@ -290,6 +291,7 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
     rejected = 0
 
     crawler = BeautifulSoupCrawler(
+        http_client=ImpitHttpClient(follow_redirects=False),
         max_requests_per_crawl=max_pages,
         max_crawl_depth=max_depth,
         max_request_retries=2,
