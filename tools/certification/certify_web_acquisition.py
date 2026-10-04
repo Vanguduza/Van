@@ -37,11 +37,16 @@ SERVICE_VERSION = "van-web-acquisition-worker/1.1.0"
 EVIDENCE_DIR = ROOT / "artifacts" / "runtime"
 
 
-async def run(target_url: str) -> int:
+async def run(target_url: str, crawl_url: str | None = None) -> int:
     parsed = urlparse(target_url)
     if parsed.scheme not in {"http", "https"} or not parsed.hostname:
         print("FAIL: --url must be an http(s) public canary URL")
         return 2
+    if crawl_url is not None:
+        crawl_parsed = urlparse(crawl_url)
+        if crawl_parsed.scheme not in {"http", "https"} or not crawl_parsed.hostname:
+            print("FAIL: --crawl-url must be an http(s) public canary URL")
+            return 2
 
     settings = get_settings()
     if not settings.browser_enabled:
@@ -118,6 +123,83 @@ async def run(target_url: str) -> int:
         print(f"FAIL acquisition evidence chain: {chain}")
         return 1
 
+    crawl_receipt = None
+    if crawl_url is not None:
+        crawl_item = await frontier.enqueue(
+            crawl_url,
+            profile_alias="public_research",
+            source="LIVE_CRAWLEE_CERTIFICATION",
+            priority=100,
+            max_attempts=1,
+        )
+        try:
+            crawl = await adapter.crawl(
+                crawl_item,
+                max_pages=10,
+                max_depth=2,
+                max_concurrency=2,
+                max_tasks_per_minute=30,
+                timeout_seconds=90,
+                respect_robots_txt=True,
+            )
+        except AcquisitionRuntimeError as exc:
+            print(f"FAIL Crawlee canary: {exc}")
+            return 1
+        if crawl.get("contains_secrets") is not False:
+            print("FAIL Crawlee canary violated the secret boundary")
+            return 1
+        if str(crawl.get("crawlee_version") or "") != "1.10.2":
+            print("FAIL Crawlee canary version mismatch")
+            return 1
+        if int(crawl.get("visited_count") or 0) < 1:
+            print("FAIL Crawlee canary visited no pages")
+            return 1
+        if int(crawl.get("max_pages") or 0) != 10:
+            print("FAIL Crawlee canary page bound mismatch")
+            return 1
+        if int(crawl.get("max_depth") or -1) != 2:
+            print("FAIL Crawlee canary depth bound mismatch")
+            return 1
+        if int(crawl.get("max_concurrency") or 0) != 2:
+            print("FAIL Crawlee canary concurrency bound mismatch")
+            return 1
+        if int(crawl.get("max_tasks_per_minute") or 0) != 30:
+            print("FAIL Crawlee canary rate bound mismatch")
+            return 1
+        crawl_digest = str(crawl.get("content_digest") or "")
+        if not crawl_digest.startswith("sha256:"):
+            print("FAIL Crawlee canary returned no content digest")
+            return 1
+        crawl_evidence = await ledger.record(
+            item_id=crawl_item.item_id,
+            kind="WEB_ACQUISITION_CRAWLEE_CERTIFICATION",
+            content_digest=crawl_digest,
+            source_url=crawl_url,
+            route=None,
+            byte_size=int(crawl.get("byte_size") or 0),
+            detail={
+                "crawlee_version": crawl.get("crawlee_version"),
+                "visited_count": crawl.get("visited_count"),
+                "discovered_count": crawl.get("discovered_count"),
+                "max_pages": crawl.get("max_pages"),
+                "max_depth": crawl.get("max_depth"),
+                "max_concurrency": crawl.get("max_concurrency"),
+                "max_tasks_per_minute": crawl.get("max_tasks_per_minute"),
+                "timeout_seconds": crawl.get("timeout_seconds"),
+            },
+        )
+        chain = await ledger.verify_chain()
+        if chain.get("ok") is not True:
+            print(f"FAIL Crawlee evidence chain: {chain}")
+            return 1
+        crawl_receipt = {
+            "url_digest": crawl_item.url_digest,
+            "visited_count": int(crawl.get("visited_count") or 0),
+            "discovered_count": int(crawl.get("discovered_count") or 0),
+            "evidence_pointer": f"web-acquisition-evidence://{crawl_evidence.evidence_id}",
+            "content_digest": crawl_digest,
+        }
+
     pointer = f"web-acquisition-evidence://{evidence.evidence_id}"
     await registry.record_evidence(
         ReadinessEvidence(
@@ -137,6 +219,7 @@ async def run(target_url: str) -> int:
         "scrapling_version": health.get("scrapling"),
         "crawlee_version": health.get("crawlee"),
         "crawlee_ready": bool(health.get("crawlee_ready")),
+        "crawlee_canary": crawl_receipt,
         "katana_version": health.get("katana"),
         "katana_ready": bool(health.get("katana_ready")),
         "auth_surface": False,
@@ -156,8 +239,13 @@ async def run(target_url: str) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", required=True)
+    parser.add_argument(
+        "--crawl-url",
+        default=None,
+        help="Optional public multi-page site used for a bounded Crawlee canary.",
+    )
     args = parser.parse_args()
-    return asyncio.run(run(args.url))
+    return asyncio.run(run(args.url, args.crawl_url))
 
 
 if __name__ == "__main__":
