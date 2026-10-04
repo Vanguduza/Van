@@ -83,6 +83,9 @@ def test_crawlee_is_bulk_public_orchestration_not_authority():
     assert "use_session_pool=True" in source
     assert "retry_on_blocked=False" in source
     assert "ImpitHttpClient(follow_redirects=False)" in source
+    assert "redirects_admitted" in source
+    assert "redirects_rejected" in source
+    assert 'str(header_name).lower() == "location"' in source
     assert "max_requests_per_crawl=max_pages" in source
     assert 'crawler.stop("VAN max_pages reached")' in source
     assert "max_crawl_depth=max_depth" in source
