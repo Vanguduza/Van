@@ -54,6 +54,12 @@ SENSITIVE_QUERY_KEYS = {
     "credential", "password", "passwd", "session", "sessionid",
     "signature", "sig", "token", "x-amz-credential", "x-amz-signature",
 }
+NON_HTML_CRAWL_EXTENSIONS = {
+    ".7z", ".avi", ".bmp", ".csv", ".doc", ".docx", ".epub", ".gif",
+    ".gz", ".ico", ".jpeg", ".jpg", ".json", ".m4a", ".mkv", ".mov",
+    ".mp3", ".mp4", ".pdf", ".png", ".rar", ".rss", ".svg", ".tar",
+    ".tgz", ".wav", ".webm", ".webp", ".xls", ".xlsx", ".xml", ".zip",
+}
 
 if BIND not in {"127.0.0.1", "::1", "localhost"}:
     raise SystemExit("web acquisition worker refuses non-loopback bind")
@@ -311,6 +317,7 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
     rejected = 0
     redirects_admitted = 0
     redirects_rejected = 0
+    discovered_only_count = 0
     resolved_hosts: set[str] = set()
 
     def assert_crawl_public(candidate: str) -> None:
@@ -350,7 +357,7 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
 
     @crawler.router.default_handler
     async def request_handler(context: BeautifulSoupCrawlingContext) -> None:
-        nonlocal rejected, redirects_admitted, redirects_rejected
+        nonlocal rejected, redirects_admitted, redirects_rejected, discovered_only_count
         if len(pages) >= max_pages:
             crawler.stop("VAN max_pages reached")
             return
@@ -417,6 +424,10 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
                 continue
             if len(discovered) < MAX_CRAWLEE_DISCOVERED_URLS:
                 discovered.add(candidate)
+                suffix = Path(urlparse(candidate).path).suffix.lower()
+                if suffix in NON_HTML_CRAWL_EXTENSIONS:
+                    discovered_only_count += 1
+                    continue
                 candidates.append(candidate)
 
         remaining = max_pages - len(pages)
@@ -471,6 +482,7 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
         "rejected_count": rejected,
         "redirects_admitted": redirects_admitted,
         "redirects_rejected": redirects_rejected,
+        "discovered_only_count": discovered_only_count,
         "resolved_host_count": len(resolved_hosts),
         "max_hosts": max(1, MAX_CRAWLEE_HOSTS),
         "max_pages": max_pages,
