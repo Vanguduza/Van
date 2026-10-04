@@ -248,6 +248,7 @@ async def test_domain_skill_quarantine_falls_back_to_previous_qualified_version(
         goal_class="catalog",
         route=AcquisitionRoute.HARNESS,
         artifact_ref="artifact://skill/v1",
+        golden_case_refs=["golden://catalog/v1"],
         now_ms=1000,
     )
     first = await registry.qualify(
@@ -258,6 +259,7 @@ async def test_domain_skill_quarantine_falls_back_to_previous_qualified_version(
         goal_class="catalog",
         route=AcquisitionRoute.HARNESS,
         artifact_ref="artifact://skill/v2",
+        golden_case_refs=["golden://catalog/v2"],
         now_ms=2000,
     )
     second = await registry.qualify(
@@ -269,5 +271,48 @@ async def test_domain_skill_quarantine_falls_back_to_previous_qualified_version(
     await registry.quarantine(
         second.skill_id, reason="site_fingerprint_changed", evidence_ref="evidence://drift", now_ms=3000
     )
+    fallback = await registry.hot(domain="example.com", goal_class="catalog")
+    assert fallback is not None and fallback.skill_id == first.skill_id
+
+
+async def test_skill_requires_replay_oracle_before_qualification(tmp_path):
+    import pytest
+    store = await make_store(tmp_path)
+    registry = DomainSkillRegistry(store)
+    skill = await registry.propose(
+        domain="example.com",
+        goal_class="catalog",
+        route=AcquisitionRoute.HARNESS,
+        artifact_ref="artifact://skill/no-oracle",
+        now_ms=1000,
+    )
+    with pytest.raises(ValueError, match="golden_case_or_success_assertion"):
+        await registry.qualify(
+            skill.skill_id, replay_passed=True, evidence_refs=["evidence://run"], now_ms=1100
+        )
+
+
+async def test_failed_canary_quarantines_and_falls_back(tmp_path):
+    store = await make_store(tmp_path)
+    registry = DomainSkillRegistry(store)
+    first = await registry.propose(
+        domain="example.com", goal_class="catalog", route=AcquisitionRoute.HARNESS,
+        artifact_ref="artifact://skill/v1", golden_case_refs=["golden://v1"], now_ms=1000,
+    )
+    await registry.qualify(
+        first.skill_id, replay_passed=True, evidence_refs=["evidence://v1"], now_ms=1100
+    )
+    second = await registry.propose(
+        domain="example.com", goal_class="catalog", route=AcquisitionRoute.HARNESS,
+        artifact_ref="artifact://skill/v2", golden_case_refs=["golden://v2"], now_ms=2000,
+    )
+    await registry.qualify(
+        second.skill_id, replay_passed=True, evidence_refs=["evidence://v2"], now_ms=2100
+    )
+    failed = await registry.record_canary(
+        second.skill_id, passed=False, evidence_ref="evidence://canary-fail",
+        observed_fingerprint="sha256:drift", now_ms=3000,
+    )
+    assert failed.state.value == "QUARANTINED"
     fallback = await registry.hot(domain="example.com", goal_class="catalog")
     assert fallback is not None and fallback.skill_id == first.skill_id
