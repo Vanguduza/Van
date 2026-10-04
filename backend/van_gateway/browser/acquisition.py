@@ -980,6 +980,83 @@ class AcquisitionFrontier:
         assert row is not None
         return self._row_to_item(row)
 
+    async def enqueue_many(
+        self,
+        urls: list[str],
+        *,
+        profile_alias: str = "public_research",
+        source: str = "DISCOVERY",
+        parent_item_id: str | None = None,
+        depth: int = 0,
+        priority: int = 50,
+        preferred_route: AcquisitionRoute | None = None,
+        max_attempts: int = 5,
+        metadata: dict[str, Any] | None = None,
+        expected_domain: str | None = None,
+        max_urls: int = 2000,
+        now_ms: int | None = None,
+    ) -> dict[str, int]:
+        """Batch discovered URLs into the VAN frontier in one transaction.
+
+        Crawlee may manage a temporary internal request queue while crawling, but
+        durable continuation belongs here. The batch is re-canonicalized and
+        scope-checked rather than trusting worker-returned URLs.
+        """
+        if not 0 <= priority <= 100:
+            raise ValueError("web_acquisition_priority_out_of_range")
+        if depth < 0:
+            raise ValueError("web_acquisition_depth_negative")
+        if not 1 <= max_attempts <= 20:
+            raise ValueError("web_acquisition_max_attempts_out_of_range")
+        limit = max(1, min(int(max_urls), 5000))
+        expected = expected_domain.lower().rstrip(".") if expected_domain else None
+        unique: dict[str, tuple[str, str]] = {}
+        rejected = 0
+        for raw in urls[:limit]:
+            try:
+                canonical_url, domain = canonicalize_url(str(raw))
+            except ValueError:
+                rejected += 1
+                continue
+            if expected and domain != expected and not domain.endswith("." + expected):
+                rejected += 1
+                continue
+            url_digest = digest({"url": canonical_url})
+            unique[url_digest] = (canonical_url, domain)
+
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        payload = json.dumps(metadata or {}, sort_keys=True, separators=(",", ":"))
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            for url_digest, (canonical_url, domain) in unique.items():
+                await db.execute(
+                    """
+                    INSERT INTO web_acquisition_items(
+                      item_id, canonical_url, url_digest, domain, profile_alias, source,
+                      parent_item_id, depth, priority, preferred_route, route, state,
+                      attempt_count, max_attempts, next_eligible_at_ms, lease_owner,
+                      lease_token, lease_expires_at_ms, checkpoint_ref, last_failure_class,
+                      last_error_code, metadata_json, created_at_ms, updated_at_ms, completed_at_ms
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, 'QUEUED',
+                              0, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, ?, ?, ?, NULL)
+                    ON CONFLICT(url_digest, profile_alias) DO UPDATE SET
+                      priority = MAX(web_acquisition_items.priority, excluded.priority),
+                      updated_at_ms = excluded.updated_at_ms
+                    """,
+                    (
+                        new_id("wacq"), canonical_url, url_digest, domain, profile_alias,
+                        source, parent_item_id, depth, priority,
+                        preferred_route.value if preferred_route else None,
+                        max_attempts, payload, now, now,
+                    ),
+                )
+            await db.commit()
+        return {
+            "received": min(len(urls), limit),
+            "unique_admitted": len(unique),
+            "rejected": rejected,
+        }
+
     async def _expire_leases(self, db: Any, now: int) -> None:
         await db.execute(
             """
