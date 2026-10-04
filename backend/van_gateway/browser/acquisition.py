@@ -453,6 +453,14 @@ class AcquisitionRouter:
     @classmethod
     def decide(cls, item: WebWorkItem, signals: AcquisitionSignals) -> RouteDecision:
         if item.preferred_route is not None:
+            if (
+                item.preferred_route is AcquisitionRoute.CRAWLEE_CRAWL
+                and item.profile_alias == "public_research"
+            ):
+                return RouteDecision(
+                    route=AcquisitionRoute.CRAWLEE_CRAWL,
+                    reason="owner_or_caller_bulk_crawl_preference",
+                )
             if item.preferred_route not in cls.admissible_routes(item, signals):
                 raise ValueError("web_acquisition_preferred_route_not_admissible")
             return RouteDecision(route=item.preferred_route, reason="owner_or_caller_preference")
