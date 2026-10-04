@@ -31,9 +31,12 @@ def test_acquisition_worker_is_loopback_read_only_and_has_no_auth_surface():
     assert "VAN_WEB_ACQUISITION_BIND=127.0.0.1" in env
 
 
-def test_runtime_dependency_is_exactly_pinned():
-    requirements = REQUIREMENTS.read_text(encoding="utf-8").strip()
-    assert requirements == "scrapling[rag]==0.4.15"
+def test_runtime_dependencies_are_exactly_pinned():
+    requirements = REQUIREMENTS.read_text(encoding="utf-8").splitlines()
+    assert requirements == [
+        "scrapling[rag]==0.4.15",
+        "crawlee[beautifulsoup,httpx]==1.10.2",
+    ]
 
 
 def test_katana_is_bounded_shallow_recon_not_authenticated_browser():
@@ -66,3 +69,22 @@ def test_url_boundary_rejects_cross_domain_and_userinfo(monkeypatch):
         module.safe_url("https://attacker.example.net/a", "example.com")
     with pytest.raises(module.WorkerError, match="USERINFO_FORBIDDEN"):
         module.safe_url("https://user:pass@example.com/a", "example.com")
+
+
+def test_crawlee_is_bulk_public_orchestration_not_authority():
+    source = _source()
+    env = RUNTIME_ENV.read_text(encoding="utf-8")
+    assert 'CRAWLEE_EXPECTED = os.getenv("VAN_CRAWLEE_VERSION", "1.10.2")' in source
+    assert '"/crawl/crawlee"' in source
+    assert "BeautifulSoupCrawler" in source
+    assert "ConcurrencySettings" in source
+    assert "use_session_pool=True" in source
+    assert "retry_on_blocked=False" in source
+    assert "ImpitHttpClient(follow_redirects=False)" in source
+    assert "max_requests_per_crawl=max_pages" in source
+    assert "max_crawl_depth=max_depth" in source
+    assert "max_tasks_per_minute=max_tasks_per_minute" in source
+    assert "VAN_CRAWLEE_MAX_PAGES=1000" in env
+    assert "VAN_CRAWLEE_MAX_DEPTH=6" in env
+    assert "VAN_CRAWLEE_MAX_CONCURRENCY=12" in env
+    assert "VAN_CRAWLEE_MAX_TASKS_PER_MINUTE=240" in env
