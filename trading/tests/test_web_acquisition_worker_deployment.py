@@ -93,6 +93,7 @@ def test_crawlee_is_bulk_public_orchestration_not_authority():
     assert "VAN_CRAWLEE_MAX_SECONDS=300" in env
     assert "VAN_CRAWLEE_MAX_JOBS=1" in env
     assert "VAN_CRAWLEE_MAX_DISCOVERED_URLS=2000" in env
+    assert "CRAWLEE_STORAGE_DIR=/var/lib/van-acquisition/storage" in env
     assert "CRAWLEE_JOB_SLOTS" in source
     assert "asyncio.wait_for" in source
     assert "request_handler_timeout=timedelta(seconds=30)" in source
@@ -107,6 +108,7 @@ def test_acquisition_service_is_least_privilege_and_resource_bounded():
     assert "ProtectSystem=strict" in unit
     assert "ProtectHome=true" in unit
     assert "MemoryMax=1024M" in unit
+    assert "/var/lib/van-acquisition" in unit
     assert "TasksMax=256" in unit
     assert "CPUWeight=10" in unit
     assert "IPAddressDeny=10.0.0.0/8" in unit
@@ -123,3 +125,6 @@ def test_bootstrap_verifies_exact_worker_dependency_versions():
     assert "crawlee_ready" in script
     assert "challenge_solver_enabled" in script
     assert "systemctl enable vati-web-acquisition.service" in script
+    assert "missing existing VAN config directory" in script
+    assert "/var/lib/van-acquisition/storage" in script
+    assert 'install -d -o root -g van-acquisition -m 0750 "$BASE" "$CONFIG_DIR"' not in script
