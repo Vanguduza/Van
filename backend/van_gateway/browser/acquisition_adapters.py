@@ -66,12 +66,18 @@ class HttpAcquisitionRuntimeAdapter:
             **extra,
         }
 
-    async def _call(self, path: str, payload: dict[str, Any]) -> dict[str, Any]:
+    async def _call(
+        self,
+        path: str,
+        payload: dict[str, Any],
+        *,
+        timeout_seconds: float | None = None,
+    ) -> dict[str, Any]:
         self._assert_usable()
         try:
             async with httpx.AsyncClient(
                 base_url=self.base_url,
-                timeout=self.timeout_seconds,
+                timeout=timeout_seconds or self.timeout_seconds,
                 transport=self.transport,
             ) as client:
                 response = await client.post(path, json=payload)
@@ -82,7 +88,21 @@ class HttpAcquisitionRuntimeAdapter:
                 detail = str(response.json().get("error") or response.status_code)
             except Exception:
                 detail = str(response.status_code)
-            raise AcquisitionRuntimeError("WEB_ACQUISITION_REQUEST_FAILED", detail)
+            typed = {
+                "CRAWLEE_BUSY",
+                "CRAWLEE_TIMEOUT",
+                "CRAWLEE_CRAWL_FAILED",
+                "CRAWLEE_RUNTIME_UNAVAILABLE",
+                "SCRAPLING_HTTP_FAILED",
+                "SCRAPLING_BROWSER_FAILED",
+                "KATANA_RUNTIME_UNAVAILABLE",
+                "KATANA_RECON_FAILED",
+                "NON_PUBLIC_DESTINATION_FORBIDDEN",
+                "CROSS_DOMAIN_REDIRECT_REQUIRES_RECON",
+                "SENSITIVE_QUERY_FORBIDDEN",
+            }
+            code = detail if detail in typed else "WEB_ACQUISITION_REQUEST_FAILED"
+            raise AcquisitionRuntimeError(code, detail)
         data = response.json()
         if not isinstance(data, dict):
             raise AcquisitionRuntimeError("WEB_ACQUISITION_RESPONSE_INVALID")
@@ -135,6 +155,7 @@ class HttpAcquisitionRuntimeAdapter:
         timeout_seconds: int = 300,
         respect_robots_txt: bool = True,
     ) -> dict[str, Any]:
+        bounded_timeout = max(30, min(int(timeout_seconds), 1800))
         return await self._call(
             "/crawl/crawlee",
             self._envelope(
@@ -143,9 +164,10 @@ class HttpAcquisitionRuntimeAdapter:
                 max_depth=max(0, min(int(max_depth), 6)),
                 max_concurrency=max(1, min(int(max_concurrency), 12)),
                 max_tasks_per_minute=max(1, min(int(max_tasks_per_minute), 240)),
-                timeout_seconds=max(30, min(int(timeout_seconds), 1800)),
+                timeout_seconds=bounded_timeout,
                 respect_robots_txt=bool(respect_robots_txt),
             ),
+            timeout_seconds=bounded_timeout + 15,
         )
 
     async def status(self) -> ExternalRuntimeStatus:
