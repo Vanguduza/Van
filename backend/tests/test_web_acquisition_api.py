@@ -144,6 +144,7 @@ async def test_domain_skill_api_falls_back_after_quarantine(tmp_path):
                 "goal_class": "catalog",
                 "route": "HARNESS",
                 "artifact_ref": "artifact://skill/v1",
+                "golden_case_refs": ["golden://catalog/v1"],
             },
         )
         first_skill = first.json()
@@ -162,6 +163,7 @@ async def test_domain_skill_api_falls_back_after_quarantine(tmp_path):
                 "goal_class": "catalog",
                 "route": "HARNESS",
                 "artifact_ref": "artifact://skill/v2",
+                "golden_case_refs": ["golden://catalog/v2"],
             },
         )
         second_skill = second.json()
