@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20261006-owner-derived-cognitive-fabric-complete-closure",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "f51c362d5cc7defb17b2b1290bb8e9b5a4d7e1319f85b90741ff3f8578fc6bba",
+  "owner_instruction_excerpt": "do it",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "chatgpt",
+    "request_id": "owner-20261006-cognitive-fabric-complete-closure",
+    "owner_attested": true,
+    "antecedent": "Owner instructed do it in response to the six-step closure plan: baseline recovery package, direct verification execution, substantive implementation gaps, 27 gates/11 scenarios, source provenance, reviewable canonical adoption and rollout artifacts."
+  },
+  "issued_at_utc": "2026-10-06T13:09:54.893170+00:00",
+  "base_sha": "a62cd1b01af623d001ec7770a35eb4b9f88d3e74",
+  "branch_scope": "codex/cognitive-fabric-r161-20261006",
+  "authorized_paths": [
+    "trading/vati/cognition/**",
+    "trading/vati/app/**",
+    "trading/tests/**",
+    "android/**",
+    "docs/project-state/cognitive-fabric/**"
+  ],
+  "change_classes": [
+    "technical_implementation",
+    "baseline_regression_repairs",
+    "direct_verification_execution",
+    "acceptance_evidence",
+    "source_provenance",
+    "reviewable_recovery_and_adoption_artifacts"
+  ],
+  "material_scope_expansion": false,
+  "reusable": true,
+  "revoked": false,
+  "limitations": [
+    "No fabrication of missing historical approvals or missing original source provenance",
+    "No self-adoption or legacy history boundary change",
+    "No protected merge, deployment, live trading, paid provider or billing mutation",
+    "Direct construction without Hermes follows the standing owner correction"
+  ],
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false
+}

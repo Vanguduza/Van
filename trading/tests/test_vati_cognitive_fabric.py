@@ -210,3 +210,97 @@ def test_expired_discovery_becomes_no_trade_learning_without_hindsight_revision(
     assert plane._rows('TradeLearningEpisode')[0]['ex_ante_validity_frozen'] is True
     plane.join_outcomes(now_ms=112)
     assert len(plane._rows('TradeLearningEpisode')) == 1
+
+
+@pytest.mark.parametrize('has_unchanged_bar', [False, True])
+def test_actual_account_poll_joins_learning_without_a_new_market_bar(tmp_path, has_unchanged_bar):
+    from types import SimpleNamespace
+    from unittest.mock import Mock
+    from test_account_lifecycle import _bar
+    from vati.app.account_service import AccountCoordinatorService
+    plane, ev, _ = setup_plane(deadline=110)
+    service = AccountCoordinatorService(SimpleNamespace(account_alias='test', heartbeat_path=str(tmp_path/'heartbeat')), clock=lambda:112)
+    service._ledger = plane.ledger
+    service.tri_analyst = plane
+    service.lifecycle = SimpleNamespace()
+    service.coordinator = SimpleNamespace(step=Mock(side_effect=AssertionError('idle learning must not allocate')),
+        pool=SimpleNamespace(admit=Mock(side_effect=AssertionError('idle learning must not mint candidates'))))
+    service._observe_owner_halt = lambda now:None
+    service._sync_owner_ticket_buys = lambda now:()
+    service._sync_owner_ticket_sells = lambda now:()
+    service.refresh_news = lambda now:{}
+    service._apply_news_event_risk = lambda now:{}
+    service._heartbeat = Mock()
+    service.specs = {'EURUSD':SimpleNamespace(timeframe='M1')}
+    service.bar_sources = {'EURUSD':lambda now:[_bar(100)] if has_unchanged_bar else []}
+    service.last_bar_end_ms = {'EURUSD':100}
+    assert service.step_once() is None
+    assert plane._rows('TradeLearningEpisode')[0]['outcome_state']=='EXPIRED_NO_TRADE'
+    assert plane._rows('TradeLearningEpisode')[0]['ex_ante_validity_frozen'] is True
+    assert service.step_once() is None
+    assert len(plane._rows('TradeLearningEpisode'))==1
+    assert service.coordinator.step.call_count==0
+
+
+def test_actual_review_and_learning_artifacts_join_without_hindsight_changes():
+    from types import SimpleNamespace
+    from decimal import Decimal
+    from vati.core.events import make_event, EventKind
+    from vati.execution.review import review_trade
+    from vati.core.canonical import canonical_hash
+    from test_account_coordinator import cand
+    plane, _, _ = setup_plane()
+    ev = plane.evidence(symbol='XAUUSD',state={'market_data_hash':canonical_hash([])},source_refs=['market:canonical'],now_ms=102,deadline_ms=1000)
+    plane.packet(packet(ev), now_ms=104);plane.packet(second(ev), now_ms=104)
+    request=plane.admission(candidate_id='signal',evidence_epoch=ev['evidence_epoch'],now_ms=105)
+    candidate = cand('actual-candidate','XAUUSD',gen=106)
+    evaluator = SimpleNamespace(evaluate=lambda bars,now_ms:[candidate])
+    plane.evaluate_pending(evaluators={'XAUUSD':evaluator},bars_by_symbol={'XAUUSD':[]},now_ms=106)
+    frozen=deepcopy(plane._rows('TradeLearningEpisode')[0])
+    plane.bind_intent(candidate,SimpleNamespace(trade_intent_id='actual-intent'),108)
+    review=review_trade(trade_intent_id='actual-intent',strategy_id='actual-strategy',entry=Decimal('100'),exit_price=Decimal('95'),stop=Decimal('90'),direction_long=True,pnl=Decimal('-5'),thesis_correct=True,process_ok=True)
+    plane.ledger.append(make_event(EventKind.TRADE_REVIEW,'vati-trade-review',{'outcome':review.outcome.value,'process_ok':review.process_ok},event_time_ms=109,received_time_ms=109,correlation_id='actual-intent'))
+    learning=make_event(EventKind.TRADE_EXPERIENCE_ARTIFACT,'vati-learning',{'artifact_hash':'measured-learning'},event_time_ms=110,received_time_ms=110,correlation_id='actual-intent')
+    plane.ledger.append(learning)
+    plane.join_outcomes(now_ms=111)
+    outcome=plane._rows('TradeLearningOutcome')[-1]
+    assert outcome['process_outcome_class']=='GOOD_LOSS'
+    assert outcome['learning_artifact_refs']==[learning.hash]
+    assert outcome['routing_weight_allowed'] is False and outcome['risk_multiplier_allowed'] is False
+    assert plane._rows('TradeLearningEpisode')[0]==frozen
+    plane.join_outcomes(now_ms=112)
+    assert len(plane._rows('TradeLearningOutcome'))==1
+
+
+def test_expired_admission_learning_is_frozen_once_before_later_evaluation():
+    plane, ev, _=setup_plane(deadline=110)
+    plane.packet(packet(ev),now_ms=104);plane.packet(second(ev),now_ms=104)
+    request=plane.admission(candidate_id='signal',evidence_epoch=ev['evidence_epoch'],now_ms=105)
+    plane.join_outcomes(now_ms=111)
+    frozen=deepcopy(plane._rows('TradeLearningEpisode')[0])
+    assert frozen['admission_id']==request['admission_id']
+    assert frozen['consolidation']==request['consolidated_assessment_hash']
+    result=plane.evaluate_pending(evaluators={},bars_by_symbol={},now_ms=112)
+    assert result[0]['vati_candidate_ids']==[]
+    assert plane._rows('TradeLearningEpisode')==[frozen]
+
+
+@pytest.mark.parametrize('field,value', [
+    ('directional_thesis', {'unsupported':'object'}), ('directional_thesis',['BUY']),
+    ('directional_thesis','x'*4001), ('uncertainty',{}), ('regime_assessment',{}),
+    ('model_or_agent_id',{}), ('analysis_lineage_id',[]), ('packet_id',1),
+    ('candidate_id',' '), ('provider_product',[]), ('evidence_epoch',{}),
+    ('supporting_evidence',[{}]), ('contradicting_evidence','wrong'),
+    ('missing_inputs',['x']*31), ('invalidation_conditions',[1]),
+    ('prior_lane_outputs_seen',''), ('generated_at_ms',True), ('expires_at_ms',1000.0),
+])
+def test_native_packet_structural_types_are_rejected_before_any_persist(field,value):
+    plane,ev,_=setup_plane();body=packet(ev);body[field]=value
+    before=plane.ledger.head(),plane.ledger.count()
+    with pytest.raises(FabricError,match='PACKET_'):
+        plane.packet(body,now_ms=104)
+    assert (plane.ledger.head(),plane.ledger.count())==before
+    assert plane._rows('TradeAnalysisPacket')==[]
+    assert plane._rows('CognitiveAdmissionEnvelope')==[]
+    plane.packet(packet(ev),now_ms=104);plane.packet(second(ev),now_ms=104)
+    assert plane.admission(candidate_id='signal',evidence_epoch=ev['evidence_epoch'],now_ms=105)['independence_gate_passed']

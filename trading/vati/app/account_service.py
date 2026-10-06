@@ -126,6 +126,9 @@ class AccountCoordinatorService:
         # heartbeat can always state the invoker's actual state, including
         # on a service that has not finished building.
         self.tri_analyst = None
+        self._packet_worker_stop = None
+        self._packet_worker = None
+        self._packet_worker_state = 'DISABLED'
         self.cognition_config = CognitionConfig()
         self.event_research: Optional[EventResearchRuntime] = None
         self.news = None
@@ -1008,6 +1011,7 @@ class AccountCoordinatorService:
         payload = {
             "account_alias": self.cfg.account_alias, "symbols": sorted(self.specs),
             "status": status, "cycles": self.cycles,
+            "cognitive_packet_worker": {"state":self._packet_worker_state, "authority":"ADVISORY_CANDIDATE", "live_qualification_claimed":False},
             "lease_epoch": self.lease.epoch if self.lease else None,
             "kill_switch": sorted(t.value for t in self.kill.active),
             "mtf_shadow": {
@@ -1141,6 +1145,8 @@ class AccountCoordinatorService:
                 advanced_bars[symbol] = bars
 
         if not observed_bars:
+            if self.tri_analyst is not None:
+                self.tri_analyst.join_outcomes(now_ms=now)
             self._heartbeat("NO_DATA")
             return None
         cognitive_results = []
@@ -1153,6 +1159,8 @@ class AccountCoordinatorService:
                 self._heartbeat("COGNITIVE_ADMISSION_REFUSED", {"reason": str(exc)[:200]})
         cognitive_candidates = any(r.get('vati_candidate_ids') for r in cognitive_results)
         if not advanced_bars and not cognitive_candidates:
+            if self.tri_analyst is not None:
+                self.tri_analyst.join_outcomes(now_ms=now)
             self._heartbeat("WAITING_FOR_BAR")
             return None
 
@@ -1229,6 +1237,48 @@ class AccountCoordinatorService:
             "cognition_invoker": self.cognition_config.invoker,
         })
         return result
+    def _start_packet_worker(self):
+        sources = getattr(self.cfg, 'cognitive_fabric', {}).get('packet_sources', [])
+        if not sources or not any(s.get('enabled') is True for s in sources):
+            return
+        import threading
+        from vati.cognition.packet_producer import PacketProducer
+        from vati.cognition.fabric import TriAnalystPlane
+        # Validate configuration without performing network calls or changing qualification.
+        PacketProducer(self.tri_analyst, sources=sources, clock=self.clock)
+        stop = threading.Event()
+        self._packet_worker_stop = stop
+        def produce():
+            ledger = None
+            try:
+                ledger = open_ledger(self.cfg.ledger)
+                self._packet_worker_state = 'RUNNING_ADVISORY'
+                plane = TriAnalystPlane(ledger, account_alias=self.cfg.account_alias)
+                producer = PacketProducer(plane, sources=sources, clock=self.clock,
+                    secrets_dir=getattr(self.cfg, 'secrets_dir', ''), should_stop=stop.is_set)
+                while not stop.is_set():
+                    try:
+                        producer.poll()
+                        self._packet_worker_state = 'RUNNING_ADVISORY'
+                    except Exception:
+                        self._packet_worker_state = 'DEGRADED'
+                        # Isolated advisory lane faults never trip/widen account risk state.
+                        ledger.append(make_event(EventKind.COGNITIVE_FABRIC, 'vati-packet-worker',
+                            {'record_type':'PacketWorkerFault', 'account_alias':self.cfg.account_alias,
+                             'state':'DEGRADED', 'reason':'PACKET_WORKER_FAULT'},
+                            event_time_ms=self.clock(), received_time_ms=self.clock()))
+                    stop.wait(max(0.1, self.cfg.poll_seconds))
+            except Exception:
+                self._packet_worker_state = 'DEGRADED'
+            finally:
+                if ledger is not None:
+                    ledger.close()
+                if stop.is_set():
+                    self._packet_worker_state = 'STOPPED'
+        self._packet_worker_state = 'CONFIGURED_NOT_STARTED'
+        self._packet_worker = threading.Thread(target=produce, name='vati-advisory-packets', daemon=True)
+        self._packet_worker.start()
+
     def run_forever(self) -> int:
         def stop(*_args):
             self.stop_requested = True
@@ -1236,6 +1286,7 @@ class AccountCoordinatorService:
         signal.signal(signal.SIGINT, stop)
         self.start()
         try:
+            self._start_packet_worker()
             while not self.stop_requested:
                 try:
                     self.step_once()
@@ -1251,6 +1302,10 @@ class AccountCoordinatorService:
                     self._heartbeat("FAULT", {"error": str(exc)[:200]})
                 time.sleep(self.cfg.poll_seconds)
         finally:
+            if self._packet_worker_stop is not None:
+                self._packet_worker_stop.set()
+            if self._packet_worker is not None:
+                self._packet_worker.join(timeout=16)
             if self.lease is not None:
                 self.lease.release(now_ms=self.clock())
             if self._lease_store is not None:

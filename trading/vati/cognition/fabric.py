@@ -162,11 +162,28 @@ class TriAnalystPlane:
             'technical_structure', 'macro_view', 'event_risk', 'liquidity_view', 'execution_quality',
             'cross_asset_view', 'timing_quality', 'setup_quality', 'thesis_health', 'add_on_quality',
             'exit_quality', 'invalidation_conditions', 'confidence'}
-        if not required <= set(body) or set(body) - required - optional:
+        if not isinstance(body, dict) or not required <= set(body) or set(body) - required - optional:
             raise FabricError('PACKET_SCHEMA')
         if 'confidence' in body and (isinstance(body['confidence'], bool) or not isinstance(body['confidence'], (int, float)) or not 0 <= body['confidence'] <= 1):
             raise FabricError('CONFIDENCE_DISPLAY_RANGE')
         deny_authority(body)
+        # Validate provider data before lookup, clock comparisons, sealing or persistence.
+        # In particular consolidation hashes/compares theses; objects must never enter it.
+        identities = {'packet_id','candidate_id','analyst_lane','analysis_lineage_id',
+            'independence_class','provider_product','model_or_agent_id','evidence_epoch','evidence_hash'}
+        if any(not isinstance(body[key], str) or not 1 <= len(body[key]) <= 200 or not body[key].strip() for key in identities):
+            raise FabricError('PACKET_IDENTITY_TYPES')
+        text = {'directional_thesis', 'uncertainty'} | (optional - {'confidence','invalidation_conditions'})
+        if any(not isinstance(body[key], str) or len(body[key]) > 4000 for key in text if key in body):
+            raise FabricError('PACKET_TEXT_TYPES')
+        lists = {'prior_lane_outputs_seen','supporting_evidence','contradicting_evidence','missing_inputs','invalidation_conditions'}
+        if any(not isinstance(body[key], list) or len(body[key]) > 30 or
+               any(not isinstance(item, str) or not 1 <= len(item) <= 2000 or not item.strip() for item in body[key])
+               for key in lists if key in body):
+            raise FabricError('PACKET_LIST_TYPES')
+        if any(type(body[key]) is not int or not 0 <= body[key] <= 9_000_000_000_000_000
+               for key in ('generated_at_ms','expires_at_ms')) or type(body['abstain']) is not bool:
+            raise FabricError('PACKET_SCALAR_TYPES')
         identity = IDENTITIES.get(body['provider_product'])
         if not identity or identity[:2] != (body['analyst_lane'], body['independence_class']):
             raise FabricError('PROVIDER_IDENTITY')
@@ -272,9 +289,15 @@ class TriAnalystPlane:
                 'disposition': 'DETERMINISTIC_CANDIDATE' if candidates else 'WATCH_RESEARCH',
                 'reason': 'ADMITTED_STRATEGY_MATCH' if candidates else 'NO_COMPATIBLE_ADMITTED_STRATEGY_OR_STALE',
                 'vati_candidate_ids': [c.candidate_id for c in candidates]}, now_ms)
+            if any(r.get('admission_id') == request['admission_id'] for r in self._rows('TradeLearningEpisode')):
+                completed.add(request['admission_id'])
+                results.append(result)
+                continue
             self._write('TradeLearningEpisode', {'episode_id': request['admission_id'],
                 'admission_id': request['admission_id'], 'candidate_id': signal['candidate_id'],
                 'evidence_epoch': request['evidence_epoch'], 'discovery_origin': signal['origin_lane'],
+                'consolidation': request['consolidated_assessment_hash'],
+                'ex_ante_evidence_hash': ev['content_hash'],
                 'analyst_packets': [r['content_hash'] for r in self._rows('TradeAnalysisPacket') if r['candidate_id'] == signal['candidate_id'] and r['evidence_epoch'] == request['evidence_epoch']],
                 'VATI_decision': result, 'ex_ante_validity_frozen': True,
                 'process_outcome_class': 'UNKNOWN', 'realized_outcome': None,
@@ -299,26 +322,35 @@ class TriAnalystPlane:
             candidate_ids = evaluation.get('vati_candidate_ids', [])
             intents = {bindings[c] for c in candidate_ids if c in bindings}
             selected = [e for e in rows if (e.kind == EventKind.ALLOCATION_DECISION and e.payload.get('candidate_id') in candidate_ids)
-                or (e.kind in (EventKind.RISK_DECISION, EventKind.EXECUTION_RECEIPT, EventKind.TRADE_REVIEW, EventKind.TCA_RECORD)
+                or (e.kind in (EventKind.RISK_DECISION, EventKind.EXECUTION_RECEIPT, EventKind.TRADE_REVIEW, EventKind.TCA_RECORD, EventKind.TRADE_EXPERIENCE_ARTIFACT)
                     and e.correlation_id in intents)]
             identity = canonical_hash([e.hash for e in selected])
             if not selected or previous.get(episode['episode_id']) == identity:
                 continue
             reviews = [e.payload for e in selected if e.kind == EventKind.TRADE_REVIEW]
             receipts = [e.hash for e in selected if e.kind == EventKind.EXECUTION_RECEIPT]
+            from vati.execution.review import Outcome
+            observed_classes = {r.get('outcome') for r in reviews}
+            process_class = next(iter(observed_classes)) if len(observed_classes) == 1 and observed_classes <= {v.value for v in Outcome} else 'UNKNOWN'
             self._write('TradeLearningOutcome', {'episode_id': episode['episode_id'],
                 'candidate_id': episode['candidate_id'], 'evidence_epoch': episode['evidence_epoch'],
                 'outcome_evidence_hash': identity, 'evidence_refs': [e.hash for e in selected],
                 'risk_decisions': [e.hash for e in selected if e.kind == EventKind.RISK_DECISION],
                 'execution_receipts': receipts, 'realized_outcomes': reviews,
                 'state': 'REVIEWED' if reviews else 'EXECUTED' if receipts else 'WAITED_OR_REJECTED',
-                'process_outcome_class': 'UNKNOWN', 'ex_ante_validity_frozen': True,
+                'process_outcome_class': process_class, 'ex_ante_validity_frozen': True,
+                'learning_artifact_refs': [e.hash for e in selected if e.kind == EventKind.TRADE_EXPERIENCE_ARTIFACT],
+                'tca_refs': [e.hash for e in selected if e.kind == EventKind.TCA_RECORD],
                 'routing_weight_allowed': False, 'risk_multiplier_allowed': False}, now_ms)
         episodes = {r['candidate_id'] for r in self._rows('TradeLearningEpisode')}
         for signal in self._rows('TradeDiscoverySignal'):
             if signal['candidate_id'] not in episodes and signal['expires_at_ms'] <= now_ms:
-                self._write('TradeLearningEpisode', {'episode_id': signal['content_hash'],
-                    'candidate_id': signal['candidate_id'], 'evidence_epoch': None,
+                admissions = [r for r in self._rows('CognitiveAdmissionEnvelope') if r['candidate_id'] == signal['candidate_id']]
+                request = admissions[-1] if admissions else None
+                self._write('TradeLearningEpisode', {'episode_id': request['admission_id'] if request else signal['content_hash'],
+                    'admission_id': request['admission_id'] if request else None,
+                    'candidate_id': signal['candidate_id'], 'evidence_epoch': request['evidence_epoch'] if request else None,
+                    'consolidation': request['consolidated_assessment_hash'] if request else None,
                     'discovery_origin': signal['origin_lane'], 'outcome_state': 'EXPIRED_NO_TRADE',
                     'ex_ante_validity_frozen': True, 'realized_outcome': None,
                     'process_outcome_class': 'UNKNOWN'}, now_ms)
