@@ -122,6 +122,7 @@ class AccountDecisionCoordinator:
         #: `mandate` and this resolves each candidate's own signed ceiling.
         risk_pct_fn: Optional[Callable[[CandidateOpportunity], Decimal]] = None,
         mandate=None,
+        candidate_intent_fn: Optional[Callable[[CandidateOpportunity, object, int], None]] = None,
     ) -> None:
         self.cfg = cfg
         self.evaluators = {e.symbol: e for e in evaluators}
@@ -136,6 +137,7 @@ class AccountDecisionCoordinator:
         self.mandate = mandate
         self.risk_pct_fn = risk_pct_fn or self._mandate_risk_pct
         self.snapshot_calls = 0
+        self.candidate_intent_fn = candidate_intent_fn
 
     def _mandate_risk_pct(self, candidate: CandidateOpportunity) -> Decimal:
         """A strategy's own owner-signed budget, or the mandate ceiling.
@@ -252,6 +254,9 @@ class AccountDecisionCoordinator:
                 correlation_multiplier=correlation,
                 now_ms=now_ms,
             )
+
+            if self.candidate_intent_fn is not None:
+                self.candidate_intent_fn(cand, intent, now_ms)
 
             if self.risk_fn is None:
                 self.pool.mark(cand.candidate_id, CandidateState.RISK_REJECTED,

@@ -211,7 +211,11 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             onOpenArtemis = { nav.navigate(VanRoute.WORK_ARTEMIS) },
                             onOpenActivity = { nav.navigate(VanRoute.WORK_ACTIVITY) },
                             onOpenDevelopment = { nav.navigate(VanRoute.devHomeRoute()) },
+                            onOpenCognitiveTwin = { nav.navigate(VanRoute.WORK_COGNITIVE_TWIN) },
                         )
+                    }
+                    composable(VanRoute.WORK_COGNITIVE_TWIN) {
+                        com.dial.van.cognitive.CognitiveTwinRoute(app, onBack = { nav.popBackStack() })
                     }
                     composable(VanRoute.WORK_ACTIVITY) {
                         WorkActivityRoute(app, onBack = { nav.popBackStack() })
@@ -256,6 +260,7 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             onOpenArtemis = { nav.navigate(VanRoute.WORK_ARTEMIS) },
                             onOpenActivity = { nav.navigate(VanRoute.WORK_ACTIVITY) },
                             onOpenDevelopment = { nav.navigate(VanRoute.devHomeRoute()) },
+                            onOpenCognitiveTwin = { nav.navigate(VanRoute.WORK_COGNITIVE_TWIN) },
                         )
                     }
                     composable(VanRoute.TRADING) {

@@ -40,6 +40,7 @@ from enum import Enum
 class ControlScope(str, Enum):
     """What a privileged credential is allowed to reach."""
 
+    COGNITIVE = "cognitive"  # candidate-only machine principal, explicitly provisioned
     RUNTIME = "runtime"
     AUTOMATION = "automation"
     BROWSER = "browser"
@@ -59,11 +60,12 @@ class ControlScope(str, Enum):
 
 
 #: What the legacy single token is granted when nothing finer is configured. Everything
-#: except device enrolment: an existing deployment keeps working, and the one scope that
-#: turns a control credential into owner authority has to be granted on purpose.
+#: except separately provisioned enrolment, observability and candidate-only cognitive
+#: credentials. Existing runtime grants remain unchanged; new external cognition must
+#: receive its own bounded principal explicitly.
 DEFAULT_SCOPES = frozenset(
     s for s in ControlScope
-    if s not in (ControlScope.DEVICE_ENROLMENT, ControlScope.OBSERVABILITY)
+    if s not in (ControlScope.DEVICE_ENROLMENT, ControlScope.OBSERVABILITY, ControlScope.COGNITIVE)
 )
 
 

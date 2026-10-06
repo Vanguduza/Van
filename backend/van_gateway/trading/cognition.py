@@ -95,6 +95,11 @@ def cognition_from_ledger(ledger) -> dict[str, Any]:
     # one place decides what this host claims about its cognition, and a stale
     # constant underneath it would be the defect all over again.
     built["authority"] = invoker_state_from_ledger(ledger)
+    from vati.cognition.fabric import TriAnalystPlane
+    aliases = sorted({e.payload.get("account_alias") for e in ledger.iter()
+                      if e.kind.value == "COGNITIVE_FABRIC" and e.payload.get("account_alias")})
+    built["cognitive_fabric"] = {"accounts": [TriAnalystPlane(ledger, account_alias=a).projection() for a in aliases],
+                                  "paid_meta": "DISABLED", "meta_t2": "QUALIFICATION_REQUIRED"}
     return {"ledger_available": True, **built}
 
 

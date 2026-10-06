@@ -1,0 +1,7 @@
+{
+  "source": "DDS candidate cognitive-twin.mjs",
+  "source_sha256": "21c5f11253815bd33bc9a9f1f8b09b93f0ea8f9e82b8a57cbabe6718d09b2583",
+  "generator": "actual compileTwin Node invocation in test_cognitive_twin.py",
+  "fixture_sha256": "02d500f8e9bcb477328dc43f30a4b7002fdae436a611941e5c75e03c666750e9",
+  "live_qualification": false
+}

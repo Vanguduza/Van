@@ -52,6 +52,7 @@ sourceSets {
         // which actions need owner approval — is held to the gateway's by
         // backend/tests/test_account_approval_contract.py instead.
         kotlin.include(
+            "com/dial/van/cognitive/CognitiveTwin.kt",
             "com/dial/van/status/**",
             "com/dial/van/mission/MissionModels.kt",
             // Gate 6 — the pure half of the visual runtime. These files have no Android and

@@ -144,6 +144,11 @@ class Settings(BaseSettings):
     # forwards typed owner commands; it never plans or executes DIAL work. The DIAL-scoped
     # bearer lives in a gateway-side token file and never reaches Android. Off by default:
     # an unconfigured deployment answers 404 on /v1/dial-dev/* rather than inventing state.
+    # Dedicated server-held VAN_PROJECTION credential. Never sent to Android.
+    cognitive_twin_enabled: bool = False
+    cognitive_twin_base_url: str = ""
+    cognitive_twin_token_file: str = ""
+    cognitive_twin_projects: str = "van"
     dial_dev_enabled: bool = False
     dial_dev_base_url: str = ""
     dial_dev_token_file: str = ""
