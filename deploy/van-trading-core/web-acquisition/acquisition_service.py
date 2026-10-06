@@ -348,6 +348,7 @@ async def _crawlee_crawl_async(body: dict[str, Any], domain: str) -> dict[str, A
         retry_on_blocked=False,
         concurrency_settings=ConcurrencySettings(
             min_concurrency=1,
+            desired_concurrency=1,
             max_concurrency=max_concurrency,
             max_tasks_per_minute=max_tasks_per_minute,
         ),
