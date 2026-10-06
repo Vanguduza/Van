@@ -1,0 +1,27 @@
+{
+  "candidate_before_fix": "d196bea0",
+  "old_remote_sha": "fba19760fd3d7f50471a85b765108053b31b1153",
+  "cause": "Candidate parser dropped legacy authority.model_hierarchy while native snapshot contract still uses it.",
+  "fix": "Read legacy key only when canonical supported_model_hierarchy key is absent; canonical empty list remains authoritative.",
+  "native_test_modified": false,
+  "checks": {
+    "before_fix": "2 regression tests,1 failed",
+    "after_fix": "2 regression tests passed",
+    "native_assertions": "Both unchanged CognitionSurfacesTest method bodies and fixture executed through JVM harness with JUnit import-only adaptation; passed. Temporary adapted file removed.",
+    "apk_build": "Not run locally; hosted native gate must rerun."
+  },
+  "files": [
+    {
+      "path": "android/app/src/main/java/com/dial/van/trading/TradingModels.kt",
+      "sha256": "fb8da94dd68f64950ef8f1898f278e146635d95dbda2aa829494c201ea5f4e5a"
+    },
+    {
+      "path": "android/verification/src/test/kotlin/com/dial/van/trading/CognitionHierarchyContractTest.kt",
+      "sha256": "35d44677ebaceeb113780dbbc1b53ba2746cc51e3e2d91189ae1452e186221b5"
+    },
+    {
+      "path": "android/app/src/test/java/com/dial/van/trading/CognitionSurfacesTest.kt",
+      "sha256": "893f7fbd5a15db90a244cee2ed0b2954c306e7f2b2fd9654b31b5d6bba5e0478"
+    }
+  ]
+}

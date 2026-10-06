@@ -348,7 +348,10 @@ data class CognitionSnapshot(
                 cognitionMode = authority.str("cognition_mode") ?: "UNKNOWN",
                 liveAdvisory = authority.str("live_advisory") ?: "UNKNOWN",
                 liveStatus = authority.str("live_status") ?: "UNKNOWN",
-                modelHierarchy = authority.strList("supported_model_hierarchy"),
+                // Canonical supported-model key takes precedence, including an explicit empty list.
+                // Older gateway snapshots use model_hierarchy and remain readable.
+                modelHierarchy = authority.strList(if (authority.containsKey("supported_model_hierarchy"))
+                    "supported_model_hierarchy" else "model_hierarchy"),
                 summary = summary,
                 models = models,
                 missions = missions,
