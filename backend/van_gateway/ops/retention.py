@@ -199,6 +199,32 @@ POLICIES: tuple[TablePolicy, ...] = (
             "browser_tasks row, so it must outlive that row. Triggers refuse its deletion."),
     _p("watch_runs", _TEL, "created_at_ms", note="Individual watch observations are operational history; triggered owner state lives in Attention."),
 
+    # ---- VAN web acquisition fabric (migrations 31-32) ---------------------
+    _p(
+        "web_acquisition_items",
+        _OWNER,
+        note="Durable frontier state can remain actionable for longer than a generic "
+             "retention horizon. Prune only with a future state-aware terminal-item "
+             "sweeper, never by age alone.",
+    ),
+    _p(
+        "web_domain_skills",
+        _OWNER,
+        note="Qualified learned skills remain active until superseded/quarantined/retired; "
+             "generic age pruning could remove the current executable skill.",
+    ),
+    _p("web_domain_controls", _DER, "updated_at_ms",
+       note="Rate/concurrency state is rebuildable from future observations."),
+    _p("web_acquisition_sessions", _TEL, "updated_at_ms",
+       note="Acquisition session-pool metadata is operational telemetry; no secrets live here."),
+    _p("web_acquisition_events", _EV, "occurred_at_ms"),
+    _p("web_acquisition_evidence", _EV, "created_at_ms",
+       note="Content-addressed custody/provenance records outlive the crawl that produced them."),
+    _p("web_domain_skill_canaries", _EV, "created_at_ms",
+       note="Qualification/drift evidence for learned domain skills."),
+    _p("web_acquisition_telemetry", _TEL, "recorded_at_ms"),
+
+
     # ---- Remote Browser Rev 1.5 (migration 27) ------------------------------
     #
     # The session is telemetry and the *binding* is owner state, which is the split that

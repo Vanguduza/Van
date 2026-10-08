@@ -213,6 +213,8 @@ class Settings(BaseSettings):
     computer_worker_deployment_id: str = "van"
     computer_worker_timeout_seconds: int = 60
     computer_worker_qualification_file: str = ""
+    browser_acquisition_base_url: str = "http://127.0.0.1:9143"
+    browser_acquisition_expected_version: str = ""
 
     # Hermes-governed ARTEMIS Android console. The raw UI remains on Netcup loopback;
     # VAN Gateway reaches only the authenticated private-overlay proxy. Android never

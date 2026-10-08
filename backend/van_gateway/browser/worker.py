@@ -359,6 +359,8 @@ class AdapterBackedWorker:
             return await self.adapter.page_info(task)
         if kind == "screenshot":
             return await self.adapter.screenshot(task)
+        if kind == "network_observe":
+            return await self.adapter.network_candidates(task)
         raise BrowserAdapterError("BROWSER_ACTION_UNSUPPORTED", kind)
 
     @staticmethod

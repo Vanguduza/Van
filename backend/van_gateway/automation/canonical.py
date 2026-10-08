@@ -35,6 +35,14 @@ _PREFIXES = {
     "repair": "wfrep",
     "deadletter": "wfdl",
     "generation": "wfgen",
+    # VAN web acquisition fabric — durable work/evidence namespace.
+    "wacq": "wacq",
+    "wacqsess": "wacqsess",
+    "wskill": "wskill",
+    "wcanary": "wcanary",
+    "wacqev": "wacqev",
+    "wacqdl": "wacqdl",
+    "wtelemetry": "wtelemetry",
 }
 
 

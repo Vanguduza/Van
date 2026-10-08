@@ -263,6 +263,7 @@ class BrowserHarnessAdapter(Protocol):
     async def tabs(self, task: BrowserTask) -> dict[str, Any]: ...
     async def describe(self, task: BrowserTask, locator: str) -> dict[str, Any]: ...
     async def describe_focus(self, task: BrowserTask) -> dict[str, Any]: ...
+    async def network_candidates(self, task: BrowserTask) -> dict[str, Any]: ...
 
 
 #: Harness refusal codes (409) that mean "the target is not the one VAN classified, or the
@@ -592,6 +593,8 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
         the ``describe`` shape and bound the same way, so a key press is classified against
         the element that will receive it."""
         return await self._call("/describe", self._envelope(task, focus=True))
+    async def network_candidates(self, task: BrowserTask) -> dict[str, Any]:
+        return await self._call("/network_candidates", self._envelope(task))
 
     async def status(self) -> ExternalRuntimeStatus:  # type: ignore[override]
         return await super().status("BROWSER_HARNESS_UNAVAILABLE")
