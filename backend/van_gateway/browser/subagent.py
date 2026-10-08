@@ -34,7 +34,112 @@ from pydantic import BaseModel, Field
 from van_gateway.automation.canonical import digest
 from van_gateway.automation.payments import PaymentBoundaryError, assert_not_automated_payment
 from van_gateway.browser.models import (
-    BrowserBoundaryType…860 tokens truncated…Assignment, history: list[SubagentStep]
+    BrowserBoundaryType,
+    AutonomyTier,
+    BrowserObservation,
+    BrowserTask,
+    InjectionAssessment,
+)
+from van_gateway.browser.policy import BrowserPolicyEngine, BrowserPolicyError
+from van_gateway.models import ActionClass
+
+_RANK = {ActionClass.A1: 1, ActionClass.A2: 2, ActionClass.A3: 3, ActionClass.A4: 4, ActionClass.A5: 5}
+
+
+class SubagentStop(str, Enum):
+    """Why an autonomous run ended. Every one is terminal — none escalates."""
+
+    GOAL_ACHIEVED = "GOAL_ACHIEVED"
+    BUDGET_EXHAUSTED = "BUDGET_EXHAUSTED"
+    DEADLINE_REACHED = "DEADLINE_REACHED"
+    SCOPE_VIOLATION = "SCOPE_VIOLATION"
+    ACTION_CLASS_VIOLATION = "ACTION_CLASS_VIOLATION"
+    GOAL_DRIFT = "GOAL_DRIFT"
+    PAYMENT_REFUSED = "PAYMENT_REFUSED"
+    INJECTION_REFUSED = "INJECTION_REFUSED"
+    WORKER_ERROR = "WORKER_ERROR"
+    NO_PROGRESS = "NO_PROGRESS"
+
+
+class SubagentAssignment(BaseModel):
+    """What Hermes hands the worker. The worker cannot change any of it."""
+
+    assignment_id: str = Field(default_factory=lambda: f"bsub_{uuid.uuid4().hex}")
+    #: The Hermes turn that assigned this. Every step is attributed to it.
+    turn_id: str
+    command_id: str
+    task_id: str
+
+    goal: str
+    #: Domains the worker may touch. Leaving them ends the task.
+    allowed_domains: list[str]
+    #: Ceiling for any action the worker selects.
+    action_class_ceiling: ActionClass = ActionClass.A2
+    autonomy_tier: AutonomyTier = AutonomyTier.L4_STAGEHAND_ACT
+
+    #: Hard bounds. The worker cannot extend either.
+    max_steps: int = Field(default=12, ge=1, le=50)
+    deadline_ms: int | None = None
+    #: Ends the task when the page stops changing, so a loop cannot spin the budget.
+    max_steps_without_progress: int = Field(default=3, ge=1, le=10)
+
+    @property
+    def goal_digest(self) -> str:
+        return digest({"goal": self.goal})
+
+
+class SubagentStep(BaseModel):
+    """One action the worker selected, with the attribution that makes it traceable."""
+
+    index: int
+    assignment_id: str
+    turn_id: str
+    kind: str
+    domain: str
+    action_class: ActionClass
+    rationale: str | None = None
+    observation_digest: str | None = None
+    at_ms: int
+
+
+class SubagentResult(BaseModel):
+    assignment_id: str
+    task_id: str
+    stop_reason: SubagentStop
+    steps: list[SubagentStep] = Field(default_factory=list)
+    extraction: dict[str, Any] = Field(default_factory=dict)
+    detail: str | None = None
+
+    @property
+    def succeeded(self) -> bool:
+        return self.stop_reason is SubagentStop.GOAL_ACHIEVED
+
+    @property
+    def step_count(self) -> int:
+        return len(self.steps)
+
+
+class ProposedAction(BaseModel):
+    """What the worker wants to do next. A proposal, never a decision."""
+
+    kind: str
+    domain: str
+    action_class: ActionClass = ActionClass.A2
+    url: str | None = None
+    instruction: str | None = None
+    rationale: str | None = None
+    #: Set when the worker believes the goal is met.
+    done: bool = False
+    #: If the worker restates its goal, drift is detected against the assignment.
+    restated_goal: str | None = None
+    payload: dict[str, Any] = Field(default_factory=dict)
+
+
+class SubagentWorker(Protocol):
+    """The semantic worker. Proposes; it does not decide."""
+
+    async def propose(
+        self, assignment: SubagentAssignment, history: list[SubagentStep]
     ) -> ProposedAction:
         ...
 
@@ -305,4 +410,3 @@ __all__ = [
     "SubagentStop",
     "SubagentWorker",
 ]
-

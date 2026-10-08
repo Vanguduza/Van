@@ -393,4 +393,3 @@ async def test_a_stale_question_expires_and_a_late_yes_cannot_authorize(tmp_path
         listed = (await ac.get("/v1/browser/escalations")).json()
         assert listed[0]["actionable"] is False
         assert listed[0]["expired"] is True
-
