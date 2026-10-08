@@ -64,9 +64,9 @@ chmod 0644 "$CONFIG"
 sudo -u van-browser npm --prefix "$BASE" ci --omit=dev --no-audit --no-fund
 export PLAYWRIGHT_BROWSERS_PATH="$BASE/browsers"
 "$BASE/node_modules/.bin/playwright" install-deps chromium
+chown -R van-browser:van-browser "$BASE/browsers"
 sudo -u van-browser env PLAYWRIGHT_BROWSERS_PATH="$PLAYWRIGHT_BROWSERS_PATH" \
   "$BASE/node_modules/.bin/playwright" install chromium
-chown -R van-browser:van-browser "$BASE/browsers"
 stagehand_ver="$(node -p "require('$BASE/node_modules/@browserbasehq/stagehand/package.json').version")"
 playwright_ver="$(node -p "require('$BASE/node_modules/@playwright/test/package.json').version")"
 [[ "$stagehand_ver" == 4.1.0 ]] || { echo "Stagehand pin mismatch: $stagehand_ver" >&2; exit 43; }
@@ -74,6 +74,17 @@ playwright_ver="$(node -p "require('$BASE/node_modules/@playwright/test/package.
 chromium_path="$(cd "$BASE" && PLAYWRIGHT_BROWSERS_PATH="$PLAYWRIGHT_BROWSERS_PATH" node -e \
   "const { chromium } = require('playwright'); process.stdout.write(chromium.executablePath())")"
 [[ -x "$chromium_path" ]] || { echo "Chromium executable missing: $chromium_path" >&2; exit 45; }
+
+# The AppArmor userns allowance below attaches to this exact executable path. Keep the
+# installed browser tree immutable to the van-browser runtime identity so compromised
+# browser content cannot replace an allowlisted executable and inherit that allowance.
+chown -R root:van-browser "$BASE/browsers"
+chmod -R u=rwX,g=rX,o= "$BASE/browsers"
+[[ "$(stat -c '%U:%G' "$chromium_path")" == "root:van-browser" ]] || {
+  echo "Chromium ownership hardening failed: $chromium_path" >&2
+  exit 49
+}
+[[ -x "$chromium_path" ]] || { echo "Chromium lost execute permission after hardening" >&2; exit 50; }
 
 # Ubuntu 24.04 restricts unprivileged user namespaces through AppArmor. Chromium uses
 # user namespaces for its own sandbox; never disable Chromium's sandbox or the host
