@@ -29,6 +29,7 @@ from vati.lifecycle.preservation import ActionKind, PreservationEngine
 from vati.lifecycle.scale_policy import (
     Adjustment, AdjustmentPolicyRegistry, PositionAdjustmentEngine, ScalePolicyRegistry,
 )
+from vati.lifecycle.temperament import profit_pursuit_policy
 from vati.lifecycle.thesis import (
     ThesisEngine, ThesisInputs, ThesisState, thesis_from_capsule,
 )
@@ -841,9 +842,15 @@ class AccountTradeLifecycle:
         # so the headroom for an add is the whole original allowance — and no
         # more, which is the rule that stops a winner becoming a bigger bet.
         current_risk = ZERO if protection_be else (original_risk or ZERO)
+        temperament = (self.mandate.temperament_for(strategy_id)
+                       if self.mandate is not None and
+                       getattr(self.mandate, "temperament_enabled", False) else None)
+        position_policy = profit_pursuit_policy(
+            self.adjustment_policies.policy_for(strategy_id), temperament)
         proposal = self.adjustments.propose(
             assessment,
             health=health,
+            policy=position_policy,
             original_approved_risk_pct=original_risk,
             current_risk_pct=current_risk,
             protection_at_break_even=protection_be,

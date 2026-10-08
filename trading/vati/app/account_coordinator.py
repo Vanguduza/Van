@@ -32,6 +32,7 @@ from vati.app.account_lease import AccountRuntimeLease, LeaseOutcome, LeaseResul
 from vati.app.candidate_pool import CandidatePool, CandidateState
 from vati.arbiter.candidate import CandidateOpportunity
 from vati.arbiter.intent_factory import IntentFactory
+from vati.arbiter.temperament import TemperamentPolicy
 from vati.app.instrument_evaluator import InstrumentEvaluator
 from vati.core.canonical import canonical_hash
 from vati.market_data.bars import Bar
@@ -62,10 +63,14 @@ class AdmissionOutcome:
     reason: str = ""
     snapshot_hash: str = ""
     risk_decision: object | None = None
+    temperament_verdict_hash: str = ""
+    risk_fraction: str = ""
 
     def as_dict(self) -> dict:
         return {"candidate_id": self.candidate_id, "symbol": self.symbol, "rank": self.rank,
-                "decision": self.decision, "reason": self.reason, "snapshot_hash": self.snapshot_hash}
+                "decision": self.decision, "reason": self.reason, "snapshot_hash": self.snapshot_hash,
+                "temperament_verdict_hash": self.temperament_verdict_hash,
+                "risk_fraction": self.risk_fraction}
 
 
 @dataclass(frozen=True)
@@ -123,6 +128,7 @@ class AccountDecisionCoordinator:
         risk_pct_fn: Optional[Callable[[CandidateOpportunity], Decimal]] = None,
         mandate=None,
         candidate_intent_fn: Optional[Callable[[CandidateOpportunity, object, int], None]] = None,
+        temperament_policy: Optional[TemperamentPolicy] = None,
     ) -> None:
         self.cfg = cfg
         self.evaluators = {e.symbol: e for e in evaluators}
@@ -136,6 +142,9 @@ class AccountDecisionCoordinator:
         self.dependency_fn = dependency_fn
         self.mandate = mandate
         self.risk_pct_fn = risk_pct_fn or self._mandate_risk_pct
+        self.temperament_policy = temperament_policy
+        if self.temperament_policy is None and getattr(mandate, "temperament_enabled", False):
+            self.temperament_policy = TemperamentPolicy(mandate)
         self.snapshot_calls = 0
         self.candidate_intent_fn = candidate_intent_fn
 
@@ -232,6 +241,24 @@ class AccountDecisionCoordinator:
                                                  "NOT_SELECTED", getattr(d, "reason", "")))
                 metrics.inc(ALLOCATOR_REJECTED, account_alias=self.cfg.account_alias, symbol=cand.symbol)
                 continue
+            # Profile is a second, reduce-only gate. Even an accidentally
+            # unwrapped allocator cannot pass an ineligible candidate.
+            profile = (self.temperament_policy.verdict(cand, now_ms=now_ms)
+                       if self.temperament_policy is not None else None)
+            if profile is not None:
+                allocation_hash = getattr(d, "score_components", {}).get(
+                    "profile_verdict_hash", profile.decision_hash)
+                if not profile.eligible or allocation_hash != profile.decision_hash:
+                    reason = (profile.reason if not profile.eligible else
+                              "temperament verdict changed during admission")
+                    self.pool.mark(cand.candidate_id, CandidateState.NOT_SELECTED,
+                                   reason=reason, now_ms=now_ms)
+                    outcomes.append(AdmissionOutcome(cand.candidate_id, cand.symbol, d.rank,
+                                                     "NOT_SELECTED", reason,
+                                                     temperament_verdict_hash=profile.decision_hash))
+                    metrics.inc(ALLOCATOR_REJECTED, account_alias=self.cfg.account_alias,
+                                symbol=cand.symbol)
+                    continue
             # Freshly re-read: the previous candidate may have changed the book.
             snapshot = self._snapshot(cand)
             snap_hash = self._snapshot_hash(snapshot)
@@ -247,8 +274,11 @@ class AccountDecisionCoordinator:
                 fresh_dependency = self.dependency_fn(cand, snapshot)
                 correlation = getattr(fresh_dependency, "correlation_multiplier", correlation)
 
+            requested_risk = self.risk_pct_fn(cand)
+            if profile is not None:
+                requested_risk *= profile.risk_fraction
             intent = self.intent_factory.from_selected_candidate(
-                cand, requested_risk_pct=self.risk_pct_fn(cand),
+                cand, requested_risk_pct=requested_risk,
                 idempotency_seed=f"{self.cfg.account_alias}:{cand.symbol}:{cand.generated_at_ms}",
                 allocation_decision_hash=getattr(d, "decision_hash", ""),
                 correlation_multiplier=correlation,
@@ -280,7 +310,11 @@ class AccountDecisionCoordinator:
                 self.pool.mark(cand.candidate_id, CandidateState.SELECTED,
                                reason=str(approved), now_ms=now_ms)
                 outcomes.append(AdmissionOutcome(cand.candidate_id, cand.symbol, d.rank,
-                                                 str(approved), "", snap_hash, decision))
+                                                 str(approved), "", snap_hash, decision,
+                                                 temperament_verdict_hash=(
+                                                     profile.decision_hash if profile else ""),
+                                                 risk_fraction=(str(profile.risk_fraction)
+                                                                if profile else "")))
                 metrics.inc(ALLOCATOR_SELECTED, account_alias=self.cfg.account_alias, symbol=cand.symbol)
                 admitted_count += 1
             else:
@@ -290,7 +324,11 @@ class AccountDecisionCoordinator:
                 outcomes.append(AdmissionOutcome(cand.candidate_id, cand.symbol, d.rank,
                                                  "RISK_REJECTED",
                                                  str(getattr(decision, "reason_code", approved)),
-                                                 snap_hash, decision))
+                                                 snap_hash, decision,
+                                                 temperament_verdict_hash=(
+                                                     profile.decision_hash if profile else ""),
+                                                 risk_fraction=(str(profile.risk_fraction)
+                                                                if profile else "")))
 
         return CoordinatorPass(
             account_alias=self.cfg.account_alias, as_of_ms=now_ms,
