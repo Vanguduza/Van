@@ -81,3 +81,11 @@ def test_bootstrap_grants_only_browser_worker_parent_traverse_access():
     assert "/var/log/van-trading/browser" in text
     assert "chmod 0711 /var/lib/van-trading" not in text
     assert "chmod 0755 /var/lib/van-trading" not in text
+
+
+def test_stagehand_readiness_window_allows_cold_arm64_import():
+    text = BOOTSTRAP.read_text(encoding="utf-8")
+    marker = "systemctl restart vati-stagehand.service"
+    tail = text[text.index(marker):]
+    assert "for attempt in $(seq 1 15); do" in tail
+    assert 'if [[ "$attempt" == 15 ]]; then' in tail

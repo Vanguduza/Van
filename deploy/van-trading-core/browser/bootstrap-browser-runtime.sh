@@ -149,7 +149,10 @@ PY
 done
 
 systemctl restart vati-stagehand.service
-for attempt in 1 2 3 4 5; do
+# Stagehand imports the pinned semantic/browser stack before opening its loopback listener.
+# On the ARM64 trading host that cold import can approach ten seconds, so give it a
+# bounded 30-second readiness window instead of racing the service start.
+for attempt in $(seq 1 15); do
   if curl -fsS --max-time 3 "http://127.0.0.1:${VAN_STAGEHAND_PORT:-9140}/health" >/tmp/van-stagehand-health.json 2>/dev/null \
      && python3 - /tmp/van-stagehand-health.json <<'PY'
 import json, sys
@@ -163,7 +166,7 @@ PY
     echo STAGEHAND_RUNTIME_GREEN
     break
   fi
-  if [[ "$attempt" == 5 ]]; then
+  if [[ "$attempt" == 15 ]]; then
     journalctl -u vati-stagehand.service -n 100 --no-pager >&2 || true
     exit 47
   fi
