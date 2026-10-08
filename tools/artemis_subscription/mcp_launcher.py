@@ -16,6 +16,12 @@ os.environ["PYTHONPATH"] = os.pathsep.join(
 # Use native standalone task runners so an unrelated existing daemon cannot
 # receive this owner's task with a different model binding.
 os.environ["ARTEMIS_STANDALONE"] = "1"
+# Keep native clients and task children on the qualified private ADB server.
+os.environ["ARTEMIS_ADB_PATH"] = os.environ.get(
+    "VAN_ARTEMIS_ADB_PATH", "/home/ubuntu/.local/share/van/artemis-subscription/toolchain/adb")
+os.environ["ADB_HOST"] = "127.0.0.1"
+os.environ["ADB_PORT"] = "5039"
+os.environ["ADB_SERVER_SOCKET"] = "tcp:127.0.0.1:5039"
 for name in ("ARTEMIS_FAKE_LLM", "OPENAI_API_KEY", "OPENAI_BASE_URL"):
     os.environ.pop(name, None)
 

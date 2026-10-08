@@ -39,3 +39,5 @@ The retained operational receipts distinguish real provider vision/structured-ou
 ## Native task children
 
 The launcher sets a private PYTHONPATH bootstrap and the VAN subscription binding flag. Native standalone background task interpreters inherit the same exact model factory and profile. The hook is idempotent, refuses other providers in this binding, and terminates startup on bootstrap failure. It is not installed globally. The launcher uses standalone native task execution to avoid routing through an unrelated daemon.
+
+The owner runtime pins Android Platform Tools 37.0.1 to a private loopback ADB server at port 5039. Both native MCP and task children inherit that endpoint and binary. The existing paired owner keys remain in place. VAN_ARTEMIS_ADB_PATH may select a separately qualified executable. The runtime installation receipt hashes the pinned executable.
