@@ -125,6 +125,9 @@ chmod 0644 "$CONFIG"
 
 systemctl daemon-reload
 systemctl enable vati-browser-harness.service vati-stagehand.service
+# Previous failed boots may have exhausted StartLimitBurst. A corrected configuration must
+# be allowed one fresh start without waiting for the rate-limit interval to expire.
+systemctl reset-failed vati-browser-harness.service vati-stagehand.service || true
 systemctl restart vati-browser-harness.service
 for attempt in 1 2 3 4 5; do
   if curl -fsS --max-time 3 "http://127.0.0.1:${VAN_HARNESS_PORT:-9141}/health" >/tmp/van-harness-health.json 2>/dev/null \
