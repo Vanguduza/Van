@@ -64,6 +64,12 @@ def test_the_installer_ships_a_runtime_that_starts(tmp_path):
     assert (runtime / "trading/commander/accounts.py").is_file()
     assert not (runtime / "trading/tests").exists()
     assert (runtime / "backend/van_gateway/mtls/serve.py").is_file()
+    assert (runtime / "config/browser/profiles.yaml").is_file()
+    assert (runtime / "config/browser/domains.yaml").is_file()
+    assert (runtime / "docs/decisions/VAN-ADOPT-BROWSER-HARNESS-001.yaml").is_file()
+    assert (runtime / "docs/decisions/VAN-ADOPT-STAGEHAND-001.yaml").is_file()
+    assert (runtime / "docs/decisions/VAN-ADOPT-N8N-001.yaml").is_file()
+    assert (runtime / "docs/decisions/VAN-AMEND-SECURITY-POLICY-001.md").is_file()
 
 
 def _committed_gateway() -> dict:
