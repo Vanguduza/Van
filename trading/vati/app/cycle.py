@@ -91,6 +91,8 @@ class DecisionCycle:
         self.regime = regime_engine or RegimeEngine()
         self.kill = kill_switch or KillSwitch()
         self.mandate = TradingMandate.from_mapping(cfg.mandate_dict)
+        if self.mandate.temperament_enabled:
+            raise RuntimeError("DecisionCycle single-symbol path does not admit temperament profiles")
         self.authority = RiskAuthority(self.mandate)
         self.protection = ProtectionManager()
         self.routes = RouteRegistry(ledger=ledger)
