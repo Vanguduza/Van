@@ -229,6 +229,40 @@ async def test_consumer_notebook_fails_closed_without_authenticated_browser_prof
     assert status.state == ProviderState.UNCONFIGURED
 
 
+@pytest.mark.parametrize("failure,code", [
+    (httpx.ReadTimeout("private details"), "knowledge_provider_timeout"),
+    (httpx.ConnectError("private details"), "knowledge_provider_unavailable"),
+])
+async def test_knowledge_transport_fault_closes_action_instead_of_leaving_executing(tmp_path, failure, code):
+    store = Store(str(tmp_path / "knowledge-failure.sqlite3"))
+    await store.migrate()
+    runtime = KnowledgeRuntime(store, Settings(database_path=store.path))
+    await runtime.startup()
+    actions = ActionRuntime(store)
+    await install_builtin_actions(actions)
+    parameters = {"title": "Owner notebook"}
+    execution = await actions.begin(
+        execution_id="exec-notebook-failure", command_id="cmd-notebook-failure", turn_id="turn-notebook-failure",
+        action_id="google.notebook.enterprise.create", principal_type=PrincipalType.OWNER_DEVICE,
+        requested_by="device:dev-1", idempotency_key="notebook-failure-1", parameters=parameters,
+        snapshot_id=None, owner_approved=True,
+    )
+
+    async def unavailable(_request):
+        raise failure
+
+    runtime.create_enterprise_notebook = unavailable
+    result = await runtime.execute_authorized_action(actions, execution_id=execution.execution_id, parameters=parameters)
+    assert result.status is ExecutionStatus.RETRYABLE_FAILURE
+    assert result.error_code == code
+    assert (await actions.get_execution(execution.execution_id)).status is ExecutionStatus.RETRYABLE_FAILURE
+
+
+def test_cloud_credential_locus_reports_the_token_file_that_actually_wins():
+    provider = CloudAccessTokenProvider(service_account_file="/not/read/service-account.json", access_token_file="/not/read/access-token")
+    assert provider.credential_locus() == "gateway-short-lived-token-file"
+
+
 @pytest.mark.asyncio
 async def test_authorized_notebook_mutation_reaches_verified_success_and_rejects_parameter_swap(tmp_path):
     store = Store(str(tmp_path / "bridge.sqlite3"))

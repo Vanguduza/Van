@@ -31,6 +31,7 @@ import org.json.JSONObject
  *    an attacker who has recorded one would replay.
  */
 class ConnectivityRegistry(context: Context) {
+    private val refreshMutex = kotlinx.coroutines.sync.Mutex()
 
     private val prefs = EncryptedSharedPreferences.create(
         context.applicationContext,
@@ -78,26 +79,33 @@ class ConnectivityRegistry(context: Context) {
      */
     suspend fun refresh(fetch: suspend (Int) -> JSONObject): ManifestVerdict? =
         withContext(Dispatchers.IO) {
-            if (!configured) return@withContext null
-            val response = fetch(knownVersion)
-            if (response.optBoolean("current", false)) return@withContext null
-            val manifestJson = response.optJSONObject("manifest")?.toString()
-                ?: return@withContext ManifestVerdict.Refused("connectivity_manifest_absent")
-            val verdict = verify(
-                manifestJson,
-                response.optString("signature", ""),
-                response.optString("kid", ""),
-                knownVersion,
-            )
-            if (verdict is ManifestVerdict.Accepted) {
-                prefs.edit()
-                    .putString(KEY_MANIFEST, manifestJson)
-                    .putString(KEY_SIGNATURE, response.optString("signature", ""))
-                    .putString(KEY_KID, response.optString("kid", ""))
-                    .putInt(KEY_VERSION, verdict.manifest.manifestVersion)
-                    .apply()
-            }
-            verdict
+            refreshMutex.lock()
+            try {
+                if (!configured) return@withContext null
+                val response = fetch(knownVersion)
+                if (response.optBoolean("current", false)) return@withContext null
+                val manifestJson = response.optJSONObject("manifest")?.toString()
+                    ?: return@withContext ManifestVerdict.Refused("connectivity_manifest_absent")
+                val verdict = verify(
+                    manifestJson,
+                    response.optString("signature", ""),
+                    response.optString("kid", ""),
+                    knownVersion,
+                )
+                if (verdict is ManifestVerdict.Accepted) {
+                    try { SignedConnectivityRouting.from(verdict.manifest) }
+                    catch (invalid: IllegalArgumentException) {
+                        return@withContext ManifestVerdict.Refused(invalid.message ?: "connectivity_routes_invalid")
+                    }
+                    prefs.edit()
+                        .putString(KEY_MANIFEST, manifestJson)
+                        .putString(KEY_SIGNATURE, response.optString("signature", ""))
+                        .putString(KEY_KID, response.optString("kid", ""))
+                        .putInt(KEY_VERSION, verdict.manifest.manifestVersion)
+                        .commit().also { check(it) { "connectivity_manifest_store_failed" } }
+                }
+                verdict
+            } finally { refreshMutex.unlock() }
         }
 
     private fun verify(

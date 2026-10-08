@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.visual.VanStatePriorityTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:34" hostname="052fefa249ff" time="0.001">
+  <properties/>
+  <testcase name="the alarms outrank the work and the work outranks the idle()" classname="com.dial.van.visual.VanStatePriorityTest" time="0.0"/>
+  <testcase name="every state has a priority()" classname="com.dial.van.visual.VanStatePriorityTest" time="0.0"/>
+  <testcase name="the authority set is the states the browser must not take()" classname="com.dial.van.visual.VanStatePriorityTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import ssl
 from typing import Any, AsyncIterator, Awaitable, Callable
 
 import httpx
@@ -95,6 +96,8 @@ class DialDevClient:
             token = Path(self.config.token_file).read_text(encoding="utf-8").strip()
         except OSError as exc:
             raise DialDevUnavailable("unconfigured") from exc
+        except UnicodeDecodeError as exc:
+            raise DialDevUnavailable("credential_invalid") from exc
         if len(token) < MIN_TOKEN_LENGTH or any(ch.isspace() for ch in token):
             raise DialDevUnavailable("credential_invalid")
         return token
@@ -107,10 +110,22 @@ class DialDevClient:
         }
 
     def _client(self, timeout: httpx.Timeout) -> httpx.AsyncClient:
+        verify: bool | ssl.SSLContext = True
+        if self.config.tls_configured:
+            try:
+                context = ssl.create_default_context(cafile=self.config.tls_ca_file)
+                context.minimum_version = ssl.TLSVersion.TLSv1_3
+                context.load_cert_chain(
+                    self.config.tls_client_cert_file, self.config.tls_client_key_file,
+                )
+                verify = context
+            except (OSError, ssl.SSLError, ValueError) as exc:
+                raise DialDevUnavailable("unconfigured") from exc
         return httpx.AsyncClient(
             base_url=self.config.base_url,
             timeout=timeout,
             transport=self.transport,
+            verify=verify,
             follow_redirects=False,
             # A proxy environment variable must not route DIAL traffic somewhere else.
             trust_env=False,

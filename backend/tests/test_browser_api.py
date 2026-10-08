@@ -373,7 +373,11 @@ async def test_a_worker_runs_inside_its_assignment_and_the_task_closes(tmp_path)
         assert response.status_code == 200, response.text
         body = response.json()
         assert body["stop_reason"] == "GOAL_ACHIEVED"
-        assert body["succeeded"] is True
+        assert body["execution_completed"] is True
+        assert body["worker_goal_reported"] is True
+        assert body["succeeded"] is False
+        assert body["owner_success"] is False
+        assert body["verification_state"] == "UNVERIFIED"
         assert body["step_count"] == 2
         # §379 — every step is attributed to the assigning Hermes turn.
         assert {step["turn_id"] for step in body["steps"]} == {"turn-7"}
@@ -382,6 +386,47 @@ async def test_a_worker_runs_inside_its_assignment_and_the_task_closes(tmp_path)
 
         fetched = await ac.get(f"/v1/browser/tasks/{task['task_id']}", headers=HEADERS)
         assert fetched.json()["task"]["status"] == BrowserTaskStatus.COMPLETED.value
+
+
+async def test_worker_done_without_observation_is_execution_completion_only(tmp_path):
+    worker = _ScriptedWorker([ProposedAction(kind="done", domain=DOMAIN, done=True)])
+    ac, _api, store = await _client(tmp_path, worker=worker)
+    async with ac:
+        task = await _make_task(ac)
+        response = await ac.post(
+            "/v1/browser/assignments", headers=HEADERS,
+            json={
+                "task_id": task["task_id"], "turn_id": "turn-unverified", "command_id": "cmd-owner-1",
+                "goal": "read the statement total", "allowed_domains": [DOMAIN], "max_steps": 2,
+            },
+        )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["execution_completed"] is True
+        assert body["worker_goal_reported"] is True
+        assert body["succeeded"] is False
+        assert body["owner_success"] is False
+        assert body["verification_state"] == "UNVERIFIED"
+        assert body["step_count"] == 0
+        projection = (await ac.get(f"/v1/browser/tasks/{task['task_id']}")).json()
+        assert projection["task"]["status"] == "COMPLETED"
+        assert projection["task"]["owner_success"] is False
+        assert projection["task"]["verification_state"] == "UNVERIFIED"
+        assert projection["evidence"] == []
+        listed = (await ac.get("/v1/browser/tasks")).json()
+        assert listed[0]["owner_success"] is False
+        assert listed[0]["verification_state"] == "UNVERIFIED"
+        from van_gateway.mission.models import SuccessContract, VerificationStatus
+        from van_gateway.verification.production import build_mission_registry
+
+        registry = build_mission_registry(store=store, trading=None, knowledge=None)
+        verified = await registry.verify(
+            strategy="browser-evidence",
+            contract=SuccessContract(postconditions={"evidence_captured": True}, verifier_class="browser-evidence"),
+            context={"mission_id": "no-observed-evidence", "engine_reported_success": body["worker_goal_reported"]},
+        )
+        assert verified.status is not VerificationStatus.VERIFIED
+        assert verified.observed_postconditions["evidence_captured"] is False
 
 
 @pytest.mark.parametrize(
@@ -467,8 +512,8 @@ async def test_an_assignment_cannot_carry_an_a4_ceiling(tmp_path):
         assert worker.proposed == 0
 
 
-async def test_owner_approval_resumes_same_browser_task(tmp_path):
-    """A scope overrun checkpoints, canonical owner approval unlocks the same task."""
+async def test_advisory_owner_answer_cannot_resume_or_widen_browser_task(tmp_path):
+    """An advisory answer cannot replace fresh exact signed command authority."""
     worker = _ScriptedWorker(
         [ProposedAction(kind="navigate", domain="outside.example.net", url="https://outside.example.net/")]
     )
@@ -497,10 +542,11 @@ async def test_owner_approval_resumes_same_browser_task(tmp_path):
         )
 
         second = await ac.post("/v1/browser/assignments", headers=HEADERS, json=request)
-        assert second.status_code == 200, second.text
-        assert second.json()["stop_reason"] == "GOAL_ACHIEVED"
-        fetched = await ac.get(f"/v1/browser/tasks/{task['task_id']}", headers=HEADERS)
-        assert fetched.json()["task"]["status"] == BrowserTaskStatus.COMPLETED.value
+        assert second.status_code == 409
+        assert "WAITING_FOR_OWNER" in second.json()["detail"]
+        assert await store.fetchall("SELECT * FROM browser_scope_authorizations") == []
+        row = await store.fetchone("SELECT error_code FROM browser_tasks WHERE task_id=?", (task["task_id"],))
+        assert row["error_code"] == "BROWSER_FRESH_SEALED_COMMAND_REQUIRED"
 
 
 
@@ -534,7 +580,8 @@ async def test_owner_approval_cannot_widen_to_unapproved_domain(tmp_path):
             },
         )
         assert refused.status_code == 409
-        assert refused.json()["detail"] == "BROWSER_RESUME_SCOPE_EXCEEDS_APPROVAL"
+        assert refused.json()["detail"] == "BROWSER_TASK_NOT_RUNNABLE:WAITING_FOR_OWNER"
+        assert await store.fetchall("SELECT * FROM browser_scope_authorizations") == []
 
 
 async def test_action_class_approval_cannot_be_exceeded(tmp_path):
@@ -565,7 +612,8 @@ async def test_action_class_approval_cannot_be_exceeded(tmp_path):
             },
         )
         assert refused.status_code == 409
-        assert refused.json()["detail"] == "BROWSER_RESUME_CLASS_EXCEEDS_APPROVAL"
+        assert refused.json()["detail"] == "BROWSER_TASK_NOT_RUNNABLE:WAITING_FOR_OWNER"
+        assert await store.fetchall("SELECT * FROM browser_scope_authorizations") == []
 
 
 async def test_a_run_cannot_be_started_twice(tmp_path):

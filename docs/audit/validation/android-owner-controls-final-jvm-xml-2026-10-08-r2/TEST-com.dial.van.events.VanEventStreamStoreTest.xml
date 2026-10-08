@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.events.VanEventStreamStoreTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:38" hostname="052fefa249ff" time="0.017">
+  <properties/>
+  <testcase name="newRecords emits only what a subscriber had not already been shown()" classname="com.dial.van.events.VanEventStreamStoreTest" time="0.012"/>
+  <testcase name="the cursor is saved from the merged state rather than from the page()" classname="com.dial.van.events.VanEventStreamStoreTest" time="0.0"/>
+  <testcase name="every applied page is written down()" classname="com.dial.van.events.VanEventStreamStoreTest" time="0.001"/>
+  <testcase name="the history starts where the last one stopped()" classname="com.dial.van.events.VanEventStreamStoreTest" time="0.0"/>
+  <testcase name="newRecords stays empty for an overlapping page with nothing new()" classname="com.dial.van.events.VanEventStreamStoreTest" time="0.002"/>
+  <testcase name="a recovery clears the failure()" classname="com.dial.van.events.VanEventStreamStoreTest" time="0.0"/>
+  <testcase name="a page from the socket and a page from the poll do not double an event()" classname="com.dial.van.events.VanEventStreamStoreTest" time="0.001"/>
+  <testcase name="a failure is counted without discarding what the owner already has()" classname="com.dial.van.events.VanEventStreamStoreTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

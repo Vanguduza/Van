@@ -16,6 +16,16 @@ object MutualTlsScope {
         return authority(target) == direct
     }
 
+    /** A signature-verified gateway/session migration retains the existing TLS identity. */
+    fun appliesToManagedGateway(
+        directBaseUrl: String,
+        target: String,
+        signedGatewayUrl: String? = null,
+        signedSessionUrl: String? = null,
+    ): Boolean = applies(directBaseUrl, target) ||
+        signedGatewayUrl?.let { applies(it, target) } == true ||
+        signedSessionUrl?.let { applies(it, target) } == true
+
     /**
      * The gateway address to use. A build that pins a direct endpoint (an https address and
      * a CA) always uses it, even over an address saved on the phone by an earlier build or
@@ -42,6 +52,8 @@ object MutualTlsScope {
         "/v1/devices/pair",
         "/v1/devices/bootstrap/challenge",
         "/v1/devices/bootstrap/attest",
+        "/v1/devices/bootstrap/recover",
+        "/v1/device-binding/certify",
         "/v1/devices/tls-certificate",
     )
 

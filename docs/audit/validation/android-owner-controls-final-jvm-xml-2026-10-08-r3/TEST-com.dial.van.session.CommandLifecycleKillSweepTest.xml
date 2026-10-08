@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.session.CommandLifecycleKillSweepTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:28" hostname="052fefa249ff" time="0.025">
+  <properties/>
+  <testcase name="no kill point leaves a command silently absent()" classname="com.dial.van.session.CommandLifecycleKillSweepTest" time="0.023"/>
+  <testcase name="a kill before the store leaves nothing claimed and nothing lost()" classname="com.dial.van.session.CommandLifecycleKillSweepTest" time="0.0"/>
+  <testcase name="the sweep covers more boundaries than the chain has writes()" classname="com.dial.van.session.CommandLifecycleKillSweepTest" time="0.0"/>
+  <testcase name="a command that never reached the Gateway is still held after a restart()" classname="com.dial.van.session.CommandLifecycleKillSweepTest" time="0.001"/>
+  <testcase name="a kill between the send and the forget is recovered by the Gateway's answer()" classname="com.dial.van.session.CommandLifecycleKillSweepTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -377,10 +377,16 @@ class OwnerCognitiveModel:
                 "state": assertion.state.value,
                 "confidence": round(assertion.confidence, 2),
                 "independent_episodes": assertion.independent_episodes,
+                "evidence_refs": assertion.evidence_refs,
+                "supporting_episode_refs": assertion.supporting_episode_refs,
                 "autonomy_bearing": assertion.is_autonomy_bearing,
                 "owner_confirmed": assertion.owner_confirmed_at_ms is not None,
                 "temporary": assertion.temporary,
                 "project_id": assertion.project_id,
+                "created_at_ms": assertion.created_at_ms,
+                "updated_at_ms": assertion.updated_at_ms,
+                "last_revalidated_at_ms": assertion.last_revalidated_at_ms,
+                "owner_confirmed_at_ms": assertion.owner_confirmed_at_ms,
             })
         return {"owner_principal_id": owner_principal_id, "fields": grouped}
 

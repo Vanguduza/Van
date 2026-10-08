@@ -33,6 +33,7 @@ DEFAULT_PKI_DIR = "/opt/van-trading/secrets/pki"
 #: The certificates the trading estate's two TLS seams need. Named rather than
 #: globbed so a missing file is a reported absence instead of a shorter list.
 EXPECTED = ("ca", "commander", "mt5-worker", "client")
+DEVICE_EXPECTED = ("ca", "server")
 
 
 @dataclass(frozen=True)
@@ -66,7 +67,8 @@ def _not_after_unix(certificate: x509.Certificate) -> int:
     return int(value.timestamp())
 
 
-def scan(pki_dir: str | Path = DEFAULT_PKI_DIR, *, now_unix: int | None = None) -> dict[str, Any]:
+def scan(pki_dir: str | Path = DEFAULT_PKI_DIR, *, now_unix: int | None = None,
+         expected: tuple[str, ...] = EXPECTED) -> dict[str, Any]:
     """Report expiry for every expected certificate, and the soonest of them."""
     now = now_unix if now_unix is not None else int(_dt.datetime.now(_dt.timezone.utc).timestamp())
     root = Path(pki_dir)
@@ -75,14 +77,14 @@ def scan(pki_dir: str | Path = DEFAULT_PKI_DIR, *, now_unix: int | None = None) 
             "present": False,
             "pki_dir": str(root),
             "certificates": [],
-            "missing": list(EXPECTED),
+            "missing": list(expected),
             "unreadable": [],
             "days_remaining": None,
         }
     certificates: list[CertificateStatus] = []
     missing: list[str] = []
     unreadable: list[str] = []
-    for name in EXPECTED:
+    for name in expected:
         path = root / f"{name}.crt"
         if not path.exists():
             missing.append(name)
@@ -115,4 +117,15 @@ def scan(pki_dir: str | Path = DEFAULT_PKI_DIR, *, now_unix: int | None = None) 
     }
 
 
-__all__ = ["DEFAULT_PKI_DIR", "EXPECTED", "CertificateStatus", "scan"]
+def scan_device(pki_dir: str | Path | None) -> dict[str, Any]:
+    """The direct-phone CA/server pair; a configured but lost pair needs an alert."""
+    if not pki_dir:
+        return {"configured": False, "present": False, "days_remaining": None}
+    report = scan(pki_dir, expected=DEVICE_EXPECTED)
+    report["configured"] = True
+    if not report["present"]:
+        report["days_remaining"] = -1
+    return report
+
+
+__all__ = ["DEFAULT_PKI_DIR", "EXPECTED", "DEVICE_EXPECTED", "CertificateStatus", "scan", "scan_device"]

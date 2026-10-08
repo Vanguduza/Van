@@ -15,6 +15,7 @@ from van_gateway.action.models import (
     VerifierType,
 )
 from van_gateway.models import ActionClass, PrincipalType
+from van_gateway.mission.models import TERMINAL_STATES
 from van_gateway.proactive.autonomy import AutonomyPolicy
 from van_gateway.storage.db import Store
 
@@ -187,7 +188,10 @@ class ActionRuntime:
             ))
         existing = await self.store.fetchone("SELECT * FROM action_executions WHERE idempotency_key = ?", (idempotency_key,))
         if existing is not None:
-            if str(existing["parameters_digest"]) != self.digest_parameters(parameters) or str(existing["action_id"]) != action_id:
+            if (str(existing["parameters_digest"]) != self.digest_parameters(parameters) or str(existing["action_id"]) != action_id
+                or existing["command_id"] != command_id or existing["turn_id"] != turn_id
+                or existing["principal_type"] != principal_type.value or existing["requested_by"] != requested_by
+                or existing["snapshot_id"] != snapshot_id or existing["action_class"] != definition.action_class.value):
                 raise ActionPolicyError("idempotency_conflict")
             return self._row_to_execution(existing)
         return await self._persist_execution(ActionExecution(
@@ -196,24 +200,45 @@ class ActionRuntime:
             principal_type=principal_type, requested_by=requested_by,
             status=ExecutionStatus.AUTHORIZED, idempotency_key=idempotency_key,
             snapshot_id=snapshot_id, parameters_digest=self.digest_parameters(parameters),
-        ))
+        ), permission_parameters=parameters)
 
     async def mark_executing(self, execution_id: str) -> ActionExecution:
-        current = await self.get_execution(execution_id)
-        if current is None:
-            raise ActionPolicyError("unknown_execution")
-        if current.terminal:
-            return current
-        if current.status not in {ExecutionStatus.AUTHORIZED, ExecutionStatus.RETRYABLE_FAILURE}:
-            raise ActionPolicyError("execution_not_authorized")
-        now = int(time.time() * 1000)
-        await self.store.execute(
-            "UPDATE action_executions SET status=?, updated_at_unix_ms=? WHERE execution_id=?",
-            (ExecutionStatus.EXECUTING.value, now, execution_id),
-        )
-        result = await self.get_execution(execution_id)
-        assert result is not None
-        return result
+        from van_gateway.capability.owner_permissions import recheck_permission_execution, OwnerPermissionDenied
+        from van_gateway.mission.control import require_mission_dispatch, MissionControlError
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            try:
+                row = await (await db.execute("SELECT * FROM action_executions WHERE execution_id=?", (execution_id,))).fetchone()
+                if row is None:
+                    raise ActionPolicyError("unknown_execution")
+                current = self._row_to_execution(row)
+                if current.terminal:
+                    raise ActionPolicyError("execution_terminal")
+                if current.status not in {ExecutionStatus.AUTHORIZED, ExecutionStatus.RETRYABLE_FAILURE}:
+                    raise ActionPolicyError("execution_not_authorized")
+                definition = await (await db.execute("SELECT enabled,action_class FROM action_definitions WHERE action_id=?", (current.action_id,))).fetchone()
+                if definition is None or not definition["enabled"] or definition["action_class"] != current.action_class.value:
+                    raise ActionPolicyError("action_definition_disabled_or_changed")
+                await recheck_permission_execution(self.store, execution_id, db=db)
+                mission = await (await db.execute(
+                    "SELECT mission_id,state FROM missions WHERE json_extract(authority_envelope_json, '$.source_command_id')=?",
+                    (current.command_id,),
+                )).fetchone()
+                if mission is not None:
+                    if str(mission["state"]) in {state.value for state in TERMINAL_STATES}:
+                        raise ActionPolicyError("command_mission_terminal")
+                    await require_mission_dispatch(self.store, str(mission["mission_id"]), db=db)
+                await db.execute("UPDATE action_executions SET status=?,updated_at_unix_ms=? WHERE execution_id=?",
+                    (ExecutionStatus.EXECUTING.value, int(time.time()*1000), execution_id))
+                result = await (await db.execute("SELECT * FROM action_executions WHERE execution_id=?", (execution_id,))).fetchone()
+                await db.commit()
+            except (OwnerPermissionDenied, MissionControlError) as exc:
+                await db.rollback()
+                raise ActionPolicyError(str(exc)) from exc
+            except BaseException:
+                await db.rollback()
+                raise
+        return self._row_to_execution(result)
 
     async def mark_verifying(self, execution_id: str) -> ActionExecution:
         current = await self.get_execution(execution_id)
@@ -225,8 +250,8 @@ class ActionRuntime:
             raise ActionPolicyError("execution_not_submitted")
         now = int(time.time() * 1000)
         await self.store.execute(
-            "UPDATE action_executions SET status=?, updated_at_unix_ms=? WHERE execution_id=?",
-            (ExecutionStatus.VERIFYING.value, now, execution_id),
+            "UPDATE action_executions SET status=?, updated_at_unix_ms=? WHERE execution_id=? AND status=?",
+            (ExecutionStatus.VERIFYING.value, now, execution_id, current.status.value),
         )
         result = await self.get_execution(execution_id)
         assert result is not None
@@ -240,17 +265,45 @@ class ActionRuntime:
             return current
         now = int(time.time() * 1000)
         await self.store.execute(
-            "UPDATE action_executions SET status=?, submitted_at_ms=?, correlation_json=?, evidence_pointer=?, updated_at_unix_ms=? WHERE execution_id=?",
-            (ExecutionStatus.SUBMITTED.value, now, Store.dumps(correlation), evidence_pointer, now, execution_id),
+            "UPDATE action_executions SET status=?, submitted_at_ms=?, correlation_json=?, evidence_pointer=?, updated_at_unix_ms=? WHERE execution_id=? AND status=?",
+            (ExecutionStatus.SUBMITTED.value, now, Store.dumps(correlation), evidence_pointer, now, execution_id, current.status.value),
         )
         result = await self.get_execution(execution_id)
         assert result is not None
         return result
 
-    async def verify(self, observation: VerificationObservation) -> ActionReceipt:
+    async def verify(self, observation: VerificationObservation, *, independent_observer: bool = False) -> ActionReceipt:
+        """Record a gateway observation; a worker report cannot establish success.
+
+        Only deterministic in-process adapters that performed an independent readback
+        may set ``independent_observer``. It is never accepted from the HTTP body.
+        """
         execution = await self.get_execution(observation.execution_id)
         if execution is None:
             raise ActionPolicyError("unknown_execution")
+        if execution.terminal:
+            row = await self.store.fetchone(
+                "SELECT * FROM action_receipts WHERE execution_id = ? "
+                "ORDER BY created_at_unix_ms DESC, rowid DESC LIMIT 1", (execution.execution_id,),
+            )
+            if row is None:
+                raise ActionPolicyError("execution_terminal")
+            receipt = ActionReceipt(
+                receipt_id=str(row["receipt_id"]), execution_id=execution.execution_id,
+                status=ExecutionStatus(str(row["status"])), verifier_type=VerifierType(str(row["verifier_type"])),
+                correlation=json.loads(str(row["correlation_json"])),
+                observed_postcondition=json.loads(str(row["observed_postcondition_json"])),
+                evidence_pointer=row["evidence_pointer"], created_at_ms=int(row["created_at_unix_ms"]),
+            )
+            expected_success = receipt.status in {ExecutionStatus.VERIFIED_SUCCESS, ExecutionStatus.UNVERIFIABLE}
+            if (receipt.correlation != observation.correlation
+                or receipt.observed_postcondition != observation.observed_postcondition
+                or receipt.evidence_pointer != (observation.evidence_pointer or execution.evidence_pointer)
+                or (receipt.status is not ExecutionStatus.UNVERIFIABLE and observation.success != expected_success)):
+                raise ActionPolicyError("terminal_verification_conflict")
+            return receipt
+        if execution.status not in {ExecutionStatus.SUBMITTED, ExecutionStatus.VERIFYING}:
+            raise ActionPolicyError("execution_not_submitted")
         definition = await self.get_definition(execution.action_id)
         if definition is None:
             raise ActionPolicyError("unknown_action")
@@ -265,16 +318,16 @@ class ActionRuntime:
                     status = ExecutionStatus.VERIFICATION_FAILED
                     break
             else:
-                status = ExecutionStatus.VERIFIED_SUCCESS
+                status = ExecutionStatus.VERIFIED_SUCCESS if independent_observer else ExecutionStatus.UNVERIFIABLE
         else:
-            status = ExecutionStatus.UNVERIFIABLE if definition.mutates_state else ExecutionStatus.VERIFIED_SUCCESS
+            status = ExecutionStatus.UNVERIFIABLE if definition.mutates_state or not independent_observer else ExecutionStatus.VERIFIED_SUCCESS
+
+        if (status is ExecutionStatus.VERIFIED_SUCCESS and definition.mutates_state
+            and (not observation.observed_postcondition or not (observation.evidence_pointer or execution.evidence_pointer))):
+            status = ExecutionStatus.UNVERIFIABLE
 
         now = int(time.time() * 1000)
         evidence_pointer = observation.evidence_pointer or execution.evidence_pointer
-        await self.store.execute(
-            "UPDATE action_executions SET status=?, verified_at_ms=?, evidence_pointer=?, updated_at_unix_ms=? WHERE execution_id=?",
-            (status.value, now, evidence_pointer, now, execution.execution_id),
-        )
         receipt = ActionReceipt(
             receipt_id=str(uuid.uuid4()), execution_id=execution.execution_id,
             status=status, verifier_type=definition.verifier_type,
@@ -282,11 +335,26 @@ class ActionRuntime:
             observed_postcondition=observation.observed_postcondition,
             evidence_pointer=evidence_pointer, created_at_ms=now,
         )
-        await self.store.execute(
-            "INSERT INTO action_receipts(receipt_id, execution_id, status, verifier_type, correlation_json, observed_postcondition_json, evidence_pointer, created_at_unix_ms) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            (receipt.receipt_id, receipt.execution_id, receipt.status.value, receipt.verifier_type.value,
-             Store.dumps(receipt.correlation), Store.dumps(receipt.observed_postcondition), receipt.evidence_pointer, receipt.created_at_ms),
-        )
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            try:
+                updated = await db.execute(
+                    "UPDATE action_executions SET status=?, verified_at_ms=?, evidence_pointer=?, updated_at_unix_ms=? "
+                    "WHERE execution_id=? AND status IN (?, ?)",
+                    (status.value, now, evidence_pointer, now, execution.execution_id,
+                     ExecutionStatus.SUBMITTED.value, ExecutionStatus.VERIFYING.value),
+                )
+                if updated.rowcount != 1:
+                    raise ActionPolicyError("execution_state_changed")
+                await db.execute(
+                    "INSERT INTO action_receipts(receipt_id, execution_id, status, verifier_type, correlation_json, observed_postcondition_json, evidence_pointer, created_at_unix_ms) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    (receipt.receipt_id, receipt.execution_id, receipt.status.value, receipt.verifier_type.value,
+                     Store.dumps(receipt.correlation), Store.dumps(receipt.observed_postcondition), receipt.evidence_pointer, receipt.created_at_ms),
+                )
+                await db.commit()
+            except BaseException:
+                await db.rollback()
+                raise
         return receipt
 
     async def fail_execution(
@@ -315,8 +383,8 @@ class ActionRuntime:
             return current
         now = int(time.time() * 1000)
         await self.store.execute(
-            "UPDATE action_executions SET status=?, error_code=?, evidence_pointer=COALESCE(?,evidence_pointer), updated_at_unix_ms=? WHERE execution_id=?",
-            (status.value, error_code, evidence_pointer, now, execution_id),
+            "UPDATE action_executions SET status=?, error_code=?, evidence_pointer=COALESCE(?,evidence_pointer), updated_at_unix_ms=? WHERE execution_id=? AND status=?",
+            (status.value, error_code, evidence_pointer, now, execution_id, current.status.value),
         )
         result = await self.get_execution(execution_id)
         assert result is not None
@@ -327,39 +395,60 @@ class ActionRuntime:
         return self._row_to_execution(row) if row is not None else None
 
     async def revoke_privileged_for_device(self, requested_by: str) -> int:
+        from van_gateway.action.models import TERMINAL_EXECUTION_STATUSES
         now = int(time.time() * 1000)
+        terminal = tuple(sorted(status.value for status in TERMINAL_EXECUTION_STATUSES))
+        placeholders = ",".join("?" for _ in terminal)
         async with self.store.connection() as db:
             cur = await db.execute(
-                """
+                f"""
                 UPDATE action_executions
                 SET status=?, error_code='DEVICE_OR_GRANT_REVOKED', updated_at_unix_ms=?
                 WHERE requested_by=? AND action_class IN ('A2','A3','A4')
-                  AND status NOT IN ('VERIFIED_SUCCESS','DENIED','EXPIRED','REVOKED','VERIFICATION_FAILED','UNVERIFIABLE')
+                  AND status NOT IN ({placeholders})
                 """,
-                (ExecutionStatus.REVOKED.value, now, requested_by),
+                (ExecutionStatus.REVOKED.value, now, requested_by, *terminal),
             )
             await db.commit()
             return int(cur.rowcount if cur.rowcount is not None and cur.rowcount >= 0 else 0)
 
-    async def _persist_execution(self, execution: ActionExecution) -> ActionExecution:
-        now = int(time.time() * 1000)
-        await self.store.execute(
-            """
-            INSERT INTO action_executions(
-              execution_id, command_id, turn_id, action_id, action_class, principal_type,
-              requested_by, status, idempotency_key, snapshot_id, parameters_digest,
-              submitted_at_ms, verified_at_ms, correlation_json, evidence_pointer, error_code,
-              updated_at_unix_ms
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(execution_id) DO UPDATE SET
-              status=excluded.status, error_code=excluded.error_code, updated_at_unix_ms=excluded.updated_at_unix_ms
-            """,
-            (execution.execution_id, execution.command_id, execution.turn_id, execution.action_id,
-             execution.action_class.value, execution.principal_type.value, execution.requested_by,
-             execution.status.value, execution.idempotency_key, execution.snapshot_id,
-             execution.parameters_digest, execution.submitted_at_ms, execution.verified_at_ms,
-             Store.dumps(execution.correlation), execution.evidence_pointer, execution.error_code, now),
-        )
+    async def _persist_execution(self, execution: ActionExecution, *, permission_parameters: dict[str, Any] | None = None) -> ActionExecution:
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            try:
+                row = await (await db.execute("SELECT * FROM action_executions WHERE execution_id=? OR idempotency_key=?",
+                    (execution.execution_id,execution.idempotency_key))).fetchone()
+                if row is not None:
+                    existing = self._row_to_execution(row)
+                    immutable = ("command_id","turn_id","action_id","action_class","principal_type","requested_by",
+                                 "idempotency_key","snapshot_id","parameters_digest")
+                    if any(getattr(existing,k) != getattr(execution,k) for k in immutable):
+                        raise ActionPolicyError("execution_identity_conflict")
+                    await db.rollback()
+                    return existing
+                if permission_parameters is not None:
+                    from van_gateway.capability.owner_permissions import enforce_permission_scope, OwnerPermissionDenied
+                    try:
+                        await enforce_permission_scope(self.store, action_id=execution.action_id,
+                            parameters=permission_parameters, execution_id=execution.execution_id, claim=True, db=db)
+                    except OwnerPermissionDenied as exc:
+                        raise ActionPolicyError(str(exc)) from exc
+                await db.execute(
+                    """INSERT INTO action_executions(
+                        execution_id,command_id,turn_id,action_id,action_class,principal_type,requested_by,status,
+                        idempotency_key,snapshot_id,parameters_digest,submitted_at_ms,verified_at_ms,
+                        correlation_json,evidence_pointer,error_code,updated_at_unix_ms)
+                        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    (execution.execution_id,execution.command_id,execution.turn_id,execution.action_id,
+                     execution.action_class.value,execution.principal_type.value,execution.requested_by,
+                     execution.status.value,execution.idempotency_key,execution.snapshot_id,
+                     execution.parameters_digest,execution.submitted_at_ms,execution.verified_at_ms,
+                     Store.dumps(execution.correlation),execution.evidence_pointer,execution.error_code,int(time.time()*1000)),
+                )
+                await db.commit()
+            except BaseException:
+                await db.rollback()
+                raise
         return execution
 
     @staticmethod

@@ -218,6 +218,7 @@ KNOWLEDGE: dict[KnowledgeOperationStatus, OwnerWorkStatus] = {
 DECISION: dict[DecisionStatus, OwnerWorkStatus] = {
     DecisionStatus.OPEN: _W.WAITING_ON_YOU,
     DecisionStatus.APPROVED: _W.DONE,
+    DecisionStatus.ANSWERED: _W.DONE,
     DecisionStatus.REJECTED: _W.REFUSED,
     DecisionStatus.EXPIRED: _W.STOPPED,
 }

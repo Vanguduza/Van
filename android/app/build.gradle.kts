@@ -5,13 +5,21 @@ plugins {
 }
 
 import java.util.Properties
+import com.dial.van.buildconfig.VanProductionTarget
+
+// The admitted handset remains arm64. CI's x86_64 emulator needs matching native
+// libraries; this explicit test-only override is refused for release artifacts.
+val vanTestAbi = providers.gradleProperty("VAN_TEST_ABI").orNull
+require(vanTestAbi == null || vanTestAbi == "x86_64") {
+    "VAN_TEST_ABI only supports x86_64 instrumentation builds"
+}
 
 /*
- * Where the app connects, and the CA it pins there. The committed default is
- * android/van-gateway.properties, so every build (CI's debug APK included) ships configured
- * for the direct mutual-TLS link. A VAN_GATEWAY_BASE_URL Gradle property or environment
- * variable overrides it, and then the CA comes from the same override or not at all: the
- * committed CA belongs to the committed address and must never be pinned on another one.
+ * Production connects to VAN on van-trading-core through the separately admitted
+ * oracle-admin VAN TLS ingress; Hermes remains on dial-control. A deployment compiler
+ * supplies the address, pinned CA and host roles together in VAN_DEPLOYMENT_PROFILE_FILE.
+ * The committed historical dial-control address remains a debug fixture. It cannot
+ * qualify a release, and individual overrides cannot split a deployment profile.
  */
 val committedGateway = Properties().apply {
     val file = rootProject.file("van-gateway.properties")
@@ -21,31 +29,38 @@ val overriddenGatewayBaseUrl = providers.gradleProperty("VAN_GATEWAY_BASE_URL")
     .orElse(providers.environmentVariable("VAN_GATEWAY_BASE_URL"))
     .orNull
     ?.trim()
-val vanGatewayBaseUrl = (overriddenGatewayBaseUrl ?: committedGateway.getProperty("VAN_GATEWAY_BASE_URL", "")).trim()
+val overriddenGatewayCaPemB64 = providers.gradleProperty("VAN_GATEWAY_CA_PEM_B64")
+    .orElse(providers.environmentVariable("VAN_GATEWAY_CA_PEM_B64"))
+    .orNull
+    ?.trim()
+val deploymentProfilePath = providers.gradleProperty("VAN_DEPLOYMENT_PROFILE_FILE")
+    .orElse(providers.environmentVariable("VAN_DEPLOYMENT_PROFILE_FILE"))
+    .orNull
+    ?.trim()
+val productionGatewayProfile = deploymentProfilePath?.let { profilePath ->
+    val profileFile = rootProject.file(profilePath)
+    require(profilePath.isNotEmpty() && profileFile.isFile) {
+        "VAN_DEPLOYMENT_PROFILE_FILE must identify an existing deployment properties file"
+    }
+    Properties().apply { profileFile.inputStream().use { load(it) } }
+}
+val gatewayConnection = VanProductionTarget.resolve(
+    committedGateway,
+    productionGatewayProfile,
+    overriddenGatewayBaseUrl,
+    overriddenGatewayCaPemB64,
+)
+val vanGatewayBaseUrl = gatewayConnection.baseUrl
 val escapedVanGatewayBaseUrl = vanGatewayBaseUrl
     .replace("\\", "\\\\")
     .replace("\"", "\\\"")
 
 /*
- * Direct mutual-TLS link to the VAN gateway on the Hermes host: the VAN device CA, as the
- * base64 of its PEM. When set, the app trusts only this CA on the gateway link and presents
- * a Keystore-backed client certificate the gateway issues. Base64 so the PEM's newlines never
- * reach the generated Java source.
+ * End-to-end mutual TLS to VAN: the ingress passes the connection to van-trading-core.
+ * The APK trusts only the selected gateway CA and presents its Keystore-backed certificate.
+ * Base64 keeps PEM newlines out of generated Java source.
  */
-val vanGatewayCaPemB64 = (
-    if (overriddenGatewayBaseUrl != null) {
-        providers.gradleProperty("VAN_GATEWAY_CA_PEM_B64")
-            .orElse(providers.environmentVariable("VAN_GATEWAY_CA_PEM_B64"))
-            .orElse("")
-            .get()
-    } else {
-        committedGateway.getProperty("VAN_GATEWAY_CA_PEM_B64", "")
-    }
-).trim()
-require(vanGatewayCaPemB64.matches(Regex("^[A-Za-z0-9+/=]*$"))) { "VAN_GATEWAY_CA_PEM_B64 must be base64" }
-require(vanGatewayCaPemB64.isEmpty() || vanGatewayBaseUrl.startsWith("https://")) {
-    "VAN_GATEWAY_CA_PEM_B64 is set but VAN_GATEWAY_BASE_URL is not an https:// address to pin it on"
-}
+val vanGatewayCaPemB64 = gatewayConnection.caPemB64
 
 /*
  * ADR-RB-027 — the keys this build will accept a signed connectivity manifest from,
@@ -69,6 +84,10 @@ val escapedVanConnectivityTrustedKeys = vanConnectivityTrustedKeys
 android {
     namespace = "com.dial.van"
     compileSdk = 36
+    // Large acoustic weights are prepared from the source-pinned lock before
+    // building. They are embedded in the signed APK, then installed privately
+    // on first launch; the phone never chooses URLs, hashes or model files.
+    sourceSets.getByName("main").assets.srcDir(layout.buildDirectory.dir("generated/voice-assets"))
 
     defaultConfig {
         applicationId = "com.dial.van"
@@ -104,6 +123,10 @@ android {
          */
         ndk {
             abiFilters += "arm64-v8a"
+            if (vanTestAbi != null) {
+                abiFilters.clear()
+                abiFilters += vanTestAbi
+            }
         }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -149,10 +172,21 @@ android {
     // Check when the task graph is ready so dependent minify/package steps also abort early.
     gradle.taskGraph.whenReady {
         val releaseRequested = allTasks.any { task ->
-            val n = task.name
-            n == "assembleRelease" || n == "bundleRelease" || n.endsWith(":assembleRelease") || n.endsWith(":bundleRelease")
+            task.project == project && task.name.contains("Release")
+        }
+        require(vanTestAbi == null || !releaseRequested) {
+            "Release ABI refused: VAN_TEST_ABI is test-only"
         }
         if (releaseRequested) {
+            try {
+                VanProductionTarget.requireReleaseProfile(
+                    productionGatewayProfile,
+                    vanGatewayBaseUrl,
+                    vanGatewayCaPemB64,
+                )
+            } catch (invalid: IllegalArgumentException) {
+                throw GradleException("Release deployment target refused: ${invalid.message}")
+            }
             if (!vanGatewayBaseUrl.startsWith("https://")) {
                 throw GradleException(
                     "Release gateway configuration refused: VAN_GATEWAY_BASE_URL must be a stable HTTPS URL.",
@@ -278,10 +312,14 @@ dependencies {
 
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
     implementation("androidx.biometric:biometric:1.1.0")
+    // Explicit: FragmentActivity owns the SAF ActivityResult launchers. Do not
+    // inherit Biometric's older Fragment runtime through an unrelated dependency.
+    implementation("androidx.fragment:fragment-ktx:1.7.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
-    implementation("app.rive:rive-android:9.6.5")
+    // Both Rive native libraries must load on Android's 16 KiB page-size devices.
+    implementation("app.rive:rive-android:9.13.10")
 
     /*
      * Rev 1.5 §32 — the Remote Browser's two admitted dependencies.
@@ -346,6 +384,20 @@ dependencies {
  * shipping Sherpa, or adding an API branch that resolves to a runtime this build does not
  * contain, stops the build rather than the owner.
  */
+val voiceAssetsGuard = tasks.register<Exec>("assertVoiceAssetsAreSealed") {
+    workingDir(rootProject.projectDir.parentFile)
+    commandLine(
+        providers.environmentVariable("VAN_ASSET_PYTHON").orElse("python3").get(),
+        "android/tools/package_voice_assets.py", "--verify",
+    )
+    // Verification deliberately rehashes the actual bytes being packaged.
+    // A previous valid pack cannot authorize missing or changed build inputs.
+    outputs.upToDateWhen { false }
+}
+
+tasks.matching { it.name.startsWith("merge") && it.name.endsWith("Assets") }
+    .configureEach { dependsOn(voiceAssetsGuard) }
+
 val voiceRuntimeGuard = tasks.register("assertVoiceRuntimeIsShippable") {
     val policySource = layout.projectDirectory
         .file("src/main/java/com/dial/van/voice/VoiceRecognitionModels.kt").asFile
@@ -391,4 +443,4 @@ val voiceRuntimeGuard = tasks.register("assertVoiceRuntimeIsShippable") {
 }
 
 tasks.matching { it.name.startsWith("assemble") || it.name.startsWith("bundle") }
-    .configureEach { dependsOn(voiceRuntimeGuard) }
+    .configureEach { dependsOn(voiceRuntimeGuard, voiceAssetsGuard) }

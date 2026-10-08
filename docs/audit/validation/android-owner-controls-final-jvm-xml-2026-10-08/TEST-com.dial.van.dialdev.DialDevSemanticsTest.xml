@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.dialdev.DialDevSemanticsTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:43:33" hostname="052fefa249ff" time="0.005">
+  <properties/>
+  <testcase name="a terminal or blocked state is not relabelled by the candidate flag()" classname="com.dial.van.dialdev.DialDevSemanticsTest" time="0.0"/>
+  <testcase name="progress events map onto DNA roles, and a completion candidate event is never favourable()" classname="com.dial.van.dialdev.DialDevSemanticsTest" time="0.002"/>
+  <testcase name="only the projection's own PASS reads passed, whatever the candidate flag says()" classname="com.dial.van.dialdev.DialDevSemanticsTest" time="0.0"/>
+  <testcase name="the table covers every DIAL state this build knows, and every role is a DNA role()" classname="com.dial.van.dialdev.DialDevSemanticsTest" time="0.0"/>
+  <testcase name="only NOT_APPLICABLE is hidden from lists()" classname="com.dial.van.dialdev.DialDevSemanticsTest" time="0.0"/>
+  <testcase name="state parsing is case- and space-tolerant but exact on the name()" classname="com.dial.van.dialdev.DialDevSemanticsTest" time="0.0"/>
+  <testcase name="captions drop a detail DIAL did not send rather than inventing one()" classname="com.dial.van.dialdev.DialDevSemanticsTest" time="0.0"/>
+  <testcase name="the smaller vocabularies map onto DNA roles, and unknown words onto disabled()" classname="com.dial.van.dialdev.DialDevSemanticsTest" time="0.0"/>
+  <testcase name="an unknown state is shown as itself in the disabled role, not guessed()" classname="com.dial.van.dialdev.DialDevSemanticsTest" time="0.0"/>
+  <testcase name="every row of the section 4 table maps exactly()" classname="com.dial.van.dialdev.DialDevSemanticsTest" time="0.0"/>
+  <testcase name="a completion candidate never renders as passed()" classname="com.dial.van.dialdev.DialDevSemanticsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

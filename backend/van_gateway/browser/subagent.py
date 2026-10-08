@@ -26,7 +26,7 @@ import re
 import time
 import uuid
 from enum import Enum
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
 
 from pydantic import BaseModel, Field
 
@@ -110,8 +110,14 @@ class SubagentResult(BaseModel):
     detail: str | None = None
 
     @property
-    def succeeded(self) -> bool:
+    def execution_completed(self) -> bool:
         return self.stop_reason is SubagentStop.GOAL_ACHIEVED
+
+    @property
+    def succeeded(self) -> bool:
+        # This runner has no independent postcondition observer. Completion is
+        # the worker's claim; owner success belongs to the gateway verifier.
+        return False
 
     @property
     def step_count(self) -> int:
@@ -156,8 +162,9 @@ class BrowserSubagentRunner:
     corrected-and-continued.
     """
 
-    def __init__(self, policy: BrowserPolicyEngine | None = None) -> None:
+    def __init__(self, policy: BrowserPolicyEngine | None = None, *, clock_ms: Callable[[], int] | None = None) -> None:
         self.policy = policy or BrowserPolicyEngine()
+        self.clock_ms = clock_ms or (lambda: int(time.time() * 1000))
 
     async def run(
         self,
@@ -188,9 +195,14 @@ class BrowserSubagentRunner:
         extraction: dict[str, Any] = {}
         last_observation: str | None = None
         stagnant = 0
-        now = int(time.time() * 1000) if now_ms is None else now_ms
+        clock_start = self.clock_ms()
+        initial_ms = clock_start if now_ms is None else now_ms
+
+        def current_ms() -> int:
+            return initial_ms + max(0, self.clock_ms() - clock_start)
 
         for index in range(assignment.max_steps):
+            now = current_ms()
             if assignment.deadline_ms is not None and now >= assignment.deadline_ms:
                 return self._stop(assignment, task, steps, extraction, SubagentStop.DEADLINE_REACHED)
 
@@ -202,13 +214,17 @@ class BrowserSubagentRunner:
                     detail=f"{type(exc).__name__}",
                 )
 
-            if action.done:
-                return self._stop(assignment, task, steps, extraction, SubagentStop.GOAL_ACHIEVED)
+            now = current_ms()
+            if assignment.deadline_ms is not None and now >= assignment.deadline_ms:
+                return self._stop(assignment, task, steps, extraction, SubagentStop.DEADLINE_REACHED)
 
             violation = self._check(assignment, action)
             if violation is not None:
                 stop, detail = violation
                 return self._stop(assignment, task, steps, extraction, stop, detail=detail)
+
+            if action.done:
+                return self._stop(assignment, task, steps, extraction, SubagentStop.GOAL_ACHIEVED)
 
             try:
                 observation = await worker.execute(assignment, action)
@@ -217,6 +233,7 @@ class BrowserSubagentRunner:
                     assignment, task, steps, extraction, SubagentStop.WORKER_ERROR,
                     detail=f"{type(exc).__name__}",
                 )
+            now = current_ms()
 
             # Page content is data. It cannot raise the class or carry secrets, and
             # a page that tries to redirect the task ends it.
@@ -247,11 +264,15 @@ class BrowserSubagentRunner:
             if observation.extraction:
                 extraction.update(observation.extraction)
 
+            if assignment.deadline_ms is not None and now >= assignment.deadline_ms:
+                # Preserve the observation from the action already sent, but never
+                # begin another action or accept a late worker success claim.
+                return self._stop(assignment, task, steps, extraction, SubagentStop.DEADLINE_REACHED)
+
             stagnant = stagnant + 1 if observation_digest == last_observation else 0
             if stagnant >= assignment.max_steps_without_progress:
                 return self._stop(assignment, task, steps, extraction, SubagentStop.NO_PROGRESS)
             last_observation = observation_digest
-            now += 1
 
         return self._stop(assignment, task, steps, extraction, SubagentStop.BUDGET_EXHAUSTED)
 

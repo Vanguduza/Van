@@ -70,9 +70,12 @@ async def _enroll(ac, app, device_id="dev"):
 
 async def _cmd(ac, app, *, text, action="A1", project=None, trust="CONVERSATION", approval=None, age=0, key="k"):
     issued = int(time.time()) - age
-    canonical = AuthService.canonical_command("cmd", key, "dev", issued, text, action, project)
+    # Separate owner intents need separate immutable command identities. Reusing
+    # the same key still models a retry of the same logical command.
+    command_id = f"cmd-{key}"
+    canonical = AuthService.canonical_command(command_id, key, "dev", issued, text, action, project)
     body = {
-        "command_id": "cmd",
+        "command_id": command_id,
         "idempotency_key": key,
         "device_id": "dev",
         "issued_at_unix": issued,

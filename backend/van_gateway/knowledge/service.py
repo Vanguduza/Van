@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import httpx
 from pydantic import ValidationError
 
 from van_gateway.action.models import ExecutionStatus, VerificationObservation
@@ -262,6 +263,19 @@ class KnowledgeRuntime:
             return await actions.fail_execution(
                 execution_id, status=self._provider_failure_status(str(exc)), error_code=str(exc),
             )
+        except httpx.TimeoutException:
+            # The provider handles ambiguous mutation responses in its durable
+            # operation ledger. An unhandled preflight/readback transport fault
+            # must also close the canonical action, rather than leave EXECUTING.
+            return await actions.fail_execution(
+                execution_id, status=ExecutionStatus.RETRYABLE_FAILURE,
+                error_code="knowledge_provider_timeout",
+            )
+        except httpx.HTTPError:
+            return await actions.fail_execution(
+                execution_id, status=ExecutionStatus.RETRYABLE_FAILURE,
+                error_code="knowledge_provider_unavailable",
+            )
 
         if result.status == KnowledgeOperationStatus.VERIFIED_SUCCESS:
             await actions.mark_submitted(
@@ -274,7 +288,7 @@ class KnowledgeRuntime:
                 correlation=result.correlation,
                 observed_postcondition=result.observed_postcondition,
                 evidence_pointer=result.evidence_pointer,
-            ))
+            ), independent_observer=True)
         if result.status == KnowledgeOperationStatus.SUBMITTED:
             return await actions.mark_submitted(
                 execution_id, correlation=result.correlation, evidence_pointer=result.evidence_pointer,

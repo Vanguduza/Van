@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.BrowserSessionRecordsTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:43:33" hostname="052fefa249ff" time="0.003">
+  <properties/>
+  <testcase name="server inventory retains target identity digest and active state()" classname="com.dial.van.browser.BrowserSessionRecordsTest" time="0.002"/>
+  <testcase name="malformed or repeated identity is unavailable rather than empty records()" classname="com.dial.van.browser.BrowserSessionRecordsTest" time="0.0"/>
+  <testcase name="null digest and title do not become secret or invented address()" classname="com.dial.van.browser.BrowserSessionRecordsTest" time="0.001"/>
+  <testcase name="events preserve durable time severity evidence without claiming work completion()" classname="com.dial.van.browser.BrowserSessionRecordsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

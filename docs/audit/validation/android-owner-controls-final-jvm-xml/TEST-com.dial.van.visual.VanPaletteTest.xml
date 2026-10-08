@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.visual.VanPaletteTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:34" hostname="052fefa249ff" time="0.004">
+  <properties/>
+  <testcase name="scheme selection follows the mode()" classname="com.dial.van.visual.VanPaletteTest" time="0.001"/>
+  <testcase name="contrast arithmetic matches the published values()" classname="com.dial.van.visual.VanPaletteTest" time="0.0"/>
+  <testcase name="the deprecated parent theme is gone and a night configuration exists()" classname="com.dial.van.visual.VanPaletteTest" time="0.0"/>
+  <testcase name="both schemes carry body text at AA()" classname="com.dial.van.visual.VanPaletteTest" time="0.0"/>
+  <testcase name="the window theme agrees with the palette()" classname="com.dial.van.visual.VanPaletteTest" time="0.001"/>
+  <testcase name="the outline is visible against its surface()" classname="com.dial.van.visual.VanPaletteTest" time="0.0"/>
+  <testcase name="the glow cyan is not used as a light-mode primary()" classname="com.dial.van.visual.VanPaletteTest" time="0.001"/>
+  <testcase name="the light scheme is not the dark one with the background flipped()" classname="com.dial.van.visual.VanPaletteTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

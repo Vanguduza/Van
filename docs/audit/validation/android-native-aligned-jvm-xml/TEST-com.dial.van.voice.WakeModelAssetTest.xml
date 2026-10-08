@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.WakeModelAssetTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:49" hostname="052fefa249ff" time="0.002">
+  <properties/>
+  <testcase name="a plausible model with no pinned digest is accepted()" classname="com.dial.van.voice.WakeModelAssetTest" time="0.001"/>
+  <testcase name="no model at all is absent, and says so()" classname="com.dial.van.voice.WakeModelAssetTest" time="0.0"/>
+  <testcase name="a matching digest is accepted whatever its case()" classname="com.dial.van.voice.WakeModelAssetTest" time="0.0"/>
+  <testcase name="a placeholder is not a model()" classname="com.dial.van.voice.WakeModelAssetTest" time="0.0"/>
+  <testcase name="only READY reports ready()" classname="com.dial.van.voice.WakeModelAssetTest" time="0.0"/>
+  <testcase name="a model that is not the one the release pinned is refused()" classname="com.dial.van.voice.WakeModelAssetTest" time="0.0"/>
+  <testcase name="every state has a sentence and none of them names an enum or a path()" classname="com.dial.van.voice.WakeModelAssetTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -23,11 +23,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
 import com.dial.van.VanApplication
 import com.dial.van.command.AdminCard
 import com.dial.van.command.SectionHeader
 import com.dial.van.command.TruthMessage
 import com.dial.van.voice.SpeechContext
+import com.dial.van.voice.SpeakerEnrollmentPanel
 
 /**
  * Teaching VAN the words it keeps getting wrong.
@@ -44,7 +46,7 @@ import com.dial.van.voice.SpeechContext
  * learns its own mistakes.
  */
 @Composable
-internal fun SpeechModule(app: VanApplication, glass: com.dial.van.visual.VanGlassStyle) {
+internal fun SpeechModule(app: VanApplication, glass: com.dial.van.visual.VanGlassStyle, ownerActivity: FragmentActivity? = null) {
     val model = app.personalSpeechModel
     var heard by rememberSaveable { mutableStateOf("") }
     var meant by rememberSaveable { mutableStateOf("") }
@@ -62,6 +64,7 @@ internal fun SpeechModule(app: VanApplication, glass: com.dial.van.visual.VanGla
         contentPadding = PaddingValues(vertical = 8.dp),
     ) {
         item { SectionHeader("Speech", "Words Van keeps getting wrong") }
+        item { AdminCard(glass) { SpeakerEnrollmentPanel(app, ownerActivity) } }
         message?.let { item { TruthMessage(it) } }
 
         item {
@@ -91,15 +94,16 @@ internal fun SpeechModule(app: VanApplication, glass: com.dial.van.visual.VanGla
                         // recordCorrection refuses a blank pair, an identical pair, and a
                         // trust level below OWNER_CONFIRMED. The screen reports what it
                         // decided rather than assuming it took.
+                        val corrected = meant.trim()
                         val taught = model.recordCorrection(
                             observed = heard,
-                            corrected = meant,
+                            corrected = corrected,
                             contexts = setOf(selected),
                         )
                         message = if (taught) {
                             heard = ""
                             meant = ""
-                            "Van will hear that as \"$meant\" from now on."
+                            "Van will hear that as \"$corrected\" from now on."
                         } else {
                             "Nothing to learn there — the two need to differ, and neither can be empty."
                         }

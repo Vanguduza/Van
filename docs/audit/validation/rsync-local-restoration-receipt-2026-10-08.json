@@ -1,0 +1,44 @@
+{
+  "status": "LOCAL_RSYNC_RESTORED_FROM_SIGNATURE_VERIFIED_CACHED_DEBIAN_PACKAGES",
+  "wrapper": "/workspace/.onboarding/bin/rsync",
+  "wrapper_sha256": "7b35c940b56dedd10762c678c62ca20c2b4c29a27efbd91cef7d734db8bbf01a",
+  "binary": "/workspace/.onboarding/browser-parser/rsync-root/usr/bin/rsync",
+  "binary_sha256": "a56c05b960beb734169619d5760b43ff495e84f85a93eb1f54fe58118262fb20",
+  "version": "rsync  version 3.4.1  protocol version 32",
+  "archive_keyring_sha256": "506b815cbb32d9b6066b4a2aa524071e071761e7e7f68c3ac74f3061ba852017",
+  "InRelease_sha256": "0584fba32e13e0ab8285fb16c27adea1ec03a73669c18702821094fd6ca86675",
+  "Packages_xz_sha256": "7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498",
+  "signature_verification_exit_code": 0,
+  "valid_signature_fingerprints": [
+    "4CB50190207B4758A3F73A796ED0E7B82643E131",
+    "B8E5F13176D2A7A75220028078DBA3BC47EF2265",
+    "41587F7DB8C774BCCF131416762F67A0B2C39DE4"
+  ],
+  "packages": {
+    "libpopt0": {
+      "version": "1.19+dfsg-2",
+      "package_sha256": "07f649b706852af937654295697dcfc7858f3295718ec18681dce1704663e4f2",
+      "package_bytes": 43844,
+      "verified_extracted_files": {
+        "/workspace/.onboarding/browser-parser/rsync-root/usr/lib/x86_64-linux-gnu/libpopt.so.0.0.2": "f17e0e11908c7ce3a54c7e24ef99b8a571e410c78c3ac1d3abdca94d11152e41"
+      }
+    },
+    "rsync": {
+      "version": "3.4.1+ds1-5+deb13u4",
+      "package_sha256": "8aa122f6ba8d2ff112c72bb9814ee096ee516f0213b36b98bbe79c83c92fb226",
+      "package_bytes": 432964,
+      "verified_extracted_files": {
+        "/workspace/.onboarding/browser-parser/rsync-root/usr/bin/rsync": "a56c05b960beb734169619d5760b43ff495e84f85a93eb1f54fe58118262fb20"
+      }
+    }
+  },
+  "local_transfer_delete_exclude_passed": true,
+  "global_production_manifest_sha256": "7a2ea2642fb6ed0467e52c93344d4706c67cf98e211b9ebf5a7d01ea2e322c88",
+  "global_production_inputs": 1413,
+  "global_production_bytes_stable": true,
+  "usr_mutations": 0,
+  "network_downloads": 0,
+  "setup_draft_mutations": 0,
+  "live_host_actions": 0,
+  "export_for_affected_suite": "PATH=/workspace/.onboarding/bin:$PATH"
+}

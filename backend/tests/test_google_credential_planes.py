@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import pytest
 
-from van_gateway.google.mesh import GoogleCredentialPlane
+from van_gateway.google.mesh import GoogleCapabilityState, GoogleCredentialPlane
 from van_gateway.google.planes import (
     PlaneState,
     capabilities_by_plane,
@@ -60,9 +60,10 @@ class FakeProvider:
 
 
 class FakeBroker:
-    def __init__(self, *, registered: bool, status: str = "active") -> None:
+    def __init__(self, *, registered: bool, status: str = "VERIFIED_OWNER_ACCOUNT", runtime_state: str = "READY") -> None:
         self._registered = registered
         self._status = status
+        self._runtime_state = runtime_state
 
     async def principal_status(self, owner_id: str | None = None):
         class Principal:
@@ -70,6 +71,10 @@ class FakeBroker:
             status = self._status
 
         return Principal()
+
+    async def capability_status(self, capability_id):
+        from types import SimpleNamespace
+        return SimpleNamespace(state=GoogleCapabilityState(self._runtime_state))
 
 
 async def _health(**overrides):
@@ -139,6 +144,26 @@ class TestEachPlaneIsAnsweredByItsOwnAuthority:
     async def test_an_unregistered_principal_is_not_a_working_runtime(self):
         planes = {p.plane: p for p in await _health(broker=FakeBroker(registered=False))}
         assert planes[GoogleCredentialPlane.GEMINI_RUNTIME].usable is False
+
+    async def test_a_registered_principal_without_runtime_evidence_is_not_authenticated(self):
+        planes = {p.plane: p for p in await _health(broker=FakeBroker(registered=True, runtime_state="CONFIGURED"))}
+        assert planes[GoogleCredentialPlane.GEMINI_RUNTIME].state == PlaneState.AUTH_REQUIRED
+
+    @pytest.mark.parametrize("state", ["READY", "CAPACITY_LIMITED", "RATE_LIMITED"])
+    async def test_real_principal_status_and_runtime_evidence_answer_authentication(self, tmp_path, state):
+        from pathlib import Path
+        from van_gateway.google.mesh import GoogleCapabilityRegistry, GoogleIdentityBroker
+        from van_gateway.storage.db import Store
+
+        store = Store(str(tmp_path / "runtime-plane.sqlite3"))
+        await store.migrate()
+        broker = GoogleIdentityBroker(store, GoogleCapabilityRegistry(str(Path(__file__).resolve().parents[2] / "registries/google_capabilities.json")))
+        principal = await broker.register_principal(subject="synthetic-owner")
+        assert principal.status == "VERIFIED_OWNER_ACCOUNT"
+        await broker.record_capability_evidence("gemini", state=GoogleCapabilityState(state), evidence_pointer="synthetic://runtime")
+        planes = {p.plane: p for p in await _health(broker=broker)}
+        assert planes[GoogleCredentialPlane.GEMINI_RUNTIME].state == PlaneState.READY
+        assert (await broker.capability_status("gemini")).state.value == state
 
 
 @pytest.mark.asyncio
@@ -288,3 +313,38 @@ class TestTheRouteIsReachableThroughTheRealApp:
         for plane in body["planes"]:
             if not plane["usable"]:
                 assert plane["detail"], f"{plane['plane']} is not ready and does not say why"
+
+    async def test_android_reads_real_principal_and_independent_capabilities(self):
+        from httpx import ASGITransport, AsyncClient
+        from van_gateway.app import create_app
+
+        app = create_app()
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test",
+            headers={"X-Van-Ingress-Token": "planes-ingress-token-0123456789"},
+        ) as ac:
+            async with app.router.lifespan_context(app):
+                await self._as_owner_device(ac, app)
+                broker = app.state.google_broker
+                await broker.register_principal(subject="synthetic-owner")
+                await broker.register_principal(subject="synthetic-worker", owner_id="antigravity_worker_account")
+                for capability, state in (("stitch", "READY"), ("antigravity", "READY"), ("gemini", "CAPACITY_LIMITED")):
+                    await broker.record_capability_evidence(capability, state=GoogleCapabilityState(state), evidence_pointer=f"synthetic://{capability}")
+                response = await ac.get("/v1/google/planes")
+
+        assert response.status_code == 200
+        body = response.json()
+        # These are the exact keys ConnectedRoute reads, rather than a fake shape.
+        assert body["principal"]["registered"] is True
+        capabilities = {c["capability_id"]: c for c in body["capabilities"]}
+        assert capabilities["stitch"]["state"] == "READY"
+        assert capabilities["antigravity"]["state"] == "READY"
+        assert capabilities["antigravity"]["identity_alias"] == "antigravity_worker_account"
+        assert capabilities["gemini"]["state"] == "CAPACITY_LIMITED"
+        assert capabilities["gemini_notebook_enterprise"]["state"] != "READY"
+        assert capabilities["gemini_notebook"]["state"] != "READY"
+        assert "stitch" in body["capabilities_whose_credential_plane_is_ready"]
+        assert "antigravity" in body["capabilities_whose_credential_plane_is_ready"]
+        assert "gemini_notebook_enterprise" in body["capabilities_blocked_by_their_credential_plane"]
+        assert "gemini_notebook" in body["capabilities_blocked_by_their_credential_plane"]
+        assert {p["plane"] for p in body["planes"]} == {p.value for p in GoogleCredentialPlane}

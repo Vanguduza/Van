@@ -29,6 +29,11 @@ private fun ticket(
  * Rev 1.5 §19 — a page asked for a file, and what VAN does and does not do with it.
  */
 class BrowserUploadPolicyTest {
+    @Test fun `plain chooser does not invent a producer binding`() {
+        assertEquals("", request().chooserId)
+        assertEquals("", request().mediaEpoch)
+        assertEquals(0L, request().expiresAtMs)
+    }
 
     @Test
     fun `a ticket has nowhere to put a byte`() {

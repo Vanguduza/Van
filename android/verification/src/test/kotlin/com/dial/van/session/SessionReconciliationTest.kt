@@ -19,6 +19,14 @@ import kotlin.test.assertTrue
  */
 class SessionReconciliationTest {
 
+    @Test fun `a durable admission with no recorded result remains recoverable`() {
+        val plan = SessionReconciliation.plan(
+            pending("msg_pending" to "cmd_pending"), mapOf("cmd_pending" to SessionReconciliation.RESULT_PENDING),
+        )
+        assertEquals(listOf("msg_pending"), plan.resend)
+        assertTrue(plan.settle.isEmpty())
+    }
+
     private fun pending(vararg ids: Pair<String, String?>) =
         ids.map { (messageId, commandId) -> SessionReconciliation.Pending(messageId, commandId) }
 

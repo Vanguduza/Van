@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.security.Pkcs10Test" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:28" hostname="052fefa249ff" time="0.004">
+  <properties/>
+  <testcase name="lengths use the shortest DER form()" classname="com.dial.van.security.Pkcs10Test" time="0.0"/>
+  <testcase name="the encoder reproduces the signed bytes of the request the gateway accepts()" classname="com.dial.van.security.Pkcs10Test" time="0.002"/>
+  <testcase name="a request is well formed and signed by the key it carries()" classname="com.dial.van.security.Pkcs10Test" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -20,12 +20,14 @@ from __future__ import annotations
 import json
 
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Query, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from van_gateway.auth.control_scopes import ControlScope, require_scoped_internal
 from van_gateway.attention.scoring import AttentionScorer
 from van_gateway.learning.feed import LearningFeed
+from van_gateway.learning.observations import ObservedLearning
 from van_gateway.capability.permissions import PermissionRegistry
 from van_gateway.config import Settings
 from van_gateway.evolution.radar import (
@@ -36,6 +38,7 @@ from van_gateway.evolution.radar import (
 )
 from van_gateway.evolution.vaneval import VanEval
 from van_gateway.proactive.autonomy import DomainTrustService, ProactivePolicyService
+from van_gateway.proactive.owner_control import ACTION_ID, COMMAND_PREFIX, SUPPORTED_LEVELS, known_autonomy_domains
 from van_gateway.reasoning.kernel import CriticalReasoningKernel
 from van_gateway.storage.db import Store
 from van_gateway.reasoning.calibration import RelationshipCalibrationEngine
@@ -52,6 +55,18 @@ from van_gateway.understanding.owner_model import (
     OwnerCognitiveModel,
     OwnerModelError,
     OwnerModelField,
+)
+from van_gateway.understanding.owner_preferences import (
+    ComplementPreferenceBody,
+    OwnerDeclarationStore,
+    VocabularyDefinitionBody,
+    normalize_domain,
+    normalize_project,
+    normalize_term,
+)
+from van_gateway.understanding.records import OwnerRecords
+from van_gateway.understanding.record_models import (
+    MemoryRecordView, MemoryRecordPage, MemoryRecordErasurePlan, LearningProducersView,
 )
 
 
@@ -86,6 +101,9 @@ class UnderstandingApi:
         self.owner_model = OwnerCognitiveModel(store, learning=LearningFeed(store))
         self.vocabulary = SharedVocabularyRegistry(store)
         self.complement = CognitiveComplementMap(store)
+        self.owner_declarations = OwnerDeclarationStore(store)
+        self.records = OwnerRecords(store)
+        self.observed_learning = ObservedLearning(store)
         self.growth = SymbioticGrowthLedger(store)
         self.kernel = CriticalReasoningKernel(store)
         # P2-DEAD-001 — §75. The engine decides how VAN says a thing and how hard it pushes,
@@ -160,6 +178,96 @@ class UnderstandingApi:
     def _install_routes(self) -> None:
         router = self.router
 
+        def declaration_response(value: dict):
+            return JSONResponse(value, headers={"Cache-Control": "no-store"})
+
+        async def owner_record_call(request: Request, operation):
+            await self.owner_declarations.require_read(request)
+            try:
+                return declaration_response(await operation())
+            except LookupError as exc:
+                raise HTTPException(404, "memory_record_not_found") from exc
+            except ValueError as exc:
+                raise HTTPException(422, "memory_record_selector_invalid") from exc
+
+        @router.get("/context/records", response_model=MemoryRecordPage)
+        async def memory_records(request: Request, store: str = Query(..., min_length=1, max_length=64),
+                                 limit: int = Query(50, ge=1, le=100), cursor: int = Query(0, ge=0, le=1_000_000)):
+            return await owner_record_call(request, lambda: self.records.list(store, limit=limit, cursor=cursor))
+
+        @router.get("/context/records/{store}/{record_id}", response_model=MemoryRecordView)
+        async def memory_record_detail(request: Request, store: str, record_id: str):
+            return await owner_record_call(request, lambda: self.records.exact(store, record_id))
+
+        @router.get("/context/records/{store}/{record_id}/export", response_model=MemoryRecordView)
+        async def memory_record_export(request: Request, store: str, record_id: str):
+            return await owner_record_call(request, lambda: self.records.exact(store, record_id))
+
+        @router.get("/context/records/{store}/{record_id}/erasure-plan", response_model=MemoryRecordErasurePlan)
+        async def memory_record_erasure_plan(request: Request, store: str, record_id: str):
+            return await owner_record_call(request, lambda: self.records.erasure_plan(store, record_id))
+
+        @router.get("/understanding/learning/producers", response_model=LearningProducersView)
+        async def learning_producers(request: Request):
+            await self.owner_declarations.require_read(request)
+            import time
+            now = int(time.time() * 1000)
+            producers = []
+            for producer_id, operation in (("decision-patterns", self.observed_learning.decisions),
+                                            ("external-contradictions", self.observed_learning.external)):
+                try:
+                    result = await operation(now_ms=now)
+                    summary = {key: value for key, value in result.items() if key not in {"patterns", "comparisons", "contradictions"}}
+                    summary["comparisons"] = result.get("comparison_count", result.get("comparisons", 0))
+                    producers.append(summary)
+                except Exception:
+                    producers.append({"id": producer_id, "active": True, "status": "DEGRADED",
+                        "observations": None, "comparisons": None, "unmeasured": None,
+                        "observed_at_ms": now, "evidence_refs": [], "snapshot_sha256": None,
+                        "why": "Persisted observations could not be read; no result was inferred."})
+            return declaration_response({"observed_at_ms": now, "producers": producers, "execution_grant": False})
+
+        @router.get("/understanding/vocabulary")
+        async def vocabulary_read(
+            request: Request, term: str | None = Query(None, min_length=1, max_length=128),
+            project_id: str | None = Query(None, min_length=1, max_length=64),
+        ):
+            await self.owner_declarations.require_read(request)
+            if term is None:
+                if project_id is not None:
+                    raise HTTPException(422, "vocabulary_term_required_for_exact_scope")
+                return declaration_response(await self.owner_declarations.all("vocabulary"))
+            try:
+                scope = {"term": normalize_term(term), "project_id": normalize_project(project_id)}
+            except ValueError as exc:
+                raise HTTPException(422, str(exc)) from exc
+            # Exact readback must never substitute a global definition for a missing
+            # project-specific target (the conversational resolver may still do that).
+            return declaration_response(await self.owner_declarations.exact("vocabulary", scope))
+
+        @router.put("/understanding/vocabulary")
+        async def vocabulary_write(request: Request, body: VocabularyDefinitionBody):
+            if body.project_id is not None and body.project_id not in request.app.state.projects.known_projects():
+                raise HTTPException(404, "owner_memory_project_not_known")
+            return declaration_response(await self.owner_declarations.save("vocabulary", body, request))
+
+        @router.get("/understanding/complement/preferences")
+        async def complement_preference_read(
+            request: Request, domain: str | None = Query(None, min_length=1, max_length=128),
+        ):
+            await self.owner_declarations.require_read(request)
+            if domain is None:
+                return declaration_response(await self.owner_declarations.all("complement"))
+            try:
+                scope = {"domain": normalize_domain(domain)}
+            except ValueError as exc:
+                raise HTTPException(422, str(exc)) from exc
+            return declaration_response(await self.owner_declarations.exact("complement", scope))
+
+        @router.put("/understanding/complement/preferences")
+        async def complement_preference_write(request: Request, body: ComplementPreferenceBody):
+            return declaration_response(await self.owner_declarations.save("complement", body, request))
+
         @router.get("/understanding")
         async def understanding(owner_principal_id: str = "owner"):
             """§33 — what VAN believes, how firmly, and what it has adapted."""
@@ -232,12 +340,11 @@ class UnderstandingApi:
         async def decision_fingerprints():
             """§65 — what you decided and how it turned out.
 
-            §12 forbids treating an inferred pattern as an unquestionable rule and
-            requires outcomes to be able to falsify one. VAN does not currently infer why
-            the owner decided anything, so every fingerprint here has a null inferred
-            reason and `falsified` is empty. That is reported explicitly: an owner reading
-            "no falsified patterns" from a silent surface would reasonably take it to mean
-            VAN's model of them is accurate, when it means VAN has not made a claim.
+            §12 forbids treating a candidate as an unquestionable rule. The producer
+            describes repeated observed choices in exact typed task contexts, reports
+            counterexamples and separate independently verified outcome counts, and never
+            guesses psychological reasons. Missing, generic or stale evidence stays
+            unmeasured; no candidate changes permission or execution authority.
             """
             rows = await self.store.fetchall(
                 "SELECT decision_id, mission_id, owner_choice, owner_stated_reason, "
@@ -247,13 +354,7 @@ class UnderstandingApi:
             return {
                 "decisions": [dict(r) for r in rows],
                 "falsified": await self.fingerprints.falsified(),
-                "pattern_inference": {
-                    "active": False,
-                    "why": (
-                        "VAN records what you decided and how it turned out. It does not "
-                        "infer why, so there is nothing here for an outcome to falsify."
-                    ),
-                },
+                "pattern_inference": await self.observed_learning.decisions(),
             }
 
         @router.get("/projects/{project_id}/strategic-memory")
@@ -403,7 +504,13 @@ class UnderstandingApi:
                     "false_successes": trust.false_successes,
                     "suspended_for_false_success": trust.has_unrecovered_false_success,
                 })
-            return {"domains": domains, "policies": await self.policies.policies()}
+            return {"domains": domains, "policies": await self.policies.policies(),
+                "known_domains": await known_autonomy_domains(self.store),
+                "supported_levels": list(SUPPORTED_LEVELS), "typed_command_prefix": COMMAND_PREFIX,
+                "owner_ceiling_command": {"action_id": ACTION_ID, "text_prefix": COMMAND_PREFIX,
+                    "parameter_fields": ["domain", "level"], "action_class": "A4",
+                    "max_age_seconds": 30, "requires_fresh_biometric": True,
+                    "changes_standing_policies": False, "overrides_native_action_authority": False}}
 
         @router.get("/strategies")
         async def strategies():
@@ -468,10 +575,10 @@ class UnderstandingApi:
             protecting nothing. Every observation here comes from a research result with a
             citable source; the model refuses to record one without.
 
-            `contradicts_owner_belief` is never set, because nothing compares a search
-            result with the owner model. That is reported rather than left to be inferred:
-            an empty contradiction list from a silent surface reads as the world agreeing
-            with the owner, when it means no comparison was made.
+            The bounded producer compares source-bound structured provider claims with
+            exact current owner declarations. Headlines/prose remain unmeasured. A
+            disagreement is evidence of different claims, not proof the owner is wrong,
+            and neither stored assertion is rewritten by the comparison.
             """
             observations = (
                 await self.reality.current(subject) if subject
@@ -485,14 +592,8 @@ class UnderstandingApi:
             return {
                 "subject": subject,
                 "observations": observations,
-                "contradictions": await self.reality.contradictions(),
-                "contradiction_detection": {
-                    "active": False,
-                    "why": (
-                        "nothing compares an external observation with the owner model, so "
-                        "no observation is marked as contradicting one"
-                    ),
-                },
+                "contradictions": (detected := await self.observed_learning.external())["contradictions"],
+                "contradiction_detection": detected,
             }
 
         @router.get("/eval")

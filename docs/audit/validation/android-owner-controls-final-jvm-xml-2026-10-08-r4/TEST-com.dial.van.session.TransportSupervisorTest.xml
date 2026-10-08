@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.session.TransportSupervisorTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:59:31" hostname="052fefa249ff" time="0.005">
+  <properties/>
+  <testcase name="two carriers on one route are protocol diversity, not route diversity()" classname="com.dial.van.session.TransportSupervisorTest" time="0.002"/>
+  <testcase name="no usable path reports offline rather than a degraded socket()" classname="com.dial.van.session.TransportSupervisorTest" time="0.001"/>
+  <testcase name="failover prefers a different road to the one that just broke()" classname="com.dial.van.session.TransportSupervisorTest" time="0.0"/>
+  <testcase name="a healthy active path needs no failover()" classname="com.dial.van.session.TransportSupervisorTest" time="0.001"/>
+  <testcase name="a suspect path prepares a failover and a failed one commits it()" classname="com.dial.van.session.TransportSupervisorTest" time="0.0"/>
+  <testcase name="two missed heartbeats make a path suspect()" classname="com.dial.van.session.TransportSupervisorTest" time="0.0"/>
+  <testcase name="a write that failed outranks every timing signal()" classname="com.dial.van.session.TransportSupervisorTest" time="0.0"/>
+  <testcase name="a failed path does not count towards redundancy()" classname="com.dial.van.session.TransportSupervisorTest" time="0.001"/>
+  <testcase name="the idle cadence does not call a background path suspect for being quiet()" classname="com.dial.van.session.TransportSupervisorTest" time="0.0"/>
+  <testcase name="two independent routes are multipath()" classname="com.dial.van.session.TransportSupervisorTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

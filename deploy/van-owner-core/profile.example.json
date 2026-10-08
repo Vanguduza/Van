@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "profile_id": "van-owner-core-s24-v1",
+  "backend_host": "van-trading-core",
+  "hermes_host": "dial-control",
+  "ingress_host": "oracle-admin",
+  "public_gateway_url": null,
+  "ingress_bind_address": null,
+  "ingress_capability_receipt": null,
+  "hermes_api_url": null,
+  "hermes_runtime_token_file": null,
+  "gateway_ca_file": null,
+  "connectivity_signing_key_file": null,
+  "connectivity_signing_kid": null,
+  "mtls_directory": null,
+  "database_file": null,
+  "commander_api_url": null,
+  "commander_token_file": null,
+  "commander_ca_file": null,
+  "browser_artifact_providers_file": null,
+  "mtls_machine_client_ca_file": null
+}

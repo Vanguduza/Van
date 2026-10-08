@@ -64,6 +64,7 @@ _VERIFICATION_WEIGHT = {
 #: official API, then workflow, then semantic browser" as a class preference.
 _CLASS_WEIGHT = {
     CapabilityClass.NATIVE_READ: 30,
+    CapabilityClass.NATIVE_CONTROL: 30,
     CapabilityClass.KNOWLEDGE_RETRIEVAL: 26,
     CapabilityClass.GOOGLE_WORKSPACE: 22,
     CapabilityClass.AUTOMATION: 18,

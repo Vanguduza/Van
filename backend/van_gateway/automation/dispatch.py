@@ -28,8 +28,12 @@ from van_gateway.action.service import ActionPolicyError, ActionRuntime
 from van_gateway.action.models import VerificationObservation
 from van_gateway.automation.canonical import digest, new_id
 from van_gateway.automation.external_runtime import RuntimeState
-from van_gateway.automation.grants import GrantKind, MintedGrant, RunGrantService
+from van_gateway.automation.grants import GrantDenied, GrantKind, MintedGrant, RunGrantService
 from van_gateway.automation.models import AutomationWorkflowArtifact, RunStatus, WorkflowLifecycle
+from van_gateway.automation.models import WorkflowIR, Primitive, strongest_class
+from van_gateway.automation.primitive_policy import assert_primitive_semantics, PrimitiveSemanticError
+from van_gateway.automation.runtime_bindings import RuntimeBindingStore
+from van_gateway.automation.provisioner import graph_matches, verify_runtime_dependencies, ProvisioningError
 from van_gateway.automation.n8n_client import N8nClientError, N8nManagementClient
 from van_gateway.automation.deadletter import DeadLetterService
 from van_gateway.automation.registry import AutomationRegistry
@@ -47,6 +51,9 @@ from van_gateway.automation.verifier import (
 from van_gateway.command.authority import CommandAuthorityService
 from van_gateway.models import ActionClass, PrincipalType
 from van_gateway.storage.db import Store
+from van_gateway.automation.mission_fence import require_automation_missions
+from van_gateway.mission.control import MissionControlError
+from van_gateway.automation.input_bindings import ARTIFACT_PIN
 
 
 class DispatchError(RuntimeError):
@@ -117,9 +124,16 @@ class AutomationDispatcher:
         postcondition: PostconditionSpec | None = None,
         standing_authority_id: str | None = None,
         now_ms: int | None = None,
+        mission_id: str | None = None,
     ) -> DispatchResult:
         if not self.enabled:
             raise DispatchError("AUTOMATION_FABRIC_DISABLED")
+        source_authority = await self.authority.get(command_id)
+        try:
+            await require_automation_missions(self.store, command_id=command_id,
+                source_command_id=source_authority.source_command_id if source_authority else None, mission_id=mission_id)
+        except MissionControlError as exc:
+            raise DispatchError(exc.reason) from exc
 
         now = int(time.time() * 1000) if now_ms is None else now_ms
         run_id = new_id("run")
@@ -128,9 +142,37 @@ class AutomationDispatcher:
         if artifact is None:
             # §36 — nothing executes before admission, on any path.
             raise DispatchError("CAPABILITY_NOT_ADMITTED", capability_id)
+        if ARTIFACT_PIN in inputs and inputs[ARTIFACT_PIN] != artifact.artifact_id:
+            raise DispatchError("WORKFLOW_OWNER_ARTIFACT_PIN_MISMATCH")
         capability = await self.registry.get_capability(capability_id)
         if capability is None:
             raise DispatchError("CAPABILITY_UNKNOWN", capability_id)
+        definition = await self.actions.get_definition(action_id)
+        if definition is None:
+            raise DispatchError("UNKNOWN_ACTION", action_id)
+        binding = await RuntimeBindingStore(self.store).get(artifact.artifact_id)
+        if binding is None or binding["binding_state"] != "DEPLOYED" or binding["readiness_errors"]:
+            raise DispatchError("WORKFLOW_RUNTIME_BINDING_UNVERIFIED")
+        if action_id != f"automation.workflow.{capability_id}":
+            raise DispatchError("WORKFLOW_TYPED_ACTION_MISMATCH")
+        ir = WorkflowIR.model_validate(binding["ir"])
+        if (definition.action_class != capability.action_class or ir.action_class != capability.action_class
+                or strongest_class(ir.steps) != capability.action_class):
+            raise DispatchError("WORKFLOW_ACTION_CLASS_MISMATCH")
+        if capability.lifecycle_state not in {WorkflowLifecycle.ADMITTED, WorkflowLifecycle.HOT}:
+            raise DispatchError("CAPABILITY_NOT_ADMITTED")
+        if principal_type.value not in capability.allowed_principals:
+            raise DispatchError("WORKFLOW_PRINCIPAL_REFUSED")
+        if digest(ir.semantic_payload()) != artifact.workflow_ir_digest:
+            raise DispatchError("WORKFLOW_RUNTIME_BINDING_UNVERIFIED")
+        for step in ir.steps:
+            if step.primitive not in {Primitive.SCHEDULE_TRIGGER, Primitive.WEBHOOK_TRIGGER, Primitive.EVENT_TRIGGER}:
+                try:
+                    assert_primitive_semantics(step)
+                except PrimitiveSemanticError as exc:
+                    raise DispatchError("WORKFLOW_PRIMITIVE_AUTHORITY_INVALID", str(exc)) from exc
+        if ir.verifier:
+            postcondition = PostconditionSpec(kind="AUTOMATION_WORKER_READ_BACK")
 
         input_digest = digest(inputs)
         await self._record_run(
@@ -141,14 +183,14 @@ class AutomationDispatcher:
 
         # 1. Authority. The Action Runtime re-derives every canonical rule; this
         #    dispatcher never decides whether something is permitted.
-        definition = await self.actions.get_definition(action_id)
-        if definition is None:
-            raise DispatchError("UNKNOWN_ACTION", action_id)
         try:
             record, age = await self.authority.authorize_action(
                 command_id=command_id, action=definition, principal_type=principal_type,
                 requested_by=requested_by, snapshot_id=snapshot_id, turn_id=turn_id,
+                parameters=inputs,
             )
+            if record.origin_channel.value not in capability.allowed_origin_channels:
+                raise ValueError("workflow_origin_refused")
             execution = await self.actions.begin(
                 execution_id=f"exec_{run_id}", command_id=command_id, turn_id=record.turn_id,
                 action_id=action_id, principal_type=record.principal_type,
@@ -170,18 +212,40 @@ class AutomationDispatcher:
             )
 
         # 2. Worker-scope grant. Never owner authority (§160).
-        grant = await self._mint_grant(
-            run_id=run_id, command_id=command_id, capability=capability, artifact=artifact,
-            snapshot_id=snapshot_id, input_digest=input_digest,
-            standing_authority_id=standing_authority_id, now=now,
-        )
+        try:
+            grant = await self._mint_grant(
+                run_id=run_id, command_id=command_id, capability=capability, artifact=artifact,
+                snapshot_id=snapshot_id, input_digest=input_digest,
+                standing_authority_id=standing_authority_id, now=now,
+            )
+        except GrantDenied as exc:
+            execution = await self.actions.fail_execution(
+                execution.execution_id, status=ExecutionStatus.PRECONDITION_FAILED,
+                error_code=exc.reason,
+            )
+            await self._fail(run_id, exc.reason, now)
+            return DispatchResult(
+                run_id=run_id, capability_id=capability_id, artifact_id=artifact.artifact_id,
+                status=RunStatus.FAILED, execution=execution, error_code=exc.reason,
+            )
 
         # 3. Execute. An engine failure is a failure; an engine success is not
         #    yet an owner success.
         try:
+            execution = await self.actions.mark_executing(execution.execution_id)
+            try:
+                await require_automation_missions(self.store, command_id=command_id,
+                    source_command_id=record.source_command_id, mission_id=mission_id)
+            except MissionControlError as exc:
+                raise DispatchError(exc.reason) from exc
             engine_result = await self._invoke(artifact, inputs, grant)
-        except (N8nClientError, DispatchError) as exc:
-            code = getattr(exc, "code", "AUTOMATION_FABRIC_UNAVAILABLE")
+        except (N8nClientError, DispatchError, ActionPolicyError, GrantDenied) as exc:
+            code = str(exc) if isinstance(exc, ActionPolicyError) else exc.reason if isinstance(exc, GrantDenied) else getattr(exc, "code", "AUTOMATION_FABRIC_UNAVAILABLE")
+            execution = await self.actions.fail_execution(
+                execution.execution_id,
+                status=ExecutionStatus.PRECONDITION_FAILED if isinstance(exc, ActionPolicyError) else ExecutionStatus.EXECUTION_FAILED,
+                error_code=code,
+            )
             await self._fail(run_id, code, now)
             await self.grants.revoke_run(run_id, now_ms=now)
             await self._record_failure(
@@ -217,7 +281,8 @@ class AutomationDispatcher:
                 observed_postcondition=verification.observed,
                 evidence_pointer=verification.evidence_pointer,
                 partial=verification.outcome is VerificationOutcome.PARTIAL,
-            )
+            ),
+            independent_observer=True,
         )
         status = {
             VerificationOutcome.VERIFIED: RunStatus.VERIFIED_SUCCESS,
@@ -269,17 +334,15 @@ class AutomationDispatcher:
         artifact: AutomationWorkflowArtifact, snapshot_id: str, input_digest: str,
         standing_authority_id: str | None, now: int,
     ) -> MintedGrant:
-        kind = (
-            GrantKind.SINGLE_USE_MUTATION if capability.mutates_state else GrantKind.BOUNDED_READ_SESSION
-        )
         return await self.grants.mint(
             run_id=run_id, command_id=command_id, capability_id=capability.capability_id,
             artifact_id=artifact.artifact_id, artifact_version=artifact.version,
             context_snapshot_id=snapshot_id, input_digest=input_digest,
             action_class_ceiling=capability.action_class,
-            allowed_gateway_operations=sorted(set(capability.required_context) | {"emit_event", "seal_evidence"}),
-            allowed_external_domains=[], grant_kind=kind,
-            max_uses=1 if capability.mutates_state else 16,
+            allowed_gateway_operations=["admit_run"],
+            allowed_external_domains=[],
+            grant_kind=GrantKind.SINGLE_USE_MUTATION if capability.action_class is ActionClass.A4 else GrantKind.BOUNDED_READ_SESSION,
+            max_uses=1,
             standing_authority_id=standing_authority_id, now_ms=now,
         )
 
@@ -293,10 +356,38 @@ class AutomationDispatcher:
         """
         if artifact.n8n_workflow_id is None:
             raise DispatchError("ARTIFACT_NOT_DEPLOYED", artifact.artifact_id)
+        binding = await RuntimeBindingStore(self.store).get(artifact.artifact_id)
+        if (binding is None or binding["binding_state"] != "DEPLOYED" or binding["readiness_errors"]
+                or binding["n8n_workflow_id"] != artifact.n8n_workflow_id
+                or binding["semantic_digest"] != artifact.compiled_semantic_digest
+                or binding["full_digest"] != artifact.compiled_full_digest):
+            raise DispatchError("WORKFLOW_RUNTIME_BINDING_UNVERIFIED")
         status = await self.client.status()
         if status.state is not RuntimeState.READY:
             # §369 — an unproven runtime cannot execute owner work.
             raise DispatchError("AUTOMATION_FABRIC_UNAVAILABLE", status.state.value)
+        if not graph_matches(binding["runtime_graph"], await self.client.get_workflow(artifact.n8n_workflow_id)):
+            raise DispatchError("N8N_RUNTIME_GRAPH_DRIFT")
+        try:
+            await verify_runtime_dependencies(self.client, binding)
+        except ProvisioningError as exc:
+            raise DispatchError(str(exc)) from exc
+        ir = WorkflowIR.model_validate(binding["ir"])
+        children = {}
+        for step in ir.steps:
+            if step.primitive in {Primitive.SCHEDULE_TRIGGER, Primitive.WEBHOOK_TRIGGER, Primitive.EVENT_TRIGGER}:
+                continue
+            child = await self.grants.mint(
+                run_id=grant.grant.run_id, command_id=grant.grant.command_id,
+                capability_id=grant.grant.capability_id, artifact_id=artifact.artifact_id,
+                artifact_version=artifact.version, context_snapshot_id=grant.grant.context_snapshot_id,
+                input_digest=grant.grant.input_digest, action_class_ceiling=step.action_class,
+                allowed_gateway_operations=[f"step:{step.step_id}"],
+                allowed_external_domains=[step.external_domain] if step.external_domain else [],
+                grant_kind=GrantKind.SINGLE_USE_MUTATION if step.mutates else GrantKind.BOUNDED_READ_SESSION,
+                max_uses=1, standing_authority_id=grant.grant.standing_authority_id,
+            )
+            children[step.step_id] = {"grant": child.grant.model_dump(mode="json"), "capability_grant": child.token}
         response = await self.client.run_workflow(
             artifact.n8n_workflow_id,
             {
@@ -309,6 +400,8 @@ class AutomationDispatcher:
                 "issued_at_ms": grant.grant.issued_at_ms,
                 "expires_at_ms": grant.grant.expires_at_ms,
                 "capability_grant": grant.token,
+                "grant": grant.grant.model_dump(mode="json"),
+                "step_grants": children,
             },
         )
         return response

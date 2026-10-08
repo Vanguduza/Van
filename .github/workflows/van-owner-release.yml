@@ -1,0 +1,80 @@
+name: van-owner-release
+
+# An owner-core release requires machine-bound public routing and private owner
+# signing settings. Ordinary CI continues to provide development artifacts.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: van-owner-release
+  cancel-in-progress: false
+
+jobs:
+  owner-release:
+    runs-on: ubuntu-latest
+    environment: van-owner-release
+    timeout-minutes: 45
+    env:
+      VAN_OWNER_RELEASE_INPUT_DIR: ${{ runner.temp }}/van-owner-release-inputs
+      VAN_DEPLOYMENT_PROFILE_FILE: ${{ runner.temp }}/van-owner-release-inputs/android-owner-core.properties
+      VAN_CONNECTIVITY_TRUSTED_KEYS: ${{ vars.VAN_CONNECTIVITY_TRUSTED_KEYS }}
+      VAN_OWNER_CORE_PROFILE_BASE64: ${{ vars.VAN_OWNER_CORE_PROFILE_BASE64 }}
+      VAN_OWNER_SIGNER_SHA256: ${{ vars.VAN_OWNER_SIGNER_SHA256 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install verified release tooling
+        run: |
+          python -m pip install -r backend/requirements.lock
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Restore bound owner release inputs
+        env:
+          VAN_OWNER_KEYSTORE_BASE64: ${{ secrets.VAN_OWNER_KEYSTORE_BASE64 }}
+          VAN_OWNER_KEYSTORE_PASSWORD: ${{ secrets.VAN_OWNER_KEYSTORE_PASSWORD }}
+          VAN_OWNER_KEY_ALIAS: ${{ secrets.VAN_OWNER_KEY_ALIAS }}
+          VAN_OWNER_KEY_PASSWORD: ${{ secrets.VAN_OWNER_KEY_PASSWORD }}
+        run: python tools/release/owner_release.py restore-ci-inputs
+      - name: Build owner release from the bound deployment profile
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:testReleaseUnitTest :app:lintRelease :app:assembleRelease --console=plain
+      - name: Verify release identity and produce its installation packet
+        env:
+          RELEASE_REPOSITORY_SHA: ${{ github.sha }}
+        run: |
+          python tools/release/owner_release.py packet \
+            --apk android/app/build/outputs/apk/release/app-release.apk \
+            --profile "$VAN_DEPLOYMENT_PROFILE_FILE" \
+            --trusted-keys "$VAN_OWNER_RELEASE_INPUT_DIR/connectivity-trusted-keys.txt" \
+            --build-config android/app/build/generated/source/buildConfig/release/com/dial/van/BuildConfig.java \
+            --expected-sha "$RELEASE_REPOSITORY_SHA" \
+            --expected-signer "$VAN_OWNER_SIGNER_SHA256" \
+            --apksigner "$ANDROID_HOME/build-tools/36.0.0/apksigner" \
+            --aapt "$ANDROID_HOME/build-tools/36.0.0/aapt" \
+            --output "$RUNNER_TEMP/van-owner-release-packet/release-packet.json"
+          cp android/app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/van-owner-release-packet/owner-release.apk"
+          cp "$VAN_DEPLOYMENT_PROFILE_FILE" "$RUNNER_TEMP/van-owner-release-packet/android-owner-core.properties"
+          cp "$VAN_OWNER_RELEASE_INPUT_DIR/connectivity-trusted-keys.txt" "$RUNNER_TEMP/van-owner-release-packet/connectivity-trusted-keys.txt"
+      - name: Upload the verified owner release packet
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-owner-release-${{ github.sha }}
+          path: ${{ runner.temp }}/van-owner-release-packet/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Remove private signing material
+        if: always()
+        run: |
+          rm -f android/keystore.properties
+          rm -rf "$VAN_OWNER_RELEASE_INPUT_DIR"

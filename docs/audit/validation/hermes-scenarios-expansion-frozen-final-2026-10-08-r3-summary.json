@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "suite": "hermes-scenarios",
+  "selection": [
+    "tests/hermes",
+    "hermes/policy/tests",
+    "tests/scenarios"
+  ],
+  "command": [
+    "/workspace/.onboarding/van-venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/hermes",
+    "hermes/policy/tests",
+    "tests/scenarios",
+    "--junitxml=/workspace/van-audit/hermes-scenarios-expansion-frozen-final-2026-10-08-r3.xml"
+  ],
+  "cwd": "/workspace/Van",
+  "started_at_utc": "2026-10-08T04:55:00.251533+00:00",
+  "finished_at_utc": "2026-10-08T04:55:08.877728+00:00",
+  "exit_code": 0,
+  "source_unchanged_during_test": true,
+  "changed_inputs": [],
+  "input_files": 1358,
+  "inputs_sha256": "08d475b03b1bd1e84637979a25e23280dec0c637e5a915377a4e872481b37451",
+  "production_manifest_sha256": "7c10fa544d0344d1b73899b4cb3fd7341c0d32caaba9b4c54df7eb6ffadc50af",
+  "physical_tests_executed": 0,
+  "production_deployed": false,
+  "counts": {
+    "tests": 89,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "per_class": {
+    "hermes.policy.tests.test_van_policy_hook": 46,
+    "tests.hermes.test_full_trading_commander": 10,
+    "tests.hermes.test_profile_layout": 19,
+    "tests.hermes.test_spmrf_trading_memory": 6,
+    "tests.scenarios.test_acceptance_scenarios": 8
+  },
+  "pytest_seconds": 6.75,
+  "rsync_preservation_executed": true,
+  "rsync_preservation_outcome": "PASSED",
+  "rsync_binary": "/workspace/.onboarding/browser-parser/rsync-root/usr/bin/rsync",
+  "rsync_sha256": "a56c05b960beb734169619d5760b43ff495e84f85a93eb1f54fe58118262fb20",
+  "rsync_matches_preserved_signature_verified_tool_receipt": true,
+  "rsync_trust_receipt": "/workspace/van-audit/van-wiring-source-handoff-2026-10-07/untracked/docs/audit/validation/hermes-profile-runtime-preservation-rsync-2026-10-07.json",
+  "tool_path_prefix": "/workspace/.onboarding/browser-parser/rsync-root/usr/bin",
+  "tool_ld_library_path_prefix": "/workspace/.onboarding/browser-parser/rsync-root/usr/lib/x86_64-linux-gnu",
+  "live_tls_or_provider_qualified": false,
+  "revision": "r3_after_android_encrypted_recovery_privacy_fix"
+}

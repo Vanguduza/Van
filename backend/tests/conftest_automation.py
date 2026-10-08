@@ -97,6 +97,8 @@ async def seal_owner_command(
     effective: ActionClass = ActionClass.A3,
     turn_id: str | None = "turn-1",
     owner_approved: bool = False,
+    typed_action_id: str | None = None,
+    typed_parameters: dict | None = None,
 ) -> CommandAuthorityRecord:
     now = int(time.time())
     record = CommandAuthorityRecord(
@@ -107,6 +109,8 @@ async def seal_owner_command(
         origin_channel=OriginChannel.VOICE,
         signed_action_class=effective,
         effective_action_class=effective,
+        typed_action_id=typed_action_id,
+        typed_parameter_constraints=typed_parameters or {},
         snapshot_id=snapshot_id,
         context_digest="sha256:ownerctx",
         issued_at_unix=now,

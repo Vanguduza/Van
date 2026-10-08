@@ -83,7 +83,7 @@ LEGAL_TRANSITIONS: dict[MissionState, frozenset[MissionState]] = {
                               _S.EXPIRED}),
     _S.PLANNED: frozenset({_S.AUTHORIZED, _S.WAITING_FOR_OWNER, _S.CANCELLED,
                            _S.BLOCKED_POLICY, _S.BLOCKED_UNSAFE, _S.EXPIRED}),
-    _S.AUTHORIZED: frozenset({_S.RUNNING, _S.CANCELLED, _S.BLOCKED_POLICY, _S.BLOCKED_UNSAFE,
+    _S.AUTHORIZED: frozenset({_S.RUNNING, _S.WAITING_EXTERNAL, _S.CANCELLED, _S.BLOCKED_POLICY, _S.BLOCKED_UNSAFE,
                               _S.EXPIRED}),
     _S.RUNNING: frozenset({_S.WAITING_EXTERNAL, _S.WAITING_FOR_OWNER, _S.VERIFYING, _S.FAILED,
                            _S.CANCELLED, _S.BLOCKED_POLICY, _S.BLOCKED_UNSAFE, _S.EXPIRED}),
@@ -283,6 +283,8 @@ class MissionEventType(str, Enum):
     MISSION_VERIFYING = "mission.verifying"
     MISSION_COMPLETED = "mission.completed"
     MISSION_FAILED = "mission.failed"
+    MISSION_CANCELLED = "mission.cancelled"
+    MISSION_MESSAGE = "mission.message"
     ACTIVITY_STARTED = "activity.started"
     ACTIVITY_CHECKPOINTED = "activity.checkpointed"
     ACTIVITY_COMPLETED = "activity.completed"
@@ -300,6 +302,7 @@ EVENT_FOR_STATE = {
     MissionState.VERIFIED_SUCCESS: MissionEventType.MISSION_COMPLETED,
     MissionState.PARTIAL_SUCCESS: MissionEventType.MISSION_COMPLETED,
     MissionState.FAILED: MissionEventType.MISSION_FAILED,
+    MissionState.CANCELLED: MissionEventType.MISSION_CANCELLED,
 }
 
 

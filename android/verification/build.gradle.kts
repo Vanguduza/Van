@@ -41,6 +41,8 @@ dependencies {
     // one screen was open.
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
     testImplementation(kotlin("test"))
+    // Execute the actual session manager against a test-only gateway and socket factory.
+    testImplementation("com.squareup.okhttp3:okhttp:4.12.0")
 }
 
 sourceSets {
@@ -54,6 +56,17 @@ sourceSets {
         kotlin.include(
             "com/dial/van/status/**",
             "com/dial/van/mission/MissionModels.kt",
+            "com/dial/van/mission/MissionSelection.kt",
+            "com/dial/van/mission/MissionIntervention.kt",
+            "com/dial/van/command/attention/OwnerDecision.kt",
+            "com/dial/van/memory/DerivedMemoryRecord.kt",
+            "com/dial/van/memory/LearningProducer.kt",
+            "com/dial/van/browser/BrowserActionPlan.kt",
+            "com/dial/van/browser/BrowserFileInspection.kt",
+            "com/dial/van/browser/BrowserFileProvider.kt",
+            "com/dial/van/command/settings/OwnerPermissionDraft.kt",
+            "com/dial/van/command/owner/OwnerAutomationDraft.kt",
+            "com/dial/van/mission/MissionExecutionControl.kt",
             // Gate 6 — the pure half of the visual runtime. These files have no Android and
             // no Compose imports, which is exactly why the logic that was wrong in them
             // (a restarting animation clock, an unproduced frame-budget signal, an aura
@@ -120,6 +133,7 @@ sourceSets {
             // GAP-F-011 — whether a dispatched command's thread still needs polling, and
             // what GET /v1/commands/{id} becomes once it answers.
             "com/dial/van/command/work/ConversationReducer.kt",
+            "com/dial/van/command/work/GmailApprovalPreview.kt",
             "com/dial/van/events/EventStream.kt",
             // One history for the app, rather than one per screen. Pure because the
             // cursor is an interface, so the merge of a socket page and a polled one
@@ -128,6 +142,7 @@ sourceSets {
             "com/dial/van/share/ShareIntake.kt",
             "com/dial/van/onboarding/OnboardingPlan.kt",
             "com/dial/van/gateway/GatewayRetry.kt",
+            "com/dial/van/gateway/GatewayMutationRetry.kt",
             "com/dial/van/gateway/ReplayTrigger.kt",
             "com/dial/van/telemetry/DeviceTelemetry.kt",
             "com/dial/van/telemetry/BrowserStreamTelemetry.kt",
@@ -146,19 +161,34 @@ sourceSets {
             "com/dial/van/trading/TradeBook.kt",
             "com/dial/van/trading/ChartGeometry.kt",
             "com/dial/van/trading/TradingReadModels.kt",
+            "com/dial/van/trading/TradingLoading.kt",
+            "com/dial/van/trading/TradingRuntimeReadModel.kt",
+            "com/dial/van/trading/TradingTickets.kt",
+            "com/dial/van/trading/TradingNavigation.kt",
+            "com/dial/van/notification/NotificationAppCatalogue.kt",
             "com/dial/van/voice/VoiceRecognitionModels.kt",
+            "com/dial/van/voice/VoiceTurnLifecycle.kt",
             "com/dial/van/voice/WakeModelAsset.kt",
             // Rev 1.5 §21 — the offline voice edge's decisions. Every case that matters
             // here is one that cannot be produced on demand: a bundle with a TTS voice and
             // no ASR model, an answer that arrives at 3am, a reconnect halfway through a
             // sentence, VAN hearing its own voice and interrupting itself.
             "com/dial/van/voice/VoiceAssetManifest.kt",
+            "com/dial/van/voice/EmbeddedVoiceAssetInstaller.kt",
+            "com/dial/van/voice/SpeakerEnrollmentPolicy.kt",
+            "com/dial/van/voice/SpeakerEvidenceRevision.kt",
+            "com/dial/van/voice/SpeakerCaptureJob.kt",
+            "com/dial/van/voice/VoiceBundlePin.kt",
+            "com/dial/van/voice/OfflineVoiceTurn.kt",
+            "com/dial/van/voice/SpeechPlaybackEpoch.kt",
+            "com/dial/van/voice/VitsLexiconCoverage.kt",
             "com/dial/van/voice/VoiceTurn.kt",
             "com/dial/van/voice/SpeechQueue.kt",
             // GAP-F-013 — the device-side cue timing model and the pure lookup
             // TtsOutputManager drives it with.
             "com/dial/van/voice/SpeechCueTiming.kt",
             "com/dial/van/voice/LocalTtsRouter.kt",
+            "com/dial/van/voice/AndroidOfflineTtsReadiness.kt",
             "com/dial/van/voice/VoiceAudioPolicy.kt",
             // Written before this checkpoint and never executed: it is pure, it decides
             // what VAN believes the owner said, and nothing ran it. That combination is
@@ -178,9 +208,22 @@ sourceSets {
             "com/dial/van/browser/BrowserUpload.kt",
             "com/dial/van/browser/BrowserProcessRecovery.kt",
             "com/dial/van/browser/BrowserModels.kt",
+            "com/dial/van/browser/BrowserControlMutation.kt",
+            "com/dial/van/browser/BrowserSessionRecords.kt",
+            "com/dial/van/browser/BrowserStreamMetadata.kt",
+            "com/dial/van/browser/BrowserTransfers.kt",
+            "com/dial/van/browser/BrowserSurfaceCoordinates.kt",
+            "com/dial/van/browser/BrowserKeyMapping.kt",
+            "com/dial/van/browser/BrowserDownloadReview.kt",
             "com/dial/van/connectivity/ConnectivityManifest.kt",
             "com/dial/van/connectivity/ProvisioningPayload.kt",
+            "com/dial/van/connectivity/ProvisioningRecovery.kt",
+            "com/dial/van/connectivity/SignedConnectivityRouting.kt",
+            "com/dial/van/connectivity/SignedBrowserRouting.kt",
+            "com/dial/van/connectivity/SignedPinTrustManager.kt",
+            "com/dial/van/security/AttestationChallenge.kt",
             "com/dial/van/session/SessionEnvelope.kt",
+            "com/dial/van/session/SessionSseFrames.kt",
             "com/dial/van/session/TransportSupervisor.kt",
             "com/dial/van/session/WarmStandby.kt",
             "com/dial/van/session/DurableOutbox.kt",
@@ -238,7 +281,13 @@ sourceSets {
             // this list (`com/dial/van/mission/MissionModels.kt`,
             // `com/dial/van/design/StatusSemantics.kt`).
             "com/dial/van/memory/MemoryModels.kt",
+            "com/dial/van/memory/MemoryEffectReceipt.kt",
+            "com/dial/van/memory/OwnerMemoryDeclarations.kt",
+            "com/dial/van/command/owner/OwnerServicePresentation.kt",
+            "com/dial/van/command/settings/DomainAutonomyCommand.kt",
+            "com/dial/van/command/connected/ConnectedReadback.kt",
             "com/dial/van/projects/ProjectModels.kt",
+            "com/dial/van/projects/ProjectSourceRead.kt",
             // VAN-DEVCC-R1 (VAN-DEV-003/004/009) — the DIAL Development Control Centre's pure
             // half: the §4 state table, the §3.1 envelope → seven-state reducer, the typed
             // action state machine, and the read models every development screen renders. No
@@ -247,6 +296,13 @@ sourceSets {
             "com/dial/van/dialdev/**",
         )
     }
+}
+
+sourceSets.named("test") {
+    // Only this Android-free adapter is added; the gateway fake lives under src/test.
+    kotlin.srcDir("../app/src/main/java/com/dial/van/session")
+    kotlin.srcDir("../app/src/main/java/com/dial/van/control")
+    kotlin.include("com/dial/van/**", "androidx/fragment/app/FragmentActivity.kt", "VanHermesSessionManager.kt", "HttpSessionCarrier.kt", "VanCommandController.kt")
 }
 
 tasks.test {

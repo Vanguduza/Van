@@ -149,6 +149,7 @@ class VoiceAudioArbiter(
     }
 
     fun isCapturing(): Boolean = captureRunning
+    fun hasReleasedCapture(): Boolean = synchronized(lock) { !captureRunning && recorder == null }
     fun echoCancellationActive(): Boolean = echoCanceler?.enabled == true
     fun noiseSuppressionActive(): Boolean = noiseSuppressor?.enabled == true
 

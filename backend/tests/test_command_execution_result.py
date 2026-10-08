@@ -174,8 +174,10 @@ async def test_unknown_hermes_run_cannot_move_a_mission(client):
             "summary": "failed",
         },
     )
-    assert response.status_code == 404
-    assert response.json()["detail"] == "HERMES_RUN_UNBOUND"
+    assert response.status_code == 202
+    assert response.json()["status"] == "WAITING_FOR_BINDING"
+    assert response.json()["mission_id"] is None
+    assert await app.state.missions.for_hermes_run("run-never-bound") is None
 
 
 @pytest.mark.asyncio

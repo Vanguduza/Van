@@ -321,9 +321,34 @@ class TestDownloadClassification:
     def test_a_deleted_file_is_offered_nothing(self):
         assert owner_actions(DownloadState.DELETED, dangerous=False) == []
 
+    @pytest.mark.parametrize("state", [DownloadState.CREATED, DownloadState.IN_PROGRESS])
+    @pytest.mark.parametrize("dangerous", [False, True])
+    def test_incomplete_transfer_does_not_offer_an_unsupported_cancel(self, state, dangerous):
+        assert owner_actions(state, dangerous=dangerous) == []
+
+    def test_failed_record_can_be_removed(self):
+        assert owner_actions(DownloadState.FAILED, dangerous=False) == [OwnerAction.DELETE]
+
 
 @pytest.mark.asyncio
 class TestTheDownloadPipeline:
+
+    @pytest.mark.parametrize("size,hash_value,reason", [
+        (-1, "a" * 64, "download_byte_size_invalid"),
+        (True, "a" * 64, "download_byte_size_invalid"),
+        (1, "z" * 64, "download_content_hash_invalid"),
+        (1, "a" * 63, "download_content_hash_invalid"),
+    ])
+    async def test_malformed_completion_evidence_cannot_advance_download(self, tmp_path, size, hash_value, reason):
+        broker, _store = await self._broker(tmp_path)
+        await broker.create(
+            download_id="dl-invalid", session_id="ibs_1", target_id="t", suggested_name="report.pdf",
+            declared_mime="application/pdf", url_digest="abc", now_ms=NOW,
+        )
+        await broker.start("dl-invalid")
+        with pytest.raises(DownloadError, match=reason):
+            await broker.finish(download_id="dl-invalid", byte_size=size, content_sha256=hash_value, now_ms=NOW)
+        assert await broker.state_of("dl-invalid") is DownloadState.IN_PROGRESS
 
     async def _broker(self, tmp_path):
         store = await make_store(tmp_path)
@@ -658,6 +683,8 @@ class TestTheDownloadSurfacesThroughTheIngress:
         assert "OPEN_IN_VAN" not in row["actions"]
         assert "SEND_TO_PHONE" not in row["actions"]
         assert "DELETE" in row["actions"]
+        assert row["executable_actions"] == ["DELETE"]
+        assert row["record_removal_verifies_file_cleanup"] is False
 
     async def test_a_traversal_name_is_refused_at_the_route(self, client):
         ac, app = client

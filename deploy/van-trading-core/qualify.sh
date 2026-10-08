@@ -171,7 +171,14 @@ from vati.core.ledger_pg import open_ledger
 l = open_ledger("${VAN_COMMANDER_LEDGER}"); ok, n = l.verify_chain(); print(json.dumps({"backend": type(l).__name__, "chain_ok": ok, "events": n})); l.close()
 PY
 fi
-if ufw status 2>/dev/null | grep -q "Status: active"; then ufw status | grep -q "9133" && add firewall GREEN "ufw active, 9133 scoped" || add firewall RED "9133 rule missing"; else add firewall RED "ufw inactive"; fi
+# A port substring cannot establish source scope or rule order. Observe one
+# verbose summary (including default incoming policy) and evaluate it as data.
+if ufw_status="$(ufw status verbose 2>/dev/null)" &&
+   ufw_scope="$(printf '%s\n' "$ufw_status" | python3 "$APP/tools/runtime/check_ufw_commander_scope.py" --admin-cidrs "${VAN_ADMIN_CIDRS:-10.0.0.123/32}")"; then
+  add firewall GREEN "ordered UFW summary admits only selected VCN /32 Commander sources; native/OCI checks remain separate"
+else
+  add firewall RED "UFW observation missing or Commander source scope/default policy/order unsafe or unsupported"
+fi
 if VAN_ADMIN_CIDRS="${VAN_ADMIN_CIDRS:-10.0.0.123/32}" VAN_PUBLIC_HOST="${VAN_PUBLIC_HOST:-}" bash "$BASE/app/deploy/van-trading-core/oci/harden-oracle-image-firewall.sh" --verify >/tmp/oracle-firewall.log 2>&1; then add oracle_image_firewall GREEN "$(tail -n 1 /tmp/oracle-firewall.log)"; else add oracle_image_firewall RED "$(tail -c 500 /tmp/oracle-firewall.log)"; fi
 listeners="$(ss -ltnH 2>/dev/null | awk '{print $4}' | grep -E ':(3000|5432|5433|6543|8000)$' || true)"
 bad_listeners="$(printf '%s

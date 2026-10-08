@@ -17,8 +17,8 @@ from typing import Any
 import json
 
 #: §148 — the compiler backend mapping is versioned independently of the IR.
-NODE_CATALOG_VERSION = "van-n8n-catalog-1"
-COMPILER_VERSION = "van-automation-compiler-1"
+NODE_CATALOG_VERSION = "van-n8n-catalog-3"
+COMPILER_VERSION = "van-automation-compiler-3"
 
 _PREFIXES = {
     "capability": "wfcap",

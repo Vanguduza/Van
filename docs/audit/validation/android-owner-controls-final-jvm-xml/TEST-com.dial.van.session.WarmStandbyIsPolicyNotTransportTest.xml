@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.session.WarmStandbyIsPolicyNotTransportTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:33" hostname="052fefa249ff" time="0.012">
+  <properties/>
+  <testcase name="the session manager still holds exactly one socket()" classname="com.dial.van.session.WarmStandbyIsPolicyNotTransportTest" time="0.005"/>
+  <testcase name="this build cannot reach WARM because it has one route()" classname="com.dial.van.session.WarmStandbyIsPolicyNotTransportTest" time="0.003"/>
+  <testcase name="the policy documents that it decides rather than connects()" classname="com.dial.van.session.WarmStandbyIsPolicyNotTransportTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

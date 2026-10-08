@@ -100,6 +100,12 @@ class Settings(BaseSettings):
     # Rev 1.3 Automation & Browser Fabric. All switches default OFF and
     # runtime credentials remain in the gateway environment/secret plane.
     automation_enabled: bool = False
+    #: Private HTTPS callback for the canonical per-run, per-step n8n worker.
+    #: Empty keeps workflow provisioning unavailable rather than guessing a route.
+    automation_worker_endpoint: str = ""
+    #: Operator-owned source aliases bind exact HTTPS domains and protected token
+    #: files. Workers receive approved content, never the source credential.
+    automation_source_credentials_file: str = ""
     automation_ingress_enabled: bool = False
     #: P2-DEAD-001 — HMAC secret for signed provider webhooks. Empty means signed ingress is
     #: refused rather than accepted unverified: an unauthenticated event ingress is how an
@@ -140,13 +146,17 @@ class Settings(BaseSettings):
     artemis_console_launch_ttl_seconds: int = 60
 
     # VAN-DEV-001 (DIAL VAN-DEVCC-R1 §3.4) — the DIAL Development Projection API v1 on
-    # `dial-control`, reached over the private overlay only. VAN displays DIAL state and
+    # `dial-control`, reached through oracle-admin's product-mTLS proxy over the private
+    # overlay in production. VAN displays DIAL state and
     # forwards typed owner commands; it never plans or executes DIAL work. The DIAL-scoped
     # bearer lives in a gateway-side token file and never reaches Android. Off by default:
     # an unconfigured deployment answers 404 on /v1/dial-dev/* rather than inventing state.
     dial_dev_enabled: bool = False
     dial_dev_base_url: str = ""
     dial_dev_token_file: str = ""
+    dial_dev_tls_ca_file: str = ""
+    dial_dev_tls_client_cert_file: str = ""
+    dial_dev_tls_client_key_file: str = ""
     dial_dev_timeout_s: float = 10.0
     #: §3.1 — a projection older than this is STALE on the device. Reported to the device
     #: as a header beside the unchanged envelope; the gateway never rewrites the envelope.
@@ -254,9 +264,29 @@ class Settings(BaseSettings):
     #: Where the device performs SDP/ICE signalling. §6.4: never `van-trading-core`, which
     #: is private and holds the Browser Fabric's authority.
     browser_stream_signal_url: str = ""
+    #: Explicit profile routes beneath the signed browser signal URL prefix.
+    #: A configured map is strict: omitted profiles are unavailable.
+    browser_stream_profile_signal_urls: str = "{}"
     #: JSON array of ICE servers, passed through to the device verbatim. Deployment
     #: configuration, not owner authority.
     browser_stream_ice_servers: str = "[]"
+    #: Mapping from SHA-256 scoped proxy-token fingerprints to the private mTLS
+    #: client names that the browser control proxy is admitted to attest.
+    browser_control_proxy_bindings: str = "{}"
+    browser_control_client_address: str = ""
+    browser_control_client_port: int = 9443
+    browser_control_client_server_name: str = ""
+    browser_control_client_ca_file: str = ""
+    browser_control_client_cert_file: str = ""
+    browser_control_client_key_file: str = ""
+    browser_control_client_common_name: str = "van-trading-core"
+    browser_control_proxy_principal_sha256: str = ""
+    #: Strict canonical profile -> isolated native control TLS client binding.
+    #: A nonempty map supersedes the single-instance compatibility fields above.
+    browser_control_profile_clients: str = "{}"
+    #: Operator-owned exact provider, namespace, TLS and dedicated admission signer
+    #: bindings. Empty keeps owner-file effects unavailable; Android supplies none.
+    browser_artifact_providers_file: str = ""
 
     # ---- owner-device binding (§0D.3) -------------------------------------------
     #
@@ -266,9 +296,9 @@ class Settings(BaseSettings):
     #: disables enrolment entirely: there is no weaker binding to fall back to, and
     #: §0E.1 D5 forbids inventing one.
     owner_device_signing_cert_sha256: str = ""
-    #: Comma-separated Google attestation root fingerprints. Empty means the root is
-    #: recorded but not pinned, which is the honest state until one has been observed from
-    #: the owner's own device (RB-120).
+    #: Comma-separated trusted Google attestation root fingerprints, configured by the
+    #: deployment authority. Empty refuses public enrollment and provisioning; a root
+    #: fingerprint supplied by a phone is never a trust anchor.
     owner_device_attestation_roots: str = ""
     #: ADR-RB-025 — whether a privileged owner request from an *unbound* device is
     #: refused outright. A bound device is always held to its proof; this decides what
@@ -298,6 +328,9 @@ class Settings(BaseSettings):
     mtls_port: int = 8443
     #: Directory holding ca.crt, ca.key, server.crt, server.key and issued.json.
     mtls_dir: str = ""
+    #: Optional governed machine CA bundle. Machine routes still require an exact
+    #: current leaf pin and dedicated purpose; this grants no owner-device identity.
+    mtls_machine_client_ca_file: str = ""
     mtls_client_cert_days: int = 365
     #: WebSocket keepalive on the public listener; also bounds how long a dead phone
     #: connection lingers.

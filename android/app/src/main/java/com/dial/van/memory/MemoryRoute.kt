@@ -1,6 +1,7 @@
 package com.dial.van.memory
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -28,6 +30,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.dial.van.VanApplication
 import com.dial.van.control.VanCommandSource
+import com.dial.van.command.nav.VanRoute
+import com.dial.van.command.owner.ownerTime
 import com.dial.van.design.LocalVanTokens
 import com.dial.van.design.ScreenAction
 import com.dial.van.design.ScreenState
@@ -39,7 +43,9 @@ import com.dial.van.design.components.VanPanel
 import com.dial.van.design.components.VanPressable
 import com.dial.van.design.components.VanScreen
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 /**
  * DNA §4 destination 5: "Memory — facts, decisions, assumptions, preferences, unresolved
@@ -60,32 +66,62 @@ private data class MemoryData(
     val conflicts: List<MemoryConflict>,
 )
 
-private enum class MemoryDialog { NONE, REMEMBER, CORRECT, FORGET }
+private enum class MemoryDialog { NONE, REMEMBER, CORRECT, FORGET, HISTORY }
 
 @Composable
-fun MemoryRoute(app: VanApplication, onBack: () -> Unit) {
+fun MemoryRoute(app: VanApplication, onBack: () -> Unit, onOpenRoute: (String) -> Unit = {}) {
     val tokens = LocalVanTokens.current
     val scope = rememberCoroutineScope()
     var data by remember { mutableStateOf<MemoryData?>(null) }
     var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
     var notice by remember { mutableStateOf<String?>(null) }
+    var conflictsError by remember { mutableStateOf<String?>(null) }
+    var mutating by remember { mutableStateOf(false) }
+    var mutationError by remember { mutableStateOf<String?>(null) }
+    var privacyOpen by remember { mutableStateOf(false) }
+    var lastRead by remember { mutableStateOf(0L) }
     var dialog by remember { mutableStateOf(MemoryDialog.NONE) }
     var actingOn by remember { mutableStateOf<MemoryFact?>(null) }
 
     fun load() {
         scope.launch {
             loading = true
-            runCatching {
-                MemoryData(
-                    facts = MemoryReadModel.parseExportFacts(app.gatewayClient.contextExport()),
-                    conflicts = MemoryReadModel.parseConflicts(app.gatewayClient.contextConflicts()),
-                )
-            }.onSuccess { data = it; error = null; loading = false }
-                .onFailure { error = it.message ?: "VAN could not open its own memory."; loading = false }
+            try {
+                val facts = MemoryReadModel.parseExportFacts(app.gatewayClient.contextExport())
+                data = MemoryData(facts, data?.conflicts.orEmpty())
+                lastRead = System.currentTimeMillis()
+                error = null
+                mutationError = null
+                try {
+                    data = MemoryData(facts, MemoryReadModel.parseConflicts(app.gatewayClient.contextConflicts()))
+                    conflictsError = null
+                } catch (cancel: CancellationException) { throw cancel }
+                catch (failure: Exception) { conflictsError = "VAN could not refresh conflicts. Last known conflicts are retained. ${failure.message.orEmpty()}" }
+            } catch (cancel: CancellationException) { throw cancel }
+            catch (failure: Exception) { error = failure.message ?: "VAN could not open its own memory." }
+            finally { loading = false }
         }
     }
     LaunchedEffect(Unit) { load() }
+    LaunchedEffect(Unit) {
+        while (true) { delay(15_000L); if ((error != null || conflictsError != null) && !loading && !mutating) load() }
+    }
+    fun mutate(success: String, action: suspend () -> JSONObject) {
+        if (mutating || loading || error != null || mutationError != null) return
+        mutating = true
+        mutationError = null
+        scope.launch {
+            try {
+                action()
+                notice = success
+                dialog = MemoryDialog.NONE
+                load()
+            } catch (cancel: CancellationException) { throw cancel }
+            catch (failure: Exception) { mutationError = "VAN could not confirm this change. Your draft is kept. Refresh memory before trying again. ${failure.message.orEmpty()}" }
+            finally { mutating = false }
+        }
+    }
 
     val state: ScreenState<MemoryData> = ScreenStateMerge.merge(
         content = data,
@@ -95,6 +131,14 @@ fun MemoryRoute(app: VanApplication, onBack: () -> Unit) {
         emptyAction = ScreenAction("Remember something"),
     )
 
+    Column(modifier = Modifier.fillMaxSize()) {
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2), contentPadding = PaddingValues(horizontal = tokens.space.pageGutter)) {
+            item { OutlinedButton(onClick = { onOpenRoute(VanRoute.UNDERSTANDING) }) { Text("Understanding") } }
+            item { OutlinedButton(onClick = { onOpenRoute(VanRoute.ADAPTATIONS) }) { Text("Adaptations") } }
+            item { OutlinedButton(onClick = { onOpenRoute(VanRoute.GOALS) }) { Text("Goals & evidence") } }
+            item { OutlinedButton(onClick = { privacyOpen = true }) { Text("Memory privacy") } }
+        }
+        Box(modifier = Modifier.weight(1f)) {
     VanScreen(state = state, onRetry = ::load, onEmptyAction = { dialog = MemoryDialog.REMEMBER }) { memory ->
         val now = System.currentTimeMillis()
         val byScope = MemoryReadModel.factsByScope(memory.facts, now)
@@ -127,6 +171,8 @@ fun MemoryRoute(app: VanApplication, onBack: () -> Unit) {
                     }
                 }
             }
+            item { Text("Last read ${ownerTime(lastRead)}", style = tokens.type.label, color = tokens.color.textTertiary); OutlinedButton(enabled = !loading && !mutating, onClick = ::load) { Text("Refresh memory") } }
+            mutationError?.let { item { Text(it, style = tokens.type.body, color = tokens.color.textSecondary) } }
 
             item { SectionHeader("What I know about you", detail = if (byScope.isEmpty()) null else "${byScope.values.sumOf { it.size }} facts") }
             if (byScope.isEmpty()) {
@@ -142,6 +188,7 @@ fun MemoryRoute(app: VanApplication, onBack: () -> Unit) {
                         now = now,
                         onCorrect = { actingOn = fact; dialog = MemoryDialog.CORRECT },
                         onForget = { actingOn = fact; dialog = MemoryDialog.FORGET },
+                        onHistory = { actingOn = fact; dialog = MemoryDialog.HISTORY },
                     )
                 }
             }
@@ -151,7 +198,7 @@ fun MemoryRoute(app: VanApplication, onBack: () -> Unit) {
                 item { Text("No decisions recorded yet — say \"record decision: …\" and VAN will keep it.", style = tokens.type.body, color = tokens.color.textSecondary) }
             }
             items(decisions, key = { "decision:" + it.factId }) { fact ->
-                FactRow(fact = fact, now = now, onCorrect = { actingOn = fact; dialog = MemoryDialog.CORRECT }, onForget = { actingOn = fact; dialog = MemoryDialog.FORGET })
+                FactRow(fact = fact, now = now, onCorrect = { actingOn = fact; dialog = MemoryDialog.CORRECT }, onForget = { actingOn = fact; dialog = MemoryDialog.FORGET }, onHistory = { actingOn = fact; dialog = MemoryDialog.HISTORY })
             }
 
             item { SectionHeader("Preferences") }
@@ -159,28 +206,25 @@ fun MemoryRoute(app: VanApplication, onBack: () -> Unit) {
                 item { Text("VAN has not learned any preferences yet.", style = tokens.type.body, color = tokens.color.textSecondary) }
             }
             items(preferences, key = { "pref:" + it.factId }) { fact ->
-                FactRow(fact = fact, now = now, onCorrect = { actingOn = fact; dialog = MemoryDialog.CORRECT }, onForget = { actingOn = fact; dialog = MemoryDialog.FORGET })
+                FactRow(fact = fact, now = now, onCorrect = { actingOn = fact; dialog = MemoryDialog.CORRECT }, onForget = { actingOn = fact; dialog = MemoryDialog.FORGET }, onHistory = { actingOn = fact; dialog = MemoryDialog.HISTORY })
             }
 
             item { SectionHeader("Things I'm unsure about", detail = if (uncertainty.isEmpty) "Nothing right now" else null) }
-            if (uncertainty.isEmpty) {
+            conflictsError?.let { item { Text(it, style = tokens.type.body, color = tokens.color.textSecondary) } }
+            if (uncertainty.isEmpty && conflictsError == null) {
                 item { Text("No contradictions and nothing about to lapse.", style = tokens.type.body, color = tokens.color.textSecondary) }
             }
             items(uncertainty.conflicts, key = { "conflict:" + it.subject + it.predicate + it.scope }) { conflict ->
                 ConflictCard(
                     conflict = conflict,
+                    enabled = !mutating && !loading && mutationError == null && conflictsError == null,
                     onResolve = { side ->
-                        scope.launch {
-                            runCatching {
-                                app.gatewayClient.stateOwnerFact(conflict.subject, conflict.predicate, side.value, conflict.scope)
-                            }.onSuccess { notice = "VAN will use \"${side.value}\" from now on."; load() }
-                                .onFailure { notice = "Could not resolve: ${it.message}" }
-                        }
+                        mutate("Your correction was recorded for this conflict.") { app.gatewayClient.stateOwnerFact(conflict.subject, conflict.predicate, side.value, conflict.scope).also { check(it.optString("value") == side.value) { "The fact receipt did not match your correction." } } }
                     },
                 )
             }
             items(uncertainty.staleOrExpiring, key = { "stale:" + it.factId }) { fact ->
-                FactRow(fact = fact, now = now, onCorrect = { actingOn = fact; dialog = MemoryDialog.CORRECT }, onForget = { actingOn = fact; dialog = MemoryDialog.FORGET }, showFreshness = true)
+                FactRow(fact = fact, now = now, onCorrect = { actingOn = fact; dialog = MemoryDialog.CORRECT }, onForget = { actingOn = fact; dialog = MemoryDialog.FORGET }, onHistory = { actingOn = fact; dialog = MemoryDialog.HISTORY }, showFreshness = true)
             }
 
             item { SectionHeader("Recent changes") }
@@ -198,22 +242,22 @@ fun MemoryRoute(app: VanApplication, onBack: () -> Unit) {
         }
     }
 
+        }
+    }
     if (dialog == MemoryDialog.REMEMBER) {
         RememberDialog(
-            onDismiss = { dialog = MemoryDialog.NONE },
+            working = mutating,
+            errorMessage = mutationError,
+            onRetry = ::load,
+            onDismiss = { if (!mutating) dialog = MemoryDialog.NONE },
             onSubmitStatement = { statement ->
                 dialog = MemoryDialog.NONE
                 app.commandController.submitText("remember that $statement", VanCommandSource.CHAT)
-                notice = "Sent to VAN to remember."
-                scope.launch { delay(1_200); load() }
+                notice = "Request sent. Follow its outcome in Work."
+                onOpenRoute(VanRoute.WORK)
             },
             onSubmitStructured = { predicate, value ->
-                dialog = MemoryDialog.NONE
-                scope.launch {
-                    runCatching { app.gatewayClient.stateOwnerFact("OWNER", predicate, value, "global") }
-                        .onSuccess { notice = "Remembered."; load() }
-                        .onFailure { notice = "Could not remember that: ${it.message}" }
-                }
+                mutate("Owner-stated fact recorded.") { app.gatewayClient.stateOwnerFact("OWNER", predicate, value, "global").also { check(it.optString("value") == value) { "The fact receipt did not match." } } }
             },
         )
     }
@@ -222,14 +266,12 @@ fun MemoryRoute(app: VanApplication, onBack: () -> Unit) {
         actingOn?.let { fact ->
             CorrectDialog(
                 fact = fact,
-                onDismiss = { dialog = MemoryDialog.NONE },
+                working = mutating,
+                errorMessage = mutationError,
+                onRetry = ::load,
+                onDismiss = { if (!mutating) dialog = MemoryDialog.NONE },
                 onSubmit = { newValue ->
-                    dialog = MemoryDialog.NONE
-                    scope.launch {
-                        runCatching { app.gatewayClient.stateOwnerFact(fact.subject, fact.predicate, newValue, fact.scope) }
-                            .onSuccess { notice = "Updated."; load() }
-                            .onFailure { notice = "Could not correct: ${it.message}" }
-                    }
+                    mutate("Correction recorded.") { app.gatewayClient.stateOwnerFact(fact.subject, fact.predicate, newValue, fact.scope).also { check(it.optString("value") == newValue) { "The fact receipt did not match." } } }
                 },
             )
         }
@@ -238,26 +280,33 @@ fun MemoryRoute(app: VanApplication, onBack: () -> Unit) {
     if (dialog == MemoryDialog.FORGET) {
         actingOn?.let { fact ->
             AlertDialog(
-                onDismissRequest = { dialog = MemoryDialog.NONE },
-                title = { Text("Forget this?") },
-                text = { Text("VAN will stop treating \"${fact.predicate.replace('_', ' ')}\" as \"${fact.value}\". This does not undo anything already done with it.") },
+                onDismissRequest = { if (!mutating) dialog = MemoryDialog.NONE },
+                title = { Text("Withdraw this fact?") },
+                text = { Column { Text("VAN will stop treating \"${fact.predicate.replace('_', ' ')}\" as \"${fact.value}\". This does not undo anything already done with it."); mutationError?.let { Text(it); OutlinedButton(onClick = ::load, enabled = !loading) { Text("Refresh memory") } } } },
                 confirmButton = {
                     Button(
+                        enabled = !mutating && !loading && mutationError == null,
                         onClick = {
-                            dialog = MemoryDialog.NONE
-                            scope.launch {
-                                runCatching { app.gatewayClient.forgetOwnerFact(fact.subject, fact.predicate, fact.scope) }
-                                    .onSuccess { notice = "Forgotten."; load() }
-                                    .onFailure { notice = "Could not forget: ${it.message}" }
-                            }
+                            mutate("Fact withdrawn. Its history remains available.") { app.gatewayClient.forgetOwnerFact(fact.subject, fact.predicate, fact.scope).also { check(it.has("ended")) { "No withdrawal receipt was returned." } } }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = LocalVanTokens.current.color.forStatusRole(StatusSemantics.ROLE_CRITICAL)),
-                    ) { Text("Forget") }
+                    ) { Text("Withdraw fact") }
                 },
-                dismissButton = { TextButton(onClick = { dialog = MemoryDialog.NONE }) { Text("Cancel") } },
+                dismissButton = { TextButton(enabled = !mutating, onClick = { dialog = MemoryDialog.NONE }) { Text("Cancel") } },
             )
         }
     }
+    if (dialog == MemoryDialog.HISTORY) actingOn?.let { FactHistoryDialog(app, it, onDismiss = { dialog = MemoryDialog.NONE }) }
+    if (privacyOpen) MemoryPrivacyDialog(app, onDismiss = { privacyOpen = false }, onRequestErasure = { store ->
+        val command = if (store == null) "forget all owner-derived memory" else "forget owner-derived memory store $store"
+        app.commandController.submitText(command, VanCommandSource.CHAT)
+        privacyOpen = false
+        onOpenRoute(VanRoute.WORK)
+    }, onRequestRecordErasure = { command ->
+        app.commandController.submitText(command, VanCommandSource.QUICK_ACTION, actionClass = "A4")
+        privacyOpen = false
+        onOpenRoute(VanRoute.WORK)
+    })
 }
 
 @Composable
@@ -266,6 +315,7 @@ private fun FactRow(
     now: Long,
     onCorrect: () -> Unit,
     onForget: () -> Unit,
+    onHistory: () -> Unit,
     showFreshness: Boolean = false,
 ) {
     val tokens = LocalVanTokens.current
@@ -290,14 +340,16 @@ private fun FactRow(
             }
             Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space3)) {
                 TextButton(onClick = onCorrect) { Text("Correct", style = tokens.type.label) }
-                TextButton(onClick = onForget) { Text("Forget", style = tokens.type.label) }
+                TextButton(onClick = onForget) { Text("Withdraw", style = tokens.type.label) }
+                TextButton(onClick = onHistory) { Text("History", style = tokens.type.label) }
             }
+            Text("${fact.subject} · ${fact.scope}\nSource: ${fact.sourceRef.ifBlank { "Not recorded" }}\nTrust: ${fact.sourceTrust} · observed ${ownerTime(fact.observedAtMs)}", style = tokens.type.label, color = tokens.color.textTertiary)
         }
     }
 }
 
 @Composable
-private fun ConflictCard(conflict: MemoryConflict, onResolve: (MemoryConflictSide) -> Unit) {
+private fun ConflictCard(conflict: MemoryConflict, enabled: Boolean, onResolve: (MemoryConflictSide) -> Unit) {
     val tokens = LocalVanTokens.current
     VanPanel {
         Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
@@ -317,8 +369,9 @@ private fun ConflictCard(conflict: MemoryConflict, onResolve: (MemoryConflictSid
                     Column(modifier = Modifier.weight(1f)) {
                         Text(side.value, style = tokens.type.body, color = tokens.color.textPrimary)
                         Text(side.authority, style = tokens.type.label, color = tokens.color.textTertiary)
+                        Text("${side.sourceTrust} · ${ownerTime(side.observedAtMs)}\n${side.sourceRef.ifBlank { "Source not recorded" }}", style = tokens.type.label, color = tokens.color.textTertiary)
                     }
-                    OutlinedButton(onClick = { onResolve(side) }) { Text("Use this", style = tokens.type.label) }
+                    OutlinedButton(enabled = enabled, onClick = { onResolve(side) }) { Text("Use this", style = tokens.type.label) }
                 }
             }
         }
@@ -327,6 +380,9 @@ private fun ConflictCard(conflict: MemoryConflict, onResolve: (MemoryConflictSid
 
 @Composable
 private fun RememberDialog(
+    working: Boolean,
+    errorMessage: String?,
+    onRetry: () -> Unit,
     onDismiss: () -> Unit,
     onSubmitStatement: (String) -> Unit,
     onSubmitStructured: (predicate: String, value: String) -> Unit,
@@ -342,6 +398,7 @@ private fun RememberDialog(
         title = { Text("Remember something") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space3)) {
+                errorMessage?.let { Text(it); OutlinedButton(onClick = onRetry, enabled = !working) { Text("Refresh memory") } }
                 Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
                     RememberModeChip(label = "Say it", selected = !structured, onClick = { structured = false })
                     RememberModeChip(label = "Structured", selected = structured, onClick = { structured = true })
@@ -371,35 +428,39 @@ private fun RememberDialog(
         },
         confirmButton = {
             Button(
-                enabled = if (!structured) statement.isNotBlank() else predicate.isNotBlank() && value.isNotBlank(),
+                enabled = !working && errorMessage == null && (if (!structured) statement.isNotBlank() else predicate.isNotBlank() && value.isNotBlank()),
                 onClick = {
                     if (!structured) onSubmitStatement(statement.trim()) else onSubmitStructured(predicate.trim(), value.trim())
                 },
             ) { Text("Remember") }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(enabled = !working, onClick = onDismiss) { Text("Cancel") } },
     )
 }
 
 @Composable
-private fun CorrectDialog(fact: MemoryFact, onDismiss: () -> Unit, onSubmit: (String) -> Unit) {
+private fun CorrectDialog(fact: MemoryFact, working: Boolean, errorMessage: String?, onRetry: () -> Unit, onDismiss: () -> Unit, onSubmit: (String) -> Unit) {
     val tokens = LocalVanTokens.current
     var value by remember { mutableStateOf(fact.value) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Correct \"${fact.predicate.replace('_', ' ')}\"") },
         text = {
+            Column {
+            errorMessage?.let { Text(it); OutlinedButton(onClick = onRetry, enabled = !working) { Text("Refresh memory") } }
             OutlinedTextField(
                 value = value,
+                enabled = !working,
                 onValueChange = { value = it },
                 label = { Text("New value", style = tokens.type.label) },
                 modifier = Modifier.fillMaxWidth(),
             )
+            }
         },
         confirmButton = {
-            Button(enabled = value.isNotBlank() && value != fact.value, onClick = { onSubmit(value.trim()) }) { Text("Save") }
+            Button(enabled = !working && errorMessage == null && value.isNotBlank() && value != fact.value, onClick = { onSubmit(value.trim()) }) { Text(if (working) "Saving…" else "Save") }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(enabled = !working, onClick = onDismiss) { Text("Cancel") } },
     )
 }
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import re
 import time
 from datetime import datetime
 from typing import Any
@@ -10,6 +11,7 @@ from cryptography.fernet import Fernet, InvalidToken
 
 from van_gateway.action.models import ExecutionStatus, VerificationObservation
 from van_gateway.action.service import ActionPolicyError, ActionRuntime
+from van_gateway.google.mail import content_digest, encode_snapshot, message_snapshot, prepare_reply
 from van_gateway.models import DegradedCode, GoogleConnectionStatus
 from van_gateway.storage.db import Store
 
@@ -90,10 +92,26 @@ class GoogleService:
               status='active',
               updated_at_unix=excluded.updated_at_unix
             """, (owner_id, token, Store.dumps(scopes), now))
+        # A new refresh credential needs its own canary. Retain the previous receipt
+        # for diagnosis, but do not let it certify a replacement credential.
+        await self.store.execute(
+            "UPDATE google_capability_connections SET state = 'CONFIGURED', "
+            "verified_at_unix = NULL, updated_at_unix = ? "
+            "WHERE credential_plane = 'workspace_oauth'",
+            (now,),
+        )
 
     async def revoke(self, owner_id: str = "owner") -> None:
         now = int(time.time())
         await self.store.execute("UPDATE google_connections SET status = 'revoked', encrypted_refresh_token = '', updated_at_unix = ? WHERE owner_id = ?", (now, owner_id))
+        # Readiness consumers do not all receive GoogleService.status(). Invalidate
+        # this plane's live verdict at the revocation boundary as well.
+        await self.store.execute(
+            "UPDATE google_capability_connections SET state = 'AUTH_REQUIRED', "
+            "verified_at_unix = NULL, updated_at_unix = ? "
+            "WHERE credential_plane = 'workspace_oauth'",
+            (now,),
+        )
 
     async def _refresh_token(self, owner_id: str) -> str:
         if not self._fernet:
@@ -123,37 +141,71 @@ class GoogleService:
         except RuntimeError as exc:
             raise GoogleAuthError(str(exc)) from exc
 
-    async def gmail_search(self, query: str, *, owner_id: str = "owner") -> list[dict]:
+    async def _provider_call(self, method: str, *args: Any, owner_id: str = "owner") -> Any:
         token = await self._api_token(owner_id)
-        return await self._require_transport().gmail_search(token, query)
+        try:
+            return await getattr(self._require_transport(), method)(token, *args)
+        except RuntimeError as exc:
+            # Owner read routes already translate GoogleAuthError into a usable
+            # service-unavailable state. Transport failures need the same boundary.
+            raise GoogleAuthError(str(exc)) from exc
+
+    async def gmail_search(self, query: str, *, owner_id: str = "owner") -> list[dict]:
+        return await self._provider_call("gmail_search", query, owner_id=owner_id)
 
     async def gmail_draft(self, thread_id: str, body: str, *, owner_id: str = "owner") -> dict:
-        token = await self._api_token(owner_id)
-        return await self._require_transport().gmail_draft(token, thread_id, body)
+        provider, _prepared = await self._create_gmail_reply(thread_id, body, owner_id=owner_id)
+        return provider
+
+    async def _create_gmail_reply(self, thread_id: str, body: str, *, owner_id: str = "owner"):
+        profile = await self._provider_call("gmail_profile_get", owner_id=owner_id)
+        thread = await self._provider_call("gmail_thread_get", thread_id, owner_id=owner_id)
+        try:
+            prepared = prepare_reply(profile, thread, thread_id, body)
+        except RuntimeError as exc:
+            raise GoogleAuthError(str(exc)) from exc
+        provider = await self._provider_call("gmail_draft", thread_id, prepared.raw, owner_id=owner_id)
+        return provider, prepared
+
+    async def gmail_draft_preview(self, draft_id: str, *, owner_id: str = "owner") -> dict:
+        draft = await self.gmail_draft_get(draft_id, owner_id=owner_id)
+        message = draft.get("message") or {}
+        if draft.get("id") != draft_id or not isinstance(message, dict) or not isinstance(message.get("threadId"), str) or not message["threadId"]:
+            raise GoogleAuthError("gmail_draft_identity_invalid")
+        try:
+            snapshot = message_snapshot(message.get("raw"))
+        except RuntimeError as exc:
+            raise GoogleAuthError(str(exc)) from exc
+        return {
+            "draft_id": draft_id, "thread_id": message["threadId"],
+            "draft_content_sha256": content_digest(snapshot, message["threadId"]),
+            "recipient": snapshot["to"], "cc": snapshot["cc"], "bcc": snapshot["bcc"],
+            "sender": snapshot["from"], "subject": snapshot["subject"],
+            "body_sha256": hashlib.sha256(snapshot["body"].encode()).hexdigest(),
+            "preview": snapshot, "content_trust": "UNTRUSTED_EXTERNAL",
+            "atomic_conditional_send_supported": False,
+            "immutable_payload_send_supported": True,
+            "source_draft_cleanup": "NOT_ATTEMPTED",
+            "source_draft_state": "UNOBSERVED",
+        }
 
     async def gmail_draft_get(self, draft_id: str, *, owner_id: str = "owner") -> dict:
-        token = await self._api_token(owner_id)
-        return await self._require_transport().gmail_draft_get(token, draft_id)
+        return await self._provider_call("gmail_draft_get", draft_id, owner_id=owner_id)
 
     async def gmail_send(self, draft_id: str, *, owner_id: str = "owner") -> dict:
-        token = await self._api_token(owner_id)
-        return await self._require_transport().gmail_send(token, draft_id)
+        return await self._provider_call("gmail_send", draft_id, owner_id=owner_id)
 
     async def gmail_message_get(self, message_id: str, *, owner_id: str = "owner") -> dict:
-        token = await self._api_token(owner_id)
-        return await self._require_transport().gmail_message_get(token, message_id)
+        return await self._provider_call("gmail_message_get", message_id, owner_id=owner_id)
 
     async def calendar_agenda(self, *, owner_id: str = "owner") -> list[dict]:
-        token = await self._api_token(owner_id)
-        return await self._require_transport().calendar_agenda(token)
+        return await self._provider_call("calendar_agenda", owner_id=owner_id)
 
     async def calendar_reschedule(self, event_id: str, new_start_unix: int, *, owner_id: str = "owner") -> dict:
-        token = await self._api_token(owner_id)
-        return await self._require_transport().calendar_reschedule(token, event_id, new_start_unix)
+        return await self._provider_call("calendar_reschedule", event_id, new_start_unix, owner_id=owner_id)
 
     async def calendar_event_get(self, event_id: str, *, owner_id: str = "owner") -> dict:
-        token = await self._api_token(owner_id)
-        return await self._require_transport().calendar_event_get(token, event_id)
+        return await self._provider_call("calendar_event_get", event_id, owner_id=owner_id)
 
     async def execute_authorized_action(
         self,
@@ -188,7 +240,7 @@ class GoogleService:
             if execution.action_id == "google.gmail.draft":
                 thread_id = str(parameters["thread_id"])
                 body = str(parameters["body"])
-                provider = await self.gmail_draft(thread_id, body)
+                provider, prepared = await self._create_gmail_reply(thread_id, body)
                 object_id = str(provider.get("id") or "")
                 if not object_id:
                     raise GoogleAuthError("gmail_draft_id_missing")
@@ -204,7 +256,7 @@ class GoogleService:
                     success = (
                         str(observed.get("id") or "") == object_id
                         and str(message.get("threadId") or "") == thread_id
-                        and str(message.get("raw") or "") == body
+                        and message_snapshot(message.get("raw")) == prepared.snapshot
                     )
                 except Exception:
                     success, observed = False, {}
@@ -217,19 +269,34 @@ class GoogleService:
                         observed_postcondition={
                             "draft_id": object_id,
                             "thread_id": str((observed.get("message") or {}).get("threadId") or ""),
+                            "source_message_id": prepared.source_message_id,
+                            "draft_content_sha256": content_digest(prepared.snapshot, thread_id) if success else None,
+                            "decoded_content_matches": success,
                         },
                         evidence_pointer=pointer,
-                    )
+                    ),
+                    independent_observer=True,
                 )
                 return {"provider": provider, "verification": receipt.model_dump(mode="json")}
 
             if execution.action_id == "google.gmail.send":
                 draft_id = str(parameters["draft_id"])
-                provider = await self.gmail_send(draft_id)
+                expected_digest = parameters.get("draft_content_sha256")
+                if not isinstance(expected_digest, str) or re.fullmatch(r"[0-9a-f]{64}", expected_digest) is None:
+                    raise GoogleAuthError("gmail_send_content_binding_required")
+                preview = await self.gmail_draft_preview(draft_id)
+                if preview["draft_content_sha256"] != expected_digest:
+                    raise GoogleAuthError("gmail_send_draft_changed_since_approval")
+                # Gmail cannot conditionally send a mutable draft revision.
+                # messages.send takes the frozen approved MIME as request data,
+                # so an edit to the original draft after this read cannot change
+                # the recipients/content of the effect request.
+                frozen_raw = encode_snapshot(preview["preview"])
+                provider = await self._provider_call("gmail_message_send", frozen_raw, preview["thread_id"])
                 message_id = str(provider.get("id") or "")
                 if not message_id:
                     raise GoogleAuthError("gmail_sent_message_id_missing")
-                correlation = {"message_id": message_id}
+                correlation = {"message_id": message_id, "source_draft_id": draft_id}
                 pointer = f"google://gmail/messages/{message_id}"
                 await actions.mark_submitted(
                     execution_id, correlation=correlation, evidence_pointer=pointer
@@ -238,7 +305,11 @@ class GoogleService:
                 try:
                     observed = await self.gmail_message_get(message_id)
                     labels = {str(item) for item in observed.get("labelIds") or []}
-                    success = str(observed.get("id") or "") == message_id and "SENT" in labels
+                    success = (
+                        str(observed.get("id") or "") == message_id and "SENT" in labels
+                        and str(observed.get("threadId") or "") == preview["thread_id"]
+                        and content_digest(message_snapshot(observed.get("raw")), preview["thread_id"]) == expected_digest
+                    )
                 except Exception:
                     success, observed = False, {}
                 receipt = await actions.verify(
@@ -250,9 +321,16 @@ class GoogleService:
                         observed_postcondition={
                             "message_id": str(observed.get("id") or ""),
                             "sent": "SENT" in {str(item) for item in observed.get("labelIds") or []},
+                            "approved_content_matches": success,
+                            "draft_content_sha256": expected_digest,
+                            "atomic_conditional_send_supported": False,
+                            "immutable_payload_send_supported": True,
+                            "source_draft_cleanup": "NOT_ATTEMPTED",
+                            "source_draft_state": "UNOBSERVED",
                         },
                         evidence_pointer=pointer,
-                    )
+                    ),
+                    independent_observer=True,
                 )
                 return {"provider": provider, "verification": receipt.model_dump(mode="json")}
 
@@ -269,9 +347,22 @@ class GoogleService:
                 observed = await self.calendar_event_get(event_id)
                 raw = str((observed.get("start") or {}).get("dateTime") or "")
                 parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+                observed_end = datetime.fromisoformat(
+                    str((observed.get("end") or {}).get("dateTime") or "").replace("Z", "+00:00")
+                )
+                expected_end = datetime.fromisoformat(
+                    str((provider.get("end") or {}).get("dateTime") or "").replace("Z", "+00:00")
+                )
                 success = (
                     str(observed.get("id") or "") == event_id
+                    and str(provider.get("id") or "") == event_id
+                    and observed.get("status") != "cancelled"
+                    and parsed.tzinfo is not None
+                    and observed_end.tzinfo is not None
+                    and expected_end.tzinfo is not None
                     and int(parsed.timestamp()) == new_start_unix
+                    and observed_end == expected_end
+                    and observed_end > parsed
                 )
             except Exception:
                 success, observed = False, {}
@@ -284,32 +375,39 @@ class GoogleService:
                     observed_postcondition={
                         "event_id": str(observed.get("id") or ""),
                         "start": (observed.get("start") or {}).get("dateTime"),
+                        "end": (observed.get("end") or {}).get("dateTime"),
                     },
                     evidence_pointer=pointer,
-                )
+                ),
+                independent_observer=True,
             )
             return {"provider": provider, "verification": receipt.model_dump(mode="json")}
         except (GoogleAuthError, RuntimeError, KeyError, ValueError) as exc:
+            code = str(exc)
+            status = ExecutionStatus.EXECUTION_FAILED
+            if code == "gmail_send_draft_changed_since_approval":
+                status = ExecutionStatus.CONFLICTED_STATE
+            elif code.startswith(("gmail_reply_", "gmail_raw_", "gmail_frozen_")) or code in {
+                "gmail_send_content_binding_required", "gmail_draft_identity_invalid",
+            }:
+                status = ExecutionStatus.PRECONDITION_FAILED
             await actions.fail_execution(
                 execution_id,
-                status=ExecutionStatus.EXECUTION_FAILED,
-                error_code=str(exc)[:200],
+                status=status,
+                error_code=code[:200],
             )
             if isinstance(exc, GoogleAuthError):
                 raise
             raise GoogleAuthError(str(exc)) from exc
 
     async def drive_search(self, query: str, *, owner_id: str = "owner") -> list[dict]:
-        token = await self._api_token(owner_id)
-        return await self._require_transport().drive_search(token, query)
+        return await self._provider_call("drive_search", query, owner_id=owner_id)
 
     async def contacts_resolve(self, query: str, *, owner_id: str = "owner") -> list[dict]:
-        token = await self._api_token(owner_id)
-        return await self._require_transport().contacts_resolve(token, query)
+        return await self._provider_call("contacts_resolve", query, owner_id=owner_id)
 
     async def tasks_list(self, *, owner_id: str = "owner") -> list[dict]:
-        token = await self._api_token(owner_id)
-        return await self._require_transport().tasks_list(token)
+        return await self._provider_call("tasks_list", owner_id=owner_id)
 
     @staticmethod
     def scrub_for_prompt(payload: dict[str, Any]) -> dict[str, Any]:

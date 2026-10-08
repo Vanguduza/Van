@@ -241,6 +241,7 @@ internal fun BrowserTasksPage(
     app: VanApplication,
     glass: com.dial.van.visual.VanGlassStyle,
     back: () -> Unit,
+    onOpenOutcome: (String) -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     var tasks by remember { mutableStateOf<List<JSONObject>?>(null) }
@@ -270,7 +271,7 @@ internal fun BrowserTasksPage(
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(task.optString("goal", "Browser task"), color = Color.White, fontWeight = FontWeight.Bold)
                     Text(
-                        "${task.optString("status")} • ${task.optString("strategy")} • ${task.optString("autonomy_tier")}",
+                        "${if (task.optString("status") == "COMPLETED") "Execution complete · owner result unverified" else task.optString("status")} • ${task.optString("strategy")} • ${task.optString("autonomy_tier")}",
                         color = if (task.optString("status") == "WAITING_FOR_OWNER") Color(VanGlassTokens.ACCENT_AMBER) else Color(0xFFD7E7EC),
                         fontSize = 11.sp,
                     )
@@ -279,6 +280,7 @@ internal fun BrowserTasksPage(
                         Text("State reason: $it", color = Color(0xFFBCD1D8), fontSize = 10.sp)
                     }
                     val taskId = task.optString("task_id")
+                    Button(enabled = taskId.isNotBlank(), onClick = { onOpenOutcome(taskId) }) { Text("Inspect outcome") }
                     Button(
                         onClick = {
                             scope.launch {

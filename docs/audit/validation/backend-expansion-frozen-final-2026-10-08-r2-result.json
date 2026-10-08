@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "suite": "backend",
+  "selection": [
+    "backend/tests"
+  ],
+  "command": [
+    "/workspace/.onboarding/van-venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "backend/tests",
+    "--junitxml=/workspace/van-audit/backend-expansion-frozen-final-2026-10-08-r2.xml"
+  ],
+  "cwd": "/workspace/Van",
+  "started_at_utc": "2026-10-08T04:47:32.116070+00:00",
+  "finished_at_utc": "2026-10-08T04:57:13.080353+00:00",
+  "exit_code": 0,
+  "source_unchanged_during_test": false,
+  "changed_inputs": [
+    "android/app/src/main/java/com/dial/van/browser/BrowserPhoneActions.kt"
+  ],
+  "input_files": 1535,
+  "inputs_sha256": "2df977bd4f7d33b564b66a77458e15f0bc50ba7a9357ed44d5b76843f86afd59",
+  "production_manifest_sha256": "7c10fa544d0344d1b73899b4cb3fd7341c0d32caaba9b4c54df7eb6ffadc50af",
+  "physical_tests_executed": 0,
+  "production_deployed": false
+}

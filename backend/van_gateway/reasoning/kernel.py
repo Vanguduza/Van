@@ -373,6 +373,7 @@ class CriticalReasoningKernel:
         evidence_refs: list[str] | None = None,
         superseded_by: str | None = None,
         now_ms: int | None = None,
+        independent_observer: bool = False,
     ) -> None:
         """Clear an assumption, at a price that depends on what is being claimed.
 
@@ -393,18 +394,23 @@ class CriticalReasoningKernel:
             # without evidence is the same assertion wearing the opposite sign, and it is
             # the one that unblocks the work.
             raise ReasoningError("ASSUMPTION_RESOLUTION_REQUIRES_EVIDENCE", assumption_id)
+        if status in (AssumptionStatus.VERIFIED, AssumptionStatus.FALSIFIED) and not independent_observer:
+            # Evidence-reference strings supplied by the planner are claims, not a
+            # deterministic observation of this assumption's postcondition. The generic
+            # runtime API cannot grant this service-internal authority.
+            raise ReasoningError("ASSUMPTION_RESOLUTION_REQUIRES_INDEPENDENT_OBSERVATION", assumption_id)
 
         if status is AssumptionStatus.SUPERSEDED:
             if not superseded_by:
                 raise ReasoningError("SUPERSEDED_REQUIRES_A_REPLACEMENT", assumption_id)
             original = await self.store.fetchone(
-                "SELECT mission_id FROM assumption_ledger WHERE assumption_id = ?",
+                "SELECT mission_id, importance FROM assumption_ledger WHERE assumption_id = ?",
                 (assumption_id,),
             )
             if original is None:
                 raise ReasoningError("ASSUMPTION_NOT_FOUND", assumption_id)
             replacement = await self.store.fetchone(
-                "SELECT mission_id, status FROM assumption_ledger WHERE assumption_id = ?",
+                "SELECT mission_id, status, importance FROM assumption_ledger WHERE assumption_id = ?",
                 (superseded_by,),
             )
             if replacement is None:
@@ -415,6 +421,11 @@ class CriticalReasoningKernel:
                 raise ReasoningError("REPLACEMENT_BELONGS_TO_ANOTHER_MISSION", superseded_by)
             if superseded_by == assumption_id:
                 raise ReasoningError("ASSUMPTION_CANNOT_SUPERSEDE_ITSELF", assumption_id)
+            if original["importance"] in {Importance.HIGH.value, Importance.CRITICAL.value} and (
+                replacement["status"] != AssumptionStatus.ACTIVE.value
+                or replacement["importance"] not in {Importance.HIGH.value, Importance.CRITICAL.value}
+            ):
+                raise ReasoningError("ASSUMPTION_REPLACEMENT_WEAKENS_BLOCKER", superseded_by)
 
         now = int(time.time() * 1000) if now_ms is None else now_ms
         await self.store.execute(

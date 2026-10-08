@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.VoiceSecondPassPolicyTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:34" hostname="052fefa249ff" time="0.001">
+  <properties/>
+  <testcase name="an easy turn does not pay for a second pass()" classname="com.dial.van.voice.VoiceSecondPassPolicyTest" time="0.0"/>
+  <testcase name="low confidence is a reason()" classname="com.dial.van.voice.VoiceSecondPassPolicyTest" time="0.001"/>
+  <testcase name="a correction the owner has made before is a reason()" classname="com.dial.van.voice.VoiceSecondPassPolicyTest" time="0.0"/>
+  <testcase name="nothing heard is a reason to try again()" classname="com.dial.van.voice.VoiceSecondPassPolicyTest" time="0.0"/>
+  <testcase name="a confidence outside the valid range is ignored rather than treated as low()" classname="com.dial.van.voice.VoiceSecondPassPolicyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Iterable, Iterator, Optional
@@ -53,10 +54,24 @@ class Ledger:
         self._conn.execute("CREATE INDEX IF NOT EXISTS ix_events_kind ON events(kind)")
 
     # ------------------------------------------------------------------ write
+    @contextmanager
+    def atomic(self):
+        """Serialize a read/validate/append operation with every ledger writer."""
+        if self._conn.in_transaction:
+            yield self
+            return
+        self._conn.execute("BEGIN IMMEDIATE")
+        try:
+            yield self
+            self._conn.commit()
+        except BaseException:
+            self._conn.rollback()
+            raise
+
     def append(self, event: Event) -> str:
         if not event.hash or event.hash != canonical_hash(event.body()):
             raise LedgerError("event hash missing or does not match body")
-        with self._conn:
+        with self.atomic():
             row = self._conn.execute("SELECT chain_hash FROM events ORDER BY seq DESC LIMIT 1").fetchone()
             prev = row[0] if row else GENESIS
             chain = hashlib.sha256((prev + event.hash).encode()).hexdigest()

@@ -24,6 +24,7 @@ object VanRoute {
 
     const val HOME = "home"
     const val ATTENTION = "attention"
+    const val REMINDERS = "attention/reminders"
     const val WORK = "work"
     const val WORK_ACTIVITY = "work/activity"
     const val WORK_ARTEMIS = "work/artemis"
@@ -35,8 +36,12 @@ object VanRoute {
     const val WORK_MISSION_TEMPLATE = "work/missions/{missionId}"
     const val TRADING = "trading"
     const val MEMORY = "memory"
+    const val UNDERSTANDING = "memory/understanding"
+    const val ADAPTATIONS = "memory/adaptations"
+    const val GOALS = "memory/goals"
     const val PROJECTS = "projects"
     const val PROJECT_DETAIL_TEMPLATE = "projects/{projectId}"
+    const val PROJECT_RATIONALE_TEMPLATE = "projects/{projectId}/rationale"
     const val CONNECTED = "connected"
     const val SETTINGS = "settings"
     /**
@@ -47,6 +52,12 @@ object VanRoute {
      */
     const val SETTINGS_VOICE = "settings/voice"
     const val SETTINGS_NOTIFICATIONS = "settings/notifications"
+    const val SETTINGS_PERMISSIONS = "settings/permissions"
+    const val OWNER_KNOWLEDGE = "owner/knowledge"
+    const val OWNER_RESEARCH = "owner/research"
+    const val OWNER_AUTOMATION = "owner/automation"
+    const val OWNER_DIAGNOSTICS = "owner/diagnostics"
+    const val OWNER_BROWSER_OUTCOME = "owner/browser-outcome/{taskId}"
 
     // ---- DIAL Development Control Centre (VAN-DEVCC-R1 §2.1, VAN-DEV-003) -----------------
     // Routes *inside* Work, not a ninth destination: DNA §4's eight stay eight. Every one of
@@ -87,13 +98,16 @@ object VanRoute {
 
     fun missionRoute(missionId: String): String = "work/missions/${encode(missionId)}"
     fun projectRoute(projectId: String): String = "projects/${encode(projectId)}"
+    fun projectRationaleRoute(projectId: String): String = "projects/${encode(projectId)}/rationale"
+    fun browserOutcomeRoute(taskId: String): String = "owner/browser-outcome/${encode(taskId)}"
 
     /** Every template this app's `NavHost` declares a `composable` for. */
     val ALL_TEMPLATES: List<String> = listOf(
-        HOME, ATTENTION, WORK, WORK_ACTIVITY, WORK_ARTEMIS, WORK_BROWSER, WORK_BROWSER_TASKS, WORK_BROWSER_ESCALATIONS,
-        WORK_BROWSER_SESSIONS, WORK_BROWSER_POLICY, WORK_MISSION_TEMPLATE, TRADING, MEMORY,
-        PROJECTS, PROJECT_DETAIL_TEMPLATE, CONNECTED, SETTINGS,
-        SETTINGS_VOICE, SETTINGS_NOTIFICATIONS,
+        HOME, ATTENTION, REMINDERS, WORK, WORK_ACTIVITY, WORK_ARTEMIS, WORK_BROWSER, WORK_BROWSER_TASKS, WORK_BROWSER_ESCALATIONS,
+        WORK_BROWSER_SESSIONS, WORK_BROWSER_POLICY, WORK_MISSION_TEMPLATE, TRADING, MEMORY, UNDERSTANDING, ADAPTATIONS, GOALS,
+        PROJECTS, PROJECT_DETAIL_TEMPLATE, PROJECT_RATIONALE_TEMPLATE, CONNECTED, SETTINGS,
+        SETTINGS_VOICE, SETTINGS_NOTIFICATIONS, SETTINGS_PERMISSIONS,
+        OWNER_KNOWLEDGE, OWNER_RESEARCH, OWNER_AUTOMATION, OWNER_DIAGNOSTICS, OWNER_BROWSER_OUTCOME,
     ) + DEV_TEMPLATES
 
     /**
@@ -108,6 +122,7 @@ object VanRoute {
     /** Child route template → its parent template, for "up"/back-to-parent affordances. */
     val PARENTS: Map<String, String> = mapOf(
         ATTENTION to HOME,
+        REMINDERS to ATTENTION,
         WORK to HOME,
         WORK_ACTIVITY to WORK,
         WORK_ARTEMIS to WORK,
@@ -119,12 +134,22 @@ object VanRoute {
         WORK_MISSION_TEMPLATE to WORK,
         TRADING to HOME,
         MEMORY to HOME,
+        UNDERSTANDING to MEMORY,
+        ADAPTATIONS to MEMORY,
+        GOALS to MEMORY,
         PROJECTS to HOME,
         PROJECT_DETAIL_TEMPLATE to PROJECTS,
+        PROJECT_RATIONALE_TEMPLATE to PROJECT_DETAIL_TEMPLATE,
         CONNECTED to HOME,
         SETTINGS to HOME,
         SETTINGS_VOICE to SETTINGS,
         SETTINGS_NOTIFICATIONS to SETTINGS,
+        SETTINGS_PERMISSIONS to SETTINGS,
+        OWNER_KNOWLEDGE to WORK,
+        OWNER_RESEARCH to WORK,
+        OWNER_AUTOMATION to WORK,
+        OWNER_DIAGNOSTICS to SETTINGS,
+        OWNER_BROWSER_OUTCOME to WORK_BROWSER_TASKS,
     ) + DEV_TEMPLATES.associateWith { WORK }
 
     /**
@@ -145,6 +170,28 @@ object VanRoute {
             .sortedWith(compareByDescending<IndexedValue<String>> { literalSegments(it.value) }.thenBy { it.index })
             .firstOrNull()
             ?.value
+    }
+
+    /** Persist the admitted destination's actual arguments, never its unresolved template. */
+    fun concreteRoute(template: String, arguments: Map<String, String?>): String? {
+        if (template !in ALL_TEMPLATES) return null
+        val placeholder = Regex("\\{(\\w+)}")
+        var missingPathArgument = false
+        val path = placeholder.replace(template.substringBefore('?')) { match ->
+            val value = arguments[match.groupValues[1]]?.takeIf { it.isNotBlank() }
+            if (value == null) { missingPathArgument = true; "" } else encode(value)
+        }
+        if (missingPathArgument) return null
+        val query = template.substringAfter('?', "").split('&').filter { it.isNotBlank() }.mapNotNull { parameter ->
+            val key = parameter.substringBefore('=')
+            val valueTemplate = parameter.substringAfter('=', "")
+            val match = placeholder.matchEntire(valueTemplate)
+            if (match == null) parameter
+            else arguments[match.groupValues[1]]?.takeIf { it.isNotBlank() }?.let { "$key=${encodeQuery(it)}" }
+        }.joinToString("&")
+        val concrete = path + if (query.isBlank()) "" else "?$query"
+        // An ambiguous identifier must not restore as a different admitted destination.
+        return concrete.takeIf { templateFor(it) == template }
     }
 
     private fun literalSegments(template: String): Int =
@@ -178,7 +225,7 @@ object VanRoute {
     }
 
     private fun encode(value: String): String =
-        value.replace("/", "%2F")
+        java.net.URLEncoder.encode(value, "UTF-8").replace("+", "%20")
 
     private fun encodeQuery(value: String): String =
         value.replace("%", "%25").replace("&", "%26").replace("=", "%3D").replace("#", "%23").replace(" ", "%20")
@@ -192,7 +239,7 @@ object VanRoute {
      * crashing the `NavHost` on an unregistered destination.
      */
     fun restore(savedRoute: String?): String =
-        savedRoute?.takeIf { isKnown(it) } ?: HOME
+        savedRoute?.takeIf { '{' !in it && '}' !in it && isKnown(it) } ?: HOME
 
     // ---- Deep links (`van://<route>`) ----------------------------------------------------
 

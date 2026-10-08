@@ -73,6 +73,40 @@ class ExplodingWorker:
         raise AssertionError
 
 
+@pytest.mark.parametrize("advance_during", ["propose", "execute", "finish"])
+async def test_elapsed_worker_time_cannot_escape_the_deadline(tmp_path, advance_during):
+    task = await _task(tmp_path)
+    clock = [1000]
+
+    class AdvancingWorker(ScriptedWorker):
+        async def propose(self, assignment, history):
+            if advance_during in {"propose", "finish"}:
+                clock[0] = 2001
+            return ProposedAction(kind="finish" if advance_during == "finish" else "navigate", domain=DOMAIN, done=advance_during == "finish")
+
+        async def execute(self, assignment, action):
+            observation = await super().execute(assignment, action)
+            clock[0] = 2001
+            return observation
+
+    worker = AdvancingWorker([])
+    result = await BrowserSubagentRunner(clock_ms=lambda: clock[0]).run(
+        assignment=_assignment(task, deadline_ms=2000), worker=worker, task=task,
+    )
+    assert result.stop_reason is SubagentStop.DEADLINE_REACHED
+    assert result.succeeded is False
+    assert len(worker.executed) == (1 if advance_during == "execute" else 0)
+    assert result.step_count == len(worker.executed)
+
+
+async def test_a_done_claim_cannot_skip_the_assignment_boundary(tmp_path):
+    task = await _task(tmp_path)
+    worker = ScriptedWorker([ProposedAction(kind="finish", domain="outside.example.com", done=True)])
+    result = await BrowserSubagentRunner().run(assignment=_assignment(task), worker=worker, task=task)
+    assert result.stop_reason is SubagentStop.SCOPE_VIOLATION
+    assert result.execution_completed is False
+
+
 async def _task(tmp_path):
     store = await make_store(tmp_path)
     service = BrowserTaskService(store)
@@ -111,7 +145,8 @@ async def test_worker_selects_its_own_actions_within_the_assignment(tmp_path):
         assignment=_assignment(task), worker=worker, task=task
     )
     assert result.stop_reason is SubagentStop.GOAL_ACHIEVED
-    assert result.succeeded
+    assert result.execution_completed
+    assert result.succeeded is False
     assert result.step_count == 3
     assert [s.kind for s in result.steps] == ["navigate", "click", "extract"]
 

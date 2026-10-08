@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "suite": "trading",
+  "selection": [
+    "trading/tests"
+  ],
+  "command": [
+    "/workspace/.onboarding/van-venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "trading/tests",
+    "--junitxml=/workspace/van-audit/trading-expansion-frozen-final-2026-10-08-r2.xml"
+  ],
+  "cwd": "/workspace/Van",
+  "started_at_utc": "2026-10-08T04:47:51.596326+00:00",
+  "finished_at_utc": "2026-10-08T04:48:35.350446+00:00",
+  "exit_code": 0,
+  "source_unchanged_during_test": true,
+  "changed_inputs": [],
+  "input_files": 1424,
+  "inputs_sha256": "51dd8c573083bc02e12cfed07f77431e54b9263e8e7ca9b5046b0d9ace32901b",
+  "production_manifest_sha256": "0250ebbb27305d083f8f0b1c2aa7b7c78d211b42b5ef31f8512a0fc5228ccb8c",
+  "physical_tests_executed": 0,
+  "production_deployed": false,
+  "junit_counts": {
+    "tests": 1295,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 2,
+    "passed": 1293
+  },
+  "skipped_cases": [
+    {
+      "classname": "trading.tests.test_infra_live",
+      "name": "test_postgres_ledger_matches_sqlite_chain_and_detects_tampering",
+      "reason": "local PostgreSQL not reachable"
+    },
+    {
+      "classname": "trading.tests.test_vtil_borrow",
+      "name": "test_dial_resolver_selects_trading_knowledge_from_van_registry",
+      "reason": "dial-new checkout not available (set DIAL_REPO)"
+    }
+  ],
+  "complete_input_files": 1609,
+  "complete_inputs_unchanged_during_test": true,
+  "complete_changed_inputs": [],
+  "complete_inputs_before_sha256": "7190c19a98cf31b3f19716347286bd92eea19b25f3d428323a10e2b66a53df3d",
+  "complete_inputs_after_sha256": "7190c19a98cf31b3f19716347286bd92eea19b25f3d428323a10e2b66a53df3d",
+  "warnings": 3,
+  "local_fixture_scope": true,
+  "actual_host_firewall_verified": false,
+  "live_provider_execution_verified": false,
+  "production_or_shared_database_used": false,
+  "retained_source_bound_postgres_fixture": {
+    "receipt": "trading-postgres-retained-input-check-2026-10-08.json",
+    "source_inputs_unchanged": true,
+    "prior_counts": {
+      "tests": 1,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0
+    }
+  },
+  "retained_source_only_DIAL_resolver": {
+    "receipt": "trading-dial-resolver-retained-input-check-2026-10-08.json",
+    "source_inputs_unchanged": true,
+    "prior_counts": {
+      "tests": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    "prior_golden_cases": 5
+  }
+}

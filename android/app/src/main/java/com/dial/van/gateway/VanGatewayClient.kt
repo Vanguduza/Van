@@ -5,6 +5,9 @@ import android.util.Base64
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.dial.van.BuildConfig
+import com.dial.van.connectivity.ConnectivityRegistry
+import com.dial.van.connectivity.SignedConnectivityRouting
+import com.dial.van.connectivity.SignedPinTrustManager
 import com.dial.van.browser.BrowserParsing
 import com.dial.van.browser.BrowserSessionSnapshot
 import com.dial.van.browser.BrowserStreamGrant
@@ -33,6 +36,8 @@ import java.net.HttpURLConnection
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.X509TrustManager
+import javax.net.ssl.TrustManagerFactory
+import java.security.KeyStore
 import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -49,6 +54,9 @@ import javax.crypto.spec.SecretKeySpec
  * independent from the signed per-command owner-intent envelope.
  */
 class VanGatewayClient(context: Context) {
+
+    private val provisioningMutex = kotlinx.coroutines.sync.Mutex()
+    private val sessionOpenMutex = kotlinx.coroutines.sync.Mutex()
 
     /**
      * P3-AND-001 — stops VAN hammering a gateway that is down, and gives the health screen
@@ -78,20 +86,63 @@ class VanGatewayClient(context: Context) {
 
     /** The phone's client certificate and the pinned gateway CA for the direct mutual-TLS link. */
     private val mtls = MutualTlsIdentity(context)
+    @Volatile private var deviceIdentityReady = false
+    @Volatile private var signedRouting: SignedConnectivityRouting? = null
+    private val platformTrust by lazy {
+        TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm()).run {
+            init(null as KeyStore?); trustManagers.filterIsInstance<X509TrustManager>().first()
+        }
+    }
+
+    /** Re-read and verify the signed store before changing any credential-bearing route. */
+    @Synchronized
+    fun applyConnectivity(registry: ConnectivityRegistry): Boolean {
+        val manifest = registry.current() ?: return false
+        val next = SignedConnectivityRouting.from(manifest)
+        if (next.version == signedRouting?.version) return false
+        require(next.version > (signedRouting?.version ?: 0)) { "connectivity_manifest_rollback" }
+        signedRouting = next
+        return true
+    }
+
+    private fun signedTls(url: String, presentCertificate: Boolean): Pair<SSLSocketFactory, X509TrustManager>? {
+        val route = signedRouting?.takeIf { it.permitsTls(url) } ?: return null
+        val trust = SignedPinTrustManager(listOfNotNull(mtls.pinnedTrustManager(), platformTrust), route.pins)
+        return mtls.socketFactoryWithTrust(trust, presentCertificate) to trust
+    }
+
+    fun browserSignalTransport(url: String): SSLSocketFactory? = signedTls(url, false)?.first
+
+    fun admitBrowserGrant(grant: BrowserStreamGrant): BrowserStreamGrant = signedRouting?.let {
+        com.dial.van.connectivity.SignedBrowserRouting.apply(it, grant)
+    } ?: grant
+
+    fun admitBrowserTransferUrl(url: String): String {
+        val uri = java.net.URI(url)
+        require(uri.scheme == "https" && uri.host != null && uri.rawUserInfo == null && uri.rawFragment == null && uri.rawQuery == null) {
+            "browser_transfer_https_required"
+        }
+        return signedRouting?.let { com.dial.van.connectivity.SignedBrowserRouting.admitUrl(it, url) } ?: url
+    }
 
     /**
      * Every HTTP connection to the gateway is opened here, so each one carries the pinned
      * trust and the client certificate when the build is configured for the direct link.
      */
     private fun open(url: String): HttpURLConnection {
-        val direct = MutualTlsScope.applies(BuildConfig.VAN_GATEWAY_BASE_URL, url)
+        val route = signedRouting
+        val direct = MutualTlsScope.appliesToManagedGateway(BuildConfig.VAN_GATEWAY_BASE_URL, url,
+            route?.gatewayUrl, route?.sessionUrl)
         val preEnrolment = MutualTlsScope.isPreEnrolment(url)
         // Every other route on the direct link refuses a phone without a certificate, so
         // enrol (or renew) first. Best effort: an unpaired or unbound phone cannot yet, and
         // the gateway's 403 then says exactly that.
         if (direct && !preEnrolment) runCatching { ensureTlsIdentity() }
         val conn = URL(url).openConnection() as HttpURLConnection
-        if (conn is HttpsURLConnection && direct) {
+        conn.instanceFollowRedirects = false
+        if (conn is HttpsURLConnection && signedRouting?.permitsTls(url) == true) {
+            conn.sslSocketFactory = signedTls(url, !preEnrolment)?.first ?: error("signed_tls_unavailable")
+        } else if (conn is HttpsURLConnection && direct) {
             val factory = if (preEnrolment) mtls.enrolmentSocketFactory() else mtls.socketFactory()?.first
             factory?.let { conn.sslSocketFactory = it }
         }
@@ -103,7 +154,7 @@ class VanGatewayClient(context: Context) {
      * direct mutual-TLS endpoint this build pins, otherwise null (platform trust).
      */
     fun tlsTransport(url: String): Pair<SSLSocketFactory, X509TrustManager>? =
-        if (MutualTlsScope.applies(BuildConfig.VAN_GATEWAY_BASE_URL, url)) mtls.socketFactory() else null
+        signedTls(url, true) ?: if (MutualTlsScope.applies(BuildConfig.VAN_GATEWAY_BASE_URL, url)) mtls.socketFactory() else null
 
     /**
      * Hold a current client certificate for the direct mutual-TLS link: enrol on first use,
@@ -114,14 +165,30 @@ class VanGatewayClient(context: Context) {
     @Synchronized
     fun ensureTlsIdentity() {
         if (!mtls.isConfigured || mtls.hasUsableCertificate()) return
-        if (!MutualTlsScope.applies(BuildConfig.VAN_GATEWAY_BASE_URL, baseUrl)) return  // not on the direct link
+        val route = signedRouting
+        if (!MutualTlsScope.appliesToManagedGateway(BuildConfig.VAN_GATEWAY_BASE_URL, baseUrl,
+                route?.gatewayUrl, route?.sessionUrl)) return
         val device = deviceId?.takeIf { it.isNotBlank() } ?: return
+        ensureCertifiedIdentity()
         val answer = postProved(TLS_CERTIFICATE_PATH, JSONObject().put("csr_pem", mtls.certificateRequestPem(device)))
         mtls.storeCertificate(answer.getString("certificate_pem"))
     }
 
     /** Whether this device has enrolled a hardware identity (§0D.3). */
     fun hasDeviceIdentity(): Boolean = deviceIdentity.isEnrolled()
+
+    @Synchronized
+    private fun ensureCertifiedIdentity() {
+        if (deviceIdentityReady) return
+        require(isPaired() && deviceIdentity.isEnrolled()) { "device_identity_unavailable" }
+        val answer = postProved("/v1/device-binding/certify", JSONObject()
+            .put("attestation_chain_b64", JSONArray(deviceIdentity.certificateChainBase64())))
+        require(answer.optBoolean("bound", false) && answer.optBoolean("attestation_chain_verified", false) &&
+            answer.optString("device_key_fingerprint") == deviceIdentity.publicKeyFingerprint()) { "device_identity_certification_failed" }
+        deviceIdentityReady = true
+    }
+
+    suspend fun ensureDeviceIdentityReady() = withContext(Dispatchers.IO) { ensureCertifiedIdentity() }
 
     /**
      * Enrol this phone as the owner's device.
@@ -130,26 +197,30 @@ class VanGatewayClient(context: Context) {
      * issues it, the Keystore bakes it into the attestation, and a chain captured from one
      * enrolment is then useless for another.
      */
-    suspend fun bindThisDevice(bootstrapToken: String): JSONObject = withContext(Dispatchers.IO) {
+    suspend fun bindThisDevice(
+        bootstrapToken: String,
+        expectedChallenge: String? = null,
+        mayReplaceUnboundKey: Boolean = false,
+    ): JSONObject = withContext(Dispatchers.IO) {
         val challenge = postRawAt(
             baseUrl, "/v1/devices/bootstrap/challenge",
             JSONObject().put("token", bootstrapToken).toString(), useIngress = false,
         ).getString("attestation_challenge")
-        val material = deviceIdentity.ensureKey(challenge.toByteArray(StandardCharsets.UTF_8))
+        require(expectedChallenge == null || expectedChallenge == challenge) { "provisioning_challenge_mismatch" }
+        val material = deviceIdentity.ensureKey(challenge.toByteArray(StandardCharsets.UTF_8), mayReplaceUnboundKey)
         val device = deviceId ?: error("device_not_paired")
-        postRawAt(
-            baseUrl, "/v1/devices/bootstrap/attest",
-            JSONObject()
+        val path = "/v1/devices/bootstrap/attest"
+        val body = JSONObject()
                 .put("token", bootstrapToken)
                 .put("device_id", device)
                 .put("public_key_pem", material.publicKeyPem)
                 .put("attestation_extension_b64", material.attestationExtensionBase64)
                 .put("attestation_root_fingerprint", material.attestationRootFingerprint)
+                .put("attestation_chain_b64", JSONArray(material.attestationCertificateChainBase64))
                 .put("os_version", android.os.Build.VERSION.SDK_INT.toString())
                 .put("os_patch_level", android.os.Build.VERSION.SECURITY_PATCH)
-                .toString(),
-            useIngress = false,
-        )
+                .toString()
+        postRawAt(baseUrl, path, body, useIngress = false, freshHeaders = { proofHeaders("POST", path, body) })
     }
 
     suspend fun deviceBindingStatus(): JSONObject = withContext(Dispatchers.IO) {
@@ -201,6 +272,7 @@ class VanGatewayClient(context: Context) {
      */
     var baseUrl: String
         get() {
+            signedRouting?.let { return it.gatewayUrl }
             val saved = prefs.getString(KEY_BASE, null)
             val configured = MutualTlsScope.effectiveBaseUrl(saved, BuildConfig.VAN_GATEWAY_BASE_URL, mtls.isConfigured)
             if (configured != null && configured != saved) {
@@ -229,15 +301,12 @@ class VanGatewayClient(context: Context) {
     }
 
     private fun normalizeGatewayBaseUrl(value: String): String {
-        val normalized = value.trim().trimEnd('/')
+        val normalized = value.trim()
         require(normalized.isNotBlank()) { "gateway_url_blank" }
-        val secure = normalized.startsWith("https://", ignoreCase = true)
-        val debugLoopback = BuildConfig.DEBUG && (
-            normalized.startsWith("http://127.0.0.1", ignoreCase = true) ||
-                normalized.startsWith("http://localhost", ignoreCase = true)
-            )
-        require(secure || debugLoopback) { "gateway_url_must_use_https" }
-        return normalized
+        require(com.dial.van.connectivity.GatewayBaseUrl.accepts(normalized, BuildConfig.DEBUG)) {
+            "gateway_url_must_use_https"
+        }
+        return normalized.trimEnd('/')
     }
 
     var deviceId: String?
@@ -290,15 +359,103 @@ class VanGatewayClient(context: Context) {
      * did not bind is exactly the failure §0D.3 describes — an APK copied to another phone
      * that works.
      *
-     * The order matters and is not arbitrary: `bindThisDevice` signs with the device id
-     * that pairing mints, so binding first would have nothing to bind.
+     * New attempts commit a chosen device id and candidate token before the first POST,
+     * attest that hardware identity, then recoverably pair the exact saved request.
+     * Previously paired devices retain their earned credentials while finishing binding.
      */
     suspend fun provisionThisDevice(
         payload: com.dial.van.connectivity.ProvisioningPayload,
         label: String = "android",
     ): JSONObject = withContext(Dispatchers.IO) {
-        pairThisDevice(payload.gatewayUrl, payload.pairingToken, label)
-        bindThisDevice(payload.bootstrapToken)
+        provisioningMutex.lock()
+        try {
+            val intended = normalizeGatewayBaseUrl(payload.gatewayUrl)
+            val active = MutualTlsScope.effectiveBaseUrl(intended, BuildConfig.VAN_GATEWAY_BASE_URL, mtls.isConfigured)
+            require(active == null || normalizeGatewayBaseUrl(active) == intended) { "provisioning_gateway_mismatch" }
+            if (!isPaired()) {
+                return@withContext com.dial.van.connectivity.ProvisioningRecovery.completePrebound(
+                    payload = payload,
+                    prepare = { preparePairing(payload, label) },
+                    recoverBinding = { recoverBootstrap(payload.bootstrapToken) },
+                    bind = { bindThisDevice(payload.bootstrapToken, payload.attestationChallenge) },
+                    pair = { pairPreparedDevice(intended) },
+                )
+            }
+            com.dial.van.connectivity.ProvisioningRecovery.complete(
+                payload = payload,
+                pairing = {
+                    com.dial.van.connectivity.ProvisioningRecovery.Pairing(
+                        prefs.getString(KEY_PROVISIONING_FINGERPRINT, null),
+                        prefs.getString(KEY_BASE, "").orEmpty(), deviceId.orEmpty(), isPaired(),
+                        prefs.getString(KEY_PROVISIONING_DEVICE_ID, null),
+                    )
+                },
+                pair = {
+                    pairThisDevice(payload.gatewayUrl, payload.pairingToken, label,
+                        com.dial.van.connectivity.ProvisioningRecovery.fingerprint(payload))
+                },
+                bindingStatus = { deviceBindingStatus() },
+                localKeyFingerprint = { deviceIdentity.publicKeyFingerprint() },
+                bind = { mayReplace -> bindThisDevice(payload.bootstrapToken, payload.attestationChallenge, mayReplace) },
+            )
+        } finally {
+            provisioningMutex.unlock()
+        }
+    }
+
+    private fun preparePairing(payload: com.dial.van.connectivity.ProvisioningPayload, label: String):
+        com.dial.van.connectivity.ProvisioningRecovery.PreparedPairing {
+        val fingerprint = com.dial.van.connectivity.ProvisioningRecovery.fingerprint(payload)
+        val existing = prefs.getString(KEY_PENDING_PAIR, null)
+        if (existing == null) {
+            require(!isPaired()) { "provisioning_existing_identity_mismatch" }
+            fun token(): String = Base64.encodeToString(ByteArray(32).also { SecureRandom().nextBytes(it) },
+                Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
+            val id = "android-${UUID.randomUUID()}"
+            val secret = token()
+            val body = JSONObject().put("pairing_token", payload.pairingToken.trim()).put("device_id", id)
+                .put("device_secret", secret).put("device_access_token", token())
+                .put("public_key_pem", approvalKeys.publicKeyPem()).put("label", label)
+            check(prefs.edit().putString(KEY_PENDING_PAIR, body.toString()).putString(KEY_BASE, payload.gatewayUrl.trimEnd('/'))
+                .putString(KEY_PROVISIONING_FINGERPRINT, fingerprint).putString(KEY_PROVISIONING_DEVICE_ID, id)
+                .putString(KEY_DEVICE, id).putString(KEY_SECRET, secret).commit()) { "provisioning_pending_store_failed" }
+        }
+        require(prefs.getString(KEY_PROVISIONING_FINGERPRINT, null) == fingerprint &&
+            prefs.getString(KEY_BASE, null) == payload.gatewayUrl.trimEnd('/')) { "provisioning_pending_identity_mismatch" }
+        val body = JSONObject(prefs.getString(KEY_PENDING_PAIR, null) ?: error("provisioning_pending_absent"))
+        require(body.getString("device_id") == deviceId && body.getString("device_id") ==
+            prefs.getString(KEY_PROVISIONING_DEVICE_ID, null)) { "provisioning_pending_identity_mismatch" }
+        return com.dial.van.connectivity.ProvisioningRecovery.PreparedPairing(fingerprint,
+            body.getString("device_id"), body.getString("device_access_token"))
+    }
+
+    private fun recoverBootstrap(token: String): JSONObject? {
+        if (!deviceIdentity.isEnrolled()) return null
+        val path = "/v1/devices/bootstrap/recover"
+        val payload = JSONObject().put("device_id", deviceId).put("token", token).toString()
+        return try {
+            postRawAt(baseUrl, path, payload, useIngress = false, freshHeaders = { proofHeaders("POST", path, payload) }).also {
+                require(it.optBoolean("bound", false) && it.optString("device_key_fingerprint") ==
+                    deviceIdentity.publicKeyFingerprint()) { "provisioning_bound_key_mismatch" }
+            }
+        } catch (refused: GatewayHttpException) {
+            val reason = runCatching { JSONObject(refused.body).optString("detail") }.getOrDefault("")
+            if (refused.code == 404 && reason == "bootstrap_not_consumed") null else throw refused
+        }
+    }
+
+    private fun pairPreparedDevice(gateway: String): JSONObject {
+        val body = prefs.getString(KEY_PENDING_PAIR, null) ?: error("provisioning_pending_absent")
+        val response = postRawAt(gateway, "/v1/devices/pair", body, useIngress = false,
+            freshHeaders = { proofHeaders("POST", "/v1/devices/pair", body) })
+        val pending = JSONObject(body)
+        require(response.optString("device_id") == pending.getString("device_id") &&
+            response.optString("device_access_token") == pending.getString("device_access_token") &&
+            response.optString("ingress_token").length >= MIN_INGRESS_TOKEN_CHARS) { "provisioning_pairing_receipt_mismatch" }
+        check(prefs.edit().putString(KEY_INGRESS_TOKEN, response.getString("ingress_token"))
+            .putString(KEY_DEVICE_ACCESS_TOKEN, response.getString("device_access_token"))
+            .remove(KEY_PENDING_PAIR).commit()) { "provisioning_credentials_store_failed" }
+        return response
     }
 
     /**
@@ -313,6 +470,7 @@ class VanGatewayClient(context: Context) {
         gatewayUrl: String,
         pairingToken: String,
         label: String = "android",
+        provisioningFingerprint: String,
     ): JSONObject = withContext(Dispatchers.IO) {
         val normalizedUrl = normalizeGatewayBaseUrl(gatewayUrl)
         val normalizedPairingToken = pairingToken.trim()
@@ -337,7 +495,9 @@ class VanGatewayClient(context: Context) {
             .putString(KEY_DEVICE_ACCESS_TOKEN, returnedDeviceAccess)
             .putString(KEY_DEVICE, id)
             .putString(KEY_SECRET, secret)
-            .apply()
+            .putString(KEY_PROVISIONING_FINGERPRINT, provisioningFingerprint)
+            .putString(KEY_PROVISIONING_DEVICE_ID, id)
+            .commit().also { require(it) { "provisioning_credentials_store_failed" } }
         response.remove("ingress_token")
         response.remove("device_access_token")
         response
@@ -370,11 +530,23 @@ class VanGatewayClient(context: Context) {
 
     suspend fun googleMesh(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/google/mesh") }
 
+    /** Current Workspace connection and revocation state, independent of registry readiness. */
+    suspend fun googleStatus(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/google/status") }
+
+    suspend fun googleGmailDraftPreview(draftId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/owner/google/gmail/drafts/${encodeSegment(draftId)}/preview")
+    }
+
     suspend fun briefing(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/briefing") }
 
     suspend fun tradingTrades(view: String, limit: Int = 12): String = withContext(Dispatchers.IO) {
         rawGet("/v1/trading/trades?view=${encodeQuery(view)}&limit=$limit")
     }
+
+    /** Worker connection, execution gates and active owner-halt triggers for the overview. */
+    suspend fun tradingStatus(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/status") }
+
+    suspend fun tradingTickets(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/tickets") }
 
     suspend fun tradingPortfolio(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/portfolio") }
 
@@ -460,16 +632,18 @@ class VanGatewayClient(context: Context) {
     }
 
     private fun tradingPromotionPost(path: String, body: JsonObject): Pair<Int, String> {
+        val bodyText = body.toString()
         val conn = open("$baseUrl$path").apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
             applyIngressAuth(this)
+            proofHeaders("POST", path, bodyText).forEach { (name, value) -> setRequestProperty(name, value) }
             doOutput = true
             connectTimeout = 15_000
             readTimeout = 60_000
         }
         conn.outputStream.use {
-            it.write(body.toString().toByteArray(StandardCharsets.UTF_8))
+            it.write(bodyText.toByteArray(StandardCharsets.UTF_8))
         }
         val code = conn.responseCode
         val stream = if (code in 200..299) conn.inputStream else conn.errorStream
@@ -486,10 +660,12 @@ class VanGatewayClient(context: Context) {
         val body = com.dial.van.trading.AccountOnboarding.requestBody(
             secret, id, System.currentTimeMillis() / 1000L, action, args, approvalProof,
         )
+        val bodyText = body.toString()
         val conn = open("$baseUrl/v1/trading/accounts/action").apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
             applyIngressAuth(this)
+            proofHeaders("POST", "/v1/trading/accounts/action", bodyText).forEach { (name, value) -> setRequestProperty(name, value) }
             doOutput = true
             connectTimeout = 15_000
             readTimeout = 90_000
@@ -497,7 +673,7 @@ class VanGatewayClient(context: Context) {
         // P0-AND-012 — `requestBody` returns a JsonObject, not a String. This read
         // `body.toByteArray(...)`, which does not exist on JsonObject, so the
         // trading account-action path has never compiled.
-        conn.outputStream.use { it.write(body.toString().toByteArray(StandardCharsets.UTF_8)) }
+        conn.outputStream.use { it.write(bodyText.toByteArray(StandardCharsets.UTF_8)) }
         val code = conn.responseCode
         val stream = if (code in 200..299) conn.inputStream else conn.errorStream
         code to (stream?.bufferedReader()?.readText() ?: "{}")
@@ -519,15 +695,17 @@ class VanGatewayClient(context: Context) {
         val body = com.dial.van.trading.AccountOnboarding.requestBody(
             secret, id, System.currentTimeMillis() / 1000L, action, args,
         )
+        val bodyText = body.toString()
         val conn = open("$baseUrl/v1/trading/accounts/challenge").apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
             applyIngressAuth(this)
+            proofHeaders("POST", "/v1/trading/accounts/challenge", bodyText).forEach { (name, value) -> setRequestProperty(name, value) }
             doOutput = true
             connectTimeout = 15_000
             readTimeout = 30_000
         }
-        conn.outputStream.use { it.write(body.toString().toByteArray(StandardCharsets.UTF_8)) }
+        conn.outputStream.use { it.write(bodyText.toByteArray(StandardCharsets.UTF_8)) }
         val code = conn.responseCode
         val stream = if (code in 200..299) conn.inputStream else conn.errorStream
         code to (stream?.bufferedReader()?.use { it.readText() } ?: "")
@@ -535,6 +713,26 @@ class VanGatewayClient(context: Context) {
 
     suspend fun decisions(): JSONArray = withContext(Dispatchers.IO) {
         JSONArray(rawGet("/v1/decisions"))
+    }
+
+    suspend fun missionControl(missionId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/missions/${encodeSegment(missionId)}/control")
+    }
+    suspend fun missionControlRequest(missionId: String, requestId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/missions/${encodeSegment(missionId)}/control/requests/${encodeSegment(requestId)}")
+    }
+    suspend fun writeMissionControl(missionId: String, operation: String, exactRequest: JSONObject): JSONObject = withContext(Dispatchers.IO) {
+        val route = when (operation) { "PAUSE" -> "pause"; "RESUME" -> "resume"; "DIRECTION" -> "direction"; else -> error("mission_control_operation_invalid") }
+        postJson("/v1/missions/${encodeSegment(missionId)}/$route", exactRequest)
+    }
+
+    suspend fun decision(decisionId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/decisions/${encodeSegment(decisionId)}")
+    }
+
+    /** The immutable request ID/body permits exact recovery; an answer is not action approval. */
+    suspend fun answerDecision(decisionId: String, exactRequest: JSONObject): JSONObject = withContext(Dispatchers.IO) {
+        postJson("/v1/decisions/${encodeSegment(decisionId)}/answer", exactRequest)
     }
 
     suspend fun resolveDecision(decisionId: String, approved: Boolean): JSONObject = withContext(Dispatchers.IO) {
@@ -545,7 +743,7 @@ class VanGatewayClient(context: Context) {
     }
 
     suspend fun projects(): JSONArray = withContext(Dispatchers.IO) {
-        getJson("/v1/projects").optJSONArray("projects") ?: JSONArray()
+        getJson("/v1/projects").getJSONArray("projects")
     }
 
     suspend fun projectTruth(projectId: String): JSONObject = withContext(Dispatchers.IO) {
@@ -600,6 +798,19 @@ class VanGatewayClient(context: Context) {
         JSONArray(rawGet("/v1/browser/tasks/${encodeSegment(taskId)}/evidence"))
     }
 
+    suspend fun browserActionPlans(sessionId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/browser/interactive-sessions/${encodeSegment(sessionId)}/action-plans")
+    }
+    suspend fun browserActionPlan(sessionId: String, planId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/browser/interactive-sessions/${encodeSegment(sessionId)}/action-plans/${encodeSegment(planId)}")
+    }
+    suspend fun createBrowserActionPlan(sessionId: String, exactDraft: JSONObject): JSONObject = withContext(Dispatchers.IO) {
+        postJson("/v1/browser/interactive-sessions/${encodeSegment(sessionId)}/action-plans", exactDraft)
+    }
+    suspend fun cancelBrowserActionPlan(sessionId: String, planId: String): JSONObject = withContext(Dispatchers.IO) {
+        postJson("/v1/browser/interactive-sessions/${encodeSegment(sessionId)}/action-plans/${encodeSegment(planId)}/cancel", JSONObject())
+    }
+
     // ------------------------------------------------- interactive browser (Rev 1.5 §6)
     //
     // The owner's phone owns these: it creates the session, heartbeats it, hands control
@@ -641,12 +852,12 @@ class VanGatewayClient(context: Context) {
 
     suspend fun interactiveBrowserStreamGrant(sessionId: String): BrowserStreamGrant =
         withContext(Dispatchers.IO) {
-            BrowserParsing.streamGrant(
+            admitBrowserGrant(BrowserParsing.streamGrant(
                 postProved(
                     "$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/stream-grant",
                     JSONObject(),
                 ),
-            )
+            ))
         }
 
     suspend fun interactiveBrowserTakeControl(sessionId: String): JSONObject =
@@ -697,11 +908,16 @@ class VanGatewayClient(context: Context) {
      * Actuation is withheld between the proposal and this call, because a tap mapped
      * through the old viewport lands somewhere the owner did not touch.
      */
-    suspend fun interactiveBrowserAckViewport(sessionId: String, revision: Int): JSONObject =
+    suspend fun interactiveBrowserAckViewport(sessionId: String, revision: Int,
+        frameSequence: Long? = null, mediaEpoch: String? = null): JSONObject =
         withContext(Dispatchers.IO) {
+            require((frameSequence == null) == (mediaEpoch == null)) { "browser_frame_proof_incomplete" }
+            val body = JSONObject().put("revision", revision)
+            frameSequence?.let { require(it > 0); body.put("frame_sequence", it) }
+            mediaEpoch?.let { require(it.isNotBlank()); body.put("media_epoch", it) }
             postProved(
                 "$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/viewport/ack",
-                JSONObject().put("revision", revision),
+                body,
             )
         }
 
@@ -721,22 +937,70 @@ class VanGatewayClient(context: Context) {
             )
         }
 
+    suspend fun interactiveBrowserResume(sessionId: String): BrowserSessionSnapshot =
+        withContext(Dispatchers.IO) {
+            BrowserParsing.session(postProved("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/resume", JSONObject()))
+        }
+
     suspend fun interactiveBrowserTabs(sessionId: String): JSONArray =
         withContext(Dispatchers.IO) {
-            getJson("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/tabs")
-                .optJSONArray("tabs") ?: JSONArray()
+            val response = getJson("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/tabs")
+            require(response.optString("session_id") == sessionId) { "browser_tabs_session_mismatch" }
+            response.getJSONArray("tabs")
         }
 
     suspend fun interactiveBrowserDownloads(sessionId: String): JSONArray =
         withContext(Dispatchers.IO) {
-            getJson("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/downloads")
-                .optJSONArray("downloads") ?: JSONArray()
+            val response = getJson("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/downloads")
+            require(response.optString("session_id") == sessionId) { "browser_download_session_mismatch" }
+            response.getJSONArray("downloads")
+        }
+
+    suspend fun browserFileOperations(sessionId: String, downloadId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/browser/interactive-sessions/${encodeSegment(sessionId)}/downloads/${encodeSegment(downloadId)}/operations")
+    }
+
+    suspend fun browserFileProviderContracts(sessionId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/browser/interactive-sessions/${encodeSegment(sessionId)}/file-provider-contracts")
+    }
+
+    /** Drafting and readback only. Provider writes require the canonical exact A4 command. */
+    suspend fun browserFileProviderRequests(sessionId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/file-provider-requests")
+    }
+    suspend fun browserFileProviderRequest(sessionId: String, requestId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/file-provider-requests/${encodeSegment(requestId)}")
+    }
+    /** Explicit read-only observation; never creates a claim, write, or replacement authority. */
+    suspend fun browserFileProviderObservation(sessionId: String, requestId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/file-provider-requests/${encodeSegment(requestId)}/observation")
+    }
+    suspend fun createBrowserFileProviderRequest(sessionId: String, exactDraft: JSONObject): JSONObject = withContext(Dispatchers.IO) {
+        postProved("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/file-provider-requests", exactDraft)
+    }
+    suspend fun cancelBrowserFileProviderRequest(sessionId: String, requestId: String): JSONObject = withContext(Dispatchers.IO) {
+        postProved("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/file-provider-requests/${encodeSegment(requestId)}/cancel", JSONObject())
+    }
+
+    suspend fun automationPlanRequest(key: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/owner/automation/requests/${encodeSegment(key)}")
+    }
+
+    suspend fun interactiveBrowserTransferGrant(sessionId: String, request: JSONObject): JSONObject =
+        withContext(Dispatchers.IO) {
+            postProved("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/transfer-grants", request)
+        }
+
+    suspend fun interactiveBrowserDeleteDownload(sessionId: String, downloadId: String): JSONObject =
+        withContext(Dispatchers.IO) {
+            deleteProved("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/downloads/${encodeSegment(downloadId)}")
         }
 
     suspend fun interactiveBrowserEvents(sessionId: String): JSONArray =
         withContext(Dispatchers.IO) {
-            getJson("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/events")
-                .optJSONArray("events") ?: JSONArray()
+            val response = getJson("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/events")
+            require(response.optString("session_id") == sessionId) { "browser_events_session_mismatch" }
+            response.getJSONArray("events")
         }
 
     // ------------------------------------------------ durable session (Rev 1.5 §20)
@@ -750,14 +1014,46 @@ class VanGatewayClient(context: Context) {
         protocol: String = "WSS",
         pathClass: String = "A_REALTIME",
     ): JSONObject = withContext(Dispatchers.IO) {
-        postProved(
-            "$SESSION_PREFIX/open",
-            JSONObject()
-                .put("path_id", pathId)
-                .put("route_id", routeId)
-                .put("protocol", protocol)
-                .put("path_class", pathClass),
-        )
+        sessionOpenMutex.lock()
+        try {
+            var prepared = prefs.getString(KEY_PENDING_SESSION_OPEN, null)
+            if (prepared == null) {
+                prepared = JSONObject().put("open_request_id", UUID.randomUUID().toString())
+                    .put("path_id", pathId).put("route_id", routeId).put("protocol", protocol)
+                    .put("path_class", pathClass).toString()
+                check(prefs.edit().putString(KEY_PENDING_SESSION_OPEN, prepared).commit()) { "session_open_store_failed" }
+            }
+            val path = "$SESSION_PREFIX/open"
+            val exactBody = prepared
+            val answer = try {
+                postRawAt(baseUrl, path, exactBody, useIngress = true,
+                    freshHeaders = { proofHeaders("POST", path, exactBody) })
+            } catch (refused: GatewayHttpException) {
+                if (refused.code != 409) throw refused
+                throw SessionOpenRecoveryException(runCatching { JSONObject(refused.body).optString("detail") }
+                    .getOrDefault("session_open_refused").ifBlank { "session_open_refused" })
+            }
+            val requestId = JSONObject(exactBody).getString("open_request_id")
+            if (answer.optString("open_request_id") != requestId || answer.optString("van_session_id").isBlank()) {
+                throw SessionOpenRecoveryException("session_open_identity_contract_missing")
+            }
+            storeSessionIdentity(answer.getString("van_session_id"), answer.getInt("session_epoch"), answer.getInt("path_epoch"), clearOpen = true)
+            answer
+        } finally { sessionOpenMutex.unlock() }
+    }
+
+    fun restoredSessionIdentity(): JSONObject? = prefs.getString(KEY_SESSION_IDENTITY, null)?.let { raw ->
+        val identity = JSONObject(raw)
+        require(identity.getString("device_id") == deviceId) { "session_identity_device_mismatch" }
+        identity
+    }
+
+    private fun storeSessionIdentity(id: String, epoch: Int, pathEpoch: Int, clearOpen: Boolean = false) {
+        val identity = JSONObject().put("device_id", deviceId).put("van_session_id", id)
+            .put("session_epoch", epoch).put("path_epoch", pathEpoch)
+        val edit = prefs.edit().putString(KEY_SESSION_IDENTITY, identity.toString())
+        if (clearOpen) edit.remove(KEY_PENDING_SESSION_OPEN)
+        check(edit.commit()) { "session_identity_store_failed" }
     }
 
     /**
@@ -774,6 +1070,7 @@ class VanGatewayClient(context: Context) {
         pendingCommandIds: List<String>,
         pathId: String,
         routeId: String,
+        pathClass: String = "A_REALTIME",
     ): JSONObject = withContext(Dispatchers.IO) {
         val body = JSONObject()
             .put("van_session_id", vanSessionId)
@@ -782,17 +1079,24 @@ class VanGatewayClient(context: Context) {
             .put("pending_command_ids", JSONArray(pendingCommandIds))
             .put("path_id", pathId)
             .put("route_id", routeId)
-            .put("path_class", "A_REALTIME")
+            .put("path_class", pathClass)
         try {
-            postProved("$SESSION_PREFIX/resume", body)
+            postProved("$SESSION_PREFIX/resume", body).also { response ->
+                if (response.optBoolean("accepted", false)) storeSessionIdentity(vanSessionId,
+                    response.getInt("session_epoch"), response.getInt("new_path_epoch"))
+            }
         } catch (refused: GatewayHttpException) {
             if (refused.code != 409 && refused.code != 404) throw refused
-            JSONObject().put(
+            val response = JSONObject().put(
                 "refusal",
                 runCatching { JSONObject(refused.body).optString("detail") }
-                    .getOrDefault("session_unknown")
-                    .ifBlank { "session_unknown" },
+                    .getOrDefault("session_resume_refused")
+                    .ifBlank { "session_resume_refused" },
             )
+            if (response.optString("refusal") == "session_unknown") {
+                check(prefs.edit().remove(KEY_SESSION_IDENTITY).commit()) { "session_identity_clear_failed" }
+            }
+            response
         }
     }
 
@@ -800,21 +1104,61 @@ class VanGatewayClient(context: Context) {
         getJson("$SESSION_PREFIX/status?van_session_id=${encodeQuery(vanSessionId)}")
     }
 
+    suspend fun sessionUpstream(envelope: JSONObject): JSONObject = withContext(Dispatchers.IO) {
+        try { postProved("$SESSION_PREFIX/messages", envelope) }
+        catch (refused: GatewayHttpException) {
+            if (refused.code != 400 && refused.code != 409) throw refused
+            JSONObject().put("accepted", false).put("kind", envelope.optString("kind"))
+                .put("refusal", runCatching { JSONObject(refused.body).optString("detail") }.getOrDefault("session_refused"))
+        }
+    }
+
+    /** Emits an admission marker first, then the gateway's unchanged durable event records. */
+    fun sessionDownstream(vanSessionId: String, afterSeq: Long): Flow<JSONObject> = callbackFlow {
+        val path = "$SESSION_PREFIX/events-stream"
+        val connection = open("$baseUrl$path?van_session_id=${encodeQuery(vanSessionId)}&after_seq=$afterSeq")
+        val reader = launch(Dispatchers.IO) {
+            try {
+                connection.requestMethod = "GET"
+                applyIngressAuth(connection)
+                proofHeaders("GET", path, "").forEach { (name, value) -> connection.setRequestProperty(name, value) }
+                connection.setRequestProperty("Accept", "text/event-stream")
+                connection.connectTimeout = 15_000
+                connection.readTimeout = 60_000
+                val code = connection.responseCode
+                if (code !in 200..299) throw GatewayHttpException(code,
+                    connection.errorStream?.bufferedReader()?.use { it.readText() }.orEmpty())
+                send(JSONObject())
+                val parser = com.dial.van.session.SessionSseFrames.Parser()
+                connection.inputStream.bufferedReader().use { lines ->
+                    while (true) { val line = lines.readLine() ?: break; parser.feed(line)?.let { send(it) } }
+                }
+                close()
+            } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+            catch (failure: Exception) { close(failure) }
+        }
+        awaitClose { connection.disconnect(); reader.cancel() }
+    }
+
     /**
      * The full-duplex endpoint, with its credentials in the query string.
      *
-     * Not a stylistic choice: the HTTP middleware does not run for a WebSocket handshake,
-     * so the socket authenticates itself, and the only place a handshake can carry a
-     * credential portably is the URL. It is short-lived and scoped to one device.
+     * HTTP middleware does not run for a WebSocket handshake, so the socket authenticates
+     * itself. This revocable token is scoped to one device; the hardware proof is carried
+     * separately in [sessionSocketHeaders].
      */
     fun sessionSocketUrl(vanSessionId: String): String {
         val root = baseUrl
             .replaceFirst("https://", "wss://")
             .replaceFirst("http://", "ws://")
         val token = deviceAccessToken?.takeIf { it.isNotBlank() } ?: error("device_access_token_unconfigured")
-        return "$root$SESSION_PREFIX/ws?van_session_id=${encodeQuery(vanSessionId)}" +
+        val endpoint = signedRouting?.sessionUrl ?: "$root$SESSION_PREFIX/ws"
+        return "$endpoint?van_session_id=${encodeQuery(vanSessionId)}" +
             "&device_token=${encodeQuery(token)}"
     }
+
+    /** Hardware proof for the handshake; query credentials are authenticated separately. */
+    fun sessionSocketHeaders(): Map<String, String> = proofHeaders("GET", "$SESSION_PREFIX/ws", "")
 
     // --------------------------------------------------- signed connectivity (ADR-RB-027)
 
@@ -884,6 +1228,37 @@ class VanGatewayClient(context: Context) {
         getJson("/v1/understanding")
     }
 
+    suspend fun ownerVocabulary(): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/understanding/vocabulary")
+    }
+
+    suspend fun saveOwnerVocabulary(definition: com.dial.van.memory.OwnerVocabularyDefinition,
+                                  sessionId: String, sessionEpoch: Int): JSONObject = withContext(Dispatchers.IO) {
+        require(sessionId.isNotBlank() && sessionEpoch > 0) { "Reconnect the owner session before saving." }
+        val path = "/v1/understanding/vocabulary"
+        val saved = putProved(path, definition.content().put("van_session_id", sessionId).put("session_epoch", sessionEpoch))
+        val scope = definition.projectId?.let { "&project_id=${encodeQuery(it)}" }.orEmpty()
+        val observed = getJson("$path?term=${encodeQuery(definition.term)}$scope")
+        com.dial.van.memory.verifyOwnerMemoryReadback(saved, observed)
+        definition.verifyEntry(observed.getJSONObject("entry"))
+        observed
+    }
+
+    suspend fun ownerCollaborationPreferences(): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/understanding/complement/preferences")
+    }
+
+    suspend fun saveOwnerCollaborationPreference(preference: com.dial.van.memory.OwnerCollaborationPreference,
+                                               sessionId: String, sessionEpoch: Int): JSONObject = withContext(Dispatchers.IO) {
+        require(sessionId.isNotBlank() && sessionEpoch > 0) { "Reconnect the owner session before saving." }
+        val path = "/v1/understanding/complement/preferences"
+        val saved = putProved(path, preference.content().put("van_session_id", sessionId).put("session_epoch", sessionEpoch))
+        val observed = getJson("$path?domain=${encodeQuery(preference.domain)}")
+        com.dial.van.memory.verifyOwnerMemoryReadback(saved, observed)
+        preference.verifyEntry(observed.getJSONObject("entry"))
+        observed
+    }
+
     suspend fun confirmUnderstanding(assertionId: String): JSONObject =
         withContext(Dispatchers.IO) {
             postJson("/v1/understanding/${encodeSegment(assertionId)}/confirm", JSONObject())
@@ -915,6 +1290,10 @@ class VanGatewayClient(context: Context) {
     suspend fun permissions(): JSONObject = withContext(Dispatchers.IO) {
         getJson("/v1/permissions")
     }
+    suspend fun permissionContracts(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/permissions/contracts") }
+    suspend fun permissionGrant(grantId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/permissions/grants/${encodeSegment(grantId)}")
+    }
 
     suspend fun revokePermission(grantId: String): JSONObject = withContext(Dispatchers.IO) {
         postJson("/v1/permissions/${encodeSegment(grantId)}/revoke", JSONObject())
@@ -922,12 +1301,64 @@ class VanGatewayClient(context: Context) {
 
     suspend fun autonomy(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/autonomy") }
 
+    suspend fun standingIntents(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/understanding/intents") }
+    suspend fun decisionHistory(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/understanding/decisions") }
+    suspend fun learnedStrategies(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/strategies") }
+    suspend fun externalReality(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/external-reality") }
+    suspend fun learningProducers(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/understanding/learning/producers") }
+    suspend fun authorityDescriptor(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/authority") }
+
+    suspend fun ownerKnowledge(limit: Int = 30): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/owner/knowledge?limit=${limit.coerceIn(1, 100)}")
+    }
+    suspend fun ownerResearch(limit: Int = 30): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/owner/research?limit=${limit.coerceIn(1, 100)}")
+    }
+    suspend fun ownerAutomation(limit: Int = 30): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/owner/automation?limit=${limit.coerceIn(1, 100)}")
+    }
+    suspend fun automationContracts(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/owner/automation/contracts") }
+    suspend fun proposeAutomationPlan(exactRequest: JSONObject): JSONObject = withContext(Dispatchers.IO) {
+        postJson("/v1/owner/automation/plans", exactRequest)
+    }
+    suspend fun automationPlans(limit: Int = 30): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/owner/automation/plans?limit=${limit.coerceIn(1, 100)}")
+    }
+    suspend fun automationPlan(artifactId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/owner/automation/plans/${encodeSegment(artifactId)}")
+    }
+    suspend fun automationRun(runId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/owner/automation/runs/${encodeSegment(runId)}")
+    }
+    suspend fun ownerDiagnostics(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/owner/diagnostics") }
+    suspend fun ownerBrowserOutcome(taskId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/owner/browser/tasks/${encodeSegment(taskId)}/outcome")
+    }
+
     suspend fun technologyRadar(): JSONObject = withContext(Dispatchers.IO) {
         getJson("/v1/technology-radar")
     }
 
     /** §41 — the scoreboard, including every dimension VAN cannot yet measure. */
     suspend fun evalReport(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/eval") }
+
+    suspend fun projectStrategicMemory(projectId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/projects/${encodeSegment(projectId)}/strategic-memory")
+    }
+
+    suspend fun recordProjectRationale(
+        projectId: String,
+        entryType: com.dial.van.projects.ProjectRationaleType,
+        statement: String,
+        rationale: String?,
+        evidenceRefs: List<String>,
+    ): JSONObject = withContext(Dispatchers.IO) {
+        require(projectId.isNotBlank() && statement.isNotBlank()) { "project_rationale_required" }
+        postProved("/v1/projects/${encodeSegment(projectId)}/strategic-memory", JSONObject()
+            .put("entry_type", entryType.name).put("statement", statement.trim())
+            .put("rationale", rationale?.trim()?.takeIf { it.isNotBlank() } ?: JSONObject.NULL)
+            .put("evidence_refs", JSONArray(evidenceRefs.filter { it.isNotBlank() }.distinct())))
+    }
 
     // ---------------------------------------------------------------- owner memory (Memory)
     //
@@ -939,6 +1370,27 @@ class VanGatewayClient(context: Context) {
     /** GET /v1/context/memory — what VAN holds about the owner, store by store. */
     suspend fun contextMemory(): JSONObject = withContext(Dispatchers.IO) {
         getJson("/v1/context/memory")
+    }
+
+    suspend fun contextRecords(store: String, limit: Int = 50, cursor: Int = 0): JSONObject = withContext(Dispatchers.IO) {
+        require(cursor in 0..1_000_000) { "memory_record_pagination_invalid" }
+        getJson("/v1/context/records?store=${encodeSegment(store)}&limit=${limit.coerceIn(1, 100)}&cursor=$cursor")
+    }
+
+    suspend fun contextRecord(store: String, recordId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/context/records/${encodeSegment(store)}/${encodeSegment(recordId)}")
+    }
+
+    suspend fun exportContextRecord(store: String, recordId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/context/records/${encodeSegment(store)}/${encodeSegment(recordId)}/export")
+    }
+
+    suspend fun contextRecordErasurePlan(store: String, recordId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/context/records/${encodeSegment(store)}/${encodeSegment(recordId)}/erasure-plan")
+    }
+
+    suspend fun eraseContextMemory(store: String? = null): JSONObject = withContext(Dispatchers.IO) {
+        deleteProved("/v1/context/memory" + (store?.let { "?store=${encodeQuery(it)}" } ?: ""))
     }
 
     /**
@@ -1017,11 +1469,12 @@ class VanGatewayClient(context: Context) {
      * `ReminderParseBody`'s shape (`app.py`'s `/v1/reminders/parse`, the richer of the two
      * creation routes) so the same call parses "tomorrow at 9" the owner typed.
      */
-    suspend fun createReminder(text: String, dueExpression: String): JSONObject =
+    suspend fun createReminder(text: String, dueExpression: String, idempotencyKey: String): JSONObject =
         withContext(Dispatchers.IO) {
             postJson(
                 "/v1/reminders/parse",
-                JSONObject().put("text", text).put("due_expression", dueExpression),
+                JSONObject().put("text", text).put("due_expression", dueExpression)
+                    .put("idempotency_key", idempotencyKey),
             )
         }
 
@@ -1377,6 +1830,8 @@ class VanGatewayClient(context: Context) {
         contextCapsuleHash: String? = null,
         declaredTrust: String = TRUST_CONVERSATION,
         clientContext: Map<String, String> = emptyMap(),
+        /** The exact signed bytes that must be retained if the HTTP result is lost. */
+        onPreparedCommand: (String) -> Unit = {},
     ): JSONObject = withContext(Dispatchers.IO) {
         val body = buildCommandBody(
             text = text,
@@ -1399,9 +1854,11 @@ class VanGatewayClient(context: Context) {
             declaredTrust = declaredTrust,
             clientContext = clientContext,
         )
+        val bodyText = body.toString()
+        onPreparedCommand(bodyText)
         VanLiveVisualState.dispatchStarted()
         try {
-            val response = postJson("/v1/commands", body)
+            val response = postRawAt(baseUrl, "/v1/commands", bodyText, useIngress = true)
             publishCommandVisualStatus(response)
             response
         } catch (exc: Throwable) {
@@ -1466,12 +1923,14 @@ class VanGatewayClient(context: Context) {
         body: String,
         useIngress: Boolean,
         extraHeaders: Map<String, String> = emptyMap(),
-    ): JSONObject = withRetry {
+        freshHeaders: (() -> Map<String, String>)? = null,
+    ): JSONObject = withRetry(allowRetry = GatewayMutationRetry.replaySafe(path, body)) {
         val conn = open("$rootUrl$path").apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
             if (useIngress) applyIngressAuth(this)
-            extraHeaders.forEach { (name, value) -> setRequestProperty(name, value) }
+            val identityHeaders = freshHeaders?.invoke() ?: if (useIngress) proofHeaders("POST", path, body) else emptyMap()
+            (extraHeaders + identityHeaders).forEach { (name, value) -> setRequestProperty(name, value) }
             doOutput = true
             connectTimeout = 15_000
             readTimeout = 60_000
@@ -1496,11 +1955,32 @@ class VanGatewayClient(context: Context) {
         val payload = body.toString()
         return postRawAt(
             baseUrl, path, payload, useIngress = true,
-            extraHeaders = proofHeaders("POST", path, payload),
+            freshHeaders = { proofHeaders("POST", path, payload) },
         )
     }
 
-    private fun deleteProved(path: String): JSONObject = withRetry {
+    private fun putProved(path: String, body: JSONObject): JSONObject = withRetry(allowRetry = false) {
+        val payload = body.toString()
+        val conn = open("$baseUrl$path").apply {
+            requestMethod = "PUT"
+            setRequestProperty("Content-Type", "application/json")
+            applyIngressAuth(this)
+            proofHeaders("PUT", path, payload).forEach { (name, value) -> setRequestProperty(name, value) }
+            doOutput = true
+            connectTimeout = 15_000
+            readTimeout = 30_000
+        }
+        try {
+            conn.outputStream.use { it.write(payload.toByteArray(StandardCharsets.UTF_8)) }
+            val code = conn.responseCode
+            val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+            val result = stream?.bufferedReader()?.use { it.readText() } ?: "{}"
+            if (code !in 200..299) throw GatewayHttpException(code, result)
+            JSONObject(result)
+        } finally { conn.disconnect() }
+    }
+
+    private fun deleteProved(path: String): JSONObject = withRetry(allowRetry = false) {
         val conn = open("$baseUrl$path").apply {
             requestMethod = "DELETE"
             applyIngressAuth(this)
@@ -1557,7 +2037,17 @@ class VanGatewayClient(context: Context) {
      * `withContext(Dispatchers.IO)`; making these functions suspend would change forty call
      * sites to express the same thing.
      */
-    private fun <T> withRetry(call: () -> T): T {
+    private fun <T> withRetry(allowRetry: Boolean = true, call: () -> T): T {
+        if (!allowRetry) return GatewayMutationRetry.singleAttempt(
+            httpStatus = { (it as? GatewayHttpException)?.code },
+        ) {
+            try {
+                call().also { breaker.recordSuccess() }
+            } catch (failure: Throwable) {
+                if (failure is GatewayHttpException || failure is IOException) breaker.recordFailure()
+                throw failure
+            }
+        }
         var attempt = 0
         while (true) {
             try {
@@ -1603,6 +2093,11 @@ class VanGatewayClient(context: Context) {
         private const val KEY_SECRET = "device_secret"
         private const val KEY_INGRESS_TOKEN = "ingress_token"
         private const val KEY_DEVICE_ACCESS_TOKEN = "device_access_token"
+        private const val KEY_PROVISIONING_FINGERPRINT = "provisioning_payload_fingerprint"
+        private const val KEY_PROVISIONING_DEVICE_ID = "provisioning_device_id"
+        private const val KEY_PENDING_PAIR = "pending_pair_body"
+        private const val KEY_PENDING_SESSION_OPEN = "pending_session_open"
+        private const val KEY_SESSION_IDENTITY = "logical_session_identity"
         private const val MIN_INGRESS_TOKEN_CHARS = 32
         private const val MIN_DEVICE_ACCESS_TOKEN_CHARS = 32
         private const val MIN_PAIRING_TOKEN_CHARS = 32

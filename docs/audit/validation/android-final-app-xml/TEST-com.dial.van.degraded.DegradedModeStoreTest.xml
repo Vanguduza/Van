@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.degraded.DegradedModeStoreTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:16:26" hostname="052fefa249ff" time="0.05">
+  <properties/>
+  <testcase name="liveWorkspaceReadyClearsGoogleWithoutClearingTheBanner" classname="com.dial.van.degraded.DegradedModeStoreTest" time="0.039"/>
+  <testcase name="theBannerClearsOnceNothingIsBroken" classname="com.dial.van.degraded.DegradedModeStoreTest" time="0.001"/>
+  <testcase name="configuredWorkspaceDoesNotClearGoogleDegraded" classname="com.dial.van.degraded.DegradedModeStoreTest" time="0.009"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -22,9 +22,48 @@ not a hole to be filled with something optimistic.
 
 from __future__ import annotations
 
+import json
 from typing import Any
 
+from van_gateway.command.authority import AuthoritySource, CommandAuthorityService
+from van_gateway.models import PrincipalType
 from van_gateway.storage.db import Store
+
+
+async def standing_intent_disable_readback(store: Store, intent_id: str, command_id: str) -> dict[str, Any]:
+    """Observe exact intent state and captured roots independently after execution."""
+    intent = await store.fetchone("SELECT enabled FROM automation_standing_intents WHERE intent_id=?", (intent_id,))
+    if intent is None:
+        return {"intent_id": intent_id, "exists": False}
+    roots = await store.fetchall(
+        "SELECT authority_id,source_device_id,revoked_at_ms FROM standing_automation_authorities WHERE standing_intent_id=?",
+        (intent_id,),
+    )
+    row = await store.fetchone("SELECT value FROM runtime_meta WHERE key=?", ("standing_disable_witness:" + command_id,))
+    witness = json.loads(row["value"]) if row else {}
+    captured = witness.get("authority_ids", [])
+    by_id = {str(r["authority_id"]): r for r in roots}
+    authority = await CommandAuthorityService(store).get(command_id)
+    bound = bool(
+        authority and authority.authority_source is AuthoritySource.OWNER_COMMAND
+        and authority.principal_type is PrincipalType.OWNER_DEVICE
+        and authority.typed_action_id == "automation.standing_intent.disable"
+        and authority.typed_parameter_constraints.get("intent_id") == intent_id
+        and witness.get("intent_id") == intent_id and witness.get("command_id") == command_id
+        and any(r["source_device_id"] == authority.device_id for r in roots)
+    )
+    revoked = bool(captured and isinstance(captured, list) and all(
+        isinstance(root, str) and root in by_id and by_id[root]["revoked_at_ms"] is not None
+        for root in captured
+    ))
+    observed = {
+        "intent_id": intent_id, "enabled": bool(intent["enabled"]),
+        "active_authorities": sum(r["revoked_at_ms"] is None for r in roots),
+        "captured_authorities_revoked": revoked, "owner_command_bound": bound,
+    }
+    if bound and revoked:
+        observed["evidence_refs"] = [f"standing-intent://{intent_id}/disable/{command_id}"]
+    return observed
 
 
 async def trading_ledger_readback(trading: Any, trade_intent_id: str) -> dict[str, Any]:
@@ -40,6 +79,68 @@ async def trading_ledger_readback(trading: Any, trade_intent_id: str) -> dict[st
         "fill_price": detail.get("fill_price"),
         "evidence_refs": [f"ledger://trade/{trade_intent_id}"],
     }
+
+
+async def trading_ticket_readback(trading: Any, ticket_id: str) -> dict[str, Any]:
+    """Confirm only the owner-recorded broker receipt, never broker execution itself."""
+    from van_gateway.command.resolver import canonical_positive_decimal
+
+    if trading is None or not trading.available():
+        raise FileNotFoundError("trading ledger unavailable")
+    status = trading.status()
+    ticket = next((item for item in trading.tickets() if item.get("ticket") == ticket_id), None)
+    observed = {"ticket_id": ticket_id, "ticket_found": ticket is not None,
+        "ledger_chain_ok": status.get("chain_ok") is True}
+    if ticket is not None:
+        observed.update(status=ticket.get("status"), contract_note_ref=ticket.get("contract_note_ref"))
+        if ticket.get("status") == "CONFIRMED":
+            observed.update(fill_price=canonical_positive_decimal(ticket.get("fill_price")),
+                filled_qty=canonical_positive_decimal(ticket.get("filled_qty")))
+            digest = ticket.get("confirmation_hash")
+            if isinstance(digest, str) and len(digest) == 64 and observed["ledger_chain_ok"]:
+                observed["evidence_ref"] = f"vati-event:{digest}"
+    return observed
+
+
+async def gmail_sent_readback(store: Store, google: Any, command_id: str, postconditions: dict[str, Any]) -> dict[str, Any]:
+    """Correlations locate a provider object; only sealed owner intent and fresh raw MIME prove it."""
+    from van_gateway.action.service import ActionRuntime
+    from van_gateway.google.mail import content_digest, message_snapshot
+
+    if google is None:
+        raise ValueError("Google provider unavailable")
+    authority = await CommandAuthorityService(store).get(command_id)
+    params = {"draft_id": postconditions.get("draft_id"), "draft_content_sha256": postconditions.get("draft_content_sha256")}
+    if (authority is None or authority.authority_source is not AuthoritySource.OWNER_COMMAND
+        or authority.principal_type is not PrincipalType.OWNER_DEVICE or not authority.owner_approved
+        or authority.typed_action_id != "google.gmail.send" or authority.typed_parameter_constraints != params):
+        raise ValueError("Gmail send is not bound to sealed owner approval")
+    rows = await store.fetchall("SELECT correlation_json,parameters_digest FROM action_executions "
+        "WHERE command_id=? AND action_id='google.gmail.send' AND submitted_at_ms IS NOT NULL", (command_id,))
+    message_ids = set()
+    for row in rows:
+        correlation = json.loads(row["correlation_json"])
+        if row["parameters_digest"] != ActionRuntime.digest_parameters(params) or correlation.get("source_draft_id") != params["draft_id"]:
+            raise ValueError("Gmail send correlation is not bound to approved parameters")
+        message_id = correlation.get("message_id")
+        if not isinstance(message_id, str) or not message_id or len(message_id) > 256:
+            raise ValueError("Gmail sent message identity unavailable")
+        message_ids.add(message_id)
+    if len(message_ids) != 1:
+        raise ValueError("Gmail sent message correlation is missing or ambiguous")
+    message_id = next(iter(message_ids))
+    message = await google.gmail_message_get(message_id)
+    thread_id = message.get("threadId")
+    if not isinstance(thread_id, str) or not thread_id:
+        raise ValueError("Gmail sent thread identity unavailable")
+    actual_digest = content_digest(message_snapshot(message.get("raw")), thread_id)
+    observed = {"draft_id": params["draft_id"], "draft_content_sha256": actual_digest,
+        "sent": message.get("id") == message_id and "SENT" in (message.get("labelIds") or []),
+        "approved_content_matches": actual_digest == params["draft_content_sha256"],
+        "owner_approved_command_bound": True, "message_id": message_id,
+        "source_draft_cleanup": "NOT_ATTEMPTED", "source_draft_state": "UNOBSERVED",
+        "evidence_ref": f"google://gmail/messages/{message_id}"}
+    return observed
 
 
 async def browser_evidence_readback(store: Store, mission_id: str) -> dict[str, Any]:
@@ -236,6 +337,7 @@ def _is_absent(exc: Exception) -> bool:
 
 
 __all__ = [
+    "standing_intent_disable_readback",
     "automation_run_state_predicate",
     "browser_evidence_readback",
     "google_resource_readback",

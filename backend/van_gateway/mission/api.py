@@ -23,7 +23,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
 from van_gateway.auth.control_scopes import ControlScope, require_scoped_internal
@@ -35,6 +35,10 @@ from van_gateway.capability.router import CapabilityRouter
 from van_gateway.coherence import owner_status
 from van_gateway.config import Settings
 from van_gateway.mission.binding import MissionBinder
+from van_gateway.mission.control import MissionControlError, MissionExecutionControlService
+from van_gateway.mission.control_models import (
+    MissionControlBody, MissionControlReceipt, MissionControlState, MissionDirectionBody,
+)
 from van_gateway.mission.models import (
     MissionOrigin,
     MissionState,
@@ -131,6 +135,7 @@ class MissionApi:
         self.registry = registry
         self.capability_router = router
         self.binder = MissionBinder(store, missions)
+        self.controls = MissionExecutionControlService(store)
         self.router = APIRouter(prefix="/v1", tags=["missions"])
         self._install_routes()
 
@@ -377,15 +382,72 @@ class MissionApi:
 
         # ------------------------------------------------ owner mutations
 
+        def owner(request: Request) -> str:
+            device_id = getattr(request.state, "van_device_id", None)
+            if not device_id:
+                raise HTTPException(status_code=401, detail="owner_device_required")
+            return f"device:{device_id}"
+
+        def control_error(exc: MissionControlError) -> HTTPException:
+            status = 404 if exc.code in ("MISSION_UNKNOWN", "MISSION_CONTROL_UNKNOWN") else 409
+            if exc.code == "MISSION_CONTROL_DEVICE_REVOKED":
+                status = 403
+            return HTTPException(status_code=status, detail=exc.code)
+
+        @router.get("/missions/{mission_id}/control", response_model=MissionControlState)
+        async def read_mission_control(mission_id: str, request: Request):
+            owner(request)
+            try:
+                return await self.controls.read(mission_id)
+            except MissionControlError as exc:
+                raise control_error(exc) from exc
+
+        @router.get("/missions/{mission_id}/control/requests/{request_id}", response_model=MissionControlReceipt)
+        async def read_mission_control_request(mission_id: str, request_id: str, request: Request):
+            owner(request)
+            try:
+                return await self.controls.get_request(mission_id, request_id)
+            except MissionControlError as exc:
+                raise control_error(exc) from exc
+
+        async def record_control(mission_id: str, request: Request, body: MissionControlBody,
+                                 operation: str, direction: str | None = None):
+            try:
+                return await self.controls.request(
+                    mission_id=mission_id, request_id=body.request_id, operation=operation,
+                    expected_generation=body.expected_generation, requested_by=owner(request),
+                    reason=body.reason, direction=direction,
+                )
+            except MissionControlError as exc:
+                raise control_error(exc) from exc
+
+        @router.post("/missions/{mission_id}/pause", response_model=MissionControlReceipt)
+        async def pause_mission(mission_id: str, request: Request, body: MissionControlBody):
+            return await record_control(mission_id, request, body, "PAUSE")
+
+        @router.post("/missions/{mission_id}/resume", response_model=MissionControlReceipt)
+        async def resume_mission(mission_id: str, request: Request, body: MissionControlBody):
+            return await record_control(mission_id, request, body, "RESUME")
+
+        @router.post("/missions/{mission_id}/direction", response_model=MissionControlReceipt)
+        async def direct_mission(mission_id: str, request: Request, body: MissionDirectionBody):
+            return await record_control(mission_id, request, body, "DIRECTION", body.message)
+
         @router.post("/missions/{mission_id}/cancel")
         async def cancel_mission(mission_id: str):
             """Owner-authenticated: stopping your own mission is yours to say."""
+            existing = await self.missions.get(mission_id)
+            if existing is not None and existing.state is MissionState.CANCELLED:
+                return await self._mission_summary(existing)
             try:
                 mission = await self.missions.transition(
                     mission_id, target=MissionState.CANCELLED,
                     actor=PrincipalType.OWNER_DEVICE, final_outcome="cancelled by owner",
                 )
             except MissionError as exc:
+                existing = await self.missions.get(mission_id)
+                if existing is not None and existing.state is MissionState.CANCELLED:
+                    return await self._mission_summary(existing)
                 raise self._translate(exc) from exc
             return await self._mission_summary(mission)
 
@@ -402,7 +464,7 @@ class MissionApi:
             from van_gateway.mission.models import MissionEventType
 
             event = await self.missions.record_event(
-                mission_id=mission_id, event_type=MissionEventType.MISSION_CREATED,
+                mission_id=mission_id, event_type=MissionEventType.MISSION_MESSAGE,
                 actor=PrincipalType.OWNER_DEVICE, summary=body.message[:500],
                 severity="INFO",
             )

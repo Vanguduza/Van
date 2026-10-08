@@ -70,10 +70,10 @@ class CloudAccessTokenProvider:
         return bool(self.service_account_file or self.access_token_file)
 
     def credential_locus(self) -> str:
-        if self.service_account_file:
-            return "gateway-service-account-file"
         if self.access_token_file:
             return "gateway-short-lived-token-file"
+        if self.service_account_file:
+            return "gateway-service-account-file"
         return "unconfigured"
 
     async def token(self) -> str:
@@ -83,7 +83,7 @@ class CloudAccessTokenProvider:
         if self.access_token_file:
             try:
                 token = Path(self.access_token_file).expanduser().read_text(encoding="utf-8").strip()
-            except OSError as exc:
+            except (OSError, UnicodeDecodeError) as exc:
                 raise NotebookProviderError("notebook_enterprise_token_file_unavailable") from exc
             if not token:
                 raise NotebookProviderError("notebook_enterprise_token_file_empty")
@@ -114,14 +114,23 @@ class CloudAccessTokenProvider:
                 "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
                 "assertion": assertion,
             })
-        if response.status_code >= 400:
+        if response.status_code >= 300:
             raise NotebookProviderError(f"notebook_enterprise_token_exchange_failed:{response.status_code}")
-        payload = response.json()
-        token = str(payload.get("access_token") or "")
-        if not token:
+        try:
+            payload = response.json()
+        except ValueError as exc:
+            raise NotebookProviderError("notebook_enterprise_token_exchange_malformed") from exc
+        if not isinstance(payload, dict):
+            raise NotebookProviderError("notebook_enterprise_token_exchange_malformed")
+        token = payload.get("access_token")
+        try:
+            expires_in = int(payload.get("expires_in") or 3600)
+        except (ValueError, TypeError) as exc:
+            raise NotebookProviderError("notebook_enterprise_token_exchange_malformed") from exc
+        if not isinstance(token, str) or not token or expires_in <= 0:
             raise NotebookProviderError("notebook_enterprise_token_exchange_malformed")
         self._cached_token = token
-        self._expires_at = issued + int(payload.get("expires_in") or 3600)
+        self._expires_at = issued + expires_in
         return token
 
 
@@ -224,7 +233,7 @@ class NotebookEnterpriseProvider:
             raise NotebookProviderError("notebook_enterprise_not_found")
         if response.status_code in {401, 403}:
             raise NotebookProviderError(f"notebook_enterprise_authorization_failed:{response.status_code}")
-        if response.status_code >= 400:
+        if response.status_code >= 300:
             raise NotebookProviderError(f"notebook_enterprise_http_{response.status_code}")
         if not response.content:
             return {}
@@ -276,7 +285,10 @@ class NotebookEnterpriseProvider:
     async def list_recent(self, page_size: int = 100) -> list[dict[str, Any]]:
         size = max(1, min(page_size, 500))
         body = await self._request("GET", f"/notebooks:listRecentlyViewed?pageSize={size}")
-        return list(body.get("notebooks") or [])
+        notebooks = body.get("notebooks", [])
+        if not isinstance(notebooks, list) or any(not isinstance(item, dict) for item in notebooks):
+            raise NotebookProviderError("notebook_enterprise_malformed_response")
+        return notebooks
 
     async def certify(self) -> ProviderStatus:
         notebooks = await self.list_recent(1)

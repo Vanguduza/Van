@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.BrowserStreamMetadataTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:46" hostname="052fefa249ff" time="0.007">
+  <properties/>
+  <testcase name="file chooser event is bounded and tied to exact peer without host file paths()" classname="com.dial.van.browser.BrowserStreamMetadataTest" time="0.002"/>
+  <testcase name="decoded frame alone or metadata alone cannot acknowledge viewport()" classname="com.dial.van.browser.BrowserStreamMetadataTest" time="0.001"/>
+  <testcase name="signal answer binds exact session control viewport and geometry()" classname="com.dial.van.browser.BrowserStreamMetadataTest" time="0.0"/>
+  <testcase name="unknown malformed oversized and duplicate target metadata fail closed()" classname="com.dial.van.browser.BrowserStreamMetadataTest" time="0.001"/>
+  <testcase name="tab metadata yields actual navigation history without inventing target or security()" classname="com.dial.van.browser.BrowserStreamMetadataTest" time="0.001"/>
+  <testcase name="old peer epoch generation viewport or repeated marker cannot confirm new peer()" classname="com.dial.van.browser.BrowserStreamMetadataTest" time="0.0"/>
+  <testcase name="producer progress and refusal events remain truthful without treating progress as completion()" classname="com.dial.van.browser.BrowserStreamMetadataTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

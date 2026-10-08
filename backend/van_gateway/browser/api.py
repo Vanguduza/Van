@@ -128,6 +128,8 @@ class AssignmentBody(BaseModel):
     #: `action_class_ceiling` ends the task exactly as a model-chosen one would. Absent for
     #: a semantic tier, which selects its own actions and needs a runtime to do it.
     plan: BrowserTaskPlan | None = None
+    #: Select the exact owner-delegated target rather than an independent profile worker.
+    interactive_session_id: str | None = Field(default=None, min_length=1, max_length=128)
 
 
 class BrowserApi:
@@ -339,12 +341,13 @@ class BrowserApi:
         decision = await self.decisions.escalate(
             DecisionCreate(
                 title=summary,
+                request_id="browser-" + digest(idem),
                 body=(
                     f"{why_required}\n\n{risk_summary}\n\n"
                     f"Task {task.task_id} stopped at step {len(result.steps)} of "
                     f"{assignment.max_steps} and is waiting for your decision. "
-                    f"Approving widens this task only; it does not change the "
-                    f"browser policy or any other task."
+                    f"Your answer is advisory. Widening scope requires a fresh "
+                    f"signed command with exact authority and parameters."
                 ),
                 source="browser",
                 hermes_ref=assignment.turn_id,
@@ -464,12 +467,12 @@ class BrowserApi:
     ) -> str:
         if requested_domain:
             return (
-                f"Approving lets this one task read {requested_domain} at "
+                f"A fresh sealed command is required to let this task read {requested_domain} at "
                 f"{assignment.action_class_ceiling.value}. It does not admit the "
                 f"domain for any other task and does not raise the action class."
             )
         return (
-            f"Approving raises this one task's ceiling to "
+            f"A fresh sealed command is required to raise this task's ceiling to "
             f"{requested_class.value if requested_class else 'the requested class'} "
             f"within its existing domain scope. Payments and irreversible actions "
             f"remain prohibited on the browser at every class."
@@ -521,63 +524,20 @@ class BrowserApi:
             )
             return BrowserTaskStatus.EXPIRED
 
-        if decision_status is DecisionStatus.APPROVED:
-            current_scope = json.loads(str(row["current_scope_json"]))
+        if decision_status in {DecisionStatus.APPROVED, DecisionStatus.ANSWERED}:
             delta = json.loads(str(row["requested_scope_delta_json"]))
-            approved_domains = list(current_scope.get("allowed_domains", []))
-            if delta.get("allowed_domain") and delta["allowed_domain"] not in approved_domains:
-                approved_domains.append(delta["allowed_domain"])
-            approved_class = delta.get("action_class_ceiling") or current_scope.get(
-                "action_class_ceiling"
-            )
-            # §§108, 391 — belt and braces. `classify_boundary` refuses to raise
-            # an A4 question at all, but a row written by an earlier build could
-            # still carry one, and an owner-approved A4 browser grant must not be
-            # able to exist in this table whatever asked for it.
-            if approved_class in (ActionClass.A4.value, ActionClass.A5.value):
-                await self.store.execute(
-                    "UPDATE browser_escalations SET status = ?, boundary_type = ?, "
-                    "updated_at_ms = ? WHERE escalation_id = ?",
-                    (
-                        BrowserEscalationStatus.REJECTED.value,
-                        BrowserBoundaryType.POLICY_FORBIDDEN.value,
-                        now, row["escalation_id"],
-                    ),
-                )
-                await self.store.execute(
-                    "UPDATE browser_tasks SET status = ?, error_code = ?, completed_at_ms = ?, "
-                    "updated_at_ms = ? WHERE task_id = ?",
-                    (
-                        BrowserTaskStatus.BLOCKED_POLICY.value,
-                        "BROWSER_ACTION_CLASS_NEVER_PERMITTED",
-                        now, now, task.task_id,
-                    ),
-                )
+            if delta.get("action_class_ceiling") in {"A4", "A5"}:
+                await self.store.execute("UPDATE browser_tasks SET status=?,error_code=?,updated_at_ms=? WHERE task_id=?",
+                    (BrowserTaskStatus.BLOCKED_POLICY.value, "BROWSER_LEGACY_SCOPE_GRANT_FORBIDDEN", now, task.task_id))
                 return BrowserTaskStatus.BLOCKED_POLICY
-            authorization_id = f"bsauth_{row['escalation_id']}"
+            # An advisory answer is evidence of the owner's preference, never a
+            # capability grant. A new exact sealed command is required to widen
+            # domain, action class or resume a boundary-stopped task.
             await self.store.execute(
-                """
-                INSERT INTO browser_scope_authorizations(
-                  authorization_id, escalation_id, task_id, decision_id,
-                  approved_domains_json, approved_action_class_ceiling, status,
-                  issued_at_ms, expires_at_ms, consumed_at_ms
-                ) VALUES (?, ?, ?, ?, ?, ?, 'ACTIVE', ?, NULL, NULL)
-                ON CONFLICT(escalation_id) DO NOTHING
-                """,
-                (
-                    authorization_id, row["escalation_id"], task.task_id, row["decision_id"],
-                    Store.dumps(approved_domains), approved_class, now,
-                ),
+                "UPDATE browser_tasks SET error_code=?,updated_at_ms=? WHERE task_id=?",
+                ("BROWSER_FRESH_SEALED_COMMAND_REQUIRED", now, task.task_id),
             )
-            await self.store.execute(
-                "UPDATE browser_escalations SET status = ?, updated_at_ms = ? WHERE escalation_id = ?",
-                (BrowserEscalationStatus.APPROVED.value, now, row["escalation_id"]),
-            )
-            await self.store.execute(
-                "UPDATE browser_tasks SET status = ?, error_code = NULL, updated_at_ms = ? WHERE task_id = ?",
-                (BrowserTaskStatus.RESUME_AUTHORIZED.value, now, task.task_id),
-            )
-            return BrowserTaskStatus.RESUME_AUTHORIZED
+            return BrowserTaskStatus.WAITING_FOR_OWNER
         if decision_status is DecisionStatus.REJECTED:
             await self.store.execute(
                 "UPDATE browser_escalations SET status = ?, updated_at_ms = ? WHERE escalation_id = ?",
@@ -709,7 +669,15 @@ class BrowserApi:
             rows = await self.store.fetchall(
                 "SELECT * FROM browser_tasks ORDER BY updated_at_ms DESC LIMIT 100"
             )
-            return [dict(r) for r in rows]
+            return [
+                {
+                    **dict(r),
+                    "execution_completed": r["status"] == BrowserTaskStatus.COMPLETED.value,
+                    "owner_success": False,
+                    "verification_state": "UNVERIFIED",
+                }
+                for r in rows
+            ]
 
         @router.get("/escalations")
         async def list_escalations():
@@ -842,7 +810,12 @@ class BrowserApi:
                 (task_id,),
             )
             return {
-                "task": task.model_dump(mode="json"),
+                "task": {
+                    **task.model_dump(mode="json"),
+                    "execution_completed": task.status == BrowserTaskStatus.COMPLETED,
+                    "owner_success": False,
+                    "verification_state": "UNVERIFIED",
+                },
                 "evidence": [dict(row) for row in evidence],
             }
 
@@ -916,8 +889,20 @@ class BrowserApi:
             # assignments overwrite each other's task id, and the adapter is the only part
             # that is legitimately shared.
             worker = self.worker
+            if body.interactive_session_id is not None:
+                factory = getattr(self, "interactive_worker_factory", None)
+                if factory is None:
+                    raise HTTPException(status_code=503, detail="INTERACTIVE_CONTROL_CLIENT_UNCONFIGURED")
+                try:
+                    worker = await factory(task, assignment, body.plan, body.interactive_session_id)
+                except SemanticWorkerUnavailable as exc:
+                    raise HTTPException(status_code=503, detail="INTERACTIVE_SEMANTIC_WORKER_UNCONFIGURED") from exc
+                except ValueError as exc:
+                    raise HTTPException(status_code=422, detail=str(exc)) from exc
+                except Exception as exc:
+                    raise HTTPException(status_code=409, detail="INTERACTIVE_CONTROL_NOT_ADMITTED") from exc
             binder = getattr(worker, "for_task", None)
-            if binder is not None:
+            if binder is not None and body.interactive_session_id is None:
                 worker = binder(task, body.plan)
             try:
                 result = await self.runner.run(
@@ -965,6 +950,10 @@ class BrowserApi:
                 "turn_id": assignment.turn_id,
                 "stop_reason": result.stop_reason.value,
                 "succeeded": result.succeeded,
+                "execution_completed": result.execution_completed,
+                "worker_goal_reported": result.execution_completed,
+                "owner_success": False,
+                "verification_state": "UNVERIFIED",
                 "step_count": result.step_count,
                 "steps": [step.model_dump(mode="json") for step in result.steps],
                 "extraction": result.extraction,

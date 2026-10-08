@@ -1,0 +1,15 @@
+{
+  "source_files": 352,
+  "changed_during_final_run": [],
+  "source_unchanged": true,
+  "pytest_passed": 2157,
+  "pytest_failed": 0,
+  "pytest_warnings": 30,
+  "duration_seconds": 289.22,
+  "log": "/workspace/van-audit/implementation-backend-full.log",
+  "cwd": "/workspace/Van/backend",
+  "invocation": "PYTHONPATH=/workspace/Van/backend /workspace/.onboarding/van-venv/bin/python -m pytest -q tests > /workspace/van-audit/implementation-backend-full.log 2>&1",
+  "exec_session_id": 42917,
+  "source_inputs": "/workspace/van-audit/implementation-backend-inputs.json",
+  "receipt_note": "Refreshed after memory DELETE OpenAPI status_code=409 metadata correction; source untouched during validation."
+}

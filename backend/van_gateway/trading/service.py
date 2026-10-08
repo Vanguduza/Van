@@ -395,24 +395,32 @@ class TradingService:
             px, qty = Decimal(str(fill_price)), Decimal(str(filled_qty))
         except InvalidOperation as exc:
             raise ValueError("fill_price and filled_qty must be decimal strings") from exc
-        if px <= 0 or qty <= 0:
-            raise ValueError("fill_price and filled_qty must be positive")
+        if not px.is_finite() or not qty.is_finite() or px <= 0 or qty <= 0:
+            raise ValueError("fill_price and filled_qty must be finite and positive")
         if not self.available():
             raise FileNotFoundError(f"trading ledger not available at {self.ledger_path}")
         EventKind, make_event, led = self._open()
         try:
-            known = {t["ticket"]: t for t in self._tickets(led, EventKind)}
-            t = known.get(ticket_id)
-            if t is None:
-                raise KeyError(f"unknown ticket {ticket_id}")
-            if t["status"] != "OPEN":
-                raise TradingControlError(f"ticket {ticket_id} is already {t['status']}")
-            if t.get("qty") is not None and qty > Decimal(str(t["qty"])):
-                raise ValueError(f"filled_qty {qty} exceeds ticket quantity {t['qty']}")
-            now = now_ms if now_ms is not None else int(time.time() * 1000)
-            ev = make_event(EventKind.OWNER_TICKET, self.producer, {"ticket": ticket_id, "action": "CONFIRMED", "fill_price": str(px), "filled_qty": str(qty), "contract_note_ref": contract_note_ref.strip(), "sig": sig},
-                            event_time_ms=now, received_time_ms=now, correlation_id=t.get("trade_intent_id") or ticket_id)
-            chain = led.append(ev)
+            with led.atomic():
+                known = {t["ticket"]: t for t in self._tickets(led, EventKind)}
+                t = known.get(ticket_id)
+                if t is None:
+                    raise KeyError(f"unknown ticket {ticket_id}")
+                if t["status"] != "OPEN":
+                    raise TradingControlError(f"ticket {ticket_id} is already {t['status']}")
+                if t.get("qty") is not None:
+                    try:
+                        ticket_qty = Decimal(str(t["qty"]))
+                    except InvalidOperation as exc:
+                        raise TradingControlError("ticket quantity cannot be verified") from exc
+                    if not ticket_qty.is_finite() or ticket_qty <= 0:
+                        raise TradingControlError("ticket quantity cannot be verified")
+                    if qty > ticket_qty:
+                        raise ValueError(f"filled_qty {qty} exceeds ticket quantity {t['qty']}")
+                now = now_ms if now_ms is not None else int(time.time() * 1000)
+                ev = make_event(EventKind.OWNER_TICKET, self.producer, {"ticket": ticket_id, "action": "CONFIRMED", "fill_price": str(px), "filled_qty": str(qty), "contract_note_ref": contract_note_ref.strip(), "sig": sig},
+                                event_time_ms=now, received_time_ms=now, correlation_id=t.get("trade_intent_id") or ticket_id)
+                chain = led.append(ev)
             return {"ticket": ticket_id, "status": "CONFIRMED", "event_hash": ev.hash, "chain_hash": chain, "event_time_ms": now}
         finally:
             led.close()

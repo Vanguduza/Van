@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import time
 from contextlib import asynccontextmanager
@@ -8,7 +9,126 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 30
+SCHEMA_VERSION = 41
+
+MIGRATION_41 = """
+CREATE TABLE IF NOT EXISTS automation_owner_plans (
+ device_id TEXT NOT NULL REFERENCES devices(device_id), idempotency_key TEXT NOT NULL,
+ request_digest TEXT NOT NULL, state TEXT NOT NULL, result_json TEXT,
+ created_at_ms INTEGER NOT NULL, completed_at_ms INTEGER,
+ PRIMARY KEY(device_id,idempotency_key)
+);
+"""
+
+MIGRATION_39 = """
+CREATE TABLE IF NOT EXISTS decision_details (
+ decision_id TEXT PRIMARY KEY REFERENCES decisions(id), choices_json TEXT NOT NULL,
+ evidence_json TEXT NOT NULL, mission_id TEXT REFERENCES missions(mission_id),
+ blocking INTEGER NOT NULL DEFAULT 1, expires_at_unix INTEGER,
+ revision INTEGER NOT NULL DEFAULT 1, selected_choice_id TEXT, answer_note TEXT,
+ answered_at_unix INTEGER, resolution_request_id TEXT, resolution_request_hash TEXT,
+ create_request_id TEXT UNIQUE, create_request_hash TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_decision_details_expiry ON decision_details(expires_at_unix,decision_id);
+"""
+
+MIGRATION_40 = """
+CREATE TABLE IF NOT EXISTS mission_execution_controls (
+ mission_id TEXT PRIMARY KEY REFERENCES missions(mission_id),
+ generation INTEGER NOT NULL DEFAULT 0 CHECK(generation >= 0),
+ desired_execution TEXT NOT NULL DEFAULT 'RUNNING' CHECK(desired_execution IN ('RUNNING','PAUSED')),
+ hermes_run_id TEXT, updated_at_ms INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS mission_control_requests (
+ control_id TEXT PRIMARY KEY, mission_id TEXT NOT NULL REFERENCES missions(mission_id),
+ request_id TEXT NOT NULL, operation TEXT NOT NULL CHECK(operation IN ('PAUSE','RESUME','DIRECTION')),
+ expected_generation INTEGER NOT NULL CHECK(expected_generation >= 0),
+ generation INTEGER NOT NULL CHECK(generation > 0), payload_digest TEXT NOT NULL,
+ canonical_payload_json TEXT NOT NULL, requested_by TEXT NOT NULL, direction TEXT,
+ desired_execution TEXT NOT NULL CHECK(desired_execution IN ('RUNNING','PAUSED')),
+ hermes_run_id TEXT, owner_receipt_json TEXT NOT NULL, created_at_ms INTEGER NOT NULL,
+ worker_ack_json TEXT, worker_ack_digest TEXT, checkpoint_ref TEXT, acknowledged_at_ms INTEGER,
+ UNIQUE(mission_id,request_id), UNIQUE(mission_id,generation)
+);
+CREATE INDEX IF NOT EXISTS idx_mission_control_pending ON mission_control_requests(mission_id,operation,generation,acknowledged_at_ms);
+"""
+
+MIGRATION_35 = """
+ALTER TABLE browser_interactive_sessions ADD COLUMN acked_media_epoch TEXT;
+ALTER TABLE browser_interactive_sessions ADD COLUMN acked_frame_sequence INTEGER;
+ALTER TABLE browser_downloads ADD COLUMN producer_session_id TEXT;
+ALTER TABLE browser_downloads ADD COLUMN host_deleted_at_ms INTEGER;
+-- Authenticated producer connections are durable, one-use grant bindings. A new
+-- connection fences the previous one; neither a signed token nor a stale media
+-- process is allowed to invent current session authority.
+CREATE TABLE IF NOT EXISTS browser_stream_producers (
+  producer_session_id TEXT PRIMARY KEY,
+  grant_id TEXT NOT NULL UNIQUE REFERENCES browser_stream_grants(grant_id),
+  session_id TEXT NOT NULL REFERENCES browser_interactive_sessions(session_id),
+  producer_principal_sha256 TEXT NOT NULL,
+  profile_lease_id TEXT NOT NULL,
+  profile_generation INTEGER NOT NULL,
+  created_at_ms INTEGER NOT NULL,
+  revoked_at_ms INTEGER,
+  revoke_reason TEXT,
+  observed_viewport_revision INTEGER,
+  observed_frame_sequence INTEGER NOT NULL DEFAULT 0,
+  observed_at_ms INTEGER
+  ,pending_chooser_id TEXT
+  ,pending_chooser_target_id TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_stream_producer_session
+  ON browser_stream_producers(session_id, revoked_at_ms);
+
+CREATE TABLE IF NOT EXISTS browser_owner_transfer_grants (
+  transfer_id TEXT PRIMARY KEY,
+  token_sha256 TEXT NOT NULL UNIQUE,
+  producer_session_id TEXT NOT NULL REFERENCES browser_stream_producers(producer_session_id),
+  session_id TEXT NOT NULL REFERENCES browser_interactive_sessions(session_id),
+  owner_device_id TEXT NOT NULL,
+  operation TEXT NOT NULL,
+  resource_id TEXT NOT NULL,
+  target_id TEXT NOT NULL,
+  profile_lease_id TEXT NOT NULL,
+  profile_generation INTEGER NOT NULL,
+  control_lease_id TEXT NOT NULL,
+  control_generation INTEGER NOT NULL,
+  viewport_revision INTEGER NOT NULL,
+  metadata_json TEXT NOT NULL,
+  created_at_ms INTEGER NOT NULL,
+  expires_at_ms INTEGER NOT NULL,
+  consumed_at_ms INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS browser_control_producer_grants (
+  grant_id TEXT PRIMARY KEY,
+  task_id TEXT NOT NULL REFERENCES browser_tasks(task_id),
+  session_id TEXT NOT NULL REFERENCES browser_interactive_sessions(session_id),
+  target_id TEXT NOT NULL,
+  proxy_principal_sha256 TEXT NOT NULL,
+  caller_common_name TEXT NOT NULL,
+  scope TEXT NOT NULL,
+  control_lease_id TEXT NOT NULL,
+  control_generation INTEGER NOT NULL,
+  profile_lease_id TEXT NOT NULL,
+  profile_generation INTEGER NOT NULL,
+  step_budget INTEGER NOT NULL,
+  steps_used INTEGER NOT NULL DEFAULT 0,
+  deadline_ms INTEGER NOT NULL,
+  created_at_ms INTEGER NOT NULL,
+  revoked_at_ms INTEGER,
+  UNIQUE(task_id, session_id, caller_common_name)
+);
+"""
+
+MIGRATION_34 = """
+ALTER TABLE owner_device_bindings ADD COLUMN attestation_challenge TEXT;
+"""
+
+MIGRATION_33 = """
+-- Signed certificate-chain validation is separate from historical extension metadata.
+ALTER TABLE owner_device_bindings ADD COLUMN attestation_chain_verified INTEGER NOT NULL DEFAULT 0;
+"""
 
 
 MIGRATION_17 = """
@@ -609,6 +729,101 @@ CREATE TABLE IF NOT EXISTS visual_acceptances (
 );
 CREATE INDEX IF NOT EXISTS idx_visual_acceptances_latest
   ON visual_acceptances(verified_at DESC);
+"""
+
+MIGRATION_31 = """
+-- A worker can report before the create-run response reaches the gateway. The inbox
+-- retains authenticated lifecycle reports until a real dispatch receipt binds the run.
+-- Workers never select or create that binding themselves.
+CREATE TABLE IF NOT EXISTS hermes_run_bindings (
+  hermes_run_id TEXT PRIMARY KEY,
+  mission_id TEXT NOT NULL UNIQUE,
+  bound_at_ms INTEGER NOT NULL,
+  started_at_ms INTEGER,
+  FOREIGN KEY (mission_id) REFERENCES missions(mission_id)
+);
+CREATE TABLE IF NOT EXISTS hermes_result_inbox (
+  result_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  hermes_run_id TEXT NOT NULL,
+  outcome TEXT NOT NULL,
+  summary TEXT NOT NULL,
+  received_at_ms INTEGER NOT NULL,
+  state TEXT NOT NULL DEFAULT 'RECEIVED',
+  lease_owner TEXT,
+  lease_until_ms INTEGER,
+  applied_at_ms INTEGER,
+  refusal_code TEXT,
+  UNIQUE (hermes_run_id, outcome)
+);
+CREATE INDEX IF NOT EXISTS idx_hermes_result_pending
+  ON hermes_result_inbox(state, lease_until_ms, result_id);
+"""
+
+MIGRATION_32 = """
+-- Recover a lost first pairing reply using the client-known token and a fresh proof
+-- from the already bound hardware key. No recoverable copy of the access token exists.
+CREATE TABLE IF NOT EXISTS pairing_attempts (
+  pairing_ticket_hash TEXT PRIMARY KEY,
+  device_id TEXT NOT NULL UNIQUE,
+  request_hash TEXT NOT NULL,
+  access_token_hash TEXT NOT NULL,
+  created_at_unix INTEGER NOT NULL,
+  FOREIGN KEY (device_id) REFERENCES devices(device_id)
+);
+"""
+
+MIGRATION_36 = """
+CREATE TABLE IF NOT EXISTS automation_runtime_bindings (
+  artifact_id TEXT PRIMARY KEY REFERENCES automation_artifacts(artifact_id),
+  ir_json TEXT NOT NULL, semantic_graph_json TEXT NOT NULL, runtime_graph_json TEXT,
+  semantic_digest TEXT NOT NULL, full_digest TEXT,
+  binding_state TEXT NOT NULL DEFAULT 'CANDIDATE', n8n_workflow_id TEXT,
+  readiness_errors_json TEXT NOT NULL, created_at_ms INTEGER NOT NULL, updated_at_ms INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS automation_worker_steps (
+  run_id TEXT NOT NULL REFERENCES automation_runs(run_id), step_id TEXT NOT NULL,
+  request_digest TEXT NOT NULL, state TEXT NOT NULL, result_json TEXT,
+  result_digest TEXT, created_at_ms INTEGER NOT NULL, completed_at_ms INTEGER,
+  PRIMARY KEY(run_id,step_id)
+);
+CREATE TABLE IF NOT EXISTS automation_worker_dedupe (
+  artifact_id TEXT NOT NULL, step_id TEXT NOT NULL, content_digest TEXT NOT NULL,
+  updated_at_ms INTEGER NOT NULL, PRIMARY KEY(artifact_id,step_id)
+);
+CREATE TABLE IF NOT EXISTS automation_worker_files (
+  file_id TEXT PRIMARY KEY, run_id TEXT NOT NULL REFERENCES automation_runs(run_id),
+  content BLOB, content_sha256 TEXT NOT NULL, size_bytes INTEGER NOT NULL,
+  filename TEXT NOT NULL, state TEXT NOT NULL, created_at_ms INTEGER NOT NULL, deleted_at_ms INTEGER
+);
+CREATE TABLE IF NOT EXISTS automation_worker_evidence (
+  evidence_id TEXT PRIMARY KEY, run_id TEXT NOT NULL REFERENCES automation_runs(run_id),
+  step_id TEXT NOT NULL, payload_json TEXT NOT NULL, content_digest TEXT NOT NULL,
+  snapshot_id TEXT NOT NULL, source_trust TEXT NOT NULL, created_at_ms INTEGER NOT NULL
+);
+"""
+
+MIGRATION_37 = """
+CREATE TABLE IF NOT EXISTS automation_standing_firings (
+  authority_id TEXT NOT NULL, trigger_key TEXT NOT NULL, state TEXT NOT NULL,
+  run_id TEXT, error_code TEXT, created_at_ms INTEGER NOT NULL, completed_at_ms INTEGER,
+  PRIMARY KEY(authority_id,trigger_key)
+);
+CREATE TABLE IF NOT EXISTS automation_n8n_resources (
+  resource_key TEXT PRIMARY KEY, credential_id TEXT NOT NULL, workflow_id TEXT,
+  graph_json TEXT, created_at_ms INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS automation_credential_bindings (
+  alias TEXT PRIMARY KEY, credential_class TEXT NOT NULL, admitted INTEGER NOT NULL,
+  n8n_credential_id TEXT, gateway_capability TEXT
+);
+"""
+
+MIGRATION_38 = """
+ALTER TABLE automation_runtime_bindings ADD COLUMN dependencies_json TEXT NOT NULL DEFAULT '{}';
+ALTER TABLE automation_worker_dedupe ADD COLUMN generation INTEGER NOT NULL DEFAULT 0;
+-- The earlier cache recorded observation before required delivery. It cannot be
+-- promoted into a delivered checkpoint. Immutable callbacks/events remain intact.
+DELETE FROM automation_worker_dedupe;
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -1943,6 +2158,17 @@ MIGRATIONS: dict[int, str] = {
     28: MIGRATION_28,
     29: MIGRATION_29,
     30: MIGRATION_30,
+    31: MIGRATION_31,
+    32: MIGRATION_32,
+    33: MIGRATION_33,
+    34: MIGRATION_34,
+    35: MIGRATION_35,
+    36: MIGRATION_36,
+    37: MIGRATION_37,
+    38: MIGRATION_38,
+    39: MIGRATION_39,
+    40: MIGRATION_40,
+    41: MIGRATION_41,
 }
 
 
@@ -1953,7 +2179,20 @@ class Store:
 
     @asynccontextmanager
     async def connection(self) -> AsyncIterator[aiosqlite.Connection]:
-        async with aiosqlite.connect(self.path) as db:
+        # Cancellation must not abandon the worker that is opening this connection.
+        # Shutdown used to close the event loop while that worker still held futures.
+        opening = asyncio.ensure_future(aiosqlite.connect(self.path))
+        try:
+            db = await asyncio.shield(opening)
+        except asyncio.CancelledError:
+            try:
+                db = await self._drain_connection_task(opening)
+            except Exception:
+                pass
+            else:
+                await self._drain_connection_task(asyncio.create_task(db.close()))
+            raise
+        try:
             db.row_factory = aiosqlite.Row
             await db.execute("PRAGMA foreign_keys = ON")
             # A fresh connection per query with journal_mode=delete and no busy timeout is
@@ -1964,6 +2203,23 @@ class Store:
             await db.execute("PRAGMA busy_timeout = 5000")
             await db.execute("PRAGMA synchronous = NORMAL")
             yield db
+        finally:
+            closing = asyncio.create_task(db.close())
+            try:
+                await asyncio.shield(closing)
+            except asyncio.CancelledError:
+                await self._drain_connection_task(closing)
+                raise
+
+    @staticmethod
+    async def _drain_connection_task(task: asyncio.Future):
+        """Finish private connection cleanup despite repeated caller cancellation."""
+        while not task.done():
+            try:
+                await asyncio.shield(task)
+            except asyncio.CancelledError:
+                continue
+        return task.result()
 
     @staticmethod
     async def _ensure_access_token_column(db: aiosqlite.Connection) -> None:

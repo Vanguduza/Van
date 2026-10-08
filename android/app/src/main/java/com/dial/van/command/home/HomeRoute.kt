@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -22,29 +23,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dial.van.VanApplication
 import com.dial.van.command.objectList
+import com.dial.van.command.owner.ownerTime
 import com.dial.van.design.AttentionSeverity
 import com.dial.van.design.LocalVanTokens
 import com.dial.van.design.ScreenState
 import com.dial.van.design.ScreenStateMerge
 import com.dial.van.design.StatusSemantics
-import com.dial.van.design.components.LiveBadge
-import com.dial.van.design.components.LiveBadgeState
 import com.dial.van.design.components.MetricTile
 import com.dial.van.design.components.SectionHeader
 import com.dial.van.design.components.StatusChip
 import com.dial.van.design.components.VanPanel
 import com.dial.van.design.components.VanPressable
 import com.dial.van.design.components.VanScreen
-import com.dial.van.mission.MissionRepository
+import com.dial.van.mission.MissionParsing
 import com.dial.van.mission.MissionSummary
 import com.dial.van.status.OwnerOverview
 import com.dial.van.status.OwnerOverviewSummary
+import com.dial.van.status.OwnerSourceRead
+import com.dial.van.status.readOwnerSource
 import com.dial.van.visual.VanEmbodiment
 import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.visual.VanPresence
 import com.dial.van.visual.VanPresentation
 import com.dial.van.visual.rememberVanEffectBudget
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
+import kotlinx.coroutines.supervisorScope
+import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Calendar
 
@@ -57,10 +62,12 @@ import java.util.Calendar
  * blank the rest of Home, and the panels each declare that on their own function.
  */
 private data class HomeData(
-    val overview: OwnerOverviewSummary,
-    val activeMissions: List<MissionSummary>,
-    val waitingMissions: List<MissionSummary>,
-    val remindersDueToday: List<JSONObject>,
+    val attention: OwnerSourceRead<JSONArray>,
+    val briefing: OwnerSourceRead<JSONObject>,
+    val active: OwnerSourceRead<List<MissionSummary>>,
+    val waiting: OwnerSourceRead<List<MissionSummary>>,
+    val reminders: OwnerSourceRead<List<JSONObject>>,
+    val trading: OwnerSourceRead<JSONObject>,
 )
 
 @Composable
@@ -69,45 +76,45 @@ fun HomeRoute(
     onOpenAttention: () -> Unit,
     onOpenWork: () -> Unit,
     onOpenTrading: () -> Unit,
+    onOpenMission: (String) -> Unit = { onOpenWork() },
+    onOpenReminders: () -> Unit = onOpenAttention,
 ) {
     val tokens = LocalVanTokens.current
     val scope = rememberCoroutineScope()
     var data by remember { mutableStateOf<HomeData?>(null) }
-    var loading by remember { mutableStateOf(true) }
-    var error by remember { mutableStateOf<String?>(null) }
+    var loading by remember { mutableStateOf(false) }
     val degradedMode by app.degradedModeStore.state.collectAsState()
 
     fun load() {
+        if (loading) return
+        loading = true
+        val previous = data
         scope.launch {
-            loading = true
-            runCatching {
-                val repository = MissionRepository(app.gatewayClient)
-                val snapshot = repository.home()
-                // P3-AND-003 — the two capabilities that existed end to end apart from the
-                // last ten lines: the gateway builds an attention queue and a briefing, and
-                // OwnerOverview is the one place their JSON becomes what a home screen says
-                // about them ("nothing is waiting" is never the same sentence as "VAN could
-                // not reach the gateway").
-                val attentionJson = app.gatewayClient.attention()
-                val briefingJson = runCatching { app.gatewayClient.briefing() }.getOrNull()
-                val overview = OwnerOverview.summarize(attentionJson, briefingJson)
-                val reminders = app.gatewayClient.reminders().objectList().filter { isDueToday(it.optLong("due_at_unix")) }
-                HomeData(
-                    overview = overview,
-                    activeMissions = snapshot.activeMissions,
-                    waitingMissions = snapshot.waitingMissions,
-                    remindersDueToday = reminders,
-                )
-            }.onSuccess { data = it; error = null; loading = false }
-                .onFailure { error = it.message ?: "VAN could not reach its own gateway."; loading = false }
+            try {
+                data = supervisorScope {
+                    val attention = async { readOwnerSource(previous?.attention ?: OwnerSourceRead()) { app.gatewayClient.attention() } }
+                    val briefing = async { readOwnerSource(previous?.briefing ?: OwnerSourceRead()) { app.gatewayClient.briefing() } }
+                    val active = async { readOwnerSource(previous?.active ?: OwnerSourceRead()) {
+                        MissionParsing.missionSummaries(app.gatewayClient.missions(activeOnly = true)).filter { it.isActive }
+                    } }
+                    val waiting = async { readOwnerSource(previous?.waiting ?: OwnerSourceRead()) {
+                        val needs = app.gatewayClient.needsYou()
+                        MissionParsing.missionSummaries(needs.optJSONArray("missions") ?: JSONArray())
+                    } }
+                    val reminders = async { readOwnerSource(previous?.reminders ?: OwnerSourceRead()) { app.gatewayClient.reminders().objectList() } }
+                    val trading = async { readOwnerSource(previous?.trading ?: OwnerSourceRead()) { JSONObject(app.gatewayClient.tradingAssessment()) } }
+                    HomeData(attention.await(), briefing.await(), active.await(), waiting.await(), reminders.await(), trading.await())
+                }
+            } finally {
+                loading = false
+            }
         }
     }
     LaunchedEffect(Unit) { load() }
 
     val state: ScreenState<HomeData> = ScreenStateMerge.merge(
         content = data,
-        loading = loading,
-        errorMessage = error,
+        loading = data == null,
         degradedSubsystems = degradedMode.subsystems.filter { it.status.name != "WORKING" }.map { it.id },
         emptySentence = "Nothing needs you right now.",
     )
@@ -118,11 +125,25 @@ fun HomeRoute(
             verticalArrangement = Arrangement.spacedBy(tokens.space.space3),
             contentPadding = PaddingValues(vertical = tokens.space.space3),
         ) {
+            item { OutlinedButton(enabled = !loading, onClick = ::load) { Text2(if (loading) "Refreshing…" else "Refresh", tokens.type.label, tokens.color.textSecondary) } }
             item { EmbodimentPanel(app) }
-            item { AttentionNowPanel(home.overview, onOpenAttention) }
-            item { ActiveWorkPanel(home.activeMissions, home.waitingMissions, onOpenWork) }
-            item { SignificantTradePanel(app, onOpenTrading) }
-            item { UpcomingPanel(home.remindersDueToday) }
+            item {
+                SourceObservation("Attention", home.attention)
+                SourceObservation("Briefing", home.briefing)
+                if (home.attention.hasObservation) {
+                    val overview = OwnerOverview.summarize(home.attention.value, home.briefing.value)
+                    AttentionNowPanel(if (home.attention.unavailable) overview.copy(headline = "Last confirmed: ${overview.headline}") else overview, onOpenAttention)
+                } else {
+                    SectionHeader("Attention now")
+                    VanPanel { Text2("Attention is unavailable; VAN cannot tell you what is waiting.", tokens.type.body, tokens.color.textSecondary) }
+                }
+            }
+            item { ActiveWorkPanel(home.active, home.waiting, onOpenWork, onOpenMission) }
+            item { SignificantTradePanel(home.trading, onOpenTrading) }
+            item {
+                SourceObservation("Reminders", home.reminders)
+                UpcomingPanel(home.reminders.value?.filter { isDueToday(it.optLong("due_at_unix")) }, home.reminders.unavailable, onOpenReminders)
+            }
             item { RecentChangePanel(app) }
         }
     }
@@ -189,54 +210,52 @@ private fun AttentionNowPanel(overview: OwnerOverviewSummary, onOpen: () -> Unit
 
 /** @DataSource("GET /v1/missions?active=true, GET /v1/needs-you") — RUNNING and WAITING. */
 @Composable
-private fun ActiveWorkPanel(active: List<MissionSummary>, waiting: List<MissionSummary>, onOpen: () -> Unit) {
+private fun ActiveWorkPanel(active: OwnerSourceRead<List<MissionSummary>>, waiting: OwnerSourceRead<List<MissionSummary>>, onOpen: () -> Unit, onOpenMission: (String) -> Unit) {
     val tokens = LocalVanTokens.current
     SectionHeader("Active work")
-    VanPressable(onClick = onOpen, modifier = Modifier.fillMaxWidth()) {
-        VanPanel(modifier = Modifier.fillMaxWidth()) {
-            if (active.isEmpty() && waiting.isEmpty()) {
+    SourceObservation("Running missions", active)
+    SourceObservation("Waiting missions", waiting)
+    OutlinedButton(onClick = onOpen) { Text2("All work", tokens.type.label, tokens.color.textSecondary) }
+    VanPanel(modifier = Modifier.fillMaxWidth()) {
+            if (active.value?.isEmpty() == true && waiting.value?.isEmpty() == true && !active.unavailable && !waiting.unavailable) {
                 Text2("Nothing is running.", tokens.type.body, tokens.color.textSecondary)
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                    active.take(3).forEach { mission ->
-                        Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                            StatusChip(label = "RUNNING", role = StatusSemantics.ROLE_ENGAGED)
-                            Text2(mission.title, tokens.type.body, tokens.color.textPrimary)
+                    active.value?.take(3)?.forEach { mission ->
+                        VanPressable(onClick = { onOpenMission(mission.missionId) }, modifier = Modifier.fillMaxWidth()) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                                StatusChip(label = "RUNNING", role = StatusSemantics.ROLE_ENGAGED)
+                                Text2(mission.title, tokens.type.body, tokens.color.textPrimary)
+                            }
                         }
                     }
-                    waiting.take(3).forEach { mission ->
-                        Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                            StatusChip(label = "WAITING", role = StatusSemantics.ROLE_HYPOTHESIS)
-                            Text2(mission.title, tokens.type.body, tokens.color.textPrimary)
+                    waiting.value?.take(3)?.forEach { mission ->
+                        VanPressable(onClick = { onOpenMission(mission.missionId) }, modifier = Modifier.fillMaxWidth()) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                                StatusChip(label = "WAITING", role = StatusSemantics.ROLE_HYPOTHESIS)
+                                Text2(mission.title, tokens.type.body, tokens.color.textPrimary)
+                            }
                         }
                     }
                 }
             }
         }
-    }
 }
 
 /**
- * @DataSource("GET /v1/trading/assessment") — a `MetricTile` row on 200, `LiveBadge`
- * unavailable otherwise. Independent of Home's aggregate load: this route does not exist on
- * every backend yet, and that must never blank the rest of the dashboard.
+ * @DataSource("GET /v1/trading/assessment") — independent observation and refresh time.
+ * An unavailable trading source leaves the other dashboard sources visible.
  */
 @Composable
-private fun SignificantTradePanel(app: VanApplication, onOpen: () -> Unit) {
+private fun SignificantTradePanel(assessment: OwnerSourceRead<JSONObject>, onOpen: () -> Unit) {
     val tokens = LocalVanTokens.current
-    var assessment by remember { mutableStateOf<JSONObject?>(null) }
-    var unavailable by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        runCatching { JSONObject(app.gatewayClient.tradingAssessment()) }
-            .onSuccess { assessment = it }
-            .onFailure { unavailable = true }
-    }
     SectionHeader("Significant trade state")
+    SourceObservation("Trading", assessment)
     VanPressable(onClick = onOpen, modifier = Modifier.fillMaxWidth()) {
         VanPanel(modifier = Modifier.fillMaxWidth()) {
             when {
-                assessment != null -> {
-                    val a = assessment!!
+                assessment.value != null -> {
+                    val a = assessment.value
                     MetricTile(
                         label = a.optString("headline", "Portfolio"),
                         value = a.optString("value", "—"),
@@ -244,8 +263,7 @@ private fun SignificantTradePanel(app: VanApplication, onOpen: () -> Unit) {
                         deltaRole = if (a.has("role")) a.optString("role") else null,
                     )
                 }
-                unavailable -> LiveBadge(state = LiveBadgeState.Offline)
-                else -> Text2("Checking…", tokens.type.body, tokens.color.textSecondary)
+                else -> Text2("Trading data is unavailable.", tokens.type.body, tokens.color.textSecondary)
             }
         }
     }
@@ -253,12 +271,15 @@ private fun SignificantTradePanel(app: VanApplication, onOpen: () -> Unit) {
 
 /** @DataSource("GET /v1/reminders") — filtered to those due before local midnight tonight. */
 @Composable
-private fun UpcomingPanel(dueToday: List<JSONObject>) {
+private fun UpcomingPanel(dueToday: List<JSONObject>?, unavailable: Boolean, onOpen: () -> Unit) {
     val tokens = LocalVanTokens.current
     SectionHeader("Upcoming")
+    VanPressable(onClick = onOpen, modifier = Modifier.fillMaxWidth()) {
     VanPanel {
-        if (dueToday.isEmpty()) {
-            Text2("Nothing due today.", tokens.type.body, tokens.color.textSecondary)
+        if (dueToday == null) {
+            Text2("Reminders are unavailable.", tokens.type.body, tokens.color.textSecondary)
+        } else if (dueToday.isEmpty()) {
+            Text2(if (unavailable) "Last confirmed: nothing due today." else "Nothing due today.", tokens.type.body, tokens.color.textSecondary)
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
                 dueToday.take(5).forEach { reminder ->
@@ -267,6 +288,16 @@ private fun UpcomingPanel(dueToday: List<JSONObject>) {
             }
         }
     }
+    }
+}
+
+@Composable
+private fun <T> SourceObservation(label: String, source: OwnerSourceRead<T>) {
+    val tokens = LocalVanTokens.current
+    if (source.unavailable) {
+        Text2("$label could not refresh." + if (source.hasObservation) " Showing the last confirmed data." else " No confirmed data is available.", tokens.type.label, tokens.color.textSecondary)
+    }
+    source.observedAtMs?.let { Text2("$label last checked ${ownerTime(it)}", tokens.type.label, tokens.color.textSecondary) }
 }
 
 /** @DataSource("device event store, com.dial.van.events.VanEventStreamStore") — last 5. */

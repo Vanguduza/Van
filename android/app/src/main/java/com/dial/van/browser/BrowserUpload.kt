@@ -51,6 +51,8 @@ enum class UploadRefusal {
     /** The chooser belongs to a session that is no longer the one on screen. */
     SESSION_STALE,
     OWNER_CANCELLED,
+    /** No qualified host file chooser / binary upload route exists for this build. */
+    TRANSPORT_UNAVAILABLE,
 }
 
 /**
@@ -82,6 +84,9 @@ data class FileChooserRequest(
     val targetId: String,
     val acceptTypes: List<String>,
     val multiple: Boolean,
+    val chooserId: String = "",
+    val mediaEpoch: String = "",
+    val expiresAtMs: Long = 0,
 )
 
 object BrowserUploadPolicy {

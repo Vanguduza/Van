@@ -111,7 +111,7 @@ async def test_status_without_ledger_is_degraded_not_fatal(client):
     ac, app = client
     r = await ac.get("/v1/trading/status")
     assert r.status_code == 200 and r.json()["ledger_available"] is False and "TRADING_LEDGER_UNAVAILABLE" in r.json()["degraded"]
-    assert (await ac.get("/v1/trading/tickets")).json() == {"tickets": []}
+    assert (await ac.get("/v1/trading/tickets")).json() == {"ledger_available": False, "tickets": []}
     r = await ac.post(
         "/v1/trading/halt",
         json={"owner_signature_ref": _halt_token(), "reason": "x"},

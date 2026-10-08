@@ -194,7 +194,9 @@ async def test_google_fake_transport_requires_authorized_execution_and_readback(
     )
     assert bypass.status_code == 422
 
-    parameters = {"draft_id": "d1"}
+    preview = await _app.state.google.gmail_draft_preview("d1")
+    parameters = {"draft_id": "d1", "draft_content_sha256": preview["draft_content_sha256"]}
+    _app.state.google.transport.calls.clear()
     execution = await _app.state.owner_runtime.actions.begin(
         execution_id="exec-google-send",
         command_id="cmd-google-send",
@@ -217,7 +219,7 @@ async def test_google_fake_transport_requires_authorized_execution_and_readback(
     assert ok.status_code == 200, ok.text
     assert ok.json()["verification"]["status"] == "VERIFIED_SUCCESS"
     calls = [name for name, _args in _app.state.google.transport.calls]
-    assert calls == ["gmail_send", "gmail_message_get"]
+    assert calls == ["gmail_draft_get", "gmail_message_send", "gmail_message_get"]
 
     # A4 without owner approval produces an execution record, but not one the provider
     # executor may use. This separates "has an execution id" from "is authorized".
@@ -229,7 +231,7 @@ async def test_google_fake_transport_requires_authorized_execution_and_readback(
         principal_type=PrincipalType.OWNER_DEVICE,
         requested_by="device:pytest-client",
         idempotency_key="turn-google-send-blocked:google.gmail.send",
-        parameters={"draft_id": "d2"},
+        parameters={"draft_id": "d2", "draft_content_sha256": "0" * 64},
         snapshot_id=None,
         owner_approved=False,
     )
@@ -238,7 +240,7 @@ async def test_google_fake_transport_requires_authorized_execution_and_readback(
     refused = await ac.post(
         "/v1/google/actions/execute",
         headers=headers,
-        json={"execution_id": blocked.execution_id, "parameters": {"draft_id": "d2"}},
+        json={"execution_id": blocked.execution_id, "parameters": {"draft_id": "d2", "draft_content_sha256": "0" * 64}},
     )
     assert refused.status_code == 409
     assert refused.json()["detail"] == "execution_not_authorized"

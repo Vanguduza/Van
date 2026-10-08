@@ -102,6 +102,105 @@ async def test_owner_state_is_never_pruned_however_old_it_is(tmp_path):
 
 
 @pytest.mark.asyncio
+async def test_recovery_authority_survives_age_pruning_and_tracks_its_parent(tmp_path):
+    """A timer must not erase delayed lifecycle reports or earned pairing recovery."""
+    store = await make_store(tmp_path)
+    now_ms = int(time.time() * 1000)
+    ancient = now_ms - 900 * DAY_MS
+    await store.execute(
+        "INSERT INTO missions(mission_id, owner_principal_id, origin, origin_channel, "
+        "title, goal, created_at_ms, updated_at_ms) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        ("m-recovery", "owner", "OWNER_VOICE", "VOICE", "t", "g", ancient, ancient),
+    )
+    await store.execute(
+        "INSERT INTO devices(device_id, public_key_pem, enrolled_at_unix) VALUES (?, ?, ?)",
+        ("d-recovery", "synthetic test key", ancient // 1000),
+    )
+    await store.execute(
+        "INSERT INTO hermes_run_bindings(hermes_run_id, mission_id, bound_at_ms) VALUES (?, ?, ?)",
+        ("run-recovery", "m-recovery", ancient),
+    )
+    await store.execute(
+        "INSERT INTO hermes_result_inbox(hermes_run_id, outcome, summary, received_at_ms) "
+        "VALUES (?, ?, ?, ?)", ("run-before-bind", "COMPLETED", "delayed report", ancient),
+    )
+    await store.execute(
+        "INSERT INTO pairing_attempts(pairing_ticket_hash, device_id, request_hash, "
+        "access_token_hash, created_at_unix) VALUES (?, ?, ?, ?, ?)",
+        ("ticket-hash", "d-recovery", "body-hash", "token-hash", ancient // 1000),
+    )
+    await RetentionService(store).prune(now_ms=now_ms)
+    assert len(await store.fetchall("SELECT * FROM hermes_run_bindings")) == 1
+    assert len(await store.fetchall("SELECT * FROM hermes_result_inbox")) == 1
+    assert len(await store.fetchall("SELECT * FROM pairing_attempts")) == 1
+
+    # Restore/owner deletion can leave old-schema orphans; the existing child sweep
+    # removes correlation records only when their authoritative parent is absent.
+    async with store.connection() as db:
+        await db.execute("PRAGMA foreign_keys = OFF")
+        await db.execute("DELETE FROM missions WHERE mission_id = 'm-recovery'")
+        await db.execute("DELETE FROM devices WHERE device_id = 'd-recovery'")
+        await db.commit()
+    await RetentionService(store).prune(now_ms=now_ms)
+    assert await store.fetchall("SELECT * FROM hermes_run_bindings") == []
+    assert await store.fetchall("SELECT * FROM pairing_attempts") == []
+    assert len(await store.fetchall("SELECT * FROM hermes_result_inbox")) == 1
+
+
+@pytest.mark.asyncio
+async def test_session_retirement_preserves_live_admission_then_removes_grant_producer_and_transfer(tmp_path):
+    from van_gateway.browser.control_lease import ControlLeaseService
+    from van_gateway.browser.interactive_models import Viewport
+    from van_gateway.browser.interactive_service import InteractiveSessionService
+    from van_gateway.browser.producer_service import BrowserProducerService, credential_principal
+    from van_gateway.browser.service import BrowserSessionBroker
+    from van_gateway.browser.stream_grants import StreamGrantService, StreamGrantSigner, generate_signing_key
+
+    store = await make_store(tmp_path)
+    now = int(time.time() * 1000)
+    old = now - 91 * DAY_MS
+    await store.execute("INSERT INTO devices(device_id,public_key_pem,enrolled_at_unix) VALUES('phone','test-key',?)", (old // 1000,))
+    broker = BrowserSessionBroker(store)
+    await broker.register_profile(profile_alias="public_research", now_ms=old)
+    sessions = InteractiveSessionService(store, broker, ControlLeaseService(store))
+    session = await sessions.create(owner_device_id="phone", profile_alias="public_research",
+        viewport=Viewport(width=1080, height=1920, device_scale_factor=1), now_ms=old)
+    grants = StreamGrantService(store, StreamGrantSigner(generate_signing_key("retention-test")))
+    token, _ = await grants.mint(session_id=session.session_id, device_id="phone", profile_alias="public_research",
+        scope=["browser.view", "webrtc.signal", "browser.owner_input"], max_width=1080, max_height=1920,
+        max_fps=60, now_ms=old)
+    producer = BrowserProducerService(store=store, sessions=sessions, grants=grants)
+    await producer.redeem(stream_grant=token, producer_session_id="producer_retention_0123456789",
+                          principal=credential_principal("retention-machine-token"), now_ms=old)
+    await store.execute("""INSERT INTO browser_owner_transfer_grants(
+        transfer_id,token_sha256,producer_session_id,session_id,owner_device_id,operation,resource_id,target_id,
+        profile_lease_id,profile_generation,control_lease_id,control_generation,viewport_revision,metadata_json,
+        created_at_ms,expires_at_ms) VALUES('transfer','hash','producer_retention_0123456789',?,'phone','upload','chooser','target',
+        'profile-lease',1,'control-lease',1,1,'{}',?,?)""", (session.session_id, old, old + 60_000))
+    # A renewed live session retains its canonical producer mint row even though
+    # the original short redemption window and age horizon have elapsed.
+    await store.execute("UPDATE browser_interactive_sessions SET expires_at_ms=? WHERE session_id=?", (now + 60_000, session.session_id))
+    await RetentionService(store).prune(now_ms=now)
+    assert len(await store.fetchall("SELECT * FROM browser_stream_grants")) == 1
+    assert len(await store.fetchall("SELECT * FROM browser_stream_producers")) == 1
+    assert len(await store.fetchall("SELECT * FROM browser_owner_transfer_grants")) == 1
+    await store.execute("UPDATE browser_interactive_sessions SET expires_at_ms=? WHERE session_id=?", (now - 1, session.session_id))
+    # Its independently retained event evidence outlives the live episode. Do
+    # not silently erase that evidence or fail the sweep on its foreign key.
+    await RetentionService(store).prune(now_ms=now)
+    assert len(await store.fetchall("SELECT * FROM browser_stream_producers")) == 1
+    await store.execute("UPDATE browser_session_events SET occurred_at_ms=?", (now - 400 * DAY_MS,))
+    await RetentionService(store).prune(now_ms=now)
+    results = {row.table: row for row in await RetentionService(store).prune(now_ms=now)}
+    assert results["browser_stream_grants"].deleted == 1
+    assert results["browser_stream_producers"].deleted == 1
+    assert results["browser_owner_transfer_grants"].deleted == 1
+    assert await store.fetchall("SELECT * FROM browser_stream_producers") == []
+    assert await store.fetchall("SELECT * FROM browser_owner_transfer_grants") == []
+    assert await store.fetchone("SELECT session_id FROM browser_interactive_sessions") is None
+
+
+@pytest.mark.asyncio
 async def test_an_orphaned_child_row_is_swept(tmp_path):
     """The foreign key stops an orphan being *created*, which is why the sweep is
     a floor rather than the mechanism. It still has to hold, because a database

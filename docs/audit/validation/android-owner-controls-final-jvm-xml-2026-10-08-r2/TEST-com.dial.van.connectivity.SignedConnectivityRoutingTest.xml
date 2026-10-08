@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.connectivity.SignedConnectivityRoutingTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:38" hostname="052fefa249ff" time="0.013">
+  <properties/>
+  <testcase name="a matching pin never bypasses CA trust and a trusted wrong pin fails closed()" classname="com.dial.van.connectivity.SignedConnectivityRoutingTest" time="0.009"/>
+  <testcase name="browser grants retain scoped relay credentials and use signed STUN configuration()" classname="com.dial.van.connectivity.SignedConnectivityRoutingTest" time="0.002"/>
+  <testcase name="malformed or credential carrying endpoints and unsigned pin formats are refused()" classname="com.dial.van.connectivity.SignedConnectivityRoutingTest" time="0.0"/>
+  <testcase name="signed endpoints automatically include the distinct socket and stream authorities()" classname="com.dial.van.connectivity.SignedConnectivityRoutingTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

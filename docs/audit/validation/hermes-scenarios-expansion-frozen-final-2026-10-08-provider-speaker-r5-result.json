@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "suite": "hermes-scenarios",
+  "selection": [
+    "tests/hermes",
+    "hermes/policy/tests",
+    "tests/scenarios"
+  ],
+  "command": [
+    "/workspace/.onboarding/van-venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/hermes",
+    "hermes/policy/tests",
+    "tests/scenarios",
+    "--junitxml=/workspace/van-audit/hermes-scenarios-expansion-frozen-final-2026-10-08-provider-speaker-r5.xml"
+  ],
+  "cwd": "/workspace/Van",
+  "started_at_utc": "2026-10-08T06:36:53.983501+00:00",
+  "finished_at_utc": "2026-10-08T06:37:16.381619+00:00",
+  "exit_code": 0,
+  "source_unchanged_during_test": true,
+  "changed_inputs": [],
+  "input_files": 1418,
+  "inputs_sha256": "2178d16181c8249428d05ea280e7f4a121382eb6a79749ffd46c83d62f7946e3",
+  "production_manifest_sha256": "7a2ea2642fb6ed0467e52c93344d4706c67cf98e211b9ebf5a7d01ea2e322c88",
+  "physical_tests_executed": 0,
+  "production_deployed": false
+}

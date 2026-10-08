@@ -53,15 +53,26 @@ gradle -p android assembleDebug
 
 ### Gateway connection
 
-Every build, debug and release, connects to the address in `van-gateway.properties` and pins
-the VAN device CA committed beside it. That is the direct mutual-TLS link to the gateway on
-the Hermes host (backend README, "Direct phone link"). A phone installed from an older build
-moves to that address on upgrade and enrols its client certificate on first use.
+Production VAN runs on `van-trading-core`; Hermes remains private on `dial-control`.
+The phone reaches VAN through a separately admitted VAN-only TLS ingress on `oracle-admin`,
+with end-to-end pinned TLS to VAN. This is a distinct capability from the existing limited
+DDS product proxy and must be qualified through a governed deployment recipe.
 
-To build against a different gateway, pass `VAN_GATEWAY_BASE_URL`, and with it
-`VAN_GATEWAY_CA_PEM_B64` if that gateway uses a private CA, as Gradle properties or
-environment variables. An override replaces both: the committed CA is never pinned on
-another address.
+Release builds require `VAN_DEPLOYMENT_PROFILE_FILE`, supplied as a Gradle property or
+environment variable, pointing at `android-owner-core.properties` emitted by the owner-core
+deployment compiler. The file carries the exact host roles, public HTTPS root, current
+pinned CA and SHA256 fingerprint, profile ID, and ingress capability receipt ID. Build
+validation checks this declaration; the deployment runner must independently validate
+the receipt's immutable scope. A generated profile is not evidence of live deployment.
+
+The historical address and CA in `van-gateway.properties` remain debug fixtures. Release
+tasks refuse this fallback, private phone endpoints, stale profiles, and a CA/fingerprint
+mismatch. Debug-only `VAN_GATEWAY_BASE_URL` and matching `VAN_GATEWAY_CA_PEM_B64` overrides
+still select both values together. Individual overrides cannot alter a selected profile.
+
+The owner-signed APK also requires stable release signing and compiled
+`VAN_CONNECTIVITY_TRUSTED_KEYS`. The authorized installer supplies the signed connectivity
+and binding payload automatically; the app has no URL, token, or pairing settings.
 
 ## Gradle wrapper
 

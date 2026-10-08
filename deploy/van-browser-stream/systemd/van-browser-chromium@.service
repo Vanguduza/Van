@@ -1,0 +1,33 @@
+[Unit]
+Description=Isolated VAN Chromium profile %i (loopback CDP)
+After=network-online.target van-browser-transfer-stage@%i.service van-browser-cdp-isolation.service
+Requires=van-browser-transfer-stage@%i.service van-browser-cdp-isolation.service
+RequiresMountsFor=/var/lib/van-browser-profiles
+
+[Service]
+Type=simple
+User=van-browser-%i
+Group=van-browser-%i
+SupplementaryGroups=van-transfer-%i
+EnvironmentFile=/etc/van-browser-stream/profiles/%i/chromium.env
+ExecStart=@CHROMIUM_EXECUTABLE@ --headless=new --remote-debugging-address=127.0.0.1 --remote-debugging-port=${VAN_BROWSER_CDP_PORT} --remote-allow-origins=http://127.0.0.1:${VAN_BROWSER_CDP_PORT} --user-data-dir=${VAN_BROWSER_PROFILE_MOUNT}/${VAN_BROWSER_PROFILE_ALIAS} --window-size=${VAN_BROWSER_WIDTH},${VAN_BROWSER_HEIGHT} --force-device-scale-factor=1 --no-first-run --disable-features=Translate,MediaRouter --autoplay-policy=no-user-gesture-required
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+ProtectProc=invisible
+ProcSubset=pid
+ReadWritePaths=/var/lib/van-browser-profiles/%i /var/lib/van-browser-transfers/%i
+InaccessiblePaths=-/etc/van-browser-stream/profiles -/run/docker.sock
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

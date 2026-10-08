@@ -7,6 +7,63 @@ from van_gateway.models import ActionClass, PrincipalType
 
 BUILTIN_ACTIONS: tuple[ActionDefinition, ...] = (
     ActionDefinition(
+        action_id="browser.file.provider.submit", action_class=ActionClass.A4,
+        mutates_state=True, allowed_principals={PrincipalType.OWNER_DEVICE},
+        verifier_type=VerifierType.STATE_PREDICATE, no_stale_replay=True,
+        max_age_seconds=30, parameter_schema={"required": ["session_id", "request_id", "request_sha256"],
+            "properties": {"session_id":"string", "request_id":"string", "request_sha256":"string"}},
+    ),
+    ActionDefinition(
+        action_id="browser.task.prepare", action_class=ActionClass.A3,
+        mutates_state=True, allowed_principals={PrincipalType.OWNER_DEVICE},
+        verifier_type=VerifierType.STATE_PREDICATE, no_stale_replay=True,
+        max_age_seconds=30, parameter_schema={"required":["session_id","target_domain","goal"],
+            "properties":{"session_id":"string","target_domain":"string","goal":"string"}},
+    ),
+    ActionDefinition(
+        action_id="owner.permission.grant", action_class=ActionClass.A4,
+        mutates_state=True, allowed_principals={PrincipalType.OWNER_DEVICE},
+        verifier_type=VerifierType.STATE_PREDICATE, no_stale_replay=True,
+        max_age_seconds=30, parameter_schema={"required": ["permission", "action_id", "parameters", "expires_at_ms", "max_uses"],
+            "properties": {"permission":"string", "action_id":"string", "parameters":"object", "expires_at_ms":"integer", "max_uses":"integer"}},
+    ),
+    ActionDefinition(
+        action_id="browser.plan.execute", action_class=ActionClass.A4,
+        mutates_state=True, allowed_principals={PrincipalType.OWNER_DEVICE},
+        verifier_type=VerifierType.STATE_PREDICATE, no_stale_replay=True,
+        max_age_seconds=30, parameter_schema={"required": ["session_id", "plan_id", "plan_sha256"],
+            "properties": {"session_id":"string", "plan_id":"string", "plan_sha256":"string"}},
+    ),
+    ActionDefinition(
+        action_id="owner.autonomy.ceiling.set",
+        action_class=ActionClass.A4,
+        mutates_state=True,
+        allowed_principals={PrincipalType.OWNER_DEVICE},
+        verifier_type=VerifierType.STATE_PREDICATE,
+        no_stale_replay=True,
+        max_age_seconds=30,
+        parameter_schema={"required": ["domain", "level"], "properties": {"domain": "string", "level": "string"}},
+    ),
+    ActionDefinition(
+        action_id="memory.erase",
+        action_class=ActionClass.A4,
+        mutates_state=True,
+        allowed_principals={PrincipalType.OWNER_DEVICE},
+        verifier_type=VerifierType.STATE_PREDICATE,
+        no_stale_replay=True,
+        max_age_seconds=30,
+        parameter_schema={"required": ["store", "stores"], "properties": {"store": "string", "stores": "array", "record_id": "string", "expected_sha256": "string"}},
+    ),
+    ActionDefinition(
+        action_id="automation.standing_intent.disable",
+        action_class=ActionClass.A3,
+        mutates_state=True,
+        allowed_principals={PrincipalType.OWNER_DEVICE},
+        verifier_type=VerifierType.STATE_PREDICATE,
+        max_age_seconds=300,
+        parameter_schema={"required": ["intent_id"], "properties": {"intent_id": "string"}},
+    ),
+    ActionDefinition(
         action_id="owner.context.read",
         action_class=ActionClass.A1,
         mutates_state=False,
@@ -42,8 +99,8 @@ BUILTIN_ACTIONS: tuple[ActionDefinition, ...] = (
         no_stale_replay=True,
         max_age_seconds=30,
         parameter_schema={
-            "required": ["draft_id"],
-            "properties": {"draft_id": "string"},
+            "required": ["draft_id", "draft_content_sha256"],
+            "properties": {"draft_id": "string", "draft_content_sha256": "string"},
         },
     ),
     ActionDefinition(
@@ -123,6 +180,17 @@ BUILTIN_ACTIONS: tuple[ActionDefinition, ...] = (
         verifier_type=VerifierType.DOMAIN_ATTESTATION,
         no_stale_replay=True,
         max_age_seconds=5,
+    ),
+    ActionDefinition(
+        action_id="trading.ticket.confirm",
+        action_class=ActionClass.A4,
+        mutates_state=True,
+        allowed_principals={PrincipalType.OWNER_DEVICE},
+        verifier_type=VerifierType.DOMAIN_ATTESTATION,
+        no_stale_replay=True,
+        max_age_seconds=30,
+        parameter_schema={"required": ["ticket_id", "fill_price", "filled_qty", "contract_note_ref"],
+            "properties": {"ticket_id": "string", "fill_price": "string", "filled_qty": "string", "contract_note_ref": "string"}},
     ),
     # GAP-F-001 — the owner saying "remember that my accountant is Thandi" now has a typed
     # action and a gateway-side executor (command/local_executors.py) rather than a route

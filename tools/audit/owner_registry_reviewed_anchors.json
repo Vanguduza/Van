@@ -1,0 +1,1166 @@
+{
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:517": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/VanApplication.kt:698": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ health\\ =\\ gatewayClient\\.health\\(\\)$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/VanApplication.kt:103": {
+    "pattern": "^class VanApplication\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:66": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ h\\ =\\ ConnectedReadback\\.source\\ \\{\\ app\\.gatewayClient\\.health\\(\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:521": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/home/HomeRoute.kt:92": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ briefing\\ =\\ async\\ \\{\\ readOwnerSource\\(previous\\?\\.briefing\\ \\?:\\ OwnerSourceRead\\(\\)\\)\\ \\{\\ app\\.gatewayClient\\.briefing\\(\\)\\ \\}\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1072": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/projects/ProjectDetailRoute.kt:77": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ missions\\ =\\ readProjectSource\\ \\{\\ MissionParsing\\.missionSummaries\\(app\\.gatewayClient\\.missions\\(\\)\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/projects/ProjectsRoute.kt:69": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ missions\\ =\\ readProjectSource\\ \\{\\ MissionParsing\\.missionSummaries\\(app\\.gatewayClient\\.missions\\(\\)\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:709": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/attention/AttentionRoute.kt:85": {
+    "pattern": "^fun AttentionRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/home/HomeRoute.kt:91": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ attention\\ =\\ async\\ \\{\\ readOwnerSource\\(previous\\?\\.attention\\ \\?:\\ OwnerSourceRead\\(\\)\\)\\ \\{\\ app\\.gatewayClient\\.attention\\(\\)\\ \\}\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/projects/ProjectDetailRoute.kt:78": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ attention\\ =\\ readProjectSource\\ \\{\\ app\\.gatewayClient\\.attention\\(\\)\\.objectList\\(\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/projects/ProjectsRoute.kt:70": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ attention\\ =\\ readProjectSource\\ \\{\\ app\\.gatewayClient\\.attention\\(\\)\\.objectList\\(\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/home/HomeRoute.kt:230": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ trading\\ =\\ async\\ \\{\\ readOwnerSource\\(previous\\?\\.trading\\ \\?:\\ OwnerSourceRead\\(\\)\\)\\ \\{\\ JSONObject\\(app\\.gatewayClient\\.tradingAssessment\\(\\)\\)\\ \\}\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:36": {
+    "pattern": "^\\ \\ \\ \\ suspend\\ fun\\ assessment\\(\\):\\ Loaded<AssessmentReadModel>\\ =\\ load\\(AssessmentReadModel::parse\\)\\ \\{\\ client\\.tradingAssessment\\(\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:12": {
+    "pattern": "^class TradingRepository\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/control/VanCommandController.kt:243": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ response\\ =\\ gateway\\.dispatchCommand\\($",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/control/VanCommandController.kt:98": {
+    "pattern": "^class VanCommandController\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/control/VanCommandController.kt:302": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ response\\ =\\ gateway\\.dispatchCommand\\($",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/control/VanCommandController.kt:437": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ response\\ =\\ try\\ \\{\\ gateway\\.commandStatus\\(commandId\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:72": {
+    "pattern": "^fun WorkRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:191": {
+    "pattern": "^fun WorkRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1077": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1081": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1085": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1095": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:63": {
+    "pattern": "^fun WorkRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:269": {
+    "pattern": "^class CommandCentreActivity\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:178": {
+    "pattern": "^class CommandCentreActivity\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1104": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1112": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:57": {
+    "pattern": "^fun WorkRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:714": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/attention/AttentionRoute.kt:223": {
+    "pattern": "^fun AttentionRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:719": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/attention/AttentionRoute.kt:233": {
+    "pattern": "^fun AttentionRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/attention/AttentionRoute.kt:68": {
+    "pattern": "^fun AttentionRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1090": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:690": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/attention/AttentionRoute.kt:86": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ decisions\\ =\\ app\\.gatewayClient\\.decisions\\(\\)\\.objectList\\(\\),$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/projects/ProjectDetailRoute.kt:79": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ decisions\\ =\\ readProjectSource\\ \\{\\ app\\.gatewayClient\\.decisions\\(\\)\\.objectList\\(\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:694": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/attention/AttentionRoute.kt:253": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ app\\.gatewayClient\\.resolveDecision\\(decisionId,\\ true\\)$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/attention/AttentionRoute.kt:260": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ app\\.gatewayClient\\.resolveDecision\\(decisionId,\\ false\\)$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1169": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt:88": {
+    "pattern": "^fun PermissionsRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:225": {
+    "pattern": "^fun WorkRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:229": {
+    "pattern": "^fun WorkRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/control/VanCommandController.kt:264": {
+    "pattern": "^class VanCommandController\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1302": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1293": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/home/HomeRoute.kt:94": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ reminders\\ =\\ async\\ \\{\\ readOwnerSource\\(previous\\?\\.reminders\\ \\?:\\ OwnerSourceRead\\(\\)\\)\\ \\{\\ app\\.gatewayClient\\.reminders\\(\\)\\.objectList\\(\\)\\ \\}\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1311": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1315": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1258": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1279": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1218": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1219": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1232": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/projects/ProjectDetailRoute.kt:80": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ facts\\ =\\ readProjectSource\\ \\{\\ MemoryReadModel\\.parseExportFacts\\(app\\.gatewayClient\\.contextExport\\(\\)\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/projects/ProjectsRoute.kt:71": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ facts\\ =\\ readProjectSource\\ \\{\\ MemoryReadModel\\.parseExportFacts\\(app\\.gatewayClient\\.contextExport\\(\\)\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1222": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/control/VanCommandController.kt:390": {
+    "pattern": "^class VanCommandController\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1242": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1237": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1123": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/memory/UnderstandingRoutes.kt:41": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ OwnerDataSection\\(\"Collaboration\\ preferences\",\\ load\\ =\\ \\{\\ app\\.gatewayClient\\.understanding\\(\\)\\ \\}\\)\\ \\{\\ body,\\ actions\\ \\->$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/memory/UnderstandingRoutes.kt:128": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ OwnerDataSection\\(\"How\\ VAN\\ has\\ adapted\",\\ load\\ =\\ \\{\\ app\\.gatewayClient\\.understanding\\(\\)\\ \\}\\)\\ \\{\\ body,\\ actions\\ \\->$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/memory/UnderstandingRoutes.kt:148": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ readback\\ =\\ app\\.gatewayClient\\.understanding\\(\\)\\.optJSONArray\\(\"recent_adaptation\"\\)\\.ownerRows\\(\\)$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1127": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/memory/UnderstandingRoutes.kt:69": {
+    "pattern": "^fun UnderstandingRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1132": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/memory/UnderstandingRoutes.kt:114": {
+    "pattern": "^fun UnderstandingRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1140": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/memory/UnderstandingRoutes.kt:73": {
+    "pattern": "^fun UnderstandingRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/memory/UnderstandingRoutes.kt:36": {
+    "pattern": "^fun UnderstandingRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1150": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/memory/UnderstandingRoutes.kt:146": {
+    "pattern": "^fun UnderstandingRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1146": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/memory/UnderstandingRoutes.kt:163": {
+    "pattern": "^fun UnderstandingRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/memory/UnderstandingRoutes.kt:123": {
+    "pattern": "^fun UnderstandingRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1165": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1166": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1167": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1168": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1185": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1190": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:701": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/projects/ProjectsRoute.kt:68": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ ids\\ =\\ app\\.gatewayClient\\.projects\\(\\)\\.objectListOrStrings\\(\\)$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:705": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/projects/ProjectDetailRoute.kt:75": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ truth\\ =\\ readProjectSource\\ \\{\\ ProjectTruthParsing\\.parse\\(projectId,\\ app\\.gatewayClient\\.projectTruth\\(projectId\\)\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/projects/ProjectsRoute.kt:74": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ truth\\ =\\ readProjectSource\\ \\{\\ ProjectTruthParsing\\.parse\\(id,\\ app\\.gatewayClient\\.projectTruth\\(id\\)\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1192": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1196": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1155": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt:36": {
+    "pattern": "^fun PermissionsRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1159": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt:59": {
+    "pattern": "^fun PermissionsRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1163": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt:65": {
+    "pattern": "^fun PermissionsRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1099": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt:95": {
+    "pattern": "^fun PermissionsRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt:31": {
+    "pattern": "^fun PermissionsRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:519": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:202": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ val\\ outcome\\ =\\ ConnectedReadback\\.revoke\\(request\\ =\\ \\{\\ app\\.gatewayClient\\.googleOwnerRevoke\\(\\)\\ \\},\\ read\\ =\\ \\{\\ app\\.gatewayClient\\.googleStatus\\(\\)\\ \\}\\)$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1174": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1171": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:339": {
+    "pattern": "^class CommandCentreActivity\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1177": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:345": {
+    "pattern": "^class CommandCentreActivity\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:737": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:749": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:741": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:753": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:745": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1181": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:767": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:413": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ gateway\\.interactiveBrowserCreate\\($",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:40": {
+    "pattern": "^class BrowserSessionController\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:791": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:382": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ val\\ fresh\\ =\\ BrowserControlMutation\\.capture\\ \\{\\ gateway\\.interactiveBrowserRead\\(sessionId\\)\\ \\}\\.getOrNull\\(\\)$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:411": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ val\\ fresh\\ =\\ BrowserControlMutation\\.capture\\ \\{\\ gateway\\.interactiveBrowserRead\\(sessionId\\)\\ \\}\\.getOrNull\\(\\)$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:500": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ val\\ fresh\\ =\\ BrowserControlMutation\\.capture\\ \\{\\ gateway\\.interactiveBrowserRead\\(sessionId\\)\\ \\}\\.getOrElse\\ \\{\\ failure\\ \\->$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:796": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:443": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ val\\ grant\\ =\\ BrowserControlMutation\\.capture\\ \\{\\ gateway\\.interactiveBrowserStreamGrant\\(sessionId\\)\\ \\}\\.getOrElse\\ \\{\\ failure\\ \\->$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:824": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:483": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ BrowserControlMutation\\.capture\\ \\{\\ gateway\\.interactiveBrowserHeartbeat\\(sessionId\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:833": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:283": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ gateway\\.interactiveBrowserProposeViewport\\($",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:854": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:304": {
+    "pattern": "^class BrowserSessionController\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:437": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ request\\ =\\ \\{\\ gateway\\.interactiveBrowserAckViewport\\(snapshot\\.sessionId,\\ snapshot\\.viewport\\.revision,$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:862": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:511": {
+    "pattern": "^class BrowserSessionController\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:871": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:527": {
+    "pattern": "^class BrowserSessionController\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:878": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:896": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:112": {
+    "pattern": "^class BrowserSessionController\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserControlMutation.kt:27": {
+    "pattern": "^object BrowserControlMutation\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserControlMutation.kt:94": {
+    "pattern": "^object BrowserControlMutation\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserControlMutation.kt:80": {
+    "pattern": "^object BrowserControlMutation\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserControlMutation.kt:87": {
+    "pattern": "^object BrowserControlMutation\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:806": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:499": {
+    "pattern": "^class BrowserSessionController\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:813": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:493": {
+    "pattern": "^class BrowserSessionController\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserControlMutation.kt:65": {
+    "pattern": "^object BrowserControlMutation\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserActivity.kt:319": {
+    "pattern": "^class BrowserActivity\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:96": {
+    "pattern": "^class BrowserSessionController\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserControlMutation.kt:33": {
+    "pattern": "^object BrowserControlMutation\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:884": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserDownloadsPanel.kt:44": {
+    "pattern": "^fun BrowserDownloadsPanel\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserDownloadsPanel.kt:31": {
+    "pattern": "^fun BrowserDownloadsPanel\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserDownloadsPanel.kt:100": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ read\\ =\\ \\{\\ gateway\\.interactiveBrowserDownloads\\(sessionId\\)\\ \\}\\)$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:891": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserDownloadsPanel.kt:99": {
+    "pattern": "^fun BrowserDownloadsPanel\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserDownloadReview.kt:10": {
+    "pattern": "^object BrowserDownloadReview\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserDownloadReview.kt:35": {
+    "pattern": "^object BrowserDownloadReview\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserActivity.kt:348": {
+    "pattern": "^class BrowserActivity\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserDownloadReview.kt:53": {
+    "pattern": "^object BrowserDownloadReview\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserDownloadReview.kt:76": {
+    "pattern": "^object BrowserDownloadReview\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserDownloadReview.kt:77": {
+    "pattern": "^object BrowserDownloadReview\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserActivity.kt:238": {
+    "pattern": "^class BrowserActivity\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:188": {
+    "pattern": "^class BrowserSessionController\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:907": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:454": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ gateway\\.sessionOpen\\(pathId\\ =\\ activePathId,\\ routeId\\ =\\ \"primary\\-ingress\",$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:48": {
+    "pattern": "^class VanHermesSessionManager\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:827": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ gateway\\.sessionOpen\\(pathId\\ =\\ activePathId,\\ routeId\\ =\\ \"primary\\-ingress\",$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:962": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:748": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ gateway\\.sessionResume\\($",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:999": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1000": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1003": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:502": {
+    "pattern": "^class VanHermesSessionManager\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1013": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1046": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:490": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ val\\ socketUrl\\ =\\ gateway\\.sessionSocketUrl\\(sessionId\\)$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:265": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ if\\ \\(live\\ !=\\ null\\ \\&\\&\\ live\\.send\\(envelope\\.toString\\(\\)\\)\\)\\ \\{$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:983": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ if\\ \\(!live\\.send\\(readdressed\\.toString\\(\\)\\)\\)\\ \\{$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:1041": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ if\\ \\(live\\.send\\(readdressed\\.toString\\(\\)\\)\\)\\ \\{$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:1145": {
+    "pattern": "^class VanHermesSessionManager\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt:687": {
+    "pattern": "^class VoiceSessionCoordinator\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:203": {
+    "pattern": "^fun WorkRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:512": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:514": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:457": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:382": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ pairThisDevice\\(payload\\.gatewayUrl,\\ payload\\.pairingToken,\\ label,$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:475": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:354": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:188": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:368": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ bind\\ =\\ \\{\\ bindThisDevice\\(payload\\.bootstrapToken,\\ payload\\.attestationChallenge\\)\\ \\},$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:387": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ bind\\ =\\ \\{\\ bindThisDevice\\(payload\\.bootstrapToken,\\ payload\\.attestationChallenge\\)\\ \\},$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:194": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:214": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:385": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ bindingStatus\\ =\\ \\{\\ deviceBindingStatus\\(\\)\\ \\},$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:215": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1061": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/VanApplication.kt:447": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ gatewayClient\\.connectivityManifest\\(knownVersion\\)$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1062": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:420": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:367": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ recoverBinding\\ =\\ \\{\\ recoverBootstrap\\(payload\\.bootstrapToken\\)\\ \\},$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:169": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:160": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ ensureCertifiedIdentity\\(\\)$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:179": {
+    "pattern": "^\\ \\ \\ \\ private\\ fun\\ ensureCertifiedIdentity\\(\\)\\ \\{$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/build.gradle.kts:36": {
+    "pattern": "^android\\s*\\{",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1347": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1180": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:527": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:19": {
+    "pattern": "^\\ \\ \\ \\ suspend\\ fun\\ portfolio\\(\\):\\ Loaded<PortfolioSummary>\\ =\\ load\\(PortfolioSummary::parse\\)\\ \\{\\ client\\.tradingPortfolio\\(\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:32": {
+    "pattern": "^\\ \\ \\ \\ suspend\\ fun\\ positions\\(\\):\\ Loaded<PositionsReadModel>\\ =\\ load\\(PositionsReadModel::parse\\)\\ \\{\\ client\\.tradingPositions\\(\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:535": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:21": {
+    "pattern": "^\\ \\ \\ \\ suspend\\ fun\\ risk\\(\\):\\ Loaded<RiskView>\\ =\\ load\\(RiskView::parse\\)\\ \\{\\ client\\.tradingRisk\\(\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:531": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:20": {
+    "pattern": "^\\ \\ \\ \\ suspend\\ fun\\ marketStates\\(symbol:\\ String\\?\\ =\\ null\\):\\ Loaded<List<MarketStateCard>>\\ =\\ load\\(\\{\\ MarketStateCard\\.parseAll\\(it\\)\\ \\}\\)\\ \\{\\ client\\.tradingMarketState\\(symbol\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:537": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:22": {
+    "pattern": "^\\ \\ \\ \\ suspend\\ fun\\ cognition\\(\\):\\ Loaded<CognitionSnapshot>\\ =\\ load\\(CognitionSnapshot::parse\\)\\ \\{\\ client\\.tradingCognition\\(\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:523": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:26": {
+    "pattern": "^\\ \\ \\ \\ suspend\\ fun\\ trades\\(view:\\ TradeView\\):\\ Loaded<List<TradeRow>>\\ =\\ load\\(\\{\\ b\\ \\->\\ \\(TradeBookParser\\.parse\\(view,\\ b\\)\\ as\\?\\ TradeBookState\\.Ready\\)\\?\\.rows\\ \\}\\)\\ \\{\\ client\\.tradingTrades\\(view\\.query,\\ 100\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:539": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:24": {
+    "pattern": "^\\ \\ \\ \\ suspend\\ fun\\ tradeDetail\\(id:\\ String\\):\\ Loaded<TradeDetail>\\ =\\ load\\(TradeDetail::parse\\)\\ \\{\\ client\\.tradingTradeDetail\\(id\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:543": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:25": {
+    "pattern": "^\\ \\ \\ \\ suspend\\ fun\\ bars\\(symbol:\\ String,\\ timeframe:\\ String,\\ limit:\\ Int\\ =\\ 300\\):\\ Loaded<BarSeries>\\ =\\ load\\(BarSeries::parse\\)\\ \\{\\ client\\.tradingBars\\(symbol,\\ timeframe,\\ limit\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:33": {
+    "pattern": "^\\ \\ \\ \\ suspend\\ fun\\ events\\(limit:\\ Int\\ =\\ 50\\):\\ Loaded<EventsReadModel>\\ =\\ load\\(EventsReadModel::parse\\)\\ \\{\\ client\\.tradingEvents\\(limit\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/ui/OverviewScreen.kt:72": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ events\\ =\\ repo\\.events\\(30\\)$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/ui/OverviewScreen.kt:60": {
+    "pattern": "^fun OverviewScreen\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:34": {
+    "pattern": "^\\ \\ \\ \\ suspend\\ fun\\ potentialTrades\\(\\):\\ Loaded<PotentialReadModel>\\ =\\ load\\(PotentialReadModel::parse\\)\\ \\{\\ client\\.tradingPotential\\(\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:35": {
+    "pattern": "^\\ \\ \\ \\ suspend\\ fun\\ history\\(limit:\\ Int\\ =\\ 50\\):\\ Loaded<HistoryReadModel>\\ =\\ load\\(HistoryReadModel::parse\\)\\ \\{\\ client\\.tradingHistory\\(limit\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/TradingNavigation.kt:4": {
+    "pattern": "^object TradingNavigation\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/ui/TradingRoute.kt:54": {
+    "pattern": "^fun TradingRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:529": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:23": {
+    "pattern": "^\\ \\ \\ \\ suspend\\ fun\\ accounts\\(\\):\\ Loaded<List<AccountCard>>\\ =\\ load\\(\\{\\ b\\ \\->\\ parseObject\\(b\\)\\?\\.arr\\(\"accounts\"\\)\\?\\.map\\(AccountCard::from\\)\\ \\}\\)\\ \\{\\ client\\.tradingAccounts\\(\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:665": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:629": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:547": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:29": {
+    "pattern": "^\\ \\ \\ \\ \\ \\ \\ \\ load\\(StrategyPromotionCandidate::parseAll\\)\\ \\{\\ client\\.tradingPromotionCandidates\\(\\)\\ \\}$",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:575": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:592": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1369": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1371": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1373": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1375": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1378": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1380": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1382": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1395": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1399": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1397": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1415": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1406": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1384": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1386": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1388": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1391": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:733": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1322": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1340": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1341": {
+    "pattern": "^class VanGatewayClient\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/projects/ProjectDetailRoute.kt:101": {
+    "pattern": "^fun ProjectDetailRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:534": {
+    "pattern": "^class BrowserSessionController\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:332": {
+    "pattern": "^class CommandCentreActivity\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:286": {
+    "pattern": "^class CommandCentreActivity\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:217": {
+    "pattern": "^class CommandCentreActivity\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:287": {
+    "pattern": "^class CommandCentreActivity\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:288": {
+    "pattern": "^class CommandCentreActivity\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:314": {
+    "pattern": "^class CommandCentreActivity\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserActivity.kt:324": {
+    "pattern": "^class BrowserActivity\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:351": {
+    "pattern": "^class CommandCentreActivity\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:333": {
+    "pattern": "^class CommandCentreActivity\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:352": {
+    "pattern": "^class CommandCentreActivity\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserControlMutation.kt:9": {
+    "pattern": "^object BrowserControlMutation\\b",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/home/HomeRoute.kt:74": {
+    "pattern": "^fun HomeRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/control/VanCommandController.kt:274": {
+    "pattern": "^class VanCommandController\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/projects/ProjectsRoute.kt:62": {
+    "pattern": "^fun ProjectsRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/projects/ProjectDetailRoute.kt:59": {
+    "pattern": "^fun ProjectDetailRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:39": {
+    "pattern": "^fun ConnectedRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "backend/van_gateway/automation/worker_runtime.py:140": {
+    "pattern": "^class AutomationWorkerRuntime:",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "backend/van_gateway/automation/standing_runner.py:59": {
+    "pattern": "^class StandingRunProducer:",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt:34": {
+    "pattern": "^fun PermissionsRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/memory/OwnerDeclarationSections.kt:28": {
+    "pattern": "^fun OwnerVocabularySection\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/memory/OwnerDeclarationSections.kt:85": {
+    "pattern": "^fun OwnerVocabularySection\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:39": {
+    "pattern": "^class BrowserSessionController\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt:450": {
+    "pattern": "^class VoiceSessionCoordinator\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/ui/OverviewScreen.kt:62": {
+    "pattern": "^fun OverviewScreen\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:6": {
+    "pattern": "^class TradingRepository\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/ui/TradingRoute.kt:217": {
+    "pattern": "^fun TradingRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/trading/ui/TradingRoute.kt:135": {
+    "pattern": "^fun TradingRoute\\(",
+    "review_scope": "Current production module entry; exact endpoint calls are regenerated independently."
+  },
+  "android/app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt:763": {
+    "pattern": "^class VoiceSessionCoordinator\\(",
+    "review_scope": "Reviewed current owner-turn begin/cancel coordinator; delegates cancellation to the same token-fenced VoiceInputManager and does not cancel submitted missions."
+  },
+  "android/app/build.gradle.kts:84": {
+    "pattern": "^val gatewayConnection = VanProductionTarget.resolve\\(",
+    "review_scope": "Reviewed actual production role/address/trust resolver consumed by BuildConfig; voice asset staging does not alter connection authority."
+  },
+  "android/app/src/main/java/com/dial/van/command/settings/SettingsRoute.kt:109": {
+    "pattern": "^                    Text\\(\"This phone\\x27s pairing\",",
+    "review_scope": "Reviewed current pairing card renders real paired/hardware-bound state and supported installer recovery, without host/token configuration fields."
+  }
+}

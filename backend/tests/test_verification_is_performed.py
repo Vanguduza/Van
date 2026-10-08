@@ -333,9 +333,24 @@ class TestAutomationVerificationIsWired:
         from van_gateway.app import create_app
 
         app = create_app()
-        observers = app.state.automation_dispatcher.verifier.observers
+        verifier = app.state.automation_dispatcher.verifier
+        observers = verifier.observers
         assert observers, "the production observer map is empty"
-        assert set(observers) == set(WIRED_POSTCONDITION_KINDS)
+        assert set(observers) == set(WIRED_POSTCONDITION_KINDS) | {"AUTOMATION_WORKER_READ_BACK"}
+        from van_gateway.automation.worker_runtime import WorkerWorkflowObserver
+
+        observer = observers["AUTOMATION_WORKER_READ_BACK"]
+        assert isinstance(observer, WorkerWorkflowObserver)
+        assert observer.worker is app.state.automation_worker
+        await app.state.store.migrate()
+        result = await verifier.verify(
+            spec=PostconditionSpec(kind="AUTOMATION_WORKER_READ_BACK"),
+            verifier_type=VerifierType.READ_BACK,
+            engine_reported_success=True,
+            context={"run_id": "never-observed-run", "inputs": {}},
+        )
+        assert result.outcome is VerificationOutcome.UNVERIFIABLE
+        assert result.detail == "observation failed: WorkerDenied"
 
     async def test_a_read_back_confirms_from_the_provider_not_from_the_engine(self, store):
         class FakeGoogle:

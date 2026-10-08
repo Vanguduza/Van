@@ -315,6 +315,14 @@ RULES: tuple[AlertRule, ...] = (
         evaluate=_ops_fact_below("pki_days_remaining", "the soonest PKI expiry, in days"),
     ),
     AlertRule(
+        name="DEVICE_PKI_EXPIRING", severity=AlertSeverity.CRITICAL, threshold=30.0,
+        action="Inspect the direct-phone CA and server certificate. Re-run "
+               "tools/runtime/enable_van_mtls.sh with the deployed SAN to renew the server "
+               "certificate while retaining the CA pin. CA expiry requires coordinated "
+               "trust-anchor rotation and an app rebuild; never recreate the CA blindly.",
+        evaluate=_ops_fact_below("device_pki_days_remaining", "the direct-phone PKI expiry, in days"),
+    ),
+    AlertRule(
         name="BACKUP_STALE", severity=AlertSeverity.CRITICAL, threshold=0.0,
         action="No usable backup is newer than the retention floor. Run "
                "tools/ops/backup.py and confirm the restore drill passes.",

@@ -4,6 +4,7 @@ import os
 import pathlib
 import re
 import subprocess
+import tempfile
 import time
 from urllib.parse import quote
 
@@ -42,17 +43,24 @@ def update_core_env(path, password):
     else:
         updated = current.rstrip() + "\nVAN_COMMANDER_LEDGER=" + uri + "\n"
     st = p.stat()
-    tmp = p.with_name(p.name + ".tmp")
-    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, st.st_mode & 0o777)
-    with os.fdopen(fd, "w", encoding="utf-8") as handle:
-        handle.write(updated)
-        handle.flush()
-        os.fsync(handle.fileno())
+    fd, tmp = tempfile.mkstemp(prefix="." + p.name + ".", suffix=".tmp", dir=p.parent)
     try:
-        os.chown(tmp, st.st_uid, st.st_gid)
-    except PermissionError:
-        pass
-    os.replace(tmp, p)
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            try:
+                os.fchown(handle.fileno(), st.st_uid, st.st_gid)
+            except PermissionError:
+                pass
+            # Preserve the trusted existing mode even under a restrictive umask.
+            os.fchmod(handle.fileno(), st.st_mode & 0o777)
+            handle.write(updated)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(tmp, p)
+    finally:
+        try:
+            os.unlink(tmp)
+        except FileNotFoundError:
+            pass
 
 def wait_for_db(container, attempts=60):
     for _ in range(attempts):

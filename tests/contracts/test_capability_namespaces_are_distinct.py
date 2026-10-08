@@ -46,15 +46,18 @@ AUDIT_ONLY_LABELS = frozenset({
     "browser.download.quarantine",
     "browser.interactive.create",
     "browser.interactive.end",
+    # Owner-proved transfer permission occurrence; not a routable browser action.
+    "browser.owner.transfer.authorize",
     "context.data.ingest",
     "context.export",
-    "context.memory.forget",
     "context.owner_fact.forget",
     "context.owner_fact.state",
     "device.bootstrap.attest",
     "device.bootstrap.create",
     "device.provisioning.issue",
     "device.rebind",
+    # Recorded by the real socket handler after admission; not a routeable action.
+    "session.transport.admitted",
     # Strategy promotion is an A4 owner workflow handled by the dedicated
     # StrategyPromotionGateway / approval path. It is recorded as an audit action id,
     # not exposed to the generic capability router; declaring it routable here would

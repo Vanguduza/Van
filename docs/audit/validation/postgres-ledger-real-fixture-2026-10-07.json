@@ -1,0 +1,192 @@
+{
+  "schema_version": 1,
+  "scope": "ISOLATED_REAL_POSTGRES_LEDGER_FIXTURE",
+  "recorded_at_utc": "2026-10-07T23:31:40.924111+00:00",
+  "fixture_user_uid": 1000,
+  "shared_or_production_database_used": false,
+  "production_source_changed": false,
+  "registry_or_receipt_hashes_changed": false,
+  "host_executed": false,
+  "device_executed": false,
+  "live_qualified": false,
+  "measured_free_loopback_port": 59229,
+  "junit_counts": {
+    "tests": 1,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "test_returncode": 0,
+  "fixture_stopped": true,
+  "post_stop_status_returncode": 3,
+  "no_fixture_server_running": true,
+  "commands": [
+    {
+      "args": [
+        "/workspace/.onboarding/browser-parser/postgres-root/usr/lib/postgresql/17/bin/postgres",
+        "--version"
+      ],
+      "returncode": 0,
+      "stdout": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)\n",
+      "stderr": "",
+      "elapsed_seconds": 0.011978533999354113
+    },
+    {
+      "args": [
+        "/workspace/.onboarding/browser-parser/postgres-root/usr/lib/postgresql/17/bin/initdb",
+        "-D",
+        "/workspace/.onboarding/browser-parser/postgres-ledger-htr8tij9/data",
+        "-L",
+        "/workspace/.onboarding/browser-parser/postgres-root/usr/share/postgresql/17",
+        "-A",
+        "trust",
+        "-U",
+        "van_fixture",
+        "--encoding=UTF8",
+        "--locale=C",
+        "--no-instructions"
+      ],
+      "returncode": 0,
+      "stdout": "The files belonging to this database system will be owned by user \"agent\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are disabled.\n\ncreating directory /workspace/.onboarding/browser-parser/postgres-ledger-htr8tij9/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... posix\nselecting default \"max_connections\" ... 100\nselecting default \"shared_buffers\" ... 128MB\nselecting default time zone ... Etc/UTC\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n",
+      "stderr": "",
+      "elapsed_seconds": 0.795177396001236
+    },
+    {
+      "args": [
+        "/workspace/.onboarding/browser-parser/postgres-root/usr/lib/postgresql/17/bin/pg_ctl",
+        "-D",
+        "/workspace/.onboarding/browser-parser/postgres-ledger-htr8tij9/data",
+        "-l",
+        "/workspace/.onboarding/browser-parser/postgres-ledger-htr8tij9/postgres.log",
+        "-w",
+        "-t",
+        "15",
+        "-o",
+        "-h 127.0.0.1 -p 59229 -k /workspace/.onboarding/browser-parser/postgres-ledger-htr8tij9/socket -c shared_buffers=16MB -c max_connections=10",
+        "start"
+      ],
+      "returncode": 0,
+      "stdout": "waiting for server to start.... done\nserver started\n",
+      "stderr": "",
+      "elapsed_seconds": 0.11077955099608516
+    },
+    {
+      "args": [
+        "/workspace/.onboarding/van-venv/bin/python",
+        "-c",
+        "import os,psycopg; c=psycopg.connect(os.environ[\"VATI_TEST_PG_DSN\"]); c.autocommit=True; c.execute(\"CREATE SCHEMA vati\"); print(\"psycopg\",psycopg.__version__); print(\"server\",c.execute(\"SELECT version()\").fetchone()[0]); print(\"fixture schemas\",c.execute(\"SELECT nspname FROM pg_namespace WHERE nspname = 'vati'\").fetchall()); c.close()"
+      ],
+      "returncode": 0,
+      "stdout": "psycopg 3.2.6\nserver PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit\nfixture schemas [('vati',)]\n",
+      "stderr": "",
+      "elapsed_seconds": 0.2240230329989572
+    },
+    {
+      "args": [
+        "/workspace/.onboarding/van-venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "trading/tests/test_infra_live.py::test_postgres_ledger_matches_sqlite_chain_and_detects_tampering",
+        "--junitxml=/workspace/Van/docs/audit/validation/postgres-ledger-real-fixture-2026-10-07.xml"
+      ],
+      "returncode": 0,
+      "stdout": ".                                                                        [100%]\n1 passed in 0.39s\n",
+      "stderr": "",
+      "elapsed_seconds": 0.7068044150000787
+    },
+    {
+      "args": [
+        "/workspace/.onboarding/browser-parser/postgres-root/usr/lib/postgresql/17/bin/pg_ctl",
+        "-D",
+        "/workspace/.onboarding/browser-parser/postgres-ledger-htr8tij9/data",
+        "-m",
+        "fast",
+        "-w",
+        "-t",
+        "15",
+        "stop"
+      ],
+      "returncode": 0,
+      "stdout": "waiting for server to shut down.... done\nserver stopped\n",
+      "stderr": "",
+      "elapsed_seconds": 0.10169671100447886
+    },
+    {
+      "args": [
+        "/workspace/.onboarding/browser-parser/postgres-root/usr/lib/postgresql/17/bin/pg_ctl",
+        "-D",
+        "/workspace/.onboarding/browser-parser/postgres-ledger-htr8tij9/data",
+        "status"
+      ],
+      "returncode": 3,
+      "stdout": "pg_ctl: no server running\n",
+      "stderr": "",
+      "elapsed_seconds": 0.0015615080046700314
+    }
+  ],
+  "package_trust": {
+    "origin": "https://deb.debian.org/debian/",
+    "trusted_archive_keyring": "/usr/share/keyrings/debian-archive-keyring.gpg",
+    "release_signature_verified": true,
+    "index_size_and_sha256_match_signed_release": true,
+    "release_sha256": "0584fba32e13e0ab8285fb16c27adea1ec03a73669c18702821094fd6ca86675",
+    "index_sha256": "7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498",
+    "packages": [
+      {
+        "Package": "libpq5",
+        "Version": "17.11-0+deb13u1",
+        "Filename": "pool/main/p/postgresql-17/libpq5_17.11-0+deb13u1_amd64.deb",
+        "SHA256": "20a4c9ef58b4baf90deda67cfb2cc062871c062830dddc234d28f5ac7931b86b",
+        "Size": "237376",
+        "Depends": "libc6 (>= 2.38), libgssapi-krb5-2 (>= 1.17), libldap2 (>= 2.6.2), libssl3t64 (>= 3.0.0)"
+      },
+      {
+        "Package": "postgresql-17",
+        "Version": "17.11-0+deb13u1",
+        "Filename": "pool/main/p/postgresql-17/postgresql-17_17.11-0+deb13u1_amd64.deb",
+        "SHA256": "d2ce1ddffafa783f9acda4c92c86fc21e8288bff3782d739294f14fa797d7886",
+        "Size": "16678028",
+        "Depends": "locales | locales-all, postgresql-client-17, postgresql-common (>= 252~), ssl-cert, tzdata, debconf (>= 0.5) | debconf-2.0, libc6 (>= 2.38), libgcc-s1 (>= 3.0), libgssapi-krb5-2 (>= 1.14+dfsg), libicu76 (>= 76.1-1~), libldap2 (>= 2.6.2), libllvm19 (>= 1:19.1.0), liblz4-1 (>= 0.0~r130), libpam0g (>= 0.99.7.1), libpq5 (>= 17~~), libselinux1 (>= 3.1~), libssl3t64 (>= 3.4.0), libstdc++6 (>= 5.2), libsystemd0, libuuid1 (>= 2.16), libxml2 (>= 2.7.4), libxslt1.1 (>= 1.1.25), libzstd1 (>= 1.5.5), zlib1g (>= 1:1.1.4)"
+      },
+      {
+        "Package": "postgresql-client-17",
+        "Version": "17.11-0+deb13u1",
+        "Filename": "pool/main/p/postgresql-17/postgresql-client-17_17.11-0+deb13u1_amd64.deb",
+        "SHA256": "9d8558f8dd57c8e92e218a20698383575d53742ca3f9e7c2b7fe5f246d5216ae",
+        "Size": "2071508",
+        "Depends": "libpq5 (>= 17.11), postgresql-client-common (>= 182~), sensible-utils, libc6 (>= 2.38), liblz4-1 (>= 0.0~r127), libreadline8t64 (>= 6.0), libssl3t64 (>= 3.0.0), libzstd1 (>= 1.5.5), zlib1g (>= 1:1.1.4)"
+      },
+      {
+        "Package": "python3-psycopg",
+        "Version": "3.2.6-1",
+        "Filename": "pool/main/p/psycopg3/python3-psycopg_3.2.6-1_all.deb",
+        "SHA256": "7c8365166a7142256ff6cd2405232b1270dacbf822b32ce7980fac9e33d6d158",
+        "Size": "124368",
+        "Depends": "python3-typing-extensions | python3-supported-min (>= 3.13), python3:any, libpq5"
+      }
+    ],
+    "extraction": "dpkg-deb -x workspace-only; no package scripts or global installation"
+  },
+  "binary_sha256": {
+    "postgres": "6468a969338215cb3912cf9c0b894bdbbd37b9a709926db078e9a5bf8bdc3e16",
+    "pg_ctl": "c8a0fa6df90600186575e3f3c47a352bafac73547416cf67675b41991b5b5d74",
+    "initdb": "a0363354125bc00f25075bb47fc32a2838fa7668c008326227f5bc04d628ca1d",
+    "psql": "3c94c29652ea7ff8803ab1ca35e48c38a39c8a94a8c8eeadbb1d87c68494506c"
+  },
+  "test_inputs_sha256": {
+    "trading/tests/test_infra_live.py": "40aeb666ff026f660f907fb96bdbb317b669ee866acf4d7cb86242fec2dc2c99",
+    "trading/vati/core/ledger_pg.py": "67dc572be633462419e71fb4011d8ea6409ae947389fbfa5cfd47d6e1de61431",
+    "trading/vati/core/ledger.py": "0f421754b0ec7ddc39c27a2dfee17fb8df19c19bbebfadde9cf10876a61a8e3b",
+    "trading/vati/core/events.py": "8b50ee08492ca343df1e6d9ae27cf13cbb83bbab7579bdeaa28b7c0f09bd8b7d",
+    "trading/vati/core/canonical.py": "2b5bd78b575ce1092af9d44ec5f5b23e20bde1e3d489202bdd613032ec344bdb"
+  },
+  "limits": [
+    "Database initialized and used only by current nonroot user in a private workspace fixture.",
+    "Loopback-only trust authentication is fixture-specific; production authentication, network isolation, runtime grant policy and deployment readiness are not qualified.",
+    "VATI_TEST_PG_DSN and PGOPTIONS supplied only to fixture subprocess environment; existing deployment settings unused."
+  ],
+  "temporary_database_removed": true,
+  "fixture_source_sha256": "96fb46a86ba855afceb6f00532394b45cdc00fba2c7fa31c96bdfee501806ec4",
+  "fixture_source": "docs/audit/validation/postgres-ledger-real-fixture-2026-10-07-fixture.py"
+}

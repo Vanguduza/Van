@@ -165,6 +165,8 @@ class CommandResult(BaseModel):
     approval_challenge: str | None = None
     approval_expires_at_unix: int | None = None
     resolved_action_id: str | None = None
+    resolved_parameters: dict[str, Any] | None = None
+    approval_preview: dict[str, Any] | None = None
     effective_action_class: ActionClass | None = None
     no_stale_replay: bool | None = None
     max_age_seconds: int | None = None

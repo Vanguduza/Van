@@ -18,6 +18,22 @@ from van_gateway.capability.models import CapabilityDeclaration
 from van_gateway.storage.db import Store
 
 
+class OwnerArtifactProviderReadiness:
+    """Ask the configured provider's current signed-admission capability contract."""
+
+    def __init__(self, service_provider) -> None:
+        self.service_provider = service_provider
+
+    async def is_ready(self, declaration: CapabilityDeclaration) -> tuple[bool, str | None]:
+        service = self.service_provider()
+        if service is None:
+            return False, "OWNER_ARTIFACT_ADMISSION_UNCONFIGURED"
+        try:
+            return await service.is_ready()
+        except Exception:
+            return False, "OWNER_ARTIFACT_CAPABILITY_UNAVAILABLE"
+
+
 class AutomationReadiness:
     """Ready iff the automation fabric holds an ADMITTED artifact.
 

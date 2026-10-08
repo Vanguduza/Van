@@ -168,13 +168,18 @@ class VoiceRecognitionPolicyTest {
     }
 
     @Test
-    fun `the build guard is installed and depends on the assemble tasks`() {
+    fun `the runtime and asset guards protect both assemble and bundle tasks`() {
         // A guard nothing depends on is a guard that never runs.
         val build = buildFile.readText()
         assertTrue(build.contains("assertVoiceRuntimeIsShippable"), "guard task is absent")
-        assertTrue(
-            build.contains("""startsWith("assemble")""") && build.contains("dependsOn(voiceRuntimeGuard)"),
-            "the guard is not attached to the assemble tasks",
+        assertTrue(build.contains("assertVoiceAssetsAreSealed"), "asset guard task is absent")
+        val guardedTasks = Regex(
+            """tasks\.matching\s*\{\s*it\.name\.startsWith\("assemble"\)\s*\|\|\s*it\.name\.startsWith\("bundle"\)\s*}\s*\.configureEach\s*\{\s*dependsOn\(([^)]*)\)\s*}""",
+        ).find(build) ?: error("assemble and bundle tasks lack a shared guard dependency")
+        assertEquals(
+            setOf("voiceRuntimeGuard", "voiceAssetsGuard"),
+            guardedTasks.groupValues[1].split(',').map(String::trim).toSet(),
+            "both guards must run for each assemble and bundle task",
         )
     }
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.share.ShareIntakeTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:43:35" hostname="052fefa249ff" time="0.004">
+  <properties/>
+  <testcase name="kind follows the mime type and the number of items()" classname="com.dial.van.share.ShareIntakeTest" time="0.001"/>
+  <testcase name="a shared credential is dropped, not queued()" classname="com.dial.van.share.ShareIntakeTest" time="0.001"/>
+  <testcase name="blank text and empty uris do not become empty fields()" classname="com.dial.van.share.ShareIntakeTest" time="0.001"/>
+  <testcase name="no acknowledgement leaks the shared content back()" classname="com.dial.van.share.ShareIntakeTest" time="0.0"/>
+  <testcase name="the owner is told what happened, including when nothing was kept()" classname="com.dial.van.share.ShareIntakeTest" time="0.0"/>
+  <testcase name="a secret in the subject counts as much as one in the body()" classname="com.dial.van.share.ShareIntakeTest" time="0.0"/>
+  <testcase name="ordinary content is kept()" classname="com.dial.van.share.ShareIntakeTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

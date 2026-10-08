@@ -17,12 +17,15 @@ that the agent rejects a foreign certificate — is a fact about a host and is R
 from __future__ import annotations
 
 import re
+import json
+import os
+import subprocess
 from pathlib import Path
 
 import pytest
 
 from services.browser_control_agent.cdp import CdpUnavailable, LoopbackCdp
-from services.browser_control_agent.server import BindRefused, require_private_bind
+from services.browser_control_agent.server import BindRefused, main, require_private_bind
 
 ROOT = Path(__file__).resolve().parents[3]
 PACKAGE = ROOT / "deploy" / "van-browser-stream"
@@ -189,15 +192,44 @@ class TestBootstrapRefusesRatherThanGuesses:
 
 class TestThePackageDoesNotOverstate:
 
+    def test_unbound_server_is_a_failed_startup_without_opening_a_listener(self, monkeypatch, capsys):
+        monkeypatch.setenv("VAN_BROWSER_CONTROL_BIND", "10.0.1.240")
+        monkeypatch.setattr('asyncio.start_server', lambda *args, **kwargs: pytest.fail('unbound server opened a listener'))
+        assert main() == 2
+        report = json.loads(capsys.readouterr().out)
+        assert report["error"] in {"RUNTIME_NOT_INSTALLED", "RUNTIME_NOT_CONFIGURED"}
+        assert report["ready"] is False
+
+    def test_bootstrap_stops_before_installation_when_runtime_is_absent(self):
+        environment = {
+            **os.environ,
+            "VAN_BROWSER_CONTROL_BIND": "10.0.1.240",
+            "VAN_BROWSER_PROFILE_DEVICE": "/dev/unused-profile-device",
+            "VAN_BROWSER_STREAM_TLS_CERT": "/unused/tls.crt",
+            "VAN_BROWSER_STREAM_TLS_KEY": "/unused/tls.key",
+            "VAN_BROWSER_BROKER_ORIGIN": "https://10.0.1.2:8443",
+            "VAN_BROWSER_BROKER_CA": "/unused/broker-ca.crt",
+            "VAN_BROWSER_CONTROL_BROKER_TOKEN_FILE": "/unused/control.token",
+            "VAN_BROWSER_STREAM_BROKER_TOKEN_FILE": "/unused/stream.token",
+            "VAN_BROWSER_GRANT_PUBLIC_KEY": "/unused/grant.pem",
+        }
+        result = subprocess.run(["bash", str(BOOTSTRAP), "--dry-run"], env=environment, text=True, capture_output=True, timeout=10)
+        assert result.returncode == 2
+        assert "RUNTIME_NOT_INSTALLED" in result.stdout + result.stderr
+        assert "== users ==" not in result.stdout
+        assert "would:" not in result.stdout
+        assert "installed." not in result.stdout
+
     def test_the_readme_says_nothing_here_has_been_run(self):
         readme = (PACKAGE / "README.md").read_text()
-        assert "Nothing in this directory has ever been run" in readme
+        assert "No live host or physical Android device has been qualified" in readme
 
     def test_the_server_entry_point_does_not_pretend_to_serve(self):
         """A process that binds a socket to prove it can is the "integrated because it
         starts" claim §42.5 forbids."""
         server = (ROOT / "services" / "browser_control_agent" / "server.py").read_text()
-        assert "no HTTP server is wired in this repository" in server
+        assert "--check-runtime" in server
+        assert "asyncio.start_server" in server
 
     def test_the_cdp_client_says_it_cannot_send(self):
         cdp = LoopbackCdp("ws://127.0.0.1:9222/x")

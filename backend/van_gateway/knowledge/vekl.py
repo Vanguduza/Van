@@ -122,6 +122,8 @@ class VeklKnowledgeProvider:
             except (ValueError, httpx.HTTPStatusError) as exc:
                 last_error = exc
                 break
+            except httpx.HTTPError as exc:
+                raise VeklProviderError("vekl_upstream_unavailable") from exc
         raise VeklProviderError("vekl_upstream_error") from last_error
 
     @staticmethod

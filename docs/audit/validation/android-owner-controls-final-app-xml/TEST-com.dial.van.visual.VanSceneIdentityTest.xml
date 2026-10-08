@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.visual.VanSceneIdentityTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:58:10" hostname="052fefa249ff" time="0.08">
+  <properties/>
+  <testcase name="eighteenStatesAndFourteenDistinctActionPoses" classname="com.dial.van.visual.VanSceneIdentityTest" time="0.03"/>
+  <testcase name="hairIsLightNeverDark" classname="com.dial.van.visual.VanSceneIdentityTest" time="0.0"/>
+  <testcase name="offlineAndDegradedDesaturateWithoutFadingTheCharacter" classname="com.dial.van.visual.VanSceneIdentityTest" time="0.0"/>
+  <testcase name="geometryStaysInsideTheDrawableBox" classname="com.dial.van.visual.VanSceneIdentityTest" time="0.045"/>
+  <testcase name="compactPresentationKeepsFaceLargeEnoughToRead" classname="com.dial.van.visual.VanSceneIdentityTest" time="0.001"/>
+  <testcase name="glowStaysRestrainedAcrossEveryState" classname="com.dial.van.visual.VanSceneIdentityTest" time="0.0"/>
+  <testcase name="gazeFollowsAttentionInputs" classname="com.dial.van.visual.VanSceneIdentityTest" time="0.001"/>
+  <testcase name="orbCompanionAccompaniesEveryPresentation" classname="com.dial.van.visual.VanSceneIdentityTest" time="0.0"/>
+  <testcase name="reducedMotionRemovesEveryOscillation" classname="com.dial.van.visual.VanSceneIdentityTest" time="0.001"/>
+  <testcase name="speakingOpensTheMouthProportionally" classname="com.dial.van.visual.VanSceneIdentityTest" time="0.0"/>
+  <testcase name="visorIsTransparentSoBlueEyesStayVisible" classname="com.dial.van.visual.VanSceneIdentityTest" time="0.0"/>
+  <testcase name="fullFigureIsCandidateBsCompactBuild" classname="com.dial.van.visual.VanSceneIdentityTest" time="0.001"/>
+  <testcase name="canonicalIdentityElementsAreAllPresent" classname="com.dial.van.visual.VanSceneIdentityTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

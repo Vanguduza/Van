@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.SuggestionPolicyTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:59:30" hostname="052fefa249ff" time="0.003">
+  <properties/>
+  <testcase name="an empty box asks nothing()" classname="com.dial.van.browser.SuggestionPolicyTest" time="0.001"/>
+  <testcase name="local history is not a request()" classname="com.dial.van.browser.SuggestionPolicyTest" time="0.0"/>
+  <testcase name="something that looks like a credential is never sent()" classname="com.dial.van.browser.SuggestionPolicyTest" time="0.0"/>
+  <testcase name="an address is never sent to a suggestion provider()" classname="com.dial.van.browser.SuggestionPolicyTest" time="0.0"/>
+  <testcase name="the default asks nobody()" classname="com.dial.van.browser.SuggestionPolicyTest" time="0.0"/>
+  <testcase name="consent allows a query to be asked about()" classname="com.dial.van.browser.SuggestionPolicyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

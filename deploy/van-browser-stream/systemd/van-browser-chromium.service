@@ -6,15 +6,17 @@
 # difference between a private debugger and a public remote-code-execution endpoint.
 [Unit]
 Description=VAN Browser Stream Host — Chromium (loopback CDP only)
-After=network-online.target van-browser-profiles.mount
-Requires=van-browser-profiles.mount
+After=network-online.target van-browser-profiles.mount van-browser-transfer-stage.service
+Requires=van-browser-profiles.mount van-browser-transfer-stage.service
 
 [Service]
 Type=simple
 User=van-browser
 Group=van-browser
+SupplementaryGroups=van-browser-transfer
 EnvironmentFile=/etc/van-browser-stream/runtime.env
 ExecStart=/usr/bin/chromium \
+  --headless=new \
   --remote-debugging-address=127.0.0.1 \
   --remote-debugging-port=${VAN_BROWSER_CDP_PORT} \
   --remote-allow-origins=http://127.0.0.1:${VAN_BROWSER_CDP_PORT} \
@@ -39,7 +41,7 @@ ProtectControlGroups=true
 RestrictSUIDSGID=true
 RestrictRealtime=true
 LockPersonality=true
-ReadWritePaths=${VAN_BROWSER_PROFILE_MOUNT}
+ReadWritePaths=${VAN_BROWSER_PROFILE_MOUNT} /var/lib/van-browser-transfers
 # Deliberately absent: any access to /var/run/docker.sock. Membership of the docker group
 # is root on this host, one API call away, and this user must never have it.
 

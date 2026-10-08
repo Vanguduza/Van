@@ -32,10 +32,14 @@ from __future__ import annotations
 
 from van_gateway.command.context_requirements import OWNER_SUBJECT
 from van_gateway.command.resolver import CommandResolution, ResolutionMode
+from van_gateway.context.memory_erasure import selected_stores
 from van_gateway.mission.models import SuccessContract
+from van_gateway.proactive.owner_control import ceiling_parameters
 
 #: Strategy names, matching the registrations in `verification.production`.
 TRADING_HALT = "trading-halt"
+TRADING_TICKET_CONFIRM = "trading-ticket-confirm"
+GMAIL_SENT_READBACK = "gmail-sent-readback"
 NOTEBOOK_READBACK = "api-readback"
 NOTEBOOK_SOURCE_READBACK = "notebook-source-readback"
 #: GAP-F-001/002 — the gateway's own owner-fact store and reminders table are systems
@@ -45,6 +49,7 @@ NOTEBOOK_SOURCE_READBACK = "notebook-source-readback"
 #: executor's own report).
 OWNER_FACT_READBACK = "owner-fact-readback"
 REMINDER_READBACK = "reminder-readback"
+STANDING_INTENT_READBACK = "standing-intent-readback"
 
 #: Why an exactly-resolved action still gets no checkable contract. Recorded rather than
 #: implied: "VAN cannot confirm this" is a supported outcome and the owner is entitled to
@@ -96,6 +101,92 @@ def contract_for(resolution: CommandResolution) -> SuccessContract:
 
     action_id = resolution.action_id
 
+    if action_id.startswith("automation.workflow."):
+        artifact_id = resolution.parameters.get("_automation_artifact_id")
+        if not isinstance(artifact_id, str) or not artifact_id:
+            return SuccessContract()
+        return SuccessContract(verifier_class="automation-owner-readback",
+            postconditions={"artifact_id": artifact_id, "verified": True}, evidence_required=True)
+
+    if action_id.startswith("automation.plan.admit."):
+        parameters = resolution.parameters
+        if set(parameters) != {"artifact_id", "workflow_ir_digest", "semantic_digest"}:
+            return SuccessContract()
+        return SuccessContract(verifier_class="automation-owner-readback",
+            postconditions={**parameters, "admitted": True}, evidence_required=True)
+
+    if action_id == "browser.file.provider.submit":
+        p = resolution.parameters
+        if set(p) != {"session_id", "request_id", "request_sha256"}:
+            return SuccessContract()
+        return SuccessContract(verifier_class="browser-artifact-readback", postconditions={
+            "request_id": p["request_id"], "request_sha256": p["request_sha256"], "success": True}, evidence_required=True)
+
+    if action_id == "browser.plan.execute":
+        p = resolution.parameters
+        if set(p) != {"session_id", "plan_id", "plan_sha256"}:
+            return SuccessContract()
+        return SuccessContract(verifier_class="browser-plan-readback", postconditions={
+            "plan_id":p["plan_id"],"plan_sha256":p["plan_sha256"],"success":True},evidence_required=True)
+
+    if action_id == "owner.permission.grant":
+        from van_gateway.capability.owner_permissions import permission_parameters
+        try:
+            parameters = permission_parameters(resolution.parameters)
+        except ValueError:
+            return SuccessContract()
+        return SuccessContract(verifier_class="owner-permission-readback", postconditions={
+            "permission":parameters["permission"],"action_id":parameters["action_id"],
+            "grant_exists":True,"owner_approved_command_bound":True,"current_owner_operation_matches":True,
+            "native_authority_required":True},evidence_required=True)
+
+    if action_id == "owner.autonomy.ceiling.set":
+        try:
+            parameters = ceiling_parameters(resolution.parameters)
+        except ValueError:
+            return SuccessContract()
+        return SuccessContract(verifier_class="domain-autonomy-readback", postconditions={
+            **parameters, "owner_granted_ceiling": parameters["level"],
+            "owner_approved_command_bound": True, "current_owner_operation_matches": True,
+        }, evidence_required=True)
+
+    if action_id == "google.gmail.send":
+        draft_id = resolution.parameters.get("draft_id")
+        digest = resolution.parameters.get("draft_content_sha256")
+        if not isinstance(draft_id, str) or not draft_id or not isinstance(digest, str) or len(digest) != 64:
+            return SuccessContract()
+        return SuccessContract(verifier_class=GMAIL_SENT_READBACK,
+            postconditions={"draft_id": draft_id, "draft_content_sha256": digest, "sent": True,
+                "approved_content_matches": True, "owner_approved_command_bound": True}, evidence_required=True)
+
+    if action_id == "memory.erase":
+        store_id = str(resolution.parameters.get("store") or "").strip()
+        try:
+            stores = selected_stores(store_id)
+        except ValueError:
+            return SuccessContract()
+        return SuccessContract(
+            verifier_class="memory-erasure-readback", postconditions={
+                "store": store_id, "affected_stores": [entry.table for entry in stores],
+                **{k:resolution.parameters[k] for k in ["record_id","expected_sha256"] if k in resolution.parameters},
+                "scope_empty": True, "captured_ids_absent": True, "owner_approved_command_bound": True,
+                "context_cache_invalidated": True,
+            }, evidence_required=True,
+        )
+
+    if action_id == "automation.standing_intent.disable":
+        intent_id = str(resolution.parameters.get("intent_id") or "").strip()
+        if not intent_id:
+            return SuccessContract()
+        return SuccessContract(
+            verifier_class=STANDING_INTENT_READBACK,
+            postconditions={
+                "intent_id": intent_id, "enabled": False, "active_authorities": 0,
+                "captured_authorities_revoked": True, "owner_command_bound": True,
+            },
+            evidence_required=True,
+        )
+
     if action_id == "trading.halt":
         # Not "the ledger accepted an event" — that is what `halt()` returns and it is the
         # claim, not the check. What must be true afterwards is that the kill switch is
@@ -105,6 +196,14 @@ def contract_for(resolution: CommandResolution) -> SuccessContract:
             postconditions={"kill_switch_active": True, "owner_halt_active": True},
             evidence_required=True,
         )
+
+    if action_id == "trading.ticket.confirm":
+        required = ("ticket_id", "fill_price", "filled_qty", "contract_note_ref")
+        if not all(isinstance(resolution.parameters.get(name), str) and resolution.parameters[name] for name in required):
+            return SuccessContract()
+        return SuccessContract(verifier_class=TRADING_TICKET_CONFIRM,
+            postconditions={**{name: resolution.parameters[name] for name in required},
+                "ticket_found": True, "status": "CONFIRMED", "ledger_chain_ok": True}, evidence_required=True)
 
     if action_id == "memory.remember":
         subject = str(resolution.parameters.get("subject") or "").strip()

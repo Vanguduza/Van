@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.visual.VanAuraGeometryTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:48" hostname="052fefa249ff" time="0.02">
+  <properties/>
+  <testcase name="a caller that cannot say what a dp is gets no dp claim()" classname="com.dial.van.visual.VanAuraGeometryTest" time="0.006"/>
+  <testcase name="the dp gap actually reaches the geometry()" classname="com.dial.van.visual.VanAuraGeometryTest" time="0.001"/>
+  <testcase name="the old proportional gap is the 5 point 3 dp the audit measured()" classname="com.dial.van.visual.VanAuraGeometryTest" time="0.001"/>
+  <testcase name="sub-pixel float wobble does not defeat the cache()" classname="com.dial.van.visual.VanAuraGeometryTest" time="0.0"/>
+  <testcase name="the field still animates while the silhouette is cached()" classname="com.dial.van.visual.VanAuraGeometryTest" time="0.002"/>
+  <testcase name="resizing the body does rebuild it()" classname="com.dial.van.visual.VanAuraGeometryTest" time="0.001"/>
+  <testcase name="the gap stays in band at every size VAN is drawn at()" classname="com.dial.van.visual.VanAuraGeometryTest" time="0.001"/>
+  <testcase name="at the shipping avatar size the gap is inside the 10 to 14 dp band()" classname="com.dial.van.visual.VanAuraGeometryTest" time="0.0"/>
+  <testcase name="the silhouette is built once and reused across frames()" classname="com.dial.van.visual.VanAuraGeometryTest" time="0.008"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

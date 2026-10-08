@@ -48,6 +48,43 @@ Use the owner-runtime tools in this order; do not start with semantic inference:
 10. Before ending an owner-directed run, call `mission_result` with the `hermes_run_id` returned by Hermes and one of COMPLETED / FAILED / WAITING_FOR_OWNER / WAITING_EXTERNAL. This is lifecycle reporting only: COMPLETED causes the gateway to enter VERIFYING and cannot itself produce VERIFIED_SUCCESS. The `mission_id` supplied in the run metadata is for correlation; the gateway resolves authority from the durable run binding rather than trusting a caller-supplied mission id.
 11. Report success only for the gateway's verified terminal state. `knowledge_action_execute` performs provider submission/readback and action verification; generic actions still use `action_submitted` then `action_verify`.
 
+Before consequential planning, use `assumption_record` for each material factual assumption,
+`assumption_blocking` to inspect unresolved HIGH/CRITICAL obligations, and `premise_record`
+to record the premise assessment and cited evidence. These are runtime-scoped ledger
+operations, never owner truth or execution authority. A model-supplied evidence reference
+cannot clear the irreversible-work gate. No generic assumption-resolution tool is exposed
+until a deterministic observer can correlate the exact assumption and its postcondition.
+Unsettled blockers require a reversible plan or WAITING_FOR_OWNER / WAITING_EXTERNAL.
+
+At the start of a bound mission and before every new effect, use `mission_control_poll`
+with the actual `mission_id` and `hermes_run_id` from this run. A PAUSED desired execution
+fences future gateway dispatch. Stop initiating effects until a later poll permits them;
+an operation already admitted may still finish. This does not suspend an OS process.
+Record the latest pause/resume checkpoint with `mission_control_ack`, passing the current
+poll generation, original control ID and payload digest, and a concrete checkpoint
+reference. A checkpoint acknowledgement is your report, not independent proof of stopping.
+Adopt pending directions in their listed order and acknowledge each exact control using
+the current generation. A stale-generation refusal means poll again before proceeding.
+Resume and direction never issue new action authority or change sealed action parameters.
+If a direction changes the authorized effect, request fresh owner command/approval.
+
+When the owner must choose, use `decision_escalate` with a stable request ID retained
+across uncertain replies, actual bound mission/run IDs, bounded choices and a deadline.
+`REFERENCE` evidence remains reference-only; `MISSION_EVENT` must match this mission's
+actual timeline record, which still does not prove an effect succeeded. Recover the same
+proposal by exact retry, then use `decision_read` to read the owner selection and note.
+Expired or rejected choices require a new explicit proposal. An APPROVED/ANSWERED judgment
+does not authorize actions, resume blocked browser work, or consume an A4 approval.
+
+Lifecycle callbacks may arrive before the create-run response binds the run. A 202
+WAITING_FOR_BINDING / QUEUED response means the gateway durably retained the report; it
+does not mean the result was verified. The gateway replays it after a real run receipt
+binds the mission. Duplicate reports preserve the first terminal outcome; conflicting
+terminal reports are refused. Transport outcome_unknown also forbids starting a second
+run blindly. This profile has no qualified run-lookup or remote-cancel protocol in the
+available contract; do not invent one or claim that a mission cancellation stopped a
+remote process.
+
 Graph and lexical results are retrieval evidence, not truth resolution. Hot capsules are latency optimizations over revision-bound evidence, not memory authority. Inferred/model-derived context cannot override owner, locked authority, Project Truth or verified live state. `context_fact_candidate`/`context_edge_candidate` are the only memory-admission tools this shim carries, and the gateway route forces every candidate through them to `authority=INFERRED` + `source_trust=MODEL_DERIVED`; owner/canonical promotion is a separate trusted gateway/owner path this shim does not expose.
 
 ## Trading, reminders, attention/briefing, browser and automation tools

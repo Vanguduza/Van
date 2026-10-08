@@ -12,8 +12,8 @@ import com.k2fsa.sherpa.onnx.OfflineTtsKokoroModelConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsModelConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsVitsModelConfig
 import org.json.JSONObject
+import java.io.File
 import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.sqrt
 
 /**
@@ -30,7 +30,6 @@ import kotlin.math.sqrt
  */
 class SherpaLocalTtsRuntime(context: Context) {
     private val appContext = context.applicationContext
-    private val assets = appContext.assets
     private val main = Handler(Looper.getMainLooper())
     private val executor = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "van-sherpa-tts").apply { isDaemon = true }
@@ -39,29 +38,46 @@ class SherpaLocalTtsRuntime(context: Context) {
     @Volatile private var engine: OfflineTts? = null
     @Volatile private var preparationError: String? = null
     @Volatile private var track: AudioTrack? = null
-    private val cancelled = AtomicBoolean(false)
+    private val playback = SpeechPlaybackEpoch()
+    private val playbackLock = Any()
     private var speakerId: Int = 0
     private var speed: Float = 1.0f
+    private var vocabulary: VitsLexiconCoverage? = null
 
     val ready: Boolean get() = engine != null
     val lastPreparationError: String? get() = preparationError
+    fun canSpeak(text: String): Boolean = ready && vocabulary?.canSpeak(text) == true
 
     /**
      * Load and self-test the model. Call from a background thread; model initialisation is
      * intentionally not hidden on the UI thread.
      */
+    @Synchronized
     fun prepare(): Boolean {
         if (engine != null) return true
         return runCatching {
-            val cfg = assets.open(CONFIG_PATH).bufferedReader().use { JSONObject(it.readText()) }
+            val installed = VoiceAssetInstaller.installedOrNull()
+                ?: error("voice_bundle_unavailable")
+            val root = installed.root
+            val cfg = File(root, "tts/runtime.json").readText().let(::JSONObject)
+            fun path(name: String, required: Boolean = true): String {
+                val value = cfg.optString(name).trim()
+                if (value.isEmpty() && !required) return ""
+                val file = EmbeddedVoiceAssetInstaller.confined(root, value)
+                require(file.exists()) { "sherpa_tts_asset_missing:$name" }
+                if (file.isFile) require(installed.bundle.entries.any { it.path == value }) {
+                    "sherpa_tts_asset_not_admitted:$name"
+                }
+                return file.absolutePath
+            }
             val model = when (val family = cfg.getString("family").lowercase()) {
                 "kokoro" -> OfflineTtsModelConfig(
                     kokoro = OfflineTtsKokoroModelConfig(
-                        model = cfg.getString("model"),
-                        voices = cfg.getString("voices"),
-                        tokens = cfg.getString("tokens"),
-                        dataDir = cfg.optString("data_dir"),
-                        lexicon = cfg.optString("lexicon"),
+                        model = path("model"),
+                        voices = path("voices"),
+                        tokens = path("tokens"),
+                        dataDir = path("data_dir", false),
+                        lexicon = path("lexicon", false),
                         lang = cfg.optString("lang", "en-us"),
                         lengthScale = cfg.optDouble("length_scale", 1.0).toFloat(),
                     ),
@@ -70,10 +86,10 @@ class SherpaLocalTtsRuntime(context: Context) {
                 )
                 "vits" -> OfflineTtsModelConfig(
                     vits = OfflineTtsVitsModelConfig(
-                        model = cfg.getString("model"),
-                        lexicon = cfg.optString("lexicon"),
-                        tokens = cfg.getString("tokens"),
-                        dataDir = cfg.optString("data_dir"),
+                        model = path("model"),
+                        lexicon = path("lexicon", false),
+                        tokens = path("tokens"),
+                        dataDir = path("data_dir", false),
                         noiseScale = cfg.optDouble("noise_scale", 0.667).toFloat(),
                         noiseScaleW = cfg.optDouble("noise_scale_w", 0.8).toFloat(),
                         lengthScale = cfg.optDouble("length_scale", 1.0).toFloat(),
@@ -85,15 +101,35 @@ class SherpaLocalTtsRuntime(context: Context) {
             }
             speakerId = cfg.optInt("speaker_id", 0).coerceAtLeast(0)
             speed = cfg.optDouble("speed", 1.0).toFloat().coerceIn(0.5f, 2.0f)
+            // The admitted fixed English voice uses the lexicon-only frontend. That frontend
+            // drops OOV words, so validate coverage before ever claiming an answer was spoken.
+            require(cfg.getString("family").lowercase() == "vits" && cfg.optString("data_dir").isEmpty()) {
+                "sherpa_tts_frontend_not_admitted"
+            }
+            vocabulary = File(path("tokens")).useLines { tokens ->
+                File(path("lexicon")).useLines { lexicon -> VitsLexiconCoverage.parse(tokens, lexicon) }
+            }
+            require(vocabulary!!.canSpeak(WakeAcknowledgementPolicy.TEXT)) { "sherpa_tts_self_test_vocabulary_missing" }
             val created = OfflineTts(
-                assetManager = assets,
+                assetManager = null,
                 config = OfflineTtsConfig(
                     model = model,
                     maxNumSentences = 1,
                     silenceScale = cfg.optDouble("silence_scale", 0.2).toFloat(),
                 ),
             )
-            require(created.sampleRate() > 0) { "sherpa_tts_invalid_sample_rate" }
+            try {
+                require(created.sampleRate() > 0 && speakerId < created.numSpeakers()) {
+                    "sherpa_tts_invalid_voice"
+                }
+                val probe = created.generate(WakeAcknowledgementPolicy.TEXT, speakerId, speed)
+                require(probe.samples.isNotEmpty() && probe.samples.all { it.isFinite() }) {
+                    "sherpa_tts_self_test_failed"
+                }
+            } catch (failure: Throwable) {
+                created.release()
+                throw failure
+            }
             engine = created
             preparationError = null
             true
@@ -112,21 +148,31 @@ class SherpaLocalTtsRuntime(context: Context) {
         onError: (String) -> Unit,
     ): Boolean {
         val localEngine = engine ?: return false
-        cancelled.set(false)
+        if (!canSpeak(text)) return false
+        val epoch = playback.snapshot()
         executor.execute {
             try {
+                if (!playback.isCurrent(epoch)) return@execute
                 val audio = localEngine.generate(text = text, sid = speakerId, speed = speed)
-                if (cancelled.get() || audio.samples.isEmpty()) {
-                    if (!cancelled.get()) main.post { onError("sherpa_tts_empty_audio") }
+                if (!playback.isCurrent(epoch) || audio.samples.isEmpty()) {
+                    if (playback.isCurrent(epoch)) main.post {
+                        if (playback.isCurrent(epoch)) onError("sherpa_tts_empty_audio")
+                    }
                     return@execute
                 }
                 val player = newTrack(audio.sampleRate)
-                track = player
-                main.post(onStart)
-                player.play()
+                val started = synchronized(playbackLock) {
+                    if (!playback.isCurrent(epoch)) false else {
+                        track = player
+                        player.play()
+                        true
+                    }
+                }
+                if (!started) { player.release(); return@execute }
+                main.post { if (playback.isCurrent(epoch)) onStart() }
 
                 var offset = 0
-                while (offset < audio.samples.size && !cancelled.get()) {
+                while (offset < audio.samples.size && playback.isCurrent(epoch)) {
                     val count = minOf(CHUNK_SAMPLES, audio.samples.size - offset)
                     val written = player.write(
                         audio.samples,
@@ -143,34 +189,38 @@ class SherpaLocalTtsRuntime(context: Context) {
                         mouthOpen = open,
                         viseme = ((offset / CHUNK_SAMPLES) % 15),
                     )
-                    main.post { onFrame(frame) }
+                    main.post { if (playback.isCurrent(epoch)) onFrame(frame) }
                     offset += written
                 }
 
-                if (!cancelled.get()) {
+                if (playback.isCurrent(epoch)) {
                     player.stop()
-                    main.post { onDone(utteranceId) }
+                    main.post { if (playback.isCurrent(epoch)) onDone(utteranceId) }
                 }
             } catch (t: Throwable) {
-                if (!cancelled.get()) {
-                    main.post { onError(t.message ?: "sherpa_tts_failed") }
+                if (playback.isCurrent(epoch)) {
+                    main.post { if (playback.isCurrent(epoch)) onError(t.message ?: "sherpa_tts_failed") }
                 }
             } finally {
-                runCatching { track?.release() }
-                track = null
+                synchronized(playbackLock) {
+                    runCatching { track?.release() }
+                    track = null
+                }
             }
         }
         return true
     }
 
     fun stop() {
-        cancelled.set(true)
-        val current = track
-        track = null
-        runCatching { current?.pause() }
-        runCatching { current?.flush() }
-        runCatching { current?.stop() }
-        runCatching { current?.release() }
+        playback.cancel()
+        synchronized(playbackLock) {
+            val current = track
+            track = null
+            runCatching { current?.pause() }
+            runCatching { current?.flush() }
+            runCatching { current?.stop() }
+            runCatching { current?.release() }
+        }
     }
 
     fun release() {

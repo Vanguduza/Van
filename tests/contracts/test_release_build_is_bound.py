@@ -7,20 +7,22 @@ be discovered after the fact from the artefact:
   binding is "this package + this app signing identity + this hardware Keystore key + this
   Gateway owner-device slot", and a debug key is whichever machine ran the build. The
   owner's first sideload failed with the dialog for exactly that (P2-AND-016);
-* it points at an HTTPS Gateway;
+* it points at a public HTTPS Gateway from the owner-core deployment profile;
 * it carries a **connectivity trust anchor**. §0D.2 removed every field the owner could
   type an endpoint into, so a build with no anchor can never accept a manifest and can
   never be provisioned. It installs, opens, and sits on "waiting for the installer"
   forever with nothing saying why;
 * it has a keystore at all.
 
-**What this file verifies and what it does not.** The Android Gradle Plugin is unreachable
-in the audit container, so no test here runs `assembleRelease`. What is checked is that the
+**What this file verifies and what it does not.** These portable source contracts do not
+require an Android SDK or production signing credentials. What is checked is that the
 gate exists in the build script, that it fires on the release task graph rather than on
 every build, and that the predicate it uses actually rejects the inputs it is supposed to —
 the last by re-implementing that one predicate here and running it against a table. A gate
 present but wrong is the failure this last part exists to catch; a gate correct but never
-executed is CI's to prove, and it is the reason `assembleRelease` runs there.
+executed is separately checked by the opt-in actual AGP direct `packageRelease` regression
+in `test_android_instrumentation_abi.py`, using an environment without a qualified core
+profile. The actual target/trust validator is executed in `test_android_production_target.py`.
 """
 
 from __future__ import annotations
@@ -48,7 +50,7 @@ def test_the_gate_fires_only_on_a_release_task_graph():
     removes the check, and it is gone for the release too.
     """
     gate = _gate()
-    assert 'n == "assembleRelease" || n == "bundleRelease"' in gate
+    assert 'task.project == project && task.name.contains("Release")' in gate
     assert "if (releaseRequested) {" in gate
 
 

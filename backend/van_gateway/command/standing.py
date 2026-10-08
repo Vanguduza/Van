@@ -376,6 +376,7 @@ class StandingAutomationAuthorityService:
             signed_action_class=authority.action_class_ceiling,
             effective_action_class=operation_action_class,
             typed_action_id=typed_action_id,
+            typed_parameter_constraints=dict(parameters),
             snapshot_id=run_snapshot_id,
             context_digest=run_context_digest,
             issued_at_unix=now_unix,

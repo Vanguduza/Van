@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.visual.VanWindFieldMotionTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:56:16" hostname="052fefa249ff" time="0.001">
+  <properties/>
+  <testcase name="budgetTightensFieldBeforeStateMeaningIsLost" classname="com.dial.van.visual.VanWindFieldMotionTest" time="0.001"/>
+  <testcase name="repeatingClockIsSeamlessAtPhaseBoundary" classname="com.dial.van.visual.VanWindFieldMotionTest" time="0.0"/>
+  <testcase name="workingFieldCarriesMoreEnergyThanIdleField" classname="com.dial.van.visual.VanWindFieldMotionTest" time="0.0"/>
+  <testcase name="staticBudgetFreezesLivingFieldWithoutRemovingIt" classname="com.dial.van.visual.VanWindFieldMotionTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

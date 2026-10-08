@@ -126,6 +126,38 @@ CREATE_BODY = {
 @pytest.mark.asyncio
 class TestProofIsActuallyRequired:
 
+    async def test_new_owner_mutators_cannot_escape_the_proof_gate(self, client):
+        ac, app = client
+        enrolled = await _paired(app)
+        await _bind(app, enrolled.device.device_id)
+        for method, path in [
+            ("POST", "/v1/permissions/known-grant/revoke"),
+            ("POST", "/v1/understanding/assertions/known/confirm"),
+            ("DELETE", "/v1/context/facts?subject=owner&predicate=location"),
+            ("DELETE", "/v1/context/memory"),
+        ]:
+            response = await ac.request(method, path, headers=_base_headers(enrolled))
+            assert response.status_code == 401, response.text
+            assert response.json()["detail"] == "device_proof_required"
+
+    async def test_fact_withdrawal_proof_binds_query_and_is_single_use(self, client):
+        ac, app = client
+        enrolled = await _paired(app)
+        private_key = await _bind(app, enrolled.device.device_id)
+        target = "/v1/context/facts?subject=owner&predicate=old&scope=global"
+        headers = {**_base_headers(enrolled), **_proof_headers(
+            private_key, method="DELETE", path=target,
+            device_id=enrolled.device.device_id, body=b"",
+        )}
+        tampered = await ac.delete(target.replace("predicate=old", "predicate=other"), headers=headers)
+        assert tampered.status_code == 401
+        assert tampered.json()["detail"] == "device_proof_invalid"
+        original = await ac.delete(target, headers=headers)
+        assert original.status_code == 200, original.text
+        replay = await ac.delete(target, headers=headers)
+        assert replay.status_code == 401
+        assert replay.json()["detail"] == "device_proof_replayed"
+
     async def test_a_bound_device_cannot_act_without_signing_the_request(self, client):
         ac, app = client
         enrolled = await _paired(app)
@@ -279,21 +311,27 @@ class TestWhatIsNotGated:
         ac, app = client
         service = app.state.owner_device_bindings
         token, challenge = await service.create_bootstrap_token()
-        pem, _ = _keypair()
+        pem, private = _keypair()
+        from attestation_fixtures import signed_attestation_chain
+        from dataclasses import replace
+        extension = _attestation(challenge.encode())
+        chain, root = signed_attestation_chain(pem, extension)
+        service.policy = replace(service.policy, allowed_root_fingerprints=frozenset({root}))
+        body = json.dumps({
+            "token": token, "device_id": "s24-fresh", "public_key_pem": pem,
+            "attestation_extension_b64": base64.b64encode(extension).decode(),
+            "attestation_chain_b64": [base64.b64encode(cert).decode() for cert in chain],
+        }).encode()
 
         response = await ac.post(
             "/v1/devices/bootstrap/attest",
-            json={
-                "token": token,
-                "device_id": "s24-fresh",
-                "public_key_pem": pem,
-                "attestation_extension_b64": base64.b64encode(
-                    _attestation(challenge.encode())
-                ).decode(),
-            },
+            content=body,
+            headers={"Content-Type":"application/json", **_proof_headers(private,
+                method="POST",path="/v1/devices/bootstrap/attest",device_id="s24-fresh",body=body)},
         )
 
         assert response.status_code == 200, response.text
+        assert response.json()["attestation_chain_verified"] is True
 
 
 class TestTheGateCoversWhatItClaims:

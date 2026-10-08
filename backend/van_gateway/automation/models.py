@@ -11,7 +11,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from van_gateway.models import ActionClass
 
@@ -170,6 +170,7 @@ DISALLOWED_PRIMITIVE_NAMES = frozenset(
 
 
 class WorkflowIRStep(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     step_id: str
     primitive: Primitive
     operation: str
@@ -198,12 +199,14 @@ class WorkflowIRStep(BaseModel):
 
 
 class WorkflowIREdge(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     from_step: str
     to_step: str
     branch: str | None = None
 
 
 class WorkflowIR(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     ir_id: str
     family: str
     semantic_goal: str

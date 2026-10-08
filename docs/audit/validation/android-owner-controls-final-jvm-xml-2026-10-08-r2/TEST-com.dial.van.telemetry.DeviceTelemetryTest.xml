@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.telemetry.DeviceTelemetryTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:39" hostname="052fefa249ff" time="0.008">
+  <properties/>
+  <testcase name="a non-finite value never reaches the wire()" classname="com.dial.van.telemetry.DeviceTelemetryTest" time="0.001"/>
+  <testcase name="every wire name round-trips and none collide()" classname="com.dial.van.telemetry.DeviceTelemetryTest" time="0.001"/>
+  <testcase name="an empty batch still produces valid JSON()" classname="com.dial.van.telemetry.DeviceTelemetryTest" time="0.0"/>
+  <testcase name="a nonsense measurement is never buffered()" classname="com.dial.van.telemetry.DeviceTelemetryTest" time="0.001"/>
+  <testcase name="the buffer is bounded and drops the oldest()" classname="com.dial.van.telemetry.DeviceTelemetryTest" time="0.0"/>
+  <testcase name="a batch never exceeds what the route will read()" classname="com.dial.van.telemetry.DeviceTelemetryTest" time="0.001"/>
+  <testcase name="the body is the shape the route parses()" classname="com.dial.van.telemetry.DeviceTelemetryTest" time="0.0"/>
+  <testcase name="a latency needs two readings that make sense()" classname="com.dial.van.telemetry.DeviceTelemetryTest" time="0.002"/>
+  <testcase name="a surface name cannot break out of the body()" classname="com.dial.van.telemetry.DeviceTelemetryTest" time="0.0"/>
+  <testcase name="only the labelled metric carries a surface()" classname="com.dial.van.telemetry.DeviceTelemetryTest" time="0.0"/>
+  <testcase name="a surface on an unlabelled metric never reaches the wire()" classname="com.dial.van.telemetry.DeviceTelemetryTest" time="0.0"/>
+  <testcase name="draining removes what it takes()" classname="com.dial.van.telemetry.DeviceTelemetryTest" time="0.001"/>
+  <testcase name="only the aura frame time carries a surface()" classname="com.dial.van.telemetry.DeviceTelemetryTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

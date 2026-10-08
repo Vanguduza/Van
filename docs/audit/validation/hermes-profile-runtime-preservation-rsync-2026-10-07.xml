@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="1.254" timestamp="2026-10-07T23:28:24.598124+00:00" hostname="052fefa249ff"><testcase classname="tests.hermes.test_profile_layout" name="test_install_profile_preserves_runtime_state_and_secrets" time="1.225" /></testsuite></testsuites>

@@ -77,7 +77,7 @@ class SharedVocabularyRegistry:
               updated_at_ms=excluded.updated_at_ms
             """,
             (
-                entry.term.strip().lower(), entry.project_id or "", entry.owner_meaning,
+                " ".join(entry.term.strip().lower().split()), entry.project_id or "", entry.owner_meaning,
                 entry.system_operationalization, Store.dumps(entry.examples),
                 Store.dumps(entry.anti_examples), entry.confidence,
                 Store.dumps(entry.evidence_refs), now, now,
@@ -90,7 +90,7 @@ class SharedVocabularyRegistry:
         for scope in ([project_id] if project_id else []) + [""]:
             row = await self.store.fetchone(
                 "SELECT * FROM shared_vocabulary WHERE term = ? AND project_id = ?",
-                (term.strip().lower(), scope or ""),
+                (" ".join(term.strip().lower().split()), scope or ""),
             )
             if row is not None:
                 return VocabularyEntry(
@@ -588,7 +588,12 @@ class CognitiveComplementMap:
                 Store.dumps(sorted(set(evidence_refs or []))), now, now,
             ),
         )
-        return entry_id
+        row = await self.store.fetchone(
+            "SELECT entry_id FROM cognitive_complement_map WHERE domain = ?", (domain,),
+        )
+        if row is None:
+            raise RuntimeError("complement_upsert_readback_missing")
+        return str(row["entry_id"])
 
     async def all(self) -> list[dict[str, Any]]:
         rows = await self.store.fetchall(

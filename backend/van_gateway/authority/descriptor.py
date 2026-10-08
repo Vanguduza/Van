@@ -141,6 +141,15 @@ VERIFICATION_ALIASES: dict[str, str] = {
 #: absent from this map is UNDECLARED, which is the honest answer and is what the test
 #: refuses to let accumulate silently for a mutating action.
 ACTION_REVERSIBILITY: dict[str, Reversibility] = {
+    # A subsequent fresh owner approval can raise or lower the same ceiling.
+    "owner.autonomy.ceiling.set": Reversibility.REVERSIBLE,
+    # Exact consent can be revoked; it never replaces per-use native authority.
+    "owner.permission.grant": Reversibility.REVERSIBLE,
+    # Preparation creates a bounded local task that can be cancelled. A browser
+    # effect may disclose or change external state with no reliable undo.
+    "browser.task.prepare": Reversibility.REVERSIBLE,
+    "browser.plan.execute": Reversibility.IRREVERSIBLE,
+    "browser.file.provider.submit": Reversibility.IRREVERSIBLE,
     "owner.context.read": Reversibility.READ_ONLY,
     "research.web.search": Reversibility.READ_ONLY,
     # A draft can be discarded without sending; moving a calendar event can be moved back.
@@ -157,11 +166,19 @@ ACTION_REVERSIBILITY: dict[str, Reversibility] = {
     "google.notebook.enterprise.sources.delete": Reversibility.IRREVERSIBLE,
     # Halting is reversible by resuming; the owner is never stuck with it.
     "trading.halt": Reversibility.REVERSIBLE,
+    # A broker fill confirmation appends immutable ledger evidence, once. There
+    # is no undo or replacement; this records an existing fill and places no order.
+    "trading.ticket.confirm": Reversibility.IRREVERSIBLE,
     # GAP-F-001 — a remembered fact or decision supersedes rather than destroys (the prior
     # row's `valid_until_ms` closes, it is not deleted) and `OwnerFactAuthor.forget` /
     # `DELETE /v1/context/facts` can end it, so the owner is never stuck with either.
     "memory.remember": Reversibility.REVERSIBLE,
     "memory.decision.record": Reversibility.REVERSIBLE,
+    # Erased owner content is deliberately not retained for an undo.
+    "memory.erase": Reversibility.IRREVERSIBLE,
+    # Disabling retains the intent/workflow/history. Resuming requires fresh owner
+    # authority; an old revoked authorization is never revived.
+    "automation.standing_intent.disable": Reversibility.REVERSIBLE,
     # GAP-F-002 — a created reminder can be cancelled (`POST /v1/reminders/{id}/cancel`)
     # any time before it fires.
     "reminder.create": Reversibility.REVERSIBLE,

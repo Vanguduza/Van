@@ -66,6 +66,7 @@ def test_sensitive_stores_are_encrypted() -> None:
         "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "van_gateway_creds",
         "android/app/src/main/java/com/dial/van/overlay/OverlayStateStore.kt": "van_overlay_state",
         "android/app/src/main/java/com/dial/van/VanApplication.kt": "van_browser_session",
+        "android/app/src/main/java/com/dial/van/browser/BrowserPhoneActions.kt": "van-browser-file-recovery",
     }
     for rel, store_name in expected.items():
         text = (ROOT / rel).read_text(encoding="utf-8")

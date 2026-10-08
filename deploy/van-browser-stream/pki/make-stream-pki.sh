@@ -20,15 +20,36 @@
 # name from a request body, because a name a caller can write is a field, not an identity.
 set -euo pipefail
 
-PKI_DIR="${VAN_BROWSER_PKI_DIR:-/opt/van-browser-stream/pki}"
 CONTROL_BIND="${VAN_BROWSER_CONTROL_BIND:?set the private VCN address the control agent binds to}"
 DAYS="${VAN_BROWSER_PKI_DAYS:-397}"
 WITH_FOREIGN_TEST_CERT=0
-[ "${1:-}" = "--with-foreign-test-cert" ] && WITH_FOREIGN_TEST_CERT=1
+INSTANCE=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --with-foreign-test-cert) WITH_FOREIGN_TEST_CERT=1; shift ;;
+    --instance) [ "$#" -ge 2 ] || { echo 'refused: missing profile instance' >&2; exit 2; }; INSTANCE="$2"; shift 2 ;;
+    *) echo 'refused: unknown PKI option' >&2; exit 2 ;;
+  esac
+done
+case "$INSTANCE" in
+  public|owner) PKI_DIR="${VAN_BROWSER_PKI_DIR:-/etc/van-browser-stream/profiles/$INSTANCE/control-pki}"; CONTROL_USER="van-control-$INSTANCE" ;;
+  "") PKI_DIR="${VAN_BROWSER_PKI_DIR:-/opt/van-browser-stream/pki}"; CONTROL_USER=van-control ;;
+  *) echo 'refused: profile instance must be public or owner' >&2; exit 2 ;;
+esac
+[[ "$DAYS" =~ ^[0-9]+$ ]] && (( DAYS >= 1 && DAYS <= 3650 )) || { echo 'refused: bounded PKI validity required' >&2; exit 2; }
+VAN_BROWSER_SELECTED_CONTROL_BIND="$CONTROL_BIND" python3 - <<'BIND'
+import ipaddress, os
+try:
+    address = ipaddress.ip_address(os.environ['VAN_BROWSER_SELECTED_CONTROL_BIND'])
+    assert address.version == 4 and address.is_private and not address.is_unspecified and not address.is_loopback and not address.is_multicast
+except (ValueError, AssertionError):
+    raise SystemExit('refused: literal private control bind required')
+BIND
 
 #: The services allowed to call the agent. Adding a name here is granting a machine the
 #: ability to drive the owner's browser; it is not a configuration convenience.
 CLIENTS=(
+  "van-trading-core"
   "browser-harness.trading-core.van.internal"
   "stagehand.trading-core.van.internal"
 )
@@ -89,7 +110,13 @@ if [ "$WITH_FOREIGN_TEST_CERT" = 1 ]; then
   rm -f foreign-client.csr
 fi
 
-chown -R van-control:van-control "$PKI_DIR" 2>/dev/null || true
+chown root:root "$PKI_DIR"/*.key
+if id "$CONTROL_USER" >/dev/null 2>&1; then
+  chown "$CONTROL_USER:$CONTROL_USER" "$PKI_DIR/agent.key" "$PKI_DIR/agent.crt" "$PKI_DIR/ca.crt"
+else
+  echo 'Role user is not installed yet; generated material remains root-owned for the isolated installer.'
+fi
+chmod 755 "$PKI_DIR"
 chmod 600 "$PKI_DIR"/*.key
 chmod 644 "$PKI_DIR"/*.crt
 

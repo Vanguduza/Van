@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.trading.TradingNavigationTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:29" hostname="052fefa249ff" time="0.001">
+  <properties/>
+  <testcase name="a selected trade retains its exact ID in the detail destination()" classname="com.dial.van.trading.TradingNavigationTest" time="0.001"/>
+  <testcase name="launch links navigate after the overview root and restored links do not repeat()" classname="com.dial.van.trading.TradingNavigationTest" time="0.0"/>
+  <testcase name="unknown or malformed links fall back to overview()" classname="com.dial.van.trading.TradingNavigationTest" time="0.0"/>
+  <testcase name="the overlay views open their corresponding existing screen()" classname="com.dial.van.trading.TradingNavigationTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

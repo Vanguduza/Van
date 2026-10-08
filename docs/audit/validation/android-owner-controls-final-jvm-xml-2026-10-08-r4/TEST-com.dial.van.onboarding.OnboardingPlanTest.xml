@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.onboarding.OnboardingPlanTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:59:31" hostname="052fefa249ff" time="0.004">
+  <properties/>
+  <testcase name="the optional steps are the two the owner cannot simply grant()" classname="com.dial.van.onboarding.OnboardingPlanTest" time="0.001"/>
+  <testcase name="the pairing screen says what happens if it is not done()" classname="com.dial.van.onboarding.OnboardingPlanTest" time="0.0"/>
+  <testcase name="an unpaired phone can never finish onboarding()" classname="com.dial.van.onboarding.OnboardingPlanTest" time="0.001"/>
+  <testcase name="a required step cannot be skipped by asking to skip it()" classname="com.dial.van.onboarding.OnboardingPlanTest" time="0.0"/>
+  <testcase name="a phone too old to have the permission is not blocked on granting it()" classname="com.dial.van.onboarding.OnboardingPlanTest" time="0.0"/>
+  <testcase name="pairing is the first thing a new owner is asked for()" classname="com.dial.van.onboarding.OnboardingPlanTest" time="0.001"/>
+  <testcase name="every step has words for the owner and none of them is an enum()" classname="com.dial.van.onboarding.OnboardingPlanTest" time="0.0"/>
+  <testcase name="display awareness is required for obstruction-safe floating VAN()" classname="com.dial.van.onboarding.OnboardingPlanTest" time="0.0"/>
+  <testcase name="a permission granted in settings shows up when the owner comes back()" classname="com.dial.van.onboarding.OnboardingPlanTest" time="0.0"/>
+  <testcase name="the whole flow walks in order and ends()" classname="com.dial.van.onboarding.OnboardingPlanTest" time="0.0"/>
+  <testcase name="opening a settings screen is not granting a permission()" classname="com.dial.van.onboarding.OnboardingPlanTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

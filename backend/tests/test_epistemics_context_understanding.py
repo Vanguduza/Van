@@ -293,6 +293,13 @@ async def test_a_correction_supersedes_rather_than_edits(tmp_path):
     view = await model.understanding("owner")
     values = [e["value"] for e in view["fields"]["reasoning_preferences"]]
     assert values == ["wants full evidence"]
+    projected = view["fields"]["reasoning_preferences"][0]
+    assert projected["supporting_episode_refs"] == replacement.supporting_episode_refs
+    assert projected["evidence_refs"] == replacement.evidence_refs
+    assert projected["created_at_ms"] == replacement.created_at_ms
+    assert projected["updated_at_ms"] == replacement.updated_at_ms
+    assert projected["last_revalidated_at_ms"] == replacement.last_revalidated_at_ms
+    assert projected["owner_confirmed_at_ms"] == replacement.owner_confirmed_at_ms
 
 
 # --------------------------------------------------- §§76-78, 87 memory stores
@@ -509,6 +516,7 @@ async def test_irreversible_work_blocks_on_unverified_high_impact_assumptions(tm
     await kernel.resolve_assumption(
         assumption.assumption_id, status=AssumptionStatus.VERIFIED,
         evidence_refs=["probe://broker-auth"],
+        independent_observer=True,
     )
     await kernel.assert_safe_for_irreversible_work(mission.mission_id)
 

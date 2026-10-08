@@ -1,0 +1,14 @@
+[
+  {
+    "file": "android/app/build.gradle.kts",
+    "old_line": 84,
+    "pattern_hint": null,
+    "reason": "Changed source requires a reviewed unique anchor"
+  },
+  {
+    "file": "android/app/src/main/java/com/dial/van/command/settings/SettingsRoute.kt",
+    "old_line": 109,
+    "pattern_hint": null,
+    "reason": "Changed source requires a reviewed unique anchor"
+  }
+]

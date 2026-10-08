@@ -1,9 +1,8 @@
 """Rev 1.5 §13.2 — the narrow API, and the loopback CDP behind it.
 
-The split in this file is the design. `BrowserControlAgent` is the contract Trading Core
-calls and it decides nothing about the browser; `CdpTransport` is the part that talks to
-Chromium and decides nothing about authority. That way the half that cannot run in this
-repository is also the half with no rules in it.
+`BrowserControlAgent` holds the testable authority/handler contract; production dispatch
+resolves its durable authority through Trading Core and `LoopbackCdp` talks to Chromium.
+Source tests can execute the real transport; deployed-host qualification is independent.
 
 What the agent refuses to be, from §13.2, and why each one is on the list:
 
@@ -34,9 +33,7 @@ from services.browser_control_agent.authority import (
 class CdpTransport(Protocol):
     """Whatever actually speaks to Chromium on 127.0.0.1.
 
-    A Protocol rather than a class because the real one needs a running browser and this
-    repository has none. The tests drive a recording double; the production implementation
-    lives in `cdp.py` and is `EXTERNAL_RUNTIME` in the ledger until a host runs it.
+    Recording doubles test handlers; `cdp.py` supplies the real multiplexed transport.
     """
 
     async def send(self, target_id: str, method: str, params: dict[str, Any]) -> dict[str, Any]:
@@ -104,7 +101,39 @@ async def _navigate(cdp: CdpTransport, call: Call, task: TaskGrant) -> dict[str,
     if not (url.startswith("https://") or url.startswith("http://")):
         raise ValueError("control_agent_navigate_scheme_refused")
     result = await cdp.send(call.target_id, "Page.navigate", {"url": url})
-    return {"frame_id": result.get("frameId"), "steps_remaining": task.steps_remaining}
+    if result.get('errorText') or result.get('isDownload'):
+        raise ValueError('control_agent_navigation_failed')
+    observation = None
+    if task.allowed_domains:
+        wait = getattr(cdp, 'wait_navigation', None)
+        if wait is None:
+            # Recording transports may implement the same bounded read conversation.
+            # Production LoopbackCdp additionally requires the actual loader commit.
+            from van_gateway.browser.agent_grant import domain_allowed
+            import asyncio
+            deadline = asyncio.get_running_loop().time() + 10
+            while asyncio.get_running_loop().time() < deadline:
+                history = await cdp.send(call.target_id, 'Page.getNavigationHistory', {})
+                entries = history.get('entries', [])
+                index = history.get('currentIndex', -1)
+                if type(index) is int and 0 <= index < len(entries):
+                    actual = entries[index].get('url', '')
+                    if actual == url:
+                        if not domain_allowed(actual, task.allowed_domains):
+                            raise ValueError('control_agent_navigation_redirect_outside_task_domain')
+                        observation = {'url': actual, 'history': entries, 'current': index}
+                        break
+                    if not domain_allowed(actual, task.allowed_domains) and actual != 'about:blank':
+                        raise ValueError('control_agent_navigation_redirect_outside_task_domain')
+                await asyncio.sleep(0.05)
+            if observation is None:
+                raise ValueError('control_agent_navigation_commit_timeout')
+        else:
+            observation = await wait(call.target_id, result, url, task.allowed_domains)
+    if observation is not None and task.allowed_domains:
+        entries, current = _scoped_history(observation['history'], observation['current'], task.allowed_domains)
+        observation = {**observation, 'history': entries, 'current': current}
+    return {"frame_id": result.get("frameId"), "steps_remaining": task.steps_remaining, "navigation": observation}
 
 
 async def _dispatch_input(cdp: CdpTransport, call: Call, task: TaskGrant) -> dict[str, Any]:
@@ -132,13 +161,27 @@ async def _query_accessibility(cdp: CdpTransport, call: Call, task: TaskGrant) -
 
 async def _observe_navigation(cdp: CdpTransport, call: Call, task: TaskGrant) -> dict[str, Any]:
     history = await cdp.send(call.target_id, "Page.getNavigationHistory", {})
-    return {"history": history.get("entries", []), "current": history.get("currentIndex")}
+    entries, current = _scoped_history(history.get('entries', []), history.get('currentIndex'), task.allowed_domains)
+    return {"history": entries, "current": current}
+
+
+def _scoped_history(entries, current, allowed_domains):
+    if not allowed_domains:
+        return entries, current
+    from van_gateway.browser.agent_grant import domain_allowed
+    selected = [(index, entry) for index, entry in enumerate(entries) if domain_allowed(entry.get('url', ''), allowed_domains)]
+    mapped_current = next((index for index, (original, _) in enumerate(selected) if original == current), None)
+    return [entry for _, entry in selected], mapped_current
 
 
 async def _observe_download(cdp: CdpTransport, call: Call, task: TaskGrant) -> dict[str, Any]:
     # Downloads are reported, never fetched through this agent. A file the agent could
     # return is a file the private VCN carries out of the browser profile.
-    return {"downloads": call.params.get("known", []), "transfer": "not_through_this_agent"}
+    observer = getattr(cdp, 'observed_downloads', None)
+    observed = observer(call.target_id) if observer else []
+    # An empty event cache is not proof that no download exists. Canonical owner
+    # downloads are reported by the authenticated native producer to DownloadBroker.
+    return {"downloads": observed, "observation_available": bool(observed), "complete_snapshot": False, "transfer": "not_through_this_agent"}
 
 
 async def _capture_evidence(cdp: CdpTransport, call: Call, task: TaskGrant) -> dict[str, Any]:
@@ -146,7 +189,16 @@ async def _capture_evidence(cdp: CdpTransport, call: Call, task: TaskGrant) -> d
     return {"screenshot_base64": shot.get("data", ""), "task_id": task.task_id}
 
 
+async def _planned_effect_requires_durable_broker(cdp, call, task):
+    # The in-memory harness cannot seal canonical owner authority. Production's
+    # broker-backed dispatcher alone resolves immutable effects.
+    raise ValueError("control_planned_effect_requires_durable_broker")
+
+
 _HANDLERS = {
+    Operation.CLICK_ELEMENT: _planned_effect_requires_durable_broker,
+    Operation.FILL_ELEMENT: _planned_effect_requires_durable_broker,
+    Operation.OBSERVE_EFFECT: _planned_effect_requires_durable_broker,
     Operation.ATTACH: _attach,
     Operation.NAVIGATE: _navigate,
     Operation.DISPATCH_INPUT: _dispatch_input,

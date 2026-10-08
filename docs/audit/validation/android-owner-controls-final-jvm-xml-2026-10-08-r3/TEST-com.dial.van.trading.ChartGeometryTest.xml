@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.trading.ChartGeometryTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:29" hostname="052fefa249ff" time="0.006">
+  <properties/>
+  <testcase name="time ticks are snapped to a human boundary and stay inside the visible span()" classname="com.dial.van.trading.ChartGeometryTest" time="0.004"/>
+  <testcase name="levels and markers widen the price range so nothing draws off-scale()" classname="com.dial.van.trading.ChartGeometryTest" time="0.001"/>
+  <testcase name="risk reward is the distance to target over the distance to stop()" classname="com.dial.van.trading.ChartGeometryTest" time="0.001"/>
+  <testcase name="an empty series produces an empty scene rather than a crash()" classname="com.dial.van.trading.ChartGeometryTest" time="0.0"/>
+  <testcase name="grid step is a nice round number, not an arbitrary fraction()" classname="com.dial.van.trading.ChartGeometryTest" time="0.0"/>
+  <testcase name="build produces a candle per visible bar and at least one grid line()" classname="com.dial.van.trading.ChartGeometryTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

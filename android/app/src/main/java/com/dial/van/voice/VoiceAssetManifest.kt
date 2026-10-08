@@ -29,6 +29,7 @@ enum class VoiceCapability {
     LOCAL_VAD,
     LOCAL_ASR,
     LOCAL_TTS,
+    LOCAL_SPEAKER,
     CRITICAL_PHRASES;
 
     /**
@@ -93,6 +94,7 @@ data class VoiceAssetStatus(
             VoiceCapability.LOCAL_VAD -> "I can tell when you have finished speaking"
             VoiceCapability.LOCAL_ASR -> "I can understand you without a network"
             VoiceCapability.LOCAL_TTS -> "I can answer aloud without a network"
+            VoiceCapability.LOCAL_SPEAKER -> "The generic local speaker model is available; an owner profile requires separate enrollment"
             VoiceCapability.CRITICAL_PHRASES -> "I can answer you immediately"
         }
 
@@ -102,6 +104,7 @@ data class VoiceAssetStatus(
             VoiceCapability.LOCAL_VAD -> "I may cut you off or wait too long when you speak"
             VoiceCapability.LOCAL_ASR -> "I need a network to understand you"
             VoiceCapability.LOCAL_TTS -> "I need a network to answer aloud"
+            VoiceCapability.LOCAL_SPEAKER -> "I cannot prepare local speaker evidence because the generic model is unavailable"
             VoiceCapability.CRITICAL_PHRASES -> "I may not answer you straight away"
         }
 }
@@ -114,7 +117,20 @@ data class VoiceAssetEntry(
     val path: String,
     val sha256: String,
     val sizeBytes: Long,
+    val kind: VoiceAssetKind = VoiceAssetKind.MODEL,
 )
+
+/** Model-sized bounds do not apply to a one-line keyword list or runtime configuration. */
+enum class VoiceAssetKind(val minimumBytes: Long, val maximumBytes: Long) {
+    MODEL(16L * 1024L, 512L * 1024L * 1024L),
+    TOKENS(1L, 4L * 1024L * 1024L),
+    KEYWORDS(1L, 64L * 1024L),
+    CONFIG(1L, 256L * 1024L),
+    LEXICON(1L, 32L * 1024L * 1024L),
+    DATA(1L, 128L * 1024L * 1024L),
+    AUDIO(44L, 16L * 1024L * 1024L),
+    LICENSE(1L, 1024L * 1024L),
+}
 
 data class VoiceAssetBundle(
     val schema: String,
@@ -147,6 +163,7 @@ object VoiceAssetManifest {
         "vad" to VoiceCapability.LOCAL_VAD,
         "asr" to VoiceCapability.LOCAL_ASR,
         "tts" to VoiceCapability.LOCAL_TTS,
+        "speaker" to VoiceCapability.LOCAL_SPEAKER,
         "critical_phrases" to VoiceCapability.CRITICAL_PHRASES,
     )
 
@@ -171,9 +188,11 @@ object VoiceAssetManifest {
         }
 
         val entries = mutableListOf<VoiceAssetEntry>()
+        val paths = mutableSetOf<String>()
         val files = parsed.optJSONArray("files")
         for (index in 0 until (files?.length() ?: 0)) {
-            val file = files!!.getJSONObject(index)
+            val file = files!!.optJSONObject(index)
+                ?: return VoiceManifestVerdict.Refused("voice_manifest_file_malformed")
             val section = file.optString("capability")
             val capability = SECTIONS[section]
                 ?: return VoiceManifestVerdict.Refused("voice_manifest_unknown_capability:$section")
@@ -183,12 +202,27 @@ object VoiceAssetManifest {
                 // unverifiable model decides what VAN hears.
                 return VoiceManifestVerdict.Refused("voice_manifest_bad_digest:$section")
             }
+            val path = file.optString("path")
+            if (!safeRelativePath(path) || !paths.add(path)) {
+                return VoiceManifestVerdict.Refused("voice_manifest_bad_path:$section")
+            }
+            val kind = VoiceAssetKind.entries.firstOrNull {
+                it.name.lowercase() == file.optString("kind", "model")
+            } ?: return VoiceManifestVerdict.Refused("voice_manifest_bad_kind:$section")
+            val size = file.optLong("size", -1L)
+            if (size !in kind.minimumBytes..kind.maximumBytes) {
+                return VoiceManifestVerdict.Refused("voice_manifest_bad_size:$section")
+            }
             entries += VoiceAssetEntry(
                 capability = capability,
-                path = file.optString("path"),
+                path = path,
                 sha256 = sha.lowercase(),
-                sizeBytes = file.optLong("size", -1L),
+                sizeBytes = size,
+                kind = kind,
             )
+        }
+        if (entries.size > 2048 || entries.sumOf { it.sizeBytes } > 1024L * 1024L * 1024L) {
+            return VoiceManifestVerdict.Refused("voice_manifest_bundle_too_large")
         }
 
         return VoiceManifestVerdict.Accepted(
@@ -209,6 +243,11 @@ object VoiceAssetManifest {
      * signing one spelling while verifying another is a check that passes by luck.
      */
     fun canonical(manifest: JSONObject): ByteArray = VanCanonicalJson.bytes(manifest)
+
+    fun safeRelativePath(path: String): Boolean =
+        path.isNotBlank() && path.length <= 512 && !path.startsWith('/') &&
+            !path.contains('\\') && !path.contains(':') && path.none { it.code < 32 } &&
+            path.split('/').all { it.isNotEmpty() && it != "." && it != ".." }
 
     /**
      * Classify one capability against what is actually on disk.
@@ -231,7 +270,7 @@ object VoiceAssetManifest {
                     capability, VoiceAssetState.MISSING, declaredSha256 = entry.sha256,
                 )
             val (sha, size) = found
-            if (size < MIN_MODEL_BYTES || size > MAX_MODEL_BYTES) {
+            if (size !in entry.kind.minimumBytes..entry.kind.maximumBytes || size != entry.sizeBytes) {
                 return VoiceAssetStatus(
                     capability, VoiceAssetState.UNUSABLE,
                     declaredSha256 = entry.sha256, observedSha256 = sha, sizeBytes = size,

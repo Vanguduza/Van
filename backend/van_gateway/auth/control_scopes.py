@@ -42,7 +42,12 @@ class ControlScope(str, Enum):
 
     RUNTIME = "runtime"
     AUTOMATION = "automation"
+    #: Isolated n8n callback consumer, always combined with a per-run step grant.
+    AUTOMATION_WORKER = "automation_worker"
     BROWSER = "browser"
+    #: Untrusted media hosts may report observations and consume existing authority;
+    #: they cannot issue browser tasks, owner control or device enrolment.
+    BROWSER_STREAM_PRODUCER = "browser_stream_producer"
     GOOGLE = "google"
     TRADING = "trading"
     PROJECTS = "projects"
@@ -59,11 +64,12 @@ class ControlScope(str, Enum):
 
 
 #: What the legacy single token is granted when nothing finer is configured. Everything
-#: except device enrolment: an existing deployment keeps working, and the one scope that
-#: turns a control credential into owner authority has to be granted on purpose.
+#: except device enrolment, observability and isolated producer/worker scopes.
+#: An existing deployment keeps working; these roles must be granted on purpose.
 DEFAULT_SCOPES = frozenset(
     s for s in ControlScope
-    if s not in (ControlScope.DEVICE_ENROLMENT, ControlScope.OBSERVABILITY)
+    if s not in (ControlScope.DEVICE_ENROLMENT, ControlScope.OBSERVABILITY,
+                 ControlScope.BROWSER_STREAM_PRODUCER, ControlScope.AUTOMATION_WORKER)
 )
 
 

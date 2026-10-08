@@ -1,0 +1,90 @@
+{
+  "captured_at_utc": "2026-10-07T23:28:39.051877+00:00",
+  "dial_git_head": "64d6b7158c723b7700e5b53175ea8048d4e92d00",
+  "dial_git_status": "",
+  "dial_repo": "/workspace/dial-development-system",
+  "execution_scope": "Local source-only cross-repository resolver/registry validation",
+  "files": [
+    {
+      "bytes": 2473,
+      "path": "trading/tests/test_vtil_borrow.py",
+      "repository": "van",
+      "sha256": "406699f603b6a9397866d723c7b6014d8d66651b20e5ca881eef6cec289c0cae"
+    },
+    {
+      "bytes": 5651,
+      "path": "trading/vtil/tools/resolve_probe.mjs",
+      "repository": "van",
+      "sha256": "774a3e7d7328c5625296c11c92d16d228af644eb5b3407a121905ee279adf3e6"
+    },
+    {
+      "bytes": 18707,
+      "path": "trading/vtil/registry/ENGINEERING_RESOURCE_REGISTRY.json",
+      "repository": "van",
+      "sha256": "73567d27e2c44f7bddaea393d0e7aabc9957d41564febaca633e640f91fedb60"
+    },
+    {
+      "bytes": 12686,
+      "path": "trading/vtil/registry/ENGINEERING_RESOURCE_SOURCE_REGISTRY.json",
+      "repository": "van",
+      "sha256": "ad6a14e2122974bc7247df907b40067bb31ebf9918882372b315cfe80ba7aaa5"
+    },
+    {
+      "bytes": 3,
+      "path": "trading/vtil/registry/ENGINEERING_SKILL_REGISTRY.json",
+      "repository": "van",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "bytes": 6163,
+      "path": "trading/vtil/registry/TASK_CLASS_SIGNAL_POLICY.json",
+      "repository": "van",
+      "sha256": "f8b8fc703ffe6add2c21f43aa698a030e6285c852476e2008806ff17d4d990c6"
+    },
+    {
+      "bytes": 2574,
+      "path": "AGENTS.md",
+      "repository": "dial",
+      "sha256": "edec0966e51c818395f5a381a764ff19947e1091ab655e352450b2a963e3ecc4"
+    },
+    {
+      "bytes": 22984,
+      "path": "agent-system/orchestration/engineering-resource-resolver.mjs",
+      "repository": "dial",
+      "sha256": "6d20c98daf2f3390de99bb6200b4eacf2a8493b7e85992cf80cde7f4a103e36e"
+    },
+    {
+      "bytes": 4889,
+      "path": "agent-system/orchestration/engineering-resource-registry.mjs",
+      "repository": "dial",
+      "sha256": "fd89fe548a1e072edb85ce260a7495224304eed1cf592280b7488e3a8b8a5d72"
+    },
+    {
+      "bytes": 12478,
+      "path": "agent-system/orchestration/skill-resolver.mjs",
+      "repository": "dial",
+      "sha256": "020f0270249d0b8197c9c22817c00743f2aaf2b8af45944c975bee5904b4fdce"
+    },
+    {
+      "bytes": 4080,
+      "path": "agent-system/orchestration/skill-registry.mjs",
+      "repository": "dial",
+      "sha256": "0608f6944bac4257318e9060633fd3a4fb2f87199232668520b59129bd5a8da0"
+    },
+    {
+      "bytes": 4510,
+      "path": "agent-system/orchestration/state-store.mjs",
+      "repository": "dial",
+      "sha256": "73f972e1749c30905d0c9c707ada5055bda3bd0ec960bf341df60f88d0741f18"
+    }
+  ],
+  "missing_optional_mirror_registries": [
+    "SKILL_BUNDLE_REGISTRY.json",
+    "SKILL_CONFLICT_REGISTRY.json",
+    "SKILL_PERFORMANCE_REGISTRY.json"
+  ],
+  "node_version": "v24.19.0",
+  "python_version": "Python 3.12.14",
+  "schema_version": 1,
+  "van_git_head": "12feb9033dfc1dd68d7b4d41ac477f0d9dbbc4af"
+}
