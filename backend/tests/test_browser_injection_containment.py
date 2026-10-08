@@ -293,8 +293,14 @@ async def test_an_adapter_failure_is_not_an_empty_success(tmp_path):
         PlannedStep(kind="navigate", domain=DOMAIN, url=f"https://{DOMAIN}/"),
     ]))
     action = await worker.propose(_assignment(task), [])
-    observation = await worker.execute(_assignment(task), action)
-    assert observation.extraction["adapter_error"] == "BROWSER_WORKER_UNREACHABLE"
+    with pytest.raises(BrowserAdapterError, match="BROWSER_WORKER_UNREACHABLE"):
+        await worker.execute(_assignment(task), action)
+    result = await BrowserSubagentRunner().run(
+        assignment=_assignment(task), worker=worker, task=task,
+    )
+    assert result.stop_reason is SubagentStop.WORKER_ERROR
+    assert result.succeeded is False
+    assert result.steps == []
 
 
 @pytest.mark.asyncio
@@ -333,3 +339,4 @@ async def test_binding_a_worker_to_a_task_does_not_mutate_the_shared_one(tmp_pat
     assert shared.task is None
     assert bound.task is first
     assert bound.adapter is shared.adapter
+
