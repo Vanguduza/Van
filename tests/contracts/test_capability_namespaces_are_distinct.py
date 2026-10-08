@@ -115,7 +115,7 @@ def test_a_runtime_adapter_name_is_not_mistaken_for_a_capability():
             value for value in re.findall(r'\w*CAPABILITY\w*\s*=\s*"([a-z0-9_.]+)"', text)
             if "." not in value
         }
-    assert undotted == {"n8n", "worker", "browser_harness", "stagehand"}, sorted(undotted)
+    assert undotted == {"n8n", "worker", "browser_harness", "stagehand", "web_acquisition"}, sorted(undotted)
     assert not (undotted & _declared())
 
 

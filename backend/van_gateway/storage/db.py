@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 30
+SCHEMA_VERSION = 32
 
 
 MIGRATION_17 = """
@@ -609,6 +609,177 @@ CREATE TABLE IF NOT EXISTS visual_acceptances (
 );
 CREATE INDEX IF NOT EXISTS idx_visual_acceptances_latest
   ON visual_acceptances(verified_at DESC);
+"""
+
+
+MIGRATION_31 = """
+-- VAN Autonomous Web Acquisition Fabric Rev 1.
+-- Durable crawl orchestration is internal to VAN so Browser Harness/Hermes retain authority.
+CREATE TABLE IF NOT EXISTS web_acquisition_items (
+  item_id TEXT PRIMARY KEY,
+  canonical_url TEXT NOT NULL,
+  url_digest TEXT NOT NULL,
+  domain TEXT NOT NULL,
+  profile_alias TEXT NOT NULL,
+  source TEXT NOT NULL,
+  parent_item_id TEXT,
+  depth INTEGER NOT NULL DEFAULT 0,
+  priority INTEGER NOT NULL DEFAULT 50,
+  preferred_route TEXT,
+  route TEXT,
+  state TEXT NOT NULL DEFAULT 'QUEUED',
+  attempt_count INTEGER NOT NULL DEFAULT 0,
+  max_attempts INTEGER NOT NULL DEFAULT 5,
+  next_eligible_at_ms INTEGER,
+  lease_owner TEXT,
+  lease_token TEXT,
+  lease_expires_at_ms INTEGER,
+  checkpoint_ref TEXT,
+  last_failure_class TEXT,
+  last_error_code TEXT,
+  metadata_json TEXT NOT NULL DEFAULT '{}',
+  created_at_ms INTEGER NOT NULL,
+  updated_at_ms INTEGER NOT NULL,
+  completed_at_ms INTEGER,
+  FOREIGN KEY(parent_item_id) REFERENCES web_acquisition_items(item_id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_web_acquisition_identity
+  ON web_acquisition_items(url_digest, profile_alias);
+CREATE INDEX IF NOT EXISTS idx_web_acquisition_ready
+  ON web_acquisition_items(state, next_eligible_at_ms, priority DESC, created_at_ms);
+CREATE INDEX IF NOT EXISTS idx_web_acquisition_domain
+  ON web_acquisition_items(domain, state, lease_expires_at_ms);
+CREATE INDEX IF NOT EXISTS idx_web_acquisition_lease
+  ON web_acquisition_items(lease_owner, lease_expires_at_ms);
+
+CREATE TABLE IF NOT EXISTS web_domain_controls (
+  domain TEXT PRIMARY KEY,
+  max_concurrency INTEGER NOT NULL DEFAULT 2,
+  min_delay_ms INTEGER NOT NULL DEFAULT 0,
+  cooldown_until_ms INTEGER,
+  last_claimed_at_ms INTEGER,
+  error_score INTEGER NOT NULL DEFAULT 0,
+  updated_at_ms INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS web_acquisition_sessions (
+  session_id TEXT PRIMARY KEY,
+  profile_alias TEXT NOT NULL,
+  domain_scope TEXT NOT NULL,
+  network_identity_ref TEXT,
+  state TEXT NOT NULL DEFAULT 'READY',
+  use_count INTEGER NOT NULL DEFAULT 0,
+  failure_count INTEGER NOT NULL DEFAULT 0,
+  created_at_ms INTEGER NOT NULL,
+  updated_at_ms INTEGER NOT NULL,
+  retired_at_ms INTEGER
+);
+
+CREATE INDEX IF NOT EXISTS idx_web_acquisition_sessions_ready
+  ON web_acquisition_sessions(profile_alias, domain_scope, state, failure_count, use_count);
+
+CREATE TABLE IF NOT EXISTS web_domain_skills (
+  skill_id TEXT PRIMARY KEY,
+  domain TEXT NOT NULL,
+  goal_class TEXT NOT NULL,
+  version INTEGER NOT NULL,
+  state TEXT NOT NULL DEFAULT 'CANDIDATE',
+  route TEXT NOT NULL,
+  artifact_ref TEXT NOT NULL,
+  site_fingerprint TEXT,
+  success_assertions_json TEXT NOT NULL DEFAULT '[]',
+  failure_signatures_json TEXT NOT NULL DEFAULT '[]',
+  evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+  qualified_at_ms INTEGER,
+  superseded_by TEXT,
+  created_at_ms INTEGER NOT NULL,
+  updated_at_ms INTEGER NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_web_domain_skill_version
+  ON web_domain_skills(domain, goal_class, version);
+CREATE INDEX IF NOT EXISTS idx_web_domain_skill_hot
+  ON web_domain_skills(domain, goal_class, state, version DESC);
+
+CREATE TABLE IF NOT EXISTS web_acquisition_events (
+  event_id TEXT PRIMARY KEY,
+  item_id TEXT NOT NULL,
+  event_type TEXT NOT NULL,
+  route TEXT,
+  summary TEXT NOT NULL,
+  detail_json TEXT NOT NULL DEFAULT '{}',
+  evidence_ref TEXT,
+  occurred_at_ms INTEGER NOT NULL,
+  FOREIGN KEY(item_id) REFERENCES web_acquisition_items(item_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_web_acquisition_events_item
+  ON web_acquisition_events(item_id, occurred_at_ms);
+"""
+
+
+MIGRATION_32 = """
+-- VAN Web Acquisition hardening: content-addressed custody, skill canaries and cost telemetry.
+ALTER TABLE web_domain_skills ADD COLUMN golden_case_refs_json TEXT NOT NULL DEFAULT '[]';
+ALTER TABLE web_domain_skills ADD COLUMN canary_pass_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE web_domain_skills ADD COLUMN canary_fail_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE web_domain_skills ADD COLUMN last_canary_at_ms INTEGER;
+
+CREATE TABLE IF NOT EXISTS web_acquisition_evidence (
+  evidence_id TEXT PRIMARY KEY,
+  item_id TEXT NOT NULL,
+  chain_seq INTEGER NOT NULL UNIQUE,
+  prev_hash TEXT NOT NULL,
+  entry_hash TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  content_digest TEXT NOT NULL,
+  source_url_digest TEXT NOT NULL,
+  route TEXT,
+  artifact_ref TEXT,
+  manifest_digest TEXT NOT NULL,
+  signature_ref TEXT,
+  integrity_state TEXT NOT NULL,
+  byte_size INTEGER NOT NULL DEFAULT 0,
+  manifest_json TEXT NOT NULL,
+  created_at_ms INTEGER NOT NULL,
+  FOREIGN KEY(item_id) REFERENCES web_acquisition_items(item_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_web_acquisition_evidence_item
+  ON web_acquisition_evidence(item_id, created_at_ms);
+CREATE INDEX IF NOT EXISTS idx_web_acquisition_evidence_digest
+  ON web_acquisition_evidence(content_digest);
+
+CREATE TABLE IF NOT EXISTS web_domain_skill_canaries (
+  canary_id TEXT PRIMARY KEY,
+  skill_id TEXT NOT NULL,
+  passed INTEGER NOT NULL,
+  observed_fingerprint TEXT,
+  evidence_ref TEXT NOT NULL,
+  latency_ms INTEGER,
+  created_at_ms INTEGER NOT NULL,
+  FOREIGN KEY(skill_id) REFERENCES web_domain_skills(skill_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_web_domain_skill_canaries_skill
+  ON web_domain_skill_canaries(skill_id, created_at_ms DESC);
+
+CREATE TABLE IF NOT EXISTS web_acquisition_telemetry (
+  telemetry_id TEXT PRIMARY KEY,
+  item_id TEXT NOT NULL,
+  route TEXT NOT NULL,
+  success INTEGER NOT NULL,
+  latency_ms INTEGER NOT NULL DEFAULT 0,
+  byte_count INTEGER NOT NULL DEFAULT 0,
+  verified_records INTEGER NOT NULL DEFAULT 0,
+  cost_micros INTEGER NOT NULL DEFAULT 0,
+  recorded_at_ms INTEGER NOT NULL,
+  FOREIGN KEY(item_id) REFERENCES web_acquisition_items(item_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_web_acquisition_telemetry_route
+  ON web_acquisition_telemetry(route, recorded_at_ms);
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -1943,6 +2114,8 @@ MIGRATIONS: dict[int, str] = {
     28: MIGRATION_28,
     29: MIGRATION_29,
     30: MIGRATION_30,
+    31: MIGRATION_31,
+    32: MIGRATION_32,
 }
 
 

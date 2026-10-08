@@ -50,6 +50,7 @@ class BrowserHarnessAdapter(Protocol):
     async def wait(self, task: BrowserTask, condition: dict[str, Any]) -> dict[str, Any]: ...
     async def upload(self, task: BrowserTask, locator: str, file_ref: str) -> dict[str, Any]: ...
     async def tabs(self, task: BrowserTask) -> dict[str, Any]: ...
+    async def network_candidates(self, task: BrowserTask) -> dict[str, Any]: ...
 
 
 class _PrivateWorkerClient:
@@ -187,6 +188,9 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
 
     async def tabs(self, task: BrowserTask) -> dict[str, Any]:
         return await self._call("/tabs", self._envelope(task))
+
+    async def network_candidates(self, task: BrowserTask) -> dict[str, Any]:
+        return await self._call("/network_candidates", self._envelope(task))
 
     async def status(self) -> ExternalRuntimeStatus:  # type: ignore[override]
         return await super().status("BROWSER_HARNESS_UNAVAILABLE")

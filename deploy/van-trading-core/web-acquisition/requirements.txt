@@ -1,0 +1,2 @@
+scrapling[rag]==0.4.15
+crawlee[beautifulsoup]==1.10.2
