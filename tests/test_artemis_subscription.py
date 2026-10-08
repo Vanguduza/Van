@@ -136,8 +136,16 @@ class SubscriptionContracts(unittest.TestCase):
         env = dict(os.environ)
         env["VAN_ARTEMIS_SUBSCRIPTION_BINDING"] = "1"
         env["ARTEMIS_ARTEMIS_JSONC"] = str(profile_dir / "profile.json")
+        env["ARTEMIS_CONFIG_DIR"] = str(profile_dir)
         env["PYTHONPATH"] = os.pathsep.join([str(profile_dir), str(ROOT)])
         code = (
+            "from mcp_server.background.task_runner import resolve_profile_file; "
+            "import pathlib,os,json; "
+            "p=pathlib.Path(resolve_profile_file()); "
+            "assert p.parent==pathlib.Path(os.environ['ARTEMIS_CONFIG_DIR']); "
+            "c=json.loads(p.read_text()); "
+            "nodes=[v for k,v in c.items() if k!='utils']+list(c['utils'].values()); "
+            "assert len(nodes)==20 and all(n['provider']=='custom' and n['model']=='gpt-5.6-sol' for n in nodes); "
             "from artemis.llm.router import ModelFactory, ModelProvider; "
             "from types import SimpleNamespace; "
             "m=ModelFactory.create_model(SimpleNamespace(provider=ModelProvider.CUSTOM, "

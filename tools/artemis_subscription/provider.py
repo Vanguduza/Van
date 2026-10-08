@@ -22,7 +22,8 @@ from langchain_core.utils.function_calling import convert_to_openai_tool
 
 MODEL = "gpt-5.6-sol"
 ACCOUNT = "tapiwaguduza@gmail.com"
-_CLI_PATH = os.environ.get("PATH", os.defpath)
+_CLI_PATH = os.environ.get("VAN_ARTEMIS_SUBSCRIPTION_CLI_PATH", os.environ.get("PATH", os.defpath))
+os.environ.setdefault("VAN_ARTEMIS_SUBSCRIPTION_CLI_PATH", _CLI_PATH)
 _DISABLED_FEATURES = (
     "shell_tool", "unified_exec", "multi_agent", "plugins", "hooks", "memories",
     "apps", "browser_use", "browser_use_external", "computer_use",

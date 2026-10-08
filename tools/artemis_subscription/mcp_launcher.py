@@ -8,6 +8,7 @@ PROFILE_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(PROFILE_DIR))
 os.environ["ARTEMIS_ARTEMIS_JSONC"] = str(PROFILE_DIR / "profile.json")
+os.environ["ARTEMIS_CONFIG_DIR"] = str(PROFILE_DIR)
 os.environ.setdefault("ARTEMIS_APP_DIR", "/home/ubuntu/.local/share/van/artemis-subscription")
 os.environ.setdefault("ARTEMIS_TRACES_DIR", "/home/ubuntu/.local/share/van/artemis-subscription/traces")
 os.environ["VAN_ARTEMIS_SUBSCRIPTION_BINDING"] = "1"
