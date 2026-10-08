@@ -99,3 +99,12 @@ def test_bootstrap_keeps_chromium_sandbox_and_scopes_userns_to_exact_binary():
     assert 'apparmor_parser -r "$APPARMOR_PROFILE"' in text
     assert "--no-sandbox" not in text
     assert "apparmor_restrict_unprivileged_userns=0" not in text
+
+
+def test_playwright_chromium_allowlisted_binary_is_runtime_immutable():
+    text = BOOTSTRAP.read_text(encoding="utf-8")
+    assert 'chown -R van-browser:van-browser "$BASE/browsers"' in text
+    assert 'chown -R root:van-browser "$BASE/browsers"' in text
+    assert 'chmod -R u=rwX,g=rX,o= "$BASE/browsers"' in text
+    assert '"$(stat -c \'%U:%G\' "$chromium_path")" == "root:van-browser"' in text
+    assert text.index('chown -R root:van-browser "$BASE/browsers"') < text.index('APPARMOR_PROFILE=/etc/apparmor.d/van-browser-playwright-chromium')
