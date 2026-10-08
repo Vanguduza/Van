@@ -57,16 +57,24 @@ async def make_store(tmp_path) -> Store:
 
 async def rewrite_task_truth(store: Store, sql: str, params: tuple = ()) -> None:
     """Test setup only — rewrite a browser_tasks row's task truth (``scope_json``, ``mutating``)
-    the way a store written before migration 38 could hold it (a legacy row with no scope, a
-    malformed flag). Migration 38's identity trigger refuses such an edit; it is dropped for the
+    the way a store written before browser identity hardening could hold it (a legacy row with no scope, a
+    malformed flag). The current identity trigger refuses such an edit; it is dropped for the
     one statement and re-created from the migration itself."""
-    from van_gateway.storage.db import MIGRATION_38
-
+    # Preserve the actual current trigger, independent of migration renumbering.
+    # Replaying an old numeric migration may now add unrelated columns.
     async with store.connection() as db:
-        await db.execute("DROP TRIGGER IF EXISTS browser_tasks_identity_immutable")
-        await db.execute(sql, params)
+        cursor = await db.execute(
+            "SELECT sql FROM sqlite_master WHERE type='trigger' AND name=?",
+            ("browser_tasks_identity_immutable",))
+        row = await cursor.fetchone()
+        assert row is not None and row[0]
+        trigger_sql = row[0]
+        await db.execute("DROP TRIGGER browser_tasks_identity_immutable")
+        try:
+            await db.execute(sql, params)
+        finally:
+            await db.execute(trigger_sql)
         await db.commit()
-        await db.executescript(MIGRATION_38)
 
 
 async def enroll_device(store: Store, device_id: str = DEVICE_ID) -> str:

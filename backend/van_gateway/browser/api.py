@@ -776,17 +776,17 @@ class BrowserApi:
         if decision_status in {DecisionStatus.APPROVED, DecisionStatus.ANSWERED}:
             delta = json.loads(str(row["requested_scope_delta_json"]))
             if delta.get("action_class_ceiling") in {"A4", "A5"}:
-                await self.store.execute("UPDATE browser_tasks SET status=?,error_code=?,updated_at_ms=? WHERE task_id=?",
-                    (BrowserTaskStatus.BLOCKED_POLICY.value, "BROWSER_LEGACY_SCOPE_GRANT_FORBIDDEN", now, task.task_id))
-                return BrowserTaskStatus.BLOCKED_POLICY
+                return await self._sync_task_status(
+                    task, BrowserTaskStatus.BLOCKED_POLICY,
+                    "BROWSER_LEGACY_SCOPE_GRANT_FORBIDDEN", now,
+                )
             # An advisory answer is evidence of the owner's preference, never a
             # capability grant. A new exact sealed command is required to widen
             # domain, action class or resume a boundary-stopped task.
-            await self.store.execute(
-                "UPDATE browser_tasks SET error_code=?,updated_at_ms=? WHERE task_id=?",
-                ("BROWSER_FRESH_SEALED_COMMAND_REQUIRED", now, task.task_id),
+            return await self._sync_task_status(
+                task, BrowserTaskStatus.WAITING_FOR_OWNER,
+                "BROWSER_FRESH_SEALED_COMMAND_REQUIRED", now,
             )
-            return BrowserTaskStatus.WAITING_FOR_OWNER
         if decision_status is DecisionStatus.REJECTED:
             await self.store.execute(
                 "UPDATE browser_escalations SET status = ?, updated_at_ms = ? WHERE escalation_id = ?",
