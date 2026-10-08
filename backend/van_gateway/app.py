@@ -7,6 +7,7 @@ import base64
 import binascii
 import hmac
 import json
+import re
 import shutil
 import time
 from typing import Any
@@ -1159,7 +1160,9 @@ def create_app() -> FastAPI:
     app.include_router(mission_api.router)
     app.include_router(understanding_api.router)
 
-    def control_scope_for(method: str, path: str) -> ControlScope | None:
+    def control_scope_for(
+        method: str, path: str, *, internal_present: bool = False
+    ) -> ControlScope | None:
         """Which privileged scope a route belongs to, or None if it is not one.
 
         P0-SEC-001 — one token reached all of these. Naming the scope per route is what
@@ -1204,7 +1207,17 @@ def create_app() -> FastAPI:
             # P0-SEC-001 closed and P2-GOOG-004 nearly reopened.
             return None
         if path.startswith("/v1/browser/"):
-            return None if method == "GET" else ControlScope.BROWSER
+            if method != "GET":
+                return ControlScope.BROWSER
+            # The fixed browser control client needs these two task projections
+            # to bind assignments and read sealed evidence. A presented internal
+            # credential must hold BROWSER scope; a wrong scope cannot fall through
+            # to device auth. Without one, retain the owner's existing device path.
+            if internal_present and re.fullmatch(
+                r"/v1/browser/tasks/[^/]+(?:/evidence)?", path
+            ):
+                return ControlScope.BROWSER
+            return None
         if method == "PUT" and path.startswith("/v1/projects/") and path.endswith("/truth"):
             return ControlScope.PROJECTS
         if method == "POST" and path in {
@@ -1381,8 +1394,10 @@ def create_app() -> FastAPI:
             return await call_next(request)
 
         # Privileged local Hermes control uses an independent machine credential.
-        scope = control_scope_for(request.method, request.url.path)
         presented_internal = request.headers.get("X-Van-Internal-Token", "")
+        scope = control_scope_for(
+            request.method, request.url.path, internal_present=bool(presented_internal.strip())
+        )
         if scope is not None:
             if control_authority.permits(presented_internal, scope):
                 request.state.van_control_scope = scope.value
