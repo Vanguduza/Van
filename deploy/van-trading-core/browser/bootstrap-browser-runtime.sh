@@ -28,6 +28,25 @@ install -d -o van-browser -g van-browser -m 0700 /run/van-browser
 install -d -o vati -g vati -m 0750 /var/lib/van-trading/evidence/automation/sha256
 install -d -o van-browser -g van-browser -m 0750 /var/log/van-trading/browser
 
+# The trading data root is intentionally not world-traversable. The browser worker still
+# has to cross those parents to reach only its dedicated subtrees. Grant execute-only ACLs
+# to the van-browser identity instead of weakening /var/lib/van-trading or /var/log/van-trading.
+if ! command -v setfacl >/dev/null 2>&1; then
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get -o Acquire::Retries=3 update -qq
+  apt-get install -y -qq --no-install-recommends acl >/dev/null
+fi
+for parent in \
+  /var/lib/van-trading \
+  /var/lib/van-trading/browser \
+  /var/lib/van-trading/evidence \
+  /var/lib/van-trading/evidence/browser \
+  /var/log/van-trading \
+  /var/log/van-trading/browser
+do
+  setfacl -m u:van-browser:--x "$parent"
+done
+
 install -o van-browser -g van-browser -m 0644 "$HERE/package.json" "$BASE/package.json"
 install -o van-browser -g van-browser -m 0644 "$HERE/package-lock.json" "$BASE/package-lock.json"
 install -o root -g root -m 0644 "$HERE/runtime.env.example" "$CONFIG"
