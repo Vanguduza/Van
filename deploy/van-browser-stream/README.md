@@ -51,7 +51,8 @@ Dual-homing is what satisfies all four; a single-homed host fails at least one.
 
 | Component | Unit | Interface | Notes |
 |---|---|---|---|
-| Chromium | `van-browser-chromium.service` | **loopback only** | `--remote-debugging-address=127.0.0.1`. The debugger is the reason this host is fenced. |
+| Exact-IP egress proxy | `van-browser-egress-proxy.service` | **loopback only** | Public HTTP(S) only; rejects any hostname with a private/reserved DNS answer and connects to the exact admitted IP. |
+| Chromium | `van-browser-chromium.service` | **loopback only** | `--remote-debugging-address=127.0.0.1`; all HTTP(S) is forced through the exact-IP proxy; QUIC and non-proxied WebRTC UDP are disabled. |
 | Browser Control Agent | `van-browser-control-agent.service` | private VCN, mTLS | `services/browser_control_agent`; the only cross-host bridge to Chromium |
 | Stream runtime | `van-browser-stream.service` | public | signalling + WebRTC; verifies `BrowserStreamGrant` (ES256, `kid` pinned) |
 | Profile volume | — | — | encrypted, mounted only here (§13.5 option A) |
@@ -167,7 +168,9 @@ an unknown caller, and those are the two things that matter on this host.
 
 It is deliberately short and every check is a refusal that must happen:
 
-1. **CDP is not reachable off loopback.** It connects to the debugging port on every
+1. **CDP and the egress proxy are not reachable off loopback.** The proxy must also
+   reject a loopback/private destination, and live Chromium must show the proxy/no-bypass,
+   QUIC-disable and non-proxied-WebRTC-disable flags. **CDP is not reachable off loopback.** It connects to the debugging port on every
    non-loopback address the host has. Any answer is a `RED`. This is RB-117 and it is first
    because it is the one that turns this host into a remote shell.
 2. **The control agent refuses an unknown client certificate.** A connection with no client

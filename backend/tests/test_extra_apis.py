@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+import base64
+import hashlib
+import io
+
 import pytest
 from cryptography.fernet import Fernet
 from httpx import ASGITransport, AsyncClient
+from pypdf import PdfWriter
 
 from van_gateway.action.models import ExecutionStatus
 from van_gateway.app import create_app
@@ -182,8 +187,17 @@ async def test_google_fake_transport_requires_authorized_execution_and_readback(
         },
     )
     assert connected.status_code == 200
-    _app.state.google.transport = FakeGoogleTransport()
+    google_transport = FakeGoogleTransport()
+    seed_raw = base64.urlsafe_b64encode(
+        b"From: owner@example.com\r\nTo: supplier@example.com\r\nSubject: Reviewed\r\n\r\nReady"
+    ).decode("ascii").rstrip("=")
+    google_transport.drafts["d1"] = {
+        "id": "d1",
+        "message": {"id": "md1", "threadId": "t1", "raw": seed_raw},
+    }
+    _app.state.google.transport = google_transport
     _app.state.google.oauth = None
+    reviewed_sha = hashlib.sha256(seed_raw.encode("ascii")).hexdigest()
 
     # An internal-control credential is not owner approval. The historical route accepted
     # approved=true here; the new route has no such authority-bearing parameter.
@@ -246,6 +260,31 @@ async def test_google_fake_transport_requires_authorized_execution_and_readback(
     assert refused.json()["detail"] == "execution_not_authorized"
     assert _app.state.google.transport.calls == before
 
+    # Owner approval binds the irreversible send to the exact reviewed MIME bytes.
+    stale_parameters = {"draft_id": "d1", "expected_raw_sha256": "0" * 64}
+    stale = await _app.state.owner_runtime.actions.begin(
+        execution_id="exec-google-send-stale",
+        command_id="cmd-google-send-stale",
+        turn_id="turn-google-send-stale",
+        action_id="google.gmail.send",
+        principal_type=PrincipalType.OWNER_DEVICE,
+        requested_by="device:pytest-client",
+        idempotency_key="turn-google-send-stale:google.gmail.send",
+        parameters=stale_parameters,
+        snapshot_id=None,
+        owner_approved=True,
+    )
+    before_send = len([name for name, _args in google_transport.calls if name == "gmail_send"])
+    stale_response = await ac.post(
+        "/v1/google/actions/execute",
+        headers=headers,
+        json={"execution_id": stale.execution_id, "parameters": stale_parameters},
+    )
+    assert stale_response.status_code == 503
+    assert stale_response.json()["detail"] == "gmail_draft_version_changed"
+    after_send = len([name for name, _args in google_transport.calls if name == "gmail_send"])
+    assert after_send == before_send
+
     scrubbed = GoogleService.scrub_for_prompt({"access_token": "tok", "snippet": "hi"})
     assert "access_token" not in scrubbed
     assert scrubbed["snippet"] == "hi"
@@ -287,3 +326,96 @@ async def test_internal_control_token_is_not_general_ingress(client):
         general = await internal.get("/v1/projects")
         assert general.status_code == 401
         assert general.json()["detail"] == "ingress_auth_failed"
+
+
+
+@pytest.mark.asyncio
+async def test_google_filled_pdf_reply_round_trip_is_action_bound(client):
+    """Canonical OpenMuse→VAN acceptance #3 through the real ActionRuntime boundary."""
+    ac, app = client
+    headers = {"X-Van-Internal-Token": "test-internal-token"}
+    connected = await ac.post(
+        "/v1/google/connect",
+        headers=headers,
+        json={
+            "refresh_token": "refresh-round-trip",
+            "scopes": [
+                "https://www.googleapis.com/auth/gmail.readonly",
+                "https://www.googleapis.com/auth/gmail.compose",
+                "https://www.googleapis.com/auth/gmail.send",
+            ],
+        },
+    )
+    assert connected.status_code == 200
+    transport = FakeGoogleTransport()
+    app.state.google.transport = transport
+    app.state.google.oauth = None
+
+    writer=PdfWriter()
+    writer.add_blank_page(width=100,height=100)
+    pdf=io.BytesIO()
+    writer.write(pdf)
+    document=await app.state.documents.import_pdf(
+        filename="permission.pdf",data=pdf.getvalue(),mission_id="mission-google-round-trip"
+    )
+    filled=await app.state.documents.fill(document.document_id,{})
+    assert filled.output_artifact_id
+
+    draft_parameters={
+        "thread_id":"thread-1",
+        "body":"Attached is the completed form.",
+        "attachment_document_id":document.document_id,
+    }
+    draft_execution=await app.state.owner_runtime.actions.begin(
+        execution_id="exec-google-draft-attachment",
+        command_id="cmd-google-draft-attachment",
+        turn_id="turn-google-draft-attachment",
+        action_id="google.gmail.draft",
+        principal_type=PrincipalType.OWNER_DEVICE,
+        requested_by="device:pytest-client",
+        idempotency_key="turn-google-draft-attachment:google.gmail.draft",
+        parameters=draft_parameters,
+        snapshot_id=None,
+        owner_approved=False,
+    )
+    assert draft_execution.status is ExecutionStatus.AUTHORIZED
+    drafted=await ac.post(
+        "/v1/google/actions/execute",
+        headers=headers,
+        json={"execution_id":draft_execution.execution_id,"parameters":draft_parameters},
+    )
+    assert drafted.status_code==200,drafted.text
+    review=drafted.json()["review"]
+    assert review["attachment_document_id"]==document.document_id
+    assert len(review["raw_sha256"])==64
+    assert drafted.json()["verification"]["status"]=="VERIFIED_SUCCESS"
+
+    send_parameters={
+        "draft_id":review["draft_id"],
+        "expected_raw_sha256":review["raw_sha256"],
+    }
+    send_execution=await app.state.owner_runtime.actions.begin(
+        execution_id="exec-google-send-attachment",
+        command_id="cmd-google-send-attachment",
+        turn_id="turn-google-send-attachment",
+        action_id="google.gmail.send",
+        principal_type=PrincipalType.OWNER_DEVICE,
+        requested_by="device:pytest-client",
+        idempotency_key="turn-google-send-attachment:google.gmail.send",
+        parameters=send_parameters,
+        snapshot_id=None,
+        owner_approved=True,
+    )
+    assert send_execution.status is ExecutionStatus.AUTHORIZED
+    sent=await ac.post(
+        "/v1/google/actions/execute",
+        headers=headers,
+        json={"execution_id":send_execution.execution_id,"parameters":send_parameters},
+    )
+    assert sent.status_code==200,sent.text
+    assert sent.json()["verification"]["status"]=="VERIFIED_SUCCESS"
+    calls=[name for name,_args in transport.calls]
+    assert calls==[
+        "gmail_draft","gmail_draft_get",
+        "gmail_draft_get","gmail_send","gmail_message_get",
+    ]

@@ -335,3 +335,141 @@ def test_private_browser_workers_are_real_and_fail_closed():
     for text in (stagehand, bootstrap, env, stagehand_unit):
         assert "sk-ant-" not in text
         assert "sk-proj-" not in text
+
+
+# --------------------------------------------------------------------------- coherence
+#
+# Decision-record signature vocabulary. In docs/decisions, `owner_signature_status: SIGNED`
+# means an owner decision recorded through the Project Truth process (PROJECT_TRUTH_PROTOCOL
+# authority tier 2, `owner_instruction_is_project_truth_authority`). A device-authenticated,
+# replay-protected owner-signed instruction (tier 1) arrives only through signed ingress.
+# A record must never let the first be read as the second, and must never contradict itself.
+
+import re
+
+import pytest
+import yaml
+
+_SIGNED_INGRESS_PRESENT = {"PRESENT", "SATISFIED"}
+_SIGNED_INGRESS_ABSENT = {"ABSENT", "PENDING"}
+_GATE_STATUSES = {"PENDING", "SATISFIED"}
+_HEADER_DENIES_SIGNATURE = re.compile(r"not\s+owner[- ]signed", re.IGNORECASE)
+
+
+def decision_coherence_violations(text: str) -> list[str]:
+    """Return every signature/status incoherence in one decision record."""
+    violations: list[str] = []
+    header = []
+    for line in text.splitlines():
+        if not line.startswith("#"):
+            break
+        header.append(line)
+    body = yaml.safe_load(text) or {}
+    status = body.get("owner_signature_status")
+
+    if status == "SIGNED" and _HEADER_DENIES_SIGNATURE.search("\n".join(header)):
+        violations.append("header says NOT owner-signed but owner_signature_status is SIGNED")
+
+    ingress = body.get("signed_ingress")
+    semantics = body.get("owner_signature_semantics")
+    claims_device_signature = (
+        isinstance(semantics, dict) and semantics.get("basis") == "DEVICE_SIGNED_INGRESS"
+    ) or body.get("device_signed") is True
+
+    if status == "SIGNED" and not isinstance(ingress, dict):
+        violations.append(
+            "SIGNED without a signed_ingress block: an unqualified SIGNED reads as a "
+            "device-signed claim with no signed-ingress evidence reference"
+        )
+    if status == "SIGNED" and not isinstance(semantics, dict):
+        violations.append("SIGNED without owner_signature_semantics stating its basis")
+
+    if isinstance(ingress, dict):
+        ingress_status = ingress.get("status")
+        ref = ingress.get("evidence_ref")
+        has_ref = isinstance(ref, str) and ref.startswith("evidence://")
+        if ingress_status not in _SIGNED_INGRESS_PRESENT | _SIGNED_INGRESS_ABSENT:
+            violations.append(f"signed_ingress.status {ingress_status!r} is not a known value")
+        if ingress_status in _SIGNED_INGRESS_PRESENT and not has_ref:
+            violations.append("signed ingress claimed PRESENT without an evidence:// reference")
+        if ingress_status in _SIGNED_INGRESS_ABSENT and ref:
+            violations.append("signed ingress ABSENT/PENDING yet carries an evidence reference")
+        if claims_device_signature and ingress_status not in _SIGNED_INGRESS_PRESENT:
+            violations.append("device-signed basis claimed while signed ingress is not PRESENT")
+    elif claims_device_signature:
+        violations.append("device-signed basis claimed without a signed-ingress evidence reference")
+
+    for gate_name, gate in (body.get("production_gates") or {}).items():
+        components = gate.get("components") or {}
+        for name, component in components.items():
+            cstatus = component.get("status")
+            if cstatus not in _GATE_STATUSES:
+                violations.append(f"{gate_name}.{name}: status {cstatus!r} is not PENDING/SATISFIED")
+            if cstatus == "SATISFIED" and not component.get("evidence"):
+                violations.append(f"{gate_name}.{name}: SATISFIED without evidence")
+        all_satisfied = bool(components) and all(
+            c.get("status") == "SATISFIED" for c in components.values()
+        )
+        if gate.get("status") == "SATISFIED" and not all_satisfied:
+            violations.append(f"{gate_name}: SATISFIED while a component is not SATISFIED")
+        if gate.get("status") != "SATISFIED" and all_satisfied:
+            violations.append(f"{gate_name}: every component SATISFIED but gate not SATISFIED")
+    return violations
+
+
+#: Records that predate this check and still carry an unqualified SIGNED (and, for Browser
+#: Harness, the same stale "NOT owner-signed" header). They are owned by other work units;
+#: strict xfail makes a fix visible so the entry is removed in the same change.
+_KNOWN_INCOHERENT = {"VAN-ADOPT-N8N-001.yaml", "VAN-ADOPT-BROWSER-HARNESS-001.yaml"}
+
+
+@pytest.mark.parametrize(
+    "name", sorted(p.name for p in DECISIONS.glob("*.yaml"))
+)
+def test_decision_record_signature_status_is_coherent(name, request):
+    if name in _KNOWN_INCOHERENT:
+        request.applymarker(pytest.mark.xfail(strict=True, reason="known incoherent record"))
+    violations = decision_coherence_violations((DECISIONS / name).read_text(encoding="utf-8"))
+    assert violations == [], f"{name}: {violations}"
+
+
+def test_coherence_check_rejects_the_known_bad_shapes():
+    """The check must fail on each shape it exists to catch (induced failure)."""
+    header_contradiction = "# proposal. NOT owner-signed.\nowner_signature_status: SIGNED\n"
+    assert any("header" in v for v in decision_coherence_violations(header_contradiction))
+
+    bare_signed = "owner_signature_status: SIGNED\n"
+    assert any("signed_ingress" in v for v in decision_coherence_violations(bare_signed))
+
+    forged_ingress = (
+        "owner_signature_status: SIGNED\n"
+        "owner_signature_semantics: {basis: DEVICE_SIGNED_INGRESS}\n"
+        "signed_ingress: {status: PRESENT, evidence_ref: null}\n"
+    )
+    assert any("evidence://" in v for v in decision_coherence_violations(forged_ingress))
+
+    gate_overclaim = (
+        "production_gates:\n  G:\n    status: SATISFIED\n    components:\n"
+        "      a: {status: PENDING}\n"
+    )
+    assert any("SATISFIED while" in v for v in decision_coherence_violations(gate_overclaim))
+
+
+def test_stagehand_record_preserves_owner_intent_and_names_its_production_gate():
+    body = yaml.safe_load((DECISIONS / "VAN-ADOPT-STAGEHAND-001.yaml").read_text(encoding="utf-8"))
+    record = body["owner_decision_record"]
+    assert record["decision"] == "APPROVED_AS_HERMES_SUBAGENT"
+    assert str(record["decided_on"]) == "2026-09-18"
+    assert body["owner_signature_evidence_ref"].startswith("evidence://owner/session/")
+    assert body["owner_intent_status"] == "APPROVED"
+    assert body["signed_ingress"]["status"] == "ABSENT"
+    gate = body["production_gates"]["STAGEHAND_PRODUCTION_ADOPTION_RECONCILED"]
+    assert set(gate["components"]) == {
+        "owner_intent_preserved",
+        "contradictory_metadata_corrected",
+        "production_signed_ingress_evidence",
+        "exact_version_and_digest_pinned",
+        "local_cdp_runtime_qualification",
+        "deployment_host_approved",
+    }
+    assert gate["status"] == "PENDING"

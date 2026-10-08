@@ -70,6 +70,18 @@ jobs:
         run: pytest -q
       - name: Contract tests
         run: pytest -q tests/contracts
+      - name: OpenMuse → VAN convergence repository certification
+        run: |
+          python tools/certification/openmuse_van_convergence.py \
+            --check \
+            --output artifacts/release/openmuse-van/convergence-certification.json
+      - name: Upload OpenMuse → VAN convergence evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-openmuse-convergence-certification
+          path: artifacts/release/openmuse-van/convergence-certification.json
+          if-no-files-found: error
+
 
       # Rev 1.5 §13.2 — the Browser Control Agent. It lives outside backend/ because it
       # runs on the Browser Stream Host rather than on the Gateway, so neither of the two

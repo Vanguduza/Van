@@ -23,6 +23,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Protocol
 
+from services.browser_control_agent.egress_proxy import validate_public_url_syntax
 from services.browser_control_agent.authority import (
     ControlAuthority,
     Operation,
@@ -98,8 +99,13 @@ async def _navigate(cdp: CdpTransport, call: Call, task: TaskGrant) -> dict[str,
     # The scheme allowlist is here rather than in the policy layer because this is the
     # last place before the browser: `file://` reads the host's disk into a page the owner
     # is watching, and `chrome://` reaches the browser's own settings.
-    if not (url.startswith("https://") or url.startswith("http://")):
-        raise ValueError("control_agent_navigate_scheme_refused")
+    # Defense in depth. The exact-IP proxy below Chromium is the complete egress
+    # boundary (including redirects/subresources); this last pre-CDP check prevents an
+    # obviously private/literal/nonstandard target even if a host was misconfigured.
+    try:
+        validate_public_url_syntax(url)
+    except ValueError as exc:
+        raise ValueError("control_agent_navigate_destination_refused") from exc
     result = await cdp.send(call.target_id, "Page.navigate", {"url": url})
     if result.get('errorText') or result.get('isDownload'):
         raise ValueError('control_agent_navigation_failed')

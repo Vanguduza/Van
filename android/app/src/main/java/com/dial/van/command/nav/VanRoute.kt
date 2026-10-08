@@ -28,6 +28,9 @@ object VanRoute {
     const val WORK = "work"
     const val WORK_ACTIVITY = "work/activity"
     const val WORK_ARTEMIS = "work/artemis"
+    const val WORK_ASSETS = "work/assets"
+    const val WORK_DOCUMENT_TEMPLATE = "work/documents/{documentId}"
+    const val WORK_THREAD_TEMPLATE = "work/threads/{threadId}"
     const val WORK_BROWSER = "work/browser"
     const val WORK_BROWSER_TASKS = "work/browser/tasks"
     const val WORK_BROWSER_ESCALATIONS = "work/browser/escalations"
@@ -44,6 +47,12 @@ object VanRoute {
     const val PROJECT_RATIONALE_TEMPLATE = "projects/{projectId}/rationale"
     const val CONNECTED = "connected"
     const val SETTINGS = "settings"
+    /**
+     * Jev Intelligence — the owner projection of the one DDS `dial-jev` service. A child of
+     * Settings, not a ninth destination (DNA §4 stays at eight). The Browser & Automation
+     * surface shows the same service as its interaction-router Jev lane.
+     */
+    const val SETTINGS_JEV = "settings/jev"
     /**
      * Full-screen children of Settings for the two legacy bodies this rebuild reuses rather
      * than duplicates (`SpeechModule`, `NotificationPolicyModule`) — both are themselves a
@@ -97,6 +106,8 @@ object VanRoute {
     fun devEvidenceRoute(evidenceRef: String): String = "work/dev/evidence/${encode(evidenceRef)}"
 
     fun missionRoute(missionId: String): String = "work/missions/${encode(missionId)}"
+    fun documentRoute(documentId: String): String = "work/documents/${encode(documentId)}"
+    fun threadRoute(threadId: String): String = "work/threads/${encode(threadId)}"
     fun projectRoute(projectId: String): String = "projects/${encode(projectId)}"
     fun projectRationaleRoute(projectId: String): String = "projects/${encode(projectId)}/rationale"
     fun browserOutcomeRoute(taskId: String): String = "owner/browser-outcome/${encode(taskId)}"
@@ -108,6 +119,7 @@ object VanRoute {
         PROJECTS, PROJECT_DETAIL_TEMPLATE, PROJECT_RATIONALE_TEMPLATE, CONNECTED, SETTINGS,
         SETTINGS_VOICE, SETTINGS_NOTIFICATIONS, SETTINGS_PERMISSIONS,
         OWNER_KNOWLEDGE, OWNER_RESEARCH, OWNER_AUTOMATION, OWNER_DIAGNOSTICS, OWNER_BROWSER_OUTCOME,
+        WORK_ASSETS, WORK_DOCUMENT_TEMPLATE, WORK_THREAD_TEMPLATE, SETTINGS_JEV,
     ) + DEV_TEMPLATES
 
     /**
@@ -126,6 +138,9 @@ object VanRoute {
         WORK to HOME,
         WORK_ACTIVITY to WORK,
         WORK_ARTEMIS to WORK,
+        WORK_ASSETS to WORK,
+        WORK_DOCUMENT_TEMPLATE to WORK_ASSETS,
+        WORK_THREAD_TEMPLATE to WORK_ASSETS,
         WORK_BROWSER to WORK,
         WORK_BROWSER_TASKS to WORK_BROWSER,
         WORK_BROWSER_ESCALATIONS to WORK_BROWSER,
@@ -142,6 +157,7 @@ object VanRoute {
         PROJECT_RATIONALE_TEMPLATE to PROJECT_DETAIL_TEMPLATE,
         CONNECTED to HOME,
         SETTINGS to HOME,
+        SETTINGS_JEV to SETTINGS,
         SETTINGS_VOICE to SETTINGS,
         SETTINGS_NOTIFICATIONS to SETTINGS,
         SETTINGS_PERMISSIONS to SETTINGS,

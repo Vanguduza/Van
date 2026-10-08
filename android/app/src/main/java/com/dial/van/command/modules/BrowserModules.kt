@@ -58,9 +58,15 @@ internal fun BrowserAutomationModule(
     var escalations by remember { mutableStateOf<List<JSONObject>?>(null) }
     var policy by remember { mutableStateOf<JSONObject?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
+    var jevLane by remember { mutableStateOf<com.dial.van.command.jev.JevBrowserLane?>(null) }
 
     fun refresh() {
         scope.launch {
+            // Separate from the browser truth below: a router/Jev read failure must never
+            // blank the Browser & Automation page (Jev outage never breaks VAN).
+            jevLane = runCatching {
+                com.dial.van.command.jev.JevJson.browserLane(app.gatewayClient.browserInteractionRouter())
+            }.getOrNull()
             runCatching {
                 status = app.gatewayClient.browserStatus()
                 tasks = app.gatewayClient.browserTasks().objectList()
@@ -85,6 +91,7 @@ internal fun BrowserAutomationModule(
         }
         if (status == null && error == null) item { TruthMessage("Loading browser and automation state…") }
         if (error != null) item { TruthMessage(error!!, warning = true) }
+        jevLane?.let { lane -> item { com.dial.van.command.jev.JevBrowserLaneCard(lane, glass) } }
 
         status?.let { s ->
             item {

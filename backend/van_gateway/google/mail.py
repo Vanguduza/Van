@@ -69,19 +69,41 @@ def message_snapshot(raw: str) -> dict[str, Any]:
     for name in ("From", "To", "Cc", "Bcc", "Subject", "In-Reply-To", "References", "Reply-To"):
         if len(message.get_all(name, [])) > 1:
             raise RuntimeError("gmail_raw_message_duplicate_header")
-    if message.is_multipart() or message.get_content_type() != "text/plain" or message.get_content_disposition() == "attachment":
+    attachments = []
+    body_part = message
+    if message.is_multipart():
+        if message.get_content_type() != "multipart/mixed":
+            raise RuntimeError("gmail_raw_message_plain_text_required")
+        parts = list(message.iter_parts())
+        if not 2 <= len(parts) <= 9:
+            raise RuntimeError("gmail_attachment_count_invalid")
+        body_part = parts[0]
+        for part in parts[1:]:
+            filename = part.get_filename()
+            if (part.is_multipart() or part.get_content_type() != "application/pdf"
+                    or part.get_content_disposition() != "attachment"
+                    or not isinstance(filename, str) or not 1 <= len(filename) <= 180
+                    or any(c in filename for c in "\\r\\n\\x00/\\\\")
+                    or part.defects):
+                raise RuntimeError("gmail_attachment_invalid")
+            data = part.get_payload(decode=True)
+            if not isinstance(data, bytes) or not data.startswith(b"%PDF-"):
+                raise RuntimeError("gmail_attachment_invalid")
+            attachments.append({"filename": filename, "mime_type": "application/pdf",
+                                "data_b64": base64.b64encode(data).decode("ascii")})
+    if body_part.is_multipart() or body_part.get_content_type() != "text/plain" or body_part.get_content_disposition() == "attachment":
         raise RuntimeError("gmail_raw_message_plain_text_required")
     if "From" not in message or "To" not in message or "Subject" not in message:
         raise RuntimeError("gmail_raw_message_required_header_missing")
     try:
-        body = message.get_content(errors="strict")
+        body = body_part.get_content(errors="strict")
     except (LookupError, UnicodeError, ValueError) as exc:
         raise RuntimeError("gmail_raw_message_invalid") from exc
     in_reply_to = _header(str(message.get("In-Reply-To", "")))
     references = _header(str(message.get("References", ""))).split()
     if (in_reply_to and _MESSAGE_ID.fullmatch(in_reply_to) is None) or any(_MESSAGE_ID.fullmatch(item) is None for item in references):
         raise RuntimeError("gmail_reply_message_id_invalid")
-    return {
+    snapshot = {
         "from": _addresses(str(message["From"]), single=True)[0],
         "to": _addresses(str(message["To"])),
         "cc": _addresses(str(message["Cc"])) if message.get("Cc") else [],
@@ -92,6 +114,9 @@ def message_snapshot(raw: str) -> dict[str, Any]:
         "references": references,
         "body": _normal_body(body),
     }
+    if attachments:
+        snapshot["attachments"] = attachments
+    return snapshot
 
 
 def content_digest(snapshot: dict[str, Any], thread_id: str) -> str:
@@ -114,6 +139,9 @@ def encode_snapshot(snapshot: dict[str, Any]) -> str:
         message["References"] = " ".join(snapshot["references"])
     message["Date"] = formatdate(localtime=False, usegmt=True)
     message.set_content(snapshot["body"], charset="utf-8")
+    for attachment in snapshot.get("attachments", []):
+        message.add_attachment(base64.b64decode(attachment["data_b64"], validate=True),
+            maintype="application", subtype="pdf", filename=attachment["filename"])
     raw = base64.urlsafe_b64encode(message.as_bytes()).decode("ascii").rstrip("=")
     if message_snapshot(raw) != snapshot:
         raise RuntimeError("gmail_frozen_message_mismatch")
@@ -127,7 +155,7 @@ class PreparedReply:
     source_message_id: str
 
 
-def prepare_reply(profile: dict[str, Any], thread: dict[str, Any], thread_id: str, body: str) -> PreparedReply:
+def prepare_reply(profile: dict[str, Any], thread: dict[str, Any], thread_id: str, body: str, *, attachments: list[dict[str, Any]] | None = None) -> PreparedReply:
     if not isinstance(body, str) or len(body.encode("utf-8")) > MAX_MESSAGE_BYTES // 2 or "\x00" in body:
         raise RuntimeError("gmail_reply_body_invalid")
     if not isinstance(profile, dict) or not isinstance(thread, dict):
@@ -191,5 +219,10 @@ def prepare_reply(profile: dict[str, Any], thread: dict[str, Any], thread_id: st
     reply["References"] = " ".join(references)
     reply["Date"] = formatdate(localtime=False, usegmt=True)
     reply.set_content(_normal_body(body), charset="utf-8")
+    for attachment in attachments or []:
+        if attachment.get("mime_type") != "application/pdf" or not isinstance(attachment.get("data"), bytes):
+            raise RuntimeError("gmail_attachment_invalid")
+        reply.add_attachment(attachment["data"], maintype="application", subtype="pdf",
+                             filename=attachment["filename"])
     raw = base64.urlsafe_b64encode(reply.as_bytes()).decode("ascii").rstrip("=")
     return PreparedReply(raw=raw, snapshot=message_snapshot(raw), source_message_id=str(source["id"]))

@@ -101,6 +101,7 @@ class MissionService:
         # A mission reaching a terminal state is the outcome; this is where it is written.
         self.learning = learning
         self.hermes_results = HermesResultInbox(self)
+        self.terminal_projector = None
 
     # ------------------------------------------------------------- creation
 
@@ -277,6 +278,11 @@ class MissionService:
                 raise MissionError("MISSION_STATE_PRECONDITION_FAILED", current.value)
             if event is not None:
                 await self._persist_event(db, event)
+            if target in TERMINAL_STATES:
+                await db.execute(
+                    "INSERT OR IGNORE INTO mission_projection_outbox(mission_id, created_at_ms) VALUES(?,?)",
+                    (mission_id, now),
+                )
             await db.commit()
         if event is not None:
             await self._publish_event(event)
@@ -317,7 +323,36 @@ class MissionService:
             # §12 — how the owner's decision actually turned out, which is the only thing
             # that can falsify what VAN inferred from it.
             await self.learning.record_decision_outcome(refreshed, state=refreshed.state)
+        if refreshed.is_terminal:
+            await self.reconcile_terminal_projections(mission_id=mission_id)
         return refreshed
+
+    async def reconcile_terminal_projections(self, *, mission_id: str | None = None, limit: int = 32) -> int:
+        """Retry local idempotent publication; never rerun an external effect."""
+        if self.terminal_projector is None:
+            return 0
+        rows = await self.store.fetchall(
+            "SELECT mission_id FROM mission_projection_outbox" +
+            (" WHERE mission_id=?" if mission_id else "") +
+            " ORDER BY created_at_ms LIMIT ?",
+            (mission_id, min(max(limit, 1), 100)) if mission_id else (min(max(limit, 1), 100),),
+        )
+        completed = 0
+        for row in rows:
+            mission = await self.get(row["mission_id"])
+            if mission is None or not mission.is_terminal:
+                continue
+            try:
+                await self.terminal_projector(mission)
+            except Exception as exc:
+                await self.store.execute(
+                    "UPDATE mission_projection_outbox SET attempts=attempts+1, last_failure=? WHERE mission_id=?",
+                    (type(exc).__name__, mission.mission_id),
+                )
+                continue
+            await self.store.execute("DELETE FROM mission_projection_outbox WHERE mission_id=?", (mission.mission_id,))
+            completed += 1
+        return completed
 
     async def for_hermes_run(self, hermes_run_id: str) -> Mission | None:
         """Resolve a Hermes run through the durable mission-event ledger.

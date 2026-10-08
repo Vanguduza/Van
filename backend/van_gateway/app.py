@@ -21,6 +21,8 @@ from pydantic import BaseModel, Field, StrictBool, ValidationError
 from van_gateway.action.service import ActionPolicyError
 from van_gateway.artemis.console import ArtemisConsoleProxy
 from van_gateway.attention.engine import AttentionEngine
+from van_gateway.artifacts.api import build_artifact_router
+from van_gateway.artifacts.service import ArtifactService
 from van_gateway.audit.service import AuditService
 from van_gateway.auth.service import AuthError, AuthService
 from van_gateway.approval.service import OwnerApprovalError, OwnerApprovalService
@@ -39,6 +41,15 @@ from van_gateway.command.mission_link import CommandMissionLink
 from van_gateway.briefing.service import BriefingService
 from van_gateway.config import get_settings
 from van_gateway.decisions.service import DecisionCreate, DecisionError, DecisionService
+from van_gateway.documents.api import build_document_router
+from van_gateway.documents.service import DocumentService
+from van_gateway.goals.api import build_goal_router
+from van_gateway.goals.service import GoalService
+from van_gateway.goals.watch_runner import WatchRunner
+from van_gateway.suggestions.api import build_suggestion_router
+from van_gateway.suggestions.service import SuggestionService
+from van_gateway.conversations.api import build_conversation_router
+from van_gateway.conversations.service import ConversationService
 from van_gateway.degraded.registry import DegradedRegistry
 from van_gateway.dial_dev.api import build_dial_dev_router
 from van_gateway.dial_dev.attention import DialDevAttentionIngest
@@ -54,6 +65,9 @@ from van_gateway.hermes.bridge import HermesBridge
 from van_gateway.mtls.pki import DeviceCA, PkiError
 from van_gateway.mtls.transport import mtls_device_id
 from van_gateway.idempotency.service import IdempotencyService
+from van_gateway.jev.client import JevProjectionClient
+from van_gateway.jev.api import JevProjectionApi
+from van_gateway.jev.advisor import JevVanAdvisor
 from van_gateway.models import (
     ActionClass,
     AttentionSeverity,
@@ -96,6 +110,7 @@ from van_gateway.automation.temporal_bridge import TemporalAutomationApi
 from van_gateway.browser.agent_grant import AgentGrantService
 from van_gateway.browser.api import BrowserApi
 from van_gateway.browser.control_lease import ControlLeaseService
+from van_gateway.browser.interaction_router import InteractionRouter
 from van_gateway.browser.downloads import DownloadBroker
 from van_gateway.browser.downloads_api import build_download_report_router
 from van_gateway.browser.interactive_api import (
@@ -109,6 +124,9 @@ from van_gateway.browser.producer_api import (
 )
 from van_gateway.browser.producer_service import BrowserProducerService
 from van_gateway.browser.quality_api import QualityControllers, build_quality_router
+from van_gateway.computer_use.api import build_computer_use_router
+from van_gateway.computer_use.fabric import ComputerInteractionFabric, Surface
+from van_gateway.computer_use.worker import DockerComputerConfig, DockerComputerWorker
 from van_gateway.connectivity.provisioning import (
     build_provisioning_payload,
     sign_provisioning_payload,
@@ -367,6 +385,9 @@ class TicketConfirmRequest(BaseModel):
 #: route at all.
 GOOGLE_CONTROL_ROUTES: frozenset[str] = frozenset({
     "/v1/google/gmail/search",
+    "/v1/google/calendar/review",
+    "/v1/google/gmail/attachment/import-pdf",
+    "/v1/google/gmail/thread",
     "/v1/google/actions/execute",
     "/v1/google/gmail/send",
     "/v1/google/gmail/draft",
@@ -475,7 +496,28 @@ def create_app() -> FastAPI:
     projects = ProjectRouter(store, project_registry_path)
     audit = AuditService(store)
     degraded = DegradedRegistry()
-    attention = AttentionEngine(store, settings.attention_budget_per_hour)
+    jev_advisor = JevVanAdvisor(
+        base_url=settings.jev_base_url,
+        token_file=settings.jev_consumer_token_file,
+        enabled=settings.jev_enabled,
+        timeout_seconds=min(settings.jev_timeout_seconds, 1.2),
+    )
+    jev_projection = JevProjectionApi(
+        JevProjectionClient(
+            base_url=settings.jev_base_url,
+            read_token_file=settings.jev_projection_token_file,
+            control_token_file=settings.jev_control_token_file,
+            enabled=settings.jev_enabled,
+            timeout_seconds=settings.jev_timeout_seconds,
+        ),
+        degraded,
+    )
+    attention = AttentionEngine(store, settings.attention_budget_per_hour, jev_advisor=jev_advisor)
+    artifacts = ArtifactService(store)
+    documents = DocumentService(store, artifacts)
+    goals = GoalService(store, attention)
+    suggestions = SuggestionService(store, attention)
+    conversations = ConversationService(store)
     briefing = BriefingService(store, attention)
     reminders = ReminderService(store)
     decisions = DecisionService(store, attention)
@@ -484,16 +526,33 @@ def create_app() -> FastAPI:
     domain_trust = DomainTrustService(store)
     owner_runtime = OwnerRuntimeApi(
         store, settings, reminders=reminders, attention=attention, briefing=briefing,
+        artifacts=artifacts, suggestions=suggestions, conversations=conversations,
         # GAP-F-008: agent-initiated mutations consult the earned/granted domain trust.
         autonomy=ActionAutonomyGate(domain_trust),
+        jev_advisor=jev_advisor,
     )
     owner_runtime.bind_decisions(decisions)
     automation_registry = AutomationRegistry(store)
     automation_hot_index = HotWorkflowIndex()
+    computer_worker = DockerComputerWorker(DockerComputerConfig(
+        enabled=settings.computer_worker_enabled,
+        image=settings.computer_worker_image,
+        deployment_id=settings.computer_worker_deployment_id,
+        timeout_seconds=settings.computer_worker_timeout_seconds,
+        qualification_file=settings.computer_worker_qualification_file,
+    ))
+    computer_use = ComputerInteractionFabric(
+        store,
+        worker_impls=(
+            {Surface.TERMINAL: computer_worker}
+            if settings.computer_worker_enabled else {}
+        ),
+    )
     # One index, so `/v1/automation/health` reports the index work is routed
     # through rather than an empty copy of it.
     automation_health = AutomationHealthApi(
-        store, settings, degraded=degraded, hot_index=automation_hot_index
+        store, settings, degraded=degraded, hot_index=automation_hot_index,
+        computer_use=computer_use,
     )
     # The dispatcher shares the owner runtime's ActionRuntime and command
     # authority: an automation run must meet the same single final authority
@@ -537,6 +596,13 @@ def create_app() -> FastAPI:
         ),
     )
 
+    watch_runner = WatchRunner(
+        goals,
+        tasks=browser.tasks,
+        broker=browser.broker,
+        harness=automation_health.harness,
+    )
+
 
     trading = TradingService(
         settings.vati_ledger_path,
@@ -564,7 +630,13 @@ def create_app() -> FastAPI:
     if settings.google_oauth_client_id and settings.google_oauth_client_secret:
         google_transport = GoogleHttpTransport()
         google_oauth = GoogleOAuthTokenClient(settings.google_oauth_client_id, settings.google_oauth_client_secret)
-    google = GoogleService(store, settings.google_token_fernet_key, transport=google_transport, oauth=google_oauth)
+    google = GoogleService(
+        store,
+        settings.google_token_fernet_key,
+        transport=google_transport,
+        oauth=google_oauth,
+        documents=documents,
+    )
     google_registry = GoogleCapabilityRegistry(google_registry_path)
     google_broker = GoogleIdentityBroker(
         store,
@@ -606,6 +678,14 @@ def create_app() -> FastAPI:
     browser_control_leases = ControlLeaseService(store)
     interactive_sessions = InteractiveSessionService(
         store, browser.broker, browser_control_leases, events=events,
+    )
+    # Programme B B5 — the interaction router is built over the *existing* control-lease model
+    # and the one dial-jev client. It opens no session and starts no service. Eligibility is
+    # left at its default (deny all) until the B2 classifier is wired, so the Jev lane is
+    # never taken; the harness executor and Stagehand lane are attached by their owners.
+    interaction_router = InteractionRouter(
+        leases=browser_control_leases,
+        jev=jev_advisor if jev_advisor.configured else None,
     )
     # §5.5 — a dedicated ES256 key, separate from owner approval and device enrolment.
     # Absent configuration means grants cannot be minted, which is the honest state of a
@@ -700,7 +780,7 @@ def create_app() -> FastAPI:
 
     verifiers = build_mission_registry(
         store=store, trading=trading, knowledge=owner_runtime.knowledge, google=google, browser_plans=browser_action_plans, automation=automation,
-        browser_artifacts=browser_artifacts,
+        browser_artifacts=browser_artifacts, jev=jev_projection.client,
     )
     # P1-AUTO-001 — the dispatcher was constructed with an empty observer map, so every
     # production run came back UNVERIFIABLE and owner_success could never be true; the
@@ -782,6 +862,7 @@ def create_app() -> FastAPI:
         owner_fact_author=owner_fact_author,
         reminders=reminders,
         trading=trading,
+        jev=jev_projection.client,
         learning=learning,
         google=google,
     )
@@ -857,6 +938,7 @@ def create_app() -> FastAPI:
             database_path=settings.database_path,
             destination=destination,
             project_state_dir=str(Path(__file__).resolve().parents[2] / "docs" / "project-state"),
+            document_dir=str(Path(settings.database_path).resolve().parent / "documents"),
         )
         return {"destination": str(destination), "entries": len(manifest.entries)}
 
@@ -904,6 +986,7 @@ def create_app() -> FastAPI:
             database_path=settings.database_path,
             workspace=workspace,
             project_state_dir=str(Path(__file__).resolve().parents[2] / "docs" / "project-state"),
+            document_dir=str(Path(settings.database_path).resolve().parent / "documents"),
         )
         app.state.ops_backup_drill = report
         if not report["ok"]:
@@ -933,6 +1016,11 @@ def create_app() -> FastAPI:
     async def _run_proactive_followups() -> dict:
         return await proactive_followups.run(int(time.time() * 1000))
 
+    async def _run_owner_watches() -> dict:
+        # Individual watches carry their own next_run_at_ms. The scheduler tick merely
+        # wakes the bounded runner; a restart therefore does not re-check every watch.
+        return await watch_runner.run(now_ms=int(time.time() * 1000))
+
     def _scheduler_jobs() -> tuple[ScheduledJob, ...]:
         jobs = [
             ScheduledJob("reminders.fire_due", settings.reminder_sweep_seconds, _sweep_reminders),
@@ -942,6 +1030,7 @@ def create_app() -> FastAPI:
             ),
             ScheduledJob("ops.retention", settings.retention_interval_seconds, _run_retention),
             ScheduledJob("proactive.follow_ups", settings.reminder_sweep_seconds, _run_proactive_followups),
+            ScheduledJob("owner.watches", settings.reminder_sweep_seconds, _run_owner_watches),
             ScheduledJob("trading.publish_closed", settings.reminder_sweep_seconds, _run_trading_events),
         ]
         if settings.automation_enabled:
@@ -982,6 +1071,7 @@ def create_app() -> FastAPI:
         await auth.load_persisted_secrets()
         await oauth_pending.migrate()
         await owner_runtime.startup()
+        await missions.reconcile_terminal_projections()
         # §273 — the HOT index is a cache of durable state, so it is rebuilt on
         # every boot rather than trusted to survive a restart.
         await automation_hot_index.rebuild(store)
@@ -1021,6 +1111,14 @@ def create_app() -> FastAPI:
     app.state.owner_memory = owner_memory
     app.state.learning = learning
     app.state.degraded = degraded
+    app.state.artifacts = artifacts
+    app.state.documents = documents
+    app.state.goals = goals
+    app.state.watch_runner = watch_runner
+    app.state.suggestions = suggestions
+    app.state.conversations = conversations
+    app.state.jev_projection = jev_projection
+    app.state.jev_advisor = jev_advisor
     app.state.visual_acceptance = visual_acceptance
     # Exposed like `degraded`: which jobs a build actually installs is a property of
     # the running app, and a job list that exists only inside a closure is how
@@ -1032,6 +1130,8 @@ def create_app() -> FastAPI:
     app.state.orchestrator = orchestrator
     app.state.owner_runtime = owner_runtime
     app.state.automation_health = automation_health
+    app.state.computer_use = computer_use
+    app.state.computer_worker = computer_worker
     app.state.automation = automation
     app.state.automation_worker = automation_worker
     app.state.temporal_automation = temporal_automation
@@ -1069,6 +1169,12 @@ def create_app() -> FastAPI:
     from van_gateway.automation.owner_api import OwnerAutomationApi
     app.include_router(OwnerAutomationApi(automation).router)
 
+    app.include_router(build_artifact_router(artifacts))
+    app.include_router(build_document_router(documents))
+    app.include_router(build_goal_router(goals))
+    app.include_router(build_suggestion_router(suggestions))
+    app.include_router(build_conversation_router(conversations))
+    app.include_router(build_computer_use_router(computer_use))
     app.include_router(build_dial_dev_router(
         client=dial_dev_client,
         config=dial_dev_config,
@@ -1076,6 +1182,13 @@ def create_app() -> FastAPI:
         degraded=degraded,
         audit=audit,
     ))
+    app.include_router(jev_projection.router)
+
+    @app.get("/v1/browser/interaction-router")
+    async def interaction_router_status() -> dict:
+        """Which B5 lanes are wired. Read-only; the Jev lane names the one dial-jev."""
+        return interaction_router.describe()
+
     app.include_router(automation_health.router)
     app.include_router(automation.router)
     app.include_router(automation_worker.router)
@@ -1348,6 +1461,7 @@ def create_app() -> FastAPI:
     app.state.browser_action_plans = browser_action_plans
     app.state.interactive_sessions = interactive_sessions
     app.state.browser_control_leases = browser_control_leases
+    app.state.interaction_router = interaction_router
     app.state.browser_stream_grants = browser_stream_grants
     app.state.browser_producers = browser_producers
     app.include_router(mission_api.router)
@@ -1992,7 +2106,27 @@ def create_app() -> FastAPI:
     async def commands(req: CommandRequest, request: Request):
         if getattr(request.state, "van_device_id", None) != req.device_id:
             raise HTTPException(status_code=403, detail="device_identity_mismatch")
-        return await orchestrator.handle(req)
+        result = await orchestrator.handle(req)
+        # OMV-006 — only a command that reached the point of becoming owner intent has a
+        # Mission. Invalid signatures/refusals before that point must never be projected as
+        # owner speech. Projection is presentation state and cannot change command outcome.
+        if result.mission_id:
+            try:
+                main_thread = await conversations.ensure_main()
+                await conversations.append_projection(
+                    main_thread.thread_id,
+                    projection_key=f"command:{req.command_id}:owner",
+                    role="OWNER",
+                    body=req.text,
+                    command_id=req.command_id,
+                    mission_id=result.mission_id,
+                    terminal=False,
+                )
+            except Exception:
+                logging.getLogger("van_gateway.conversations").exception(
+                    "failed to project owner command %s into main thread", req.command_id
+                )
+        return result
 
     def _require_binding_service() -> OwnerDeviceBindingService:
         if owner_device_bindings is None:
@@ -2563,6 +2697,57 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=code, detail=str(exc)) from exc
         except GoogleAuthError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.get("/v1/google/gmail/thread")
+    async def gmail_thread(
+        thread_id: str,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
+        try:
+            return {"thread": _scrubbed(await google.gmail_thread_get(thread_id))}
+        except GoogleAuthError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.post("/v1/google/gmail/attachment/import-pdf")
+    async def gmail_attachment_import_pdf(
+        message_id: str,
+        attachment_id: str,
+        filename: str = "attachment.pdf",
+        project_id: str | None = None,
+        command_id: str | None = None,
+        mission_id: str | None = None,
+        execution_id: str | None = None,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        """Import a Gmail attachment through Document Fabric, never into model context."""
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
+        try:
+            data = await google.gmail_attachment_get(message_id, attachment_id)
+            record = await documents.import_pdf(
+                filename=filename, data=data, project_id=project_id, command_id=command_id,
+                mission_id=mission_id, execution_id=execution_id,
+            )
+            return record.model_dump(mode="json")
+        except GoogleAuthError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except Exception as exc:
+            code = getattr(exc, "code", "gmail_attachment_import_failed")
+            raise HTTPException(status_code=422, detail=str(code)) from exc
+
+    @app.get("/v1/google/calendar/review")
+    async def calendar_review(
+        event_id: str,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
+        try:
+            return _scrubbed(await google.calendar_event_review(event_id))
+        except GoogleAuthError as exc:
+            raise HTTPException(
+                status_code=409 if str(exc) == "google_outcome_unknown" else 503,
+                detail=str(exc),
+            ) from exc
 
     @app.post("/v1/google/actions/execute")
     async def execute_google_action(

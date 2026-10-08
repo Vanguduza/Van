@@ -102,7 +102,7 @@ if ! PYTHONPATH="$SRC_DIR:$SRC_DIR/backend${PYTHONPATH:+:$PYTHONPATH}" "$RUNTIME
 fi
 
 echo '== users =='
-for user in van-browser van-control van-stream; do
+for user in van-browser van-control van-stream van-egress; do
   if id "$user" >/dev/null 2>&1; then say "$user exists"; else
     run useradd --system --no-create-home --shell /usr/sbin/nologin "$user"
   fi
@@ -148,7 +148,7 @@ fi
 run install -m 644 "$VAN_BROWSER_GRANT_PUBLIC_KEY" "$ROOT/pki/grant-verify.pem"
 
 echo '== units =='
-for unit in van-browser-chromium.service van-browser-control-agent.service van-browser-stream.service van-browser-transfer-stage.service; do
+for unit in van-browser-egress-proxy.service van-browser-chromium.service van-browser-control-agent.service van-browser-stream.service van-browser-transfer-stage.service; do
   run install -m 644 "$PACKAGE/systemd/$unit" "/etc/systemd/system/$unit"
 done
 run install -m 644 "$PACKAGE/van-browser-stream-tmpfiles.conf" /etc/tmpfiles.d/van-browser-stream.conf

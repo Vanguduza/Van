@@ -57,6 +57,7 @@ import com.dial.van.command.artemis.ArtemisConsoleRoute
 import com.dial.van.command.connected.ConnectedRoute
 import com.dial.van.command.dev.dialDevGraph
 import com.dial.van.command.home.HomeRoute
+import com.dial.van.command.jev.JevControlRoute
 import com.dial.van.command.modules.BrowserEscalationsPage
 import com.dial.van.command.modules.BrowserPolicyPage
 import com.dial.van.command.modules.BrowserSessionsPage
@@ -73,6 +74,9 @@ import com.dial.van.command.settings.SettingsNotificationsRoute
 import com.dial.van.command.settings.PermissionsRoute
 import com.dial.van.command.settings.SettingsRoute
 import com.dial.van.command.settings.SettingsVoiceRoute
+import com.dial.van.command.work.ConvergenceRoute
+import com.dial.van.command.work.ConversationThreadRoute
+import com.dial.van.command.work.DocumentRoute
 import com.dial.van.command.work.WorkActivityRoute
 import com.dial.van.command.work.WorkRoute
 import com.dial.van.design.LocalVanTokens
@@ -240,6 +244,7 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             onOpenBrowser = { nav.navigate(VanRoute.WORK_BROWSER) },
                             onOpenArtemis = { nav.navigate(VanRoute.WORK_ARTEMIS) },
                             onOpenActivity = { nav.navigate(VanRoute.WORK_ACTIVITY) },
+                            onOpenConvergence = { nav.navigate(VanRoute.WORK_ASSETS) },
                             onOpenDevelopment = { nav.navigate(VanRoute.devHomeRoute()) },
                             onOpenKnowledge = { nav.navigate(VanRoute.OWNER_KNOWLEDGE) },
                             onOpenResearch = { nav.navigate(VanRoute.OWNER_RESEARCH) },
@@ -251,6 +256,36 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                     }
                     composable(VanRoute.WORK_ARTEMIS) {
                         ArtemisConsoleRoute(app, onBack = { nav.popBackStack() })
+                    }
+                    composable(VanRoute.WORK_ASSETS) {
+                        ConvergenceRoute(
+                            app = app,
+                            onBack = { nav.popBackStack() },
+                            onOpenDocument = { documentId -> nav.navigate(VanRoute.documentRoute(documentId)) },
+                            onOpenThread = { threadId -> nav.navigate(VanRoute.threadRoute(threadId)) },
+                        )
+                    }
+                    composable(
+                        VanRoute.WORK_DOCUMENT_TEMPLATE,
+                        arguments = listOf(navArgument("documentId") { type = NavType.StringType }),
+                    ) { entry ->
+                        val documentId = entry.arguments?.getString("documentId") ?: ""
+                        DocumentRoute(
+                            app = app,
+                            documentId = documentId,
+                            onBack = { nav.popBackStack() },
+                        )
+                    }
+                    composable(
+                        VanRoute.WORK_THREAD_TEMPLATE,
+                        arguments = listOf(navArgument("threadId") { type = NavType.StringType }),
+                    ) { entry ->
+                        val threadId = entry.arguments?.getString("threadId") ?: ""
+                        ConversationThreadRoute(
+                            app = app,
+                            threadId = threadId,
+                            onBack = { nav.popBackStack() },
+                        )
                     }
                     composable(VanRoute.WORK_BROWSER) {
                         val glass = legacyGlass(app)
@@ -284,6 +319,7 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             onOpenBrowser = { nav.navigate(VanRoute.WORK_BROWSER) },
                             onOpenArtemis = { nav.navigate(VanRoute.WORK_ARTEMIS) },
                             onOpenActivity = { nav.navigate(VanRoute.WORK_ACTIVITY) },
+                            onOpenConvergence = { nav.navigate(VanRoute.WORK_ASSETS) },
                             onOpenDevelopment = { nav.navigate(VanRoute.devHomeRoute()) },
                             requestedMissionId = entry.arguments?.getString("missionId"),
                             onOpenKnowledge = { nav.navigate(VanRoute.OWNER_KNOWLEDGE) },
@@ -343,7 +379,11 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             onOpenNotifications = { nav.navigate(VanRoute.SETTINGS_NOTIFICATIONS) },
                             onOpenPermissions = { nav.navigate(VanRoute.SETTINGS_PERMISSIONS) },
                             onOpenDiagnostics = { nav.navigate(VanRoute.OWNER_DIAGNOSTICS) },
+                            onOpenJev = { nav.navigate(VanRoute.SETTINGS_JEV) },
                         )
+                    }
+                    composable(VanRoute.SETTINGS_JEV) {
+                        JevControlRoute(app = app, onBack = { nav.popBackStack() })
                     }
                     composable(VanRoute.SETTINGS_VOICE) {
                         SettingsVoiceRoute(app, onBack = { nav.popBackStack() })

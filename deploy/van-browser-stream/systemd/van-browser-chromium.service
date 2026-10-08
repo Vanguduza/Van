@@ -6,8 +6,9 @@
 # difference between a private debugger and a public remote-code-execution endpoint.
 [Unit]
 Description=VAN Browser Stream Host — Chromium (loopback CDP only)
-After=network-online.target van-browser-profiles.mount van-browser-transfer-stage.service
-Requires=van-browser-profiles.mount van-browser-transfer-stage.service
+After=network-online.target van-browser-profiles.mount van-browser-transfer-stage.service van-browser-egress-proxy.service
+Requires=van-browser-profiles.mount van-browser-transfer-stage.service van-browser-egress-proxy.service
+BindsTo=van-browser-egress-proxy.service
 
 [Service]
 Type=simple
@@ -23,6 +24,10 @@ ExecStart=/usr/bin/chromium \
   --user-data-dir=${VAN_BROWSER_PROFILE_MOUNT}/${VAN_BROWSER_PROFILE_ALIAS} \
   --window-size=${VAN_BROWSER_WIDTH},${VAN_BROWSER_HEIGHT} \
   --force-device-scale-factor=1 \
+  --proxy-server=http://127.0.0.1:${VAN_BROWSER_EGRESS_PORT} \
+  --proxy-bypass-list=<-loopback> \
+  --disable-quic \
+  --force-webrtc-ip-handling-policy=disable_non_proxied_udp \
   --no-first-run \
   --disable-features=Translate,MediaRouter \
   --autoplay-policy=no-user-gesture-required

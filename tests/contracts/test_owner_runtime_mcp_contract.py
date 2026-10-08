@@ -39,7 +39,10 @@ REQUIRED_TOOLS = {
     "google_capabilities",
     "google_gmail_search",
     "google_gmail_draft_preview",
+    "google_gmail_thread",
+    "google_gmail_attachment_import",
     "google_calendar_agenda",
+    "google_calendar_review",
     "google_drive_search",
     "google_contacts_resolve",
     "google_tasks_list",
@@ -66,6 +69,7 @@ REQUIRED_TOOLS = {
     "trading_trade_detail",
     "trading_status",
     "reminder_create",
+    "suggestion_create",
     "attention_list",
     "briefing_read",
     "browser_task_create",
@@ -289,7 +293,10 @@ def test_google_mcp_surface_is_read_or_plan_only():
         "/v1/google/status",
         "/v1/google/capabilities",
         "/v1/google/gmail/search",
+        "/v1/google/gmail/thread",
+        "/v1/google/gmail/attachment/import-pdf",
         "/v1/google/calendar/agenda",
+        "/v1/google/calendar/review",
         "/v1/google/drive/search",
         "/v1/google/contacts/resolve",
         "/v1/google/tasks",
@@ -304,6 +311,9 @@ def test_google_mcp_surface_is_read_or_plan_only():
     assert "trust: 'UNTRUSTED', validation_state: 'PENDING'" in text
     assert "/v1/google/calendar/reschedule" not in text
     assert "/v1/google/actions/execute" in text
+    assert "name: 'google_gmail_thread'" in text
+    assert "name: 'google_gmail_attachment_import'" in text
+    assert "name: 'google_calendar_review'" in text
     action_tool = re.search(
         r"name: 'google_action_execute'.*?additionalProperties: false", text, re.S
     )
@@ -342,6 +352,19 @@ def test_reminder_create_is_owner_behalf_and_not_a_memory_admission():
     assert tool is not None
     assert "own words" in tool.group(0)
     assert "creates no canonical owner fact" in tool.group(0)
+
+
+def test_suggestion_create_is_evidence_backed_and_non_executing():
+    text = SHIM.read_text(encoding="utf-8")
+    assert "suggestion_create: { method: 'POST', path: () => '/v1/runtime/suggestions'" in text
+    tool = re.search(r"name: 'suggestion_create'.*?additionalProperties: false", text, re.S)
+    assert tool is not None
+    block = tool.group(0)
+    assert "source_refs" in block
+    assert "minItems: 1" in block
+    assert "cannot execute the proposed prompt" in block
+    assert "approved" not in block.lower()
+    assert "execution_id" not in block
 
 
 def test_attention_and_briefing_reads_are_read_only():
