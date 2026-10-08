@@ -76,8 +76,8 @@ chromium_path="$(cd "$BASE" && PLAYWRIGHT_BROWSERS_PATH="$PLAYWRIGHT_BROWSERS_PA
 [[ -x "$chromium_path" ]] || { echo "Chromium executable missing: $chromium_path" >&2; exit 45; }
 
 # Ubuntu 24.04 restricts unprivileged user namespaces through AppArmor. Chromium uses
-# user namespaces for its own sandbox; never work around that with --no-sandbox or by
-# disabling the host restriction globally. Instead, allow userns for this exact pinned
+# user namespaces for its own sandbox; never disable Chromium's sandbox or the host
+# restriction globally. Instead, allow userns for this exact pinned
 # Chromium executable only. The profile is replaced on every bootstrap so a Playwright
 # revision/path change cannot silently inherit the previous allowance.
 command -v apparmor_parser >/dev/null 2>&1 || {
