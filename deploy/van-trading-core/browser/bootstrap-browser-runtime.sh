@@ -75,6 +75,29 @@ chromium_path="$(cd "$BASE" && PLAYWRIGHT_BROWSERS_PATH="$PLAYWRIGHT_BROWSERS_PA
   "const { chromium } = require('playwright'); process.stdout.write(chromium.executablePath())")"
 [[ -x "$chromium_path" ]] || { echo "Chromium executable missing: $chromium_path" >&2; exit 45; }
 
+# Ubuntu 24.04 restricts unprivileged user namespaces through AppArmor. Chromium uses
+# user namespaces for its own sandbox; never work around that with --no-sandbox or by
+# disabling the host restriction globally. Instead, allow userns for this exact pinned
+# Chromium executable only. The profile is replaced on every bootstrap so a Playwright
+# revision/path change cannot silently inherit the previous allowance.
+command -v apparmor_parser >/dev/null 2>&1 || {
+  echo "AppArmor parser missing; refusing to run Chromium without its sandbox" >&2
+  exit 48
+}
+APPARMOR_PROFILE=/etc/apparmor.d/van-browser-playwright-chromium
+cat >"$APPARMOR_PROFILE" <<EOF
+abi <abi/4.0>,
+include <tunables/global>
+
+profile van-browser-playwright-chromium $chromium_path flags=(unconfined) {
+  userns,
+}
+EOF
+chown root:root "$APPARMOR_PROFILE"
+chmod 0644 "$APPARMOR_PROFILE"
+apparmor_parser -r "$APPARMOR_PROFILE"
+echo BROWSER_CHROMIUM_USERNS_PROFILE_GREEN
+
 # Browser Harness is the adopted deterministic actuator. Pin the released package and its
 # direct runtime dependencies. The installed environment is also frozen into deployment
 # evidence so a later qualification can detect transitive drift rather than assuming it.
