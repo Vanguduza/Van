@@ -346,7 +346,7 @@ class DecisionCycle:
                 self._log(EventKind.TCA_RECORD, tca_payload, now_ms=now_ms, corr=intent.trade_intent_id)
                 self._entries[intent.trade_intent_id]["cost_ratio"] = tca.cost_ratio
                 if self.learning is not None:
-                    self.learning.on_tca(symbol=cfg.symbol, session=state.session.value, event_window=state.event_window.value, cost_ratio=tca.cost_ratio, slippage=tca.slippage)
+                    self.learning.on_tca(self.ledger, trade_intent_id=intent.trade_intent_id, symbol=cfg.symbol, session=state.session.value, event_window=state.event_window.value, cost_ratio=tca.cost_ratio, slippage=tca.slippage)
                     self.engine.m.broker_liquidity[cfg.symbol] = self.learning.broker_liquidity(cfg.symbol)
         return CycleResult(state.as_of_ms, state.state_hash, decision.decision.value, "", decision.approved_size)
 

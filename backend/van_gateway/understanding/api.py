@@ -51,7 +51,13 @@ from van_gateway.understanding.memory import (
     StrategicMemory,
     SymbioticGrowthLedger,
 )
+from van_gateway.understanding.personal_context_resolver import (
+    PersonalContextResolver,
+    PersonalContextUnavailable,
+    RevisionFencedCapsuleCache,
+)
 from van_gateway.understanding.owner_model import (
+    ObservationOrigin,
     OwnerCognitiveModel,
     OwnerModelError,
     OwnerModelField,
@@ -75,6 +81,9 @@ class ObserveBody(BaseModel):
     field: OwnerModelField
     value: str
     episode_ref: str
+    #: Contract C1 — required, no default. Only SYSTEM_OBSERVED advances the ladder;
+    #: HINDSIGHT_DERIVED / OPENVIKING_RETRIEVED / MODEL_INFERRED are recorded as provenance.
+    origin: ObservationOrigin
     evidence_refs: list[str] = Field(default_factory=list)
     project_id: str | None = None
 
@@ -99,6 +108,11 @@ class UnderstandingApi:
         # P1-LEARN-001 — the owner-facing surface is where corrections arrive, so this is
         # the instance that has to feed the growth ledger.
         self.owner_model = OwnerCognitiveModel(store, learning=LearningFeed(store))
+        # Owner decision 2026-09-29 §3: personal context is served only at the verified
+        # authoritative owner_model_revision; the cache has no TTL and no error fallback.
+        self.personal_context = PersonalContextResolver(
+            self.owner_model, cache=RevisionFencedCapsuleCache()
+        )
         self.vocabulary = SharedVocabularyRegistry(store)
         self.complement = CognitiveComplementMap(store)
         self.owner_declarations = OwnerDeclarationStore(store)
@@ -460,12 +474,41 @@ class UnderstandingApi:
         ):
             """Hermes observes. It never confirms — that asymmetry is the point."""
             self._require_internal(x_van_internal_token)
-            assertion = await self.owner_model.observe(
-                owner_principal_id=body.owner_principal_id, field=body.field,
-                value=body.value, episode_ref=body.episode_ref,
-                evidence_refs=body.evidence_refs, project_id=body.project_id,
-            )
+            try:
+                assertion = await self.owner_model.observe(
+                    owner_principal_id=body.owner_principal_id, field=body.field,
+                    value=body.value, episode_ref=body.episode_ref, origin=body.origin,
+                    evidence_refs=body.evidence_refs, project_id=body.project_id,
+                )
+            except OwnerModelError as exc:
+                raise HTTPException(status_code=422, detail=exc.code) from exc
             return assertion.model_dump(mode="json")
+
+        @router.get("/understanding/revision")
+        async def owner_model_revision(owner_principal_id: str = "owner"):
+            """Contract C2 — the live Owner Model revision a personal capsule is fenced by."""
+            return await self.owner_model.revision(owner_principal_id)
+
+        @router.get("/understanding/personal-context")
+        async def personal_context(
+            owner_model_revision: int,
+            purpose: str,
+            owner_principal_id: str = "owner",
+            project_id: str | None = None,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            """C3 served through the revision fence: requested == authoritative, or 409
+            PERSONAL_CONTEXT_UNAVAILABLE. Never a cached capsule the store cannot confirm."""
+            self._require_internal(x_van_internal_token)
+            try:
+                return await self.personal_context.resolve(
+                    owner_principal_id, requested_revision=owner_model_revision,
+                    purpose=purpose, project_id=project_id,
+                )
+            except PersonalContextUnavailable as exc:
+                raise HTTPException(status_code=409, detail=exc.as_detail()) from exc
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
 
         @router.get("/permissions")
         async def permissions():

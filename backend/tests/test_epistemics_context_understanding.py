@@ -49,6 +49,7 @@ from van_gateway.understanding.owner_model import (
     OwnerCognitiveModel,
     OwnerModelError,
     OwnerModelField,
+    ObservationOrigin,
 )
 
 
@@ -200,6 +201,7 @@ async def test_one_emphatic_conversation_does_not_mint_a_trait(tmp_path):
         assertion = await model.observe(
             owner_principal_id="owner", field=OwnerModelField.COMMUNICATION_PREFERENCE,
             value="prefers terse status updates", episode_ref=episodes["m1"],
+            origin=ObservationOrigin.SYSTEM_OBSERVED,
         )
     assert assertion.independent_episodes == 1
     assert assertion.state is AssertionState.OBSERVED
@@ -216,6 +218,7 @@ async def test_evidence_promotes_to_candidate_then_evidenced_but_never_confirmed
         assertion = await model.observe(
             owner_principal_id="owner", field=OwnerModelField.COMMUNICATION_PREFERENCE,
             value="terse", episode_ref=episodes[name],
+            origin=ObservationOrigin.SYSTEM_OBSERVED,
         )
         states.append(assertion.state)
     assert states == [
@@ -237,6 +240,7 @@ async def test_an_episode_that_did_not_happen_is_not_evidence(tmp_path):
                 owner_principal_id="owner",
                 field=OwnerModelField.COMMUNICATION_PREFERENCE,
                 value="terse", episode_ref=rubbish,
+            origin=ObservationOrigin.SYSTEM_OBSERVED,
             )
 
 
@@ -249,6 +253,7 @@ async def test_an_autonomy_bearing_trait_never_confirms_from_evidence_alone(tmp_
         assertion = await model.observe(
             owner_principal_id="owner", field=OwnerModelField.DELEGATION_PREFERENCE,
             value="happy for VAN to act without asking", episode_ref=episode,
+            origin=ObservationOrigin.SYSTEM_OBSERVED,
         )
     assert assertion.is_autonomy_bearing is True
     assert assertion.state is AssertionState.CANDIDATE
@@ -265,12 +270,14 @@ async def test_a_correction_outranks_any_amount_of_evidence(tmp_path):
     a = await model.observe(
         owner_principal_id="owner", field=OwnerModelField.EVIDENCE_PREFERENCE,
         value="wants summaries", episode_ref=episodes["m1"],
+            origin=ObservationOrigin.SYSTEM_OBSERVED,
     )
     await model.reject(a.assertion_id)
     for name in ("m2", "m3", "m4"):
         again = await model.observe(
             owner_principal_id="owner", field=OwnerModelField.EVIDENCE_PREFERENCE,
             value="wants summaries", episode_ref=episodes[name],
+            origin=ObservationOrigin.SYSTEM_OBSERVED,
         )
     assert again.state is AssertionState.REJECTED
     assert again.may_act_on is False
@@ -283,6 +290,7 @@ async def test_a_correction_supersedes_rather_than_edits(tmp_path):
     original = await model.observe(
         owner_principal_id="owner", field=OwnerModelField.REASONING_PREFERENCE,
         value="wants short answers", episode_ref=episodes["m1"],
+            origin=ObservationOrigin.SYSTEM_OBSERVED,
     )
     replacement = await model.correct(original.assertion_id, new_value="wants full evidence")
     assert replacement.state is AssertionState.CONFIRMED

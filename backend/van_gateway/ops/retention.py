@@ -114,6 +114,12 @@ POLICIES: tuple[TablePolicy, ...] = (
     _p("owner_facts", _OWNER, note="Superseded revisions are the fact's history, not litter."),
     _p("owner_context_edges", _OWNER),
     _p("owner_cognitive_model", _OWNER),
+    # Memory Fabric C1/C2: per-episode origin rows die with their assertion; the revision
+    # counter must never be pruned or reset (a reset would let an old capsule verify again).
+    _p("owner_model_episodes", _CHILD, parent=("assertion_id", "owner_cognitive_model")),
+    _p("owner_model_revisions", _OWNER, note="Monotonic fence for personal capsules; never reset."),
+    _p("owner_model_outbox", _EV, "created_at_ms",
+       note="Correction/invalidation delivery record, with per-target receipts."),
     _p("shared_vocabulary", _OWNER),
     _p("strategic_memory", _OWNER),
     _p("symbiotic_growth", _OWNER),
@@ -512,6 +518,7 @@ _PRIMARY_KEY = {
     "browser_stream_producers": "producer_session_id",
     "browser_tasks": "task_id",
     "owner_goals": "goal_id",
+    "owner_cognitive_model": "assertion_id",
 }
 
 

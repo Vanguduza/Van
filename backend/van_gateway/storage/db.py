@@ -9,7 +9,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 45
+SCHEMA_VERSION = 47
 
 MIGRATION_41 = """
 CREATE TABLE IF NOT EXISTS automation_owner_plans (
@@ -838,6 +838,332 @@ CREATE TABLE IF NOT EXISTS mission_projection_outbox (
  created_at_ms INTEGER NOT NULL, attempts INTEGER NOT NULL DEFAULT 0, last_failure TEXT
 );
 """
+
+MEMORY_FABRIC_MIGRATION_31 = """
+-- Memory Fabric Programme A, contracts C1/C2 — Owner Model origin provenance, revision
+-- fence and correction outbox. Every statement is idempotent (IF NOT EXISTS / OR IGNORE /
+-- NOT EXISTS guards), so re-running this script against a database that already has it
+-- changes nothing.
+
+-- C1. Per-episode origin. An assertion used to hold a bare list of episode refs, so the
+-- ladder could not tell a mission VAN watched happen from a Hindsight/OpenViking/model
+-- derivation that merely *cited* a mission id — and the derived one was a vote. Origin is
+-- recorded per (assertion, episode, origin), never per assertion; only SYSTEM_OBSERVED
+-- rows count toward promotion.
+CREATE TABLE IF NOT EXISTS owner_model_episodes (
+  assertion_id TEXT NOT NULL
+    REFERENCES owner_cognitive_model(assertion_id) ON DELETE CASCADE,
+  episode_ref TEXT NOT NULL,
+  origin TEXT NOT NULL CHECK (origin IN (
+    'OWNER_EXPLICIT', 'SYSTEM_OBSERVED', 'HINDSIGHT_DERIVED',
+    'OPENVIKING_RETRIEVED', 'MODEL_INFERRED'
+  )),
+  evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+  recorded_at_ms INTEGER NOT NULL,
+  PRIMARY KEY (assertion_id, episode_ref, origin)
+);
+CREATE INDEX IF NOT EXISTS idx_owner_model_episodes_origin
+  ON owner_model_episodes(assertion_id, origin);
+
+-- Legacy backfill. A legacy supporting ref becomes SYSTEM_OBSERVED only if it resolves,
+-- after the same normalisation `OwnerCognitiveModel._require_episode` applies
+-- (`<lowercase kind>:<trimmed id>`), to a real `missions.mission_id` or `audit.command_id`.
+-- That is what the only pre-existing producer (the internal observe route) wrote after
+-- P1-SYM-001; anything else (free text, `hindsight://…`, a mission that does not exist,
+-- rows from before P1-SYM-001 made episodes resolvable) cannot be proven to be something
+-- VAN saw, so it is kept for provenance under its raw spelling as MODEL_INFERRED, which
+-- never evidences. Resolved refs are stored normalised, so two spellings of one mission are
+-- one episode. The trimmed set is ASCII whitespace; an id padded with other Unicode
+-- whitespace fails to resolve here and is labelled MODEL_INFERRED (the fail-closed side).
+--
+-- Never-relabel / idempotency: the NOT EXISTS guard skips a legacy ref if an episode row of
+-- any origin already exists under either its raw or its normalised spelling, so a re-run —
+-- even after the missing mission has since been created — never changes an origin.
+INSERT OR IGNORE INTO owner_model_episodes(
+  assertion_id, episode_ref, origin, evidence_refs_json, recorded_at_ms
+)
+WITH legacy AS (
+  SELECT a.assertion_id, CAST(j.value AS TEXT) AS raw, a.updated_at_ms AS at_ms
+    FROM owner_cognitive_model a, json_each(a.supporting_episode_refs_json) j
+), parsed AS (
+  SELECT assertion_id, raw, at_ms,
+         CASE WHEN instr(raw, ':') > 0
+              THEN lower(trim(substr(raw, 1, instr(raw, ':') - 1), ' ' || char(9, 10, 11, 12, 13)))
+         END AS kind,
+         CASE WHEN instr(raw, ':') > 0
+              THEN trim(substr(raw, instr(raw, ':') + 1), ' ' || char(9, 10, 11, 12, 13))
+         END AS ident
+    FROM legacy
+), classified AS (
+  SELECT assertion_id, raw, at_ms,
+         CASE WHEN ident IS NOT NULL AND ident != '' AND (
+                (kind = 'mission' AND EXISTS (SELECT 1 FROM missions m WHERE m.mission_id = ident))
+             OR (kind = 'command' AND EXISTS (SELECT 1 FROM audit c WHERE c.command_id = ident)))
+              THEN kind || ':' || ident
+         END AS resolved
+    FROM parsed
+)
+SELECT c.assertion_id, COALESCE(c.resolved, c.raw),
+       CASE WHEN c.resolved IS NULL THEN 'MODEL_INFERRED' ELSE 'SYSTEM_OBSERVED' END,
+       '[]', c.at_ms
+  FROM classified c
+ WHERE NOT EXISTS (
+   SELECT 1 FROM owner_model_episodes e
+    WHERE e.assertion_id = c.assertion_id
+      AND e.episode_ref IN (c.raw, COALESCE(c.resolved, c.raw))
+ );
+
+-- A ladder state is only as good as the episodes under it. A legacy CANDIDATE/EVIDENCED
+-- whose support no longer counts (its refs did not resolve) is demoted to what its
+-- SYSTEM_OBSERVED count supports — demote only, never promote. Owner states (CONFIRMED,
+-- REJECTED, CONTESTED) and SUPERSEDED rows are not touched. Deterministic from the episode
+-- table, so a re-run is a no-op.
+UPDATE owner_cognitive_model
+   SET state = CASE WHEN (SELECT COUNT(DISTINCT e.episode_ref) FROM owner_model_episodes e
+                           WHERE e.assertion_id = owner_cognitive_model.assertion_id
+                             AND e.origin = 'SYSTEM_OBSERVED') >= 2
+                    THEN 'CANDIDATE' ELSE 'OBSERVED' END
+ WHERE (state = 'EVIDENCED' AND (SELECT COUNT(DISTINCT e.episode_ref) FROM owner_model_episodes e
+                                  WHERE e.assertion_id = owner_cognitive_model.assertion_id
+                                    AND e.origin = 'SYSTEM_OBSERVED') < 3)
+    OR (state = 'CANDIDATE' AND (SELECT COUNT(DISTINCT e.episode_ref) FROM owner_model_episodes e
+                                  WHERE e.assertion_id = owner_cognitive_model.assertion_id
+                                    AND e.origin = 'SYSTEM_OBSERVED') < 2);
+
+-- `supporting_episode_refs_json` means SYSTEM_OBSERVED refs only from here on (the
+-- model writes it that way); bring legacy rows into line, and recompute ladder-state
+-- confidence from the admissible count with the model's formula (owner-state and
+-- SUPERSEDED confidence is left as written). Idempotent.
+UPDATE owner_cognitive_model
+   SET supporting_episode_refs_json = COALESCE((
+         SELECT json_group_array(ref) FROM (
+           SELECT DISTINCT e.episode_ref AS ref FROM owner_model_episodes e
+            WHERE e.assertion_id = owner_cognitive_model.assertion_id
+              AND e.origin = 'SYSTEM_OBSERVED' ORDER BY e.episode_ref)), '[]'),
+       confidence = CASE
+         WHEN state NOT IN ('OBSERVED', 'CANDIDATE', 'EVIDENCED') THEN confidence
+         ELSE (SELECT CASE WHEN n = 0 THEN 0.0 ELSE MIN(0.95, 0.2 + 0.25 * (n - 1)) END
+                 FROM (SELECT COUNT(DISTINCT e.episode_ref) AS n FROM owner_model_episodes e
+                        WHERE e.assertion_id = owner_cognitive_model.assertion_id
+                          AND e.origin = 'SYSTEM_OBSERVED'))
+       END;
+
+-- C2. A strictly monotonic revision per owner principal, advanced inside the same
+-- transaction as every authoritative Owner Model mutation. Deliberately NOT forgettable:
+-- resetting it would let a capsule issued at an old revision match again later.
+CREATE TABLE IF NOT EXISTS owner_model_revisions (
+  owner_principal_id TEXT PRIMARY KEY,
+  owner_model_revision INTEGER NOT NULL CHECK (owner_model_revision >= 0),
+  updated_at_ms INTEGER NOT NULL
+);
+-- Owners that already hold assertions start at 1 (a capsule could not have been issued
+-- against them before this migration, so any value >= 1 is safe; 1 is the smallest).
+INSERT OR IGNORE INTO owner_model_revisions(owner_principal_id, owner_model_revision, updated_at_ms)
+SELECT DISTINCT owner_principal_id, 1, CAST(strftime('%s','now') AS INTEGER) * 1000
+  FROM owner_cognitive_model;
+
+-- Durable correction/invalidation outbox: one row per (event, target), written in the
+-- same transaction as the Owner Model commit and revision bump. Delivery is at-least-once
+-- per target; a receipt is recorded per target. No distributed atomicity is claimed — the
+-- synchronous guarantee is the revision fence above.
+CREATE TABLE IF NOT EXISTS owner_model_outbox (
+  outbox_id TEXT NOT NULL,
+  target TEXT NOT NULL CHECK (target IN (
+    'HINDSIGHT_OWNER', 'OPENVIKING_OWNER_PROJECTION', 'PERSONAL_CONTEXT_CACHE'
+  )),
+  owner_principal_id TEXT NOT NULL,
+  owner_model_revision INTEGER NOT NULL,
+  event_kind TEXT NOT NULL,
+  payload_json TEXT NOT NULL DEFAULT '{}',
+  status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'DELIVERED')),
+  attempts INTEGER NOT NULL DEFAULT 0,
+  receipt TEXT,
+  last_error TEXT,
+  created_at_ms INTEGER NOT NULL,
+  last_attempt_at_ms INTEGER,
+  delivered_at_ms INTEGER,
+  PRIMARY KEY (outbox_id, target)
+);
+CREATE INDEX IF NOT EXISTS idx_owner_model_outbox_pending
+  ON owner_model_outbox(status, created_at_ms);
+
+-- The owner's forget path (context/forget.py) deletes assertions outside the Owner Model
+-- class. Without this trigger that deletion would leave the revision unchanged, and a
+-- capsule issued before the forget would still verify as current. The trigger runs in the
+-- deleting statement's transaction, so the fence and the invalidation rows commit (or
+-- roll back) with the delete. The payload carries ids and field names only, never values.
+CREATE TRIGGER IF NOT EXISTS trg_owner_model_forget_fence
+AFTER DELETE ON owner_cognitive_model
+BEGIN
+  INSERT INTO owner_model_revisions(owner_principal_id, owner_model_revision, updated_at_ms)
+  VALUES (OLD.owner_principal_id, 1, CAST(strftime('%s','now') AS INTEGER) * 1000)
+  ON CONFLICT(owner_principal_id) DO UPDATE SET
+    owner_model_revision = owner_model_revision + 1,
+    updated_at_ms = MAX(updated_at_ms, excluded.updated_at_ms);
+  INSERT OR IGNORE INTO owner_model_outbox(
+    outbox_id, target, owner_principal_id, owner_model_revision, event_kind,
+    payload_json, status, attempts, created_at_ms
+  )
+  SELECT 'omo_forget_' || OLD.assertion_id || '_' || r.owner_model_revision, t.target,
+         OLD.owner_principal_id, r.owner_model_revision, 'FORGOTTEN',
+         json_object('assertion_ids', json_array(OLD.assertion_id), 'field', OLD.field),
+         'PENDING', 0, CAST(strftime('%s','now') AS INTEGER) * 1000
+    FROM owner_model_revisions r,
+         (SELECT 'HINDSIGHT_OWNER' AS target
+          UNION ALL SELECT 'OPENVIKING_OWNER_PROJECTION'
+          UNION ALL SELECT 'PERSONAL_CONTEXT_CACHE') t
+   WHERE r.owner_principal_id = OLD.owner_principal_id;
+END;
+"""
+
+# ---------------------------------------------------------------------------- migration 32
+#
+# Why 32 and not an edit of 31: `Store.migrate()` applies a version once and records it in
+# `schema_migrations`; it never re-reads the SQL of an applied version. Migration 31 has been
+# pushed on the Memory Fabric branch, so any database that already ran it would silently keep
+# the defects below if they were fixed only inside 31. A new version reaches both a fresh
+# database (31 then 32) and one that already ran 31. Every statement in the repair script is
+# deterministic from the tables it reads, so re-running it changes nothing.
+
+def _m32_resolved_principal(column: str) -> str:
+    """A stored principal, with `device:<id>` resolved through owner_device_bindings."""
+    return (f"(CASE WHEN substr({column}, 1, 7) = 'device:' THEN COALESCE(("
+            f"SELECT b.owner_principal_id FROM owner_device_bindings b "
+            f"WHERE b.device_id = substr({column}, 8) LIMIT 1), {column}) ELSE {column} END)")
+
+
+def _m32_foreign(ref: str, owner: str) -> str:
+    """True when anything attributes episode `ref` to a principal other than `owner`.
+
+    The same rule as `OwnerCognitiveModel._foreign_principal` (O2)."""
+    principal = _m32_resolved_principal("m.owner_principal_id")
+    return f"""(
+      (substr({ref}, 1, 8) = 'mission:' AND EXISTS (
+         SELECT 1 FROM missions m WHERE m.mission_id = substr({ref}, 9)
+            AND {principal} != {owner}))
+   OR (substr({ref}, 1, 8) = 'command:' AND (
+         EXISTS (SELECT 1 FROM missions m WHERE json_valid(m.authority_envelope_json)
+                    AND json_extract(m.authority_envelope_json, '$.source_command_id')
+                        = substr({ref}, 9)
+                    AND {principal} != {owner})
+      OR EXISTS (SELECT 1 FROM audit c JOIN owner_device_bindings b ON b.device_id = c.device_id
+                  WHERE c.command_id = substr({ref}, 9) AND b.owner_principal_id != {owner}))))"""
+
+
+# The episode identity the ladder counts (M4) — the same expression as
+# `owner_model.EPISODE_KEY_SQL`, frozen here because an applied migration must not change.
+_M32_KEY = (
+    "COALESCE(CASE WHEN substr(e.episode_ref, 1, 8) = 'mission:' THEN ("
+    "SELECT 'command:' || NULLIF(trim(json_extract(m.authority_envelope_json, "
+    "'$.source_command_id')), '') FROM missions m "
+    "WHERE m.mission_id = substr(e.episode_ref, 9) "
+    "AND json_valid(m.authority_envelope_json)) END, e.episode_ref)"
+)
+_M32_VOTES = (
+    f"(SELECT COUNT(DISTINCT {_M32_KEY}) FROM owner_model_episodes e "
+    "WHERE e.assertion_id = owner_cognitive_model.assertion_id "
+    "AND e.origin = 'SYSTEM_OBSERVED')"
+)
+# What evidence alone can produce (OwnerCognitiveModel._ladder). Autonomy-bearing fields
+# stop at CANDIDATE.
+_M32_LADDER = (
+    f"(CASE WHEN {_M32_VOTES} >= 3 AND field NOT IN ("
+    "'delegation_preferences', 'accepted_risk_patterns', 'interruption_preferences') "
+    f"THEN 'EVIDENCED' WHEN {_M32_VOTES} >= 2 THEN 'CANDIDATE' ELSE 'OBSERVED' END)"
+)
+_M32_RANK = "(CASE {s} WHEN 'EVIDENCED' THEN 2 WHEN 'CANDIDATE' THEN 1 ELSE 0 END)"
+
+MIGRATION_32_OWNER_MODEL_REPAIR = f"""
+-- Memory Fabric Programme A, reviewer D findings M4, M5 and O2. Idempotent.
+
+-- Snapshot, so the revision fence can be advanced for exactly the owners this changes.
+DROP TABLE IF EXISTS temp.m32_before;
+CREATE TEMP TABLE m32_before AS
+  SELECT assertion_id, owner_principal_id, state, confidence, supporting_episode_refs_json
+    FROM owner_cognitive_model;
+
+-- O2. An episode another principal owns was never evidence about this owner. Migration 31
+-- (and observe() until now) never read missions.owner_principal_id, so such an episode may
+-- be stored as SYSTEM_OBSERVED. It is kept for provenance as MODEL_INFERRED, which never
+-- evidences: the same fail-closed label 31 gives any legacy ref it cannot vouch for.
+INSERT OR IGNORE INTO owner_model_episodes(
+  assertion_id, episode_ref, origin, evidence_refs_json, recorded_at_ms
+)
+SELECT e.assertion_id, e.episode_ref, 'MODEL_INFERRED', e.evidence_refs_json, e.recorded_at_ms
+  FROM owner_model_episodes e JOIN owner_cognitive_model a ON a.assertion_id = e.assertion_id
+ WHERE e.origin = 'SYSTEM_OBSERVED' AND {_m32_foreign("e.episode_ref", "a.owner_principal_id")};
+DELETE FROM owner_model_episodes
+ WHERE origin = 'SYSTEM_OBSERVED' AND EXISTS (
+   SELECT 1 FROM owner_cognitive_model a
+    WHERE a.assertion_id = owner_model_episodes.assertion_id
+      AND {_m32_foreign("owner_model_episodes.episode_ref", "a.owner_principal_id")});
+
+-- M5. CONFIRMED means the owner said so, and confirm()/correct() are the only writers that
+-- set owner_confirmed_at_ms. A CONFIRMED row without it was minted by the pre-P1-SYM-001
+-- evidence ladder (three free strings made CONFIRMED) and 31 left it alone, so the capsule
+-- labelled it owner_stated at S0 with zero evidencing episodes. It is recomputed from its
+-- SYSTEM_OBSERVED votes like any ladder state: EVIDENCED at best, never CONFIRMED.
+-- M4/O2. Ladder states are re-checked against the vote count after the relabel above and
+-- with a mission and its source command counted once. Demote only, never promote.
+UPDATE owner_cognitive_model
+   SET state = CASE
+         WHEN state = 'CONFIRMED' THEN {_M32_LADDER}
+         WHEN {_M32_RANK.format(s=_M32_LADDER)} < {_M32_RANK.format(s="state")} THEN {_M32_LADDER}
+         ELSE state END
+ WHERE state IN ('OBSERVED', 'CANDIDATE', 'EVIDENCED')
+    OR (state = 'CONFIRMED' AND owner_confirmed_at_ms IS NULL);
+
+-- Supporting refs are SYSTEM_OBSERVED refs; ladder-state confidence follows the vote count
+-- with the model's formula. Owner states and SUPERSEDED keep their confidence.
+UPDATE owner_cognitive_model
+   SET supporting_episode_refs_json = COALESCE((
+         SELECT json_group_array(ref) FROM (
+           SELECT DISTINCT e.episode_ref AS ref FROM owner_model_episodes e
+            WHERE e.assertion_id = owner_cognitive_model.assertion_id
+              AND e.origin = 'SYSTEM_OBSERVED' ORDER BY e.episode_ref)), '[]'),
+       confidence = CASE
+         WHEN state NOT IN ('OBSERVED', 'CANDIDATE', 'EVIDENCED') THEN confidence
+         WHEN {_M32_VOTES} = 0 THEN 0.0
+         ELSE MIN(0.95, 0.2 + 0.25 * ({_M32_VOTES} - 1))
+       END;
+
+-- C2. A capsule issued before this repair carries the old labels (an M5 row as
+-- owner_stated). Advancing the revision of every owner whose assertions changed makes the
+-- fence refuse it. Owners with no change keep their revision, so a re-run bumps nothing.
+UPDATE owner_model_revisions
+   SET owner_model_revision = owner_model_revision + 1,
+       updated_at_ms = MAX(updated_at_ms, CAST(strftime('%s','now') AS INTEGER) * 1000)
+ WHERE owner_principal_id IN (
+   SELECT b.owner_principal_id FROM m32_before b JOIN owner_cognitive_model a
+     ON a.assertion_id = b.assertion_id
+    WHERE a.state IS NOT b.state OR a.confidence IS NOT b.confidence
+       OR a.supporting_episode_refs_json IS NOT b.supporting_episode_refs_json);
+DROP TABLE IF EXISTS temp.m32_before;
+"""
+
+MIGRATION_32_OUTBOX_DELIVERY = """
+-- Outbox starvation. drain_outbox read the oldest 100 PENDING rows across every target, so
+-- rows for a target with no handler, or rows whose handler always fails, filled every
+-- batch and handled targets were never reached. Delivery now schedules each row on its
+-- own: a failure sets next_attempt_at_ms (exponential backoff) and, past the attempt
+-- budget, dead_lettered_at_ms. A dead-lettered row stays PENDING (the status CHECK is
+-- unchanged) and is never selected again; it is the operator's to inspect.
+-- The two columns (MIGRATION_32_OUTBOX_COLUMNS) are added by Store._ensure_m32_outbox_columns
+-- before this script runs: ALTER TABLE ADD COLUMN cannot be guarded in SQL, and a crash
+-- between this script and its schema_migrations row must leave a database that migrates.
+CREATE INDEX IF NOT EXISTS idx_owner_model_outbox_due
+  ON owner_model_outbox(status, target, dead_lettered_at_ms, created_at_ms);
+"""
+
+MEMORY_FABRIC_MIGRATION_32 = MIGRATION_32_OWNER_MODEL_REPAIR + MIGRATION_32_OUTBOX_DELIVERY
+
+# (column, declared type) added to owner_model_outbox by migration 32's guarded pre-step,
+# in this order (A-MIN-VAN, reviewer D2: the plain ALTERs were not re-runnable).
+MIGRATION_32_OUTBOX_COLUMNS: tuple[tuple[str, str], ...] = (
+    ("next_attempt_at_ms", "INTEGER"),
+    ("dead_lettered_at_ms", "INTEGER"),
+)
+
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -2186,6 +2512,8 @@ MIGRATIONS: dict[int, str] = {
     43: MIGRATION_43,
     44: MIGRATION_44,
     45: MIGRATION_45,
+    46: MEMORY_FABRIC_MIGRATION_31,
+    47: MEMORY_FABRIC_MIGRATION_32,
 }
 
 
@@ -2253,6 +2581,22 @@ class Store:
             await db.execute("ALTER TABLE devices ADD COLUMN access_token_hash TEXT")
             await db.commit()
 
+    @staticmethod
+    async def _ensure_m32_outbox_columns(db: aiosqlite.Connection) -> None:
+        """Migration 32's outbox columns, added only when absent.
+
+        ``executescript`` autocommits statement by statement, so a process that dies after
+        migration 32's script but before its ``schema_migrations`` row leaves the columns in
+        place with version 31 recorded; a plain ``ALTER TABLE ... ADD COLUMN`` would then fail
+        every later migrate with "duplicate column name". The rest of 32 is idempotent.
+        """
+        cur = await db.execute("PRAGMA table_info(owner_model_outbox)")
+        columns = {str(row["name"]) for row in await cur.fetchall()}
+        for name, decl in MIGRATION_32_OUTBOX_COLUMNS:
+            if name not in columns:
+                await db.execute(f"ALTER TABLE owner_model_outbox ADD COLUMN {name} {decl}")
+        await db.commit()
+
     async def migrate(self) -> None:
         async with self.connection() as db:
             await db.execute(
@@ -2272,6 +2616,8 @@ class Store:
                     continue
                 if version == 5:
                     await self._ensure_access_token_column(db)
+                if version == 47:
+                    await self._ensure_m32_outbox_columns(db)
                 await db.executescript(MIGRATIONS[version])
                 await db.execute(
                     "INSERT INTO schema_migrations(version, applied_at_unix) VALUES (?, ?)",
