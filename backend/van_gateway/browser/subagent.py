@@ -25,8 +25,9 @@ import ipaddress
 import re
 import time
 import uuid
+from collections.abc import Awaitable, Callable
 from enum import Enum
-from typing import Any, Callable, Protocol
+from typing import Any, Protocol
 
 from pydantic import BaseModel, Field
 
@@ -173,6 +174,7 @@ class BrowserSubagentRunner:
         worker: SubagentWorker,
         task: BrowserTask,
         now_ms: int | None = None,
+        assert_lease_active: Callable[[], Awaitable[None]] | None = None,
     ) -> SubagentResult:
         # The ladder cap is a policy decision, checked once before any step.
         try:
@@ -201,13 +203,23 @@ class BrowserSubagentRunner:
         def current_ms() -> int:
             return initial_ms + max(0, self.clock_ms() - clock_start)
 
+        def deadline_reached() -> bool:
+            current = current_ms()
+            return assignment.deadline_ms is not None and current >= assignment.deadline_ms
+
         for index in range(assignment.max_steps):
             now = current_ms()
             if assignment.deadline_ms is not None and now >= assignment.deadline_ms:
                 return self._stop(assignment, task, steps, extraction, SubagentStop.DEADLINE_REACHED)
 
             try:
+                # Semantic proposals can inspect the browser too. Lease authority is
+                # checked before either a proposal or an action touches the profile.
+                if assert_lease_active is not None:
+                    await assert_lease_active()
                 action = await worker.propose(assignment, list(steps))
+                if assert_lease_active is not None:
+                    await assert_lease_active()
             except Exception as exc:  # noqa: BLE001 - a worker fault ends the task
                 return self._stop(
                     assignment, task, steps, extraction, SubagentStop.WORKER_ERROR,
@@ -227,7 +239,13 @@ class BrowserSubagentRunner:
                 return self._stop(assignment, task, steps, extraction, SubagentStop.GOAL_ACHIEVED)
 
             try:
+                if assert_lease_active is not None:
+                    await assert_lease_active()
+                if deadline_reached():
+                    return self._stop(assignment, task, steps, extraction, SubagentStop.DEADLINE_REACHED)
                 observation = await worker.execute(assignment, action)
+                if assert_lease_active is not None:
+                    await assert_lease_active()
             except Exception as exc:  # noqa: BLE001
                 return self._stop(
                     assignment, task, steps, extraction, SubagentStop.WORKER_ERROR,
@@ -235,6 +253,8 @@ class BrowserSubagentRunner:
                 )
             now = current_ms()
 
+            if deadline_reached():
+                return self._stop(assignment, task, steps, extraction, SubagentStop.DEADLINE_REACHED)
             # Page content is data. It cannot raise the class or carry secrets, and
             # a page that tries to redirect the task ends it.
             try:

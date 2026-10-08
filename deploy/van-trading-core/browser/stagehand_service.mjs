@@ -386,7 +386,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, BIND, () => {
-  process.stdout.write(\`[van-stagehand] listening on \${BIND}:\${PORT}\\n\`);
+  process.stdout.write(`[van-stagehand] listening on ${BIND}:${PORT}\n`);
 });
 
 function shutdown() {

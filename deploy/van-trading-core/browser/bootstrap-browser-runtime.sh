@@ -20,6 +20,8 @@ if ! id van-browser >/dev/null 2>&1; then
   useradd --system --home-dir "$BASE" --shell /usr/sbin/nologin van-browser
 fi
 install -d -o van-browser -g van-browser -m 0750 "$BASE" "$BASE/browsers"
+install -d -o van-browser -g van-browser -m 0750 /var/lib/van-trading/browser
+install -d -o van-browser -g van-browser -m 0750 /var/lib/van-trading/evidence/browser
 install -d -o van-browser -g van-browser -m 0700 /var/lib/van-trading/browser/profiles
 install -d -o van-browser -g van-browser -m 0700 /var/lib/van-trading/browser/secrets
 install -d -o van-browser -g van-browser -m 0750 /var/lib/van-trading/browser/downloads
@@ -27,6 +29,25 @@ install -d -o van-browser -g van-browser -m 0750 /var/lib/van-trading/evidence/b
 install -d -o van-browser -g van-browser -m 0700 /run/van-browser
 install -d -o vati -g vati -m 0750 /var/lib/van-trading/evidence/automation/sha256
 install -d -o van-browser -g van-browser -m 0750 /var/log/van-trading/browser
+
+# The trading data root is intentionally not world-traversable. The browser worker still
+# has to cross those parents to reach only its dedicated subtrees. Grant execute-only ACLs
+# to the van-browser identity instead of weakening /var/lib/van-trading or /var/log/van-trading.
+if ! command -v setfacl >/dev/null 2>&1; then
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get -o Acquire::Retries=3 update -qq
+  apt-get install -y -qq --no-install-recommends acl >/dev/null
+fi
+for parent in \
+  /var/lib/van-trading \
+  /var/lib/van-trading/browser \
+  /var/lib/van-trading/evidence \
+  /var/lib/van-trading/evidence/browser \
+  /var/log/van-trading \
+  /var/log/van-trading/browser
+do
+  setfacl -m u:van-browser:--x "$parent"
+done
 
 install -o van-browser -g van-browser -m 0644 "$HERE/package.json" "$BASE/package.json"
 install -o van-browser -g van-browser -m 0644 "$HERE/package-lock.json" "$BASE/package-lock.json"
@@ -43,9 +64,9 @@ chmod 0644 "$CONFIG"
 sudo -u van-browser npm --prefix "$BASE" ci --omit=dev --no-audit --no-fund
 export PLAYWRIGHT_BROWSERS_PATH="$BASE/browsers"
 "$BASE/node_modules/.bin/playwright" install-deps chromium
+chown -R van-browser:van-browser "$BASE/browsers"
 sudo -u van-browser env PLAYWRIGHT_BROWSERS_PATH="$PLAYWRIGHT_BROWSERS_PATH" \
   "$BASE/node_modules/.bin/playwright" install chromium
-chown -R van-browser:van-browser "$BASE/browsers"
 stagehand_ver="$(node -p "require('$BASE/node_modules/@browserbasehq/stagehand/package.json').version")"
 playwright_ver="$(node -p "require('$BASE/node_modules/@playwright/test/package.json').version")"
 [[ "$stagehand_ver" == 4.1.0 ]] || { echo "Stagehand pin mismatch: $stagehand_ver" >&2; exit 43; }
@@ -54,20 +75,54 @@ chromium_path="$(cd "$BASE" && PLAYWRIGHT_BROWSERS_PATH="$PLAYWRIGHT_BROWSERS_PA
   "const { chromium } = require('playwright'); process.stdout.write(chromium.executablePath())")"
 [[ -x "$chromium_path" ]] || { echo "Chromium executable missing: $chromium_path" >&2; exit 45; }
 
+# The AppArmor userns allowance below attaches to this exact executable path. Keep the
+# installed browser tree immutable to the van-browser runtime identity so compromised
+# browser content cannot replace an allowlisted executable and inherit that allowance.
+chown -R root:van-browser "$BASE/browsers"
+chmod -R u=rwX,g=rX,o= "$BASE/browsers"
+[[ "$(stat -c '%U:%G' "$chromium_path")" == "root:van-browser" ]] || {
+  echo "Chromium ownership hardening failed: $chromium_path" >&2
+  exit 49
+}
+[[ -x "$chromium_path" ]] || { echo "Chromium lost execute permission after hardening" >&2; exit 50; }
+
+# Ubuntu 24.04 restricts unprivileged user namespaces through AppArmor. Chromium uses
+# user namespaces for its own sandbox; never disable Chromium's sandbox or the host
+# restriction globally. Instead, allow userns for this exact pinned
+# Chromium executable only. The profile is replaced on every bootstrap so a Playwright
+# revision/path change cannot silently inherit the previous allowance.
+command -v apparmor_parser >/dev/null 2>&1 || {
+  echo "AppArmor parser missing; refusing to run Chromium without its sandbox" >&2
+  exit 48
+}
+APPARMOR_PROFILE=/etc/apparmor.d/van-browser-playwright-chromium
+cat >"$APPARMOR_PROFILE" <<EOF
+abi <abi/4.0>,
+include <tunables/global>
+
+profile van-browser-playwright-chromium $chromium_path flags=(unconfined) {
+  userns,
+}
+EOF
+chown root:root "$APPARMOR_PROFILE"
+chmod 0644 "$APPARMOR_PROFILE"
+apparmor_parser -r "$APPARMOR_PROFILE"
+echo BROWSER_CHROMIUM_USERNS_PROFILE_GREEN
+
 # Browser Harness is the adopted deterministic actuator. Pin the released package and its
 # direct runtime dependencies. The installed environment is also frozen into deployment
 # evidence so a later qualification can detect transitive drift rather than assuming it.
 python3.12 -m venv "$BASE/harness-venv"
 "$BASE/harness-venv/bin/python" -m pip install --disable-pip-version-check --no-cache-dir \
   "browser-harness==0.1.13" "cdp-use==1.4.5" "fetch-use==0.4.0" \
-  "pillow==12.2.0" "websockets==15.0.1"
+  "pillow==12.3.0" "websockets==15.0.1"
 "$BASE/harness-venv/bin/python" - <<'PY'
 import importlib.metadata as m
 expected = {
     "browser-harness": "0.1.13",
     "cdp-use": "1.4.5",
     "fetch-use": "0.4.0",
-    "pillow": "12.2.0",
+    "pillow": "12.3.0",
     "websockets": "15.0.1",
 }
 for package, version in expected.items():
@@ -104,6 +159,7 @@ chmod 0644 "$CONFIG"
 
 systemctl daemon-reload
 systemctl enable vati-browser-harness.service vati-stagehand.service
+systemctl reset-failed vati-browser-harness.service vati-stagehand.service || true
 systemctl restart vati-browser-harness.service
 for attempt in 1 2 3 4 5; do
   if curl -fsS --max-time 3 "http://127.0.0.1:${VAN_HARNESS_PORT:-9141}/health" >/tmp/van-harness-health.json 2>/dev/null \
@@ -127,7 +183,10 @@ PY
 done
 
 systemctl restart vati-stagehand.service
-for attempt in 1 2 3 4 5; do
+# Stagehand imports the pinned semantic/browser stack before opening its loopback listener.
+# On the ARM64 trading host that cold import can approach ten seconds, so give it a
+# bounded 30-second readiness window instead of racing the service start.
+for attempt in $(seq 1 15); do
   if curl -fsS --max-time 3 "http://127.0.0.1:${VAN_STAGEHAND_PORT:-9140}/health" >/tmp/van-stagehand-health.json 2>/dev/null \
      && python3 - /tmp/van-stagehand-health.json <<'PY'
 import json, sys
@@ -141,7 +200,7 @@ PY
     echo STAGEHAND_RUNTIME_GREEN
     break
   fi
-  if [[ "$attempt" == 5 ]]; then
+  if [[ "$attempt" == 15 ]]; then
     journalctl -u vati-stagehand.service -n 100 --no-pager >&2 || true
     exit 47
   fi

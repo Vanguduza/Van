@@ -19,9 +19,11 @@ Everything here is internal-control only: Hermes is the only caller.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import time
 from typing import Any
+from urllib.parse import urlsplit
 
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, Field
@@ -44,6 +46,7 @@ from van_gateway.browser.subagent import (
     BrowserSubagentRunner,
     classify_boundary,
     SubagentAssignment,
+    SubagentResult,
     SubagentStop,
     SubagentWorker,
 )
@@ -246,15 +249,17 @@ class BrowserApi:
         owner can still see which session the question came from.
         """
         row = await self.store.fetchone(
-            "SELECT lease_holder FROM browser_profiles WHERE profile_alias = ?",
-            (task.profile_alias,),
+            "SELECT lease_holder FROM browser_profiles WHERE profile_alias = ? "
+            "AND lease_holder_kind = 'TASK' AND lease_holder_id = ?",
+            (task.profile_alias, task.task_id),
         )
         lease_ref = None if row is None else row["lease_holder"]
         if lease_ref:
             await self.store.execute(
                 "UPDATE browser_profiles SET lease_holder = NULL, lease_expires_at_ms = NULL, "
-                "updated_at_ms = ? WHERE profile_alias = ? AND lease_holder = ?",
-                (int(time.time() * 1000), task.profile_alias, lease_ref),
+                "lease_holder_kind = NULL, lease_holder_id = NULL, updated_at_ms = ? "
+                "WHERE profile_alias = ? AND lease_holder = ? AND lease_holder_id = ?",
+                (int(time.time() * 1000), task.profile_alias, lease_ref, task.task_id),
             )
         return lease_ref
 
@@ -882,8 +887,6 @@ class BrowserApi:
                 deadline_ms=body.deadline_ms,
                 max_steps_without_progress=body.max_steps_without_progress,
             )
-            if status is BrowserTaskStatus.RESUME_AUTHORIZED:
-                await self._enforce_resume_authorization(task, assignment)
             # P2-BROW-001 — the worker is bound to *this* task and its plan before it
             # runs. A long-lived worker mutated per assignment would let two concurrent
             # assignments overwrite each other's task id, and the adapter is the only part
@@ -905,45 +908,165 @@ class BrowserApi:
             if binder is not None and body.interactive_session_id is None:
                 worker = binder(task, body.plan)
             try:
-                result = await self.runner.run(
-                    assignment=assignment, worker=worker, task=task
-                )
-            except SemanticWorkerUnavailable as exc:
-                # An L2+ assignment asked for judgement about a page and no semantic
-                # runtime is configured. Walking the deterministic plan instead would be
-                # answering a different question and reporting success on this one.
-                raise HTTPException(
-                    status_code=503, detail=f"BROWSER_SEMANTIC_RUNTIME_UNAVAILABLE:{exc}"
-                ) from exc
+                await self.broker.ensure_registered_profile(profile_alias=task.profile_alias)
+                acquisition = asyncio.create_task(self.broker.acquire_lease(
+                    profile_alias=task.profile_alias, task_id=task.task_id
+                ))
+                try:
+                    lease = await asyncio.shield(acquisition)
+                except asyncio.CancelledError:
+                    # Acquisition can commit before cancellation reaches its caller.
+                    # Obtain the handle before releasing; never abandon a live lease.
+                    try:
+                        acquired = await asyncio.shield(acquisition)
+                    except BrowserPolicyError:
+                        pass
+                    else:
+                        await self.broker.release_lease(acquired)
+                    raise
+            except BrowserPolicyError as exc:
+                raise HTTPException(status_code=409, detail=str(exc)) from exc
 
-            escalation = None
-            if result.stop_reason in (SubagentStop.SCOPE_VIOLATION, SubagentStop.ACTION_CLASS_VIOLATION):
-                escalation = await self._create_boundary_escalation(
-                    task=task, assignment=assignment, result=result
+            async def assert_lease_active() -> None:
+                await self.broker.assert_lease_active(
+                    lease_id=lease.lease_id, holder_id=task.task_id,
+                    generation=lease.generation,
                 )
-            else:
-                terminal_status = BrowserTaskStatus.COMPLETED
-                if result.stop_reason in (SubagentStop.PAYMENT_REFUSED, SubagentStop.INJECTION_REFUSED):
-                    terminal_status = BrowserTaskStatus.BLOCKED_POLICY
-                elif result.stop_reason is SubagentStop.GOAL_DRIFT:
-                    terminal_status = BrowserTaskStatus.BLOCKED_UNSAFE
-                elif result.stop_reason is not SubagentStop.GOAL_ACHIEVED:
-                    terminal_status = BrowserTaskStatus.FAILED
-                await self.tasks.complete(
-                    task_id=task.task_id,
-                    status=terminal_status,
-                    error_code=(
-                        None if result.stop_reason is SubagentStop.GOAL_ACHIEVED
-                        else result.stop_reason.value
-                    ),
-                    now_ms=int(time.time() * 1000),
-                )
-                # P3-OBS-002 — "browser task status" is one of Gate 11's named
-                # metrics. Recorded at the one place a task reaches a terminal
-                # status, so a new stop reason is counted without being added here.
-                instruments.record_browser_task(terminal_status)
-            if escalation is not None:
-                instruments.record_browser_task("ESCALATED")
+
+            claimed = False
+            evidence = None
+            evidence_pointer = None
+            try:
+                # Recheck after the exclusive lease: a concurrent call may have read
+                # PENDING before another assignment completed and released this profile.
+                current = await self._load_task(task.task_id)
+                if current.status not in (BrowserTaskStatus.PENDING, BrowserTaskStatus.RESUME_AUTHORIZED):
+                    raise HTTPException(
+                        status_code=409,
+                        detail=f"BROWSER_TASK_NOT_RUNNABLE:{current.status.value}",
+                    )
+                if current.status is BrowserTaskStatus.RESUME_AUTHORIZED:
+                    await self._enforce_resume_authorization(task, assignment)
+                async with self.store.connection() as db:
+                    changed = await db.execute(
+                        "UPDATE browser_tasks SET status = 'RUNNING', updated_at_ms = ? "
+                        "WHERE task_id = ? AND status IN ('PENDING', 'RESUME_AUTHORIZED')",
+                        (int(time.time() * 1000), task.task_id),
+                    )
+                    if changed.rowcount != 1:
+                        raise HTTPException(status_code=409, detail="BROWSER_TASK_ALREADY_CLAIMED")
+                    # Set before the commit await: cancellation may arrive after the
+                    # database has durably stored RUNNING but before await returns.
+                    claimed = True
+                    await db.commit()
+                try:
+                    # The lease never extends the caller's deadline. Cancel a run that
+                    # cannot finish while it still owns the browser profile.
+                    deadline_first = (
+                        assignment.deadline_ms is not None
+                        and assignment.deadline_ms <= lease.expires_at_ms
+                    )
+                    stop_at_ms = (
+                        min(lease.expires_at_ms, assignment.deadline_ms)
+                        if assignment.deadline_ms is not None else lease.expires_at_ms
+                    )
+                    remaining = max(0.0, (stop_at_ms - time.time() * 1000) / 1000)
+                    async with asyncio.timeout(remaining):
+                        result = await self.runner.run(
+                            assignment=assignment, worker=worker, task=task,
+                            assert_lease_active=assert_lease_active,
+                        )
+                except TimeoutError:
+                    result = SubagentResult(
+                        assignment_id=assignment.assignment_id, task_id=task.task_id,
+                        stop_reason=(
+                            SubagentStop.DEADLINE_REACHED if deadline_first else SubagentStop.WORKER_ERROR
+                        ),
+                        detail=None if deadline_first else "BROWSER_PROFILE_LEASE_EXPIRED",
+                    )
+                except SemanticWorkerUnavailable as exc:
+                    raise HTTPException(
+                        status_code=503, detail=f"BROWSER_SEMANTIC_RUNTIME_UNAVAILABLE:{exc}"
+                    ) from exc
+
+                if result.succeeded:
+                    await assert_lease_active()
+                    # A worker saying "done" is not evidence. Seal only observations
+                    # actually returned by executed, policy-sanitized browser steps.
+                    observed_url = result.extraction.get("url")
+                    try:
+                        observed = urlsplit(observed_url) if isinstance(observed_url, str) else None
+                        observed_host = (observed.hostname or "").lower().rstrip(".") if observed else ""
+                    except ValueError:
+                        observed, observed_host = None, ""
+                    allowed_hosts = [domain.lower().rstrip(".") for domain in assignment.allowed_domains]
+                    within_scope = any(
+                        domain and (observed_host == domain or observed_host.endswith("." + domain))
+                        for domain in allowed_hosts
+                    )
+                    if (
+                        not result.steps
+                        or not all(step.observation_digest for step in result.steps)
+                        or observed is None
+                        or observed.scheme not in ("http", "https")
+                        or not within_scope
+                        or observed.username is not None
+                        or observed.password is not None
+                        or "adapter_error" in result.extraction
+                    ):
+                        result.stop_reason = SubagentStop.WORKER_ERROR
+                        result.detail = "BROWSER_COMPLETION_OBSERVATION_MISSING_OR_INVALID"
+                    else:
+                        evidence = await self.tasks.seal_evidence(
+                            task=task, kind="ASSIGNMENT_COMPLETION", url=observed_url,
+                            extraction={
+                                "assignment_id": assignment.assignment_id,
+                                "turn_id": assignment.turn_id,
+                                "command_id": assignment.command_id,
+                                "goal_digest": assignment.goal_digest,
+                                "steps": [step.model_dump(mode="json") for step in result.steps],
+                                "observation": result.extraction,
+                            },
+                        )
+                        evidence_pointer = f"browser-evidence://{evidence.evidence_id}"
+
+                escalation = None
+                if result.stop_reason in (SubagentStop.SCOPE_VIOLATION, SubagentStop.ACTION_CLASS_VIOLATION):
+                    escalation = await self._create_boundary_escalation(
+                        task=task, assignment=assignment, result=result
+                    )
+                else:
+                    terminal_status = BrowserTaskStatus.COMPLETED
+                    if result.stop_reason in (SubagentStop.PAYMENT_REFUSED, SubagentStop.INJECTION_REFUSED):
+                        terminal_status = BrowserTaskStatus.BLOCKED_POLICY
+                    elif result.stop_reason is SubagentStop.GOAL_DRIFT:
+                        terminal_status = BrowserTaskStatus.BLOCKED_UNSAFE
+                    elif result.stop_reason is not SubagentStop.GOAL_ACHIEVED:
+                        terminal_status = BrowserTaskStatus.FAILED
+                    await self.tasks.complete(
+                        task_id=task.task_id, status=terminal_status,
+                        evidence_pointer=evidence_pointer,
+                        error_code=None if result.succeeded else result.stop_reason.value,
+                        now_ms=int(time.time() * 1000),
+                    )
+                    instruments.record_browser_task(terminal_status)
+                if escalation is not None:
+                    instruments.record_browser_task("ESCALATED")
+            except BaseException:
+                if claimed:
+                    # Cancellation, a lost lease or failed evidence sealing cannot leave
+                    # an apparently runnable or successful task after the profile is free.
+                    now = int(time.time() * 1000)
+                    await self.store.execute(
+                        "UPDATE browser_tasks SET status = 'FAILED', error_code = "
+                        "'BROWSER_ASSIGNMENT_INTERRUPTED', completed_at_ms = ?, updated_at_ms = ? "
+                        "WHERE task_id = ? AND status = 'RUNNING'",
+                        (now, now, task.task_id),
+                    )
+                raise
+            finally:
+                # A stale task may only release its own lease, never a newer holder.
+                await self.broker.release_lease(lease)
             return {
                 "assignment_id": assignment.assignment_id,
                 "task_id": task.task_id,
@@ -959,6 +1082,11 @@ class BrowserApi:
                 "extraction": result.extraction,
                 "detail": result.detail,
                 "escalation": escalation,
+                "evidence_pointer": evidence_pointer,
+                "evidence": evidence.model_dump(mode="json") if evidence is not None else None,
+                "session_lease_ref": lease.lease_id,
+                "session_lease_generation": lease.generation,
+                "session_lease_released": True,
                 # Stated so the subordination is observable, not just documented.
                 "assigned_by_turn": assignment.turn_id,
                 "bounds": {

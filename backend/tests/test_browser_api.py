@@ -65,7 +65,10 @@ class _ScriptedWorker:
         self.executed += 1
         return BrowserObservation(
             task_id=assignment.task_id,
-            extraction={"step": self.executed, "seen": action.instruction or action.kind},
+            extraction={
+                "step": self.executed, "seen": action.instruction or action.kind,
+                "url": f"https://{action.domain}/statements", "title": "Statements",
+            },
             injection_assessment=InjectionAssessment.NONE_DETECTED,
         )
 
@@ -541,6 +544,8 @@ async def test_advisory_owner_answer_cannot_resume_or_widen_browser_task(tmp_pat
             (escalation["decision_id"],),
         )
 
+        # Resumption must observe the page; merely declaring done is not completion.
+        worker.actions = [ProposedAction(kind="read", domain=DOMAIN)]
         second = await ac.post("/v1/browser/assignments", headers=HEADERS, json=request)
         assert second.status_code == 409
         assert "WAITING_FOR_OWNER" in second.json()["detail"]
@@ -618,7 +623,7 @@ async def test_action_class_approval_cannot_be_exceeded(tmp_path):
 
 async def test_a_run_cannot_be_started_twice(tmp_path):
     """A completed task is terminal; a second assignment does not resume it."""
-    worker = _ScriptedWorker([ProposedAction(kind="done", domain=DOMAIN, done=True)])
+    worker = _ScriptedWorker([ProposedAction(kind="read", domain=DOMAIN)])
     ac, _api, _store = await _client(tmp_path, worker=worker)
     async with ac:
         task = await _make_task(ac)

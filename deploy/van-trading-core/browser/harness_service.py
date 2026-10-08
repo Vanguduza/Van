@@ -134,6 +134,21 @@ class ChromeSession:
                 raise WorkerError("CHROMIUM_EXECUTABLE_UNAVAILABLE", 503)
             self.profile_dir.mkdir(parents=True, exist_ok=True)
             self.runtime_dir.mkdir(parents=True, exist_ok=True)
+            # Chromium's crash reporter and NSS use XDG paths outside --user-data-dir.
+            # Keep persistent config/data inside this profile and cache in its private
+            # runtime directory, all covered by the unit's existing ReadWritePaths.
+            # Preserve HOME and the rest of the service environment.
+            chrome_paths = {
+                "XDG_CONFIG_HOME": self.profile_dir / "xdg-config",
+                "XDG_DATA_HOME": self.profile_dir / "xdg-data",
+                "XDG_CACHE_HOME": self.runtime_dir / "xdg-cache",
+            }
+            for directory in chrome_paths.values():
+                directory.mkdir(mode=0o700, parents=True, exist_ok=True)
+            chrome_env = {
+                **os.environ,
+                **{key: str(directory) for key, directory in chrome_paths.items()},
+            }
             active = self.profile_dir / "DevToolsActivePort"
             active.unlink(missing_ok=True)
             self.process = subprocess.Popen(
@@ -154,6 +169,7 @@ class ChromeSession:
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 text=True,
+                env=chrome_env,
             )
             deadline = time.monotonic() + 12
             while time.monotonic() < deadline:

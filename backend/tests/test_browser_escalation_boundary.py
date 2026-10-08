@@ -317,13 +317,10 @@ async def test_an_open_question_does_not_hold_the_browser_lease(tmp_path):
     ac, _api, store = await _client(tmp_path, worker=worker)
     async with ac:
         task = await _make_task(ac)
-        lease = await ac.post(
-            "/v1/browser/leases", headers=HEADERS,
-            json={"profile_alias": "public_research", "task_id": task["task_id"]},
-        )
-        assert lease.status_code == 200
-        await ac.post("/v1/browser/assignments", headers=HEADERS,
-                      json=_assignment(task["task_id"]))
+        response = await ac.post("/v1/browser/assignments", headers=HEADERS,
+                                 json=_assignment(task["task_id"]))
+        assert response.status_code == 200
+        assert response.json()["session_lease_released"] is True
 
         profile = await store.fetchone(
             "SELECT lease_holder FROM browser_profiles WHERE profile_alias = 'public_research'"
@@ -334,7 +331,7 @@ async def test_an_open_question_does_not_hold_the_browser_lease(tmp_path):
             "SELECT session_lease_ref FROM browser_escalations WHERE task_id = ?",
             (task["task_id"],),
         )
-        assert row["session_lease_ref"] == lease.json()["lease_id"]
+        assert row["session_lease_ref"] == response.json()["session_lease_ref"]
         # And the profile is immediately usable by another task.
         retaken = await ac.post(
             "/v1/browser/leases", headers=HEADERS,

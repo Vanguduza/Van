@@ -97,6 +97,10 @@ cp -a "$ROOT/backend/van_gateway" "$STAGE/backend/"
 cp "$ROOT/backend/requirements.txt" "$STAGE/backend/requirements.txt"
 cp "$ROOT/backend/requirements.lock" "$STAGE/backend/requirements.lock"
 cp -a "$ROOT/registries" "$STAGE/registries"
+cp -a "$ROOT/config" "$STAGE/config"
+install -d "$STAGE/docs" "$STAGE/tools"
+cp -a "$ROOT/docs/decisions" "$STAGE/docs/decisions"
+cp -a "$ROOT/tools/certification" "$STAGE/tools/certification"
 # `van_gateway.trading.accounts` puts <runtime>/trading on sys.path and imports `commander`
 # from it. Without this copy the gateway crashes at startup; runtimes that worked had it
 # placed by hand. The trading test suite is not runtime code.

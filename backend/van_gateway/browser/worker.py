@@ -157,18 +157,9 @@ class AdapterBackedWorker:
                 step, index = candidate, candidate_index
                 break
 
-        try:
-            payload = await self._dispatch(task, action, step)
-        except BrowserAdapterError as exc:
-            # A browser that could not act did not act. Reporting an empty-but-successful
-            # observation is how "the task completed" comes to mean nothing.
-            return BrowserObservation(
-                task_id=task.task_id,
-                controls=[],
-                extraction={"adapter_error": exc.code, "detail": exc.detail or ""},
-                injection_assessment=InjectionAssessment.NONE_DETECTED,
-                proposed_action_class=None,
-            )
+        # An adapter failure is a failed action. Let the runner stop the assignment;
+        # packaging the failure as an observation let plan exhaustion report success.
+        payload = await self._dispatch(task, action, step)
         return self._observation(task, action, payload)
 
     async def _dispatch(
