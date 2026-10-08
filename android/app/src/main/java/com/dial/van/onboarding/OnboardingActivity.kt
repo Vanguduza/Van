@@ -52,30 +52,17 @@ import com.dial.van.overlay.VanObstructionAccessibilityService
 import com.dial.van.visual.VanTheme
 
 /**
- * First run.
+ * Optional Android permission review, opened from Settings.
  *
- * P1-AND-002, two defects in one screen.
- *
- * **Pairing was not here.** Onboarding covered five permissions and not the one thing
- * without which nothing works, which lived at Home > Connections. A new owner finished
- * onboarding, landed on a dashboard where every call returned 401, and had no way to know
- * that the missing step was several taps away under a menu they had never opened.
- *
- * **Steps advanced on `startActivity`.** `step.intValue++` sat next to the intent, so
- * opening the Android settings screen counted as granting the permission. An owner could
- * tap through the whole flow, grant nothing, and be told they were set. Nothing re-checked
- * on resume either, so a permission granted in settings and then returned from still showed
- * as pending.
- *
- * Both are fixed the same way: the step is *derived* from what the device reports, by
- * [OnboardingPlan], which is pure and executed in `android/verification`. There is no step
- * counter to increment, and the grants are re-read every time this screen resumes.
+ * Enrollment is completed by the signed installer. Launching VAN always opens the
+ * Command Centre; this activity never asks the owner for connection or pairing data.
+ * Permission advancement still depends on observed OS grants, never on firing an intent.
  */
 class OnboardingActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (isOnboardingComplete()) {
+        if (!intent.getBooleanExtra(EXTRA_REVIEW_PERMISSIONS, false)) {
             navigateToCommandCentre()
             return
         }
@@ -91,9 +78,6 @@ class OnboardingActivity : FragmentActivity() {
         }
     }
 
-    private fun isOnboardingComplete(): Boolean =
-        getSharedPreferences(PREFS, MODE_PRIVATE).getBoolean(KEY_COMPLETE, false)
-
     private fun markOnboardingComplete() {
         getSharedPreferences(PREFS, MODE_PRIVATE).edit { putBoolean(KEY_COMPLETE, true) }
     }
@@ -104,14 +88,14 @@ class OnboardingActivity : FragmentActivity() {
     }
 
     companion object {
+        const val EXTRA_REVIEW_PERMISSIONS = "review_permissions"
         private const val PREFS = "van_onboarding"
         private const val KEY_COMPLETE = "complete"
     }
 }
 
 /** Read what the device actually reports. Never what an intent was fired for. */
-internal fun readGrants(context: Context, paired: Boolean): OnboardingGrants = OnboardingGrants(
-    paired = paired,
+internal fun readGrants(context: Context): OnboardingGrants = OnboardingGrants(
     overlayGranted = Settings.canDrawOverlays(context),
     displayAwarenessEnabled = VanObstructionAccessibilityService.isEnabled(context),
     notificationsGranted = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
@@ -152,10 +136,10 @@ private fun OnboardingFlow(onComplete: () -> Unit) {
     // Set is not something a Bundle can hold — it would throw the first time the owner
     // rotated the phone on an optional step.
     var skipped by rememberSaveable { mutableStateOf(emptyList<String>()) }
-    var grants by remember { mutableStateOf(readGrants(context, app.gatewayClient.isPaired())) }
+    var grants by remember { mutableStateOf(readGrants(context)) }
 
     fun refresh() {
-        grants = readGrants(context, app.gatewayClient.isPaired())
+        grants = readGrants(context)
     }
 
     // The re-check that was missing. A permission granted in system settings and returned
@@ -190,11 +174,19 @@ private fun OnboardingFlow(onComplete: () -> Unit) {
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text("Welcome to Van", style = MaterialTheme.typography.headlineMedium)
+        Text("Phone permissions", style = MaterialTheme.typography.headlineMedium)
         Text(
-            "A few things first. Van will not pretend any of these are done when they are not.",
+            "Review the Android permissions used by Floating VAN, voice and notifications. " +
+                "Each feature starts only after Android confirms its permission.",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+
+        TextButton(onClick = {
+            (context as? android.app.Activity)?.let { activity ->
+                activity.startActivity(Intent(activity, CommandCentreActivity::class.java))
+                activity.finish()
+            }
+        }) { Text("Back to VAN") }
 
         if (step == OnboardingStep.DONE) {
             Text(view.title, style = MaterialTheme.typography.titleMedium)
@@ -224,7 +216,6 @@ private fun OnboardingFlow(onComplete: () -> Unit) {
             onSkip = { skipped = (skipped + step.id).distinct() },
             onClick = {
                 when (step) {
-                    OnboardingStep.PAIRING -> Unit
                     OnboardingStep.OVERLAY -> context.startActivity(
                         Intent(
                             Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -249,53 +240,7 @@ private fun OnboardingFlow(onComplete: () -> Unit) {
                 // Note what is NOT here: a step counter. The next recomposition asks the
                 // device again, so firing an intent advances nothing by itself.
             },
-            content = {
-                if (step == OnboardingStep.PAIRING) {
-                    ProvisioningStatus(configured = app.provisioning.configured)
-                }
-            },
         )
-    }
-}
-
-
-/**
- * Rev 1.5 §0D.2 — what replaced the pairing form, and why there is nothing to fill in.
- *
- * This used to be two text fields: "Gateway address" and "Pairing code". They are the
- * first and fifth entries on §0D.2's list of fields a production build must never expose,
- * and the reason is not tidiness. A box asking the owner to type a server address is a
- * phishing surface with their entire assistant behind it — anyone who persuades them to
- * retype an address owns every command from that moment, and nothing on the phone would
- * look wrong afterwards. A pairing code is worse: it is exactly the kind of string someone
- * can be talked into reading out over the phone.
- *
- * ADR-RB-026 replaces both with an installer-driven path. The deployment pipeline hands
- * this device one signed, single-use, short-lived payload; the device verifies it against
- * a key compiled into this build, pairs and binds itself, and the owner watches.
- *
- * So what is left here is a status, and the status is honest about the two states that
- * are not the same: a build with no trust anchor can never be provisioned and says so,
- * while a build that has one is simply waiting.
- */
-@Composable
-private fun ProvisioningStatus(configured: Boolean) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (configured) {
-            Text(
-                "Van is waiting for its installer to finish setting this phone up. " +
-                    "There is nothing here for you to type — that is deliberate.",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        } else {
-            // Not "waiting": this build will never provision, and saying "waiting" would
-            // leave the owner watching a screen that cannot change.
-            Text(
-                "This build was not given the key it needs to be set up. It cannot be " +
-                    "paired from this screen, and a rebuild is what it needs.",
-                color = MaterialTheme.colorScheme.error,
-            )
-        }
     }
 }
 

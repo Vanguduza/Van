@@ -81,6 +81,12 @@ val escapedVanConnectivityTrustedKeys = vanConnectivityTrustedKeys
     .replace("\"", "\\\"")
     .replace("\n", "\\n")
 
+val vanSourceSha = providers.exec {
+    workingDir(rootProject.projectDir.parentFile)
+    commandLine("git", "rev-parse", "HEAD")
+}.standardOutput.asText.get().trim()
+require(vanSourceSha.matches(Regex("[0-9a-f]{40}"))) { "VAN source identity is unavailable" }
+
 android {
     namespace = "com.dial.van"
     compileSdk = 36
@@ -103,8 +109,9 @@ android {
         // for API <= 30 is retained and tested for exactly that day.
         minSdk = 31
         targetSdk = 36
-        versionCode = 5
-        versionName = "0.5.0-dev"
+        versionCode = 7
+        versionName = "0.6.0-canon-rc1"
+        buildConfigField("String", "VAN_SOURCE_SHA", "\"$vanSourceSha\"")
         buildConfigField("String", "VAN_GATEWAY_BASE_URL", "\"$escapedVanGatewayBaseUrl\"")
         buildConfigField("String", "VAN_GATEWAY_CA_PEM_B64", "\"$vanGatewayCaPemB64\"")
         buildConfigField(

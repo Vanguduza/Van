@@ -98,7 +98,15 @@ fun SettingsRoute(
         verticalArrangement = Arrangement.spacedBy(tokens.space.space3),
         contentPadding = PaddingValues(vertical = tokens.space.space3),
     ) {
-        item { SectionHeader("Settings & Devices", detail = "Pairing, permissions, voice, notifications, diagnostics") }
+        item { SectionHeader("Settings & Devices", detail = "Connection, permissions, voice, notifications, diagnostics") }
+        item {
+            Text("VAN ${BuildConfig.VERSION_NAME} · ${BuildConfig.VAN_SOURCE_SHA.take(12)}",
+                style = tokens.type.label, color = tokens.color.textSecondary)
+            OutlinedButton(onClick = {
+                context.startActivity(Intent(context, com.dial.van.onboarding.OnboardingActivity::class.java)
+                    .putExtra(com.dial.van.onboarding.OnboardingActivity.EXTRA_REVIEW_PERMISSIONS, true))
+            }) { Text("Review Android permissions") }
+        }
         item { Button(onClick = onOpenPermissions) { Text("Standing permissions & automatic readiness") } }
         item { OutlinedButton(onClick = onOpenDiagnostics) { Text("Service readiness & recovery") } }
 
@@ -106,10 +114,10 @@ fun SettingsRoute(
             VanPanel {
                 Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
                     val paired = app.gatewayClient.isPaired()
-                    Text("This phone's pairing", style = tokens.type.headline, color = tokens.color.textPrimary)
+                    Text("Automatic phone connection", style = tokens.type.headline, color = tokens.color.textPrimary)
                     Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
                         StatusChip(
-                            label = if (paired) "PAIRED" else "NOT PAIRED",
+                            label = if (paired) "ENROLLED" else "INSTALLER SETUP PENDING",
                             role = if (paired) StatusSemantics.ROLE_FAVOURABLE else StatusSemantics.ROLE_EVENT_RISK,
                         )
                         StatusChip(

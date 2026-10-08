@@ -42,13 +42,8 @@
 
         <activity
             android:name=".onboarding.OnboardingActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Van">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="false"
+            android:theme="@style/Theme.Van" />
 
         <!--
           Rev 1.5 ADR-RB-026 — the installer's way in, started over ADB and never by the
@@ -85,6 +80,10 @@
             android:exported="true"
             android:launchMode="singleTop"
             android:theme="@style/Theme.Van">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
             <intent-filter android:autoVerify="false">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

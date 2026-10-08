@@ -1,27 +1,11 @@
 package com.dial.van.onboarding
 
 /**
- * What first run has to establish, and whether it actually has.
- *
- * P1-AND-002. Onboarding covered overlay, notifications, the listener, the microphone and
- * the biometric — and not pairing, which lives at Home > Connections. So a new owner
- * finished onboarding, landed on a dashboard where every call returned 401, and had no way
- * to know that the thing they had not done was several taps away under a menu they had
- * never opened. The most important step was the one that was missing.
- *
- * Worse, steps advanced on `startActivity`. Opening the Android settings screen counted as
- * granting the permission: an owner could tap through the whole flow, grant nothing, and be
- * told they were set. Nothing re-checked on resume either, so a permission granted in
- * settings and then returned from still showed as pending.
- *
- * This file is the plan and the advancement rule. It takes the *observed* grant state and
- * says where the owner is, so the flow cannot advance on an intent that was merely fired.
- *
- * Pure Kotlin, executed in `android/verification`.
+ * Observed OS grants for the optional permission review.
+ * Installer enrollment is independent and is never an owner-facing setup step.
+ * Opening Android settings cannot satisfy a permission.
  */
 enum class OnboardingStep(val id: String) {
-    /** Without this VAN cannot talk to its gateway at all, so it is first. */
-    PAIRING("pairing"),
     OVERLAY("overlay"),
     DISPLAY_AWARENESS("display_awareness"),
     NOTIFICATIONS("notifications"),
@@ -36,7 +20,6 @@ enum class OnboardingStep(val id: String) {
  * fired: that distinction is the finding.
  */
 data class OnboardingGrants(
-    val paired: Boolean = false,
     val overlayGranted: Boolean = false,
     val displayAwarenessEnabled: Boolean = false,
     val notificationsGranted: Boolean = false,
@@ -64,13 +47,12 @@ object OnboardingPlan {
      *
      * The notification listener is genuinely optional — VAN works without reading
      * notifications, it just knows less. The biometric depends on hardware the owner cannot
-     * install. Everything else is required, and pairing most of all: without it every
-     * screen is an error message.
+     * install. The remaining grants are required to complete this permission review.
+     * The Command Centre remains accessible independently.
      */
     val SKIPPABLE = setOf(OnboardingStep.NOTIFICATION_LISTENER, OnboardingStep.BIOMETRIC)
 
     fun satisfied(step: OnboardingStep, grants: OnboardingGrants): Boolean = when (step) {
-        OnboardingStep.PAIRING -> grants.paired
         OnboardingStep.OVERLAY -> grants.overlayGranted
         OnboardingStep.DISPLAY_AWARENESS -> grants.displayAwarenessEnabled
         OnboardingStep.NOTIFICATIONS ->
@@ -101,9 +83,8 @@ object OnboardingPlan {
     /**
      * Whether onboarding may finish.
      *
-     * The required steps must be satisfied outright. An owner cannot skip past pairing, and
-     * the "you're set" screen cannot appear while VAN cannot reach its gateway — which is
-     * exactly what used to happen.
+     * Required OS permissions must be observed before this review is marked complete.
+     * This result does not establish enrollment, connectivity or provider readiness.
      */
     fun mayComplete(grants: OnboardingGrants): Boolean =
         OnboardingStep.entries
@@ -111,14 +92,6 @@ object OnboardingPlan {
             .all { satisfied(it, grants) }
 
     fun view(step: OnboardingStep, grants: OnboardingGrants): OnboardingStepView = when (step) {
-        OnboardingStep.PAIRING -> OnboardingStepView(
-            step,
-            "Pair this phone with your gateway",
-            "Until this is done VAN cannot reach anything: every screen will show an error. " +
-                "You will need the pairing code from the machine running the gateway.",
-            "Pair now",
-            satisfied(step, grants), skippable = false,
-        )
         OnboardingStep.OVERLAY -> OnboardingStepView(
             step,
             "Let VAN appear over other apps",
@@ -166,8 +139,9 @@ object OnboardingPlan {
         )
         OnboardingStep.DONE -> OnboardingStepView(
             step,
-            "You're set",
-            "VAN is paired and can reach your gateway.",
+            "Permission review complete",
+            "Android confirms the required grants for the features in this review. " +
+                "Connection readiness is shown separately in VAN.",
             "Enter Command Centre",
             satisfied = true, skippable = false,
         )
