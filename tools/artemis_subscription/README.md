@@ -35,3 +35,7 @@ Run the optional adapter contract tests inside the installed native Artemis envi
 ```
 
 The retained operational receipts distinguish real provider vision/structured-output checks, native factory/tool/stream checks, failed or interrupted setup attempts, handset installation and physical acceptance. Synthetic contract fixtures never count as handset acceptance.
+
+## Native task children
+
+The launcher sets a private PYTHONPATH bootstrap and the VAN subscription binding flag. Native standalone background task interpreters inherit the same exact model factory and profile. The hook is idempotent, refuses other providers in this binding, and terminates startup on bootstrap failure. It is not installed globally. The launcher uses standalone native task execution to avoid routing through an unrelated daemon.

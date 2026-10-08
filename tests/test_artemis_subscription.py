@@ -118,6 +118,39 @@ class SubscriptionContracts(unittest.TestCase):
         with self.assertRaises(ValueError):
             ChatGPTSubscriptionChatModel(model_name="fixture").invoke("test")
 
+    def test_binding_is_idempotent_and_refuses_unbound_provider(self):
+        from provider import bind_native_artemis
+        from artemis.llm.router import ModelFactory
+        from types import SimpleNamespace
+        with patch.dict(os.environ, {"VAN_ARTEMIS_SUBSCRIPTION_BINDING": "1"}):
+            bind_native_artemis()
+            first = ModelFactory.create_model.__func__
+            bind_native_artemis()
+            self.assertIs(first, ModelFactory.create_model.__func__)
+            with self.assertRaises(PermissionError):
+                ModelFactory.create_model(SimpleNamespace(provider="fixture", model_name="fixture"))
+
+    def test_fresh_native_task_child_inherits_binding(self):
+        import subprocess
+        profile_dir = Path(__file__).resolve().parents[1] / "tools/artemis_subscription"
+        env = dict(os.environ)
+        env["VAN_ARTEMIS_SUBSCRIPTION_BINDING"] = "1"
+        env["ARTEMIS_ARTEMIS_JSONC"] = str(profile_dir / "profile.json")
+        env["PYTHONPATH"] = os.pathsep.join([str(profile_dir), str(ROOT)])
+        code = (
+            "from artemis.llm.router import ModelFactory, ModelProvider; "
+            "from types import SimpleNamespace; "
+            "m=ModelFactory.create_model(SimpleNamespace(provider=ModelProvider.CUSTOM, "
+            "model_name='gpt-5.6-sol', timeout_seconds=180, reasoning_effort='low')); "
+            "import json; print(json.dumps({'model_class':type(m).__name__,"
+            "'model_name':m.model_name,'binding':getattr(ModelFactory,'_van_subscription_bound',False)}))"
+        )
+        result = subprocess.run([sys.executable, "-c", code], env=env, text=True,
+                                capture_output=True, timeout=60, check=True)
+        data = json.loads(result.stdout.strip().splitlines()[-1])
+        self.assertEqual(data, {"model_class": "ChatGPTSubscriptionChatModel",
+                               "model_name": MODEL, "binding": True})
+
 
 if __name__ == "__main__":
     unittest.main()

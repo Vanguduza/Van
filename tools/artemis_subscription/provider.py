@@ -341,14 +341,19 @@ def bind_native_artemis():
     from artemis.llm.router import ModelFactory, ModelProvider
     from artemis.core.diagnostics.probes.credentials_probe import LLMCredentialsProbe
     from artemis.core.diagnostics.schema import ProbeResult, ProbeStatus
+    if getattr(ModelFactory, "_van_subscription_bound", False):
+        return
     original = ModelFactory.create_model.__func__
     def create_model(cls, endpoint):
         if endpoint.provider == ModelProvider.CUSTOM and endpoint.model_name == MODEL:
             return ChatGPTSubscriptionChatModel(model_name=MODEL,
                 timeout_seconds=max(180, endpoint.timeout_seconds),
                 reasoning_effort=endpoint.reasoning_effort or "low")
+        if os.environ.get("VAN_ARTEMIS_SUBSCRIPTION_BINDING") == "1":
+            raise PermissionError("VAN native tasks require the exact owner subscription model")
         return original(cls, endpoint)
     ModelFactory.create_model = classmethod(create_model)
+    ModelFactory._van_subscription_bound = True
     async def probe(self):
         try:
             account = await read_subscription_account()

@@ -4,11 +4,18 @@ from pathlib import Path
 import sys
 
 ROOT = Path(os.environ.get("VAN_ARTEMIS_ROOT", "/opt/hermes-mobile-fabric/artemis/current")).resolve()
+PROFILE_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-os.environ["ARTEMIS_ARTEMIS_JSONC"] = str(Path(__file__).with_name("profile.json"))
+sys.path.insert(0, str(PROFILE_DIR))
+os.environ["ARTEMIS_ARTEMIS_JSONC"] = str(PROFILE_DIR / "profile.json")
 os.environ.setdefault("ARTEMIS_APP_DIR", "/home/ubuntu/.local/share/van/artemis-subscription")
 os.environ.setdefault("ARTEMIS_TRACES_DIR", "/home/ubuntu/.local/share/van/artemis-subscription/traces")
+os.environ["VAN_ARTEMIS_SUBSCRIPTION_BINDING"] = "1"
+os.environ["PYTHONPATH"] = os.pathsep.join(
+    [str(PROFILE_DIR), str(ROOT)] + ([os.environ["PYTHONPATH"]] if os.environ.get("PYTHONPATH") else []))
+# Use native standalone task runners so an unrelated existing daemon cannot
+# receive this owner's task with a different model binding.
+os.environ["ARTEMIS_STANDALONE"] = "1"
 for name in ("ARTEMIS_FAKE_LLM", "OPENAI_API_KEY", "OPENAI_BASE_URL"):
     os.environ.pop(name, None)
 
