@@ -20,6 +20,13 @@ if ! id van-browser >/dev/null 2>&1; then
   useradd --system --home-dir "$BASE" --shell /usr/sbin/nologin van-browser
 fi
 install -d -o van-browser -g van-browser -m 0750 "$BASE" "$BASE/browsers"
+if ! command -v setfacl >/dev/null 2>&1; then
+  apt-get update -qq
+  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq acl
+fi
+setfacl -m u:van-browser:--x /var/lib/van-trading
+install -d -o vati -g vati -m 0750 /var/lib/van-trading/evidence
+setfacl -m u:van-browser:--x /var/lib/van-trading/evidence
 install -d -o van-browser -g van-browser -m 0750 /var/lib/van-trading/browser
 install -d -o van-browser -g van-browser -m 0750 /var/lib/van-trading/evidence/browser
 install -d -o van-browser -g van-browser -m 0700 /var/lib/van-trading/browser/profiles
