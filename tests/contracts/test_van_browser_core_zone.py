@@ -217,7 +217,21 @@ def test_forbidden_zone_packages_cannot_install_stagehand_for_production(zone_di
         text = path.read_text(encoding="utf-8", errors="ignore")
         if "stagehand" not in text.lower() or path.name == "package-lock.json":
             continue
-        # Only the historical dev-only package may mention it, and only behind the guard.
+        # This exact qualifier detects and refuses browser workloads; it does
+        # not install or run them. Keep the negative check observable.
+        if path == ROOT / "deploy/van-private-core/qualify.sh":
+            assert "forbidden_procs=" in text and "stagehand|playwright" in text
+            assert "record no_forbidden_workloads RED" in text
+            assert "systemctl enable" not in text and "npm " not in text
+            continue
+        if path == ROOT / "deploy/van-private-core/topology.json":
+            data = json.loads(text)
+            forbidden = data["must_not_host"]
+            assert any(item["class"] == "Stagehand" for item in forbidden)
+            assert "stagehand" not in json.dumps(
+                {k: v for k, v in data.items() if k != "must_not_host"}).lower()
+            continue
+        # Only historical dev-only packages may install it, behind the guard.
         assert zone_dir == "van-trading-core", f"{path} mentions Stagehand in {zone_dir}"
         assert "VAN_BROWSER_HISTORICAL_DEV_ONLY" in text or "stagehand_not_on_trading_core" in text, path
 

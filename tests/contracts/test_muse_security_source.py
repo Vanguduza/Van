@@ -231,3 +231,17 @@ def test_embedded_muse_python_is_parseable_without_execution():
             ast.parse(body, filename=str(path))
             checked += 1
     assert checked >= 8
+
+def test_historical_installer_cannot_activate_production():
+    script = MUSE / "sandbox/install-muse-sandbox.sh"
+    text = script.read_text()
+    assert text.index("exit 48") < text.index("apt-get ")
+    assert text.index("exit 49") < text.index("systemctl restart")
+    for env, expected in [
+        ({"PATH": "/usr/bin:/bin"}, 48),
+        ({"PATH": "/usr/bin:/bin", "VAN_BROWSER_HISTORICAL_DEV_ONLY": "1",
+          "VAN_ENV": "production"}, 49),
+    ]:
+        proc = subprocess.run(["bash", str(script)], env=env,
+                              capture_output=True, text=True, timeout=10)
+        assert proc.returncode == expected, proc.stderr

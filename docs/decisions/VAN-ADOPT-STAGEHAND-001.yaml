@@ -1,10 +1,4 @@
-# Rev 1.3 §§365, 377-379, 418 — Stagehand adoption decision.
-# Created 2026-09-18 as an agent proposal; the owner approved it the same day by direct
-# session instruction (owner_decision_record). Owner intent is APPROVED. No device-signed,
-# replay-protected owner instruction exists for it (signed_ingress: ABSENT). The earlier
-# header line, which described this file as an unsigned proposal, was stale proposal-era
-# text that contradicted the body; it was reconciled on 2026-09-29 (reconciliation_record)
-# without erasing provenance.
+# Rev 1.3 §§365, 377-379, 418 — Stagehand adoption proposal. NOT owner-signed.
 decision_id: VAN-ADOPT-STAGEHAND-001
 schema_version: 1
 subject: Browserbase Stagehand semantic browser layer (local/CDP mode)
@@ -63,58 +57,11 @@ autonomy_ladder_boundary:
 observed_runtime:
   design_time_observation: "4.1.0"
   deployment_branch_pin: "4.1.0"
-  # Label shared with registries/automation_browser_dependencies.json and stack_lock.json;
-  # it tracks adoption qualification, which is pending. The version and npm integrity
-  # digest themselves are exact (see version_pin_assessment).
   pin_status: UNPINNED_VERIFY_AT_ADOPTION
 
-version_pin_assessment:
-  assessed_on: 2026-09-29
-  repo_pin:
-    package_json: 'deploy/van-trading-core/browser/package.json pins @browserbasehq/stagehand to exactly 4.1.0 (no range)'
-    lockfile: deploy/van-trading-core/browser/package-lock.json (lockfileVersion 3, 46 entries, all with integrity)
-    lockfile_integrity: sha512-PJikMBVoaCRh6TFD7GcmeISmsMq4IwUu1BD5FOsGUVDUxrVqZomWa6W6dF+a/zu4xRZu2Z2xX1nXVMDaCuZWsw==
-    install_path: bootstrap-browser-runtime.sh runs `npm ci` and exits 43 unless the installed version is 4.1.0
-    floating_ranges_for_stagehand: none (the transitive @browserbasehq/sdk ^2.16.0 is resolved by the lock to 2.20.0 with integrity)
-  upstream_observed_2026_09_29:
-    repository: browserbase/stagehand
-    head: ad2bf12ea7abd95bb1d6f3a59600842a0954fffb
-    latest_release_tag: "@browserbasehq/stagehand@4.1.0"
-    tag_object: 308bd2b0def8807ab7afa75bc62a1612db3c143c
-    tag_commit: cd7b230778cf92269e4cb90e80d97f5113781c51
-    npm_dist_tags: {latest: 4.1.0, alpha: 4.2.0-alpha-ad2bf12ea7abd95bb1d6f3a59600842a0954fffb}
-    npm_integrity_4_1_0: matches repo lockfile_integrity byte-for-byte
-    npm_gitHead: absent (the npm tarball does not itself bind to a source commit)
-    licence: MIT
-  gap:
-    - the tarball-to-source-commit binding (tag commit cd7b2307) is an observation, not qualification evidence
-    - no SBOM / transitive-dependency qualification record for the 46 locked packages
-    - pin_status label remains UNPINNED_VERIFY_AT_ADOPTION until qualification relabels it in all three files together
-
-# Decision-record vocabulary: SIGNED here means an owner decision recorded through the
-# Project Truth process (PROJECT_TRUTH_PROTOCOL tier 2; PROJECT_CANONICAL_STATE.json
-# owner_instruction_is_project_truth_authority). It is NOT a tier-1 device-authenticated,
-# replay-protected owner-signed instruction. The literal is kept because stack-lock admission
-# (tests/contracts/test_automation_browser_governance.py, trading/tests/
-# test_automation_browser_stack_proposal.py, tools/architecture/promote_stack_lock_layers.py)
-# keys on it; owner_signature_semantics and signed_ingress make its meaning explicit.
-owner_intent_status: APPROVED
 owner_signature_status: SIGNED
-owner_signature_semantics:
-  basis: PROJECT_TRUTH_OWNER_INSTRUCTION
-  authority_tier: "PROJECT_TRUTH_PROTOCOL tier 2 (Project Truth), not tier 1 (device-signed)"
-  device_signed: false
 owner_signed_at: 2026-09-18
 owner_signature_evidence_ref: evidence://owner/session/01JhzRtSJ6z18Vcx8Eo2yYB5#automation-browser-fabric-approval
-
-signed_ingress:
-  status: ABSENT
-  evidence_ref: null
-  note: >-
-    No device-signed gateway-ingress record of this decision exists. None is claimed or
-    fabricated. owner_decision_record.provenance says production "should additionally capture
-    the owner-signed record through signed ingress"; that is tracked as a production gate
-    component below.
 
 owner_decision_record:
   decided_on: 2026-09-18
@@ -127,63 +74,15 @@ owner_decision_record:
     under PROJECT_CANONICAL_STATE.json. Not a device-signed gateway command; a production
     deployment should additionally capture the owner-signed record through signed ingress.
 
-reconciliation_record:
-  reconciled_on: 2026-09-29
-  authority: >-
-    Owner instruction in Claude Code session session_01CSuhPskbCd3shvSXX1P7JT
-    (auth-20260929-owner-jev-openmuse-convergence-r1; docs/project-state/
-    MISSION_PROVENANCE_MEMORY_FABRIC_JEV_20260929.md). The owner preserved the 2026-09-18
-    intent and asked for this reconciliation. It did not newly sign anything.
-  corrected:
-    - "header line 1 said 'NOT owner-signed' while the body recorded SIGNED/APPROVED_AS_HERMES_SUBAGENT"
-    - "SIGNED carried no statement of its basis, so it could be read as a device-signed claim"
-  preserved_unchanged:
-    - owner_decision_record (date, decision, owner words, provenance)
-    - owner_signature_evidence_ref
-    - autonomy_ladder_boundary and every technical boundary
-
-production_gates:
-  STAGEHAND_PRODUCTION_ADOPTION_RECONCILED:
-    status: PENDING
-    components:
-      owner_intent_preserved:
-        status: SATISFIED
-        evidence:
-          - owner_decision_record (APPROVED_AS_HERMES_SUBAGENT, 2026-09-18)
-          - evidence://owner/session/01JhzRtSJ6z18Vcx8Eo2yYB5#automation-browser-fabric-approval
-      contradictory_metadata_corrected:
-        status: SATISFIED
-        evidence:
-          - reconciliation_record (2026-09-29)
-          - tests/contracts/test_automation_browser_governance.py::test_decision_record_signature_status_is_coherent
-      production_signed_ingress_evidence:
-        status: PENDING
-        requirement: >-
-          Recommended by this record's own provenance ("should"); not mandated by
-          docs/SECURITY_POLICY.md for a non-trading browser worker. Held as blocking here
-          (fail closed) until the owner either supplies the signed-ingress record or
-          explicitly waives this component.
-        owner_action: sign the decision through the device-signed gateway ingress path, or waive
-      exact_version_and_digest_pinned:
-        status: SATISFIED
-        evidence:
-          - deploy/van-trading-core/browser/package.json (exact 4.1.0)
-          - deploy/van-trading-core/browser/package-lock.json (sha512 integrity equal to npm registry 4.1.0)
-          - deploy/van-trading-core/browser/bootstrap-browser-runtime.sh (exit 43 on version mismatch)
-        residual: source-commit binding and SBOM qualification are listed under version_pin_assessment.gap
-      local_cdp_runtime_qualification:
-        status: PENDING
-        requirement: >-
-          docs/EXTERNAL_GATES.md "Stagehand local semantic browser" is REPO_COMPLETE /
-          PENDING_LIVE; a live observe/extract/act canary under Hermes assignment is required.
-      deployment_host_approved:
-        status: PENDING
-        requirement: >-
-          Owner approval of the production host. Current canon (Rev 1.5 §13.1,
-          VAN-ADOPT-REMOTE-BROWSER-STREAMING-001) places Stagehand on private Trading Core;
-          "Trading Core isolation" is PENDING_LIVE. See
-          docs/decisions/VAN-STAGEHAND-PLACEMENT-ASSESSMENT-20260929.md.
-
+# =====================================================================================
+# APPENDED 2026-09-29 — Programme B (Jev × OpenMuse Convergence Rev 1) reconciliation.
+# Append-only: every key above this line, including the owner's 2026-09-18 decision
+# record, is preserved byte-for-byte. Nothing here re-dates, re-signs or widens it.
+# Authority for this append: auth-20260929-owner-jev-openmuse-convergence-r1
+# (docs/project-state/MISSION_PROVENANCE_MEMORY_FABRIC_JEV_20260929.md) — an owner
+# session instruction; no device, biometric or cryptographic signature is claimed.
+# DEC-039: browserbase/stagehand upstream is reference only; nothing was copied from it.
+# =====================================================================================
 reconciliation_20260929:
   source_blueprint: >-
     DDS docs/dial/final-audit/06_DEVELOPMENT_SYSTEM/DIAL_JEV_OPENMUSE_CONVERGENCE_BLUEPRINT_REV1.md
@@ -789,3 +688,102 @@ fence_correction_review_i5_20260930:
   blockers_status_unchanged:
     STAGEHAND-VERIFIER-GAP-20260929: CLOSED
     STAGEHAND-DIRECT-ACTUATION-20260929: CLOSED
+
+# APPENDED 2026-10-08 — signature scope clarification; historical text is frozen.
+version_pin_assessment:
+  assessed_on: 2026-09-29
+  repo_pin:
+    package_json: deploy/van-trading-core/browser/package.json pins @browserbasehq/stagehand
+      to exactly 4.1.0 (no range)
+    lockfile: deploy/van-trading-core/browser/package-lock.json (lockfileVersion 3,
+      46 entries, all with integrity)
+    lockfile_integrity: sha512-PJikMBVoaCRh6TFD7GcmeISmsMq4IwUu1BD5FOsGUVDUxrVqZomWa6W6dF+a/zu4xRZu2Z2xX1nXVMDaCuZWsw==
+    install_path: bootstrap-browser-runtime.sh runs `npm ci` and exits 43 unless the
+      installed version is 4.1.0
+    floating_ranges_for_stagehand: none (the transitive @browserbasehq/sdk ^2.16.0
+      is resolved by the lock to 2.20.0 with integrity)
+  upstream_observed_2026_09_29:
+    repository: browserbase/stagehand
+    head: ad2bf12ea7abd95bb1d6f3a59600842a0954fffb
+    latest_release_tag: '@browserbasehq/stagehand@4.1.0'
+    tag_object: 308bd2b0def8807ab7afa75bc62a1612db3c143c
+    tag_commit: cd7b230778cf92269e4cb90e80d97f5113781c51
+    npm_dist_tags:
+      latest: 4.1.0
+      alpha: 4.2.0-alpha-ad2bf12ea7abd95bb1d6f3a59600842a0954fffb
+    npm_integrity_4_1_0: matches repo lockfile_integrity byte-for-byte
+    npm_gitHead: absent (the npm tarball does not itself bind to a source commit)
+    licence: MIT
+  gap:
+  - the tarball-to-source-commit binding (tag commit cd7b2307) is an observation,
+    not qualification evidence
+  - no SBOM / transitive-dependency qualification record for the 46 locked packages
+  - pin_status label remains UNPINNED_VERIFY_AT_ADOPTION until qualification relabels
+    it in all three files together
+owner_intent_status: APPROVED
+owner_signature_semantics:
+  basis: PROJECT_TRUTH_OWNER_INSTRUCTION
+  authority_tier: PROJECT_TRUTH_PROTOCOL tier 2 (Project Truth), not tier 1 (device-signed)
+  device_signed: false
+signed_ingress:
+  status: ABSENT
+  evidence_ref: null
+  note: No device-signed gateway-ingress record of this decision exists. None is claimed
+    or fabricated. owner_decision_record.provenance says production "should additionally
+    capture the owner-signed record through signed ingress"; that is tracked as a
+    production gate component below.
+reconciliation_record:
+  reconciled_on: 2026-09-29
+  authority: Owner instruction in Claude Code session session_01CSuhPskbCd3shvSXX1P7JT
+    (auth-20260929-owner-jev-openmuse-convergence-r1; docs/project-state/ MISSION_PROVENANCE_MEMORY_FABRIC_JEV_20260929.md).
+    The owner preserved the 2026-09-18 intent and asked for this reconciliation. It
+    did not newly sign anything.
+  corrected:
+  - Historical header is retained byte-for-byte; SIGNED denotes recorded Project Truth
+    intent only, not a device or cryptographic signature.
+  preserved_unchanged:
+  - Entire Stagehand record through review-I5 correction at d5aacf27, including all
+    earlier append boundaries.
+  preserved_prefix_sha256: f8f70698a9cfb4771a91aa9b4da23ccee805d540c3628166790e1e717d8576f5
+  header_status: HISTORICAL_HEADER_SUPERSEDED_BY_SIGNATURE_SCOPE_CLARIFICATION
+production_gates:
+  STAGEHAND_PRODUCTION_ADOPTION_RECONCILED:
+    status: PENDING
+    components:
+      owner_intent_preserved:
+        status: SATISFIED
+        evidence:
+        - owner_decision_record (APPROVED_AS_HERMES_SUBAGENT, 2026-09-18)
+        - evidence://owner/session/01JhzRtSJ6z18Vcx8Eo2yYB5#automation-browser-fabric-approval
+      contradictory_metadata_corrected:
+        status: SATISFIED
+        evidence:
+        - reconciliation_record (2026-09-29)
+        - tests/contracts/test_automation_browser_governance.py::test_decision_record_signature_status_is_coherent
+      production_signed_ingress_evidence:
+        status: PENDING
+        requirement: Recommended by this record's own provenance ("should"); not mandated
+          by docs/SECURITY_POLICY.md for a non-trading browser worker. Held as blocking
+          here (fail closed) until the owner either supplies the signed-ingress record
+          or explicitly waives this component.
+        owner_action: sign the decision through the device-signed gateway ingress
+          path, or waive
+      exact_version_and_digest_pinned:
+        status: SATISFIED
+        evidence:
+        - deploy/van-trading-core/browser/package.json (exact 4.1.0)
+        - deploy/van-trading-core/browser/package-lock.json (sha512 integrity equal
+          to npm registry 4.1.0)
+        - deploy/van-trading-core/browser/bootstrap-browser-runtime.sh (exit 43 on
+          version mismatch)
+        residual: source-commit binding and SBOM qualification are listed under version_pin_assessment.gap
+      local_cdp_runtime_qualification:
+        status: PENDING
+        requirement: docs/EXTERNAL_GATES.md "Stagehand local semantic browser" is
+          REPO_COMPLETE / PENDING_LIVE; a live observe/extract/act canary under Hermes
+          assignment is required.
+      deployment_host_approved:
+        status: PENDING
+        requirement: Owner approval of the production host. Current canon (Rev 1.5
+          §13.1, VAN-ADOPT-REMOTE-BROWSER-STREAMING-001) places Stagehand on private
+          Trading Core; "Trading Core isolation" is PENDING_LIVE. See docs/decisions/VAN-STAGEHAND-PLACEMENT-ASSESSMENT-20260929.md.

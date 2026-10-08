@@ -15,14 +15,11 @@ from pathlib import Path
 import pytest
 
 from van_gateway.browser.interaction_router import (
-    JEV_CLOSED_OPERATIONS,
-    FabricAnnotation,
-    InteractionRequest,
-    InteractionTarget,
-    ProposalRejected,
-    annotate_fabric_operations,
-    validate_proposal,
+    B1ValidationError, InteractionStep, validate_b1_payload, validate_jev_proposal,
 )
+from van_gateway.computer_use.annotations import FabricAnnotation, annotate_fabric_operations
+
+JEV_CLOSED_OPERATIONS = frozenset(InteractionStep.__dataclass_fields__["closed_operation_set"].default)
 from van_gateway.computer_use.fabric import OperationType
 from van_gateway.jev.advisor import JevVanAdvisor
 from van_gateway.jev.client import JevProjectionClient
@@ -56,12 +53,18 @@ def test_the_fabric_itself_still_has_no_generic_primitive():
     assert not {"EXECUTE", "RUN_ARBITRARY", "EVAL", "SHELL"} & {op.value for op in OperationType}
 
 
-REQUEST = InteractionRequest(
-    session_id="s", control_lease_id="l", control_generation=1, observation=None,
-    observation_epoch="ep", targets=(InteractionTarget("t_a", "button", "Go"),),
-    action_class_ceiling="A3",
+REQUEST = validate_b1_payload(
+    {
+        "payload_schema": "van.browser.action_payload.v1",
+        "effect_direction": "PROPOSE_ACTION",
+        "closed_operation_set": sorted(JEV_CLOSED_OPERATIONS),
+        "origin_class": "PUBLIC_ALLOWLISTED",
+        "targets": [{"target_id": "t_00000000000000a1", "role": "button", "label": "Go"}],
+        "action_class_ceiling": "A3",
+        "observation_epoch": "ep",
+    },
+    ceiling="A3", closed_operation_set=tuple(JEV_CLOSED_OPERATIONS),
 )
-
 
 @pytest.mark.parametrize(
     "operation",
@@ -71,11 +74,11 @@ REQUEST = InteractionRequest(
 def test_no_fabric_or_generic_operation_survives_the_b1_validator(operation):
     if operation in JEV_CLOSED_OPERATIONS:
         pytest.skip("member of the B1 closed set by definition")
-    with pytest.raises(ProposalRejected):
-        validate_proposal(
-            {"proposal": {"operation": operation, "target_id": "t_a", "value_ref": None},
-             "confidence": 0.9, "observation_epoch": "ep"},
-            REQUEST,
+    with pytest.raises(B1ValidationError, match="OPERATION_NOT_IN_CLOSED_SET"):
+        validate_jev_proposal(
+            proposal={"operation": operation, "target_id": "t_00000000000000a1", "value_ref": None},
+            request=REQUEST, current_epoch="ep",
+            classify=lambda *_: pytest.fail("off-contract operation reached classification"),
         )
 
 
@@ -95,6 +98,9 @@ def test_fabric_ranking_is_data_over_caller_candidates_only():
     {"ranking": [{"candidate_id": "op_read", "operation_type": "RUN_PYTHON_FILE"}]},
     {"ranking": [{"candidate_id": "op_read"}], "execute": {"command": "rm -rf /"}},
     {"ranking": "op_click"},
+    {"ranking": [{"candidate_id": {"not": "an identifier"}}]},
+    {"ranking": [{"candidate_id": ["op_read"]}]},
+    {"ranking": [{"candidate_id": "op_read"}, {"candidate_id": "op_read"}]},
     None,
 ])
 def test_off_contract_ranking_cannot_add_or_execute_and_leaves_caller_order(response):

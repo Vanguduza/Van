@@ -95,11 +95,19 @@ def test_bootstrap_applies_the_ruleset_at_provisioning_before_starting_workers()
 
 
 def test_bootstrap_refuses_without_a_resolver(tmp_path):
-    env = {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "VAN_BROWSER_CORE_EDGE_BIND": "10.77.0.6"}
-    proc = subprocess.run(["bash", str(ZONE_DIR / "bootstrap.sh"), "--dry-run"], env=env, capture_output=True,
+    # Exercise the real resolver guard without depending on this dial-control
+    # host's foreign-zone markers. No bootstrap mutations are executed.
+    source = (ZONE_DIR / "bootstrap.sh").read_text()
+    start = source.index('DNS_RESOLVER="${VAN_BROWSER_DNS_RESOLVER:-}"')
+    end = source.index("node - <<", start)
+    guard = tmp_path / "resolver-guard.sh"
+    guard.write_text("set -euo pipefail\nCONFIG=/nonexistent/van-resolver-test\n"
+                     'refuse() { echo "refused: $*" >&2; exit 2; }\n' + source[start:end])
+    env = {"PATH": os.environ.get("PATH", "/usr/bin:/bin")}
+    proc = subprocess.run(["bash", str(guard)], env=env, capture_output=True,
                           text=True, timeout=60)
     assert proc.returncode == 2 and "VAN_BROWSER_DNS_RESOLVER" in proc.stderr
-    proc = subprocess.run(["bash", str(ZONE_DIR / "bootstrap.sh"), "--dry-run"],
+    proc = subprocess.run(["bash", str(guard)],
                           env={**env, "VAN_BROWSER_DNS_RESOLVER": "0.0.0.0"}, capture_output=True, text=True, timeout=60)
     assert proc.returncode == 2
 

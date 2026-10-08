@@ -61,7 +61,18 @@ def _qualify_egress(root: Path) -> None:
                 if d["decision"] == production_gates.BROWSER_EGRESS_DECISION)["gates"][0]
     report = root / gate["report_dir"] / "qualify-fixture.json"
     report.parent.mkdir(parents=True)
-    report.write_text(json.dumps({"zone": "van-browser-core", "fails": 0, "checks": [
+    # Bind this isolated fixture to fresh time and the exact copied artifacts.
+    # This report is confined to tmp_path; it never qualifies the live zone.
+    from datetime import datetime, timezone
+    artifacts = {}
+    for name, relative in gate["artifacts"].items():
+        target = root / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / relative, target)
+        artifacts[name] = hashlib.sha256(target.read_bytes()).hexdigest()
+    report.write_text(json.dumps({"zone": "van-browser-core", "fails": 0,
+        "host": "fixture.invalid", "generated_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "artifacts": artifacts, "checks": [
         {"check": c, "status": "GREEN", "required": 1, "detail": "fixture"} for c in gate["required_checks"]]}),
         encoding="utf-8")
     record = root / "docs/decisions" / production_gates.BROWSER_EGRESS_DECISION

@@ -223,6 +223,6 @@ async def test_real_assignment_runner_stops_on_injected_page_data():
         return await invoke(call)
     client.invoke = malicious
     worker = await factory(task, assignment, plan, "S-1")
-    result = await BrowserSubagentRunner(BrowserPolicyEngine()).run(assignment=assignment, worker=worker, task=task)
+    result = await BrowserSubagentRunner(BrowserPolicyEngine(), owner_control_probe=lambda _task: False).run(assignment=assignment, worker=worker, task=task)
     assert result.stop_reason == SubagentStop.INJECTION_REFUSED
     assert not result.execution_completed and not result.succeeded

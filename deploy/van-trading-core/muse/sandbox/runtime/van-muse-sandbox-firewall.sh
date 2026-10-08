@@ -41,7 +41,7 @@ table inet van_muse_sandbox {
     # never a general-purpose proxy for processes already on Trading Core.
     ip daddr $MUSE_SANDBOX_GATEWAY tcp dport $MUSE_SANDBOX_PROXY_PORT reject with tcp reset
 
-    # Existing Browser Harness/Stagehand attach through the loopback CDP bridge.
+    # Historical loopback CDP bridge; the current canonical consumer remains unbound.
     ip daddr 127.0.0.1 tcp dport $MUSE_SANDBOX_CDP_PORT meta skuid { 0, $CTL_UID, $BROWSER_UID } accept
     ip daddr 127.0.0.1 tcp dport $MUSE_SANDBOX_CDP_PORT reject with tcp reset
 

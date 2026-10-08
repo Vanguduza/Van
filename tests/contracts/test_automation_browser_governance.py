@@ -593,7 +593,23 @@ def decision_coherence_violations(text: str) -> list[str]:
     status = body.get("owner_signature_status")
 
     if status == "SIGNED" and _HEADER_DENIES_SIGNATURE.search("\n".join(header)):
-        violations.append("header says NOT owner-signed but owner_signature_status is SIGNED")
+        # Clarify the frozen header through a content-bound append rather than
+        # rewriting owner records. The basis must explicitly deny a device signature.
+        marker = "\n# APPENDED 2026-10-08 — signature scope clarification; historical text is frozen.\n"
+        clarification = body.get("reconciliation_record") or {}
+        semantics = body.get("owner_signature_semantics") or {}
+        prefix = text.split(marker, 1)[0]
+        clarified = (
+            text.count(marker) == 1
+            and body.get("decision_id") == "VAN-ADOPT-STAGEHAND-001"
+            and clarification.get("header_status") == "HISTORICAL_HEADER_SUPERSEDED_BY_SIGNATURE_SCOPE_CLARIFICATION"
+            and clarification.get("preserved_prefix_sha256") == hashlib.sha256(prefix.encode()).hexdigest()
+            and semantics.get("basis") == "PROJECT_TRUTH_OWNER_INSTRUCTION"
+            and semantics.get("device_signed") is False
+            and (body.get("signed_ingress") or {}).get("status") == "ABSENT"
+        )
+        if not clarified:
+            violations.append("header says NOT owner-signed but owner_signature_status is SIGNED")
 
     ingress = body.get("signed_ingress")
     semantics = body.get("owner_signature_semantics")
@@ -788,3 +804,11 @@ def test_stagehand_i5_fence_correction_is_appended_and_corrects_the_three_statem
     assert fix["blockers_status_unchanged"] == {
         "STAGEHAND-VERIFIER-GAP-20260929": "CLOSED", "STAGEHAND-DIRECT-ACTUATION-20260929": "CLOSED"}
     assert all(b["status"] == "CLOSED" for b in doc["blocker_closure_20260929"]["blockers"].values())
+
+def test_append_header_clarification_requires_the_frozen_prefix_digest():
+    text = (DECISIONS / "VAN-ADOPT-STAGEHAND-001.yaml").read_text()
+    assert decision_coherence_violations(text) == []
+    body = yaml.safe_load(text)
+    digest = body["reconciliation_record"]["preserved_prefix_sha256"]
+    assert any("header" in v for v in decision_coherence_violations(
+        text.replace(digest, "0" * 64)))

@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# HISTORICAL DEV-ONLY source retained for security review. The current canonical
+# browser handoff is unbound; this installer must never activate it in production.
+if [[ "${VAN_BROWSER_HISTORICAL_DEV_ONLY:-}" != 1 ]]; then
+  echo "historical dev-only Muse installer: canonical browser handoff unbound" >&2
+  exit 48
+fi
+if [[ "${VAN_ENV:-}" == production ]]; then
+  echo "historical Muse browser placement is forbidden in production" >&2
+  exit 49
+fi
 [[ $EUID -eq 0 ]] || { echo "run as root" >&2; exit 2; }
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENVF=/etc/van-muse-sandbox.env
