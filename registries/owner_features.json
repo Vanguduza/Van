@@ -44928,7 +44928,7 @@
     "android_receipt": null,
     "android_receipt_sha256": null,
     "scope": "Reviewed owner contracts and current source declarations; final build/integration and live acceptance remain separate.",
-    "source_review_manifest_sha256": "f65e61fc832ae15812a67a618c23575512420ce8b7eb0024b25f7dc9cc43da17"
+    "source_review_manifest_sha256": "71edc92ec546b96d1e0367f53194db0bf75f7d2d1d7c0c7e86198f5d17830e2b"
   },
   "functional_wiring_status_semantics": {
     "SOURCE_WIRED_REQUIRES_ACCEPTANCE": "Supported source producer/consumer path is reviewed; stated provider, deployment, visual or physical acceptance remains required.",

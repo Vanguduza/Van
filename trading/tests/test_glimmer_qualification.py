@@ -120,6 +120,9 @@ def test_operator_cli_measures_real_loopback_contract_without_cloud_fallback(tmp
     worker.start()
     try:
         data['placement_receipt'].update(host_id=socket.gethostname(), reserved_ram_bytes=1024**3)
+        # A synthetic receipt for the loopback contract test, never live admission.
+        if socket.gethostname() in ('dial-control', 'van-trading-core', 'vekl-worker'):
+            data['placement_receipt']['owner_capacity_exception_ref'] = 'fixture-local-contract-only'
         data['sandbox_receipt']['host_id'] = socket.gethostname()
         receipts = []
         for key in ('license_receipt', 'placement_receipt', 'sandbox_receipt'):

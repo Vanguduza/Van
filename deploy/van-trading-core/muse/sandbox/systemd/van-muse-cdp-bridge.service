@@ -1,0 +1,34 @@
+[Unit]
+Description=VAN Muse loopback-only CDP bridge
+Requires=van-muse-sandbox.service van-muse-sandbox-firewall.service
+After=van-muse-sandbox.service van-muse-sandbox-firewall.service
+BindsTo=van-muse-sandbox.service
+
+[Service]
+Type=simple
+User=vanmusectl
+Group=vanmusectl
+EnvironmentFile=/etc/van-muse-sandbox.env
+ExecStartPre=/usr/local/bin/van-muse-sandboxctl health
+ExecStart=/usr/bin/socat TCP4-LISTEN:${MUSE_SANDBOX_CDP_PORT},bind=127.0.0.1,reuseaddr,fork TCP4:${MUSE_SANDBOX_IP}:9222
+ExecStartPost=/usr/local/sbin/van-muse-publish-cdp
+ExecStopPost=-/usr/bin/rm -f /run/van-browser/muse_owner/cdp-endpoint.json
+Restart=always
+RestartSec=2
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/run/van-browser/muse_owner
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+RestrictAddressFamilies=AF_INET AF_UNIX
+
+[Install]
+WantedBy=multi-user.target

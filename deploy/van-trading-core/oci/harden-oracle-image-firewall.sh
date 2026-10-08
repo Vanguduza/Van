@@ -138,16 +138,23 @@ if [[ -n "$PUBLIC_HOST" ]]; then
   iptables -C INPUT -p tcp -m state --state NEW -m tcp --dport 443 -m comment --comment "VAN_TRADING_MANAGED public-https" -j ACCEPT >/dev/null 2>&1 || die "live public rule missing for 443"
 fi
 
+persistent_reject="$(awk 'index($0,"-A INPUT -j REJECT --reject-with icmp-host-prohibited"){print NR; exit}' "$RULES_V4")"
+[[ -n "$persistent_reject" ]] || die "persistent OCI reject rule missing"
+for port in 22 9133; do
+  persistent_overlay="$(awk -v s="$DIAL_OVERLAY_SOURCE" -v p="$port" -v i="$DIAL_OVERLAY_IF" 'index($0,"-A INPUT -i " i " -s " s " ") && index($0,"--dport " p " ") && index($0,"DIAL_OVERLAY_MANAGED") && $0 ~ /-j ACCEPT$/ {print NR; exit}' "$RULES_V4")"
+  [[ -n "$persistent_overlay" && "$persistent_overlay" -lt "$persistent_reject" ]] || die "persistent DIAL overlay rule for tcp/$port is not ACCEPT before OCI reject"
+done
+
 reject_line="$(printf '%s\n' "$rules" | awk 'index($0,"-j REJECT --reject-with icmp-host-prohibited"){print NR; exit}')"
 [[ -n "$reject_line" ]] || die "OCI reject rule missing"
 for dport in 22 9133; do
-  overlay_line="$(printf '%s\n' "$rules" | awk -v s="$DIAL_OVERLAY_SOURCE" -v p="$dport" 'index($0,"-s " s " ") && index($0,"--dport " p) && index($0,"DIAL_OVERLAY_MANAGED"){print NR; exit}')"
+  overlay_line="$(printf '%s\n' "$rules" | awk -v s="$DIAL_OVERLAY_SOURCE" -v p="$dport" 'index($0,"-s " s " ") && index($0,"--dport " p) && index($0,"DIAL_OVERLAY_MANAGED") && $0 ~ /-j ACCEPT$/ {print NR; exit}')"
   [[ -n "$overlay_line" && "$overlay_line" -lt "$reject_line" ]] || die "DIAL overlay rule for tcp/$dport is not before OCI reject"
 done
 for cidr in "${CIDRS[@]}"; do
-  rule_line="$(printf '%s\n' "$rules" | awk -v s="$cidr" 'index($0,"-s " s " ") && index($0,"--dport 9133") && index($0,"VAN_TRADING_MANAGED commander"){print NR; exit}')"
+  rule_line="$(printf '%s\n' "$rules" | awk -v s="$cidr" 'index($0,"-s " s " ") && index($0,"--dport 9133") && index($0,"VAN_TRADING_MANAGED commander") && $0 ~ /-j ACCEPT$/ {print NR; exit}')"
   [[ -n "$rule_line" && "$rule_line" -lt "$reject_line" ]] || die "Commander rule for $cidr is not before OCI reject"
-  ssh_line="$(printf '%s\n' "$rules" | awk -v s="$cidr" 'index($0,"-s " s " ") && index($0,"--dport 22 ") && index($0,"VAN_TRADING_MANAGED admin-ssh"){print NR; exit}')"
+  ssh_line="$(printf '%s\n' "$rules" | awk -v s="$cidr" 'index($0,"-s " s " ") && index($0,"--dport 22 ") && index($0,"VAN_TRADING_MANAGED admin-ssh") && $0 ~ /-j ACCEPT$/ {print NR; exit}')"
   [[ -n "$ssh_line" && "$ssh_line" -lt "$reject_line" ]] || die "SSH rule for $cidr is not before OCI reject"
   persistent_reject="$(awk 'index($0,"-A INPUT -j REJECT --reject-with icmp-host-prohibited"){print NR; exit}' "$RULES_V4")"
   [[ -n "$persistent_reject" ]] || die "persistent OCI reject rule missing"

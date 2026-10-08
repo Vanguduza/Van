@@ -120,7 +120,7 @@ sha = subprocess.check_output(["git", "-C", root, "rev-parse", "HEAD"], text=Tru
 dirty = bool(subprocess.check_output(["git", "-C", root, "status", "--porcelain", "--untracked-files=all"], text=True))
 stage = Path(os.environ["VAN_SOURCE_STAGE"])
 runtime_hashes = {str(path.relative_to(stage)): hashlib.sha256(path.read_bytes()).hexdigest()
-                  for directory in ("backend", "registries", "trading", "services") for path in (stage / directory).rglob("*")
+                  for directory in ("backend", "registries", "trading", "services", "config", "docs", "tools") for path in (stage / directory).rglob("*")
                   if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc"}
 config = Path(os.environ.get("VAN_CONFIG_ROOT", str(Path.home() / ".config/van")))
 configuration = {name: hashlib.sha256((config / name).read_bytes()).hexdigest()

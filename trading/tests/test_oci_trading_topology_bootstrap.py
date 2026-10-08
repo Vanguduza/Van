@@ -203,16 +203,32 @@ def test_firewall_verify_refuses_unobservable_live_rules(tmp_path):
 
 def test_firewall_verify_refuses_ssh_allow_after_reject(tmp_path):
     result = _run_firewall_verify(tmp_path, "10.0.0.123/32",
-                                  live_transform=lambda rules: [rules[1], rules[2], rules[0]])
+                                  live_transform=lambda rules: [r for r in rules if 'VAN_TRADING_MANAGED admin-ssh' not in r] +
+                                      [r for r in rules if 'VAN_TRADING_MANAGED admin-ssh' in r])
     assert result.returncode != 0
     assert "SSH rule for 10.0.0.123/32 is not before OCI reject" in result.stderr
 
 
 @pytest.mark.parametrize("transform", [
-    lambda rules: [rules[0].replace("-j ACCEPT", "-j DROP"), *rules[1:]],
-    lambda rules: [rules[1], rules[2], rules[0]],
+    lambda rules: [r.replace("-j ACCEPT", "-j DROP") if "VAN_TRADING_MANAGED admin-ssh" in r else r for r in rules],
+    lambda rules: [r for r in rules if "VAN_TRADING_MANAGED admin-ssh" not in r] +
+                  [r for r in rules if "VAN_TRADING_MANAGED admin-ssh" in r],
 ])
 def test_firewall_verify_requires_persisted_accept_before_reject(tmp_path, transform):
     result = _run_firewall_verify(tmp_path, "10.0.0.123/32", persistent_transform=transform)
     assert result.returncode != 0
     assert "persistent admin-ssh rule" in result.stderr
+
+
+@pytest.mark.parametrize("port", [22, 9133])
+@pytest.mark.parametrize("change", ["drop", "after_reject"])
+def test_overlay_persistent_accept_and_order_are_verified(tmp_path, port, change):
+    def transform(rules):
+        def target(rule):
+            return "DIAL_OVERLAY_MANAGED" in rule and f"--dport {port} " in rule
+        if change == "drop":
+            return [r.replace("-j ACCEPT", "-j DROP") if target(r) else r for r in rules]
+        return [r for r in rules if not target(r)] + [r for r in rules if target(r)]
+    result = _run_firewall_verify(tmp_path, "10.0.0.123/32", persistent_transform=transform)
+    assert result.returncode != 0
+    assert "persistent DIAL overlay rule" in result.stderr

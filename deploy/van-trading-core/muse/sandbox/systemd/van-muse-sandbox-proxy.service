@@ -1,0 +1,29 @@
+[Unit]
+Description=VAN Muse sandbox-only bridge to hardened SOCKS egress
+Requires=van-muse-bridge.service van-muse-sandbox-firewall.service
+After=van-muse-bridge.service van-muse-sandbox-firewall.service
+
+[Service]
+Type=simple
+User=vanmuseproxy
+Group=vanmuseproxy
+EnvironmentFile=/etc/van-muse-sandbox.env
+ExecStart=/usr/bin/socat TCP4-LISTEN:${MUSE_SANDBOX_PROXY_PORT},bind=${MUSE_SANDBOX_GATEWAY},reuseaddr,fork TCP4:127.0.0.1:17890
+Restart=always
+RestartSec=2
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+RestrictAddressFamilies=AF_INET AF_UNIX
+
+[Install]
+WantedBy=multi-user.target

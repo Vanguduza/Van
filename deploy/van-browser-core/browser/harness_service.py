@@ -212,6 +212,19 @@ class ChromeSession:
             self.profile_dir.mkdir(parents=True, exist_ok=True)
             self.runtime_dir.mkdir(parents=True, exist_ok=True)
             os.chmod(self.runtime_dir, 0o750)  # review I8 MINOR-4: see _publish_cdp
+            # Retain the current sandbox and give Chromium private writable XDG paths.
+            chrome_paths = {
+                "XDG_CONFIG_HOME": self.profile_dir / "xdg-config",
+                "XDG_DATA_HOME": self.profile_dir / "xdg-data",
+                "XDG_CACHE_HOME": self.runtime_dir / "xdg-cache",
+            }
+            for directory in chrome_paths.values():
+                directory.mkdir(mode=0o700, parents=True, exist_ok=True)
+                os.chmod(directory, 0o700)
+            chrome_env = {
+                **os.environ,
+                **{key: str(directory) for key, directory in chrome_paths.items()},
+            }
             active = self.profile_dir / "DevToolsActivePort"
             active.unlink(missing_ok=True)
             self.process = subprocess.Popen(
@@ -220,6 +233,7 @@ class ChromeSession:
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 text=True,
+                env=chrome_env,
             )
             deadline = time.monotonic() + 12
             while time.monotonic() < deadline:
@@ -3376,8 +3390,17 @@ print("__VAN_JSON__" + json.dumps({"candidates": items[:512]}))
             continue
         url = str(item.get("url") or "")[:4096]
         initiator = str(item.get("initiator_type") or "other")[:64]
-        if url.startswith(("http://", "https://")):
-            candidates.append({"url": url, "initiator_type": initiator})
+        try:
+            parsed = urlparse(url)
+            if (parsed.scheme not in {"http", "https"} or not parsed.hostname
+                    or parsed.username is not None or parsed.password is not None):
+                continue
+            # Defense at the projection boundary, independent of the page script.
+            _ = parsed.port
+            public_url = parsed._replace(query="", fragment="").geturl()
+        except ValueError:
+            continue
+        candidates.append({"url": public_url, "initiator_type": initiator})
     return {"candidates": candidates[:512], "harness_version": HARNESS_VERSION}
 
 OPERATIONS = {

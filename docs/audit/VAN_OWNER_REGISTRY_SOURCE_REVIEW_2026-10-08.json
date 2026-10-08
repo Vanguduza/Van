@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "REVIEWED_SOURCE_ONLY",
-  "created_at_utc": "2026-10-08T22:17:48.177050+00:00",
+  "created_at_utc": "2026-10-08T22:36:31.428778+00:00",
   "files": {
     "android/app/src/main/java/com/dial/van/VanApplication.kt": "22daa7c39be6d788f5c417b71a4cfd703f04678fd7413729063f808ab0be38dc",
     "android/app/src/main/java/com/dial/van/browser/BrowserActionPlan.kt": "79847399cd9b2495f28f72b7d50514361e5fdfbb02a80d21ab04630adc8cf81b",

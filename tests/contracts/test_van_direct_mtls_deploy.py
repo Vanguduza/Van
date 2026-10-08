@@ -70,6 +70,14 @@ def test_the_installer_ships_a_runtime_that_starts(tmp_path):
     digest = hashlib.sha256((runtime / "backend/van_gateway/app.py").read_bytes()).hexdigest()
     assert receipt["runtime_sha256"]["backend/van_gateway/app.py"] == digest
     assert receipt["live_qualified"] is False
+    for name in ("config/browser/profiles.yaml", "config/browser/domains.yaml",
+                 "docs/decisions/VAN-ADOPT-BROWSER-HARNESS-001.yaml",
+                 "docs/decisions/VAN-ADOPT-STAGEHAND-001.yaml",
+                 "docs/decisions/VAN-ADOPT-N8N-001.yaml",
+                 "docs/decisions/VAN-AMEND-SECURITY-POLICY-001.md"):
+        assert (runtime / name).is_file()
+        assert receipt["runtime_sha256"][name] == hashlib.sha256((runtime / name).read_bytes()).hexdigest()
+
 
 
 def _committed_gateway() -> dict:
