@@ -103,16 +103,23 @@ async def _build(tmp_path, *, observer: _Observer | None = None, engine_success:
 
 
 async def test_verified_run_reports_owner_success(tmp_path):
-    observer = _Observer({"exists": True, "evidence_pointer": "gateway://evidence/1"})
+    # The observer independently reports the engine execution it saw the effect of; the
+    # caller declares the value its correlation key must hold (reviewer I2 N-1 / issue (a)).
+    observer = _Observer({"exists": True, "evidence_pointer": "gateway://evidence/1",
+                          "n8n_execution_id": "n8n-exec-9"})
     _store, dispatcher = await _build(tmp_path, observer=observer)
     result = await dispatcher.dispatch(
         capability_id="wfcap_statements", action_id=ACTION_ID, command_id="cmd-owner-1",
         principal_type=PrincipalType.OWNER_DEVICE, requested_by="dev-owner-1",
         snapshot_id="ctx-owner-1", turn_id="turn-1", inputs={"broker_alias": "primary_mt5"},
-        postcondition=PostconditionSpec(kind="READ_BACK", field=None),
+        postcondition=PostconditionSpec(
+            kind="READ_BACK", correlation_keys=["evidence_pointer"],
+            expected_correlation={"evidence_pointer": "gateway://evidence/1"},
+        ),
     )
     assert result.status is RunStatus.VERIFIED_SUCCESS
     assert result.owner_success is True
+    assert result.execution.status is ExecutionStatus.VERIFIED_SUCCESS
     assert observer.calls == 1
 
 
@@ -137,21 +144,52 @@ async def test_engine_success_but_absent_postcondition_fails(tmp_path):
         capability_id="wfcap_statements", action_id=ACTION_ID, command_id="cmd-owner-1",
         principal_type=PrincipalType.OWNER_DEVICE, requested_by="dev-owner-1",
         snapshot_id="ctx-owner-1", turn_id="turn-1", inputs={},
-        postcondition=PostconditionSpec(kind="READ_BACK"),
+        postcondition=PostconditionSpec(
+            kind="READ_BACK", correlation_keys=["receipt_id"], expected_correlation={"receipt_id": "r-1"},
+        ),
     )
     assert result.status is RunStatus.FAILED
     assert result.verification_outcome is VerificationOutcome.FAILED
 
 
+async def test_a_postcondition_with_no_predicate_is_unverifiable_and_never_observed(tmp_path):
+    """Reviewer I M-1 — ``{"kind": "READ_BACK"}`` names nothing that could be false.
+
+    The observer would say ``exists: True`` for anything readable, so its answer proves
+    nothing; the verifier does not ask it, and the run is UNVERIFIABLE, not owner success.
+    """
+    for index, spec in enumerate((
+        PostconditionSpec(kind="READ_BACK"),
+        PostconditionSpec(kind="READ_BACK", field="title"),  # a field with nothing expected
+        PostconditionSpec(kind="READ_BACK", field="exists", expected=True),  # the signal itself
+    )):
+        observer = _Observer({"exists": True, "title": "anything"})
+        run_dir = tmp_path / f"case{index}"
+        run_dir.mkdir()
+        _store, dispatcher = await _build(run_dir, observer=observer)
+        result = await dispatcher.dispatch(
+            capability_id="wfcap_statements", action_id=ACTION_ID, command_id="cmd-owner-1",
+            principal_type=PrincipalType.OWNER_DEVICE, requested_by="dev-owner-1",
+            snapshot_id="ctx-owner-1", turn_id="turn-1", inputs={},
+            postcondition=spec,
+        )
+        assert result.status is RunStatus.UNVERIFIABLE, spec
+        assert result.owner_success is False
+        assert result.verification_outcome is VerificationOutcome.UNVERIFIABLE
+        assert observer.calls == 0
+
+
 async def test_incomplete_correlation_is_partial(tmp_path):
     """§166 — something exists, but we cannot prove it is ours."""
-    observer = _Observer({"exists": True, "receipt_id": None})
+    observer = _Observer({"exists": True, "receipt_id": None, "n8n_execution_id": "n8n-exec-9"})
     _store, dispatcher = await _build(tmp_path, observer=observer)
     result = await dispatcher.dispatch(
         capability_id="wfcap_statements", action_id=ACTION_ID, command_id="cmd-owner-1",
         principal_type=PrincipalType.OWNER_DEVICE, requested_by="dev-owner-1",
         snapshot_id="ctx-owner-1", turn_id="turn-1", inputs={},
-        postcondition=PostconditionSpec(kind="READ_BACK", correlation_keys=["receipt_id"]),
+        postcondition=PostconditionSpec(
+            kind="READ_BACK", correlation_keys=["receipt_id"], expected_correlation={"receipt_id": "r-1"},
+        ),
     )
     assert result.status is RunStatus.PARTIAL_SUCCESS
 
@@ -221,13 +259,16 @@ async def test_unready_runtime_blocks_execution(tmp_path):
 
 
 async def test_run_is_recorded_with_execution_linkage(tmp_path):
-    observer = _Observer({"exists": True})
+    # Reviewer I2 issue (a): this used to pass with an observer that never saw the engine
+    # run, because the dispatcher merged the engine's own id back in and the Action Runtime
+    # compared it with itself. The observer must report which execution it saw.
+    observer = _Observer({"exists": True, "state": "DELIVERED", "n8n_execution_id": "n8n-exec-9"})
     store, dispatcher = await _build(tmp_path, observer=observer)
     result = await dispatcher.dispatch(
         capability_id="wfcap_statements", action_id=ACTION_ID, command_id="cmd-owner-1",
         principal_type=PrincipalType.OWNER_DEVICE, requested_by="dev-owner-1",
         snapshot_id="ctx-owner-1", turn_id="turn-1", inputs={},
-        postcondition=PostconditionSpec(kind="READ_BACK"),
+        postcondition=PostconditionSpec(kind="READ_BACK", field="state", expected="DELIVERED"),
     )
     row = await store.fetchone(
         "SELECT * FROM automation_runs WHERE run_id = ?", (result.run_id,)

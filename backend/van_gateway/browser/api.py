@@ -30,6 +30,8 @@ from pydantic import BaseModel, Field
 
 from van_gateway.auth.control_scopes import ControlScope, require_scoped_internal
 from van_gateway.observability import instruments
+from van_gateway.browser.adapters import broker_lease_fence, harness_lease_fence
+from van_gateway.browser.lane_gates import OwnerControlProbe
 from van_gateway.browser.models import (
     AutonomyTier,
     BrowserBoundaryType,
@@ -39,8 +41,18 @@ from van_gateway.browser.models import (
     BrowserTaskStatus,
 )
 from van_gateway.browser.policy import BrowserPolicyEngine, BrowserPolicyError
-from van_gateway.browser.service import BrowserSessionBroker, BrowserTaskService
+from van_gateway.browser.task_scope import TaskScope, TaskScopeError, load_scope
+from van_gateway.browser.service import (
+    BrowserSessionBroker,
+    BrowserTaskNotVerified,
+    BrowserTaskRunInFlight,
+    BrowserTaskService,
+    BrowserTaskTransitionRefused,
+    TERMINAL_TASK_STATUSES,
+    network_owner_code,
+)
 from van_gateway.automation.canonical import digest
+from van_gateway.automation.verifier import PostconditionSpec
 from van_gateway.browser.worker import BrowserTaskPlan, SemanticWorkerUnavailable
 from van_gateway.browser.subagent import (
     BrowserSubagentRunner,
@@ -78,6 +90,11 @@ class CreateTaskBody(BaseModel):
     #: intentions while the real execution sits in browser_tasks.
     mission_id: str | None = None
     inputs: dict[str, Any] = Field(default_factory=dict)
+    #: The owner-confirmed task-scope rule (docs/decisions/OWNER-DECISION-20260930-BROWSER-
+    #: TASK-SCOPE.md, confirmation block; auth-20260930-owner-explicit-task-scope-confirmation) —
+    #: the pages this task may act on, as URL prefixes (``https://host[:port][/path/]``), each inside ``target_domain``. Omitted:
+    #: the task's ``target_domain`` origin is recorded. See ``browser/task_scope.py``.
+    scope: list[str] | None = Field(default=None, max_length=32)
 
 
 class LeaseBody(BaseModel):
@@ -133,6 +150,9 @@ class AssignmentBody(BaseModel):
     plan: BrowserTaskPlan | None = None
     #: Select the exact owner-delegated target rather than an independent profile worker.
     interactive_session_id: str | None = Field(default=None, min_length=1, max_length=128)
+    #: Owner decision 2026-09-29 §7 — what must be observably true for the worker's "done"
+    #: to count. Absent means a "done" claim is UNVERIFIABLE, never COMPLETED.
+    postcondition: PostconditionSpec | None = None
 
 
 class BrowserApi:
@@ -147,6 +167,7 @@ class BrowserApi:
         worker: SubagentWorker | None = None,
         decisions: DecisionService | None = None,
         binder: Any | None = None,
+        verifier: Any | None = None,
     ) -> None:
         self.store = store
         self.settings = settings
@@ -156,8 +177,15 @@ class BrowserApi:
         self.binder = binder
         self.broker = BrowserSessionBroker(store, self.policy)
         self.tasks = BrowserTaskService(store, self.broker, self.policy)
-        self.runner = BrowserSubagentRunner(self.policy)
+        # Review I M-4 / owner decision 2026-09-29 §9: owner takeover preempts the
+        # assignment path exactly as it preempts the B5 router — the same probe.
+        self.runner = BrowserSubagentRunner(self.policy, owner_control_probe=OwnerControlProbe(store))
         self.worker = worker
+        #: Owner decision 2026-09-29 §7 — the independent postcondition verifier. None means
+        #: every "done" claim is UNVERIFIABLE: fail closed, never COMPLETED.
+        self.verifier = verifier
+        #: Programme B / B5 — set by create_app; None keeps the fabric testable alone.
+        self.interaction_router: Any | None = None
         self.decisions = decisions
         self.router = APIRouter(prefix="/v1/browser", tags=["browser"])
         self._install_routes()
@@ -171,6 +199,53 @@ class BrowserApi:
     def _require_enabled(self) -> None:
         if not self.settings.browser_enabled:
             raise HTTPException(status_code=503, detail="BROWSER_FABRIC_DISABLED")
+
+    async def _task_scope(self, row) -> TaskScope | None:
+        """Task-scope rule (owner-confirmed 2026-09-30: docs/decisions/OWNER-DECISION-20260930-
+        BROWSER-TASK-SCOPE.md, confirmation block; auth-20260930-owner-explicit-task-scope-
+        confirmation) — the scope in the task's truth: what was
+        recorded at creation, widened by the domain the owner approved for *this* task.
+
+        Review I6 m1: only the approved *delta* widens it — the ``allowed_domain`` of the
+        escalation the owner answered, not every domain the authorization row lists (those
+        include the task's current domains, and adding them origin-wide would drop a declared
+        path limit). A domain the recorded scope already names is not widened at all (the
+        owner approved a domain, not the removal of that domain's path limit). Only an
+        ACTIVE authorization that has not expired counts: a REVOKED, EXPIRED or CONSUMED
+        row, or one past ``expires_at_ms``, widens nothing. (``consume_resume_authorization``
+        consumes the row for the run it authorizes; that run's task was loaded, and its scope
+        read, while the row was still ACTIVE.) Missing or unreadable recorded scope stays
+        None — an approval does not invent the rest of a scope — and every action on the
+        task is refused."""
+        scope = load_scope(row["scope_json"] if "scope_json" in row.keys() else None)
+        if scope is None:
+            return None
+        grants = await self.store.fetchall(
+            "SELECT a.authorization_id, a.approved_domains_json, e.requested_scope_delta_json "
+            "FROM browser_scope_authorizations a "
+            "JOIN browser_escalations e ON e.escalation_id = a.escalation_id "
+            "WHERE a.task_id = ? AND a.status = 'ACTIVE' "
+            "AND (a.expires_at_ms IS NULL OR a.expires_at_ms > ?) "
+            "ORDER BY a.issued_at_ms",
+            (str(row["task_id"]), int(time.time() * 1000)),
+        )
+        declared_hosts = scope.hosts()
+        for grant in grants:
+            try:
+                approved = json.loads(str(grant["approved_domains_json"]))
+                delta = json.loads(str(grant["requested_scope_delta_json"]))
+            except ValueError:
+                continue
+            domain = delta.get("allowed_domain") if isinstance(delta, dict) else None
+            if not isinstance(domain, str) or not domain.strip() or not isinstance(approved, list) or domain not in approved:
+                continue
+            if domain.strip().lower().rstrip(".") in declared_hosts:
+                continue
+            try:
+                scope = scope.with_origin(domain, f"OWNER_APPROVED:{grant['authorization_id']}")
+            except TaskScopeError:
+                continue  # unit G14: an approval never widens a task onto the zone overlay
+        return scope
 
     async def _load_task(self, task_id: str) -> BrowserTask:
         row = await self.store.fetchone(
@@ -189,6 +264,9 @@ class BrowserApi:
             action_class=ActionClass(str(row["action_class"])),
             target_domain=str(row["target_domain"]),
             goal=str(row["goal"]),
+            scope=await self._task_scope(row),
+            # Network-effect guard: admitted as mutating only when the row says so (1).
+            mutating=("mutating" in row.keys() and row["mutating"] == 1),
             status=BrowserTaskStatus(str(row["status"])),
             evidence_pointer=row["evidence_pointer"],
             error_code=row["error_code"],
@@ -255,6 +333,9 @@ class BrowserApi:
         )
         lease_ref = None if row is None else row["lease_holder"]
         if lease_ref:
+            # Unit G11 (review I7 MAJOR-1): the Harness freezes the lease's page and removes its
+            # network interception before the lease is dropped.
+            await self.broker.release_page(profile_alias=task.profile_alias, lease_id=lease_ref)
             await self.store.execute(
                 "UPDATE browser_profiles SET lease_holder = NULL, lease_expires_at_ms = NULL, "
                 "lease_holder_kind = NULL, lease_holder_id = NULL, updated_at_ms = ? "
@@ -262,6 +343,25 @@ class BrowserApi:
                 (int(time.time() * 1000), task.profile_alias, lease_ref, task.task_id),
             )
         return lease_ref
+
+    async def _hand_late_block_to_owner(self, task_id: str, code: str) -> str:
+        """Unit G15 (review I8 MAJOR-2) — a write the lease's guard blocked (or detected, or a
+        guard it lost) that the Harness reported only when the lease was given back goes to
+        the owner, as ``/interaction/step`` does: WAITING_FOR_OWNER with ``OWNER_TAKEOVER:
+        <code>`` through the guarded writer. A task already in an end state stays there (the
+        writer refuses); callers order their release before any end state they write. Returns
+        the task's status afterwards."""
+        from van_gateway.browser.models import BrowserTaskStatus as _Status
+
+        try:
+            await self.tasks.set_working_status(
+                task_id=task_id, status=_Status.WAITING_FOR_OWNER,
+                error_code=f"OWNER_TAKEOVER:{code}"[:200],
+            )
+        except BrowserTaskTransitionRefused as exc:
+            return exc.current or "UNKNOWN"
+        instruments.record_browser_task(_Status.WAITING_FOR_OWNER)
+        return _Status.WAITING_FOR_OWNER.value
 
     async def _terminate_without_asking(
         self, task: BrowserTask, result, *, boundary_type: BrowserBoundaryType
@@ -318,6 +418,12 @@ class BrowserApi:
             return {"status": BrowserTaskStatus.BLOCKED_UNSAFE.value, "escalated": False}
 
         reason = result.stop_reason.value
+        # Review I3 MINOR-2: the task moves to WAITING_FOR_OWNER through the guarded writer
+        # before anything is put to the owner. A task that ended while its run was in flight
+        # (e.g. CANCELLED) refuses here, and no question is raised for it.
+        await self.tasks.set_working_status(
+            task_id=task.task_id, status=BrowserTaskStatus.WAITING_FOR_OWNER, error_code=reason,
+        )
         # The key carries *what was asked for*, not just why the run stopped.
         # Keyed on the reason alone, a second overrun for a different domain
         # collided with the first and the owner was never asked about it.
@@ -385,11 +491,6 @@ class BrowserApi:
                 BrowserEscalationStatus.OPEN.value, now + self.ESCALATION_TTL_MS, now, now,
             ),
         )
-        await self.store.execute(
-            "UPDATE browser_tasks SET status = ?, error_code = ?, completed_at_ms = NULL, "
-            "updated_at_ms = ? WHERE task_id = ?",
-            (BrowserTaskStatus.WAITING_FOR_OWNER.value, reason, now, task.task_id),
-        )
         return {
             "status": BrowserTaskStatus.WAITING_FOR_OWNER.value,
             "boundary_type": boundary_type.value,
@@ -412,11 +513,7 @@ class BrowserApi:
         """
         status = BrowserEscalationStatus(str(existing["status"]))
         if status is BrowserEscalationStatus.OPEN:
-            await self.store.execute(
-                "UPDATE browser_tasks SET status = ?, error_code = ?, updated_at_ms = ? "
-                "WHERE task_id = ?",
-                (BrowserTaskStatus.WAITING_FOR_OWNER.value, reason, now, task.task_id),
-            )
+            # Already WAITING_FOR_OWNER (set by the caller through the guarded writer).
             return {
                 "status": BrowserTaskStatus.WAITING_FOR_OWNER.value,
                 "escalated": True,
@@ -483,6 +580,32 @@ class BrowserApi:
             f"remain prohibited on the browser at every class."
         )
 
+    async def _sync_task_status(
+        self, task: BrowserTask, status: BrowserTaskStatus, error_code: str | None, now: int
+    ) -> BrowserTaskStatus:
+        """The owner-decision sync's task write, through the guarded writers (I3 MINOR-2).
+
+        An end state goes through ``complete()``, RESUME_AUTHORIZED through
+        ``set_working_status`` (from WAITING_FOR_OWNER only). If the task ended meanwhile, the
+        write is refused and the task's actual status is returned: the sync never moves a
+        task out of an end state.
+        """
+        try:
+            if status is BrowserTaskStatus.RESUME_AUTHORIZED:
+                await self.tasks.set_working_status(
+                    task_id=task.task_id, status=status, error_code=error_code, now_ms=now,
+                )
+            else:
+                await self.tasks.complete(
+                    task_id=task.task_id, status=status, error_code=error_code, now_ms=now,
+                )
+        except BrowserTaskTransitionRefused:
+            row = await self.store.fetchone(
+                "SELECT status FROM browser_tasks WHERE task_id = ?", (task.task_id,)
+            )
+            return BrowserTaskStatus(str(row["status"])) if row is not None else task.status
+        return status
+
     async def _sync_waiting_owner_decision(self, task: BrowserTask) -> BrowserTaskStatus:
         row = await self.store.fetchone(
             """
@@ -519,15 +642,9 @@ class BrowserApi:
                 "WHERE escalation_id = ?",
                 (BrowserEscalationStatus.EXPIRED.value, now, row["escalation_id"]),
             )
-            await self.store.execute(
-                "UPDATE browser_tasks SET status = ?, error_code = ?, completed_at_ms = ?, "
-                "updated_at_ms = ? WHERE task_id = ?",
-                (
-                    BrowserTaskStatus.EXPIRED.value, "BROWSER_ESCALATION_EXPIRED",
-                    now, now, task.task_id,
-                ),
+            return await self._sync_task_status(
+                task, BrowserTaskStatus.EXPIRED, "BROWSER_ESCALATION_EXPIRED", now,
             )
-            return BrowserTaskStatus.EXPIRED
 
         if decision_status in {DecisionStatus.APPROVED, DecisionStatus.ANSWERED}:
             delta = json.loads(str(row["requested_scope_delta_json"]))
@@ -548,17 +665,34 @@ class BrowserApi:
                 "UPDATE browser_escalations SET status = ?, updated_at_ms = ? WHERE escalation_id = ?",
                 (BrowserEscalationStatus.REJECTED.value, now, row["escalation_id"]),
             )
-            await self.store.execute(
-                "UPDATE browser_tasks SET status = ?, completed_at_ms = ?, updated_at_ms = ? WHERE task_id = ?",
-                (BrowserTaskStatus.CANCELLED.value, now, now, task.task_id),
-            )
-            return BrowserTaskStatus.CANCELLED
+            return await self._sync_task_status(task, BrowserTaskStatus.CANCELLED, None, now)
         return BrowserTaskStatus.WAITING_FOR_OWNER
 
 
     async def _enforce_resume_authorization(
         self, task: BrowserTask, assignment: SubagentAssignment
     ) -> None:
+        await self.consume_resume_authorization(
+            task, requested_domains=list(assignment.allowed_domains),
+            requested_class=assignment.action_class_ceiling,
+        )
+
+    async def consume_resume_authorization(
+        self,
+        task: BrowserTask,
+        *,
+        requested_domains: list[str] | None = None,
+        requested_class: ActionClass | None = None,
+    ) -> dict[str, Any]:
+        """Bind one run of a RESUME_AUTHORIZED task to the owner's ACTIVE authorization.
+
+        The status alone is not the owner's answer; the authorization row is, and it is
+        single-use. Used by ``/assignments`` (which refuses a scope or class above the
+        approval) and by ``/interaction/step`` (review I2 N-4, which caps its ceiling at the
+        approved class). The consumption is conditional on the row still being ACTIVE, so two
+        concurrent resumes cannot both spend it. Returns ``{"authorization_id",
+        "approved_action_class_ceiling", "approved_domains"}``.
+        """
         row = await self.store.fetchone(
             """
             SELECT authorization_id, approved_domains_json,
@@ -572,20 +706,29 @@ class BrowserApi:
         )
         if row is None:
             raise HTTPException(status_code=409, detail="BROWSER_RESUME_AUTHORIZATION_MISSING")
-        approved_domains = set(json.loads(str(row["approved_domains_json"])))
-        requested_domains = set(assignment.allowed_domains)
-        if not requested_domains.issubset(approved_domains):
+        approved_domains = list(json.loads(str(row["approved_domains_json"])))
+        if requested_domains is not None and not set(requested_domains).issubset(set(approved_domains)):
             raise HTTPException(status_code=409, detail="BROWSER_RESUME_SCOPE_EXCEEDS_APPROVAL")
         approved_class_raw = row["approved_action_class_ceiling"]
-        if approved_class_raw:
+        approved_class = ActionClass(str(approved_class_raw)) if approved_class_raw else None
+        if approved_class is not None and requested_class is not None:
             rank = {ActionClass.A1: 1, ActionClass.A2: 2, ActionClass.A3: 3, ActionClass.A4: 4, ActionClass.A5: 5}
-            approved_class = ActionClass(str(approved_class_raw))
-            if rank[assignment.action_class_ceiling] > rank[approved_class]:
+            if rank.get(requested_class, 99) > rank.get(approved_class, 0):
                 raise HTTPException(status_code=409, detail="BROWSER_RESUME_CLASS_EXCEEDS_APPROVAL")
-        await self.store.execute(
-            "UPDATE browser_scope_authorizations SET status = 'CONSUMED', consumed_at_ms = ? WHERE authorization_id = ?",
-            (int(time.time() * 1000), row["authorization_id"]),
-        )
+        async with self.store.connection() as db:
+            cur = await db.execute(
+                "UPDATE browser_scope_authorizations SET status = 'CONSUMED', consumed_at_ms = ? "
+                "WHERE authorization_id = ? AND status = 'ACTIVE'",
+                (int(time.time() * 1000), row["authorization_id"]),
+            )
+            await db.commit()
+            if cur.rowcount != 1:
+                raise HTTPException(status_code=409, detail="BROWSER_RESUME_AUTHORIZATION_MISSING")
+        return {
+            "authorization_id": str(row["authorization_id"]),
+            "approved_action_class_ceiling": approved_class.value if approved_class is not None else None,
+            "approved_domains": approved_domains,
+        }
 
     # ------------------------------------------------------------- routes
 
@@ -760,13 +903,24 @@ class BrowserApi:
             self._require_internal(x_van_internal_token)
             from van_gateway.browser.models import PageLease
 
-            await self.broker.release_lease(
+            released = await self.broker.release_lease(
                 PageLease(
                     lease_id=body.lease_id, profile_alias=body.profile_alias,
                     task_id=body.task_id, acquired_at_ms=0, expires_at_ms=0,
                 )
             )
-            return {"released": True, "lease_id": body.lease_id}
+            out: dict[str, Any] = {"released": True, "lease_id": body.lease_id}
+            code = released.owner_code
+            if code is not None:
+                # Unit G15 (review I8 MAJOR-2): what the guard blocked after the lease's last
+                # call is the owner's, whoever gives the lease back.
+                out["blocked"] = code
+                row = await self.store.fetchone(
+                    "SELECT task_id FROM browser_tasks WHERE task_id = ?", (body.task_id,)
+                )
+                if row is not None:
+                    out["task_status"] = await self._hand_late_block_to_owner(body.task_id, code)
+            return out
 
         @router.post("/tasks")
         async def create_task(
@@ -781,7 +935,7 @@ class BrowserApi:
                     autonomy_tier=body.autonomy_tier, action_class=body.action_class,
                     target_domain=body.target_domain, goal=body.goal, mutating=body.mutating,
                     command_id=body.command_id, execution_id=body.execution_id,
-                    capability_id=body.capability_id, inputs=body.inputs,
+                    capability_id=body.capability_id, inputs=body.inputs, scope=body.scope,
                 )
             except BrowserPolicyError as exc:
                 raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -849,11 +1003,34 @@ class BrowserApi:
             x_van_internal_token: str | None = Header(default=None),
         ):
             self._require_internal(x_van_internal_token)
-            await self._load_task(task_id)
-            await self.tasks.complete(
-                task_id=task_id, status=body.status,
-                evidence_pointer=body.evidence_pointer, error_code=body.error_code,
-            )
+            task = await self._load_task(task_id)
+            if body.status is BrowserTaskStatus.COMPLETED and task.status not in TERMINAL_TASK_STATUSES:
+                # Unit G15 (review I8 MAJOR-2): an end state is final, so a page lease the task
+                # still holds is ended first — a write its guard blocked after the task's last
+                # call must reach the owner before COMPLETED could stand over it.
+                code = await self._end_held_page(task)
+                if code is not None:
+                    status = await self._hand_late_block_to_owner(task_id, code)
+                    raise HTTPException(
+                        status_code=409, detail=f"BROWSER_TASK_HANDED_TO_OWNER:{code}:{status}",
+                    )
+            try:
+                await self.tasks.complete(
+                    task_id=task_id, status=body.status,
+                    evidence_pointer=body.evidence_pointer, error_code=body.error_code,
+                )
+            except BrowserTaskTransitionRefused as exc:
+                # Review I2 N-3: an end state only, and never out of one. RESUME_AUTHORIZED
+                # comes from the owner's decision and PENDING from task creation, not here.
+                raise HTTPException(
+                    status_code=409, detail=f"BROWSER_TASK_TRANSITION_REFUSED:{exc.why}:{exc.current or 'UNKNOWN'}->{exc.requested}",
+                ) from exc
+            except BrowserTaskNotVerified as exc:
+                # §7 / review I M-2: a caller cannot declare success. COMPLETED needs the
+                # independent verifier's VERIFIED verdict on record for this task.
+                raise HTTPException(
+                    status_code=409, detail=f"BROWSER_TASK_NOT_VERIFIED:{exc.latest or 'NO_VERIFICATION'}"
+                ) from exc
             return {"task_id": task_id, "status": body.status.value}
 
         @router.post("/assignments")
@@ -873,229 +1050,257 @@ class BrowserApi:
                 raise HTTPException(status_code=503, detail="BROWSER_WORKER_UNCONFIGURED")
 
             task = await self._load_task(body.task_id)
-            status = task.status
-            if status is BrowserTaskStatus.WAITING_FOR_OWNER:
-                status = await self._sync_waiting_owner_decision(task)
-            if status not in (BrowserTaskStatus.PENDING, BrowserTaskStatus.RESUME_AUTHORIZED):
-                raise HTTPException(status_code=409, detail=f"BROWSER_TASK_NOT_RUNNABLE:{status.value}")
-
-            assignment = SubagentAssignment(
-                turn_id=body.turn_id, command_id=body.command_id, task_id=body.task_id,
-                goal=body.goal, allowed_domains=list(body.allowed_domains),
-                action_class_ceiling=body.action_class_ceiling,
-                autonomy_tier=body.autonomy_tier, max_steps=body.max_steps,
-                deadline_ms=body.deadline_ms,
-                max_steps_without_progress=body.max_steps_without_progress,
-            )
-            # P2-BROW-001 — the worker is bound to *this* task and its plan before it
-            # runs. A long-lived worker mutated per assignment would let two concurrent
-            # assignments overwrite each other's task id, and the adapter is the only part
-            # that is legitimately shared.
-            worker = self.worker
-            if body.interactive_session_id is not None:
-                factory = getattr(self, "interactive_worker_factory", None)
-                if factory is None:
-                    raise HTTPException(status_code=503, detail="INTERACTIVE_CONTROL_CLIENT_UNCONFIGURED")
-                try:
-                    worker = await factory(task, assignment, body.plan, body.interactive_session_id)
-                except SemanticWorkerUnavailable as exc:
-                    raise HTTPException(status_code=503, detail="INTERACTIVE_SEMANTIC_WORKER_UNCONFIGURED") from exc
-                except ValueError as exc:
-                    raise HTTPException(status_code=422, detail=str(exc)) from exc
-                except Exception as exc:
-                    raise HTTPException(status_code=409, detail="INTERACTIVE_CONTROL_NOT_ADMITTED") from exc
-            binder = getattr(worker, "for_task", None)
-            if binder is not None and body.interactive_session_id is None:
-                worker = binder(task, body.plan)
+            # Review I3 MAJOR-3: one run per task at a time. An /assignments run and an
+            # /interaction/step run on the same task would otherwise share the page and its
+            # lease, and whichever finished first would drop the lease under the other.
             try:
-                await self.broker.ensure_registered_profile(profile_alias=task.profile_alias)
-                acquisition = asyncio.create_task(self.broker.acquire_lease(
-                    profile_alias=task.profile_alias, task_id=task.task_id
-                ))
-                try:
-                    lease = await asyncio.shield(acquisition)
-                except asyncio.CancelledError:
-                    # Acquisition can commit before cancellation reaches its caller.
-                    # Obtain the handle before releasing; never abandon a live lease.
-                    try:
-                        acquired = await asyncio.shield(acquisition)
-                    except BrowserPolicyError:
-                        pass
-                    else:
-                        await self.broker.release_lease(acquired)
-                    raise
-            except BrowserPolicyError as exc:
-                raise HTTPException(status_code=409, detail=str(exc)) from exc
-
-            async def assert_lease_active() -> None:
-                await self.broker.assert_lease_active(
-                    lease_id=lease.lease_id, holder_id=task.task_id,
-                    generation=lease.generation,
-                )
-
-            claimed = False
-            evidence = None
-            evidence_pointer = None
+                run_token = self.tasks.claim_run(task.task_id, "ASSIGNMENT")
+            except BrowserTaskRunInFlight as exc:
+                raise HTTPException(
+                    status_code=409, detail=f"BROWSER_TASK_RUN_IN_FLIGHT:{exc.kind}"
+                ) from exc
             try:
-                # Recheck after the exclusive lease: a concurrent call may have read
-                # PENDING before another assignment completed and released this profile.
-                current = await self._load_task(task.task_id)
-                if current.status not in (BrowserTaskStatus.PENDING, BrowserTaskStatus.RESUME_AUTHORIZED):
-                    raise HTTPException(
-                        status_code=409,
-                        detail=f"BROWSER_TASK_NOT_RUNNABLE:{current.status.value}",
-                    )
-                if current.status is BrowserTaskStatus.RESUME_AUTHORIZED:
-                    await self._enforce_resume_authorization(task, assignment)
-                async with self.store.connection() as db:
-                    changed = await db.execute(
-                        "UPDATE browser_tasks SET status = 'RUNNING', updated_at_ms = ? "
-                        "WHERE task_id = ? AND status IN ('PENDING', 'RESUME_AUTHORIZED')",
-                        (int(time.time() * 1000), task.task_id),
-                    )
-                    if changed.rowcount != 1:
-                        raise HTTPException(status_code=409, detail="BROWSER_TASK_ALREADY_CLAIMED")
-                    # Set before the commit await: cancellation may arrive after the
-                    # database has durably stored RUNNING but before await returns.
-                    claimed = True
-                    await db.commit()
-                try:
-                    # The lease never extends the caller's deadline. Cancel a run that
-                    # cannot finish while it still owns the browser profile.
-                    deadline_first = (
-                        assignment.deadline_ms is not None
-                        and assignment.deadline_ms <= lease.expires_at_ms
-                    )
-                    stop_at_ms = (
-                        min(lease.expires_at_ms, assignment.deadline_ms)
-                        if assignment.deadline_ms is not None else lease.expires_at_ms
-                    )
-                    remaining = max(0.0, (stop_at_ms - time.time() * 1000) / 1000)
-                    async with asyncio.timeout(remaining):
-                        result = await self.runner.run(
-                            assignment=assignment, worker=worker, task=task,
-                            assert_lease_active=assert_lease_active,
-                        )
-                except TimeoutError:
-                    result = SubagentResult(
-                        assignment_id=assignment.assignment_id, task_id=task.task_id,
-                        stop_reason=(
-                            SubagentStop.DEADLINE_REACHED if deadline_first else SubagentStop.WORKER_ERROR
-                        ),
-                        detail=None if deadline_first else "BROWSER_PROFILE_LEASE_EXPIRED",
-                    )
-                except SemanticWorkerUnavailable as exc:
-                    raise HTTPException(
-                        status_code=503, detail=f"BROWSER_SEMANTIC_RUNTIME_UNAVAILABLE:{exc}"
-                    ) from exc
-
-                if result.succeeded:
-                    await assert_lease_active()
-                    # A worker saying "done" is not evidence. Seal only observations
-                    # actually returned by executed, policy-sanitized browser steps.
-                    observed_url = result.extraction.get("url")
-                    try:
-                        observed = urlsplit(observed_url) if isinstance(observed_url, str) else None
-                        observed_host = (observed.hostname or "").lower().rstrip(".") if observed else ""
-                    except ValueError:
-                        observed, observed_host = None, ""
-                    allowed_hosts = [domain.lower().rstrip(".") for domain in assignment.allowed_domains]
-                    within_scope = any(
-                        domain and (observed_host == domain or observed_host.endswith("." + domain))
-                        for domain in allowed_hosts
-                    )
-                    if (
-                        not result.steps
-                        or not all(step.observation_digest for step in result.steps)
-                        or observed is None
-                        or observed.scheme not in ("http", "https")
-                        or not within_scope
-                        or observed.username is not None
-                        or observed.password is not None
-                        or "adapter_error" in result.extraction
-                    ):
-                        result.stop_reason = SubagentStop.WORKER_ERROR
-                        result.detail = "BROWSER_COMPLETION_OBSERVATION_MISSING_OR_INVALID"
-                    else:
-                        evidence = await self.tasks.seal_evidence(
-                            task=task, kind="ASSIGNMENT_COMPLETION", url=observed_url,
-                            extraction={
-                                "assignment_id": assignment.assignment_id,
-                                "turn_id": assignment.turn_id,
-                                "command_id": assignment.command_id,
-                                "goal_digest": assignment.goal_digest,
-                                "steps": [step.model_dump(mode="json") for step in result.steps],
-                                "observation": result.extraction,
-                            },
-                        )
-                        evidence_pointer = f"browser-evidence://{evidence.evidence_id}"
-
-                escalation = None
-                if result.stop_reason in (SubagentStop.SCOPE_VIOLATION, SubagentStop.ACTION_CLASS_VIOLATION):
-                    escalation = await self._create_boundary_escalation(
-                        task=task, assignment=assignment, result=result
-                    )
-                else:
-                    terminal_status = BrowserTaskStatus.COMPLETED
-                    if result.stop_reason in (SubagentStop.PAYMENT_REFUSED, SubagentStop.INJECTION_REFUSED):
-                        terminal_status = BrowserTaskStatus.BLOCKED_POLICY
-                    elif result.stop_reason is SubagentStop.GOAL_DRIFT:
-                        terminal_status = BrowserTaskStatus.BLOCKED_UNSAFE
-                    elif result.stop_reason is not SubagentStop.GOAL_ACHIEVED:
-                        terminal_status = BrowserTaskStatus.FAILED
-                    await self.tasks.complete(
-                        task_id=task.task_id, status=terminal_status,
-                        evidence_pointer=evidence_pointer,
-                        error_code=None if result.succeeded else result.stop_reason.value,
-                        now_ms=int(time.time() * 1000),
-                    )
-                    instruments.record_browser_task(terminal_status)
-                if escalation is not None:
-                    instruments.record_browser_task("ESCALATED")
-            except BaseException:
-                if claimed:
-                    # Cancellation, a lost lease or failed evidence sealing cannot leave
-                    # an apparently runnable or successful task after the profile is free.
-                    now = int(time.time() * 1000)
-                    await self.store.execute(
-                        "UPDATE browser_tasks SET status = 'FAILED', error_code = "
-                        "'BROWSER_ASSIGNMENT_INTERRUPTED', completed_at_ms = ?, updated_at_ms = ? "
-                        "WHERE task_id = ? AND status = 'RUNNING'",
-                        (now, now, task.task_id),
-                    )
-                raise
+                return await self._run_assignment(body, task, run_token)
             finally:
-                # A stale task may only release its own lease, never a newer holder.
-                await self.broker.release_lease(lease)
-            return {
-                "assignment_id": assignment.assignment_id,
-                "task_id": task.task_id,
-                "turn_id": assignment.turn_id,
-                "stop_reason": result.stop_reason.value,
-                "succeeded": result.succeeded,
-                "execution_completed": result.execution_completed,
-                "worker_goal_reported": result.execution_completed,
-                "owner_success": False,
-                "verification_state": "UNVERIFIED",
-                "step_count": result.step_count,
-                "steps": [step.model_dump(mode="json") for step in result.steps],
-                "extraction": result.extraction,
-                "detail": result.detail,
-                "escalation": escalation,
-                "evidence_pointer": evidence_pointer,
-                "evidence": evidence.model_dump(mode="json") if evidence is not None else None,
-                "session_lease_ref": lease.lease_id,
-                "session_lease_generation": lease.generation,
-                "session_lease_released": True,
-                # Stated so the subordination is observable, not just documented.
-                "assigned_by_turn": assignment.turn_id,
-                "bounds": {
-                    "max_steps": assignment.max_steps,
-                    "allowed_domains": assignment.allowed_domains,
-                    "action_class_ceiling": assignment.action_class_ceiling.value,
-                    "autonomy_tier": assignment.autonomy_tier.value,
-                },
-            }
+                self.tasks.release_run(task.task_id, run_token)
+
+    async def _run_assignment(
+        self, body: "AssignmentBody", task: BrowserTask, run_token: str
+    ) -> dict[str, Any]:
+        """The body of ``POST /assignments``, run while the task's in-flight marker is held."""
+        status = task.status
+        if status is BrowserTaskStatus.WAITING_FOR_OWNER:
+            status = await self._sync_waiting_owner_decision(task)
+        if status not in (BrowserTaskStatus.PENDING, BrowserTaskStatus.RESUME_AUTHORIZED):
+            raise HTTPException(status_code=409, detail=f"BROWSER_TASK_NOT_RUNNABLE:{status.value}")
+
+        assignment = SubagentAssignment(
+            turn_id=body.turn_id, command_id=body.command_id, task_id=body.task_id,
+            goal=body.goal, allowed_domains=list(body.allowed_domains),
+            action_class_ceiling=body.action_class_ceiling,
+            autonomy_tier=body.autonomy_tier, max_steps=body.max_steps,
+            deadline_ms=body.deadline_ms,
+            max_steps_without_progress=body.max_steps_without_progress,
+        )
+        if status is BrowserTaskStatus.RESUME_AUTHORIZED:
+            await self._enforce_resume_authorization(task, assignment)
+        # Owner decision 2026-09-30 — the run acts within the task's recorded scope, narrowed
+        # to the hosts this assignment allows (an assignment can narrow, never widen it). A
+        # task with no recorded scope keeps None and every action is handed to the owner.
+        if task.scope is not None:
+            task = task.model_copy(update={"scope": task.scope.narrowed_to_hosts(assignment.allowed_domains)})
+        # P2-BROW-001 — the worker is bound to *this* task and its plan before it
+        # runs. A long-lived worker mutated per assignment would let two concurrent
+        # assignments overwrite each other's task id, and the adapter is the only part
+        # that is legitimately shared.
+        worker = self.worker
+        if body.interactive_session_id is not None:
+            factory = getattr(self, "interactive_worker_factory", None)
+            if factory is None:
+                raise HTTPException(status_code=503, detail="INTERACTIVE_CONTROL_CLIENT_UNCONFIGURED")
+            try:
+                worker = await factory(task, assignment, body.plan, body.interactive_session_id)
+            except SemanticWorkerUnavailable as exc:
+                raise HTTPException(status_code=503, detail="INTERACTIVE_SEMANTIC_WORKER_UNCONFIGURED") from exc
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+            except Exception as exc:
+                raise HTTPException(status_code=409, detail="INTERACTIVE_CONTROL_NOT_ADMITTED") from exc
+        binder = getattr(worker, "for_task", None)
+        if binder is not None and body.interactive_session_id is None:
+            worker = binder(task, body.plan)
+        # Review I4 MINOR-A — an assignment acts under the task's page lease, fenced like
+        # /interaction/step: the lease the task holds, or one taken for this run and given
+        # back after it. Every Harness call carries its generation, and the fence's guard
+        # re-checks (and renews) the lease with the broker before each one.
+        try:
+            acquisition = asyncio.create_task(self.broker.lease_for_task_run(
+                profile_alias=task.profile_alias, task_id=task.task_id,
+            ))
+            try:
+                acquired, lease = await asyncio.shield(acquisition)
+            except asyncio.CancelledError:
+                try:
+                    got_new, got_lease = await asyncio.shield(acquisition)
+                except BrowserPolicyError:
+                    pass
+                else:
+                    if got_new:
+                        await self.broker.release_lease(got_lease)
+                raise
+        except BrowserPolicyError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        page_end: dict[str, Any] | None = None
+        try:
+            try:
+                with harness_lease_fence(broker_lease_fence(self.broker, lease)):
+                    result = await self.runner.run(
+                        assignment=assignment, worker=worker, task=task,
+                        verifier=self.verifier, postcondition=body.postcondition,
+                    )
+            finally:
+                page_end = await self._end_run_page(acquired, lease)
+        except SemanticWorkerUnavailable as exc:
+            await self._late_block_before_raising(task, page_end)
+            # An L2+ assignment asked for judgement about a page and no semantic
+            # runtime is configured. Walking the deterministic plan instead would be
+            # answering a different question and reporting success on this one.
+            raise HTTPException(
+                status_code=503, detail=f"BROWSER_SEMANTIC_RUNTIME_UNAVAILABLE:{exc}"
+            ) from exc
+        except Exception:
+            await self._late_block_before_raising(task, page_end)
+            raise
+        # Unit G15 (review I8 MAJOR-2): the page ended before any outcome is written, so a write
+        # the guard blocked after the run's last Harness call hands the task to the owner
+        # instead of letting COMPLETED (or any end state) stand over it.
+        result = self._with_late_block(result, page_end)
+
+        if result.verification_outcome is not None:
+            # The verifier's verdict on the worker's "done" claim goes on record for
+            # this task, whatever it was; COMPLETED is only reachable over VERIFIED.
+            await self.tasks.record_verification(
+                task=task, outcome=result.verification_outcome,
+                verifier=type(self.verifier).__name__ if self.verifier is not None else "NONE",
+                detail=result.detail, assignment_id=assignment.assignment_id,
+            )
+
+        escalation = None
+        try:
+            escalation = await self._record_run_outcome(task, assignment, result, run_token)
+        except BrowserTaskTransitionRefused as exc:
+            # Review I3 MINOR-2: the task reached an end state while this run was in flight
+            # (e.g. /complete CANCELLED). It stays there; the run's outcome is not applied.
+            raise HTTPException(
+                status_code=409,
+                detail=f"BROWSER_TASK_ENDED_DURING_RUN:{exc.current or 'UNKNOWN'}",
+            ) from exc
+        if escalation is not None:
+            instruments.record_browser_task("ESCALATED")
+        return self._assignment_response(assignment, task, result, escalation)
+
+    async def _end_run_page(self, acquired: Any, lease: Any) -> dict[str, Any] | None:
+        """Unit G15 — end the run's page and return the Harness's ``/release`` answer.
+
+        A lease the run took is given back (only while it is still the holding). A lease the
+        task already held outlives the run in the broker, but the run is the last one on it —
+        every outcome ends the task, holds it for verification or hands it to the owner, and
+        none of those runs again on this lease — so its page is ended here too, before the
+        outcome is written."""
+        if acquired is not None:
+            return (await self.broker.release_lease_if_held(acquired)).page
+        return await self.broker.release_page(profile_alias=lease.profile_alias, lease_id=lease.lease_id)
+
+    async def _end_held_page(self, task: BrowserTask) -> str | None:
+        """Unit G15 — end the page of the live lease ``task`` holds (if any) and return the
+        owner code its ``/release`` answer carries."""
+        row = await self.store.fetchone(
+            "SELECT lease_holder, lease_expires_at_ms, lease_holder_id FROM browser_profiles "
+            "WHERE profile_alias = ?",
+            (task.profile_alias,),
+        )
+        if row is None or not row["lease_holder"] or row["lease_holder_id"] != task.task_id:
+            return None
+        return network_owner_code(
+            await self.broker.release_page(profile_alias=task.profile_alias, lease_id=str(row["lease_holder"]))
+        )
+
+    async def _late_block_before_raising(self, task: BrowserTask, page_end: Any) -> None:
+        """A run that raised still hands a late block to the owner before the error goes up."""
+        code = network_owner_code(page_end)
+        if code is not None:
+            await self._hand_late_block_to_owner(task.task_id, code)
+
+    @staticmethod
+    def _with_late_block(result, page_end: Any):
+        """The run's result with a late block applied: OWNER_TAKEOVER (lane 4), never success.
+        A run that already handed over keeps its own reason."""
+        code = network_owner_code(page_end)
+        if code is None or result.stop_reason is SubagentStop.OWNER_TAKEOVER:
+            return result
+        return result.model_copy(update={
+            "stop_reason": SubagentStop.OWNER_TAKEOVER, "detail": f"HARNESS_REFUSED:{code}",
+        })
+
+    async def _record_run_outcome(
+        self, task: BrowserTask, assignment: SubagentAssignment, result, run_token: str
+    ) -> dict[str, Any] | None:
+        """Apply a finished run to its task, through the guarded writers only (I3 MINOR-2).
+
+        Raises ``BrowserTaskTransitionRefused`` when the task ended while the run was in
+        flight. Returns the escalation, if one was raised.
+        """
+        escalation = None
+        if result.stop_reason is SubagentStop.OWNER_TAKEOVER:
+            # Handed over, not finished: the owner is driving this profile. Not
+            # terminal (completed_at_ms stays NULL) and never success; the task
+            # lease is dropped so automation holds nothing while the owner acts.
+            await self._release_task_lease(task)
+            await self.tasks.set_working_status(
+                task_id=task.task_id, status=BrowserTaskStatus.WAITING_FOR_OWNER,
+                error_code=f"{SubagentStop.OWNER_TAKEOVER.value}:{result.detail or ''}"[:200],
+            )
+            instruments.record_browser_task(BrowserTaskStatus.WAITING_FOR_OWNER)
+        elif result.stop_reason in (SubagentStop.SCOPE_VIOLATION, SubagentStop.ACTION_CLASS_VIOLATION):
+            escalation = await self._create_boundary_escalation(
+                task=task, assignment=assignment, result=result
+            )
+        else:
+            # §7: COMPLETED only after VERIFIED. UNVERIFIABLE stays VERIFYING (not
+            # terminal success, not a failure the page caused) and is escalated.
+            terminal_status = BrowserTaskStatus.COMPLETED
+            if result.stop_reason is SubagentStop.UNVERIFIABLE:
+                terminal_status = BrowserTaskStatus.VERIFYING
+            elif result.stop_reason in (SubagentStop.PAYMENT_REFUSED, SubagentStop.INJECTION_REFUSED):
+                terminal_status = BrowserTaskStatus.BLOCKED_POLICY
+            elif result.stop_reason is SubagentStop.GOAL_DRIFT:
+                terminal_status = BrowserTaskStatus.BLOCKED_UNSAFE
+            elif not result.succeeded:
+                terminal_status = BrowserTaskStatus.FAILED
+            error_code = None if result.succeeded else result.stop_reason.value
+            if terminal_status is BrowserTaskStatus.VERIFYING:
+                # Not an end state (review I2 N-3): held for the owner, never success.
+                await self.tasks.hold_for_verification(
+                    task_id=task.task_id, error_code=error_code,
+                    now_ms=int(time.time() * 1000),
+                )
+            else:
+                await self.tasks.complete(
+                    task_id=task.task_id, status=terminal_status, error_code=error_code,
+                    now_ms=int(time.time() * 1000), run_token=run_token,
+                )
+            # P3-OBS-002 — "browser task status" is one of Gate 11's named
+            # metrics. Recorded at the one place a task reaches a terminal
+            # status, so a new stop reason is counted without being added here.
+            instruments.record_browser_task(terminal_status)
+        return escalation
+
+    @staticmethod
+    def _assignment_response(
+        assignment: SubagentAssignment, task: BrowserTask, result, escalation: dict[str, Any] | None
+    ) -> dict[str, Any]:
+        return {
+            "assignment_id": assignment.assignment_id,
+            "task_id": task.task_id,
+            "turn_id": assignment.turn_id,
+            "stop_reason": result.stop_reason.value,
+            "succeeded": result.succeeded,
+            "verification_outcome": result.verification_outcome,
+            "needs_owner": result.stop_reason in (SubagentStop.UNVERIFIABLE, SubagentStop.OWNER_TAKEOVER),
+            "step_count": result.step_count,
+            "steps": [step.model_dump(mode="json") for step in result.steps],
+            "extraction": result.extraction,
+            "detail": result.detail,
+            "escalation": escalation,
+            # Stated so the subordination is observable, not just documented.
+            "assigned_by_turn": assignment.turn_id,
+            "bounds": {
+                "max_steps": assignment.max_steps,
+                "allowed_domains": assignment.allowed_domains,
+                "action_class_ceiling": assignment.action_class_ceiling.value,
+                "autonomy_tier": assignment.autonomy_tier.value,
+            },
+        }
 
 
 __all__ = ["BrowserApi"]

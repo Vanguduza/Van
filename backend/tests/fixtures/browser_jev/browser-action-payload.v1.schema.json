@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dial.local/schemas/jev/browser-action-payload.v1.schema.json",
+  "title": "JevBrowserActionPayloadV1",
+  "description": "Programme B contract B2. The only browser observation payload VAN may send to dial-jev PROPOSE_ACTION (module van.browser.ultrafast.action.v1), produced by VAN backend/van_gateway/browser/jev_eligibility.py for PUBLIC_ELIGIBLE / SANITIZABLE_ELIGIBLE observations only. Minimal by construction: opaque per-observation target ids, role and a short label (the element text field is `label`, never `name`); no URLs, timestamps, owner identity, account identifiers, selectors or page contents. Payloads must additionally pass the unmodified Jev egress checker (assertJevEgressAllowed). Never authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["payload_schema", "effect_direction", "closed_operation_set", "origin_class", "targets", "action_class_ceiling", "observation_epoch"],
+  "properties": {
+    "payload_schema": { "const": "van.browser.action_payload.v1" },
+    "effect_direction": { "const": "PROPOSE_ACTION" },
+    "closed_operation_set": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "enum": ["click", "fill", "select", "scroll", "press_key", "done", "abstain"] }
+    },
+    "origin_class": { "enum": ["PUBLIC_ALLOWLISTED", "PUBLIC_UNLISTED"] },
+    "targets": {
+      "type": "array",
+      "maxItems": 40,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["target_id", "role", "label"],
+        "properties": {
+          "target_id": { "type": "string", "pattern": "^t_[0-9a-f]{16}$" },
+          "role": {
+            "enum": ["button", "link", "textbox", "searchbox", "combobox", "checkbox", "radio", "tab", "menuitem", "option", "listbox", "switch", "slider", "spinbutton", "generic"]
+          },
+          "label": { "type": "string", "minLength": 1, "maxLength": 64 }
+        }
+      }
+    },
+    "action_class_ceiling": { "enum": ["A0", "A1", "A2", "A3"] },
+    "observation_epoch": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,64}$" }
+  }
+}

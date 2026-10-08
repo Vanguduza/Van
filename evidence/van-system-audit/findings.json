@@ -2247,8 +2247,8 @@
           "backend/van_gateway/browser/api.py",
           "backend/van_gateway/browser/adapters.py",
           "backend/van_gateway/app.py",
-          "deploy/van-trading-core/browser/harness_service.py",
-          "deploy/van-trading-core/browser/stagehand_service.mjs",
+          "deploy/van-browser-core/browser/harness_service.py",
+          "deploy/van-browser-core/browser/stagehand_service.mjs",
           "deploy/van-trading-core/browser/bootstrap-browser-runtime.sh",
           "deploy/van-trading-core/systemd/vati-browser-harness.service",
           "deploy/van-trading-core/systemd/vati-stagehand.service"

@@ -48,6 +48,7 @@ object VanRoute {
     const val PROJECT_RATIONALE_TEMPLATE = "projects/{projectId}/rationale"
     const val CONNECTED = "connected"
     const val SETTINGS = "settings"
+    const val JEV = "jev"
     /**
      * Jev Intelligence — the owner projection of the one DDS `dial-jev` service. A child of
      * Settings, not a ninth destination (DNA §4 stays at eight). The Browser & Automation

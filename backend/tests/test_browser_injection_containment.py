@@ -37,6 +37,12 @@ from van_gateway.browser.worker import (
 )
 from van_gateway.models import ActionClass
 
+
+async def _no_owner_control(_task) -> bool:
+    """Review I M-4: the runner fails closed without an owner-control probe; these
+    tests are about other bounds, so the owner is explicitly not holding control."""
+    return False
+
 DOMAIN = "research.example.com"
 
 #: The canary corpus: page text a hostile site would actually serve to an agent.
@@ -112,11 +118,20 @@ class FakeHarness:
         self.calls.append("page_info")
         return self.pages.pop(0) if self.pages else {"url": f"https://{DOMAIN}/", "title": "end"}
 
-    async def click(self, task, locator):
+    async def describe(self, task, locator):
+        """Review I5: /describe reports the element on the current page, bound to its node."""
+        page = self.pages[0] if self.pages else {}
+        for e in page.get("elements") or ():
+            if e.get("locator") == locator:
+                return {"element": dict(e), "matches": 1, "page_url": page.get("url"),
+                        "binding": {"backend_node_id": 3, "digest": "0" * 64}}
+        return {"element": None, "matches": 0}
+
+    async def click(self, task, locator, *, binding=None):
         self.calls.append(f"click:{locator}")
         return {"ok": True}
 
-    async def fill_ref(self, task, locator, value_ref):
+    async def fill_ref(self, task, locator, value_ref, *, binding=None):
         self.calls.append(f"fill:{locator}:{value_ref}")
         return {"ok": True}
 
@@ -213,7 +228,7 @@ async def test_a_hostile_page_ends_the_task_through_the_real_runner(tmp_path):
         PlannedStep(kind="navigate", domain=DOMAIN, url=f"https://{DOMAIN}/reports"),
         PlannedStep(kind="read", domain=DOMAIN),
     ]))
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task), worker=worker, task=task,
     )
     assert result.stop_reason is SubagentStop.INJECTION_REFUSED
@@ -235,8 +250,8 @@ async def test_an_ordinary_page_is_not_stopped(tmp_path):
         PlannedStep(kind="navigate", domain=DOMAIN, url=f"https://{DOMAIN}/"),
         PlannedStep(kind="navigate", domain=DOMAIN, url=f"https://{DOMAIN}/reports"),
     ]))
-    result = await BrowserSubagentRunner().run(
-        assignment=_assignment(task), worker=worker, task=task,
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
+        assignment=_assignment(task), worker=worker, task=task, verifier=_VerifiedReadBack(),
     )
     assert result.stop_reason is SubagentStop.GOAL_ACHIEVED
     assert harness.calls.count("page_info") >= 2
@@ -250,8 +265,12 @@ async def test_the_worker_actually_drives_the_adapter(tmp_path):
     """P2-BROW-001 — nothing on this path imported an adapter, so evidence was whatever
     the caller handed in."""
     task = await _task(tmp_path)
+    # Review I4 MAJOR-A (action_risk R6): a fill needs the Harness to report the field; one
+    # it does not report is A4 (owner takeover), never filled blind.
+    password = {"locator": "#password", "role": "textbox", "name": "Password", "type": "password"}
     harness = FakeHarness([
-        {"url": f"https://{DOMAIN}/login", "title": "login", "extraction": {}},
+        {"url": f"https://{DOMAIN}/login", "title": "login", "extraction": {}, "elements": [password]},
+        {"url": f"https://{DOMAIN}/login", "title": "login", "extraction": {}, "elements": [password]},
         {"url": f"https://{DOMAIN}/home", "title": "home", "extraction": {"text": "Welcome"}},
     ])
     worker = AdapterBackedWorker(harness, task=task, plan=BrowserTaskPlan(steps=[
@@ -261,7 +280,10 @@ async def test_the_worker_actually_drives_the_adapter(tmp_path):
             value_ref="secretref://browser/google-primary",
         ),
     ]))
-    await BrowserSubagentRunner().run(assignment=_assignment(task), worker=worker, task=task)
+    # A fill writes owner data: A3 under the shared classifier (review I3 MAJOR-1), so the
+    # assignment has to allow A3; an A2 ceiling now refuses the planned fill.
+    await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
+        assignment=_assignment(task, action_class_ceiling=ActionClass.A3), worker=worker, task=task)
     assert f"navigate:https://{DOMAIN}/login" in harness.calls
     # A reference, never a literal: §367.3 forbids secret material crossing this boundary.
     assert "fill:#password:secretref://browser/google-primary" in harness.calls
@@ -324,7 +346,7 @@ async def test_a_plan_cannot_widen_its_assignment(tmp_path):
     worker = AdapterBackedWorker(harness, task=task, plan=BrowserTaskPlan(steps=[
         PlannedStep(kind="navigate", domain="elsewhere.example", url="https://elsewhere.example/"),
     ]))
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task), worker=worker, task=task,
     )
     assert result.stop_reason is SubagentStop.SCOPE_VIOLATION
@@ -339,3 +361,13 @@ async def test_binding_a_worker_to_a_task_does_not_mutate_the_shared_one(tmp_pat
     assert shared.task is None
     assert bound.task is first
     assert bound.adapter is shared.adapter
+
+
+class _VerifiedReadBack:
+    """Owner decision 2026-09-29 §7 — GOAL_ACHIEVED now requires an independent VERIFIED."""
+
+    async def verify(self, task, action, postcondition, *, claimed_done):
+        from van_gateway.action.models import VerifierType
+        from van_gateway.automation.verifier import VerificationOutcome, VerificationResult
+
+        return VerificationResult(outcome=VerificationOutcome.VERIFIED, verifier_type=VerifierType.READ_BACK)

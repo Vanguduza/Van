@@ -9,7 +9,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 47
+SCHEMA_VERSION = 53
 
 MIGRATION_41 = """
 CREATE TABLE IF NOT EXISTS automation_owner_plans (
@@ -1164,6 +1164,21 @@ MIGRATION_32_OUTBOX_COLUMNS: tuple[tuple[str, str], ...] = (
     ("dead_lettered_at_ms", "INTEGER"),
 )
 
+
+# Converge overlapping migration numbers from independent historical feature branches.
+# Existing attestation flags remain unchanged; absent flags default to unverified.
+MIGRATION_48 = "\n".join((MIGRATION_31, MIGRATION_32, MIGRATION_33, MIGRATION_34,
+                           MIGRATION_35, MIGRATION_36, MIGRATION_37, MIGRATION_38))
+
+BROWSER_HARDENING_MIGRATION_34 = '\n-- Review I4 MINOR-C. End states are sticky at the database, not only in the service.\n-- BrowserTaskService._write_status is the one guarded status writer (its UPDATE carries\n-- `status NOT IN (<terminal>)`), but the only thing enforcing "one writer" was a source\n-- regex that `UPDATE main.browser_tasks` or `UPDATE "browser_tasks"` walked past. These\n-- triggers refuse, whoever writes, a status change out of a terminal status\n-- (browser/service.py TERMINAL_TASK_STATUSES; tests pin the two lists together), and an\n-- INSERT OR REPLACE over a terminal task (REPLACE deletes then inserts, so no UPDATE\n-- trigger would see it). Deleting a row (retention) is unaffected.\nCREATE TRIGGER IF NOT EXISTS browser_tasks_terminal_status_sticky\nBEFORE UPDATE OF status ON browser_tasks\nWHEN OLD.status IN (\'COMPLETED\', \'FAILED\', \'DENIED\', \'BLOCKED_POLICY\', \'BLOCKED_UNSAFE\',\n                    \'CANCELLED\', \'EXPIRED\')\n  AND NEW.status IS NOT OLD.status\nBEGIN\n  SELECT RAISE(ABORT, \'browser_task_terminal_status\');\nEND;\n\nCREATE TRIGGER IF NOT EXISTS browser_tasks_terminal_not_replaced\nBEFORE INSERT ON browser_tasks\nWHEN EXISTS (\n  SELECT 1 FROM browser_tasks\n  WHERE task_id = NEW.task_id\n    AND status IN (\'COMPLETED\', \'FAILED\', \'DENIED\', \'BLOCKED_POLICY\', \'BLOCKED_UNSAFE\',\n                   \'CANCELLED\', \'EXPIRED\')\n)\nBEGIN\n  SELECT RAISE(ABORT, \'browser_task_terminal_status\');\nEND;\n'
+
+BROWSER_HARDENING_MIGRATION_35 = "\n-- Review I5 D1. Migration 34 kept a terminal *status* sticky, but a terminal task could still\n-- be resurrected: DELETE then INSERT the same task_id as PENDING, or rename its task_id and\n-- INSERT the old one; and its other columns stayed writable. Now:\n--   * a task_id that reached a terminal status is tombstoned (by trigger, on INSERT or\n--     UPDATE, and backfilled here); an INSERT of a tombstoned task_id is refused, whether or\n--     not the row still exists. The tombstone outlives the row, so retention may still\n--     DELETE browser_tasks rows; tombstones themselves cannot be deleted or changed;\n--   * a task's identity columns never change once written;\n--   * a terminal row's evidence (evidence_pointer, completed_at_ms) never changes. Its\n--     error_code and updated_at_ms stay writable: review I4 pinned that an ended task may\n--     be touched without a status change.\n-- The terminal list is browser/service.py TERMINAL_TASK_STATUSES (tests pin the lists).\nCREATE TABLE IF NOT EXISTS browser_task_tombstones (\n  task_id TEXT PRIMARY KEY,\n  terminal_status TEXT NOT NULL,\n  tombstoned_at_ms INTEGER NOT NULL\n);\n\nINSERT OR IGNORE INTO browser_task_tombstones(task_id, terminal_status, tombstoned_at_ms)\n  SELECT task_id, status, CAST(strftime('%s', 'now') AS INTEGER) * 1000 FROM browser_tasks\n  WHERE status IN ('COMPLETED', 'FAILED', 'DENIED', 'BLOCKED_POLICY', 'BLOCKED_UNSAFE',\n                     'CANCELLED', 'EXPIRED');\n\nCREATE TRIGGER IF NOT EXISTS browser_tasks_tombstone_on_terminal_insert\nAFTER INSERT ON browser_tasks\nWHEN NEW.status IN ('COMPLETED', 'FAILED', 'DENIED', 'BLOCKED_POLICY', 'BLOCKED_UNSAFE',\n                     'CANCELLED', 'EXPIRED')\nBEGIN\n  INSERT OR IGNORE INTO browser_task_tombstones(task_id, terminal_status, tombstoned_at_ms)\n  VALUES (NEW.task_id, NEW.status, CAST(strftime('%s', 'now') AS INTEGER) * 1000);\nEND;\n\nCREATE TRIGGER IF NOT EXISTS browser_tasks_tombstone_on_terminal_update\nAFTER UPDATE OF status ON browser_tasks\nWHEN NEW.status IN ('COMPLETED', 'FAILED', 'DENIED', 'BLOCKED_POLICY', 'BLOCKED_UNSAFE',\n                     'CANCELLED', 'EXPIRED')\nBEGIN\n  INSERT OR IGNORE INTO browser_task_tombstones(task_id, terminal_status, tombstoned_at_ms)\n  VALUES (NEW.task_id, NEW.status, CAST(strftime('%s', 'now') AS INTEGER) * 1000);\nEND;\n\nCREATE TRIGGER IF NOT EXISTS browser_tasks_tombstoned_id_not_reinserted\nBEFORE INSERT ON browser_tasks\nWHEN EXISTS (SELECT 1 FROM browser_task_tombstones WHERE task_id = NEW.task_id)\nBEGIN\n  SELECT RAISE(ABORT, 'browser_task_terminal_status');\nEND;\n\nCREATE TRIGGER IF NOT EXISTS browser_tasks_identity_immutable\nBEFORE UPDATE ON browser_tasks\nWHEN NEW.task_id IS NOT OLD.task_id\n  OR NEW.command_id IS NOT OLD.command_id\n  OR NEW.execution_id IS NOT OLD.execution_id\n  OR NEW.capability_id IS NOT OLD.capability_id\n  OR NEW.profile_alias IS NOT OLD.profile_alias\n  OR NEW.strategy IS NOT OLD.strategy\n  OR NEW.autonomy_tier IS NOT OLD.autonomy_tier\n  OR NEW.action_class IS NOT OLD.action_class\n  OR NEW.target_domain IS NOT OLD.target_domain\n  OR NEW.goal IS NOT OLD.goal\n  OR NEW.started_at_ms IS NOT OLD.started_at_ms\nBEGIN\n  SELECT RAISE(ABORT, 'browser_task_identity_immutable');\nEND;\n\nCREATE TRIGGER IF NOT EXISTS browser_tasks_terminal_evidence_frozen\nBEFORE UPDATE OF evidence_pointer, completed_at_ms ON browser_tasks\nWHEN OLD.status IN ('COMPLETED', 'FAILED', 'DENIED', 'BLOCKED_POLICY', 'BLOCKED_UNSAFE',\n                     'CANCELLED', 'EXPIRED')\n  AND (NEW.evidence_pointer IS NOT OLD.evidence_pointer\n       OR NEW.completed_at_ms IS NOT OLD.completed_at_ms)\nBEGIN\n  SELECT RAISE(ABORT, 'browser_task_terminal_status');\nEND;\n\nCREATE TRIGGER IF NOT EXISTS browser_task_tombstones_no_delete\nBEFORE DELETE ON browser_task_tombstones\nBEGIN\n  SELECT RAISE(ABORT, 'browser_task_tombstone_immutable');\nEND;\n\nCREATE TRIGGER IF NOT EXISTS browser_task_tombstones_no_update\nBEFORE UPDATE ON browser_task_tombstones\nBEGIN\n  SELECT RAISE(ABORT, 'browser_task_tombstone_immutable');\nEND;\n"
+
+BROWSER_HARDENING_MIGRATION_36 = '\n-- Owner decision 2026-09-30 — browser automation stays inside the task\'s own truth. The\n-- pages a task may act on are recorded with the task (browser/task_scope.py): declared by\n-- Hermes at creation, else the target domain\'s origin, and widened only by an owner\n-- approval. NULL (every task created before this migration) is "no scope": the router, the\n-- assignment workers and the Harness refuse every action on it (fail closed).\nALTER TABLE browser_tasks ADD COLUMN scope_json TEXT;\n'
+
+BROWSER_HARDENING_MIGRATION_37 = '\n-- Owner decision 2026-09-30 (answer to review I6 M4: "Network-effect guard"). Whether a browser\n-- task was admitted as mutating (``mutating=true`` at creation, which BrowserPolicyEngine.\n-- check_task admits only for a gateway_authorized_only profile and a mutation-admitted\n-- domain) is recorded with the task. The Harness blocks every network write during an\n-- automated action unless the task is admitted as mutating. 0 (every task created before\n-- this migration) is non-mutating: fail closed.\nALTER TABLE browser_tasks ADD COLUMN mutating INTEGER NOT NULL DEFAULT 0;\n'
+
+BROWSER_HARDENING_MIGRATION_38 = "\n-- Review I7 minor 8 (unit G11). browser_tasks.mutating (whether the Harness's network-effect\n-- guard lets the task write) and browser_tasks.scope_json (the pages it may act on) are task\n-- truth set at creation. Neither may change afterwards: the identity trigger now covers both,\n-- so a running task cannot be flipped to mutating or have its scope rewritten in place. Owner\n-- widening stays what it was: an approval row read at load time, never an edit of the task.\nDROP TRIGGER IF EXISTS browser_tasks_identity_immutable;\nCREATE TRIGGER browser_tasks_identity_immutable\nBEFORE UPDATE ON browser_tasks\nWHEN NEW.task_id IS NOT OLD.task_id\n  OR NEW.command_id IS NOT OLD.command_id\n  OR NEW.execution_id IS NOT OLD.execution_id\n  OR NEW.capability_id IS NOT OLD.capability_id\n  OR NEW.profile_alias IS NOT OLD.profile_alias\n  OR NEW.strategy IS NOT OLD.strategy\n  OR NEW.autonomy_tier IS NOT OLD.autonomy_tier\n  OR NEW.action_class IS NOT OLD.action_class\n  OR NEW.target_domain IS NOT OLD.target_domain\n  OR NEW.goal IS NOT OLD.goal\n  OR NEW.started_at_ms IS NOT OLD.started_at_ms\n  OR NEW.mutating IS NOT OLD.mutating\n  OR NEW.scope_json IS NOT OLD.scope_json\nBEGIN\n  SELECT RAISE(ABORT, 'browser_task_identity_immutable');\nEND;\n"
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -2514,6 +2529,13 @@ MIGRATIONS: dict[int, str] = {
     45: MIGRATION_45,
     46: MEMORY_FABRIC_MIGRATION_31,
     47: MEMORY_FABRIC_MIGRATION_32,
+    48: MIGRATION_48,
+    49: BROWSER_HARDENING_MIGRATION_34,
+    50: BROWSER_HARDENING_MIGRATION_35,
+    51: BROWSER_HARDENING_MIGRATION_36,
+    52: BROWSER_HARDENING_MIGRATION_37,
+    53: BROWSER_HARDENING_MIGRATION_38,
+
 }
 
 
@@ -2597,6 +2619,30 @@ class Store:
                 await db.execute(f"ALTER TABLE owner_model_outbox ADD COLUMN {name} {decl}")
         await db.commit()
 
+    @staticmethod
+    async def _guard_fork_columns(db: aiosqlite.Connection, script: str) -> str:
+        """Skip only already-present ADD COLUMN statements in explicit fork repairs.
+
+        Historical branch numbers overlap, and a crash can apply a column before
+        recording its migration. Existing data and evidence flags are preserved.
+        An incompatible declared column type fails the upgrade.
+        """
+        import re
+        pattern = re.compile(
+            r"(?mi)^ALTER TABLE ([a-z_]+) ADD COLUMN ([a-z_]+) ([^;]+);"
+        )
+        skipped: set[str] = set()
+        for match in pattern.finditer(script):
+            table, column, declaration = match.groups()
+            cur = await db.execute(f"PRAGMA table_info({table})")
+            columns = {str(row["name"]): row for row in await cur.fetchall()}
+            if column in columns:
+                expected_type = declaration.split()[0].upper()
+                if str(columns[column]["type"]).upper() != expected_type:
+                    raise ValueError(f"incompatible_fork_column:{table}.{column}")
+                skipped.add(match.group(0))
+        return pattern.sub(lambda m: "" if m.group(0) in skipped else m.group(0), script)
+
     async def migrate(self) -> None:
         async with self.connection() as db:
             await db.execute(
@@ -2618,7 +2664,10 @@ class Store:
                     await self._ensure_access_token_column(db)
                 if version == 47:
                     await self._ensure_m32_outbox_columns(db)
-                await db.executescript(MIGRATIONS[version])
+                script = MIGRATIONS[version]
+                if version in (48, 51, 52):
+                    script = await self._guard_fork_columns(db, script)
+                await db.executescript(script)
                 await db.execute(
                     "INSERT INTO schema_migrations(version, applied_at_unix) VALUES (?, ?)",
                     (version, int(time.time())),

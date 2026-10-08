@@ -164,7 +164,9 @@ curl -fsS --max-time 5 "${VAN_VEKL_URL:-http://127.0.0.1:9134}/health" >/tmp/vek
 curl -fsSk --max-time 5 "https://127.0.0.1:${VAN_COMMANDER_PORT:-9133}/health" >/tmp/cmd.json 2>/dev/null && jq -e '.ok==true' /tmp/cmd.json >/dev/null && add commander_health GREEN "$(jq -c '.commands|length' /tmp/cmd.json) commands" || add commander_health RED "commander health not ok"
 if "$BASE/automation/qualify-automation-runtime.sh" >/tmp/automation-qualify.log 2>&1; then add automation_fabric GREEN "$(tail -n 1 /tmp/automation-qualify.log)"; else add automation_fabric RED "$(tail -c 500 /tmp/automation-qualify.log)"; fi
 if "$BASE/app/deploy/van-trading-core/supabase/qualify-supabase-runtime.sh" >/tmp/supabase-qualify.log 2>&1; then add supabase_runtime GREEN "$(tail -n 1 /tmp/supabase-qualify.log)"; else add supabase_runtime RED "$(tail -c 500 /tmp/supabase-qualify.log)"; fi
-if [[ -f "$DATA/evidence/browser/runtime-manifest.json" ]] && jq -e '.stagehand=="4.1.0" and .playwright=="1.63.0" and .temporalio=="1.33.0"' "$DATA/evidence/browser/runtime-manifest.json" >/dev/null; then add browser_runtime GREEN "Stagehand 4.1.0 / Playwright 1.63.0 / Temporal 1.33.0"; else add browser_runtime RED "browser runtime manifest missing or mismatched"; fi
+# Owner decision 2026-09-29 §1: Stagehand must not run on van-trading-core in production.
+# The browser runtime is qualified by deploy/van-browser-core/qualify.sh on its own host.
+if systemctl is-active --quiet vati-stagehand.service 2>/dev/null || systemctl is-enabled --quiet vati-stagehand.service 2>/dev/null; then add stagehand_not_on_trading_core RED "vati-stagehand.service is enabled/active on van-trading-core; production placement is van-browser-core"; else add stagehand_not_on_trading_core GREEN "no Stagehand service on van-trading-core"; fi
 if [[ -n "${VAN_COMMANDER_LEDGER:-}" ]]; then PYTHONPATH="$BASE/app/trading" "$BASE/venv/bin/python" - <<PY >/tmp/ledger.json 2>/tmp/ledger.err && add ledger GREEN "$(cat /tmp/ledger.json)" || add ledger RED "$(tail -c 300 /tmp/ledger.err)"
 import json
 from vati.core.ledger_pg import open_ledger

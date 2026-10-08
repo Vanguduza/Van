@@ -75,6 +75,230 @@ def test_browser_subagent_decision_is_recorded():
     assert "subagent_invariants:" in text
 
 
+#: sha256 of VAN-ADOPT-STAGEHAND-001.yaml as the owner's 2026-09-18 decision left it. Later
+#: reconciliations are appended after the marker below; the approved text above it is frozen.
+STAGEHAND_2026_09_18_SHA256 = "0553d1bdc5b2285218c7f1667808a6ee0d6fc7fede1fb538d03d353b99b6e9d6"
+STAGEHAND_APPEND_MARKER = (
+    "\n# ====================================================================================="
+    "\n# APPENDED 2026-09-29"
+)
+
+
+def test_stagehand_reconciliation_is_append_only_and_keeps_production_pending():
+    """Programme B: the 2026-09-18 approval is preserved; production stays PENDING.
+
+    The approval authorises the architecture. It is not signed-ingress evidence and does not
+    choose a host, so the appended production gate must stay PENDING until the owner resolves
+    the open questions, and the Jev lane must precede Stagehand in the B5 order.
+    """
+    import yaml
+
+    text = (DECISIONS / "VAN-ADOPT-STAGEHAND-001.yaml").read_text(encoding="utf-8")
+    assert STAGEHAND_APPEND_MARKER in text
+    approved = text.split(STAGEHAND_APPEND_MARKER, 1)[0]
+    assert hashlib.sha256(approved.encode("utf-8")).hexdigest() == STAGEHAND_2026_09_18_SHA256, (
+        "the owner's 2026-09-18 Stagehand decision text was edited; append instead"
+    )
+
+    rec = yaml.safe_load(text)["reconciliation_20260929"]
+    assert rec["owner_approval_2026_09_18"]["preserved_unchanged"] is True
+    assert rec["owner_approval_2026_09_18"]["evidence_absent"], "absent evidence must be stated"
+    assert rec["production_gate"]["status"] == "PENDING"
+    order = rec["programme_b_router_position"]["order"]
+    assert [i for i, lane in enumerate(order) if "PROPOSE_ACTION" in lane] == [1]
+    assert "Stagehand" in order[2] and "owner takeover" in order[3]
+    ids = {q["id"] for q in rec["owner_decisions_required"]}
+    assert {"OQ-STAGEHAND-HOST", "OQ-STAGEHAND-SIGNED-INGRESS", "OQ-VAN-PRIVATE-PLANE-HOST"} <= ids
+    for q in rec["owner_decisions_required"]:
+        assert "decision" not in q, "open questions must not carry a decision"
+
+
+#: sha256 of VAN-ADOPT-STAGEHAND-001.yaml through the end of reconciliation_20260929 (H's
+#: append, commit 379d6ab). The owner decisions of 2026-09-29 are appended after the marker
+#: below; nothing above it may change.
+STAGEHAND_RECONCILED_SHA256 = "e667a5b3b3bac824d51bca238e8a3c833c9e7e1f60dadbaa8130863fcdf51152"
+STAGEHAND_OWNER_DECISIONS_MARKER = (
+    "\n\n# ====================================================================================="
+    "\n# APPENDED 2026-09-29 (second append)"
+)
+OWNER_DECISIONS_20260929 = DECISIONS / "OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md"
+OWNER_DECISIONS_20260929_SHA256 = "64f1c0560ef88776d0d199392d315767ea3576827e335ba2da8081d12e307c81"
+STAGEHAND_LOCK = ROOT / "deploy" / "van-browser-core" / "browser" / "package-lock.json"
+
+
+def test_stagehand_owner_decisions_20260929_are_appended_truthfully():
+    """Owner decisions 2026-09-29 §§1-8: recorded append-only, with nothing overstated.
+
+    Intent is approved but signed ingress is still pending (not waived); the host is
+    van-browser-core and Stagehand is PRODUCTION_DISABLED while it is unprovisioned; the
+    model pin is not claimed; 4.1.0 is the release commit, not upstream HEAD; the router
+    findings are blockers; the five open questions are closed by reference, not by editing.
+    """
+    import yaml
+
+    assert hashlib.sha256(OWNER_DECISIONS_20260929.read_bytes()).hexdigest() == (
+        OWNER_DECISIONS_20260929_SHA256
+    ), "the committed owner decision text must stay verbatim"
+
+    text = (DECISIONS / "VAN-ADOPT-STAGEHAND-001.yaml").read_text(encoding="utf-8")
+    assert STAGEHAND_OWNER_DECISIONS_MARKER in text
+    prior = text.split(STAGEHAND_OWNER_DECISIONS_MARKER, 1)[0] + "\n"
+    assert hashlib.sha256(prior.encode("utf-8")).hexdigest() == STAGEHAND_RECONCILED_SHA256, (
+        "text above the 2026-09-29 owner-decisions append was edited; append instead"
+    )
+
+    doc = yaml.safe_load(text)
+    dec = doc["owner_decisions_20260929"]
+    assert dec["record_sha256"] == OWNER_DECISIONS_20260929_SHA256
+    assert dec["signature_claimed"] == "none"
+    assert dec["owner_intent"] == "OWNER_INTENT_APPROVED"
+    assert dec["signed_ingress"]["status"] == "SIGNED_INGRESS_PENDING"
+    assert dec["signed_ingress"]["waived"] is False
+
+    host = dec["hosting"]
+    assert host["production_host"] == "van-browser-core"
+    assert set(host["forbidden_production_hosts"]) == {
+        "van-trading-core", "dial-control", "van-private-core"
+    }
+    assert host["when_zone_unavailable"] == "PRODUCTION_DISABLED"
+    if host["zone_status"] != "AVAILABLE":
+        assert host["stagehand_production_state"] == "PRODUCTION_DISABLED"
+    assert "Stagehand" in dec["private_plane"]["must_not_host"]
+
+    model = dec["model"]
+    assert (model["provider"], model["model"]) == ("anthropic", "claude-sonnet-5")
+    # No immutable revision may be recorded unless one was actually observed and pinned.
+    if model["pin_status"] != "PINNED_IMMUTABLE_REVISION":
+        assert model["immutable_revision_id"] is None
+
+    version = dec["version"]
+    assert version["adopted_version"] == "4.1.0"
+    assert version["release_commit"] == "cd7b230778cf92269e4cb90e80d97f5113781c51"
+    assert version["not_the_adopted_artifact"]["commit"].startswith("ad2bf12e")
+    lock = json.loads(STAGEHAND_LOCK.read_text(encoding="utf-8"))
+    entry = lock["packages"]["node_modules/@browserbasehq/stagehand"]
+    assert entry["version"] == version["adopted_version"]
+    assert entry["integrity"] == version["npm_integrity"]
+
+    assert dec["production_gate"]["status"] == "PENDING"
+    for finding in dec["blockers"].values():
+        assert finding["severity"] == "BLOCKER"
+
+    open_ids = {q["id"] for q in doc["reconciliation_20260929"]["owner_decisions_required"]}
+    closed = {q["id"]: q for q in dec["open_questions_closed"]}
+    assert open_ids == set(closed)
+    for q in closed.values():
+        assert q["status"] == "DECIDED" and q["decision_ref"].startswith("owner_decisions_20260929.")
+
+
+#: sha256 of VAN-ADOPT-STAGEHAND-001.yaml through the end of owner_decisions_20260929 (the
+#: second append; VAN f55d360d). The blocker closure (unit G4b, review I3) is appended after
+#: the marker below; nothing above it may change.
+STAGEHAND_OWNER_DECISIONS_SHA256 = "d46d8618253fac1819c7bd7d4c7c65d34998ab98f6b078eaf789c622f0dd82bc"
+STAGEHAND_BLOCKER_CLOSURE_MARKER = (
+    "\n\n# ====================================================================================="
+    "\n# APPENDED 2026-09-29 (third append)"
+)
+STAGEHAND_VERIFIER_GAP_LIMITATION = (
+    'CLOSED (review I3, VAN f55d360d). On /assignments, /interaction/step, the watch runner, '
+    'the notebook consumer and automation dispatch, no lane result (done=True, GOAL_ACHIEVED,'
+    ' empty Stagehand controls, Jev done, engine success) yields COMPLETED/VERIFIED_SUCCESS; '
+    'only WorkflowVerifier VERIFIED over a declared predicate (field/expected other than '
+    '`exists`, or correlation keys each with a caller-declared expected value) does. '
+    'BrowserTaskService.complete(COMPLETED) requires the latest recorded verdict to be '
+    'VERIFIED; dispatch additionally requires the action receipt VERIFIED_SUCCESS with the '
+    'engine execution id independently observed. Limits: (1) READ_BACK observes a page the '
+    'site controls, so a declared title/URL/text proves what the page shows, not the '
+    'server-side effect; (2) automation dispatch has no production observer, so every run is '
+    'UNVERIFIABLE until one is qualified; (3) completion is refused while a router step or '
+    'assignment run is in flight on the task, and is written only if the verdict it checked '
+    "is still the task's latest (I3 MINOR-1, fixed by unit G4b; the in-flight marker is per "
+    'gateway process).'
+)
+STAGEHAND_DIRECT_ACTUATION_LIMITATION = (
+    'CLOSED (review I3, VAN f55d360d). On every production caller Stagehand is used only via '
+    'observe(); router lane 3 and HybridBrowserWorker turn one observed candidate into a '
+    'typed click/fill/press/scroll that VAN classifies from the Harness-observed element and '
+    'the Browser Harness executes. StagehandAdapter.act() refuses unless actuation_enabled, '
+    'which production wiring never sets; the worker serves /act only on a HISTORICAL_DEV_ONLY'
+    ' placement, and the gate refuses a worker whose /health reports act_endpoint_enabled. '
+    'Limits: (1) separation is process policy, not capability: the Stagehand 4.1.0 worker '
+    'still attaches to the Harness-owned Chromium over a full CDP connection '
+    "(stagehand_service.mjs:335), so a compromised worker could actuate; (2) Stagehand's "
+    'autonomous act/agent modes stay outside production, which makes the NotebookLM consumer '
+    '(notebook.py → act) non-functional in production; (3) the live Harness reports no '
+    'element list, so every targeted Stagehand proposal currently goes to owner takeover.'
+)
+
+
+def test_stagehand_blocker_closure_is_appended_and_reads_closed():
+    """Review I3 at VAN f55d360d: both Programme B blockers CLOSED, OWNER_DERIVED, append-only.
+
+    The earlier blocks are byte-for-byte what they were (their OPEN statuses included); the
+    gate model reads the blocker statuses from the new block, and nothing else about
+    Stagehand's production posture changes.
+    """
+    import yaml
+
+    text = (DECISIONS / "VAN-ADOPT-STAGEHAND-001.yaml").read_text(encoding="utf-8")
+    assert text.count(STAGEHAND_BLOCKER_CLOSURE_MARKER) == 1
+    prior = text.split(STAGEHAND_BLOCKER_CLOSURE_MARKER, 1)[0] + "\n"
+    assert hashlib.sha256(prior.encode("utf-8")).hexdigest() == STAGEHAND_OWNER_DECISIONS_SHA256, (
+        "text above the blocker-closure append was edited; append instead"
+    )
+
+    doc = yaml.safe_load(text)
+    # The recorded-at-the-time statuses stay OPEN; closure is a later statement, not an edit.
+    for blocker in doc["owner_decisions_20260929"]["blockers"].values():
+        assert blocker["status"] == "OPEN"
+    closure = doc["blocker_closure_20260929"]
+    assert closure["authority_class"] == "OWNER_DERIVED"
+    assert closure["signature_claimed"] == "none"
+    assert closure["authority_basis"]["owner_record_sha256"] == OWNER_DECISIONS_20260929_SHA256
+    assert closure["authority_basis"]["owner_sections"] == [7, 8, 10]
+    review = closure["independent_review"]
+    assert (review["id"], review["reviewed_commit"][:8], review["verdict_on_these_blockers"]) == (
+        "I3", "f55d360d", "CLOSED")
+    blockers = closure["blockers"]
+    assert set(blockers) == {"STAGEHAND-VERIFIER-GAP-20260929", "STAGEHAND-DIRECT-ACTUATION-20260929"}
+    assert all(b["status"] == "CLOSED" for b in blockers.values())
+    assert blockers["STAGEHAND-VERIFIER-GAP-20260929"]["limitation"] == STAGEHAND_VERIFIER_GAP_LIMITATION
+    assert blockers["STAGEHAND-DIRECT-ACTUATION-20260929"]["limitation"] == STAGEHAND_DIRECT_ACTUATION_LIMITATION
+    for blocker_id, blocker in blockers.items():
+        assert blocker["closes"] == f"owner_decisions_20260929.blockers.{blocker_id}"
+
+    # The gate model reads the new block, and only the two blocker gates moved.
+    model = json.loads((ROOT / "registries" / "production_activation_gates.json").read_text(encoding="utf-8"))
+    stagehand = next(d for d in model["required_decisions"] if d["decision"] == "VAN-ADOPT-STAGEHAND-001.yaml")
+    paths = {g["id"]: g["path"] for g in stagehand["gates"]}
+    assert paths["blocker_verifier_gap"] == (
+        "blocker_closure_20260929.blockers.STAGEHAND-VERIFIER-GAP-20260929.status")
+    assert paths["blocker_direct_actuation"] == (
+        "blocker_closure_20260929.blockers.STAGEHAND-DIRECT-ACTUATION-20260929.status")
+    assert paths["production_gate"] == "owner_decisions_20260929.production_gate.status"
+    assert paths["signed_ingress"] == "owner_decisions_20260929.signed_ingress.status"
+
+    # And Stagehand's production posture is unchanged by the closure.
+    dec = doc["owner_decisions_20260929"]
+    assert dec["production_gate"]["status"] == "PENDING"
+    assert dec["signed_ingress"]["status"] == "SIGNED_INGRESS_PENDING"
+    assert dec["hosting"]["stagehand_production_state"] == "PRODUCTION_DISABLED"
+    assert dec["model"]["pin_status"] == "UNVERIFIED"
+    assert dec["version"]["live_qualification"]["status"] == "PENDING"
+
+
+def test_no_provenance_pairs_unreleased_stagehand_head_with_4_1_0():
+    """Owner decision §5: ad2bf12e is later unreleased work, never "Stagehand 4.1.0"."""
+    row = next(
+        line
+        for line in (ROOT / "docs" / "project-state" / "MISSION_PROVENANCE_MEMORY_FABRIC_JEV_20260929.md")
+        .read_text(encoding="utf-8")
+        .splitlines()
+        if line.startswith("| browserbase/stagehand |")
+    )
+    assert "not** 4.1.0" in row and "cd7b230778cf92269e4cb90e80d97f5113781c51" in row
+
+
 def test_security_policy_amendment_was_applied():
     """§368 — the amendment is owner-approved and now lives in the locked policy."""
     amendment = (DECISIONS / "VAN-AMEND-SECURITY-POLICY-001.md").read_text(encoding="utf-8")
@@ -217,7 +441,7 @@ def test_manifest_matches_deployment_env_pins():
     assert f"N8N_VERSION={manifest['n8n']['version']}" in env
 
     package = json.loads(
-        (ROOT / "deploy" / "van-trading-core" / "browser" / "package.json").read_text(encoding="utf-8")
+        (ROOT / "deploy" / "van-browser-core" / "browser" / "package.json").read_text(encoding="utf-8")
     )
     assert package["dependencies"]["@browserbasehq/stagehand"] == manifest["stagehand"]["version"]
 
@@ -294,25 +518,26 @@ def test_private_browser_workers_are_real_and_fail_closed():
     Live identity/model/profile qualification remains an external gate, but CI prevents the
     private worker processes from silently collapsing back into "environment prepared".
     """
-    browser = ROOT / "deploy" / "van-trading-core" / "browser"
+    # Owner decision 2026-09-29 §1: the production package is deploy/van-browser-core; the
+    # historical deploy/van-trading-core/browser placement is development-only
+    # (tests/contracts/test_van_browser_core_zone.py).
+    zone = ROOT / "deploy" / "van-browser-core"
+    browser = zone / "browser"
     harness = (browser / "harness_service.py").read_text(encoding="utf-8")
     stagehand = (browser / "stagehand_service.mjs").read_text(encoding="utf-8")
-    bootstrap = (browser / "bootstrap-browser-runtime.sh").read_text(encoding="utf-8")
-    env = (browser / "runtime.env.example").read_text(encoding="utf-8")
-    harness_unit = (
-        ROOT / "deploy" / "van-trading-core" / "systemd" / "vati-browser-harness.service"
-    ).read_text(encoding="utf-8")
-    stagehand_unit = (
-        ROOT / "deploy" / "van-trading-core" / "systemd" / "vati-stagehand.service"
-    ).read_text(encoding="utf-8")
+    bootstrap = (zone / "bootstrap.sh").read_text(encoding="utf-8")
+    env = (zone / "runtime.env.example").read_text(encoding="utf-8")
+    harness_unit = (zone / "systemd" / "van-browser-harness.service").read_text(encoding="utf-8")
+    stagehand_unit = (zone / "systemd" / "van-stagehand.service").read_text(encoding="utf-8")
 
     assert "browser-harness==0.1.13" in bootstrap
-    assert "BROWSER_HARNESS_RUNTIME_GREEN" in bootstrap
-    assert "vati-browser-harness.service" in bootstrap
+    assert "VAN_BROWSER_CORE_WORKERS_GREEN" in bootstrap
+    assert "van-browser-harness.service" in bootstrap
     assert "127.0.0.1" in harness
     assert "allow_helper_authoring" in harness
     assert "cdp-endpoint.json" in harness
-    assert "os.chmod(tmp, 0o600)" in harness
+    # Review I8 MINOR-4: group-readable (0640) for the Stagehand user, which has its own uid.
+    assert "os.chmod(tmp, 0o640)" in harness
     assert "User=van-browser" in harness_unit
 
     assert '@browserbasehq/stagehand' in (browser / "package.json").read_text(encoding="utf-8")
@@ -324,10 +549,10 @@ def test_private_browser_workers_are_real_and_fail_closed():
     assert "allow_unbounded_agent_loop !== false" in stagehand
     assert "VAN_STAGEHAND_MODEL_KEY_REF" in env
     assert "secretref://browser/stagehand-model" in env
-    assert "STAGEHAND_RUNTIME_GREEN" in bootstrap
-    assert "HARNESS_AND_STAGEHAND_IMPLEMENTED_PENDING_LIVE_QUALIFICATION" in bootstrap
-    assert "User=van-browser" in stagehand_unit
-    assert "Requires=vati-browser-harness.service" in stagehand_unit
+    assert 's["runtime_version"] == "4.1.0"' in bootstrap
+    assert "VAN_BROWSER_CORE_INSTALLED_PENDING_QUALIFY_AND_GATES" in bootstrap
+    assert "User=van-stagehand\n" in stagehand_unit and "User=van-browser\n" not in stagehand_unit
+    assert "Requires=van-browser-harness.service" in stagehand_unit
     assert "NoNewPrivileges=true" in stagehand_unit
 
     # The credential is a file-backed secret reference. Neither service file nor bootstrap
@@ -473,3 +698,93 @@ def test_stagehand_record_preserves_owner_intent_and_names_its_production_gate()
         "deployment_host_approved",
     }
     assert gate["status"] == "PENDING"
+
+#: sha256 of VAN-ADOPT-STAGEHAND-001.yaml through the end of blocker_closure_20260929 (the
+#: third append; VAN 65865d00). The review-I4 fence correction (unit G5b) is appended after
+#: the marker below; nothing above it may change.
+STAGEHAND_BLOCKER_CLOSURE_SHA256 = "6bc5a0a160519da45ce1990eeb5d2aadcb233b4ec819f86fc113ed57e5347d78"
+STAGEHAND_FENCE_CORRECTION_MARKER = (
+    "\n\n# ====================================================================================="
+    "\n# APPENDED 2026-09-29 (fourth append)"
+)
+
+
+def test_stagehand_fence_correction_is_appended_and_leaves_the_blockers_closed():
+    """Review I4 MINOR-A: the I3-MAJOR-3 disposition overstated the fence. The correction is
+    a later append (the closure text stays byte-for-byte), both blockers stay CLOSED and the
+    gate model still reads them from the closure block."""
+    import yaml
+
+    text = (DECISIONS / "VAN-ADOPT-STAGEHAND-001.yaml").read_text(encoding="utf-8")
+    assert text.count(STAGEHAND_FENCE_CORRECTION_MARKER) == 1
+    prior = text.split(STAGEHAND_FENCE_CORRECTION_MARKER, 1)[0] + "\n"
+    assert hashlib.sha256(prior.encode("utf-8")).hexdigest() == STAGEHAND_BLOCKER_CLOSURE_SHA256, (
+        "text above the fence-correction append was edited; append instead"
+    )
+    doc = yaml.safe_load(text)
+    fix = doc["blocker_closure_correction_20260929"]
+    assert (fix["authority_class"], fix["signature_claimed"]) == ("OWNER_DERIVED", "none")
+    assert fix["authority_basis"]["owner_record_sha256"] == OWNER_DECISIONS_20260929_SHA256
+    assert (fix["independent_review"]["id"], fix["independent_review"]["finding"]) == ("I4", "I4-MINOR-A")
+    covers = fix["what_the_fence_covers_after_unit_g5b"]
+    assert {"gateway_callers", "step_deadline", "harness_worker", "owner_interactive_input"} <= set(covers)
+    for caller in ("/interaction/step", "/assignments", "watch runner", "notebook consumer", "assert_lease_active"):
+        assert caller in covers["gateway_callers"], caller
+    assert "LEASE_FENCE_REQUIRED" in covers["harness_worker"] and "VAN_HARNESS_STATE_ROOT" in covers["harness_worker"]
+    notes = {c["corrects"]: c["note"] for c in fix["wording_corrections"]}
+    watch = notes["blocker_closure_20260929.blockers.STAGEHAND-VERIFIER-GAP-20260929.limitation"]
+    assert "verify_read_only_evidence" in watch and "not by WorkflowVerifier" in watch
+    assert "WorkflowVerifier" in watch
+    assert fix["blockers_status_unchanged"] == {
+        "STAGEHAND-VERIFIER-GAP-20260929": "CLOSED", "STAGEHAND-DIRECT-ACTUATION-20260929": "CLOSED"}
+    closure = doc["blocker_closure_20260929"]["blockers"]
+    assert all(b["status"] == "CLOSED" for b in closure.values())
+    model = json.loads((ROOT / "registries" / "production_activation_gates.json").read_text(encoding="utf-8"))
+    stagehand = next(d for d in model["required_decisions"] if d["decision"] == "VAN-ADOPT-STAGEHAND-001.yaml")
+    paths = {g["id"]: g["path"] for g in stagehand["gates"]}
+    assert paths["blocker_verifier_gap"] == "blocker_closure_20260929.blockers.STAGEHAND-VERIFIER-GAP-20260929.status"
+    assert paths["blocker_direct_actuation"] == (
+        "blocker_closure_20260929.blockers.STAGEHAND-DIRECT-ACTUATION-20260929.status")
+
+
+#: sha256 of VAN-ADOPT-STAGEHAND-001.yaml through the end of the fourth append
+#: (blocker_closure_correction_20260929; VAN fbe5502e). The review-I5 correction (unit G6b)
+#: is appended after the marker below; nothing above it may change.
+STAGEHAND_FENCE_CORRECTION_SHA256 = "13d2a4d30c16144242fd91f797907576f93a1df44155f6df28274ba34b06b721"
+STAGEHAND_I5_CORRECTION_MARKER = (
+    "\n\n# ====================================================================================="
+    "\n# APPENDED 2026-09-30 (fifth append)"
+)
+
+
+def test_stagehand_i5_fence_correction_is_appended_and_corrects_the_three_statements():
+    """Review I5 R1: the fourth append overstated the fence (a /step kept inside its lease; a
+    restart never re-admitting a stale generation; "at least" a quarter). The correction is a
+    later append, the text above stays byte-for-byte and both blockers stay CLOSED."""
+    import yaml
+
+    text = (DECISIONS / "VAN-ADOPT-STAGEHAND-001.yaml").read_text(encoding="utf-8")
+    assert text.count(STAGEHAND_I5_CORRECTION_MARKER) == 1
+    prior = text.split(STAGEHAND_I5_CORRECTION_MARKER, 1)[0] + "\n"
+    assert hashlib.sha256(prior.encode("utf-8")).hexdigest() == STAGEHAND_FENCE_CORRECTION_SHA256, (
+        "text above the review-I5 append was edited; append instead"
+    )
+    doc = yaml.safe_load(text)
+    fix = doc["fence_correction_review_i5_20260930"]
+    assert (fix["authority_class"], fix["signature_claimed"]) == ("OWNER_DERIVED", "none")
+    assert fix["authority_basis"]["owner_record_sha256"] == OWNER_DECISIONS_20260929_SHA256
+    assert fix["independent_review"]["id"] == "I5"
+    by_target = {c["corrects"]: c for c in fix["statement_corrections"]}
+    prior_block = doc["blocker_closure_correction_20260929"]
+    step = by_target["blocker_closure_correction_20260929.limits_after_unit_g5b[1]"]
+    assert step["overstated"] in prior_block["limits_after_unit_g5b"][1]
+    restart = by_target["blocker_closure_correction_20260929.what_the_fence_covers_after_unit_g5b.harness_worker"]
+    assert restart["overstated"] in prior_block["what_the_fence_covers_after_unit_g5b"]["harness_worker"]
+    assert "LEASE_FENCE_STATE_MISSING" in restart["after_unit_g6b"]
+    quarter = by_target["blocker_closure_correction_20260929.what_the_fence_covers_after_unit_g5b.step_deadline"]
+    assert quarter["overstated"] in prior_block["what_the_fence_covers_after_unit_g5b"]["step_deadline"]
+    assert "at most a quarter" in quarter["correct_wording"]
+    assert "LEASE_FENCE_MAC_INVALID" in fix["added_after_unit_g6b"]["fence_authentication"]
+    assert fix["blockers_status_unchanged"] == {
+        "STAGEHAND-VERIFIER-GAP-20260929": "CLOSED", "STAGEHAND-DIRECT-ACTUATION-20260929": "CLOSED"}
+    assert all(b["status"] == "CLOSED" for b in doc["blocker_closure_20260929"]["blockers"].values())

@@ -400,15 +400,15 @@ Optional Jev System-1 support:
 - If the Hermes runtime exposes the `dial_jev` MCP server, you MAY call
   `jev_registered_batch` during this active cognition run with project_id `van`
   and only registered `van.trading.*` modules.
-- Jev is subordinate evidence only. Use it in the reasoning result only when the
-  returned registered judgment has apply_effect=true; SHADOW/ADVISORY output is
-  comparison evidence only. It cannot create this CognitiveAssessment, alter
-  risk_multiplier, size, route, stop, mandate or execution.
+- Jev is subordinate evidence only (ANNOTATE, lifecycle ceiling SHADOW):
+  record it beside your reasoning as comparison evidence; it never changes
+  your conclusion. It cannot create this CognitiveAssessment or alter any of
+  its fields, and never touches a mandate or execution.
 - If Jev is unavailable, disabled, unqualified, abstains, or conflicts with your
   reasoning, continue normally and increase uncertainty rather than inventing a
   Jev answer. Never call Jev as an independent/background trading loop.
-- A Jev conflict may support REDUCE/ABSTAIN/PROPOSE_RESEARCH, but must never be
-  used to justify raising risk above the deterministic decision.
+- A Jev conflict may only increase your stated uncertainty; it is never a
+  reason to raise risk above the deterministic decision.
 
 Decision context (sealed, hash {context_hash}):
 {context_json}

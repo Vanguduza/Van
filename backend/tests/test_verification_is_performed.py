@@ -364,7 +364,7 @@ class TestAutomationVerificationIsWired:
         google = FakeGoogle()
         verifier = build_automation_verifier(store=store, google=google)
         result = await verifier.verify(
-            spec=PostconditionSpec(kind="READ_BACK", field="exists", expected=True),
+            spec=PostconditionSpec(kind="READ_BACK", field="match_count", expected=1),
             verifier_type=VerifierType.READ_BACK,
             engine_reported_success=False,  # the engine says it failed; the world disagrees
             context={"readback": {"surface": "drive", "query": "Q3 report"}},
@@ -379,7 +379,7 @@ class TestAutomationVerificationIsWired:
 
         verifier = build_automation_verifier(store=store, google=EmptyGoogle())
         result = await verifier.verify(
-            spec=PostconditionSpec(kind="READ_BACK", field="exists", expected=True),
+            spec=PostconditionSpec(kind="READ_BACK", field="match_count", expected=1),
             verifier_type=VerifierType.READ_BACK,
             engine_reported_success=True,
             context={"readback": {"surface": "drive", "query": "Q3 report"}},

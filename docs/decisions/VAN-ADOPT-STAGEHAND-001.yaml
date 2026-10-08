@@ -183,3 +183,609 @@ production_gates:
           VAN-ADOPT-REMOTE-BROWSER-STREAMING-001) places Stagehand on private Trading Core;
           "Trading Core isolation" is PENDING_LIVE. See
           docs/decisions/VAN-STAGEHAND-PLACEMENT-ASSESSMENT-20260929.md.
+
+reconciliation_20260929:
+  source_blueprint: >-
+    DDS docs/dial/final-audit/06_DEVELOPMENT_SYSTEM/DIAL_JEV_OPENMUSE_CONVERGENCE_BLUEPRINT_REV1.md
+    @ 39d3777, sections 3 (B5), 4 and 10
+  owner_approval_2026_09_18:
+    preserved_unchanged: true
+    what_it_authorizes: >-
+      Stagehand as a Hermes-managed subagent semantic browser layer (architecture approval,
+      autonomy ceiling L5 inside Hermes-assigned bounds). It does not certify a live runtime
+      and does not choose a production host.
+    evidence_present:
+      - kind: session instruction transcribed into this record
+        ref: owner_decision_record.owner_words (above)
+      - kind: session pointer
+        ref: evidence://owner/session/01JhzRtSJ6z18Vcx8Eo2yYB5#automation-browser-fabric-approval
+        note: >-
+          An opaque pointer. It does not resolve to any artifact in this repository (grep of
+          the tree finds it only in the four 2026-09-18 decision records that cite it; there
+          is no evidence/owner/ directory).
+      - kind: same-day corroboration
+        ref: docs/decisions/VAN-AMEND-SECURITY-POLICY-001.md (OWNER_APPROVED, 2026-09-18)
+    evidence_absent:
+      - >-
+        No device-signed, biometric or otherwise cryptographically signed owner-ingress record
+        of the 2026-09-18 approval exists in the repository. The record above already says it
+        is "Not a device-signed gateway command"; that remains true on 2026-09-29.
+      - No hash, signature or transcript excerpt binding the session pointer to its content.
+    reading: >-
+      owner_signature_status SIGNED above means "owner-approved in session under Project
+      Truth authority" (the meaning the 2026-09-18 record gives it). It must not be read as
+      cryptographic proof. No signature is invented here.
+
+  production_gate:
+    status: PENDING
+    meaning: >-
+      Stagehand may not be relied on in production until every item in blocking_on is
+      resolved. The owner approval above is necessary but not sufficient.
+    blocking_on:
+      - signed-ingress evidence for the 2026-09-18 approval, or an explicit owner waiver
+      - an owner hosting decision for the Stagehand worker (see hosting)
+      - live worker/model canary (tools/certification/certify_browser_fabric.py stagehand);
+        no van_browser_stagehand_attestation.json is committed
+      - the B5 router and the postcondition-verifier gap below
+    external_gate_row: >-
+      docs/EXTERNAL_GATES.md "Stagehand local semantic browser" = REPO_COMPLETE / PENDING_LIVE;
+      REMOTE_BROWSER_IMPLEMENTATION_MATRIX RB-040 (Stagehand live gate) and RB-041 are BLOCKED
+      behind RB-002 (owner streaming-host decision).
+    not_to_be_confused_with: >-
+      backend/van_gateway/automation/health.py governance_state() reports
+      production_activation_permitted=true because it only checks that no required decision
+      carries a PENDING owner signature. It does not read this production gate.
+
+  hosting:
+    where_it_runs_in_code_today:
+      worker: deploy/van-trading-core/browser/stagehand_service.mjs (Node >=22.18 <23)
+      unit: deploy/van-trading-core/systemd/vati-stagehand.service (User=van-browser,
+        Requires=vati-browser-harness.service, EnvironmentFile=/opt/van-trading/config/browser-runtime.env)
+      installer: deploy/van-trading-core/browser/bootstrap-browser-runtime.sh (exits 43 on a
+        Stagehand version other than 4.1.0)
+      bind: 127.0.0.1:9140 loopback only; refuses a non-loopback VAN_STAGEHAND_BIND
+      browser: attaches via localBrowser.connect to the Harness-owned Chromium CDP endpoint
+        (loopback cdp-endpoint.json); no Browserbase cloud
+      gateway_client: backend/van_gateway/browser/adapters.py StagehandAdapter
+        (settings.browser_stagehand_base_url default http://127.0.0.1:9140)
+      worker_surface: backend/van_gateway/browser/worker.py HybridBrowserWorker under
+        backend/van_gateway/browser/subagent.py BrowserSubagentRunner
+    observation: >-
+      Every deploy artifact for Stagehand lives under deploy/van-trading-core and is
+      configured from /opt/van-trading, i.e. it is packaged to co-reside with Trading Core.
+      No live deployment evidence exists for any host.
+    undecided:
+      - which host runs Stagehand + the Harness-owned Chromium in production
+      - whether that is the dedicated Browser Stream Host recommended (by delegation, not
+        signature) in docs/decisions/VAN-ADOPT-REMOTE-BROWSER-STREAMING-001.yaml, or a
+        separate private browser host
+      - model provider/model for Stagehand (browser_stagehand_model_provider/_name default
+        empty, so StagehandAdapter.configured is false)
+
+  version:
+    repo_pin:
+      manifest: deploy/van-trading-core/browser/package.json "@browserbasehq/stagehand" = "4.1.0" (exact)
+      lockfile: >-
+        deploy/van-trading-core/browser/package-lock.json (lockfileVersion 3) resolves
+        stagehand-4.1.0.tgz with integrity
+        sha512-PJikMBVoaCRh6TFD7GcmeISmsMq4IwUu1BD5FOsGUVDUxrVqZomWa6W6dF+a/zu4xRZu2Z2xX1nXVMDaCuZWsw==
+      registry: registries/automation_browser_dependencies.json stagehand.version 4.1.0,
+        pin_status UNPINNED_VERIFY_AT_ADOPTION
+    observed_upstream_2026_09_29:
+      npm_dist_tag_latest: "4.1.0"
+      npm_4_1_0_integrity_matches_lockfile: true
+      release_tag: "@browserbasehq/stagehand@4.1.0 -> commit cd7b230778cf92269e4cb90e80d97f5113781c51"
+      default_branch_head: ad2bf12ea7abd95bb1d6f3a59600842a0954fffb
+      head_is_release: false
+      head_note: >-
+        HEAD ad2bf12e is an unreleased commit ahead of the 4.1.0 tag; npm publishes it only as
+        4.2.0-alpha-ad2bf12e... The blueprint's "ad2bf12e (@browserbasehq/stagehand@4.1.0)" and
+        the mission provenance table pair HEAD with the latest tag; they are not the same code.
+    reading: >-
+      The repo pins the released 4.1.0 exactly and its lockfile integrity matches the npm
+      registry. It does not pin, and must not be read as pinning, upstream HEAD. pin_status
+      remains UNPINNED_VERIFY_AT_ADOPTION until a live runtime reports 4.1.0 through the
+      gateway health check. No dependency was changed by this reconciliation.
+
+  programme_b_router_position:
+    contract: B5 (blueprint section 3)
+    order:
+      - deterministic typed Playwright/CDP (Browser Harness)
+      - dial-jev PROPOSE_ACTION, only when B2 classify_observation is eligible
+      - Stagehand semantic fallback (this decision)
+      - owner takeover / policy refusal
+    invariants:
+      - Jev proposes only; Jev never executes a browser action and holds no Chromium,
+        browser session, router or credential plane (B0/B1)
+      - Stagehand is reached only after the deterministic lane and the Jev lane have
+        abstained, been ineligible or failed; default router eligibility denies everything
+      - Stagehand output is UNTRUSTED_EXTERNAL and may not raise the action class
+      - a Stagehand result counts as success only after the same independent postcondition
+        verifier used for every other lane returns VERIFIED_SUCCESS; Stagehand cannot
+        certify its own effect
+      - Stagehand is not a Jev dependency
+    implementation_state: >-
+      The B5 router is Subagent G's deliverable and does not exist in VAN on this branch
+      (no Jev/PROPOSE_ACTION reference under backend/van_gateway/browser or capability).
+      This section records the required position; it is not evidence that it is wired.
+    gap_found:
+      id: STAGEHAND-VERIFIER-GAP-20260929
+      finding: >-
+        In HybridBrowserWorker.propose, a Stagehand observe() that returns no controls yields
+        ProposedAction(done=True); BrowserSubagentRunner stops with GOAL_ACHIEVED and
+        browser/api.py marks the task COMPLETED with succeeded=true. No independent
+        postcondition verifier (backend/van_gateway/automation/verifier.py is used only by
+        the automation dispatch/production paths) runs on the browser subagent path, so
+        Stagehand's "nothing left to do" is currently accepted as success.
+      also: >-
+        Stagehand act() replays the observed action itself over CDP on the shared Chromium;
+        the Harness only reads the page back afterwards. The B5 target says the Harness /
+        Browser Control Agent executes.
+      disposition: open; to be closed by the B5 router work, not by this record
+
+  owner_decisions_required:
+    # Open questions only. None of these is decided by this record.
+    - id: OQ-STAGEHAND-HOST
+      question: >-
+        Where does the production Stagehand worker (with the Harness-owned Chromium) run?
+      recommendation: >-
+        A private browser host, not the trading host. Current packaging co-resides with
+        Trading Core; VAN-ADOPT-REMOTE-BROWSER-STREAMING-001 already rejects co-residing
+        Chromium with Trading Core for the streaming path.
+    - id: OQ-STAGEHAND-SIGNED-INGRESS
+      question: >-
+        Provide device-signed / signed-ingress evidence of the 2026-09-18 approval, or
+        explicitly waive it for production?
+    - id: OQ-VAN-PRIVATE-PLANE-HOST
+      question: >-
+        Provision the VAN private-plane host (and its VCN attachment) that the chosen
+        placement needs? The repository cannot do this.
+    - id: OQ-STAGEHAND-MODEL
+      question: >-
+        Which model provider and model does the Stagehand worker use (gateway-held
+        credential, explicitly configured per section 418)?
+    - id: OQ-STAGEHAND-VERSION-AT-ADOPTION
+      question: >-
+        Confirm 4.1.0 (the released, lockfile-pinned version) as the production adoption
+        pin, rather than any post-4.1.0 upstream HEAD?
+
+# =====================================================================================
+# APPENDED 2026-09-29 (second append) — owner decisions on Stagehand, the VAN private
+# plane and the Programme B gates. Append-only: every byte above this line, including the
+# 2026-09-18 decision and reconciliation_20260929, is preserved unchanged. Where this block
+# resolves something reconciliation_20260929 left open, it says so here; the earlier text
+# is not edited.
+# Authority: auth-20260929-owner-stagehand-private-plane-gates (OWNER_EXPLICIT; owner
+# message in session session_01ELKqm4GCPmPvF3ggKkgB1J). No device, biometric or
+# cryptographic signature is claimed.
+# Owner text (verbatim): docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md
+# (sha256 64f1c0560ef88776d0d199392d315767ea3576827e335ba2da8081d12e307c81)
+# Machine-readable gate model reading this block: registries/production_activation_gates.json
+# =====================================================================================
+owner_decisions_20260929:
+  record: docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md
+  record_sha256: 64f1c0560ef88776d0d199392d315767ea3576827e335ba2da8081d12e307c81
+  authorization_id: auth-20260929-owner-stagehand-private-plane-gates
+  signature_claimed: none
+
+  # Decisions section 2. The 2026-09-18 approval is owner intent, not signed ingress.
+  owner_intent: OWNER_INTENT_APPROVED
+  owner_intent_is_not:
+    - device-authenticated
+    - biometric
+    - cryptographically signed
+    - replay-protected production ingress
+  signed_ingress:
+    status: SIGNED_INGRESS_PENDING
+    waived: false
+    blocks: production activation where VAN policy requires signed owner ingress
+    does_not_block:
+      - repository implementation
+      - tests
+      - convergence
+      - Stagehand integration
+      - PR preparation
+      - non-production qualification
+    evidence_fabricated: false
+
+  # Decisions section 1.
+  hosting:
+    production_host: van-browser-core
+    trust_zone: dedicated VAN browser/automation trust zone
+    forbidden_production_hosts:
+      - van-trading-core
+      - dial-control
+      - van-private-core
+    co_residence_permitted: Harness-owned Chromium, under the existing browser lease/isolation rules
+    no_direct_authority_over:
+      - VATI Risk Authority
+      - Execution Router
+      - broker credentials
+      - trading secrets
+      - Owner Model database
+      - owner-private Hindsight
+      - owner-private OpenViking
+      - Project Truth mutation
+    cross_zone_access: bounded authenticated interfaces only
+    current_repo_placement: >-
+      deploy/van-trading-core/browser/** is historical packaging, not the final production
+      placement. Migration to van-browser-core is owned by the placement unit (M).
+    temporary_provisioning_on_van_trading_core: forbidden
+    zone_status: UNPROVISIONED
+    when_zone_unavailable: PRODUCTION_DISABLED
+    stagehand_production_state: PRODUCTION_DISABLED
+    unaffected_when_disabled: >-
+      The deterministic browser path and any independently qualified Jev lane continue under
+      their own policy.
+
+  # Decisions section 3 (recorded here because OQ-VAN-PRIVATE-PLANE-HOST is closed by it).
+  private_plane:
+    trust_zone: van-private-core
+    hosts:
+      - Owner Cognitive Model
+      - owner_model_revision
+      - correction/invalidation outbox
+      - owner-private Hindsight
+      - owner-private OpenViking projection
+      - personal-context resolver
+    must_not_host:
+      - generic browser automation
+      - Stagehand
+      - Chromium
+      - Jev browser execution
+      - VATI order execution
+      - broker adapters
+    cross_plane_access: bounded authenticated APIs only
+    personal_context_rule: >-
+      requested owner revision must equal the authoritative current owner_model_revision;
+      if it cannot be verified the resolver returns PERSONAL_CONTEXT_UNAVAILABLE and never
+      serves stale cached owner context.
+    provisioning_status: EXTERNAL_DEPLOYMENT_GATE
+
+  # Decisions section 4.
+  model:
+    provider: anthropic
+    model: claude-sonnet-5
+    family: Claude Sonnet 5
+    role: Hermes-managed specialist worker/subagent (not the DIAL manager)
+    pin_status: UNVERIFIED
+    pin_status_note: >-
+      Whether Anthropic exposes an immutable snapshot/revision identifier for the exact
+      Sonnet 5 model used could not be determined from this environment (no provider API
+      access). No snapshot id is recorded because none was observed; claude-sonnet-5 is
+      the configured family/name and must not be read as an immutable revision. The gate
+      stays pending until the provider identifier is established and either pinned
+      (PINNED_IMMUTABLE_REVISION) or the limitation recorded (FLOATING_ALIAS_ONLY, which
+      keeps production pending where deterministic pinning is mandatory).
+    immutable_revision_id: null
+    substitution_without_owner_decision: forbidden
+    if_stagehand_4_1_0_cannot_operate_with_it: >-
+      reproduce the incompatibility, report it, keep Stagehand production-disabled; no
+      substitute model without another explicit owner decision.
+    credential_locus: gateway/runtime only; never page content, prompts-as-data, browser
+      memory, Jev payloads or repository files
+
+  # Decisions section 5.
+  version:
+    package: "@browserbasehq/stagehand"
+    adopted_version: "4.1.0"
+    canonical_source_identity: released 4.1.0 artifact (not upstream default-branch HEAD)
+    release_commit: cd7b230778cf92269e4cb90e80d97f5113781c51
+    npm_integrity: sha512-PJikMBVoaCRh6TFD7GcmeISmsMq4IwUu1BD5FOsGUVDUxrVqZomWa6W6dF+a/zu4xRZu2Z2xX1nXVMDaCuZWsw==
+    integrity_matches_repo_lockfile: true
+    integrity_checked_against: >-
+      deploy/van-trading-core/browser/package-lock.json
+      node_modules/@browserbasehq/stagehand (version 4.1.0, stagehand-4.1.0.tgz)
+    not_the_adopted_artifact:
+      commit: ad2bf12ea7abd95bb1d6f3a59600842a0954fffb
+      reading: later unreleased upstream work past the 4.1.0 tag; it is NOT Stagehand 4.1.0
+    live_qualification:
+      status: PENDING
+      requires:
+        - the live runtime reports the expected 4.1.0 artifact through the gateway health check
+        - the runtime canary passes
+
+  # Supersedes reconciliation_20260929.production_gate for the gate model; that text stays.
+  production_gate:
+    status: PENDING
+    supersedes: reconciliation_20260929.production_gate
+    blocking_on:
+      - signed_ingress (SIGNED_INGRESS_PENDING; not waived)
+      - van-browser-core provisioning (zone_status UNPROVISIONED => PRODUCTION_DISABLED)
+      - model pin determination (pin_status UNVERIFIED)
+      - live 4.1.0 runtime report + canary (version.live_qualification PENDING)
+      - blockers STAGEHAND-VERIFIER-GAP-20260929 and STAGEHAND-DIRECT-ACTUATION-20260929
+
+  # Decisions sections 7 and 8 classify H's findings as mandatory Programme B remediation.
+  blockers:
+    STAGEHAND-VERIFIER-GAP-20260929:
+      severity: BLOCKER
+      status: OPEN
+      owner_unit: Programme B browser router unit (G)
+      source: reconciliation_20260929.programme_b_router_position.gap_found.finding
+      decision_section: 7
+      required: >-
+        lane proposes/acts -> VERIFYING -> independent postcondition verifier ->
+        VERIFIED_SUCCESS -> COMPLETED; done=True, GOAL_ACHIEVED, an empty control set, model
+        prose or Stagehand success never produce completed/succeeded directly.
+    STAGEHAND-DIRECT-ACTUATION-20260929:
+      severity: BLOCKER
+      status: OPEN
+      owner_unit: Programme B browser router unit (G)
+      source: reconciliation_20260929.programme_b_router_position.gap_found.also
+      decision_section: 8
+      required: >-
+        Stagehand -> typed action proposal -> Browser Router / policy -> Browser Harness /
+        Browser Control Agent -> Chromium -> independent verifier; Stagehand holds no
+        independent actuation authority.
+
+  # The open questions listed in reconciliation_20260929.owner_decisions_required.
+  open_questions_closed:
+    - id: OQ-STAGEHAND-HOST
+      status: DECIDED
+      decided_on: 2026-09-29
+      decision_ref: owner_decisions_20260929.hosting (record section 1)
+    - id: OQ-STAGEHAND-SIGNED-INGRESS
+      status: DECIDED
+      decided_on: 2026-09-29
+      decision_ref: owner_decisions_20260929.signed_ingress (record section 2)
+    - id: OQ-VAN-PRIVATE-PLANE-HOST
+      status: DECIDED
+      decided_on: 2026-09-29
+      decision_ref: owner_decisions_20260929.private_plane (record section 3)
+    - id: OQ-STAGEHAND-MODEL
+      status: DECIDED
+      decided_on: 2026-09-29
+      decision_ref: owner_decisions_20260929.model (record section 4)
+    - id: OQ-STAGEHAND-VERSION-AT-ADOPTION
+      status: DECIDED
+      decided_on: 2026-09-29
+      decision_ref: owner_decisions_20260929.version (record section 5)
+
+  health_governance_finding:
+    id: HEALTH-GOVERNANCE-BYPASS-20260929
+    decision_section: 6
+    finding: >-
+      health.py governance_state() declared production_activation_permitted=true when no
+      required decision carried a literal PENDING owner-signature line (a substring test), ignoring
+      reconciliation_20260929.production_gate.status PENDING.
+    remediation: registries/production_activation_gates.json + backend/van_gateway/automation/production_gates.py
+
+# =====================================================================================
+# APPENDED 2026-09-29 (third append) — closure of the two Programme B blockers recorded in
+# owner_decisions_20260929.blockers. Append-only: every byte above this line is preserved
+# unchanged, including the OPEN statuses there (they record the state at the time); the
+# gate model's blocker paths move to this block (registries/production_activation_gates.json).
+# Authority class: OWNER_DERIVED. The owner ordered these blockers closed by the runtime work
+# (docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md sections 7, 8 and 10:
+# "its findings remain blockers until closed"); independent review I3 at VAN f55d360d
+# confirmed closure. This block changes no product, security, money, provider or
+# owner-control intent, claims no signature, and leaves every other Stagehand gate as it was.
+# =====================================================================================
+blocker_closure_20260929:
+  authority_class: OWNER_DERIVED
+  authority_basis:
+    owner_record: docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md
+    owner_record_sha256: 64f1c0560ef88776d0d199392d315767ea3576827e335ba2da8081d12e307c81
+    owner_sections: [7, 8, 10]
+    parent_authorization_id: auth-20260929-owner-stagehand-private-plane-gates
+  signature_claimed: none
+  independent_review:
+    id: I3
+    reviewed_commit: f55d360dcefe3aa2439a4324c547d0d27acb5670
+    verdict_on_these_blockers: CLOSED
+    evidence_probes:
+      location: review-i3/probes/ (reviewer I3's probe set, held outside this repository)
+      on_direct_actuation: [act_refused.py, adapter_gate_slice.py, sh_lane_slice.py]
+      on_verifier_gap: [corr_types.py]
+      on_follow_up_findings: [lease_race.py, complete_inflight.py, terminal_resurrect.py,
+        watch_terminal.py, jev_gate.py]
+    review_suites_at_reviewed_commit: backend 2567 passed; trading 1280 passed 2 skipped;
+      tests/contracts + tests/hermes 627 passed 4 skipped (all exit 0)
+  follow_up_findings_from_the_same_review:
+    - id: I3-MAJOR-3
+      subject: /step lease exclusivity under concurrent steps on one task
+      disposition: fixed by unit G4b (in-flight marker, holder-checked release, Harness lease-generation fence)
+    - id: I3-MINOR-1
+      subject: /complete COMPLETED during an in-flight step
+      disposition: fixed by unit G4b (refused while a run is in flight; verdict-id conditional write)
+    - id: I3-MINOR-2
+      subject: end states not sticky outside complete()
+      disposition: fixed by unit G4b (single guarded status writer)
+    - id: I3-MINOR-3
+      subject: watch runner aborted on an already-terminal task
+      disposition: fixed by unit G4b
+    - id: I3-MINOR-4
+      subject: Jev browser effect GREEN without owner signature
+      disposition: fixed by unit G4b (owner_decision + owner_decision_reference gates)
+  blockers:
+    STAGEHAND-VERIFIER-GAP-20260929:
+      status: CLOSED
+      closes: owner_decisions_20260929.blockers.STAGEHAND-VERIFIER-GAP-20260929
+      decision_section: 7
+      limitation: >-
+        CLOSED (review I3, VAN f55d360d). On /assignments, /interaction/step, the watch runner, the notebook consumer and automation dispatch, no lane result (done=True, GOAL_ACHIEVED, empty Stagehand controls, Jev done, engine success) yields COMPLETED/VERIFIED_SUCCESS; only WorkflowVerifier VERIFIED over a declared predicate (field/expected other than `exists`, or correlation keys each with a caller-declared expected value) does. BrowserTaskService.complete(COMPLETED) requires the latest recorded verdict to be VERIFIED; dispatch additionally requires the action receipt VERIFIED_SUCCESS with the engine execution id independently observed. Limits: (1) READ_BACK observes a page the site controls, so a declared title/URL/text proves what the page shows, not the server-side effect; (2) automation dispatch has no production observer, so every run is UNVERIFIABLE until one is qualified; (3) completion is refused while a router step or assignment run is in flight on the task, and is written only if the verdict it checked is still the task's latest (I3 MINOR-1, fixed by unit G4b; the in-flight marker is per gateway process).
+    STAGEHAND-DIRECT-ACTUATION-20260929:
+      status: CLOSED
+      closes: owner_decisions_20260929.blockers.STAGEHAND-DIRECT-ACTUATION-20260929
+      decision_section: 8
+      limitation: >-
+        CLOSED (review I3, VAN f55d360d). On every production caller Stagehand is used only via observe(); router lane 3 and HybridBrowserWorker turn one observed candidate into a typed click/fill/press/scroll that VAN classifies from the Harness-observed element and the Browser Harness executes. StagehandAdapter.act() refuses unless actuation_enabled, which production wiring never sets; the worker serves /act only on a HISTORICAL_DEV_ONLY placement, and the gate refuses a worker whose /health reports act_endpoint_enabled. Limits: (1) separation is process policy, not capability: the Stagehand 4.1.0 worker still attaches to the Harness-owned Chromium over a full CDP connection (stagehand_service.mjs:335), so a compromised worker could actuate; (2) Stagehand's autonomous act/agent modes stay outside production, which makes the NotebookLM consumer (notebook.py → act) non-functional in production; (3) the live Harness reports no element list, so every targeted Stagehand proposal currently goes to owner takeover.
+  not_changed_by_this_block:
+    - owner_decisions_20260929.production_gate.status (PENDING)
+    - owner_decisions_20260929.signed_ingress.status (SIGNED_INGRESS_PENDING)
+    - owner_decisions_20260929.hosting.zone_status (UNPROVISIONED => Stagehand PRODUCTION_DISABLED)
+    - owner_decisions_20260929.model.pin_status (UNVERIFIED)
+    - owner_decisions_20260929.version.live_qualification.status (PENDING)
+
+# =====================================================================================
+# APPENDED 2026-09-29 (fourth append) — correction to blocker_closure_20260929 after
+# independent review I4. Append-only: every byte above this line is preserved unchanged.
+# Review I4 found that the I3-MAJOR-3 disposition above ("Harness lease-generation fence")
+# overstated the fence: at VAN 65865d00 it worked one way only (MINOR-A). This block records
+# what the fence covers after unit G5b's fix, and one wording correction. It does not reopen
+# either blocker (both stay CLOSED; the gate model's blocker paths are unchanged) and changes
+# no product, security, money, provider or owner-control intent.
+# Authority class: OWNER_DERIVED (the owner ordered the review findings closed by the runtime
+# work: docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md sections 8-10).
+# =====================================================================================
+blocker_closure_correction_20260929:
+  authority_class: OWNER_DERIVED
+  authority_basis:
+    owner_record: docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md
+    owner_record_sha256: 64f1c0560ef88776d0d199392d315767ea3576827e335ba2da8081d12e307c81
+    owner_sections: [8, 9, 10]
+  signature_claimed: none
+  corrects: blocker_closure_20260929.follow_up_findings_from_the_same_review[I3-MAJOR-3].disposition
+  independent_review:
+    id: I4
+    reviewed_commit: 65865d00
+    finding: I4-MINOR-A
+    evidence_probe: review-i4/probes/test_i4_fence.py (held outside this repository)
+    fixed_by: unit G5b, VAN 529619bd
+    reproduced_at_65865d00: >-
+      (1) a /step whose lease lapsed and was re-taken by task2 still clicked on task2's page
+      and returned VERIFIED_SUCCESS; (2) /assignments Harness calls carried no lease fence;
+      (3) the Harness accepted a stale generation 4 after an unfenced new holder, and after a
+      Harness restart (its fence was in memory only).
+  what_the_fence_did_not_cover_at_65865d00:
+    - Only /interaction/step sent lease_generation; /assignments, the watch runner and the
+      notebook consumer sent none.
+    - The Harness accepted unfenced envelopes, so an unfenced holder never advanced the fence.
+    - The Harness kept the newest generation in memory; a restart forgot it.
+    - /step never called broker.assert_lease_active and had no deadline, so it could outlive
+      its lease.
+  what_the_fence_covers_after_unit_g5b:
+    gateway_callers: >-
+      Every gateway caller of the Browser Harness runs under a HarnessLeaseFence built from
+      the task's broker lease (adapters.broker_lease_fence): /interaction/step and
+      /assignments (BrowserSessionBroker.lease_for_task_run: the lease the task holds, or one
+      taken for the run and released only if still held), the watch runner and the notebook
+      consumer. Before every fenced Harness call the fence's guard calls
+      broker.assert_lease_active (lease id, holder and generation must match and the lease
+      must not have expired) and renews the lease once two thirds of its TTL has elapsed; a
+      lapsed or re-taken lease raises BROWSER_HARNESS_LEASE_LOST and nothing is sent. The
+      adapter refuses to send a mutating operation (navigate, click, fill, press, scroll,
+      upload) without a fence.
+    step_deadline: >-
+      /interaction/step confirms (and if due renews) its lease before routing and runs the
+      router step under asyncio.wait_for with a deadline shorter than the remaining lease
+      (at most 30 s, at least a quarter of the remainder, before expiry); past it the step
+      is stopped with 504 BROWSER_STEP_DEADLINE_EXCEEDED and its own lease is released.
+    harness_worker: >-
+      The Harness refuses a mutating operation without lease_generation (428
+      LEASE_FENCE_REQUIRED); reads (page_info, describe, screenshot, tabs, wait) may be
+      unfenced and are checked when fenced. It persists the newest generation and holder per
+      profile under VAN_HARNESS_STATE_ROOT (fsynced before the action runs), so a restart
+      does not re-admit a stale generation; unreadable fence state refuses (503
+      LEASE_FENCE_STATE_INVALID) rather than resetting.
+    owner_interactive_input: >-
+      Exempt from the Harness fence because it never passes through the Harness worker: it
+      travels the browser stream host / control agent path, fenced by the interactive
+      control lease and control generation (InteractiveSessionService.assert_may_actuate).
+      The owner preempts automation: an owner session holds the profile lease, which
+      advances the generation every automated Harness call is re-checked against.
+  limits_after_unit_g5b:
+    - The Harness-side refusal knows only generations it has been sent; a holder that never
+      calls the Harness (an owner interactive session) is enforced by the gateway guard, not
+      by the Harness.
+    - The guard and the Harness request are separate steps; a lease cannot be re-taken in
+      between while it is live, and the step deadline keeps a /step inside its lease, but
+      /assignments has no whole-run deadline (each call is re-checked instead).
+    - The in-flight run marker and the step deadline are per gateway process.
+    - Stagehand's observe() connection to the Harness-owned Chromium is not fenced (it is
+      read-only by policy; blocker_closure_20260929 limit (1) on direct actuation stands).
+  wording_corrections:
+    - corrects: blocker_closure_20260929.blockers.STAGEHAND-VERIFIER-GAP-20260929.limitation
+      note: >-
+        The watch runner is verified by BrowserTaskService.verify_read_only_evidence (the
+        sealed A1 evidence row read back, verifier READ_ONLY_EVIDENCE_READ_BACK), not by
+        WorkflowVerifier. The rest of that limitation stands.
+    - corrects: blocker_closure_20260929.blockers.STAGEHAND-DIRECT-ACTUATION-20260929.limitation
+      note: >-
+        Limit (3) ("the live Harness reports no element list") is superseded by unit G5b: the
+        Harness page_info now reports a bounded elements list (and a describe operation for
+        one locator), so a targeted Stagehand proposal resolves when the Harness reports that
+        exact locator and goes to owner takeover otherwise. Limits (1) and (2) stand.
+  blockers_status_unchanged:
+    STAGEHAND-VERIFIER-GAP-20260929: CLOSED
+    STAGEHAND-DIRECT-ACTUATION-20260929: CLOSED
+
+# =====================================================================================
+# APPENDED 2026-09-30 (fifth append) — correction to blocker_closure_correction_20260929
+# after independent review I5. Append-only: every byte above this line is preserved
+# unchanged. Review I5 found three statements in the fourth append that overstated the
+# fence at VAN fbe5502e (findings F1, F2 and the deadline wording). This block records what
+# is true after unit G6b's fixes. It does not reopen either blocker (both stay CLOSED; the
+# gate model's blocker paths are unchanged) and changes no product, security, money,
+# provider or owner-control intent.
+# Authority class: OWNER_DERIVED (the owner ordered the review findings closed by the runtime
+# work: docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md sections 8-10).
+# =====================================================================================
+fence_correction_review_i5_20260930:
+  authority_class: OWNER_DERIVED
+  authority_basis:
+    owner_record: docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md
+    owner_record_sha256: 64f1c0560ef88776d0d199392d315767ea3576827e335ba2da8081d12e307c81
+    owner_sections: [8, 9, 10]
+  signature_claimed: none
+  corrects: blocker_closure_correction_20260929
+  independent_review:
+    id: I5
+    reviewed_commit: fbe5502e
+    findings: [I5-F1, I5-F2, I5-F3, I5-R1]
+    evidence_probe: review-i5/probes/test_i5_fence.py (held outside this repository)
+    fixed_by: unit G6b (branch unit-g6b)
+    reproduced_at_fbe5502e: >-
+      (F1) a /step past its 0.5 s deadline returned 504 and released its lease while its click
+      was still at the Harness; task2 took generation 2 and the Harness then applied the
+      generation-1 click. (F2) deleting a profile's fence state file and restarting the Harness
+      re-admitted stale generation 4 after generation 5. (F3) any local caller could send
+      lease_generation 2**62 and lock the real holder out, across restarts.
+  statement_corrections:
+    - corrects: blocker_closure_correction_20260929.limits_after_unit_g5b[1]
+      overstated: the step deadline keeps a /step inside its lease
+      at_fbe5502e: >-
+        False. The deadline stopped the router waiting, not the Harness call it had sent; the
+        lease was then released while that call was still in flight (F1).
+      after_unit_g6b: >-
+        The deadline stops the router waiting. Every fenced Harness call runs to its end as a
+        task the fence tracks, and /step does not release its lease until all of them have
+        ended, renewing it while it waits. If a call ended without a response (transport
+        failure, timeout), its outcome is unknown and the lease is not released but left to
+        expire. The Harness also checks the fence under the same per-profile lock it applies
+        the operation under, so no older generation is still applying once a newer one has
+        been admitted. Limits: the wait is bounded at 300 s, after which the lease is left to
+        expire; and the lease is a gateway-process fact (a gateway that dies mid-call stops
+        renewing, and the lease then lapses on its TTL).
+    - corrects: blocker_closure_correction_20260929.what_the_fence_covers_after_unit_g5b.harness_worker
+      overstated: so a restart does not re-admit a stale generation
+      at_fbe5502e: >-
+        False when the state file was missing: a missing file read as "never fenced" and the
+        fence restarted from nothing (F2). Only an unreadable file refused.
+      after_unit_g6b: >-
+        The Harness lists every fenced profile in lease-fence-manifest.json beside the state
+        files, and bootstrap.sh writes /etc/van-browser-core/harness-fence-installed (with an
+        empty manifest) once. A missing state file for a listed profile, or a missing manifest
+        while the install marker exists, refuses fenced calls (503 LEASE_FENCE_STATE_MISSING)
+        until the state is restored. Limit: a worker without the install marker (not installed
+        by bootstrap.sh) that loses its whole state directory, manifest included, starts
+        again from first boot.
+    - corrects: blocker_closure_correction_20260929.what_the_fence_covers_after_unit_g5b.step_deadline
+      overstated: at least a quarter of the remainder
+      correct_wording: >-
+        The margin before expiry is min(30 s, a quarter of the remaining lease): at most 30 s
+        and at most a quarter of the remainder (interaction_router._step_page_lease).
+  added_after_unit_g6b:
+    fence_authentication: >-
+      (F3) The fence was unauthenticated at fbe5502e. The gateway now sends lease_mac =
+      HMAC-SHA256 over (alias, generation, holder_id) with a key shared through
+      VAN_BROWSER_HARNESS_FENCE_KEY_FILE (gateway) and VAN_HARNESS_FENCE_KEY_FILE (Harness),
+      generated by bootstrap.sh and never in the repository. The Harness refuses a fence
+      without a valid MAC (403 LEASE_FENCE_MAC_INVALID). A worker with a trust zone configured
+      and no usable key refuses every fenced call (503 LEASE_FENCE_KEY_UNCONFIGURED) and will
+      not start. Limit: a caller that can read a valid MAC off the loopback can replay that
+      same (alias, generation, holder); it cannot advance the fence past the real holder.
+  blockers_status_unchanged:
+    STAGEHAND-VERIFIER-GAP-20260929: CLOSED
+    STAGEHAND-DIRECT-ACTUATION-20260929: CLOSED

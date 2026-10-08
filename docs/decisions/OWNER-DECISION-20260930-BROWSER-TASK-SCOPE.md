@@ -1,0 +1,191 @@
+# OWNER DECISION 2026-09-30 — BROWSER AUTOMATION TASK SCOPE (and Programme B authorization recording)
+
+Status: OWNER ANSWERS RECORDED VERBATIM. The integrator's reading of answer A (section 3) is an
+INTERPRETATION PENDING OWNER CONFIRMATION. It is not a decision and confers no authority.
+
+Channel: owner answers in Claude Code session `session_01ELKqm4GCPmPvF3ggKkgB1J`, 2026-09-30.
+No device, biometric or cryptographic signature is claimed. This is not signed-ingress evidence
+(owner decisions 2026-09-29 section 2 keep `SIGNED_INGRESS_PENDING`).
+
+Related records:
+- `docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md` (sha256
+  `64f1c0560ef88776d0d199392d315767ea3576827e335ba2da8081d12e307c81`): sections 7 to 9 are the
+  parent authority that answer B cites.
+- `docs/project-state/authorizations/auth-20260930-owner-derived-programme-b-browser-deploy.json`
+  records answer B.
+
+## 1. Owner answers (verbatim)
+
+A. The browser automation policy question.
+   Question put to the owner: "Automated clicks on arbitrary web pages cannot be proven safe by a
+   classifier (the page controls every input it reads). Which browser automation policy should
+   Programme B adopt?" The options offered were allowlist-only, keep hardening the classifier, and
+   read-only until qualified.
+
+   Owner answer (verbatim, spacing and wording preserved):
+
+   > I do not want to build  a fixed allowlist, pages should relevant to the task truth
+
+   sha256 (UTF-8, exact characters between the quotes, no newline):
+   `3bab5be4342e18f9ddb84ce612399aa51d7b42b4f368428a531e406760a4ea3c`
+
+B. The authorization recording question.
+   Question put to the owner: "Units G–G5 browser/deploy commits were ordered by your §7–§9
+   decisions but no VAN authorization record covers those paths. How should that be recorded?"
+
+   Owner answer (verbatim, the selected option label):
+
+   > Record OWNER_DERIVED (Recommended)
+
+   sha256 (UTF-8, exact characters between the quotes, no newline):
+   `6a16a0f0bc8718a3aaf84ddefaf8261565916fa39a944e4055eb65b7a12821d3`
+
+## 2. What is decided
+
+- Answer A decides that Programme B does **not** adopt an owner-maintained fixed allowlist, and that
+  the pages automation may act on are to be bounded by relevance to the task's truth. The owner has
+  not said how "task truth" is established or enforced. Section 3 is a proposed reading of that.
+- Answer B decides that the Programme B browser/deploy commits are recorded under `OWNER_DERIVED`
+  authority citing the 2026-09-29 decisions sections 7 to 9, with ledger rows for those commits and
+  no signature claimed. The record is
+  `auth-20260930-owner-derived-programme-b-browser-deploy`.
+
+Neither answer changes the 2026-09-29 decisions. Payments stay out of automation, Jev never
+executes, Stagehand never self-certifies or actuates, and owner takeover preempts automation.
+
+## 3. Integrator's interpretation of answer A — PENDING OWNER CONFIRMATION, NOT A DECISION
+
+This is the integrator's reading, recorded so that implementation can be traced to it. It carries
+no authority of its own. If the owner confirms, amends or rejects it, that is recorded as a new
+append-only decision; this section is not edited to match. Unit G6a is implementing this reading.
+Its code is therefore implementation against an unconfirmed interpretation. It must not be
+described as implementing an owner decision until the owner confirms the reading.
+
+- No owner-maintained static allowlist of domains, pages or actions.
+- Scope is derived per task from the task's own truth: the admitted goal or instruction, the domain
+  scope, the admitted action class, and owner approvals already recorded for that browser task (and
+  its Hermes mission).
+- Automated clicks, fills, selects and key presses may run at the task's admitted class only on
+  pages and against targets that are within that task's scope and consistent with its admitted
+  goal. Anything outside the task truth goes to lane 4 (owner takeover / policy refusal).
+- Existing invariants stay: payments are never automated (payment boundary), Jev never executes,
+  Stagehand never self-certifies or actuates (sections 7 and 8), owner takeover preempts (section
+  9), and unknowns fail closed.
+- The mechanism fixes from review I5 are still required: hit-test at the click point,
+  element-instance binding, press_key focus classification, form/submit context, visible text as
+  well as accessible name, and empty name → A4. They make "the target" mean the element actually
+  acted on, and task-scope enforcement depends on that.
+
+## 4. Source note (verbatim copy)
+
+Below is the integrator's scratch note of the exchange, copied without edits. Its sha256 was
+`55bcc330adf5d11f00e638fe01735c188ad6fd5ac68a0a85d8049384e969ce76` when copied.
+
+```text
+OWNER DECISION — BROWSER AUTOMATION SCOPE (answer in Claude Code session session_01ELKqm4GCPmPvF3ggKkgB1J, 2026-09-30; no device or cryptographic signature claimed)
+
+Question put to the owner: "Automated clicks on arbitrary web pages cannot be proven safe by a classifier (the page
+controls every input it reads). Which browser automation policy should Programme B adopt?" Options offered:
+allowlist-only / keep hardening classifier / read-only until qualified.
+
+Owner answer (verbatim): "I do not want to build  a fixed allowlist, pages should relevant to the task truth"
+
+Second question: "Units G–G5 browser/deploy commits were ordered by your §7–§9 decisions but no VAN authorization
+record covers those paths. How should that be recorded?"
+Owner answer: "Record OWNER_DERIVED (Recommended)" — i.e. append a VAN authorization record citing the owner's
+2026-09-29 decisions §7–§9 as authority for backend/van_gateway/browser/**, deploy/van-browser-core/**,
+deploy/van-private-core/** plus ledger rows for those commits; no signature claimed.
+
+Integrator's interpretation of the first answer (to be confirmed by the owner, not a new decision):
+- No owner-maintained static allowlist of domains/pages/actions.
+- Scope is derived per task from the task's own truth: the admitted goal/instruction, domain scope, admitted action
+  class, and owner approvals already recorded for that browser task (and its Hermes mission).
+- Automated clicks/fills/selects/key presses may run at the task's admitted class only on pages and against targets
+  within that task's scope and consistent with its admitted goal; anything outside the task truth goes to lane 4
+  (owner takeover / policy refusal).
+- Existing invariants stay: payments are never automated (§ payment boundary), Jev never executes, Stagehand never
+  self-certifies or actuates (§7/§8), owner takeover preempts (§9), fail-closed on unknowns.
+- Mechanism fixes from review I5 (hit-test at click point, element-instance binding, press_key focus
+  classification, form/submit context, visible text as well as accessible name, empty-name → A4) remain required:
+  they make "the target" mean the element actually acted on, which task-scope enforcement depends on.
+```
+
+---
+
+## Owner confirmation of the task-scope reading (appended 2026-09-30)
+
+Recorded first-hand by the integrator (the Claude Code session that asked the question and received the
+answer: `session_01ELKqm4GCPmPvF3ggKkgB1J`). No device, biometric or cryptographic signature is claimed.
+This block appends; nothing above it is changed.
+
+Question put to the owner (verbatim):
+
+> Do you confirm this reading of "pages should be relevant to the task truth": each browser task's recorded scope
+> (URL prefixes Hermes declares from the mission, or the task's target domain if none are declared, widened only by
+> your approvals) decides what automation may act on, and anything outside it comes to you?
+
+Owner's selected answer (verbatim label): **"Yes, confirmed"** — option text: "The scope rule becomes an
+owner-confirmed decision, and the records change from PENDING to confirmed."
+
+Consequence: the task-scope rule implemented in `backend/van_gateway/browser/task_scope.py` (units G6a, G9b) is an
+owner-confirmed decision from this point. Earlier records that say `PENDING_OWNER_CONFIRMATION` are left unchanged
+(append-only); this block supersedes their pending status. Authorization:
+`auth-20260930-owner-explicit-task-scope-confirmation`.
+
+Recorded in the same exchange (verbatim labels):
+
+- Handler-borne money: **"Network-effect guard (Recommended)"** — see
+  `OWNER-DECISION-20260930-NETWORK-EFFECT-GUARD.md` and `auth-20260930-owner-explicit-network-effect-guard`.
+- Rule R11 (long-number / token-like labels go to the owner): **"Keep (Recommended)"** — "Fail-safe: occasional
+  unnecessary handoffs to you."
+- Later, covering unit G9c's two commits outside its record's stated range: **"Widen by binding (Recommended)"** —
+  "Append an OWNER_DERIVED binding that extends the guard record to G9c's 9 first-parent commits
+  (72e72120..2833fa4c), citing your 'Network-effect guard' choice. Paths are unchanged." See
+  `auth-20260930-scope-binding-network-effect-guard`.
+
+---
+
+## Owner answers after independent review I7 (appended 2026-09-30)
+
+Recorded first-hand by the integrator (the Claude Code session that asked and received the answers:
+`session_01ELKqm4GCPmPvF3ggKkgB1J`). No device, biometric or cryptographic signature is claimed. Append-only.
+
+1. Question (verbatim): "WebSocket connections can't be blocked by the browser guard. It detects them and closes the
+   page, but the handshake still reaches the server. A handshake URL can carry a payment request (e.g.
+   /ws-pay?amount=500). What should happen?"
+   Answer (verbatim label): **"Egress proxy (Recommended)"** — option text: "Route the van-browser-core browser through
+   a local egress proxy that refuses WebSocket upgrades and non-GET requests unless the task is admitted as mutating.
+   That is repository and zone work, and it also covers UDP. Stagehand stays production-disabled until it exists."
+2. Question (verbatim): "Read-only browser tasks (watches, research) fail when a page sends ordinary analytics beacons
+   on load, which most real pages do. The guard blocks the beacon. What should happen?"
+   Answer (verbatim label): **"Block silently, continue (Recommended)"** — option text: "For read-only tasks, blocked
+   background writes that no action triggered (load-time analytics) are dropped and logged. The task continues. A
+   write that follows an automated action still goes to you."
+3. Question (verbatim): "The guard only covers requests made over HTTP. WebRTC and WebTransport (UDP) traffic from the
+   browser isn't seen at all, and Chrome flags don't stop it. How should that be handled?"
+   Answer (verbatim label): **"Firewall UDP in zone (Recommended)"** — option text: "Add a host firewall rule in the
+   van-browser-core deploy that drops all UDP from the browser user except DNS to the resolver. Applied at
+   provisioning and checked by qualify.sh."
+
+Implemented by units G11 (persistent guard, background-write drop rule) and G12 (egress proxy, UDP/TCP firewall),
+integrated by G13. Authorizations: `auth-20260930-owner-explicit-browser-egress-and-beacons` and
+`auth-20260930-owner-derived-programme-b-review-i7-remediation`.
+
+---
+
+## Owner answer after unit G13: guard canary origin (appended 2026-09-30)
+
+Recorded first-hand by the integrator (the Claude Code session that asked and received the answer:
+`session_01ELKqm4GCPmPvF3ggKkgB1J`). No device, biometric or cryptographic signature is claimed. Append-only.
+
+Question (verbatim): "The guard canary in qualify.sh serves its test page from 127.0.0.1, but the egress proxy refuses
+local upstream addresses. So on a real host the canary always fails, and browser qualification can never pass. How
+should the canary be qualified?"
+Answer (verbatim label): **"In-zone canary origin (Recommended)"** — option text: "The canary serves its fixture from a
+dedicated canary hostname on the zone's private overlay, listed in the proxy config as the only allowed non-global
+upstream. It is checked by qualify.sh and never reachable by a task scope. The proxy's local-address rule stays strict
+for everything else."
+
+Implemented by unit G14 (canary origin, reserved `*.internal` hosts refused at the gateway, Harness and proxy).
+Authorization: `auth-20260930-owner-explicit-guard-canary-origin`. Unit G14's review-I8 egress remediation is
+authorized separately by `auth-20260930-owner-derived-programme-b-review-i8-egress-remediation`.

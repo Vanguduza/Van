@@ -73,10 +73,23 @@ class _ScriptedWorker:
         )
 
 
-async def _client(tmp_path, worker=None):
+class _Verdict:
+    """Independent postcondition verifier stand-in (owner decision 2026-09-29 §7)."""
+
+    def __init__(self, outcome: str = "VERIFIED") -> None:
+        self.outcome = outcome
+
+    async def verify(self, task, action, postcondition, *, claimed_done):
+        from van_gateway.action.models import VerifierType
+        from van_gateway.automation.verifier import VerificationOutcome, VerificationResult
+
+        return VerificationResult(outcome=VerificationOutcome(self.outcome), verifier_type=VerifierType.READ_BACK)
+
+
+async def _client(tmp_path, worker=None, verifier=None):
     store = await make_store(tmp_path)
     decisions = DecisionService(store, AttentionEngine(store))
-    api = BrowserApi(store, get_settings(), worker=worker, decisions=decisions)
+    api = BrowserApi(store, get_settings(), worker=worker, decisions=decisions, verifier=verifier)
     app = FastAPI()
     app.include_router(api.router)
     ac = AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
@@ -361,7 +374,7 @@ async def test_a_worker_runs_inside_its_assignment_and_the_task_closes(tmp_path)
             ProposedAction(kind="done", domain=DOMAIN, done=True),
         ]
     )
-    ac, _api, store = await _client(tmp_path, worker=worker)
+    ac, _api, store = await _client(tmp_path, worker=worker, verifier=_Verdict())
     async with ac:
         task = await _make_task(ac)
         response = await ac.post(
@@ -520,7 +533,7 @@ async def test_advisory_owner_answer_cannot_resume_or_widen_browser_task(tmp_pat
     worker = _ScriptedWorker(
         [ProposedAction(kind="navigate", domain="outside.example.net", url="https://outside.example.net/")]
     )
-    ac, _api, store = await _client(tmp_path, worker=worker)
+    ac, _api, store = await _client(tmp_path, worker=worker, verifier=_Verdict())
     async with ac:
         task = await _make_task(ac)
         request = {
@@ -636,3 +649,33 @@ async def test_a_run_cannot_be_started_twice(tmp_path):
         second = await ac.post("/v1/browser/assignments", headers=HEADERS, json=body)
         assert second.status_code == 409
         assert second.json()["detail"] == "BROWSER_TASK_NOT_RUNNABLE:COMPLETED"
+
+
+# ---- owner decision 2026-09-29 §7: no browser lane self-certifies ------------------------
+
+
+@pytest.mark.parametrize("verifier,stop,status", [
+    (None, "UNVERIFIABLE", BrowserTaskStatus.VERIFYING),          # verifier unavailable
+    (_Verdict("FAILED"), "NOT_SATISFIED", BrowserTaskStatus.FAILED),  # postcondition false
+    (_Verdict("UNVERIFIABLE"), "UNVERIFIABLE", BrowserTaskStatus.VERIFYING),
+])
+async def test_worker_done_never_completes_without_verified(tmp_path, verifier, stop, status):
+    worker = _ScriptedWorker([ProposedAction(kind="done", domain=DOMAIN, done=True)])
+    ac, _api, _store = await _client(tmp_path, worker=worker, verifier=verifier)
+    async with ac:
+        task = await _make_task(ac)
+        response = await ac.post(
+            "/v1/browser/assignments", headers=HEADERS,
+            json={
+                "task_id": task["task_id"], "turn_id": "turn-v", "command_id": "cmd-owner-1",
+                "goal": "read the statement total", "allowed_domains": [DOMAIN],
+                "postcondition": {"kind": "READ_BACK", "field": "title", "expected": "Statement"},
+            },
+        )
+        body = response.json()
+        assert body["stop_reason"] == stop
+        assert body["succeeded"] is False
+        assert body["needs_owner"] is (stop == "UNVERIFIABLE")
+        fetched = await ac.get(f"/v1/browser/tasks/{task['task_id']}", headers=HEADERS)
+        assert fetched.json()["task"]["status"] == status.value
+        assert fetched.json()["task"]["status"] != BrowserTaskStatus.COMPLETED.value

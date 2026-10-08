@@ -15,14 +15,25 @@ import time
 from typing import Any
 from urllib.parse import urlsplit
 
+from van_gateway.browser.adapters import broker_lease_fence, harness_lease_fence
 from van_gateway.browser.models import (
     AutonomyTier, BrowserStrategy, BrowserTaskStatus,
 )
-from van_gateway.browser.service import BrowserSessionBroker, BrowserTaskService
+from van_gateway.browser.service import (
+    BrowserSessionBroker, BrowserTaskService, BrowserTaskTransitionRefused,
+)
 from van_gateway.models import ActionClass
 
 from .models import Watch, WatchConditionKind, WatchObservation, WatchSourceKind
 from .service import GoalService
+
+class _HandedToOwner(Exception):
+    """Unit G15 — the watch's page lease came back with a network owner code."""
+
+    def __init__(self, code: str) -> None:
+        super().__init__(code)
+        self.code = code
+
 
 _PRICE = re.compile(r"(?:USD\s*|\$)\s*([0-9]{1,9}(?:,[0-9]{3})*(?:\.[0-9]{1,2})?)")
 
@@ -125,7 +136,28 @@ class WatchRunner:
                 lease = await self.broker.acquire_lease(
                     profile_alias=self.PROFILE_ALIAS, task_id=task.task_id, now_ms=now
                 )
-                info = await self.harness.navigate(task, watch.target)
+                # Review I4 MINOR-A: the navigation carries the lease generation and is
+                # re-checked against the broker before it reaches the Harness.
+                nav_error: Exception | None = None
+                try:
+                    with harness_lease_fence(broker_lease_fence(self.broker, lease)):
+                        info = await self.harness.navigate(task, watch.target)
+                except Exception as exc:  # noqa: BLE001 - re-raised after the lease is back
+                    nav_error = exc
+                # Unit G15 (review I8 MAJOR-2): the lease — the watch's only Harness call is
+                # behind it — is given back before anything is recorded, because an end state
+                # is final and the release is where the Harness reports what the page's guard
+                # did after that call. A watch never acts, so the page's load-time background
+                # writes were dropped and the watch continues (owner answer after review I7,
+                # "Block silently, continue"); anything the release still reports (a write
+                # after an automated action, a WebSocket it could only detect, a guard it could
+                # not keep on) goes to the owner.
+                released = await self.broker.release_lease(lease, now_ms=now)
+                lease = None
+                if released.owner_code is not None:
+                    raise _HandedToOwner(released.owner_code)
+                if nav_error is not None:
+                    raise nav_error
                 observation = self._observation(watch, info)
                 evidence = await self.tasks.seal_evidence(
                     task=task,
@@ -144,6 +176,14 @@ class WatchRunner:
                     WatchObservation(observation=observation),
                     now_ms=now,
                 )
+                # §7 / review I M-2: COMPLETED needs a VERIFIED verdict. This task is a
+                # read-only A1 read whose postcondition is the sealed evidence itself, so
+                # the task service reads the evidence row back rather than taking ours.
+                verdict = await self.tasks.verify_read_only_evidence(
+                    task=task, evidence_id=evidence.evidence_id, now_ms=now
+                )
+                if verdict != "VERIFIED":
+                    raise RuntimeError(f"WATCH_EVIDENCE_{verdict}")
                 await self.tasks.complete(
                     task_id=task.task_id,
                     status=BrowserTaskStatus.COMPLETED,
@@ -152,6 +192,20 @@ class WatchRunner:
                 )
                 checked += 1
                 triggered += 1 if result["triggered"] else 0
+            except _HandedToOwner as handed:
+                failed += 1
+                await self.service.record_observation(
+                    watch.watch_id,
+                    WatchObservation(success=False, error_code=f"WATCH_OWNER_TAKEOVER:{handed.code}"[:200]),
+                    now_ms=now,
+                )
+                try:
+                    await self.tasks.set_working_status(
+                        task_id=task.task_id, status=BrowserTaskStatus.WAITING_FOR_OWNER,
+                        error_code=f"OWNER_TAKEOVER:{handed.code}"[:200], now_ms=now,
+                    )
+                except BrowserTaskTransitionRefused:
+                    pass  # the task ended elsewhere meanwhile; it stays ended
             except Exception as exc:  # one broken watch cannot stop the scheduler job
                 failed += 1
                 code = str(exc) if str(exc).startswith("WATCH_") else type(exc).__name__
@@ -161,12 +215,18 @@ class WatchRunner:
                     now_ms=now,
                 )
                 if task is not None:
-                    await self.tasks.complete(
-                        task_id=task.task_id,
-                        status=BrowserTaskStatus.FAILED,
-                        error_code=code[:200],
-                        now_ms=now,
-                    )
+                    try:
+                        await self.tasks.complete(
+                            task_id=task.task_id,
+                            status=BrowserTaskStatus.FAILED,
+                            error_code=code[:200],
+                            now_ms=now,
+                        )
+                    except BrowserTaskTransitionRefused:
+                        # Review I3 MINOR-3: the task already ended elsewhere (e.g. CANCELLED
+                        # mid-run). End states are sticky, so there is nothing to write; the
+                        # failure is on the watch's record and the other watches still run.
+                        pass
             finally:
                 if lease is not None:
                     await self.broker.release_lease(lease, now_ms=now)

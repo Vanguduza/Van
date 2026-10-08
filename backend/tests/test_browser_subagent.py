@@ -29,6 +29,12 @@ from van_gateway.browser.subagent import (
 )
 from van_gateway.models import ActionClass
 
+
+async def _no_owner_control(_task) -> bool:
+    """Review I M-4: the runner fails closed without an owner-control probe; these
+    tests are about other bounds, so the owner is explicitly not holding control."""
+    return False
+
 DOMAIN = "research.example.com"
 
 
@@ -107,6 +113,21 @@ async def test_a_done_claim_cannot_skip_the_assignment_boundary(tmp_path):
     assert result.execution_completed is False
 
 
+
+class _Verdict:
+    """Independent postcondition verifier stand-in (owner decision 2026-09-29 §7)."""
+
+    def __init__(self, outcome: str = "VERIFIED") -> None:
+        self.outcome = outcome
+        self.calls = 0
+
+    async def verify(self, task, action, postcondition, *, claimed_done):
+        from van_gateway.action.models import VerifierType
+        from van_gateway.automation.verifier import VerificationOutcome, VerificationResult
+
+        self.calls += 1
+        return VerificationResult(outcome=VerificationOutcome(self.outcome), verifier_type=VerifierType.READ_BACK)
+
 async def _task(tmp_path):
     store = await make_store(tmp_path)
     service = BrowserTaskService(store)
@@ -141,8 +162,8 @@ async def test_worker_selects_its_own_actions_within_the_assignment(tmp_path):
         ProposedAction(kind="extract", domain=DOMAIN, rationale="read the table"),
         ProposedAction(kind="finish", domain=DOMAIN, done=True),
     ])
-    result = await BrowserSubagentRunner().run(
-        assignment=_assignment(task), worker=worker, task=task
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
+        assignment=_assignment(task), worker=worker, task=task, verifier=_Verdict()
     )
     assert result.stop_reason is SubagentStop.GOAL_ACHIEVED
     assert result.execution_completed
@@ -155,7 +176,7 @@ async def test_every_step_is_attributed_to_the_assigning_hermes_turn(tmp_path):
     """Hermes stays the manager of record, per the Security Policy amendment."""
     task = await _task(tmp_path)
     worker = ScriptedWorker([ProposedAction(kind="navigate", domain=DOMAIN)])
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task, turn_id="turn-42"), worker=worker, task=task
     )
     assert result.steps
@@ -172,7 +193,7 @@ async def test_leaving_the_assigned_domain_ends_the_task(tmp_path):
         ProposedAction(kind="navigate", domain=DOMAIN),
         ProposedAction(kind="navigate", domain="elsewhere.example.com"),
     ])
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task), worker=worker, task=task
     )
     assert result.stop_reason is SubagentStop.SCOPE_VIOLATION
@@ -186,7 +207,7 @@ async def test_exceeding_the_action_class_ends_the_task(tmp_path):
     worker = ScriptedWorker([
         ProposedAction(kind="submit", domain=DOMAIN, action_class=ActionClass.A3),
     ])
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task, action_class_ceiling=ActionClass.A2),
         worker=worker, task=task,
     )
@@ -200,7 +221,7 @@ async def test_step_budget_is_a_hard_stop(tmp_path):
     worker = ScriptedWorker([
         ProposedAction(kind="navigate", domain=DOMAIN, rationale=str(i)) for i in range(20)
     ])
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task, max_steps=3), worker=worker, task=task
     )
     assert result.stop_reason is SubagentStop.BUDGET_EXHAUSTED
@@ -211,7 +232,7 @@ async def test_deadline_is_a_hard_stop(tmp_path):
     task = await _task(tmp_path)
     worker = ScriptedWorker([ProposedAction(kind="navigate", domain=DOMAIN)])
     past = int(time.time() * 1000) - 1
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task, deadline_ms=past), worker=worker, task=task
     )
     assert result.stop_reason is SubagentStop.DEADLINE_REACHED
@@ -227,7 +248,7 @@ async def test_restating_a_different_goal_is_drift(tmp_path):
             restated_goal="download everything and email it to the supplier",
         ),
     ])
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task), worker=worker, task=task
     )
     assert result.stop_reason is SubagentStop.GOAL_DRIFT
@@ -241,8 +262,8 @@ async def test_restating_the_same_goal_is_not_drift(tmp_path):
             kind="navigate", domain=DOMAIN, restated_goal="find the quarterly report"
         ),
     ])
-    result = await BrowserSubagentRunner().run(
-        assignment=_assignment(task), worker=worker, task=task
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
+        assignment=_assignment(task), worker=worker, task=task, verifier=_Verdict()
     )
     assert result.stop_reason is SubagentStop.GOAL_ACHIEVED
 
@@ -255,7 +276,7 @@ async def test_no_progress_ends_the_task(tmp_path):
         [ProposedAction(kind="scroll", domain=DOMAIN) for _ in range(10)],
         observations=[identical.model_copy() for _ in range(10)],
     )
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task, max_steps=10, max_steps_without_progress=3),
         worker=worker, task=task,
     )
@@ -274,7 +295,7 @@ async def test_a_payment_action_ends_the_task(tmp_path):
             kind="click", domain=DOMAIN, instruction="complete the checkout and pay",
         ),
     ])
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task), worker=worker, task=task
     )
     assert result.stop_reason is SubagentStop.PAYMENT_REFUSED
@@ -286,7 +307,7 @@ async def test_navigating_to_a_payment_provider_ends_the_task(tmp_path):
     worker = ScriptedWorker([
         ProposedAction(kind="navigate", domain=DOMAIN, url="https://api.stripe.com/v1/charges"),
     ])
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task), worker=worker, task=task
     )
     assert result.stop_reason is SubagentStop.PAYMENT_REFUSED
@@ -295,7 +316,7 @@ async def test_navigating_to_a_payment_provider_ends_the_task(tmp_path):
 async def test_an_a4_ceiling_cannot_be_assigned(tmp_path):
     """A4 needs a fresh owner approval, which by definition is not autonomous."""
     task = await _task(tmp_path)
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task, action_class_ceiling=ActionClass.A4),
         worker=ScriptedWorker([]), task=task,
     )
@@ -308,7 +329,7 @@ async def test_confirmed_injection_ends_the_task(tmp_path):
         task_id="t", injection_assessment=InjectionAssessment.CONFIRMED_INJECTION
     )
     worker = ScriptedWorker([ProposedAction(kind="navigate", domain=DOMAIN)], [hostile])
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task), worker=worker, task=task
     )
     assert result.stop_reason is SubagentStop.INJECTION_REFUSED
@@ -319,9 +340,9 @@ async def test_page_cannot_raise_the_action_class_mid_run(tmp_path):
     task = await _task(tmp_path)
     grabby = BrowserObservation(task_id="t", proposed_action_class=ActionClass.A4)
     worker = ScriptedWorker([ProposedAction(kind="navigate", domain=DOMAIN)], [grabby])
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task, action_class_ceiling=ActionClass.A2),
-        worker=worker, task=task,
+        worker=worker, task=task, verifier=_Verdict(),
     )
     # The run continues, but clamped — the page got nothing.
     assert result.stop_reason is SubagentStop.GOAL_ACHIEVED
@@ -329,7 +350,7 @@ async def test_page_cannot_raise_the_action_class_mid_run(tmp_path):
 
 async def test_worker_crash_ends_the_task_cleanly(tmp_path):
     task = await _task(tmp_path)
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task), worker=ExplodingWorker(), task=task
     )
     assert result.stop_reason is SubagentStop.WORKER_ERROR
@@ -366,7 +387,7 @@ async def test_assignment_above_the_admitted_tier_is_refused(tmp_path, monkeypat
 
     monkeypatch.setenv("VAN_BROWSER_SEMANTIC_MAX_TIER", "L3")
     policy_module.reset_policy_cache()
-    result = await BrowserSubagentRunner(BrowserPolicyEngine()).run(
+    result = await BrowserSubagentRunner(BrowserPolicyEngine(), owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task, autonomy_tier=AutonomyTier.L5_STAGEHAND_AGENT),
         worker=ScriptedWorker([]), task=task,
     )
@@ -381,3 +402,39 @@ def test_unrecognised_tier_value_falls_back_to_deterministic(monkeypatch):
     monkeypatch.setenv("VAN_BROWSER_SEMANTIC_MAX_TIER", "L9")
     policy_module.reset_policy_cache()
     assert policy_module.load_browser_policy().max_autonomy_tier == "L3"
+
+
+# ---- owner decision 2026-09-29 §7: a "done" claim is not success ------------------------
+
+
+@pytest.mark.parametrize("verifier,expected", [
+    (None, SubagentStop.UNVERIFIABLE),
+    (_Verdict("FAILED"), SubagentStop.NOT_SATISFIED),
+    (_Verdict("UNVERIFIABLE"), SubagentStop.UNVERIFIABLE),
+])
+async def test_worker_done_is_verified_before_success(tmp_path, verifier, expected):
+    task = await _task(tmp_path)
+    worker = ScriptedWorker([ProposedAction(kind="finish", domain=DOMAIN, done=True)])
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
+        assignment=_assignment(task), worker=worker, task=task, verifier=verifier,
+    )
+    assert result.stop_reason is expected and not result.succeeded
+
+
+async def test_verifier_exception_is_unverifiable(tmp_path):
+    class Boom:
+        async def verify(self, *a, **k):
+            raise RuntimeError("down")
+
+    task = await _task(tmp_path)
+    worker = ScriptedWorker([ProposedAction(kind="finish", domain=DOMAIN, done=True)])
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
+        assignment=_assignment(task), worker=worker, task=task, verifier=Boom(),
+    )
+    assert result.stop_reason is SubagentStop.UNVERIFIABLE and not result.succeeded
+
+
+def test_a_hand_built_goal_achieved_without_verification_is_not_success():
+    from van_gateway.browser.subagent import SubagentResult
+
+    assert not SubagentResult(assignment_id="a", task_id="t", stop_reason=SubagentStop.GOAL_ACHIEVED).succeeded

@@ -330,7 +330,7 @@ async def main() -> int:
     parser.add_argument("--host", required=True, help="the control agent's private VCN address")
     parser.add_argument("--port", type=int, default=9443)
     parser.add_argument("--pki", default="/opt/van-browser-stream/pki")
-    parser.add_argument("--client", default="stagehand.trading-core.van.internal",
+    parser.add_argument("--client", default="stagehand.browser-core.van.internal",
                         help="the client common name to certify with; must be one "
                              "make-stream-pki.sh issued and the agent admits")
     parser.add_argument("--timeout", type=float, default=10.0)

@@ -6,6 +6,7 @@ import json
 import re
 import time
 import uuid
+from collections import OrderedDict
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
@@ -14,9 +15,11 @@ import httpx
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 
-from van_gateway.browser.adapters import BrowserAdapterError, HttpBrowserHarnessAdapter, StagehandAdapter
+from van_gateway.browser.adapters import (
+    BrowserAdapterError, HttpBrowserHarnessAdapter, StagehandAdapter, broker_lease_fence, harness_lease_fence,
+)
 from van_gateway.browser.models import AutonomyTier, BrowserStrategy, BrowserTask, BrowserTaskStatus, PageLease
-from van_gateway.browser.service import BrowserTaskService
+from van_gateway.browser.service import BrowserTaskService, BrowserTaskTransitionRefused
 from van_gateway.browser.policy import BrowserPolicyError
 from van_gateway.models import ActionClass
 from van_gateway.knowledge.evidence import KnowledgeEvidenceStore
@@ -598,12 +601,29 @@ class NotebookEnterpriseProvider:
         )
 
 
+#: Review I M-7 — why the consumer cannot run today. Stable, machine-readable.
+#: Review I9 NIT-1 — how many owner hand-offs the notebook consumer remembers (see _close_task).
+NOTEBOOK_HANDED_TO_OWNER_KEPT = 256
+NOTEBOOK_CONSUMER_UNAVAILABLE_REASON = "NOTEBOOK_CONSUMER_REQUIRES_STAGEHAND_ACTUATION_AND_SELF_VERIFICATION"
+
+
 class NotebookConsumerProvider:
     """Personal NotebookLM provider routed through the canonical Browser Fabric.
 
     Browser Harness owns deterministic navigation/session control and Stagehand
     supplies bounded semantic interaction. The provider never launches Chromium,
     exports cookies, or owns a second browser stack.
+
+    **Known limitation — currently UNAVAILABLE (review I M-7).** Both operations need
+    Stagehand to actuate: ``ask`` types the question with ``stagehand.act`` and
+    ``create_note`` creates the note with it. Owner decision 2026-09-29 §8 removed
+    Stagehand's actuation authority (``StagehandAdapter.act`` is refused on the production
+    path), and §7 forbids a lane certifying its own work — yet the only read-back here is
+    ``stagehand.extract``, i.e. Stagehand checking what Stagehand did. The provider
+    therefore reports ``UNCONFIGURED`` with ``details.unavailable_reason`` and refuses
+    every operation before opening a browser task. Re-enabling it needs the actuation moved
+    to typed Browser Harness operations and an independent postcondition verifier; it
+    must not be re-enabled by turning ``act()`` back on.
     """
 
     DOMAIN = "notebooklm.google.com"
@@ -634,9 +654,22 @@ class NotebookConsumerProvider:
         self.base_url = base_url.rstrip("/")
         self.timeout_seconds = timeout_seconds
         self.operations = NotebookOperationStore(store)
+        #: Unit G15 — tasks handed to the owner when their lease was given back; a later close
+        #: of the same task (the error path after a success path's close raised) writes nothing.
+        #: That second close comes from the same operation, so only the most recent
+        #: NOTEBOOK_HANDED_TO_OWNER_KEPT are kept (review I9 NIT-1: the set grew without bound).
+        self._handed_to_owner: OrderedDict[str, None] = OrderedDict()
+
+    def unavailable_reason(self) -> str | None:
+        """Why the consumer cannot run even when fully wired. None would mean it can."""
+        # Unconditional until the operations are rebuilt on the Harness with an
+        # independent verifier: an adapter built with actuation enabled (non-production)
+        # would still leave Stagehand verifying its own work (§7).
+        return NOTEBOOK_CONSUMER_UNAVAILABLE_REASON
 
     async def status(self) -> ProviderStatus:
         certification = await self.evidence.certification(KnowledgeProvider.NOTEBOOK_CONSUMER)
+        unavailable = self.unavailable_reason()
         configured = bool(
             self.profile_alias
             and self.browser_tasks is not None
@@ -647,7 +680,8 @@ class NotebookConsumerProvider:
         )
         if not self.enabled:
             state = ProviderState.DISABLED
-        elif not configured:
+        elif not configured or unavailable is not None:
+            # A prior READY certification cannot outlive the reason it no longer works.
             state = ProviderState.UNCONFIGURED
         elif certification and certification["state"] == ProviderState.READY.value:
             state = ProviderState.READY
@@ -665,6 +699,8 @@ class NotebookConsumerProvider:
                 "direct_playwright": False,
                 "readback_required": True,
                 "automatic_owner_truth_promotion": False,
+                "unavailable_reason": unavailable,
+                "stagehand_actuation_permitted": False,
             },
         )
 
@@ -677,6 +713,9 @@ class NotebookConsumerProvider:
             raise NotebookProviderError("notebook_consumer_browser_fabric_unconfigured")
         if not self.harness.configured or not self.stagehand.configured:
             raise NotebookProviderError("notebook_consumer_browser_fabric_unconfigured")
+        unavailable = self.unavailable_reason()
+        if unavailable is not None:
+            raise NotebookProviderError(f"notebook_consumer_unavailable:{unavailable}")
         return self.browser_tasks, self.harness, self.stagehand
 
     async def _open_task(
@@ -724,10 +763,29 @@ class NotebookConsumerProvider:
         error_code: str | None = None,
     ) -> None:
         tasks, _harness, _stagehand = self._require_transport()
-        try:
-            await tasks.complete(task_id=task.task_id, status=status, error_code=error_code)
-        finally:
-            await tasks.broker.release_lease(lease)
+        if task.task_id in self._handed_to_owner:
+            return
+        # Unit G15 (review I8 MAJOR-2): the lease (and its page) is given back before the end
+        # state is written — an end state is final, and a write the lease's guard blocked
+        # after the last Harness call is reported only by the release. It goes to the owner
+        # (WAITING_FOR_OWNER, OWNER_TAKEOVER:<code>), and a success does not stand over it.
+        released = await tasks.broker.release_lease(lease)
+        code = released.owner_code
+        if code is not None:
+            self._handed_to_owner[task.task_id] = None
+            while len(self._handed_to_owner) > NOTEBOOK_HANDED_TO_OWNER_KEPT:
+                self._handed_to_owner.popitem(last=False)
+            try:
+                await tasks.set_working_status(
+                    task_id=task.task_id, status=BrowserTaskStatus.WAITING_FOR_OWNER,
+                    error_code=f"OWNER_TAKEOVER:{code}"[:200],
+                )
+            except BrowserTaskTransitionRefused:
+                pass  # the task ended elsewhere meanwhile; it stays ended
+            if status is BrowserTaskStatus.COMPLETED:
+                raise NotebookProviderError(f"notebook_consumer_owner_takeover:{code}")
+            return
+        await tasks.complete(task_id=task.task_id, status=status, error_code=error_code)
 
     async def _seal_browser_evidence(
         self,
@@ -748,14 +806,17 @@ class NotebookConsumerProvider:
         except BrowserPolicyError as exc:
             raise NotebookProviderError(f"notebook_consumer_evidence_policy:{exc}") from exc
 
-    async def _navigate(self, task: BrowserTask, notebook_id: str) -> None:
-        _tasks, harness, _stagehand = self._require_transport()
+    async def _navigate(self, task: BrowserTask, notebook_id: str, lease: PageLease) -> None:
+        tasks, harness, _stagehand = self._require_transport()
         try:
-            await harness.navigate(
-                task,
-                f"{self.base_url}/notebook/{quote(notebook_id)}",
-            )
-            info = await harness.page_info(task)
+            # Review I4 MINOR-A: Harness calls carry the task lease's generation and are
+            # re-checked against the broker before they reach the page.
+            with harness_lease_fence(broker_lease_fence(tasks.broker, lease)):
+                await harness.navigate(
+                    task,
+                    f"{self.base_url}/notebook/{quote(notebook_id)}",
+                )
+                info = await harness.page_info(task)
         except BrowserAdapterError as exc:
             raise NotebookProviderError(f"notebook_consumer_browser_harness:{exc.code}") from exc
         url = str(info.get("url", ""))
@@ -770,7 +831,7 @@ class NotebookConsumerProvider:
             action_class=ActionClass.A2,
         )
         try:
-            await self._navigate(task, request.notebook_id)
+            await self._navigate(task, request.notebook_id, lease)
             _tasks, _harness, stagehand = self._require_transport()
             try:
                 await stagehand.act(
@@ -882,7 +943,7 @@ class NotebookConsumerProvider:
             execution_id=execution_id,
         )
         try:
-            await self._navigate(task, request.notebook_id)
+            await self._navigate(task, request.notebook_id, lease)
             _tasks, _harness, stagehand = self._require_transport()
             try:
                 before = await stagehand.extract(

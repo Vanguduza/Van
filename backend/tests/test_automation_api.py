@@ -645,15 +645,20 @@ def _execute_body(**overrides) -> dict:
 
 
 async def test_execute_reports_owner_success_only_when_verified(executable):
-    """§17 — an engine success is not an owner success, and the two are distinct."""
+    """§17 — an engine success is not an owner success, and the two are distinct.
+
+    Reviewer I M-1: the endpoint derives the postcondition from the capability, which today
+    declares only a verifier kind (``READ_BACK``) and no predicate. A kind alone cannot be
+    observed false, so the run is UNVERIFIABLE — the engine succeeded and the observer would
+    have said ``exists: True``, and neither is owner success.
+    """
     ac, _api, _store = executable
     response = await ac.post("/v1/automation/execute", headers=HEADERS, json=_execute_body())
     assert response.status_code == 200, response.text
     body = response.json()
-    assert body["status"] == "VERIFIED_SUCCESS"
-    assert body["owner_success"] is True
-    assert body["verification_outcome"] == "VERIFIED"
-    assert body["evidence_pointer"]
+    assert body["status"] == "UNVERIFIABLE"
+    assert body["owner_success"] is False
+    assert body["verification_outcome"] == "UNVERIFIABLE"
 
 
 async def test_replacement_candidate_preserves_active_capability_and_action(executable):

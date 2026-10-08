@@ -151,6 +151,10 @@ async def browser_evidence_readback(store: Store, mission_id: str) -> dict[str, 
         FROM browser_evidence e
         JOIN mission_activities a ON a.executor_ref = e.task_id
         WHERE a.mission_id = ? AND a.executor = 'BROWSER_FABRIC'
+          -- A router step record is a routing ledger entry and a postcondition verdict is a
+          -- verifier's judgement; neither is a captured artefact, and a failed, refused or
+          -- UNVERIFIABLE step must never read as "evidence captured".
+          AND e.kind NOT IN ('interaction_router_step', 'postcondition_verification')
         ORDER BY e.created_at_ms
         """,
         (mission_id,),

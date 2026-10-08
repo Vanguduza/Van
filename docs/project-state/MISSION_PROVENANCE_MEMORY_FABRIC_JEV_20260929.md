@@ -46,7 +46,15 @@ context interface only.
 | vectorize-io/hindsight | `1e427025b4d4c01e8ad6385dd04e02102886a5c4` | `v0.10.1` | MIT |
 | volcengine/OpenViking | `0f31ece6b8213db36a7619f9212e6f2c39282c7a` | `v0.4.22` | AGPL-3.0 |
 | browser-use/jev-ultrafast | `1231850a0bf1a0c0341fe408ef1668dbbfdfac46` | none | MIT |
-| browserbase/stagehand | `ad2bf12ea7abd95bb1d6f3a59600842a0954fffb` | `@browserbasehq/stagehand@4.1.0` | MIT |
+| browserbase/stagehand | `ad2bf12ea7abd95bb1d6f3a59600842a0954fffb` (unreleased; **not** 4.1.0) | `@browserbasehq/stagehand@4.1.0` → release commit `cd7b230778cf92269e4cb90e80d97f5113781c51` | MIT |
 
 OpenViking HEAD has moved since the Rev 1.1 review commit `1f4f7039`. These are observations,
 not adoption pins; exact-version adoption requires the qualification gates in each blueprint.
+
+**Correction (2026-09-29, auth-20260929-owner-stagehand-private-plane-gates).** The Stagehand
+row originally put HEAD `ad2bf12e` beside the `4.1.0` tag, which read as if they were the same
+code. They are not: `ad2bf12e` is later unreleased upstream work, and the adopted artifact is the
+released 4.1.0 (release commit `cd7b2307…`, npm integrity
+`sha512-PJikMBVoaCRh6TFD7GcmeISmsMq4IwUu1BD5FOsGUVDUxrVqZomWa6W6dF+a/zu4xRZu2Z2xX1nXVMDaCuZWsw==`,
+matching `deploy/van-browser-core/browser/package-lock.json`, moved from `deploy/van-trading-core/browser/` by the van-browser-core migration). Owner decision §5,
+`docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md`.

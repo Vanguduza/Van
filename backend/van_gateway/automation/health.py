@@ -5,11 +5,14 @@ n8n-backed automations only, a missing Stagehand leaves the deterministic and
 native paths intact, and VATI T0 is independent of all of it. This module reports
 that truthfully — including reporting `PENDING_OWNER` while the adoption
 decisions and Security Policy amendment are unsigned, rather than implying the
-fabric is merely switched off.
+fabric is merely switched off — and, since owner decision 2026-09-29 §6, reporting
+production activation as permitted only when every gate in the explicit gate model
+(`production_gates.py`) is GREEN.
 """
 
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 from typing import Any
@@ -21,10 +24,15 @@ from van_gateway.automation.external_runtime import ExternalRuntimeRegistry, Run
 from van_gateway.automation.n8n_client import N8nManagementClient
 from van_gateway.automation.deadletter import DeadLetterService
 from van_gateway.automation.policy import load_automation_policy, load_browser_policy
+from van_gateway.automation.production_gates import GATE_MODEL, evaluate_production_gates
 from van_gateway.automation.registry import HotWorkflowIndex
 from van_gateway.automation.telemetry import TelemetryService
 from van_gateway.automation.workflow_health import WorkflowHealthService
-from van_gateway.browser.adapters import HttpBrowserHarnessAdapter, StagehandAdapter
+from van_gateway.browser.adapters import (
+    HttpBrowserHarnessAdapter,
+    StagehandAdapter,
+    harness_fence_key_from_settings,
+)
 from van_gateway.computer_use.fabric import ComputerInteractionFabric
 from van_gateway.config import Settings
 from van_gateway.degraded.registry import DegradedRegistry
@@ -34,34 +42,49 @@ from van_gateway.storage.db import Store
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DECISIONS = REPO_ROOT / "docs" / "decisions"
 
-#: The decisions that gate production activation (§§365, 368).
-REQUIRED_DECISIONS = (
-    "VAN-ADOPT-N8N-001.yaml",
-    "VAN-ADOPT-STAGEHAND-001.yaml",
-    "VAN-ADOPT-BROWSER-HARNESS-001.yaml",
-    "VAN-AMEND-SECURITY-POLICY-001.md",
-)
+#: The decisions that gate production activation (§§365, 368). Derived from the explicit
+#: gate model so the list and the gates cannot drift apart; kept as a name for callers.
+def _required_decisions() -> tuple[str, ...]:
+    try:
+        model = json.loads(GATE_MODEL.read_text(encoding="utf-8"))
+        return tuple(str(e["decision"]) for e in model["required_decisions"])
+    except Exception:  # noqa: BLE001 — the gate evaluation itself reports the error
+        return ()
+
+
+REQUIRED_DECISIONS = _required_decisions()
 
 
 def governance_state() -> dict[str, Any]:
-    """Report whether the owner has signed the gating decisions.
+    """Report whether production activation is permitted, and why.
 
-    An agent cannot set these (§365); it can only read them, which is exactly
-    why this is computed rather than configured.
+    Owner decision 2026-09-29 §6: this used to declare activation permitted when no required
+    decision file contained the literal ``owner_signature_status: PENDING``, which ignored
+    every production gate (Stagehand's ``production_gate.status: PENDING`` among them). It now
+    evaluates the explicit gate model in ``registries/production_activation_gates.json``:
+    activation is permitted only when every governance *and* production gate is GREEN, and
+    anything unknown, missing or unparseable fails closed.
+
+    An agent cannot set these (§365); it can only read them, which is exactly why this is
+    computed rather than configured. The first three keys keep their original meaning for
+    existing consumers; ``gates`` is the per-gate breakdown that explains the answer.
     """
-    pending: list[str] = []
-    missing: list[str] = []
-    for name in REQUIRED_DECISIONS:
-        path = DECISIONS / name
-        if not path.is_file():
-            missing.append(name)
-            continue
-        if "owner_signature_status: PENDING" in path.read_text(encoding="utf-8"):
-            pending.append(name)
+    evaluation = evaluate_production_gates()
     return {
-        "owner_decisions_pending": sorted(pending),
-        "owner_decisions_missing": sorted(missing),
-        "production_activation_permitted": not pending and not missing,
+        "owner_decisions_pending": evaluation["owner_decisions_pending"],
+        "owner_decisions_missing": evaluation["owner_decisions_missing"],
+        "production_activation_permitted": evaluation["production_activation_permitted"],
+        "production_gates_not_green": evaluation["production_gates_not_green"],
+        "gates": evaluation["gates"],
+        "gate_model": evaluation["gate_model"],
+        "gate_model_error": evaluation["gate_model_error"],
+        # Reviewer I minor 8 — the same model, per capability. The global flag above keeps
+        # its meaning (every gate GREEN); these say which capability a gate belongs to.
+        "capabilities": evaluation["capabilities"],
+        "production_activation_permitted_by_capability": {
+            name: cap["production_activation_permitted"]
+            for name, cap in evaluation["capabilities"].items()
+        },
     }
 
 
@@ -99,6 +122,7 @@ class AutomationHealthApi:
             enabled=settings.browser_enabled,
             expected_version=settings.browser_harness_expected_version
             or self._manifest("browser_harness"),
+            fence_key=harness_fence_key_from_settings(settings),
         )
         self.stagehand = StagehandAdapter(
             self.runtime,
@@ -108,6 +132,9 @@ class AutomationHealthApi:
             or self._manifest("stagehand"),
             model_provider=settings.browser_stagehand_model_provider,
             model_name=settings.browser_stagehand_model_name,
+            # Unit G2a: the adapter's production gate reads *these* settings (placement,
+            # model, mTLS identity), so health reports the gate's verdict for this process.
+            settings=settings,
         )
         # P2-CU-001 — the fabric is constructed in production for the first time. Its
         # health surface is here rather than in its own module because the three fabrics
@@ -196,10 +223,33 @@ class AutomationHealthApi:
             "median_first_use_latency_ms": metrics.median_first_use_latency_ms,
         }
 
+    async def _stagehand_production(self, governance: dict[str, Any]) -> dict[str, Any]:
+        """Reviewer I minor 8 — unit M's placement/model state, surfaced, and ANDed with the
+        Stagehand slice of the gate model exactly as the router's Stagehand gate does."""
+        from van_gateway.browser.interaction_router import _fetch_stagehand_worker_health
+
+        try:
+            from van_gateway.automation.placement import stagehand_production_state
+        except ImportError:
+            placement = {"state": "PRODUCTION_DISABLED", "reason": "PLACEMENT_GATE_MISSING"}
+        else:
+            health = await _fetch_stagehand_worker_health(self.stagehand)
+            # Review I5 P2 — resolves the endpoint name; never on the event loop.
+            placement = await asyncio.to_thread(stagehand_production_state, self.settings, worker_health=health)
+        gates = governance["capabilities"]["stagehand"]
+        return {
+            **placement,
+            "gate_model_permitted": gates["production_activation_permitted"],
+            "gates_not_green": gates["gates_not_green"],
+            "production_activation_permitted": placement.get("state") == "PLACEMENT_SATISFIED"
+            and gates["production_activation_permitted"] is True,
+        }
+
     async def browser_health(self) -> dict[str, Any]:
         harness = await self.harness.status()
         stagehand = await self.stagehand.status()
         policy = load_browser_policy()
+        governance = governance_state()
 
         self._sync_degraded(harness.state, DegradedCode.BROWSER_HARNESS_UNAVAILABLE)
         self._sync_degraded(stagehand.state, DegradedCode.BROWSER_SEMANTIC_UNAVAILABLE)
@@ -208,7 +258,26 @@ class AutomationHealthApi:
             "capability": "browser_fabric",
             "harness": harness.model_dump(mode="json"),
             "stagehand": stagehand.model_dump(mode="json"),
-            "governance": governance_state(),
+            "governance": governance,
+            # Reviewer I minor 8 — per capability, so Stagehand's pending gates do not make
+            # the deterministic Harness path look not-permitted, and Stagehand's own answer
+            # includes its placement (van-browser-core, model, provider-key rules).
+            "production_activation": {
+                "browser_harness": {
+                    "production_activation_permitted": governance["capabilities"]["browser_harness"][
+                        "production_activation_permitted"
+                    ],
+                    "gates_not_green": governance["capabilities"]["browser_harness"]["gates_not_green"],
+                },
+                "stagehand": await self._stagehand_production(governance),
+                # Review I2 N-7 — VAN's own gate on Jev browser effect (SHADOW only until GREEN).
+                "jev_browser_effect": {
+                    "production_activation_permitted": governance["capabilities"]["jev_browser_effect"][
+                        "production_activation_permitted"
+                    ],
+                    "gates_not_green": governance["capabilities"]["jev_browser_effect"]["gates_not_green"],
+                },
+            },
             "policy_version": policy.policy_version,
             "max_autonomy_tier": policy.max_autonomy_tier,
             "raw_cookie_export_forbidden": policy.raw_cookie_export_forbidden,
