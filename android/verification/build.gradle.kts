@@ -54,6 +54,7 @@ sourceSets {
         // which actions need owner approval — is held to the gateway's by
         // backend/tests/test_account_approval_contract.py instead.
         kotlin.include(
+            "com/dial/van/cognitive/CognitiveTwin.kt",
             "com/dial/van/status/**",
             "com/dial/van/mission/MissionModels.kt",
             "com/dial/van/mission/MissionSelection.kt",

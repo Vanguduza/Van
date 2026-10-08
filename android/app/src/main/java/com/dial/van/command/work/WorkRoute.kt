@@ -66,6 +66,7 @@ fun WorkRoute(
     onOpenKnowledge: () -> Unit = {},
     onOpenResearch: () -> Unit = {},
     onOpenAutomation: () -> Unit = {},
+    onOpenCognitiveTwin: () -> Unit = {},
 ) {
     val tokens = LocalVanTokens.current
     val scope = rememberCoroutineScope()
@@ -301,6 +302,10 @@ fun WorkRoute(
             OutlinedButton(onClick = onOpenConvergence) {
                 Text("Documents, goals & results")
             }
+        }
+
+        item {
+            OutlinedButton(onClick = onOpenCognitiveTwin) { Text("Cognitive Twin — current DIAL facts and evidence") }
         }
 
         // VAN-DEVCC-R1 §2.1 — the Development hub lives under Work (`work/dev`), not as a

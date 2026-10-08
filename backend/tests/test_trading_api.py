@@ -248,7 +248,10 @@ def test_service_never_exposes_an_order_path():
     # history, assessment). Each is a projection of the ledger; none of them is
     # a capability, which the banned-substring check below still proves.
     assert names == {"available", "status", "tickets", "halt", "confirm_ticket", "trade_book", "portfolio", "accounts", "market_state", "risk", "cognition", "trade_detail", "bars", "producer", "accounts_registry", "lake_root", "reporting_currency", "owner_authority",
-                     "positions", "events", "potential_trades", "history", "assessment"}
+                     "positions", "events", "potential_trades", "history", "assessment",
+                     "cognitive_fabric", "cognitive_slice", "cognitive_import"}
+    # Cognitive projections are read-only; imports append bounded evidence only.
+    # Their effects are independently checked by the authority-tripwire regression below.
     for banned in ("order", "submit", "size", "cancel", "modify", "credential", "token"):
         assert not any(banned in n.lower() for n in names), banned
     # P0-TRADE-001 — the one field added since is the verifier for owner-signed acts, and
@@ -486,3 +489,68 @@ async def test_account_onboarding_is_device_signed_and_forwards_without_storing_
     # MT5-EA key issue returns the key once to the app, stores it on the VM
     k = (await act("mt5_ea_issue_key", {"alias": "mt5_ea", "login": "1", "server": "Demo"})).json()
     assert len(k["signing_key"]) == 64 and (await act("account_remove", {"alias": "mt5_ea"})).json()["removed"]
+
+
+def test_cognitive_projections_and_imports_cannot_reach_order_authority(tmp_path, monkeypatch):
+    """Exercise every new service method with real evidence and live authority tripwires."""
+    from van_gateway.trading.service import TradingService
+    from vati.cognition.fabric import TriAnalystPlane, FabricError
+    from vati.risk.authority import RiskAuthority
+    from vati.execution.router import ExecutionRouter
+    from vati.execution.ctrader.adapter import CtraderAdapter
+    from vati.arbiter.intent_factory import IntentFactory
+    from unittest.mock import Mock
+
+    authority = Mock(side_effect=AssertionError('cognitive evidence reached execution authority'))
+    for owner, methods in ((RiskAuthority, ('evaluate',)),
+                           (ExecutionRouter, ('execute', 'apply_preservation', 'apply_exits')),
+                           (CtraderAdapter, ('submit', 'modify_stop', 'close')),
+                           (IntentFactory, ('from_selected_candidate',))):
+        for method in methods:
+            monkeypatch.setattr(owner, method, authority)
+    monkeypatch.setattr('van_gateway.trading.service.time.time', lambda: 1)
+    path = tmp_path / 'cognitive-authority.sqlite'
+    ledger = Ledger(path)
+    plane = TriAnalystPlane(ledger, account_alias='test')
+    universe = plane.universe(instruments=[{'symbol':'XAUUSD', 'broker_symbol':'XAUUSD',
+        'asset_class':'METAL', 'contract_hash':'h', 'market_data_available':True,
+        'discovery_allowed':True, 'execution_supported':False,
+        'execution_eligibility_state':'RESEARCH_ONLY'}], broker='test', venue='test', now_ms=900)
+    evidence = plane.evidence(symbol='XAUUSD', state={'market_data_hash':'market-hash'},
+        source_refs=['market:canonical'], now_ms=950, deadline_ms=2000)
+    service = TradingService(str(path))
+    def snapshot():
+        return ledger.head(), tuple(event.hash for event in ledger.iter())
+    before = snapshot()
+    service.cognition()
+    service.cognitive_fabric('test')
+    for operation in ('trading-market', 'strategy-health', 'performance', 'tca', 'learning-episodes'):
+        service.cognitive_slice(operation)
+    assert snapshot() == before
+
+    signal = {'candidate_id':'signal', 'origin_lane':'META_ANALYST', 'provider_product':'personal-muse-free',
+        'universe_snapshot_id':universe['snapshot_id'], 'symbol':'XAUUSD', 'venue':'test',
+        'horizon':'SWING', 'initial_thesis':'Watch breakout', 'evidence_refs':['source'], 'expires_at_ms':2000}
+    service.cognitive_import('test', 'discovery', signal)
+    packet = {'packet_id':'meta-packet', 'candidate_id':'signal', 'analyst_lane':'META_ANALYST',
+        'analysis_lineage_id':'personal-muse-lineage', 'independence_class':'META_PERSONAL_MUSE',
+        'provider_product':'personal-muse-free', 'model_or_agent_id':'muse',
+        'evidence_epoch':evidence['evidence_epoch'], 'evidence_hash':evidence['content_hash'],
+        'generated_at_ms':1000, 'expires_at_ms':2000, 'prior_lane_outputs_seen':[],
+        'directional_thesis':'WATCH', 'supporting_evidence':['market:canonical'],
+        'contradicting_evidence':[], 'missing_inputs':[], 'uncertainty':'Bounded', 'abstain':False}
+    service.cognitive_import('test', 'packet', packet)
+    service.cognitive_import('test', 'focus', {'candidate_id':'signal', 'evidence_epoch':evidence['evidence_epoch'], 'reason':'bounded review'})
+    with pytest.raises(FabricError):
+        service.cognitive_import('test', 'admission', {'candidate_id':'signal', 'evidence_epoch':evidence['evidence_epoch']})
+    for operation, body in (('discovery', signal), ('packet', packet),
+                            ('focus', {'candidate_id':'signal','evidence_epoch':evidence['evidence_epoch'],'reason':'bounded'}),
+                            ('admission', {'candidate_id':'signal','evidence_epoch':evidence['evidence_epoch']})):
+        unchanged = snapshot()
+        with pytest.raises(FabricError):
+            service.cognitive_import('test', operation, {**body, 'approved_size':100})
+        assert snapshot() == unchanged
+    appended = list(ledger.iter())[len(before[1]):]
+    assert appended and all(event.kind == EventKind.COGNITIVE_FABRIC for event in appended)
+    assert authority.call_count == 0
+    ledger.close()

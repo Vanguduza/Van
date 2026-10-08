@@ -299,6 +299,9 @@ data class CognitionSnapshot(
     val proposals: List<ImprovementProposalRow>,
     val rejectionCategories: Map<String, Int>,
     val expansionModes: Map<String, Int>,
+    val cognitiveRecords: Int = 0,
+    val metaT2State: String = "QUALIFICATION_REQUIRED",
+    val paidMetaState: String = "DISABLED",
 ) {
     companion object {
         fun parse(body: String): CognitionSnapshot? {
@@ -345,13 +348,19 @@ data class CognitionSnapshot(
                 cognitionMode = authority.str("cognition_mode") ?: "UNKNOWN",
                 liveAdvisory = authority.str("live_advisory") ?: "UNKNOWN",
                 liveStatus = authority.str("live_status") ?: "UNKNOWN",
-                modelHierarchy = authority.strList("model_hierarchy"),
+                // Canonical supported-model key takes precedence, including an explicit empty list.
+                // Older gateway snapshots use model_hierarchy and remain readable.
+                modelHierarchy = authority.strList(if (authority.containsKey("supported_model_hierarchy"))
+                    "supported_model_hierarchy" else "model_hierarchy"),
                 summary = summary,
                 models = models,
                 missions = missions,
                 proposals = proposals,
                 rejectionCategories = intMap(root.obj("rejections"), "by_category"),
                 expansionModes = intMap(root.obj("expansion"), "mode_counts"),
+                cognitiveRecords = root.obj("cognitive_fabric")?.arr("accounts")?.sumOf { it.arr("records").size } ?: 0,
+                metaT2State = root.obj("cognitive_fabric")?.str("meta_t2") ?: "QUALIFICATION_REQUIRED",
+                paidMetaState = root.obj("cognitive_fabric")?.str("paid_meta") ?: "DISABLED",
             )
         }
     }

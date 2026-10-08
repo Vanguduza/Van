@@ -249,7 +249,11 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             onOpenKnowledge = { nav.navigate(VanRoute.OWNER_KNOWLEDGE) },
                             onOpenResearch = { nav.navigate(VanRoute.OWNER_RESEARCH) },
                             onOpenAutomation = { nav.navigate(VanRoute.OWNER_AUTOMATION) },
+                            onOpenCognitiveTwin = { nav.navigate(VanRoute.WORK_COGNITIVE_TWIN) },
                         )
+                    }
+                    composable(VanRoute.WORK_COGNITIVE_TWIN) {
+                        com.dial.van.cognitive.CognitiveTwinRoute(app, onBack = { nav.popBackStack() })
                     }
                     composable(VanRoute.WORK_ACTIVITY) {
                         WorkActivityRoute(app, onBack = { nav.popBackStack() })
@@ -325,6 +329,7 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             onOpenKnowledge = { nav.navigate(VanRoute.OWNER_KNOWLEDGE) },
                             onOpenResearch = { nav.navigate(VanRoute.OWNER_RESEARCH) },
                             onOpenAutomation = { nav.navigate(VanRoute.OWNER_AUTOMATION) },
+                            onOpenCognitiveTwin = { nav.navigate(VanRoute.WORK_COGNITIVE_TWIN) },
                         )
                     }
                     composable(VanRoute.TRADING) {

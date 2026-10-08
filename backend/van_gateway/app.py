@@ -1175,6 +1175,15 @@ def create_app() -> FastAPI:
     app.include_router(build_suggestion_router(suggestions))
     app.include_router(build_conversation_router(conversations))
     app.include_router(build_computer_use_router(computer_use))
+    from van_gateway.cognitive.api import build_cognitive_router
+    from van_gateway.cognitive.twin import CognitiveTwinClient
+    twin_client = CognitiveTwinClient(DialDevClient(DialDevConfig(
+        enabled=settings.cognitive_twin_enabled, base_url=settings.cognitive_twin_base_url,
+        token_file=settings.cognitive_twin_token_file)),
+        projects=tuple(p.strip() for p in settings.cognitive_twin_projects.split(',') if p.strip()))
+    app.include_router(build_cognitive_router(store=store, context=owner_runtime.context,
+        trading=trading, require_internal=lambda token: require_internal_control(token, ControlScope.COGNITIVE),
+        twin_client=twin_client))
     app.include_router(build_dial_dev_router(
         client=dial_dev_client,
         config=dial_dev_config,
@@ -1480,6 +1489,8 @@ def create_app() -> FastAPI:
         makes "the Hermes runtime may drive automation but may not enrol a device"
         expressible at all.
         """
+        if path.startswith("/v1/runtime/cognitive/"):
+            return ControlScope.COGNITIVE
         if path.startswith("/v1/runtime/"):
             return ControlScope.RUNTIME
         # P2-CU-001 adds the computer-use fabric's health on the same terms as the other
@@ -3340,6 +3351,17 @@ def create_app() -> FastAPI:
     @app.get("/v1/trading/risk")
     async def trading_risk():
         return trading.risk()
+
+    @app.get("/v1/trading/cognitive-fabric/{account_alias}")
+    async def trading_cognitive_fabric(account_alias: str):
+        return trading.cognitive_fabric(account_alias)
+
+    @app.post("/v1/trading/cognitive-fabric/{account_alias}/{operation}")
+    async def trading_cognitive_candidate(account_alias: str, operation: str, body: dict):
+        try:
+            return trading.cognitive_import(account_alias, operation, body)
+        except (ValueError, TypeError, KeyError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.get("/v1/trading/cognition")
     async def trading_cognition():

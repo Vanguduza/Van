@@ -125,6 +125,10 @@ class AccountCoordinatorService:
         # GAP-F-004. Present from construction so the read model and the
         # heartbeat can always state the invoker's actual state, including
         # on a service that has not finished building.
+        self.tri_analyst = None
+        self._packet_worker_stop = None
+        self._packet_worker = None
+        self._packet_worker_state = 'DISABLED'
         self.cognition_config = CognitionConfig()
         self.event_research: Optional[EventResearchRuntime] = None
         self.news = None
@@ -178,6 +182,12 @@ class AccountCoordinatorService:
         self.authority = RiskAuthority(mandate)
         self.adapter = self.adapter or build_adapter(account, registry)
         self._ledger = open_ledger(c.ledger)
+        from vati.cognition.fabric import TriAnalystPlane
+        self.tri_analyst = TriAnalystPlane(self._ledger, account_alias=c.account_alias,
+            qualified_providers=getattr(c, 'cognitive_fabric', {}).get('qualified_providers', {}))
+        self._ledger.append(make_event(EventKind.COGNITIVE_FABRIC, 'vati-account-service',
+            {'record_type': 'ProviderQualification', 'account_alias': c.account_alias,
+             'providers': self.tri_analyst.qualified}, event_time_ms=self.clock(), received_time_ms=self.clock()))
         self._lease_store = PostgresLeaseStore(c.ledger)
         # GAP-F-004 closed here. Persistent first-pass cognition is still
         # shadow-only and still wakes *after* RiskAuthority has decided; what
@@ -399,6 +409,7 @@ class AccountCoordinatorService:
             execute_fn=self._execute,
             dependency_fn=self._dependency_for,
             mandate=mandate,
+            candidate_intent_fn=self.tri_analyst.bind_intent,
         )
         return self
 
@@ -1000,6 +1011,7 @@ class AccountCoordinatorService:
         payload = {
             "account_alias": self.cfg.account_alias, "symbols": sorted(self.specs),
             "status": status, "cycles": self.cycles,
+            "cognitive_packet_worker": {"state":self._packet_worker_state, "authority":"ADVISORY_CANDIDATE", "live_qualification_claimed":False},
             "lease_epoch": self.lease.epoch if self.lease else None,
             "kill_switch": sorted(t.value for t in self.kill.active),
             "mtf_shadow": {
@@ -1133,9 +1145,22 @@ class AccountCoordinatorService:
                 advanced_bars[symbol] = bars
 
         if not observed_bars:
+            if self.tri_analyst is not None:
+                self.tri_analyst.join_outcomes(now_ms=now)
             self._heartbeat("NO_DATA")
             return None
-        if not advanced_bars:
+        cognitive_results = []
+        if self.tri_analyst is not None:
+            try:
+                cognitive_results = self.tri_analyst.evaluate_pending(
+                    evaluators=self.evaluators, bars_by_symbol=observed_bars, now_ms=now,
+                    candidate_sink=self.coordinator.pool.admit)
+            except (ValueError, KeyError) as exc:
+                self._heartbeat("COGNITIVE_ADMISSION_REFUSED", {"reason": str(exc)[:200]})
+        cognitive_candidates = any(r.get('vati_candidate_ids') for r in cognitive_results)
+        if not advanced_bars and not cognitive_candidates:
+            if self.tri_analyst is not None:
+                self.tri_analyst.join_outcomes(now_ms=now)
             self._heartbeat("WAITING_FOR_BAR")
             return None
 
@@ -1169,6 +1194,34 @@ class AccountCoordinatorService:
             if evaluator.last_mtf_state is not None
         }
         self._log_allocation_pass(result, now)
+        if self.tri_analyst is not None:
+            self.tri_analyst.join_outcomes(now_ms=now)
+        if self.tri_analyst is not None:
+            from vati.core.canonical import canonical_hash
+            self.tri_analyst.universe(instruments=[{
+                'symbol': symbol, 'broker_symbol': spec.contract.get('broker_symbol', symbol),
+                'asset_class': 'CONFIGURED_CONTRACT',
+                'contract_hash': canonical_hash(spec.contract),
+                'market_data_available': symbol in observed_bars,
+                'discovery_allowed': True, 'execution_supported': symbol in self.evaluators,
+                'execution_eligibility_state': 'VATI_STRATEGY_AND_RISK_GATES_REQUIRED'}
+                for symbol, spec in sorted(self.specs.items())],
+                broker=str(getattr(self.account.broker, 'value', self.account.broker)),
+                venue=self.account.router_venue, now_ms=now)
+            for symbol, evaluator in self.evaluators.items():
+                if evaluator.last_state is None or symbol not in advanced_bars:
+                    continue
+                state = evaluator.last_state
+                self.tri_analyst.evidence(symbol=symbol, state={
+                    'market_data_hash': canonical_hash([b.as_dict() if hasattr(b, 'as_dict') else str(b) for b in advanced_bars[symbol]]),
+                    'state_hash': state.state_hash,
+                    'contract_hash': canonical_hash(self.specs[symbol].contract),
+                    'multi_timeframe_state_hash': evaluator.last_mtf_state.mtf_state_hash if evaluator.last_mtf_state else state.state_hash,
+                    'strategy_context_hash': canonical_hash(self.specs[symbol].capsules),
+                    'portfolio_context_hash': self._ledger.head(),
+                    'VTIL_activation_ref': self.cfg.activation_id},
+                    source_refs=[state.state_hash, self._ledger.head()], now_ms=now,
+                    deadline_ms=now + self.cfg.max_quote_age_ms)
         for symbol, bars in advanced_bars.items():
             self.last_bar_end_ms[symbol] = max(
                 self.last_bar_end_ms.get(symbol, 0), bars[-1].end_ms)
@@ -1184,6 +1237,48 @@ class AccountCoordinatorService:
             "cognition_invoker": self.cognition_config.invoker,
         })
         return result
+    def _start_packet_worker(self):
+        sources = getattr(self.cfg, 'cognitive_fabric', {}).get('packet_sources', [])
+        if not sources or not any(s.get('enabled') is True for s in sources):
+            return
+        import threading
+        from vati.cognition.packet_producer import PacketProducer
+        from vati.cognition.fabric import TriAnalystPlane
+        # Validate configuration without performing network calls or changing qualification.
+        PacketProducer(self.tri_analyst, sources=sources, clock=self.clock)
+        stop = threading.Event()
+        self._packet_worker_stop = stop
+        def produce():
+            ledger = None
+            try:
+                ledger = open_ledger(self.cfg.ledger)
+                self._packet_worker_state = 'RUNNING_ADVISORY'
+                plane = TriAnalystPlane(ledger, account_alias=self.cfg.account_alias)
+                producer = PacketProducer(plane, sources=sources, clock=self.clock,
+                    secrets_dir=getattr(self.cfg, 'secrets_dir', ''), should_stop=stop.is_set)
+                while not stop.is_set():
+                    try:
+                        producer.poll()
+                        self._packet_worker_state = 'RUNNING_ADVISORY'
+                    except Exception:
+                        self._packet_worker_state = 'DEGRADED'
+                        # Isolated advisory lane faults never trip/widen account risk state.
+                        ledger.append(make_event(EventKind.COGNITIVE_FABRIC, 'vati-packet-worker',
+                            {'record_type':'PacketWorkerFault', 'account_alias':self.cfg.account_alias,
+                             'state':'DEGRADED', 'reason':'PACKET_WORKER_FAULT'},
+                            event_time_ms=self.clock(), received_time_ms=self.clock()))
+                    stop.wait(max(0.1, self.cfg.poll_seconds))
+            except Exception:
+                self._packet_worker_state = 'DEGRADED'
+            finally:
+                if ledger is not None:
+                    ledger.close()
+                if stop.is_set():
+                    self._packet_worker_state = 'STOPPED'
+        self._packet_worker_state = 'CONFIGURED_NOT_STARTED'
+        self._packet_worker = threading.Thread(target=produce, name='vati-advisory-packets', daemon=True)
+        self._packet_worker.start()
+
     def run_forever(self) -> int:
         def stop(*_args):
             self.stop_requested = True
@@ -1191,6 +1286,7 @@ class AccountCoordinatorService:
         signal.signal(signal.SIGINT, stop)
         self.start()
         try:
+            self._start_packet_worker()
             while not self.stop_requested:
                 try:
                     self.step_once()
@@ -1206,6 +1302,10 @@ class AccountCoordinatorService:
                     self._heartbeat("FAULT", {"error": str(exc)[:200]})
                 time.sleep(self.cfg.poll_seconds)
         finally:
+            if self._packet_worker_stop is not None:
+                self._packet_worker_stop.set()
+            if self._packet_worker is not None:
+                self._packet_worker.join(timeout=16)
             if self.lease is not None:
                 self.lease.release(now_ms=self.clock())
             if self._lease_store is not None:
