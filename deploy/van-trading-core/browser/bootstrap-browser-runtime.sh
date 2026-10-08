@@ -60,14 +60,14 @@ chromium_path="$(cd "$BASE" && PLAYWRIGHT_BROWSERS_PATH="$PLAYWRIGHT_BROWSERS_PA
 python3.12 -m venv "$BASE/harness-venv"
 "$BASE/harness-venv/bin/python" -m pip install --disable-pip-version-check --no-cache-dir \
   "browser-harness==0.1.13" "cdp-use==1.4.5" "fetch-use==0.4.0" \
-  "pillow==12.2.0" "websockets==15.0.1"
+  "pillow==12.3.0" "websockets==15.0.1"
 "$BASE/harness-venv/bin/python" - <<'PY'
 import importlib.metadata as m
 expected = {
     "browser-harness": "0.1.13",
     "cdp-use": "1.4.5",
     "fetch-use": "0.4.0",
-    "pillow": "12.2.0",
+    "pillow": "12.3.0",
     "websockets": "15.0.1",
 }
 for package, version in expected.items():
