@@ -68,3 +68,13 @@ def test_bootstrap_pins_and_health_checks_harness_worker():
     assert "vati-browser-harness.service" in text
     assert "127.0.0.1:${VAN_HARNESS_PORT:-9141}/health" in text
     assert "BROWSER_HARNESS_RUNTIME_GREEN" in text
+
+
+def test_bootstrap_grants_only_browser_worker_parent_traverse_access():
+    text = BOOTSTRAP.read_text(encoding="utf-8")
+    assert "setfacl -m u:van-browser:--x" in text
+    assert "apt-get install -y -qq --no-install-recommends acl" in text
+    assert "/var/lib/van-trading/evidence/browser" in text
+    assert "/var/log/van-trading/browser" in text
+    assert "chmod 0711 /var/lib/van-trading" not in text
+    assert "chmod 0755 /var/lib/van-trading" not in text
