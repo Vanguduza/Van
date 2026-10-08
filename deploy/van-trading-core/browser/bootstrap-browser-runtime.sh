@@ -20,6 +20,8 @@ if ! id van-browser >/dev/null 2>&1; then
   useradd --system --home-dir "$BASE" --shell /usr/sbin/nologin van-browser
 fi
 install -d -o van-browser -g van-browser -m 0750 "$BASE" "$BASE/browsers"
+install -d -o van-browser -g van-browser -m 0750 /var/lib/van-trading/browser
+install -d -o van-browser -g van-browser -m 0750 /var/lib/van-trading/evidence/browser
 install -d -o van-browser -g van-browser -m 0700 /var/lib/van-trading/browser/profiles
 install -d -o van-browser -g van-browser -m 0700 /var/lib/van-trading/browser/secrets
 install -d -o van-browser -g van-browser -m 0750 /var/lib/van-trading/browser/downloads
