@@ -89,3 +89,13 @@ def test_stagehand_readiness_window_allows_cold_arm64_import():
     tail = text[text.index(marker):]
     assert "for attempt in $(seq 1 15); do" in tail
     assert 'if [[ "$attempt" == 15 ]]; then' in tail
+
+
+def test_bootstrap_keeps_chromium_sandbox_and_scopes_userns_to_exact_binary():
+    text = BOOTSTRAP.read_text(encoding="utf-8")
+    assert "APPARMOR_PROFILE=/etc/apparmor.d/van-browser-playwright-chromium" in text
+    assert "profile van-browser-playwright-chromium $chromium_path flags=(unconfined)" in text
+    assert "userns," in text
+    assert 'apparmor_parser -r "$APPARMOR_PROFILE"' in text
+    assert "--no-sandbox" not in text
+    assert "apparmor_restrict_unprivileged_userns=0" not in text
