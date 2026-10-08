@@ -63,6 +63,8 @@ def test_harness_systemd_identity_is_bounded():
 def test_bootstrap_pins_and_health_checks_harness_worker():
     text = BOOTSTRAP.read_text(encoding="utf-8")
     assert "browser-harness==0.1.13" in text
+    assert "pillow==12.3.0" in text
+    assert "pillow==12.2.0" not in text
     assert "vati-browser-harness.service" in text
     assert "127.0.0.1:${VAN_HARNESS_PORT:-9141}/health" in text
     assert "BROWSER_HARNESS_RUNTIME_GREEN" in text
