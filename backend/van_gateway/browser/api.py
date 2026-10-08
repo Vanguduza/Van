@@ -1110,4 +1110,3 @@ class BrowserApi:
 
 
 __all__ = ["BrowserApi"]
-

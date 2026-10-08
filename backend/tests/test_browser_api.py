@@ -588,4 +588,3 @@ async def test_a_run_cannot_be_started_twice(tmp_path):
         second = await ac.post("/v1/browser/assignments", headers=HEADERS, json=body)
         assert second.status_code == 409
         assert second.json()["detail"] == "BROWSER_TASK_NOT_RUNNABLE:COMPLETED"
-

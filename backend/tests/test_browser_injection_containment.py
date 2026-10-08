@@ -339,4 +339,3 @@ async def test_binding_a_worker_to_a_task_does_not_mutate_the_shared_one(tmp_pat
     assert shared.task is None
     assert bound.task is first
     assert bound.adapter is shared.adapter
-
