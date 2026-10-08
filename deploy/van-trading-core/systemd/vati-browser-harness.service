@@ -25,7 +25,9 @@ ProtectHome=true
 ReadWritePaths=/var/lib/van-trading/browser /var/lib/van-trading/evidence/browser /run/van-browser /var/log/van-trading/browser
 ReadOnlyPaths=/opt/van-browser-runtime /opt/van-trading/config/browser-runtime.env
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
-RestrictNamespaces=true
+# Chromium's sandbox creates user, PID and network namespaces.
+# Keep other namespace types prohibited and Chromium's sandbox enabled.
+RestrictNamespaces=user pid net
 LockPersonality=true
 MemoryDenyWriteExecute=false
 CapabilityBoundingSet=
