@@ -40,6 +40,39 @@ class BrowserSessionBroker:
         self.store = store
         self.policy = policy or BrowserPolicyEngine()
 
+    async def ensure_registered_profile(self, *, profile_alias: str) -> None:
+        """Record a public profile on first use without replacing existing state.
+
+        Authenticated profiles still require explicit secret-reference provisioning.
+        The conflict clause preserves a concurrent registration and its reference.
+        """
+        spec = self.policy.check_profile(profile_alias)
+        existing = await self.store.fetchone(
+            "SELECT profile_alias FROM browser_profiles WHERE profile_alias = ?",
+            (profile_alias,),
+        )
+        if existing is not None:
+            return
+        # The repository YAML loader maps the explicit scalar `none` to None.
+        # A missing authentication declaration is not an unauthenticated profile.
+        if "authentication" not in spec or spec["authentication"] not in (None, "none"):
+            raise BrowserPolicyError(f"browser_profile_registration_required:{profile_alias}")
+        now = int(time.time() * 1000)
+        await self.store.execute(
+            """
+            INSERT INTO browser_profiles(
+              profile_alias, persistence, authentication, mutation_policy, secret_ref,
+              lease_holder, lease_expires_at_ms, last_verified_at_ms, created_at_ms, updated_at_ms
+            ) VALUES (?, ?, ?, ?, NULL, NULL, NULL, NULL, ?, ?)
+            ON CONFLICT(profile_alias) DO NOTHING
+            """,
+            (
+                profile_alias, str(spec.get("persistence", "ephemeral")),
+                "none", str(spec.get("mutation", "forbidden")),
+                now, now,
+            ),
+        )
+
     async def register_profile(
         self,
         *,
@@ -353,3 +386,4 @@ class BrowserTaskService:
 
 
 __all__ = ["BrowserSessionBroker", "BrowserTaskService"]
+
