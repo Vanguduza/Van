@@ -330,8 +330,6 @@ class BrowserSubagentRunner:
                 observation = await worker.execute(assignment, action)
                 if assert_lease_active is not None:
                     await assert_lease_active()
-                if deadline_reached():
-                    return self._stop(assignment, task, steps, extraction, SubagentStop.DEADLINE_REACHED)
             except OwnerTakeoverRequired as exc:
                 # Review I5: the Harness refused to act on the bound target (it moved,
                 # changed, lost focus, or the page left the task scope). Lane 4.
@@ -373,6 +371,8 @@ class BrowserSubagentRunner:
             )
             if observation.extraction:
                 extraction.update(observation.extraction)
+            if deadline_reached():
+                return self._stop(assignment, task, steps, extraction, SubagentStop.DEADLINE_REACHED)
 
             stagnant = stagnant + 1 if observation_digest == last_observation else 0
             if stagnant >= assignment.max_steps_without_progress:

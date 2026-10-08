@@ -1160,7 +1160,19 @@
     "review_scope": "Reviewed actual production role/address/trust resolver consumed by BuildConfig; voice asset staging does not alter connection authority."
   },
   "android/app/src/main/java/com/dial/van/command/settings/SettingsRoute.kt:109": {
-    "pattern": "^                    Text\\(\"This phone\\x27s pairing\",",
-    "review_scope": "Reviewed current pairing card renders real paired/hardware-bound state and supported installer recovery, without host/token configuration fields."
+    "pattern": "^fun SettingsRoute\\(",
+    "review_scope": "Reviewed current settings destination and optional Android permission review; no owner pairing form."
+  },
+  "android/app/src/main/java/com/dial/van/command/nav/VanRoute.kt:176": {
+    "pattern": "^    fun concreteRoute\\(template: String, arguments: Map<String, String\\?>\\): String\\? \\{",
+    "review_scope": "Reviewed typed route reconstruction, required arguments and registered templates; source only."
+  },
+  "android/app/src/main/java/com/dial/van/command/modules/BrowserModules.kt:283": {
+    "pattern": "^internal fun BrowserTasksPage\\(",
+    "review_scope": "Reviewed actual task outcome presentation; execution completion remains distinct from owner goal verification."
+  },
+  "android/buildSrc/src/main/java/com/dial/van/buildconfig/VanProductionTarget.java:17": {
+    "pattern": "^public final class VanProductionTarget \\{",
+    "review_scope": "Reviewed build trust selection and core-only release role validation; no live admission claim."
   }
 }

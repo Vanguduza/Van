@@ -314,6 +314,8 @@ POLICIES: tuple[TablePolicy, ...] = (
     ),
 
     # ---- children -----------------------------------------------------------
+    _p("mission_projection_outbox", _CHILD, parent=("mission_id", "missions"),
+       note="Undelivered terminal publication must survive retries and age sweeps."),
     _p("mission_events", _CHILD, parent=("mission_id", "missions")),
     _p("mission_activities", _CHILD, parent=("mission_id", "missions")),
     _p("mission_execution_controls", _CHILD, parent=("mission_id", "missions")),

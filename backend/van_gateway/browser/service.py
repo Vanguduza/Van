@@ -772,6 +772,23 @@ class BrowserTaskService:
         BrowserTaskStatus.VERIFYING,
     })
 
+    async def start_assignment(self, *, task_id: str, expected_status: BrowserTaskStatus) -> None:
+        """Claim only a runnable task using the guarded compare-and-set writer."""
+        if expected_status not in (BrowserTaskStatus.PENDING, BrowserTaskStatus.RESUME_AUTHORIZED):
+            raise BrowserTaskTransitionRefused(task_id, expected_status.value, "RUNNING", "TASK_NOT_RUNNABLE")
+        await self._write_status(task_id=task_id, status=BrowserTaskStatus.RUNNING,
+            evidence_pointer=None, error_code=None, completed=False, now_ms=None,
+            require_current=expected_status)
+
+    async def interrupt_assignment(self, *, task_id: str) -> None:
+        """Record interruption only if this run still owns RUNNING; never undo an end state."""
+        try:
+            await self._write_status(task_id=task_id, status=BrowserTaskStatus.FAILED,
+                evidence_pointer=None, error_code="BROWSER_ASSIGNMENT_INTERRUPTED",
+                completed=True, now_ms=None, require_current=BrowserTaskStatus.RUNNING)
+        except BrowserTaskTransitionRefused:
+            return
+
     async def set_working_status(
         self, *, task_id: str, status: BrowserTaskStatus, error_code: str | None = None,
         now_ms: int | None = None,

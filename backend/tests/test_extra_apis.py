@@ -261,7 +261,7 @@ async def test_google_fake_transport_requires_authorized_execution_and_readback(
     assert _app.state.google.transport.calls == before
 
     # Owner approval binds the irreversible send to the exact reviewed MIME bytes.
-    stale_parameters = {"draft_id": "d1", "expected_raw_sha256": "0" * 64}
+    stale_parameters = {"draft_id": "d1", "draft_content_sha256": "0" * 64}
     stale = await _app.state.owner_runtime.actions.begin(
         execution_id="exec-google-send-stale",
         command_id="cmd-google-send-stale",
@@ -274,15 +274,15 @@ async def test_google_fake_transport_requires_authorized_execution_and_readback(
         snapshot_id=None,
         owner_approved=True,
     )
-    before_send = len([name for name, _args in google_transport.calls if name == "gmail_send"])
+    before_send = len([name for name, _args in google_transport.calls if name == "gmail_message_send"])
     stale_response = await ac.post(
         "/v1/google/actions/execute",
         headers=headers,
         json={"execution_id": stale.execution_id, "parameters": stale_parameters},
     )
     assert stale_response.status_code == 503
-    assert stale_response.json()["detail"] == "gmail_draft_version_changed"
-    after_send = len([name for name, _args in google_transport.calls if name == "gmail_send"])
+    assert stale_response.json()["detail"] == "gmail_send_draft_changed_since_approval"
+    after_send = len([name for name, _args in google_transport.calls if name == "gmail_message_send"])
     assert after_send == before_send
 
     scrubbed = GoogleService.scrub_for_prompt({"access_token": "tok", "snippet": "hi"})
@@ -362,7 +362,7 @@ async def test_google_filled_pdf_reply_round_trip_is_action_bound(client):
     assert filled.output_artifact_id
 
     draft_parameters={
-        "thread_id":"thread-1",
+        "thread_id":"t1",
         "body":"Attached is the completed form.",
         "attachment_document_id":document.document_id,
     }
@@ -387,12 +387,12 @@ async def test_google_filled_pdf_reply_round_trip_is_action_bound(client):
     assert drafted.status_code==200,drafted.text
     review=drafted.json()["review"]
     assert review["attachment_document_id"]==document.document_id
-    assert len(review["raw_sha256"])==64
+    assert len(review["draft_content_sha256"])==64
     assert drafted.json()["verification"]["status"]=="VERIFIED_SUCCESS"
 
     send_parameters={
         "draft_id":review["draft_id"],
-        "expected_raw_sha256":review["raw_sha256"],
+        "draft_content_sha256":review["draft_content_sha256"],
     }
     send_execution=await app.state.owner_runtime.actions.begin(
         execution_id="exec-google-send-attachment",
@@ -416,6 +416,6 @@ async def test_google_filled_pdf_reply_round_trip_is_action_bound(client):
     assert sent.json()["verification"]["status"]=="VERIFIED_SUCCESS"
     calls=[name for name,_args in transport.calls]
     assert calls==[
-        "gmail_draft","gmail_draft_get",
-        "gmail_draft_get","gmail_send","gmail_message_get",
+        "gmail_profile_get","gmail_thread_get","gmail_draft","gmail_draft_get",
+        "gmail_draft_get","gmail_message_send","gmail_message_get",
     ]

@@ -1385,6 +1385,12 @@ class BrowserInteractionRouter:
         cls = _class_value(getattr(eligibility, "eligibility_class", None))
         reasons.append(f"B2:{cls}")
         payload = getattr(eligibility, "jev_payload", None)
+        if cls == "TRADING_PROTECTED":
+            self.metrics.inc("b2_privacy_rejections")
+            self.metrics.inc("policy_refusals")
+            return StepResult(lane=RouterLane.POLICY_REFUSAL, state=StepState.POLICY_REFUSED,
+                trail=[StepState.POLICY_REFUSED.value],
+                reasons=reasons + ["TRADING_PROTECTED_BROWSER_REFUSED"], eligibility_class=cls)
         if cls not in ELIGIBLE_CLASSES or payload is None or getattr(eligibility, "eligible", True) is False:
             self.metrics.inc("b2_privacy_rejections")
             return None

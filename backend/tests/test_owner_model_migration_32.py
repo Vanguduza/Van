@@ -37,7 +37,8 @@ async def _missions(store, owner: str, *names: str, source_command_id: str | Non
 async def _v31_store(tmp_path, monkeypatch) -> Store:
     """A database that already ran 31 — the case an edit of 31 would never reach."""
     store = Store(str(tmp_path / "v31.sqlite3"))
-    monkeypatch.delitem(dbmod.MIGRATIONS, 47)
+    for version in [v for v in dbmod.MIGRATIONS if v > 46]:
+        monkeypatch.delitem(dbmod.MIGRATIONS, version)
     await store.migrate()
     monkeypatch.undo()
     assert (await store.fetchone("SELECT MAX(version) AS v FROM schema_migrations"))["v"] == 46
@@ -159,7 +160,7 @@ async def test_migration_32_reruns_after_a_crash_before_its_version_row(tmp_path
         await db.executescript(MEMORY_FABRIC_MIGRATION_32)
     assert (await store.fetchone("SELECT MAX(version) AS v FROM schema_migrations"))["v"] == 46
     await store.migrate()
-    assert (await store.fetchone("SELECT MAX(version) AS v FROM schema_migrations"))["v"] == 47
+    assert (await store.fetchone("SELECT MAX(version) AS v FROM schema_migrations"))["v"] == dbmod.SCHEMA_VERSION
     cols = [r["name"] for r in await store.fetchall("PRAGMA table_info(owner_model_outbox)")]
     assert cols[-2:] == ["next_attempt_at_ms", "dead_lettered_at_ms"]
     assert cols.count("next_attempt_at_ms") == 1 and cols.count("dead_lettered_at_ms") == 1

@@ -304,3 +304,13 @@ def test_native_packet_structural_types_are_rejected_before_any_persist(field,va
     assert plane._rows('CognitiveAdmissionEnvelope')==[]
     plane.packet(packet(ev),now_ms=104);plane.packet(second(ev),now_ms=104)
     assert plane.admission(candidate_id='signal',evidence_epoch=ev['evidence_epoch'],now_ms=105)['independence_gate_passed']
+
+
+def test_consolidation_reports_only_the_actual_deterministic_checks():
+    plane, ev, _ = setup_plane()
+    plane.packet(packet(ev), now_ms=104)
+    plane.packet(second(ev), now_ms=104)
+    assessment = plane.consolidate(candidate_id="signal", evidence_epoch=ev["evidence_epoch"], now_ms=105)
+    assert "jev" not in assessment
+    assert assessment["consolidation_checks"]["mode"] == "DETERMINISTIC"
+    assert assessment["consolidation_checks"]["fresh"] is True

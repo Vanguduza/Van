@@ -34,11 +34,11 @@ async def test_terminal_reviewed_action_never_reverts_to_pending_on_replay(tmp_p
     receipt = await runtime.verify(VerificationObservation(
         execution_id=execution.execution_id, success=True,
         correlation={"request": "r1"}, evidence_pointer="ev://verified",
-    ))
+    ), independent_observer=True)
     assert receipt.status is ExecutionStatus.VERIFIED_SUCCESS
 
     replay = await runtime.begin(
-        execution_id="exec-new", command_id="cmd-1", turn_id="turn-2",
+        execution_id="exec-new", command_id="cmd-1", turn_id="turn-1",
         action_id="research.web.search", principal_type=PrincipalType.OWNER_DEVICE,
         requested_by="device-1", idempotency_key="idem-1",
         parameters={"query": "test"}, snapshot_id=None, owner_approved=False,

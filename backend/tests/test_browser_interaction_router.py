@@ -453,7 +453,9 @@ async def test_ineligible_observation_never_reaches_jev(cls):
     router = make_router(jev_client=jev, eligibility_classifier=classifier)
     result = await router.route(step())
     assert len(jev.calls) == 0
-    assert result.lane is RouterLane.STAGEHAND
+    assert result.lane is (RouterLane.POLICY_REFUSAL if cls == "TRADING_PROTECTED" else RouterLane.STAGEHAND)
+    if cls == "TRADING_PROTECTED":
+        assert router.executor.executed == [] and router.semantic_fallback.calls == 0
     assert router.metrics.counts["b2_privacy_rejections"] == 1
 
 

@@ -18,6 +18,7 @@ from van_gateway.automation.canonical import digest
 from van_gateway.browser.adapters import BrowserAdapterError
 from van_gateway.browser.subagent import ProposedAction
 from van_gateway.browser.worker import AdapterBackedWorker
+from van_gateway.browser.interaction_router import IndependentPostconditionVerifier
 
 GOAL = "Read the public statement page and report its URL and title."
 
@@ -61,6 +62,7 @@ def _assignment(task):
         "action_class_ceiling": "A2",
         "autonomy_tier": "L1_HARNESS_DETERMINISTIC",
         "max_steps": 4,
+        "postcondition": {"kind": "READ_BACK", "field": "title", "expected": "Actual statement"},
         "plan": {"steps": [
             {"kind": "navigate", "domain": DOMAIN, "url": f"https://{DOMAIN}/statement"},
             {"kind": "read", "domain": DOMAIN},
@@ -84,7 +86,7 @@ async def _profile(store, alias="public_research"):
 
 async def test_five_tool_route_registers_a_fresh_public_profile(tmp_path):
     harness = _Harness()
-    ac, _api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness))
+    ac, _api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness), verifier=IndependentPostconditionVerifier(harness))
     async with ac:
         assert await _profile(store) is None
         created = await ac.post("/v1/browser/tasks", headers=HEADERS, json={
@@ -111,7 +113,7 @@ async def test_five_tool_route_registers_a_fresh_public_profile(tmp_path):
 
 async def test_success_seals_actual_observation_and_releases_profile(tmp_path):
     harness = _Harness()
-    ac, _api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness))
+    ac, _api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness), verifier=IndependentPostconditionVerifier(harness))
     async with ac:
         task = await _task(ac)
         response = await ac.post("/v1/browser/assignments", headers=HEADERS, json=_assignment(task))
@@ -142,6 +144,8 @@ async def test_success_seals_actual_observation_and_releases_profile(tmp_path):
         assert task_result["task"]["status"] == "COMPLETED"
         assert task_result["task"]["evidence_pointer"] == pointer
         rows = (await ac.get(f"/v1/browser/tasks/{task['task_id']}/evidence")).json()
+        assert any(row["kind"] == "postcondition_verification" for row in rows)
+        rows = [row for row in rows if row["kind"] == "ASSIGNMENT_COMPLETION"]
         assert len(rows) == 1
         assert rows[0]["evidence_id"] == evidence["evidence_id"]
         assert rows[0]["extraction_digest"] == evidence["extraction_digest"]
@@ -153,7 +157,7 @@ async def test_success_seals_actual_observation_and_releases_profile(tmp_path):
 
 async def test_adapter_failure_cannot_complete_or_seal_evidence(tmp_path):
     harness = _Harness(fail=True)
-    ac, _api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness))
+    ac, _api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness), verifier=IndependentPostconditionVerifier(harness))
     async with ac:
         task = await _task(ac)
         response = await ac.post("/v1/browser/assignments", headers=HEADERS, json=_assignment(task))
@@ -176,7 +180,7 @@ async def test_concurrent_assignments_cannot_share_a_profile(tmp_path):
     entered = asyncio.Event()
     proceed = asyncio.Event()
     harness = _Harness(entered=entered, proceed=proceed)
-    ac, _api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness))
+    ac, _api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness), verifier=IndependentPostconditionVerifier(harness))
     async with ac:
         first_task = await _task(ac)
         second_task = await _task(ac)
@@ -208,7 +212,7 @@ async def test_concurrent_assignments_cannot_share_a_profile(tmp_path):
 
 async def test_lease_expiry_during_observation_stops_before_completion(tmp_path):
     harness = _Harness()
-    ac, _api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness))
+    ac, _api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness), verifier=IndependentPostconditionVerifier(harness))
 
     async def expire_lease():
         await store.execute(
@@ -272,20 +276,22 @@ async def test_blocked_proposal_cannot_run_past_the_assignment_deadline(tmp_path
 ])
 async def test_completion_observation_uses_the_bounded_domain_rule(tmp_path, observed_url, succeeds):
     harness = _Harness(observed_url=observed_url)
-    ac, _api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness))
+    ac, _api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness), verifier=IndependentPostconditionVerifier(harness))
     async with ac:
-        task = await _task(ac)
-        response = await ac.post("/v1/browser/assignments", headers=HEADERS, json=_assignment(task))
+        task = await _task(ac, scope=[f"https://{DOMAIN}", f"https://sub.{DOMAIN}"])
+        body = _assignment(task)
+        body["allowed_domains"] = [DOMAIN, f"sub.{DOMAIN}"]
+        response = await ac.post("/v1/browser/assignments", headers=HEADERS, json=body)
         assert response.status_code == 200, response.text
         result = response.json()
-        assert result["succeeded"] is succeeds
+        assert result["succeeded"] is succeeds, result
         assert (result["evidence"] is not None) is succeeds
         assert (await _profile(store))["lease_holder"] is None
 
 
 async def test_assignment_does_not_replace_authenticated_profile_reference(tmp_path):
     harness = _Harness()
-    ac, _api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness))
+    ac, _api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness), verifier=IndependentPostconditionVerifier(harness))
     async with ac:
         registered = await ac.post("/v1/browser/profiles", headers=HEADERS, json={
             "profile_alias": "authenticated_owner",
@@ -302,7 +308,7 @@ async def test_assignment_does_not_replace_authenticated_profile_reference(tmp_p
 
 async def test_assignment_does_not_provision_an_absent_authenticated_profile(tmp_path):
     harness = _Harness()
-    ac, _api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness))
+    ac, _api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness), verifier=IndependentPostconditionVerifier(harness))
     async with ac:
         task = await _task(ac, profile_alias="authenticated_owner")
         response = await ac.post("/v1/browser/assignments", headers=HEADERS, json=_assignment(task))
@@ -315,7 +321,7 @@ async def test_assignment_does_not_provision_an_absent_authenticated_profile(tmp
 async def test_cancelled_assignment_fails_and_releases_its_profile(tmp_path):
     entered = asyncio.Event()
     harness = _Harness(entered=entered, proceed=asyncio.Event())
-    ac, _api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness))
+    ac, _api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness), verifier=IndependentPostconditionVerifier(harness))
     async with ac:
         task = await _task(ac)
         pending = asyncio.create_task(
@@ -333,7 +339,8 @@ async def test_cancelled_assignment_fails_and_releases_its_profile(tmp_path):
 
 
 async def test_cancellation_during_acquisition_releases_the_committed_lease(tmp_path, monkeypatch):
-    ac, api, store = await _client(tmp_path, worker=AdapterBackedWorker(_Harness()))
+    harness = _Harness()
+    ac, api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness), verifier=IndependentPostconditionVerifier(harness))
     acquired = asyncio.Event()
     proceed = asyncio.Event()
     acquire = api.broker.acquire_lease
@@ -363,7 +370,8 @@ async def test_cancellation_during_acquisition_releases_the_committed_lease(tmp_
 
 
 async def test_failed_evidence_sealing_cannot_complete_and_releases_profile(tmp_path, monkeypatch):
-    ac, api, store = await _client(tmp_path, worker=AdapterBackedWorker(_Harness()))
+    harness = _Harness()
+    ac, api, store = await _client(tmp_path, worker=AdapterBackedWorker(harness), verifier=IndependentPostconditionVerifier(harness))
 
     async def failed_seal(**kwargs):
         raise RuntimeError("evidence store unavailable")
@@ -395,7 +403,7 @@ async def test_done_without_observation_is_not_success(tmp_path):
             "/v1/browser/assignments", headers=HEADERS, json=_assignment(task)
         )).json()
         assert result["succeeded"] is False
-        assert result["stop_reason"] == "WORKER_ERROR"
-        assert result["detail"] == "BROWSER_COMPLETION_OBSERVATION_MISSING_OR_INVALID"
+        assert result["stop_reason"] == "UNVERIFIABLE"
+        assert result["detail"] == "verifier_unavailable"
         assert result["evidence"] is None
         assert (await _profile(store))["lease_holder"] is None

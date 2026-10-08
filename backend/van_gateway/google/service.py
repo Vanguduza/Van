@@ -15,6 +15,7 @@ from van_gateway.google.mail import content_digest, encode_snapshot, message_sna
 from van_gateway.documents.service import DocumentService, DocumentServiceError
 from van_gateway.models import DegradedCode, GoogleConnectionStatus
 from van_gateway.google.transport import GoogleOutcomeUnknown
+from van_gateway.google.calendar_readback import event_content_matches
 from van_gateway.storage.db import Store
 
 
@@ -348,8 +349,9 @@ class GoogleService:
                     "review": {
                         "draft_id": object_id,
                         "thread_id": thread_id,
-                        "raw_sha256": submitted_raw_sha,
-                        "attachment_document_id": attachment_document_id,
+                        "draft_content_sha256": content_digest(prepared.snapshot, thread_id),
+                        "source_message_id": prepared.source_message_id,
+                        "attachment_document_id": str(parameters.get("attachment_document_id") or "").strip() or None,
                     },
                     "verification": receipt.model_dump(mode="json"),
                 }
@@ -423,7 +425,10 @@ class GoogleService:
                 await actions.mark_verifying(execution_id)
                 try:
                     observed = await self.calendar_event_get(event_id)
-                    success = str(observed.get("id") or "") == event_id
+                    success = (
+                        str(observed.get("id") or "") == event_id
+                        and event_content_matches(event, observed)
+                    )
                 except Exception:
                     success, observed = False, {}
                 receipt = await actions.verify(
@@ -435,7 +440,8 @@ class GoogleService:
                             "etag": str(observed.get("etag") or ""),
                         },
                         evidence_pointer=pointer,
-                    )
+                    ),
+                    independent_observer=True,
                 )
                 return {"provider": provider, "verification": receipt.model_dump(mode="json")}
 
@@ -454,7 +460,9 @@ class GoogleService:
                     observed = await self.calendar_event_get(event_id)
                     success = (
                         str(observed.get("id") or "") == event_id
+                        and bool(str(observed.get("etag") or ""))
                         and str(observed.get("etag") or "") != expected_version
+                        and event_content_matches(event, observed)
                     )
                 except Exception:
                     success, observed = False, {}
@@ -467,7 +475,8 @@ class GoogleService:
                             "etag": str(observed.get("etag") or ""),
                         },
                         evidence_pointer=pointer,
-                    )
+                    ),
+                    independent_observer=True,
                 )
                 return {"provider": provider, "verification": receipt.model_dump(mode="json")}
 
@@ -485,7 +494,10 @@ class GoogleService:
                 success = False
                 try:
                     observed = await self.calendar_event_get(event_id)
-                    success = str(observed.get("status") or "") == "cancelled"
+                    success = (
+                        str(observed.get("id") or "") == event_id
+                        and str(observed.get("status") or "") == "cancelled"
+                    )
                 except Exception as exc:
                     success = str(exc) == "google_http_404"
                 receipt = await actions.verify(
@@ -497,7 +509,8 @@ class GoogleService:
                             "deleted": success,
                         },
                         evidence_pointer=pointer,
-                    )
+                    ),
+                    independent_observer=True,
                 )
                 return {"provider": provider, "verification": receipt.model_dump(mode="json")}
 

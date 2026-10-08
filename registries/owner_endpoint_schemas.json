@@ -77,6 +77,562 @@
         ],
         "title": "AccountChallengeRequest"
       },
+      "AcquisitionCheckpointBody": {
+        "properties": {
+          "worker_id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Worker Id"
+          },
+          "lease_token": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 8,
+            "title": "Lease Token"
+          },
+          "checkpoint_ref": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Checkpoint Ref"
+          }
+        },
+        "type": "object",
+        "required": [
+          "worker_id",
+          "lease_token",
+          "checkpoint_ref"
+        ],
+        "title": "AcquisitionCheckpointBody"
+      },
+      "AcquisitionClaimBody": {
+        "properties": {
+          "worker_id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Worker Id"
+          },
+          "lease_seconds": {
+            "type": "integer",
+            "maximum": 3600.0,
+            "minimum": 30.0,
+            "title": "Lease Seconds",
+            "default": 120
+          }
+        },
+        "type": "object",
+        "required": [
+          "worker_id"
+        ],
+        "title": "AcquisitionClaimBody"
+      },
+      "AcquisitionCompleteBody": {
+        "properties": {
+          "worker_id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Worker Id"
+          },
+          "lease_token": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 8,
+            "title": "Lease Token"
+          },
+          "checkpoint_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2048
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checkpoint Ref"
+          }
+        },
+        "type": "object",
+        "required": [
+          "worker_id",
+          "lease_token"
+        ],
+        "title": "AcquisitionCompleteBody"
+      },
+      "AcquisitionEnqueueBody": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "profile_alias": {
+            "type": "string",
+            "title": "Profile Alias",
+            "default": "public_research"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "default": "HERMES"
+          },
+          "parent_item_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Item Id"
+          },
+          "depth": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Depth",
+            "default": 0
+          },
+          "priority": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Priority",
+            "default": 50
+          },
+          "preferred_route": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AcquisitionRoute"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "max_attempts": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Max Attempts",
+            "default": 5
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "AcquisitionEnqueueBody"
+      },
+      "AcquisitionEvidenceBody": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Kind"
+          },
+          "content_digest": {
+            "type": "string",
+            "maxLength": 71,
+            "minLength": 71,
+            "title": "Content Digest"
+          },
+          "source_url": {
+            "type": "string",
+            "title": "Source Url"
+          },
+          "route": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AcquisitionRoute"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "artifact_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2048
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artifact Ref"
+          },
+          "signature_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2048
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signature Ref"
+          },
+          "byte_size": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Byte Size",
+            "default": 0
+          },
+          "detail": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "content_digest",
+          "source_url"
+        ],
+        "title": "AcquisitionEvidenceBody"
+      },
+      "AcquisitionExecuteBody": {
+        "properties": {
+          "worker_id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Worker Id"
+          },
+          "lease_token": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 8,
+            "title": "Lease Token"
+          },
+          "signals": {
+            "$ref": "#/components/schemas/AcquisitionSignals"
+          },
+          "recon_depth": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 1.0,
+            "title": "Recon Depth",
+            "default": 2
+          },
+          "crawl_max_pages": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Crawl Max Pages",
+            "default": 100
+          },
+          "crawl_max_depth": {
+            "type": "integer",
+            "maximum": 6.0,
+            "minimum": 0.0,
+            "title": "Crawl Max Depth",
+            "default": 3
+          },
+          "crawl_max_concurrency": {
+            "type": "integer",
+            "maximum": 12.0,
+            "minimum": 1.0,
+            "title": "Crawl Max Concurrency",
+            "default": 6
+          },
+          "crawl_max_tasks_per_minute": {
+            "type": "integer",
+            "maximum": 240.0,
+            "minimum": 1.0,
+            "title": "Crawl Max Tasks Per Minute",
+            "default": 120
+          },
+          "crawl_timeout_seconds": {
+            "type": "integer",
+            "maximum": 1800.0,
+            "minimum": 30.0,
+            "title": "Crawl Timeout Seconds",
+            "default": 300
+          },
+          "crawl_respect_robots_txt": {
+            "type": "boolean",
+            "title": "Crawl Respect Robots Txt",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "worker_id",
+          "lease_token"
+        ],
+        "title": "AcquisitionExecuteBody"
+      },
+      "AcquisitionFailBody": {
+        "properties": {
+          "worker_id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Worker Id"
+          },
+          "lease_token": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 8,
+            "title": "Lease Token"
+          },
+          "failure": {
+            "$ref": "#/components/schemas/AcquisitionFailure"
+          },
+          "error_code": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Error Code"
+          },
+          "retry_after_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 86400000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retry After Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "worker_id",
+          "lease_token",
+          "failure",
+          "error_code"
+        ],
+        "title": "AcquisitionFailBody"
+      },
+      "AcquisitionFailure": {
+        "type": "string",
+        "enum": [
+          "NETWORK",
+          "RATE_LIMIT",
+          "SERVER",
+          "AUTH_EXPIRED",
+          "SESSION_INVALID",
+          "DOM_DRIFT",
+          "CHALLENGE",
+          "EXTRACTION",
+          "RUNTIME",
+          "CAPACITY",
+          "POLICY",
+          "UNSAFE",
+          "UNKNOWN"
+        ],
+        "title": "AcquisitionFailure"
+      },
+      "AcquisitionLeaseMutationBody": {
+        "properties": {
+          "worker_id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Worker Id"
+          },
+          "lease_token": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 8,
+            "title": "Lease Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "worker_id",
+          "lease_token"
+        ],
+        "title": "AcquisitionLeaseMutationBody"
+      },
+      "AcquisitionRenewBody": {
+        "properties": {
+          "worker_id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Worker Id"
+          },
+          "lease_token": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 8,
+            "title": "Lease Token"
+          },
+          "lease_seconds": {
+            "type": "integer",
+            "maximum": 3600.0,
+            "minimum": 30.0,
+            "title": "Lease Seconds",
+            "default": 120
+          }
+        },
+        "type": "object",
+        "required": [
+          "worker_id",
+          "lease_token"
+        ],
+        "title": "AcquisitionRenewBody"
+      },
+      "AcquisitionRoute": {
+        "type": "string",
+        "enum": [
+          "DIRECT_HTTP",
+          "SCRAPLING_HTTP",
+          "KATANA_RECON",
+          "CRAWLEE_CRAWL",
+          "SCRAPLING_BROWSER",
+          "HARNESS",
+          "STAGEHAND"
+        ],
+        "title": "AcquisitionRoute"
+      },
+      "AcquisitionRouteBody": {
+        "properties": {
+          "worker_id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Worker Id"
+          },
+          "lease_token": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 8,
+            "title": "Lease Token"
+          },
+          "signals": {
+            "$ref": "#/components/schemas/AcquisitionSignals"
+          }
+        },
+        "type": "object",
+        "required": [
+          "worker_id",
+          "lease_token",
+          "signals"
+        ],
+        "title": "AcquisitionRouteBody"
+      },
+      "AcquisitionSignals": {
+        "properties": {
+          "structured_endpoint_available": {
+            "type": "boolean",
+            "title": "Structured Endpoint Available",
+            "default": false
+          },
+          "unknown_site": {
+            "type": "boolean",
+            "title": "Unknown Site",
+            "default": false
+          },
+          "reconnaissance_complete": {
+            "type": "boolean",
+            "title": "Reconnaissance Complete",
+            "default": false
+          },
+          "javascript_required": {
+            "type": "boolean",
+            "title": "Javascript Required",
+            "default": false
+          },
+          "browser_required": {
+            "type": "boolean",
+            "title": "Browser Required",
+            "default": false
+          },
+          "semantic_interaction_required": {
+            "type": "boolean",
+            "title": "Semantic Interaction Required",
+            "default": false
+          },
+          "selector_drift": {
+            "type": "boolean",
+            "title": "Selector Drift",
+            "default": false
+          },
+          "domain_skill_available": {
+            "type": "boolean",
+            "title": "Domain Skill Available",
+            "default": false
+          },
+          "bulk_crawl_required": {
+            "type": "boolean",
+            "title": "Bulk Crawl Required",
+            "default": false
+          },
+          "jev_hint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AcquisitionRoute"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "AcquisitionSignals",
+        "description": "Observed signals used by the deterministic route selector.\n\nJEV may populate/accelerate these signals, but it does not become an\nauthority source. A hint can choose among otherwise-admissible routes only."
+      },
+      "AcquisitionTelemetryBody": {
+        "properties": {
+          "route": {
+            "$ref": "#/components/schemas/AcquisitionRoute"
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "latency_ms": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Latency Ms",
+            "default": 0
+          },
+          "byte_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Byte Count",
+            "default": 0
+          },
+          "verified_records": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Verified Records",
+            "default": 0
+          },
+          "cost_micros": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Cost Micros",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "route",
+          "success"
+        ],
+        "title": "AcquisitionTelemetryBody"
+      },
       "ActionBeginBody": {
         "properties": {
           "execution_id": {
@@ -287,6 +843,24 @@
         ],
         "title": "AppPolicy"
       },
+      "ArtifactKind": {
+        "type": "string",
+        "enum": [
+          "REPORT",
+          "PLAN",
+          "COMPARISON",
+          "DOCUMENT",
+          "PDF",
+          "BROWSER_SNAPSHOT",
+          "CHART",
+          "TABLE",
+          "FILE",
+          "RECEIPT",
+          "FINANCE_SUMMARY",
+          "OTHER"
+        ],
+        "title": "ArtifactKind"
+      },
       "AssignmentBody": {
         "properties": {
           "task_id": {
@@ -368,6 +942,16 @@
               }
             ],
             "title": "Interactive Session Id"
+          },
+          "postcondition": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PostconditionSpec"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -785,6 +1369,64 @@
         "title": "AutonomyTier",
         "description": "§88 — the Stagehand determinism ladder.\n\nL0-L3 keep action selection deterministic. L4/L5 place it inside the worker,\nwhich is why they are gated: `docs/SECURITY_POLICY.md` says Hermes is the sole\nagent runtime."
       },
+      "Body_import_document_v1_documents_import_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "command_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command Id"
+          },
+          "mission_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mission Id"
+          },
+          "execution_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_import_document_v1_documents_import_post"
+      },
       "BootstrapAttestBody": {
         "properties": {
           "token": {
@@ -1126,6 +1768,168 @@
           "attestation_chain_b64"
         ],
         "title": "CertifyBindingBody"
+      },
+      "CognitiveCandidate": {
+        "properties": {
+          "expected_context_revision": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Context Revision"
+          },
+          "candidate_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Candidate Id"
+          },
+          "provider_product": {
+            "type": "string",
+            "enum": [
+              "personal-muse-free",
+              "meta-ai-free-spark-surface",
+              "openai-dot",
+              "van-native"
+            ],
+            "title": "Provider Product"
+          },
+          "candidate_type": {
+            "type": "string",
+            "enum": [
+              "GUARDIAN_OBSERVATION",
+              "DOCTOR_FINDING",
+              "RESEARCH_ARTIFACT",
+              "OWNER_PATTERN",
+              "ATTENTION_CALIBRATION",
+              "MISSION_CANDIDATE",
+              "TRADING_RESEARCH"
+            ],
+            "title": "Candidate Type"
+          },
+          "observed_at_ms": {
+            "type": "integer",
+            "title": "Observed At Ms"
+          },
+          "expires_at_ms": {
+            "type": "integer",
+            "title": "Expires At Ms"
+          },
+          "source_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 30,
+            "minItems": 1,
+            "title": "Source Refs"
+          },
+          "evidence_hashes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 30,
+            "minItems": 1,
+            "title": "Evidence Hashes"
+          },
+          "confidence_permille": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 0.0,
+            "title": "Confidence Permille"
+          },
+          "affected_scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "minItems": 1,
+            "title": "Affected Scopes"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Summary"
+          },
+          "proposed_follow_up": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Proposed Follow Up",
+            "default": ""
+          },
+          "data_class": {
+            "type": "string",
+            "enum": [
+              "PUBLIC",
+              "INTERNAL_SANITIZED"
+            ],
+            "title": "Data Class"
+          },
+          "response_hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Response Hash"
+          },
+          "sensitive_inference": {
+            "type": "boolean",
+            "const": false,
+            "title": "Sensitive Inference",
+            "default": false
+          },
+          "counterexamples": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 30,
+            "title": "Counterexamples"
+          },
+          "observed_instances": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 30,
+            "title": "Observed Instances"
+          },
+          "attention_dimensions": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Attention Dimensions"
+          },
+          "supersedes_candidate_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supersedes Candidate Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_context_revision",
+          "candidate_id",
+          "provider_product",
+          "candidate_type",
+          "observed_at_ms",
+          "expires_at_ms",
+          "source_refs",
+          "evidence_hashes",
+          "confidence_permille",
+          "affected_scopes",
+          "summary",
+          "data_class",
+          "response_hash"
+        ],
+        "title": "CognitiveCandidate"
       },
       "CommandRequest": {
         "properties": {
@@ -2032,6 +2836,21 @@
             "additionalProperties": true,
             "type": "object",
             "title": "Inputs"
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array",
+                "maxItems": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scope"
           }
         },
         "type": "object",
@@ -2529,6 +3348,42 @@
         ],
         "title": "DecisionStatus"
       },
+      "DeterministicAction": {
+        "properties": {
+          "operation": {
+            "type": "string",
+            "title": "Operation"
+          },
+          "locator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locator"
+          },
+          "value_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value Ref"
+          }
+        },
+        "type": "object",
+        "required": [
+          "operation"
+        ],
+        "title": "DeterministicAction",
+        "description": "A typed action the caller already knows. No model involved."
+      },
       "DeviceTelemetryBody": {
         "properties": {
           "samples": {
@@ -2582,6 +3437,187 @@
         ],
         "title": "DeviceTelemetrySample",
         "description": "One device-produced measurement (P3-OBS-002).\n\nThe name must be one the catalogue declares — see\n`instruments.DEVICE_HISTOGRAMS` and `DEVICE_GAUGES`. An unknown name is\nrefused rather than registered, because a metric that appears at runtime with\nno declared producer is exactly the drift Gate 11 exists to stop."
+      },
+      "DomainSkillCanaryBody": {
+        "properties": {
+          "passed": {
+            "type": "boolean",
+            "title": "Passed"
+          },
+          "evidence_ref": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Evidence Ref"
+          },
+          "observed_fingerprint": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observed Fingerprint"
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 3600000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latency Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "passed",
+          "evidence_ref"
+        ],
+        "title": "DomainSkillCanaryBody"
+      },
+      "DomainSkillProposeBody": {
+        "properties": {
+          "domain": {
+            "type": "string",
+            "maxLength": 253,
+            "minLength": 1,
+            "title": "Domain"
+          },
+          "goal_class": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Goal Class"
+          },
+          "route": {
+            "$ref": "#/components/schemas/AcquisitionRoute"
+          },
+          "artifact_ref": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Artifact Ref"
+          },
+          "site_fingerprint": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Site Fingerprint"
+          },
+          "success_assertions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Success Assertions"
+          },
+          "failure_signatures": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Failure Signatures"
+          },
+          "evidence_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Refs"
+          },
+          "golden_case_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Golden Case Refs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "domain",
+          "goal_class",
+          "route",
+          "artifact_ref"
+        ],
+        "title": "DomainSkillProposeBody"
+      },
+      "DomainSkillQualifyBody": {
+        "properties": {
+          "replay_passed": {
+            "type": "boolean",
+            "title": "Replay Passed"
+          },
+          "evidence_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Evidence Refs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "replay_passed",
+          "evidence_refs"
+        ],
+        "title": "DomainSkillQualifyBody"
+      },
+      "DomainSkillQuarantineBody": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Reason"
+          },
+          "evidence_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2048
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Ref"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "DomainSkillQuarantineBody"
+      },
+      "DraftBody": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 20000,
+            "title": "Text",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "DraftBody"
       },
       "DurableSignalBody": {
         "properties": {
@@ -2969,6 +4005,104 @@
         "title": "FailureClass",
         "description": "§77 — what kind of failure this was, because they do not weigh the same."
       },
+      "FillDocumentRequest": {
+        "properties": {
+          "values": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Values"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "command_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command Id"
+          },
+          "mission_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mission Id"
+          },
+          "execution_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "values"
+        ],
+        "title": "FillDocumentRequest"
+      },
+      "FollowUpCreate": {
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "maxLength": 8000,
+            "minLength": 1,
+            "title": "Prompt"
+          }
+        },
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "title": "FollowUpCreate"
+      },
+      "FollowUpDecision": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "pattern": "^(promote|dismiss)$",
+            "title": "Action"
+          },
+          "command_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "title": "FollowUpDecision"
+      },
       "GenerateBody": {
         "properties": {
           "goal": {
@@ -2993,6 +4127,124 @@
         ],
         "title": "GenerateBody",
         "description": "§22 — COLD generation. The gateway ships only the deterministic proposer."
+      },
+      "GoalCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Description",
+            "default": ""
+          },
+          "priority": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Priority",
+            "default": 50
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "evidence_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Refs"
+          },
+          "milestones": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Milestones"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "GoalCreate"
+      },
+      "GoalPatch": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoalStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "GoalPatch"
+      },
+      "GoalStatus": {
+        "type": "string",
+        "enum": [
+          "ACTIVE",
+          "PAUSED",
+          "COMPLETED",
+          "CANCELLED"
+        ],
+        "title": "GoalStatus"
       },
       "GoogleArtifactBody": {
         "properties": {
@@ -3360,6 +4612,57 @@
         "title": "HermesReminderCreateBody",
         "description": "What Hermes may ask the gateway to remind the owner about, on the owner's behalf.\n\n`text` must be the owner's own words, not Hermes's paraphrase (AGENTS.md's run\nprocedure says so explicitly). `mission_id` is correlation context for the caller, not\nowner-authored data, and is echoed back in this route's response rather than persisted\n(reminders has no mission_id column). `source` on the request is likewise echoed back\nas this route received it — it is Hermes's own label, not trusted as the persisted\nrecord of who reached this route. The *persisted* `source` column (added for\nGAP-F-002, closing the gap this docstring used to name: \"reminders has no free-form\nmetadata column to hold them\") is always the literal `\"hermes\"` this route sets, never\n`body.source`, because only a RUNTIME-scoped internal-control credential can reach here\nat all, and that is the fact worth recording. `created_by` in the response says the\nsame thing for the reader who does not want to open the database to see it."
       },
+      "HermesSuggestionCreateBody": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "rationale": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Rationale"
+          },
+          "proposed_prompt": {
+            "type": "string",
+            "maxLength": 8000,
+            "minLength": 1,
+            "title": "Proposed Prompt"
+          },
+          "source_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Source Refs"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "rationale",
+          "proposed_prompt",
+          "source_refs"
+        ],
+        "title": "HermesSuggestionCreateBody",
+        "description": "An evidence-backed idea for the owner, never an execution request."
+      },
       "HotContextCapsuleRequest": {
         "properties": {
           "scopes": {
@@ -3464,6 +4767,69 @@
         ],
         "title": "IntentSignature",
         "description": "§26 — semantic index key, so natural phrasing maps to one capability."
+      },
+      "InteractionStepBody": {
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id"
+          },
+          "action_class_ceiling": {
+            "type": "string",
+            "title": "Action Class Ceiling",
+            "default": "A1"
+          },
+          "closed_operation_set": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Closed Operation Set"
+          },
+          "deterministic_action": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DeterministicAction"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "postcondition": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PostconditionSpec"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "semantic_instruction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Semantic Instruction"
+          },
+          "value_slots": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Value Slots"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_id"
+        ],
+        "title": "InteractionStepBody"
       },
       "KnowledgeActionExecuteBody": {
         "properties": {
@@ -4016,19 +5382,18 @@
         ],
         "title": "MemoryRecordView"
       },
-      "MessageBody": {
+      "MilestonePatch": {
         "properties": {
-          "message": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Message"
+          "done": {
+            "type": "boolean",
+            "title": "Done"
           }
         },
         "type": "object",
         "required": [
-          "message"
+          "done"
         ],
-        "title": "MessageBody"
+        "title": "MilestonePatch"
       },
       "MissionControlAckBody": {
         "properties": {
@@ -4535,6 +5900,19 @@
         ],
         "title": "MissionDirectionBody"
       },
+      "MissionLink": {
+        "properties": {
+          "mission_id": {
+            "type": "string",
+            "title": "Mission Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mission_id"
+        ],
+        "title": "MissionLink"
+      },
       "MissionOrigin": {
         "type": "string",
         "enum": [
@@ -4653,6 +6031,18 @@
         ],
         "title": "NotebookConsumerAskRequest"
       },
+      "ObservationOrigin": {
+        "type": "string",
+        "enum": [
+          "OWNER_EXPLICIT",
+          "SYSTEM_OBSERVED",
+          "HINDSIGHT_DERIVED",
+          "OPENVIKING_RETRIEVED",
+          "MODEL_INFERRED"
+        ],
+        "title": "ObservationOrigin",
+        "description": "Contract C1 — where one supporting episode came from. Persisted per episode."
+      },
       "ObserveBody": {
         "properties": {
           "owner_principal_id": {
@@ -4669,6 +6059,9 @@
           "episode_ref": {
             "type": "string",
             "title": "Episode Ref"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/ObservationOrigin"
           },
           "evidence_refs": {
             "items": {
@@ -4694,7 +6087,8 @@
           "owner_principal_id",
           "field",
           "value",
-          "episode_ref"
+          "episode_ref",
+          "origin"
         ],
         "title": "ObserveBody"
       },
@@ -4781,6 +6175,85 @@
         },
         "type": "object",
         "title": "OpenSessionBody"
+      },
+      "OperationRequest": {
+        "properties": {
+          "mission_id": {
+            "type": "string",
+            "title": "Mission Id"
+          },
+          "surface": {
+            "$ref": "#/components/schemas/Surface"
+          },
+          "target_application": {
+            "type": "string",
+            "title": "Target Application"
+          },
+          "operation_type": {
+            "$ref": "#/components/schemas/OperationType"
+          },
+          "action_class": {
+            "$ref": "#/components/schemas/ActionClass",
+            "default": "A2"
+          },
+          "scope": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Scope"
+          },
+          "activity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activity Id"
+          },
+          "verifier_type": {
+            "type": "string",
+            "title": "Verifier Type",
+            "default": "NONE"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mission_id",
+          "surface",
+          "target_application",
+          "operation_type"
+        ],
+        "title": "OperationRequest",
+        "description": "Every field is a binding §38 requires; none is optional in spirit."
+      },
+      "OperationType": {
+        "type": "string",
+        "enum": [
+          "NAVIGATE",
+          "READ",
+          "EXTRACT",
+          "CLICK",
+          "TYPE_TEXT",
+          "FILL_FROM_REFERENCE",
+          "SELECT",
+          "SCROLL",
+          "SCREENSHOT",
+          "UPLOAD_FROM_REFERENCE",
+          "DOWNLOAD_TO_EVIDENCE",
+          "WAIT_FOR_CONDITION",
+          "LIST_FILES",
+          "READ_TEXT",
+          "WRITE_TEXT",
+          "RUN_PYTHON_FILE",
+          "RUN_NODE_FILE",
+          "GIT_STATUS",
+          "GIT_DIFF",
+          "GIT_APPLY_PATCH"
+        ],
+        "title": "OperationType",
+        "description": "§38 — typed operations only. This set is the boundary.\n\nThere is deliberately no RUN_ARBITRARY, EXECUTE or EVAL. Anything a new\nintegration needs is a new member here, reviewed as a change to this file,\nrather than a new string passed at runtime."
       },
       "OriginChannel": {
         "type": "string",
@@ -5805,6 +7278,46 @@
         ],
         "title": "PlannedStep",
         "description": "One step of a deterministic assignment. Mirrors `ProposedAction`'s shape, because\nthe runner grades the proposal and the plan has to be gradeable in the same terms."
+      },
+      "PostconditionSpec": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Field"
+          },
+          "expected": {
+            "title": "Expected"
+          },
+          "correlation_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Correlation Keys"
+          },
+          "expected_correlation": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Expected Correlation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "title": "PostconditionSpec",
+        "description": "What the IR declared must become true (§165)."
       },
       "PremiseAssessmentBody": {
         "properties": {
@@ -7001,6 +8514,162 @@
         "title": "SuccessContract",
         "description": "§6 — machine-readable, so \"done\" is checkable rather than asserted.\n\n`postconditions` are the claims a verifier must observe. An empty contract is\nlegal (not every mission is consequential) but it can never yield\nVERIFIED_SUCCESS — `MissionService` routes it to UNVERIFIABLE instead, since\na mission with nothing to check has not been verified, only finished."
       },
+      "SuggestionCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "rationale": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Rationale"
+          },
+          "proposed_prompt": {
+            "type": "string",
+            "maxLength": 8000,
+            "minLength": 1,
+            "title": "Proposed Prompt"
+          },
+          "source_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Source Refs"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "rationale",
+          "proposed_prompt"
+        ],
+        "title": "SuggestionCreate"
+      },
+      "SuggestionDecision": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "pattern": "^(accept|edit|dismiss)$",
+            "title": "Action"
+          },
+          "edited_prompt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 8000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edited Prompt"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "title": "SuggestionDecision"
+      },
+      "SuggestionStatus": {
+        "type": "string",
+        "enum": [
+          "NEW",
+          "ACCEPTED",
+          "EDITED",
+          "DISMISSED"
+        ],
+        "title": "SuggestionStatus"
+      },
+      "Surface": {
+        "type": "string",
+        "enum": [
+          "BROWSER",
+          "DESKTOP",
+          "TERMINAL",
+          "MOBILE"
+        ],
+        "title": "Surface",
+        "description": "Where an operation happens. Each has its own worker and its own limits."
+      },
+      "ThreadCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "ThreadCreate"
+      },
+      "ThreadRename": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "ThreadRename"
+      },
+      "ThreadStatePatch": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/ThreadStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "ThreadStatePatch"
+      },
+      "ThreadStatus": {
+        "type": "string",
+        "enum": [
+          "ACTIVE",
+          "ARCHIVED"
+        ],
+        "title": "ThreadStatus"
+      },
       "TicketConfirmRequest": {
         "properties": {
           "owner_signature_ref": {
@@ -7291,6 +8960,113 @@
           "system_operationalization"
         ],
         "title": "VocabularyDefinitionBody"
+      },
+      "WatchCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "source_kind": {
+            "$ref": "#/components/schemas/WatchSourceKind"
+          },
+          "target": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Target"
+          },
+          "condition": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Condition"
+          },
+          "interval_seconds": {
+            "type": "integer",
+            "maximum": 2678400.0,
+            "minimum": 60.0,
+            "title": "Interval Seconds",
+            "default": 3600
+          },
+          "goal_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "source_kind",
+          "target",
+          "condition"
+        ],
+        "title": "WatchCreate"
+      },
+      "WatchObservation": {
+        "properties": {
+          "observation": {
+            "title": "Observation"
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          }
+        },
+        "type": "object",
+        "title": "WatchObservation"
+      },
+      "WatchSourceKind": {
+        "type": "string",
+        "enum": [
+          "BROWSER",
+          "PROVIDER",
+          "AUTOMATION",
+          "MANUAL_FEED"
+        ],
+        "title": "WatchSourceKind"
+      },
+      "WatchStatus": {
+        "type": "string",
+        "enum": [
+          "ACTIVE",
+          "PAUSED",
+          "CANCELLED"
+        ],
+        "title": "WatchStatus"
+      },
+      "WatchStatusPatch": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/WatchStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "WatchStatusPatch"
       },
       "WorkerStepBody": {
         "properties": {
@@ -7714,6 +9490,75 @@
           "signature"
         ],
         "title": "RouteBody"
+      },
+      "van_gateway__conversations__api__MessageBody": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 50000,
+            "minLength": 1,
+            "title": "Body"
+          },
+          "command_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command Id"
+          },
+          "mission_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mission Id"
+          },
+          "artifact_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Artifact Refs"
+          },
+          "terminal": {
+            "type": "boolean",
+            "title": "Terminal",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "body"
+        ],
+        "title": "MessageBody"
+      },
+      "van_gateway__mission__api__MessageBody": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "MessageBody"
       },
       "van_gateway__mission__api__RouteBody": {
         "properties": {

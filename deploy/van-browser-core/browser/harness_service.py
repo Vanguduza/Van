@@ -3355,8 +3355,34 @@ print("__VAN_JSON__" + json.dumps({"tabs": items}))
     return {"tabs": safe, "harness_version": HARNESS_VERSION}
 
 
+def network_candidates(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
+    """Read-only endpoint candidates from the live page's Resource Timing buffer.
+
+    Query strings, fragments, headers, cookies and bodies never leave the worker.
+    This is discovery metadata, not authority to call the discovered endpoint.
+    """
+    script = r"""
+import json
+expr = "(()=>{const out=[];for(const e of performance.getEntriesByType('resource').slice(-512)){try{const u=new URL(e.name,location.href);if(u.protocol!=='http:'&&u.protocol!=='https:')continue;out.push({url:u.origin+u.pathname,initiator_type:String(e.initiatorType||'other')});}catch(_){}}return out;})()"
+items = js(expr) or []
+print("__VAN_JSON__" + json.dumps({"candidates": items[:512]}))
+"""
+    result = _run(alias, script)
+    if not isinstance(result, dict) or not isinstance(result.get("candidates"), list):
+        raise WorkerError("BROWSER_NETWORK_CANDIDATES_INVALID", 502)
+    candidates = []
+    for item in result.get("candidates", []):
+        if not isinstance(item, dict):
+            continue
+        url = str(item.get("url") or "")[:4096]
+        initiator = str(item.get("initiator_type") or "other")[:64]
+        if url.startswith(("http://", "https://")):
+            candidates.append({"url": url, "initiator_type": initiator})
+    return {"candidates": candidates[:512], "harness_version": HARNESS_VERSION}
+
 OPERATIONS = {
     "/navigate": navigate,
+    "/network_candidates": network_candidates,
     "/click": click,
     "/fill": fill,
     "/press": press,
@@ -3570,7 +3596,7 @@ class LeaseFence:
 #: Operations that change the page. Each must carry the lease generation it runs under.
 MUTATING_OPERATIONS = frozenset({"/navigate", "/click", "/fill", "/press", "/scroll", "/upload"})
 #: Reads. Unfenced is allowed; a fenced read is checked like any other call.
-READ_OPERATIONS = frozenset({"/page_info", "/screenshot", "/tabs", "/describe", "/wait"})
+READ_OPERATIONS = frozenset({"/page_info", "/screenshot", "/tabs", "/describe", "/wait", "/network_candidates"})
 #: Unit G11 — the gateway gives a page lease back: the lease's guard freezes the page and is
 #: removed. Fenced like a mutating operation (a stale generation cannot end a newer lease).
 LEASE_END_OPERATION = "/release"

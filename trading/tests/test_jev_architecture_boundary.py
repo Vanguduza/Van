@@ -126,42 +126,38 @@ def test_vati_execution_and_risk_have_no_browser_or_jev_entry():
 
 
 def test_router_refuses_a_trading_protected_page_before_any_lane():
-    from van_gateway.browser.interaction_router import (
-        InteractionRequest,
-        InteractionRouter,
-        InteractionTarget,
-        RouteStatus,
-    )
-
-    class _Lease:
-        async def assert_may_actuate(self, **_):
-            return None
-
-    class _Protected:
-        def classify_observation(self, observation):
-            return {"eligibility": "TRADING_PROTECTED", "reasons": ["broker_order_ticket"],
-                    "data_class": None, "jev_payload": None}
+    from types import SimpleNamespace
+    from van_gateway.browser.interaction_router import BrowserInteractionRouter, InteractionStep, RouterLane, StepState
+    from van_gateway.browser.models import BrowserTask, BrowserStrategy, AutonomyTier
+    from van_gateway.models import ActionClass
 
     calls = []
-
-    class _Anything:
-        async def propose_action(self, payload):
+    class Lane:
+        configured = True
+        async def propose_action(self, **kwargs):
             calls.append("jev")
-            return {}
-
-        async def act(self, request):
+            raise AssertionError("trading page must not reach Jev")
+        async def propose(self, *args):
             calls.append("stagehand")
-            return {}
-
-        async def execute(self, step, *, request):
+            raise AssertionError("trading page must not reach Stagehand")
+        async def execute(self, *args):
             calls.append("execute")
-            return {}
+            raise AssertionError("trading page must not be actuated")
 
-    lane = _Anything()
-    router = InteractionRouter(leases=_Lease(), eligibility=_Protected(), jev=lane, stagehand=lane, executor=lane)
-    result = asyncio.run(router.route(InteractionRequest(
-        session_id="s", control_lease_id="l", control_generation=1, observation={},
-        observation_epoch="e", targets=(InteractionTarget("t_buy", "button", "Buy"),),
-    )))
-    assert result.status is RouteStatus.POLICY_REFUSED
+    async def owner_idle(task):
+        return False
+    def protected(observation, **kwargs):
+        return SimpleNamespace(eligibility_class="TRADING_PROTECTED", jev_payload=None)
+
+    lane = Lane()
+    router = BrowserInteractionRouter(enabled=True, eligibility_classifier=protected,
+        jev_client=lane, semantic_fallback=lane, executor=lane, owner_control_probe=owner_idle,
+        stagehand_gate=lambda: (True, "TEST_PERMITTED"))
+    task = BrowserTask(task_id="protected", profile_alias="public_research",
+        strategy=BrowserStrategy.HARNESS, autonomy_tier=AutonomyTier.L1_HARNESS_DETERMINISTIC,
+        action_class=ActionClass.A2, target_domain="broker.example.com",
+        goal="Read broker page", started_at_ms=0)
+    result = asyncio.run(router.route(InteractionStep(task=task, action_class_ceiling="A2",
+        observation={"url": "https://broker.example.com/order", "controls": []})))
+    assert result.state is StepState.POLICY_REFUSED and result.lane is RouterLane.POLICY_REFUSAL
     assert calls == []

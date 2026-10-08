@@ -102,7 +102,7 @@ async def test_migration_backfills_legacy_episodes_as_system_observed(tmp_path, 
     assert eps == expected
     assert revs == [("owner", 1), ("someone-else", 1)]
     version = await store.fetchone("SELECT MAX(version) AS v FROM schema_migrations")
-    assert version["v"] == dbmod.SCHEMA_VERSION == 47
+    assert version["v"] == dbmod.SCHEMA_VERSION
 
     model = OwnerCognitiveModel(store)
     legacy = await model.get("oca_ev")

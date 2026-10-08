@@ -237,3 +237,14 @@ async def test_ambiguous_send_timeout_never_retries_or_claims_success(tmp_path):
         with pytest.raises(Exception, match="execution_not_authorized"):
             await google.execute_authorized_action(actions, execution_id=execution.execution_id, parameters=parameters)
     assert len(posts) == 1
+
+
+@pytest.mark.parametrize("body", ["", "Ready", "Ready\\n", "Ready\\n\\n", "Zoë\\r\\nReady"])
+@pytest.mark.parametrize("with_pdf", [False, True])
+def test_frozen_snapshot_preserves_exact_body_and_attachment_bytes(body, with_pdf):
+    snapshot = message_snapshot(_approved_draft()["message"]["raw"])
+    snapshot["body"] = body.replace("\\r\\n", "\\n")
+    if with_pdf:
+        snapshot["attachments"] = [{"filename": "reply.pdf", "mime_type": "application/pdf",
+            "data_b64": base64.b64encode(b"%PDF-1.4\\nexact-test-bytes\\x00\\xff").decode("ascii")}]
+    assert message_snapshot(encode_snapshot(snapshot)) == snapshot

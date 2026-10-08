@@ -83,7 +83,7 @@ def message_snapshot(raw: str) -> dict[str, Any]:
             if (part.is_multipart() or part.get_content_type() != "application/pdf"
                     or part.get_content_disposition() != "attachment"
                     or not isinstance(filename, str) or not 1 <= len(filename) <= 180
-                    or any(c in filename for c in "\\r\\n\\x00/\\\\")
+                    or any(c in filename for c in "\r\n\x00/\\")
                     or part.defects):
                 raise RuntimeError("gmail_attachment_invalid")
             data = part.get_payload(decode=True)
@@ -124,6 +124,12 @@ def content_digest(snapshot: dict[str, Any], thread_id: str) -> str:
     return hashlib.sha256(material.encode()).hexdigest()
 
 
+def _set_exact_text_content(message: EmailMessage, body: str) -> None:
+    """Keep approved trailing newlines exact while using a safe MIME transfer encoding."""
+    message.set_content(body, charset="utf-8", cte="base64")
+    message.set_payload(base64.encodebytes(_normal_body(body).replace("\n", "\r\n").encode("utf-8")).decode("ascii"))
+
+
 def encode_snapshot(snapshot: dict[str, Any]) -> str:
     """Serialize only approved fields; discard unrelated provider/raw headers."""
     message = EmailMessage(policy=policy.SMTP)
@@ -138,7 +144,7 @@ def encode_snapshot(snapshot: dict[str, Any]) -> str:
     if snapshot["references"]:
         message["References"] = " ".join(snapshot["references"])
     message["Date"] = formatdate(localtime=False, usegmt=True)
-    message.set_content(snapshot["body"], charset="utf-8")
+    _set_exact_text_content(message, snapshot["body"])
     for attachment in snapshot.get("attachments", []):
         message.add_attachment(base64.b64decode(attachment["data_b64"], validate=True),
             maintype="application", subtype="pdf", filename=attachment["filename"])

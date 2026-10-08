@@ -13,6 +13,7 @@ from pypdf import PdfWriter
 from van_gateway.artifacts.service import ArtifactService
 from van_gateway.documents.service import DocumentService
 from van_gateway.google.service import GoogleService
+from van_gateway.google.mail import prepare_reply, message_snapshot, content_digest
 from van_gateway.google.transport import (
     FakeGoogleTransport, GoogleHttpTransport, GoogleOutcomeUnknown, _normalise_gmail_message,
 )
@@ -126,7 +127,7 @@ async def test_gmail_reply_draft_binds_threading_headers():
             return httpx.Response(200, json={
                 "id":"t1",
                 "messages":[{
-                    "id":"m1","threadId":"t1",
+                    "id":"m1","threadId":"t1","internalDate":"1000","labelIds":["INBOX"],
                     "payload":{"headers":[
                         {"name":"Message-ID","value":"<source@example.com>"},
                         {"name":"References","value":"<older@example.com>"},
@@ -147,15 +148,18 @@ async def test_gmail_reply_draft_binds_threading_headers():
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
         transport=GoogleHttpTransport(client)
-        result=await transport.gmail_draft("token","t1","Thanks")
+        profile=await transport.gmail_profile_get("token")
+        thread=await transport.gmail_thread_get("token","t1")
+        prepared=prepare_reply(profile,thread,"t1","Thanks")
+        result=await transport.gmail_draft("token","t1",prepared.raw)
     assert result["id"]=="d1"
     raw=result["message"]["raw"]
     decoded=base64.urlsafe_b64decode(raw + "=" * (-len(raw) % 4)).decode("utf-8")
     assert "In-Reply-To: <source@example.com>" in decoded
     assert "References: <older@example.com> <source@example.com>" in decoded
     assert "To: supplier@example.com" in decoded
-    assert "Subject: Re: Question" in decoded
-    assert len(result["_van_raw_sha256"])==64
+    assert "Subject: Question" in decoded
+    assert message_snapshot(raw)==prepared.snapshot
 
 
 
@@ -193,7 +197,7 @@ async def test_filled_document_output_is_attached_to_reviewed_reply(tmp_path):
         ],
     )
     result=await service.gmail_draft(
-        "thread-1","Attached is the completed form.",
+        "t1","Attached is the completed form.",
         attachment_document_id=source.document_id,
     )
     raw=result["message"]["raw"]
@@ -205,7 +209,7 @@ async def test_filled_document_output_is_attached_to_reviewed_reply(tmp_path):
     assert attachments[0].get_filename()=="permission.pdf"
     assert attachments[0].get_content_type()=="application/pdf"
     assert attachments[0].get_payload(decode=True)==output_bytes
-    assert len(result["_van_raw_sha256"])==64
+    assert message_snapshot(raw)["attachments"][0]["data_b64"]==base64.b64encode(output_bytes).decode("ascii")
 
 
 

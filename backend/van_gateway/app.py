@@ -110,7 +110,6 @@ from van_gateway.automation.temporal_bridge import TemporalAutomationApi
 from van_gateway.browser.agent_grant import AgentGrantService
 from van_gateway.browser.api import BrowserApi
 from van_gateway.browser.control_lease import ControlLeaseService
-from van_gateway.browser.interaction_router import InteractionRouter
 from van_gateway.browser.downloads import DownloadBroker
 from van_gateway.browser.downloads_api import build_download_report_router
 from van_gateway.browser.interactive_api import (
@@ -707,14 +706,6 @@ def create_app() -> FastAPI:
     interactive_sessions = InteractiveSessionService(
         store, browser.broker, browser_control_leases, events=events,
     )
-    # Programme B B5 — the interaction router is built over the *existing* control-lease model
-    # and the one dial-jev client. It opens no session and starts no service. Eligibility is
-    # left at its default (deny all) until the B2 classifier is wired, so the Jev lane is
-    # never taken; the harness executor and Stagehand lane are attached by their owners.
-    interaction_router = InteractionRouter(
-        leases=browser_control_leases,
-        jev=jev_advisor if jev_advisor.configured else None,
-    )
     # §5.5 — a dedicated ES256 key, separate from owner approval and device enrolment.
     # Absent configuration means grants cannot be minted, which is the honest state of a
     # deployment with no stream host: the routes refuse rather than issuing a credential
@@ -1049,6 +1040,9 @@ def create_app() -> FastAPI:
         # wakes the bounded runner; a restart therefore does not re-check every watch.
         return await watch_runner.run(now_ms=int(time.time() * 1000))
 
+    async def _reconcile_mission_publications() -> dict:
+        return {"published": await missions.reconcile_terminal_projections()}
+
     def _scheduler_jobs() -> tuple[ScheduledJob, ...]:
         jobs = [
             ScheduledJob("reminders.fire_due", settings.reminder_sweep_seconds, _sweep_reminders),
@@ -1056,6 +1050,8 @@ def create_app() -> FastAPI:
                 "missions.expire_overdue", settings.reminder_sweep_seconds,
                 _expire_overdue_missions,
             ),
+            ScheduledJob("missions.publish_terminal", settings.reminder_sweep_seconds,
+                         _reconcile_mission_publications),
             ScheduledJob("ops.retention", settings.retention_interval_seconds, _run_retention),
             ScheduledJob("proactive.follow_ups", settings.reminder_sweep_seconds, _run_proactive_followups),
             ScheduledJob("owner.watches", settings.reminder_sweep_seconds, _run_owner_watches),
@@ -1224,8 +1220,22 @@ def create_app() -> FastAPI:
 
     @app.get("/v1/browser/interaction-router")
     async def interaction_router_status() -> dict:
-        """Which B5 lanes are wired. Read-only; the Jev lane names the one dial-jev."""
-        return interaction_router.describe()
+        """Configured lanes and their actual gate verdicts; read-only capability projection."""
+        stagehand_reason = await browser_interaction._stagehand_disabled_reason()
+        jev_reasons = browser_interaction.jev_lane_disabled_reasons()
+        jev_gate_reason = await browser_interaction._jev_effect_gate_closed_reason()
+        return {
+            "jev_service": "dial-jev" if browser_interaction.jev_client is not None else None,
+            "jev_lane_reachable": bool(browser_interaction.enabled and not jev_reasons
+                                       and jev_gate_reason is None),
+            "jev_lane_disabled_reasons": jev_reasons,
+            "jev_effect_gate_reason": jev_gate_reason,
+            "jev_eligibility_classifier": type(browser_interaction.eligibility_classifier).__name__,
+            "deterministic_executor": browser_interaction.executor is not None,
+            "stagehand_fallback": bool(browser_interaction.enabled and stagehand_reason is None),
+            "stagehand_disabled_reason": stagehand_reason,
+            "independent_verifier": browser_interaction.verifier is not None,
+        }
 
     app.include_router(automation_health.router)
     app.include_router(automation.router)
@@ -1500,7 +1510,7 @@ def create_app() -> FastAPI:
     app.state.browser_action_plans = browser_action_plans
     app.state.interactive_sessions = interactive_sessions
     app.state.browser_control_leases = browser_control_leases
-    app.state.interaction_router = interaction_router
+    app.state.interaction_router = browser_interaction
     app.state.browser_stream_grants = browser_stream_grants
     app.state.browser_producers = browser_producers
     app.include_router(mission_api.router)

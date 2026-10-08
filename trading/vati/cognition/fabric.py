@@ -246,7 +246,7 @@ class TriAnalystPlane:
             'unresolved_questions': [p['missing_inputs'] for p in packets],
             'uncertainty': [p['uncertainty'] for p in packets],
             'provenance': [p['content_hash'] for p in packets],
-            'jev': {'mode': 'DETERMINISTIC', 'fresh': fresh, 'epoch_matching': True,
+            'consolidation_checks': {'mode': 'DETERMINISTIC', 'fresh': fresh, 'epoch_matching': True,
                     'disagreement': len(set(directions.values())) > 1},
             'disposition': 'VATI_EVALUATE' if passed else 'WATCH',
             'expires_at_ms': min(ev['freshness_deadline_ms'], signal['expires_at_ms'])}, now_ms)

@@ -1686,6 +1686,7 @@ class BrowserApi:
         # back after it. Every Harness call carries its generation, and the fence's guard
         # re-checks (and renews) the lease with the broker before each one.
         try:
+            await self.broker.ensure_registered_profile(profile_alias=task.profile_alias)
             acquisition = asyncio.create_task(self.broker.lease_for_task_run(
                 profile_alias=task.profile_alias, task_id=task.task_id,
             ))
@@ -1702,26 +1703,61 @@ class BrowserApi:
                 raise
         except BrowserPolicyError as exc:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
+        async def assert_lease_active() -> None:
+            await self.broker.assert_lease_active(
+                lease_id=lease.lease_id, holder_id=task.task_id, generation=lease.generation)
+
         page_end: dict[str, Any] | None = None
+        evidence = None
+        evidence_pointer = None
+        claimed = False
         try:
             try:
+                current = await self._load_task(task.task_id)
+                claim = asyncio.create_task(self.tasks.start_assignment(
+                    task_id=task.task_id, expected_status=current.status))
+                try:
+                    await asyncio.shield(claim)
+                    claimed = True
+                except asyncio.CancelledError:
+                    await asyncio.shield(claim)
+                    claimed = True
+                    raise
+                deadline_first = assignment.deadline_ms is not None and assignment.deadline_ms <= lease.expires_at_ms
+                stop_at_ms = min(lease.expires_at_ms, assignment.deadline_ms) if assignment.deadline_ms is not None else lease.expires_at_ms
                 with harness_lease_fence(broker_lease_fence(self.broker, lease)):
-                    result = await self.runner.run(
-                        assignment=assignment, worker=worker, task=task,
-                        verifier=self.verifier, postcondition=body.postcondition,
-                    )
+                    try:
+                        async with asyncio.timeout(max(0, (stop_at_ms - time.time() * 1000) / 1000)):
+                            result = await self.runner.run(
+                                assignment=assignment, worker=worker, task=task,
+                                verifier=self.verifier, postcondition=body.postcondition,
+                                assert_lease_active=assert_lease_active,
+                            )
+                    except TimeoutError:
+                        result = SubagentResult(assignment_id=assignment.assignment_id, task_id=task.task_id,
+                            stop_reason=SubagentStop.DEADLINE_REACHED if deadline_first else SubagentStop.WORKER_ERROR,
+                            detail=None if deadline_first else "BROWSER_PROFILE_LEASE_EXPIRED")
+                    if result.succeeded:
+                        await assert_lease_active()
+                        evidence = await self._seal_assignment_observation(task, assignment, result)
+                        if evidence is not None:
+                            evidence_pointer = f"browser-evidence://{evidence.evidence_id}"
             finally:
                 page_end = await self._end_run_page(acquired, lease)
         except SemanticWorkerUnavailable as exc:
             await self._late_block_before_raising(task, page_end)
+            if claimed:
+                await self.tasks.interrupt_assignment(task_id=task.task_id)
             # An L2+ assignment asked for judgement about a page and no semantic
             # runtime is configured. Walking the deterministic plan instead would be
             # answering a different question and reporting success on this one.
             raise HTTPException(
                 status_code=503, detail=f"BROWSER_SEMANTIC_RUNTIME_UNAVAILABLE:{exc}"
             ) from exc
-        except Exception:
+        except BaseException:
             await self._late_block_before_raising(task, page_end)
+            if claimed:
+                await self.tasks.interrupt_assignment(task_id=task.task_id)
             raise
         # Unit G15 (review I8 MAJOR-2): the page ended before any outcome is written, so a write
         # the guard blocked after the run's last Harness call hands the task to the owner
@@ -1739,7 +1775,7 @@ class BrowserApi:
 
         escalation = None
         try:
-            escalation = await self._record_run_outcome(task, assignment, result, run_token)
+            escalation = await self._record_run_outcome(task, assignment, result, run_token, evidence_pointer)
         except BrowserTaskTransitionRefused as exc:
             # Review I3 MINOR-2: the task reached an end state while this run was in flight
             # (e.g. /complete CANCELLED). It stays there; the run's outcome is not applied.
@@ -1749,7 +1785,13 @@ class BrowserApi:
             ) from exc
         if escalation is not None:
             instruments.record_browser_task("ESCALATED")
-        return self._assignment_response(assignment, task, result, escalation)
+        response = self._assignment_response(assignment, task, result, escalation)
+        response.update(evidence_pointer=evidence_pointer,
+            evidence=evidence.model_dump(mode="json") if evidence is not None else None,
+            execution_completed=result.execution_completed,
+            session_lease_ref=lease.lease_id, session_lease_generation=lease.generation,
+            session_lease_released=acquired is not None)
+        return response
 
     async def _end_run_page(self, acquired: Any, lease: Any) -> dict[str, Any] | None:
         """Unit G15 — end the run's page and return the Harness's ``/release`` answer.
@@ -1794,8 +1836,32 @@ class BrowserApi:
             "stop_reason": SubagentStop.OWNER_TAKEOVER, "detail": f"HARNESS_REFUSED:{code}",
         })
 
+    async def _seal_assignment_observation(self, task, assignment, result):
+        """Seal actual bounded observations; a verified claim alone supplies no page data."""
+        observed_url = result.extraction.get("url")
+        try:
+            observed = urlsplit(observed_url) if isinstance(observed_url, str) else None
+            host = (observed.hostname or "").lower().rstrip(".") if observed else ""
+        except ValueError:
+            observed, host = None, ""
+        allowed = [domain.lower().rstrip(".") for domain in assignment.allowed_domains]
+        if (not result.steps or not all(step.observation_digest for step in result.steps)
+                or observed is None or observed.scheme not in ("http", "https")
+                or not any(host == domain or host.endswith("." + domain) for domain in allowed)
+                or observed.username is not None or observed.password is not None
+                or "adapter_error" in result.extraction):
+            result.stop_reason = SubagentStop.WORKER_ERROR
+            result.detail = "BROWSER_COMPLETION_OBSERVATION_MISSING_OR_INVALID"
+            return None
+        return await self.tasks.seal_evidence(task=task, kind="ASSIGNMENT_COMPLETION", url=observed_url,
+            extraction={"assignment_id": assignment.assignment_id, "turn_id": assignment.turn_id,
+                "command_id": assignment.command_id, "goal_digest": assignment.goal_digest,
+                "steps": [step.model_dump(mode="json") for step in result.steps],
+                "observation": result.extraction})
+
     async def _record_run_outcome(
-        self, task: BrowserTask, assignment: SubagentAssignment, result, run_token: str
+        self, task: BrowserTask, assignment: SubagentAssignment, result, run_token: str,
+        evidence_pointer: str | None = None,
     ) -> dict[str, Any] | None:
         """Apply a finished run to its task, through the guarded writers only (I3 MINOR-2).
 
@@ -1840,6 +1906,7 @@ class BrowserApi:
                 await self.tasks.complete(
                     task_id=task.task_id, status=terminal_status, error_code=error_code,
                     now_ms=int(time.time() * 1000), run_token=run_token,
+                    evidence_pointer=evidence_pointer,
                 )
             # P3-OBS-002 — "browser task status" is one of Gate 11's named
             # metrics. Recorded at the one place a task reaches a terminal

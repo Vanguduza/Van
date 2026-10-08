@@ -574,6 +574,16 @@ class OwnerRuntimeApi:
                 )
             except MissionError as exc:
                 raise HTTPException(status_code=409, detail=exc.code) from exc
+            if receipt["status"] == "APPLIED" and receipt.get("mission_id"):
+                mission_id = receipt["mission_id"]
+                pending = await self.store.fetchone(
+                    "SELECT mission_id FROM mission_projection_outbox WHERE mission_id=?", (mission_id,))
+                artifact = await self.store.fetchone(
+                    "SELECT artifact_id FROM owner_artifacts WHERE canonical_source_type=? "
+                    "AND canonical_source_id=? ORDER BY created_at_ms ASC LIMIT 1",
+                    ("mission.outcome", mission_id))
+                receipt["artifact_id"] = artifact["artifact_id"] if artifact else None
+                receipt["publication_state"] = "PENDING" if pending else "PUBLISHED" if artifact else "UNAVAILABLE"
             return JSONResponse(receipt, status_code=200 if receipt["status"] == "APPLIED" else 202)
 
         @router.post("/missions/control/poll", response_model=MissionControlState)
