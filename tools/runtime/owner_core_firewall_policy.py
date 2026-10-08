@@ -10,6 +10,7 @@ No result grants OCI, deployment, provider or device authority.
 from __future__ import annotations
 import ipaddress
 import shlex
+import re
 
 ADDRESSES = {"van-trading-core": "10.77.0.4", "dial-control": "10.77.0.1", "oracle-admin": "10.77.0.2"}
 MAX_RULES = 4096
@@ -210,6 +211,8 @@ def packet(source: str | int, target: str | int, port: int, *, iif="wg-dial", oi
 
 def declared_lanes(declaration: dict) -> list[dict]:
     lanes = declaration.get("required_network_lanes")
+    if declaration.get("topology") == "CORE_ONLY_V2":
+        return core_only_lanes(declaration)
     if declaration.get("ingress_capability") != "VAN_OWNER_TLS_PASSTHROUGH_V1" or not isinstance(lanes, list) or len(lanes) != 4:
         raise Unsupported("exact_declaration_required")
     expected = {("10.77.0.2", "van-trading-core", "10.77.0.4", 8443),
@@ -231,7 +234,91 @@ def declared_lanes(declaration: dict) -> list[dict]:
     return lanes
 
 
+def core_only_lanes(declaration: dict) -> list[dict]:
+    lanes = declaration.get("required_network_lanes")
+    interface = declaration.get("public_ingress_interface", "")
+    if (type(declaration.get("schema_version")) is not int or declaration["schema_version"] != 2
+            or declaration.get("topology") != "CORE_ONLY_V2"
+            or declaration.get("runtime_hosts") != ["van-trading-core"]
+            or declaration.get("ingress_capability") != "VAN_OWNER_CORE_DIRECT_MTLS_V1"
+            or not isinstance(interface, str)
+            or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,14}", interface) or interface == "lo"
+            or not isinstance(lanes, list) or len(lanes) != 3):
+        raise Unsupported("exact_core_only_declaration_required")
+    protocols = {"DIRECT_MTLS_HTTPS_WSS", "SCOPED_TOKEN_LOCAL_HTTP", "HERMES_PROFILE_LOCAL_HTTP"}
+    if any(not isinstance(item, dict) or item.get("target_host") != "van-trading-core"
+           or type(item.get("port")) is not int or not 1024 <= item["port"] <= 65535 for item in lanes):
+        raise Unsupported("invalid_core_only_lane")
+    if {item.get("protocol") for item in lanes} != protocols or len({item["port"] for item in lanes}) != 3:
+        raise Unsupported("ambiguous_core_only_lane")
+    for item in lanes:
+        address = ipaddress.IPv4Address(item["target_address"])
+        if item["protocol"] == "DIRECT_MTLS_HTTPS_WSS":
+            if (item.get("source") != "owner_phone" or item["port"] in {8787, 9133}
+                    or address.is_loopback or address.is_unspecified or address.is_multicast
+                    or address.is_link_local or address.is_reserved or address in ipaddress.ip_network("10.77.0.0/24")):
+                raise Unsupported("wrong_core_ingress_lane")
+        elif item.get("source") != "127.0.0.1" or str(address) != "127.0.0.1":
+            raise Unsupported("cross_host_runtime_lane_refused")
+        elif item["protocol"] == "SCOPED_TOKEN_LOCAL_HTTP" and item["port"] != 8787:
+            raise Unsupported("wrong_local_gateway_port")
+        elif item["protocol"] == "HERMES_PROFILE_LOCAL_HTTP" and item["port"] in {8787, 9133}:
+            raise Unsupported("wrong_local_hermes_port")
+    return [dict(item, ingress_interface=interface) if item["protocol"] == "DIRECT_MTLS_HTTPS_WSS" else dict(item) for item in lanes]
+
+
+def core_only_filter_part(table: dict, host: str, lanes: list[dict], version: int) -> dict:
+    if host != "van-trading-core":
+        raise Unsupported("core_only_host_required")
+    ingress = next(item for item in lanes if item["source"] == "owner_phone")
+    classes = partitions(table, version, ["127.0.0.1", ingress["target_address"]])
+    classes["iif"] = sorted(set(classes["iif"]) | {ingress["ingress_interface"]})
+    classes["oif"] = sorted(set(classes["oif"]) | {ingress["ingress_interface"]})
+    count = 0
+    for chain in ("INPUT", "FORWARD"):
+        for lane in lanes:
+            for src in classes["src"]:
+                for dst in classes["dst"]:
+                    for sport in classes["sport"]:
+                        for iif in classes["iif"]:
+                            if iif == "lo":
+                                continue  # Exact local listener bindings are a separate measured prerequisite.
+                            for oif in classes["oif"] if chain == "FORWARD" else ["van-unlisted-iface"]:
+                                count += 1
+                                if count > MAX_CLASSES:
+                                    raise Unsupported("policy_class_limit_exceeded")
+                                allowed = (version == 4 and chain == "INPUT" and lane["source"] == "owner_phone"
+                                    and dst == int(ipaddress.IPv4Address(ingress["target_address"]))
+                                    and iif == ingress["ingress_interface"])
+                                if verdict(table, chain, packet(src, dst, lane["port"], sport=sport, iif=iif, oif=oif)) == "ACCEPT" and not allowed:
+                                    return {"status": "FAIL", "reason": "unapproved_core_owner_plane_class_admitted",
+                                            "chain": chain, "port": lane["port"]}
+    if version == 4:
+        for state in ("NEW", "ESTABLISHED"):
+            if verdict(table, "INPUT", packet("198.51.100.24", ingress["target_address"], ingress["port"],
+                        iif=ingress["ingress_interface"], state=state)) != "ACCEPT":
+                return {"status": "FAIL", "reason": "direct_core_ingress_blocked"}
+        if verdict(table, "OUTPUT", packet(ingress["target_address"], "198.51.100.24", 49152,
+                    oif=ingress["ingress_interface"], sport=ingress["port"], state="ESTABLISHED")) != "ACCEPT":
+            return {"status": "FAIL", "reason": "direct_core_ingress_reply_blocked"}
+        for lane in lanes:
+            if lane["source"] == "owner_phone":
+                continue
+            for chain in ("INPUT", "OUTPUT"):
+                for state in ("NEW", "ESTABLISHED"):
+                    if verdict(table, chain, packet("127.0.0.1", "127.0.0.1", lane["port"],
+                               iif="lo", oif="lo", state=state)) != "ACCEPT":
+                        return {"status": "FAIL", "reason": "local_runtime_lane_blocked", "port": lane["port"]}
+                if verdict(table, chain, packet("127.0.0.1", "127.0.0.1", 49152,
+                           iif="lo", oif="lo", sport=lane["port"], state="ESTABLISHED")) != "ACCEPT":
+                    return {"status": "FAIL", "reason": "local_runtime_reply_blocked", "port": lane["port"]}
+    return {"status": "PASS", "checked_equivalence_classes": count,
+            "scope": "core-only external NEW TCP admission and required IPv4 direct/local lanes"}
+
+
 def filter_part(table: dict, host: str, lanes: list[dict], version: int) -> dict:
+    if any(item.get("protocol") == "DIRECT_MTLS_HTTPS_WSS" for item in lanes):
+        return core_only_filter_part(table, host, lanes, version)
     hermes = next(item for item in lanes if item["target_host"] == "dial-control")
     ingress = next(item for item in lanes if item["source"] == "owner_phone")
     if host == "van-trading-core":
@@ -320,9 +407,11 @@ def native_part(body: str | None, host: str, lanes: list[dict], version: int) ->
                 for lane in lanes:
                     if lane["source"] == "owner_phone":
                         continue
-                    packets = [packet(lane["source"], lane["target_address"], lane["port"]),
+                    local = lane.get("source") == "127.0.0.1"
+                    interfaces = {"iif": "lo", "oif": "lo"} if local else {}
+                    packets = [packet(lane["source"], lane["target_address"], lane["port"], **interfaces),
                                packet(lane["target_address"], lane["source"], 49152,
-                                      sport=lane["port"], state="ESTABLISHED")]
+                                      sport=lane["port"], state="ESTABLISHED", **interfaces)]
                     for chain, policy in nat["chains"].items():
                         if policy == "-":
                             continue
@@ -343,7 +432,7 @@ def evaluate(declaration: dict, host: str, *, ipv4: str | None, ipv6: str | None
               "deployment_authority_verified": False, "provider_callback_route_verified": False,
               "device_provisioning_permitted": False, "live_e2e_qualified": False}
     try:
-        if host not in ADDRESSES:
+        if host not in ADDRESSES or (declaration.get("topology") == "CORE_ONLY_V2" and host != "van-trading-core"):
             raise Unsupported("exact_host_role_required")
         lanes = declared_lanes(declaration)
         for name, body, version in (("IPv4", ipv4, 4), ("IPv6", ipv6, 6)):

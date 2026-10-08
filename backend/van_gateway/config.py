@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import ipaddress
+import re
 from functools import lru_cache
 from urllib.parse import urlsplit
 
@@ -20,12 +22,36 @@ def _is_loopback_url(value: str) -> bool:
     return (host or "").lower() in _LOOPBACK_HOSTS
 
 
+def _public_core_endpoint(value: str, port: int) -> bool:
+    try:
+        public = urlsplit(value)
+        host = (public.hostname or "").lower()
+        if (not value.startswith("https://") or public.scheme != "https" or public.port != port
+                or not 1024 <= port <= 65535 or port in {8787, 9133}
+                or not host or "@" in public.netloc or "?" in value or "#" in value
+                or public.path not in ("", "/") or public.netloc.endswith(":")
+                or host in {"localhost", "62.83.35.103"} or host.endswith(
+                    (".local", ".localhost", ".internal", ".invalid", ".test", ".onion"))):
+            return False
+        try:
+            address = ipaddress.ip_address(host)
+        except ValueError:
+            return bool("." in host and re.fullmatch(r"(?=.{1,253}$)[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?", host)
+                and not re.fullmatch(r"[0-9.]+", host)
+                and all(label and len(label) <= 63 and not label.startswith("-") and not label.endswith("-") for label in host.split(".")))
+        return address.version == 4 and address.is_global
+    except (ValueError, TypeError):
+        return False
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="VAN_", env_file=".env", extra="ignore")
 
     app_name: str = "van-gateway"
     database_path: str = "data/van_gateway.sqlite3"
     hermes_base_url: str = "http://127.0.0.1:8642"
+    deployment_topology: str = ""
+    mtls_interface: str = ""
     hermes_profile: str = "van"
     hermes_bearer_token: str = ""
     internal_control_token: str = ""  # Hermes→gateway privileged control API
@@ -367,6 +393,29 @@ class Settings(BaseSettings):
         self.assert_production_safe()
         return self
 
+    def _core_only_production_bindings(self) -> bool:
+        """Narrow colocated-runtime exception; never permits a loopback phone URL."""
+        try:
+            hermes = urlsplit(self.hermes_base_url)
+            public = urlsplit(self.van_public_base_url)
+            address = ipaddress.IPv4Address(self.mtls_bind)
+            return (self.deployment_topology == "CORE_ONLY_V2"
+                    and self.mtls_enabled and self.loopback_host == "127.0.0.1"
+                    and self.loopback_port == 8787
+                    and bool(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,14}", self.mtls_interface)) and self.mtls_interface != "lo"
+                    and not self.van_allow_loopback_in_production
+                    and not (address.is_unspecified or address.is_loopback or address.is_multicast or address.is_link_local or address.is_reserved)
+                    and address not in ipaddress.ip_network("10.77.0.0/24")
+                    and self.hermes_base_url.startswith("http://") and hermes.scheme == "http" and hermes.hostname == "127.0.0.1"
+                    and "?" not in self.hermes_base_url and "#" not in self.hermes_base_url
+                    and hermes.username is None and hermes.password is None
+                    and hermes.path in ("", "/") and not hermes.query and not hermes.fragment
+                    and hermes.port is not None and 1024 <= hermes.port <= 65535
+                    and hermes.port not in {8787, self.mtls_port, 9133}
+                    and _public_core_endpoint(self.van_public_base_url, self.mtls_port))
+        except (ValueError, TypeError):
+            return False
+
     def assert_production_safe(self) -> None:
         """GAP-F-018/021 — refuse to construct a production `Settings` that still
         carries a migration-era or localhost-only default.
@@ -393,11 +442,15 @@ class Settings(BaseSettings):
                 "token-only mutations from a device that was never bound to the "
                 "owner (Section 0D.3)."
             )
+        if self.deployment_topology == "CORE_ONLY_V2" and not self._core_only_production_bindings():
+            raise ValueError("CORE_ONLY_V2: exact core mTLS and local Hermes bindings required")
         if not self.van_allow_loopback_in_production:
             for env_name, value in (
                 ("VAN_HERMES_BASE_URL", self.hermes_base_url),
                 ("VAN_PUBLIC_BASE_URL", self.van_public_base_url),
             ):
+                if env_name == "VAN_HERMES_BASE_URL" and self._core_only_production_bindings():
+                    continue
                 if _is_loopback_url(value):
                     raise ValueError(
                         f"GAP-F-021: {env_name}={value!r} is a loopback default and "

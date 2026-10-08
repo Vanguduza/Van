@@ -21,10 +21,10 @@ def bound(tmp_path, monkeypatch):
     config.mkdir()
     ca = state / "mtls"
     init_ca(ca)
-    input_profile = {"schema_version": 1, "profile_id": "synthetic-local-test", "backend_host": "van-trading-core",
-                     "hermes_host": "dial-control", "ingress_host": "oracle-admin",
-                     "public_gateway_url": "https://owner-ingress.example.net:8443", "ingress_bind_address": "10.0.0.122",
-                     "ingress_capability_receipt": "synthetic-test:receipt", "hermes_api_url": "http://10.77.0.1:8642",
+    input_profile = {"schema_version": 2, "profile_id": "synthetic-local-test", "backend_host": "van-trading-core",
+                     "hermes_host": "van-trading-core", "ingress_host": "van-trading-core",
+                     "public_gateway_url": "https://owner-ingress.example.net:8443", "ingress_bind_address": "10.0.0.122", "ingress_interface": "eth0",
+                     "ingress_capability_receipt": "synthetic-test:receipt", "hermes_api_url": "http://127.0.0.1:8642",
                      "gateway_ca_file": str(ca / "ca.crt"), "hermes_runtime_token_file": "/private/acceptance/runtime.token",
                      "connectivity_signing_key_file": "/private/acceptance/connectivity.key", "connectivity_signing_kid": "test-kid",
                      "mtls_directory": str(ca), "database_file": str(state / "owner.sqlite3"),
@@ -140,7 +140,7 @@ def test_only_get_observations_and_current_recorded_canaries_can_pass(bound, mon
     result = runner.collect(*bound)
     assert result["outcome"] == "PASS_HOST_HEALTH_ONLY"
     assert len(calls) == 8
-    assert all(url.startswith(("http://127.0.0.1:8787/", "http://10.77.0.1:8642/", "https://owner-ingress.example.net:8443/")) for url, _, _ in calls)
+    assert all(url.startswith(("http://127.0.0.1:8787/", "http://127.0.0.1:8642/", "https://owner-ingress.example.net:8443/")) for url, _, _ in calls)
     assert result["handset_verified"] is result["fresh_provider_execution_verified"] is result["live_e2e_qualified"] is False
     assert result["ingress_authority_verified"] is result["device_provisioning_permitted"] is False
     encoded = json.dumps(result)

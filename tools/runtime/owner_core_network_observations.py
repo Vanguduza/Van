@@ -92,7 +92,12 @@ def listeners(body: str) -> set[tuple[str, int]]:
 
 
 def private_listener_checks(host: str, lanes: list[dict], pairs: set[tuple[str, int]]) -> dict:
-    if host == "van-trading-core":
+    if any(item.get("protocol") == "DIRECT_MTLS_HTTPS_WSS" for item in lanes):
+        if host != "van-trading-core":
+            raise ValueError("core_only_host_required")
+        allowed = required = {(item["target_address"], item["port"]) for item in lanes}
+        ports = {item["port"] for item in lanes}
+    elif host == "van-trading-core":
         allowed = {("127.0.0.1", 8787), ("10.77.0.4", 8787), ("10.77.0.4", 8443)}
         ports = {8787, 8443}
         required = allowed
@@ -125,7 +130,8 @@ def collect(declaration: Path, expected_declaration_sha: str, host: str, *, run=
             raise ValueError("selected_declaration_mismatch")
         selected = json.loads(body)
         lanes = declared_lanes(selected)
-        if host not in HOST_ADDRESSES:
+        core_only = selected.get("topology") == "CORE_ONLY_V2"
+        if host not in HOST_ADDRESSES or (core_only and host != "van-trading-core"):
             raise ValueError("exact_owner_core_declaration_required")
         report["declaration_sha256"] = expected_declaration_sha
         report["checks"]["selected_host_identity"] = platform.node() == host
@@ -140,7 +146,9 @@ def collect(declaration: Path, expected_declaration_sha: str, host: str, *, run=
                  ("nft_ruleset", "nft", ["-j", "list", "ruleset"]),
                  ("iptables_ruleset", "iptables-save", []),
                  ("ip6tables_ruleset", "ip6tables-save", [])]
-        outgoing_peers = {"van-trading-core": ["10.77.0.1"], "dial-control": ["10.77.0.4", "10.77.0.2"],
+        if core_only:
+            plans.append(("ingress_addresses", "ip", ["-j", "address", "show", "dev", selected["public_ingress_interface"]]))
+        outgoing_peers = [] if core_only else {"van-trading-core": ["10.77.0.1"], "dial-control": ["10.77.0.4", "10.77.0.2"],
                           "oracle-admin": ["10.77.0.4"]}[host]
         plans += [("route_to_" + peer, "ip", ["-j", "route", "get", peer]) for peer in outgoing_peers]
         for name, program, args in plans:
@@ -149,6 +157,14 @@ def collect(declaration: Path, expected_declaration_sha: str, host: str, *, run=
             # listings or WireGuard private-key output enter the receipt.
             observed[name] = observation
             report["observations"].append({"name": name, **{key: value for key, value in observation.items() if key != "body"}})
+        if core_only:
+            ingress = next(item for item in lanes if item["source"] == "owner_phone")
+            report["checks"]["selected_core_ingress_interface_address"] = any(
+                entry.get("ifname") == selected["public_ingress_interface"]
+                and item.get("family") == "inet" and item.get("local") == ingress["target_address"]
+                for entry in json.loads(observed["ingress_addresses"].get("body", "[]"))
+                for item in entry.get("addr_info", []))
+            report["runtime_hosts"] = ["van-trading-core"]
         addresses = json.loads(observed["overlay_addresses"].get("body", "[]"))
         report["checks"]["selected_private_overlay_address"] = any(
             item.get("local") == HOST_ADDRESSES[host] for entry in addresses for item in entry.get("addr_info", []))

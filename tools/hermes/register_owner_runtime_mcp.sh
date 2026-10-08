@@ -19,7 +19,7 @@ python3 -c 'import yaml' 2>/dev/null || fail "python3 PyYAML is required"
 [[ -f "$HERMES_CONFIG" ]] || fail "Hermes config not found: $HERMES_CONFIG"
 [[ -f "$SHIM" ]] || fail "owner-runtime MCP shim not installed: $SHIM"
 if [[ "${VAN_OWNER_RUNTIME_HOST:-}" == "van-trading-core" ]]; then
-  [[ "$OWNER_RUNTIME_URL" == "http://10.77.0.4:8787" ]] || fail "private core runtime URL must be explicit"
+  [[ "$OWNER_RUNTIME_URL" == "http://127.0.0.1:8787" ]] || fail "local core runtime URL must be explicit"
   [[ -n "$RUNTIME_TOKEN_FILE" ]] || fail "separate scoped runtime token file required"
 fi
 if [[ -n "$RUNTIME_TOKEN_FILE" ]]; then

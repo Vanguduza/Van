@@ -35,11 +35,11 @@ def profile(tmp_path):
     directory = tmp_path / "public-pki"
     init_ca(directory)
     return {
-        "schema_version": 1, "profile_id": "synthetic-test-core",
-        "backend_host": "van-trading-core", "hermes_host": "dial-control", "ingress_host": "oracle-admin",
-        "public_gateway_url": "https://owner-ingress.example:8443/", "ingress_bind_address": "10.0.0.122",
+        "schema_version": 2, "profile_id": "synthetic-test-core",
+        "backend_host": "van-trading-core", "hermes_host": "van-trading-core", "ingress_host": "van-trading-core",
+        "public_gateway_url": "https://owner-ingress.example:8443/", "ingress_bind_address": "10.0.0.122", "ingress_interface": "eth0",
         "ingress_capability_receipt": "synthetic-test:typed-recipe:123",
-        "hermes_api_url": "http://10.77.0.1:8642", "gateway_ca_file": str(directory / "ca.crt"),
+        "hermes_api_url": "http://127.0.0.1:8642", "gateway_ca_file": str(directory / "ca.crt"),
         "hermes_runtime_token_file": "/private/hermes/van-runtime.token",
         "connectivity_signing_key_file": "/private/owner-runtime/connectivity.key",
         "connectivity_signing_kid": "test-connectivity-1", "mtls_directory": "/private/owner-runtime/mtls",
@@ -48,27 +48,29 @@ def profile(tmp_path):
     }
 
 
-def test_compilation_preserves_tls_and_separates_three_planes(profile):
+def test_compilation_places_phone_gateway_and_runtime_only_on_core(profile):
     result = module.render(profile)
-    ingress = result["oracle-admin-van-ingress.cfg"].decode()
-    assert "bind 10.0.0.122:8443" in ingress
-    assert "10.77.0.4:8443 source 10.77.0.2" in ingress
-    assert "mode tcp" in ingress and "ssl" not in ingress and "send-proxy" not in ingress
-    relay = result["core-hermes-relay.cfg"].decode()
-    assert "bind 10.77.0.4:8787" in relay and "src 10.77.0.1/32" in relay
-    assert "tcp-request connection reject if !dial_control" in relay
+    assert not any(name.endswith(".cfg") for name in result)
     env = result["owner-core.env"].decode()
-    assert 'VAN_MTLS_BIND="10.77.0.4"' in env
+    assert 'VAN_MTLS_BIND="10.0.0.122"' in env and 'VAN_MTLS_INTERFACE="eth0"' in env
     assert 'VAN_LOOPBACK_HOST="127.0.0.1"' in env
+    assert 'VAN_HERMES_BASE_URL="http://127.0.0.1:8642"' in env
+    assert 'VAN_ALLOW_LOOPBACK_IN_PRODUCTION="false"' in env
     assert "VAN_DIAL_DEV_ENABLED" not in env
     declaration = json.loads(result["declaration.json"])
     assert declaration["status"] == "PREPARED_NOT_DEPLOYED"
     assert declaration["live_qualified"] is declaration["deployed"] is declaration["ingress_authority_verified"] is False
-    assert len(declaration["required_network_lanes"]) == 4
+    assert declaration["runtime_hosts"] == ["van-trading-core"]
+    assert declaration["topology"] == "CORE_ONLY_V2"
+    assert len(declaration["required_network_lanes"]) == 3
+    assert {lane["target_host"] for lane in declaration["required_network_lanes"]} == {"van-trading-core"}
+    assert all(lane["source"] == lane["target_address"] == "127.0.0.1"
+               for lane in declaration["required_network_lanes"] if lane["source"] != "owner_phone")
     ca = x509.load_pem_x509_certificate(Path(profile["gateway_ca_file"]).read_bytes())
     props = result["android-owner-core.properties"].decode()
     assert "VAN_GATEWAY_CA_SHA256=" + ca.fingerprint(hashes.SHA256()).hex() in props
-    assert "VAN_GATEWAY_INGRESS_HOST=oracle-admin" in props
+    assert "VAN_GATEWAY_INGRESS_HOST=van-trading-core" in props
+    assert "oracle-admin" not in "".join(content.decode() for content in result.values())
     assert "PRIVATE KEY" not in "".join(content.decode() for content in result.values())
 
 
@@ -185,11 +187,11 @@ def test_real_unit_order_and_effective_settings_preserve_profile_over_stale_trad
         from van_gateway.config import Settings
         settings = Settings(_env_file=None)
     assert settings.van_env == "production" and settings.require_device_binding and settings.mtls_enabled
-    assert settings.mtls_bind == "10.77.0.4" and settings.mtls_port == 8443
+    assert settings.mtls_bind == "10.0.0.122" and settings.mtls_port == 8443
     assert settings.hermes_base_url == profile["hermes_api_url"]
     assert settings.database_path == profile["database_file"]
     assert settings.van_public_base_url == profile["public_gateway_url"].rstrip("/")
-    assert preflight.configuration_checks(actual)["private_core_profile"]
+    assert preflight.configuration_checks(actual)["core_only_profile"]
     assert not preflight.configuration_checks(actual)["enrolment_credential_separated_from_runtime"]
 
 
@@ -270,7 +272,7 @@ def test_browser_deployment_admits_only_separate_narrow_native_control_identity(
 
 
 @pytest.mark.parametrize("name,value", [
-    ("backend_host", "dial-control"), ("hermes_host", "van-trading-core"), ("ingress_host", "dial-control"),
+    ("backend_host", "dial-control"), ("hermes_host", "dial-control"), ("ingress_host", "oracle-admin"), ("ingress_host", "dial-control"),
     ("public_gateway_url", "https://62.83.35.103:8443"), ("public_gateway_url", "https://10.77.0.4:8443"),
     ("public_gateway_url", "http://owner.example:8443"), ("public_gateway_url", "https://owner.example:443"),
     ("public_gateway_url", "https://token@owner.example:8443"), ("public_gateway_url", "https://owner.example:8443?"),
@@ -278,7 +280,7 @@ def test_browser_deployment_admits_only_separate_narrow_native_control_identity(
     ("public_gateway_url", "https://owner.example:8443/path"), ("public_gateway_url", "https://999.999.999.999:8443"),
     ("ingress_bind_address", "0.0.0.0"), ("ingress_bind_address", "10.77.0.2"),
     ("ingress_capability_receipt", None), ("ingress_capability_receipt", "receipt\nOTHER=value"),
-    ("hermes_api_url", "http://127.0.0.1:8642"), ("hermes_api_url", "https://10.77.0.2:8443"),
+    ("hermes_api_url", "http://10.77.0.1:8642"), ("ingress_interface", "lo"), ("ingress_interface", "eth0;bad"), ("hermes_api_url", "https://10.77.0.2:8443"),
     ("hermes_api_url", "http://@10.77.0.1:8642"), ("hermes_api_url", "HTTP://10.77.0.1:8642"),
     ("hermes_api_url", "http://10.77.0.1:8642/p/other"), ("schema_version", True),
     ("connectivity_signing_key_file", "$(cat /secret)"),
@@ -369,13 +371,13 @@ def test_hermes_core_registration_uses_scoped_file_without_gateway_secret_enviro
     token.chmod(0o600)
     result = subprocess.run(["bash", str(ROOT / "tools/hermes/register_owner_runtime_mcp.sh")],
                             env={**os.environ, "HERMES_HOME": str(home), "VAN_OWNER_RUNTIME_HOST": "van-trading-core",
-                                 "VAN_OWNER_RUNTIME_URL": "http://10.77.0.4:8787", "VAN_OWNER_RUNTIME_TOKEN_FILE": str(token),
+                                 "VAN_OWNER_RUNTIME_URL": "http://127.0.0.1:8787", "VAN_OWNER_RUNTIME_TOKEN_FILE": str(token),
                                  "VAN_GATEWAY_ENV_FILE": str(tmp_path / "unavailable.env")},
                             capture_output=True, text=True, timeout=30)
     assert result.returncode == 0, result.stdout + result.stderr
     servers = yaml.safe_load(config.read_text())["mcp_servers"]
     assert servers["existing"]["command"] == "preserve-this-sibling"
-    assert servers["van_owner_runtime"]["env"] == {"VAN_OWNER_RUNTIME_URL": "http://10.77.0.4:8787",
+    assert servers["van_owner_runtime"]["env"] == {"VAN_OWNER_RUNTIME_URL": "http://127.0.0.1:8787",
                                                      "VAN_OWNER_RUNTIME_TOKEN_FILE": str(token)}
     assert token.read_text() not in config.read_text() + result.stdout + result.stderr
 

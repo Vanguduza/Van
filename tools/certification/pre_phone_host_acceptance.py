@@ -97,21 +97,22 @@ def bindings(config: Path, state: Path, profile_path: Path, expected: str) -> tu
     if not all(configuration_checks(values).values()):
         raise ValueError("production_machine_configuration_required")
     profile = properties(profile_path)
-    roles = {"VAN_DEPLOYMENT_PROFILE_VERSION": "1", "VAN_BACKEND_HOST": "van-trading-core",
-             "VAN_HERMES_HOST": "dial-control", "VAN_GATEWAY_INGRESS_HOST": "oracle-admin"}
+    roles = {"VAN_DEPLOYMENT_PROFILE_VERSION": "2", "VAN_DEPLOYMENT_TOPOLOGY": "CORE_ONLY_V2",
+             "VAN_BACKEND_HOST": "van-trading-core", "VAN_HERMES_HOST": "van-trading-core",
+             "VAN_GATEWAY_INGRESS_HOST": "van-trading-core"}
     if not all(profile.get(key) == value for key, value in roles.items()):
         raise ValueError("selected_owner_core_profile_required")
     if (not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}", profile.get("VAN_DEPLOYMENT_PROFILE_ID", ""))
             or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}", profile.get("VAN_GATEWAY_INGRESS_CAPABILITY_RECEIPT", ""))):
         raise ValueError("bound_profile_receipt_reference_required")
-    url, _ = public_url(profile["VAN_GATEWAY_BASE_URL"])
+    url, public_port = public_url(profile["VAN_GATEWAY_BASE_URL"])
     if values.get("VAN_PUBLIC_BASE_URL") != url:
         raise ValueError("profile_and_effective_endpoint_disagree")
     hermes = urllib.parse.urlsplit(values.get("VAN_HERMES_BASE_URL", ""))
-    if (hermes.scheme != "http" or hermes.hostname != "10.77.0.1" or "@" in hermes.netloc
-            or hermes.port is None or not 1024 <= hermes.port <= 65535
+    if (hermes.scheme != "http" or hermes.hostname != "127.0.0.1" or "@" in hermes.netloc
+            or hermes.port is None or not 1024 <= hermes.port <= 65535 or hermes.port in {public_port, 8787, 9133}
             or hermes.path not in ("", "/") or hermes.query or hermes.fragment):
-        raise ValueError("measured_private_hermes_endpoint_required")
+        raise ValueError("measured_local_core_hermes_endpoint_required")
     pem = base64.b64decode(profile["VAN_GATEWAY_CA_PEM_B64"], validate=True)
     certificate = x509.load_pem_x509_certificate(pem)
     declared_sha = profile["VAN_GATEWAY_CA_SHA256"].replace(":", "").lower()

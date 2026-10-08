@@ -61,16 +61,18 @@ public final class VanProductionTarget {
     public static void requireReleaseProfile(Properties profile, String url, String caPemB64,
             Instant now) {
         require(profile != null, "VAN_DEPLOYMENT_PROFILE_FILE is required for van-trading-core releases");
-        require("1".equals(value(profile, "VAN_DEPLOYMENT_PROFILE_VERSION")),
-                "deployment profile version must be 1");
+        require("2".equals(value(profile, "VAN_DEPLOYMENT_PROFILE_VERSION")),
+                "deployment profile version must be 2");
+        require("CORE_ONLY_V2".equals(value(profile, "VAN_DEPLOYMENT_TOPOLOGY")),
+                "deployment topology must be CORE_ONLY_V2");
         require(value(profile, "VAN_DEPLOYMENT_PROFILE_ID").matches("[A-Za-z0-9][A-Za-z0-9._-]{0,127}"),
                 "deployment profile ID is missing or invalid");
         require("van-trading-core".equals(value(profile, "VAN_BACKEND_HOST")),
                 "VAN backend must be van-trading-core");
-        require("dial-control".equals(value(profile, "VAN_HERMES_HOST")),
-                "Hermes host must remain dial-control");
-        require("oracle-admin".equals(value(profile, "VAN_GATEWAY_INGRESS_HOST")),
-                "VAN ingress must be the separately admitted oracle-admin VAN ingress");
+        require("van-trading-core".equals(value(profile, "VAN_HERMES_HOST")),
+                "VAN Hermes host must be van-trading-core");
+        require("van-trading-core".equals(value(profile, "VAN_GATEWAY_INGRESS_HOST")),
+                "VAN ingress must be the separately admitted van-trading-core direct mTLS ingress");
         require(value(profile, "VAN_GATEWAY_INGRESS_CAPABILITY_RECEIPT")
                         .matches("[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}"),
                 "VAN ingress capability receipt is missing or invalid");
@@ -78,6 +80,7 @@ public final class VanProductionTarget {
                         && caPemB64.equals(value(profile, "VAN_GATEWAY_CA_PEM_B64")),
                 "gateway URL or CA does not match the selected deployment profile");
         URI gateway = validateGateway(url, true);
+        require(!gateway.getHost().contains(":"), "core-only IPv4 ingress cannot qualify an IPv6 literal");
         require(!"62.83.35.103".equals(gateway.getHost()),
                 "historical dial-control public endpoint cannot be a van-trading-core release target");
         validateCa(caPemB64, value(profile, "VAN_GATEWAY_CA_SHA256"), now);

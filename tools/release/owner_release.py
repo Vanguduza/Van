@@ -52,8 +52,9 @@ def profile_values(path: Path) -> dict[str, str]:
         if not separator or key in values or not re.fullmatch(r"VAN_[A-Z0-9_]+", key):
             raise ReleaseRefused("invalid_deployment_properties")
         values[key] = value
-    required = {"VAN_DEPLOYMENT_PROFILE_VERSION": "1", "VAN_BACKEND_HOST": "van-trading-core",
-                "VAN_HERMES_HOST": "dial-control", "VAN_GATEWAY_INGRESS_HOST": "oracle-admin"}
+    required = {"VAN_DEPLOYMENT_PROFILE_VERSION": "2", "VAN_DEPLOYMENT_TOPOLOGY": "CORE_ONLY_V2",
+                "VAN_BACKEND_HOST": "van-trading-core", "VAN_HERMES_HOST": "van-trading-core",
+                "VAN_GATEWAY_INGRESS_HOST": "van-trading-core"}
     if any(values.get(k) != v for k, v in required.items()):
         raise ReleaseRefused("owner_core_host_roles_unbound")
     if (not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}", values.get("VAN_GATEWAY_INGRESS_CAPABILITY_RECEIPT", ""))
@@ -190,7 +191,7 @@ def create_packet(apk: Path, profile: Path, anchors: Path, *, build_config: Path
             "source_clean": True, "apk": {"sha256": digest(apk), "bytes": apk.stat().st_size, **identity},
             "profile": {"sha256": digest(profile), "profile_id": values["VAN_DEPLOYMENT_PROFILE_ID"],
                         "gateway_url": values["VAN_GATEWAY_BASE_URL"], "gateway_ca_sha256": values["VAN_GATEWAY_CA_SHA256"],
-                        "backend_host": "van-trading-core", "hermes_host": "dial-control", "ingress_host": "oracle-admin",
+                        "backend_host": "van-trading-core", "hermes_host": "van-trading-core", "ingress_host": "van-trading-core",
                         "ingress_capability_receipt": values["VAN_GATEWAY_INGRESS_CAPABILITY_RECEIPT"]},
             "trusted_keys_sha256": digest(anchors), "deployed": False, "provisioned": False,
             "compiled_build_config_sha256": digest(build_config), "producer_authenticity_verified": False,
@@ -206,7 +207,7 @@ def verify_packet(packet: dict, apk: Path, profile: Path, anchors: Path, *, expe
     identity = apk_identity(apk, apksigner, aapt)
     expected_profile = {"sha256": digest(profile), "profile_id": values["VAN_DEPLOYMENT_PROFILE_ID"],
                         "gateway_url": values["VAN_GATEWAY_BASE_URL"], "gateway_ca_sha256": values["VAN_GATEWAY_CA_SHA256"],
-                        "backend_host": "van-trading-core", "hermes_host": "dial-control", "ingress_host": "oracle-admin",
+                        "backend_host": "van-trading-core", "hermes_host": "van-trading-core", "ingress_host": "van-trading-core",
                         "ingress_capability_receipt": values["VAN_GATEWAY_INGRESS_CAPABILITY_RECEIPT"]}
     if (type(packet.get("schema_version")) is not int or packet.get("schema_version") != 1 or packet.get("source_clean") is not True
             or packet.get("status") != "OWNER_RELEASE_ARTIFACT_VERIFIED"

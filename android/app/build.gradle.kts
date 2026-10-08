@@ -16,7 +16,7 @@ require(vanTestAbi == null || vanTestAbi == "x86_64") {
 
 /*
  * Production connects to VAN on van-trading-core through the separately admitted
- * oracle-admin VAN TLS ingress; Hermes remains on dial-control. A deployment compiler
+ * van-trading-core direct mTLS ingress; VAN Hermes is local on core. A deployment compiler
  * supplies the address, pinned CA and host roles together in VAN_DEPLOYMENT_PROFILE_FILE.
  * The committed historical dial-control address remains a debug fixture. It cannot
  * qualify a release, and individual overrides cannot split a deployment profile.

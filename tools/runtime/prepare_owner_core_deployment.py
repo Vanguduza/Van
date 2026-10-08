@@ -18,9 +18,8 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes
 
 BACKEND_ADDRESS = "10.77.0.4"
-CONTROL_ADDRESS = "10.77.0.1"
-INGRESS_ADDRESS = "10.77.0.2"
-CAPABILITY = "VAN_OWNER_TLS_PASSTHROUGH_V1"
+LOCAL_ADDRESS = "127.0.0.1"
+CAPABILITY = "VAN_OWNER_CORE_DIRECT_MTLS_V1"
 
 
 def required(profile: dict, name: str) -> str:
@@ -45,7 +44,7 @@ def public_url(value: str) -> tuple[str, int]:
             or parsed.netloc.endswith(":")):
         raise ValueError("invalid_public_gateway_url")
     port = parsed.port or 443
-    if not 1024 <= port <= 65535:
+    if not 1024 <= port <= 65535 or port in {8787, 9133}:
         raise ValueError("dedicated_unprivileged_ingress_port_required")
     hostname = parsed.hostname.lower()
     if (hostname in {"localhost", "62.83.35.103"} or hostname.endswith(
@@ -64,16 +63,16 @@ def public_url(value: str) -> tuple[str, int]:
         if re.fullmatch(r"[0-9.]+", hostname):
             raise ValueError("invalid_public_gateway_address")
     else:
-        if not address.is_global:
+        if address.version != 4 or not address.is_global:
             raise ValueError("phone_route_must_be_public")
     return value.rstrip("/"), port
 
 
 def render(profile: dict) -> dict[str, bytes]:
-    if type(profile.get("schema_version")) is not int or profile.get("schema_version") != 1:
+    if type(profile.get("schema_version")) is not int or profile.get("schema_version") != 2:
         raise ValueError("profile_schema_version_required")
-    for name, expected in {"backend_host": "van-trading-core", "hermes_host": "dial-control",
-                           "ingress_host": "oracle-admin"}.items():
+    for name, expected in {"backend_host": "van-trading-core", "hermes_host": "van-trading-core",
+                           "ingress_host": "van-trading-core"}.items():
         if profile.get(name) != expected:
             raise ValueError(f"wrong_host_role:{name}")
     profile_id = required(profile, "profile_id")
@@ -84,16 +83,19 @@ def render(profile: dict) -> dict[str, bytes]:
         raise ValueError("invalid_ingress_capability_receipt")
     url, port = public_url(required(profile, "public_gateway_url"))
     bind = ipaddress.ip_address(required(profile, "ingress_bind_address"))
-    if (bind.version != 4 or bind.is_unspecified or bind.is_loopback or bind.is_multicast
+    if (bind.version != 4 or bind.is_unspecified or bind.is_loopback or bind.is_multicast or bind.is_link_local or bind.is_reserved
             or bind in ipaddress.ip_network("10.77.0.0/24")):
         raise ValueError("dedicated_observed_ingress_vnic_address_required")
+    interface = required(profile, "ingress_interface")
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,14}", interface) or interface == "lo":
+        raise ValueError("observed_core_ingress_interface_required")
     hermes_value = required(profile, "hermes_api_url")
     hermes = urlsplit(hermes_value)
-    # WireGuard encrypts this fixed peer-to-peer lane. It is not the DDS product proxy.
-    if (not hermes_value.startswith("http://") or hermes.scheme != "http" or hermes.hostname != CONTROL_ADDRESS or hermes.port is None
-            or not 1024 <= hermes.port <= 65535 or hermes.path not in ("", "/")
+    # VAN Hermes and the gateway are colocated on the retained core. No inter-host relay.
+    if (not hermes_value.startswith("http://") or hermes.scheme != "http" or hermes.hostname != LOCAL_ADDRESS or hermes.port is None
+            or not 1024 <= hermes.port <= 65535 or hermes.port in {port, 8787, 9133} or hermes.path not in ("", "/")
             or "@" in hermes.netloc or "?" in hermes.geturl() or "#" in hermes.geturl()):
-        raise ValueError("explicit_private_hermes_api_port_required")
+        raise ValueError("explicit_local_core_hermes_api_port_required")
     ca_file = absolute_path(profile, "gateway_ca_file")
     pem = ca_file.read_bytes()
     if (len(base64.b64encode(pem)) > 65536 or not re.fullmatch(
@@ -130,19 +132,20 @@ def render(profile: dict) -> dict[str, bytes]:
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}", kid):
         raise ValueError("invalid_connectivity_signing_kid")
     properties = {
-        "VAN_DEPLOYMENT_PROFILE_VERSION": "1", "VAN_DEPLOYMENT_PROFILE_ID": profile_id,
-        "VAN_BACKEND_HOST": "van-trading-core", "VAN_HERMES_HOST": "dial-control",
-        "VAN_GATEWAY_INGRESS_HOST": "oracle-admin",
+        "VAN_DEPLOYMENT_PROFILE_VERSION": "2", "VAN_DEPLOYMENT_TOPOLOGY": "CORE_ONLY_V2", "VAN_DEPLOYMENT_PROFILE_ID": profile_id,
+        "VAN_BACKEND_HOST": "van-trading-core", "VAN_HERMES_HOST": "van-trading-core",
+        "VAN_GATEWAY_INGRESS_HOST": "van-trading-core",
         "VAN_GATEWAY_INGRESS_CAPABILITY_RECEIPT": receipt,
         "VAN_GATEWAY_BASE_URL": url, "VAN_GATEWAY_CA_SHA256": ca_sha,
         "VAN_GATEWAY_CA_PEM_B64": base64.b64encode(pem).decode("ascii"),
     }
     gateway_env = {
         "VAN_ENV": "production", "VAN_REQUIRE_DEVICE_BINDING": "true",
+        "VAN_DEPLOYMENT_TOPOLOGY": "CORE_ONLY_V2", "VAN_MTLS_INTERFACE": interface,
         "VAN_ALLOW_LOOPBACK_IN_PRODUCTION": "false", "VAN_PUBLIC_BASE_URL": url,
         "VAN_HERMES_BASE_URL": hermes.geturl().rstrip("/"), "VAN_HERMES_PROFILE": "van",
         "VAN_LOOPBACK_HOST": "127.0.0.1", "VAN_LOOPBACK_PORT": "8787",
-        "VAN_MTLS_ENABLED": "true", "VAN_MTLS_BIND": BACKEND_ADDRESS, "VAN_MTLS_PORT": "8443",
+        "VAN_MTLS_ENABLED": "true", "VAN_MTLS_BIND": str(bind), "VAN_MTLS_PORT": str(port),
         "VAN_MTLS_DIR": str(mtls), "VAN_CONNECTIVITY_SIGNING_KEY_FILE": str(signing_key),
         "VAN_CONNECTIVITY_SIGNING_KID": kid,
         "VAN_DATABASE_PATH": str(database), "VAN_COMMANDER_URL": commander.geturl().rstrip("/"),
@@ -156,37 +159,8 @@ def render(profile: dict) -> dict[str, bytes]:
     }.items():
         if profile.get(name) not in (None, ""):
             gateway_env[variable] = str(absolute_path(profile, name))
-    # No HTTP TLS termination, PROXY protocol, forwarded certificate header or route rewriting.
-    ingress = f"""# VAN-only capability {CAPABILITY}; deployment authority pending independent verification.
-global
-    maxconn 128
-defaults
-    mode tcp
-    timeout connect 5s
-    timeout client 75s
-    timeout server 75s
-frontend van_owner_phone
-    bind {bind}:{port}
-    default_backend van_owner_private_core
-backend van_owner_private_core
-    server van_core {BACKEND_ADDRESS}:8443 source {INGRESS_ADDRESS} check
-"""
-    relay = f"""# Private scoped-token lane, dial-control only; WireGuard wg-dial firewall required.
-global
-    maxconn 64
-defaults
-    mode tcp
-    timeout connect 5s
-    timeout client 75s
-    timeout server 75s
-frontend van_hermes_internal
-    bind {BACKEND_ADDRESS}:8787
-    acl dial_control src {CONTROL_ADDRESS}/32
-    tcp-request connection reject if !dial_control
-    default_backend van_gateway_loopback
-backend van_gateway_loopback
-    server gateway 127.0.0.1:8787 check
-"""
+    # The gateway owns direct phone TLS/HTTPS/WSS at this exact observed core VNIC.
+    # No HAProxy listener, TLS forwarding hop or public Hermes/runtime port is emitted.
     dropin = """[Service]
 MemoryAccounting=true
 MemoryHigh=768M
@@ -200,27 +174,27 @@ TasksMax=128
     result = {
         "android-owner-core.properties": "".join(f"{k}={v}\n" for k, v in properties.items()).encode(),
         "owner-core.env": "".join(f'{k}="{v}"\n' for k, v in gateway_env.items()).encode(),
-        "oracle-admin-van-ingress.cfg": ingress.encode(), "core-hermes-relay.cfg": relay.encode(),
         "van-gateway-resource-limits.conf": dropin.encode(),
         "hermes-runtime.env": (f'VAN_OWNER_RUNTIME_HOST="van-trading-core"\n'
-                               f'VAN_OWNER_RUNTIME_URL="http://{BACKEND_ADDRESS}:8787"\n'
+                               f'VAN_OWNER_RUNTIME_URL="http://{LOCAL_ADDRESS}:8787"\n'
                                f'VAN_OWNER_RUNTIME_TOKEN_FILE="{runtime_token}"\n').encode(),
     }
     declaration = {
-        "schema_version": 1, "status": "PREPARED_NOT_DEPLOYED", "profile_id": profile_id,
+        "schema_version": 2, "topology": "CORE_ONLY_V2", "status": "PREPARED_NOT_DEPLOYED", "profile_id": profile_id,
         "deployed": False, "live_qualified": False, "ingress_authority_verified": False,
         "ingress_capability": CAPABILITY, "ingress_capability_receipt": receipt,
         "gateway_ca_sha256": ca_sha,
         "artifact_sha256": {name: hashlib.sha256(value).hexdigest() for name, value in result.items()},
+        "public_ingress_interface": interface,
+        "runtime_hosts": ["van-trading-core"],
         "required_network_lanes": [
-            {"source": "owner_phone", "target_host": "oracle-admin", "target_address": str(bind), "port": port, "protocol": "TLS_PASSTHROUGH"},
-            {"source": INGRESS_ADDRESS, "target_host": "van-trading-core", "target_address": BACKEND_ADDRESS, "port": 8443, "protocol": "TCP_OVER_WIREGUARD"},
-            {"source": CONTROL_ADDRESS, "target_host": "van-trading-core", "target_address": BACKEND_ADDRESS, "port": 8787, "protocol": "SCOPED_TOKEN_HTTP_OVER_WIREGUARD"},
-            {"source": BACKEND_ADDRESS, "target_host": "dial-control", "target_address": CONTROL_ADDRESS, "port": hermes.port, "protocol": "HERMES_PROFILE_HTTP_OVER_WIREGUARD"},
+            {"source": "owner_phone", "target_host": "van-trading-core", "target_address": str(bind), "port": port, "protocol": "DIRECT_MTLS_HTTPS_WSS"},
+            {"source": LOCAL_ADDRESS, "target_host": "van-trading-core", "target_address": LOCAL_ADDRESS, "port": 8787, "protocol": "SCOPED_TOKEN_LOCAL_HTTP"},
+            {"source": LOCAL_ADDRESS, "target_host": "van-trading-core", "target_address": LOCAL_ADDRESS, "port": hermes.port, "protocol": "HERMES_PROFILE_LOCAL_HTTP"},
         ],
-        "pending_checks": ["governed_ingress_recipe_and_exact_receipt_scope", "fresh_host_identity_and_wireguard_handshakes",
-                           "port_scoped_hub_forwarding_without_nat", "private_listeners_and_firewall",
-                           "matching_server_SAN_and_device_CA", "pinned_proxy_binary", "immutable_clean_source_SHA",
+        "pending_checks": ["governed_ingress_recipe_and_exact_receipt_scope", "fresh_core_identity_and_ingress_VNIC",
+                           "direct_public_ingress_and_OCI_firewall", "local_runtime_listeners_and_firewall",
+                           "matching_server_SAN_and_existing_device_CA", "existing_owner_state_and_runtime_migration", "immutable_clean_source_SHA",
                            "separate_scoped_credentials_and_google_attestation_roots", "trading_resource_headroom",
                            "host_readiness_and_phone_e2e_receipts"],
     }

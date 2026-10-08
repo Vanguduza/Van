@@ -53,10 +53,14 @@ gradle -p android assembleDebug
 
 ### Gateway connection
 
-Production VAN runs on `van-trading-core`; Hermes remains private on `dial-control`.
-The phone reaches VAN through a separately admitted VAN-only TLS ingress on `oracle-admin`,
-with end-to-end pinned TLS to VAN. This is a distinct capability from the existing limited
-DDS product proxy and must be qualified through a governed deployment recipe.
+Production VAN, its gateway, and Hermes profile van run together on van-trading-core.
+The phone connects directly to the core separately admitted mTLS HTTPS/WSS endpoint
+on an observed VNIC and dedicated public port. Gateway/runtime connections use exact
+IPv4 loopback bindings. dial-control hosts development and direct Artemis testing.
+Oracle Admin is excluded and remains stopped.
+
+Release profiles require version 2 and topology CORE_ONLY_V2. The proposed direct ingress
+capability VAN_OWNER_CORE_DIRECT_MTLS_V1 needs a real scoped admission receipt.
 
 Release builds require `VAN_DEPLOYMENT_PROFILE_FILE`, supplied as a Gradle property or
 environment variable, pointing at `android-owner-core.properties` emitted by the owner-core

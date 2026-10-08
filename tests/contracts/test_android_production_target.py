@@ -105,11 +105,11 @@ def _ca(*, is_ca=True, offset=timedelta(0), private_suffix=False):
 def profile(tmp_path):
     encoded, fingerprint = _ca()
     values = {
-        "VAN_DEPLOYMENT_PROFILE_VERSION": "1",
+        "VAN_DEPLOYMENT_PROFILE_VERSION": "2", "VAN_DEPLOYMENT_TOPOLOGY": "CORE_ONLY_V2",
         "VAN_DEPLOYMENT_PROFILE_ID": "synthetic-owner-core-test",
         "VAN_BACKEND_HOST": "van-trading-core",
-        "VAN_HERMES_HOST": "dial-control",
-        "VAN_GATEWAY_INGRESS_HOST": "oracle-admin",
+        "VAN_HERMES_HOST": "van-trading-core",
+        "VAN_GATEWAY_INGRESS_HOST": "van-trading-core",
         "VAN_GATEWAY_INGRESS_CAPABILITY_RECEIPT": "synthetic-receipt-not-live",
         "VAN_GATEWAY_BASE_URL": "https://van-gateway.example.net:8443",
         "VAN_GATEWAY_CA_PEM_B64": encoded,
@@ -141,17 +141,19 @@ def test_complete_core_profile_selects_matching_public_route_and_ca(probe, profi
     assert probe(profile()).returncode == 0
 
 
-def test_complete_core_profile_accepts_a_public_ipv6_literal(probe, profile):
-    assert probe(profile(VAN_GATEWAY_BASE_URL="https://[2001:4860:4860::8888]:8443/")).returncode == 0
+def test_core_ipv4_profile_does_not_qualify_an_unbound_ipv6_literal(probe, profile):
+    result = probe(profile(VAN_GATEWAY_BASE_URL="https://[2001:4860:4860::8888]:8443/"))
+    assert result.returncode == 2 and "core-only IPv4 ingress" in result.stdout
 
 
 @pytest.mark.parametrize("field,value,reason", [
-    ("VAN_DEPLOYMENT_PROFILE_VERSION", "0", "version must be 1"),
+    ("VAN_DEPLOYMENT_PROFILE_VERSION", "0", "version must be 2"),
     ("VAN_DEPLOYMENT_PROFILE_ID", "", "profile ID"),
     ("VAN_DEPLOYMENT_PROFILE_ID", "bad id", "profile ID"),
     ("VAN_BACKEND_HOST", "dial-control", "backend must be van-trading-core"),
-    ("VAN_HERMES_HOST", "van-trading-core", "Hermes host must remain dial-control"),
-    ("VAN_GATEWAY_INGRESS_HOST", "dial-control", "separately admitted oracle-admin"),
+    ("VAN_HERMES_HOST", "dial-control", "VAN Hermes host must be van-trading-core"),
+    ("VAN_GATEWAY_INGRESS_HOST", "oracle-admin", "van-trading-core direct mTLS ingress"),
+    ("VAN_DEPLOYMENT_TOPOLOGY", "", "deployment topology must be CORE_ONLY_V2"),
     ("VAN_GATEWAY_INGRESS_CAPABILITY_RECEIPT", "", "capability receipt"),
     ("VAN_GATEWAY_INGRESS_CAPABILITY_RECEIPT", "unqualified receipt", "capability receipt"),
     ("VAN_GATEWAY_CA_SHA256", "", "fingerprint is missing"),

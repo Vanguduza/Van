@@ -9,6 +9,8 @@ from pathlib import Path
 import platform
 import re
 import subprocess
+import ipaddress
+from urllib.parse import urlsplit
 
 
 def read_environment(path: Path) -> dict[str, str]:
@@ -91,17 +93,62 @@ def browser_credential_checks(values: dict[str, str]) -> dict[str, bool]:
     }
 
 
+def _public_core_endpoint(value: str, port: int) -> bool:
+    try:
+        public = urlsplit(value)
+        host = (public.hostname or "").lower()
+        if (not value.startswith("https://") or public.scheme != "https" or public.port != port
+                or not 1024 <= port <= 65535 or port in {8787, 9133}
+                or not host or "@" in public.netloc or "?" in value or "#" in value
+                or public.path not in ("", "/") or public.netloc.endswith(":")
+                or host in {"localhost", "62.83.35.103"} or host.endswith(
+                    (".local", ".localhost", ".internal", ".invalid", ".test", ".onion"))):
+            return False
+        try:
+            address = ipaddress.ip_address(host)
+        except ValueError:
+            return bool("." in host and re.fullmatch(r"(?=.{1,253}$)[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?", host)
+                and not re.fullmatch(r"[0-9.]+", host)
+                and all(label and len(label) <= 63 and not label.startswith("-") and not label.endswith("-") for label in host.split(".")))
+        return address.version == 4 and address.is_global
+    except (ValueError, TypeError):
+        return False
+
+
+def core_only_endpoint_checks(values: dict[str, str]) -> dict[str, bool]:
+    try:
+        public = urlsplit(values.get("VAN_PUBLIC_BASE_URL", ""))
+        hermes = urlsplit(values.get("VAN_HERMES_BASE_URL", ""))
+        address = ipaddress.IPv4Address(values.get("VAN_MTLS_BIND", ""))
+        port = int(values.get("VAN_MTLS_PORT", "0"))
+        return {
+            "direct_core_mtls_endpoint": _public_core_endpoint(values.get("VAN_PUBLIC_BASE_URL", ""), port),
+            "specific_core_ingress_bind": not (address.is_unspecified or address.is_loopback or address.is_multicast or address.is_link_local or address.is_reserved)
+                and address not in ipaddress.ip_network("10.77.0.0/24")
+                and bool(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,14}", values.get("VAN_MTLS_INTERFACE", "")))
+                and values.get("VAN_MTLS_INTERFACE") != "lo",
+            "local_core_hermes_endpoint": values.get("VAN_HERMES_BASE_URL", "").startswith("http://")
+                and "?" not in values.get("VAN_HERMES_BASE_URL", "") and "#" not in values.get("VAN_HERMES_BASE_URL", "") and hermes.scheme == "http" and hermes.hostname == "127.0.0.1"
+                and hermes.port is not None and 1024 <= hermes.port <= 65535 and hermes.port not in {port, 8787, 9133}
+                and hermes.username is None and hermes.password is None and hermes.path in ("", "/")
+                and not hermes.query and not hermes.fragment,
+        }
+    except (ValueError, TypeError):
+        return {"core_only_endpoint_bindings": False}
+
+
 def configuration_checks(values: dict[str, str]) -> dict[str, bool]:
     required = {"VAN_ENV": "production", "VAN_REQUIRE_DEVICE_BINDING": "true",
                 "VAN_ALLOW_LOOPBACK_IN_PRODUCTION": "false", "VAN_MTLS_ENABLED": "true",
-                "VAN_MTLS_BIND": "10.77.0.4", "VAN_MTLS_PORT": "8443",
+                "VAN_DEPLOYMENT_TOPOLOGY": "CORE_ONLY_V2",
                 "VAN_LOOPBACK_HOST": "127.0.0.1", "VAN_LOOPBACK_PORT": "8787", "VAN_HERMES_PROFILE": "van"}
     key_names = ("VAN_DEVICE_SECRET_FERNET_KEY", "VAN_GOOGLE_TOKEN_FERNET_KEY",
                  "VAN_HERMES_BEARER_TOKEN", "VAN_INTERNAL_CONTROL_SCOPED_TOKENS", "VAN_DEVICE_ENROLMENT_TOKEN")
     signer = values.get("VAN_OWNER_DEVICE_SIGNING_CERT_SHA256", "").replace(":", "")
     roots = values.get("VAN_OWNER_DEVICE_ATTESTATION_ROOTS", "").split(",")
     return {
-        "private_core_profile": all(values.get(key) == value for key, value in required.items()),
+        "core_only_profile": all(values.get(key) == value for key, value in required.items()),
+        **core_only_endpoint_checks(values),
         "ingress_credential_present": len(values.get("VAN_INGRESS_TOKEN", "")) >= 32,
         "separate_service_credentials_present": all(values.get(key) for key in key_names),
         "enrolment_credential_separated_from_runtime": bool(values.get("VAN_DEVICE_ENROLMENT_TOKEN"))
@@ -166,6 +213,9 @@ def main() -> int:
         interfaces = json.loads(subprocess.check_output(["ip", "-j", "address", "show", "dev", "wg-dial"], text=True))
         checks["core_wireguard_interface"] = any(entry.get("local") == "10.77.0.4"
                                                 for item in interfaces for entry in item.get("addr_info", []))
+        ingress_interfaces = json.loads(subprocess.check_output(["ip", "-j", "address", "show", "dev", values["VAN_MTLS_INTERFACE"]], text=True))
+        checks["observed_core_ingress_VNIC_address"] = any(entry.get("local") == values["VAN_MTLS_BIND"]
+            for item in ingress_interfaces for entry in item.get("addr_info", []))
         dropin = args.resource_dropin.read_text()
         limits = {line.strip() for line in dropin.splitlines()}
         checks["bounded_gateway_cgroup"] = {"MemoryAccounting=true", "MemoryHigh=768M", "MemoryMax=1024M",
@@ -181,7 +231,7 @@ def main() -> int:
                             "gateway_commander_token": values.get("VAN_COMMANDER_TOKEN_FILE", "")}.items():
             selected = Path(path)
             checks[label + "_private_mode"] = selected.is_absolute() and selected.exists() and not (selected.stat().st_mode & 0o077)
-    except (OSError, ValueError, subprocess.SubprocessError):
+    except (OSError, ValueError, KeyError, subprocess.SubprocessError):
         checks["local_inputs_and_observations_available"] = False
     ok = bool(checks) and all(checks.values())
     print(json.dumps({"status": "LOCAL_PREFLIGHT_PASS" if ok else "BLOCKED", "checks": checks,
