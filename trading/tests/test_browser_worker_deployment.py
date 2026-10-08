@@ -80,3 +80,8 @@ def test_bootstrap_grants_only_browser_worker_parent_traverse_access():
     assert "/var/log/van-trading/browser" in text
     assert "chmod 0711 /var/lib/van-trading" not in text
     assert "chmod 0755 /var/lib/van-trading" not in text
+
+
+def test_bootstrap_clears_stale_browser_worker_start_limits():
+    text = BOOTSTRAP.read_text(encoding="utf-8")
+    assert "systemctl reset-failed vati-browser-harness.service vati-stagehand.service" in text
