@@ -68,5 +68,7 @@ def test_bootstrap_pins_and_health_checks_harness_worker():
     assert "vati-browser-harness.service" in text
     assert "install -d -o van-browser -g van-browser -m 0750 /var/lib/van-trading/browser" in text
     assert "install -d -o van-browser -g van-browser -m 0750 /var/lib/van-trading/evidence/browser" in text
+    assert "setfacl -m u:van-browser:--x /var/lib/van-trading" in text
+    assert "setfacl -m u:van-browser:--x /var/lib/van-trading/evidence" in text
     assert "127.0.0.1:${VAN_HARNESS_PORT:-9141}/health" in text
     assert "BROWSER_HARNESS_RUNTIME_GREEN" in text
