@@ -60,9 +60,11 @@ def contained(root: Path, relative: str) -> Path:
 
 
 def build_plan(root: Path = ROOT, dds_root: Path | None = None, *, device_transport: str = WIRELESS_ADB,
-               source_manifest: str | Path | None = None) -> dict:
+               source_manifest: str | Path | None = None, native_schema: dict | None = None) -> dict:
     if device_transport not in {WIRELESS_ADB, USB_PRIVATE_BRIDGE}:
         raise ValueError("Unsupported governed device transport")
+    if native_schema is not None and device_transport != USB_PRIVATE_BRIDGE:
+        raise ValueError("This owner native Artemis route requires USB_PRIVATE_BRIDGE")
     feature_document = read_json(root / "registries/owner_features.json")
     features = feature_document["features"]
     screens = read_json(root / "registries/owner_screens.json")["screens"]
@@ -207,6 +209,7 @@ def build_plan(root: Path = ROOT, dds_root: Path | None = None, *, device_transp
             {"prepared_data": fixture, "state_setup": "Exact admitted fault/recovery boundary; keep original identities",
              "specific_failure": "Duplicate effect, widened trust, lost record or falsely reported completion"})
     dds = dds_root or root.parent / "dial-development-system"
+    native = native_schema is not None
     contract_paths = ["agent-system/orchestration/android-testing-mcp.mjs", "agent-system/orchestration/android-testing-plane.mjs",
                       "deploy/netcup/hermes-control/artemis/dial_artemis_mcp_bridge.py"]
     plan = {
@@ -219,7 +222,7 @@ def build_plan(root: Path = ROOT, dds_root: Path | None = None, *, device_transp
                      "surfaces": len(screens), "cases": len(cases)},
         "inputs_sha256": manifest,
         "governed_schema_sources": [{"repository": "dial-development-system", "path": p,
-                                      "sha256": hashlib.sha256(contained(dds, p).read_bytes()).hexdigest()} for p in contract_paths],
+                                      "sha256": hashlib.sha256(contained(dds, p).read_bytes()).hexdigest()} for p in contract_paths] if not native else [],
         "prerequisites": ["Current Global DIAL/Hermes connector and actual exposed Android tool schemas",
                           "Governed one-use wireless pairing and device admission recipe; current schema has no pairing tool",
                           "Phone private pairing code delivered only through secure ephemeral binding, never objective/chat/logs",
@@ -263,6 +266,42 @@ def build_plan(root: Path = ROOT, dds_root: Path | None = None, *, device_transp
             "verified_applicable_cases": 0,
             "note": "Registry coverage is candidate coverage; no wireless plan or prior device receipt is promoted to USB acceptance",
         }
+    if native:
+        required_tools = {"mobile_run_task", "mobile_manage_task", "mobile_inspect_trace",
+                          "mobile_get_device_state", "mobile_diagnose"}
+        runtime_root = native_schema.get("root")
+        if (not isinstance(runtime_root, str) or not runtime_root
+                or not Path(runtime_root).is_absolute() or ".." in Path(runtime_root).parts
+                or any(c in runtime_root for c in "\n\r\x00")):
+            raise ValueError("Native Artemis requires an exact absolute runtime root")
+        tools = native_schema.get("tools", {})
+        if (native_schema.get("record_kind") != "NATIVE_ARTEMIS_SCHEMA_DISCOVERY"
+                or native_schema.get("route") != "NATIVE_ARTEMIS_MCP_DIRECT_COMMANDER"
+                or not required_tools <= tools.keys()):
+            raise ValueError("Actual native Artemis schema discovery is required")
+        task_fields = tools["mobile_run_task"].get("properties", {})
+        if not {"task_desc", "device_serial", "model", "locked_app_package",
+                "verification_level", "expected_output_desc"} <= task_fields.keys():
+            raise ValueError("Native Artemis task schema is incompatible")
+        plan["adapter_route"] = "NATIVE_ARTEMIS_MCP_DIRECT_COMMANDER"
+        plan["native_schema_sha256"] = digest(tools)
+        plan["native_schema_runtime_root"] = native_schema.get("root")
+        plan["dds_readiness_required"] = False
+        plan["target"] = {**plan["target"], "hermes": "van-trading-core",
+                          "artemis": "dial-control", "device_serial": "RFCX2054F5W",
+                          "device_model": "SM-S928B", "package_name": "com.dial.van"}
+        plan["target"].pop("hermes_and_artemis", None)
+        plan["prerequisites"] = [
+            "Current native Artemis MCP schema and runtime identity; direct Commander/DIAL ingress",
+            "Exact owner-authorized S24 USB serial and independently measured private Windows loopback ADB bridge",
+            "Reviewed immutable core gateway/product Hermes source, current backend qualification and owner-signed APK",
+            "Matching signed provisioning, current CA/pins, device identity, hardware attestation and session",
+            "Isolated acceptance data, bounded fault fixtures, private owner OS/biometric consent and demo-only trading",
+            "Per-step native traces and independently observed backend/product Hermes/provider effects",
+        ]
+        plan["preferred_execution_route"] = "Native Artemis MCP directly through Commander/DIAL; no DDS development-readiness dependency."
+        plan["evidence_limits"].append(
+            "Native arguments and schema discovery are preparation only. Legacy DDS evidence validation cannot qualify native traces.")
     plan["plan_sha256"] = digest(plan)
     return plan
 
@@ -275,6 +314,8 @@ def verify_plan(plan: dict) -> None:
 
 def invocation(plan: dict, case_id: str, *, device_serial: str, apk_path: str | None = None, timeout_ms: int = 300000) -> dict:
     verify_plan(plan)
+    if plan.get("adapter_route") == "NATIVE_ARTEMIS_MCP_DIRECT_COMMANDER":
+        raise ValueError("Native plans require native_invocation and direct native reconciliation")
     if not SERIAL.fullmatch(device_serial):
         raise ValueError("An exact admitted device serial is required")
     case = next((c for c in plan["cases"] if c["id"] == case_id), None)
@@ -304,6 +345,44 @@ def invocation(plan: dict, case_id: str, *, device_serial: str, apk_path: str | 
         args["apk_path"] = apk_path
     return {"tool": "android_test_run", "arguments": args, "case_id": case_id,
             "plan_sha256": plan["plan_sha256"], "objective_sha256": hashlib.sha256(objective.encode()).hexdigest()}
+
+
+
+def native_invocation(plan: dict, case_id: str, *, device_serial: str, native_schema: dict) -> dict:
+    """Prepare exact native MCP arguments; this function does not dispatch or admit a device."""
+    verify_plan(plan)
+    if plan.get("adapter_route") != "NATIVE_ARTEMIS_MCP_DIRECT_COMMANDER":
+        raise ValueError("A source-bound native Artemis plan is required")
+    if device_serial != plan["target"].get("device_serial"):
+        raise ValueError("Native task requires the exact owner-selected handset")
+    if digest(native_schema.get("tools", {})) != plan.get("native_schema_sha256"):
+        raise ValueError("Native Artemis schema drift")
+    if native_schema.get("root") != plan.get("native_schema_runtime_root"):
+        raise ValueError("Native Artemis runtime root drift")
+    case = next((c for c in plan["cases"] if c["id"] == case_id), None)
+    if case is None or case["execution_readiness"] == "MISSING_FRONTEND":
+        raise ValueError("Unknown case or missing frontend cannot be executed")
+    objective = (
+        "Run one bounded VAN acceptance case on the admitted owner S24 Ultra; use native Artemis directly through Commander/DIAL. "
+        "Use the prepared isolated fixture only. No real trades, private-memory erasure, production service faults, "
+        "raw pairing/admission, credential retrieval or permission changes beyond the admitted case. Owner handles "
+        "biometrics/OAuth privately; unavailable fixture/dialog/control means BLOCKED or FAIL, never pass. "
+        "Do not create another command after ambiguous acceptance; reconcile original identity. "
+        "Capture per-step screenshots/trace and final Logcat. Record case ID, source/APK identities, expected/observed "
+        "assertions and exact backend/Hermes/service correlation IDs. A successful CLI exit is insufficient. "
+        "Report separately VERIFIED, FAIL, BLOCKED, PARTIAL or OUTCOME_UNKNOWN. Case: " + json.dumps(case, ensure_ascii=False)
+    )
+    args = {"task_desc": objective, "device_serial": device_serial, "model": "Pro",
+            "locked_app_package": "com.dial.van", "verification_level": "strict",
+            "expected_output_desc": "Per-case native trace, observed assertions, original effect identities and independent readbacks; no acoustic data or credentials."}
+    schema = native_schema["tools"]["mobile_run_task"]
+    if not set(args) <= schema.get("properties", {}).keys() or not set(schema.get("required", [])) <= args.keys():
+        raise ValueError("Native arguments do not match the actual MCP schema")
+    return {"tool": "mobile_run_task", "arguments": args, "case_id": case_id,
+            "plan_sha256": plan["plan_sha256"], "native_schema_sha256": plan["native_schema_sha256"],
+            "objective_sha256": hashlib.sha256(objective.encode()).hexdigest(),
+            "execution_state": "PREPARED_NATIVE_ARGUMENTS_NOT_EXECUTED",
+            "live_qualified": False}
 
 
 def unwrap(response: dict) -> dict:
@@ -387,6 +466,8 @@ def device_transport_errors(plan: dict, bindings: dict, evidence_root: Path | No
 async def run_case(call_tool: Callable[[str, dict], Awaitable[dict]], plan: dict, case_id: str, bindings: dict,
                    *, evidence_root: Path | None = None) -> dict:
     """Invoke the existing typed MCP only; transport ambiguity is never retried."""
+    if plan.get("adapter_route") == "NATIVE_ARTEMIS_MCP_DIRECT_COMMANDER":
+        raise ValueError("Native plans require direct native Artemis dispatch and reconciliation")
     required = ("repository_sha", "apk_sha256", "deployment_receipt_id", "fixture_receipt_id", "device_serial",
                 "device_identity_receipt_id", "device_model", "inputs_sha256")
     if any(not bindings.get(x) for x in required):
@@ -592,6 +673,8 @@ def provider_write_readback_matches(proof: dict, effect: dict, correlations: dic
 
 def validate_evidence(plan: dict, receipt: dict, evidence_root: Path) -> dict:
     """Fail closed on missing/stale/mismatched evidence; never promote offline claims."""
+    if plan.get("adapter_route") == "NATIVE_ARTEMIS_MCP_DIRECT_COMMANDER":
+        raise ValueError("Native traces require direct native reconciliation; legacy evidence is incompatible")
     verify_plan(plan)
     problems = []
     if receipt.get("plan_sha256") != plan["plan_sha256"]:
@@ -794,9 +877,16 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="action", required=True)
     prepare = sub.add_parser("prepare")
-    prepare.add_argument("--device-transport", choices=[WIRELESS_ADB, USB_PRIVATE_BRIDGE], default=WIRELESS_ADB)
+    prepare.add_argument("--device-transport", choices=[WIRELESS_ADB, USB_PRIVATE_BRIDGE])
     prepare.add_argument("--source-manifest", type=Path)
+    prepare.add_argument("--native-schema", type=Path, help="Actual native Artemis MCP schema discovery; excludes the legacy DDS adapter")
     prepare.add_argument("--out", type=Path, required=True)
+    native = sub.add_parser("native-call")
+    native.add_argument("--plan", type=Path, required=True)
+    native.add_argument("--native-schema", type=Path, required=True)
+    native.add_argument("--case", required=True)
+    native.add_argument("--device-serial", required=True)
+    native.add_argument("--out", type=Path, required=True)
     invoke = sub.add_parser("call")
     invoke.add_argument("--plan", type=Path, required=True)
     invoke.add_argument("--case", required=True)
@@ -810,7 +900,11 @@ def main() -> int:
     validate.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.action == "prepare":
-        value = build_plan(device_transport=args.device_transport, source_manifest=args.source_manifest)
+        value = build_plan(device_transport=args.device_transport or (USB_PRIVATE_BRIDGE if args.native_schema else WIRELESS_ADB), source_manifest=args.source_manifest,
+                           native_schema=read_json(args.native_schema) if args.native_schema else None)
+    elif args.action == "native-call":
+        value = native_invocation(read_json(args.plan), args.case, device_serial=args.device_serial,
+                                  native_schema=read_json(args.native_schema))
     elif args.action == "call":
         value = invocation(read_json(args.plan), args.case, device_serial=args.device_serial, apk_path=args.apk_path)
         value["execution_state"] = "PREPARED_TOOL_ARGUMENTS_NOT_EXECUTED"
