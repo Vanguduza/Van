@@ -15,6 +15,11 @@ def test_oci_firewall_helper_is_syntax_valid_and_persistent():
     text = HELPER.read_text()
     assert "/etc/iptables/rules.v4" in text
     assert "VAN_TRADING_MANAGED commander" in text
+    assert "DIAL_OVERLAY_MANAGED dial-control-ssh" in text
+    assert "DIAL_OVERLAY_MANAGED dial-control-commander" in text
+    assert 'DIAL_OVERLAY_SOURCE="10.77.0.1/32"' in text
+    assert 'DIAL_OVERLAY_IF="wg-dial"' in text
+    assert "persistent DIAL overlay SSH rule missing" in text
     assert "global SSH allow still present" in text
     assert "Commander rule for $cidr is not before OCI reject" in text
 
@@ -89,7 +94,10 @@ def _run_firewall_verify(tmp_path, admin_cidrs, *, live_transform=None,
     """Drive the helper's --verify path against a stub iptables and a fixture rules.v4."""
     import os
     cidrs = [c for c in admin_cidrs.split(",") if c]
-    managed = []
+    managed = [
+        '-A INPUT -i wg-dial -s 10.77.0.1/32 -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-ssh" -j ACCEPT',
+        '-A INPUT -i wg-dial -s 10.77.0.1/32 -p tcp -m state --state NEW -m tcp --dport 9133 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-commander" -j ACCEPT',
+    ]
     for c in cidrs:
         managed.append(f'-A INPUT -s {c} -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "VAN_TRADING_MANAGED admin-ssh" -j ACCEPT')
         managed.append(f'-A INPUT -s {c} -p tcp -m state --state NEW -m tcp --dport 9133 -m comment --comment "VAN_TRADING_MANAGED commander" -j ACCEPT')

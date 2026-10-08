@@ -7,6 +7,10 @@ RULES_V4="${VAN_ORACLE_RULES_V4:-/etc/iptables/rules.v4}"
 # the WireGuard overlay (10.77.0.1 via wg-dial, DIAL_OVERLAY_MANAGED rules), not the VCN.
 ADMIN_CIDRS="${VAN_ADMIN_CIDRS:-10.0.0.123/32}"
 PUBLIC_HOST="${VAN_PUBLIC_HOST:-}"
+# DIAL control reaches VAN over the private estate overlay. These rules are canonical,
+# must survive every firewall regeneration, and must never be replaced by a public SSH allow.
+DIAL_OVERLAY_SOURCE="10.77.0.1/32"
+DIAL_OVERLAY_IF="wg-dial"
 VERIFY_ONLY=0
 if (( $# > 1 )); then
   echo "ORACLE_IMAGE_FIREWALL_RED: expected no arguments or --verify" >&2
@@ -44,21 +48,25 @@ done
 
 if (( ! VERIFY_ONLY )); then
   [[ -f "${RULES_V4}.van-original" ]] || cp -a "$RULES_V4" "${RULES_V4}.van-original"
-  python3 - "$RULES_V4" "$ADMIN_CIDRS" "$PUBLIC_HOST" <<'PY'
+  python3 - "$RULES_V4" "$ADMIN_CIDRS" "$PUBLIC_HOST" "$DIAL_OVERLAY_SOURCE" "$DIAL_OVERLAY_IF" <<'PY'
 import os, pathlib, re, sys, tempfile
 path = pathlib.Path(sys.argv[1])
 cidrs = [x for x in sys.argv[2].split(",") if x]
 public = bool(sys.argv[3])
+overlay_source = sys.argv[4]
+overlay_if = sys.argv[5]
 lines = path.read_text(encoding="utf-8").splitlines()
 out = []
 inserted = False
 global_ssh = re.compile(r"^-A INPUT -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT$")
 for line in lines:
-    if "VAN_TRADING_MANAGED" in line:
+    if "VAN_TRADING_MANAGED" in line or "DIAL_OVERLAY_MANAGED" in line:
         continue
     if global_ssh.match(line):
         continue
     if not inserted and line == "-A INPUT -j REJECT --reject-with icmp-host-prohibited":
+        out.append(f'-A INPUT -i {overlay_if} -s {overlay_source} -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-ssh" -j ACCEPT')
+        out.append(f'-A INPUT -i {overlay_if} -s {overlay_source} -p tcp -m state --state NEW -m tcp --dport 9133 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-commander" -j ACCEPT')
         for cidr in cidrs:
             out.append(f'-A INPUT -s {cidr} -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "VAN_TRADING_MANAGED admin-ssh" -j ACCEPT')
             out.append(f'-A INPUT -s {cidr} -p tcp -m state --state NEW -m tcp --dport 9133 -m comment --comment "VAN_TRADING_MANAGED commander" -j ACCEPT')
@@ -89,6 +97,10 @@ PY
       iptables -I INPUT 4 "$@"
     fi
   }
+  iptables -C INPUT -i "$DIAL_OVERLAY_IF" -s "$DIAL_OVERLAY_SOURCE" -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-ssh" -j ACCEPT 2>/dev/null || \
+    iptables -I INPUT 1 -i "$DIAL_OVERLAY_IF" -s "$DIAL_OVERLAY_SOURCE" -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-ssh" -j ACCEPT
+  iptables -C INPUT -i "$DIAL_OVERLAY_IF" -s "$DIAL_OVERLAY_SOURCE" -p tcp -m state --state NEW -m tcp --dport 9133 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-commander" -j ACCEPT 2>/dev/null || \
+    iptables -I INPUT 2 -i "$DIAL_OVERLAY_IF" -s "$DIAL_OVERLAY_SOURCE" -p tcp -m state --state NEW -m tcp --dport 9133 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-commander" -j ACCEPT
   for cidr in "${CIDRS[@]}"; do
     add_live -s "$cidr" -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "VAN_TRADING_MANAGED admin-ssh" -j ACCEPT
     add_live -s "$cidr" -p tcp -m state --state NEW -m tcp --dport 9133 -m comment --comment "VAN_TRADING_MANAGED commander" -j ACCEPT
@@ -103,6 +115,11 @@ PY
 fi
 
 rules="$(iptables -S INPUT 2>/dev/null)" || die "cannot read live INPUT rules; current kernel privileges or observation route are unavailable"
+iptables -C INPUT -i "$DIAL_OVERLAY_IF" -s "$DIAL_OVERLAY_SOURCE" -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-ssh" -j ACCEPT >/dev/null 2>&1 || die "live DIAL overlay SSH rule missing"
+iptables -C INPUT -i "$DIAL_OVERLAY_IF" -s "$DIAL_OVERLAY_SOURCE" -p tcp -m state --state NEW -m tcp --dport 9133 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-commander" -j ACCEPT >/dev/null 2>&1 || die "live DIAL overlay Commander rule missing"
+grep -Fq -- "-A INPUT -i $DIAL_OVERLAY_IF -s $DIAL_OVERLAY_SOURCE -p tcp -m state --state NEW -m tcp --dport 22 " "$RULES_V4" || die "persistent DIAL overlay SSH rule missing"
+grep -Fq -- "-A INPUT -i $DIAL_OVERLAY_IF -s $DIAL_OVERLAY_SOURCE -p tcp -m state --state NEW -m tcp --dport 9133 " "$RULES_V4" || die "persistent DIAL overlay Commander rule missing"
+
 for cidr in "${CIDRS[@]}"; do
   iptables -C INPUT -s "$cidr" -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "VAN_TRADING_MANAGED admin-ssh" -j ACCEPT >/dev/null 2>&1 || die "live SSH rule missing for $cidr"
   iptables -C INPUT -s "$cidr" -p tcp -m state --state NEW -m tcp --dport 9133 -m comment --comment "VAN_TRADING_MANAGED commander" -j ACCEPT >/dev/null 2>&1 || die "live Commander rule missing for $cidr"
@@ -123,6 +140,10 @@ fi
 
 reject_line="$(printf '%s\n' "$rules" | awk 'index($0,"-j REJECT --reject-with icmp-host-prohibited"){print NR; exit}')"
 [[ -n "$reject_line" ]] || die "OCI reject rule missing"
+for dport in 22 9133; do
+  overlay_line="$(printf '%s\n' "$rules" | awk -v s="$DIAL_OVERLAY_SOURCE" -v p="$dport" 'index($0,"-s " s " ") && index($0,"--dport " p) && index($0,"DIAL_OVERLAY_MANAGED"){print NR; exit}')"
+  [[ -n "$overlay_line" && "$overlay_line" -lt "$reject_line" ]] || die "DIAL overlay rule for tcp/$dport is not before OCI reject"
+done
 for cidr in "${CIDRS[@]}"; do
   rule_line="$(printf '%s\n' "$rules" | awk -v s="$cidr" 'index($0,"-s " s " ") && index($0,"--dport 9133") && index($0,"VAN_TRADING_MANAGED commander"){print NR; exit}')"
   [[ -n "$rule_line" && "$rule_line" -lt "$reject_line" ]] || die "Commander rule for $cidr is not before OCI reject"
