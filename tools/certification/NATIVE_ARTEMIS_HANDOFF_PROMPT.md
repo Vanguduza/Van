@@ -1,108 +1,78 @@
-# Prompt for a ChatGPT session with DIAL and native Artemis tools
+# Direct native Artemis acceptance on wireless ADB
 
-Paste the following prompt into the tool-enabled session after the current VAN wiring
-validation and registries are available. It requests later acceptance; no phone test was
-run while preparing it.
+The current owner instruction selects **wireless ADB**. Use Commander and/or direct
+DIAL MCP to operate native Artemis on dial-control. VAN's gateway, phone mTLS ingress
+and product Hermes profile van belong on van-trading-core. Oracle Admin is excluded.
+DDS development readiness is not a prerequisite for this native route.
 
----
+The exact handset is Samsung S24 Ultra, physical serial RFCX2054F5W, Android model
+SM-S928B, application com.dial.van. Its wireless ADB transport serial is a measured
+private IPv4:port, recorded separately from its physical serial. A VPN address,
+a prepared plan, or enabled wireless debugging proves no pairing.
 
-Conduct VAN Android acceptance on my Samsung S24 Ultra using my existing administrative
-DIAL MCP and native Artemis directly on dial-control. Use the available DIAL/desktop
-Commander tools to reach native Artemis. Keep Artemis operation outside Hermes
-orchestration. VAN application commands must still exercise its real Hermes backend.
+## Connection and identity
 
-My backend selection is van-trading-core; Hermes profile `van` runs on dial-control.
-The S24 Ultra is `RFCX2054F5W`, model `SM_S928B`. Its USB cable is attached to my Windows
-PC, where I reported it authorized by ADB. My Windows SSH alias is `dial-control`.
-Wireless debugging was enabled but never paired. Verify fresh observations rather than
-assuming any of these reported states remain current.
+Reuse the existing owner-authorized private route and Android wireless-debugging TLS
+pairing. Keep the pairing code in a secure ephemeral input; never place it in chat,
+objectives, source or evidence logs. Inspect the current connection endpoint and
+pairing endpoint on the phone. Do not guess ports, enable legacy plaintext ADB,
+publish ADB, alter unrelated peers, or assume mDNS crosses a VPN.
 
-First inspect the actual available tools and reuse my connected account and existing
-admin authority. Apply the DIAL operator skill if available. Do not ask me to enable a
-connector that is already available, request credentials in chat, assume the separate
-public diagnostic client represents my MCP authorization, or invent tool names.
-If an actual tool policy rejects an operation, report that exact operation and stated
-reason and continue the unaffected work.
+Use the actual exposed Commander/DIAL contracts. Establish a private endpoint from
+dial-control, directly or through a measured loopback tunnel over existing private
+estate access. Keep native Artemis, adbutils, ADB subprocesses and evidence processes
+on the same observed ADB server. Do not replace a shared server or copy credential
+files into evidence. Reuse the provider binding in its original scope.
 
-Read the current checkout's `docs/audit/VAN_WIRING_CLOSURE_2026-10-07.md`, its final source
-manifest and validation receipt, and these registries:
+Before each handset task, independently run:
 
-- `registries/owner_features.json`
-- `registries/owner_screens.json`
-- `registries/owner_endpoints.json`
-- `registries/owner_endpoint_schemas.json`
+- adb -s <measured-private-IP:port> get-state
+- adb -s <measured-private-IP:port> shell getprop ro.serialno
+- adb -s <measured-private-IP:port> shell getprop ro.product.model
 
-Verify exact source/artifact hashes before testing. The baseline repository commit alone
-does not include the uncommitted implementation patch. Never test an older installed
-app and attribute it to current source. The local debug build/receipts are not a signed,
-provisioned owner release. Use the release-profile, release-inspection and signed
-installer provisioning tools to prepare or independently verify the actual tested app.
-Do not add host, port, credential or certificate-entry screens. Confirm the app connects
-from installer-supplied trust and hardware identity without owner configuration.
+Require device, RFCX2054F5W and SM-S928B, with successful commands. Recheck after
+connection loss, reboot or endpoint change. Never fall back to another phone.
 
-Establish the smallest private ADB route through existing tools. The USB transport belongs
-to Windows. If it needs forwarding, use the existing SSH connection to a dedicated,
-verified-free dial-control loopback port forwarding Windows `127.0.0.1:5037`. Inspect
-effective SSH forwarding/listener policy and verify the actual loopback-only bind. Never
-expose an ADB server publicly or replace the shared host ADB endpoint. If no Windows
-execution tool exists, finish host preflight and provide only the minimal Windows command
-needed to start that measured private forward. No wireless pairing is needed for USB.
+artemis_acceptance.py prepare --native-schema <actual-schema.json> --out <plan.json>
+now defaults to wireless ADB. The plan is prepared candidate coverage, not executed
+acceptance. USB remains an explicitly selected alternative, with separate evidence.
 
-Freeze one exact endpoint for every native Artemis, adbutils, ADB subprocess, install and
-evidence process: `ADB_HOST`, `ADB_PORT`, `ADB_SERVER_SOCKET` and
-`ARTEMIS_ADB_ENDPOINT_ID` must identify the same dedicated loopback bridge. Use a dedicated
-Artemis profile and trace directory, preserving existing tasks and securely bound provider
-settings. Do not change HOME or copy credential files into evidence.
+For wireless native-call, pass --device-serial <measured-private-IP:port> and
+--device-binding <fresh-readbacks.json>. The binding has record kind
+NATIVE_WIRELESS_ADB_IDENTITY_READBACK, device transport WIRELESS_ADB, adb_serial,
+authentication ANDROID_WIRELESS_DEBUGGING_TLS_PAIRED, a timezone-aware observed_at,
+and a reads array containing the exact three command argv vectors, exit codes and
+stdout values above. This JSON contains no pairing code. Its five-minute consistency
+check grants no pairing, admission, producer authenticity or live qualification.
+The actual private paired connection and fresh live readbacks remain required.
 
-Strictly verify `adb -H <host> -P <port> devices -l`, exact authorized serial, live model,
-Android version, page size and package identity before any UI task. An unknown,
-unauthorized, disconnected, mismatched or ambiguous device must not trigger fallback to
-another phone. Keep the native Artemis source/pin and applicable DDS hardening patch;
-inspect the installed tool schema/CLI before invoking it. The reviewed Artemis source pin
-is `google/artemis@371aa6df56880643da57b30da936e9812fb0ec66`; its recorded path is a source
-expectation, not proof of an installed executable.
+## Source, release and execution
 
-Use native `mobile_diagnose` with fixes disabled, `mobile_get_device_state`,
-`mobile_run_task`, `mobile_manage_task` and `mobile_inspect_trace` when exposed. For tasks,
-bind `device_serial="RFCX2054F5W"`, `locked_app_package="com.dial.van"`, `model="Pro"`
-and final verification. Alternatively use the discovered native CLI's standalone mode,
-exact device, locked app and isolated trace path. Poll actual returned task/trace IDs and
-inspect terminal traces. An accepted task, screenshot or autonomous success statement
-does not establish a passed feature.
+Inspect native tool schemas from the actual installed runtime; the reviewed source
+expectation is google/artemis@371aa6df56880643da57b30da936e9812fb0ec66.
+Use mobile_diagnose with fixes disabled, mobile_get_device_state, mobile_run_task,
+mobile_manage_task and mobile_inspect_trace as exposed. Bind the measured ADB serial,
+locked_app_package=com.dial.van, model=Pro and strict verification.
+Poll actual task/trace IDs to a terminal result.
 
-Generate the acceptance matrix from the current registry's functions, screens, authority
-gates and required happy/error/recovery states. Preserve explicitly unsupported functions
-as unsupported; do not turn them into passed or deployment-only cases. In particular,
-custody handover does not authorize arbitrary browser mutation, and policy permission for
-ANALYSE/Oracle/VEKL file actions is not an executable producer.
+Freeze reviewed source and APK identities. A successful debug build is not an owner
+release. Verify the owner signer, core deployment profile, signed provisioning,
+current CA/pins and hardware/session binding before installing or attributing
+physical acceptance to this source. Preserve the existing phone's signing identity,
+owner PKI and state. Do not add host/token/CA entry screens.
 
-Exercise every applicable implemented owner function through the Android UI and real
-backend. Include provisioning/renewal, Home and navigation, commands and sessions,
-decisions/A4 review, missions and intervention, memory/corrections, connected providers,
-projects, reminders, automation, trading views/ticket confirmation, voice/overlay,
-permissions and browser video/control/pause/resume/keyboard/file-picker/upload/download/
-clipboard. Join UI evidence to the actual endpoint request, canonical command/action/run
-and independent effect readback. Browser tests require both isolated producers, measured
-control fencing, real frames and actual bytes; backend metadata alone is insufficient.
+Generate the current feature/function/surface and happy/error/recovery matrix. Use
+isolated fixtures and demo trading. Join native UI steps and traces to canonical
+backend/product Hermes actions and independent effects. Missing controls fail;
+unavailable prerequisites remain blocked. Ambiguous effects remain unknown without
+resend. Network-loss cases must preserve or independently recover the wireless
+control path; candidate cases are not automatically applicable.
 
-Cover outages, malformed/error responses, lost replies, duplicate submission, background/
-foreground transitions, rotation, process death, restart, transport loss/recovery, stale
-frames/generations, denied/revoked permissions, expired/revoked bindings, wrong TLS trust,
-approval refusal and cancellation. Check that unknown effects remain unknown and uncertain
-mutations are not retried. Use isolated test records, owner-controlled recipient addresses
-and demo trading data; do not place live orders, move money or send messages to third
-parties. Genuine system/biometric consent must come from me when required; do not bypass it
-or mark an unattended approval test as passed.
+Actual OS/biometric consent and private speaker enrollment must come from the owner.
+Keep audio, embeddings, credentials and private content out of exported evidence.
+Do not infer acoustic accuracy from a process exit or schema check.
 
-For each case, return actual source and APK hashes, serial and frozen ADB endpoint,
-native trace ID, start/end timestamps, terminal native status, screenshots/hierarchy or
-Logcat references, endpoint/command/action/run IDs, independent before/after observations,
-cleanup state and an outcome of PASSED, FAILED, BLOCKED, UNSUPPORTED or NOT_RUN with a
-concrete reason. Redact credentials, private mail content and biometric material. Keep
-raw private evidence where appropriate and provide a sanitized bundle.
-
-Bring back a JSON summary and readable report: exact tested versions, per-feature/state
-results, coverage gaps, reproducible failures, real evidence references and remaining
-deployment/device requirements. Separate local fixtures, host checks and physical phone
-results. Do not convert earlier Hermes-produced or candidate-plan receipts into native
-Artemis execution evidence.
+Return exact source/APK hashes, physical serial, measured transport and ADB server,
+native task/trace IDs, timestamps, observed assertions, effect/readback identities,
+cleanup state and per-case outcomes. Keep host checks, offline consistency and
+physical execution separate. A prepared invocation never increments physical cases.

@@ -11,6 +11,7 @@ import argparse
 import asyncio
 from datetime import datetime, timezone
 import hashlib
+import ipaddress
 import json
 from pathlib import Path
 import re
@@ -63,8 +64,6 @@ def build_plan(root: Path = ROOT, dds_root: Path | None = None, *, device_transp
                source_manifest: str | Path | None = None, native_schema: dict | None = None) -> dict:
     if device_transport not in {WIRELESS_ADB, USB_PRIVATE_BRIDGE}:
         raise ValueError("Unsupported governed device transport")
-    if native_schema is not None and device_transport != USB_PRIVATE_BRIDGE:
-        raise ValueError("This owner native Artemis route requires USB_PRIVATE_BRIDGE")
     feature_document = read_json(root / "registries/owner_features.json")
     features = feature_document["features"]
     screens = read_json(root / "registries/owner_screens.json")["screens"]
@@ -291,9 +290,22 @@ def build_plan(root: Path = ROOT, dds_root: Path | None = None, *, device_transp
                           "artemis": "dial-control", "device_serial": "RFCX2054F5W",
                           "device_model": "SM-S928B", "package_name": "com.dial.van"}
         plan["target"].pop("hermes_and_artemis", None)
+        plan["target"]["device_transport"] = device_transport
+        plan["status"] = "NATIVE_PLAN_PREPARED_NOT_EXECUTED"
+        plan["target"]["phone_connection"] = (
+            "paired_private_wireless_adb_via_native_artemis" if device_transport == WIRELESS_ADB
+            else "usb_private_bridge_via_native_artemis")
+        if device_transport == WIRELESS_ADB:
+            plan["transport_adaptation"] = {
+                "selected_transport": WIRELESS_ADB, "verified_applicable_cases": 0,
+                "applicability": "CANDIDATES_REQUIRING_CASE_SCOPED_WIRELESS_REVIEW",
+                "note": "Recheck the private paired endpoint and physical identity after transport loss or reboot; no USB/Windows prerequisite.",
+            }
         plan["prerequisites"] = [
             "Current native Artemis MCP schema and runtime identity; direct Commander/DIAL ingress",
-            "Exact owner-authorized S24 USB serial and independently measured private Windows loopback ADB bridge",
+            ("Owner-authorized Android wireless-debugging pairing on a measured private endpoint; fresh ADB state, hardware serial and model readbacks"
+             if device_transport == WIRELESS_ADB else
+             "Exact owner-authorized S24 USB serial and independently measured private loopback ADB bridge"),
             "Reviewed immutable core gateway/product Hermes source, current backend qualification and owner-signed APK",
             "Matching signed provisioning, current CA/pins, device identity, hardware attestation and session",
             "Isolated acceptance data, bounded fault fixtures, private owner OS/biometric consent and demo-only trading",
@@ -348,12 +360,64 @@ def invocation(plan: dict, case_id: str, *, device_serial: str, apk_path: str | 
 
 
 
-def native_invocation(plan: dict, case_id: str, *, device_serial: str, native_schema: dict) -> dict:
+def native_wireless_binding(plan: dict, adb_serial: str, binding: dict | None) -> dict:
+    """Check offline readback consistency for preparation; confer no pairing or live authority."""
+    if not isinstance(binding, dict):
+        raise ValueError("Wireless native arguments require fresh physical identity readbacks")
+    if (binding.get("record_kind") != "NATIVE_WIRELESS_ADB_IDENTITY_READBACK"
+            or binding.get("device_transport") != WIRELESS_ADB
+            or binding.get("adb_serial") != adb_serial
+            or binding.get("authentication") != "ANDROID_WIRELESS_DEBUGGING_TLS_PAIRED"):
+        raise ValueError("Wireless transport binding mismatch or missing paired TLS binding")
+    try:
+        host, port_text = adb_serial.rsplit(":", 1)
+        address = ipaddress.IPv4Address(host)
+        port = int(port_text)
+        private = any(address in ipaddress.IPv4Network(n) for n in
+                      ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/8"))
+        if not private or host != str(address) or str(port) != port_text or not 1024 <= port <= 65535:
+            raise ValueError()
+    except (ValueError, AttributeError):
+        raise ValueError("Wireless ADB requires an exact private IPv4:port endpoint") from None
+    try:
+        observed = datetime.fromisoformat(binding["observed_at"].replace("Z", "+00:00"))
+        if observed.tzinfo is None:
+            raise ValueError()
+        age = (datetime.now(timezone.utc) - observed).total_seconds()
+        if not 0 <= age <= 300:
+            raise ValueError()
+    except (KeyError, TypeError, AttributeError, ValueError):
+        raise ValueError("Wireless identity readbacks must be current and timezone-aware") from None
+    probes = binding.get("reads")
+    if not isinstance(probes, list):
+        raise ValueError("Wireless ADB physical identity probes are required")
+    expected = [
+        (["get-state"], "device"),
+        (["shell", "getprop", "ro.serialno"], plan["target"]["device_serial"]),
+        (["shell", "getprop", "ro.product.model"], plan["target"]["device_model"]),
+    ]
+    for suffix, value in expected:
+        matches = [r for r in probes if isinstance(r, dict)
+                   and r.get("argv") == ["adb", "-s", adb_serial, *suffix]]
+        if (len(matches) != 1 or type(matches[0].get("exit_code")) is not int
+                or matches[0]["exit_code"] != 0 or not isinstance(matches[0].get("stdout"), str)
+                or matches[0]["stdout"].strip() != value):
+            raise ValueError("Wireless ADB state or physical handset identity mismatch")
+    return {"adb_serial": adb_serial, "physical_serial": plan["target"]["device_serial"],
+            "device_model": plan["target"]["device_model"], "binding_sha256": digest(binding),
+            "producer_authenticity_verified": False, "requires_live_device_recheck": True}
+
+
+def native_invocation(plan: dict, case_id: str, *, device_serial: str, native_schema: dict,
+                      device_binding: dict | None = None) -> dict:
     """Prepare exact native MCP arguments; this function does not dispatch or admit a device."""
     verify_plan(plan)
     if plan.get("adapter_route") != "NATIVE_ARTEMIS_MCP_DIRECT_COMMANDER":
         raise ValueError("A source-bound native Artemis plan is required")
-    if device_serial != plan["target"].get("device_serial"):
+    transport_binding = None
+    if plan["target"].get("device_transport") == WIRELESS_ADB:
+        transport_binding = native_wireless_binding(plan, device_serial, device_binding)
+    elif device_serial != plan["target"].get("device_serial"):
         raise ValueError("Native task requires the exact owner-selected handset")
     if digest(native_schema.get("tools", {})) != plan.get("native_schema_sha256"):
         raise ValueError("Native Artemis schema drift")
@@ -382,6 +446,7 @@ def native_invocation(plan: dict, case_id: str, *, device_serial: str, native_sc
             "plan_sha256": plan["plan_sha256"], "native_schema_sha256": plan["native_schema_sha256"],
             "objective_sha256": hashlib.sha256(objective.encode()).hexdigest(),
             "execution_state": "PREPARED_NATIVE_ARGUMENTS_NOT_EXECUTED",
+            "transport_binding": transport_binding, "producer_authenticity_verified": False,
             "live_qualified": False}
 
 
@@ -885,7 +950,8 @@ def main() -> int:
     native.add_argument("--plan", type=Path, required=True)
     native.add_argument("--native-schema", type=Path, required=True)
     native.add_argument("--case", required=True)
-    native.add_argument("--device-serial", required=True)
+    native.add_argument("--device-serial", required=True, help="Exact ADB transport serial; wireless uses private IPv4:port")
+    native.add_argument("--device-binding", type=Path, help="Fresh wireless ADB state and physical serial/model readbacks")
     native.add_argument("--out", type=Path, required=True)
     invoke = sub.add_parser("call")
     invoke.add_argument("--plan", type=Path, required=True)
@@ -900,11 +966,12 @@ def main() -> int:
     validate.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.action == "prepare":
-        value = build_plan(device_transport=args.device_transport or (USB_PRIVATE_BRIDGE if args.native_schema else WIRELESS_ADB), source_manifest=args.source_manifest,
+        value = build_plan(device_transport=args.device_transport or WIRELESS_ADB, source_manifest=args.source_manifest,
                            native_schema=read_json(args.native_schema) if args.native_schema else None)
     elif args.action == "native-call":
         value = native_invocation(read_json(args.plan), args.case, device_serial=args.device_serial,
-                                  native_schema=read_json(args.native_schema))
+                                  native_schema=read_json(args.native_schema),
+                                  device_binding=read_json(args.device_binding) if args.device_binding else None)
     elif args.action == "call":
         value = invocation(read_json(args.plan), args.case, device_serial=args.device_serial, apk_path=args.apk_path)
         value["execution_state"] = "PREPARED_TOOL_ARGUMENTS_NOT_EXECUTED"

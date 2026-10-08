@@ -2,6 +2,7 @@
 import asyncio
 import copy
 from pathlib import Path
+from datetime import datetime, timezone, timedelta
 import pytest
 from tools.certification import artemis_acceptance as a
 
@@ -84,6 +85,76 @@ def test_native_runtime_root_must_be_explicit_absolute(schema, root):
         a.build_plan(dds_root=Path("/nonexistent"), device_transport=a.USB_PRIVATE_BRIDGE,
                      native_schema={**schema, "root": root})
 
-def test_native_wireless_cannot_claim_the_owner_usb_route(schema):
-    with pytest.raises(ValueError, match="USB_PRIVATE_BRIDGE"):
-        a.build_plan(dds_root=Path("/nonexistent"), native_schema=schema)
+def test_native_wireless_is_default_without_windows_or_dds(schema):
+    p = a.build_plan(dds_root=Path("/nonexistent"), native_schema=schema)
+    assert p["target"]["device_transport"] == a.WIRELESS_ADB
+    assert p["status"] == "NATIVE_PLAN_PREPARED_NOT_EXECUTED"
+    assert p["physical_cases_executed"] == 0
+    assert p["coverage"]["cases"] == 826
+    assert p["target"]["hermes"] == "van-trading-core"
+    assert p["target"]["artemis"] == "dial-control"
+    assert p["governed_schema_sources"] == []
+    assert not p["dds_readiness_required"]
+    assert "Windows" not in str(p["prerequisites"])
+    assert "USB" not in str(p["prerequisites"])
+    assert "pairing" in str(p["prerequisites"])
+    assert p["transport_adaptation"]["verified_applicable_cases"] == 0
+
+@pytest.fixture(scope="module")
+def wireless_plan(schema):
+    return a.build_plan(dds_root=Path("/nonexistent"), native_schema=schema)
+
+def wireless_readbacks(serial="10.66.66.2:37123"):
+    # Synthetic unit fixture: neither paired nor measured on a real handset.
+    return {"record_kind": "NATIVE_WIRELESS_ADB_IDENTITY_READBACK",
+            "device_transport": a.WIRELESS_ADB, "adb_serial": serial,
+            "authentication": "ANDROID_WIRELESS_DEBUGGING_TLS_PAIRED",
+            "observed_at": datetime.now(timezone.utc).isoformat(),
+            "reads": [{"argv": ["adb", "-s", serial, *suffix], "exit_code": 0, "stdout": value + "\n"}
+                      for suffix, value in [(["get-state"], "device"),
+                                            (["shell", "getprop", "ro.serialno"], "RFCX2054F5W"),
+                                            (["shell", "getprop", "ro.product.model"], "SM-S928B")]]}
+
+@pytest.mark.parametrize("serial", ["10.66.66.2:37123", "127.0.0.1:37123"])
+def test_wireless_uses_transport_address_and_binds_separate_physical_identity(wireless_plan, schema, serial):
+    call = a.native_invocation(wireless_plan, "OF-HOME-001:happy", device_serial=serial,
+                               native_schema=schema, device_binding=wireless_readbacks(serial))
+    assert call["arguments"]["device_serial"] == serial
+    assert call["transport_binding"]["physical_serial"] == "RFCX2054F5W"
+    assert call["transport_binding"]["device_model"] == "SM-S928B"
+    assert call["transport_binding"]["requires_live_device_recheck"] is True
+    assert call["transport_binding"]["producer_authenticity_verified"] is False
+    assert call["execution_state"] == "PREPARED_NATIVE_ARGUMENTS_NOT_EXECUTED"
+    assert call["live_qualified"] is False
+
+@pytest.mark.parametrize("change", ["missing", "public", "physical_serial", "model", "offline",
+                                   "expired", "future", "naive", "auth", "serial", "failed", "duplicate"])
+def test_wireless_unpaired_public_stale_or_wrong_hardware_refused(wireless_plan, schema, change):
+    serial = "10.66.66.2:37123"
+    b = wireless_readbacks(serial)
+    if change == "missing": b = None
+    elif change == "public":
+        serial = "8.8.8.8:37123"; b = wireless_readbacks(serial)
+    elif change == "physical_serial": b["reads"][1]["stdout"] = "OTHER"
+    elif change == "model": b["reads"][2]["stdout"] = "OTHER"
+    elif change == "offline": b["reads"][0]["stdout"] = "unauthorized"
+    elif change == "expired": b["observed_at"] = (datetime.now(timezone.utc) - timedelta(minutes=6)).isoformat()
+    elif change == "future": b["observed_at"] = (datetime.now(timezone.utc) + timedelta(minutes=1)).isoformat()
+    elif change == "naive": b["observed_at"] = datetime.now().isoformat()
+    elif change == "auth": b["authentication"] = "LEGACY_PLAINTEXT_ADB"
+    elif change == "serial": serial = "10.66.66.2:37124"
+    elif change == "failed": b["reads"][0]["exit_code"] = 1
+    elif change == "duplicate": b["reads"].append(copy.deepcopy(b["reads"][1]))
+    with pytest.raises(ValueError):
+        a.native_invocation(wireless_plan, "OF-HOME-001:happy", device_serial=serial,
+                            native_schema=schema, device_binding=b)
+
+
+@pytest.mark.parametrize("stdout", [None, 1, True, [], {}])
+def test_wireless_malformed_stdout_has_explicit_refusal(wireless_plan, schema, stdout):
+    serial = "10.66.66.2:37123"
+    b = wireless_readbacks(serial)
+    b["reads"][1]["stdout"] = stdout
+    with pytest.raises(ValueError, match="physical handset identity"):
+        a.native_invocation(wireless_plan, "OF-HOME-001:happy", device_serial=serial,
+                            native_schema=schema, device_binding=b)
