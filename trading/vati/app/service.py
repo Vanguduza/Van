@@ -172,6 +172,9 @@ class SessionService:
         if not account.enabled:
             raise RuntimeError(f"account {account.alias} is disabled")
         mandate = TradingMandate.from_mapping(c.mandate)
+        if mandate.temperament_enabled:
+            raise RuntimeError("trading temperaments require AccountCoordinatorService; "
+                               "single-symbol session refuses unsupported signed posture")
         if mandate.mode.value in ("LIMITED_LIVE", "AUTONOMOUS_LIVE") and account.demo:
             raise RuntimeError("mandate is live but the account record is demo: refuse to start with mismatched safety identity")
         if mandate.account_alias != account.alias:

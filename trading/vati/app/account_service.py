@@ -30,6 +30,7 @@ from vati.arbiter import OpportunityEngine
 from vati.arbiter.candidate import CandidateOpportunity
 from vati.arbiter.opportunity import CANDIDATE_TTL_MS, DEFAULT_CANDIDATE_TTL_MS
 from vati.arbiter.portfolio_allocator import OpportunityPortfolioAllocator
+from vati.arbiter.temperament import TemperamentPolicy, TemperedOpportunityAllocator
 from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind, make_event
 from vati.cognition.invokers import CognitionConfig, build_invoker, build_research_invoker
@@ -389,16 +390,32 @@ class AccountCoordinatorService:
         # TCA, protection, trade review and reduce-only learning.
         self._entries = self.lifecycle.entries
 
+        profile = TemperamentPolicy(mandate) if mandate.temperament_enabled else None
+        base_allocator = OpportunityPortfolioAllocator()
+        allocator = (TemperedOpportunityAllocator(base_allocator, profile)
+                     if profile is not None else base_allocator)
+        if profile is not None:
+            self._ledger.append(make_event(
+                EventKind.SESSION, "vati-account-coordinator",
+                {"event": "SIGNED_TEMPERAMENT_ACTIVATED",
+                 "mandate_id": mandate.mandate_id, "mandate_version": mandate.version,
+                 "default": (mandate.trading_temperament.value
+                             if mandate.trading_temperament else "LEGACY"),
+                 "per_strategy": {s: v.value for s, v in sorted(
+                     mandate.strategy_temperaments.items())}},
+                event_time_ms=self.clock(), received_time_ms=self.clock(),
+                correlation_id=account.alias))
         self.coordinator = AccountDecisionCoordinator(
             CoordinatorConfig(account_alias=account.alias, max_new_intents_per_pass=1),
             evaluators=evaluators,
-            allocator=OpportunityPortfolioAllocator(),
+            allocator=allocator,
             lease=self.lease,
             snapshot_fn=self._snapshot_for,
             risk_fn=self._risk,
             execute_fn=self._execute,
             dependency_fn=self._dependency_for,
             mandate=mandate,
+            temperament_policy=profile,
         )
         return self
 
@@ -674,6 +691,9 @@ class AccountCoordinatorService:
 
     def _dependency_for(self, candidate: CandidateOpportunity, snapshot: RiskSnapshot):
         risk_pct = self.coordinator.risk_pct_fn(candidate) if self.coordinator else Decimal("0")
+        if self.coordinator and self.coordinator.temperament_policy is not None:
+            profile = self.coordinator.temperament_policy.verdict(candidate, now_ms=self.clock())
+            risk_pct *= profile.risk_fraction if profile.eligible else Decimal("0")
         dep = self.dependency.assess(
             candidate_id=candidate.candidate_id, symbol=candidate.symbol,
             candidate_risk=snapshot.equity * risk_pct,
@@ -958,6 +978,16 @@ class AccountCoordinatorService:
                 "week_start_equity": str(self.week_start_equity),
                 "kill_switch": sorted(t.value for t in self.kill.active),
                 "mode": self.mandate.mode.value if self.mandate else "UNKNOWN",
+                "temperament": (self.mandate.trading_temperament.value
+                                if self.mandate and self.mandate.trading_temperament
+                                else "LEGACY"),
+                "strategy_temperaments": ({s: p.value for s, p in sorted(
+                    self.mandate.strategy_temperaments.items())}
+                    if self.mandate else {}),
+                "aggressive_edge_authority": (
+                    "UNBOUND" if self.coordinator and self.coordinator.temperament_policy
+                    and self.coordinator.temperament_policy.admitted_edge_fn is None
+                    else "NOT_APPLICABLE_OR_BOUND"),
             },
             event_time_ms=now_ms, received_time_ms=now_ms,
             correlation_id=self.cfg.account_alias,
