@@ -166,7 +166,7 @@ PY
     echo STAGEHAND_RUNTIME_GREEN
     break
   fi
-  if [[ "$attempt" == 5 ]]; then
+  if [[ "$attempt" == 15 ]]; then
     journalctl -u vati-stagehand.service -n 100 --no-pager >&2 || true
     exit 47
   fi
