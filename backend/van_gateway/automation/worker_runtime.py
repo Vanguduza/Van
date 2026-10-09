@@ -830,7 +830,8 @@ class WorkerWorkflowObserver:
         # A pointer to immutable callback receipts is evidence of the independently
         # read local effect. It does not claim a provider-issued receipt.
         return {**({field: result[field]} if field else {}),
-                "exists": True, "correlation": {"run_id": run_id}, "steps": observed,
+                "exists": True, "run_id": run["run_id"], "input_digest": run["input_digest"],
+                "artifact_id": run["artifact_id"], "correlation": {"run_id": run_id}, "steps": observed,
                 "evidence_pointer": evidence_pointer or f"automation-run://{run_id}",
                 "source_trust": "UNTRUSTED_EXTERNAL", "provider_correctness_verified": False}
 

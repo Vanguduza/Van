@@ -23,7 +23,7 @@ from van_gateway.action.models import ExecutionStatus, PrincipalType
 from van_gateway.automation.models import RunStatus
 from van_gateway.automation.verifier import PostconditionSpec, VerificationOutcome
 
-ENGINE_ID = "n8n-exec-9"  # what the fake n8n webhook returns as executionId
+ENGINE_ID = "n8n-exec-1"  # what the fake n8n webhook returns as executionId
 
 
 async def _dispatch(tmp_path, observed: dict, spec: PostconditionSpec):

@@ -523,6 +523,7 @@ class BrowserApi:
         task: BrowserTask,
         assignment: SubagentAssignment,
         result,
+        session_lease_ref: str | None = None,
     ) -> dict[str, Any]:
         delta, requested_class, requested_domain = self._requested_delta(result)
         boundary_type = classify_boundary(
@@ -573,7 +574,7 @@ class BrowserApi:
         why_required = self._why_required(assignment, result, delta, requested_domain)
         risk_summary = self._risk_summary(assignment, requested_domain, requested_class)
         evidence_refs = await self._collect_evidence_refs(task, result)
-        lease_ref = await self._release_task_lease(task)
+        lease_ref = await self._release_task_lease(task) or session_lease_ref
         pending_step = result.steps[-1].kind if result.steps else None
 
         decision = await self.decisions.escalate(
@@ -718,7 +719,7 @@ class BrowserApi:
         task out of an end state.
         """
         try:
-            if status is BrowserTaskStatus.RESUME_AUTHORIZED:
+            if status in self.tasks.WORKING_TASK_STATUSES:
                 await self.tasks.set_working_status(
                     task_id=task.task_id, status=status, error_code=error_code, now_ms=now,
                 )
@@ -1775,7 +1776,7 @@ class BrowserApi:
 
         escalation = None
         try:
-            escalation = await self._record_run_outcome(task, assignment, result, run_token, evidence_pointer)
+            escalation = await self._record_run_outcome(task, assignment, result, run_token, evidence_pointer, lease.lease_id)
         except BrowserTaskTransitionRefused as exc:
             # Review I3 MINOR-2: the task reached an end state while this run was in flight
             # (e.g. /complete CANCELLED). It stays there; the run's outcome is not applied.
@@ -1861,7 +1862,7 @@ class BrowserApi:
 
     async def _record_run_outcome(
         self, task: BrowserTask, assignment: SubagentAssignment, result, run_token: str,
-        evidence_pointer: str | None = None,
+        evidence_pointer: str | None = None, session_lease_ref: str | None = None,
     ) -> dict[str, Any] | None:
         """Apply a finished run to its task, through the guarded writers only (I3 MINOR-2).
 
@@ -1881,7 +1882,7 @@ class BrowserApi:
             instruments.record_browser_task(BrowserTaskStatus.WAITING_FOR_OWNER)
         elif result.stop_reason in (SubagentStop.SCOPE_VIOLATION, SubagentStop.ACTION_CLASS_VIOLATION):
             escalation = await self._create_boundary_escalation(
-                task=task, assignment=assignment, result=result
+                task=task, assignment=assignment, result=result, session_lease_ref=session_lease_ref
             )
         else:
             # §7: COMPLETED only after VERIFIED. UNVERIFIABLE stays VERIFYING (not

@@ -48,17 +48,17 @@ def _refused(db, fn, match="browser_task_terminal_status"):
     db.rollback()
 
 
-async def test_schema_is_35():
-    # Integration G8: G6a's migration 36 (browser_tasks.scope_json) follows migration 35.
-    # Unit G9c: migration 37 (browser_tasks.mutating, the network-effect guard) follows 36.
+async def test_current_schema_keeps_all_browser_hardening_migrations():
     from van_gateway.storage.db import MIGRATIONS
 
-    # Unit G11: migration 38 (task truth — mutating, scope_json — immutable) follows 37.
-    assert SCHEMA_VERSION == 38
-    assert sorted(MIGRATIONS)[-4:] == [35, 36, 37, 38]
-    assert "browser_task_tombstones" in MIGRATIONS[35] and "scope_json" in MIGRATIONS[36]
-    assert "mutating" in MIGRATIONS[37]
-    assert "NEW.mutating IS NOT OLD.mutating" in MIGRATIONS[38] and "NEW.scope_json IS NOT OLD.scope_json" in MIGRATIONS[38]
+    assert max(MIGRATIONS) == SCHEMA_VERSION
+    assert sorted(MIGRATIONS) == list(range(1, SCHEMA_VERSION + 1))
+    # Browser logical 34..38 were assigned 49..53 after the branch reconciliation.
+    assert "browser_tasks_terminal_status_sticky" in MIGRATIONS[49]
+    assert "browser_task_tombstones" in MIGRATIONS[50]
+    assert "scope_json" in MIGRATIONS[51] and "mutating" in MIGRATIONS[52]
+    assert "NEW.mutating IS NOT OLD.mutating" in MIGRATIONS[53]
+    assert "NEW.scope_json IS NOT OLD.scope_json" in MIGRATIONS[53]
 
 
 @pytest.mark.parametrize("terminal", TERMINAL)
@@ -141,29 +141,27 @@ async def test_a_new_task_id_is_unaffected(db):
     assert _status(conn, "fresh") == "RUNNING"
 
 
-async def test_upgrading_a_v34_database_tombstones_tasks_already_terminal(db):
-    """Migration 35 over an existing store: terminal rows written before it are tombstoned."""
-    conn, store = db
-    for name in ("browser_tasks_tombstone_on_terminal_insert", "browser_tasks_tombstone_on_terminal_update",
-                 "browser_tasks_tombstoned_id_not_reinserted", "browser_tasks_identity_immutable",
-                 "browser_tasks_terminal_evidence_frozen", "browser_task_tombstones_no_delete",
-                 "browser_task_tombstones_no_update"):
-        conn.execute(f"DROP TRIGGER {name}")
-    conn.execute("DROP TABLE browser_task_tombstones")
-    # Integration G8: a v34 store also lacks migration 36 (G6a's scope_json); migrate() applies
-    # every version above the highest recorded, so both are rolled back and both re-applied.
-    conn.execute("ALTER TABLE browser_tasks DROP COLUMN scope_json")
-    conn.execute("ALTER TABLE browser_tasks DROP COLUMN mutating")  # unit G9c: migration 37
-    conn.execute("DELETE FROM schema_migrations WHERE version IN (35, 36, 37, 38)")
-    conn.commit()
-    _ins(conn, "legacy", "EXPIRED")
+async def test_upgrade_before_tombstone_migration_backfills_terminal_tasks(tmp_path, monkeypatch):
+    """Build the real pre-tombstone schema, then apply its mapped successors."""
+    from van_gateway.storage import db as db_module
+
+    migrations = dict(db_module.MIGRATIONS)
+    monkeypatch.setattr(db_module, "MIGRATIONS", {v: sql for v, sql in migrations.items() if v <= 49})
+    store = db_module.Store(str(tmp_path / "pre-tombstones.sqlite3"))
     await store.migrate()
-    assert [r[0] for r in conn.execute("SELECT version FROM schema_migrations WHERE version >= 35 ORDER BY version")] == [35, 36, 37, 38]
-    assert "scope_json" in [r[1] for r in conn.execute("PRAGMA table_info(browser_tasks)")]
-    assert "mutating" in [r[1] for r in conn.execute("PRAGMA table_info(browser_tasks)")]
-    conn.execute("DELETE FROM browser_tasks WHERE task_id = 'legacy'")
-    conn.commit()
-    _refused(conn, lambda: _ins(conn, "legacy", "PENDING"))
+    with sqlite3.connect(store.path) as conn:
+        assert conn.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == 49
+        assert conn.execute("SELECT name FROM sqlite_master WHERE name='browser_task_tombstones'").fetchone() is None
+        _ins(conn, "legacy", "EXPIRED")
+    monkeypatch.setattr(db_module, "MIGRATIONS", migrations)
+    await store.migrate()
+    with sqlite3.connect(store.path) as conn:
+        assert [r[0] for r in conn.execute("SELECT version FROM schema_migrations ORDER BY version")] == sorted(migrations)
+        assert "scope_json" in [r[1] for r in conn.execute("PRAGMA table_info(browser_tasks)")]
+        assert "mutating" in [r[1] for r in conn.execute("PRAGMA table_info(browser_tasks)")]
+        conn.execute("DELETE FROM browser_tasks WHERE task_id = 'legacy'")
+        conn.commit()
+        _refused(conn, lambda: _ins(conn, "legacy", "PENDING"))
 
 
 @pytest.mark.parametrize("column, value", [

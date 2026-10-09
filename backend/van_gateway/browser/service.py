@@ -791,7 +791,7 @@ class BrowserTaskService:
 
     async def set_working_status(
         self, *, task_id: str, status: BrowserTaskStatus, error_code: str | None = None,
-        now_ms: int | None = None,
+        now_ms: int | None = None, evidence_pointer: str | None = None,
     ) -> None:
         """Move a live task to WAITING_FOR_OWNER / RESUME_AUTHORIZED / VERIFYING.
 
@@ -803,7 +803,7 @@ class BrowserTaskService:
         if status not in self.WORKING_TASK_STATUSES:
             raise BrowserTaskTransitionRefused(task_id, None, status.value, "NOT_A_WORKING_STATUS")
         await self._write_status(
-            task_id=task_id, status=status, evidence_pointer=None, error_code=error_code,
+            task_id=task_id, status=status, evidence_pointer=evidence_pointer, error_code=error_code,
             completed=False, now_ms=now_ms,
             require_current=(
                 BrowserTaskStatus.WAITING_FOR_OWNER
@@ -812,12 +812,13 @@ class BrowserTaskService:
         )
 
     async def hold_for_verification(
-        self, *, task_id: str, error_code: str | None = None, now_ms: int | None = None
+        self, *, task_id: str, error_code: str | None = None, now_ms: int | None = None,
+        evidence_pointer: str | None = None,
     ) -> None:
         """VERIFYING: a done claim nobody could verify. Not terminal, never success (§7)."""
         await self.set_working_status(
             task_id=task_id, status=BrowserTaskStatus.VERIFYING, error_code=error_code,
-            now_ms=now_ms,
+            now_ms=now_ms, evidence_pointer=evidence_pointer,
         )
 
     async def _write_status(

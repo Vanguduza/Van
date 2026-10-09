@@ -117,7 +117,8 @@ async def test_an_owner_approval_never_widens_a_task_onto_the_overlay(tmp_path):
         await store.execute("UPDATE browser_scope_authorizations SET approved_domains_json = ? WHERE task_id = ?",
                             (json.dumps([t.DOMAIN, HOST]), tid))
         overlay = await api._load_task(tid)
-    assert "https://outside.example.net" in [e.origin for e in widened.scope.entries]
+    assert [e.origin for e in widened.scope.entries] == [f"https://{t.DOMAIN}"]
+    assert await store.fetchall("SELECT * FROM browser_scope_authorizations WHERE task_id=?", (tid,)) == []
     assert [e.origin for e in overlay.scope.entries] == [f"https://{t.DOMAIN}"]
 
 

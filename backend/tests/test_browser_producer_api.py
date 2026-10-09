@@ -237,13 +237,13 @@ async def test_unknown_or_wrong_producer_principal_is_not_admitted(fabric):
             await fabric.producers.authority(producer_session_id=pid, principal=principal, now_ms=NOW)
 
 
-async def delegated_task(f):
+async def delegated_task(f, *, action_class="A1"):
     await ready(f)
     # This test's canonical Mission and task rows are issued through the actual services
     # in integration tests; the focused broker fixture supplies their persisted contract.
     await f.store.execute("INSERT INTO missions(mission_id,owner_principal_id,origin,origin_channel,title,goal,state,created_at_ms,updated_at_ms) VALUES('mission','phone','OWNER','CHAT','test mission','test goal','RUNNING',?,?)", (NOW, NOW))
     await f.store.execute("UPDATE browser_interactive_sessions SET mission_id='mission' WHERE session_id=?", (f.session.session_id,))
-    await f.store.execute("INSERT INTO browser_tasks(task_id,profile_alias,strategy,autonomy_tier,action_class,target_domain,goal,status,started_at_ms,updated_at_ms) VALUES('task',?,'HARNESS','L1_HARNESS_DETERMINISTIC','A1','example.org','observe','RUNNING',?,?)", (f.session.profile_alias, NOW, NOW))
+    await f.store.execute("INSERT INTO browser_tasks(task_id,profile_alias,strategy,autonomy_tier,action_class,target_domain,goal,status,started_at_ms,updated_at_ms) VALUES('task',?,'HARNESS','L1_HARNESS_DETERMINISTIC',?,'example.org','observe','RUNNING',?,?)", (f.session.profile_alias, action_class, NOW, NOW))
     await f.store.execute("INSERT INTO mission_activities(activity_id,mission_id,activity_type,capability_id,executor,executor_ref,started_at_ms) VALUES('activity','mission','browser.task','browser.interactive.session','BROWSER_FABRIC','task',?)", (NOW,))
     await f.producers.observe(producer_session_id=PID, principal=PRINCIPAL, event="target", target_id="tab", url="https://example.org", now_ms=NOW)
     lease = await f.control.delegate(session_id=f.session.session_id, holder=BrowserControlHolder.HERMES_DETERMINISTIC, issued_for="van-trading-core", now_ms=NOW)
@@ -304,8 +304,7 @@ async def test_result_validation_fences_spent_final_step_without_admitting_anoth
 
 @pytest.mark.parametrize("action_class", ["A1", "A2", "A3"])
 async def test_autonomous_input_requires_immutable_mutation_admission(fabric, action_class):
-    lease = await delegated_task(fabric)
-    await fabric.store.execute("UPDATE browser_tasks SET action_class=?", (action_class,))
+    lease = await delegated_task(fabric, action_class=action_class)
     await control_grant(fabric)
     for resolve in (control_validate, control_call):
         with pytest.raises(ProducerError, match="mutation_admission_unavailable"):

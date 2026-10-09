@@ -6,6 +6,7 @@ import time
 from van_gateway.action.models import ActionDefinition, VerifierType
 from van_gateway.browser.action_plans import PlanError, digest
 from van_gateway.browser.models import BrowserStrategy, AutonomyTier
+from van_gateway.browser.service import BrowserTaskTransitionRefused, TERMINAL_TASK_STATUSES
 from van_gateway.models import ActionClass, PrincipalType
 
 PREPARE_ACTION = ActionDefinition(action_id="browser.task.prepare", action_class=ActionClass.A3,
@@ -216,9 +217,18 @@ class BrowserTaskPreparationService:
                 raise PlanError("browser_parent_completion_conflict")
             await db.execute("INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?) ON CONFLICT(key) DO NOTHING",
                 ("browser_prepared_task_completion:"+task["task_id"],json.dumps(marker),int(time.time()*1000)))
-            await db.execute("UPDATE browser_tasks SET status='COMPLETED',evidence_pointer=?,completed_at_ms=?,updated_at_ms=? WHERE task_id=? AND status<>'COMPLETED'",
-                (receipt["evidence_pointer"],int(time.time()*1000),int(time.time()*1000),task["task_id"]))
             await db.commit()
+        # Exact plan effects are verified, but this task's freeform goal is not.
+        # Keep that distinction in the task state as well as the parent Mission.
+        try:
+            await self.tasks.hold_for_verification(
+                task_id=task["task_id"], error_code="BROWSER_FREEFORM_GOAL_UNVERIFIABLE",
+                evidence_pointer=marker["evidence_pointer"],
+            )
+        except BrowserTaskTransitionRefused as exc:
+            if exc.current not in {state.value for state in TERMINAL_TASK_STATUSES}:
+                raise
+            # A concurrent owner cancellation or other end state remains sticky.
         await self.binder.sync_from_subsystems(plan["mission_id"])
         current = await self.binder.missions.get(plan["mission_id"])
         if current.state is MissionState.RUNNING:

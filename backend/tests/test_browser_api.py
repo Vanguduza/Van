@@ -390,10 +390,9 @@ async def test_a_worker_runs_inside_its_assignment_and_the_task_closes(tmp_path)
         body = response.json()
         assert body["stop_reason"] == "GOAL_ACHIEVED"
         assert body["execution_completed"] is True
-        assert body["worker_goal_reported"] is True
-        assert body["succeeded"] is False
-        assert body["owner_success"] is False
-        assert body["verification_state"] == "UNVERIFIED"
+        assert body["succeeded"] is True
+        assert body["verification_outcome"] == "VERIFIED"
+        assert body["evidence_pointer"].startswith("browser-evidence://")
         assert body["step_count"] == 2
         # §379 — every step is attributed to the assigning Hermes turn.
         assert {step["turn_id"] for step in body["steps"]} == {"turn-7"}
@@ -404,7 +403,7 @@ async def test_a_worker_runs_inside_its_assignment_and_the_task_closes(tmp_path)
         assert fetched.json()["task"]["status"] == BrowserTaskStatus.COMPLETED.value
 
 
-async def test_worker_done_without_observation_is_execution_completion_only(tmp_path):
+async def test_worker_done_without_independent_observation_remains_unverifiable(tmp_path):
     worker = _ScriptedWorker([ProposedAction(kind="done", domain=DOMAIN, done=True)])
     ac, _api, store = await _client(tmp_path, worker=worker)
     async with ac:
@@ -418,17 +417,16 @@ async def test_worker_done_without_observation_is_execution_completion_only(tmp_
         )
         assert response.status_code == 200
         body = response.json()
-        assert body["execution_completed"] is True
-        assert body["worker_goal_reported"] is True
+        assert body["execution_completed"] is False
+        assert body["stop_reason"] == "UNVERIFIABLE"
+        assert body["verification_outcome"] == "UNVERIFIABLE"
         assert body["succeeded"] is False
-        assert body["owner_success"] is False
-        assert body["verification_state"] == "UNVERIFIED"
         assert body["step_count"] == 0
         projection = (await ac.get(f"/v1/browser/tasks/{task['task_id']}")).json()
-        assert projection["task"]["status"] == "COMPLETED"
+        assert projection["task"]["status"] == "VERIFYING"
         assert projection["task"]["owner_success"] is False
         assert projection["task"]["verification_state"] == "UNVERIFIED"
-        assert projection["evidence"] == []
+        assert not any(row["kind"] == "ASSIGNMENT_COMPLETION" for row in projection["evidence"])
         listed = (await ac.get("/v1/browser/tasks")).json()
         assert listed[0]["owner_success"] is False
         assert listed[0]["verification_state"] == "UNVERIFIED"
@@ -439,7 +437,7 @@ async def test_worker_done_without_observation_is_execution_completion_only(tmp_
         verified = await registry.verify(
             strategy="browser-evidence",
             contract=SuccessContract(postconditions={"evidence_captured": True}, verifier_class="browser-evidence"),
-            context={"mission_id": "no-observed-evidence", "engine_reported_success": body["worker_goal_reported"]},
+            context={"mission_id": "no-observed-evidence", "engine_reported_success": True},
         )
         assert verified.status is not VerificationStatus.VERIFIED
         assert verified.observed_postconditions["evidence_captured"] is False
@@ -635,7 +633,7 @@ async def test_action_class_approval_cannot_be_exceeded(tmp_path):
 
 
 async def test_a_run_cannot_be_started_twice(tmp_path):
-    """A completed task is terminal; a second assignment does not resume it."""
+    """An unverified task stays VERIFYING; a second assignment cannot resume it."""
     worker = _ScriptedWorker([ProposedAction(kind="read", domain=DOMAIN)])
     ac, _api, _store = await _client(tmp_path, worker=worker)
     async with ac:
@@ -648,7 +646,7 @@ async def test_a_run_cannot_be_started_twice(tmp_path):
         assert first.status_code == 200
         second = await ac.post("/v1/browser/assignments", headers=HEADERS, json=body)
         assert second.status_code == 409
-        assert second.json()["detail"] == "BROWSER_TASK_NOT_RUNNABLE:COMPLETED"
+        assert second.json()["detail"] == "BROWSER_TASK_NOT_RUNNABLE:VERIFYING"
 
 
 # ---- owner decision 2026-09-29 §7: no browser lane self-certifies ------------------------

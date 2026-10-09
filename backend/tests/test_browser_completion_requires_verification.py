@@ -103,7 +103,10 @@ async def test_unverifiable_done_claim_cannot_be_completed_by_hand(tmp_path):
 
 
 async def test_verified_assignment_completes_and_records_its_verdict(tmp_path):
-    worker = t._ScriptedWorker([ProposedAction(kind="done", domain=t.DOMAIN, done=True)])
+    worker = t._ScriptedWorker([
+        ProposedAction(kind="extract", domain=t.DOMAIN, instruction="read the statement"),
+        ProposedAction(kind="done", domain=t.DOMAIN, done=True),
+    ])
     ac, _api, store = await t._client(tmp_path, worker=worker, verifier=t._Verdict("VERIFIED"))
     async with ac:
         task = await t._make_task(ac)

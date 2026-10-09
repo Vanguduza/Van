@@ -202,7 +202,7 @@ async def test_research_cached_evidence_does_not_certify_provider(projections):
 
 async def test_standalone_completed_browser_task_remains_unverified_with_evidence(projections):
     _, store, _, client = projections
-    await store.execute("INSERT INTO browser_tasks VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (
+    await store.execute("INSERT INTO browser_tasks(task_id,command_id,execution_id,capability_id,profile_alias,strategy,autonomy_tier,action_class,target_domain,goal,status,evidence_pointer,error_code,started_at_ms,updated_at_ms,completed_at_ms) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (
         "task-1", None, None, None, "public_research", "STAGEHAND", "L3_STAGEHAND_OBSERVE", "A2",
         "example.com", "Find correct answer", "COMPLETED", "browser-evidence://ev-1", None, 1, 2, 2,
     ))

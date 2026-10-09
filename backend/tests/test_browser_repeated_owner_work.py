@@ -37,7 +37,7 @@ async def prepare_again(ac, app, plan):
 
 
 @pytest.mark.asyncio
-async def test_verified_plan_completes_task_without_claiming_freeform_goal_and_allows_fresh_owner_work(client):
+async def test_verified_plan_holds_unmeasured_task_and_allows_fresh_owner_work(client):
     ac, app, calls = client
     plan, native, parent, result = await verified_plan(ac, app)
     completion = result["local_execution"]["parent_reconciliation"]
@@ -45,7 +45,10 @@ async def test_verified_plan_completes_task_without_claiming_freeform_goal_and_a
     assert completion["freeform_goal_independently_verified"] is False
     assert completion["parent_state"] == "UNVERIFIABLE"
     task = await app.state.store.fetchone("SELECT * FROM browser_tasks WHERE task_id=?", (plan["task_id"],))
-    assert task["status"] == "COMPLETED"
+    assert task["status"] == "VERIFYING"
+    assert task["completed_at_ms"] is None
+    assert task["evidence_pointer"] == completion["evidence_pointer"]
+    assert task["error_code"] == "BROWSER_FREEFORM_GOAL_UNVERIFIABLE"
     original_activities = await app.state.store.fetchall("SELECT * FROM mission_activities WHERE mission_id=?", (parent.mission_id,))
     original_event_count = len(await app.state.store.fetchall("SELECT * FROM mission_events WHERE mission_id=?", (parent.mission_id,)))
     assert await app.state.browser_preparation.complete_after_verified_plan(result["command_id"]) == completion
@@ -128,3 +131,24 @@ async def test_plan_command_mission_pause_during_native_focus_fences_remaining_i
     assert not any(method == "Input.insertText" for method,_ in page.calls)
     assert (await ac.post("/v1/commands", json=body)).json() == result
     assert len(native.calls) == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("terminal", ["CANCELLED", "FAILED"])
+async def test_plan_reconciliation_preserves_a_later_terminal_task_without_effect_replay(client, terminal):
+    from van_gateway.browser.models import BrowserTaskStatus
+
+    ac, app, _ = client
+    plan, native, parent, result = await verified_plan(ac, app)
+    await app.state.browser.tasks.complete(
+        task_id=plan["task_id"], status=BrowserTaskStatus(terminal),
+        evidence_pointer="browser-evidence://owner-terminal",
+    )
+    before = await app.state.store.fetchone("SELECT * FROM browser_tasks WHERE task_id=?", (plan["task_id"],))
+    completion = await app.state.browser_preparation.complete_after_verified_plan(result["command_id"])
+    after = await app.state.store.fetchone("SELECT * FROM browser_tasks WHERE task_id=?", (plan["task_id"],))
+    assert dict(after) == dict(before)
+    assert after["status"] == terminal
+    assert completion["freeform_goal_independently_verified"] is False
+    assert completion["parent_state"] == "UNVERIFIABLE"
+    assert len(native.calls) == 4

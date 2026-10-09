@@ -106,7 +106,7 @@ async def test_verified_run_reports_owner_success(tmp_path):
     # The observer independently reports the engine execution it saw the effect of; the
     # caller declares the value its correlation key must hold (reviewer I2 N-1 / issue (a)).
     observer = _Observer({"exists": True, "evidence_pointer": "gateway://evidence/1",
-                          "n8n_execution_id": "n8n-exec-9"})
+                          "n8n_execution_id": "n8n-exec-1"})
     _store, dispatcher = await _build(tmp_path, observer=observer)
     result = await dispatcher.dispatch(
         capability_id="wfcap_statements", action_id=ACTION_ID, command_id="cmd-owner-1",
@@ -181,7 +181,7 @@ async def test_a_postcondition_with_no_predicate_is_unverifiable_and_never_obser
 
 async def test_incomplete_correlation_is_partial(tmp_path):
     """§166 — something exists, but we cannot prove it is ours."""
-    observer = _Observer({"exists": True, "receipt_id": None, "n8n_execution_id": "n8n-exec-9"})
+    observer = _Observer({"exists": True, "receipt_id": None, "n8n_execution_id": "n8n-exec-1"})
     _store, dispatcher = await _build(tmp_path, observer=observer)
     result = await dispatcher.dispatch(
         capability_id="wfcap_statements", action_id=ACTION_ID, command_id="cmd-owner-1",
@@ -262,7 +262,7 @@ async def test_run_is_recorded_with_execution_linkage(tmp_path):
     # Reviewer I2 issue (a): this used to pass with an observer that never saw the engine
     # run, because the dispatcher merged the engine's own id back in and the Action Runtime
     # compared it with itself. The observer must report which execution it saw.
-    observer = _Observer({"exists": True, "state": "DELIVERED", "n8n_execution_id": "n8n-exec-9"})
+    observer = _Observer({"exists": True, "state": "DELIVERED", "n8n_execution_id": "n8n-exec-1"})
     store, dispatcher = await _build(tmp_path, observer=observer)
     result = await dispatcher.dispatch(
         capability_id="wfcap_statements", action_id=ACTION_ID, command_id="cmd-owner-1",

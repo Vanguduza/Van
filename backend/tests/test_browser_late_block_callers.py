@@ -36,6 +36,7 @@ from van_gateway.attention.engine import AttentionEngine
 from van_gateway.browser.adapters import HttpBrowserHarnessAdapter
 from van_gateway.browser.api import BrowserApi
 from van_gateway.browser.models import AutonomyTier, BrowserStrategy, BrowserTaskStatus
+from van_gateway.browser.subagent import ProposedAction
 from van_gateway.models import ActionClass
 from van_gateway.browser.service import BrowserSessionBroker, BrowserTaskService, LeaseRelease, network_owner_code
 from van_gateway.config import get_settings
@@ -52,7 +53,7 @@ chromium = pytest.mark.skipif(
 
 async def _api(tmp_path, answer: dict, calls: list):
     store = await make_store(tmp_path)
-    api = BrowserApi(store, get_settings(), worker=t._ScriptedWorker([]),
+    api = BrowserApi(store, get_settings(), worker=t._ScriptedWorker([ProposedAction(kind="extract", domain=t.DOMAIN, instruction="read the statement")]),
                      decisions=DecisionService(store, AttentionEngine(store)), verifier=t._Verdict())
 
     async def hook(**kw):

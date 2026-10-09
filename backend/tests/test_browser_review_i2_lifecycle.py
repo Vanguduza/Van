@@ -187,7 +187,7 @@ async def test_nothing_leaves_an_end_state(tmp_path, first):
 # ------------------------------------------------------------------------------ N-4
 
 
-async def test_step_on_a_resumed_task_is_capped_at_the_approved_class_and_consumes_it(tmp_path):
+async def test_advisory_approval_cannot_resume_step_above_requested_class(tmp_path):
     """Probe lifecycle.py [C]: approved ceiling A1, steps asked for A2."""
     ac, store, ex, _api = await _setup(tmp_path, OUT_OF_SCOPE)
     async with ac:
@@ -199,24 +199,23 @@ async def test_step_on_a_resumed_task_is_capped_at_the_approved_class_and_consum
         second = await ac.post("/v1/browser/interaction/step", headers=H, json=body)
         auth = await store.fetchone(
             "SELECT approved_action_class_ceiling, status FROM browser_scope_authorizations WHERE task_id = ?", (tid,))
-    assert first.status_code == 200, first.text
-    assert "STEP_CEILING_CAPPED_BY_OWNER_APPROVAL:A2->A1" in first.json()["reasons"]
-    assert (second.status_code, second.json()["detail"]) == (409, "BROWSER_RESUME_AUTHORIZATION_MISSING")
-    assert dict(auth) == {"approved_action_class_ceiling": "A1", "status": "CONSUMED"}
-    assert first.json()["state"] != "VERIFIED_SUCCESS"
-    assert ex.executed == []  # Jev's A2 click is above the approved A1; nothing ran
+    assert first.status_code == second.status_code == 409
+    assert first.json()["detail"] == second.json()["detail"] == "BROWSER_TASK_NOT_RUNNABLE:WAITING_FOR_OWNER"
+    assert auth is None
+    assert ex.executed == []
 
 
-async def test_step_on_a_resumed_task_within_the_approval_runs_once(tmp_path):
+async def test_advisory_approval_cannot_resume_step_within_requested_class(tmp_path):
     ac, store, ex, _api = await _setup(tmp_path, OUT_OF_SCOPE)
     async with ac:
         tid, decision_id = await _escalate(ac, store, ceiling="A2")
         await store.execute("UPDATE decisions SET status = 'APPROVED' WHERE id = ?", (decision_id,))
         ran = await ac.post("/v1/browser/interaction/step", headers=H, json=_step(tid))
         again = await ac.post("/v1/browser/interaction/step", headers=H, json=_step(tid))
-    assert ran.status_code == 200 and ran.json()["state"] == "VERIFIED_SUCCESS", ran.text
-    assert again.status_code == 409
-    assert [(a.operation, a.locator) for a in ex.executed] == [("click", "#go")]
+    assert ran.status_code == again.status_code == 409
+    assert ran.json()["detail"] == again.json()["detail"] == "BROWSER_TASK_NOT_RUNNABLE:WAITING_FOR_OWNER"
+    assert ex.executed == []
+    assert await store.fetchall("SELECT * FROM browser_scope_authorizations WHERE task_id=?", (tid,)) == []
 
 
 # ------------------------------------------------------------------------------ N-5

@@ -317,7 +317,9 @@ async def test_an_adapter_failure_is_not_an_empty_success(tmp_path):
     action = await worker.propose(_assignment(task), [])
     with pytest.raises(BrowserAdapterError, match="BROWSER_WORKER_UNREACHABLE"):
         await worker.execute(_assignment(task), action)
-    result = await BrowserSubagentRunner().run(
+    async def owner_not_controlling(_task):
+        return False
+    result = await BrowserSubagentRunner(owner_control_probe=owner_not_controlling).run(
         assignment=_assignment(task), worker=worker, task=task,
     )
     assert result.stop_reason is SubagentStop.WORKER_ERROR

@@ -344,7 +344,8 @@ class TestAutomationVerificationIsWired:
         assert observer.worker is app.state.automation_worker
         await app.state.store.migrate()
         result = await verifier.verify(
-            spec=PostconditionSpec(kind="AUTOMATION_WORKER_READ_BACK"),
+            spec=PostconditionSpec(kind="AUTOMATION_WORKER_READ_BACK",
+                expected_correlation={"run_id": "never-observed-run"}),
             verifier_type=VerifierType.READ_BACK,
             engine_reported_success=True,
             context={"run_id": "never-observed-run", "inputs": {}},

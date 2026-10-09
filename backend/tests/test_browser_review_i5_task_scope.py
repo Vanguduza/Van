@@ -240,8 +240,8 @@ async def test_creation_path_records_scope_and_legacy_rows_fail_closed(tmp_path)
     assert legacy.scope is None
 
 
-async def test_an_owner_approval_widens_that_tasks_scope(tmp_path):
-    """The owner's answer to a scope escalation is part of the task truth the gate reads."""
+async def test_advisory_owner_approval_does_not_widen_task_scope(tmp_path):
+    """An advisory answer cannot replace a fresh sealed command for wider scope."""
     import test_browser_review_i2_lifecycle as lc
 
     ac, store, _ex, api = await lc._setup(tmp_path, lc.OUT_OF_SCOPE)
@@ -253,7 +253,9 @@ async def test_an_owner_approval_widens_that_tasks_scope(tmp_path):
         after = await api._load_task(tid)
     assert [e.origin for e in before.scope.entries] == [f"https://{t.DOMAIN}"]
     widened = [(e.origin, e.source.split(":")[0]) for e in after.scope.entries]
-    assert widened == [(f"https://{t.DOMAIN}", "TARGET_DOMAIN"), ("https://outside.example.net", "OWNER_APPROVED")]
+    assert widened == [(f"https://{t.DOMAIN}", "TARGET_DOMAIN")]
+    assert after.status.value == "WAITING_FOR_OWNER"
+    assert await store.fetchall("SELECT * FROM browser_scope_authorizations WHERE task_id=?", (tid,)) == []
 
 
 async def test_real_chromium_no_scope_fails_closed_and_path_scope_holds(chromium):

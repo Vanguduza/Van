@@ -568,7 +568,8 @@ async def test_concurrent_duplicate_callbacks_produce_one_effect(tmp_path, monke
 
 async def verified_result(worker, inputs):
     verifier = WorkflowVerifier({"AUTOMATION_WORKER_READ_BACK": WorkerWorkflowObserver(worker)})
-    return await verifier.verify(spec=PostconditionSpec(kind="AUTOMATION_WORKER_READ_BACK"),
+    return await verifier.verify(spec=PostconditionSpec(kind="AUTOMATION_WORKER_READ_BACK",
+        expected_correlation={"run_id": "run", "input_digest": digest(inputs)}),
                                   verifier_type=VerifierType.READ_BACK, engine_reported_success=True,
                                   context={"run_id": "run", "inputs": inputs})
 
@@ -655,3 +656,25 @@ async def test_provider_echoing_a_scoped_source_secret_is_refused_before_persist
                                      resolver=resolver, credentials=Credentials())
     with pytest.raises(WorkerDenied, match="RESPONSE_CONTAINS_CREDENTIAL"):
         await fetcher.fetch("https://reports.example.com/item", timeout_ms=1000, credential_alias="connector://reports/primary")
+
+
+@pytest.mark.parametrize("correlation", [
+    {"run_id": "foreign-run"},
+    {"input_digest": "0" * 64},
+    {"artifact_id": "foreign-artifact"},
+])
+async def test_worker_effect_readback_refuses_foreign_declared_binding(tmp_path, correlation):
+    worker, store, body = await build(tmp_path)
+    await admitted(worker, body)
+    payload = {"amount": "12.34", "currency": "USD"}
+    hashed = await worker.execute(await body("hash", {"payload": payload}))
+    await worker.execute(await body("seal", {"payload": payload, "digests": hashed["result"]}))
+    verifier = WorkflowVerifier({"AUTOMATION_WORKER_READ_BACK": WorkerWorkflowObserver(worker)})
+    result = await verifier.verify(
+        spec=PostconditionSpec(kind="AUTOMATION_WORKER_READ_BACK", expected_correlation=correlation),
+        verifier_type=VerifierType.READ_BACK, engine_reported_success=True,
+        context={"run_id": "run", "inputs": {"document": payload}},
+    )
+    assert result.outcome is VerificationOutcome.FAILED
+    assert result.observed["exists"] is True
+    assert result.detail.startswith("correlation mismatch:")

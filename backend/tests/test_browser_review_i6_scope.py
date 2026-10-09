@@ -336,7 +336,7 @@ async def test_m4_executor_exception_text_is_not_a_reason():
 # ------------------------------------------------------------------ m1
 
 
-async def test_m1_approval_adds_only_the_delta_and_only_while_active(tmp_path):
+async def test_m1_historical_authorization_delta_is_bounded_and_advisory_answer_mints_nothing(tmp_path):
     import test_browser_api as t
     import test_browser_review_i2_lifecycle as lc
     from van_gateway.browser.task_scope import url_scope_violation
@@ -351,6 +351,15 @@ async def test_m1_approval_adds_only_the_delta_and_only_while_active(tmp_path):
         before = await api._load_task(tid)
         await store.execute("UPDATE decisions SET status = 'APPROVED' WHERE id = ?", (decision_id,))
         await api._sync_waiting_owner_decision(before)
+        assert await store.fetchall("SELECT * FROM browser_scope_authorizations WHERE task_id=?", (tid,)) == []
+        # Model a pre-existing historical authorization row; the current advisory
+        # decision path has no authority to mint this row.
+        escalation = await store.fetchone("SELECT escalation_id FROM browser_escalations WHERE task_id=?", (tid,))
+        await store.execute("""INSERT INTO browser_scope_authorizations(
+            authorization_id,task_id,decision_id,escalation_id,approved_action_class_ceiling,
+            approved_domains_json,status,issued_at_ms)
+            VALUES('historical-scope',?,?,?,?,?,'ACTIVE',1)""",
+            (tid,decision_id,escalation["escalation_id"],"A2",json.dumps([t.DOMAIN,"outside.example.net"])))
         after = await api._load_task(tid)
         states = {}
         for status, expires in (("REVOKED", None), ("CONSUMED", None), ("EXPIRED", None), ("ACTIVE", 1)):

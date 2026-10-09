@@ -171,10 +171,17 @@ class AutomationDispatcher:
                     assert_primitive_semantics(step)
                 except PrimitiveSemanticError as exc:
                     raise DispatchError("WORKFLOW_PRIMITIVE_AUTHORITY_INVALID", str(exc)) from exc
-        if ir.verifier:
-            postcondition = PostconditionSpec(kind="AUTOMATION_WORKER_READ_BACK")
-
         input_digest = digest(inputs)
+        worker_readback = bool(ir.verifier)
+        worker_correlation = {
+            "run_id": run_id, "input_digest": input_digest, "artifact_id": artifact.artifact_id,
+        }
+        if worker_readback:
+            # The worker observer re-reads every exact effect and the immutable run
+            # binding. The generic verifier still requires explicit expected values.
+            postcondition = PostconditionSpec(
+                kind="AUTOMATION_WORKER_READ_BACK", expected_correlation=worker_correlation,
+            )
         await self._record_run(
             run_id=run_id, capability_id=capability_id, artifact=artifact, command_id=command_id,
             turn_id=turn_id, action_class=capability.action_class, input_digest=input_digest,
@@ -258,10 +265,13 @@ class AutomationDispatcher:
                 status=RunStatus.FAILED, execution=execution, error_code=code,
             )
 
-        correlation = {"n8n_execution_id": str(engine_result.get("executionId", ""))}
+        engine_execution_id = str(engine_result.get("executionId", ""))
+        # Worker effects belong to VAN's admitted run, input and artifact. Preserve
+        # the engine id as provenance; external observers must still observe it.
+        correlation = worker_correlation if worker_readback else {"n8n_execution_id": engine_execution_id}
         execution = await self.actions.mark_submitted(execution.execution_id, correlation=correlation)
         await self._update_run(run_id, status=RunStatus.SUBMITTED, now=now,
-                               n8n_execution_id=correlation["n8n_execution_id"])
+                               n8n_execution_id=engine_execution_id)
 
         # 4. Independent verification (§80).
         verification = await self.verifier.verify(
@@ -273,11 +283,11 @@ class AutomationDispatcher:
             engine_reported_success=bool(engine_result.get("success", False)),
             context={"run_id": run_id, "inputs": inputs, "engine": engine_result},
         )
-        # Reviewer I2 issue (a) — the Action Runtime checks the execution's correlation (the
-        # engine's own execution id) against the observation. That value must come from the
-        # independent observation; merging the engine's id back in compared it with itself.
-        # An engine id the observer did not report cannot be correlated: something may exist,
-        # but it is not proven to be this run's (§166), so the receipt is PARTIAL, not success.
+        # The Action Runtime compares declared execution correlation with the
+        # independent observation. Worker readbacks bind exact effects to VAN's
+        # admitted run, input and artifact; external readbacks bind the engine id.
+        # Never merge submitted values back into an observation: that would compare
+        # an execution with itself. Missing correlation is partial, never success.
         observed_correlation = dict(verification.correlation)
         for key in correlation:
             observed_value = verification.observed.get(key)
