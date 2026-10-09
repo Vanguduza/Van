@@ -159,7 +159,9 @@ class DialDevClient:
                 )
             except httpx.TimeoutException as exc:
                 raise DialDevUnavailable("timeout") from exc
-            except httpx.HTTPError as exc:
+            # TLS 1.3 client-auth rejection can arrive as a read-phase alert
+            # outside httpx.HTTPError; keep the same safe unavailable contract.
+            except (httpx.HTTPError, ssl.SSLError) as exc:
                 raise DialDevUnavailable("unreachable") from exc
         body = response.content
         if token.encode("utf-8") in body:
@@ -179,7 +181,7 @@ class DialDevClient:
         except httpx.TimeoutException as exc:
             await client.aclose()
             raise DialDevUnavailable("timeout") from exc
-        except httpx.HTTPError as exc:
+        except (httpx.HTTPError, ssl.SSLError) as exc:
             await client.aclose()
             raise DialDevUnavailable("unreachable") from exc
 

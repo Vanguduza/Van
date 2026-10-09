@@ -130,7 +130,8 @@ async def test_actual_read_and_sse_present_product_certificate_and_bearer(tls_ga
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("defect", ["wrong_ca", "untrusted_client", "missing_client", "wrong_hostname"])
-async def test_tls_identity_failure_is_unavailable_without_http_effect(tls_gateway, defect):
+@pytest.mark.parametrize("operation", ["get", "stream"])
+async def test_tls_identity_failure_is_unavailable_without_http_effect(tls_gateway, defect, operation):
     config, seen, _, _, directory = tls_gateway
     other_key, other_ca = _ca("other-ca")
     if defect == "wrong_ca":
@@ -144,8 +145,13 @@ async def test_tls_identity_failure_is_unavailable_without_http_effect(tls_gatew
         config = replace(config, tls_client_cert_file="", tls_client_key_file="")
     else:
         config = replace(config, base_url=config.base_url.replace("127.0.0.1", "localhost"))
+    client = DialDevClient(config)
     with pytest.raises(DialDevUnavailable) as failure:
-        await DialDevClient(config).get("/v1/dev/projects")
+        if operation == "get":
+            await client.get("/v1/dev/projects")
+        else:
+            stream = await client.open_stream("/v1/dev/events")
+            await stream.close()
     assert failure.value.reason in {"unconfigured", "unreachable"}
     assert seen == []
 
