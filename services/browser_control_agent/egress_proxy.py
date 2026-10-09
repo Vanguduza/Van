@@ -51,10 +51,13 @@ def _public_address(raw: str) -> str:
         address = ipaddress.ip_address(raw)
     except ValueError as exc:
         raise EgressRefused("EGRESS_IP_INVALID", raw) from exc
-    # is_global rejects loopback, RFC1918/ULA, link-local, multicast, unspecified,
-    # documentation/reserved ranges and other destinations that should never be reachable
-    # from a public-web browser worker.
-    if not address.is_global:
+    # is_global alone admits multicast and deprecated IPv6 site-local addresses.
+    # Classify an IPv4-mapped IPv6 destination by its actual IPv4 destination;
+    # the outer IPv6 object's is_multicast flag does not describe the mapped IP.
+    mapped = address.ipv4_mapped if isinstance(address, ipaddress.IPv6Address) else None
+    policy_address = mapped if mapped is not None else address
+    if (not policy_address.is_global or policy_address.is_multicast
+            or (isinstance(policy_address, ipaddress.IPv6Address) and policy_address.is_site_local)):
         raise EgressRefused("EGRESS_NON_PUBLIC_ADDRESS", str(address))
     return str(address)
 

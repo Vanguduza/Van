@@ -70,10 +70,10 @@
 
         <!--
           DNA §4 — the `van://<route>` deep links `CommandCentreActivity.onCreate`/
-          `onNewIntent` resolve through `VanNavModel.deepLink`, never a raw path handed
+          `onNewIntent` resolve through `VanNavModel.intentDestination`, never a raw path handed
           straight to the NavHost. `singleTop` because the Activity is meant to stay
-          resident; `onNewIntent` reopens as a fresh task rather than threading a second
-          route into an already-composed `NavHostController` (see that method's comment).
+          resident; `onNewIntent` delivers the validated destination to its existing
+          NavHost without relaunching the Activity.
         -->
         <activity
             android:name=".command.CommandCentreActivity"

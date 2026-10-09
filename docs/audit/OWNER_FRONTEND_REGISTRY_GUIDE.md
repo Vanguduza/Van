@@ -1,13 +1,20 @@
 # VAN frontend registry guide
 
-The 2026-10-08 inventory contains **42 owner capabilities, 105 source functions,
-78 screens/hosted surfaces, 345 endpoint declarations and 200 schema components**.
-Use the [searchable contract](OWNER_FRONTEND_CONTRACT.html) to review it and the
-JSON files below as the design input. Current implementation and remaining external
-contracts are separate from visual redesign and live qualification. Current
-source-bound Android and backend checks passed; the exact current local evidence
-is recorded in [the provider/voice validation](VAN_PROVIDER_VOICE_VALIDATION_2026-10-08.json).
-Earlier build and test receipts remain historical for changed inputs.
+The current source inventory contains **42 owner features, 105 source functions,
+78 screens/hosted surfaces, 432 endpoint declarations and 251 schema components**.
+Use the [searchable contract](OWNER_FRONTEND_CONTRACT.html) and JSON files below as
+the design input. The October 9 review corrects current CORE_ONLY_V2 topology and
+runtime refusal/recovery contracts. Its [new source-review manifest](VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r4.json)
+binds current cited files; earlier source freezes and qualification receipts remain
+historical for changed inputs. Registry/source checks, final whole-workspace checks,
+production release/deployment/provider qualification and handset acceptance are
+separate outcomes. No live readiness follows from a route declaration.
+
+CORE_ONLY_V2 places gateway, direct phone mTLS HTTPS/WSS ingress and product Hermes
+profile `van` on `van-trading-core`. Direct native Artemis and development use
+`dial-control`; Oracle Admin is excluded from this runtime topology. Current
+`deployment_requirements` are declared source requirements with release/profile/ingress
+qualification pending, not observations that those hosts are deployed.
 
 | Artifact | Design use |
 | --- | --- |
@@ -107,15 +114,24 @@ genuine local device/hardware/approval keys and the authenticated stored revisio
 then independently reads absence and revokes the scorer. Speaker similarity remains
 evidence and grants no command or consequential-action authority.
 
-The [acceptance plan](VAN_ARTEMIS_ACCEPTANCE_PLAN_2026-10-08.json) contains **826
-prepared case contracts** against the current source snapshot. Zero physical cases
-have been executed; prepared and locally checked contracts are not handset outcomes. The owner-selected
-test route is native Artemis through DIAL/Commander on dial-control, outside
-Hermes orchestration; use the [native handoff](../../tools/certification/NATIVE_ARTEMIS_HANDOFF_PROMPT.md).
-The existing DDS/Hermes adapter is separately labeled legacy compatibility and
-cannot qualify native operation. Actual native schemas, device admission,
-deployment, signed owner release, provisioning and provider/phone evidence must
-be observed in the later test session.
+The current matrix produces **826 prepared candidate contracts**: 420 feature
+state/recovery, 238 function cases (210 happy/error plus 28 explicitly declared
+function recovery), 156 surface reachability/restoration and 12 cross-cutting
+recovery cases. The older checked-in
+[October 8 plan](VAN_ARTEMIS_ACCEPTANCE_PLAN_2026-10-08.json) is retained as historical
+input evidence and must not be relabelled as a plan for changed source.
+Regenerate a native plan from the exact corrected source and actual native schema
+before physical execution. A fixture schema used in local contract tests is not
+current native runtime discovery. Zero physical cases have been executed here.
+
+The selected route is native Artemis through Commander/DIAL on dial-control, outside
+Hermes engineering orchestration, using paired private wireless ADB and fresh S24
+hardware readbacks. Product commands still use Hermes on core. Follow the
+[native handoff](../../tools/certification/NATIVE_ARTEMIS_HANDOFF_PROMPT.md) and
+[active acceptance instructions](../../tools/certification/ARTEMIS_ANDROID_ACCEPTANCE.md).
+The DDS/Hermes wrapper is separately labelled legacy compatibility and cannot
+qualify native operation. Actual native schemas, paired transport/device identity,
+core deployment, owner release/provisioning and independent effects must be observed.
 The three local speaker function cases require private device metadata readback,
 bound to the installed S24/APK, source, current model and exact operation; they do
 not invent a gateway profile API or export raw audio/embeddings. Imported receipt
@@ -124,12 +140,19 @@ Private enrollment/erasure effects require those dedicated function cases. Broad
 backend readbacks establish connection/owner-binding context and cannot certify
 a local profile operation.
 
-Regenerate actual schemas and reviewed contracts with
-`python tools/audit/refresh_owner_registry.py`, then render the HTML with
-`python tools/audit/render_owner_contract.py`. Current module entries and exact
-Android gateway declarations/calls are regenerated from source; unresolved
-citations stop the refresh. The immutable pre-closure registry remains archived.
-After final local validation, the parent can supply absolute paths for `--final-source-manifest` and
-`--android-receipt`; receipts without stable source binding and passing nonempty
-checks are rejected. Prepare the final acceptance plan using the same manifest
-through `artemis_acceptance.py prepare --source-manifest ...`.
+For a scoped refresh, preserve the current registries and every `baseline*`/
+`historical*` property. Export current endpoint declarations with
+`tools/audit/export_owner_endpoints.py`, use `registry_sources.Refresh` with reviewed
+unique anchors for current source citations, and create a new dated source-review
+manifest. The October 8 `refresh_owner_registry.py` is a snapshot-based closure
+producer: it rebuilds from the pre-closure inventory and writes October 8 artifacts,
+so it must not be used blindly for this newer scoped review. Never rewrite historical
+source freezes, Android receipts, the Project Truth ledger or enforcement baselines
+as part of registry refresh. Unresolved current citations must stop the refresh.
+
+Render the active contract with `python tools/audit/render_owner_contract.py`.
+Prepare native candidate coverage with
+`artemis_acceptance.py prepare --native-schema <actual-schema.json> --out <new-plan.json>`
+from the exact reviewed checkout. Bind any explicit source manifest to that same
+source. Final qualification needs nonempty passing source-bound suite receipts;
+production release/deployment/provider and physical evidence remain separate.

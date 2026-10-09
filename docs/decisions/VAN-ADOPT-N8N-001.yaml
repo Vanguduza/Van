@@ -89,3 +89,33 @@ owner_decision_record:
       payee, amount, currency and reference
     standing_authority: PROHIBITED
     instrument_persistence: PROHIBITED (entered per payment, never retained)
+
+# APPENDED 2026-10-09 — signature scope clarification; historical text is frozen.
+# This append qualifies existing recorded intent; it does not sign or approve anything.
+# All historical bytes, owner words, status values and evidence pointers are preserved.
+owner_signature_semantics:
+  basis: PROJECT_TRUTH_OWNER_INSTRUCTION
+  authority_tier: Project Truth recorded intent, not device-signed ingress
+  device_signed: false
+  evidence_scope: EXISTING_RECORDED_SESSION_INTENT_ONLY
+signed_ingress:
+  status: ABSENT
+  evidence_ref: null
+  scope: REPOSITORY_RECORD
+  note: >-
+    No device-signed ingress evidence for this decision is present in this repository.
+    The historical SIGNED label records the existing owner session instruction and
+    must not be read as a cryptographic device signature or current deployment grant.
+reconciliation_record:
+  reconciled_on: 2026-10-09
+  decision_id: VAN-ADOPT-N8N-001
+  header_status: HISTORICAL_HEADER_SUPERSEDED_BY_SIGNATURE_SCOPE_CLARIFICATION
+  preserved_prefix_sha256: bf61cc54cc7db78d8c11c5f2a08bb10cbe80cad6ec1039fe72cb1811fbac49d2
+  signature_claimed: none
+  authority_granted: none
+  creates_new_approval: false
+  production_gate_changed: false
+  note: >-
+    This clarification preserves the recorded owner words and opaque session evidence
+    pointer. It does not authenticate that pointer, create trusted authorization intake,
+    provide signed-ingress evidence, waive a production gate or widen any scope.

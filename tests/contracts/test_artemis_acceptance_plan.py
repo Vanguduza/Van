@@ -332,10 +332,11 @@ def test_destructive_demo_and_private_owner_gates_block_before_any_call(plan, ca
     assert result["outcome"] == "BLOCKED"
 
 
-def test_different_admitted_handset_cannot_be_used_for_s24_acceptance(plan):
+@pytest.mark.parametrize("model", ["SM-G998B", "SM-S928U", "SM-S928N", "SM-S928B/DS", "SM_S928B", "model:SM_S928B"])
+def test_different_admitted_handset_cannot_be_used_for_s24_acceptance(plan, model):
     p = subset(plan)
     bound = bindings(p)
-    bound["device_model"] = "SM-G998B"
+    bound["device_model"] = model
 
     async def tool(name, args):
         pytest.fail("Wrong handset must not make a phone call")
@@ -372,6 +373,14 @@ def test_even_consistent_synthetic_exports_are_not_live_qualified(plan, tmp_path
     assert result["outcome"] == "CONSISTENT_IMPORTED_EVIDENCE"
     assert result["live_qualified"] is False
     assert result["producer_authenticity_verified"] is False
+
+
+@pytest.mark.parametrize("model", ["SM-S928U", "SM-S928N", "SM-S928B/DS", "SM_S928B"])
+def test_installed_phone_model_must_match_exact_plan_and_binding_even_if_variant_shares_prefix(plan, tmp_path, model):
+    p = subset(plan)
+    receipt = export_receipt(p, tmp_path)
+    rewrite_artifact(receipt, tmp_path, "installed_apk_readback", lambda d: d.update(device_model=model))
+    assert acceptance.validate_evidence(p, receipt, tmp_path)["outcome"] == "FAIL"
 
 
 @pytest.mark.parametrize("change", ["altered_file", "path_escape", "wrong_apk", "wrong_source", "unknown_effect", "wrong_producer", "wrong_phone", "trace_missing", "unobserved_assertion", "duplicate_case", "unknown_case_outcome"])

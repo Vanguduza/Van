@@ -258,7 +258,10 @@ def main(argv: list[str] | None = None) -> int:
                         help="wait for Gateway-recorded session admission (1..540 seconds)")
     parser.add_argument("--apk", default=None, help="an APK to install first")
     parser.add_argument("--serial", default=None, help="adb device serial")
-    parser.add_argument("--expected-model", default="SM_S928B", help="independently admitted owner handset model")
+    parser.add_argument("--expected-device-serial", default="RFCX2054F5W",
+                        help="independently admitted physical serial, distinct from wireless ADB IP:port")
+    parser.add_argument("--expected-model", default="SM-S928B",
+                        help="independently admitted physical ro.product.model readback, not an adb devices descriptor")
     parser.add_argument("--release-packet", type=Path)
     parser.add_argument("--deployment-profile", type=Path)
     parser.add_argument("--trusted-keys", type=Path)
@@ -286,6 +289,8 @@ def main(argv: list[str] | None = None) -> int:
         raise ProvisioningFailed("explicit admitted adb serial required")
     if not args.expected_model or any(ord(c) < 32 for c in args.expected_model):
         raise ProvisioningFailed("explicit admitted handset model required")
+    if not args.expected_device_serial or not re.fullmatch(r"[A-Za-z0-9._-]{1,160}", args.expected_device_serial):
+        raise ProvisioningFailed("explicit admitted physical handset serial required")
     if not args.allow_development_artifact:
         if not all([args.apk, args.release_packet, args.deployment_profile, args.trusted_keys,
                     args.expected_release_sha, args.expected_signer]):
@@ -303,6 +308,8 @@ def main(argv: list[str] | None = None) -> int:
         raise ProvisioningFailed("selected adb device is not ready")
     if run(adb_argv(args.serial, "shell", "getprop", "ro.product.model")).strip() != args.expected_model:
         raise ProvisioningFailed("selected adb handset model does not match admission")
+    if run(adb_argv(args.serial, "shell", "getprop", "ro.serialno")).strip() != args.expected_device_serial:
+        raise ProvisioningFailed("selected adb physical handset serial does not match admission")
     # Install before minting the short-lived payload: a slow APK transfer must not spend
     # the enrollment window before Android ever receives it.
     if args.apk:
@@ -334,6 +341,7 @@ def main(argv: list[str] | None = None) -> int:
                       "transport_receipt": receipt["transport_receipt"],
                       "owner_release_artifact_verified": not args.allow_development_artifact,
                       "device_serial": args.serial, "device_model": args.expected_model,
+                      "physical_device_serial": args.expected_device_serial,
                       "owner_e2e_verified": False, "hermes_verified": False}, sort_keys=True))
     return 0
 

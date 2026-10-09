@@ -11,12 +11,14 @@ the bearer and an Accept header only.
 
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 from pathlib import Path
 import ssl
 from typing import Any, AsyncIterator, Awaitable, Callable
 
 import httpx
+import anyio
 
 from van_gateway.dial_dev.config import MIN_TOKEN_LENGTH, DialDevConfig
 
@@ -67,8 +69,44 @@ class UpstreamStream:
     discloses_credential: Callable[[str], bool]
 
     async def lines(self) -> AsyncIterator[str]:
-        async for line in self.response.aiter_lines():
-            yield line
+        try:
+            async for line in self.response.aiter_lines():
+                yield line
+        except httpx.TimeoutException as exc:
+            raise DialDevUnavailable("timeout") from exc
+        except (httpx.HTTPError, ssl.SSLError) as exc:
+            raise DialDevUnavailable("unreachable") from exc
+
+
+async def _finish_stream_close(task: asyncio.Task[None], timeout_s: float = 2.0) -> None:
+    """Close once, including after an ASGI disconnect or caller cancellation.
+
+    The shield keeps disconnect cancellation from abandoning the private close task;
+    the deadline also bounds a transport that cannot close. Ordinary programming
+    failures still propagate rather than being treated as connection failures.
+    """
+    deadline = asyncio.get_running_loop().time() + timeout_s
+    cancelled = False
+    with anyio.CancelScope(shield=True):
+        while not task.done():
+            remaining = deadline - asyncio.get_running_loop().time()
+            if remaining <= 0:
+                task.cancel()
+                task.add_done_callback(lambda done: None if done.cancelled() else done.exception())
+                if cancelled:
+                    raise asyncio.CancelledError
+                raise DialDevUnavailable("timeout")
+            try:
+                await asyncio.wait_for(asyncio.shield(task), remaining)
+            except asyncio.CancelledError:
+                if task.cancelled():
+                    raise
+                cancelled = True
+            except asyncio.TimeoutError:
+                continue
+        task.result()
+        if cancelled:
+            raise asyncio.CancelledError
 
 
 class DialDevClient:
@@ -185,9 +223,24 @@ class DialDevClient:
             await client.aclose()
             raise DialDevUnavailable("unreachable") from exc
 
+        close_task: asyncio.Task[None] | None = None
+
+        async def release() -> None:
+            try:
+                await response.aclose()
+            finally:
+                await client.aclose()
+
         async def close() -> None:
-            await response.aclose()
-            await client.aclose()
+            nonlocal close_task
+            if close_task is None:
+                close_task = asyncio.create_task(release())
+            try:
+                await _finish_stream_close(close_task)
+            except httpx.TimeoutException as exc:
+                raise DialDevUnavailable("timeout") from exc
+            except (httpx.HTTPError, ssl.SSLError) as exc:
+                raise DialDevUnavailable("unreachable") from exc
 
         return UpstreamStream(
             response=response,

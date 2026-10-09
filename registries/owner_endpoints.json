@@ -12467,7 +12467,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/automation/worker_runtime.py:183",
+      "source": "backend/van_gateway/automation/worker_runtime.py:184",
       "summary": "Step",
       "tags": [
         "automation-worker"
@@ -17365,7 +17365,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/dial_dev/api.py:340",
+      "source": "backend/van_gateway/dial_dev/api.py:357",
       "summary": "Actions",
       "tags": [
         "dial-dev"

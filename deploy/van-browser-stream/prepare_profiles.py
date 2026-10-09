@@ -103,15 +103,16 @@ def render(data):
     artifacts, plan, ports, fingerprints, secret_paths, broker_cert_paths = {}, [], {ingress_port}, set(), {ingress_key}, set()
     proxy_bindings, core_clients, caller_names = {}, {}, set()
     signal_urls, upstreams, locations = {}, [], []
-    for instance, alias in ALIASES.items():
+    for index, (instance, alias) in enumerate(ALIASES.items()):
         entry = profiles[instance]
         if not isinstance(entry, dict) or entry.get("profile_alias") != alias:
             raise ValueError("fixed_profile_alias_required")
-        for name in ("cdp_port", "control_port", "stream_port"):
-            port = entry.get(name)
+        for name in ("cdp_port", "control_port", "stream_port", "egress_port"):
+            port = entry.get(name, 8899 + index if name == "egress_port" else None)
             if type(port) is not int or not 1024 <= port <= 65535 or port in ports:
                 raise ValueError("distinct_unprivileged_profile_ports_required")
             ports.add(port)
+        egress_port = entry.get("egress_port", 8899 + index)
         control_bind = address_value(entry, "control_bind", private=True)
         stream_bind = address_value(entry, "stream_bind")
         public_signal = text_value(entry, "public_signal_url")
@@ -198,7 +199,8 @@ def render(data):
             raise ValueError("bounded_chromium_viewport_required")
         artifacts[instance + "/chromium.env"] = env({"VAN_BROWSER_CDP_PORT": entry["cdp_port"],
             "VAN_BROWSER_PROFILE_MOUNT": PROFILE_ROOT + "/" + instance, "VAN_BROWSER_PROFILE_ALIAS": alias,
-            "VAN_BROWSER_WIDTH": width, "VAN_BROWSER_HEIGHT": height})
+            "VAN_BROWSER_EGRESS_PORT": egress_port, "VAN_BROWSER_WIDTH": width, "VAN_BROWSER_HEIGHT": height})
+        artifacts[instance + "/egress.env"] = env({"VAN_BROWSER_EGRESS_PORT": egress_port})
         artifacts[instance + "/control.env"] = env(control)
         artifacts[instance + "/stream.env"] = env(stream)
         copies = {"grant-verify.pem": "grant_public_key_file", "broker-ca.crt": "broker_ca_file",
@@ -209,6 +211,7 @@ def render(data):
                   "stream-pki/producer.token": "stream_broker_token_file", "stream-pki/broker-client.crt": "stream_broker_client_cert_file",
                   "stream-pki/broker-client.key": "stream_broker_client_key_file"}
         plan.append({"instance": instance, "profile_alias": alias, "users": ["van-browser-" + instance, "van-control-" + instance, "van-stream-" + instance],
+                     "egress_user": "van-egress-" + instance, "egress_port": egress_port,
                      "transfer_group": "van-transfer-" + instance, "copy_selectors": {name: paths[source] for name, source in copies.items()},
                      "expected_token_sha256": role_hashes, "cdp_port": entry["cdp_port"]})
         upstreams.append("upstream " + instance + "_native { server " + stream_bind + ":" + str(entry["stream_port"]) + "; }")
@@ -226,7 +229,7 @@ def render(data):
     artifacts["gateway-browser-profile-bindings.env"] = ("VAN_BROWSER_CONTROL_PROFILE_CLIENTS=" + json.dumps(core_clients, separators=(",", ":")) +
         "\nVAN_BROWSER_CONTROL_PROXY_BINDINGS=" + json.dumps(proxy_bindings, separators=(",", ":")) +
         "\nVAN_BROWSER_STREAM_SIGNAL_URL=" + signal_base + "\nVAN_BROWSER_STREAM_PROFILE_SIGNAL_URLS=" + json.dumps(signal_urls, separators=(",", ":")) + "\n").encode()
-    for name in ("chromium", "control-agent", "stream", "transfer-stage"):
+    for name in ("chromium", "control-agent", "stream", "transfer-stage", "egress-proxy"):
         template = (PACKAGE / "systemd" / ("van-browser-" + name + "@.service")).read_text()
         artifacts["systemd/van-browser-" + name + "@.service"] = template.replace("@CHROMIUM_EXECUTABLE@", '"' + chromium + '"').encode()
     artifacts["systemd/van-browser-cdp-isolation.service"] = (PACKAGE / "systemd/van-browser-cdp-isolation.service").read_bytes()
@@ -242,7 +245,7 @@ def render(data):
                        **{i + "-stream-ca.crt": profiles[i]["stream_tls_ca_file"] for i in ALIASES}},
                    "instances": plan, "artifact_sha256": {name: hashlib.sha256(value).hexdigest() for name, value in artifacts.items()},
                    "installed": False, "live_qualified": False, "pending_checks": ["encrypted_volume_identity", "four_distinct_scoped_producer_credentials",
-                       "per_profile_core_mtls_and_proxy_bindings", "uid_scoped_cdp_firewall", "public_pinned_tls_signal_routes",
+                       "per_profile_core_mtls_and_proxy_bindings", "uid_scoped_cdp_firewall", "uid_fenced_per_profile_exact_ip_egress", "public_pinned_tls_signal_routes",
                        "pinned_nginx_tls_proxy_capability_and_ingress_recipe", "profile_state_migration_or_new_profile_admission", "host_qualification_and_core_canaries"]}
     artifacts["declaration.json"] = (json.dumps(declaration, indent=2) + "\n").encode()
     return artifacts

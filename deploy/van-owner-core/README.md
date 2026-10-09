@@ -134,10 +134,12 @@ No app UI exposes host, token or CA setup. Provision the signed packet through t
 authorized installer and existing device identity. Real OS/biometric consent and
 private speaker enrollment remain required.
 
-Run the current applicable 826-case Artemis matrix directly through DIAL/Commander
-only after pre-handset qualification, on S24 RFCX2054F5W / SM_S928B, with one measured
-private Windows USB/ADB bridge. Join native evidence to canonical actions and independent
-effects. Until then report physical tests as NOT_RUN.
+Run the current candidate 826-case Artemis matrix directly through DIAL/Commander
+only after pre-handset qualification, on S24 RFCX2054F5W / SM_S928B, using the selected
+paired private wireless ADB endpoint and fresh hardware readbacks. A Windows USB/private
+bridge is an explicitly selected alternative with separate applicability evidence.
+Join native evidence to canonical actions and independent effects. A prepared matrix
+is not handset acceptance; until execution report physical tests as NOT_RUN.
 
 ## Rollback and receipts
 

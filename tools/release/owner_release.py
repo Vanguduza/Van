@@ -20,6 +20,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 
 ROOT = Path(__file__).resolve().parents[2]
+BUILD_PROVENANCE_ASSET = "assets/van-build-provenance.json"
 sys.path.insert(0, str(ROOT / "tools/runtime"))
 from prepare_owner_core_deployment import public_url
 
@@ -172,13 +173,41 @@ def source_check(repository: Path, expected: str) -> None:
         raise ReleaseRefused("exact_clean_release_source_required")
 
 
+def apk_build_provenance(apk: Path, values: dict[str, str], anchors: Path, expected_sha: str) -> str:
+    """Bind the installation packet to public inputs inside the verified APK.
+
+    BuildConfig.java is a separate build output and cannot establish what an old
+    APK contains. The provenance asset is generated from the same build inputs,
+    packaged before signing, and checked again by the independent installer.
+    It does not authenticate the build producer or claim live qualification.
+    """
+    expected = {"schema_version": 1, "application_id": "com.dial.van", "source_sha": expected_sha,
+                "gateway_url": values["VAN_GATEWAY_BASE_URL"],
+                "gateway_ca_pem_b64_sha256": hashlib.sha256(values["VAN_GATEWAY_CA_PEM_B64"].encode()).hexdigest(),
+                "connectivity_trusted_keys_sha256": hashlib.sha256(anchors.read_text().strip().encode()).hexdigest()}
+    try:
+        with zipfile.ZipFile(apk) as archive:
+            matches = [entry for entry in archive.infolist() if entry.filename == BUILD_PROVENANCE_ASSET]
+            if len(matches) != 1 or not 1 <= matches[0].file_size <= 4096:
+                raise ReleaseRefused("apk_build_provenance_missing_ambiguous_or_unbounded")
+            raw = archive.read(matches[0])
+        observed = json.loads(raw)
+        if (not isinstance(observed, dict) or type(observed.get("schema_version")) is not int
+                or observed != expected):
+            raise ReleaseRefused("apk_build_provenance_inputs_mismatch")
+    except (ValueError, KeyError, zipfile.BadZipFile) as exc:
+        raise ReleaseRefused("apk_build_provenance_invalid") from exc
+    return hashlib.sha256(raw).hexdigest()
+
+
 def create_packet(apk: Path, profile: Path, anchors: Path, *, build_config: Path, expected_sha: str,
                   expected_signer: str, apksigner: str, aapt: str, repository: Path = ROOT) -> dict:
     source_check(repository, expected_sha)
     values = profile_values(profile)
     trusted_keys(anchors.read_text())
     generated = build_config.read_text()
-    for name, expected in {"APPLICATION_ID": "com.dial.van", "VAN_GATEWAY_BASE_URL": values["VAN_GATEWAY_BASE_URL"],
+    for name, expected in {"APPLICATION_ID": "com.dial.van", "VAN_SOURCE_SHA": expected_sha,
+                           "VAN_GATEWAY_BASE_URL": values["VAN_GATEWAY_BASE_URL"],
                            "VAN_GATEWAY_CA_PEM_B64": values["VAN_GATEWAY_CA_PEM_B64"],
                            "VAN_CONNECTIVITY_TRUSTED_KEYS": anchors.read_text().strip()}.items():
         match = re.search(r"public static final String " + name + r' = ("(?:\\.|[^"\\])*");', generated)
@@ -187,6 +216,7 @@ def create_packet(apk: Path, profile: Path, anchors: Path, *, build_config: Path
     identity = apk_identity(apk, apksigner, aapt)
     if identity["signer_sha256"] != fingerprint(expected_signer):
         raise ReleaseRefused("apk_owner_signer_mismatch")
+    provenance_sha256 = apk_build_provenance(apk, values, anchors, expected_sha)
     return {"schema_version": 1, "status": "OWNER_RELEASE_ARTIFACT_VERIFIED", "repository_sha": expected_sha,
             "source_clean": True, "apk": {"sha256": digest(apk), "bytes": apk.stat().st_size, **identity},
             "profile": {"sha256": digest(profile), "profile_id": values["VAN_DEPLOYMENT_PROFILE_ID"],
@@ -194,7 +224,8 @@ def create_packet(apk: Path, profile: Path, anchors: Path, *, build_config: Path
                         "backend_host": "van-trading-core", "hermes_host": "van-trading-core", "ingress_host": "van-trading-core",
                         "ingress_capability_receipt": values["VAN_GATEWAY_INGRESS_CAPABILITY_RECEIPT"]},
             "trusted_keys_sha256": digest(anchors), "deployed": False, "provisioned": False,
-            "compiled_build_config_sha256": digest(build_config), "producer_authenticity_verified": False,
+            "compiled_build_config_sha256": digest(build_config), "compiled_provenance_sha256": provenance_sha256,
+            "producer_authenticity_verified": False,
             "live_qualified": False, "owner_e2e_verified": False}
 
 
@@ -205,6 +236,7 @@ def verify_packet(packet: dict, apk: Path, profile: Path, anchors: Path, *, expe
     values = profile_values(profile)
     trusted_keys(anchors.read_text())
     identity = apk_identity(apk, apksigner, aapt)
+    provenance_sha256 = apk_build_provenance(apk, values, anchors, expected_sha)
     expected_profile = {"sha256": digest(profile), "profile_id": values["VAN_DEPLOYMENT_PROFILE_ID"],
                         "gateway_url": values["VAN_GATEWAY_BASE_URL"], "gateway_ca_sha256": values["VAN_GATEWAY_CA_SHA256"],
                         "backend_host": "van-trading-core", "hermes_host": "van-trading-core", "ingress_host": "van-trading-core",
@@ -215,6 +247,7 @@ def verify_packet(packet: dict, apk: Path, profile: Path, anchors: Path, *, expe
             or packet.get("apk") != {"sha256": digest(apk), "bytes": apk.stat().st_size, **identity}
             or identity["signer_sha256"] != fingerprint(expected_signer)
             or packet.get("trusted_keys_sha256") != digest(anchors)
+            or packet.get("compiled_provenance_sha256") != provenance_sha256
             or packet["profile"] != expected_profile
             or any(packet.get(k) is not False for k in ("deployed", "provisioned", "live_qualified", "owner_e2e_verified", "producer_authenticity_verified"))
             or device_gateway_url.rstrip("/") != values["VAN_GATEWAY_BASE_URL"]):

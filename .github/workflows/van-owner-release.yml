@@ -37,6 +37,10 @@ jobs:
         run: |
           python -m pip install -r backend/requirements.lock
           sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Prepare source-locked generic voice assets
+        run: |
+          python android/tools/package_voice_assets.py --acquire
+          python android/tools/package_voice_assets.py --verify
       - name: Restore bound owner release inputs
         env:
           VAN_OWNER_KEYSTORE_BASE64: ${{ secrets.VAN_OWNER_KEYSTORE_BASE64 }}

@@ -578,7 +578,62 @@ import yaml
 _SIGNED_INGRESS_PRESENT = {"PRESENT", "SATISFIED"}
 _SIGNED_INGRESS_ABSENT = {"ABSENT", "PENDING"}
 _GATE_STATUSES = {"PENDING", "SATISFIED"}
-_HEADER_DENIES_SIGNATURE = re.compile(r"not\s+owner[- ]signed", re.IGNORECASE)
+_HEADER_DENIES_SIGNATURE = re.compile(
+    r"not\s+owner[- ]signed|\bproposal\b|must\s+not\s+mark\s+this\s+owner[- ]signed",
+    re.IGNORECASE,
+)
+
+# These are measured historical bytes, not authorization allowlists. Only these
+# exact recorded owner-intent prefixes can clarify their stale SIGNED/proposal
+# vocabulary. The append is explicitly not a signature or trusted intake record.
+_HISTORICAL_SIGNATURE_SCOPE_PREFIXES = {
+    "VAN-ADOPT-STAGEHAND-001": (
+        "2026-10-08", "2026-09-29",
+        "f8f70698a9cfb4771a91aa9b4da23ccee805d540c3628166790e1e717d8576f5",
+    ),
+    "VAN-ADOPT-N8N-001": (
+        "2026-10-09", "2026-10-09",
+        "bf61cc54cc7db78d8c11c5f2a08bb10cbe80cad6ec1039fe72cb1811fbac49d2",
+    ),
+    "VAN-ADOPT-BROWSER-HARNESS-001": (
+        "2026-10-09", "2026-10-09",
+        "e5b2eb0fce7c43a87a12479bad9c1c4171fae6d74257debd876d90ec2bbd8c3b",
+    ),
+}
+
+
+def _historical_signature_scope_clarified(text: str, body: dict) -> bool:
+    binding = _HISTORICAL_SIGNATURE_SCOPE_PREFIXES.get(body.get("decision_id"))
+    if binding is None:
+        return False
+    appended_on, reconciled_on, expected_prefix_sha256 = binding
+    marker = f"\n# APPENDED {appended_on} — signature scope clarification; historical text is frozen.\n"
+    clarification = body.get("reconciliation_record")
+    semantics = body.get("owner_signature_semantics")
+    ingress = body.get("signed_ingress")
+    if not all(isinstance(value, dict) for value in (clarification, semantics, ingress)):
+        return False
+    prefix_sha256 = hashlib.sha256(text.split(marker, 1)[0].encode("utf-8")).hexdigest()
+    clarified = (
+        text.count(marker) == 1
+        and prefix_sha256 == expected_prefix_sha256
+        and clarification.get("preserved_prefix_sha256") == expected_prefix_sha256
+        and str(clarification.get("reconciled_on")) == reconciled_on
+        and clarification.get("header_status") == "HISTORICAL_HEADER_SUPERSEDED_BY_SIGNATURE_SCOPE_CLARIFICATION"
+        and semantics.get("basis") == "PROJECT_TRUTH_OWNER_INSTRUCTION"
+        and semantics.get("device_signed") is False
+        and ingress.get("status") == "ABSENT"
+        and ingress.get("evidence_ref") is None
+    )
+    if appended_on == "2026-10-09":
+        clarified = clarified and (
+            clarification.get("decision_id") == body.get("decision_id")
+            and clarification.get("signature_claimed") == "none"
+            and clarification.get("authority_granted") == "none"
+            and clarification.get("creates_new_approval") is False
+            and clarification.get("production_gate_changed") is False
+        )
+    return clarified
 
 
 def decision_coherence_violations(text: str) -> list[str]:
@@ -592,30 +647,18 @@ def decision_coherence_violations(text: str) -> list[str]:
     body = yaml.safe_load(text) or {}
     status = body.get("owner_signature_status")
 
-    if status == "SIGNED" and _HEADER_DENIES_SIGNATURE.search("\n".join(header)):
-        # Clarify the frozen header through a content-bound append rather than
-        # rewriting owner records. The basis must explicitly deny a device signature.
-        marker = "\n# APPENDED 2026-10-08 — signature scope clarification; historical text is frozen.\n"
-        clarification = body.get("reconciliation_record") or {}
-        semantics = body.get("owner_signature_semantics") or {}
-        prefix = text.split(marker, 1)[0]
-        clarified = (
-            text.count(marker) == 1
-            and body.get("decision_id") == "VAN-ADOPT-STAGEHAND-001"
-            and clarification.get("header_status") == "HISTORICAL_HEADER_SUPERSEDED_BY_SIGNATURE_SCOPE_CLARIFICATION"
-            and clarification.get("preserved_prefix_sha256") == hashlib.sha256(prefix.encode()).hexdigest()
-            and semantics.get("basis") == "PROJECT_TRUTH_OWNER_INSTRUCTION"
-            and semantics.get("device_signed") is False
-            and (body.get("signed_ingress") or {}).get("status") == "ABSENT"
-        )
-        if not clarified:
+    if status == "SIGNED" and (
+        _HEADER_DENIES_SIGNATURE.search("\n".join(header))
+        or body.get("decision_id") in _HISTORICAL_SIGNATURE_SCOPE_PREFIXES
+    ):
+        if not _historical_signature_scope_clarified(text, body):
             violations.append("header says NOT owner-signed but owner_signature_status is SIGNED")
 
     ingress = body.get("signed_ingress")
     semantics = body.get("owner_signature_semantics")
     claims_device_signature = (
         isinstance(semantics, dict) and semantics.get("basis") == "DEVICE_SIGNED_INGRESS"
-    ) or body.get("device_signed") is True
+    ) or (isinstance(semantics, dict) and semantics.get("device_signed") is True) or body.get("device_signed") is True
 
     if status == "SIGNED" and not isinstance(ingress, dict):
         violations.append(
@@ -624,6 +667,10 @@ def decision_coherence_violations(text: str) -> list[str]:
         )
     if status == "SIGNED" and not isinstance(semantics, dict):
         violations.append("SIGNED without owner_signature_semantics stating its basis")
+    if (status == "SIGNED" and isinstance(semantics, dict)
+            and semantics.get("basis") == "PROJECT_TRUTH_OWNER_INSTRUCTION"
+            and semantics.get("device_signed") is not False):
+        violations.append("recorded session intent must explicitly deny a device signature")
 
     if isinstance(ingress, dict):
         ingress_status = ingress.get("status")
@@ -658,18 +705,10 @@ def decision_coherence_violations(text: str) -> list[str]:
     return violations
 
 
-#: Records that predate this check and still carry an unqualified SIGNED (and, for Browser
-#: Harness, the same stale "NOT owner-signed" header). They are owned by other work units;
-#: strict xfail makes a fix visible so the entry is removed in the same change.
-_KNOWN_INCOHERENT = {"VAN-ADOPT-N8N-001.yaml", "VAN-ADOPT-BROWSER-HARNESS-001.yaml"}
-
-
 @pytest.mark.parametrize(
     "name", sorted(p.name for p in DECISIONS.glob("*.yaml"))
 )
-def test_decision_record_signature_status_is_coherent(name, request):
-    if name in _KNOWN_INCOHERENT:
-        request.applymarker(pytest.mark.xfail(strict=True, reason="known incoherent record"))
+def test_decision_record_signature_status_is_coherent(name):
     violations = decision_coherence_violations((DECISIONS / name).read_text(encoding="utf-8"))
     assert violations == [], f"{name}: {violations}"
 
@@ -812,3 +851,86 @@ def test_append_header_clarification_requires_the_frozen_prefix_digest():
     digest = body["reconciliation_record"]["preserved_prefix_sha256"]
     assert any("header" in v for v in decision_coherence_violations(
         text.replace(digest, "0" * 64)))
+
+
+@pytest.mark.parametrize("decision_id", ["VAN-ADOPT-N8N-001", "VAN-ADOPT-BROWSER-HARNESS-001"])
+def test_legacy_adoption_clarification_preserves_every_original_byte_and_status(decision_id):
+    text = (DECISIONS / (decision_id + ".yaml")).read_text()
+    appended_on, reconciled_on, original_sha256 = _HISTORICAL_SIGNATURE_SCOPE_PREFIXES[decision_id]
+    marker = f"\n# APPENDED {appended_on} — signature scope clarification; historical text is frozen.\n"
+    original = text.split(marker, 1)[0]
+    assert hashlib.sha256(original.encode("utf-8")).hexdigest() == original_sha256
+    original_body, current_body = yaml.safe_load(original), yaml.safe_load(text)
+    assert all(current_body[key] == value for key, value in original_body.items())
+    assert current_body["owner_signature_status"] == "SIGNED"
+    assert current_body["owner_decision_record"] == original_body["owner_decision_record"]
+    assert current_body["owner_signature_evidence_ref"] == original_body["owner_signature_evidence_ref"]
+    assert current_body.get("production_gates") == original_body.get("production_gates")
+    assert current_body["signed_ingress"]["status"] == "ABSENT"
+    assert current_body["signed_ingress"]["evidence_ref"] is None
+    assert current_body["owner_signature_semantics"]["device_signed"] is False
+    assert str(current_body["reconciliation_record"]["reconciled_on"]) == reconciled_on
+    assert _historical_signature_scope_clarified(text, current_body)
+    assert decision_coherence_violations(text) == []
+
+
+@pytest.mark.parametrize("decision_id", sorted(_HISTORICAL_SIGNATURE_SCOPE_PREFIXES))
+@pytest.mark.parametrize("mutation", [
+    "altered_history", "altered_history_and_rehashed_claim", "removed_historical_header",
+    "wrong_prefix_digest", "missing_marker", "duplicate_marker", "wrong_append_date",
+    "wrong_reconciliation_date", "different_decision", "forged_device_signature",
+    "numeric_device_signature_denial", "forged_device_basis", "forged_present_ingress",
+])
+def test_historical_signature_clarification_cannot_excuse_tampered_or_forged_records(decision_id, mutation):
+    text = (DECISIONS / (decision_id + ".yaml")).read_text()
+    appended_on, reconciled_on, original_sha256 = _HISTORICAL_SIGNATURE_SCOPE_PREFIXES[decision_id]
+    marker = f"\n# APPENDED {appended_on} — signature scope clarification; historical text is frozen.\n"
+    prefix, append = text.split(marker, 1)
+    if mutation in {"altered_history", "altered_history_and_rehashed_claim"}:
+        altered = prefix.replace("subject: ", "subject: forged ", 1)
+        text = altered + marker + append
+        if mutation == "altered_history_and_rehashed_claim":
+            text = text.replace(original_sha256, hashlib.sha256(altered.encode("utf-8")).hexdigest())
+    elif mutation == "removed_historical_header":
+        text = prefix[prefix.index("decision_id:"):] + marker + append
+    elif mutation == "wrong_prefix_digest":
+        text = text.replace(original_sha256, "0" * 64)
+    elif mutation == "missing_marker":
+        text = text.replace(marker, "\n# clarification marker removed\n")
+    elif mutation == "duplicate_marker":
+        text += marker + "# duplicate clarification marker\n"
+    elif mutation == "wrong_append_date":
+        text = text.replace(marker, marker.replace(appended_on, "2026-10-10"))
+    elif mutation == "wrong_reconciliation_date":
+        text = prefix + marker + append.replace("reconciled_on: " + reconciled_on, "reconciled_on: 2026-10-10")
+    elif mutation == "different_decision":
+        text = text.replace(decision_id, "VAN-ADOPT-UNRECORDED-001")
+    elif mutation == "forged_device_signature":
+        text = text.replace("device_signed: false", "device_signed: true")
+    elif mutation == "numeric_device_signature_denial":
+        text = text.replace("device_signed: false", "device_signed: 0")
+    elif mutation == "forged_device_basis":
+        text = text.replace("basis: PROJECT_TRUTH_OWNER_INSTRUCTION", "basis: DEVICE_SIGNED_INGRESS")
+    else:
+        text = text.replace("status: ABSENT", "status: PRESENT").replace(
+            "evidence_ref: null", "evidence_ref: evidence://forged/device-signature")
+    assert decision_coherence_violations(text), (decision_id, mutation)
+
+
+@pytest.mark.parametrize("decision_id", ["VAN-ADOPT-N8N-001", "VAN-ADOPT-BROWSER-HARNESS-001"])
+@pytest.mark.parametrize("mutation", [
+    "wrong_append_decision", "signature_claim", "authority_claim", "approval_claim", "production_gate_claim",
+])
+def test_new_legacy_clarification_is_bound_and_cannot_grant_authority(decision_id, mutation):
+    text = (DECISIONS / (decision_id + ".yaml")).read_text()
+    marker = "\n# APPENDED 2026-10-09 — signature scope clarification; historical text is frozen.\n"
+    prefix, append = text.split(marker, 1)
+    original, replacement = {
+        "wrong_append_decision": ("decision_id: " + decision_id, "decision_id: VAN-ADOPT-UNRECORDED-001"),
+        "signature_claim": ("signature_claimed: none", "signature_claimed: device"),
+        "authority_claim": ("authority_granted: none", "authority_granted: owner"),
+        "approval_claim": ("creates_new_approval: false", "creates_new_approval: true"),
+        "production_gate_claim": ("production_gate_changed: false", "production_gate_changed: true"),
+    }[mutation]
+    assert original in append
+    assert decision_coherence_violations(prefix + marker + append.replace(original, replacement))

@@ -56,7 +56,16 @@ class TestTheDebuggerIsFenced:
         assert "--proxy-bypass-list=<-loopback>" in unit
         assert "--disable-quic" in unit
         assert "--force-webrtc-ip-handling-policy=disable_non_proxied_udp" in unit
-        assert "Requires=van-browser-profiles.mount van-browser-egress-proxy.service" in unit
+        dependencies = {
+            dependency
+            for directive in re.findall(r"^Requires=(.*)$", unit, re.MULTILINE)
+            for dependency in directive.split()
+        }
+        assert {
+            "van-browser-profiles.mount",
+            "van-browser-transfer-stage.service",
+            "van-browser-egress-proxy.service",
+        } <= dependencies
         assert "BindsTo=van-browser-egress-proxy.service" in unit
 
     def test_egress_proxy_is_loopback_only_and_has_no_profile_access(self):

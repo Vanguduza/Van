@@ -158,3 +158,14 @@ def test_wireless_malformed_stdout_has_explicit_refusal(wireless_plan, schema, s
     with pytest.raises(ValueError, match="physical handset identity"):
         a.native_invocation(wireless_plan, "OF-HOME-001:happy", device_serial=serial,
                             native_schema=schema, device_binding=b)
+
+
+@pytest.mark.parametrize("model", ["SM-S928U", "SM-S928N", "SM-S928B/DS", "SM_S928B", "model:SM_S928B"])
+def test_native_wireless_requires_actual_canonical_getprop_model_not_adb_descriptor(wireless_plan, schema, model):
+    serial = "10.66.66.2:37123"
+    binding = wireless_readbacks(serial)
+    binding["reads"][2]["stdout"] = model + "\n"
+    with pytest.raises(ValueError, match="physical handset identity"):
+        a.native_invocation(wireless_plan, "OF-HOME-001:happy", device_serial=serial,
+                            native_schema=schema, device_binding=binding)
+    assert binding["reads"][2]["stdout"] == model + "\n", "raw readback is retained, never normalized into an observation"

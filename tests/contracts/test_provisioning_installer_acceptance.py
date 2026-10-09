@@ -22,13 +22,15 @@ def receipt():
             "transport_receipt": {"audit_id": "test-observed-admission", "van_session_id": "test-session"}}
 
 
-def test_installer_mints_after_device_ready_and_install_then_waits_for_server(monkeypatch, capsys):
+@pytest.mark.parametrize("transport", ["synthetic-s24", "10.0.0.7:32123"])
+def test_installer_mints_after_device_ready_and_install_then_waits_for_server(monkeypatch, capsys, transport):
     calls = []
     secret = "test-internal-credential-never-printed"
     monkeypatch.setenv("INSTALLER_TEST_TOKEN", secret)
     def run(argv, **kwargs):
-        calls.append("check" if "get-state" in argv else "model" if "getprop" in argv else "install" if "install" in argv else "handoff")
-        return "device" if "get-state" in argv else "SM_S928B" if "getprop" in argv else "accepted"
+        calls.append("check" if "get-state" in argv else "identity" if "ro.serialno" in argv else
+                     "model" if "getprop" in argv else "install" if "install" in argv else "handoff")
+        return "device" if "get-state" in argv else "RFCX2054F5W" if "ro.serialno" in argv else "SM-S928B" if "getprop" in argv else "accepted"
     def issue(*args, **kwargs):
         calls.append("mint")
         assert args[1] == secret
@@ -41,13 +43,15 @@ def test_installer_mints_after_device_ready_and_install_then_waits_for_server(mo
     monkeypatch.setattr(installer, "request_payload", issue)
     monkeypatch.setattr(installer, "wait_for_admission", wait)
     assert installer.main(["--gateway", "https://van.example", "--internal-token-env", "INSTALLER_TEST_TOKEN",
-                           "--serial", "synthetic-s24", "--allow-development-artifact", "--apk", "owner.apk"]) == 0
-    assert calls == ["check", "model", "install", "mint", "handoff", "receipt"]
+                           "--serial", transport, "--allow-development-artifact", "--apk", "owner.apk"]) == 0
+    assert calls == ["check", "model", "identity", "install", "mint", "handoff", "receipt"]
     printed = capsys.readouterr()
     assert secret not in printed.out + printed.err
     assert "b" * 40 not in printed.out + printed.err
     assert json.loads(printed.out)["owner_e2e_verified"] is False
     assert json.loads(printed.out)["owner_release_artifact_verified"] is False
+    assert json.loads(printed.out)["physical_device_serial"] == "RFCX2054F5W"
+    assert json.loads(printed.out)["device_model"] == "SM-S928B"
 
 
 def test_staging_never_passes_admission_and_timeout_is_failure(monkeypatch):
@@ -140,10 +144,33 @@ def test_provisioning_refuses_implicit_device_even_for_development(monkeypatch):
         installer.main(["--gateway", "https://van.example", "--allow-development-artifact"])
 
 
-def test_provisioning_checks_admitted_model_before_install_or_mint(monkeypatch):
+@pytest.mark.parametrize("model", ["OTHER_MODEL", "SM-S928U", "SM-S928N", "SM-S928B/DS", "SM_S928B", "model:SM_S928B"])
+def test_provisioning_checks_exact_physical_model_before_install_or_mint(monkeypatch, model):
     monkeypatch.setenv("INSTALLER_TEST_TOKEN", "synthetic-enrolment")
-    monkeypatch.setattr(installer, "run", lambda argv, **kw: "device" if "get-state" in argv else "OTHER_MODEL")
+    monkeypatch.setattr(installer, "run", lambda argv, **kw: "device" if "get-state" in argv else model)
     monkeypatch.setattr(installer, "request_payload", lambda *args, **kw: pytest.fail("must not mint"))
     with pytest.raises(installer.ProvisioningFailed, match="model does not match"):
         installer.main(["--gateway", "https://van.example", "--serial", "synthetic-s24", "--allow-development-artifact",
                         "--internal-token-env", "INSTALLER_TEST_TOKEN", "--apk", "owner.apk"])
+
+
+@pytest.mark.parametrize("physical_serial", ["OTHER_S24_SAME_MODEL", "", "unknown"])
+def test_wireless_provisioning_refuses_wrong_or_missing_physical_identity_before_effects(monkeypatch, physical_serial):
+    calls = []
+    monkeypatch.setenv("INSTALLER_TEST_TOKEN", "synthetic-enrolment")
+    def readback(argv, **kwargs):
+        calls.append(argv)
+        if "get-state" in argv:
+            return "device"
+        if "ro.product.model" in argv:
+            return "SM-S928B"
+        if "ro.serialno" in argv:
+            return physical_serial
+        pytest.fail("must not install or hand off to an unadmitted handset")
+    monkeypatch.setattr(installer, "run", readback)
+    monkeypatch.setattr(installer, "request_payload", lambda *args, **kw: pytest.fail("must not mint"))
+    with pytest.raises(installer.ProvisioningFailed, match="physical handset serial does not match"):
+        installer.main(["--gateway", "https://van.example", "--serial", "10.0.0.7:32123",
+                        "--expected-device-serial", "RFCX2054F5W", "--allow-development-artifact",
+                        "--internal-token-env", "INSTALLER_TEST_TOKEN", "--apk", "owner.apk"])
+    assert all(argv[:3] == ["adb", "-s", "10.0.0.7:32123"] for argv in calls)

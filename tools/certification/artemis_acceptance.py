@@ -214,6 +214,7 @@ def build_plan(root: Path = ROOT, dds_root: Path | None = None, *, device_transp
     plan = {
         "schema_version": 1, "kind": "VAN_GOVERNED_ARTEMIS_ACCEPTANCE_PLAN", "status": "PREPARED_NOT_EXECUTED",
         "target": {"backend": "van-trading-core", "hermes_and_artemis": "dial-control", "handset": "Samsung S24 Ultra",
+                   "device_model": "SM-S928B",
                    "phone_connection": "wireless_adb_via_governed_artemis", "product_ingress": "DEDICATED_PINNED_TLS_INGRESS_REQUIRED"},
         "adapter_route": "LEGACY_DDS_HERMES_ANDROID_TESTING_PLANE",
         "owner_selected_execution_route": "NATIVE_ARTEMIS_VIA_DIAL_COMMANDER",
@@ -465,13 +466,15 @@ def device_transport_errors(plan: dict, bindings: dict, evidence_root: Path | No
     selected = plan.get("target", {}).get("device_transport", WIRELESS_ADB)
     if transport not in {WIRELESS_ADB, USB_PRIVATE_BRIDGE} or transport != selected:
         return ["Device transport does not match the source-bound plan"]
+    if bindings.get("device_model") != plan["target"]["device_model"]:
+        return ["Device model does not match the exact physical model in the source-bound plan"]
     if transport == WIRELESS_ADB:
         return [] if bindings.get("wireless_admission_receipt_id") else ["Missing wireless_admission_receipt_id"]
     if not bindings.get("device_admission_receipt_id"):
         return ["Missing device_admission_receipt_id for USB/private bridge"]
     identity_ref = bindings.get("device_identity_receipt_id")
     model = bindings.get("device_model")
-    if not isinstance(identity_ref, str) or not identity_ref.strip() or not isinstance(model, str) or not model.startswith("SM-S928"):
+    if not isinstance(identity_ref, str) or not identity_ref.strip() or model != plan["target"]["device_model"]:
         return ["USB/private bridge requires an independently observed S24 identity receipt/model"]
     if bindings.get("wireless_admission_receipt_id"):
         return ["USB/private bridge cannot substitute or reuse a wireless admission receipt"]
@@ -539,7 +542,7 @@ async def run_case(call_tool: Callable[[str, dict], Awaitable[dict]], plan: dict
         return {"outcome": "BLOCKED", "reason": "Missing deployment/APK/isolation/device-identity bindings", "live_qualified": False}
     if not REVISION.fullmatch(bindings["repository_sha"]) or not SHA.fullmatch(bindings["apk_sha256"]):
         raise ValueError("Immutable source/APK identities are required")
-    if not str(bindings["device_model"]).startswith("SM-S928"):
+    if bindings["device_model"] != plan["target"]["device_model"]:
         return {"outcome": "BLOCKED", "reason": "Selected device identity is not the owner's S24 Ultra", "live_qualified": False}
     if bindings["inputs_sha256"] != plan["inputs_sha256"]:
         return {"outcome": "BLOCKED", "reason": "Source/deployment input manifest differs from frozen acceptance plan", "live_qualified": False}
@@ -839,7 +842,8 @@ def validate_evidence(plan: dict, receipt: dict, evidence_root: Path) -> dict:
                 installed = read_json(contained(evidence_root, artifact["path"]))
                 if (installed.get("device_serial") != serial or installed.get("package_name") != "com.dial.van"
                         or installed.get("apk_sha256") != bindings.get("apk_sha256")
-                        or not str(installed.get("device_model", "")).startswith("SM-S928")
+                        or installed.get("device_model") != plan["target"]["device_model"]
+                        or installed.get("device_model") != bindings.get("device_model")
                         or installed.get("independent_observation") is not True
                         or installed.get("broker_run_id") != broker.get("run_id")):
                     raise ValueError()

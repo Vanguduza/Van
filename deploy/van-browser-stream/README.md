@@ -51,10 +51,10 @@ Dual-homing is what satisfies all four; a single-homed host fails at least one.
 
 | Component | Unit | Interface | Notes |
 |---|---|---|---|
-| Exact-IP egress proxy | `van-browser-egress-proxy.service` | **loopback only** | Public HTTP(S) only; rejects any hostname with a private/reserved DNS answer and connects to the exact admitted IP. |
-| Chromium | `van-browser-chromium.service` | **loopback only** | `--remote-debugging-address=127.0.0.1`; all HTTP(S) is forced through the exact-IP proxy; QUIC and non-proxied WebRTC UDP are disabled. |
-| Browser Control Agent | `van-browser-control-agent.service` | private VCN, mTLS | `services/browser_control_agent`; the only cross-host bridge to Chromium |
-| Stream runtime | `van-browser-stream.service` | public | signalling + WebRTC; verifies `BrowserStreamGrant` (ES256, `kid` pinned) |
+| Exact-IP egress proxy | `van-browser-egress-proxy@{public|owner}.service` | **loopback only** | Separate public HTTP(S) proxy for each profile; rejects any non-public DNS answer and connects to the exact admitted IP. |
+| Chromium | `van-browser-chromium@{public|owner}.service` | **loopback only** | `--remote-debugging-address=127.0.0.1`; each profile uses its own exact-IP proxy; QUIC and non-proxied WebRTC UDP are disabled. |
+| Browser Control Agent | `van-browser-control-agent@{public|owner}.service` | private VCN, mTLS | `services/browser_control_agent`; the only cross-host bridge to Chromium |
+| Stream runtime | `van-browser-stream@{public|owner}.service` | public | signalling + WebRTC; verifies `BrowserStreamGrant` (ES256, `kid` pinned) |
 | Profile volume | — | — | encrypted, mounted only here (§13.5 option A) |
 
 ## Install
@@ -73,7 +73,7 @@ sudo bash deploy/van-browser-stream/bootstrap.sh \
 sudo bash deploy/van-browser-stream/bootstrap.sh --profile <bound-browser-profiles.json>
 ```
 
-Preparation writes per-profile Chromium/control/stream environment files, instance units,
+Preparation writes per-profile Chromium/control/stream/egress environment files, instance units,
 one fixed-route media TLS ingress configuration, a core binding fragment and hash-bound
 `PREPARED_NOT_INSTALLED` declaration. Dry-run reads no credential material and starts no
 listener. Actual installation requires the already mounted, independently admitted LUKS
@@ -85,6 +85,10 @@ Each profile has its own `van-browser-{public|owner}`, `van-control-{public|owne
 `van-stream-{public|owner}` Unix users, transfer group, loopback CDP port, private control
 port, native HTTPS stream port, Chromium profile path and encrypted quarantine. Profile
 parents permit traversal without directory listing; each profile remains mode 0700.
+Each profile also has a distinct `van-egress-{public|owner}` proxy user and loopback port.
+That user receives no CDP, profile, transfer or credential authority; its environment
+contains only its listener port. All profile listener ports and the ingress port must be
+distinct. Chromium requires its corresponding proxy unit and stops when that unit stops.
 Role PKI directories are separately owned and mode 0700, private keys/tokens mode 0600;
 root-only environment files are read by systemd. The installer verifies the actual four
 distinct token hashes and independent matching broker client certificates/private keys,
@@ -92,6 +96,10 @@ including client-auth purpose and validity. It refuses privileged existing group
 memberships. A dedicated nftables output table permits each CDP port only to root and
 that profile's three Unix identities, then rejects other local UIDs. This prevents the
 public stack from connecting to owner Chromium through a shared loopback network.
+The same ordered table permits each Chromium UID to connect only to its own loopback
+proxy and to send established replies from its own loopback CDP listener. It rejects all
+other output from that UID, including IPv6 and UDP; no general established/related
+exception precedes this fence. Proxy flags alone do not qualify this kernel boundary.
 The dedicated table is restored at boot and never flushes other firewall tables.
 
 The signed phone origin remains one explicit public HTTPS `/rtc` base. The generated
@@ -115,8 +123,9 @@ the core, with independent issuer authority. Apply this fragment through the adm
 configuration recipe, preserving existing service bindings and owner state.
 
 Installed instance units are `van-browser-chromium@{public|owner}.service`,
-`van-browser-control-agent@{public|owner}.service`, `van-browser-stream@{public|owner}.service`
-and `van-browser-transfer-stage@{public|owner}.service`; shared units install UID fencing,
+`van-browser-control-agent@{public|owner}.service`, `van-browser-stream@{public|owner}.service`,
+`van-browser-transfer-stage@{public|owner}.service` and
+`van-browser-egress-proxy@{public|owner}.service`; shared units install UID fencing,
 encrypted ingress staging and fixed media routing. Installation refuses active stacks,
 disables quiesced legacy singleton units, validates nginx configuration and writes units
 without starting or enabling any listener. The admitted recipe must qualify both stacks
@@ -131,6 +140,7 @@ sudo env VAN_BROWSER_INSTANCE=public \
   VAN_BROWSER_CONTROL_BIND=<observed-private-bind> \
   VAN_BROWSER_CONTROL_PORT=<public-profile-control-port> \
   VAN_BROWSER_CDP_PORT=<public-profile-cdp-port> \
+  VAN_BROWSER_EGRESS_PORT=<public-profile-egress-port> \
   VAN_BROWSER_STREAM_PORT=<public-profile-native-stream-port> \
   VAN_BROWSER_PKI_DIR=/etc/van-browser-stream/profiles/public/control-pki \
   VAN_BROWSER_QUALIFY_CLIENT_CERT=<admitted-public-profile-core-client-cert> \
@@ -143,6 +153,10 @@ handshake must establish server reachability/CA/SAN before anonymous/foreign-cer
 denials can qualify. Network or trust failures remain UNKNOWN. Core canaries must also
 prove profile routing, cross-profile/UID denial, stream delivery, transfer authority and
 sealed-file cleanup; installation and source tests never establish these observations.
+Qualification reads the selected unit's actual MainPID and Unix identity, exact Chromium
+arguments, and the complete ordered nftables policy against the installed profile
+declaration and actual UIDs. Missing or unsupported process/kernel observations remain
+UNKNOWN; an incomplete or widened policy fails qualification.
 
 `pki/make-stream-pki.sh --instance public|owner` can prepare the independent private
 control CA/server/client material on its admitted PKI host. Bind the explicit private

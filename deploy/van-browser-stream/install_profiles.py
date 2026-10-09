@@ -96,11 +96,25 @@ def firewall(declaration):
     # idempotent without touching the host's existing firewall rules.
     rules = ["table inet van_browser_cdp {}", "flush table inet van_browser_cdp",
              "table inet van_browser_cdp {", "  chain output {", "    type filter hook output priority -50; policy accept;"]
+    identities = {}
     for instance in declaration["instances"]:
-        uids = [0] + [pwd.getpwnam(user).pw_uid for user in instance["users"]]
+        for user in instance["users"] + [instance["egress_user"]]:
+            uid = pwd.getpwnam(user).pw_uid
+            if uid <= 0 or uid in identities.values():
+                raise ValueError("distinct_nonroot_browser_service_uids_required")
+            identities[user] = uid
+    for instance in declaration["instances"]:
+        uids = [0] + [identities[user] for user in instance["users"]]
         rules.append("    ip daddr 127.0.0.1 tcp dport " + str(instance["cdp_port"]) +
                      " meta skuid { " + ", ".join(map(str, uids)) + " } accept")
         rules.append("    ip daddr 127.0.0.1 tcp dport " + str(instance["cdp_port"]) + " reject with tcp reset")
+    for instance in declaration["instances"]:
+        browser_uid = str(identities[instance["users"][0]])
+        # Chromium may use only its own exact-IP proxy or answer admitted CDP
+        # clients. All other IPv4/IPv6/UDP output from this identity is refused.
+        rules.append("    meta skuid " + browser_uid + " ip daddr 127.0.0.1 tcp dport " + str(instance["egress_port"]) + " accept")
+        rules.append("    meta skuid " + browser_uid + " ip saddr 127.0.0.1 ip daddr 127.0.0.1 tcp sport " + str(instance["cdp_port"]) + " ct state established ct direction reply accept")
+        rules.append("    meta skuid " + browser_uid + " reject")
     rules.extend(["  }", "}"])
     return ("\n".join(rules) + "\n").encode()
 
@@ -117,12 +131,12 @@ def install(data, artifacts):
         raise ValueError("observed_nginx_binary_hash_mismatch")
     check_credentials(declaration)
     for instance in ("public", "owner"):
-        for service in ("chromium", "control-agent", "stream", "transfer-stage"):
+        for service in ("chromium", "control-agent", "stream", "transfer-stage", "egress-proxy"):
             active = subprocess.run(["systemctl", "is-active", "--quiet", "van-browser-" + service + "@" + instance + ".service"],
                                     capture_output=True, timeout=10).returncode == 0
             if active:
                 raise ValueError("browser_services_must_be_quiesced_before_install")
-    for service in ("chromium", "control-agent", "stream", "transfer-stage"):
+    for service in ("chromium", "control-agent", "stream", "transfer-stage", "egress-proxy"):
         if subprocess.run(["systemctl", "is-active", "--quiet", "van-browser-" + service + ".service"],
                           capture_output=True, timeout=10).returncode == 0:
             raise ValueError("legacy_shared_browser_stack_must_be_quiesced")
@@ -142,8 +156,9 @@ def install(data, artifacts):
         raise ValueError("existing_encrypted_volume_identity_mismatch")
     # Stop at existing identity conflicts rather than silently changing privileged
     # memberships or introducing a second identity for an established service.
+    existing_uids = set()
     for instance in declaration["instances"]:
-        for user in instance["users"]:
+        for user in instance["users"] + [instance["egress_user"]]:
             try:
                 existing = pwd.getpwnam(user)
             except KeyError:
@@ -151,8 +166,9 @@ def install(data, artifacts):
             allowed = {user}
             if user.startswith(("van-browser-", "van-stream-")):
                 allowed.add(instance["transfer_group"])
-            if existing.pw_uid == 0 or set(run(["id", "-Gn", user]).split()) - allowed:
+            if existing.pw_uid == 0 or existing.pw_uid in existing_uids or set(run(["id", "-Gn", user]).split()) - allowed:
                 raise ValueError("existing_service_identity_conflict")
+            existing_uids.add(existing.pw_uid)
     directory(ETC, mode=0o711)
     directory(PROFILE_ROOT, mode=0o711)
     directory(PROFILE_ROOT + "/.transfers", mode=0o711)
@@ -177,7 +193,7 @@ def install(data, artifacts):
     run([declaration["nginx_executable"], "-t", "-c", str(Path(ETC).parent / "media-ingress.conf")])
     for instance in declaration["instances"]:
         name, users, group = instance["instance"], instance["users"], instance["transfer_group"]
-        for user in users:
+        for user in users + [instance["egress_user"]]:
             try:
                 pwd.getpwnam(user)
             except KeyError:
@@ -199,7 +215,7 @@ def install(data, artifacts):
             owner = users[1] if destination.startswith("control-pki/") else users[2] if destination.startswith("stream-pki/") else "root"
             mode = 0o600 if destination.endswith((".key", ".token")) else 0o644
             write_file(location + "/" + destination, Path(selector).read_bytes(), owner, owner, mode)
-        for role in ("chromium", "control", "stream"):
+        for role in ("chromium", "control", "stream", "egress"):
             write_file(location + "/" + role + ".env", artifacts[name + "/" + role + ".env"])
     # A dedicated UID-scoped CDP table prevents a compromised public stack from
     # connecting to owner Chromium's loopback debugger. Never flush other tables.
@@ -226,7 +242,7 @@ def install(data, artifacts):
     write_file("/etc/tmpfiles.d/van-browser-profiles.conf", tmpfiles.encode(), mode=0o644)
     write_file(Path(ETC).parent / "gateway-browser-profile-bindings.env", artifacts["gateway-browser-profile-bindings.env"])
     write_file(Path(ETC).parent / "profiles-declaration.json", artifacts["declaration.json"])
-    for service in ("chromium", "control-agent", "stream", "transfer-stage"):
+    for service in ("chromium", "control-agent", "stream", "transfer-stage", "egress-proxy"):
         unit = "van-browser-" + service + ".service"
         if Path("/etc/systemd/system", unit).exists():
             run(["systemctl", "disable", unit])

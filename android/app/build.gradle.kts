@@ -5,6 +5,8 @@ plugins {
 }
 
 import java.util.Properties
+import java.security.MessageDigest
+import groovy.json.JsonOutput
 import com.dial.van.buildconfig.VanProductionTarget
 
 // The admitted handset remains arm64. CI's x86_64 emulator needs matching native
@@ -87,6 +89,30 @@ val vanSourceSha = providers.exec {
 }.standardOutput.asText.get().trim()
 require(vanSourceSha.matches(Regex("[0-9a-f]{40}"))) { "VAN source identity is unavailable" }
 
+// Public build inputs inside the signed APK let the release packet and independent
+// installer reject an old APK paired with a newer, detached BuildConfig.java.
+fun publicInputSha256(value: String): String = MessageDigest.getInstance("SHA-256")
+    .digest(value.toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
+val vanBuildProvenance = linkedMapOf<String, Any>(
+    "schema_version" to 1,
+    "application_id" to "com.dial.van",
+    "source_sha" to vanSourceSha,
+    "gateway_url" to vanGatewayBaseUrl,
+    "gateway_ca_pem_b64_sha256" to publicInputSha256(vanGatewayCaPemB64),
+    "connectivity_trusted_keys_sha256" to publicInputSha256(vanConnectivityTrustedKeys),
+)
+val vanBuildProvenanceDirectory = layout.buildDirectory.dir("generated/van-build-provenance")
+val vanBuildProvenanceAsset = vanBuildProvenanceDirectory.map { it.file("van-build-provenance.json") }
+val generateVanBuildProvenance = tasks.register("generateVanBuildProvenance") {
+    inputs.properties(vanBuildProvenance)
+    outputs.file(vanBuildProvenanceAsset)
+    doLast {
+        val target = vanBuildProvenanceAsset.get().asFile
+        target.parentFile.mkdirs()
+        target.writeText(JsonOutput.toJson(vanBuildProvenance) + "\n", Charsets.UTF_8)
+    }
+}
+
 android {
     namespace = "com.dial.van"
     compileSdk = 36
@@ -94,6 +120,7 @@ android {
     // building. They are embedded in the signed APK, then installed privately
     // on first launch; the phone never chooses URLs, hashes or model files.
     sourceSets.getByName("main").assets.srcDir(layout.buildDirectory.dir("generated/voice-assets"))
+    sourceSets.getByName("main").assets.srcDir(vanBuildProvenanceDirectory)
 
     defaultConfig {
         applicationId = "com.dial.van"
@@ -403,7 +430,7 @@ val voiceAssetsGuard = tasks.register<Exec>("assertVoiceAssetsAreSealed") {
 }
 
 tasks.matching { it.name.startsWith("merge") && it.name.endsWith("Assets") }
-    .configureEach { dependsOn(voiceAssetsGuard) }
+    .configureEach { dependsOn(voiceAssetsGuard, generateVanBuildProvenance) }
 
 val voiceRuntimeGuard = tasks.register("assertVoiceRuntimeIsShippable") {
     val policySource = layout.projectDirectory

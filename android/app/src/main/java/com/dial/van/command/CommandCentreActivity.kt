@@ -99,8 +99,12 @@ import com.dial.van.voice.WakeListenerService
  * and a "More" sheet for Projects/Connected/Settings. Deep links: `van://<route>`.
  */
 class CommandCentreActivity : FragmentActivity() {
+    private var pendingDestination by mutableStateOf<String?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        pendingDestination = savedInstanceState?.getString(KEY_PENDING_DESTINATION)
+            ?.takeIf(VanRoute::isKnown)
         val app = application as VanApplication
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -118,16 +122,17 @@ class CommandCentreActivity : FragmentActivity() {
         // Legacy callers (the overlay's "module" extra) and this build's own deep links
         // (`intent.data`, e.g. from a notification) both resolve through VanNavModel, never
         // to a raw string handed straight to NavHost.
-        val fromData = intent?.data?.toString()?.let(VanNavModel::deepLink)
-        val fromExtra = VanNavModel.startDestination(intent.getStringExtra(EXTRA_MODULE))
-        val initial = fromData ?: fromExtra
+        val initial = VanNavModel.intentDestination(intent?.data?.toString(),
+            intent?.getStringExtra(EXTRA_MODULE)) ?: VanRoute.HOME
 
         setContent {
             VanTheme {
                 Box(
                     modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
                 ) {
-                    CommandCentreScreen(app, initial)
+                    CommandCentreScreen(app, initial, pendingDestination) { consumed ->
+                        if (pendingDestination == consumed) pendingDestination = null
+                    }
                 }
             }
         }
@@ -145,23 +150,20 @@ class CommandCentreActivity : FragmentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        // A deep link arriving while the Activity is already resident (`launchMode
-        // singleTop`) has nowhere to hand its route to the composition that already ran
-        // `onCreate` — that composition owns its own NavController. Reopening as a fresh
-        // task keeps the one restoration path (VanNavModel via the constructor's intent)
-        // rather than a second one threaded in after the fact.
-        val route = intent.data?.toString()?.let(VanNavModel::deepLink)
-        if (route != null) {
-            startActivity(
-                Intent(this, CommandCentreActivity::class.java)
-                    .putExtra(EXTRA_MODULE, route)
-                    .setData(intent.data),
-            )
-        }
+        // singleTop reuses this Activity. Starting it again here redelivers this
+        // callback indefinitely. Hand the validated route to its existing NavHost.
+        VanNavModel.intentDestination(intent.data?.toString(), intent.getStringExtra(EXTRA_MODULE))
+            ?.let { pendingDestination = it }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString(KEY_PENDING_DESTINATION, pendingDestination)
+        super.onSaveInstanceState(outState)
     }
 
     companion object {
         const val EXTRA_MODULE = "module"
+        private const val KEY_PENDING_DESTINATION = "command_centre.pending_destination"
 
         fun deepLinkIntent(context: android.content.Context, route: String): Intent =
             Intent(context, CommandCentreActivity::class.java)
@@ -172,7 +174,12 @@ class CommandCentreActivity : FragmentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun CommandCentreScreen(app: VanApplication, initial: String) {
+internal fun CommandCentreScreen(
+    app: VanApplication,
+    initial: String,
+    pendingDestination: String? = null,
+    onDestinationConsumed: (String) -> Unit = {},
+) {
     val viewModel: CommandCentreViewModel = viewModel()
     // Synchronous, not a LaunchedEffect: NavHost reads `viewModel.startDestination` once, at
     // its own first composition, so the fresh-vs-restored decision has to be settled before
@@ -188,6 +195,13 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                 val arguments = entry.destination.arguments.keys.associateWith { name -> entry.arguments?.getString(name) }
                 VanRoute.concreteRoute(template, arguments)?.let(viewModel::onRouteChanged)
             }
+        }
+    }
+
+    LaunchedEffect(nav, pendingDestination) {
+        pendingDestination?.let { route ->
+            nav.navigate(route) { launchSingleTop = true }
+            onDestinationConsumed(route)
         }
     }
 

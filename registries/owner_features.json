@@ -3,7 +3,7 @@
   "kind": "owner_feature_registry",
   "audited_repository": "/workspace/Van",
   "audited_commit": "12feb9033dfc1dd68d7b4d41ac477f0d9dbbc4af",
-  "audit_date": "2026-10-08",
+  "audit_date": "2026-10-09",
   "scope": "Canon-derived frontend functional requirements and baseline source coverage, with authenticated endpoint contracts. Local corrective patch results are recorded in the accompanying audit; live/device readiness remains unverified.",
   "authority_precedence": [
     {
@@ -1505,12 +1505,12 @@
         ],
         "source_citations": [],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -1575,6 +1575,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -1589,7 +1613,27 @@
         "UI_REDESIGN",
         "PHYSICAL_ACCEPTANCE"
       ],
-      "functional_wiring_status": "SOURCE_WIRED_REQUIRES_ACCEPTANCE"
+      "functional_wiring_status": "SOURCE_WIRED_REQUIRES_ACCEPTANCE",
+      "current_navigation_contract": {
+        "source_citations": [
+          {
+            "file": "android/app/src/main/java/com/dial/van/command/nav/VanNavModel.kt",
+            "line": 65,
+            "ref": "WORKSPACE_PATCH",
+            "sha256": "187616b948c9dbf6de5a2914f9b49f6ed444bba19b9de841dac1947db695bcd2",
+            "review_scope": "Fresh and resident Activity entry share the exact allowlisted destination resolver; foreign links do not fall through to extra-module steering."
+          },
+          {
+            "file": "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
+            "line": 150,
+            "ref": "WORKSPACE_PATCH",
+            "sha256": "14c746d2024fccf594a99227b2e1685c6f35a7045933a5eb0c69cafc0c28d032",
+            "review_scope": "Resident singleTop entry steers the existing NavHost once, with saved pending-route recovery, without restarting/redelivering the Activity."
+          }
+        ],
+        "description": "Fresh launch and an intent delivered to the resident singleTop Activity use the same validated destination resolver. A resident deep link navigates the existing NavHost once instead of recursively restarting the Activity. A pending known destination is saved/restored through recreation and consumed once; foreign/invalid link content is never a raw route or fallback authority. Real process/deep-link behavior remains a handset acceptance case.",
+        "device_execution_status": "UNVERIFIED"
+      }
     },
     {
       "id": "OF-COMMAND-001",
@@ -2138,12 +2182,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -2208,6 +2252,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -3382,7 +3450,7 @@
             "file": "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
             "line": 101,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "a9eaa82bb3083af016c2d334d925682bc4b3ddab4590e71a7f3c152bbc211ac3"
+            "sha256": "14c746d2024fccf594a99227b2e1685c6f35a7045933a5eb0c69cafc0c28d032"
           }
         ],
         "functions": [
@@ -3399,7 +3467,7 @@
                 "file": "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
                 "line": 101,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "a9eaa82bb3083af016c2d334d925682bc4b3ddab4590e71a7f3c152bbc211ac3"
+                "sha256": "14c746d2024fccf594a99227b2e1685c6f35a7045933a5eb0c69cafc0c28d032"
               },
               {
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionSelection.kt",
@@ -3419,7 +3487,7 @@
                 "file": "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
                 "line": 101,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "a9eaa82bb3083af016c2d334d925682bc4b3ddab4590e71a7f3c152bbc211ac3"
+                "sha256": "14c746d2024fccf594a99227b2e1685c6f35a7045933a5eb0c69cafc0c28d032"
               },
               {
                 "file": "android/app/src/main/java/com/dial/van/command/nav/VanRoute.kt",
@@ -3432,12 +3500,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -3502,6 +3570,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -4439,12 +4531,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -4509,6 +4601,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -5333,12 +5449,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -5403,6 +5519,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -6414,12 +6554,12 @@
         ],
         "source_citations": [],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -6484,6 +6624,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -7081,12 +7245,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -7151,6 +7315,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -7842,12 +8030,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -7912,6 +8100,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -8457,12 +8669,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -8527,6 +8739,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -9719,12 +9955,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -9789,6 +10025,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -10471,12 +10731,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -10541,6 +10801,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -11796,12 +12080,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -11866,6 +12150,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -12604,12 +12912,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -12674,6 +12982,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -13724,12 +14056,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -13794,6 +14126,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -15261,12 +15617,12 @@
         ],
         "source_citations": [],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -15331,6 +15687,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -15667,12 +16047,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -15737,6 +16117,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -17120,12 +17524,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -17190,6 +17594,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -17830,12 +18258,12 @@
         ],
         "source_citations": [],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -17900,6 +18328,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -18612,12 +19064,12 @@
         "functions": [],
         "source_citations": [],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -18682,6 +19134,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -19509,7 +19985,7 @@
                 "file": "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
                 "line": 101,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "a9eaa82bb3083af016c2d334d925682bc4b3ddab4590e71a7f3c152bbc211ac3"
+                "sha256": "14c746d2024fccf594a99227b2e1685c6f35a7045933a5eb0c69cafc0c28d032"
               }
             ],
             "authority_gate": "Advertised /v1/commands only; original action gate preserved; A3 standing-disable verification, A4 knowledge deletion biometric approval"
@@ -19532,12 +20008,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -19602,6 +20078,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -19870,7 +20370,7 @@
           "registration": "DEFAULT",
           "device_proof_required_when_bound": false,
           "frontend_access": "HERMES_SERVICE_ONLY",
-          "source_ref": "backend/van_gateway/automation/worker_runtime.py:183",
+          "source_ref": "backend/van_gateway/automation/worker_runtime.py:184",
           "client_function": null,
           "client_symbol": null,
           "client_namespace": null,
@@ -20783,7 +21283,7 @@
                 "file": "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
                 "line": 101,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "a9eaa82bb3083af016c2d334d925682bc4b3ddab4590e71a7f3c152bbc211ac3"
+                "sha256": "14c746d2024fccf594a99227b2e1685c6f35a7045933a5eb0c69cafc0c28d032"
               }
             ],
             "authority_gate": "Advertised /v1/commands only; original action gate preserved; A3 standing-disable verification, A4 knowledge deletion biometric approval"
@@ -20798,18 +21298,32 @@
             "source_citations": [
               {
                 "file": "backend/van_gateway/automation/worker_runtime.py",
-                "line": 164,
+                "line": 165,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "8f321eb480e66bc4388adf147b336ec829e2f7b453a741a18d163c87a06ff990"
+                "sha256": "f3dcee09c50ed284ce12f71ffe03440dd4a57baa53717beb447327f2cdbef61a"
               },
               {
                 "file": "backend/van_gateway/automation/standing_runner.py",
                 "line": 59,
                 "ref": "WORKSPACE_PATCH",
                 "sha256": "1fb055c268098115448ff7903b5e443bf3c206f65960c9c9e19d4aea2d1cd7c7"
+              },
+              {
+                "file": "backend/van_gateway/automation/worker_runtime.py",
+                "line": 737,
+                "ref": "WORKSPACE_PATCH",
+                "sha256": "f3dcee09c50ed284ce12f71ffe03440dd4a57baa53717beb447327f2cdbef61a",
+                "review_scope": "Actual independent step/owner observation uses type-strict postcondition equality."
+              },
+              {
+                "file": "backend/van_gateway/automation/verifier.py",
+                "line": 42,
+                "ref": "WORKSPACE_PATCH",
+                "sha256": "e69c52cc0fa7d6ea5b63d3ddcab2f0edadcdc11fefac04e43f97cceeb18c3fe9",
+                "review_scope": "Boolean, numeric and nested JSON postcondition types are compared explicitly."
               }
             ],
-            "authority_gate": "Dedicated machine HTTPS scope plus signed per-run/step grant, immutable parent/helper graphs, current canonical action/snapshot; machine credentials never ship to Android."
+            "authority_gate": "Dedicated machine HTTPS scope plus signed per-run/step grant, immutable parent/helper graphs, current canonical action/snapshot; machine credentials never ship to Android. Declared step and owner postconditions use type-strict JSON equality; boolean true does not satisfy numeric 1, including nested values. A mismatch refuses verification and never becomes a successful effect."
           },
           {
             "id": "OF-AUTOMATION-001:owner-plan",
@@ -20891,32 +21405,46 @@
               },
               {
                 "file": "backend/van_gateway/automation/worker_runtime.py",
-                "line": 164,
+                "line": 165,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "8f321eb480e66bc4388adf147b336ec829e2f7b453a741a18d163c87a06ff990",
+                "sha256": "f3dcee09c50ed284ce12f71ffe03440dd4a57baa53717beb447327f2cdbef61a",
                 "review_scope": "Reviewed current production entry."
+              },
+              {
+                "file": "backend/van_gateway/automation/worker_runtime.py",
+                "line": 737,
+                "ref": "WORKSPACE_PATCH",
+                "sha256": "f3dcee09c50ed284ce12f71ffe03440dd4a57baa53717beb447327f2cdbef61a",
+                "review_scope": "Actual independent step/owner observation uses type-strict postcondition equality."
+              },
+              {
+                "file": "backend/van_gateway/automation/verifier.py",
+                "line": 42,
+                "ref": "WORKSPACE_PATCH",
+                "sha256": "e69c52cc0fa7d6ea5b63d3ddcab2f0edadcdc11fefac04e43f97cceeb18c3fe9",
+                "review_scope": "Boolean, numeric and nested JSON postcondition types are compared explicitly."
               }
             ],
             "endpoint_ids": [
               "VE-92c09ab01d57",
               "VE-46283550c868"
             ],
-            "authority_gate": "Native admission/execution approval seals artifact/revision/input hash. Current canonical parent/helper manifests, single-use steps and per-target policy apply; permission hints cannot authorize VAN_CAPABILITY writes or arbitrary external writes.",
+            "authority_gate": "Native admission/execution approval seals artifact/revision/input hash. Current canonical parent/helper manifests, single-use steps and per-target policy apply; permission hints cannot authorize VAN_CAPABILITY writes or arbitrary external writes. Declared step and owner postconditions use type-strict JSON equality; boolean true does not satisfy numeric 1, including nested values. A mismatch refuses verification and never becomes a successful effect.",
             "acceptance_contract": {
               "happy": "Perform the owner interaction and verify its exact matching independent readback within the stated authority and evidence contract.",
-              "error": "Expose the concrete authentication, scope, stale identity, provider or effect refusal; preserve the reviewed input without reporting success.",
+              "error": "Expose the concrete authentication, scope, stale identity, provider or effect refusal; preserve the reviewed input without reporting success. Independently observed type/value mismatch remains unverifiable; Python boolean/numeric coercion cannot satisfy a declared predicate.",
               "recovery": "Read the immutable request/record/effect identity after an uncertain reply; repeat only supported exact recovery without broadening authority or repeating an unobserved effect.",
               "device_execution_status": "UNVERIFIED"
             }
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -20981,6 +21509,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -22999,12 +23551,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -23069,6 +23621,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -24997,12 +25573,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "control_outcome_guard": "LOCAL_GUARD_IMPLEMENTED_REMOTE_ACCEPTANCE_UNVERIFIED",
         "historical_validation": {
@@ -25075,6 +25651,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -26353,12 +26953,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "control_outcome_guard": "LOCAL_GUARD_IMPLEMENTED_REMOTE_ACCEPTANCE_UNVERIFIED",
         "historical_validation": {
@@ -26431,6 +27031,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -28008,12 +28632,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -28085,6 +28709,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -29725,12 +30373,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -29795,6 +30443,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -30048,12 +30720,12 @@
         ],
         "source_citations": [],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -30118,6 +30790,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -31371,12 +32067,12 @@
         "functions": [],
         "source_citations": [],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -31441,6 +32137,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -32100,12 +32820,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -32170,6 +32890,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -32415,12 +33159,12 @@
         "functions": [],
         "source_citations": [],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -32485,6 +33229,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -32983,7 +33751,7 @@
         }
       ],
       "integration_gaps": [
-        "Automatic signed owner-core bootstrap/recovery requires no in-app backend or Hermes connection settings. Van-trading-core is selected core; dial-control supplies Hermes and Artemis through admitted services. Private TLS ingress, release signer/trust/bootstrap binding, owner installer delivery and physical attestation/connectivity remain unqualified."
+        "Automatic signed owner-core bootstrap/recovery requires no in-app backend or Hermes connection settings. Backend, product Hermes profile van and direct phone ingress colocate on van-trading-core under CORE_ONLY_V2; dial-control supplies native Artemis/development services. Oracle Admin is excluded. Private TLS ingress, release signer/trust/bootstrap binding, owner installer delivery and physical attestation/connectivity remain unqualified."
       ],
       "required_acceptance_states": {
         "happy": "Paired and hardware-bound owner completes actual permissions/readiness and does not land in a failing dashboard.",
@@ -33573,12 +34341,12 @@
         "functions": [],
         "source_citations": [],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -33643,6 +34411,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -33655,26 +34447,38 @@
       "external_endpoint_ids": [],
       "deployment_requirements": {
         "backend_host": "van-trading-core",
-        "hermes_host": "dial-control",
-        "phone_ingress_host": "oracle-admin",
-        "status": "PREPARED_PROFILE_REQUIRED_LIVE_INGRESS_UNQUALIFIED",
+        "hermes_host": "van-trading-core",
+        "phone_ingress_host": "van-trading-core",
+        "status": "PREPARED_CORE_ONLY_V2_LIVE_PROFILE_RELEASE_AND_INGRESS_UNQUALIFIED",
         "owner_ui": "Automatic signed installer intake and read-only readiness; no in-app URL/token/pin/ICE settings.",
-        "release_gate": "Generated VAN_DEPLOYMENT_PROFILE_FILE with consistent roles, public HTTPS ingress, pinned valid CA/fingerprint and nonempty receipt ID; production signing and trusted connectivity signer still required.",
-        "authority_limit": "A profile receipt ID is a declaration, not admission; governed live ingress must independently bind exact VAN-only scope. Existing DDS HTTP/SSE proxy is not that ingress.",
+        "release_gate": "Generated version2 VAN_DEPLOYMENT_PROFILE_FILE must bind CORE_ONLY_V2 roles, actual core public IPv4 HTTPS/WSS route and dedicated port, valid pinned CA/fingerprint, genuine ingress capability receipt, existing production signer and connectivity anchor. Source declarations are not live release or deployment qualification.",
+        "authority_limit": "Core direct ingress capability/profile compilation does not admit deployment. Current source SHA, protected state, scoped authority, observed route/firewalls, provider bindings and release/provisioning must independently qualify. Oracle Admin and inter-host Hermes forwarding are excluded.",
         "source_citations": [
           {
             "file": "android/app/build.gradle.kts",
-            "line": 47,
+            "line": 49,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "0aec1faca60562de064975780c49a12d8de0987176fd6728b728842ace876cb1"
+            "sha256": "940746ba14195b4ce3afa645570771b59e0cd680dfeacb89301f4c18bdda3899"
           },
           {
             "file": "android/buildSrc/src/main/java/com/dial/van/buildconfig/VanProductionTarget.java",
             "line": 17,
             "ref": "WORKSPACE_PATCH",
             "sha256": "b8ef5483dac9de5647bb01abb98029d5707b2d2662a7ff7341a7fbe0e5c9d6c5"
+          },
+          {
+            "file": "tools/runtime/prepare_owner_core_deployment.py",
+            "line": 71,
+            "ref": "WORKSPACE_PATCH",
+            "sha256": "a70e2d779811cb67b53639cd076419829a653f4bb77a5ce1f5acec6e9e3912b4",
+            "review_scope": "CORE_ONLY_V2 validates schema2 and colocated backend/Hermes/direct ingress on core."
           }
-        ]
+        ],
+        "schema_version": 2,
+        "topology": "CORE_ONLY_V2",
+        "ingress_host": "van-trading-core",
+        "artemis_host": "dial-control",
+        "oracle_admin_runtime_dependency": false
       },
       "historical_source_state": {
         "scope": "Historical pre-final-wiring claims; not current qualification",
@@ -33687,7 +34491,111 @@
         "RELEASE_PROVISIONING",
         "PHYSICAL_ACCEPTANCE"
       ],
-      "functional_wiring_status": "SOURCE_WIRED_REQUIRES_ACCEPTANCE"
+      "functional_wiring_status": "SOURCE_WIRED_REQUIRES_ACCEPTANCE",
+      "historical_registry_metadata_pre_oct9_correction": {
+        "deployment_requirements": {
+          "backend_host": "van-trading-core",
+          "hermes_host": "dial-control",
+          "phone_ingress_host": "oracle-admin",
+          "status": "PREPARED_PROFILE_REQUIRED_LIVE_INGRESS_UNQUALIFIED",
+          "owner_ui": "Automatic signed installer intake and read-only readiness; no in-app URL/token/pin/ICE settings.",
+          "release_gate": "Generated VAN_DEPLOYMENT_PROFILE_FILE with consistent roles, public HTTPS ingress, pinned valid CA/fingerprint and nonempty receipt ID; production signing and trusted connectivity signer still required.",
+          "authority_limit": "A profile receipt ID is a declaration, not admission; governed live ingress must independently bind exact VAN-only scope. Existing DDS HTTP/SSE proxy is not that ingress.",
+          "source_citations": [
+            {
+              "file": "android/app/build.gradle.kts",
+              "line": 47,
+              "ref": "WORKSPACE_PATCH",
+              "sha256": "0aec1faca60562de064975780c49a12d8de0987176fd6728b728842ace876cb1"
+            },
+            {
+              "file": "android/buildSrc/src/main/java/com/dial/van/buildconfig/VanProductionTarget.java",
+              "line": 17,
+              "ref": "WORKSPACE_PATCH",
+              "sha256": "b8ef5483dac9de5647bb01abb98029d5707b2d2662a7ff7341a7fbe0e5c9d6c5"
+            }
+          ]
+        }
+      },
+      "historical_registry_metadata_pre_oct9_r2_correction": {
+        "deployment_requirements": {
+          "backend_host": "van-trading-core",
+          "hermes_host": "van-trading-core",
+          "phone_ingress_host": "van-trading-core",
+          "status": "PREPARED_CORE_ONLY_V2_LIVE_PROFILE_RELEASE_AND_INGRESS_UNQUALIFIED",
+          "owner_ui": "Automatic signed installer intake and read-only readiness; no in-app URL/token/pin/ICE settings.",
+          "release_gate": "Generated version2 VAN_DEPLOYMENT_PROFILE_FILE must bind CORE_ONLY_V2 roles, actual core public IPv4 HTTPS/WSS route and dedicated port, valid pinned CA/fingerprint, genuine ingress capability receipt, existing production signer and connectivity anchor. Source declarations are not live release or deployment qualification.",
+          "authority_limit": "Core direct ingress capability/profile compilation does not admit deployment. Current source SHA, protected state, scoped authority, observed route/firewalls, provider bindings and release/provisioning must independently qualify. Oracle Admin and inter-host Hermes forwarding are excluded.",
+          "source_citations": [
+            {
+              "file": "android/app/build.gradle.kts",
+              "line": 49,
+              "ref": "WORKSPACE_PATCH",
+              "sha256": "940746ba14195b4ce3afa645570771b59e0cd680dfeacb89301f4c18bdda3899"
+            },
+            {
+              "file": "android/buildSrc/src/main/java/com/dial/van/buildconfig/VanProductionTarget.java",
+              "line": 17,
+              "ref": "WORKSPACE_PATCH",
+              "sha256": "b8ef5483dac9de5647bb01abb98029d5707b2d2662a7ff7341a7fbe0e5c9d6c5"
+            },
+            {
+              "file": "tools/runtime/prepare_owner_core_deployment.py",
+              "line": 71,
+              "ref": "WORKSPACE_PATCH",
+              "sha256": "a70e2d779811cb67b53639cd076419829a653f4bb77a5ce1f5acec6e9e3912b4",
+              "review_scope": "CORE_ONLY_V2 validates schema2 and colocated backend/Hermes/direct ingress on core."
+            }
+          ],
+          "schema_version": 2,
+          "topology": "CORE_ONLY_V2",
+          "ingress_host": "van-trading-core",
+          "artemis_host": "dial-control",
+          "oracle_admin_runtime_dependency": false
+        }
+      },
+      "historical_pre_oct9_r3_topology_prose": {
+        "integration_gaps": [
+          "Automatic signed owner-core bootstrap/recovery requires no in-app backend or Hermes connection settings. Van-trading-core is selected core; dial-control supplies Hermes and Artemis through admitted services. Private TLS ingress, release signer/trust/bootstrap binding, owner installer delivery and physical attestation/connectivity remain unqualified."
+        ]
+      },
+      "historical_registry_metadata_pre_oct9_r3_correction": {
+        "deployment_requirements": {
+          "backend_host": "van-trading-core",
+          "hermes_host": "van-trading-core",
+          "phone_ingress_host": "van-trading-core",
+          "status": "PREPARED_CORE_ONLY_V2_LIVE_PROFILE_RELEASE_AND_INGRESS_UNQUALIFIED",
+          "owner_ui": "Automatic signed installer intake and read-only readiness; no in-app URL/token/pin/ICE settings.",
+          "release_gate": "Generated version2 VAN_DEPLOYMENT_PROFILE_FILE must bind CORE_ONLY_V2 roles, actual core public IPv4 HTTPS/WSS route and dedicated port, valid pinned CA/fingerprint, genuine ingress capability receipt, existing production signer and connectivity anchor. Source declarations are not live release or deployment qualification.",
+          "authority_limit": "Core direct ingress capability/profile compilation does not admit deployment. Current source SHA, protected state, scoped authority, observed route/firewalls, provider bindings and release/provisioning must independently qualify. Oracle Admin and inter-host Hermes forwarding are excluded.",
+          "source_citations": [
+            {
+              "file": "android/app/build.gradle.kts",
+              "line": 49,
+              "ref": "WORKSPACE_PATCH",
+              "sha256": "940746ba14195b4ce3afa645570771b59e0cd680dfeacb89301f4c18bdda3899"
+            },
+            {
+              "file": "android/buildSrc/src/main/java/com/dial/van/buildconfig/VanProductionTarget.java",
+              "line": 17,
+              "ref": "WORKSPACE_PATCH",
+              "sha256": "b8ef5483dac9de5647bb01abb98029d5707b2d2662a7ff7341a7fbe0e5c9d6c5"
+            },
+            {
+              "file": "tools/runtime/prepare_owner_core_deployment.py",
+              "line": 71,
+              "ref": "WORKSPACE_PATCH",
+              "sha256": "a70e2d779811cb67b53639cd076419829a653f4bb77a5ce1f5acec6e9e3912b4",
+              "review_scope": "CORE_ONLY_V2 validates schema2 and colocated backend/Hermes/direct ingress on core."
+            }
+          ],
+          "schema_version": 2,
+          "topology": "CORE_ONLY_V2",
+          "ingress_host": "van-trading-core",
+          "artemis_host": "dial-control",
+          "oracle_admin_runtime_dependency": false
+        }
+      }
     },
     {
       "id": "OF-SETTINGS-001",
@@ -34303,12 +35211,12 @@
         "functions": [],
         "source_citations": [],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -34373,32 +35281,68 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
       "external_endpoint_ids": [],
       "deployment_requirements": {
         "backend_host": "van-trading-core",
-        "hermes_host": "dial-control",
-        "phone_ingress_host": "oracle-admin",
-        "status": "PREPARED_PROFILE_REQUIRED_LIVE_INGRESS_UNQUALIFIED",
+        "hermes_host": "van-trading-core",
+        "phone_ingress_host": "van-trading-core",
+        "status": "PREPARED_CORE_ONLY_V2_LIVE_PROFILE_RELEASE_AND_INGRESS_UNQUALIFIED",
         "owner_ui": "Automatic signed installer intake and read-only readiness; no in-app URL/token/pin/ICE settings.",
-        "release_gate": "Generated VAN_DEPLOYMENT_PROFILE_FILE with consistent roles, public HTTPS ingress, pinned valid CA/fingerprint and nonempty receipt ID; production signing and trusted connectivity signer still required.",
-        "authority_limit": "A profile receipt ID is a declaration, not admission; governed live ingress must independently bind exact VAN-only scope. Existing DDS HTTP/SSE proxy is not that ingress.",
+        "release_gate": "Generated version2 VAN_DEPLOYMENT_PROFILE_FILE must bind CORE_ONLY_V2 roles, actual core public IPv4 HTTPS/WSS route and dedicated port, valid pinned CA/fingerprint, genuine ingress capability receipt, existing production signer and connectivity anchor. Source declarations are not live release or deployment qualification.",
+        "authority_limit": "Core direct ingress capability/profile compilation does not admit deployment. Current source SHA, protected state, scoped authority, observed route/firewalls, provider bindings and release/provisioning must independently qualify. Oracle Admin and inter-host Hermes forwarding are excluded.",
         "source_citations": [
           {
             "file": "android/app/build.gradle.kts",
-            "line": 47,
+            "line": 49,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "0aec1faca60562de064975780c49a12d8de0987176fd6728b728842ace876cb1"
+            "sha256": "940746ba14195b4ce3afa645570771b59e0cd680dfeacb89301f4c18bdda3899"
           },
           {
             "file": "android/buildSrc/src/main/java/com/dial/van/buildconfig/VanProductionTarget.java",
             "line": 17,
             "ref": "WORKSPACE_PATCH",
             "sha256": "b8ef5483dac9de5647bb01abb98029d5707b2d2662a7ff7341a7fbe0e5c9d6c5"
+          },
+          {
+            "file": "tools/runtime/prepare_owner_core_deployment.py",
+            "line": 71,
+            "ref": "WORKSPACE_PATCH",
+            "sha256": "a70e2d779811cb67b53639cd076419829a653f4bb77a5ce1f5acec6e9e3912b4",
+            "review_scope": "CORE_ONLY_V2 validates schema2 and colocated backend/Hermes/direct ingress on core."
           }
-        ]
+        ],
+        "schema_version": 2,
+        "topology": "CORE_ONLY_V2",
+        "ingress_host": "van-trading-core",
+        "artemis_host": "dial-control",
+        "oracle_admin_runtime_dependency": false
       },
       "historical_source_state": {
         "scope": "Historical pre-final-wiring claims; not current qualification",
@@ -34410,7 +35354,106 @@
         "RELEASE_PROVISIONING",
         "PHYSICAL_ACCEPTANCE"
       ],
-      "functional_wiring_status": "SOURCE_WIRED_REQUIRES_ACCEPTANCE"
+      "functional_wiring_status": "SOURCE_WIRED_REQUIRES_ACCEPTANCE",
+      "historical_registry_metadata_pre_oct9_correction": {
+        "deployment_requirements": {
+          "backend_host": "van-trading-core",
+          "hermes_host": "dial-control",
+          "phone_ingress_host": "oracle-admin",
+          "status": "PREPARED_PROFILE_REQUIRED_LIVE_INGRESS_UNQUALIFIED",
+          "owner_ui": "Automatic signed installer intake and read-only readiness; no in-app URL/token/pin/ICE settings.",
+          "release_gate": "Generated VAN_DEPLOYMENT_PROFILE_FILE with consistent roles, public HTTPS ingress, pinned valid CA/fingerprint and nonempty receipt ID; production signing and trusted connectivity signer still required.",
+          "authority_limit": "A profile receipt ID is a declaration, not admission; governed live ingress must independently bind exact VAN-only scope. Existing DDS HTTP/SSE proxy is not that ingress.",
+          "source_citations": [
+            {
+              "file": "android/app/build.gradle.kts",
+              "line": 47,
+              "ref": "WORKSPACE_PATCH",
+              "sha256": "0aec1faca60562de064975780c49a12d8de0987176fd6728b728842ace876cb1"
+            },
+            {
+              "file": "android/buildSrc/src/main/java/com/dial/van/buildconfig/VanProductionTarget.java",
+              "line": 17,
+              "ref": "WORKSPACE_PATCH",
+              "sha256": "b8ef5483dac9de5647bb01abb98029d5707b2d2662a7ff7341a7fbe0e5c9d6c5"
+            }
+          ]
+        }
+      },
+      "historical_registry_metadata_pre_oct9_r2_correction": {
+        "deployment_requirements": {
+          "backend_host": "van-trading-core",
+          "hermes_host": "van-trading-core",
+          "phone_ingress_host": "van-trading-core",
+          "status": "PREPARED_CORE_ONLY_V2_LIVE_PROFILE_RELEASE_AND_INGRESS_UNQUALIFIED",
+          "owner_ui": "Automatic signed installer intake and read-only readiness; no in-app URL/token/pin/ICE settings.",
+          "release_gate": "Generated version2 VAN_DEPLOYMENT_PROFILE_FILE must bind CORE_ONLY_V2 roles, actual core public IPv4 HTTPS/WSS route and dedicated port, valid pinned CA/fingerprint, genuine ingress capability receipt, existing production signer and connectivity anchor. Source declarations are not live release or deployment qualification.",
+          "authority_limit": "Core direct ingress capability/profile compilation does not admit deployment. Current source SHA, protected state, scoped authority, observed route/firewalls, provider bindings and release/provisioning must independently qualify. Oracle Admin and inter-host Hermes forwarding are excluded.",
+          "source_citations": [
+            {
+              "file": "android/app/build.gradle.kts",
+              "line": 49,
+              "ref": "WORKSPACE_PATCH",
+              "sha256": "940746ba14195b4ce3afa645570771b59e0cd680dfeacb89301f4c18bdda3899"
+            },
+            {
+              "file": "android/buildSrc/src/main/java/com/dial/van/buildconfig/VanProductionTarget.java",
+              "line": 17,
+              "ref": "WORKSPACE_PATCH",
+              "sha256": "b8ef5483dac9de5647bb01abb98029d5707b2d2662a7ff7341a7fbe0e5c9d6c5"
+            },
+            {
+              "file": "tools/runtime/prepare_owner_core_deployment.py",
+              "line": 71,
+              "ref": "WORKSPACE_PATCH",
+              "sha256": "a70e2d779811cb67b53639cd076419829a653f4bb77a5ce1f5acec6e9e3912b4",
+              "review_scope": "CORE_ONLY_V2 validates schema2 and colocated backend/Hermes/direct ingress on core."
+            }
+          ],
+          "schema_version": 2,
+          "topology": "CORE_ONLY_V2",
+          "ingress_host": "van-trading-core",
+          "artemis_host": "dial-control",
+          "oracle_admin_runtime_dependency": false
+        }
+      },
+      "historical_registry_metadata_pre_oct9_r3_correction": {
+        "deployment_requirements": {
+          "backend_host": "van-trading-core",
+          "hermes_host": "van-trading-core",
+          "phone_ingress_host": "van-trading-core",
+          "status": "PREPARED_CORE_ONLY_V2_LIVE_PROFILE_RELEASE_AND_INGRESS_UNQUALIFIED",
+          "owner_ui": "Automatic signed installer intake and read-only readiness; no in-app URL/token/pin/ICE settings.",
+          "release_gate": "Generated version2 VAN_DEPLOYMENT_PROFILE_FILE must bind CORE_ONLY_V2 roles, actual core public IPv4 HTTPS/WSS route and dedicated port, valid pinned CA/fingerprint, genuine ingress capability receipt, existing production signer and connectivity anchor. Source declarations are not live release or deployment qualification.",
+          "authority_limit": "Core direct ingress capability/profile compilation does not admit deployment. Current source SHA, protected state, scoped authority, observed route/firewalls, provider bindings and release/provisioning must independently qualify. Oracle Admin and inter-host Hermes forwarding are excluded.",
+          "source_citations": [
+            {
+              "file": "android/app/build.gradle.kts",
+              "line": 49,
+              "ref": "WORKSPACE_PATCH",
+              "sha256": "940746ba14195b4ce3afa645570771b59e0cd680dfeacb89301f4c18bdda3899"
+            },
+            {
+              "file": "android/buildSrc/src/main/java/com/dial/van/buildconfig/VanProductionTarget.java",
+              "line": 17,
+              "ref": "WORKSPACE_PATCH",
+              "sha256": "b8ef5483dac9de5647bb01abb98029d5707b2d2662a7ff7341a7fbe0e5c9d6c5"
+            },
+            {
+              "file": "tools/runtime/prepare_owner_core_deployment.py",
+              "line": 71,
+              "ref": "WORKSPACE_PATCH",
+              "sha256": "a70e2d779811cb67b53639cd076419829a653f4bb77a5ce1f5acec6e9e3912b4",
+              "review_scope": "CORE_ONLY_V2 validates schema2 and colocated backend/Hermes/direct ingress on core."
+            }
+          ],
+          "schema_version": 2,
+          "topology": "CORE_ONLY_V2",
+          "ingress_host": "van-trading-core",
+          "artemis_host": "dial-control",
+          "oracle_admin_runtime_dependency": false
+        }
+      }
     },
     {
       "id": "OF-DIAGNOSTICS-001",
@@ -35090,12 +36133,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -35160,6 +36203,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -36268,12 +37335,12 @@
         ],
         "source_citations": [],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -36338,6 +37405,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -37592,12 +38683,12 @@
           }
         ],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -37662,6 +38753,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -38203,12 +39318,12 @@
         "functions": [],
         "source_citations": [],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -38273,6 +39388,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -38785,12 +39924,12 @@
         "functions": [],
         "source_citations": [],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -38855,6 +39994,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -39494,12 +40657,12 @@
         ],
         "source_citations": [],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -39564,6 +40727,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -40773,7 +41960,7 @@
           "registration": "DEFAULT",
           "device_proof_required_when_bound": true,
           "frontend_access": "DIRECT_OWNER_ROUTE",
-          "source_ref": "backend/van_gateway/dial_dev/api.py:340",
+          "source_ref": "backend/van_gateway/dial_dev/api.py:357",
           "client_function": "dialDev.submitAction",
           "client_symbol": "submitAction",
           "client_namespace": "VanGatewayClient.DialDevClient",
@@ -43124,12 +44311,12 @@
         "functions": [],
         "source_citations": [],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -43194,6 +44381,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -43209,7 +44420,42 @@
         "EXTERNAL_PROVIDER",
         "PHYSICAL_ACCEPTANCE"
       ],
-      "functional_wiring_status": "SOURCE_WIRED_REQUIRES_ACCEPTANCE"
+      "functional_wiring_status": "SOURCE_WIRED_REQUIRES_ACCEPTANCE",
+      "current_runtime_error_contract": {
+        "source_citations": [
+          {
+            "file": "backend/van_gateway/dial_dev/client.py",
+            "line": 63,
+            "ref": "WORKSPACE_PATCH",
+            "sha256": "9954555bc63c5623e3820ab914b4bca805c58e7fb26138b8dec23ef3177fe39f",
+            "review_scope": "Actual post-header line read failures are typed and private transport closes once on EOF/error/cancellation."
+          },
+          {
+            "file": "backend/van_gateway/dial_dev/api.py",
+            "line": 305,
+            "ref": "WORKSPACE_PATCH",
+            "sha256": "ac2f578653c424381d8b5b5a54677d0bb9473468c89d34a01cb62d8fb6dd3433",
+            "review_scope": "Owner SSE emits a terminal safe dial_dev_unavailable error after headers and closes the stream."
+          },
+          {
+            "file": "backend/van_gateway/dial_dev/attention.py",
+            "line": 186,
+            "ref": "WORKSPACE_PATCH",
+            "sha256": "d5a583e171d1eaa3c2f934aeadcbd2a4841f570b2035f6138b5e3ac8c013874c",
+            "review_scope": "Independent attention consumer marks transport down and closes before bounded recovery; cancellation propagates."
+          },
+          {
+            "file": "android/app/src/main/java/com/dial/van/dialdev/DialDevFabricModels.kt",
+            "line": 518,
+            "ref": "WORKSPACE_PATCH",
+            "sha256": "1af806b9c95c264028c50350009f4b99a82c307bff3174f2115dc2daa013add7",
+            "review_scope": "Android parses the safe declared terminal-unavailable payload as a typed exception, enabling existing read-only stream retry instead of false successful completion."
+          }
+        ],
+        "description": "Owner development SSE converts actual timeout/TLS/HTTP failures after response headers into a terminal safe dial_dev_unavailable frame and marks the development plane unavailable. Private upstream response/client close exactly once on EOF, failure or disconnect; attention intake independently marks down/retries boundedly. Android treats the declared terminal failure as a safe typed exception, so existing read-only projection retry reconnects rather than interpreting an empty successful change. Raw upstream exceptions, token values and owner action authority never reach Android. A lost stream is not a successful action or a reason to repeat an external effect.",
+        "device_execution_status": "UNVERIFIED",
+        "live_upstream_qualification": "UNVERIFIED"
+      }
     },
     {
       "id": "OF-DEV-002",
@@ -43411,7 +44657,7 @@
           "registration": "DEFAULT",
           "device_proof_required_when_bound": true,
           "frontend_access": "DIRECT_OWNER_ROUTE",
-          "source_ref": "backend/van_gateway/dial_dev/api.py:340",
+          "source_ref": "backend/van_gateway/dial_dev/api.py:357",
           "client_function": "dialDev.submitAction",
           "client_symbol": "submitAction",
           "client_namespace": "VanGatewayClient.DialDevClient",
@@ -43982,12 +45228,12 @@
         "functions": [],
         "source_citations": [],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -44052,6 +45298,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -44280,12 +45550,12 @@
         "functions": [],
         "source_citations": [],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -44350,6 +45620,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -44809,12 +46103,12 @@
         "functions": [],
         "source_citations": [],
         "verification": {
-          "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
-          "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+          "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+          "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
           "device_live": "UNVERIFIED",
           "deployment_live": "UNVERIFIED",
-          "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
         },
         "historical_validation": {
           "pre_wiring_closure": {
@@ -44879,6 +46173,30 @@
             "overall_validation_receipt": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
             "overall_validation_receipt_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
             "count_scope": "Full local suite executions, not per-function/device/provider acceptance. Focused checks overlap and are excluded from the aggregate."
+          },
+          "pre_oct9_registry_correction": {
+            "android_compile": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_FINAL_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_FINAL_WHOLE_WORKSPACE_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source review; prior test results remain historical. No production/provider/handset qualification."
+          },
+          "pre_oct9_r2_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
+          },
+          "pre_oct9_r3_registry_correction": {
+            "android_compile": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "jvm_behavior_tests": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "backend_integration": "PENDING_CURRENT_SOURCE_BOUND_VALIDATION",
+            "device_live": "UNVERIFIED",
+            "deployment_live": "UNVERIFIED",
+            "scope": "Current source correction; prior suite receipt claims remain historical for changed inputs. Registry contracts and final source-bound suite qualification are separate; no production/provider/handset qualification."
           }
         }
       },
@@ -44899,7 +46217,7 @@
   ],
   "screen_registry": "owner_screens.json",
   "endpoint_registry": "owner_endpoints.json",
-  "current_audit_note": "Current production-source wiring review is bound to the frozen manifest and current local Android receipt. Original baseline and pre-final-wiring registries remain historical evidence. Supported implemented functions are distinct from missing source contracts, deferred visual/Rive redesign, deployment/provider qualification and physical acceptance. Physical Android cases executed: 0. The locally built debug APK is not an owner release. Current full local validation:6,574 runner passes / 10 skipped / 0 failures; see the source-bound closure validation receipt.",
+  "current_audit_note": "Current Oct9 source review uses a new immutable manifest. Prior Oct8 validation is historical for changed inputs; final whole-workspace qualification is separate. Native Artemis plan coverage is 826 prepared candidate cases, physical execution 0, owner release/deployment unqualified.",
   "historical_validation": {
     "scope": "HISTORICAL_PRE_OWNER_CORE_AND_BROWSER_COMPLETION_SOURCE; not current source aggregate validation",
     "app_unit_tests": {
@@ -44924,11 +46242,11 @@
     "physical_cases_executed": 0,
     "owner_release": false,
     "deployment_accepted": false,
-    "source_review_manifest": "docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-08.json",
+    "source_review_manifest": "docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r4.json",
     "android_receipt": null,
     "android_receipt_sha256": null,
-    "scope": "Reviewed owner contracts and current source declarations; final build/integration and live acceptance remain separate.",
-    "source_review_manifest_sha256": "325fcbc7f8c92327e1c7ab63656f1f3b8c2e448caf26502aa362351cc1955bf0"
+    "scope": "Current scoped CORE_ONLY_V2 registry and runtime source review. No current Android/backend full-suite, production/provider or handset qualification is inferred from historical receipts.",
+    "source_review_manifest_sha256": "d2a21730c96323879d382fa020c607312324475810824169c88765d4c7a92364"
   },
   "functional_wiring_status_semantics": {
     "SOURCE_WIRED_REQUIRES_ACCEPTANCE": "Supported source producer/consumer path is reviewed; stated provider, deployment, visual or physical acceptance remains required.",
@@ -44949,6 +46267,55 @@
     "SOURCE_WIRED_REQUIRES_ACCEPTANCE": 39,
     "EXTERNAL_CONTRACT_OR_ASSET_REQUIRED": 3
   },
-  "current_registry_scope": "Current supported source functions, explicit authority/evidence/refusal/recovery contracts and pending external qualification. No universal live-readiness claim.",
-  "historical_audit_date": "2026-10-07"
+  "current_registry_scope": "Current CORE_ONLY_V2 source declarations and owner feature/surface/endpoint contracts, including refusal and recovery; local checks, deployment/provider/release and physical acceptance remain separate.",
+  "historical_audit_date": "2026-10-07",
+  "historical_source_qualifications": {
+    "pre_oct9_current_registry": {
+      "status": "SOURCE_REVIEWED_FINAL_VALIDATION_PENDING",
+      "physical_cases_executed": 0,
+      "owner_release": false,
+      "deployment_accepted": false,
+      "source_review_manifest": "docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-08.json",
+      "android_receipt": null,
+      "android_receipt_sha256": null,
+      "scope": "Reviewed owner contracts and current source declarations; final build/integration and live acceptance remain separate.",
+      "source_review_manifest_sha256": "325fcbc7f8c92327e1c7ab63656f1f3b8c2e448caf26502aa362351cc1955bf0"
+    },
+    "pre_oct9_r2_current_registry": {
+      "status": "SOURCE_REVIEWED_FINAL_VALIDATION_PENDING",
+      "physical_cases_executed": 0,
+      "owner_release": false,
+      "deployment_accepted": false,
+      "source_review_manifest": "docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09.json",
+      "android_receipt": null,
+      "android_receipt_sha256": null,
+      "scope": "Current scoped CORE_ONLY_V2 registry and runtime source review. No current Android/backend full-suite, production/provider or handset qualification is inferred from historical receipts.",
+      "source_review_manifest_sha256": "8d5de0e2de6fc285266cb3c38cb56f6e74d6d347763a0c8b9b5fce47b4474192"
+    },
+    "pre_oct9_r3_current_registry": {
+      "status": "SOURCE_REVIEWED_FINAL_VALIDATION_PENDING",
+      "physical_cases_executed": 0,
+      "owner_release": false,
+      "deployment_accepted": false,
+      "source_review_manifest": "docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r2.json",
+      "android_receipt": null,
+      "android_receipt_sha256": null,
+      "scope": "Current scoped CORE_ONLY_V2 registry and runtime source review. No current Android/backend full-suite, production/provider or handset qualification is inferred from historical receipts.",
+      "source_review_manifest_sha256": "aae6d956b544a1e3d1b46a218e90e11155ea7c5fba5b92ccd65925d27c99bb06"
+    },
+    "pre_oct9_r4_final_model_binding": {
+      "status": "SOURCE_REVIEWED_FINAL_VALIDATION_PENDING",
+      "physical_cases_executed": 0,
+      "owner_release": false,
+      "deployment_accepted": false,
+      "source_review_manifest": "docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r3.json",
+      "android_receipt": null,
+      "android_receipt_sha256": null,
+      "scope": "Current scoped CORE_ONLY_V2 registry and runtime source review. No current Android/backend full-suite, production/provider or handset qualification is inferred from historical receipts.",
+      "source_review_manifest_sha256": "88aae512e9c28f98132bcd1d5b14f3d9d7ec11669952a35c94ca3aa524999a27"
+    }
+  },
+  "historical_current_audit_note_pre_oct9": "Current production-source wiring review is bound to the frozen manifest and current local Android receipt. Original baseline and pre-final-wiring registries remain historical evidence. Supported implemented functions are distinct from missing source contracts, deferred visual/Rive redesign, deployment/provider qualification and physical acceptance. Physical Android cases executed: 0. The locally built debug APK is not an owner release. Current full local validation:6,574 runner passes / 10 skipped / 0 failures; see the source-bound closure validation receipt.",
+  "historical_current_audit_note_pre_oct9_r2": "Current Oct9 source review uses a new immutable manifest. Prior Oct8 validation is historical for changed inputs; final whole-workspace qualification is separate. Native Artemis plan coverage is 826 prepared candidate cases, physical execution0, owner release/deployment unqualified.",
+  "historical_current_audit_note_pre_oct9_r3": "Current Oct9 source review uses a new immutable manifest. Prior Oct8 validation is historical for changed inputs; final whole-workspace qualification is separate. Native Artemis plan coverage is 826 prepared candidate cases, physical execution0, owner release/deployment unqualified."
 }

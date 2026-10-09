@@ -16,6 +16,7 @@
     "public": {
       "profile_alias": "public_research",
       "cdp_port": 9222,
+      "egress_port": 8899,
       "control_bind": null,
       "control_port": 9443,
       "stream_bind": null,
@@ -44,6 +45,7 @@
     "owner": {
       "profile_alias": "authenticated_owner",
       "cdp_port": 9223,
+      "egress_port": 8900,
       "control_bind": null,
       "control_port": 9444,
       "stream_bind": null,

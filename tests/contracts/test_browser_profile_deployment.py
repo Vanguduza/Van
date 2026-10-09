@@ -145,7 +145,7 @@ def test_installer_dry_run_is_side_effect_free_and_does_not_read_credentials(pro
 
 def test_cdp_firewall_allows_only_matching_profile_uids_without_flushing_foreign_tables(profile, monkeypatch):
     declaration = json.loads(profiles.render(profile)["declaration.json"])
-    identities = {user: 1000 + n for n, user in enumerate(user for entry in declaration["instances"] for user in entry["users"])}
+    identities = {user: 1000 + n for n, user in enumerate(user for entry in declaration["instances"] for user in entry["users"] + [entry["egress_user"]])}
     monkeypatch.setattr(installer.pwd, "getpwnam", lambda user: types.SimpleNamespace(pw_uid=identities[user]))
     rules = installer.firewall(declaration).decode()
     for entry in declaration["instances"]:

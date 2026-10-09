@@ -12,7 +12,6 @@
 set -uo pipefail
 
 INSTANCE="${VAN_BROWSER_INSTANCE:-}"
-EGRESS_PORT="${VAN_BROWSER_EGRESS_PORT:-8899}"
 PROFILE_MOUNT="${VAN_BROWSER_PROFILE_MOUNT:-/var/lib/van-browser-profiles}"
 
 results=()
@@ -33,13 +32,14 @@ case "$INSTANCE" in
     ;;
 esac
 CDP_PORT="${VAN_BROWSER_CDP_PORT:-$((9222 + offset))}"
+EGRESS_PORT="${VAN_BROWSER_EGRESS_PORT:-$((8899 + offset))}"
 AGENT_PORT="${VAN_BROWSER_CONTROL_PORT:-$((9443 + offset))}"
 STREAM_PORT="${VAN_BROWSER_STREAM_PORT:-$((8443 + offset))}"
 PKI_DIR="${VAN_BROWSER_PKI_DIR:-/etc/van-browser-stream/profiles/$INSTANCE/control-pki}"
 CHROMIUM_UNIT="van-browser-chromium@$INSTANCE.service"
 CHROMIUM_USER="van-browser-$INSTANCE"
 record "profile_instance_selected" "GREEN" "qualifying the $INSTANCE stack and its separate listener/Unix identities"
-for role in chromium control-agent stream transfer-stage; do
+for role in chromium control-agent stream transfer-stage egress-proxy; do
   unit="van-browser-$role@$INSTANCE.service"
   if systemctl is-active --quiet "$unit" 2>/dev/null; then
     record "instance_${role}_active" "GREEN" "$unit is active"
@@ -185,15 +185,15 @@ if ! printf '%s\n' "${results[@]}" | grep -q stream_port_public; then
 fi
 
 # ---------------------------------------------------------------- 4. profile volume
-if mountpoint -q "$PROFILE_MOUNT" 2>/dev/null; then
-  source_dev=$(findmnt -no SOURCE "$PROFILE_MOUNT" 2>/dev/null)
+if [ -d "$PROFILE_MOUNT" ] && [ ! -L "$PROFILE_MOUNT" ]; then
+  source_dev=$(findmnt -n -o SOURCE --target "$PROFILE_MOUNT" 2>/dev/null)
   if printf '%s' "$source_dev" | grep -q "^/dev/mapper/"; then
     record "profile_volume_encrypted" "GREEN" "mounted from $source_dev"
   else
     record "profile_volume_encrypted" "RED" "mounted from $source_dev, which is not a dm-crypt device"
   fi
 else
-  record "profile_volume_encrypted" "RED" "$PROFILE_MOUNT is not a mount point"
+  record "profile_volume_encrypted" "RED" "$PROFILE_MOUNT is not an observed literal profile directory on encrypted storage"
 fi
 
 # ---------------------------------------------------------------- 5. Chromium privileges
@@ -230,25 +230,20 @@ else
   record "no_docker_socket_reach" "UNKNOWN" "cannot observe Docker socket access as the selected browser Unix identity"
 fi
 
-chromium_pid=$(pgrep -o -u van-browser chromium 2>/dev/null || pgrep -o -u van-browser chrome 2>/dev/null || true)
-if [ -z "$chromium_pid" ] || [ ! -r "/proc/$chromium_pid/cmdline" ]; then
-  record "chromium_uses_exact_ip_proxy" "UNKNOWN" "cannot read a live van-browser Chromium command line"
+CHROMIUM_PROBE="$(dirname "${BASH_SOURCE[0]}")/qualify_chromium.py"
+if [ -z "$chromium_user" ] || [ "$chromium_user" != "$CHROMIUM_USER" ]; then
+  record "chromium_uses_exact_ip_proxy" "UNKNOWN" "no verified selected Chromium Unix identity"
 else
-  chromium_cmd=$(tr '\0' ' ' < "/proc/$chromium_pid/cmdline")
-  missing_flags=""
-  for flag in \
-    "--proxy-server=http://127.0.0.1:$EGRESS_PORT" \
-    "--proxy-bypass-list=<-loopback>" \
-    "--disable-quic" \
-    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp"; do
-    case "$chromium_cmd" in *"$flag"*) ;; *) missing_flags="$missing_flags $flag" ;; esac
-  done
-  if [ -n "$missing_flags" ]; then
-    record "chromium_uses_exact_ip_proxy" "RED" "Chromium is missing:$missing_flags"
-  else
-    record "chromium_uses_exact_ip_proxy" "GREEN" "HTTP(S), QUIC and non-proxied WebRTC flags are fenced"
-  fi
+  observed=$(python3 "$CHROMIUM_PROBE" --check flags --pid "$chromium_pid" --instance "$INSTANCE" --egress-port "$EGRESS_PORT" || true)
+  status=$(printf '%s' "$observed" | python3 -c 'import json,sys; print(json.load(sys.stdin)["status"])')
+  detail=$(printf '%s' "$observed" | python3 -c 'import json,sys; print(json.load(sys.stdin)["detail"])')
+  record "chromium_uses_exact_ip_proxy" "${status:-UNKNOWN}" "${detail:-selected Chromium readback unavailable}"
 fi
+
+observed=$(python3 "$CHROMIUM_PROBE" --check kernel --instance "$INSTANCE" --egress-port "$EGRESS_PORT" || true)
+status=$(printf '%s' "$observed" | python3 -c 'import json,sys; print(json.load(sys.stdin)["status"])')
+detail=$(printf '%s' "$observed" | python3 -c 'import json,sys; print(json.load(sys.stdin)["detail"])')
+record "chromium_uid_network_fence" "${status:-UNKNOWN}" "${detail:-kernel readback unavailable}"
 
 printf '{"host":"%s","checked_at":"%s","checks":[%s]}\n' \
   "$(hostname)" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(IFS=,; echo "${results[*]}")"

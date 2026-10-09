@@ -36,6 +36,7 @@ from van_gateway.automation.registry import AutomationRegistry
 from van_gateway.automation.runtime_bindings import RuntimeBindingStore
 from van_gateway.automation.source_credentials import SourceCredentialStore
 from van_gateway.automation.dsl import DslError, bounded_json, evaluate, pure_result
+from van_gateway.automation.verifier import strictly_equal
 from van_gateway.command.authority import CommandAuthorityError, CommandAuthorityService
 from van_gateway.events.bus import EventBus
 from van_gateway.models import AttentionSeverity, ReminderCreate
@@ -809,7 +810,7 @@ class WorkerWorkflowObserver:
                 skipped_unchanged = step.primitive is Primitive.VAN_EVENT and result.get("emitted") is False
                 if field and not skipped_unchanged and (field not in result or result[field] is None):
                     return {"exists": False, "reason": "DECLARED_FIELD_MISSING", "step_id": step.step_id}
-                if field and "expected" in step.postcondition and result[field] != step.postcondition["expected"]:
+                if field and "expected" in step.postcondition and not strictly_equal(step.postcondition["expected"], result[field]):
                     return {"exists": False, "reason": "DECLARED_FIELD_MISMATCH", "step_id": step.step_id}
             observed.append({"step_id": step.step_id, "status": "COMPLETED", "result_digest": row["result_digest"]})
             evidence_pointer = result.get("evidence_pointer", evidence_pointer)
@@ -825,7 +826,7 @@ class WorkerWorkflowObserver:
         field = ir.verifier.get("field")
         if field and field not in result:
             raise WorkerDenied("WORKER_OWNER_POSTCONDITION_FIELD_UNOBSERVABLE")
-        if field and "expected" in ir.verifier and result[field] != ir.verifier["expected"]:
+        if field and "expected" in ir.verifier and not strictly_equal(ir.verifier["expected"], result[field]):
             return {"exists": False, "reason": "OWNER_POSTCONDITION_MISMATCH"}
         # A pointer to immutable callback receipts is evidence of the independently
         # read local effect. It does not claim a provider-issued receipt.

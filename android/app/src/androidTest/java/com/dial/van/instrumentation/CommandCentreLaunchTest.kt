@@ -22,6 +22,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.dial.van.command.CommandCentreActivity
 import org.junit.Rule
 import org.junit.Test
+import org.junit.Assert.assertSame
 import org.junit.runner.RunWith
 import java.io.File
 
@@ -90,6 +91,34 @@ class CommandCentreLaunchTest {
             compose.waitForIdle()
             navItem("Attention").assertIsSelected()
             capture("deeplink-attention")
+        }
+    }
+
+    @Test
+    fun residentSingleTopActivityReceivesDeepLinksWithoutRelaunching() {
+        ActivityScenario.launch(CommandCentreActivity::class.java).use { scenario ->
+            compose.waitForIdle()
+            lateinit var resident: CommandCentreActivity
+            scenario.onActivity { activity ->
+                resident = activity
+                activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("van://attention"))
+                    .setClass(activity, CommandCentreActivity::class.java)
+                    .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP))
+            }
+            compose.waitForIdle()
+            navItem("Attention").assertIsSelected()
+            scenario.onActivity { assertSame(resident, it) }
+            // A subsequent request must still steer the same resident Activity,
+            // including when the first destination has already been consumed.
+            scenario.onActivity { activity ->
+                activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("van://work"))
+                    .setClass(activity, CommandCentreActivity::class.java)
+                    .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP))
+            }
+            compose.waitForIdle()
+            navItem("Work").assertIsSelected()
+            scenario.onActivity { assertSame(resident, it) }
+            capture("resident-deeplink-work")
         }
     }
 
