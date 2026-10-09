@@ -1,6 +1,7 @@
 # VAN Glassmorphic Floating Assistant Design System
 **Document:** VAN Glassmorphic Floating Assistant Specification  
 **Status:** Canonical design overlay / implementation-ready  
+**Aura supersession:** the glass, composition, interaction and accessibility rules remain canonical. The aura description (§2, the aura bullets of §6, §7, the aura items of §10 and §16, and the aura wording of §17–§18) is superseded by owner decisions CF-D-06, CF-D-06-REV1 and CF-D-08 (`docs/character_forge/MANIFEST.yaml`): VAN's aura is a flame envelope wrapping his silhouette with embers, and electrical filaments, arcs, specks and the orb link line are removed. Aura authority: `visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml`.  
 **Product:** VAN — DIAL Hermes AI Assistant  
 **Purpose:** Define the visual and technical treatment for VAN as a floating Android assistant using glassmorphism while preserving VAN's locked character identity, readability, performance, accessibility, and state clarity.
 
@@ -21,6 +22,8 @@ This prevents VAN from becoming visually washed out, preserves character recogni
 ---
 
 ## 2. Blue Electrical Aura — Canonical Requirement
+
+> **Superseded by CF-D-06 / CF-D-06-REV1 / CF-D-08** — see the aura supersession note at the top of this document.
 
 Yes. VAN should retain and strengthen the **blue electrical/cyan energy aura around him**.
 
@@ -204,6 +207,8 @@ Default floating mode should show:
 ---
 
 ## 7. Aura System Specification
+
+> **Superseded by CF-D-06 / CF-D-06-REV1 / CF-D-08** — see the aura supersession note at the top of this document.
 
 The blue electrical aura should be implemented as a layered effect rather than one heavy glow.
 
@@ -447,7 +452,7 @@ The design is accepted only if:
 
 The production look should be:
 
-> **A crisp, solid VAN floating in front of a dark translucent DIAL glass shell, surrounded by a restrained blue electrical aura, with his orb companion and state-driven cyan energy effects.**
+> **A crisp, solid VAN floating in front of a dark translucent DIAL glass shell, wrapped by a living flame aura (CF-D-06/CF-D-08), with his orb companion and state-driven energy colour.**
 
 The aura should make VAN feel alive, intelligent, powerful, and always present, while the glass surface keeps the assistant modern, lightweight, and integrated with whatever is underneath on the user's phone.
 
@@ -459,7 +464,7 @@ The aura should make VAN feel alive, intelligent, powerful, and always present, 
 
 - Keep VAN's existing 3D character identity.
 - Add premium DIAL glassmorphism to floating and expanded interaction surfaces.
-- Preserve the blue electrical aura as a canonical character effect.
+- Preserve the flame aura (CF-D-06/CF-D-08) as the canonical character effect; no electrical filaments, arcs or orb link line (CF-D-06-REV1).
 - Increase aura intensity contextually rather than constantly.
 - Keep Hermes/VAN operational information readable and deterministic.
 - Provide low-power and reduced-motion fallbacks.
