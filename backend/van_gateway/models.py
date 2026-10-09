@@ -102,6 +102,7 @@ class DegradedCode(str, Enum):
     DIAL_ARTEMIS_DEGRADED = "DIAL_ARTEMIS_DEGRADED"
     DIAL_ZUUL_DEGRADED = "DIAL_ZUUL_DEGRADED"
     DIAL_HERMES_DEGRADED = "DIAL_HERMES_DEGRADED"
+    JEV_UNAVAILABLE = "JEV_UNAVAILABLE"
 
 
 class ContentTrust(str, Enum):
@@ -165,6 +166,8 @@ class CommandResult(BaseModel):
     approval_challenge: str | None = None
     approval_expires_at_unix: int | None = None
     resolved_action_id: str | None = None
+    resolved_parameters: dict[str, Any] | None = None
+    approval_preview: dict[str, Any] | None = None
     effective_action_class: ActionClass | None = None
     no_stale_replay: bool | None = None
     max_age_seconds: int | None = None

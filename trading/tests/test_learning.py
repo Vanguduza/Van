@@ -19,6 +19,7 @@ from vati.learning import (
     cluster_failures, curriculum_gate, daily_report, episode_from_ledger, evaluate_missed_opportunity, monthly_report, propose_candidate, run_counterfactuals, weekly_report,
 )
 from vati.learning.boundary import FORBIDDEN_TARGETS, LiveTarget
+from test_learning_evidence import Src, observe_fact, observe_review
 from vati.learning.hooks import LearningHooks
 from vati.learning.replay import restore_learning_runtime
 from vati.market_data import FX_CALENDAR
@@ -31,43 +32,56 @@ EV = ("a" * 64,)
 
 
 # ------------------------------------------------------------------ boundary
+def _live_health_evidence(key, n, env=Environment.LIVE):
+    """n distinct TRADE_REVIEW ledger events for `key`, resolved from the ledger (C5)."""
+    src = Src(env)
+    return src.resolver, tuple(src.review(key, i) for i in range(n))
+
+
 def test_boundary_accepts_only_reduce_only_adjustments_on_three_targets():
-    ok = LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "FX-TREND-PULLBACK-01", D("0.8"), "DEGRADED", EV, D("40"))
-    assert LearningBoundary.check(ok) is ok
+    # C5: a bare 64-hex string with a caller-asserted count is no longer accepted;
+    # the acceptance case now cites resolvable evidence whose recomputed weight is 40.
+    store, EV40 = _live_health_evidence("FX-TREND-PULLBACK-01", 40)
+    ok = LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "FX-TREND-PULLBACK-01", D("0.8"), "DEGRADED", EV40, D("40"))
+    assert LearningBoundary.check(ok, store) is ok
+    xs, XEV = _live_health_evidence("x", 40)
     with pytest.raises(LearningBoundaryError):
-        LearningBoundary.check(LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "x", D("1.2"), None, EV, D("40")))   # widening
+        LearningBoundary.check(LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "x", D("1.2"), None, XEV, D("40")), xs)   # widening
+    bs, BEV = _live_health_evidence("BULL", 40)
     with pytest.raises(LearningBoundaryError):
-        LearningBoundary.check(LiveAdjustment(LiveTarget.REGIME_PROBABILITY, "BULL", D("0.5"), "SHADOW", EV, D("40")))   # only health demotes
+        LearningBoundary.check(LiveAdjustment(LiveTarget.REGIME_PROBABILITY, "BULL", D("0.5"), "SHADOW", BEV, D("40")), bs)   # only health demotes
     with pytest.raises(LearningBoundaryError):
-        LearningBoundary.check(LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "x", D("0.5"), "LIMITED_LIVE", EV, D("40")))   # promotion is never an output
-    with pytest.raises(LearningBoundaryError):
-        LearningBoundary.check(LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "x", D("0.5"), None, EV, D("5")))   # too few weighted samples
-    with pytest.raises(LearningBoundaryError):
-        LearningBoundary.check(LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "x", D("0.5"), None, (), D("40")))   # no evidence
+        LearningBoundary.check(LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "x", D("0.5"), "LIMITED_LIVE", XEV, D("40")), xs)   # promotion is never an output
+    fs, FEV = _live_health_evidence("x", 5)
+    with pytest.raises(LearningBoundaryError, match="insufficient"):
+        LearningBoundary.check(LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "x", D("0.5"), None, FEV, D("5")), fs)   # too few weighted samples
+    with pytest.raises(LearningBoundaryError, match="must cite evidence"):
+        LearningBoundary.check(LiveAdjustment(LiveTarget.CAPSULE_HEALTH, "x", D("0.5"), None, (), D("40")), xs)   # no evidence
     for tgt in sorted(FORBIDDEN_TARGETS):
         with pytest.raises(LearningBoundaryError):
             LearningBoundary.attempt(tgt)
         with pytest.raises(LearningBoundaryError):
-            LearningBoundary.check(LiveAdjustment(tgt, "x", D("0.5"), None, EV, D("40")))   # type: ignore[arg-type]
+            LearningBoundary.check(LiveAdjustment(tgt, "x", D("0.5"), None, XEV, D("40")), xs)   # type: ignore[arg-type]
 
 
 # -------------------------------------------------------------------- health
-def obs(sid, r, env=Environment.LIVE, process_ok=True, cost=D("1"), fit=True, i=0):
-    return HealthObservation(sid, env, D(str(r)), process_ok, cost, fit, f"ev-{sid}-{i}")
+def obs(t, sid, r, env=Environment.LIVE, process_ok=True, cost=D("1"), fit=True, i=0):
+    """Observe one health fact standing on a distinct real TRADE_REVIEW ledger event."""
+    return observe_review(t, sid, r, env=env, process_ok=process_ok, cost=cost, fit=fit, i=i)
 
 
 def test_health_demotes_only_after_sustained_breach_and_never_promotes():
     t = StrategyHealthTracker(certified_expectancy_r={"S": D("0.3")}, sustain=5)
     v = None
     for i in range(30):
-        v = t.observe(obs("S", 0.4, i=i))
+        v = obs(t, "S", 0.4, i=i)
     assert v.health >= D("0.9") and v.state_recommendation is None and v.weighted_samples == D("30")
     adj = t.live_adjustment("S")
     assert adj is not None and adj.multiplier <= 1 and adj.demote_to is None
     # a run of process breaches with heavy cost drift outside eligible regimes
     recs = []
     for i in range(30, 60):
-        recs.append(t.observe(obs("S", -1.0, process_ok=False, cost=D("2.5"), fit=False, i=i)).state_recommendation)
+        recs.append(obs(t, "S", -1.0, process_ok=False, cost=D("2.5"), fit=False, i=i).state_recommendation)
     assert recs[0] is None                          # hysteresis: one bad day does not demote
     assert recs[-1] == "SHADOW"                     # sustained → demotion
     adj = t.live_adjustment("S")
@@ -75,14 +89,14 @@ def test_health_demotes_only_after_sustained_breach_and_never_promotes():
     # backtest-only evidence weighs less: 30 BACKTEST observations are 9 weighted samples → no live adjustment
     t2 = StrategyHealthTracker()
     for i in range(30):
-        t2.observe(obs("B", 0.5, env=Environment.BACKTEST, i=i))
+        obs(t2, "B", 0.5, env=Environment.BACKTEST, i=i)
     assert t2.verdict("B").weighted_samples == D("9.0") and t2.live_adjustment("B") is None
 
 
 def test_health_verdict_reasons_are_explanatory():
     t = StrategyHealthTracker(certified_expectancy_r={"S": D("0.5")}, sustain=1)
     for i in range(10):
-        v = t.observe(obs("S", -0.2, cost=D("1.9"), fit=False, i=i))
+        v = obs(t, "S", -0.2, cost=D("1.9"), fit=False, i=i)
     assert any("expectancy" in r for r in v.reasons) and "cost drift" in v.reasons and any("eligible regimes" in r for r in v.reasons)
 
 
@@ -90,21 +104,21 @@ def test_health_verdict_reasons_are_explanatory():
 def test_broker_learning_ignores_simulated_execution_facts_and_degrades_on_real_ones():
     bl = BrokerLearner()
     for _ in range(50):
-        p = bl.observe(broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.BACKTEST, cost_ratio=D("5"), slippage_pips=D("9"), rejected=True, in_event_window=False)
+        p = observe_fact(bl, broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.BACKTEST, cost_ratio=D("5"), slippage_pips=D("9"), rejected=True, in_event_window=False)
     assert p.state() is BrokerState.CERTIFIED and p._w() == 0 and bl.live_adjustment("mt5-a", "EURUSD", "LONDON") is None
     for _ in range(40):
-        p = bl.observe(broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=D("1.5"), slippage_pips=D("1"), rejected=False, in_event_window=False)
+        p = observe_fact(bl, broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=D("1.5"), slippage_pips=D("1"), rejected=False, in_event_window=False)
     assert p.state() is BrokerState.DEGRADED and p.liquidity_multiplier() == D("0.7")
     adj = bl.live_adjustment("mt5-a", "EURUSD", "LONDON")
     assert adj.target is LiveTarget.BROKER_PROFILE and adj.multiplier == D("0.7")
     for _ in range(10):
-        p = bl.observe(broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=D("1.5"), slippage_pips=D("1"), rejected=True, in_event_window=False)
+        p = observe_fact(bl, broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=D("1.5"), slippage_pips=D("1"), rejected=True, in_event_window=False)
     assert p.state() is BrokerState.SUSPENDED and p.liquidity_multiplier() == 0
     ev = BrokerLearner()
     for _ in range(12):
-        ev.observe(broker="b", symbol="XAUUSD", session="NY", environment=Environment.LIVE, cost_ratio=D("1.0"), slippage_pips=D("1"), rejected=False, in_event_window=False)
+        observe_fact(ev, broker="b", symbol="XAUUSD", session="NY", environment=Environment.LIVE, cost_ratio=D("1.0"), slippage_pips=D("1"), rejected=False, in_event_window=False)
     for _ in range(4):
-        q = ev.observe(broker="b", symbol="XAUUSD", session="NY", environment=Environment.LIVE, cost_ratio=D("3.0"), slippage_pips=D("2"), rejected=False, in_event_window=True)
+        q = observe_fact(ev, broker="b", symbol="XAUUSD", session="NY", environment=Environment.LIVE, cost_ratio=D("3.0"), slippage_pips=D("2"), rejected=False, in_event_window=True)
     assert q.state() is BrokerState.EVENT_LIMITED
 
 
@@ -120,7 +134,7 @@ def test_restart_replays_capsule_health_before_new_decisions(eurusd, tmp_path):
         artifact_hash = f"{i + 1:064x}"
         ledger.append(make_event(
             EventKind.TRADE_EXPERIENCE_ARTIFACT,
-            "test-learning",
+            "vati-cycle",   # the runtime producer that writes these facts (A-VATI M1 allowlist)
             {
                 "artifact_hash": artifact_hash,
                 "environment": "LIVE",
@@ -153,7 +167,7 @@ def test_restart_replays_broker_liquidity_cap_from_contextual_tca(eurusd, tmp_pa
     for i in range(40):
         ledger.append(make_event(
             EventKind.TCA_RECORD,
-            "test-learning",
+            "vati-cycle",
             {
                 "trade_intent_id": f"intent-{i}",
                 "cost_ratio": "2.5",
@@ -269,10 +283,10 @@ def test_reports_and_episodes_come_from_a_real_backtest_ledger(eurusd, tmp_path)
     end = max(ev.event_time_ms for ev in led.iter())
     health = StrategyHealthTracker(sustain=1)
     for i in range(35):
-        health.observe(obs("FX-TREND-PULLBACK-01", -1, process_ok=False, cost=D("2.5"), fit=False, i=i))
+        obs(health, "FX-TREND-PULLBACK-01", -1, process_ok=False, cost=D("2.5"), fit=False, i=i)
     brokers = BrokerLearner()
     for _ in range(40):
-        brokers.observe(broker="paper", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=D("1.5"), slippage_pips=D("1"), rejected=False, in_event_window=False)
+        observe_fact(brokers, broker="paper", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=D("1.5"), slippage_pips=D("1"), rejected=False, in_event_window=False)
     m = monthly_report(led, month_end_ms=end, health=health, brokers=brokers)
     assert m.cadence == "MONTHLY" and m.trades_closed == res.trades and m.cycles > 0 and 0 <= m.no_trade_share <= 1
     assert m.demotion_recommendations == {"FX-TREND-PULLBACK-01": "SHADOW"} and m.broker_states == {"paper:EURUSD:LONDON": "DEGRADED"}
@@ -297,6 +311,8 @@ def test_memory_bridge_refuses_secrets_and_free_text_evidence_and_expires():
         b.remember(kind="REGIME_NOTE", subject="EURUSD", summary="gold up", now_ms=1_000, evidence_hashes=("I saw it on a forum",))
     with pytest.raises(MemoryBridgeError):
         b.remember(kind="BROKER_TOKENS", subject="x", summary="y", now_ms=1_000)
+    with pytest.raises(MemoryBridgeError, match="Owner Model"):   # retired: owner preferences live only in the VAN Owner Model
+        b.remember(kind="OWNER_PREFERENCE", subject="owner", summary="smaller size on Fridays", now_ms=1_000)
     assert [x.record_hash for x in b.recall(now_ms=2_000)] == [r.record_hash]
     assert "continuity" not in b.export_prompt_context(now_ms=2_000) and r.evidence_hashes[0][:8] in b.export_prompt_context(now_ms=2_000)
     assert b.recall(now_ms=r.expires_ms) == [] and b.expire(now_ms=r.expires_ms) == 1 and b.records == {}
@@ -325,6 +341,7 @@ def test_cycle_emits_experience_artifacts_but_backtest_evidence_cannot_adjust_li
     assert all(e.environment is Environment.BACKTEST and e.review["outcome"] for e in hooks.episodes)
     assert hooks.adjustments == [] and hooks.demotions == [] and led.count(EventKind.CAPSULE_STATE) == 0   # 0.3 weight × few trades < 30 weighted samples
     assert sum((hooks.health.verdict(sid).weighted_samples for sid in hooks.health._obs), D(0)) == D("0.3") * res.trades
+    assert hooks.refusals == []   # A-VATI M3: the cycle's observed values agree with the ledger evidence
     assert res.ledger_ok and res.decision_replay_identical
     # broker execution facts from a backtest carry zero weight: no learned liquidity cap
     assert all(p._w() == 0 for p in hooks.brokers.profiles.values()) and hooks.broker_liquidity("EURUSD") == 1
@@ -340,13 +357,14 @@ def test_cycle_applies_boundary_checked_demotion_and_capsule_stops_trading(eurus
     # 35 weighted live observations of process breaches: the next close crosses the sustain gate
     for i in range(35):
         for sid in ("FX-TREND-PULLBACK-01", "FX-LONDON-BREAKOUT-01"):
-            hooks.health.observe(obs(sid, -1.0, process_ok=False, cost=D("2.5"), fit=False, i=i))
+            obs(hooks.health, sid, -1.0, process_ok=False, cost=D("2.5"), fit=False, i=i)
     engine = fx_engine(cfg)
     bt = BacktestEngine(cfg=cfg, engine=engine, cost_fn=lambda st: D("0.0003"), calendar=FX_CALENDAR, events=EventMatrix(), ledger_path=str(tmp_path / "bt.sqlite"), learning=hooks)
     res = bt.run(synthetic_bars())
     led = Ledger(tmp_path / "bt.sqlite")
     # every capsule that closes a trade is demoted on that first close; a demoted capsule never trades again
     assert 1 <= res.trades <= 2 and len(hooks.demotions) == res.trades == led.count(EventKind.CAPSULE_STATE), res.summary()
+    assert hooks.refusals == []
     assert len({sid for sid, _ in hooks.demotions}) == res.trades and all(to == "DEGRADED" for _, to in hooks.demotions)
     evs = list(led.iter(EventKind.CAPSULE_STATE))
     for ev in evs:

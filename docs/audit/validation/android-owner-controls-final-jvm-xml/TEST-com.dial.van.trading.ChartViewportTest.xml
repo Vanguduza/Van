@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.trading.ChartViewportTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:33" hostname="052fefa249ff" time="0.01">
+  <properties/>
+  <testcase name="a nonsense density or scale still produces readable text()" classname="com.dial.van.trading.ChartViewportTest" time="0.001"/>
+  <testcase name="zooming keeps now on screen()" classname="com.dial.van.trading.ChartViewportTest" time="0.0"/>
+  <testcase name="a drag moves the chart with the finger at any zoom()" classname="com.dial.van.trading.ChartViewportTest" time="0.001"/>
+  <testcase name="the crosshair reads the price at the pointer, the right way up()" classname="com.dial.van.trading.ChartViewportTest" time="0.0"/>
+  <testcase name="zoom is bounded and reversible about the latest bar()" classname="com.dial.van.trading.ChartViewportTest" time="0.0"/>
+  <testcase name="a short series is shown whole rather than padded()" classname="com.dial.van.trading.ChartViewportTest" time="0.001"/>
+  <testcase name="a pan with no plot to pan over is a no-op()" classname="com.dial.van.trading.ChartViewportTest" time="0.0"/>
+  <testcase name="dragging the other way walks forward in time and stops at the latest bar()" classname="com.dial.van.trading.ChartViewportTest" time="0.0"/>
+  <testcase name="the window cannot be dragged off either end()" classname="com.dial.van.trading.ChartViewportTest" time="0.0"/>
+  <testcase name="the crosshair snaps to a bar the series actually has()" classname="com.dial.van.trading.ChartViewportTest" time="0.003"/>
+  <testcase name="the scale is banded so the labels do not eat the candles()" classname="com.dial.van.trading.ChartViewportTest" time="0.001"/>
+  <testcase name="a nonsense zoom factor changes nothing()" classname="com.dial.van.trading.ChartViewportTest" time="0.0"/>
+  <testcase name="chart text follows the owner's font scale()" classname="com.dial.van.trading.ChartViewportTest" time="0.001"/>
+  <testcase name="the default window shows the most recent bars()" classname="com.dial.van.trading.ChartViewportTest" time="0.0"/>
+  <testcase name="a pointer outside the plot has nothing under it()" classname="com.dial.van.trading.ChartViewportTest" time="0.001"/>
+  <testcase name="an empty series produces an empty window instead of a crash()" classname="com.dial.van.trading.ChartViewportTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

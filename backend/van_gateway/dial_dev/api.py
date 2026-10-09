@@ -322,17 +322,34 @@ def build_dial_dev_router(
             return _mark_down(DialDevUnavailable("upstream_error"))
         dial_degraded.mark_unavailable(degraded, False)
 
+        async def close_stream():
+            try:
+                await stream.close()
+            except DialDevUnavailable as exc:
+                _mark_down(exc)
+
         async def frames():
-            async for line in stream.lines():
-                if stream.discloses_credential(line):
-                    continue
-                yield line + "\n"
+            try:
+                async for line in stream.lines():
+                    if stream.discloses_credential(line):
+                        continue
+                    yield line + "\n"
+            except DialDevUnavailable as exc:
+                _mark_down(exc)
+                # Headers have already been sent: report the same safe unavailable
+                # vocabulary in a terminal SSE frame, then end this read stream.
+                # Separate an unfinished upstream event before our terminal frame.
+                yield "\nevent: error\ndata: " + json.dumps({
+                    "error": "dial_dev_unavailable", "reason": exc.reason,
+                }, separators=(",", ":")) + "\n\n"
+            finally:
+                await close_stream()
 
         return StreamingResponse(
             frames(),
             media_type="text/event-stream",
             headers={**_NO_STORE, "X-Accel-Buffering": "no"},
-            background=BackgroundTask(stream.close),
+            background=BackgroundTask(close_stream),
         )
 
     # -------------------------------------------------------------- actions (§3.3)

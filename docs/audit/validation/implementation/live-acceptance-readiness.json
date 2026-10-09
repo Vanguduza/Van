@@ -1,0 +1,65 @@
+{
+  "observed_at": "2026-10-07T08:34:24.201475+00:00",
+  "kind": "LIVE_HEALTH_AND_RECORDED_CANARY_CHECK",
+  "checks": [
+    {
+      "name": "gateway",
+      "outcome": "BLOCKED",
+      "missing_requirements": [
+        "VAN_LIVE_CLIENT_CERT_FILE",
+        "VAN_LIVE_CLIENT_KEY_FILE",
+        "VAN_INGRESS_TOKEN"
+      ]
+    },
+    {
+      "name": "runtime",
+      "outcome": "BLOCKED",
+      "missing_requirements": [
+        "VAN_LIVE_CLIENT_CERT_FILE",
+        "VAN_LIVE_CLIENT_KEY_FILE",
+        "VAN_LIVE_RUNTIME_TOKEN"
+      ]
+    },
+    {
+      "name": "automation",
+      "outcome": "BLOCKED",
+      "missing_requirements": [
+        "VAN_LIVE_CLIENT_CERT_FILE",
+        "VAN_LIVE_CLIENT_KEY_FILE",
+        "VAN_LIVE_RUNTIME_TOKEN"
+      ]
+    },
+    {
+      "name": "browser",
+      "outcome": "BLOCKED",
+      "missing_requirements": [
+        "VAN_LIVE_CLIENT_CERT_FILE",
+        "VAN_LIVE_CLIENT_KEY_FILE",
+        "VAN_LIVE_RUNTIME_TOKEN"
+      ]
+    },
+    {
+      "name": "operator",
+      "outcome": "BLOCKED",
+      "missing_requirements": [
+        "VAN_LIVE_CLIENT_CERT_FILE",
+        "VAN_LIVE_CLIENT_KEY_FILE",
+        "VAN_OBSERVABILITY_TOKEN"
+      ]
+    },
+    {
+      "name": "hermes",
+      "outcome": "BLOCKED",
+      "missing_requirements": [
+        "VAN_HERMES_BASE_URL",
+        "VAN_HERMES_BEARER_TOKEN"
+      ]
+    }
+  ],
+  "verification_enabled": true,
+  "owner_command_executed": false,
+  "handset_verified": false,
+  "deployed_source_verified": false,
+  "canary_max_age_seconds": 86400,
+  "outcome": "BLOCKED"
+}

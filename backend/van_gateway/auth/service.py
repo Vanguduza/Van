@@ -134,18 +134,85 @@ class AuthService:
         device_secret: str,
         public_key_pem: str,
         label: str | None = None,
+        *,
+        device_access_token: str | None = None,
+        request_hash: str | None = None,
+        hardware_proved: bool = False,
+        proved_binding_id: str | None = None,
     ) -> PairingResult:
         if not pairing_token:
             raise AuthError("pairing_ticket_invalid", "Pairing ticket invalid or expired")
+        recoverable = device_access_token is not None
+        if recoverable:
+            if len(device_access_token) < 32 or not device_access_token.strip():
+                raise AuthError("device_access_token_invalid", "Device access token must contain at least 32 characters")
+            if not hardware_proved:
+                raise AuthError("pairing_hardware_proof_required", "Pairing recovery requires a fresh hardware proof")
+            if request_hash is None or len(request_hash) != 64 or any(c not in "0123456789abcdef" for c in request_hash):
+                raise AuthError("pairing_request_invalid", "Pairing recovery requires an exact request digest")
         cipher = self._cipher()
         encrypted_secret = cipher.encrypt(device_secret.encode("utf-8")).decode("utf-8")
         secret_hash = hashlib.sha256(device_secret.encode("utf-8")).hexdigest()
-        access_token = secrets.token_urlsafe(32)
+        access_token = device_access_token if recoverable else secrets.token_urlsafe(32)
         access_token_hash = hashlib.sha256(access_token.encode("utf-8")).hexdigest()
         ticket_hash = hashlib.sha256(pairing_token.encode("utf-8")).hexdigest()
         now = int(time.time())
         async with self.store.connection() as db:
             await db.execute("BEGIN IMMEDIATE")
+            if recoverable or hardware_proved:
+                # A handler's proof must still name a live hardware binding at the
+                # enrollment's commit boundary. Revocation must not race a receipt retry.
+                cur = await db.execute(
+                    "SELECT binding_id, attestation_chain_verified FROM owner_device_bindings "
+                    "WHERE device_id = ? AND owner_principal_id = 'owner' AND status = 'ACTIVE'",
+                    (device_id,),
+                )
+                live_binding = await cur.fetchone()
+                if live_binding is None:
+                    await db.rollback()
+                    raise AuthError("pairing_binding_inactive", "Pairing recovery requires an active hardware binding")
+                if not live_binding["attestation_chain_verified"]:
+                    await db.rollback()
+                    raise AuthError("pairing_binding_unverified", "Pairing recovery requires a verified hardware attestation chain")
+                if proved_binding_id != live_binding["binding_id"]:
+                    await db.rollback()
+                    raise AuthError("pairing_binding_changed", "Hardware binding changed after pairing proof")
+            if recoverable:
+                cur = await db.execute(
+                    "SELECT device_id, request_hash, access_token_hash FROM pairing_attempts WHERE pairing_ticket_hash = ?",
+                    (ticket_hash,),
+                )
+                attempt = await cur.fetchone()
+                if attempt is not None:
+                    if (
+                        str(attempt["device_id"]) != device_id
+                        or not hmac.compare_digest(str(attempt["request_hash"]), request_hash)
+                        or not hmac.compare_digest(str(attempt["access_token_hash"]), access_token_hash)
+                    ):
+                        await db.rollback()
+                        raise AuthError("pairing_recovery_conflict", "Pairing recovery does not match the original enrollment")
+                    cur = await db.execute(
+                        "SELECT device_id, public_key_pem, enrolled_at_unix, revoked_at_unix, label, access_token_hash "
+                        "FROM devices WHERE device_id = ?",
+                        (device_id,),
+                    )
+                    enrolled = await cur.fetchone()
+                    if (
+                        enrolled is None
+                        or enrolled["revoked_at_unix"] is not None
+                        or not hmac.compare_digest(str(enrolled["access_token_hash"] or ""), access_token_hash)
+                    ):
+                        await db.rollback()
+                        raise AuthError("pairing_recovery_unavailable", "Original pairing credentials are no longer active")
+                    await db.commit()
+                    self._device_secrets[device_id] = device_secret.encode("utf-8")
+                    return PairingResult(
+                        DeviceRecord(
+                            str(enrolled["device_id"]), str(enrolled["public_key_pem"]),
+                            int(enrolled["enrolled_at_unix"]), None, enrolled["label"],
+                        ),
+                        access_token,
+                    )
             cur = await db.execute(
                 "SELECT label, expires_at_unix, used_at_unix FROM pairing_tickets WHERE ticket_hash = ?",
                 (ticket_hash,),
@@ -182,6 +249,12 @@ class AuthService:
                 "UPDATE pairing_tickets SET used_at_unix = ? WHERE ticket_hash = ? AND used_at_unix IS NULL",
                 (now, ticket_hash),
             )
+            if recoverable:
+                await db.execute(
+                    "INSERT INTO pairing_attempts(pairing_ticket_hash, device_id, request_hash, access_token_hash, created_at_unix) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (ticket_hash, device_id, request_hash, access_token_hash, now),
+                )
             await db.commit()
         self._device_secrets[device_id] = device_secret.encode("utf-8")
         return PairingResult(DeviceRecord(device_id, public_key_pem, now, None, effective_label), access_token)

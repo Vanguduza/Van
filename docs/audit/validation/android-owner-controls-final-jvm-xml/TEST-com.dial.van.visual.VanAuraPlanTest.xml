@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.visual.VanAuraPlanTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:33" hostname="052fefa249ff" time="0.445">
+  <properties/>
+  <testcase name="the aura draws no lines, lightning, specks or orb link (CF-D-06)()" classname="com.dial.van.visual.VanAuraPlanTest" time="0.425"/>
+  <testcase name="a still budget still produces a field()" classname="com.dial.van.visual.VanAuraPlanTest" time="0.001"/>
+  <testcase name="nothing is planned for a body too small or a field too quiet()" classname="com.dial.van.visual.VanAuraPlanTest" time="0.0"/>
+  <testcase name="embers bloom()" classname="com.dial.van.visual.VanAuraPlanTest" time="0.001"/>
+  <testcase name="the ground glow is clipped to a crescent, never a plate()" classname="com.dial.van.visual.VanAuraPlanTest" time="0.001"/>
+  <testcase name="Zone A blobs are displaced so the haze cannot read as a body outline()" classname="com.dial.van.visual.VanAuraPlanTest" time="0.001"/>
+  <testcase name="Zone A carries the shipping alpha, not the evidence painter's doubled one()" classname="com.dial.van.visual.VanAuraPlanTest" time="0.011"/>
+  <testcase name="semantic colour reaches Zone C and never the identity haze()" classname="com.dial.van.visual.VanAuraPlanTest" time="0.001"/>
+  <testcase name="the plan is deterministic for the same inputs()" classname="com.dial.van.visual.VanAuraPlanTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

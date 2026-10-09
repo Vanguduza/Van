@@ -210,6 +210,10 @@ class CommandMissionLink:
         deadline_ms = None
         if self.execution_deadline_seconds:
             deadline_ms = int(time.time() * 1000) + self.execution_deadline_seconds * 1000
+        if hermes_run_id:
+            return await self.missions.bind_hermes_run(
+                mission_id=mission.mission_id, hermes_run_id=hermes_run_id, deadline_ms=deadline_ms,
+            )
         advanced = await self._advance(
             mission,
             MissionState.RUNNING,

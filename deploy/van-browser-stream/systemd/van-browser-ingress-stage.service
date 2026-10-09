@@ -1,0 +1,15 @@
+[Unit]
+Description=Expose only encrypted transient body staging to VAN media TLS ingress
+RequiresMountsFor=/var/lib/van-browser-profiles
+Before=van-browser-media-ingress.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/usr/bin/mount --bind /var/lib/van-browser-profiles/.ingress /var/lib/van-browser-transfers/.ingress
+ExecStart=/usr/bin/mount -o remount,bind,nodev,nosuid,noexec /var/lib/van-browser-transfers/.ingress
+ExecStop=/usr/bin/umount /var/lib/van-browser-transfers/.ingress
+PrivateMounts=false
+
+[Install]
+WantedBy=multi-user.target

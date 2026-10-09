@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.session.UnboundEnvelopeTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:59:31" hostname="052fefa249ff" time="0.002">
+  <properties/>
+  <testcase name="rebinding does not mutate the stored envelope()" classname="com.dial.van.session.UnboundEnvelopeTest" time="0.001"/>
+  <testcase name="an envelope stored with no session is recognisable as unbound()" classname="com.dial.van.session.UnboundEnvelopeTest" time="0.0"/>
+  <testcase name="rebinding then readdressing is the full journey of a stored command()" classname="com.dial.van.session.UnboundEnvelopeTest" time="0.0"/>
+  <testcase name="rebinding addresses it to the live session and changes nothing else()" classname="com.dial.van.session.UnboundEnvelopeTest" time="0.0"/>
+  <testcase name="an already-bound envelope is left alone()" classname="com.dial.van.session.UnboundEnvelopeTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

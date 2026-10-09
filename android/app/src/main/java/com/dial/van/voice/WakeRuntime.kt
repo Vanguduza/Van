@@ -83,8 +83,15 @@ class WakePipeline(
     private val vad: EnergyVadGate = EnergyVadGate(),
     private val decisionEngine: WakeDecisionEngine = WakeDecisionEngine(),
     private val speechHangoverFrames: Int = 6,
+    private val resetEngines: () -> Unit = {},
 ) {
     private var remainingSpeechHangover = 0
+
+    @Synchronized
+    fun reset() {
+        remainingSpeechHangover = 0
+        resetEngines()
+    }
 
     @Synchronized
     fun evaluate(pcm16: ByteArray): WakeEvidence {
@@ -147,6 +154,7 @@ class WakeRuntimeController(
 
     fun arm(): Boolean {
         if (armed.get()) return true
+        if (runCatching { pipeline.reset() }.isFailure) return false
         if (!arbiter.start()) return false
         arbiter.registerSink(sink)
         armed.set(true)

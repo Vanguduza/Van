@@ -102,7 +102,7 @@ def test_the_acknowledgement_is_not_matched_on_kind():
     assert '"session.ack"' not in code, (
         "the device matches an acknowledgement on a kind the Gateway does not send"
     )
-    assert 'has("accepted")' in ack and 'optString("message_id")' in ack
+    assert 'frame.opt("accepted") is Boolean' in ack and 'optString("message_id")' in ack
 
 
 def test_the_session_manager_uses_the_parser_rather_than_its_own_reading():

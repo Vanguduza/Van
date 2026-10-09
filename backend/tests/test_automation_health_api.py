@@ -52,19 +52,28 @@ async def test_automation_health_requires_internal_control(client):
     assert (await ac.get("/v1/browser/health")).status_code in (401, 403)
 
 
-async def test_automation_health_reports_governance_approved(client):
-    """§368 — the owner signed all four decisions on 2026-09-18.
+async def test_automation_health_reports_governance_approved_but_production_gated(client):
+    """§368 — the owner signed all four decisions on 2026-09-18; production is still gated.
 
-    Governance is now satisfied, so this asserts the *other* half of §368: approval
-    unblocks activation but does not by itself make anything READY. That still needs
-    live canary evidence, which `test_automation_health_does_not_claim_ready` covers.
+    Owner signatures are satisfied, so nothing is reported as a pending owner decision. Until
+    2026-09-29 this test asserted `production_activation_permitted is True`, which encoded the
+    §6 governance bypass: approval was read as activation while the Stagehand production gate,
+    signed ingress and live qualification were PENDING. Activation now needs every gate GREEN.
     """
     ac, _app = client
     body = (await ac.get("/v1/automation/health", headers=HEADERS)).json()
     assert body["capability"] == "automation_fabric"
-    assert body["governance"]["owner_decisions_pending"] == []
-    assert body["governance"]["owner_decisions_missing"] == []
-    assert body["governance"]["production_activation_permitted"] is True
+    governance = body["governance"]
+    assert governance["owner_decisions_pending"] == []
+    assert governance["owner_decisions_missing"] == []
+    assert governance["production_activation_permitted"] is False
+    assert "VAN-ADOPT-STAGEHAND-001.yaml:production_gate" in governance["production_gates_not_green"]
+    # The surface explains itself: every gate names its status and the file it was read from.
+    for gate in governance["gates"]:
+        assert set(gate) >= {"decision", "gate", "status", "source", "path"}
+        assert gate["source"].startswith("docs/decisions/")
+    browser = (await ac.get("/v1/browser/health", headers=HEADERS)).json()
+    assert browser["governance"]["production_activation_permitted"] is False
 
 
 async def test_automation_health_does_not_claim_ready(client):
@@ -129,7 +138,9 @@ def test_governance_state_is_read_from_the_decision_files():
     state = governance_state()
     assert state["owner_decisions_missing"] == []
     assert state["owner_decisions_pending"] == []
-    assert state["production_activation_permitted"] is True
+    assert state["gate_model_error"] is None
+    # The real repository today: intent approved, production gates pending => not permitted.
+    assert state["production_activation_permitted"] is False
 
 
 async def test_computer_use_health_requires_internal_control(client):
@@ -172,3 +183,63 @@ async def test_computer_use_degradation_names_what_still_works(client):
     assert "Browser fabric" in entry.still_works
     # The restore action has to name the actual change, or it is a shrug in a field.
     assert "SURFACE_WORKERS" in entry.restore_action
+
+
+async def test_browser_health_surfaces_stagehand_placement_and_per_capability_gates(client):
+    """Reviewer I minor 8 — stagehand_production_state() was never surfaced, and one global
+    flag made Stagehand's pending gates read as the whole browser fabric's."""
+    ac, _app = client
+    body = (await ac.get("/v1/browser/health", headers=HEADERS)).json()
+    activation = body["production_activation"]
+    stagehand = activation["stagehand"]
+    # unit M's projection, verbatim keys, fail-closed here (no van-browser-core worker).
+    assert stagehand["state"] == "PRODUCTION_DISABLED"
+    assert stagehand["reason"]
+    assert stagehand["required_zone"] == "van-browser-core"
+    assert stagehand["model"] == "anthropic/claude-sonnet-5"
+    assert stagehand["production_activation_permitted"] is False
+    assert "VAN-ADOPT-STAGEHAND-001.yaml:production_gate" in stagehand["gates_not_green"]
+    # The Harness path is judged on its own gates, none of them Stagehand's.
+    harness = activation["browser_harness"]
+    assert not any("STAGEHAND" in g for g in harness["gates_not_green"])
+    # Existing semantics are unchanged.
+    assert body["governance"]["production_activation_permitted"] is False
+    assert set(body["governance"]["production_activation_permitted_by_capability"]) == {
+        "n8n", "browser_harness", "stagehand", "jev_browser_effect",
+    }
+    # Review I2 N-7: Jev browser effect has its own VAN gate, SHADOW_ONLY today.
+    assert activation["jev_browser_effect"]["production_activation_permitted"] is False
+    assert "VAN-JEV-BROWSER-EFFECT-001.yaml:jev_browser_effect" in activation["jev_browser_effect"]["gates_not_green"]
+
+
+async def test_browser_health_stagehand_status_is_the_gate_verdict_for_these_settings(monkeypatch):
+    """Unit G2a request: health builds StagehandAdapter with its own settings, so a wired but
+    not-permitted Stagehand reports POLICY_DISABLED and the reason, not CONFIGURED."""
+    monkeypatch.setenv("VAN_BROWSER_ENABLED", "1")
+    monkeypatch.setenv("VAN_BROWSER_STAGEHAND_BASE_URL", "http://127.0.0.1:9/stagehand")
+    monkeypatch.setenv("VAN_BROWSER_STAGEHAND_ZONE", "van-browser-core")
+    get_settings.cache_clear()
+    app = create_app()
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test",
+                           headers={"X-Van-Ingress-Token": INGRESS}) as ac:
+        async with app.router.lifespan_context(app):
+            body = (await ac.get("/v1/browser/health", headers=HEADERS)).json()
+    assert body["stagehand"]["state"] == "POLICY_DISABLED"
+    assert body["stagehand"]["detail"] == "STAGEHAND_PRODUCTION_DISABLED:STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS"
+    assert body["production_activation"]["stagehand"]["reason"] == "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS"
+
+
+async def test_health_stagehand_gate_uses_the_health_settings_not_the_process_default(tmp_path):
+    from tests.conftest_automation import make_store
+    from van_gateway.automation.health import AutomationHealthApi
+    from van_gateway.config import Settings
+    from van_gateway.degraded.registry import DegradedRegistry
+
+    store = await make_store(tmp_path)
+    settings = Settings(browser_enabled=True, browser_stagehand_zone="van-browser-core",
+                        browser_stagehand_base_url="http://127.0.0.1:9/stagehand")
+    api = AutomationHealthApi(store, settings, degraded=DegradedRegistry())
+    status = await api.stagehand.status()
+    assert status.state.value == "POLICY_DISABLED"
+    # The process default has the browser fabric off; the reason proves these settings were read.
+    assert status.detail == "STAGEHAND_PRODUCTION_DISABLED:STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS"

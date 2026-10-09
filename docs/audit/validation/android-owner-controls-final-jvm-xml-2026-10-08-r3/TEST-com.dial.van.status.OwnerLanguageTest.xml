@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.status.OwnerLanguageTest" tests="17" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:29" hostname="052fefa249ff" time="0.016">
+  <properties/>
+  <testcase name="values that escaped internal layers are caught before the owner reads them()" classname="com.dial.van.status.OwnerLanguageTest" time="0.001"/>
+  <testcase name="an unknown reason code is de-snaked rather than shown raw()" classname="com.dial.van.status.OwnerLanguageTest" time="0.001"/>
+  <testcase name="an unrecognised class is not printed raw()" classname="com.dial.van.status.OwnerLanguageTest" time="0.0"/>
+  <testcase name="a qualified code still finds its sentence()" classname="com.dial.van.status.OwnerLanguageTest" time="0.0"/>
+  <testcase name="nothing at all falls back rather than rendering empty()" classname="com.dial.van.status.OwnerLanguageTest" time="0.0"/>
+  <testcase name="the three outcomes that are not success read as three different things()" classname="com.dial.van.status.OwnerLanguageTest" time="0.0"/>
+  <testcase name="every refusal reason is a sentence the owner can act on()" classname="com.dial.van.status.OwnerLanguageTest" time="0.0"/>
+  <testcase name="an action class is described by what it costs, not by its letter()" classname="com.dial.van.status.OwnerLanguageTest" time="0.0"/>
+  <testcase name="an absent or unreadable scope never renders as raw text()" classname="com.dial.van.status.OwnerLanguageTest" time="0.0"/>
+  <testcase name="a scope is a sentence instead of JSON()" classname="com.dial.van.status.OwnerLanguageTest" time="0.002"/>
+  <testcase name="a digest is a short labelled reference, not a wall of hex()" classname="com.dial.van.status.OwnerLanguageTest" time="0.0"/>
+  <testcase name="no command status is shown to the owner as its own name()" classname="com.dial.van.status.OwnerLanguageTest" time="0.0"/>
+  <testcase name="a scope arriving as JSON is read back as a sentence()" classname="com.dial.van.status.OwnerLanguageTest" time="0.0"/>
+  <testcase name="ordinary English is not mistaken for an internal value()" classname="com.dial.van.status.OwnerLanguageTest" time="0.0"/>
+  <testcase name="Android's own constants are translated()" classname="com.dial.van.status.OwnerLanguageTest" time="0.0"/>
+  <testcase name="only the class that needs approval says so()" classname="com.dial.van.status.OwnerLanguageTest" time="0.008"/>
+  <testcase name="the owner is not told about HMAC()" classname="com.dial.van.status.OwnerLanguageTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

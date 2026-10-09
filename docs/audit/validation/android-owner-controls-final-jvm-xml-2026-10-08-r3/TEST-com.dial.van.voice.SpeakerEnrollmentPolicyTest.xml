@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.SpeakerEnrollmentPolicyTest" tests="22" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:30" hostname="052fefa249ff" time="0.052">
+  <properties/>
+  <testcase name="aggregation refuses incomplete extra empty oversized and mismatched observations()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.001"/>
+  <testcase name="aggregation refuses nonfinite zero and inconsistent speaker observations()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.0"/>
+  <testcase name="binding parser refuses missing unknown coerced and malformed identity fields()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.0"/>
+  <testcase name="strict profile readback accepts normalized observations and exact consent metadata()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.0"/>
+  <testcase name="all pairs must be consistent even if each secondary clip resembles the first()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.0"/>
+  <testcase name="changing frame DC cannot fake the minimum voiced interval()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.011"/>
+  <testcase name="consent binds exact model revision and removal of an existing profile()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.001"/>
+  <testcase name="usable changing PCM reports real energy duration and bounded voiced frames()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.005"/>
+  <testcase name="wrong rate and incomplete PCM samples cannot be treated as usable audio()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.005"/>
+  <testcase name="saturated positive and negative PCM cannot produce an accepted embedding clip()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.005"/>
+  <testcase name="silence and a loud constant DC offset are refused independently()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.008"/>
+  <testcase name="profile refuses zero unnormalized string excessive or wrong sized embedding()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.0"/>
+  <testcase name="minimum usable energy interval is measured from samples not wall time()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.005"/>
+  <testcase name="consistent observations normalize individually and produce an independent normalized result()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.0"/>
+  <testcase name="consent rejects each changed device owner hardware approval or binding()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.0"/>
+  <testcase name="canonical consent explicitly binds purpose operation exact identity and absent revision()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.0"/>
+  <testcase name="duration accepts exact bounds but rejects one overlong sample without rounding()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.004"/>
+  <testcase name="fresh exact consent accepts only the half open thirty second window()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.0"/>
+  <testcase name="persisted signal records cannot omit or coerce accepted quality bounds()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.001"/>
+  <testcase name="profile refuses extra missing coerced and changed binding envelope fields()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.001"/>
+  <testcase name="consent rejects malformed nonce IDs model digest and invalid timestamps()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.0"/>
+  <testcase name="offline removal compares genuine local keys without manufacturing current remote binding()" classname="com.dial.van.voice.SpeakerEnrollmentPolicyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

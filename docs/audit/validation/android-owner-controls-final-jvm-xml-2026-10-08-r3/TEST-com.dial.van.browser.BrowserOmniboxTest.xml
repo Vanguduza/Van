@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.BrowserOmniboxTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:27" hostname="052fefa249ff" time="0.011">
+  <properties/>
+  <testcase name="an empty label is not a host()" classname="com.dial.van.browser.BrowserOmniboxTest" time="0.004"/>
+  <testcase name="nothing typed is nothing to do()" classname="com.dial.van.browser.BrowserOmniboxTest" time="0.0"/>
+  <testcase name="a scheme VAN will not navigate becomes a search rather than a refusal()" classname="com.dial.van.browser.BrowserOmniboxTest" time="0.001"/>
+  <testcase name="a query whose last word looks like a host is still a query()" classname="com.dial.van.browser.BrowserOmniboxTest" time="0.0"/>
+  <testcase name="a single label is a search()" classname="com.dial.van.browser.BrowserOmniboxTest" time="0.0"/>
+  <testcase name="whitespace around an address does not make it a search()" classname="com.dial.van.browser.BrowserOmniboxTest" time="0.0"/>
+  <testcase name="an address with a scheme goes exactly where it says()" classname="com.dial.van.browser.BrowserOmniboxTest" time="0.0"/>
+  <testcase name="a bare host gets https, never http()" classname="com.dial.van.browser.BrowserOmniboxTest" time="0.0"/>
+  <testcase name="a punycode host is a host()" classname="com.dial.van.browser.BrowserOmniboxTest" time="0.0"/>
+  <testcase name="something that is not a hostname is a search even with a dot in it()" classname="com.dial.van.browser.BrowserOmniboxTest" time="0.0"/>
+  <testcase name="anything with a space is a search()" classname="com.dial.van.browser.BrowserOmniboxTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,9 @@
+{
+  "apk_sha256": "1562d995bfe6d12f54c7c583e9e5569a79a4129f0e828bb30952df22a5393078",
+  "artifact_references_verified": 28,
+  "copied_xml_suites_verified": 189,
+  "guard_inputs_verified": 586,
+  "receipt_sha256": "144402dd7b1776b8bcd6e155c2d1cf11069ced29eb0266b04eda4e40a1392887",
+  "source_inputs_verified": 584,
+  "status": "PASS"
+}

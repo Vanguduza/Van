@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.BrowserActionPlanTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:27" hostname="052fefa249ff" time="0.015">
+  <properties/>
+  <testcase name="success requires every effect receipt and independent result()" classname="com.dial.van.browser.BrowserActionPlanTest" time="0.004"/>
+  <testcase name="approval must name exact session current digest and unexpired draft()" classname="com.dial.van.browser.BrowserActionPlanTest" time="0.002"/>
+  <testcase name="mutation editor requires actual admitted profile policy rather than guessed alias()" classname="com.dial.van.browser.BrowserActionPlanTest" time="0.0"/>
+  <testcase name="unrelated predicate fields and duplicate effects are refused()" classname="com.dial.van.browser.BrowserActionPlanTest" time="0.005"/>
+  <testcase name="another pending action never approves this browser plan()" classname="com.dial.van.browser.BrowserActionPlanTest" time="0.0"/>
+  <testcase name="fill binds exact same element and independent value readback()" classname="com.dial.van.browser.BrowserActionPlanTest" time="0.001"/>
+  <testcase name="prepare command binds owner goal exact native domain and never guesses page URL()" classname="com.dial.van.browser.BrowserActionPlanTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

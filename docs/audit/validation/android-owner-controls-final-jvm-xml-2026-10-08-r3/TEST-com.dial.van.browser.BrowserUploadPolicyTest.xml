@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.BrowserUploadPolicyTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:27" hostname="052fefa249ff" time="0.011">
+  <properties/>
+  <testcase name="a ticket has nowhere to put a byte()" classname="com.dial.van.browser.BrowserUploadPolicyTest" time="0.001"/>
+  <testcase name="an empty file and an enormous one are both refused()" classname="com.dial.van.browser.BrowserUploadPolicyTest" time="0.001"/>
+  <testcase name="a chooser from a session that is no longer on screen is refused()" classname="com.dial.van.browser.BrowserUploadPolicyTest" time="0.0"/>
+  <testcase name="plain chooser does not invent a producer binding()" classname="com.dial.van.browser.BrowserUploadPolicyTest" time="0.001"/>
+  <testcase name="uploading a file is not asking VAN to read it()" classname="com.dial.van.browser.BrowserUploadPolicyTest" time="0.0"/>
+  <testcase name="an ephemeral copy expires()" classname="com.dial.van.browser.BrowserUploadPolicyTest" time="0.0"/>
+  <testcase name="a type the page will not take is refused here rather than after the transfer()" classname="com.dial.van.browser.BrowserUploadPolicyTest" time="0.0"/>
+  <testcase name="analysis needs the file to have actually arrived()" classname="com.dial.van.browser.BrowserUploadPolicyTest" time="0.0"/>
+  <testcase name="a log line about an upload does not carry the filename()" classname="com.dial.van.browser.BrowserUploadPolicyTest" time="0.001"/>
+  <testcase name="a copy the owner asked to keep does not expire()" classname="com.dial.van.browser.BrowserUploadPolicyTest" time="0.006"/>
+  <testcase name="a name that is not a name is refused()" classname="com.dial.van.browser.BrowserUploadPolicyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

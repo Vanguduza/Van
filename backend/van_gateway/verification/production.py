@@ -23,6 +23,8 @@ from typing import Any
 from van_gateway.automation.verifier import DocumentUploadObserver, PostconditionSpec, WorkflowVerifier
 from van_gateway.context.models import ContextRequirement
 from van_gateway.context.service import OwnerContextService
+from van_gateway.context.memory_erasure import memory_erasure_readback
+from van_gateway.proactive.owner_control import domain_ceiling_readback
 from van_gateway.mission.verifiers import (
     ApiReadbackVerifier,
     LedgerEventVerifier,
@@ -30,7 +32,10 @@ from van_gateway.mission.verifiers import (
     ScreenshotVerifier,
     VerifierRegistry,
     UnobservableStrategyVerifier,
+    RepositoryShaVerifier,
+    CiRunVerifier,
 )
+from van_gateway.verification.github import GithubVerificationConfig, GithubVerificationSource
 from van_gateway.reminders.service import ReminderService
 from van_gateway.storage.db import Store
 from van_gateway.verification import observations
@@ -64,6 +69,26 @@ def _browser_observation(store: Store):
 def _trading_halt_observation(trading: Any):
     async def observe(context: dict[str, Any]) -> dict[str, Any]:
         return await observations.trading_halt_readback(trading)
+
+    return observe
+
+
+def _trading_ticket_observation(trading: Any):
+    async def observe(context: dict[str, Any]) -> dict[str, Any]:
+        ticket_id = str((context.get("postconditions") or {}).get("ticket_id") or "")
+        if not ticket_id:
+            raise ValueError("success contract names no ticket")
+        return await observations.trading_ticket_readback(trading, ticket_id)
+
+    return observe
+
+
+def _gmail_sent_observation(store: Store, google: Any):
+    async def observe(context: dict[str, Any]) -> dict[str, Any]:
+        command_id = str((context.get("authority_envelope") or {}).get("source_command_id") or "")
+        if not command_id:
+            raise ValueError("Gmail sent readback needs a sealed source command")
+        return await observations.gmail_sent_readback(store, google, command_id, context.get("postconditions") or {})
 
     return observe
 
@@ -129,6 +154,96 @@ def _reminder_readback_observation(reminders: ReminderService):
     return observe
 
 
+def _standing_intent_observation(store: Store):
+    async def observe(context_dict: dict[str, Any]) -> dict[str, Any]:
+        intent_id = str((context_dict.get("postconditions") or {}).get("intent_id") or "").strip()
+        command_id = str((context_dict.get("authority_envelope") or {}).get("source_command_id") or "").strip()
+        if not intent_id or not command_id:
+            raise ValueError("standing intent readback needs a sealed intent and owner command")
+        return await observations.standing_intent_disable_readback(store, intent_id, command_id)
+
+    return observe
+
+
+def _memory_erasure_observation(store: Store):
+    async def observe(context_dict: dict[str, Any]) -> dict[str, Any]:
+        store_id = str((context_dict.get("postconditions") or {}).get("store") or "").strip()
+        command_id = str((context_dict.get("authority_envelope") or {}).get("source_command_id") or "").strip()
+        if not store_id or not command_id:
+            raise ValueError("memory erasure readback needs exact sealed store and owner command")
+        return await memory_erasure_readback(store, store_id, command_id,
+            **{k:context_dict["postconditions"][k] for k in ["record_id","expected_sha256"] if k in context_dict.get("postconditions",{})})
+
+    return observe
+
+
+def _domain_ceiling_observation(store: Store):
+    async def observe(context_dict: dict[str, Any]) -> dict[str, Any]:
+        postconditions = context_dict.get("postconditions") or {}
+        command_id = (context_dict.get("authority_envelope") or {}).get("source_command_id")
+        if not isinstance(command_id, str) or not command_id:
+            raise ValueError("domain ceiling readback requires the sealed source command")
+        return await domain_ceiling_readback(store,
+            {name: postconditions.get(name) for name in ("domain", "level")}, command_id)
+
+    return observe
+
+
+def _jev_reported_bool(mapping: Any, key: str, where: str) -> bool:
+    """A boolean dial-jev actually reported. Absent or non-bool raises -> UNVERIFIABLE.
+
+    Reviewer I M-6: ``.get(project_id, True)``, ``owner_active`` defaulting True and
+    ``bypassed`` defaulting False read "Jev said nothing" as "Jev confirmed the owner's
+    command", so an empty status VERIFIED an enable. Silence is not confirmation.
+    """
+    if not isinstance(mapping, dict) or key not in mapping:
+        raise ValueError(f"Jev status does not report {where}")
+    value = mapping[key]
+    if not isinstance(value, bool):
+        raise ValueError(f"Jev status reports {where} as {type(value).__name__}, not a bool")
+    return value
+
+
+def _jev_readback_observation(jev: Any):
+    async def observe(context: dict[str, Any]) -> dict[str, Any]:
+        postconditions = context.get("postconditions") or {}
+        kind = str(postconditions.get("kind") or "").strip()
+        if kind == "module":
+            module_id = str(postconditions.get("module_id") or "").strip()
+            if not module_id:
+                raise ValueError("Jev contract names no module")
+            observed = await jev.module(module_id)
+            status = observed.get("status") if isinstance(observed, dict) else None
+            if not isinstance(status, str) or not status:
+                raise ValueError("Jev does not report the module's status")
+            return {
+                "kind": "module",
+                "module_id": module_id,
+                "status": status,
+                "evidence_ref": f"jev-module://{module_id}",
+            }
+        if kind == "global":
+            project_id = str(postconditions.get("project_id") or "").strip() or None
+            observed = await jev.status()
+            global_state = observed.get("global") if isinstance(observed, dict) else None
+            if not isinstance(global_state, dict):
+                raise ValueError("Jev status does not report global control state")
+            result = {"kind": "global", "project_id": project_id}
+            if project_id:
+                result["project_enabled"] = _jev_reported_bool(
+                    global_state.get("projects"), project_id, f"project {project_id!r}"
+                )
+            else:
+                if "owner_active" in postconditions:
+                    result["owner_active"] = _jev_reported_bool(global_state, "owner_active", "owner_active")
+                if "bypassed" in postconditions:
+                    result["bypassed"] = _jev_reported_bool(global_state, "bypassed", "bypassed")
+            result["evidence_ref"] = "jev-global://control"
+            return result
+        raise ValueError("unknown Jev readback contract")
+    return observe
+
+
 def _notebook_readback_observation(knowledge: Any):
     async def observe(context: dict[str, Any]) -> dict[str, Any]:
         postconditions = context.get("postconditions") or {}
@@ -182,7 +297,7 @@ DECLARED_BUT_UNOBSERVABLE_STRATEGIES: dict[str, str] = {
 
 
 def build_mission_registry(
-    *, store: Store, trading: Any, knowledge: Any
+    *, store: Store, trading: Any, knowledge: Any, google: Any = None, github: Any = None, browser_plans: Any = None, automation: Any = None, browser_artifacts: Any = None, jev: Any | None = None
 ) -> VerifierRegistry:
     """The registry MissionService runs when a mission asks for a verification outcome.
 
@@ -194,6 +309,75 @@ def build_mission_registry(
     knowledge=owner_runtime.knowledge)` — pick up both new strategies with no wiring change.
     """
     registry = VerifierRegistry()
+    async def browser_artifact_observe(context):
+        from van_gateway.command.authority import CommandAuthorityService
+        from van_gateway.action.service import ActionRuntime
+        command_id = str((context.get("authority_envelope") or {}).get("source_command_id") or "")
+        authority = await CommandAuthorityService(store).get(command_id)
+        if browser_artifacts is None or authority is None or authority.typed_action_id != "browser.file.provider.submit":
+            raise ValueError("browser_artifact_observer_unconfigured")
+        rows = await store.fetchall("SELECT execution_id FROM action_executions WHERE command_id=? AND action_id=?",
+                                   (command_id, "browser.file.provider.submit"))
+        if len(rows) != 1:
+            raise ValueError("browser_artifact_unique_execution_required")
+        execution = await ActionRuntime(store).get_execution(rows[0]["execution_id"])
+        result = await browser_artifacts.verify(execution, authority.typed_parameter_constraints)
+        if result.get("evidence_pointer"):
+            result["evidence_refs"] = [result["evidence_pointer"]]
+        return result
+    registry.register("browser-artifact-readback", ObservationVerifier(browser_artifact_observe,
+        verifier_version="browser-artifact-readback/1", evidence_prefix="browser-artifact://"))
+    async def automation_owner_observe(context):
+        from van_gateway.automation.commands import command_readback
+        command_id = str((context.get("authority_envelope") or {}).get("source_command_id") or "")
+        if automation is None or not command_id:
+            raise ValueError("automation_owner_observer_unconfigured")
+        return await command_readback(automation, command_id)
+    registry.register("automation-owner-readback", ObservationVerifier(automation_owner_observe,
+        verifier_version="automation-owner-readback/1", evidence_prefix="automation-run://"))
+    async def browser_plan_observe(context):
+        from van_gateway.command.authority import CommandAuthorityService
+        from van_gateway.action.service import ActionRuntime
+        command_id = str((context.get("authority_envelope") or {}).get("source_command_id") or "")
+        authority = await CommandAuthorityService(store).get(command_id)
+        if browser_plans is None or not authority or authority.typed_action_id != "browser.plan.execute":
+            raise ValueError("browser_plan_native_observer_unconfigured")
+        rows = await store.fetchall("SELECT execution_id FROM action_executions WHERE command_id=? AND action_id=?", (command_id, "browser.plan.execute"))
+        if len(rows) != 1:
+            raise ValueError("browser_plan_unique_execution_required")
+        execution = await ActionRuntime(store).get_execution(rows[0]["execution_id"])
+        result = await browser_plans.verify(execution, authority.typed_parameter_constraints)
+        if result.get("evidence_pointer"):
+            result["evidence_refs"] = [result["evidence_pointer"]]
+        return result
+    registry.register("browser-plan-readback", ObservationVerifier(browser_plan_observe,
+        verifier_version="browser-plan-readback/1", evidence_prefix="browser-plan://"))
+    async def permission_observe(context):
+        from van_gateway.capability.owner_permissions import permission_readback
+        from van_gateway.command.authority import CommandAuthorityService
+        command_id=str((context.get("authority_envelope") or {}).get("source_command_id") or "")
+        authority=await CommandAuthorityService(store).get(command_id)
+        if not authority: raise ValueError("permission_source_command_missing")
+        return await permission_readback(store,authority.typed_parameter_constraints,command_id)
+    registry.register("owner-permission-readback",ObservationVerifier(permission_observe,
+        verifier_version="owner-permission-readback/1",evidence_prefix="owner-permission://"))
+    registry.register("domain-autonomy-readback", ObservationVerifier(
+        _domain_ceiling_observation(store), verifier_version="domain-autonomy-readback/1",
+        evidence_prefix="domain-autonomy://"))
+    registry.register("gmail-sent-readback", ApiReadbackVerifier(_gmail_sent_observation(store, google)))
+    registry.register(
+        "memory-erasure-readback", ObservationVerifier(
+            _memory_erasure_observation(store), verifier_version="memory-erasure-readback/1",
+            evidence_prefix="memory-erasure://",
+        ),
+    )
+    registry.register(
+        "standing-intent-readback",
+        ObservationVerifier(
+            _standing_intent_observation(store), verifier_version="standing-intent-readback/1",
+            evidence_prefix="standing-intent://",
+        ),
+    )
     registry.register("ledger-event", LedgerEventVerifier(_ledger_observation(trading)))
     # GAP-F-001 — the owner-fact readback trading.halt's ledger readback already modelled:
     # a system the executor wrote to, asked independently what it now holds.
@@ -217,6 +401,16 @@ def build_mission_registry(
     # is the one A4 command an owner issues under time pressure, and until this was
     # registered the mission for it could only ever end COMPLETED_UNVERIFIED.
     registry.register("trading-halt", LedgerEventVerifier(_trading_halt_observation(trading)))
+    registry.register("trading-ticket-confirm", LedgerEventVerifier(_trading_ticket_observation(trading)))
+    if jev is not None:
+        registry.register(
+            "jev-readback",
+            ObservationVerifier(
+                _jev_readback_observation(jev),
+                verifier_version="jev-readback/1",
+                evidence_prefix="jev://",
+            ),
+        )
     # §34 names stored browser artefacts the weakest admissible evidence and this adapter
     # is typed as such. It is registered because the artefacts are real, not because they
     # are strong.
@@ -234,16 +428,27 @@ def build_mission_registry(
     # P2-VERIFY-002 — named, so "I could not check" is distinguishable from "nothing was
     # promised". The adapter classes stay in the tree because the day a remote or a CI API
     # is configured, registering them is a one-line change rather than a rewrite.
-    for strategy, reason in DECLARED_BUT_UNOBSERVABLE_STRATEGIES.items():
-        registry.register(strategy, UnobservableStrategyVerifier(strategy, reason))
+    github = github or GithubVerificationSource(GithubVerificationConfig.from_env())
+    if github.config.repositories:
+        registry.register("repository-sha", RepositoryShaVerifier(github.repository_head))
+        registry.register("ci-run", CiRunVerifier(github.ci_run))
+    else:
+        for strategy, reason in DECLARED_BUT_UNOBSERVABLE_STRATEGIES.items():
+            registry.register(strategy, UnobservableStrategyVerifier(strategy, reason))
     return registry
 
 
 #: Mission verification strategies a success contract may name today.
 WIRED_MISSION_STRATEGIES = (
-    "ledger-event", "trading-halt", "browser-evidence", "api-readback",
+    "domain-autonomy-readback",
+    "ledger-event", "trading-halt", "trading-ticket-confirm", "gmail-sent-readback", "browser-evidence", "api-readback",
     "notebook-source-readback", "owner-fact-readback", "reminder-readback",
 )
+
+# Jev itself is optional. This verifier exists only when the Jev projection client is
+# supplied to build_mission_registry; putting it in WIRED_MISSION_STRATEGIES would falsely
+# claim every no-Jev gateway instance has it.
+OPTIONAL_MISSION_STRATEGIES = ("jev-readback",)
 
 
 
@@ -304,6 +509,7 @@ __all__ = [
     "DECLARED_BUT_UNOBSERVABLE_STRATEGIES",
     "UNOBSERVABLE_POSTCONDITION_KINDS",
     "WIRED_MISSION_STRATEGIES",
+    "OPTIONAL_MISSION_STRATEGIES",
     "WIRED_POSTCONDITION_KINDS",
     "build_automation_verifier",
     "build_mission_registry",

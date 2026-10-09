@@ -1,0 +1,569 @@
+{
+  "schema": "van-acoustic-qualification/1",
+  "created_at": "2026-10-08T05:53:17.052423+00:00",
+  "scope": "Bounded public generic acoustic asset staging outside repository; parent owns Android placement/source edits",
+  "root": "/workspace/van-acoustic-assets",
+  "models": [
+    {
+      "capability": "wake",
+      "archive": {
+        "archive": "archives/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01.tar.bz2",
+        "size": 17626723,
+        "sha256": "f170013b4716e41b62b9bfd809687c207cef798ef9bc6534d524e17af9b6561a",
+        "published_sha256": null
+      },
+      "source_url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/kws-models/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01.tar.bz2",
+      "runtime_version": "1.13.8",
+      "parameters": {
+        "model_type": "zipformer2",
+        "sample_rate_hz": 16000,
+        "feature_dim": 80,
+        "num_threads": 2,
+        "max_active_paths": 4,
+        "keywords_score": 1.5,
+        "keywords_threshold": 0.25,
+        "num_trailing_blanks": 2
+      },
+      "license": {
+        "license": "Apache-2.0",
+        "evidence": "Actual model archive README.md explicitly declares Apache License2.0; official k2-fsa/sherpa-onnx kws-models release"
+      }
+    },
+    {
+      "capability": "asr",
+      "archive": {
+        "archive": "archives/sherpa-onnx-zipformer-gigaspeech-2023-12-12.tar.bz2",
+        "size": 310562474,
+        "sha256": "f4ce13dc38fe877c37ec413caf06b925f78c5a490009940943b092a3e01ee97a",
+        "published_sha256": "f4ce13dc38fe877c37ec413caf06b925f78c5a490009940943b092a3e01ee97a"
+      },
+      "source_url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-zipformer-gigaspeech-2023-12-12.tar.bz2",
+      "runtime_version": "1.13.8",
+      "parameters": {
+        "manifest_model_type": "transducer",
+        "encoder_metadata_model_type": "zipformer2",
+        "native_model_type": "transducer",
+        "sample_rate_hz": 16000,
+        "feature_dim": 80,
+        "num_threads": 2,
+        "decoding_method": "greedy_search",
+        "max_active_paths": 4
+      },
+      "license": {
+        "license": "Apache-2.0",
+        "model_card_url": "https://huggingface.co/k2-fsa/sherpa-onnx-zipformer-gigaspeech-2023-12-12",
+        "model_card_revision": "4115aa3f7d3ff431cc04ce8223d8a20a37ef3cae"
+      }
+    },
+    {
+      "capability": "tts",
+      "archive": {
+        "archive": "archives/vits-ljs.tar.bz2",
+        "size": 109037061,
+        "sha256": "78f7df445fcd42d1dd6df2c78c66c2c2fee8b7abecc6ae255a5950097a6558bc",
+        "published_sha256": null
+      },
+      "source_url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-ljs.tar.bz2",
+      "runtime_version": "1.13.8",
+      "parameters": {
+        "family": "vits",
+        "sample_rate_hz": 22050,
+        "speaker_id": 0,
+        "num_threads": 2,
+        "data_dir": "",
+        "provider": "cpu",
+        "noise_scale": 0.667,
+        "noise_scale_w": 0.8,
+        "length_scale": 1.0,
+        "max_num_sentences": 1,
+        "silence_scale": 0.2,
+        "speed": 1.0
+      },
+      "license": {
+        "license": "Apache-2.0",
+        "model_card_url": "https://huggingface.co/csukuangfj/vits-ljs",
+        "model_card_revision": "7ac337c834f318e45a34037cb3371cc3929187ff",
+        "lexicon_provenance": "CMU dictionary converted to IPA; CMU redistribution notice retained; independent IPA conversion notice not supplied in upstream source zip; HF model repository declares Apache-2.0",
+        "lexicon_modification": "Exact pronunciation alias hie h \u02c8 a \u026a copied from existing hi/high entries"
+      }
+    }
+  ],
+  "selected_manifest": {
+    "path": "/workspace/van-acoustic-assets/selected-files-manifest.json",
+    "sha256": "55eea4ff0258f3be72f72611ef1cb82aaf942ceb9d313d3905a9cb58a2c946d3",
+    "file_count": 42,
+    "total_bytes": 224850482
+  },
+  "budgets": {
+    "max_fetch_bytes": 1073741824,
+    "max_extraction_bytes": 2147483648,
+    "retained_download_archives_and_wheels_bytes": 480970428,
+    "archive_model_extraction_bytes": 496755936,
+    "budget_limit_respected": true,
+    "metadata_downloads": "Small public cards/source recipes/license texts, retained under evidence; no large toolchain fetch",
+    "retained_download_archives_wheels_and_direct_speaker_bytes": 507504793
+  },
+  "keyword": {
+    "tokenizer": "sentencepiece",
+    "version": "0.2.1",
+    "sherpa_onnx_version": "1.13.8",
+    "raw_phrase": "HEY VAN",
+    "identity_marker": "@HEY_VAN",
+    "bpe_model_sha256": "c8a2a0129c4ab8e463164c142f82d25649661b122c8cd0b7aab5c9e80b90ad24",
+    "pieces": [
+      "\u2581HE",
+      "Y",
+      "\u2581VA",
+      "N"
+    ],
+    "decoded": "HEY VAN",
+    "keywords_sha256": "ebead6200b36bcb653cd8517cc7050fbdf3a47cd867f3691c37c354fbd7dd1a2",
+    "keywords_bytes": 25,
+    "all_pieces_present_in_model_tokens": true
+  },
+  "acknowledgement": {
+    "generator": "sherpa-onnx",
+    "version": "1.13.8",
+    "sherpa_core_version": "1.13.8",
+    "python_version": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "text": "hie van",
+    "voice": "generic pretrained LJSpeech VITS",
+    "speaker_id": 0,
+    "owner_voice_or_embedding_used": false,
+    "model_sha256": "5bbd273797a9ecf8d94bd6ec02ad16cb41cbb85f055ad98d528ced3e44c9b31a",
+    "tokens_sha256": "5fee2c6b238d712287f2ecb08f34a8a8b413bcb7390862ef6fb6fd6f0f8d3a17",
+    "lexicon_original_sha256": "bdccfc6da71c45c48e2e0056fcf0aab760577c5f959f6c1b5eb3e3e916fd5a0e",
+    "lexicon_sha256": "ade8c4ee074265004115178813429bf2c066e4321bbb0e7e42ec9db02ddf58ec",
+    "lexicon_change": {
+      "added_entry": "hie h \u02c8 a \u026a",
+      "source_entries": [
+        "hi",
+        "high"
+      ],
+      "reason": "canonical acknowledgement spelling hie is the greeting homophone of hi; alias explicitly authorized by parent",
+      "model_lexicon_source": "csukuangfj/vits-ljs; CMU dictionary converted to IPA"
+    },
+    "runtime_frontend": "Lexicon; data_dir empty; no eSpeak data files used",
+    "config": {
+      "family": "vits",
+      "num_threads": 2,
+      "provider": "cpu",
+      "noise_scale": 0.667,
+      "noise_scale_w": 0.8,
+      "length_scale": 1.0,
+      "max_num_sentences": 1,
+      "silence_scale": 0.2,
+      "speed": 1.0
+    },
+    "output": {
+      "path": "/workspace/van-acoustic-assets/selected/critical_phrases/wake_acknowledgement.wav",
+      "sha256": "eafd13b589803b7bc404c469b69e3ab1c808defb5c8ed7e8e963b11f7eb6759b",
+      "size": 35884,
+      "sample_rate_hz": 22050,
+      "channels": 1,
+      "pcm_bits": 16,
+      "sample_count": 17920,
+      "duration_seconds": 0.8126984126984127,
+      "peak": 0.5755182504653931,
+      "rms": 0.0791749656200409
+    },
+    "elapsed_seconds": 1.0406176889955532,
+    "qualification": "Actual CPU synthesis and finite nonempty PCM validation; handset listening/playback and wake quality deferred",
+    "license": "Apache-2.0 weights; CMU dictionary redistribution notice retained; shipped TTS native runtime contains separately GPL-3.0 licensed eSpeak component",
+    "canonical_text_all_lexicon_tokens_admitted": true,
+    "lexicon_unusable_entries": [
+      {
+        "word": "rapprochement",
+        "unknown_tokens": [
+          "\u0303"
+        ]
+      },
+      {
+        "word": "croissants",
+        "unknown_tokens": [
+          "\u0303"
+        ]
+      },
+      {
+        "word": "aix-en-provence",
+        "unknown_tokens": [
+          "\u0303"
+        ]
+      },
+      {
+        "word": "provence",
+        "unknown_tokens": [
+          "\u0303"
+        ]
+      },
+      {
+        "word": "croissant",
+        "unknown_tokens": [
+          "\u0303"
+        ]
+      },
+      {
+        "word": "denouement",
+        "unknown_tokens": [
+          "\u0303"
+        ]
+      },
+      {
+        "word": "hola",
+        "unknown_tokens": [
+          "(",
+          ")",
+          "-"
+        ]
+      },
+      {
+        "word": "blanc",
+        "unknown_tokens": [
+          "\u0303"
+        ]
+      }
+    ],
+    "lexicon_limit": "Sherpa1.13.8 lexicon-only frontend logs and skips out-of-vocabulary words; caller must reject incomplete spoken-answer coverage."
+  },
+  "native_smokes": {
+    "prepare": {
+      "text": "hey van",
+      "speaker_id": 0,
+      "model": "generic VITS LJSpeech",
+      "source_rate_hz": 22050,
+      "resampler": "scipy.signal.resample_poly",
+      "ack_audio": "/workspace/van-acoustic-assets/smoke/hie-van-16000.wav",
+      "positive_audio": "/workspace/van-acoustic-assets/smoke/hey-van-16000.wav",
+      "owner_audio_used": false,
+      "elapsed_seconds": 1.027112968993606,
+      "runtime_version": "1.13.8"
+    },
+    "asr_transducer": {
+      "mode": "asr_transducer",
+      "constructor_accepted": true,
+      "decode_completed": true,
+      "text": "I THEN",
+      "tokens": [
+        " I",
+        " THEN"
+      ],
+      "sample_rate_hz": 16000,
+      "feature_dim": 80,
+      "model_type": "transducer",
+      "input_text_provenance": "actual generic TTS hie van acknowledgement; no owner audio",
+      "config": "OfflineRecognizerConfig(feat_config=FeatureExtractorConfig(sampling_rate=16000, feature_dim=80, low_freq=20, high_freq=-400, dither=0, normalize_samples=True, snip_edges=False), model_config=OfflineModelConfig(transducer=OfflineTransducerModelConfig(encoder_filename=\"/workspace/van-acoustic-assets/selected/asr/encoder-epoch-30-avg-1.int8.onnx\", decoder_filename=\"/workspace/van-acoustic-assets/selected/asr/decoder-epoch-30-avg-1.int8.onnx\", joiner_filename=\"/workspace/van-acoustic-assets/selected/asr/joiner-epoch-30-avg-1.int8.onnx\"), paraformer=OfflineParaformerModelConfig(model=\"\"), nemo_ctc=OfflineNemoEncDecCtcModelConfig(model=\"\"), whisper=OfflineWhisperModelConfig(encoder=\"\", decoder=\"\", language=\"\", task=\"transcribe\", tail_paddings=-1, enable_token_timestamps=False, enable_segment_timestamps=False, ), fire_red_asr=OfflineFireRedAsrModelConfig(encoder=\"\", decoder=\"\"), tdnn=OfflineTdnnModelConfig(model=\"\"), zipformer_ctc=OfflineZipformerCtcModelConfig(model=\"\"), wenet_ctc=OfflineWenetCtcModelConfig(model=\"\"), sense_voice=OfflineSenseVoiceModelConfig(model=\"\", language=\"auto\", use_itn=False), moonshine=OfflineMoonshineModelConfig(preprocessor=\"\", encoder=\"\", uncached_decoder=\"\", cached_decoder=\"\", merged_decoder=\"\", decoder=\"\", ), dolphin=OfflineDolphinModelConfig(model=\"\"), canary=OfflineCanaryModelConfig(encoder=\"\", decoder=\"\", src_lang=\"\", tgt_lang=\"\", use_pnc=True), cohere_transcribe=OfflineCohereTranscribeModelConfig(encoder=\"\", decoder=\"\", language=\"\", use_punct=True, use_itn=True), omnilingual=OfflineOmnilingualAsrCtcModelConfig(model=\"\"), funasr_nano=OfflineFunASRNanoModelConfig(encoder_adaptor=\"\", llm=\"\", embedding=\"\", tokenizer=\"\", system_prompt=\"You are a helpful assistant.\", user_prompt=\"\u8bed\u97f3\u8f6c\u5199\uff1a\", max_new_tokens=512, temperature=1e-06, top_p=0.8, seed=42, language=\"\", itn=True, hotwords=\"\"), medasr=OfflineMedAsrCtcModelConfig(model=\"\"), fire_red_asr_ctc=OfflineFireRedAsrCtcModelConfig(model=\"\"), qwen3_asr=OfflineQwen3ASRModelConfig(conv_frontend=\"\", encoder=\"\", decoder=\"\", tokenizer=\"\", hotwords=\"\", max_total_len=512, max_new_tokens=128, temperature=1e-06, top_p=0.8, seed=42), telespeech_ctc=\"\", tokens=\"/workspace/van-acoustic-assets/selected/asr/tokens.txt\", num_threads=2, debug=False, provider=\"cpu\", model_type=\"transducer\", modeling_unit=\"cjkchar\", bpe_vocab=\"\"), lm_config=OfflineLMConfig(model=\"\", scale=0.1, lodr_scale=0, lodr_fst=\"\", lodr_backoff_id=-1), ctc_fst_decoder_config=OfflineCtcFstDecoderConfig(graph=\"\", max_active=3000), decoding_method=\"greedy_search\", max_active_paths=4, hotwords_file=\"\", hotwords_score=1.5, blank_penalty=0, rule_fsts=\"\", rule_fars=\"\", hr=HomophoneReplacerConfig(lexicon=\"\", rule_fsts=\"\"))",
+      "elapsed_seconds": 0.8997356110048713,
+      "runtime_version": "1.13.8"
+    },
+    "asr_zipformer2": {
+      "mode": "asr_zipformer2",
+      "constructor_accepted": true,
+      "decode_completed": true,
+      "text": "I THEN",
+      "tokens": [
+        " I",
+        " THEN"
+      ],
+      "sample_rate_hz": 16000,
+      "feature_dim": 80,
+      "model_type": "zipformer2",
+      "input_text_provenance": "actual generic TTS hie van acknowledgement; no owner audio",
+      "config": "OfflineRecognizerConfig(feat_config=FeatureExtractorConfig(sampling_rate=16000, feature_dim=80, low_freq=20, high_freq=-400, dither=0, normalize_samples=True, snip_edges=False), model_config=OfflineModelConfig(transducer=OfflineTransducerModelConfig(encoder_filename=\"/workspace/van-acoustic-assets/selected/asr/encoder-epoch-30-avg-1.int8.onnx\", decoder_filename=\"/workspace/van-acoustic-assets/selected/asr/decoder-epoch-30-avg-1.int8.onnx\", joiner_filename=\"/workspace/van-acoustic-assets/selected/asr/joiner-epoch-30-avg-1.int8.onnx\"), paraformer=OfflineParaformerModelConfig(model=\"\"), nemo_ctc=OfflineNemoEncDecCtcModelConfig(model=\"\"), whisper=OfflineWhisperModelConfig(encoder=\"\", decoder=\"\", language=\"\", task=\"transcribe\", tail_paddings=-1, enable_token_timestamps=False, enable_segment_timestamps=False, ), fire_red_asr=OfflineFireRedAsrModelConfig(encoder=\"\", decoder=\"\"), tdnn=OfflineTdnnModelConfig(model=\"\"), zipformer_ctc=OfflineZipformerCtcModelConfig(model=\"\"), wenet_ctc=OfflineWenetCtcModelConfig(model=\"\"), sense_voice=OfflineSenseVoiceModelConfig(model=\"\", language=\"auto\", use_itn=False), moonshine=OfflineMoonshineModelConfig(preprocessor=\"\", encoder=\"\", uncached_decoder=\"\", cached_decoder=\"\", merged_decoder=\"\", decoder=\"\", ), dolphin=OfflineDolphinModelConfig(model=\"\"), canary=OfflineCanaryModelConfig(encoder=\"\", decoder=\"\", src_lang=\"\", tgt_lang=\"\", use_pnc=True), cohere_transcribe=OfflineCohereTranscribeModelConfig(encoder=\"\", decoder=\"\", language=\"\", use_punct=True, use_itn=True), omnilingual=OfflineOmnilingualAsrCtcModelConfig(model=\"\"), funasr_nano=OfflineFunASRNanoModelConfig(encoder_adaptor=\"\", llm=\"\", embedding=\"\", tokenizer=\"\", system_prompt=\"You are a helpful assistant.\", user_prompt=\"\u8bed\u97f3\u8f6c\u5199\uff1a\", max_new_tokens=512, temperature=1e-06, top_p=0.8, seed=42, language=\"\", itn=True, hotwords=\"\"), medasr=OfflineMedAsrCtcModelConfig(model=\"\"), fire_red_asr_ctc=OfflineFireRedAsrCtcModelConfig(model=\"\"), qwen3_asr=OfflineQwen3ASRModelConfig(conv_frontend=\"\", encoder=\"\", decoder=\"\", tokenizer=\"\", hotwords=\"\", max_total_len=512, max_new_tokens=128, temperature=1e-06, top_p=0.8, seed=42), telespeech_ctc=\"\", tokens=\"/workspace/van-acoustic-assets/selected/asr/tokens.txt\", num_threads=2, debug=False, provider=\"cpu\", model_type=\"zipformer2\", modeling_unit=\"cjkchar\", bpe_vocab=\"\"), lm_config=OfflineLMConfig(model=\"\", scale=0.1, lodr_scale=0, lodr_fst=\"\", lodr_backoff_id=-1), ctc_fst_decoder_config=OfflineCtcFstDecoderConfig(graph=\"\", max_active=3000), decoding_method=\"greedy_search\", max_active_paths=4, hotwords_file=\"\", hotwords_score=1.5, blank_penalty=0, rule_fsts=\"\", rule_fars=\"\", hr=HomophoneReplacerConfig(lexicon=\"\", rule_fsts=\"\"))",
+      "elapsed_seconds": 1.7746671619970584,
+      "runtime_version": "1.13.8"
+    },
+    "kws_nonmobile": {
+      "mode": "kws_nonmobile",
+      "constructor_accepted": true,
+      "decode_completed": true,
+      "hits": [],
+      "positive_smoke_detected": false,
+      "keyword_file": "\u2581HE Y \u2581VA N @HEY_VAN\n",
+      "sample_rate_hz": 16000,
+      "feature_dim": 80,
+      "model_type": "zipformer2",
+      "config": "KeywordSpotterConfig(feat_config=FeatureExtractorConfig(sampling_rate=16000, feature_dim=80, low_freq=20, high_freq=-400, dither=0, normalize_samples=True, snip_edges=False), model_config=OnlineModelConfig(transducer=OnlineTransducerModelConfig(encoder=\"/workspace/van-acoustic-assets/extracted/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx\", decoder=\"/workspace/van-acoustic-assets/extracted/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01/decoder-epoch-12-avg-2-chunk-16-left-64.onnx\", joiner=\"/workspace/van-acoustic-assets/extracted/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx\"), paraformer=OnlineParaformerModelConfig(encoder=\"\", decoder=\"\"), wenet_ctc=OnlineWenetCtcModelConfig(model=\"\", chunk_size=16, num_left_chunks=4), zipformer2_ctc=OnlineZipformer2CtcModelConfig(model=\"\"), nemo_ctc=OnlineNeMoCtcModelConfig(model=\"\"), t_one_ctc=OnlineToneCtcModelConfig(model=\"\"), provider_config=ProviderConfig(device=0, provider=\"cpu\", cuda_config=CudaConfig(cudnn_conv_algo_search=1), trt_config=TensorrtConfig(trt_max_workspace_size=2147483647, trt_max_partition_iterations=10, trt_min_subgraph_size=5, trt_fp16_enable=\"True\", trt_detailed_build_log=\"False\", trt_engine_cache_enable=\"True\", trt_engine_cache_path=\".\", trt_timing_cache_enable=\"True\", trt_timing_cache_path=\".\",trt_dump_subgraphs=\"False\" )), tokens=\"/workspace/van-acoustic-assets/extracted/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01/tokens.txt\", num_threads=2, warm_up=0, debug=False, model_type=\"zipformer2\", modeling_unit=\"\", bpe_vocab=\"\"), max_active_paths=4, num_trailing_blanks=2, keywords_score=1.5, keywords_threshold=0.25, keywords_file=\"/workspace/van-acoustic-assets/selected/wake/keywords.txt\")",
+      "input_provenance": "actual fixed generic TTS hey van; no owner audio",
+      "qualification": "Synthetic positive CPU smoke only; no handset FAR/FRR, noise, distance, battery or enrolled-owner claim",
+      "elapsed_seconds": 0.3077857929893071,
+      "runtime_version": "1.13.8"
+    },
+    "kws_selected_silence": {
+      "mode": "kws_selected_silence",
+      "constructor_accepted": true,
+      "decode_completed": true,
+      "hits": [],
+      "positive_smoke_detected": false,
+      "keyword_file": "\u2581HE Y \u2581VA N @HEY_VAN\n",
+      "sample_rate_hz": 16000,
+      "feature_dim": 80,
+      "model_type": "zipformer2",
+      "config": "KeywordSpotterConfig(feat_config=FeatureExtractorConfig(sampling_rate=16000, feature_dim=80, low_freq=20, high_freq=-400, dither=0, normalize_samples=True, snip_edges=False), model_config=OnlineModelConfig(transducer=OnlineTransducerModelConfig(encoder=\"/workspace/van-acoustic-assets/selected/wake/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx\", decoder=\"/workspace/van-acoustic-assets/selected/wake/decoder-epoch-12-avg-2-chunk-16-left-64.onnx\", joiner=\"/workspace/van-acoustic-assets/selected/wake/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx\"), paraformer=OnlineParaformerModelConfig(encoder=\"\", decoder=\"\"), wenet_ctc=OnlineWenetCtcModelConfig(model=\"\", chunk_size=16, num_left_chunks=4), zipformer2_ctc=OnlineZipformer2CtcModelConfig(model=\"\"), nemo_ctc=OnlineNeMoCtcModelConfig(model=\"\"), t_one_ctc=OnlineToneCtcModelConfig(model=\"\"), provider_config=ProviderConfig(device=0, provider=\"cpu\", cuda_config=CudaConfig(cudnn_conv_algo_search=1), trt_config=TensorrtConfig(trt_max_workspace_size=2147483647, trt_max_partition_iterations=10, trt_min_subgraph_size=5, trt_fp16_enable=\"True\", trt_detailed_build_log=\"False\", trt_engine_cache_enable=\"True\", trt_engine_cache_path=\".\", trt_timing_cache_enable=\"True\", trt_timing_cache_path=\".\",trt_dump_subgraphs=\"False\" )), tokens=\"/workspace/van-acoustic-assets/selected/wake/tokens.txt\", num_threads=2, warm_up=0, debug=False, model_type=\"zipformer2\", modeling_unit=\"\", bpe_vocab=\"\"), max_active_paths=4, num_trailing_blanks=2, keywords_score=1.5, keywords_threshold=0.25, keywords_file=\"/workspace/van-acoustic-assets/selected/wake/keywords.txt\")",
+      "input_provenance": "all-zero silence",
+      "qualification": "Synthetic positive CPU smoke only; no handset FAR/FRR, noise, distance, battery or enrolled-owner claim",
+      "elapsed_seconds": 0.3941897579934448,
+      "runtime_version": "1.13.8"
+    },
+    "kws_selected_leading": {
+      "mode": "kws_selected_leading",
+      "constructor_accepted": true,
+      "decode_completed": true,
+      "hits": [],
+      "positive_smoke_detected": false,
+      "keyword_file": "\u2581HE Y \u2581VA N @HEY_VAN\n",
+      "sample_rate_hz": 16000,
+      "feature_dim": 80,
+      "model_type": "zipformer2",
+      "config": "KeywordSpotterConfig(feat_config=FeatureExtractorConfig(sampling_rate=16000, feature_dim=80, low_freq=20, high_freq=-400, dither=0, normalize_samples=True, snip_edges=False), model_config=OnlineModelConfig(transducer=OnlineTransducerModelConfig(encoder=\"/workspace/van-acoustic-assets/selected/wake/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx\", decoder=\"/workspace/van-acoustic-assets/selected/wake/decoder-epoch-12-avg-2-chunk-16-left-64.onnx\", joiner=\"/workspace/van-acoustic-assets/selected/wake/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx\"), paraformer=OnlineParaformerModelConfig(encoder=\"\", decoder=\"\"), wenet_ctc=OnlineWenetCtcModelConfig(model=\"\", chunk_size=16, num_left_chunks=4), zipformer2_ctc=OnlineZipformer2CtcModelConfig(model=\"\"), nemo_ctc=OnlineNeMoCtcModelConfig(model=\"\"), t_one_ctc=OnlineToneCtcModelConfig(model=\"\"), provider_config=ProviderConfig(device=0, provider=\"cpu\", cuda_config=CudaConfig(cudnn_conv_algo_search=1), trt_config=TensorrtConfig(trt_max_workspace_size=2147483647, trt_max_partition_iterations=10, trt_min_subgraph_size=5, trt_fp16_enable=\"True\", trt_detailed_build_log=\"False\", trt_engine_cache_enable=\"True\", trt_engine_cache_path=\".\", trt_timing_cache_enable=\"True\", trt_timing_cache_path=\".\",trt_dump_subgraphs=\"False\" )), tokens=\"/workspace/van-acoustic-assets/selected/wake/tokens.txt\", num_threads=2, warm_up=0, debug=False, model_type=\"zipformer2\", modeling_unit=\"\", bpe_vocab=\"\"), max_active_paths=4, num_trailing_blanks=2, keywords_score=1.5, keywords_threshold=0.25, keywords_file=\"/workspace/van-acoustic-assets/selected/wake/keywords.txt\")",
+      "input_provenance": "actual fixed generic TTS hey van; no owner audio",
+      "qualification": "Synthetic positive CPU smoke only; no handset FAR/FRR, noise, distance, battery or enrolled-owner claim",
+      "elapsed_seconds": 0.35491125599946827,
+      "runtime_version": "1.13.8"
+    }
+  },
+  "mobile_model_excluded": {
+    "runtime_version": "1.13.8",
+    "candidates": [
+      {
+        "candidate": "official mobile int8 encoder",
+        "constructor_accepted": true,
+        "decode_completed": false,
+        "failure": "ONNX Reshape /downsample/Reshape_1 input17x1x128 requested8x2x1x128",
+        "log": "smoke-kws-mobile-int8-failure.log"
+      },
+      {
+        "candidate": "official mobile FP32 encoder",
+        "constructor_accepted": true,
+        "decode_completed": false,
+        "failure": "same ONNX Reshape mismatch",
+        "log": "smoke-kws-mobile-fp32.log"
+      },
+      {
+        "candidate": "official non-mobile dynamic int8 encoder",
+        "constructor_accepted": true,
+        "decode_completed": true,
+        "positive_smoke_detected": false,
+        "receipt": "smoke/kws_nonmobile.json",
+        "selected": true
+      }
+    ],
+    "owner_audio_used": false
+  },
+  "limitations": [
+    "Dynamic int8 KWS native constructor+decode and all-zero silence smoke pass; real fixed-TTS hey van positive attempt produced no hit at declared thresholds, including a leading-silence attempt. Wake acoustic quality/owner FAR/FRR remain unqualified.",
+    "ASR native constructors accept both transducer and zipformer2 and decode; short generic hie van was recognized as I THEN, so no recognition-quality qualification is claimed.",
+    "Lexicon-only VITS silently ignores OOV words; caller must fail closed on complete lexicon/phoneme coverage. Eight upstream entries contain unsupported model phonemes.",
+    "Native TTS AAR statically contains eSpeak GPL-3.0-or-later despite lexicon-only model execution and no eSpeak data files in selected assets. Private owner acceptance combination authorized; public distribution not qualified.",
+    "Corresponding-source/build-input inventory exists and complete Sherpa source is retained; native transitive source archives and exact upstream build/toolchain/fork attestation are not complete.",
+    "No owner speech embedding/profile/enrollment, release signing key, secret file or keystore generated/read/used.",
+    "No handset wake, ASR, TTS playback/offline/network/battery tests and no model execution on owner audio were performed."
+  ],
+  "speaker_extractor": {
+    "state": "GENERIC_MODEL_NATIVE_SMOKE_PASSED",
+    "model": {
+      "runtime": "sherpa-onnx",
+      "runtime_version": "1.13.8",
+      "framework": "wespeaker",
+      "model_architecture": "ResNet34",
+      "model_type_metadata_present": false,
+      "sample_rate_hz": 16000,
+      "embedding_dimension": 256,
+      "normalize_samples_metadata": 0,
+      "source_url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/wespeaker_en_voxceleb_resnet34.onnx",
+      "sha256": "5ef208a9da1453335308a6b6f4e6dfbd7e183a38b604de0a57664f45d257fe94",
+      "size": 26534365,
+      "owner_embedding_or_profile": false,
+      "license_attribution": "licenses/WESPEAKER-ATTRIBUTION.txt"
+    },
+    "smoke_receipt": "/workspace/van-acoustic-assets/speaker-extractor-smoke.json",
+    "smoke": {
+      "schema": "van-generic-speaker-extractor-smoke/1",
+      "model": {
+        "path": "/workspace/van-acoustic-assets/selected/speaker/model.onnx",
+        "size": 26534365,
+        "sha256": "5ef208a9da1453335308a6b6f4e6dfbd7e183a38b604de0a57664f45d257fe94",
+        "onnx_metadata": {
+          "framework": "wespeaker",
+          "language": "English",
+          "url": "https://wespeaker-1256283475.cos.ap-shanghai.myqcloud.com/models/voxceleb/voxceleb_resnet34.onnx",
+          "comment": "no comment",
+          "sample_rate": "16000",
+          "output_dim": "256",
+          "normalize_samples": "0"
+        },
+        "source_url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/wespeaker_en_voxceleb_resnet34.onnx",
+        "published_sha256": null
+      },
+      "runtime": "sherpa-onnx",
+      "runtime_version": "1.13.8",
+      "provider": "cpu",
+      "num_threads": 2,
+      "sample_rate_hz": 16000,
+      "embedding_dimension": 256,
+      "embedding_finite": true,
+      "embedding_float32_bytes": 1024,
+      "embedding_l2_norm": 4.28764533996582,
+      "generic_test_embedding_sha256": "85865a1364825dfd73ff2e022f51b79bc4070cff99a1f81d56937a054904c97e",
+      "embedding_vector_persisted": false,
+      "input_audio": {
+        "path": "/workspace/van-acoustic-assets/smoke/hey-van-16000.wav",
+        "sha256": "cda15485883c77ef84e61a50ab9b9d04b50e116d219a433221eb799ee2b3c5e9",
+        "source": "actual VITS generic fixed-voice hey van synthesis",
+        "owner_audio_used": false
+      },
+      "owner_enrollment_or_profile": false,
+      "qualification": "Generic extractor tensor/native smoke only; no owner embedding/profile/acceptance; physical owner capture deferred",
+      "license": {
+        "weights_provenance_terms": "CC-BY-4.0 per official WeSpeaker pretrained-model dataset policy; attribution retained",
+        "weights_specific_hf_card": "Wespeaker/wespeaker-voxceleb-resnet34 README separately declares Apache-2.0; both source statements retained and CC-BY attribution included",
+        "code": "Apache-2.0"
+      },
+      "elapsed_seconds": 0.17304278099618386
+    },
+    "weights_license_provenance": "Official WeSpeaker pretrained-model policy CC-BY-4.0; specific HF card Apache-2.0; both statements retained, attribution included",
+    "code_license": "Apache-2.0",
+    "owner_embedding": "ABSENT; only actual consenting owner enrollment may supply it"
+  },
+  "artifacts": [
+    {
+      "path": "extraction-receipt.json",
+      "size": 12238,
+      "sha256": "d566e6e1627ee0143750cf75de9cdcdb9d5a05b60ee01391907af91ace6c8149"
+    },
+    {
+      "path": "keyword-preparation-receipt.json",
+      "size": 493,
+      "sha256": "3e2237c51b558790156f9d039ae2eeeae9b8cf8fced1438487afcece7c5a2197"
+    },
+    {
+      "path": "acknowledgement-synthesis-receipt.json",
+      "size": 3049,
+      "sha256": "d113a14265efbd470e30d032aabbaeb14ab524266578240559ad3cfb07dd4273"
+    },
+    {
+      "path": "kws-candidate-qualification.json",
+      "size": 828,
+      "sha256": "cb1ea935e5ce59643931cdf380bedd7676f0d82a087018f7049bf129bb1c81fa"
+    },
+    {
+      "path": "native-aar-receipt.json",
+      "size": 997,
+      "sha256": "f7792fdb47b147f5fea16999e6df7003c08df47b9786270e46077c554b4b5de4"
+    },
+    {
+      "path": "sherpa-source-receipt.json",
+      "size": 13576,
+      "sha256": "f1c7c0e1d4e7409fe6fce65ed75415deb6d0e24e516e9212cb958201f752b73a"
+    },
+    {
+      "path": "native-corresponding-source-inventory.json",
+      "size": 24390,
+      "sha256": "7d46e5ae3a5a395b82f8dd235d4a7ceb8a657971ccdeaa6062b926b31196f4d1"
+    },
+    {
+      "path": "native_model_smoke.py",
+      "size": 6316,
+      "sha256": "63a14b0ce17a9ec9f28e4969a267a40831af393041130635c3caf0258eeb38e2"
+    },
+    {
+      "path": "smoke/prepare.json",
+      "size": 402,
+      "sha256": "33536b6d02cd3adbc5115b9649f7ba20180e5c35bb296f7a2467c899d70237fb"
+    },
+    {
+      "path": "smoke/kws_selected_silence.json",
+      "size": 2184,
+      "sha256": "21bb868ada7eee5c0a2cce19ff5a92a0e8b94e0440cca61d751d2b82ae5be6ca"
+    },
+    {
+      "path": "smoke/hey-van-16000.wav",
+      "size": 26052,
+      "sha256": "cda15485883c77ef84e61a50ab9b9d04b50e116d219a433221eb799ee2b3c5e9"
+    },
+    {
+      "path": "smoke/hie-van-16000.wav",
+      "size": 26052,
+      "sha256": "74338bd23d348fd2612b4c2e3279cd3e16c4e325deef1ca551c549a0daafef94"
+    },
+    {
+      "path": "smoke/asr_transducer.json",
+      "size": 3235,
+      "sha256": "6f817126e4be7effc639b41d335c7667af41d71dfea6798cc2895d59339db374"
+    },
+    {
+      "path": "smoke/asr_zipformer2.json",
+      "size": 3235,
+      "sha256": "4f5698514c47f4324678eb350561c6aab8c7b6a20d78b2ed40781a01c6c3bee7"
+    },
+    {
+      "path": "smoke/kws_selected_leading.json",
+      "size": 2217,
+      "sha256": "1e736ef7fd5f68418cc08b0f15718a4db60d9ca808588a966431043cfa739b27"
+    },
+    {
+      "path": "smoke/kws_nonmobile.json",
+      "size": 2405,
+      "sha256": "c73646ef21378a463f1a5f03c141c94b6618d8b97766b40ae2641c9c470f02eb"
+    },
+    {
+      "path": "smoke-kws-nonmobile.log",
+      "size": 2405,
+      "sha256": "c73646ef21378a463f1a5f03c141c94b6618d8b97766b40ae2641c9c470f02eb"
+    },
+    {
+      "path": "smoke-kws.log",
+      "size": 1162,
+      "sha256": "e7e1b46a27cad660c5b01410d5cb216c44e745abc3a9dc0c03fd78a3c6fd1520"
+    },
+    {
+      "path": "smoke-prepare.log",
+      "size": 1017,
+      "sha256": "74b9541ff895b9a4f17a633fb66b6ea2a26d6f6daef0a0e16661264809de3fb2"
+    },
+    {
+      "path": "smoke-kws-selected-silence.log",
+      "size": 2184,
+      "sha256": "21bb868ada7eee5c0a2cce19ff5a92a0e8b94e0440cca61d751d2b82ae5be6ca"
+    },
+    {
+      "path": "smoke-kws-mobile-int8-failure.log",
+      "size": 1162,
+      "sha256": "e7e1b46a27cad660c5b01410d5cb216c44e745abc3a9dc0c03fd78a3c6fd1520"
+    },
+    {
+      "path": "smoke-kws-selected-leading.log",
+      "size": 2217,
+      "sha256": "1e736ef7fd5f68418cc08b0f15718a4db60d9ca808588a966431043cfa739b27"
+    },
+    {
+      "path": "smoke-asr-transducer.log",
+      "size": 3235,
+      "sha256": "6f817126e4be7effc639b41d335c7667af41d71dfea6798cc2895d59339db374"
+    },
+    {
+      "path": "smoke-asr-zipformer2.log",
+      "size": 3372,
+      "sha256": "85ba0e4f3abd42bc72fa10892d098dde5771853338ad06bbe89875507a453448"
+    },
+    {
+      "path": "smoke-kws-mobile-fp32.log",
+      "size": 1162,
+      "sha256": "438aac8dc70446665fc55b87cbe50acfc0edb4a14235da8d0daf2c90e86ea6ae"
+    },
+    {
+      "path": "selected-files-manifest.json",
+      "size": 7126,
+      "sha256": "55eea4ff0258f3be72f72611ef1cb82aaf942ceb9d313d3905a9cb58a2c946d3"
+    },
+    {
+      "path": "speaker-extractor-smoke.json",
+      "size": 1981,
+      "sha256": "f62a94981d6eaae8dc5dcbde5ca63aaa37c8d14593b77a00b2e20abf02e4529e"
+    },
+    {
+      "path": "speaker_model_smoke.py",
+      "size": 4021,
+      "sha256": "442d528e7f6b820e53af9b0d07c238b044ddedb10156df7bda14123f964418d2"
+    }
+  ]
+}

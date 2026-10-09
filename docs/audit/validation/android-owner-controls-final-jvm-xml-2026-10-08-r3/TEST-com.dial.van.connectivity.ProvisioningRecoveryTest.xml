@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.connectivity.ProvisioningRecoveryTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:27" hostname="052fefa249ff" time="0.016">
+  <properties/>
+  <testcase name="expiry still applies to a partially completed attempt()" classname="com.dial.van.connectivity.ProvisioningRecoveryTest" time="0.003"/>
+  <testcase name="lost successful bind answer is recovered by matching the authoritative hardware key()" classname="com.dial.van.connectivity.ProvisioningRecoveryTest" time="0.002"/>
+  <testcase name="bind first pairing recovers a lost first reply with the persisted device and client token()" classname="com.dial.van.connectivity.ProvisioningRecoveryTest" time="0.002"/>
+  <testcase name="unavailable binding status never authorises deleting a key()" classname="com.dial.van.connectivity.ProvisioningRecoveryTest" time="0.0"/>
+  <testcase name="binding failure resumes the same signed pairing without spending its ticket twice()" classname="com.dial.van.connectivity.ProvisioningRecoveryTest" time="0.001"/>
+  <testcase name="pairing receipt cannot switch the prepared device or standing token()" classname="com.dial.van.connectivity.ProvisioningRecoveryTest" time="0.001"/>
+  <testcase name="explicit unbound response permits renewing an incomplete challenge key()" classname="com.dial.van.connectivity.ProvisioningRecoveryTest" time="0.0"/>
+  <testcase name="changed signed payload cannot replace an existing device identity()" classname="com.dial.van.connectivity.ProvisioningRecoveryTest" time="0.001"/>
+  <testcase name="a bound fingerprint mismatch refuses without pairing or rebinding again()" classname="com.dial.van.connectivity.ProvisioningRecoveryTest" time="0.001"/>
+  <testcase name="an unknown binding outcome retains the prepared attempt without pair or attestation()" classname="com.dial.van.connectivity.ProvisioningRecoveryTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

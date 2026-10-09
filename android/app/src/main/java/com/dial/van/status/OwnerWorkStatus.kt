@@ -87,6 +87,7 @@ object OwnerStatusProjection {
     val commandResult: Map<String, OwnerWorkStatus> = mapOf(
         "accepted" to OwnerWorkStatus.WORKING,
         "in_flight" to OwnerWorkStatus.WORKING,
+        "outcome_unknown" to OwnerWorkStatus.UNKNOWN,
         "approval_required" to OwnerWorkStatus.WAITING_ON_YOU,
         "degraded" to OwnerWorkStatus.WAITING_ON_SOMETHING_ELSE,
         "denied" to OwnerWorkStatus.REFUSED,

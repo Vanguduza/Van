@@ -1,0 +1,155 @@
+"""Public web-acquisition runtime boundary tests."""
+
+from __future__ import annotations
+
+import httpx
+import pytest
+
+from tests.conftest_automation import make_store
+from van_gateway.automation.external_runtime import ExternalRuntimeRegistry
+from van_gateway.browser.acquisition import AcquisitionFrontier
+from van_gateway.browser.acquisition_adapters import (
+    AcquisitionRuntimeError,
+    HttpAcquisitionRuntimeAdapter,
+)
+
+
+async def _item(tmp_path, *, profile_alias="public_research"):
+    store = await make_store(tmp_path)
+    frontier = AcquisitionFrontier(store)
+    item = await frontier.enqueue(
+        "https://example.com/catalog",
+        profile_alias=profile_alias,
+        now_ms=1000,
+    )
+    return store, item
+
+
+async def test_public_runtime_envelope_has_no_credentials(tmp_path):
+    store, item = await _item(tmp_path)
+    seen = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        import json
+        seen.update(json.loads(request.content))
+        return httpx.Response(
+            200,
+            json={
+                "ok": True,
+                "status": 200,
+                "content": "catalog",
+                "content_digest": "sha256:" + "a" * 64,
+                "byte_size": 7,
+                "contains_secrets": False,
+            },
+        )
+
+    adapter = HttpAcquisitionRuntimeAdapter(
+        ExternalRuntimeRegistry(store),
+        base_url="http://127.0.0.1:9143",
+        enabled=True,
+        transport=httpx.MockTransport(handler),
+    )
+    result = await adapter.fetch_http(item)
+    assert result["ok"] is True
+    assert seen["mode"] == "READ_ONLY_ACQUISITION"
+    assert seen["target_domain"] == "example.com"
+    assert "cookie" not in seen
+    assert "headers" not in seen
+    assert "secret_ref" not in seen
+    assert "profile_alias" not in seen
+
+
+async def test_public_runtime_refuses_authenticated_profile(tmp_path):
+    store, item = await _item(tmp_path, profile_alias="authenticated_owner")
+    adapter = HttpAcquisitionRuntimeAdapter(
+        ExternalRuntimeRegistry(store),
+        base_url="http://127.0.0.1:9143",
+        enabled=True,
+        transport=httpx.MockTransport(
+            lambda request: httpx.Response(500, json={"error": "SHOULD_NOT_BE_CALLED"})
+        ),
+    )
+    with pytest.raises(AcquisitionRuntimeError, match="PUBLIC_PROFILE_REQUIRED"):
+        await adapter.fetch_http(item)
+
+
+async def test_runtime_refuses_secret_bearing_response(tmp_path):
+    store, item = await _item(tmp_path)
+    adapter = HttpAcquisitionRuntimeAdapter(
+        ExternalRuntimeRegistry(store),
+        base_url="http://127.0.0.1:9143",
+        enabled=True,
+        transport=httpx.MockTransport(
+            lambda request: httpx.Response(
+                200, json={"ok": True, "contains_secrets": True}
+            )
+        ),
+    )
+    with pytest.raises(AcquisitionRuntimeError, match="SECRET_BOUNDARY"):
+        await adapter.fetch_http(item)
+
+
+async def test_crawlee_runtime_is_bounded_and_public_only(tmp_path):
+    store, item = await _item(tmp_path)
+    seen = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        import json
+        seen.update(json.loads(request.content))
+        assert request.url.path == "/crawl/crawlee"
+        return httpx.Response(
+            200,
+            json={
+                "ok": True,
+                "pages": [],
+                "discovered_urls": ["https://example.com/a"],
+                "visited_count": 1,
+                "discovered_count": 1,
+                "content_digest": "sha256:" + "b" * 64,
+                "byte_size": 10,
+                "contains_secrets": False,
+            },
+        )
+
+    adapter = HttpAcquisitionRuntimeAdapter(
+        ExternalRuntimeRegistry(store),
+        base_url="http://127.0.0.1:9143",
+        enabled=True,
+        transport=httpx.MockTransport(handler),
+    )
+    result = await adapter.crawl(
+        item,
+        max_pages=9999,
+        max_depth=99,
+        max_concurrency=99,
+        max_tasks_per_minute=9999,
+        timeout_seconds=9999,
+        respect_robots_txt=True,
+    )
+    assert result["ok"] is True
+    assert seen["mode"] == "READ_ONLY_ACQUISITION"
+    assert seen["max_pages"] == 1000
+    assert seen["max_depth"] == 6
+    assert seen["max_concurrency"] == 12
+    assert seen["max_tasks_per_minute"] == 240
+    assert seen["timeout_seconds"] == 1800
+    assert seen["respect_robots_txt"] is True
+    assert "profile_alias" not in seen
+    assert "headers" not in seen
+    assert "cookie" not in seen
+
+
+async def test_crawlee_busy_is_preserved_as_typed_retry_signal(tmp_path):
+    store, item = await _item(tmp_path)
+    adapter = HttpAcquisitionRuntimeAdapter(
+        ExternalRuntimeRegistry(store),
+        base_url="http://127.0.0.1:9143",
+        enabled=True,
+        transport=httpx.MockTransport(
+            lambda request: httpx.Response(429, json={"error": "CRAWLEE_BUSY"})
+        ),
+    )
+    with pytest.raises(AcquisitionRuntimeError) as exc:
+        await adapter.crawl(item, timeout_seconds=60)
+    assert exc.value.code == "CRAWLEE_BUSY"

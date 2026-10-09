@@ -1,0 +1,102 @@
+{
+  "model_archives": [
+    {
+      "archive": {
+        "archive": "archives/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01.tar.bz2",
+        "published_sha256": null,
+        "sha256": "f170013b4716e41b62b9bfd809687c207cef798ef9bc6534d524e17af9b6561a",
+        "size": 17626723
+      },
+      "capability": "wake",
+      "license": {
+        "evidence": "Actual model archive README.md explicitly declares Apache License2.0; official k2-fsa/sherpa-onnx kws-models release",
+        "license": "Apache-2.0"
+      },
+      "source_url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/kws-models/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01.tar.bz2"
+    },
+    {
+      "archive": {
+        "archive": "archives/sherpa-onnx-zipformer-gigaspeech-2023-12-12.tar.bz2",
+        "published_sha256": "ec7f27abbbdba3b261deab9a853803b5ec72cb3295c01a77f34e6de5b62bf5c4",
+        "sha256": "ec7f27abbbdba3b261deab9a853803b5ec72cb3295c01a77f34e6de5b62bf5c4",
+        "size": 310562559
+      },
+      "capability": "asr",
+      "license": {
+        "license": "Apache-2.0",
+        "model_card_revision": "4115aa3f7d3ff431cc04ce8223d8a20a37ef3cae",
+        "model_card_url": "https://huggingface.co/k2-fsa/sherpa-onnx-zipformer-gigaspeech-2023-12-12"
+      },
+      "source_url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-zipformer-gigaspeech-2023-12-12.tar.bz2"
+    },
+    {
+      "archive": {
+        "archive": "archives/vits-ljs.tar.bz2",
+        "published_sha256": null,
+        "sha256": "78f7df445fcd42d1dd6df2c78c66c2c2fee8b7abecc6ae255a5950097a6558bc",
+        "size": 109037061
+      },
+      "capability": "tts",
+      "license": {
+        "lexicon_modification": "Exact pronunciation alias hie h \u02c8 a \u026a copied from existing hi/high entries",
+        "lexicon_provenance": "CMU dictionary converted to IPA; CMU redistribution notice retained; independent IPA conversion notice not supplied in upstream source zip; HF model repository declares Apache-2.0",
+        "license": "Apache-2.0",
+        "model_card_revision": "7ac337c834f318e45a34037cb3371cc3929187ff",
+        "model_card_url": "https://huggingface.co/csukuangfj/vits-ljs"
+      },
+      "source_url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-ljs.tar.bz2"
+    }
+  ],
+  "raw_models": [
+    {
+      "license_attribution": "source/licenses/WESPEAKER-ATTRIBUTION.txt",
+      "path": "speaker/model.onnx",
+      "sha256": "5ef208a9da1453335308a6b6f4e6dfbd7e183a38b604de0a57664f45d257fe94",
+      "size": 26534365,
+      "source_url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/wespeaker_en_voxceleb_resnet34.onnx"
+    }
+  ],
+  "schema_version": 1,
+  "weights": [
+    {
+      "path": "asr/decoder-epoch-30-avg-1.int8.onnx",
+      "sha256": "2b0580feb757696fa929922670b7126aaee609630349a1809fd5a2aee926d56e",
+      "size": 540688
+    },
+    {
+      "path": "asr/encoder-epoch-30-avg-1.int8.onnx",
+      "sha256": "d3eff4b1bd747bd781a47966795988539227d05638524b0313f26d3a166962d7",
+      "size": 72850738
+    },
+    {
+      "path": "asr/joiner-epoch-30-avg-1.int8.onnx",
+      "sha256": "80160e45cca71dd52f6b0a6d3d12be18126f5308b2d4ba03f001300fea377c64",
+      "size": 259417
+    },
+    {
+      "path": "speaker/model.onnx",
+      "sha256": "5ef208a9da1453335308a6b6f4e6dfbd7e183a38b604de0a57664f45d257fe94",
+      "size": 26534365
+    },
+    {
+      "path": "tts/vits-ljs.onnx",
+      "sha256": "5bbd273797a9ecf8d94bd6ec02ad16cb41cbb85f055ad98d528ced3e44c9b31a",
+      "size": 114124456
+    },
+    {
+      "path": "wake/decoder-epoch-12-avg-2-chunk-16-left-64.onnx",
+      "sha256": "f61ebd3eed3773a44d088d53dfae92dbb6aec4839f4dcaee2d402414741663a3",
+      "size": 1063189
+    },
+    {
+      "path": "wake/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "sha256": "1e721676515bcd42a186979733981213c66c80db680e1cc582dfedf3be76e678",
+      "size": 4807159
+    },
+    {
+      "path": "wake/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "sha256": "eae9da0c7e1e6c6a3f4cc42d167899c388f6c6701b94cb96320e4f55df79624c",
+      "size": 163380
+    }
+  ]
+}

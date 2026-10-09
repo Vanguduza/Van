@@ -2107,7 +2107,7 @@
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
         "android/app/src/main/java/com/dial/van/command/CommandCentreComponents.kt:100",
-        "android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:309",
+        "android/app/src/main/java/com/dial/van/command/work/WorkDetails.kt:139",
         "android/app/src/main/java/com/dial/van/command/modules/BrowserModules.kt:184",
         "android/app/src/main/java/com/dial/van/status/OwnerLanguage.kt:19"
       ],
@@ -2247,8 +2247,8 @@
           "backend/van_gateway/browser/api.py",
           "backend/van_gateway/browser/adapters.py",
           "backend/van_gateway/app.py",
-          "deploy/van-trading-core/browser/harness_service.py",
-          "deploy/van-trading-core/browser/stagehand_service.mjs",
+          "deploy/van-browser-core/browser/harness_service.py",
+          "deploy/van-browser-core/browser/stagehand_service.mjs",
           "deploy/van-trading-core/browser/bootstrap-browser-runtime.sh",
           "deploy/van-trading-core/systemd/vati-browser-harness.service",
           "deploy/van-trading-core/systemd/vati-stagehand.service"

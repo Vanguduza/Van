@@ -1,0 +1,1995 @@
+Picked up JAVA_TOOL_OPTIONS: -Dhttps.proxyHost=proxy -Dhttps.proxyPort=8080 -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Djavax.net.ssl.trustStore=/tmp/cf-van-java-cacerts -Djavax.net.ssl.trustStorePassword=changeit
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.11.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :processResources NO-SOURCE
+> Task :processTestResources NO-SOURCE
+> Task :compileKotlin
+> Task :compileJava NO-SOURCE
+> Task :classes UP-TO-DATE
+> Task :jar
+> Task :compileTestKotlin
+> Task :compileTestJava NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :test
+Picked up JAVA_TOOL_OPTIONS: -Dhttps.proxyHost=proxy -Dhttps.proxyPort=8080 -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Djavax.net.ssl.trustStore=/tmp/cf-van-java-cacerts -Djavax.net.ssl.trustStorePassword=changeit
+
+VanNavModelTest > deepLink parses every primary and more destination() PASSED
+
+VanNavModelTest > every section 2_1 development route resolves to its own template() PASSED
+
+VanNavModelTest > deepLink ignores a trailing query string() PASSED
+
+VanNavModelTest > a literal segment beats a placeholder when two development templates both fit() PASSED
+
+VanNavModelTest > restore keeps a development route across process death() PASSED
+
+VanNavModelTest > the development templates are exactly the fifteen section 2_1 names, all registered() PASSED
+
+VanNavModelTest > back on an unknown route is null rather than a guess() PASSED
+
+VanNavModelTest > back returns each route's DNA-declared parent, and null at home() PASSED
+
+VanNavModelTest > restore falls back to home for null, blank or unknown routes() PASSED
+
+VanNavModelTest > missionRoute and projectRoute build routes VanRoute recognises() PASSED
+
+VanNavModelTest > deepLink rejects a foreign scheme or unknown path() PASSED
+
+VanNavModelTest > restore keeps a known concrete route, including one with an argument() PASSED
+
+VanNavModelTest > development deep links use the van scheme and keep only declared queries() PASSED
+
+VanNavModelTest > every route template has exactly one parent chain up to home() PASSED
+
+VanNavModelTest > startDestination honours a new-style route already() PASSED
+
+VanNavModelTest > deepLink bare scheme resolves to home() PASSED
+
+VanNavModelTest > every work-dev route's parent is Work, and none is a new destination() PASSED
+
+VanNavModelTest > startDestination falls back to home for an unrecognised extra() PASSED
+
+VanNavModelTest > deepLink parses a concrete argument route() PASSED
+
+VanNavModelTest > the development route builders produce routes VanRoute recognises() PASSED
+
+VanNavModelTest > isPrimary is true only for the five adaptive-nav destinations() PASSED
+
+VanNavModelTest > startDestination resolves a plain launch to home() PASSED
+
+VanNavModelTest > startDestination maps every legacy CommandModule id somewhere known() PASSED
+
+ActivityLifetimeContractTest > the session, the media and the cursors outlive it() PASSED
+
+ActivityLifetimeContractTest > the Activity rebuilds only what it owns() PASSED
+
+ActivityLifetimeContractTest > the two lists do not overlap() PASSED
+
+BrowserBackPolicyTest > a panel closes first() PASSED
+
+BrowserBackPolicyTest > then the address bar edit() PASSED
+
+BrowserBackPolicyTest > with nothing left it is Android's back() PASSED
+
+BrowserBackPolicyTest > back does not close the browser while the page has history() PASSED
+
+BrowserExternalLinkTest > a second scheme inside the address is refused() PASSED
+
+BrowserExternalLinkTest > only http and https are accepted() PASSED
+
+BrowserExternalLinkTest > an ordinary link opens untrusted, in the public profile() PASSED
+
+BrowserExternalLinkTest > something that is not an address is refused rather than searched() PASSED
+
+BrowserGestureSequencerTest > a move and an up carry the gesture the down opened() PASSED
+
+BrowserGestureSequencerTest > each gesture on a pointer gets a higher epoch() PASSED
+
+BrowserGestureSequencerTest > two pointers keep separate epochs() PASSED
+
+BrowserGestureSequencerTest > motion sequence restarts per gesture and increases within one() PASSED
+
+BrowserGestureSequencerTest > reset drops open gestures and keeps the sequence spaces moving() PASSED
+
+BrowserGestureSequencerTest > an unopened pointer has no gesture rather than gesture zero by accident() PASSED
+
+BrowserGestureSequencerTest > the three sequence spaces are independent() PASSED
+
+BrowserGestureSequencerTest > the epoch keeps climbing across a reset() PASSED
+
+BrowserGestureSequencerTest > an edge is duplicated onto both channels with one identity() PASSED
+
+BrowserGestureSequencerTest > only edges are duplicated() PASSED
+
+BrowserInputProtocolTest > coordinates outside the normalized range cannot be encoded() PASSED
+
+BrowserInputProtocolTest > a single pixel viewport normalizes to zero rather than dividing by zero() PASSED
+
+BrowserInputProtocolTest > the header is the length both implementations agree on() PASSED
+
+BrowserInputProtocolTest > the version is the first byte so a mismatch is a refusal rather than a misparse() PASSED
+
+BrowserInputProtocolTest > normalization spans the full range at both ends() PASSED
+
+BrowserInputProtocolTest > text beyond ascii survives the encoding() PASSED
+
+BrowserOmniboxTest > an empty label is not a host() PASSED
+
+BrowserOmniboxTest > nothing typed is nothing to do() PASSED
+
+BrowserOmniboxTest > a scheme VAN will not navigate becomes a search rather than a refusal() PASSED
+
+BrowserOmniboxTest > a query whose last word looks like a host is still a query() PASSED
+
+BrowserOmniboxTest > a single label is a search() PASSED
+
+BrowserOmniboxTest > whitespace around an address does not make it a search() PASSED
+
+BrowserOmniboxTest > an address with a scheme goes exactly where it says() PASSED
+
+BrowserOmniboxTest > a bare host gets https, never http() PASSED
+
+BrowserOmniboxTest > a punycode host is a host() PASSED
+
+BrowserOmniboxTest > something that is not a hostname is a search even with a dot in it() PASSED
+
+BrowserOmniboxTest > anything with a space is a search() PASSED
+
+BrowserProcessRecoveryTest > media does not reconnect until the session is confirmed() PASSED
+
+BrowserProcessRecoveryTest > a clock that went backwards still asks rather than discarding() PASSED
+
+BrowserProcessRecoveryTest > cursors are restored because they are positions rather than verdicts() PASSED
+
+BrowserProcessRecoveryTest > only the Gateway's answer becomes what the owner sees() PASSED
+
+BrowserProcessRecoveryTest > the Gateway saying no drops the record entirely() PASSED
+
+BrowserProcessRecoveryTest > a restored session says nothing to the owner until the Gateway has() PASSED
+
+BrowserProcessRecoveryTest > nothing persisted is nothing to restore() PASSED
+
+BrowserProcessRecoveryTest > reconciliation cannot see the cached state() PASSED
+
+BrowserProcessRecoveryTest > there is no argument that produces an owner-visible state from the cache() PASSED
+
+BrowserProcessRecoveryTest > a record older than a session's life is not about that session() PASSED
+
+BrowserShortcutStoreTest > an authenticated page's tile says VAN, not what the page is() PASSED
+
+BrowserShortcutStoreTest > a profile that no longer exists refuses rather than falling back() PASSED
+
+BrowserShortcutStoreTest > the launcher gets an id, a label and an icon, and nothing else() PASSED
+
+BrowserShortcutStoreTest > renaming changes the label and never the destination() PASSED
+
+BrowserShortcutStoreTest > an untitled ordinary page still gets a usable label() PASSED
+
+BrowserShortcutStoreTest > an unbound device does not navigate() PASSED
+
+BrowserShortcutStoreTest > revoking twice is not two revocations() PASSED
+
+BrowserShortcutStoreTest > an unknown shortcut and a revoked one are different answers() PASSED
+
+BrowserShortcutStoreTest > a revoked shortcut is not listed and cannot be revived by renaming() PASSED
+
+BrowserShortcutStoreTest > a shortcut opens when the device is bound and the profile exists() PASSED
+
+BrowserShortcutStoreTest > nothing in the forbidden list can appear in a payload() PASSED
+
+BrowserTabsTest > activating an unknown target adopts it rather than losing the owner() PASSED
+
+BrowserTabsTest > closing an inactive tab does not move the owner() PASSED
+
+BrowserTabsTest > closing the only tab leaves nothing active rather than a dangling id() PASSED
+
+BrowserTabsTest > closing the active tab lands on its neighbour, not on the first() PASSED
+
+BrowserTabsTest > a created tab is not an activated tab() PASSED
+
+BrowserTabsTest > an update for a tab we never saw created creates it() PASSED
+
+BrowserTabsTest > a duplicate create is not a second tab() PASSED
+
+BrowserTabsTest > a close for a tab that is already gone changes nothing() PASSED
+
+BrowserTabsTest > closing the last tab falls back to the one before it() PASSED
+
+BrowserTabsTest > a tab opened from another lands next to it() PASSED
+
+BrowserTabsTest > the label falls back through title, url and loading() PASSED
+
+BrowserTabsTest > an unknown opener puts the tab at the end rather than nowhere() PASSED
+
+BrowserTabsTest > an update carries only what it names() PASSED
+
+BrowserUploadPolicyTest > a ticket has nowhere to put a byte() PASSED
+
+BrowserUploadPolicyTest > an empty file and an enormous one are both refused() PASSED
+
+BrowserUploadPolicyTest > a chooser from a session that is no longer on screen is refused() PASSED
+
+BrowserUploadPolicyTest > uploading a file is not asking VAN to read it() PASSED
+
+BrowserUploadPolicyTest > an ephemeral copy expires() PASSED
+
+BrowserUploadPolicyTest > a type the page will not take is refused here rather than after the transfer() PASSED
+
+BrowserUploadPolicyTest > analysis needs the file to have actually arrived() PASSED
+
+BrowserUploadPolicyTest > a log line about an upload does not carry the filename() PASSED
+
+BrowserUploadPolicyTest > a copy the owner asked to keep does not expire() PASSED
+
+BrowserUploadPolicyTest > a name that is not a name is refused() PASSED
+
+BrowserVisualStateTest > a proposal equal to what is showing is still applied() PASSED
+
+BrowserVisualStateTest > needing the owner outranks everything else the browser is doing() PASSED
+
+BrowserVisualStateTest > the states it maps are the ones section 24 lists() PASSED
+
+BrowserVisualStateTest > a degraded connection outranks a blocked page by the ladder alone() PASSED
+
+BrowserVisualStateTest > the browser may take VAN up from idle() PASSED
+
+BrowserVisualStateTest > the browser does not pull VAN down out of a louder state it does not own() PASSED
+
+BrowserVisualStateTest > a finished navigation is never SUCCESS() PASSED
+
+BrowserVisualStateTest > even needing the owner does not take an authority state() PASSED
+
+BrowserVisualStateTest > a browser with nothing to say says nothing() PASSED
+
+BrowserVisualStateTest > a page load does not displace a trading warning() PASSED
+
+ContentViewportTest > chrome and system insets both come off() PASSED
+
+ContentViewportTest > the keyboard and the navigation bar are not subtracted twice() PASSED
+
+ContentViewportTest > a window smaller than its insets reports zero rather than a negative() PASSED
+
+ResizeCoalescerTest > the first candidate of a session is sent even without a baseline() PASSED
+
+ResizeCoalescerTest > a drag that ends inside the debounce still converges, inside the settle window() PASSED
+
+ResizeCoalescerTest > a rotation is material even at the same size() PASSED
+
+ResizeCoalescerTest > releasing the window sends the last bounds immediately() PASSED
+
+ResizeCoalescerTest > a drag with pauses is capped at ten a second() PASSED
+
+ResizeCoalescerTest > a one pixel inset rounding is not a resize() PASSED
+
+ResizeCoalescerTest > a font scale change is material() PASSED
+
+ResizeCoalescerTest > a window dragged back to where it started sends nothing() PASSED
+
+ResizeCoalescerTest > a smooth drag sends nothing remote while the finger is down() PASSED
+
+ResizeCoalescerTest > a change is held until the bounds have been still() PASSED
+
+SuggestionPolicyTest > an empty box asks nothing() PASSED
+
+SuggestionPolicyTest > local history is not a request() PASSED
+
+SuggestionPolicyTest > something that looks like a credential is never sent() PASSED
+
+SuggestionPolicyTest > an address is never sent to a suggestion provider() PASSED
+
+SuggestionPolicyTest > the default asks nobody() PASSED
+
+SuggestionPolicyTest > consent allows a query to be asked about() PASSED
+
+UploadAcceptMatchingTest > an exact type matches exactly, parameters and case aside() PASSED
+
+UploadAcceptMatchingTest > a file with no extension does not match an extension rule() PASSED
+
+UploadAcceptMatchingTest > no accept attribute means anything() PASSED
+
+UploadAcceptMatchingTest > an extension matches on the extension() PASSED
+
+UploadAcceptMatchingTest > any of several accepted forms is enough() PASSED
+
+UploadAcceptMatchingTest > star slash star takes everything() PASSED
+
+UploadAcceptMatchingTest > a wildcard type matches its family() PASSED
+
+ViewportChromeClassTest > a tablet in split screen gets a phone's chrome() PASSED
+
+ViewportChromeClassTest > the breakpoints are Android's own() PASSED
+
+ViewportSwapTest > a frame cannot swap a revision the server never acknowledged() PASSED
+
+ViewportSwapTest > a frame with no pixels does not divide by zero() PASSED
+
+ViewportSwapTest > a trailing frame from the old size does not swap() PASSED
+
+ViewportSwapTest > the first frame for the new revision swaps everything at once() PASSED
+
+ViewportSwapTest > the held frame is letterboxed rather than stretched() PASSED
+
+ViewportSwapTest > a revision must advance() PASSED
+
+ViewportSwapTest > a frame larger than the window is scaled down uniformly() PASSED
+
+ViewportSwapTest > input is withheld while a revision is unacknowledged() PASSED
+
+ViewportSwapTest > the acknowledgement alone does not swap the picture() PASSED
+
+CognitiveTwinTest > separate source facts and hypotheses preserve revision and evidence() PASSED
+
+CognitiveTwinTest > restricted records and degraded sources never become a current twin() PASSED
+
+ConversationReducerTest > outcomeFor falls back to the sentence when finished but no final outcome was given() PASSED
+
+ConversationReducerTest > outcomeFor treats a blank owner status the same as an unrecognised one() PASSED
+
+ConversationReducerTest > contextGapsSentence names what VAN did not know() PASSED
+
+ConversationReducerTest > outcomeFor keeps polling while the gateway still reports work under way() PASSED
+
+ConversationReducerTest > outcomeFor never invents an optimistic status for one it does not recognise() PASSED
+
+ConversationReducerTest > outcomeFor prefers final_outcome once the gateway says the work is finished() PASSED
+
+ConversationReducerTest > contextGapsSentence is null when there is nothing to report() PASSED
+
+ConversationReducerTest > needsPolling is true only for an unfinished status with a command id() PASSED
+
+ConnectivityManifestTest > key order and whitespace do not change the verdict() PASSED
+
+ConnectivityManifestTest > a manifest carrying a credential is refused() PASSED
+
+ConnectivityManifestTest > malformed json is refused rather than throwing at the caller() PASSED
+
+ConnectivityManifestTest > a signature of the wrong length is refused() PASSED
+
+ConnectivityManifestTest > one character changed after signing is refused() PASSED
+
+ConnectivityManifestTest > an older manifest cannot be replayed at a device that has moved on() PASSED
+
+ConnectivityManifestTest > the same version the device already trusts is not applied again() PASSED
+
+ConnectivityManifestTest > an unversioned manifest is refused() PASSED
+
+ConnectivityManifestTest > an unknown signing key is refused rather than tried against every key() PASSED
+
+ConnectivityManifestTest > a correctly signed manifest is accepted and parsed() PASSED
+
+ConnectivityTrustedKeysTest > escaped newlines inside a PEM are restored() PASSED
+
+ConnectivityTrustedKeysTest > a malformed line is dropped and the rest survive() PASSED
+
+ConnectivityTrustedKeysTest > a kid and a PEM on one line is one trusted key() PASSED
+
+ConnectivityTrustedKeysTest > an empty configuration is no keys rather than an error() PASSED
+
+ConnectivityTrustedKeysTest > a value that is not a public key is not a trusted key() PASSED
+
+ProvisioningPayloadTest > a payload altered after signing is refused() PASSED
+
+ProvisioningPayloadTest > an unsupported payload version is refused rather than parsed as this one() PASSED
+
+ProvisioningPayloadTest > what may be logged excludes the token and the challenge() PASSED
+
+ProvisioningPayloadTest > a payload signed by a key this build does not pin is refused() PASSED
+
+ProvisioningPayloadTest > a payload carrying a standing credential is refused() PASSED
+
+ProvisioningPayloadTest > a bootstrap token too short to be one is refused() PASSED
+
+ProvisioningPayloadTest > loopback over http is accepted only when the build says so() PASSED
+
+ProvisioningPayloadTest > a plain http gateway is refused in a release build() PASSED
+
+ProvisioningPayloadTest > an unknown kid is refused before anything else is read() PASSED
+
+ProvisioningPayloadTest > a payload with no expiry at all is refused rather than treated as immortal() PASSED
+
+ProvisioningPayloadTest > an expired payload is refused even with a perfect signature() PASSED
+
+ProvisioningPayloadTest > every forbidden field is actually refused() PASSED
+
+ProvisioningPayloadTest > both single-use tokens survive verification and neither is loggable() PASSED
+
+ProvisioningPayloadTest > the replay check runs before the signature so a replay costs nothing() PASSED
+
+ProvisioningPayloadTest > a payload the installer just minted is accepted() PASSED
+
+ProvisioningPayloadTest > a payload with no pairing token is refused() PASSED
+
+ProvisioningPayloadTest > a payload with no attestation challenge is refused() PASSED
+
+ProvisioningPayloadTest > a payload this device has already accepted is refused() PASSED
+
+DegradedModeStoreGatewayHealthTest > the String overload matches DegradedBridge GatewayHealthSink and tolerates bad JSON() PASSED
+
+DegradedModeStoreGatewayHealthTest > device-signal rows survive a gateway-health apply untouched() PASSED
+
+DegradedModeStoreGatewayHealthTest > a resolved code clears its row on the next apply() PASSED
+
+DegradedModeStoreGatewayHealthTest > an unmapped backend code adds its own broken row() PASSED
+
+DegradedModeStoreGatewayHealthTest > HERMES_OFFLINE updates the existing hermes row rather than adding a second one() PASSED
+
+GatewayDegradedMappingTest > an unmapped code gets its own gw-prefixed id() PASSED
+
+GatewayDegradedMappingTest > parse drops a row with no code rather than throwing() PASSED
+
+GatewayDegradedMappingTest > HERMES_OFFLINE maps onto the existing hermes subsystem id() PASSED
+
+GatewayDegradedMappingTest > parse is empty for a missing degraded array() PASSED
+
+GatewayDegradedMappingTest > labelFor renders a readable title from the code() PASSED
+
+GatewayDegradedMappingTest > detailFor names what is broken, what still works, and how to restore it() PASSED
+
+GatewayDegradedMappingTest > parse reads every well-formed row() PASSED
+
+SubsystemHealthTest > working offline is not a broken queue() PASSED
+
+SubsystemHealthTest > a phone that has granted everything reports everything working() PASSED
+
+SubsystemHealthTest > every restore action renders words a person can read() PASSED
+
+SubsystemHealthTest > a queue that cannot send is broken and a queue that will not drain is broken() PASSED
+
+SubsystemHealthTest > an overlay the owner turned off is not a fault() PASSED
+
+SubsystemHealthTest > no owner-facing detail is written in VAN's own vocabulary() PASSED
+
+SubsystemHealthTest > each subsystem follows its own signal() PASSED
+
+SubsystemHealthTest > every broken subsystem carries something the owner can do() PASSED
+
+SubsystemHealthTest > a phone that has granted nothing does not report five healthy subsystems() PASSED
+
+DensityTierTest > overlay is always compact regardless of width() PASSED
+
+DensityTierTest > 600dp and above is wide() PASSED
+
+DensityTierTest > breakpoint constant matches the boundary() PASSED
+
+DensityTierTest > narrow non-overlay widths are regular() PASSED
+
+LiveBadgeFormatTest > under a minute floors to 00 colon 00() PASSED
+
+LiveBadgeFormatTest > hours beyond 24 keep counting rather than wrapping to a day() PASSED
+
+LiveBadgeFormatTest > exactly one minute() PASSED
+
+LiveBadgeFormatTest > exactly one hour rolls minutes over rather than reading 00 colon 60() PASSED
+
+LiveBadgeFormatTest > an hour and a half() PASSED
+
+LiveBadgeFormatTest > zero age is 00 colon 00() PASSED
+
+LiveBadgeFormatTest > negative ages are clamped to zero rather than producing a negative string() PASSED
+
+MotionSpecTest > press scale matches DNA() PASSED
+
+MotionSpecTest > data updates animate at quick, shared elements at standard() PASSED
+
+MotionSpecTest > unreduced motion resolves to the DNA durations() PASSED
+
+MotionSpecTest > easings are distinct curves() PASSED
+
+MotionSpecTest > DNA durations match the published tokens() PASSED
+
+MotionSpecTest > reduced motion collapses every duration to zero() PASSED
+
+ScreenStateTest > no content and queued offline work is Offline, ahead of a stale error message() PASSED
+
+ScreenStateTest > blank subsystem keys are dropped() PASSED
+
+ScreenStateTest > non-string entries in the health array are ignored() PASSED
+
+ScreenStateTest > stale overrides degraded too — merge rule is stale first() PASSED
+
+ScreenStateTest > unknown subsystem keys still get a sentence, not dropped() PASSED
+
+ScreenStateTest > content with no staleness or degradation is plain Content() PASSED
+
+ScreenStateTest > age below the stale threshold does not trigger staleness() PASSED
+
+ScreenStateTest > no content, not loading, with an error is Error() PASSED
+
+ScreenStateTest > malformed health json yields no rows rather than throwing() PASSED
+
+ScreenStateTest > known subsystem keys get their owner sentence() PASSED
+
+ScreenStateTest > no content, no loading, no error is Empty with the given sentence() PASSED
+
+ScreenStateTest > stale overrides content() PASSED
+
+ScreenStateTest > a custom stale threshold is honoured() PASSED
+
+ScreenStateTest > health json array parses into rows() PASSED
+
+ScreenStateTest > content with degraded subsystems and no staleness is Degraded, carrying the content() PASSED
+
+ScreenStateTest > age at exactly the threshold is stale() PASSED
+
+ScreenStateTest > no content and loading is Loading() PASSED
+
+StatusSemanticsTest > every thesis state maps to a valid role() PASSED
+
+StatusSemanticsTest > attention severity escalates monotonically toward critical() PASSED
+
+StatusSemanticsTest > role constants match the DNA §2 names verbatim() PASSED
+
+StatusSemanticsTest > every mission status maps to a valid role() PASSED
+
+StatusSemanticsTest > thesis confidence never uses raw pnl colour semantics() PASSED
+
+ChartAxesTest > timeLabel granularity depends on the overall span, not the individual tick() PASSED
+
+ChartAxesTest > timeTicks of an instant returns the single instant() PASSED
+
+ChartAxesTest > niceNumber rounds to 1-2-5 times a power of ten() PASSED
+
+ChartAxesTest > ticks rejects a target count below 2() PASSED
+
+ChartAxesTest > ticks of a flat series is the single value() PASSED
+
+ChartAxesTest > niceNumber non-round mode always rounds up, never clipping the range() PASSED
+
+ChartAxesTest > ticks never produces an unreadable fractional step for a round number range() PASSED
+
+ChartAxesTest > valueLabel decimal precision follows the step() PASSED
+
+ChartAxesTest > timeTicks stay within the requested span() PASSED
+
+ChartAxesTest > timeTicks snap to human boundaries for an hour-scale span() PASSED
+
+ChartAxesTest > ticks span the requested range with nice values() PASSED
+
+ChartAxesTest > ticks handles a reversed min and max() PASSED
+
+DialDevActionsTest > no action caption ever claims a pass() PASSED
+
+DialDevActionsTest > every action carries an idempotency key and the revision it was decided against() PASSED
+
+DialDevActionsTest > revoke and reject are destructive, everything else is not() PASSED
+
+DialDevActionsTest > a rejection shows its reason inline() PASSED
+
+DialDevActionsTest > the revoke consequence prefers DIAL's own sentence and otherwise says what it does not know() PASSED
+
+DialDevActionsTest > 409 is STALE_VIEW carrying the new revision, and its retry is a new decision() PASSED
+
+DialDevActionsTest > a steer needs guidance and a decision needs approve or reject() PASSED
+
+DialDevActionsTest > the projection's actions list parses and ignores rows without an id() PASSED
+
+DialDevActionsTest > only the projection moves an accepted action, and only for its own id() PASSED
+
+DialDevActionsTest > a settled action is not moved again by a later projection() PASSED
+
+DialDevActionsTest > no revision on screen means no action, which is also why nothing is queued offline() PASSED
+
+DialDevActionsTest > 202 is ACCEPTED and pending, never done, even if the forwarder says APPLIED() PASSED
+
+DialDevActionsTest > an unconfirmed send retries with the same key so DIAL cannot apply it twice() PASSED
+
+DialDevEnvelopeTest > a missing freshness is unknown, and unknown reads as stale() PASSED
+
+DialDevEnvelopeTest > a body without a projection revision is not a projection() PASSED
+
+DialDevEnvelopeTest > an empty task list is EMPTY, unless DIAL says it is degraded() PASSED
+
+DialDevEnvelopeTest > fresh data with no degraded subsystems is CONTENT() PASSED
+
+DialDevEnvelopeTest > DegradedCatalog names every DIAL development subsystem() PASSED
+
+DialDevEnvelopeTest > an unauthorised phone is an ERROR it cannot retry its way out of() PASSED
+
+DialDevEnvelopeTest > freshness over the 30 s default is STALE, and stale outranks degraded() PASSED
+
+DialDevEnvelopeTest > the envelope parses revision, sources, freshness and degraded rows() PASSED
+
+DialDevEnvelopeTest > workspaces go stale at 10 s() PASSED
+
+DialDevEnvelopeTest > a non-empty degraded list is DEGRADED with the surviving data() PASSED
+
+DialDevEnvelopeTest > offline or failed with a last-known projection keeps it on screen as STALE() PASSED
+
+DialDevEnvelopeTest > a bare degraded key still becomes a row with the catalogue's sentence() PASSED
+
+DialDevEnvelopeTest > 503 dial_dev_unavailable with nothing on screen is a retryable ERROR() PASSED
+
+DialDevEnvelopeTest > offline with nothing on screen is OFFLINE with no owner work queued() PASSED
+
+DialDevEnvelopeTest > age keeps growing on the phone after the projection was served() PASSED
+
+DialDevEnvelopeTest > a refetch in flight keeps the last projection judged by its own age() PASSED
+
+DialDevModelsTest > infrastructure reads the ladder, Orca, manager slots and the Oracle gate() PASSED
+
+DialDevModelsTest > evidence keeps admission and the exact command() PASSED
+
+DialDevModelsTest > a terminal tail marks redacted spans and never shows more than 200 lines() PASSED
+
+DialDevModelsTest > a task without a heartbeat has no age, not zero() PASSED
+
+DialDevModelsTest > a task row reads the TODO record and measures heartbeat on DIAL's clock() PASSED
+
+DialDevModelsTest > the graph is navigable as a list, critical path first() PASSED
+
+DialDevModelsTest > the completion flag on a task row reads as claimed, not passed() PASSED
+
+DialDevModelsTest > sibling paths that merely share a prefix are not an overlap() PASSED
+
+DialDevModelsTest > overlap warnings are DIAL's when sent, derived and labelled otherwise() PASSED
+
+DialDevModelsTest > task views parse to the section 16_3 names and default to Now() PASSED
+
+DialDevModelsTest > SSE frames dispatch on the blank line and name what changed() PASSED
+
+DialDevModelsTest > home counts DIAL did not send stay null and render as a dash() PASSED
+
+DialDevModelsTest > a diff lists files first and splits hunks per file on demand() PASSED
+
+DialDevModelsTest > home keeps at most five Now rows and three Needs-you items() PASSED
+
+DialDevModelsTest > the task detail reports an Android verification only when DIAL does() PASSED
+
+DialDevSemanticsTest > a terminal or blocked state is not relabelled by the candidate flag() PASSED
+
+DialDevSemanticsTest > progress events map onto DNA roles, and a completion candidate event is never favourable() PASSED
+
+DialDevSemanticsTest > only the projection's own PASS reads passed, whatever the candidate flag says() PASSED
+
+DialDevSemanticsTest > the table covers every DIAL state this build knows, and every role is a DNA role() PASSED
+
+DialDevSemanticsTest > only NOT_APPLICABLE is hidden from lists() PASSED
+
+DialDevSemanticsTest > state parsing is case- and space-tolerant but exact on the name() PASSED
+
+DialDevSemanticsTest > captions drop a detail DIAL did not send rather than inventing one() PASSED
+
+DialDevSemanticsTest > the smaller vocabularies map onto DNA roles, and unknown words onto disabled() PASSED
+
+DialDevSemanticsTest > an unknown state is shown as itself in the disabled role, not guessed() PASSED
+
+DialDevSemanticsTest > every row of the section 4 table maps exactly() PASSED
+
+DialDevSemanticsTest > a completion candidate never renders as passed() PASSED
+
+EventStreamTest > newest events are kept and the list is bounded() PASSED
+
+EventStreamTest > catching up is not slowed down() PASSED
+
+EventStreamTest > a feed that failed is not a feed with nothing in it() PASSED
+
+EventStreamTest > the cursor advances instead of staying at zero() PASSED
+
+EventStreamTest > a truncated page catches up immediately() PASSED
+
+EventStreamTest > a restored cursor resumes instead of replaying everything() PASSED
+
+EventStreamTest > the envelope never makes a stretched backoff exceed the ceiling() PASSED
+
+EventStreamTest > a device with minutes left stops polling rather than polling slowly() PASSED
+
+EventStreamTest > a cursor is saved so a restart does not replay() PASSED
+
+EventStreamTest > the cursor never rewinds() PASSED
+
+EventStreamTest > a success clears the backoff() PASSED
+
+EventStreamTest > failures back off exponentially and stop at a ceiling() PASSED
+
+EventStreamTest > a constrained device polls the event stream less often() PASSED
+
+EventStreamTest > an overlapping page does not produce duplicate rows() PASSED
+
+EventStreamTest > catch-up is immediate because the constant is zero, and that is load-bearing() PASSED
+
+EventStreamTest > the default pressure changes nothing for a caller that has no reading() PASSED
+
+VanEventStreamStoreTest > newRecords emits only what a subscriber had not already been shown() PASSED
+
+VanEventStreamStoreTest > the cursor is saved from the merged state rather than from the page() PASSED
+
+VanEventStreamStoreTest > every applied page is written down() PASSED
+
+VanEventStreamStoreTest > the history starts where the last one stopped() PASSED
+
+VanEventStreamStoreTest > newRecords stays empty for an overlapping page with nothing new() PASSED
+
+VanEventStreamStoreTest > a recovery clears the failure() PASSED
+
+VanEventStreamStoreTest > a page from the socket and a page from the poll do not double an event() PASSED
+
+VanEventStreamStoreTest > a failure is counted without discarding what the owner already has() PASSED
+
+GatewayRetryTest > every draw falls inside its window() PASSED
+
+GatewayRetryTest > an answer is not a failure() PASSED
+
+GatewayRetryTest > the server's own try-later codes are retried() PASSED
+
+GatewayRetryTest > retries are bounded() PASSED
+
+GatewayRetryTest > jitter actually decorrelates callers() PASSED
+
+GatewayRetryTest > the backoff grows and stops growing() PASSED
+
+GatewayRetryTest > the breaker opens after sustained failure and closes on success() PASSED
+
+GatewayRetryTest > an intermittent failure does not open the breaker() PASSED
+
+GatewayRetryTest > a transport failure is retried() PASSED
+
+GatewayRetryTest > nothing is both an answer and a try-later() PASSED
+
+GatewayRetryTest > a success is not retried() PASSED
+
+ReplayTriggerTest > the owner pressing the button is never debounced() PASSED
+
+ReplayTriggerTest > a replay already running is never started twice() PASSED
+
+ReplayTriggerTest > only the edge into availability is a recovery() PASSED
+
+ReplayTriggerTest > the gateway coming back is its own edge() PASSED
+
+ReplayTriggerTest > a handover burst produces one replay, not four() PASSED
+
+ReplayTriggerTest > an empty queue is not replayed() PASSED
+
+ReplayTriggerTest > after the debounce window a genuinely new recovery replays again() PASSED
+
+ReplayTriggerTest > recovery replays a queue that has something in it() PASSED
+
+MemoryModelsTest > staleOrExpiringFacts surfaces shaken authorities and near-expiry facts still in force() PASSED
+
+MemoryModelsTest > preferences excludes both decision and generic statement predicates() PASSED
+
+MemoryModelsTest > missing stores block parses as no facts, not a crash() PASSED
+
+MemoryModelsTest > a row with no fact_id is dropped rather than crashing() PASSED
+
+MemoryModelsTest > factsByScope excludes decisions and expired facts, groups the rest by scope() PASSED
+
+MemoryModelsTest > parses fields off an owner_facts export row() PASSED
+
+MemoryModelsTest > freshness classifies no-expiry, current, expiring-soon and expired() PASSED
+
+MemoryModelsTest > numeric and boolean values stringify without a trailing decimal() PASSED
+
+MemoryModelsTest > recentChanges sorts newest first and respects the limit() PASSED
+
+MemoryModelsTest > parseConflicts pairs both sides of blocking and inferred_only conflicts() PASSED
+
+MemoryModelsTest > decisions returns only the predicate decision, newest first() PASSED
+
+MemoryModelsTest > provenance tiers map every authority to one of the four DNA chips() PASSED
+
+MissionSummaryTest > aRunningMissionNamesItsPhaseWhenItHasOne() PASSED
+
+MissionSummaryTest > anUnknownStateIsNotLabelledWithTheRawEnum() PASSED
+
+MissionSummaryTest > anUnknownGatewayProjectionNameDoesNotCrashOrGuess() PASSED
+
+MissionSummaryTest > aVerifiedMissionNeedsNoAttentionAndAnUnverifiableOneDoes() PASSED
+
+MissionSummaryTest > theThreePostExecutionOutcomesRemainThreeDifferentSentences() PASSED
+
+MissionSummaryTest > anUnknownStateWithNoGatewayProjectionIsUnknown() PASSED
+
+MissionSummaryTest > anOlderGatewayFallsBackToTheLocalTableNotToUnknown() PASSED
+
+MissionSummaryTest > aWaitingMissionIsNotCountedAsActive() PASSED
+
+MissionSummaryTest > theGatewaysProjectionIsPreferredOverTheLocalTable() PASSED
+
+MissionSummaryTest > everyMissionStateTheGatewayCanSendHasItsOwnSentence() PASSED
+
+OnboardingPlanTest > the optional steps are the two the owner cannot simply grant() PASSED
+
+OnboardingPlanTest > the pairing screen says what happens if it is not done() PASSED
+
+OnboardingPlanTest > an unpaired phone can never finish onboarding() PASSED
+
+OnboardingPlanTest > a required step cannot be skipped by asking to skip it() PASSED
+
+OnboardingPlanTest > a phone too old to have the permission is not blocked on granting it() PASSED
+
+OnboardingPlanTest > pairing is the first thing a new owner is asked for() PASSED
+
+OnboardingPlanTest > every step has words for the owner and none of them is an enum() PASSED
+
+OnboardingPlanTest > display awareness is required for obstruction-safe floating VAN() PASSED
+
+OnboardingPlanTest > a permission granted in settings shows up when the owner comes back() PASSED
+
+OnboardingPlanTest > the whole flow walks in order and ends() PASSED
+
+OnboardingPlanTest > opening a settings screen is not granting a permission() PASSED
+
+OverlayDragControllerTest > the haptic fires on arming, once, not on every frame() PASSED
+
+OverlayDragControllerTest > letting go over the target closes the overlay and renders nothing after() PASSED
+
+OverlayDragControllerTest > a cancelled drag never leaves the overlay armed to close() PASSED
+
+OverlayDragControllerTest > a fast flick toward an edge docks there even released mid-screen() PASSED
+
+OverlayDragControllerTest > velocity resets on a new drag so a stale flick cannot dock the next one() PASSED
+
+OverlayDragControllerTest > a drag moves the window and reports where it ended up() PASSED
+
+OverlayDragControllerTest > reduced motion still reports a duration of zero for a fast flick() PASSED
+
+OverlayDragControllerTest > docking ticks but dismissing never does() PASSED
+
+OverlayDragControllerTest > starting a drag puts the dismiss target up and the menu away() PASSED
+
+OverlayDragControllerTest > letting go anywhere else docks and clears the drag() PASSED
+
+OverlayDragControllerTest > an ordinary dock still reports a positive duration() PASSED
+
+OverlayDragControllerTest > a drag cannot walk VAN off the screen() PASSED
+
+OverlayDragControllerTest > a slow release mid-screen docks nowhere and ticks nothing() PASSED
+
+OverlayDragControllerTest > the dismiss target is taken down however the drag ends() PASSED
+
+OverlayVisibilityPolicyTest > the screen being off stops the animation() PASSED
+
+OverlayVisibilityPolicyTest > the keyboard and a full-screen app are distinct reasons from being fully occluded() PASSED
+
+OverlayVisibilityPolicyTest > a frozen overlay always says why() PASSED
+
+OverlayVisibilityPolicyTest > a detached view does not animate() PASSED
+
+OverlayVisibilityPolicyTest > minimized is a size, not a pause() PASSED
+
+OverlayVisibilityPolicyTest > a full-screen app in front pauses the overlay and says why() PASSED
+
+OverlayVisibilityPolicyTest > every combination resolves to exactly one target() PASSED
+
+OverlayVisibilityPolicyTest > destroying wins over everything() PASSED
+
+OverlayVisibilityPolicyTest > the keyboard covering VAN pauses the overlay and says why() PASSED
+
+OverlayVisibilityPolicyTest > a fully covered overlay does not animate() PASSED
+
+OverlayVisibilityPolicyTest > a paused overlay is CREATED, not STOPPED or destroyed() PASSED
+
+VanOverlayControllerTest > a drag that ends in open space docks to nothing() PASSED
+
+VanOverlayControllerTest > the dismiss target does not arm from across the screen() PASSED
+
+VanOverlayControllerTest > the dismiss target arms on the avatar's centre, at every size() PASSED
+
+VanOverlayControllerTest > each presentation is measured by its own touch target() PASSED
+
+VanOverlayControllerTest > an avatar cannot be dragged off any edge() PASSED
+
+VanOverlayControllerTest > a screen smaller than the avatar still produces a reachable position() PASSED
+
+VanOverlayControllerTest > settling never puts the avatar outside the screen() PASSED
+
+VanOverlayControllerTest > a drag that ends near an edge snaps to it and reports the same edge() PASSED
+
+ProjectModelsTest > truth parsing reads ok, shas and updated_at() PASSED
+
+ProjectModelsTest > health is BLOCKED from attention alone, with no blocked mission() PASSED
+
+ProjectModelsTest > truth parsing without updated_at reads null rather than zero() PASSED
+
+ProjectModelsTest > health is AT_RISK when a mission failed or was unverifiable() PASSED
+
+ProjectModelsTest > missionsForProject filters by project id only() PASSED
+
+ProjectModelsTest > health is STALE_TRUTH when truth loaded but not ok() PASSED
+
+ProjectModelsTest > health is ACTIVE with running work and QUIET with none, otherwise() PASSED
+
+ProjectModelsTest > decisionMentionsProject matches id or display name in title, body or source() PASSED
+
+ProjectModelsTest > ProjectDetailBuilder scopes relevant facts to the project scope or subject() PASSED
+
+ProjectModelsTest > health is UNKNOWN when truth was never loaded and nothing is blocked() PASSED
+
+ProjectModelsTest > phase prefers a truth key over deriving from missions() PASSED
+
+ProjectModelsTest > ProjectDetailBuilder sorts next actions by severity then recency and isolates blockers() PASSED
+
+ProjectModelsTest > phase falls back to mission activity when truth has no phase-shaped key() PASSED
+
+ProjectModelsTest > attentionMatchesProject prefers the explicit column over source text() PASSED
+
+ProjectModelsTest > lastChangeAtMs is the newest of truth, missions and facts() PASSED
+
+ProjectModelsTest > health is BLOCKED when a mission is blocked, even with current truth and no running work() PASSED
+
+ProjectModelsTest > truth parsing flattens only scalar top-level keys() PASSED
+
+ProjectModelsTest > ProjectSummaryBuilder integrates missions, attention and facts for one project() PASSED
+
+VanResourceEnvelopeTest > pressure is the worst input and not the last one() PASSED
+
+VanResourceEnvelopeTest > the wake word and the owner's own commands are among them() PASSED
+
+VanResourceEnvelopeTest > the ceiling tightens as pressure rises and never loosens() PASSED
+
+VanResourceEnvelopeTest > critical state indicators survive the floor() PASSED
+
+VanResourceEnvelopeTest > power save asks for restraint and does not declare an emergency() PASSED
+
+VanResourceEnvelopeTest > a still budget is never clamped into a moving one() PASSED
+
+VanResourceEnvelopeTest > every input that reached the winning level is named() PASSED
+
+VanResourceEnvelopeTest > everything discretionary yields before anything the owner asked for() PASSED
+
+VanResourceEnvelopeTest > battery bands escalate() PASSED
+
+VanResourceEnvelopeTest > hearing the owner survives every pressure() PASSED
+
+VanResourceEnvelopeTest > saying VAN is unwell is not a luxury() PASSED
+
+VanResourceEnvelopeTest > a stopped subsystem has no cadence() PASSED
+
+VanResourceEnvelopeTest > a healthy device is nominal and says nothing() PASSED
+
+VanResourceEnvelopeTest > an unreadable battery is not a flat battery() PASSED
+
+VanResourceEnvelopeTest > cadence only ever stretches as pressure rises() PASSED
+
+VanResourceEnvelopeTest > the envelope may lower the embodiment's budget and never raise it() PASSED
+
+VanResourceEnvelopeTest > charging clears battery pressure and nothing else() PASSED
+
+VanResourceEnvelopeTest > a nearly flat battery no longer renders the full field() PASSED
+
+VanResourceEnvelopeTest > telemetry is traded before the owner's own screen stops updating() PASSED
+
+VanResourceEnvelopeTest > memory and storage contribute independently() PASSED
+
+CrossLanguageVectorsTest > a key order the gateway never used still canonicalizes the same() PASSED
+
+CrossLanguageVectorsTest > the device proof signing input matches the gateway() PASSED
+
+CrossLanguageVectorsTest > a signature is always sixty four bytes whatever the DER spelling() PASSED
+
+CrossLanguageVectorsTest > a lowercase method signs the same bytes as an uppercase one() PASSED
+
+CrossLanguageVectorsTest > canonical json matches the gateway byte for byte() PASSED
+
+MutualTlsScopeTest > every other route keeps platform trust() PASSED
+
+MutualTlsScopeTest > the direct endpoint and its session socket are on the pinned link() PASSED
+
+MutualTlsScopeTest > only the routes a phone needs before it holds a certificate skip it() PASSED
+
+MutualTlsScopeTest > a build without a direct endpoint pins nothing() PASSED
+
+MutualTlsScopeTest > a build that pins the direct link moves a phone saved on an older route() PASSED
+
+MutualTlsScopeTest > without a pinned direct link the saved address stands() PASSED
+
+Pkcs10Test > lengths use the shortest DER form() PASSED
+
+Pkcs10Test > the encoder reproduces the signed bytes of the request the gateway accepts() PASSED
+
+Pkcs10Test > a request is well formed and signed by the key it carries() PASSED
+
+CommandLifecycleKillSweepTest > no kill point leaves a command silently absent() PASSED
+
+CommandLifecycleKillSweepTest > a kill before the store leaves nothing claimed and nothing lost() PASSED
+
+CommandLifecycleKillSweepTest > the sweep covers more boundaries than the chain has writes() PASSED
+
+CommandLifecycleKillSweepTest > a command that never reached the Gateway is still held after a restart() PASSED
+
+CommandLifecycleKillSweepTest > a kill between the send and the forget is recovered by the Gateway's answer() PASSED
+
+DurableOutboxTest > an old but still valid command is asked about rather than sent() PASSED
+
+DurableOutboxTest > ordinary work is stored and flushes silently() PASSED
+
+DurableOutboxTest > reconfirmation does not rewrite what kind of command it was() PASSED
+
+DurableOutboxTest > queued never reads as submitted() PASSED
+
+DurableOutboxTest > a reconfirmed command flushes even though it is stale() PASSED
+
+DurableOutboxTest > reconfirmation cannot revive an expired command() PASSED
+
+DurableOutboxTest > an irreversible command is never stored at all() PASSED
+
+DurableOutboxTest > something that needed the owner present is asked again() PASSED
+
+DurableOutboxTest > an expired command is dropped rather than asked about() PASSED
+
+DurableOutboxTest > a NEVER_STORE entry that somehow exists is refused rather than sent() PASSED
+
+DurableOutboxTest > attempts are counted and the path recorded() PASSED
+
+DurableOutboxTest > every outcome has a sentence and none of them claims the work happened() PASSED
+
+DurableOutboxTest > the record carries what section 20_14 asks for and not the payload() PASSED
+
+DurableOutboxTest > depths are reported by what may be done with each item() PASSED
+
+FailoverTransactionTest > the old path stops being authoritative in the same call() PASSED
+
+FailoverTransactionTest > an unreadable battery does not authorise a spare socket() PASSED
+
+FailoverTransactionTest > an epoch that does not advance is not a promotion() PASSED
+
+FailoverTransactionTest > promotion requires the transaction to have run() PASSED
+
+FailoverTransactionTest > a late envelope from the old path is rejected() PASSED
+
+FailoverTransactionTest > an abandoned failover leaves the old path in place() PASSED
+
+FailoverTransactionTest > the unknown sentinel is the one the runtime reading actually uses() PASSED
+
+FailoverTransactionTest > rejection is by epoch, so a reused path does not inherit its old messages() PASSED
+
+FailoverTransactionTest > charging does not buy a spare socket the battery could not be read for() PASSED
+
+OfflineSubmissionTest > an ordinary command that never arrived is saved and sent later() PASSED
+
+OfflineSubmissionTest > something that needs the owner present is saved and asked about again() PASSED
+
+OfflineSubmissionTest > a held command is not promised a question that nothing asks() PASSED
+
+OfflineSubmissionTest > an irreversible command is not told it will be retried() PASSED
+
+OfflineSubmissionTest > an irreversible command is never stored, whatever the network did() PASSED
+
+OfflineSubmissionTest > the three outcomes do not share a sentence() PASSED
+
+OfflineSubmissionTest > the classification comes from OutboxPolicy rather than a second copy() PASSED
+
+OfflineSubmissionTest > a command the Gateway refused is not saved and replayed later() PASSED
+
+OfflineSubmissionTest > a moment-only command is refused before the storage question is asked() PASSED
+
+OfflineSubmissionTest > an elevated but reversible command is stored rather than dropped() PASSED
+
+OfflineSubmissionTest > a command that is only good for a moment is not stored for four hours() PASSED
+
+OutboxPersistenceTest > an unrecognised storability is refused rather than defaulted() PASSED
+
+OutboxPersistenceTest > a record from another part of the app is not read as session work() PASSED
+
+OutboxPersistenceTest > a record with no storability is refused rather than reconstructed() PASSED
+
+OutboxPersistenceTest > the expiry that survives is the entrys own and not the queues default() PASSED
+
+OutboxPersistenceTest > an A4 never reaches the record at all() PASSED
+
+OutboxPersistenceTest > an entry survives a round trip through the queue record unchanged() PASSED
+
+OutboxPersistenceTest > the two vocabularies on the record cannot disagree() PASSED
+
+OutboxPersistenceTest > anything needing the owner present is stored as NO_STALE_REPLAY() PASSED
+
+OutboxPersistenceTest > a reconfirmation survives the process dying() PASSED
+
+OutboxPersistenceTest > an attempt count survives so three failures on one path are not three on three() PASSED
+
+OutboxPolicyTest > irreversible and approval-bearing work is never stored() PASSED
+
+OutboxPolicyTest > anything that depends on the moment is reconfirmed rather than replayed() PASSED
+
+OutboxPolicyTest > live owner context outranks a low action class() PASSED
+
+OutboxPolicyTest > ordinary work replays silently() PASSED
+
+OwnerReconfirmationSurfaceTest > explicit_confirmation_preserves_identity_and_releases_only_that_held_entry() PASSED
+
+OwnerReconfirmationSurfaceTest > reconfirmation_cannot_revive_expired_work() PASSED
+
+OwnerReconfirmationSurfaceTest > owner_preview_is_bounded_and_missing_text_has_truthful_fallback() PASSED
+
+OwnerReconfirmationSurfaceTest > only_work_waiting_for_owner_is_projected() PASSED
+
+OwnerReconfirmationSurfaceTest > a_stale_ordinary_command_becomes_an_owner_question() PASSED
+
+OwnerReconfirmationSurfaceTest > the_surface_shows_the_owners_command_rather_than_an_opaque_queue_id() PASSED
+
+RestartSeamTest > a command awaiting the owner still awaits them after a restart() PASSED
+
+RestartSeamTest > order is preserved across a restart() PASSED
+
+RestartSeamTest > the restored command carries the identity the Gateway will match it by() PASSED
+
+RestartSeamTest > an irreversible command is not in the store to be found after a restart() PASSED
+
+RestartSeamTest > an ordinary command survives a restart and is sent exactly once() PASSED
+
+RestartSeamTest > an answered question stays answered across a restart() PASSED
+
+RestartSeamTest > the epoch is adopted after the restore, not carried across the restart() PASSED
+
+RestartSeamTest > a command that expired while the process was dead is dropped and the owner told() PASSED
+
+ResumePolicyTest > an unknown session is replaced rather than silently emptied() PASSED
+
+ResumePolicyTest > a refusal the device cannot fix is not retried as a resume() PASSED
+
+ResumePolicyTest > a higher server epoch means anything unacknowledged must go again() PASSED
+
+ResumePolicyTest > the same epoch is a plain resume() PASSED
+
+ResumePolicyTest > a gateway that has gone backwards is refused() PASSED
+
+ResumePolicyTest > only unacknowledged events are resent() PASSED
+
+ResumePolicyTest > the last acknowledged event is not sent again() PASSED
+
+SessionDownstreamTest > an acknowledgement is recognised by message id rather than by kind() PASSED
+
+SessionDownstreamTest > a shape this build does not know is left alone() PASSED
+
+SessionDownstreamTest > the event is not mistaken for an acknowledgement() PASSED
+
+SessionDownstreamTest > an event with no sequence is refused rather than cursored at zero() PASSED
+
+SessionDownstreamTest > a refusal is an answer, and carries its reason() PASSED
+
+SessionDownstreamTest > successive events advance the stream without repeating one() PASSED
+
+SessionDownstreamTest > a downstream event becomes a page the stream can apply() PASSED
+
+SessionEnvelopeTest > re-addressing a message after a failover keeps its identity() PASSED
+
+SessionEnvelopeTest > the digest is computed from the payload rather than taken on trust() PASSED
+
+SessionEnvelopeTest > a different payload digests differently() PASSED
+
+SessionEnvelopeTest > optional identifiers are absent rather than null() PASSED
+
+SessionEnvelopeTest > key order in the payload does not change the digest() PASSED
+
+SessionEnvelopeTest > re-addressing does not mutate the message it was given() PASSED
+
+SessionOutboxDurabilityTest > a command killed between the send and the forget is not delivered twice() PASSED
+
+SessionOutboxDurabilityTest > no kill during a persist can lose a command that was already on disk() PASSED
+
+SessionOutboxDurabilityTest > the record is keyed by the message id, so forgetting it finds it() PASSED
+
+SessionOutboxDurabilityTest > a reconfirmation replaces the record rather than being discarded() PASSED
+
+SessionOutboxDurabilityTest > a command awaiting the owner is restored rather than filtered away() PASSED
+
+SessionOutboxDurabilityTest > a persist is exactly one mutating operation() PASSED
+
+SessionOutboxDurabilityTest > a replaced session drops its work from the disk and tells the owner() PASSED
+
+SessionOutboxDurabilityTest > the previous two-step persist does lose the command, which is why the sweep exists() PASSED
+
+SessionOutboxDurabilityTest > persist then process death then restore then exactly-once delivery() PASSED
+
+SessionOutboxDurabilityTest > order is preserved across the real adapter() PASSED
+
+SessionOutboxDurabilityTest > a kill while forgetting leaves the record, and the next restart settles it() PASSED
+
+SessionReconciliationTest > a terminal mission settles rather than being asked about forever() PASSED
+
+SessionReconciliationTest > a command the Gateway is running is not sent a second time() PASSED
+
+SessionReconciliationTest > a command with no command id is asked about by message id and still resends() PASSED
+
+SessionReconciliationTest > a command the Gateway did not answer for at all is sent again() PASSED
+
+SessionReconciliationTest > a command the Gateway has never heard of is sent again() PASSED
+
+SessionReconciliationTest > the identity asked about is the identity the answer is matched by() PASSED
+
+SessionReconciliationTest > a mixed answer splits rather than settling or resending everything() PASSED
+
+SessionReconciliationTest > a command the Gateway admitted without opening a mission is settled() PASSED
+
+SessionReconciliationTest > order is preserved, because the owner issued these in an order() PASSED
+
+TransportSupervisorTest > two carriers on one route are protocol diversity, not route diversity() PASSED
+
+TransportSupervisorTest > no usable path reports offline rather than a degraded socket() PASSED
+
+TransportSupervisorTest > failover prefers a different road to the one that just broke() PASSED
+
+TransportSupervisorTest > a healthy active path needs no failover() PASSED
+
+TransportSupervisorTest > a suspect path prepares a failover and a failed one commits it() PASSED
+
+TransportSupervisorTest > two missed heartbeats make a path suspect() PASSED
+
+TransportSupervisorTest > a write that failed outranks every timing signal() PASSED
+
+TransportSupervisorTest > a failed path does not count towards redundancy() PASSED
+
+TransportSupervisorTest > the idle cadence does not call a background path suspect for being quiet() PASSED
+
+TransportSupervisorTest > two independent routes are multipath() PASSED
+
+UnboundEnvelopeTest > rebinding does not mutate the stored envelope() PASSED
+
+UnboundEnvelopeTest > an envelope stored with no session is recognisable as unbound() PASSED
+
+UnboundEnvelopeTest > rebinding then readdressing is the full journey of a stored command() PASSED
+
+UnboundEnvelopeTest > rebinding addresses it to the live session and changes nothing else() PASSED
+
+UnboundEnvelopeTest > an already-bound envelope is left alone() PASSED
+
+WarmStandbyIsPolicyNotTransportTest > the session manager still holds exactly one socket() PASSED
+
+WarmStandbyIsPolicyNotTransportTest > this build cannot reach WARM because it has one route() PASSED
+
+WarmStandbyIsPolicyNotTransportTest > the policy documents that it decides rather than connects() PASSED
+
+WarmStandbyPolicyTest > charging pays for the spare that a low battery would not() PASSED
+
+WarmStandbyPolicyTest > an idle VAN lets the spare go cold() PASSED
+
+WarmStandbyPolicyTest > Data Saver does not close an unmetered spare() PASSED
+
+WarmStandbyPolicyTest > a low battery closes the spare even mid-interaction() PASSED
+
+WarmStandbyPolicyTest > a spare on the same road is not redundancy() PASSED
+
+WarmStandbyPolicyTest > a spare path is held while the owner is interacting() PASSED
+
+WarmStandbyPolicyTest > Data Saver closes a metered spare even while charging() PASSED
+
+WarmStandbyPolicyTest > only the authoritative path may carry a new owner message() PASSED
+
+WarmStandbyPolicyTest > a cold path carries nothing at all() PASSED
+
+WarmStandbyPolicyTest > a warm path carries heartbeats and cursors and nothing else() PASSED
+
+ShareIntakeTest > kind follows the mime type and the number of items() PASSED
+
+ShareIntakeTest > a shared credential is dropped, not queued() PASSED
+
+ShareIntakeTest > blank text and empty uris do not become empty fields() PASSED
+
+ShareIntakeTest > no acknowledgement leaks the shared content back() PASSED
+
+ShareIntakeTest > the owner is told what happened, including when nothing was kept() PASSED
+
+ShareIntakeTest > a secret in the subject counts as much as one in the body() PASSED
+
+ShareIntakeTest > ordinary content is kept() PASSED
+
+OwnerLanguageTest > values that escaped internal layers are caught before the owner reads them() PASSED
+
+OwnerLanguageTest > an unknown reason code is de-snaked rather than shown raw() PASSED
+
+OwnerLanguageTest > an unrecognised class is not printed raw() PASSED
+
+OwnerLanguageTest > a qualified code still finds its sentence() PASSED
+
+OwnerLanguageTest > nothing at all falls back rather than rendering empty() PASSED
+
+OwnerLanguageTest > the three outcomes that are not success read as three different things() PASSED
+
+OwnerLanguageTest > every refusal reason is a sentence the owner can act on() PASSED
+
+OwnerLanguageTest > an action class is described by what it costs, not by its letter() PASSED
+
+OwnerLanguageTest > an absent or unreadable scope never renders as raw text() PASSED
+
+OwnerLanguageTest > a scope is a sentence instead of JSON() PASSED
+
+OwnerLanguageTest > a digest is a short labelled reference, not a wall of hex() PASSED
+
+OwnerLanguageTest > no command status is shown to the owner as its own name() PASSED
+
+OwnerLanguageTest > a scope arriving as JSON is read back as a sentence() PASSED
+
+OwnerLanguageTest > ordinary English is not mistaken for an internal value() PASSED
+
+OwnerLanguageTest > Android's own constants are translated() PASSED
+
+OwnerLanguageTest > only the class that needs approval says so() PASSED
+
+OwnerLanguageTest > the owner is not told about HMAC() PASSED
+
+OwnerOverviewTest > blockers sort above information and the order is stable() PASSED
+
+OwnerOverviewTest > a briefing with nothing to say contributes no line() PASSED
+
+OwnerOverviewTest > an empty queue and an unreachable gateway never say the same thing() PASSED
+
+OwnerOverviewTest > a malformed row does not take the whole queue down() PASSED
+
+OwnerOverviewTest > informational items alone do not read as something waiting() PASSED
+
+OwnerOverviewTest > blockers are counted and informational items are not() PASSED
+
+OwnerOverviewTest > an item with no title is labelled rather than shown blank() PASSED
+
+OwnerOverviewTest > one waiting item reads as one, not as a number() PASSED
+
+OwnerOverviewTest > the briefing falls back to its summary when it has no headline() PASSED
+
+OwnerOverviewTest > a failure carries its reason to the owner() PASSED
+
+OwnerStatusProjectionTest > unknownReachesTheOwnerAndIsNotTreatedAsFinished() PASSED
+
+OwnerStatusProjectionTest > acceptedIsNotSuccess() PASSED
+
+OwnerStatusProjectionTest > nothingIsBothWorkingAndFinished() PASSED
+
+OwnerStatusProjectionTest > everyProjectedValueIsAStatusWithASentence() PASSED
+
+OwnerStatusProjectionTest > caseAndWhitespaceFromTheWireDoNotProduceUnknown() PASSED
+
+OwnerStatusProjectionTest > anUnknownGatewayStatusIsUnknownNotWorking() PASSED
+
+OwnerStatusProjectionTest > theThreePostExecutionOutcomesStayThreeDifferentAnswers() PASSED
+
+OwnerStatusProjectionTest > everyStatusHasADistinctSentence() PASSED
+
+OwnerStatusProjectionTest > onlyAVerifiedMissionReadsAsDone() PASSED
+
+OwnerStatusProjectionTest > aRefusalIsNotAFailure() PASSED
+
+VanCommandStatusTest > everyOwnerStatusMapsToAMessageStatus() PASSED
+
+VanCommandStatusTest > onlyAVerifiedOutcomeShowsAsSucceeded() PASSED
+
+VanCommandStatusTest > anUnknownGatewayStatusShowsAsUnknown() PASSED
+
+VanCommandStatusTest > aRefusalDoesNotShowAsAFailure() PASSED
+
+VanCommandStatusTest > acceptedShowsAsAcceptedNotSucceeded() PASSED
+
+VanCommandStatusTest > theThreePostExecutionOutcomesShowAsThreeDifferentThings() PASSED
+
+BrowserStreamTelemetryTest > counters are deltas and drain to nothing() PASSED
+
+BrowserStreamTelemetryTest > fps is emitted once a window has closed and not before() PASSED
+
+BrowserStreamTelemetryTest > a stream that has shown nothing has no frame age() PASSED
+
+BrowserStreamTelemetryTest > a decoder restart does not subtract, and the readings after it are right() PASSED
+
+BrowserStreamTelemetryTest > the decoder's first total is not credited to the first flush() PASSED
+
+BrowserStreamTelemetryTest > a clock that went backwards restarts the window rather than stalling it() PASSED
+
+BrowserStreamTelemetryTest > a drain before any frame reports nothing at all() PASSED
+
+BrowserStreamTelemetryTest > a new stream does not inherit the old decoder's baseline() PASSED
+
+BrowserStreamTelemetryTest > later totals are reported as the delta between them() PASSED
+
+BrowserStreamTelemetryTest > a counter that went backwards does not erase drops that really happened() PASSED
+
+BrowserStreamTelemetryTest > a closed stream stops claiming an age() PASSED
+
+BrowserStreamTelemetryTest > a frozen stream reports a large age rather than going quiet() PASSED
+
+BrowserStreamTelemetryTest > frame age is how long ago the last frame arrived() PASSED
+
+BrowserStreamTelemetryTest > dropping zero frames is not an event() PASSED
+
+BrowserStreamTelemetryTest > a negative or non-finite fps never becomes a sample() PASSED
+
+DecoderStatsTest > a counter handed back as a string is still a number() PASSED
+
+DecoderStatsTest > a report without the counter yields null rather than zero() PASSED
+
+DecoderStatsTest > an outbound entry is not an inbound one() PASSED
+
+DecoderStatsTest > the video decoder's drops are read and the audio decoder's are not() PASSED
+
+DecoderStatsTest > mediaType is accepted as well as kind() PASSED
+
+DeviceTelemetryTest > a non-finite value never reaches the wire() PASSED
+
+DeviceTelemetryTest > every wire name round-trips and none collide() PASSED
+
+DeviceTelemetryTest > an empty batch still produces valid JSON() PASSED
+
+DeviceTelemetryTest > a nonsense measurement is never buffered() PASSED
+
+DeviceTelemetryTest > the buffer is bounded and drops the oldest() PASSED
+
+DeviceTelemetryTest > a batch never exceeds what the route will read() PASSED
+
+DeviceTelemetryTest > the body is the shape the route parses() PASSED
+
+DeviceTelemetryTest > a latency needs two readings that make sense() PASSED
+
+DeviceTelemetryTest > a surface name cannot break out of the body() PASSED
+
+DeviceTelemetryTest > only the labelled metric carries a surface() PASSED
+
+DeviceTelemetryTest > a surface on an unlabelled metric never reaches the wire() PASSED
+
+DeviceTelemetryTest > draining removes what it takes() PASSED
+
+DeviceTelemetryTest > only the aura frame time carries a surface() PASSED
+
+SessionTelemetryTest > the outbox depth carries its label in the dimension field not the surface() PASSED
+
+SessionTelemetryTest > a negative duration is dropped rather than observed() PASSED
+
+SessionTelemetryTest > a class nobody has ever reported is not invented() PASSED
+
+SessionTelemetryTest > two failovers in one flush are two observations() PASSED
+
+SessionTelemetryTest > a failover duration is reported once and not again() PASSED
+
+SessionTelemetryTest > the depth is re-posted on every flush so the gauge does not go stale() PASSED
+
+SessionTelemetryTest > a class that empties is posted as a zero rather than left behind() PASSED
+
+SessionTelemetryTest > nothing is posted before an outbox has ever been seen() PASSED
+
+ChartGeometryTest > time ticks are snapped to a human boundary and stay inside the visible span() PASSED
+
+ChartGeometryTest > levels and markers widen the price range so nothing draws off-scale() PASSED
+
+ChartGeometryTest > risk reward is the distance to target over the distance to stop() PASSED
+
+ChartGeometryTest > an empty series produces an empty scene rather than a crash() PASSED
+
+ChartGeometryTest > grid step is a nice round number, not an arbitrary fraction() PASSED
+
+ChartGeometryTest > build produces a candle per visible bar and at least one grid line() PASSED
+
+ChartViewportTest > a nonsense density or scale still produces readable text() PASSED
+
+ChartViewportTest > zooming keeps now on screen() PASSED
+
+ChartViewportTest > a drag moves the chart with the finger at any zoom() PASSED
+
+ChartViewportTest > the crosshair reads the price at the pointer, the right way up() PASSED
+
+ChartViewportTest > zoom is bounded and reversible about the latest bar() PASSED
+
+ChartViewportTest > a short series is shown whole rather than padded() PASSED
+
+ChartViewportTest > a pan with no plot to pan over is a no-op() PASSED
+
+ChartViewportTest > dragging the other way walks forward in time and stops at the latest bar() PASSED
+
+ChartViewportTest > the window cannot be dragged off either end() PASSED
+
+ChartViewportTest > the crosshair snaps to a bar the series actually has() PASSED
+
+ChartViewportTest > the scale is banded so the labels do not eat the candles() PASSED
+
+ChartViewportTest > a nonsense zoom factor changes nothing() PASSED
+
+ChartViewportTest > chart text follows the owner's font scale() PASSED
+
+ChartViewportTest > the default window shows the most recent bars() PASSED
+
+ChartViewportTest > a pointer outside the plot has nothing under it() PASSED
+
+ChartViewportTest > an empty series produces an empty window instead of a crash() PASSED
+
+TradingFormatTest > the float artefact never reaches the owner() PASSED
+
+TradingFormatTest > a separator never lands inside the decimal() PASSED
+
+TradingFormatTest > an unknown key reads as awkward English rather than as a field name() PASSED
+
+TradingFormatTest > no ledger key reaches the owner as a ledger key() PASSED
+
+TradingFormatTest > a signed number says which way it went() PASSED
+
+TradingFormatTest > a missing number is a dash, not a zero() PASSED
+
+TradingFormatTest > a small negative keeps its sign() PASSED
+
+TradingFormatTest > money is grouped so the eye can count the digits() PASSED
+
+TradingFormatTest > empty and unavailable are never the same sentence() PASSED
+
+TradingFormatTest > prices keep their padding because a column has to scan() PASSED
+
+TradingFormatTest > no empty state tells the owner to open a terminal() PASSED
+
+TradingReadModelsTest > ledger thesis states map onto the design system's closed set() PASSED
+
+TradingReadModelsTest > assessment reports the invoker state honestly, including unconfigured() PASSED
+
+TradingReadModelsTest > trust tier maps to a status role, never a raw colour() PASSED
+
+TradingReadModelsTest > potential parses candidates with risk requirement and invalidation() PASSED
+
+TradingReadModelsTest > quadrant label reads as English() PASSED
+
+TradingReadModelsTest > history parses closed trades with quadrant, attribution and lessons() PASSED
+
+TradingReadModelsTest > quadrant role never rewards a lucky bad decision as favourable() PASSED
+
+TradingReadModelsTest > events parses both headline and calendar-release rows plus impacts() PASSED
+
+TradingReadModelsTest > quadrant tally counts exactly the rows given, independent of a server total() PASSED
+
+TradingReadModelsTest > health never reads more favourable than the thesis, only as bad or worse() PASSED
+
+TradingReadModelsTest > positions parses the ledger's own shape, including a ledger-unavailable body() PASSED
+
+TradingReadModelsTest > significant events keeps only materiality at or above threshold() PASSED
+
+VanAnimationClockTest > a long pause is clamped rather than spun through hundreds of cycles() PASSED
+
+VanAnimationClockTest > the phase stays inside zero to one however long it runs() PASSED
+
+VanAnimationClockTest > retargeting mid-blend continues from where the field actually is() PASSED
+
+VanAnimationClockTest > a blend starts and ends with zero velocity() PASSED
+
+VanAnimationClockTest > a spec blend moves the continuous fields and does not invent a colour() PASSED
+
+VanAnimationClockTest > the old driver's failure is what this replaces() PASSED
+
+VanAnimationClockTest > identical specs are not worth blending() PASSED
+
+VanAnimationClockTest > a non-monotonic timestamp does not rewind the clock() PASSED
+
+VanAnimationClockTest > arriving at something urgent is fast and settling down is slow() PASSED
+
+VanAnimationClockTest > with no blend in flight the transition starts from what is on screen() PASSED
+
+VanAnimationClockTest > a period change advances the phase differently and never restarts it() PASSED
+
+VanAnimationClockTest > every blend duration is inside the 120 to 420 ms band() PASSED
+
+VanAnimationClockTest > the first frame advances nothing() PASSED
+
+VanAuraGeometryTest > a caller that cannot say what a dp is gets no dp claim() PASSED
+
+VanAuraGeometryTest > the dp gap actually reaches the geometry() PASSED
+
+VanAuraGeometryTest > the old proportional gap is the 5 point 3 dp the audit measured() PASSED
+
+VanAuraGeometryTest > sub-pixel float wobble does not defeat the cache() PASSED
+
+VanAuraGeometryTest > the field still animates while the silhouette is cached() PASSED
+
+VanAuraGeometryTest > resizing the body does rebuild it() PASSED
+
+VanAuraGeometryTest > the gap stays in band at every size VAN is drawn at() PASSED
+
+VanAuraGeometryTest > at the shipping avatar size the gap is inside the 10 to 14 dp band() PASSED
+
+VanAuraGeometryTest > the silhouette is built once and reused across frames() PASSED
+
+VanAuraPlanTest > the aura draws no lines, lightning, specks or orb link (CF-D-06)() PASSED
+
+VanAuraPlanTest > a still budget still produces a field() PASSED
+
+VanAuraPlanTest > nothing is planned for a body too small or a field too quiet() PASSED
+
+VanAuraPlanTest > embers bloom() PASSED
+
+VanAuraPlanTest > the ground glow is clipped to a crescent, never a plate() PASSED
+
+VanAuraPlanTest > Zone A blobs are displaced so the haze cannot read as a body outline() PASSED
+
+VanAuraPlanTest > Zone A carries the shipping alpha, not the evidence painter's doubled one() PASSED
+
+VanAuraPlanTest > semantic colour reaches Zone C and never the identity haze() PASSED
+
+VanAuraPlanTest > the plan is deterministic for the same inputs() PASSED
+
+VanAuraVoiceReactivityTest > amplitude above one is clamped the same as exactly one() PASSED
+
+VanAuraVoiceReactivityTest > a negative amplitude is treated as zero() PASSED
+
+VanAuraVoiceReactivityTest > intensity never exceeds the face-safe ceiling regardless of amplitude() PASSED
+
+VanAuraVoiceReactivityTest > zero amplitude leaves the spec unchanged() PASSED
+
+VanAuraVoiceReactivityTest > a louder voice brightens intensity, arc activity and spark rate() PASSED
+
+VanAuraVoiceReactivityTest > topology fields — filaments, envelope, semantic colour — are untouched() PASSED
+
+VanDesignRolesTest > textTertiary is distinct from onSurfaceVariant() PASSED
+
+VanDesignRolesTest > statusRoles carries exactly the StatusSemantics role vocabulary() PASSED
+
+VanDesignRolesTest > the light scheme deepens every status role rather than reusing the dark one() PASSED
+
+VanDesignRolesTest > every design role clears AA body-text contrast against background and surface() PASSED
+
+VanEmbodimentReducerTest > activity started with no kind hint just works() PASSED
+
+VanEmbodimentReducerTest > attention urgent interrupts and cautions() PASSED
+
+VanEmbodimentReducerTest > a session handshake connects() PASSED
+
+VanEmbodimentReducerTest > an open attention item outranks quiet hours() PASSED
+
+VanEmbodimentReducerTest > mission waiting owner asks and cautions() PASSED
+
+VanEmbodimentReducerTest > mission failed is an error with urgency() PASSED
+
+VanEmbodimentReducerTest > mission completed unverifiable shrugs instead of celebrating() PASSED
+
+VanEmbodimentReducerTest > mission started without a hermes run id is local work() PASSED
+
+VanEmbodimentReducerTest > quiet hours with nothing open sleeps() PASSED
+
+VanEmbodimentReducerTest > a closed trade in the good decision good outcome quadrant celebrates() PASSED
+
+VanEmbodimentReducerTest > mission started with a hermes run id delegates() PASSED
+
+VanEmbodimentReducerTest > an unrecognised event type with no hint produces nothing() PASSED
+
+VanEmbodimentReducerTest > the first session of a new day waves hello() PASSED
+
+VanEmbodimentReducerTest > a different event type never celebrates even with a matching quadrant() PASSED
+
+VanEmbodimentReducerTest > overlay expand and collapse open and close the panel() PASSED
+
+VanEmbodimentReducerTest > mission completed presents the result card() PASSED
+
+VanEmbodimentReducerTest > mission completed partial success also shrugs() PASSED
+
+VanEmbodimentReducerTest > attention info blocker and follow_up do not interrupt the pose() PASSED
+
+VanEmbodimentReducerTest > every card direction maps to its own point action() PASSED
+
+VanEmbodimentReducerTest > outside quiet hours nothing sleeps() PASSED
+
+VanEmbodimentReducerTest > the json overload reads summary, hermes_run_id and activity_kind() PASSED
+
+VanEmbodimentReducerTest > a state hint the device does not yet receive an event for still lands() PASSED
+
+VanEmbodimentReducerTest > activity started with a research kind searches() PASSED
+
+VanEmbodimentReducerTest > a closed trade in any other quadrant does not celebrate() PASSED
+
+VanEmbodimentReducerTest > an absent quadrant field never celebrates — guarded on presence() PASSED
+
+VanEmbodimentReducerTest > a non-attention event type produces nothing regardless of severity() PASSED
+
+VanEmbodimentReducerTest > every durable state and finite action has a registered producer() PASSED
+
+VanEmbodimentReducerTest > a second session on the same day does not wave again() PASSED
+
+VanEmbodimentReducerTest > the json overload reads severity off the payload() PASSED
+
+VanEmbodimentReducerTest > the json overload tolerates malformed json() PASSED
+
+VanFlameAuraTest > flame fragments break off and rise above the envelope() PASSED
+
+VanFlameAuraTest > the silhouette is Candidate B's compact build() PASSED
+
+VanFlameAuraTest > embers rise off a busy aura and a static budget draws none() PASSED
+
+VanFlameAuraTest > the outer flame carries the state colour and the core runs white-hot() PASSED
+
+VanFlameAuraTest > no tongue escapes the aura envelope reach() PASSED
+
+VanFlameAuraTest > the envelope wraps the silhouette without covering it() PASSED
+
+VanFlameAuraTest > a working VAN flares and a sleeping one smoulders() PASSED
+
+VanFlameAuraTest > the flame plan is deterministic() PASSED
+
+VanFlameAuraTest > flames rise above the head() PASSED
+
+VanFlameAuraTest > every state that has an aura has a flame envelope() PASSED
+
+VanFlameAuraTest > a pulse expands and whitens the fire() PASSED
+
+VanFlameAuraTest > the slow clock changes the fire while the fast loop stays seamless() PASSED
+
+VanFlameAuraTest > the rim lights VAN's edge and never bridges a gap across the background() PASSED
+
+VanFlameAuraTest > the fire moves with the phase and loops without a jump() PASSED
+
+VanFlameAuraTest > a live alpha mask drives the flames() PASSED
+
+VanFlameAuraTest > front wisps cross the lower body only, never the face, and stay translucent() PASSED
+
+VanFrameBudgetTest > a device that cools down gets its field back() PASSED
+
+VanFrameBudgetTest > sustained misses are() PASSED
+
+VanFrameBudgetTest > one slow frame is not a degraded device() PASSED
+
+VanFrameBudgetTest > a pause is not a missed frame() PASSED
+
+VanFrameBudgetTest > the miss ratio and p95 are inspectable() PASSED
+
+VanFrameBudgetTest > no judgement before there is a window to judge on() PASSED
+
+VanFrameBudgetTest > the default budget is one 60Hz frame() PASSED
+
+VanFrameBudgetTest > the signal reaches the effect ladder() PASSED
+
+VanFrameBudgetTest > it does not oscillate at the threshold() PASSED
+
+VanMotionMapTest > a fast flick docks faster than a slow release() PASSED
+
+VanMotionMapTest > every duration stays within the DNA quick to expressive band() PASSED
+
+VanMotionMapTest > every finite action has a positive, bounded auto-clear duration() PASSED
+
+VanMotionMapTest > reduced motion collapses every overlay motion spec to zero() PASSED
+
+VanPaletteTest > scheme selection follows the mode() PASSED
+
+VanPaletteTest > contrast arithmetic matches the published values() PASSED
+
+VanPaletteTest > the deprecated parent theme is gone and a night configuration exists() PASSED
+
+VanPaletteTest > both schemes carry body text at AA() PASSED
+
+VanPaletteTest > the window theme agrees with the palette() PASSED
+
+VanPaletteTest > the outline is visible against its surface() PASSED
+
+VanPaletteTest > the glow cyan is not used as a light-mode primary() PASSED
+
+VanPaletteTest > the light scheme is not the dark one with the background flipped() PASSED
+
+VanStatePriorityTest > the alarms outrank the work and the work outranks the idle() PASSED
+
+VanStatePriorityTest > every state has a priority() PASSED
+
+VanStatePriorityTest > the authority set is the states the browser must not take() PASSED
+
+VanTradeSemanticTest > the trading screen never shows an unreadable ledger as calm() PASSED
+
+VanTradeSemanticTest > a kill switch is a stop() PASSED
+
+VanTradeSemanticTest > an owner halt outranks everything() PASSED
+
+VanTradeSemanticTest > semantic colour never lands on VAN's body() PASSED
+
+VanTradeSemanticTest > the quiet ladder is watching then setup then entry() PASSED
+
+VanTradeSemanticTest > a default signal set is UNKNOWN, not FLAT() PASSED
+
+VanTradeSemanticTest > only the states the owner has to act on move VAN's pose() PASSED
+
+VanTradeSemanticTest > a live trade reaches the aura unless authority or health outranks it() PASSED
+
+VanTradeSemanticTest > an owner approval outranks a market() PASSED
+
+VanTradeSemanticTest > every semantic says something a person would say() PASSED
+
+VanTradeSemanticTest > the margin threshold matches the risk authority's floor() PASSED
+
+VanTradeSemanticTest > a calm market does not overwrite a degraded subsystem() PASSED
+
+VanTradeSemanticTest > each trade family carries its own flame energy() PASSED
+
+VanTradeSemanticTest > clearing the trade state restores ordinary health truth() PASSED
+
+VanTradeSemanticTest > risk pressure outranks profit on the same position() PASSED
+
+VanTradeSemanticTest > a readable ledger is classified the same on the screen and in the background() PASSED
+
+VanTradeSemanticTest > a published trade state reaches the semantic field() PASSED
+
+VanTradeSemanticTest > in the background an unreadable ledger alarms only when money was at stake() PASSED
+
+VanTradeSemanticTest > the capability board and the running app draw the same families() PASSED
+
+VanTradeSemanticTest > closing a live position pulses the field once() PASSED
+
+VanTradeSemanticTest > every semantic has its own Zone C topology and no two look the same() PASSED
+
+VanTradeSemanticTest > a ledger VAN cannot read is UNKNOWN and never FLAT() PASSED
+
+AudioFocusPolicyTest > only what VAN paused is resumed() PASSED
+
+AudioFocusPolicyTest > other media is ducked() PASSED
+
+AudioFocusPolicyTest > a page playing video is paused rather than ducked() PASSED
+
+AudioFocusPolicyTest > VAN not speaking takes nothing() PASSED
+
+AudioFocusPolicyTest > an incoming call takes the audio and VAN waits() PASSED
+
+BargeInPolicyTest > the owner speaking does interrupt() PASSED
+
+BargeInPolicyTest > VAN does not interrupt itself on its own voice() PASSED
+
+BargeInPolicyTest > a confirmation being read back is not interruptible() PASSED
+
+BargeInPolicyTest > an ordinary answer is interruptible and so is nothing at all() PASSED
+
+BargeInPolicyTest > playback stops before anything is sent anywhere() PASSED
+
+BargeInPolicyTest > room noise below the threshold does not interrupt() PASSED
+
+DelayedAnswerPolicyTest > holding the phone gets it on screen without taking the audio() PASSED
+
+DelayedAnswerPolicyTest > still in context but long past the window does not speak unprompted() PASSED
+
+DelayedAnswerPolicyTest > an answer that arrives while the owner is still here speaks normally() PASSED
+
+DelayedAnswerPolicyTest > an answer that arrives at three in the morning does not speak() PASSED
+
+LocalTtsRouterTest > a missed budget names the stage rather than saying voice was slow() PASSED
+
+LocalTtsRouterTest > a critical phrase with no bank falls through to the best real synthesiser() PASSED
+
+LocalTtsRouterTest > the wake path can ask whether it will be able to acknowledge() PASSED
+
+LocalTtsRouterTest > the sherpa voice can speak with no Android offline voice installed() PASSED
+
+LocalTtsRouterTest > an android engine whose offline data vanished is named rather than tried() PASSED
+
+LocalTtsRouterTest > the wake acknowledgement comes from the phrase bank, not a synthesiser() PASSED
+
+LocalTtsRouterTest > android is used only when its offline data is verified() PASSED
+
+LocalTtsRouterTest > a stage inside its budget is not reported() PASSED
+
+LocalTtsRouterTest > a prepared sherpa voice is preferred over Android for assistant answers() PASSED
+
+LocalTtsRouterTest > the wake acknowledgement phrase is the one the owner contract names() PASSED
+
+LocalTtsRouterTest > no engine at all says so instead of failing silently() PASSED
+
+OfflineCommandClassifierTest > an unrecognised request is not assumed to be local() PASSED
+
+OfflineCommandClassifierTest > the gateway's action class outranks the phrasing() PASSED
+
+OfflineCommandClassifierTest > things that need the world are remote() PASSED
+
+OfflineCommandClassifierTest > things VAN can do on the phone are local() PASSED
+
+OfflineCommandClassifierTest > approval-bearing work is never queued offline() PASSED
+
+OfflineCommandClassifierTest > VAN says something true when it cannot reach Hermes() PASSED
+
+OfflineCommandClassifierTest > irreversible work is never ordinary work() PASSED
+
+PreRollPolicyTest > captured audio is not written to storage by default() PASSED
+
+PreRollPolicyTest > one component owns the microphone and everything else subscribes() PASSED
+
+PreRollPolicyTest > the buffer is bounded at both ends() PASSED
+
+PreRollPolicyTest > the buffer is long enough to keep the start of a sentence() PASSED
+
+SpeechCueTimingTest > cueAt clamps a mouth_open outside 0 to 1() PASSED
+
+SpeechCueTimingTest > a null payload — a gateway that predates this field — parses to empty() PASSED
+
+SpeechCueTimingTest > a payload with no cues array parses to empty rather than throwing() PASSED
+
+SpeechCueTimingTest > cueAt walks forward and never picks a cue that has not started yet() PASSED
+
+SpeechCueTimingTest > a malformed cue entry is skipped rather than crashing the parse() PASSED
+
+SpeechCueTimingTest > cueAt on an empty track is silent and closed() PASSED
+
+SpeechCueTimingTest > parsing the exact shape the gateway sends() PASSED
+
+SpeechCueTimingTest > a SpeechSegment defaults to no cue timing() PASSED
+
+SpeechFusionEngineTest > a local transcript Android also heard can win() PASSED
+
+SpeechFusionEngineTest > a decisively more confident local transcript can win() PASSED
+
+SpeechFusionEngineTest > two readings that differ only in punctuation are not a disagreement() PASSED
+
+SpeechFusionEngineTest > a marginally more confident local transcript does not win() PASSED
+
+SpeechFusionEngineTest > a local transcript wins where Android heard nothing() PASSED
+
+SpeechFusionEngineTest > an empty local result leaves the transcript alone() PASSED
+
+SpeechFusionEngineTest > raw alternatives survive fusion as evidence() PASSED
+
+SpeechFusionEngineTest > a valid alternative span does corroborate() PASSED
+
+SpeechFusionEngineTest > a different local transcript does not win on its own() PASSED
+
+SpeechFusionEngineTest > a stale alternative span is ignored rather than guessed() PASSED
+
+SpeechQueueTest > the synthesis queue stays shallow() PASSED
+
+SpeechQueueTest > a segment from another answer is not queued behind this one() PASSED
+
+SpeechQueueTest > a renumbered stream cannot replay text the owner already heard() PASSED
+
+SpeechQueueTest > barge-in interrupts rather than deletes() PASSED
+
+SpeechQueueTest > the next segment to speak is the lowest ready one() PASSED
+
+SpeechQueueTest > a reconnect does not replay what the owner already heard() PASSED
+
+SpeechQueueTest > speech is complete only when the final segment was spoken() PASSED
+
+SpeechQueueTest > a duplicate after a failover is discarded silently() PASSED
+
+SpeechQueueTest > the two cursors are different numbers() PASSED
+
+SpeechQueueTest > nothing ready means nothing to speak rather than an arbitrary segment() PASSED
+
+VoiceAssetManifestTest > capabilities fail independently() PASSED
+
+VoiceAssetManifestTest > no bundle at all reports not declared for everything() PASSED
+
+VoiceAssetManifestTest > a file with no usable digest is refused rather than trusted() PASSED
+
+VoiceAssetManifestTest > a placeholder sized file is unusable rather than ready() PASSED
+
+VoiceAssetManifestTest > malformed json is refused rather than throwing at the caller() PASSED
+
+VoiceAssetManifestTest > an unversioned bundle is refused() PASSED
+
+VoiceAssetManifestTest > an unknown capability is refused rather than ignored() PASSED
+
+VoiceAssetManifestTest > a well formed bundle parses() PASSED
+
+VoiceAssetManifestTest > a substituted model is refused() PASSED
+
+VoiceAssetManifestTest > every state has a sentence and none of them names an enum or a path() PASSED
+
+VoiceRecognitionPolicyTest > supporting an API level is not a claim that voice works on the device() PASSED
+
+VoiceRecognitionPolicyTest > word-level evidence is only claimed from the version that emits it() PASSED
+
+VoiceRecognitionPolicyTest > the retained low-API branch is kept deliberately and still resolves() PASSED
+
+VoiceRecognitionPolicyTest > caller audio is only claimed where the platform actually supports it() PASSED
+
+VoiceRecognitionPolicyTest > a device with no on-device recognizer still fails closed rather than going to the cloud() PASSED
+
+VoiceRecognitionPolicyTest > every supported device can reach a recognition backend that exists() PASSED
+
+VoiceRecognitionPolicyTest > a working backend never carries an unavailable reason() PASSED
+
+VoiceRecognitionPolicyTest > the build guard is installed and depends on the assemble tasks() PASSED
+
+VoiceRecognitionPolicyTest > the unavailable reason reaches a production consumer() PASSED
+
+VoiceRecognitionPolicyTest > the supported floor is at or above the on-device recognizer floor() PASSED
+
+VoiceRecognitionPolicyTest > a supported device missing its recognizer is not told to install Sherpa() PASSED
+
+VoiceSecondPassPolicyTest > an easy turn does not pay for a second pass() PASSED
+
+VoiceSecondPassPolicyTest > low confidence is a reason() PASSED
+
+VoiceSecondPassPolicyTest > a correction the owner has made before is a reason() PASSED
+
+VoiceSecondPassPolicyTest > nothing heard is a reason to try again() PASSED
+
+VoiceSecondPassPolicyTest > a confidence outside the valid range is ignored rather than treated as low() PASSED
+
+VoiceTurnTest > only a completed answer counts as heard() PASSED
+
+VoiceTurnTest > a failover keeps the turn and the command() PASSED
+
+VoiceTurnTest > speaking survives a transport failover() PASSED
+
+WakeModelAssetTest > a plausible model with no pinned digest is accepted() PASSED
+
+WakeModelAssetTest > no model at all is absent, and says so() PASSED
+
+WakeModelAssetTest > a matching digest is accepted whatever its case() PASSED
+
+WakeModelAssetTest > a placeholder is not a model() PASSED
+
+WakeModelAssetTest > only READY reports ready() PASSED
+
+WakeModelAssetTest > a model that is not the one the release pinned is refused() PASSED
+
+WakeModelAssetTest > every state has a sentence and none of them names an enum or a path() PASSED
+
+BUILD SUCCESSFUL in 15s
+4 actionable tasks: 4 executed

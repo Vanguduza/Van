@@ -151,12 +151,18 @@ class RunGrantService:
         if not self.configured:
             # Fail closed: without a signing key no grant can be verified later.
             raise GrantDenied("GRANT_SIGNING_KEY_UNCONFIGURED")
-        if action_class_ceiling in (ActionClass.A4, ActionClass.A5):
-            # §160: a run grant never carries A4. A4 needs a fresh owner approval
-            # bound to the exact action, and A5 is always denied.
+        if action_class_ceiling is ActionClass.A5:
             raise GrantDenied("GRANT_ACTION_CLASS_PROHIBITED")
 
         now = int(time.time() * 1000) if now_ms is None else now_ms
+        if action_class_ceiling is ActionClass.A4:
+            await self._assert_a4_owner_scope(command_id=command_id, capability_id=capability_id,
+                artifact_id=artifact_id,
+                snapshot_id=context_snapshot_id, input_digest=input_digest, standing_authority_id=standing_authority_id,
+                issued_at_ms=now, now_ms=now)
+            if grant_kind is not GrantKind.SINGLE_USE_MUTATION or max_uses != 1:
+                raise GrantDenied("GRANT_A4_SINGLE_USE_REQUIRED")
+            ttl_seconds = min(ttl_seconds, 30)
         uses = 1 if grant_kind is GrantKind.SINGLE_USE_MUTATION else max(1, int(max_uses))
         grant = CapabilityGrant(
             grant_id=f"grant_{uuid.uuid4().hex}",
@@ -209,10 +215,33 @@ class RunGrantService:
         requested_domain: str | None = None,
         now_ms: int | None = None,
     ) -> None:
-        """Run the full §161 checklist and atomically consume/advance the nonce.
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        await self.validate(
+            token=token, grant=grant, requested_operation=requested_operation,
+            requested_action_class=requested_action_class, requested_domain=requested_domain,
+            now_ms=now,
+        )
+        nonce_hash = self.hash_nonce(token.partition(".")[0])
+        if grant.grant_kind is GrantKind.SINGLE_USE_MUTATION:
+            await self._consume_single_use(nonce_hash, now)
+        else:
+            await self._advance_bounded(nonce_hash, now)
 
-        Every failure raises :class:`GrantDenied` with the structured reason the
-        caller maps to ``403 CAPABILITY_GRANT_DENIED``.
+    async def validate(
+        self,
+        *,
+        token: str,
+        grant: CapabilityGrant,
+        requested_operation: str,
+        requested_action_class: ActionClass,
+        requested_domain: str | None = None,
+        now_ms: int | None = None,
+    ) -> None:
+        """Authenticate scope and current authority without spending a use.
+
+        This permits an exact completed callback receipt to be read after a lost
+        reply. Callers must still redeem before any new work; validation alone
+        never authorizes another effect or resurrects a consumed nonce.
         """
         if not self.configured:
             raise GrantDenied("GRANT_SIGNING_KEY_UNCONFIGURED")
@@ -259,12 +288,33 @@ class RunGrantService:
 
         # 10-11. the source authority and its owner device must still be live.
         await self._assert_source_authority_live(str(row["command_id"]), row["standing_authority_id"], now)
+        if ceiling is ActionClass.A4:
+            await self._assert_a4_owner_scope(command_id=grant.command_id, capability_id=grant.capability_id,
+                artifact_id=grant.artifact_id,
+                snapshot_id=grant.context_snapshot_id, input_digest=grant.input_digest,
+                standing_authority_id=grant.standing_authority_id, issued_at_ms=grant.issued_at_ms, now_ms=now)
 
-        # 12. atomically consume or advance.
-        if GrantKind(str(row["grant_kind"])) is GrantKind.SINGLE_USE_MUTATION:
-            await self._consume_single_use(nonce_hash, now)
-        else:
-            await self._advance_bounded(nonce_hash, now)
+    async def _assert_a4_owner_scope(self, *, command_id: str, capability_id: str, artifact_id: str, snapshot_id: str,
+                                     input_digest: str, standing_authority_id: str | None,
+                                     issued_at_ms: int, now_ms: int) -> None:
+        """A bounded callback scope consumes exact fresh owner approval, never delegates it."""
+        from van_gateway.automation.canonical import digest
+        row = await self.store.fetchone("SELECT value FROM runtime_meta WHERE key=?", (f"command_authority:{command_id}",))
+        authority = json.loads(row["value"]) if row else {}
+        owner_issued = authority.get("issued_at_unix", 0) * 1000
+        expires = authority.get("expires_at_unix")
+        if (standing_authority_id is not None or authority.get("source_authority_id") is not None
+                or authority.get("authority_source") != "OWNER_COMMAND" or authority.get("principal_type") != "OWNER_DEVICE"
+                or authority.get("signed_action_class") not in {"A1", "A2", "A3", "A4"} or authority.get("effective_action_class") != "A4"
+                or authority.get("owner_approved") is not True
+                or authority.get("typed_action_id") != f"automation.workflow.{capability_id}"
+                or authority.get("typed_parameter_constraints", {}).get("_automation_artifact_id") != artifact_id
+                or authority.get("snapshot_id") != snapshot_id
+                or digest(authority.get("typed_parameter_constraints", {})) != input_digest
+                or not 0 <= issued_at_ms - owner_issued <= 5000
+                or not 0 <= now_ms - issued_at_ms < 30000
+                or (expires is not None and now_ms >= expires * 1000)):
+            raise GrantDenied("GRANT_ACTION_CLASS_PROHIBITED")
 
     async def _consume_single_use(self, nonce_hash: str, now: int) -> None:
         async with self.store.connection() as db:

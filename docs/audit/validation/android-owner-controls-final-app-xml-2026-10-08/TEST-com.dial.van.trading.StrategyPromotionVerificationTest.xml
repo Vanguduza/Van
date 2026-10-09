@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.trading.StrategyPromotionVerificationTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:42:06" hostname="052fefa249ff" time="0.002">
+  <properties/>
+  <testcase name="oldParentCertificateMustDisappearBeforeCompletionIsClaimed" classname="com.dial.van.trading.StrategyPromotionVerificationTest" time="0.001"/>
+  <testcase name="transportSuccessMustBeBoundToExactCandidateAndLedgerEvidence" classname="com.dial.van.trading.StrategyPromotionVerificationTest" time="0.0"/>
+  <testcase name="candidateParserRequiresSealedIdentityAndPreservesEvidence" classname="com.dial.van.trading.StrategyPromotionVerificationTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

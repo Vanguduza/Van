@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.overlay.VanOverlayControllerTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:38" hostname="052fefa249ff" time="0.005">
+  <properties/>
+  <testcase name="a drag that ends in open space docks to nothing()" classname="com.dial.van.overlay.VanOverlayControllerTest" time="0.0"/>
+  <testcase name="the dismiss target does not arm from across the screen()" classname="com.dial.van.overlay.VanOverlayControllerTest" time="0.001"/>
+  <testcase name="the dismiss target arms on the avatar's centre, at every size()" classname="com.dial.van.overlay.VanOverlayControllerTest" time="0.0"/>
+  <testcase name="each presentation is measured by its own touch target()" classname="com.dial.van.overlay.VanOverlayControllerTest" time="0.0"/>
+  <testcase name="an avatar cannot be dragged off any edge()" classname="com.dial.van.overlay.VanOverlayControllerTest" time="0.001"/>
+  <testcase name="a screen smaller than the avatar still produces a reachable position()" classname="com.dial.van.overlay.VanOverlayControllerTest" time="0.0"/>
+  <testcase name="settling never puts the avatar outside the screen()" classname="com.dial.van.overlay.VanOverlayControllerTest" time="0.003"/>
+  <testcase name="a drag that ends near an edge snaps to it and reports the same edge()" classname="com.dial.van.overlay.VanOverlayControllerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

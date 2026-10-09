@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.SpeechFusionEngineTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:49" hostname="052fefa249ff" time="0.006">
+  <properties/>
+  <testcase name="a local transcript Android also heard can win()" classname="com.dial.van.voice.SpeechFusionEngineTest" time="0.002"/>
+  <testcase name="a decisively more confident local transcript can win()" classname="com.dial.van.voice.SpeechFusionEngineTest" time="0.001"/>
+  <testcase name="two readings that differ only in punctuation are not a disagreement()" classname="com.dial.van.voice.SpeechFusionEngineTest" time="0.0"/>
+  <testcase name="a marginally more confident local transcript does not win()" classname="com.dial.van.voice.SpeechFusionEngineTest" time="0.0"/>
+  <testcase name="a local transcript wins where Android heard nothing()" classname="com.dial.van.voice.SpeechFusionEngineTest" time="0.0"/>
+  <testcase name="an empty local result leaves the transcript alone()" classname="com.dial.van.voice.SpeechFusionEngineTest" time="0.0"/>
+  <testcase name="raw alternatives survive fusion as evidence()" classname="com.dial.van.voice.SpeechFusionEngineTest" time="0.001"/>
+  <testcase name="a valid alternative span does corroborate()" classname="com.dial.van.voice.SpeechFusionEngineTest" time="0.0"/>
+  <testcase name="a different local transcript does not win on its own()" classname="com.dial.van.voice.SpeechFusionEngineTest" time="0.0"/>
+  <testcase name="a stale alternative span is ignored rather than guessed()" classname="com.dial.van.voice.SpeechFusionEngineTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

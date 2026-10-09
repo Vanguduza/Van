@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.design.MotionSpecTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:32" hostname="052fefa249ff" time="0.003">
+  <properties/>
+  <testcase name="press scale matches DNA()" classname="com.dial.van.design.MotionSpecTest" time="0.001"/>
+  <testcase name="data updates animate at quick, shared elements at standard()" classname="com.dial.van.design.MotionSpecTest" time="0.001"/>
+  <testcase name="unreduced motion resolves to the DNA durations()" classname="com.dial.van.design.MotionSpecTest" time="0.0"/>
+  <testcase name="easings are distinct curves()" classname="com.dial.van.design.MotionSpecTest" time="0.001"/>
+  <testcase name="DNA durations match the published tokens()" classname="com.dial.van.design.MotionSpecTest" time="0.0"/>
+  <testcase name="reduced motion collapses every duration to zero()" classname="com.dial.van.design.MotionSpecTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -41,6 +41,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -48,10 +52,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.dial.van.VanApplication
 import com.dial.van.command.attention.AttentionRoute
+import com.dial.van.command.attention.RemindersRoute
 import com.dial.van.command.artemis.ArtemisConsoleRoute
 import com.dial.van.command.connected.ConnectedRoute
 import com.dial.van.command.dev.dialDevGraph
 import com.dial.van.command.home.HomeRoute
+import com.dial.van.command.jev.JevControlRoute
 import com.dial.van.command.modules.BrowserEscalationsPage
 import com.dial.van.command.modules.BrowserPolicyPage
 import com.dial.van.command.modules.BrowserSessionsPage
@@ -59,9 +65,18 @@ import com.dial.van.command.modules.BrowserTasksPage
 import com.dial.van.command.modules.BrowserAutomationModule
 import com.dial.van.command.nav.VanNavModel
 import com.dial.van.command.nav.VanRoute
+import com.dial.van.command.owner.KnowledgeServicesRoute
+import com.dial.van.command.owner.ResearchServicesRoute
+import com.dial.van.command.owner.AutomationServicesRoute
+import com.dial.van.command.owner.DiagnosticsServicesRoute
+import com.dial.van.command.owner.BrowserOutcomeRoute
 import com.dial.van.command.settings.SettingsNotificationsRoute
+import com.dial.van.command.settings.PermissionsRoute
 import com.dial.van.command.settings.SettingsRoute
 import com.dial.van.command.settings.SettingsVoiceRoute
+import com.dial.van.command.work.ConvergenceRoute
+import com.dial.van.command.work.ConversationThreadRoute
+import com.dial.van.command.work.DocumentRoute
 import com.dial.van.command.work.WorkActivityRoute
 import com.dial.van.command.work.WorkRoute
 import com.dial.van.design.LocalVanTokens
@@ -84,22 +99,40 @@ import com.dial.van.voice.WakeListenerService
  * and a "More" sheet for Projects/Connected/Settings. Deep links: `van://<route>`.
  */
 class CommandCentreActivity : FragmentActivity() {
+    private var pendingDestination by mutableStateOf<String?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        pendingDestination = savedInstanceState?.getString(KEY_PENDING_DESTINATION)
+            ?.takeIf(VanRoute::isKnown)
         val app = application as VanApplication
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                // First-launch models and the real acknowledgement load in the
+                // background. Start only while this activity is visible and both
+                // runtime capabilities are ready, using the existing permission gate.
+                app.voiceEdge.readiness.collect { readiness ->
+                    if (readiness.ready(com.dial.van.voice.VoiceCapability.LOCAL_WAKE) &&
+                        readiness.ready(com.dial.van.voice.VoiceCapability.CRITICAL_PHRASES)) {
+                        WakeListenerService.startIfReady(this@CommandCentreActivity)
+                    }
+                }
+            }
+        }
         // Legacy callers (the overlay's "module" extra) and this build's own deep links
         // (`intent.data`, e.g. from a notification) both resolve through VanNavModel, never
         // to a raw string handed straight to NavHost.
-        val fromData = intent?.data?.toString()?.let(VanNavModel::deepLink)
-        val fromExtra = VanNavModel.startDestination(intent.getStringExtra(EXTRA_MODULE))
-        val initial = fromData ?: fromExtra
+        val initial = VanNavModel.intentDestination(intent?.data?.toString(),
+            intent?.getStringExtra(EXTRA_MODULE)) ?: VanRoute.HOME
 
         setContent {
             VanTheme {
                 Box(
                     modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
                 ) {
-                    CommandCentreScreen(app, initial)
+                    CommandCentreScreen(app, initial, pendingDestination) { consumed ->
+                        if (pendingDestination == consumed) pendingDestination = null
+                    }
                 }
             }
         }
@@ -117,23 +150,20 @@ class CommandCentreActivity : FragmentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        // A deep link arriving while the Activity is already resident (`launchMode
-        // singleTop`) has nowhere to hand its route to the composition that already ran
-        // `onCreate` — that composition owns its own NavController. Reopening as a fresh
-        // task keeps the one restoration path (VanNavModel via the constructor's intent)
-        // rather than a second one threaded in after the fact.
-        val route = intent.data?.toString()?.let(VanNavModel::deepLink)
-        if (route != null) {
-            startActivity(
-                Intent(this, CommandCentreActivity::class.java)
-                    .putExtra(EXTRA_MODULE, route)
-                    .setData(intent.data),
-            )
-        }
+        // singleTop reuses this Activity. Starting it again here redelivers this
+        // callback indefinitely. Hand the validated route to its existing NavHost.
+        VanNavModel.intentDestination(intent.data?.toString(), intent.getStringExtra(EXTRA_MODULE))
+            ?.let { pendingDestination = it }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString(KEY_PENDING_DESTINATION, pendingDestination)
+        super.onSaveInstanceState(outState)
     }
 
     companion object {
         const val EXTRA_MODULE = "module"
+        private const val KEY_PENDING_DESTINATION = "command_centre.pending_destination"
 
         fun deepLinkIntent(context: android.content.Context, route: String): Intent =
             Intent(context, CommandCentreActivity::class.java)
@@ -142,19 +172,14 @@ class CommandCentreActivity : FragmentActivity() {
     }
 }
 
-private data class NavDestination(val route: String, val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector)
-
-private val PRIMARY_DESTINATIONS = listOf(
-    NavDestination(VanRoute.HOME, "Home", Icons.Filled.Home),
-    NavDestination(VanRoute.ATTENTION, "Attention", Icons.Filled.Notifications),
-    NavDestination(VanRoute.WORK, "Work", Icons.Filled.Chat),
-    NavDestination(VanRoute.TRADING, "Trading", Icons.Filled.ShowChart),
-    NavDestination(VanRoute.MEMORY, "Memory", Icons.Filled.MenuBook),
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun CommandCentreScreen(app: VanApplication, initial: String) {
+internal fun CommandCentreScreen(
+    app: VanApplication,
+    initial: String,
+    pendingDestination: String? = null,
+    onDestinationConsumed: (String) -> Unit = {},
+) {
     val viewModel: CommandCentreViewModel = viewModel()
     // Synchronous, not a LaunchedEffect: NavHost reads `viewModel.startDestination` once, at
     // its own first composition, so the fresh-vs-restored decision has to be settled before
@@ -166,7 +191,17 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
 
     LaunchedEffect(nav) {
         nav.currentBackStackEntryFlow.collect { entry ->
-            entry.destination.route?.let { viewModel.onRouteChanged(it) }
+            entry.destination.route?.let { template ->
+                val arguments = entry.destination.arguments.keys.associateWith { name -> entry.arguments?.getString(name) }
+                VanRoute.concreteRoute(template, arguments)?.let(viewModel::onRouteChanged)
+            }
+        }
+    }
+
+    LaunchedEffect(nav, pendingDestination) {
+        pendingDestination?.let { route ->
+            nav.navigate(route) { launchSingleTop = true }
+            onDestinationConsumed(route)
         }
     }
 
@@ -201,23 +236,64 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             onOpenAttention = { navigateTo(VanRoute.ATTENTION) },
                             onOpenWork = { navigateTo(VanRoute.WORK) },
                             onOpenTrading = { navigateTo(VanRoute.TRADING) },
+                            onOpenMission = { nav.navigate(VanRoute.missionRoute(it)) },
+                            onOpenReminders = { nav.navigate(VanRoute.REMINDERS) },
                         )
                     }
                     composable(VanRoute.ATTENTION) { AttentionRoute(app, onOpenRoute = { nav.navigate(it) }) }
+                    composable(VanRoute.REMINDERS) { RemindersRoute(app, onBack = { nav.popBackStack() }) }
                     composable(VanRoute.WORK) {
                         WorkRoute(
                             app = app,
                             onOpenBrowser = { nav.navigate(VanRoute.WORK_BROWSER) },
                             onOpenArtemis = { nav.navigate(VanRoute.WORK_ARTEMIS) },
                             onOpenActivity = { nav.navigate(VanRoute.WORK_ACTIVITY) },
+                            onOpenConvergence = { nav.navigate(VanRoute.WORK_ASSETS) },
                             onOpenDevelopment = { nav.navigate(VanRoute.devHomeRoute()) },
+                            onOpenKnowledge = { nav.navigate(VanRoute.OWNER_KNOWLEDGE) },
+                            onOpenResearch = { nav.navigate(VanRoute.OWNER_RESEARCH) },
+                            onOpenAutomation = { nav.navigate(VanRoute.OWNER_AUTOMATION) },
+                            onOpenCognitiveTwin = { nav.navigate(VanRoute.WORK_COGNITIVE_TWIN) },
                         )
+                    }
+                    composable(VanRoute.WORK_COGNITIVE_TWIN) {
+                        com.dial.van.cognitive.CognitiveTwinRoute(app, onBack = { nav.popBackStack() })
                     }
                     composable(VanRoute.WORK_ACTIVITY) {
                         WorkActivityRoute(app, onBack = { nav.popBackStack() })
                     }
                     composable(VanRoute.WORK_ARTEMIS) {
                         ArtemisConsoleRoute(app, onBack = { nav.popBackStack() })
+                    }
+                    composable(VanRoute.WORK_ASSETS) {
+                        ConvergenceRoute(
+                            app = app,
+                            onBack = { nav.popBackStack() },
+                            onOpenDocument = { documentId -> nav.navigate(VanRoute.documentRoute(documentId)) },
+                            onOpenThread = { threadId -> nav.navigate(VanRoute.threadRoute(threadId)) },
+                        )
+                    }
+                    composable(
+                        VanRoute.WORK_DOCUMENT_TEMPLATE,
+                        arguments = listOf(navArgument("documentId") { type = NavType.StringType }),
+                    ) { entry ->
+                        val documentId = entry.arguments?.getString("documentId") ?: ""
+                        DocumentRoute(
+                            app = app,
+                            documentId = documentId,
+                            onBack = { nav.popBackStack() },
+                        )
+                    }
+                    composable(
+                        VanRoute.WORK_THREAD_TEMPLATE,
+                        arguments = listOf(navArgument("threadId") { type = NavType.StringType }),
+                    ) { entry ->
+                        val threadId = entry.arguments?.getString("threadId") ?: ""
+                        ConversationThreadRoute(
+                            app = app,
+                            threadId = threadId,
+                            onBack = { nav.popBackStack() },
+                        )
                     }
                     composable(VanRoute.WORK_BROWSER) {
                         val glass = legacyGlass(app)
@@ -231,7 +307,7 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                         )
                     }
                     composable(VanRoute.WORK_BROWSER_TASKS) {
-                        BrowserTasksPage(app, legacyGlass(app), back = { nav.popBackStack() })
+                        BrowserTasksPage(app, legacyGlass(app), back = { nav.popBackStack() }, onOpenOutcome = { nav.navigate(VanRoute.browserOutcomeRoute(it)) })
                     }
                     composable(VanRoute.WORK_BROWSER_ESCALATIONS) {
                         BrowserEscalationsPage(app, legacyGlass(app), back = { nav.popBackStack() })
@@ -245,17 +321,19 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                     composable(
                         VanRoute.WORK_MISSION_TEMPLATE,
                         arguments = listOf(navArgument("missionId") { type = NavType.StringType }),
-                    ) {
-                        // The mission detail surface itself is the expandable row on Work
-                        // (`TimelineRail` on expand); this route exists so a deep link or a
-                        // notification can land the owner directly on Work with the intent
-                        // named, without inventing a second detail screen.
+                    ) { entry ->
                         WorkRoute(
                             app = app,
                             onOpenBrowser = { nav.navigate(VanRoute.WORK_BROWSER) },
                             onOpenArtemis = { nav.navigate(VanRoute.WORK_ARTEMIS) },
                             onOpenActivity = { nav.navigate(VanRoute.WORK_ACTIVITY) },
+                            onOpenConvergence = { nav.navigate(VanRoute.WORK_ASSETS) },
                             onOpenDevelopment = { nav.navigate(VanRoute.devHomeRoute()) },
+                            requestedMissionId = entry.arguments?.getString("missionId"),
+                            onOpenKnowledge = { nav.navigate(VanRoute.OWNER_KNOWLEDGE) },
+                            onOpenResearch = { nav.navigate(VanRoute.OWNER_RESEARCH) },
+                            onOpenAutomation = { nav.navigate(VanRoute.OWNER_AUTOMATION) },
+                            onOpenCognitiveTwin = { nav.navigate(VanRoute.WORK_COGNITIVE_TWIN) },
                         )
                     }
                     composable(VanRoute.TRADING) {
@@ -267,8 +345,11 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                     }
                     composable(VanRoute.MEMORY) {
                         // Owned by the memory/projects worker (`com.dial.van.memory`).
-                        com.dial.van.memory.MemoryRoute(app, onBack = { nav.popBackStack() })
+                        com.dial.van.memory.MemoryRoute(app, onBack = { nav.popBackStack() }, onOpenRoute = { nav.navigate(it) })
                     }
+                    composable(VanRoute.UNDERSTANDING) { com.dial.van.memory.UnderstandingRoute(app, onBack = { nav.popBackStack() }, onOpenRoute = { nav.navigate(it) }) }
+                    composable(VanRoute.ADAPTATIONS) { com.dial.van.memory.AdaptationsRoute(app, onBack = { nav.popBackStack() }) }
+                    composable(VanRoute.GOALS) { com.dial.van.memory.GoalsRoute(app, onBack = { nav.popBackStack() }, onOpenRoute = { nav.navigate(it) }) }
                     composable(VanRoute.PROJECTS) {
                         // Owned by the memory/projects worker (`com.dial.van.projects`).
                         com.dial.van.projects.ProjectsRoute(app) { projectId ->
@@ -285,6 +366,10 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             projectId = projectId,
                             onBack = { nav.popBackStack() },
                             onOpenDevelopment = { route -> nav.navigate(route) },
+                            onOpenRationale = { nav.navigate(VanRoute.projectRationaleRoute(projectId)) },
+                            onOpenMission = { nav.navigate(VanRoute.missionRoute(it)) },
+                            onOpenAttention = { navigateTo(VanRoute.ATTENTION) },
+                            onOpenMemory = { navigateTo(VanRoute.MEMORY) },
                             onAskVan = { text ->
                                 app.commandController.selectProject(projectId)
                                 app.commandController.submitText(text, com.dial.van.control.VanCommandSource.PROJECT)
@@ -293,18 +378,50 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                         )
                     }
                     composable(VanRoute.CONNECTED) { ConnectedRoute(app) }
+                    composable(VanRoute.PROJECT_RATIONALE_TEMPLATE, arguments = listOf(navArgument("projectId") { type = NavType.StringType })) { entry ->
+                        com.dial.van.projects.ProjectRationaleRoute(app, projectId = entry.arguments?.getString("projectId").orEmpty(), onBack = { nav.popBackStack() })
+                    }
                     composable(VanRoute.SETTINGS) {
                         SettingsRoute(
                             app = app,
                             onOpenVoice = { nav.navigate(VanRoute.SETTINGS_VOICE) },
                             onOpenNotifications = { nav.navigate(VanRoute.SETTINGS_NOTIFICATIONS) },
+                            onOpenPermissions = { nav.navigate(VanRoute.SETTINGS_PERMISSIONS) },
+                            onOpenDiagnostics = { nav.navigate(VanRoute.OWNER_DIAGNOSTICS) },
+                            onOpenJev = { nav.navigate(VanRoute.SETTINGS_JEV) },
                         )
+                    }
+                    composable(VanRoute.SETTINGS_JEV) {
+                        JevControlRoute(app = app, onBack = { nav.popBackStack() })
                     }
                     composable(VanRoute.SETTINGS_VOICE) {
                         SettingsVoiceRoute(app, onBack = { nav.popBackStack() })
                     }
                     composable(VanRoute.SETTINGS_NOTIFICATIONS) {
                         SettingsNotificationsRoute(app, onBack = { nav.popBackStack() })
+                    }
+                    composable(VanRoute.SETTINGS_PERMISSIONS) { PermissionsRoute(app, onBack = { nav.popBackStack() }, onOpenRoute = { nav.navigate(it) }) }
+                    composable(VanRoute.OWNER_KNOWLEDGE) {
+                        KnowledgeServicesRoute(app, onBack = { nav.popBackStack() }, onCommand = { text ->
+                            app.commandController.submitText(text, com.dial.van.control.VanCommandSource.CHAT)
+                            navigateTo(VanRoute.WORK)
+                        })
+                    }
+                    composable(VanRoute.OWNER_RESEARCH) {
+                        ResearchServicesRoute(app, onBack = { nav.popBackStack() }, onCommand = { text ->
+                            app.commandController.submitText(text, com.dial.van.control.VanCommandSource.CHAT)
+                            navigateTo(VanRoute.WORK)
+                        })
+                    }
+                    composable(VanRoute.OWNER_AUTOMATION) {
+                        AutomationServicesRoute(app, onBack = { nav.popBackStack() }, onCommand = { text ->
+                            app.commandController.submitText(text, com.dial.van.control.VanCommandSource.CHAT)
+                            navigateTo(VanRoute.WORK)
+                        })
+                    }
+                    composable(VanRoute.OWNER_DIAGNOSTICS) { DiagnosticsServicesRoute(app, onBack = { nav.popBackStack() }) }
+                    composable(VanRoute.OWNER_BROWSER_OUTCOME, arguments = listOf(navArgument("taskId") { type = NavType.StringType })) { entry ->
+                        BrowserOutcomeRoute(app, taskId = entry.arguments?.getString("taskId").orEmpty(), onBack = { nav.popBackStack() }, onOpenMission = { nav.navigate(VanRoute.missionRoute(it)) })
                     }
                     // VAN-DEVCC-R1 §2.1 — the Development Control Centre, every route a child of
                     // Work (`VanRoute.DEV_TEMPLATES`), registered in `command/dev/DevNavGraph.kt`.
@@ -322,81 +439,6 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                 navigateTo(route)
             },
         )
-    }
-}
-
-@Composable
-private fun CommandBottomBar(currentRoute: String, onSelect: (String) -> Unit, onMore: () -> Unit) {
-    val tokens = LocalVanTokens.current
-    NavigationBar(containerColor = tokens.color.surface1) {
-        PRIMARY_DESTINATIONS.forEach { destination ->
-            NavigationBarItem(
-                selected = currentRoute == destination.route,
-                onClick = { onSelect(destination.route) },
-                icon = { Icon(destination.icon, contentDescription = destination.label) },
-                label = { Text(destination.label, style = tokens.type.label) },
-            )
-        }
-        NavigationBarItem(
-            selected = currentRoute in VanRoute.MORE,
-            onClick = onMore,
-            icon = { Icon(Icons.Filled.MoreVert, contentDescription = "More") },
-            label = { Text("More", style = tokens.type.label) },
-        )
-    }
-}
-
-@Composable
-private fun CommandSideRail(currentRoute: String, onSelect: (String) -> Unit, onMore: () -> Unit) {
-    val tokens = LocalVanTokens.current
-    NavigationRail(containerColor = tokens.color.surface1, modifier = Modifier.fillMaxHeight()) {
-        PRIMARY_DESTINATIONS.forEach { destination ->
-            NavigationRailItem(
-                selected = currentRoute == destination.route,
-                onClick = { onSelect(destination.route) },
-                icon = { Icon(destination.icon, contentDescription = destination.label) },
-                label = { Text(destination.label, style = tokens.type.label) },
-            )
-        }
-        NavigationRailItem(
-            selected = currentRoute in VanRoute.MORE,
-            onClick = onMore,
-            icon = { Icon(Icons.Filled.MoreVert, contentDescription = "More") },
-            label = { Text("More", style = tokens.type.label) },
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun MoreSheet(onDismiss: () -> Unit, onSelect: (String) -> Unit) {
-    val tokens = LocalVanTokens.current
-    val sheetState = rememberModalBottomSheetState()
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = tokens.color.surfaceAcrylic,
-        contentColor = tokens.color.textPrimary,
-    ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = tokens.space.space5, vertical = tokens.space.space3)) {
-            SectionHeader("More")
-            listOf(
-                Triple(VanRoute.PROJECTS, "Projects", "Health, phase, blockers, next actions"),
-                Triple(VanRoute.CONNECTED, "Connected", "Google planes, Hermes, knowledge readiness"),
-                Triple(VanRoute.SETTINGS, "Settings & Devices", "Pairing, permissions, voice, notifications"),
-            ).forEach { (route, title, detail) ->
-                VanPressable(
-                    onClick = { onSelect(route) },
-                    modifier = Modifier.fillMaxWidth().padding(vertical = tokens.space.space2),
-                    contentDescription = "$title. $detail.",
-                ) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Text(title, style = tokens.type.headline, color = tokens.color.textPrimary)
-                        Text(detail, style = tokens.type.body, color = tokens.color.textSecondary)
-                    }
-                }
-            }
-        }
     }
 }
 

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.VoiceAssetManifestTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:30" hostname="052fefa249ff" time="0.002">
+  <properties/>
+  <testcase name="capabilities fail independently()" classname="com.dial.van.voice.VoiceAssetManifestTest" time="0.0"/>
+  <testcase name="no bundle at all reports not declared for everything()" classname="com.dial.van.voice.VoiceAssetManifestTest" time="0.0"/>
+  <testcase name="a file with no usable digest is refused rather than trusted()" classname="com.dial.van.voice.VoiceAssetManifestTest" time="0.0"/>
+  <testcase name="a placeholder sized file is unusable rather than ready()" classname="com.dial.van.voice.VoiceAssetManifestTest" time="0.0"/>
+  <testcase name="malformed json is refused rather than throwing at the caller()" classname="com.dial.van.voice.VoiceAssetManifestTest" time="0.0"/>
+  <testcase name="an unversioned bundle is refused()" classname="com.dial.van.voice.VoiceAssetManifestTest" time="0.0"/>
+  <testcase name="an unknown capability is refused rather than ignored()" classname="com.dial.van.voice.VoiceAssetManifestTest" time="0.001"/>
+  <testcase name="a well formed bundle parses()" classname="com.dial.van.voice.VoiceAssetManifestTest" time="0.0"/>
+  <testcase name="a substituted model is refused()" classname="com.dial.van.voice.VoiceAssetManifestTest" time="0.0"/>
+  <testcase name="every state has a sentence and none of them names an enum or a path()" classname="com.dial.van.voice.VoiceAssetManifestTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

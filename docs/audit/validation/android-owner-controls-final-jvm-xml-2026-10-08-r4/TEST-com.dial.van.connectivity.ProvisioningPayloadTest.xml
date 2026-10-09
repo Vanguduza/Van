@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.connectivity.ProvisioningPayloadTest" tests="21" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:59:30" hostname="052fefa249ff" time="0.098">
+  <properties/>
+  <testcase name="a payload altered after signing is refused()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.006"/>
+  <testcase name="an unsupported payload version is refused rather than parsed as this one()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.002"/>
+  <testcase name="gateway base rejects credentials query fragments resource paths and invalid authorities()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.017"/>
+  <testcase name="what may be logged excludes the token and the challenge()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.003"/>
+  <testcase name="a payload signed by a key this build does not pin is refused()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.003"/>
+  <testcase name="a payload carrying a standing credential is refused()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.002"/>
+  <testcase name="a bootstrap token too short to be one is refused()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.001"/>
+  <testcase name="loopback over http is accepted only when the build says so()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.003"/>
+  <testcase name="a plain http gateway is refused in a release build()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.002"/>
+  <testcase name="an unknown kid is refused before anything else is read()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.001"/>
+  <testcase name="a payload with no expiry at all is refused rather than treated as immortal()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.002"/>
+  <testcase name="an expired payload is refused even with a perfect signature()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.001"/>
+  <testcase name="every forbidden field is actually refused()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.01"/>
+  <testcase name="both single-use tokens survive verification and neither is loggable()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.002"/>
+  <testcase name="the replay check runs before the signature so a replay costs nothing()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.001"/>
+  <testcase name="a payload the installer just minted is accepted()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.002"/>
+  <testcase name="valid HTTPS DNS IPv4 and IPv6 base roots remain accepted()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.005"/>
+  <testcase name="a payload with no pairing token is refused()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.011"/>
+  <testcase name="a payload with no attestation challenge is refused()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.001"/>
+  <testcase name="debug HTTP permits exact IPv4 IPv6 and localhost but rejects lookalikes()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.013"/>
+  <testcase name="a payload this device has already accepted is refused()" classname="com.dial.van.connectivity.ProvisioningPayloadTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

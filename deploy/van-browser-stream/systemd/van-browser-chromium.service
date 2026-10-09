@@ -6,21 +6,28 @@
 # difference between a private debugger and a public remote-code-execution endpoint.
 [Unit]
 Description=VAN Browser Stream Host — Chromium (loopback CDP only)
-After=network-online.target van-browser-profiles.mount
-Requires=van-browser-profiles.mount
+After=network-online.target van-browser-profiles.mount van-browser-transfer-stage.service van-browser-egress-proxy.service
+Requires=van-browser-profiles.mount van-browser-transfer-stage.service van-browser-egress-proxy.service
+BindsTo=van-browser-egress-proxy.service
 
 [Service]
 Type=simple
 User=van-browser
 Group=van-browser
+SupplementaryGroups=van-browser-transfer
 EnvironmentFile=/etc/van-browser-stream/runtime.env
 ExecStart=/usr/bin/chromium \
+  --headless=new \
   --remote-debugging-address=127.0.0.1 \
   --remote-debugging-port=${VAN_BROWSER_CDP_PORT} \
   --remote-allow-origins=http://127.0.0.1:${VAN_BROWSER_CDP_PORT} \
   --user-data-dir=${VAN_BROWSER_PROFILE_MOUNT}/${VAN_BROWSER_PROFILE_ALIAS} \
   --window-size=${VAN_BROWSER_WIDTH},${VAN_BROWSER_HEIGHT} \
   --force-device-scale-factor=1 \
+  --proxy-server=http://127.0.0.1:${VAN_BROWSER_EGRESS_PORT} \
+  --proxy-bypass-list=<-loopback> \
+  --disable-quic \
+  --force-webrtc-ip-handling-policy=disable_non_proxied_udp \
   --no-first-run \
   --disable-features=Translate,MediaRouter \
   --autoplay-policy=no-user-gesture-required
@@ -39,7 +46,7 @@ ProtectControlGroups=true
 RestrictSUIDSGID=true
 RestrictRealtime=true
 LockPersonality=true
-ReadWritePaths=${VAN_BROWSER_PROFILE_MOUNT}
+ReadWritePaths=${VAN_BROWSER_PROFILE_MOUNT} /var/lib/van-browser-transfers
 # Deliberately absent: any access to /var/run/docker.sock. Membership of the docker group
 # is root on this host, one API call away, and this user must never have it.
 

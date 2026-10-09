@@ -1,0 +1,65 @@
+[Unit]
+Description=VAN Browser Harness worker and Harness-owned Chromium (van-browser-core)
+Documentation=file:///opt/van-browser-core/README.md
+After=network-online.target van-browser-core-firewall.service van-browser-egress.service
+Wants=network-online.target
+# Unit G12: Chromium's only way out is the egress proxy, and the zone firewall keeps it so.
+# Either stopping stops this unit; a proxy restart (which re-numbers its listeners) restarts it.
+BindsTo=van-browser-core-firewall.service van-browser-egress.service
+PartOf=van-browser-egress.service
+# Owner decision 2026-09-29 §1: this unit starts only on a host bootstrapped as
+# van-browser-core. The zone marker is written by deploy/van-browser-core/bootstrap.sh.
+ConditionPathExists=/etc/van-browser-core/zone
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=van-browser
+Group=van-browser
+# Review I8 MINOR-4: the egress proxy's control socket belongs to this group.
+SupplementaryGroups=van-egress-ctl
+EnvironmentFile=/etc/van-browser-core/runtime.env
+WorkingDirectory=/opt/van-browser-core/runtime
+ExecStartPre=/usr/bin/grep -qx van-browser-core /etc/van-browser-core/zone
+ExecStart=/usr/bin/python3.12 /opt/van-browser-core/runtime/harness_service.py
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=45
+TimeoutStopSec=15
+
+# The worker launches only the pinned local Chromium and browser-harness child. It holds
+# no credential of another trust zone (deploy/van-browser-core/zone.json).
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=false
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077
+# Review I8 MINOR-4: /run is tmpfs; systemd recreates the runtime root on every start, 0750 so
+# the Stagehand user (group van-browser) reaches the per-alias CDP endpoint files (0640).
+RuntimeDirectory=van-browser-core
+RuntimeDirectoryMode=0750
+RuntimeDirectoryPreserve=yes
+ReadWritePaths=/var/lib/van-browser-core /run/van-browser-core /var/log/van-browser-core -/run/van-browser-egress
+ReadOnlyPaths=/opt/van-browser-core/runtime /etc/van-browser-core/runtime.env
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+CPUWeight=40
+IOWeight=40
+MemoryAccounting=true
+CPUAccounting=true
+TasksAccounting=true
+MemoryMax=3G
+TasksMax=512
+
+[Install]
+WantedBy=multi-user.target

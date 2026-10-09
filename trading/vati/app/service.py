@@ -77,6 +77,8 @@ class ServiceConfig:
     #: did: an explicit MODEL_UNAVAILABLE abstention and an untouched
     #: deterministic decision.
     cognition: dict = field(default_factory=dict)
+    # Operator-admitted provider/model qualifications; packets cannot set these.
+    cognitive_fabric: dict = field(default_factory=dict)
     #: Where `secretref://` credential handles resolve. Mirrors the gateway's
     #: `vati_secrets_dir`; the credential value itself is never configuration.
     secrets_dir: str = ""
@@ -172,6 +174,9 @@ class SessionService:
         if not account.enabled:
             raise RuntimeError(f"account {account.alias} is disabled")
         mandate = TradingMandate.from_mapping(c.mandate)
+        if mandate.temperament_enabled:
+            raise RuntimeError("trading temperaments require AccountCoordinatorService; "
+                               "single-symbol session refuses unsupported signed posture")
         if mandate.mode.value in ("LIMITED_LIVE", "AUTONOMOUS_LIVE") and account.demo:
             raise RuntimeError("mandate is live but the account record is demo: refuse to start with mismatched safety identity")
         if mandate.account_alias != account.alias:

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.BrowserProcessRecoveryTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:59:30" hostname="052fefa249ff" time="0.031">
+  <properties/>
+  <testcase name="media does not reconnect until the session is confirmed()" classname="com.dial.van.browser.BrowserProcessRecoveryTest" time="0.001"/>
+  <testcase name="a clock that went backwards still asks rather than discarding()" classname="com.dial.van.browser.BrowserProcessRecoveryTest" time="0.0"/>
+  <testcase name="cursors are restored because they are positions rather than verdicts()" classname="com.dial.van.browser.BrowserProcessRecoveryTest" time="0.0"/>
+  <testcase name="only the Gateway's answer becomes what the owner sees()" classname="com.dial.van.browser.BrowserProcessRecoveryTest" time="0.001"/>
+  <testcase name="the Gateway saying no drops the record entirely()" classname="com.dial.van.browser.BrowserProcessRecoveryTest" time="0.0"/>
+  <testcase name="a restored session says nothing to the owner until the Gateway has()" classname="com.dial.van.browser.BrowserProcessRecoveryTest" time="0.0"/>
+  <testcase name="nothing persisted is nothing to restore()" classname="com.dial.van.browser.BrowserProcessRecoveryTest" time="0.0"/>
+  <testcase name="reconciliation cannot see the cached state()" classname="com.dial.van.browser.BrowserProcessRecoveryTest" time="0.0"/>
+  <testcase name="there is no argument that produces an owner-visible state from the cache()" classname="com.dial.van.browser.BrowserProcessRecoveryTest" time="0.001"/>
+  <testcase name="a record older than a session's life is not about that session()" classname="com.dial.van.browser.BrowserProcessRecoveryTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

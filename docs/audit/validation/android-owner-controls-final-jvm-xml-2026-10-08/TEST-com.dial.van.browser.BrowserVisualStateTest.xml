@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.BrowserVisualStateTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:43:33" hostname="052fefa249ff" time="0.045">
+  <properties/>
+  <testcase name="a proposal equal to what is showing is still applied()" classname="com.dial.van.browser.BrowserVisualStateTest" time="0.003"/>
+  <testcase name="needing the owner outranks everything else the browser is doing()" classname="com.dial.van.browser.BrowserVisualStateTest" time="0.001"/>
+  <testcase name="the states it maps are the ones section 24 lists()" classname="com.dial.van.browser.BrowserVisualStateTest" time="0.0"/>
+  <testcase name="a degraded connection outranks a blocked page by the ladder alone()" classname="com.dial.van.browser.BrowserVisualStateTest" time="0.0"/>
+  <testcase name="the browser may take VAN up from idle()" classname="com.dial.van.browser.BrowserVisualStateTest" time="0.0"/>
+  <testcase name="the browser does not pull VAN down out of a louder state it does not own()" classname="com.dial.van.browser.BrowserVisualStateTest" time="0.0"/>
+  <testcase name="a finished navigation is never SUCCESS()" classname="com.dial.van.browser.BrowserVisualStateTest" time="0.036"/>
+  <testcase name="even needing the owner does not take an authority state()" classname="com.dial.van.browser.BrowserVisualStateTest" time="0.001"/>
+  <testcase name="a browser with nothing to say says nothing()" classname="com.dial.van.browser.BrowserVisualStateTest" time="0.001"/>
+  <testcase name="a page load does not displace a trading warning()" classname="com.dial.van.browser.BrowserVisualStateTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

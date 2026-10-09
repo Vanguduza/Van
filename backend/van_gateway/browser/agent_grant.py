@@ -25,6 +25,7 @@ generation.
 from __future__ import annotations
 
 import time
+from urllib.parse import urlsplit
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -261,12 +262,21 @@ def domain_allowed(url: str, allowed_domains: tuple[str, ...]) -> bool:
     `endswith` gets wrong, and the way an agent ends up on a domain an attacker
     registered to look like the one it was allowed.
     """
-    if not url.startswith(("http://", "https://")):
+    if not isinstance(url, str) or any(ord(c) <= 32 or ord(c) == 127 for c in url) or "\\" in url:
         return False
-    host = url.split("://", 1)[1].split("/", 1)[0].split("@")[-1].split(":")[0].lower()
-    if not host:
+    try:
+        parsed = urlsplit(url)
+        if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+            return False
+        if parsed.username is not None or parsed.password is not None or "%" in parsed.netloc:
+            return False
+        if parsed.port is not None and not 1 <= parsed.port <= 65535:
+            return False
+        host = parsed.hostname.encode("idna").decode("ascii").lower().rstrip(".")
+        domains = tuple(domain.encode("idna").decode("ascii").lower().rstrip(".") for domain in allowed_domains)
+    except (ValueError, UnicodeError, AttributeError):
         return False
     return any(
-        host == domain.lower() or host.endswith("." + domain.lower())
-        for domain in allowed_domains
+        bool(domain) and (host == domain or host.endswith("." + domain))
+        for domain in domains
     )

@@ -9,6 +9,7 @@ PROFILE_ROOT="${HERMES_HOME}/profiles/van"
 SHIM="${PROFILE_ROOT}/mcp/owner_runtime_stdio.mjs"
 OWNER_RUNTIME_URL="${VAN_OWNER_RUNTIME_URL:-http://127.0.0.1:8787}"
 GATEWAY_ENV_FILE="${VAN_GATEWAY_ENV_FILE:-$HOME/.config/van/gateway.env}"
+RUNTIME_TOKEN_FILE="${VAN_OWNER_RUNTIME_TOKEN_FILE:-}"
 DRY_RUN=0
 [[ "${1:-}" == "--dry-run" ]] && DRY_RUN=1
 
@@ -17,10 +18,19 @@ command -v node >/dev/null || fail "node is required on the Hermes host"
 python3 -c 'import yaml' 2>/dev/null || fail "python3 PyYAML is required"
 [[ -f "$HERMES_CONFIG" ]] || fail "Hermes config not found: $HERMES_CONFIG"
 [[ -f "$SHIM" ]] || fail "owner-runtime MCP shim not installed: $SHIM"
-[[ -f "$GATEWAY_ENV_FILE" ]] || fail "gateway env file not found: $GATEWAY_ENV_FILE"
-grep -q '^VAN_INTERNAL_CONTROL_TOKEN=' "$GATEWAY_ENV_FILE" || fail "VAN_INTERNAL_CONTROL_TOKEN missing from gateway env file"
+if [[ "${VAN_OWNER_RUNTIME_HOST:-}" == "van-trading-core" ]]; then
+  [[ "$OWNER_RUNTIME_URL" == "http://127.0.0.1:8787" ]] || fail "local core runtime URL must be explicit"
+  [[ -n "$RUNTIME_TOKEN_FILE" ]] || fail "separate scoped runtime token file required"
+fi
+if [[ -n "$RUNTIME_TOKEN_FILE" ]]; then
+  [[ -f "$RUNTIME_TOKEN_FILE" ]] || fail "scoped runtime token file missing"
+  [[ "$(stat -c '%a' "$RUNTIME_TOKEN_FILE")" =~ ^(400|600)$ ]] || fail "scoped runtime token file must be owner-only"
+else
+  [[ -f "$GATEWAY_ENV_FILE" ]] || fail "gateway env file not found: $GATEWAY_ENV_FILE"
+  grep -q '^VAN_INTERNAL_CONTROL_TOKEN=' "$GATEWAY_ENV_FILE" || fail "VAN_INTERNAL_CONTROL_TOKEN missing from gateway env file"
+fi
 
-VAN_DRY_RUN="$DRY_RUN" python3 - "$HERMES_CONFIG" "$PROFILE_ROOT" "$SHIM" "$OWNER_RUNTIME_URL" "$GATEWAY_ENV_FILE" <<'PY'
+VAN_DRY_RUN="$DRY_RUN" python3 - "$HERMES_CONFIG" "$PROFILE_ROOT" "$SHIM" "$OWNER_RUNTIME_URL" "$GATEWAY_ENV_FILE" "$RUNTIME_TOKEN_FILE" <<'PY'
 import datetime
 import os
 import re
@@ -29,7 +39,7 @@ import sys
 import tempfile
 import yaml
 
-path, profile_root, shim, url, gateway_env = sys.argv[1:6]
+path, profile_root, shim, url, gateway_env, runtime_token_file = sys.argv[1:7]
 dry = os.environ.get("VAN_DRY_RUN") == "1"
 PARENT = "mcp_servers"
 KEY = "van_owner_runtime"
@@ -50,9 +60,16 @@ spec = {
         # tests/contracts/test_owner_runtime_mcp_contract.py asserts the two agree;
         # drift here silently removes capabilities AGENTS.md instructs Hermes to use.
         "include": [
+            "mission_control_poll",
+            "mission_control_ack",
+            "decision_escalate",
+            "decision_read",
             "runtime_status",
             "mission_result",
             "resolve_command",
+            "assumption_record",
+            "assumption_blocking",
+            "premise_record",
             "context_graph_query",
             "context_lexical_query",
             "context_hot_capsule",
@@ -68,11 +85,17 @@ spec = {
             "google_status",
             "google_capabilities",
             "google_gmail_search",
+            "google_gmail_draft_preview",
+            "google_gmail_thread",
+            "google_gmail_attachment_import",
             "google_calendar_agenda",
+            "google_calendar_review",
             "google_drive_search",
             "google_contacts_resolve",
             "google_tasks_list",
             "google_job_plan",
+            "google_job_get",
+            "google_artifact_record",
             "google_action_execute",
             "research_status",
             "research_search",
@@ -89,11 +112,13 @@ spec = {
             "trading_trade_detail",
             "trading_status",
             "reminder_create",
+            "suggestion_create",
             "attention_list",
             "briefing_read",
             "browser_task_create",
             "browser_assignment_run",
             "browser_task_status",
+            "browser_control_grant_issue",
             "browser_task_evidence",
             "automation_route",
             "automation_execute",
@@ -107,6 +132,9 @@ spec = {
     },
     "authority": "SUBORDINATE_CAPABILITY_NOT_TRUTH_AUTHORITY",
 }
+if runtime_token_file:
+    spec["env"].pop("VAN_GATEWAY_ENV_FILE")
+    spec["env"]["VAN_OWNER_RUNTIME_TOKEN_FILE"] = runtime_token_file
 
 def indent_of(line):
     return len(line) - len(line.lstrip(" "))

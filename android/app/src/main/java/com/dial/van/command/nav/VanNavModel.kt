@@ -58,6 +58,16 @@ object VanNavModel {
     fun deepLink(uri: String): String? = VanRoute.parseDeepLink(uri)
 
     /**
+     * An explicit destination delivered by either Activity entry point. A plain
+     * launch has no steering request; an invalid/foreign link never becomes a
+     * raw NavHost destination or falls through to a different extra's route.
+     */
+    fun intentDestination(uri: String?, extraModule: String?): String? {
+        if (uri != null) return deepLink(uri)
+        return extraModule?.takeIf { it.isNotBlank() }?.let(::startDestination)
+    }
+
+    /**
      * One level, not a history (the rule `CommandNav.back` stated): where the system back
      * button/gesture goes from [currentRoute], or null when it should leave the app (only
      * true at [VanRoute.HOME], the graph's root).

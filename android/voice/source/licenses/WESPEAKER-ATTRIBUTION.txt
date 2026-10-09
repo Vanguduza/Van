@@ -1,0 +1,14 @@
+WeSpeaker VoxCeleb ResNet34 generic extractor attribution
+
+Model title: WeSpeaker VoxCeleb ResNet34 (wespeaker_en_voxceleb_resnet34.onnx).
+Model creators/publisher: WeSpeaker project contributors, https://github.com/wenet-e2e/wespeaker .
+Official pretrained model listing and model licensing policy: https://github.com/wenet-e2e/wespeaker/blob/master/docs/pretrained.md .
+Training dataset attribution: VoxCeleb dataset creators, https://mm.kaist.ac.kr/datasets/voxceleb/ .
+Sherpa-compatible ONNX metadata conversion/publisher: k2-fsa/sherpa-onnx contributors, https://github.com/k2-fsa/sherpa-onnx/tree/v1.13.8/scripts/wespeaker .
+Downloaded artifact: https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/wespeaker_en_voxceleb_resnet34.onnx .
+
+The WeSpeaker pretrained-model policy explicitly states that VoxCeleb model weights follow Creative Commons Attribution4.0 International, https://creativecommons.org/licenses/by/4.0/ . CC-BY-4.0.txt retains the complete legal text. The specific Hugging Face card https://huggingface.co/Wespeaker/wespeaker-voxceleb-resnet34/ separately declares Apache-2.0. Both upstream statements are retained in the evidence; the CC-BY attribution is provided instead of omitting that provenance requirement. WeSpeaker code is Apache-2.0, retained in WESPEAKER-CODE-APACHE-2.0.txt.
+
+Local changes: the official ONNX bytes are unchanged; the downloaded file is renamed to speaker/model.onnx for installation. SHA2565ef208a9da1453335308a6b6f4e6dfbd7e183a38b604de0a57664f45d257fe94,26,534,365bytes. No weight training, fine-tuning, identity-specific modification or owner embedding was performed.
+
+The generic test used fixed pretrained TTS speech only. Its temporary embedding vector was not persisted. Actual consenting owner speech capture, encrypted owner enrollment storage, and device qualification are separate requirements. No owner identity or endorsement is asserted by this model attribution.

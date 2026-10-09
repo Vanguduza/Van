@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.visual.VanEmbodimentReducerTest" tests="30" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:48" hostname="052fefa249ff" time="0.007">
+  <properties/>
+  <testcase name="activity started with no kind hint just works()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.001"/>
+  <testcase name="attention urgent interrupts and cautions()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="a session handshake connects()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.001"/>
+  <testcase name="an open attention item outranks quiet hours()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="mission waiting owner asks and cautions()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="mission failed is an error with urgency()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="mission completed unverifiable shrugs instead of celebrating()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="mission started without a hermes run id is local work()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.001"/>
+  <testcase name="quiet hours with nothing open sleeps()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="a closed trade in the good decision good outcome quadrant celebrates()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="mission started with a hermes run id delegates()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="an unrecognised event type with no hint produces nothing()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="the first session of a new day waves hello()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.001"/>
+  <testcase name="a different event type never celebrates even with a matching quadrant()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="overlay expand and collapse open and close the panel()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="mission completed presents the result card()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="mission completed partial success also shrugs()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="attention info blocker and follow_up do not interrupt the pose()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.001"/>
+  <testcase name="every card direction maps to its own point action()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="outside quiet hours nothing sleeps()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="the json overload reads summary, hermes_run_id and activity_kind()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="a state hint the device does not yet receive an event for still lands()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.001"/>
+  <testcase name="activity started with a research kind searches()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="a closed trade in any other quadrant does not celebrate()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="an absent quadrant field never celebrates — guarded on presence()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="a non-attention event type produces nothing regardless of severity()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="every durable state and finite action has a registered producer()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.001"/>
+  <testcase name="a second session on the same day does not wave again()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="the json overload reads severity off the payload()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <testcase name="the json overload tolerates malformed json()" classname="com.dial.van.visual.VanEmbodimentReducerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

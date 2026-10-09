@@ -1,21 +1,31 @@
 from __future__ import annotations
 
 import uuid
+import hashlib
+import json
+import logging
 from enum import Enum
 from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException
-from pydantic import BaseModel, Field
+from fastapi.responses import JSONResponse
+import httpx
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt
 
 from van_gateway.auth.control_scopes import ControlScope, require_scoped_internal
 from van_gateway.action.models import VerificationObservation
 from van_gateway.action.registry import install_builtin_actions
 from van_gateway.action.service import ActionPolicyError, ActionRuntime
 from van_gateway.attention.engine import AttentionEngine
+from van_gateway.artifacts.models import ArtifactKind
+from van_gateway.artifacts.service import ArtifactService
 from van_gateway.briefing.service import BriefingService
 from van_gateway.command.authority import CommandAuthorityError, CommandAuthorityService
 from van_gateway.command.resolver import TypedCommandResolver
 from van_gateway.config import Settings
+from van_gateway.decisions.models import DecisionChoice, DecisionCreate, DecisionEvidenceInput, DecisionRecord
+from van_gateway.decisions.service import DecisionError, DecisionService
+from van_gateway.conversations.service import ConversationService
 from van_gateway.context.models import (
     ContextEdgeCandidate,
     ContextGraphQuery,
@@ -33,6 +43,7 @@ from van_gateway.context.retrieval import (
 from van_gateway.authority.descriptor import Reversibility, describe_action
 from van_gateway.context.service import ContextAdmissionError, OwnerContextService
 from van_gateway.epistemics.models import SemanticClass
+from van_gateway.jev.advisor import JevVanAdvisor
 from van_gateway.reasoning.kernel import (
     AssumptionStatus,
     CriticalReasoningKernel,
@@ -51,11 +62,17 @@ from van_gateway.knowledge.service import KnowledgeRuntime
 from van_gateway.knowledge.vekl import VeklProviderError
 from van_gateway.models import PrincipalType, ReminderCreate
 from van_gateway.mission.service import MissionError, MissionService
+from van_gateway.mission.control import MissionControlError, MissionExecutionControlService
+from van_gateway.mission.control_models import (
+    MissionControlAcknowledgement, MissionControlAckBody, MissionControlPollBody, MissionControlState,
+)
 from van_gateway.reminders.service import ReminderService
 from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
-from van_gateway.research.exa import ExaResearchService, ResearchPolicyError
+from van_gateway.research.exa import ExaResearchService, ResearchPolicyError, ResearchProviderError
 from van_gateway.research.models import ResearchSearchRequest
 from van_gateway.storage.db import Store
+from van_gateway.suggestions.models import SuggestionCreate
+from van_gateway.suggestions.service import SuggestionService, SuggestionServiceError
 from van_gateway.trading.service import TradingService
 
 
@@ -145,9 +162,32 @@ class HermesMissionResultBody(BaseModel):
     summary: str = Field(default="", max_length=4000)
 
 
+class HermesDecisionCreateBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    mission_id: str = Field(min_length=1, max_length=128)
+    hermes_run_id: str = Field(min_length=1, max_length=256)
+    request_id: str = Field(min_length=8, max_length=128, pattern=r"^[A-Za-z0-9][A-Za-z0-9._:-]*$")
+    title: str = Field(min_length=1, max_length=300)
+    body: str = Field(min_length=1, max_length=12000)
+    choices: list[DecisionChoice] = Field(default_factory=list, max_length=16)
+    evidence: list[DecisionEvidenceInput] = Field(default_factory=list, max_length=32)
+    blocking: StrictBool = True
+    expires_at_unix: StrictInt | None = Field(default=None, ge=1)
+
+
 class ActionSubmittedBody(BaseModel):
     correlation: dict[str, Any] = Field(default_factory=dict)
     evidence_pointer: str | None = None
+
+
+class HermesSuggestionCreateBody(BaseModel):
+    """An evidence-backed idea for the owner, never an execution request."""
+
+    title: str = Field(min_length=1, max_length=300)
+    rationale: str = Field(min_length=1, max_length=4000)
+    proposed_prompt: str = Field(min_length=1, max_length=8000)
+    source_refs: list[str] = Field(min_length=1, max_length=100)
+    project_id: str | None = None
 
 
 class HermesReminderCreateBody(BaseModel):
@@ -191,6 +231,10 @@ class OwnerRuntimeApi:
         reminders: ReminderService | None = None,
         attention: AttentionEngine | None = None,
         briefing: BriefingService | None = None,
+        artifacts: ArtifactService | None = None,
+        suggestions: SuggestionService | None = None,
+        conversations: ConversationService | None = None,
+        jev_advisor: JevVanAdvisor | None = None,
     ) -> None:
         self.store = store
         self.settings = settings
@@ -203,6 +247,9 @@ class OwnerRuntimeApi:
         self.reminders = reminders
         self.attention = attention
         self.briefing = briefing
+        self.artifacts = artifacts
+        self.suggestions = suggestions
+        self.conversations = conversations
         self.context = OwnerContextService(store)
         self.retrieval = ContextRetrievalService(store, self.context)
         # GAP-F-008: agent-initiated mutating actions are gated by the autonomy policy.
@@ -211,7 +258,7 @@ class OwnerRuntimeApi:
         self.resolver = TypedCommandResolver(
             default_notebook_id=getattr(settings, "notebook_default_id", ""),
         )
-        self.kernel = CriticalReasoningKernel(store)
+        self.kernel = CriticalReasoningKernel(store, jev_advisor=jev_advisor)
         self.knowledge = KnowledgeRuntime(store, settings)
         self.research = ExaResearchService(
             store,
@@ -221,11 +268,42 @@ class OwnerRuntimeApi:
             timeout_seconds=settings.exa_timeout_seconds,
         )
         self.missions: MissionService | None = None
+        self.decisions: DecisionService | None = None
+        self.controls = MissionExecutionControlService(store)
         self.router = APIRouter(prefix="/v1/runtime", tags=["owner-runtime"])
         self._install_routes()
 
     def bind_missions(self, missions: MissionService) -> None:
         self.missions = missions
+        if self.artifacts is not None or self.conversations is not None:
+            missions.terminal_projector = self._project_mission_outcome
+
+    async def _project_mission_outcome(self, mission) -> None:
+        artifact_id = None
+        if not mission.is_terminal or not mission.final_outcome:
+            return
+        if self.artifacts is not None:
+            source = {"mission_id": mission.mission_id, "state": mission.state.value,
+                "verification_state": mission.verification_state.value, "final_outcome": mission.final_outcome}
+            source_digest = hashlib.sha256(json.dumps(source, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+            verification = await self.missions.verification_record(mission.mission_id)
+            projection = await self.artifacts.ensure_projection(
+                kind=ArtifactKind.REPORT, title=f"Mission result · {mission.title}",
+                summary=mission.final_outcome, project_id=mission.project_id,
+                command_id=mission.authority_envelope.source_command_id, mission_id=mission.mission_id,
+                canonical_source_type="mission.outcome", canonical_source_id=mission.mission_id,
+                canonical_source_digest=source_digest,
+                evidence_refs=list(verification.evidence_refs) if verification else [])
+            artifact_id = projection.artifact_id
+        if self.conversations is not None:
+            thread = await self.conversations.ensure_main()
+            await self.conversations.append_projection(thread.thread_id,
+                projection_key=f"mission:{mission.mission_id}:terminal", role="VAN",
+                body=mission.final_outcome, command_id=mission.authority_envelope.source_command_id,
+                mission_id=mission.mission_id, artifact_refs=[artifact_id] if artifact_id else [], terminal=True)
+
+    def bind_decisions(self, decisions: DecisionService) -> None:
+        self.decisions = decisions
 
     async def _refuse_irreversible_work_on_unsettled_assumptions(
         self, definition: Any, command_id: str
@@ -405,6 +483,37 @@ class OwnerRuntimeApi:
                 "source": body.source,
             }
 
+        # ------------------------------------------------------ OMV-004 suggestions
+        #
+        # Hermes may surface an evidence-backed idea through the existing SuggestionService.
+        # This creates an Attention item only. It cannot execute the proposed prompt; the
+        # owner must accept/edit it, after which the client submits a fresh signed command.
+        @router.post("/suggestions")
+        async def runtime_create_suggestion(
+            body: HermesSuggestionCreateBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            if self.suggestions is None:
+                raise HTTPException(status_code=503, detail="suggestions_unwired")
+            try:
+                suggestion = await self.suggestions.create(
+                    SuggestionCreate(
+                        title=body.title,
+                        rationale=body.rationale,
+                        proposed_prompt=body.proposed_prompt,
+                        source_refs=body.source_refs,
+                        project_id=body.project_id,
+                    )
+                )
+            except SuggestionServiceError as exc:
+                raise HTTPException(status_code=409, detail=exc.code) from exc
+            return {
+                **suggestion.model_dump(mode="json"),
+                "execution_created": False,
+                "owner_decision_required": True,
+            }
+
         # ------------------------------------------------------- §GAP-F-003 attention/briefing
         #
         # Read-only projections of the same owner-facing state `/v1/attention` and
@@ -458,21 +567,78 @@ class OwnerRuntimeApi:
             if self.missions is None:
                 raise HTTPException(status_code=503, detail="mission_runtime_unbound")
             try:
-                mission = await self.missions.apply_hermes_result(
+                receipt = await self.missions.ingest_hermes_result(
                     hermes_run_id=body.hermes_run_id,
                     outcome=body.status.value,
                     summary=body.summary,
                 )
             except MissionError as exc:
-                code = 404 if exc.code == "HERMES_RUN_UNBOUND" else 409
-                raise HTTPException(status_code=code, detail=exc.code) from exc
-            return {
-                "hermes_run_id": body.hermes_run_id,
-                "mission_id": mission.mission_id,
-                "state": mission.state.value,
-                "verification_state": mission.verification_state.value,
-                "final_outcome": mission.final_outcome,
-            }
+                raise HTTPException(status_code=409, detail=exc.code) from exc
+            if receipt["status"] == "APPLIED" and receipt.get("mission_id"):
+                mission_id = receipt["mission_id"]
+                pending = await self.store.fetchone(
+                    "SELECT mission_id FROM mission_projection_outbox WHERE mission_id=?", (mission_id,))
+                artifact = await self.store.fetchone(
+                    "SELECT artifact_id FROM owner_artifacts WHERE canonical_source_type=? "
+                    "AND canonical_source_id=? ORDER BY created_at_ms ASC LIMIT 1",
+                    ("mission.outcome", mission_id))
+                receipt["artifact_id"] = artifact["artifact_id"] if artifact else None
+                receipt["publication_state"] = "PENDING" if pending else "PUBLISHED" if artifact else "UNAVAILABLE"
+            return JSONResponse(receipt, status_code=200 if receipt["status"] == "APPLIED" else 202)
+
+        @router.post("/missions/control/poll", response_model=MissionControlState)
+        async def poll_mission_control(body: MissionControlPollBody,
+                                       x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            try:
+                return await self.controls.poll(**body.model_dump())
+            except MissionControlError as exc:
+                raise HTTPException(status_code=409, detail=exc.code) from exc
+
+        @router.post("/missions/control/ack", response_model=MissionControlAcknowledgement)
+        async def acknowledge_mission_control(body: MissionControlAckBody,
+                                              x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            try:
+                return await self.controls.acknowledge(**body.model_dump())
+            except MissionControlError as exc:
+                raise HTTPException(status_code=409, detail=exc.code) from exc
+
+        @router.post("/decisions/escalate", response_model=DecisionRecord)
+        async def runtime_escalate_decision(body: HermesDecisionCreateBody,
+                                           x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            if self.decisions is None:
+                raise HTTPException(status_code=503, detail="decision_runtime_unbound")
+            try:
+                proposal = DecisionCreate(
+                    **body.model_dump(exclude={"hermes_run_id"}),
+                    source="hermes-runtime", hermes_ref=f"hermes-run:{body.hermes_run_id}",
+                )
+                return await self.decisions.escalate(proposal, producer_run_id=body.hermes_run_id)
+            except DecisionError as exc:
+                raise HTTPException(status_code=409, detail=exc.reason) from exc
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail="decision_invalid") from exc
+
+        @router.get("/decisions/{decision_id}", response_model=DecisionRecord)
+        async def runtime_read_decision(decision_id: str, mission_id: str, hermes_run_id: str,
+                                        x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            if self.decisions is None:
+                raise HTTPException(status_code=503, detail="decision_runtime_unbound")
+            binding = await self.store.fetchone(
+                "SELECT mission_id FROM hermes_run_bindings WHERE hermes_run_id=? AND mission_id=?",
+                (hermes_run_id, mission_id),
+            )
+            if binding is None:
+                raise HTTPException(status_code=409, detail="decision_run_binding_mismatch")
+            record = await self.decisions.get(decision_id)
+            if record is None:
+                raise HTTPException(status_code=404, detail="decision_not_found")
+            if record.mission_id != mission_id:
+                raise HTTPException(status_code=409, detail="decision_run_binding_mismatch")
+            return record
 
         @router.post("/resolve")
         async def resolve_command(body: CommandResolveBody, x_van_internal_token: str | None = Header(default=None)):
@@ -562,6 +728,10 @@ class OwnerRuntimeApi:
                 return await self.knowledge.query_vekl(body)
             except VeklProviderError as exc:
                 raise HTTPException(status_code=503, detail=str(exc)) from exc
+            except httpx.TimeoutException as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_timeout") from exc
+            except httpx.HTTPError as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_unavailable") from exc
 
         @router.post("/knowledge/vekl/certify-canary")
         async def knowledge_vekl_certify(body: VeklQueryRequest, x_van_internal_token: str | None = Header(default=None)):
@@ -570,6 +740,10 @@ class OwnerRuntimeApi:
                 return await self.knowledge.certify_vekl(body)
             except VeklProviderError as exc:
                 raise HTTPException(status_code=503, detail=str(exc)) from exc
+            except httpx.TimeoutException as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_timeout") from exc
+            except httpx.HTTPError as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_unavailable") from exc
 
         @router.post("/knowledge/obsidian/query")
         async def knowledge_obsidian_query(body: ObsidianQueryRequest, x_van_internal_token: str | None = Header(default=None)):
@@ -578,6 +752,10 @@ class OwnerRuntimeApi:
                 return await self.knowledge.query_obsidian(body)
             except ObsidianProviderError as exc:
                 raise HTTPException(status_code=503, detail=str(exc)) from exc
+            except httpx.TimeoutException as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_timeout") from exc
+            except httpx.HTTPError as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_unavailable") from exc
 
         @router.post("/knowledge/obsidian/index")
         async def knowledge_obsidian_index(body: ObsidianIndexRequest, x_van_internal_token: str | None = Header(default=None)):
@@ -586,6 +764,10 @@ class OwnerRuntimeApi:
                 return await self.knowledge.index_obsidian(force=body.force)
             except ObsidianProviderError as exc:
                 raise HTTPException(status_code=503, detail=str(exc)) from exc
+            except httpx.TimeoutException as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_timeout") from exc
+            except httpx.HTTPError as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_unavailable") from exc
 
         @router.post("/knowledge/obsidian/certify")
         async def knowledge_obsidian_certify(x_van_internal_token: str | None = Header(default=None)):
@@ -594,6 +776,10 @@ class OwnerRuntimeApi:
                 return await self.knowledge.certify_obsidian()
             except ObsidianProviderError as exc:
                 raise HTTPException(status_code=503, detail=str(exc)) from exc
+            except httpx.TimeoutException as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_timeout") from exc
+            except httpx.HTTPError as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_unavailable") from exc
 
         @router.get("/knowledge/notebook/enterprise/recent")
         async def knowledge_notebook_recent(page_size: int = 100, x_van_internal_token: str | None = Header(default=None)):
@@ -602,6 +788,10 @@ class OwnerRuntimeApi:
                 return {"notebooks": await self.knowledge.notebook_enterprise_recent(page_size)}
             except NotebookProviderError as exc:
                 raise HTTPException(status_code=503, detail=str(exc)) from exc
+            except httpx.TimeoutException as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_timeout") from exc
+            except httpx.HTTPError as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_unavailable") from exc
 
         @router.get("/knowledge/notebook/enterprise/{notebook_id}")
         async def knowledge_notebook_get(notebook_id: str, x_van_internal_token: str | None = Header(default=None)):
@@ -611,6 +801,10 @@ class OwnerRuntimeApi:
             except NotebookProviderError as exc:
                 code = 404 if str(exc) == "notebook_enterprise_not_found" else 503
                 raise HTTPException(status_code=code, detail=str(exc)) from exc
+            except httpx.TimeoutException as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_timeout") from exc
+            except httpx.HTTPError as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_unavailable") from exc
 
         @router.post("/knowledge/notebook/enterprise/certify")
         async def knowledge_notebook_enterprise_certify(x_van_internal_token: str | None = Header(default=None)):
@@ -619,6 +813,10 @@ class OwnerRuntimeApi:
                 return await self.knowledge.certify_notebook_enterprise()
             except NotebookProviderError as exc:
                 raise HTTPException(status_code=503, detail=str(exc)) from exc
+            except httpx.TimeoutException as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_timeout") from exc
+            except httpx.HTTPError as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_unavailable") from exc
 
         @router.post("/knowledge/notebook/consumer/ask")
         async def knowledge_notebook_consumer_ask(body: NotebookConsumerAskRequest, x_van_internal_token: str | None = Header(default=None)):
@@ -627,6 +825,10 @@ class OwnerRuntimeApi:
                 return await self.knowledge.ask_consumer_notebook(body)
             except NotebookProviderError as exc:
                 raise HTTPException(status_code=503, detail=str(exc)) from exc
+            except httpx.TimeoutException as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_timeout") from exc
+            except httpx.HTTPError as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_unavailable") from exc
 
         @router.post("/knowledge/notebook/consumer/certify")
         async def knowledge_notebook_consumer_certify(body: NotebookConsumerAskRequest, x_van_internal_token: str | None = Header(default=None)):
@@ -635,6 +837,10 @@ class OwnerRuntimeApi:
                 return await self.knowledge.certify_consumer_notebook(body)
             except NotebookProviderError as exc:
                 raise HTTPException(status_code=503, detail=str(exc)) from exc
+            except httpx.TimeoutException as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_timeout") from exc
+            except httpx.HTTPError as exc:
+                raise HTTPException(status_code=503, detail="knowledge_provider_unavailable") from exc
 
         @router.post("/knowledge/actions/execute")
         async def knowledge_action_execute(body: KnowledgeActionExecuteBody, x_van_internal_token: str | None = Header(default=None)):
@@ -814,7 +1020,7 @@ class OwnerRuntimeApi:
         ):
             self._require_internal(x_van_internal_token)
             try:
-                return await self.actions.verify(body)
+                return await self.actions.verify(body, independent_observer=False)
             except ActionPolicyError as exc:
                 raise HTTPException(status_code=404, detail=str(exc)) from exc
 
@@ -839,6 +1045,8 @@ class OwnerRuntimeApi:
             except ResearchPolicyError as exc:
                 code = 503 if str(exc) in {"research_egress_disabled", "exa_api_key_unconfigured"} else 403
                 raise HTTPException(status_code=code, detail=str(exc)) from exc
+            except ResearchProviderError as exc:
+                raise HTTPException(status_code=503, detail=str(exc)) from exc
 
         @router.post("/research/certify-canary")
         async def research_canary(body: ResearchSearchRequest, x_van_internal_token: str | None = Header(default=None)):
@@ -848,3 +1056,5 @@ class OwnerRuntimeApi:
             except ResearchPolicyError as exc:
                 code = 503 if str(exc) in {"research_egress_disabled", "exa_api_key_unconfigured"} else 403
                 raise HTTPException(status_code=code, detail=str(exc)) from exc
+            except ResearchProviderError as exc:
+                raise HTTPException(status_code=503, detail=str(exc)) from exc

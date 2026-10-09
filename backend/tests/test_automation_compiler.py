@@ -32,6 +32,7 @@ from van_gateway.automation.policy import PolicyError
 from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex, RegistryError
 from van_gateway.automation.validator import WorkflowValidator
 from van_gateway.models import ActionClass
+from automation_runtime_fixture import bound_compile, public_ir
 
 DOMAIN = "reports.example.com"
 CREDS = {"connector://broker/primary": "cred_17"}
@@ -233,7 +234,7 @@ def test_same_ir_compiles_to_same_semantic_digest():
 def test_canvas_position_does_not_affect_semantic_digest():
     """§150 — moving a node in the editor is not logic drift."""
     compiler = AutomationCompiler(_policy())
-    compiled = compiler.compile(sample_ir(domain=DOMAIN), credential_ids=CREDS)
+    compiled = bound_compile(public_ir())
     assert all("position" not in node for node in compiled.semantic_graph["nodes"])
     assert all("position" in node for node in compiled.n8n_graph["nodes"])
     mutated = {**compiled.n8n_graph}
@@ -245,15 +246,17 @@ def test_canvas_position_does_not_affect_semantic_digest():
 def test_node_names_are_stable_and_ordinal():
     """§149 — <ordinal:03d>_<primitive>_<suffix>."""
     compiled = AutomationCompiler(_policy()).compile(sample_ir(domain=DOMAIN), credential_ids=CREDS)
-    names = [node["name"] for node in compiled.n8n_graph["nodes"]]
+    names = [node["name"] for node in compiled.semantic_graph["nodes"]]
     assert names == ["010_SCHEDULE_TRIGGER_ig01", "020_HTTP_GET_tp02", "030_VAN_EVIDENCE_id03"]
 
 
-def test_credentials_compile_to_identifier_never_value():
-    """§46 — the graph carries an n8n credential id, not a secret."""
+def test_generic_credential_handle_cannot_invent_a_gateway_adapter():
+    """A former vanConnector ID does not implement protected source retrieval."""
     compiled = AutomationCompiler(_policy()).compile(sample_ir(domain=DOMAIN), credential_ids=CREDS)
-    http_node = next(n for n in compiled.n8n_graph["nodes"] if n["name"].startswith("020_"))
-    assert http_node["credentials"]["vanConnector"]["id"] == "cred_17"
+    assert not compiled.deployable
+    assert "gateway_credential_adapter_unavailable:connector://broker/primary" in compiled.readiness_errors
+    assert compiled.n8n_graph["nodes"] == []
+    assert "vanConnector" not in canonical_json(compiled.n8n_graph).decode()
     assert "secret" not in canonical_json(compiled.n8n_graph).decode().lower()
 
 
@@ -274,18 +277,21 @@ def test_workflow_timeout_is_always_set():
     assert compiled.n8n_graph["settings"]["executionTimeout"] > 0
 
 
-def test_webhook_trigger_compiles_with_authentication():
-    """§208 — never an open webhook."""
-    ir = sample_ir(domain=DOMAIN)
+def test_engine_entry_requires_canonical_admission_before_any_steps():
+    """No engine timer or external webhook can manufacture owner authority."""
+    ir = public_ir()
     steps = list(ir.steps)
     steps[0] = steps[0].model_copy(
         update={"primitive": Primitive.WEBHOOK_TRIGGER, "input_bindings": {"path": "van/x"}}
     )
-    compiled = AutomationCompiler(_policy()).compile(
-        ir.model_copy(update={"steps": steps}), credential_ids=CREDS
-    )
-    node = next(n for n in compiled.n8n_graph["nodes"] if n["name"].startswith("010_"))
-    assert node["parameters"]["authentication"] == "headerAuth"
+    compiled = bound_compile(ir.model_copy(update={"steps": steps}))
+    entry, admission = compiled.n8n_graph["nodes"][:2]
+    assert entry["name"] == "000_run_entry"
+    assert compiled.n8n_graph["connections"][entry["name"]]["main"][0][0]["node"] == admission["name"]
+    assert admission["credentials"]["httpHeaderAuth"]["id"] == "workerCredential1"
+    assert "__admit__" in admission["parameters"]["jsonBody"]
+    assert "capability_grant" in admission["parameters"]["jsonBody"]
+    assert all(node["type"] != "n8n-nodes-base.scheduleTrigger" for node in compiled.n8n_graph["nodes"])
 
 
 def test_disallowed_http_method_refused():

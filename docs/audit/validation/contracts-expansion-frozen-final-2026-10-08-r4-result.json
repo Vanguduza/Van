@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "suite": "contracts",
+  "selection": [
+    "tests/contracts"
+  ],
+  "command": [
+    "/workspace/.onboarding/van-venv/bin/python",
+    "-m",
+    "pytest",
+    "tests/contracts",
+    "-q",
+    "--junitxml=/workspace/Van/docs/audit/validation/contracts-expansion-frozen-final-2026-10-08-r4.xml"
+  ],
+  "started_at_utc": "2026-10-08T05:05:34.593987+00:00",
+  "finished_at_utc": "2026-10-08T05:07:00.114295+00:00",
+  "exit_code": 0,
+  "counts": {
+    "tests": 895,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2
+  },
+  "passed": 893,
+  "qualification": "LOCAL_FROZEN_CONTRACTS_PASS",
+  "source_unchanged_during_test": true,
+  "changed_inputs": [],
+  "external_changed": false,
+  "input_files": 1988,
+  "external_input_files": 2,
+  "production_manifest_sha256": "7c10fa544d0344d1b73899b4cb3fd7341c0d32caaba9b4c54df7eb6ffadc50af",
+  "android_receipt_sha256": "14c44f16382d9206d3943c1aa38b658b2ecce932e37f6d86d3c39c5142162b9c",
+  "before_snapshot": "docs/audit/validation/contracts-expansion-frozen-final-2026-10-08-r4-before.json",
+  "before_snapshot_sha256": "4f4c583fb4c7a3551a3eafe57d756b207f3489de2286e780d2a9db68c78e4a0b",
+  "after_snapshot": "docs/audit/validation/contracts-expansion-frozen-final-2026-10-08-r4-after.json",
+  "after_snapshot_sha256": "5b8e7da402bd17c9de9ffe7f1375519db9fea7310f39e4ab8b47fbe71b81e9d2",
+  "log": "docs/audit/validation/contracts-expansion-frozen-final-2026-10-08-r4.log",
+  "log_sha256": "7e5f1492bb717863dcf75072ed01a663aabcc7d94c7dbfeab7db0be6acabe931",
+  "junit": "docs/audit/validation/contracts-expansion-frozen-final-2026-10-08-r4.xml",
+  "junit_sha256": "3ba6cb3dcd58c0e5544ea00d6a4f5ef2004ed4e0f90415e9808e089836177998",
+  "physical_android_cases_executed": 0,
+  "deployment_accepted": false,
+  "provider_live_effects_accepted": false,
+  "skipped_cases": [
+    {
+      "class": "tests.contracts.test_android_instrumentation_abi",
+      "name": "test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile",
+      "reason": "opt-in actual AGP release guard check"
+    },
+    {
+      "class": "tests.contracts.test_android_production_target",
+      "name": "test_actual_agp_valid_target_still_refuses_missing_production_signing",
+      "reason": "opt-in actual AGP signing guard check"
+    }
+  ],
+  "separate_skip_qualification_receipt": {
+    "path": "docs/audit/validation/android-release-guards-supplement-2026-10-08-r2.json",
+    "sha256": "77b53ef438d222c23868de62a98f4d820d8e7964885ca9e2edeac7287595e71e",
+    "actual_agp_guard_cases_passed": 2,
+    "scope": "Separate opt-in invocation; this does not alter ordinary-contract passed/skipped counts."
+  },
+  "validation_runner": {
+    "path": "docs/audit/validation/contracts-expansion-frozen-final-2026-10-08-r4-runner.py",
+    "sha256": "ced9c3ce6f6b5f3f7fdafd012a7ef3c77be157e4682ac119adbb103e5e2f6194"
+  }
+}

@@ -164,14 +164,23 @@ curl -fsS --max-time 5 "${VAN_VEKL_URL:-http://127.0.0.1:9134}/health" >/tmp/vek
 curl -fsSk --max-time 5 "https://127.0.0.1:${VAN_COMMANDER_PORT:-9133}/health" >/tmp/cmd.json 2>/dev/null && jq -e '.ok==true' /tmp/cmd.json >/dev/null && add commander_health GREEN "$(jq -c '.commands|length' /tmp/cmd.json) commands" || add commander_health RED "commander health not ok"
 if "$BASE/automation/qualify-automation-runtime.sh" >/tmp/automation-qualify.log 2>&1; then add automation_fabric GREEN "$(tail -n 1 /tmp/automation-qualify.log)"; else add automation_fabric RED "$(tail -c 500 /tmp/automation-qualify.log)"; fi
 if "$BASE/app/deploy/van-trading-core/supabase/qualify-supabase-runtime.sh" >/tmp/supabase-qualify.log 2>&1; then add supabase_runtime GREEN "$(tail -n 1 /tmp/supabase-qualify.log)"; else add supabase_runtime RED "$(tail -c 500 /tmp/supabase-qualify.log)"; fi
-if [[ -f "$DATA/evidence/browser/runtime-manifest.json" ]] && jq -e '.stagehand=="4.1.0" and .playwright=="1.63.0" and .temporalio=="1.33.0"' "$DATA/evidence/browser/runtime-manifest.json" >/dev/null; then add browser_runtime GREEN "Stagehand 4.1.0 / Playwright 1.63.0 / Temporal 1.33.0"; else add browser_runtime RED "browser runtime manifest missing or mismatched"; fi
+# Owner decision 2026-09-29 §1: Stagehand must not run on van-trading-core in production.
+# The browser runtime is qualified by deploy/van-browser-core/qualify.sh on its own host.
+if systemctl is-active --quiet vati-stagehand.service 2>/dev/null || systemctl is-enabled --quiet vati-stagehand.service 2>/dev/null; then add stagehand_not_on_trading_core RED "vati-stagehand.service is enabled/active on van-trading-core; production placement is van-browser-core"; else add stagehand_not_on_trading_core GREEN "no Stagehand service on van-trading-core"; fi
 if [[ -n "${VAN_COMMANDER_LEDGER:-}" ]]; then PYTHONPATH="$BASE/app/trading" "$BASE/venv/bin/python" - <<PY >/tmp/ledger.json 2>/tmp/ledger.err && add ledger GREEN "$(cat /tmp/ledger.json)" || add ledger RED "$(tail -c 300 /tmp/ledger.err)"
 import json
 from vati.core.ledger_pg import open_ledger
 l = open_ledger("${VAN_COMMANDER_LEDGER}"); ok, n = l.verify_chain(); print(json.dumps({"backend": type(l).__name__, "chain_ok": ok, "events": n})); l.close()
 PY
 fi
-if ufw status 2>/dev/null | grep -q "Status: active"; then ufw status | grep -q "9133" && add firewall GREEN "ufw active, 9133 scoped" || add firewall RED "9133 rule missing"; else add firewall RED "ufw inactive"; fi
+# A port substring cannot establish source scope or rule order. Observe one
+# verbose summary (including default incoming policy) and evaluate it as data.
+if ufw_status="$(ufw status verbose 2>/dev/null)" &&
+   ufw_scope="$(printf '%s\n' "$ufw_status" | python3 "$APP/tools/runtime/check_ufw_commander_scope.py" --admin-cidrs "${VAN_ADMIN_CIDRS:-10.0.0.123/32}")"; then
+  add firewall GREEN "ordered UFW summary admits only selected VCN /32 Commander sources; native/OCI checks remain separate"
+else
+  add firewall RED "UFW observation missing or Commander source scope/default policy/order unsafe or unsupported"
+fi
 if VAN_ADMIN_CIDRS="${VAN_ADMIN_CIDRS:-10.0.0.123/32}" VAN_PUBLIC_HOST="${VAN_PUBLIC_HOST:-}" bash "$BASE/app/deploy/van-trading-core/oci/harden-oracle-image-firewall.sh" --verify >/tmp/oracle-firewall.log 2>&1; then add oracle_image_firewall GREEN "$(tail -n 1 /tmp/oracle-firewall.log)"; else add oracle_image_firewall RED "$(tail -c 500 /tmp/oracle-firewall.log)"; fi
 listeners="$(ss -ltnH 2>/dev/null | awk '{print $4}' | grep -E ':(3000|5432|5433|6543|8000)$' || true)"
 bad_listeners="$(printf '%s

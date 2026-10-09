@@ -13,6 +13,8 @@ on:
       # Character Forge candidates pushed by the bounded worker (`forge-push`); without this
       # a staged candidate would never reach RiveContractTest or character-forge-gate.
       - 'forge/**'
+      # Programme branches (review I6 m7): the ledger job verifies what was pushed, not only PRs.
+      - 'gpt/**'
   pull_request:
 
 concurrency:
@@ -20,6 +22,90 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Owner decision 2026-09-30 ("enforce van's ledger"). Every commit a pull request (or a push to
+  # a programme branch) adds must carry a LOCAL_CHANGE_LEDGER.jsonl row whose diff digest matches
+  # the commit and whose owner authorization records cover every file it changes.
+  # Review I6 M2: the gate runs the TRUSTED side's checker — the PR base, or the branch head
+  # before the push — checked out into trusted/, against the pushed/PR head checked out into
+  # head/ (its real commits, not GitHub's synthetic merge commit, with full history). The
+  # checker reads its config, baselines and authorization records from that trusted ref, so a
+  # PR cannot edit the checker, its baseline, its authority set or its own authorization.
+  # This is only a gate if branch protection requires this job and code-owner review
+  # (.github/CODEOWNERS); that is a GitHub setting the owner enables, see tools/ci/README.md.
+  # Review I7 minor 9: on a push the trusted side is a PROTECTED ref, never the pushed history.
+  # github.event.before is only the branch's previous head: on an unprotected branch whoever
+  # pushes can push a checker edit first and then be judged by it. So a push to main or a
+  # programme branch (gpt/**, protected) is judged from that branch's own previous protected
+  # head (a fast-forward of it, nothing else), and a push to any other branch from the newest
+  # commit it shares with a protected branch (its protected upstream, else the default
+  # branch's merge-base). Pull requests keep their base.
+  project-truth-ledger:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    env:
+      HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      PUSHED_REF: ${{ github.ref_name }}
+      PUSHED_BEFORE: ${{ github.event.before }}
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.HEAD_SHA }}
+          path: head
+          fetch-depth: 0
+      - name: Trusted ref (the PR base, or a protected branch; never the pushed history)
+        working-directory: head
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
+            trusted="$PR_BASE_SHA"
+          else
+            git fetch --no-tags --quiet origin "+refs/heads/$DEFAULT_BRANCH:refs/protected/$DEFAULT_BRANCH" \
+              '+refs/heads/gpt/*:refs/protected/gpt/*'
+            case "$PUSHED_REF" in
+              "$DEFAULT_BRANCH"|gpt/*)
+                # A protected branch moves only by a reviewed merge: its previous head is its
+                # protected upstream. A force-push (previous head not an ancestor) is refused.
+                trusted="$PUSHED_BEFORE"
+                if [[ "$trusted" =~ ^0+$ ]] || ! git merge-base --is-ancestor "$trusted" HEAD; then
+                  echo "push to protected $PUSHED_REF: previous head missing or rewritten; refusing" >&2
+                  exit 1
+                fi
+                ;;
+              *)
+                # Unprotected: the newest commit this history shares with a protected branch.
+                trusted=""
+                for ref in $(git for-each-ref --format='%(refname)' refs/protected/); do
+                  base="$(git merge-base HEAD "$ref" || true)"
+                  [[ -n "$base" ]] || continue
+                  if [[ -z "$trusted" ]] || git merge-base --is-ancestor "$trusted" "$base"; then
+                    trusted="$base"
+                  fi
+                done
+                if [[ -z "$trusted" ]]; then
+                  echo "no protected branch shares history with $PUSHED_REF; open a pull request" >&2
+                  exit 1
+                fi
+                ;;
+            esac
+          fi
+          echo "trusted ref: $trusted"
+          echo "TRUSTED_SHA=$trusted" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TRUSTED_SHA }}
+          path: trusted
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Project Truth ledger (trusted checker, every new commit has an authorized row)
+        run: python trusted/tools/ci/project_truth_ledger.py --repo head verify-pr --base "$TRUSTED_SHA" --head "$HEAD_SHA"
+      - name: Project Truth ledger self-test (the head's own tests; informative, not the gate)
+        working-directory: head
+        run: pip install pytest && pytest -q tests/contracts/test_project_truth_ledger.py
+
   backend:
     runs-on: ubuntu-latest
     steps:
@@ -70,6 +156,18 @@ jobs:
         run: pytest -q
       - name: Contract tests
         run: pytest -q tests/contracts
+      - name: OpenMuse → VAN convergence repository certification
+        run: |
+          python tools/certification/openmuse_van_convergence.py \
+            --check \
+            --output artifacts/release/openmuse-van/convergence-certification.json
+      - name: Upload OpenMuse → VAN convergence evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-openmuse-convergence-certification
+          path: artifacts/release/openmuse-van/convergence-certification.json
+          if-no-files-found: error
+
 
       # Rev 1.5 §13.2 — the Browser Control Agent. It lives outside backend/ because it
       # runs on the Browser Stream Host rather than on the Gateway, so neither of the two
@@ -201,6 +299,9 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       # Runs before the Android build because it needs no Android toolchain: it compiles
       # the app's own pure decision files (the owner status projection and the mission read
       # models) on the JVM and executes their tests. When the Android Gradle Plugin cannot
@@ -217,6 +318,33 @@ jobs:
         env:
           VAN_DEBUG_KEYSTORE_BASE64: ${{ secrets.VAN_DEBUG_KEYSTORE_BASE64 }}
         run: bash tools/ci/restore_debug_keystore.sh
+      - name: Prepare exact pinned generic offline voice assets
+        run: python3 android/tools/package_voice_assets.py --acquire
+      - name: Build Candidate B mechanics prototype
+        run: |
+          python -m pip install --disable-pip-version-check "Pillow==12.3.0" "vtracer==0.6.15" "PyYAML==6.0.2"
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgl1 libegl1 libgles2 libx11-6 libxkbcommon0 libfontconfig1 libfreetype6 libxcb1
+          tmp="$(mktemp -d)"
+          curl -fsSL https://releases.rive.app/cli/v1.1.1/rive-linux-x64.tar.gz -o "$tmp/rive.tar.gz"
+          echo "41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5  $tmp/rive.tar.gz" | sha256sum -c -
+          tar -xzf "$tmp/rive.tar.gz" -C "$tmp"
+          rive_bin="$(find "$tmp" -type f -name rive -perm -u+x -print -quit)"
+          test -n "$rive_bin"
+          mkdir -p "$RUNNER_TEMP/van-character-forge-bin"
+          install -m 0755 "$rive_bin" "$RUNNER_TEMP/van-character-forge-bin/rive"
+          export PATH="$RUNNER_TEMP/van-character-forge-bin:$PATH"
+          python -m tools.character_forge.build_candidate_b_rive_prototype
+          test -s visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv
+      - name: Stage Candidate B Character Rig Lab asset
+        run: |
+          candidate="visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv"
+          test -f "$candidate"
+          mkdir -p android/app/src/debug/assets
+          cp "$candidate" android/app/src/debug/assets/van_candidate.riv
+          printf '%s\n' core > android/app/src/debug/assets/forge_mode.txt
+          echo "Candidate B mechanics prototype staged into the debug-only Character Rig Lab."
       - name: Android unit tests, build and lint
         working-directory: android
         run: |
@@ -270,11 +398,44 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Enable KVM for the emulator
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+      - name: Build Candidate B mechanics prototype
+        run: |
+          python -m pip install --disable-pip-version-check "Pillow==12.3.0" "vtracer==0.6.15" "PyYAML==6.0.2"
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgl1 libegl1 libgles2 libx11-6 libxkbcommon0 libfontconfig1 libfreetype6 libxcb1
+          tmp="$(mktemp -d)"
+          curl -fsSL https://releases.rive.app/cli/v1.1.1/rive-linux-x64.tar.gz -o "$tmp/rive.tar.gz"
+          echo "41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5  $tmp/rive.tar.gz" | sha256sum -c -
+          tar -xzf "$tmp/rive.tar.gz" -C "$tmp"
+          rive_bin="$(find "$tmp" -type f -name rive -perm -u+x -print -quit)"
+          test -n "$rive_bin"
+          mkdir -p "$RUNNER_TEMP/van-character-forge-bin"
+          install -m 0755 "$rive_bin" "$RUNNER_TEMP/van-character-forge-bin/rive"
+          export PATH="$RUNNER_TEMP/van-character-forge-bin:$PATH"
+          python -m tools.character_forge.build_candidate_b_rive_prototype
+          test -s visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv
+      - name: Bind Candidate B mechanics prototype for CI only
+        run: |
+          prototype="visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv"
+          test_candidate="android/app/src/androidTest/assets/van_candidate.riv"
+          debug_candidate="android/app/src/debug/assets/van_candidate.riv"
+          if [[ -f "$prototype" ]]; then
+            mkdir -p "$(dirname "$test_candidate")" "$(dirname "$debug_candidate")"
+            cp "$prototype" "$test_candidate"
+            cp "$prototype" "$debug_candidate"
+            printf '%s\n' core > android/app/src/androidTest/assets/forge_mode.txt
+            printf '%s\n' core > android/app/src/debug/assets/forge_mode.txt
+            echo "Bound Candidate B mechanics prototype to androidTest and the debug host used by RiveContractTest."
+          fi
       - name: Bind Character Forge validation input
         run: |
           mkdir -p artifacts/character-forge
@@ -290,6 +451,8 @@ jobs:
           else
             printf '%s\n' NO_RIVE_ASSET > artifacts/character-forge/van_production.sha256
           fi
+      - name: Prepare exact pinned generic offline voice assets
+        run: python3 android/tools/package_voice_assets.py --acquire
       - name: Instrumentation tests (owner surface, Floating VAN)
         uses: reactivecircus/android-emulator-runner@v2
         timeout-minutes: 40
@@ -303,7 +466,7 @@ jobs:
           working-directory: android
           script: |
             chmod +x gradlew
-            ./gradlew :app:connectedDebugAndroidTest --console=plain
+            ./gradlew :app:connectedDebugAndroidTest -PVAN_TEST_ABI=x86_64 --console=plain
             find app/build/outputs/connected_android_test_additional_output -type f -print || echo "no screenshots captured"
       # The SHA files above say which bytes were checked out; this says what RiveContractTest
       # concluded about them. `cli rive record-validation` refuses a PASS this file does not state.

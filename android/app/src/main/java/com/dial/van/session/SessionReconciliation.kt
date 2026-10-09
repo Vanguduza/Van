@@ -48,6 +48,7 @@ object SessionReconciliation {
      * an absent key the same way.
      */
     const val UNKNOWN: String = "UNKNOWN"
+    const val RESULT_PENDING: String = "RESULT_PENDING"
 
     /** What the phone does with one thing it is still holding. */
     enum class Verdict {
@@ -79,7 +80,7 @@ object SessionReconciliation {
      * Gateway holds it.
      */
     fun verdictFor(state: String?): Verdict =
-        if (state == null || state == UNKNOWN) Verdict.RESEND else Verdict.SETTLE
+        if (state == null || state == UNKNOWN || state == RESULT_PENDING) Verdict.RESEND else Verdict.SETTLE
 
     /**
      * The identity to ask the Gateway about, and to match its answer by.

@@ -81,6 +81,7 @@ data class BrowserSessionSnapshot(
     val missionId: String?,
     val isWorkOutcome: Boolean,
     val ownerReadableStateFromGateway: String?,
+    val controlDelegateIssuedFor: String? = null,
 ) {
     /**
      * §8.1 — the client withholds actuation until the layout it is showing is acknowledged.
@@ -144,6 +145,7 @@ object BrowserParsing {
             // direction: the alternative is a screen calling a live session finished.
             isWorkOutcome = json.optBoolean("is_work_outcome", false),
             ownerReadableStateFromGateway = json.optStringOrNullBrowser("owner_readable_state"),
+            controlDelegateIssuedFor = json.optStringOrNullBrowser("control_delegate_issued_for"),
         )
     }
 

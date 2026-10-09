@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.degraded.GatewayDegradedMappingTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:38" hostname="052fefa249ff" time="0.002">
+  <properties/>
+  <testcase name="an unmapped code gets its own gw-prefixed id()" classname="com.dial.van.degraded.GatewayDegradedMappingTest" time="0.001"/>
+  <testcase name="parse drops a row with no code rather than throwing()" classname="com.dial.van.degraded.GatewayDegradedMappingTest" time="0.0"/>
+  <testcase name="HERMES_OFFLINE maps onto the existing hermes subsystem id()" classname="com.dial.van.degraded.GatewayDegradedMappingTest" time="0.0"/>
+  <testcase name="parse is empty for a missing degraded array()" classname="com.dial.van.degraded.GatewayDegradedMappingTest" time="0.0"/>
+  <testcase name="labelFor renders a readable title from the code()" classname="com.dial.van.degraded.GatewayDegradedMappingTest" time="0.001"/>
+  <testcase name="detailFor names what is broken, what still works, and how to restore it()" classname="com.dial.van.degraded.GatewayDegradedMappingTest" time="0.0"/>
+  <testcase name="parse reads every well-formed row()" classname="com.dial.van.degraded.GatewayDegradedMappingTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

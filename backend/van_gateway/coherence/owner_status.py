@@ -198,6 +198,7 @@ COMPUTER_OPERATION: dict[OperationState, OwnerWorkStatus] = {
     OperationState.CHECKPOINTED: _W.WORKING,
     OperationState.COMPLETED: _W.DONE,
     OperationState.FAILED: _W.FAILED,
+    OperationState.OUTCOME_UNKNOWN: _W.COULD_NOT_VERIFY,
     OperationState.BLOCKED_POLICY: _W.REFUSED,
     OperationState.BLOCKED_UNSAFE: _W.REFUSED,
 }
@@ -218,6 +219,7 @@ KNOWLEDGE: dict[KnowledgeOperationStatus, OwnerWorkStatus] = {
 DECISION: dict[DecisionStatus, OwnerWorkStatus] = {
     DecisionStatus.OPEN: _W.WAITING_ON_YOU,
     DecisionStatus.APPROVED: _W.DONE,
+    DecisionStatus.ANSWERED: _W.DONE,
     DecisionStatus.REJECTED: _W.REFUSED,
     DecisionStatus.EXPIRED: _W.STOPPED,
 }

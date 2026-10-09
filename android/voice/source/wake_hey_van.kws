@@ -1,0 +1,37 @@
+{
+  "candidate_threshold": 0.25,
+  "feature_dim": 80,
+  "files": {
+    "decoder": {
+      "path": "wake/decoder-epoch-12-avg-2-chunk-16-left-64.onnx",
+      "sha256": "f61ebd3eed3773a44d088d53dfae92dbb6aec4839f4dcaee2d402414741663a3"
+    },
+    "encoder": {
+      "path": "wake/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "sha256": "1e721676515bcd42a186979733981213c66c80db680e1cc582dfedf3be76e678"
+    },
+    "joiner": {
+      "path": "wake/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "sha256": "eae9da0c7e1e6c6a3f4cc42d167899c388f6c6701b94cb96320e4f55df79624c"
+    },
+    "keywords": {
+      "path": "wake/keywords.txt",
+      "sha256": "ebead6200b36bcb653cd8517cc7050fbdf3a47cd867f3691c37c354fbd7dd1a2"
+    },
+    "tokens": {
+      "path": "wake/tokens.txt",
+      "sha256": "fd2ded4050a55d2b1578870ba8697d02371980217806b7558bd0a5cc60f3ba53"
+    }
+  },
+  "keywords_score": 1.5,
+  "max_active_paths": 4,
+  "model_type": "zipformer2",
+  "num_threads": 2,
+  "num_trailing_blanks": 2,
+  "phrase": "Hey Van",
+  "runtime": "sherpa-onnx",
+  "runtime_version": "1.13.8",
+  "sample_rate_hz": 16000,
+  "schema_version": 1,
+  "verification_threshold": 0.45
+}

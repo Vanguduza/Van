@@ -62,24 +62,32 @@ def test_the_stored_body_carries_every_field_the_gateway_requires():
     )
 
 
-def test_the_builder_is_the_one_the_offline_path_uses():
+def test_the_offline_path_stores_the_body_prepared_before_dispatch():
     """Guards the guard.
 
-    If `storeSignedBody` stopped calling `buildCommandBody` — went back to assembling a
-    payload by hand, which is how this defect happened — the check above would still pass
-    while describing a function nothing on that path calls.
+    The request builder remains authoritative, but a lost reply must retain that
+    exact prepared request. Building a second signed body in the failure path
+    changes the command identity, signature and issue time of a request that may
+    already have reached the gateway.
     """
     controller = (
         ROOT / "android/app/src/main/java/com/dial/van/control/VanCommandController.kt"
     ).read_text(encoding="utf-8")
-    assert "gateway.buildCommandBody(" in controller, (
-        "the offline path no longer builds its payload with the signed builder"
-    )
+    dispatch_source = CLIENT.read_text(encoding="utf-8")
+    dispatch = dispatch_source.index("suspend fun dispatchCommand(")
+    publish = dispatch_source.index("private fun publishCommandVisualStatus(", dispatch)
+    dispatched = dispatch_source[dispatch:publish]
+    assert "val body = buildCommandBody(" in dispatched
+    assert "val bodyText = body.toString()" in dispatched
+    assert dispatched.index("onPreparedCommand(bodyText)") < dispatched.index("postRawAt(")
+    assert re.search(r'postRawAt\(baseUrl,\s*"/v1/commands",\s*bodyText', dispatched)
+    assert "onPreparedCommand = { preparedBody = it }" in controller
+    assert "recordFailure(command, t, preparedBody)" in controller
     stored = controller.index("private fun storeSignedBody(")
-    following = controller[stored : stored + 2000]
-    assert "buildCommandBody(" in following, (
-        "storeSignedBody assembles its own payload again"
-    )
+    following = controller[stored:controller.index("fun reportUndelivered(", stored)]
+    assert "OfflineSubmission.preparedReplay(preparedBody, command.idempotencyKey)" in following
+    assert "return store(body, needsReconfirm)" in following
+    assert "buildCommandBody(" not in following, "offline recovery must not re-sign an uncertain dispatch"
 
 
 def test_the_signature_is_over_the_moment_the_owner_issued_it():

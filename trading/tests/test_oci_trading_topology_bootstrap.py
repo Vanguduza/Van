@@ -1,6 +1,8 @@
 import pathlib
 import subprocess
 
+import pytest
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 HELPER = ROOT / "deploy/van-trading-core/oci/harden-oracle-image-firewall.sh"
 BOOTSTRAP = ROOT / "deploy/van-trading-core/bootstrap.sh"
@@ -13,6 +15,11 @@ def test_oci_firewall_helper_is_syntax_valid_and_persistent():
     text = HELPER.read_text()
     assert "/etc/iptables/rules.v4" in text
     assert "VAN_TRADING_MANAGED commander" in text
+    assert "DIAL_OVERLAY_MANAGED dial-control-ssh" in text
+    assert "DIAL_OVERLAY_MANAGED dial-control-commander" in text
+    assert 'DIAL_OVERLAY_SOURCE="10.77.0.1/32"' in text
+    assert 'DIAL_OVERLAY_IF="wg-dial"' in text
+    assert "persistent DIAL overlay SSH rule missing" in text
     assert "global SSH allow still present" in text
     assert "Commander rule for $cidr is not before OCI reject" in text
 
@@ -82,22 +89,29 @@ def test_runtime_qualification_is_bound_to_exact_clean_repository_sha():
 
 
 
-def _run_firewall_verify(tmp_path, admin_cidrs):
+def _run_firewall_verify(tmp_path, admin_cidrs, *, live_transform=None,
+                         persistent_transform=None, args=("--verify",), observe=True):
     """Drive the helper's --verify path against a stub iptables and a fixture rules.v4."""
     import os
-    import pytest
-    if os.geteuid() != 0:
-        pytest.skip("the helper refuses to run unless it is root")
     cidrs = [c for c in admin_cidrs.split(",") if c]
-    managed = []
+    managed = [
+        '-A INPUT -i wg-dial -s 10.77.0.1/32 -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-ssh" -j ACCEPT',
+        '-A INPUT -i wg-dial -s 10.77.0.1/32 -p tcp -m state --state NEW -m tcp --dport 9133 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-commander" -j ACCEPT',
+    ]
     for c in cidrs:
         managed.append(f'-A INPUT -s {c} -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "VAN_TRADING_MANAGED admin-ssh" -j ACCEPT')
         managed.append(f'-A INPUT -s {c} -p tcp -m state --state NEW -m tcp --dport 9133 -m comment --comment "VAN_TRADING_MANAGED commander" -j ACCEPT')
     reject = "-A INPUT -j REJECT --reject-with icmp-host-prohibited"
     rules = tmp_path / "rules.v4"
-    rules.write_text("# iptables configuration for Oracle Cloud Infrastructure\n*filter\n" + "\n".join(managed + [reject]) + "\nCOMMIT\n")
+    persistent_rules = managed + [reject]
+    if persistent_transform:
+        persistent_rules = persistent_transform(persistent_rules)
+    rules.write_text("# iptables configuration for Oracle Cloud Infrastructure\n*filter\n" + "\n".join(persistent_rules) + "\nCOMMIT\n")
     live = tmp_path / "live.txt"
-    live.write_text("-P INPUT ACCEPT\n" + "\n".join(managed + [reject]) + "\n")
+    live_rules = managed + [reject]
+    if live_transform:
+        live_rules = live_transform(live_rules)
+    live.write_text("-P INPUT ACCEPT\n" + "\n".join(live_rules) + "\n")
     bindir = tmp_path / "bin"
     bindir.mkdir()
     stub = bindir / "iptables"
@@ -105,15 +119,22 @@ def _run_firewall_verify(tmp_path, admin_cidrs):
     stub.write_text(
         "#!/usr/bin/env bash\n"
         f'LIVE="{live}"\n'
+        f'printf "%s\\n" "$1" >> "{tmp_path / "iptables-commands.txt"}"\n' +
+        ("" if observe else 'if [[ "$1" == "-S" ]]; then exit 4; fi\n') +
         'if [[ "$1" == "-S" ]]; then cat "$LIVE"; exit 0; fi\n'
         'if [[ "$1" == "-C" ]]; then shift 2; want="-A INPUT"; for a in "$@"; do\n'
         '  if [[ "$a" == *" "* ]]; then want="$want \\"$a\\""; else want="$want $a"; fi; done\n'
         '  grep -Fxq -- "$want" "$LIVE"; exit $?; fi\n'
-        "exit 0\n"
+        "exit 95\n"
     )
     stub.chmod(0o755)
+    # Tests remain deterministic on root CI: mutation must refuse a non-root
+    # caller; verification must not ask for caller privilege at all.
+    identity = bindir / "id"
+    identity.write_text("#!/usr/bin/env bash\necho 65534\n")
+    identity.chmod(0o755)
     env = {**os.environ, "PATH": f"{bindir}:{os.environ['PATH']}", "VAN_ORACLE_RULES_V4": str(rules), "VAN_ADMIN_CIDRS": admin_cidrs}
-    return subprocess.run(["bash", str(HELPER), "--verify"], text=True, capture_output=True, env=env)
+    return subprocess.run(["bash", str(HELPER), *args], text=True, capture_output=True, env=env)
 
 
 def test_firewall_default_no_longer_admits_the_terminated_hermes_address():
@@ -141,3 +162,73 @@ def test_firewall_verify_rejects_a_blank_admin_entry(tmp_path):
     blank = _run_firewall_verify(tmp_path, ",")
     assert blank.returncode != 0
     assert "ORACLE_IMAGE_FIREWALL_RED" in blank.stderr
+
+
+def test_firewall_verify_performs_only_kernel_reads_and_no_persistent_writes(tmp_path):
+    result = _run_firewall_verify(tmp_path, "10.0.0.123/32")
+    assert result.returncode == 0, result.stderr
+    assert set((tmp_path / "iptables-commands.txt").read_text().splitlines()) == {"-S", "-C"}
+    assert not (tmp_path / "rules.v4.van-original").exists()
+    assert not list(tmp_path.glob(".rules.v4.van.*"))
+    assert "VAN_TRADING_MANAGED admin-ssh" in (tmp_path / "rules.v4").read_text()
+
+
+@pytest.mark.parametrize("args", [(), ("--verfy",), ("--verify", "unexpected")])
+def test_firewall_mutation_or_unknown_cli_is_refused_before_effects(tmp_path, args):
+    result = _run_firewall_verify(tmp_path, "10.0.0.123/32", args=args)
+    assert result.returncode != 0
+    assert "ORACLE_IMAGE_FIREWALL_RED" in result.stderr
+    assert not (tmp_path / "iptables-commands.txt").exists()
+    assert not (tmp_path / "rules.v4.van-original").exists()
+    if not args:
+        assert "run as root for firewall mutation" in result.stderr
+
+
+@pytest.mark.parametrize("cidrs", ["10.0.256.1/32", "10.0.0.999/32", "10.0.00.123/32",
+                                  "10.0.0.123/32,", ",10.0.0.123/32",
+                                  "10.0.0.123/32,,10.0.0.124/32"])
+def test_firewall_verify_refuses_invalid_or_ambiguous_admin_sources(tmp_path, cidrs):
+    result = _run_firewall_verify(tmp_path, cidrs)
+    assert result.returncode != 0
+    assert "ORACLE_IMAGE_FIREWALL_RED" in result.stderr
+    assert not (tmp_path / "iptables-commands.txt").exists()
+
+
+def test_firewall_verify_refuses_unobservable_live_rules(tmp_path):
+    result = _run_firewall_verify(tmp_path, "10.0.0.123/32", observe=False)
+    assert result.returncode != 0
+    assert "cannot read live INPUT rules" in result.stderr
+    assert (tmp_path / "iptables-commands.txt").read_text().splitlines() == ["-S"]
+
+
+def test_firewall_verify_refuses_ssh_allow_after_reject(tmp_path):
+    result = _run_firewall_verify(tmp_path, "10.0.0.123/32",
+                                  live_transform=lambda rules: [r for r in rules if 'VAN_TRADING_MANAGED admin-ssh' not in r] +
+                                      [r for r in rules if 'VAN_TRADING_MANAGED admin-ssh' in r])
+    assert result.returncode != 0
+    assert "SSH rule for 10.0.0.123/32 is not before OCI reject" in result.stderr
+
+
+@pytest.mark.parametrize("transform", [
+    lambda rules: [r.replace("-j ACCEPT", "-j DROP") if "VAN_TRADING_MANAGED admin-ssh" in r else r for r in rules],
+    lambda rules: [r for r in rules if "VAN_TRADING_MANAGED admin-ssh" not in r] +
+                  [r for r in rules if "VAN_TRADING_MANAGED admin-ssh" in r],
+])
+def test_firewall_verify_requires_persisted_accept_before_reject(tmp_path, transform):
+    result = _run_firewall_verify(tmp_path, "10.0.0.123/32", persistent_transform=transform)
+    assert result.returncode != 0
+    assert "persistent admin-ssh rule" in result.stderr
+
+
+@pytest.mark.parametrize("port", [22, 9133])
+@pytest.mark.parametrize("change", ["drop", "after_reject"])
+def test_overlay_persistent_accept_and_order_are_verified(tmp_path, port, change):
+    def transform(rules):
+        def target(rule):
+            return "DIAL_OVERLAY_MANAGED" in rule and f"--dport {port} " in rule
+        if change == "drop":
+            return [r.replace("-j ACCEPT", "-j DROP") if target(r) else r for r in rules]
+        return [r for r in rules if not target(r)] + [r for r in rules if target(r)]
+    result = _run_firewall_verify(tmp_path, "10.0.0.123/32", persistent_transform=transform)
+    assert result.returncode != 0
+    assert "persistent DIAL overlay rule" in result.stderr

@@ -3,6 +3,8 @@ package com.dial.van.session
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.test.assertNull
+import org.json.JSONObject
 
 /**
  * Rev 1.5 §20.14 — the command that failed to send.
@@ -13,6 +15,18 @@ import kotlin.test.assertTrue
  * because the returned type was never the thing that was wrong.
  */
 class OfflineSubmissionTest {
+
+    @Test fun `ambiguous dispatch preserves the original signed command and client context`() {
+        val original = JSONObject().put("command_id", "original-command").put("idempotency_key", "original-key")
+            .put("device_id", "original-device").put("nonce", "original-nonce").put("issued_at_unix", 1234L)
+            .put("signature", "original-signature").put("client_context", JSONObject().put("owner_halt_authority_ref", "signed-reference"))
+        val replay = OfflineSubmission.preparedReplay(original.toString(), "original-key")!!
+        assertEquals(original.keySet(), replay.keySet())
+        for (key in original.keySet()) assertEquals(original.get(key).toString(), replay.get(key).toString(), key)
+        assertNull(OfflineSubmission.preparedReplay(null, "original-key"))
+        assertNull(OfflineSubmission.preparedReplay(original.toString(), "another-key"))
+        assertNull(OfflineSubmission.preparedReplay("{}", "original-key"))
+    }
 
     private fun decide(
         actionClass: String = "A1",
@@ -51,7 +65,8 @@ class OfflineSubmissionTest {
                 verdict is OfflineSubmission.Verdict.Drop,
                 "$actionClass was stored for a silent replay when connectivity returns",
             )
-            assertTrue("Nothing was changed" in verdict.ownerMessage, actionClass)
+            assertTrue("may already have happened" in verdict.ownerMessage, actionClass)
+            assertTrue("Nothing was queued" in verdict.ownerMessage, actionClass)
         }
     }
 
@@ -62,7 +77,7 @@ class OfflineSubmissionTest {
         // checking — and then the transfer they think is queued never happens.
         val verdict = decide(actionClass = "A4")
         assertTrue("back online" !in verdict.ownerMessage)
-        assertTrue("Not sent" in verdict.ownerMessage)
+        assertTrue("response was lost" in verdict.ownerMessage)
     }
 
     @Test

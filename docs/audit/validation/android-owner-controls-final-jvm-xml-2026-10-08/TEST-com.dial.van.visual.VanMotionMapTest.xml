@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.visual.VanMotionMapTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:43:36" hostname="052fefa249ff" time="0.001">
+  <properties/>
+  <testcase name="a fast flick docks faster than a slow release()" classname="com.dial.van.visual.VanMotionMapTest" time="0.0"/>
+  <testcase name="every duration stays within the DNA quick to expressive band()" classname="com.dial.van.visual.VanMotionMapTest" time="0.0"/>
+  <testcase name="every finite action has a positive, bounded auto-clear duration()" classname="com.dial.van.visual.VanMotionMapTest" time="0.001"/>
+  <testcase name="reduced motion collapses every overlay motion spec to zero()" classname="com.dial.van.visual.VanMotionMapTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

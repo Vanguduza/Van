@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.SpeechCueTimingTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:49" hostname="052fefa249ff" time="0.003">
+  <properties/>
+  <testcase name="cueAt clamps a mouth_open outside 0 to 1()" classname="com.dial.van.voice.SpeechCueTimingTest" time="0.001"/>
+  <testcase name="a null payload — a gateway that predates this field — parses to empty()" classname="com.dial.van.voice.SpeechCueTimingTest" time="0.0"/>
+  <testcase name="a payload with no cues array parses to empty rather than throwing()" classname="com.dial.van.voice.SpeechCueTimingTest" time="0.0"/>
+  <testcase name="cueAt walks forward and never picks a cue that has not started yet()" classname="com.dial.van.voice.SpeechCueTimingTest" time="0.0"/>
+  <testcase name="a malformed cue entry is skipped rather than crashing the parse()" classname="com.dial.van.voice.SpeechCueTimingTest" time="0.001"/>
+  <testcase name="cueAt on an empty track is silent and closed()" classname="com.dial.van.voice.SpeechCueTimingTest" time="0.0"/>
+  <testcase name="parsing the exact shape the gateway sends()" classname="com.dial.van.voice.SpeechCueTimingTest" time="0.0"/>
+  <testcase name="a SpeechSegment defaults to no cue timing()" classname="com.dial.van.voice.SpeechCueTimingTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

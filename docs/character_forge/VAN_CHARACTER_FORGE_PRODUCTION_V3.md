@@ -10,12 +10,12 @@ The core rule is:
 
 > AI may propose segmentation, occluded geometry and rig structure. Deterministic tooling must classify, hash, validate and reproduce those proposals. Owner authority decides what may become canonical.
 
-The existing primary visual authority remains:
+The primary visual authority is Candidate B (owner decision `CF-D-05-REV2_1`):
 
-- `visual-authority/assets/pack/owner_board_visual_authority.png`
-- Git blob: `fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b`
+- `visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png`
+- SHA-256: `cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c`
 
-The board explicitly declares skin token `#B8853C`; that declared token outranks raster sampling variance.
+`APPROVED_IDENTITY_LOCK.yaml` is the machine-readable identity authority. The earlier owner board is historical context only and cannot override Candidate B.
 
 ## Pipeline
 
@@ -94,13 +94,13 @@ The approved board is authoritative but is not sufficient by itself as a rig-rea
 The candidate must preserve:
 - silver/white swept hair
 - cyan/blue transparent visor
-- medium-brown skin token `#B8853C`
+- medium-brown skin token `#AF6A53`
 - blue eyes
 - black/white technical jacket
 - charcoal underlayer
 - black technical gloves
 - cyan DIAL accents
-- 5.5–6 head chibi-realistic proportions
+- compact chibi proportions of 3.2 ± 0.3 heads
 - no headband
 - dark/navy cyan holographic orb
 - body opacity except visor/orb optics

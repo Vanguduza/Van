@@ -1,0 +1,163 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "expected_context_revision": {
+      "minimum": 0,
+      "title": "Expected Context Revision",
+      "type": "integer"
+    },
+    "candidate_id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Candidate Id",
+      "type": "string"
+    },
+    "provider_product": {
+      "enum": [
+        "personal-muse-free",
+        "meta-ai-free-spark-surface",
+        "openai-dot",
+        "van-native"
+      ],
+      "title": "Provider Product",
+      "type": "string"
+    },
+    "candidate_type": {
+      "enum": [
+        "GUARDIAN_OBSERVATION",
+        "DOCTOR_FINDING",
+        "RESEARCH_ARTIFACT",
+        "OWNER_PATTERN",
+        "ATTENTION_CALIBRATION",
+        "MISSION_CANDIDATE",
+        "TRADING_RESEARCH"
+      ],
+      "title": "Candidate Type",
+      "type": "string"
+    },
+    "observed_at_ms": {
+      "title": "Observed At Ms",
+      "type": "integer"
+    },
+    "expires_at_ms": {
+      "title": "Expires At Ms",
+      "type": "integer"
+    },
+    "source_refs": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 30,
+      "minItems": 1,
+      "title": "Source Refs",
+      "type": "array"
+    },
+    "evidence_hashes": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 30,
+      "minItems": 1,
+      "title": "Evidence Hashes",
+      "type": "array"
+    },
+    "confidence_permille": {
+      "maximum": 1000,
+      "minimum": 0,
+      "title": "Confidence Permille",
+      "type": "integer"
+    },
+    "affected_scopes": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "title": "Affected Scopes",
+      "type": "array"
+    },
+    "summary": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Summary",
+      "type": "string"
+    },
+    "proposed_follow_up": {
+      "default": "",
+      "maxLength": 2000,
+      "title": "Proposed Follow Up",
+      "type": "string"
+    },
+    "data_class": {
+      "enum": [
+        "PUBLIC",
+        "INTERNAL_SANITIZED"
+      ],
+      "title": "Data Class",
+      "type": "string"
+    },
+    "response_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Response Hash",
+      "type": "string"
+    },
+    "sensitive_inference": {
+      "const": false,
+      "default": false,
+      "title": "Sensitive Inference",
+      "type": "boolean"
+    },
+    "counterexamples": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 30,
+      "title": "Counterexamples",
+      "type": "array"
+    },
+    "observed_instances": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 30,
+      "title": "Observed Instances",
+      "type": "array"
+    },
+    "attention_dimensions": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Attention Dimensions",
+      "type": "object"
+    },
+    "supersedes_candidate_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Supersedes Candidate Id"
+    }
+  },
+  "required": [
+    "expected_context_revision",
+    "candidate_id",
+    "provider_product",
+    "candidate_type",
+    "observed_at_ms",
+    "expires_at_ms",
+    "source_refs",
+    "evidence_hashes",
+    "confidence_permille",
+    "affected_scopes",
+    "summary",
+    "data_class",
+    "response_hash"
+  ],
+  "title": "CognitiveCandidate",
+  "type": "object"
+}

@@ -6,6 +6,7 @@ import json
 import secrets
 import time
 from dataclasses import dataclass
+from typing import Any
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
@@ -44,7 +45,8 @@ class OwnerApprovalService:
         self.store = store
 
     @staticmethod
-    def intent_digest(*, device_id: str, action_id: str, text: str, project_id: str | None) -> str:
+    def intent_digest(*, device_id: str, action_id: str, text: str, project_id: str | None,
+                      parameters: dict[str, Any] | None = None) -> str:
         canonical = "|".join(
             [
                 "van-a4-intent-v1",
@@ -54,6 +56,10 @@ class OwnerApprovalService:
                 " ".join(text.split()),
             ]
         )
+        if parameters is not None:
+            # Text can resolve differently after a resolver/configuration update.
+            # The owner's biometric proof also binds the exact displayed values.
+            canonical += "|" + json.dumps(parameters, sort_keys=True, separators=(",", ":"), allow_nan=False)
         return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
     async def issue(
@@ -65,6 +71,7 @@ class OwnerApprovalService:
         action_id: str,
         text: str,
         project_id: str | None,
+        parameters: dict[str, Any] | None = None,
         ttl_seconds: int = DEFAULT_TTL_SECONDS,
         now_unix: int | None = None,
     ) -> ApprovalChallenge:
@@ -77,6 +84,7 @@ class OwnerApprovalService:
             action_id=action_id,
             text=text,
             project_id=project_id,
+            parameters=parameters,
         )
         canonical = "|".join(
             [
@@ -97,6 +105,8 @@ class OwnerApprovalService:
             "turn_id": turn_id,
             "action_id": action_id,
             "intent_digest": digest,
+            "parameters_bound": parameters is not None,
+            "parameters": parameters,
             "canonical": canonical,
             "expires_at_unix": expires,
             "created_at_unix": now,
@@ -122,6 +132,7 @@ class OwnerApprovalService:
         action_id: str,
         text: str,
         project_id: str | None,
+        parameters: dict[str, Any] | None = None,
         now_unix: int | None = None,
     ) -> None:
         now = int(time.time()) if now_unix is None else now_unix
@@ -161,12 +172,20 @@ class OwnerApprovalService:
                 await db.rollback()
                 raise OwnerApprovalError("approval_challenge_binding_mismatch")
 
+            if (record.get("parameters_bound") and
+                record.get("parameters") != parameters):
+                await db.rollback()
+                raise OwnerApprovalError("approval_parameters_changed")
             expected_digest = self.intent_digest(
                 device_id=device_id,
                 action_id=action_id,
                 text=text,
                 project_id=project_id,
+                parameters=parameters if record.get("parameters_bound") else None,
             )
+            if parameters is not None and not record.get("parameters_bound"):
+                await db.rollback()
+                raise OwnerApprovalError("approval_parameters_not_bound")
             if record.get("intent_digest") != expected_digest:
                 await db.rollback()
                 raise OwnerApprovalError("approval_intent_mismatch")

@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "suite": "backend",
+  "selection": [
+    "backend/tests"
+  ],
+  "command": [
+    "/workspace/.onboarding/van-venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "backend/tests",
+    "--junitxml=/workspace/van-audit/backend-expansion-frozen-final-2026-10-08-provider-speaker-r6.xml"
+  ],
+  "cwd": "/workspace/Van",
+  "started_at_utc": "2026-10-08T06:48:04.715770+00:00",
+  "finished_at_utc": "2026-10-08T06:59:33.212000+00:00",
+  "exit_code": 0,
+  "source_unchanged_during_test": false,
+  "changed_inputs": [
+    "android/app/src/main/java/com/dial/van/voice/SpeakerEnrollmentManager.kt"
+  ],
+  "input_files": 1600,
+  "inputs_sha256": "8358153937cca85c495646484811ff6fcf808988394e2bbd05051a32937adbf1",
+  "production_manifest_sha256": "dc43ff60417434956b624128086ed03e76538422b76ef6f09b1406e18704fb02",
+  "physical_tests_executed": 0,
+  "production_deployed": false
+}

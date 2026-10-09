@@ -13,6 +13,7 @@ handled by whatever code happened to be nearest.
 from __future__ import annotations
 
 import time
+from contextvars import ContextVar
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable
 
@@ -27,6 +28,12 @@ REJECT_UNKNOWN_KIND = "session_kind_unknown"
 REJECT_WRONG_DIRECTION = "session_direction_invalid"
 REJECT_EXPIRED = "session_message_expired"
 REJECT_CONFLICT = "session_idempotency_conflict"
+REJECT_RESULT_PENDING = "session_result_pending"
+
+# This identity is supplied by the router after durable admission. It never comes
+# from an owner payload, and allows an existing local authority to make its effect
+# idempotent without turning the transport router into an execution authority.
+CURRENT_OPERATION: ContextVar[SessionEnvelope | None] = ContextVar("van_session_operation", default=None)
 
 #: The kinds an upstream envelope may carry. Adding one means adding a delegate; there is
 #: deliberately no fallback branch.
@@ -65,6 +72,7 @@ class SessionDelegates:
     answer_decision: Callable[[dict, str], Awaitable[dict]] | None = None
     cancel_mission: Callable[[dict, str], Awaitable[dict]] | None = None
     message_mission: Callable[[dict, str], Awaitable[dict]] | None = None
+    recover_result: Callable[[SessionEnvelope, str], Awaitable[dict | None]] | None = None
 
 
 @dataclass(frozen=True)
@@ -119,7 +127,10 @@ class SessionRouter:
         if delegate is None:
             return RoutedResult(False, envelope.kind, refusal=REJECT_UNKNOWN_KIND)
 
-        admission, existing = await self.sessions.admit(envelope, now_ms=now)
+        try:
+            admission, existing = await self.sessions.admit(envelope, now_ms=now)
+        except SessionError as exc:
+            return RoutedResult(False, envelope.kind, refusal=exc.reason)
         if admission is CommandAdmission.CONFLICT:
             return RoutedResult(
                 False, envelope.kind, refusal=REJECT_CONFLICT, admission=admission
@@ -128,8 +139,26 @@ class SessionRouter:
             # §20.12 — the client lost the acknowledgement, not the command. Returning the
             # first result is the whole point: re-executing would be the duplicate the
             # idempotency key exists to prevent.
+            retryable = envelope.kind == "command.submit" and existing is not None and existing.get("status") in {"degraded", "in_flight"}
+            if (existing is None or retryable) and self.delegates.recover_result is not None:
+                token = CURRENT_OPERATION.set(envelope)
+                try:
+                    recovered = await self.delegates.recover_result(envelope, session.device_id)
+                except SessionDelegateError as exc:
+                    return RoutedResult(False, envelope.kind, refusal=exc.reason, admission=admission)
+                finally:
+                    CURRENT_OPERATION.reset(token)
+                if recovered is not None:
+                    await self.sessions.record_result(envelope, recovered, replace_retryable=retryable, now_ms=now)
+                    return RoutedResult(True, envelope.kind, result=recovered, admission=admission)
+            if existing is None or retryable:
+                # Admission is not a completion receipt. The first delegate may
+                # still be running, or may have died after a side effect; neither
+                # permits another execution or an acknowledgement of success.
+                return RoutedResult(False, envelope.kind, refusal=REJECT_RESULT_PENDING, admission=admission)
             return RoutedResult(True, envelope.kind, result=existing, admission=admission)
 
+        token = CURRENT_OPERATION.set(envelope)
         try:
             result = await delegate(envelope.payload, session.device_id)
         except SessionDelegateError as exc:
@@ -147,8 +176,16 @@ class SessionRouter:
             # both, and a burned key would turn something recoverable into a command that
             # can never be sent again. Re-raised: this is not a refusal and must not be
             # reported as one.
-            await self.sessions.forget_message(envelope)
+            if envelope.kind == "command.submit":
+                # Commands have their own durable effectively-once execution
+                # authority. The other delegates can fail after a side effect;
+                # retaining admission prevents their blind replay.
+                await self.sessions.forget_message(envelope)
             raise
+        finally:
+            CURRENT_OPERATION.reset(token)
+        if envelope.kind == "command.submit" and result.get("status") == "in_flight":
+            return RoutedResult(False, envelope.kind, refusal=REJECT_RESULT_PENDING, admission=admission)
         await self.sessions.record_result(envelope, result, now_ms=now)
         return RoutedResult(True, envelope.kind, result=result, admission=admission)
 

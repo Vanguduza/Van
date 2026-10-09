@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.BrowserFileProviderTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:27" hostname="052fefa249ff" time="0.033">
+  <properties/>
+  <testcase name="draft creation receipt and recovery must retain source target key and deadline()" classname="com.dial.van.browser.BrowserFileProviderTest" time="0.005"/>
+  <testcase name="draft names exact advertised namespaces immutable bytes and bounded deadline()" classname="com.dial.van.browser.BrowserFileProviderTest" time="0.001"/>
+  <testcase name="unknown running or unverifiable target writes cannot be proposed again()" classname="com.dial.van.browser.BrowserFileProviderTest" time="0.003"/>
+  <testcase name="external observation remains scoped evidence without success or replacement authority()" classname="com.dial.van.browser.BrowserFileProviderTest" time="0.003"/>
+  <testcase name="another action or extra namespace parameter never matches this biometric challenge()" classname="com.dial.van.browser.BrowserFileProviderTest" time="0.001"/>
+  <testcase name="changing a provider scope or capability digest cannot approve the prior target()" classname="com.dial.van.browser.BrowserFileProviderTest" time="0.001"/>
+  <testcase name="provider catalogs cannot cross sessions or duplicate destination identity()" classname="com.dial.van.browser.BrowserFileProviderTest" time="0.001"/>
+  <testcase name="success requires exact persisted bytes namespace receipt and no execution or truth promotion()" classname="com.dial.van.browser.BrowserFileProviderTest" time="0.006"/>
+  <testcase name="VEKL admission is a canonical candidate rather than owner or project truth()" classname="com.dial.van.browser.BrowserFileProviderTest" time="0.002"/>
+  <testcase name="unavailable external observations never prove absence or allow replacement()" classname="com.dial.van.browser.BrowserFileProviderTest" time="0.001"/>
+  <testcase name="native source readback and separate verification cannot be omitted or swapped()" classname="com.dial.van.browser.BrowserFileProviderTest" time="0.002"/>
+  <testcase name="stale or reversed read times never enable another exact approval()" classname="com.dial.van.browser.BrowserFileProviderTest" time="0.0"/>
+  <testcase name="only current completed safe native bytes can be proposed()" classname="com.dial.van.browser.BrowserFileProviderTest" time="0.001"/>
+  <testcase name="known draft refusals and ambiguous transport outcomes stay distinct without exposing error bodies()" classname="com.dial.van.browser.BrowserFileProviderTest" time="0.001"/>
+  <testcase name="approval names only the immutable request session and digest before expiry()" classname="com.dial.van.browser.BrowserFileProviderTest" time="0.001"/>
+  <testcase name="configuration and self-reported flags alone never admit a provider()" classname="com.dial.van.browser.BrowserFileProviderTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

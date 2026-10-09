@@ -162,3 +162,10 @@ def test_process_death_restoration_is_pure_and_executed_in_the_harness():
     assert '"com/dial/van/command/nav/VanRoute.kt"' in harness
     assert '"com/dial/van/command/nav/VanNavModel.kt"' in harness
     assert NAV_MODEL.is_file()
+    # NavDestination.route is a template. Persisting it drops the selected IDs even
+    # though the pure restorer understands concrete routes.
+    shell = code_of(SHELL)
+    assert "entry.destination.arguments.keys.associateWith" in shell
+    assert "entry.arguments?.getString(name)" in shell
+    assert "VanRoute.concreteRoute(template, arguments)?.let(viewModel::onRouteChanged)" in shell
+    assert "entry.destination.route?.let { viewModel.onRouteChanged(it) }" not in shell

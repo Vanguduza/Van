@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "zone": "van-browser-core",
+  "authority": "Owner decisions 2026-09-29 §1, §4, §5 (auth-20260929-owner-stagehand-private-plane-gates; owner session instruction, no cryptographic signature claimed)",
+  "hosts": [
+    "Stagehand 4.1.0 semantic worker (van-stagehand.service)",
+    "Browser Harness 0.1.13 deterministic worker and the Harness-owned Chromium (van-browser-harness.service)",
+    "mTLS edge (van-browser-core-edge.service) - the only cross-zone listener",
+    "egress proxy (van-browser-egress.service, user van-browser-egress) - the Harness-owned Chromium's only way out",
+    "zone firewall (van-browser-core-firewall.service, nftables table inet van_browser_core)"
+  ],
+  "forbidden_production_placements_for_stagehand": [
+    "van-trading-core",
+    "dial-control",
+    "van-private-core"
+  ],
+  "no_direct_authority_over": [
+    "VATI Risk Authority (trading/vati/risk/authority.py RiskAuthority)",
+    "Execution Router (trading/vati/execution/router.py ExecutionRouter)",
+    "broker credentials (Deriv, cTrader, MT5 bridge)",
+    "trading secrets (Commander token, VATI ledger, Supabase store, owner authority keys)",
+    "Owner Model database (VAN gateway store)",
+    "owner-private Hindsight",
+    "owner-private OpenViking",
+    "Project Truth mutation"
+  ],
+  "cross_zone_interfaces": [
+    {
+      "id": "BC-IF-1",
+      "direction": "van-gateway -> van-browser-core",
+      "transport": "HTTPS, TLS 1.3, mutual TLS; client certificate from the zone-private CA (pki/make-browser-core-pki.sh), single caller identity van-gateway",
+      "listener": "edge/Caddyfile on VAN_BROWSER_CORE_EDGE_BIND:9443 (private overlay address)",
+      "operations": [
+        "GET /stagehand/health",
+        "POST /stagehand/observe",
+        "POST /stagehand/extract",
+        "GET /harness/health",
+        "POST /harness/{navigate,page_info,click,fill,press,scroll,screenshot,wait,upload,tabs}"
+      ],
+      "refused": [
+        "/stagehand/act (owner decision §8: no independent Stagehand actuation)",
+        "/stagehand/agent",
+        "raw CDP, shell, helper source, cookies, literal credentials"
+      ],
+      "payload_bounds": "fixed JSON bodies <=128 KiB; secrets only as secretref:// references; profile alias and task domain required"
+    },
+    {
+      "id": "BC-IF-2",
+      "direction": "van-browser-core -> van-browser-stream Browser Control Agent",
+      "transport": "private VCN, mutual TLS; client certificates from deploy/van-browser-stream/pki (browser-harness/stagehand .browser-core identities), scope-checked by the agent",
+      "operations": "the Browser Control Agent wire protocol (services/browser_control_agent); no raw CDP"
+    },
+    {
+      "id": "BC-IF-3",
+      "direction": "van-browser-core -> model provider",
+      "transport": "HTTPS egress to api.anthropic.com only (egress allowlist is an external provisioning gate)",
+      "credential": "file-backed secretref://browser/stagehand-model inside VAN_BROWSER_SECRET_ROOT; never in repository files, page content, Jev payloads or prompts as data",
+      "open_issue": "Stagehand 4.1.0 forwards {modelName, apiKey} to its in-Chromium extension service worker; the key therefore enters browser memory. Stagehand stays PRODUCTION_DISABLED until a client-side LLM callback keeps it out."
+    },
+    {
+      "id": "BC-IF-4",
+      "direction": "van-browser-core -> public web",
+      "transport": "Chromium egress only through the zone egress proxy (browser/egress_proxy.py): CONNECT only to task-scope origins; TLS intercepted with the zone-local CA; GET/HEAD/OPTIONS without a body pass; other methods, request bodies and WebSocket upgrades only for a task admitted as mutating and inside its scope; no policy: everything refused. The zone firewall drops all browser-user UDP except DNS to the resolver and all non-loopback browser-user TCP, so the proxy cannot be bypassed."
+    }
+  ],
+  "no_inbound_from": [
+    "van-trading-core",
+    "van-private-core",
+    "Hermes/dial-control shells or MCP servers (Hermes reaches the browser only through van-gateway)"
+  ],
+  "unit_env_config_files": [
+    "runtime.env.example",
+    "systemd/van-browser-harness.service",
+    "systemd/van-stagehand.service",
+    "systemd/van-browser-core-edge.service",
+    "edge/Caddyfile",
+    "browser/package.json",
+    "systemd/van-browser-egress.service",
+    "systemd/van-browser-core-firewall.service",
+    "firewall/van-browser-core.nft"
+  ],
+  "stagehand_release": {
+    "package": "@browserbasehq/stagehand",
+    "version": "4.1.0",
+    "upstream_release_commit": "cd7b230778cf92269e4cb90e80d97f5113781c51",
+    "npm_integrity": "sha512-PJikMBVoaCRh6TFD7GcmeISmsMq4IwUu1BD5FOsGUVDUxrVqZomWa6W6dF+a/zu4xRZu2Z2xX1nXVMDaCuZWsw==",
+    "not_this_artifact": "ad2bf12ea7abd95bb1d6f3a59600842a0954fffb is later unreleased upstream work, not 4.1.0"
+  },
+  "stagehand_model": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-5",
+    "stagehand_model_name": "anthropic/claude-sonnet-5",
+    "immutable_snapshot": "UNVERIFIED from the repository sandbox; production qualification stays pending where deterministic pinning is mandatory"
+  },
+  "egress": {
+    "authority": "Owner answers 2026-09-30 after review I7 (session_01ELKqm4GCPmPvF3ggKkgB1J; no signature claimed): 'Egress proxy (Recommended)' and 'Firewall UDP in zone (Recommended)'",
+    "proxy": {
+      "code": "browser/egress_proxy.py",
+      "unit": "systemd/van-browser-egress.service",
+      "user": "van-browser-egress (primary group van-browser; not the browser user)",
+      "design": "TLS interception with a zone-local CA (chosen over a CONNECT host allowlist, which cannot refuse wss://<in-scope host>/ws-pay)",
+      "chromium_flags": [
+        "--proxy-server=http://127.0.0.1:<alias listener>",
+        "--proxy-bypass-list=<-loopback>",
+        "--ignore-certificate-errors-spki-list=<leaf key SPKI>",
+        "--disable-quic"
+      ],
+      "listeners": "one loopback listener per profile alias, VAN_EGRESS_PORT_RANGE (9150-9199); service tunnel 9149 (CONNECT to VAN_EGRESS_SERVICE_ALLOW only, no interception)",
+      "policy_channel": "Unix control socket /run/van-browser-egress/control.sock (0660 van-browser-egress:van-browser); a policy is installed only with the gateway's effect MAC (van-harness-effect/1, the Harness lease-fence key; the proxy holds its own 0400 copy) and the newest lease generation; TTL VAN_EGRESS_POLICY_TTL_SECONDS",
+      "refuses": [
+        "every request when the alias has no policy, or its policy expired (EGRESS_POLICY_UNKNOWN)",
+        "CONNECT to a host:port that is not an origin of the task scope (EGRESS_CONNECT_OUT_OF_SCOPE)",
+        "any request whose origin is outside the task scope, GET included (EGRESS_ORIGIN_OUT_OF_SCOPE)",
+        "Upgrade: websocket unless mutating and inside the task scope (EGRESS_WEBSOCKET_REFUSED / EGRESS_WRITE_OUT_OF_SCOPE)",
+        "methods other than GET/HEAD/OPTIONS (OPTIONS a read since review I8 MINOR-7), and any request body, unless mutating and inside the task scope (EGRESS_WRITE_REFUSED / EGRESS_WRITE_OUT_OF_SCOPE)",
+        "any other Upgrade (EGRESS_UPGRADE_REFUSED)",
+        "upstream addresses that are not globally routable (EGRESS_UPSTREAM_ADDRESS_REFUSED), with exactly one exception: the guard canary origin (egress.canary_origin)",
+        "a task policy whose scope names any *.internal overlay host, the canary origin included, unless it is the guard canary's own read-only policy (POLICY_SCOPE_RESERVED_HOST at the control socket)",
+        "a client socket of a listener not owned by the configured browser uid, or of the service tunnel not owned by the configured Stagehand uid, read from the kernel's socket table (EGRESS_CLIENT_REFUSED) - review I8 MAJOR-3",
+        "a bare CR, LF or NUL in any request or header line, a non-visible-ASCII request target, control characters in header values (EGRESS_REQUEST_INVALID) - review I8 MAJOR-3; the forwarded target is the parsed, normalised one"
+      ],
+      "key_handling": "The interception CA key and the one leaf key are generated by the proxy on first start in /var/lib/van-browser-egress (0700, files 0400, owner van-browser-egress). They are never copied off the host, never readable by the browser user, never in the repository. Chromium trusts interception certificates only through the SPKI hash of the leaf key, passed on its own command line; no system or profile trust store is changed. Rotation: stop the proxy, delete the two keys, start it (the Harness restarts with it).",
+      "decision_log": "/var/log/van-browser-egress/decisions.jsonl: alias, method, origin, code; never a path, query, header or body"
+    },
+    "firewall": {
+      "ruleset": "firewall/van-browser-core.nft",
+      "unit": "systemd/van-browser-core-firewall.service (the Harness, Stagehand and egress units are bound to it)",
+      "applies_to": "sockets owned by the browser user (van-browser: the Harness worker and its Chromium) or the Stagehand user (van-stagehand, its own uid since review I8 MINOR-4): only those packets jump to chain browser_out; the output chain accepts everything else, including packets with no owning socket (kernel ICMP replies and errors, IPv6 neighbour discovery, TCP resets, kernel tunnel encapsulation) - review I8 MAJOR-4",
+      "udp": "dropped, except DNS over UDP port 53 to VAN_BROWSER_DNS_RESOLVER (review I8 MINOR-5: no TCP/53 rule; a loopback resolver stays reachable over TCP like every loopback port)",
+      "tcp": "loopback addresses only (127.0.0.0/8, ::1); any other destination is reset by van-tcp-bypass-reject (counted)",
+      "other": "dropped",
+      "applied": "bootstrap.sh (nft -c then nft -f) at provisioning and van-browser-core-firewall.service at boot",
+      "checked": "qualify.sh: firewall_loaded (the jump binds both uids, no old-form rule), browser_udp_blocked, browser_tcp_bypass_blocked (a direct connect is reset and the rule's reject counter increases)"
+    },
+    "production_gate": "docs/decisions/VAN-BROWSER-CORE-EGRESS-001.yaml egress_qualification: PENDING until qualify.sh reports every egress/firewall check GREEN on the provisioned host; required for the browser_harness, stagehand and jev_browser_effect capabilities",
+    "remaining_limits": [
+      "Live enforcement on a provisioned van-browser-core host is unverified: the ruleset has been loaded into the kernel's nftables only in a throw-away network namespace in the repository sandbox, and qualify.sh has run only there.",
+      "DNS to the configured resolver stays open to the browser user (the owner's exception). Lookups can carry data (DNS tunnelling); neither the proxy nor the firewall inspects them. Behind the proxy Chromium itself needs no DNS.",
+      "Loopback TCP stays open to the browser user (CDP, the Harness API and the proxy listeners share that uid). Chromium sends loopback through the proxy (<-loopback>), which refuses it; a renderer escape is not stopped by the firewall.",
+      "A GET or HEAD to any path of an in-scope origin passes: a state-changing GET on an in-scope site is not refused (the owner's wording is POST/PUT/DELETE and similar). Out-of-scope origins are refused for every method.",
+      "A task's policy stays in force until the next action on that profile replaces it or VAN_EGRESS_POLICY_TTL_SECONDS passes: background writes of a finished mutating task's pages can still be admitted in that window, inside that task's scope only.",
+      "The proxy offers HTTP/1.1 only to Chromium, refuses chunked request bodies and serves one request per connection.",
+      "The proxy decrypts page traffic in memory (cookies and bodies included); it logs none of it.",
+      "Stagehand's model-provider traffic through the service tunnel (HTTPS_PROXY / NODE_USE_ENV_PROXY in van-stagehand.service) is unverified; Stagehand stays PRODUCTION_DISABLED.",
+      "The resolver must be IPv4.",
+      "Unit G14: the canary origin has run only in the repository sandbox (TEST-NET address 192.0.2.2 on the sandbox interface, Chromium 1194); qualify.sh's canary step against a provisioned host's overlay address and Chromium 1243 is unverified. Any process on the host holding the lease-fence key (the gateway copy, the Harness, the proxy, root) can compute the canary MAC; the separation from task traffic is the reserved *.internal names, the fixed alias/task id and the MAC context, not a separate key."
+    ],
+    "canary_origin": {
+      "authority": "Owner answer 2026-09-30 after unit G13 (session_01ELKqm4GCPmPvF3ggKkgB1J; no signature claimed): 'In-zone canary origin (Recommended)' - 'The canary serves its fixture from a dedicated canary hostname on the zone's private overlay, listed in the proxy config as the only allowed non-global upstream. It is checked by qualify.sh and never reachable by a task scope. The proxy's local-address rule stays strict for everything else.'",
+      "config": [
+        "VAN_BROWSER_CANARY_ORIGIN (https://<name>.internal[:port], default https://canary.van-browser-core.internal)",
+        "VAN_BROWSER_CANARY_ADDRESS (private overlay IPv4; bootstrap.sh defaults it to VAN_BROWSER_CORE_EDGE_BIND; loopback, unspecified, link-local, multicast, reserved and global addresses are refused)",
+        "VAN_BROWSER_CANARY_CERT / VAN_BROWSER_CANARY_KEY (/etc/van-browser-core/canary, self-signed for the canary name by bootstrap.sh; key 0400 root)"
+      ],
+      "fixture": "browser/guard_canary.py, run by qualify.sh (root): HTTPS on VAN_BROWSER_CANARY_ADDRESS:<origin port> only while the canary runs",
+      "proxy_exception": "exact host (the canary name), exact address (pinned from config; no DNS lookup), exact port, TLS only, upstream verified against the pinned canary certificate only; used only while the alias guard_canary holds the read-only policy of task van-guard-canary for the lease qualify.sh armed (control op 'canary', MAC van-egress-canary/1 under the lease-fence key, 180 s, ended by the lease's end or a newer lease). Anything else naming the canary host is EGRESS_UPSTREAM_ADDRESS_REFUSED; every other non-global address stays refused.",
+      "never_task_reachable": [
+        "gateway: backend/van_gateway/browser/task_scope.py refuses *.internal in declared scopes, target domains and owner-approved widening; recorded scopes naming one fail closed (TASK_SCOPE_RESERVED_HOST)",
+        "Harness: every call whose scope or target domain names *.internal is refused 409 TASK_SCOPE_RESERVED_HOST before the fence, unless it is the canary's own MAC-checked call",
+        "proxy: POLICY_SCOPE_RESERVED_HOST at policy install"
+      ],
+      "checked": "qualify.sh network_guard_canary: immediate and delayed guard cases, the proxy case (GET reaches the fixture; WebSocket upgrade refused EGRESS_WEBSOCKET_REFUSED, never reaches it) and the task_refused case",
+      "firewall": "the browser user cannot reach the overlay address directly (van-tcp-bypass-reject); only the egress user connects to it"
+    },
+    "stagehand_isolation": {
+      "finding": "review I8 MINOR-4: Stagehand ran as van-browser, so it could read the lease-fence key and reach the egress proxy's control socket, and forge the gateway's MACs",
+      "now": "systemd/van-stagehand.service runs as van-stagehand (group van-stagehand, supplementary van-browser only for the Harness's 0640 CDP endpoint files); its secret root is /var/lib/van-stagehand/secrets; /var/lib/van-browser-core, /var/lib/van-browser-egress and /run/van-browser-egress are inaccessible to it. The lease-fence key stays 0400 van-browser; the proxy's control socket belongs to group van-egress-ctl (members: the proxy user and van-browser). The proxy's service tunnel serves VAN_EGRESS_SERVICE_CLIENT_UID (van-stagehand) only.",
+      "checked": "qualify.sh stagehand_isolated: the Stagehand process runs as van-stagehand, not van-browser, and as that user the fence keys and the control socket are denied"
+    }
+  }
+}

@@ -7,38 +7,66 @@ RULES_V4="${VAN_ORACLE_RULES_V4:-/etc/iptables/rules.v4}"
 # the WireGuard overlay (10.77.0.1 via wg-dial, DIAL_OVERLAY_MANAGED rules), not the VCN.
 ADMIN_CIDRS="${VAN_ADMIN_CIDRS:-10.0.0.123/32}"
 PUBLIC_HOST="${VAN_PUBLIC_HOST:-}"
+# DIAL control reaches VAN over the private estate overlay. These rules are canonical,
+# must survive every firewall regeneration, and must never be replaced by a public SSH allow.
+DIAL_OVERLAY_SOURCE="10.77.0.1/32"
+DIAL_OVERLAY_IF="wg-dial"
 VERIFY_ONLY=0
-[[ "${1:-}" == "--verify" ]] && VERIFY_ONLY=1
+if (( $# > 1 )); then
+  echo "ORACLE_IMAGE_FIREWALL_RED: expected no arguments or --verify" >&2
+  exit 2
+fi
+case "${1:-}" in
+  "") ;;
+  --verify) VERIFY_ONLY=1 ;;
+  *) echo "ORACLE_IMAGE_FIREWALL_RED: expected no arguments or --verify" >&2; exit 2 ;;
+esac
 
 die() { echo "ORACLE_IMAGE_FIREWALL_RED: $*" >&2; exit 1; }
-[[ "$(id -u)" == "0" ]] || die "run as root"
+# Verification performs only reads. A real kernel may still require CAP_NET_ADMIN
+# to expose its rules; failure to observe them remains RED. Privileged mutation
+# is never admitted by the read-only flag or by a caller-supplied rules path.
+if (( ! VERIFY_ONLY )); then
+  [[ "$(id -u)" == "0" ]] || die "run as root for firewall mutation"
+fi
 [[ -f "$RULES_V4" ]] || die "$RULES_V4 missing"
 grep -q "iptables configuration for Oracle Cloud Infrastructure" "$RULES_V4" || die "not an OCI cloud-image rules file"
 command -v iptables >/dev/null 2>&1 || die "iptables missing"
 
 IFS=',' read -r -a CIDRS <<< "$ADMIN_CIDRS"
 (( ${#CIDRS[@]} >= 1 )) || die "at least one admin /32 CIDR required"
+[[ "$ADMIN_CIDRS" != ,* && "$ADMIN_CIDRS" != *, && "$ADMIN_CIDRS" != *,,* ]] || die "at least one admin /32 CIDR required; blank entries refused"
 for cidr in "${CIDRS[@]}"; do
   [[ "$cidr" =~ ^10\.0\.[0-9]{1,3}\.[0-9]{1,3}/32$ ]] || die "invalid admin CIDR: $cidr"
+  address="${cidr%/32}"
+  IFS='.' read -r -a octets <<< "$address"
+  for octet in "${octets[@]}"; do
+    [[ "$octet" == "0" || "$octet" != 0* ]] || die "invalid admin CIDR: $cidr"
+    (( 10#$octet <= 255 )) || die "invalid admin CIDR: $cidr"
+  done
 done
 
 if (( ! VERIFY_ONLY )); then
   [[ -f "${RULES_V4}.van-original" ]] || cp -a "$RULES_V4" "${RULES_V4}.van-original"
-  python3 - "$RULES_V4" "$ADMIN_CIDRS" "$PUBLIC_HOST" <<'PY'
+  python3 - "$RULES_V4" "$ADMIN_CIDRS" "$PUBLIC_HOST" "$DIAL_OVERLAY_SOURCE" "$DIAL_OVERLAY_IF" <<'PY'
 import os, pathlib, re, sys, tempfile
 path = pathlib.Path(sys.argv[1])
 cidrs = [x for x in sys.argv[2].split(",") if x]
 public = bool(sys.argv[3])
+overlay_source = sys.argv[4]
+overlay_if = sys.argv[5]
 lines = path.read_text(encoding="utf-8").splitlines()
 out = []
 inserted = False
 global_ssh = re.compile(r"^-A INPUT -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT$")
 for line in lines:
-    if "VAN_TRADING_MANAGED" in line:
+    if "VAN_TRADING_MANAGED" in line or "DIAL_OVERLAY_MANAGED" in line:
         continue
     if global_ssh.match(line):
         continue
     if not inserted and line == "-A INPUT -j REJECT --reject-with icmp-host-prohibited":
+        out.append(f'-A INPUT -i {overlay_if} -s {overlay_source} -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-ssh" -j ACCEPT')
+        out.append(f'-A INPUT -i {overlay_if} -s {overlay_source} -p tcp -m state --state NEW -m tcp --dport 9133 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-commander" -j ACCEPT')
         for cidr in cidrs:
             out.append(f'-A INPUT -s {cidr} -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "VAN_TRADING_MANAGED admin-ssh" -j ACCEPT')
             out.append(f'-A INPUT -s {cidr} -p tcp -m state --state NEW -m tcp --dport 9133 -m comment --comment "VAN_TRADING_MANAGED commander" -j ACCEPT')
@@ -69,6 +97,10 @@ PY
       iptables -I INPUT 4 "$@"
     fi
   }
+  iptables -C INPUT -i "$DIAL_OVERLAY_IF" -s "$DIAL_OVERLAY_SOURCE" -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-ssh" -j ACCEPT 2>/dev/null || \
+    iptables -I INPUT 1 -i "$DIAL_OVERLAY_IF" -s "$DIAL_OVERLAY_SOURCE" -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-ssh" -j ACCEPT
+  iptables -C INPUT -i "$DIAL_OVERLAY_IF" -s "$DIAL_OVERLAY_SOURCE" -p tcp -m state --state NEW -m tcp --dport 9133 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-commander" -j ACCEPT 2>/dev/null || \
+    iptables -I INPUT 2 -i "$DIAL_OVERLAY_IF" -s "$DIAL_OVERLAY_SOURCE" -p tcp -m state --state NEW -m tcp --dport 9133 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-commander" -j ACCEPT
   for cidr in "${CIDRS[@]}"; do
     add_live -s "$cidr" -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "VAN_TRADING_MANAGED admin-ssh" -j ACCEPT
     add_live -s "$cidr" -p tcp -m state --state NEW -m tcp --dport 9133 -m comment --comment "VAN_TRADING_MANAGED commander" -j ACCEPT
@@ -81,6 +113,12 @@ PY
     iptables -D INPUT -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT
   done
 fi
+
+rules="$(iptables -S INPUT 2>/dev/null)" || die "cannot read live INPUT rules; current kernel privileges or observation route are unavailable"
+iptables -C INPUT -i "$DIAL_OVERLAY_IF" -s "$DIAL_OVERLAY_SOURCE" -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-ssh" -j ACCEPT >/dev/null 2>&1 || die "live DIAL overlay SSH rule missing"
+iptables -C INPUT -i "$DIAL_OVERLAY_IF" -s "$DIAL_OVERLAY_SOURCE" -p tcp -m state --state NEW -m tcp --dport 9133 -m comment --comment "DIAL_OVERLAY_MANAGED dial-control-commander" -j ACCEPT >/dev/null 2>&1 || die "live DIAL overlay Commander rule missing"
+grep -Fq -- "-A INPUT -i $DIAL_OVERLAY_IF -s $DIAL_OVERLAY_SOURCE -p tcp -m state --state NEW -m tcp --dport 22 " "$RULES_V4" || die "persistent DIAL overlay SSH rule missing"
+grep -Fq -- "-A INPUT -i $DIAL_OVERLAY_IF -s $DIAL_OVERLAY_SOURCE -p tcp -m state --state NEW -m tcp --dport 9133 " "$RULES_V4" || die "persistent DIAL overlay Commander rule missing"
 
 for cidr in "${CIDRS[@]}"; do
   iptables -C INPUT -s "$cidr" -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "VAN_TRADING_MANAGED admin-ssh" -j ACCEPT >/dev/null 2>&1 || die "live SSH rule missing for $cidr"
@@ -100,12 +138,32 @@ if [[ -n "$PUBLIC_HOST" ]]; then
   iptables -C INPUT -p tcp -m state --state NEW -m tcp --dport 443 -m comment --comment "VAN_TRADING_MANAGED public-https" -j ACCEPT >/dev/null 2>&1 || die "live public rule missing for 443"
 fi
 
-rules="$(iptables -S INPUT)"
+persistent_reject="$(awk 'index($0,"-A INPUT -j REJECT --reject-with icmp-host-prohibited"){print NR; exit}' "$RULES_V4")"
+[[ -n "$persistent_reject" ]] || die "persistent OCI reject rule missing"
+for port in 22 9133; do
+  persistent_overlay="$(awk -v s="$DIAL_OVERLAY_SOURCE" -v p="$port" -v i="$DIAL_OVERLAY_IF" 'index($0,"-A INPUT -i " i " -s " s " ") && index($0,"--dport " p " ") && index($0,"DIAL_OVERLAY_MANAGED") && $0 ~ /-j ACCEPT$/ {print NR; exit}' "$RULES_V4")"
+  [[ -n "$persistent_overlay" && "$persistent_overlay" -lt "$persistent_reject" ]] || die "persistent DIAL overlay rule for tcp/$port is not ACCEPT before OCI reject"
+done
+
 reject_line="$(printf '%s\n' "$rules" | awk 'index($0,"-j REJECT --reject-with icmp-host-prohibited"){print NR; exit}')"
 [[ -n "$reject_line" ]] || die "OCI reject rule missing"
+for dport in 22 9133; do
+  overlay_line="$(printf '%s\n' "$rules" | awk -v s="$DIAL_OVERLAY_SOURCE" -v p="$dport" 'index($0,"-s " s " ") && index($0,"--dport " p) && index($0,"DIAL_OVERLAY_MANAGED") && $0 ~ /-j ACCEPT$/ {print NR; exit}')"
+  [[ -n "$overlay_line" && "$overlay_line" -lt "$reject_line" ]] || die "DIAL overlay rule for tcp/$dport is not before OCI reject"
+done
 for cidr in "${CIDRS[@]}"; do
-  rule_line="$(printf '%s\n' "$rules" | awk -v s="$cidr" 'index($0,"-s " s " ") && index($0,"--dport 9133") && index($0,"VAN_TRADING_MANAGED commander"){print NR; exit}')"
+  rule_line="$(printf '%s\n' "$rules" | awk -v s="$cidr" 'index($0,"-s " s " ") && index($0,"--dport 9133") && index($0,"VAN_TRADING_MANAGED commander") && $0 ~ /-j ACCEPT$/ {print NR; exit}')"
   [[ -n "$rule_line" && "$rule_line" -lt "$reject_line" ]] || die "Commander rule for $cidr is not before OCI reject"
+  ssh_line="$(printf '%s\n' "$rules" | awk -v s="$cidr" 'index($0,"-s " s " ") && index($0,"--dport 22 ") && index($0,"VAN_TRADING_MANAGED admin-ssh") && $0 ~ /-j ACCEPT$/ {print NR; exit}')"
+  [[ -n "$ssh_line" && "$ssh_line" -lt "$reject_line" ]] || die "SSH rule for $cidr is not before OCI reject"
+  persistent_reject="$(awk 'index($0,"-A INPUT -j REJECT --reject-with icmp-host-prohibited"){print NR; exit}' "$RULES_V4")"
+  [[ -n "$persistent_reject" ]] || die "persistent OCI reject rule missing"
+  for port in 22 9133; do
+    marker="admin-ssh"
+    [[ "$port" == "9133" ]] && marker="commander"
+    persistent_rule="$(awk -v s="$cidr" -v p="$port" -v m="$marker" 'index($0,"-A INPUT -s " s " ") && index($0,"--dport " p " ") && index($0,"VAN_TRADING_MANAGED " m) && $0 ~ /-j ACCEPT$/ {print NR; exit}' "$RULES_V4")"
+    [[ -n "$persistent_rule" && "$persistent_rule" -lt "$persistent_reject" ]] || die "persistent $marker rule for $cidr is not ACCEPT before OCI reject"
+  done
 done
 
 echo "ORACLE_IMAGE_FIREWALL_GREEN"

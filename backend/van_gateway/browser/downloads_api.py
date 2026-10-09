@@ -7,9 +7,9 @@ Two surfaces because there are two different authorities:
 
 * the **report** surface, Hermes-scoped. Downloads start because something navigated or
   clicked on the Stream Host, and the only component that learns about them is the Browser
-  Control Agent, which Hermes drives over mTLS. The host itself holds no Gateway
-  credential — it verifies stream grants and issues nothing — so a host-authenticated
-  route would need one invented for it. Hermes already has `ControlScope.BROWSER`;
+  Control Agent, which Hermes drives over mTLS. Hermes has `ControlScope.BROWSER`.
+  The native stream host instead uses the separately scoped producer reports in
+  `producer_api`, bound to a redeemed connection and its current session/profile;
 * the **owner** surface, on the interactive-session prefix, which is where the owner
   deletes a file or asks what they are allowed to do with it. That lives in
   `interactive_api` next to the session it belongs to.
@@ -51,7 +51,7 @@ class DownloadStartedBody(BaseModel):
 
 class DownloadFinishedBody(BaseModel):
     byte_size: int = Field(ge=0)
-    content_sha256: str = Field(min_length=64, max_length=64)
+    content_sha256: str = Field(pattern=r"^[0-9a-fA-F]{64}$")
     #: What the host sniffed from the bytes, as opposed to what the server claimed.
     observed_mime: str | None = None
 

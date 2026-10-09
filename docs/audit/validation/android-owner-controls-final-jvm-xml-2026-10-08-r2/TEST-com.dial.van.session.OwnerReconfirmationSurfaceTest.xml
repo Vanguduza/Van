@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.session.OwnerReconfirmationSurfaceTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:38" hostname="052fefa249ff" time="0.002">
+  <properties/>
+  <testcase name="explicit_confirmation_preserves_identity_and_releases_only_that_held_entry()" classname="com.dial.van.session.OwnerReconfirmationSurfaceTest" time="0.001"/>
+  <testcase name="reconfirmation_cannot_revive_expired_work()" classname="com.dial.van.session.OwnerReconfirmationSurfaceTest" time="0.0"/>
+  <testcase name="owner_preview_is_bounded_and_missing_text_has_truthful_fallback()" classname="com.dial.van.session.OwnerReconfirmationSurfaceTest" time="0.001"/>
+  <testcase name="only_work_waiting_for_owner_is_projected()" classname="com.dial.van.session.OwnerReconfirmationSurfaceTest" time="0.0"/>
+  <testcase name="a_stale_ordinary_command_becomes_an_owner_question()" classname="com.dial.van.session.OwnerReconfirmationSurfaceTest" time="0.0"/>
+  <testcase name="the_surface_shows_the_owners_command_rather_than_an_opaque_queue_id()" classname="com.dial.van.session.OwnerReconfirmationSurfaceTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

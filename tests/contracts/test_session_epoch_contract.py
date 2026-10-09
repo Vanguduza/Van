@@ -13,6 +13,8 @@ that it does not mint one instead.
 """
 
 from pathlib import Path
+import asyncio
+import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 MANAGER = ROOT / "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt"
@@ -33,15 +35,26 @@ def test_the_gateway_still_calls_the_granted_field_what_the_phone_reads():
     assert GRANT_FIELD in _manager(), "the phone no longer reads the grant"
 
 
-def test_the_gateway_grants_a_new_epoch_rather_than_echoing_the_old_one():
-    """`+ 1` on the session's authoritative epoch, in the service that issues it.
+@pytest.mark.asyncio
+async def test_the_gateway_grants_a_new_epoch_rather_than_echoing_the_old_one(tmp_path):
+    """Concurrent resumes grant distinct persisted epochs, rather than echoing a cache."""
+    from van_gateway.storage.db import Store
+    from van_gateway.session.models import ResumeRequest
+    from van_gateway.session.service import VanHermesSessionService
 
-    Stated here as well as exercised at the route because it is the premise of everything
-    below: if a resume echoed the current epoch, adopting the grant would be a no-op and
-    the phone could keep its own counter without anyone noticing.
-    """
-    service = SERVICE.read_text(encoding="utf-8")
-    assert "session.authoritative_path_epoch + 1" in service
+    store = Store(str(tmp_path / "session-contract.sqlite3"))
+    await store.migrate()
+    service = VanHermesSessionService(store)
+    session, _ = await service.open(device_id="contract-owner")
+    request = ResumeRequest(van_session_id=session.van_session_id,
+        session_epoch=session.session_epoch, device_id="contract-owner")
+    grants = await asyncio.gather(service.resume(request), service.resume(request))
+    assert all(grant.accepted for grant in grants)
+    assert sorted(grant.new_path_epoch for grant in grants) == [
+        session.authoritative_path_epoch + 1, session.authoritative_path_epoch + 2]
+    persisted = await store.fetchone("SELECT authoritative_path_epoch FROM van_sessions WHERE van_session_id=?",
+        (session.van_session_id,))
+    assert persisted["authoritative_path_epoch"] == max(grant.new_path_epoch for grant in grants)
 
 
 def test_the_phone_does_not_mint_a_path_epoch_of_its_own():

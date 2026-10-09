@@ -6,6 +6,7 @@ from typing import Any
 
 from van_gateway.attention.scoring import AttentionCandidate, AttentionScorer, Disposition
 from van_gateway.models import AttentionItem, AttentionSeverity, AttentionState
+from van_gateway.jev.advisor import JevVanAdvisor, score01
 from van_gateway.storage.db import Store
 
 #: How a severity maps onto the scorer's dimensions when a caller has not supplied its own
@@ -40,10 +41,12 @@ class AttentionEngine:
         budget_per_hour: int = 12,
         *,
         scorer: AttentionScorer | None = None,
+        jev_advisor: JevVanAdvisor | None = None,
     ) -> None:
         self.store = store
         self.budget_per_hour = budget_per_hour
         self.scorer = scorer or AttentionScorer(store)
+        self.jev_advisor = jev_advisor
 
     async def upsert(
         self,
@@ -59,12 +62,50 @@ class AttentionEngine:
         quiet_hours: bool = False,
     ) -> AttentionItem:
         now = int(time.time())
-        scored = await self.scorer.score(
-            candidate or self.candidate_for(
-                title=title, severity=severity, source=source, dedupe_key=dedupe_key
-            ),
-            quiet_hours=quiet_hours,
+        base_candidate = candidate or self.candidate_for(
+            title=title, severity=severity, source=source, dedupe_key=dedupe_key
         )
+        jev_evidence: dict[str, Any] | None = None
+        if self.jev_advisor is not None and self.jev_advisor.configured:
+            try:
+                annotation = await self.jev_advisor.attention_fields(
+                    {
+                        "source": base_candidate.source,
+                        "summary": base_candidate.summary,
+                        "importance": base_candidate.importance,
+                        "urgency": base_candidate.urgency,
+                        "actionability": base_candidate.actionability,
+                        "novelty": base_candidate.novelty,
+                        "owner_relevance": base_candidate.owner_relevance,
+                        "interruption_cost": base_candidate.interruption_cost,
+                    }
+                )
+                if annotation is not None:
+                    jev_evidence = {
+                        "module_id": annotation.module_id,
+                        "provider": annotation.provider,
+                        "apply_effect": annotation.apply_effect,
+                        "result_fingerprint": annotation.result_fingerprint,
+                        "fallback_reason": annotation.fallback_reason,
+                    }
+                    if annotation.apply_effect:
+                        updates = {
+                            field: value
+                            for field in ("urgency", "owner_relevance", "novelty")
+                            if (value := score01(annotation.answers.get(field))) is not None
+                        }
+                        if updates:
+                            base_candidate = base_candidate.model_copy(update=updates)
+            except Exception:
+                # Optional provider failure must never make attention unavailable.
+                jev_evidence = {
+                    "module_id": "van.attention.fields.v1",
+                    "provider": "fallback",
+                    "apply_effect": False,
+                    "fallback_reason": "JEV_UNAVAILABLE",
+                }
+
+        scored = await self.scorer.score(base_candidate, quiet_hours=quiet_hours)
         payload = {
             **(payload or {}),
             # The decision travels with the item, so "why did VAN interrupt me" and "why
@@ -73,6 +114,7 @@ class AttentionEngine:
             "attention_score": scored.score,
             "attention_reason": scored.reason,
             "attention_candidate_id": scored.candidate_id,
+            **({"jev_attention": jev_evidence} if jev_evidence is not None else {}),
         }
         existing = await self.store.fetchone(
             "SELECT id, title, severity, state, source, project_id, created_at_unix, updated_at_unix, dedupe_key, snooze_until_unix, payload_json FROM attention WHERE dedupe_key = ?",

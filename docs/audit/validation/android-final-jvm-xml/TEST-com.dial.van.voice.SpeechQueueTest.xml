@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.SpeechQueueTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:49" hostname="052fefa249ff" time="0.004">
+  <properties/>
+  <testcase name="the synthesis queue stays shallow()" classname="com.dial.van.voice.SpeechQueueTest" time="0.001"/>
+  <testcase name="a segment from another answer is not queued behind this one()" classname="com.dial.van.voice.SpeechQueueTest" time="0.0"/>
+  <testcase name="a renumbered stream cannot replay text the owner already heard()" classname="com.dial.van.voice.SpeechQueueTest" time="0.001"/>
+  <testcase name="barge-in interrupts rather than deletes()" classname="com.dial.van.voice.SpeechQueueTest" time="0.0"/>
+  <testcase name="the next segment to speak is the lowest ready one()" classname="com.dial.van.voice.SpeechQueueTest" time="0.001"/>
+  <testcase name="a reconnect does not replay what the owner already heard()" classname="com.dial.van.voice.SpeechQueueTest" time="0.0"/>
+  <testcase name="speech is complete only when the final segment was spoken()" classname="com.dial.van.voice.SpeechQueueTest" time="0.0"/>
+  <testcase name="a duplicate after a failover is discarded silently()" classname="com.dial.van.voice.SpeechQueueTest" time="0.0"/>
+  <testcase name="the two cursors are different numbers()" classname="com.dial.van.voice.SpeechQueueTest" time="0.0"/>
+  <testcase name="nothing ready means nothing to speak rather than an arbitrary segment()" classname="com.dial.van.voice.SpeechQueueTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

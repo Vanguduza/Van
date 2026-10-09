@@ -126,6 +126,14 @@ async def test_hermes_result_is_bound_to_run_and_cannot_self_verify(client, monk
     mission_id = accepted.json()["mission_id"]
     assert observed["metadata"]["mission_id"] == mission_id
 
+    main_before = (await ac.get("/v1/conversations/main")).json()
+    owner_messages = [
+        item for item in main_before["messages"]
+        if item["role"] == "OWNER" and item["command_id"] == body["command_id"]
+    ]
+    assert len(owner_messages) == 1
+    assert owner_messages[0]["body"] == body["text"]
+
     result = await ac.post(
         "/v1/runtime/missions/result",
         headers={"X-Van-Internal-Token": INTERNAL},
@@ -153,6 +161,20 @@ async def test_hermes_result_is_bound_to_run_and_cannot_self_verify(client, monk
     assert duplicate.status_code == 200
     assert duplicate.json()["state"] == MissionState.UNVERIFIABLE.value
 
+    main_after = (await ac.get("/v1/conversations/main")).json()
+    owner_messages = [
+        item for item in main_after["messages"]
+        if item["role"] == "OWNER" and item["command_id"] == body["command_id"]
+    ]
+    van_messages = [
+        item for item in main_after["messages"]
+        if item["role"] == "VAN" and item["mission_id"] == mission_id and item["terminal"]
+    ]
+    assert len(owner_messages) == 1
+    assert len(van_messages) == 1
+    assert van_messages[0]["body"] == "Hermes finished producing the briefing"
+    assert van_messages[0]["artifact_refs"] == [payload["artifact_id"]]
+
     forged = await ac.post(
         "/v1/runtime/missions/result",
         headers={"X-Van-Internal-Token": INTERNAL},
@@ -174,8 +196,10 @@ async def test_unknown_hermes_run_cannot_move_a_mission(client):
             "summary": "failed",
         },
     )
-    assert response.status_code == 404
-    assert response.json()["detail"] == "HERMES_RUN_UNBOUND"
+    assert response.status_code == 202
+    assert response.json()["status"] == "WAITING_FOR_BINDING"
+    assert response.json()["mission_id"] is None
+    assert await app.state.missions.for_hermes_run("run-never-bound") is None
 
 
 @pytest.mark.asyncio

@@ -51,6 +51,8 @@ class OwnerDeviceIdentity {
         val attestationExtensionBase64: String,
         /** SHA-256 of the chain's root, for the gateway to pin once it has seen it. */
         val attestationRootFingerprint: String,
+        /** Complete DER certificate chain, leaf first, for server cryptographic verification. */
+        val attestationCertificateChainBase64: List<String>,
         /** True when the private half lives in a discrete secure element. */
         val strongBoxBacked: Boolean,
     )
@@ -63,18 +65,35 @@ class OwnerDeviceIdentity {
     fun isEnrolled(): Boolean = keyStore.containsAlias(ALIAS)
 
     /**
-     * The key for this device, generating it against [challenge] if it does not exist.
+     * The key for this challenge. An existing key is replaced only after the caller has
+     * obtained an authoritative unbound status; an unavailable status retains the key.
      *
      * @param challenge the attestation challenge the gateway issued for this enrolment. It
      *   is baked into the certificate, which is what stops a chain captured from one
      *   enrolment being replayed into another.
      */
-    fun ensureKey(challenge: ByteArray): KeyMaterial {
+    fun ensureKey(challenge: ByteArray, mayReplaceUnboundKey: Boolean = false): KeyMaterial {
+        if (keyStore.containsAlias(ALIAS)) {
+            val leaf = keyStore.getCertificateChain(ALIAS)?.firstOrNull() as? X509Certificate
+            val encoded = leaf?.getExtensionValue(ATTESTATION_OID)
+            val existing = encoded?.let { AttestationChallenge.read(unwrapOctetString(it)) }
+            if (existing?.contentEquals(challenge) != true) {
+                if (!mayReplaceUnboundKey) throw IdentityUnavailable("device_key_challenge_mismatch")
+                forget()
+            }
+        }
         if (!keyStore.containsAlias(ALIAS)) {
             generate(challenge, strongBox = true)
         }
         return describe()
     }
+
+    fun publicKeyFingerprint(): String? =
+        (keyStore.getCertificate(ALIAS) as? X509Certificate)?.publicKey?.encoded?.let(::sha256Hex)
+
+    fun certificateChainBase64(): List<String> =
+        (keyStore.getCertificateChain(ALIAS) ?: throw IdentityUnavailable("device_key_not_attested"))
+            .map { Base64.encodeToString(it.encoded, Base64.NO_WRAP) }
 
     /**
      * Discard this device's identity. Only for a rebind the owner asked for: the gateway
@@ -129,6 +148,7 @@ class OwnerDeviceIdentity {
                 unwrapOctetString(extension), Base64.NO_WRAP,
             ),
             attestationRootFingerprint = sha256Hex(root.encoded),
+            attestationCertificateChainBase64 = chain.map { Base64.encodeToString(it.encoded, Base64.NO_WRAP) },
             strongBoxBacked = hasStrongBoxLevel(leaf),
         )
     }

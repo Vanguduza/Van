@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.OfflineCommandClassifierTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:49" hostname="052fefa249ff" time="0.012">
+  <properties/>
+  <testcase name="an unrecognised request is not assumed to be local()" classname="com.dial.van.voice.OfflineCommandClassifierTest" time="0.001"/>
+  <testcase name="the gateway's action class outranks the phrasing()" classname="com.dial.van.voice.OfflineCommandClassifierTest" time="0.0"/>
+  <testcase name="things that need the world are remote()" classname="com.dial.van.voice.OfflineCommandClassifierTest" time="0.0"/>
+  <testcase name="things VAN can do on the phone are local()" classname="com.dial.van.voice.OfflineCommandClassifierTest" time="0.0"/>
+  <testcase name="approval-bearing work is never queued offline()" classname="com.dial.van.voice.OfflineCommandClassifierTest" time="0.0"/>
+  <testcase name="VAN says something true when it cannot reach Hermes()" classname="com.dial.van.voice.OfflineCommandClassifierTest" time="0.0"/>
+  <testcase name="irreversible work is never ordinary work()" classname="com.dial.van.voice.OfflineCommandClassifierTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

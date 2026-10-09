@@ -100,3 +100,41 @@ def test_a_non_loopback_host_that_merely_contains_localhost_is_not_flagged(monke
     `notlocalhost.example.com` is never mistaken for the loopback interface."""
     _base_env(monkeypatch, VAN_HERMES_BASE_URL="https://notlocalhost.example.com")
     Settings()  # must not raise
+
+
+def core_only_settings(**changes):
+    values = dict(_env_file=None, van_env="production", require_device_binding=True,
+                  deployment_topology="CORE_ONLY_V2", mtls_enabled=True, mtls_bind="10.0.1.233",
+                  mtls_interface="enp0s6", mtls_port=8443, loopback_host="127.0.0.1", loopback_port=8787,
+                  hermes_base_url="http://127.0.0.1:8642", van_public_base_url="https://owner.example:8443",
+                  van_allow_loopback_in_production=False)
+    selected = values | changes
+    selected["VAN_PUBLIC_BASE_URL"] = selected.pop("van_public_base_url")
+    return Settings(**selected)
+
+
+def test_core_only_production_accepts_local_runtime_with_exact_direct_mtls_bindings():
+    settings = core_only_settings()
+    assert settings.hermes_base_url == "http://127.0.0.1:8642"
+    assert not settings.van_allow_loopback_in_production
+    settings.assert_production_safe()
+
+
+@pytest.mark.parametrize("changes", [
+    {"mtls_enabled": False}, {"mtls_bind": "0.0.0.0"}, {"mtls_bind": "10.77.0.4"},
+    {"mtls_bind": "127.0.0.1"}, {"mtls_bind": "169.254.1.2"}, {"mtls_bind": "::"},
+    {"mtls_interface": ""}, {"mtls_interface": "lo"}, {"mtls_interface": "eth0;bad"},
+    {"loopback_host": "0.0.0.0"}, {"loopback_port": 8443},
+    {"hermes_base_url": "http://10.77.0.1:8642"}, {"hermes_base_url": "http://localhost:8642"},
+    {"hermes_base_url": "http://127.0.0.1:8787"}, {"hermes_base_url": "http://127.0.0.1:8642?"},
+    {"hermes_base_url": "http://127.0.0.1:8642#"}, {"hermes_base_url": "HTTP://127.0.0.1:8642"},
+    {"hermes_base_url": "http://user@127.0.0.1:8642"}, {"hermes_base_url": "http://127.0.0.1:9133"},
+    {"van_public_base_url": "https://127.0.0.1:8443"}, {"van_public_base_url": "https://10.0.1.233:8443"},
+    {"van_public_base_url": "https://owner.internal:8443"}, {"van_public_base_url": "https://owner.example:8443?"},
+    {"van_public_base_url": "https://owner.example:443"}, {"van_public_base_url": "https://owner.example:8443/path"},
+    {"van_public_base_url": "https://owner.example:8787", "mtls_port": 8787},
+    {"van_allow_loopback_in_production": True}, {"require_device_binding": False},
+])
+def test_core_only_production_refuses_widened_or_cross_host_bindings(changes):
+    with pytest.raises(ValueError):
+        core_only_settings(**changes)

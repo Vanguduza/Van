@@ -7,6 +7,10 @@ StartLimitIntervalSec=300
 StartLimitBurst=5
 
 [Service]
+# HISTORICAL DEV-ONLY placement (owner decision 2026-09-29 §1). Production browser/Stagehand
+# placement is deploy/van-browser-core. This unit refuses to start unless the environment
+# file explicitly marks the host development-only.
+ExecStartPre=/bin/sh -c 'test "$$VAN_BROWSER_HISTORICAL_DEV_ONLY" = 1 && test "$$VAN_TRUST_ZONE" = van-trading-core'
 Type=simple
 User=van-browser
 Group=van-browser

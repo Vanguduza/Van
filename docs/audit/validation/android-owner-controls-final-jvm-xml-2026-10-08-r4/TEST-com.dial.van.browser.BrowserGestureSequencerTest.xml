@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.BrowserGestureSequencerTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:59:30" hostname="052fefa249ff" time="0.007">
+  <properties/>
+  <testcase name="a move and an up carry the gesture the down opened()" classname="com.dial.van.browser.BrowserGestureSequencerTest" time="0.001"/>
+  <testcase name="each gesture on a pointer gets a higher epoch()" classname="com.dial.van.browser.BrowserGestureSequencerTest" time="0.0"/>
+  <testcase name="two pointers keep separate epochs()" classname="com.dial.van.browser.BrowserGestureSequencerTest" time="0.001"/>
+  <testcase name="motion sequence restarts per gesture and increases within one()" classname="com.dial.van.browser.BrowserGestureSequencerTest" time="0.0"/>
+  <testcase name="reset drops open gestures and keeps the sequence spaces moving()" classname="com.dial.van.browser.BrowserGestureSequencerTest" time="0.0"/>
+  <testcase name="an unopened pointer has no gesture rather than gesture zero by accident()" classname="com.dial.van.browser.BrowserGestureSequencerTest" time="0.0"/>
+  <testcase name="the three sequence spaces are independent()" classname="com.dial.van.browser.BrowserGestureSequencerTest" time="0.0"/>
+  <testcase name="the epoch keeps climbing across a reset()" classname="com.dial.van.browser.BrowserGestureSequencerTest" time="0.0"/>
+  <testcase name="an edge is duplicated onto both channels with one identity()" classname="com.dial.van.browser.BrowserGestureSequencerTest" time="0.002"/>
+  <testcase name="only edges are duplicated()" classname="com.dial.van.browser.BrowserGestureSequencerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

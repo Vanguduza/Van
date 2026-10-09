@@ -88,11 +88,9 @@ class ControlLeaseService:
     ) -> BrowserControlLease:
         """Take control, revoking whoever held it.
 
-        The generation is read and written inside one transaction. Two callers racing here
-        both compute the same next generation, and the second insert fails on the unique
-        index rather than silently producing two leases that each believe they are current —
-        which is precisely the "exactly one control holder" claim being false while both
-        rows look fine individually.
+        The writer lock is acquired before reading the generation. Racing requests get
+        distinct, ordered fences; the later request supersedes the earlier one instead
+        of failing halfway through after both computed the same generation.
         """
         if holder is BrowserControlHolder.NONE:
             raise ControlLeaseError("control_lease_requires_a_holder")
@@ -101,6 +99,7 @@ class ControlLeaseService:
         lease_id = f"bctl_{uuid.uuid4().hex}"
 
         async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
             cur = await db.execute(
                 "SELECT COALESCE(MAX(generation), 0) AS g FROM browser_control_leases WHERE session_id = ?",
                 (session_id,),
@@ -207,6 +206,24 @@ class ControlLeaseService:
             await db.commit()
 
     # ------------------------------------------------------------------ the check
+
+    async def renew_owner(self, *, session_id: str, control_lease_id: str,
+                          generation: int, device_id: str,
+                          now_ms: int | None = None) -> None:
+        """A present owner keeps the same fence; a heartbeat cannot revive a lease."""
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        async with self.store.connection() as db:
+            cur = await db.execute(
+                "UPDATE browser_control_leases SET expires_at_ms=? WHERE session_id=? "
+                "AND control_lease_id=? AND generation=? AND holder=? AND issued_for=? "
+                "AND revoked_at_ms IS NULL AND expires_at_ms>? "
+                "AND generation=(SELECT MAX(generation) FROM browser_control_leases WHERE session_id=?)",
+                (now + DEFAULT_TTL_MS[BrowserControlHolder.OWNER], session_id,
+                 control_lease_id, generation, BrowserControlHolder.OWNER.value, device_id, now, session_id),
+            )
+            await db.commit()
+            if cur.rowcount != 1:
+                raise ControlLeaseError("control_owner_lease_not_renewable")
 
     async def assert_may_actuate(
         self,

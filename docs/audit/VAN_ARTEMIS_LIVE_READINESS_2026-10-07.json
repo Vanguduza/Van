@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "kind": "VAN_ARTEMIS_DEFERRED_ACCEPTANCE_READINESS",
+  "prepared_at_utc": "2026-10-07T23:24:30.857131+00:00",
+  "observation_kind": "SOURCE_PLAN_REFRESH_NO_PHYSICAL_OBSERVATION",
+  "outcome": "DEFERRED_BY_OWNER_AND_LIVE_PREREQUISITES_UNVERIFIED",
+  "plan_sha256": "652c774bbbca3e7f7a00d70a7496befaa7f698ac2a13ef98d701ce4db3aa34aa",
+  "planned_coverage": {
+    "features": 42,
+    "functions": 77,
+    "surfaces": 70,
+    "cases": 726
+  },
+  "owner_selected_execution_route": "NATIVE_ARTEMIS_VIA_DIAL_COMMANDER",
+  "legacy_plan_adapter": "LEGACY_DDS_HERMES_ANDROID_TESTING_PLANE",
+  "legacy_receipts_qualify_native_route": false,
+  "selected_device_transport": "USB_PRIVATE_BRIDGE_CANDIDATE",
+  "native_schema_discovered_here": false,
+  "executed_device_cases": 0,
+  "live_qualified": false,
+  "owner_release": false,
+  "deployment_accepted": false,
+  "handset": {
+    "model": "Samsung S24 Ultra",
+    "reported_model": "SM-S928B",
+    "reported_usb_serial": "RFCX2054F5W",
+    "reported_usb_host": "Windows PC",
+    "usb_authorization": "OWNER_REPORTED_DEVICE_STATE",
+    "connected_verified": false,
+    "admission_verified": false,
+    "private_bridge_verified": false
+  },
+  "target": {
+    "backend": "van-trading-core",
+    "hermes_and_artemis": "dial-control",
+    "handset": "Samsung S24 Ultra",
+    "phone_connection": "usb_private_bridge_via_governed_artemis",
+    "product_ingress": "DEDICATED_PINNED_TLS_INGRESS_REQUIRED",
+    "device_transport": "USB_PRIVATE_BRIDGE"
+  },
+  "available_governed_android_tools": [],
+  "checks": [
+    {
+      "id": "owner_schedule",
+      "outcome": "DEFERRED",
+      "reason": "Owner requested phone tests only after source wiring is complete."
+    },
+    {
+      "id": "native_connector",
+      "outcome": "UNVERIFIED",
+      "reason": "No native Artemis or Global DIAL device tool is callable in this workspace; actual native schema must be discovered in the enabled test session."
+    },
+    {
+      "id": "usb_route_and_identity",
+      "outcome": "UNVERIFIED",
+      "reason": "Authorized USB device state is owner-reported; exact device admission, measured private bridge and current S24 identity must be independently observed."
+    },
+    {
+      "id": "deployment_and_release",
+      "outcome": "UNVERIFIED",
+      "reason": "No installed exact-source production release, stable-owner-signed APK/provisioning or phone session receipt is recorded here."
+    },
+    {
+      "id": "isolated_fixtures",
+      "outcome": "UNVERIFIED",
+      "reason": "Provider, browser byte/clipboard, voice and demo-trading canaries/fault fixtures need actual admitted producers and private owner interactions."
+    },
+    {
+      "id": "source_plan",
+      "outcome": "PREPARED_NOT_EXECUTED",
+      "reason": "Current registry supplies 726 candidate cases. Source hashes, closed owner/service endpoint roles and byte-effect requirements are recorded; a plan is not an observation."
+    }
+  ],
+  "production_freeze": {
+    "path": "docs/audit/validation/van-production-source-freeze-2026-10-07.json",
+    "sha256": "29c055fe86b0d3057b4975dc3a5a8fda1db74d8973de6f670096eedc16e86384"
+  },
+  "known_missing_frontend_surfaces": [],
+  "known_partial_features": [
+    "OF-HOME-001",
+    "OF-COMMAND-001",
+    "OF-MISSION-001",
+    "OF-ATTENTION-001",
+    "OF-DECISION-001",
+    "OF-APPROVAL-001",
+    "OF-MEMORY-002",
+    "OF-LEARNING-003",
+    "OF-PROJECT-001",
+    "OF-AUTHORITY-001",
+    "OF-GOOGLE-001",
+    "OF-GOOGLE-002",
+    "OF-KNOWLEDGE-001",
+    "OF-AUTOMATION-001",
+    "OF-BROWSER-001",
+    "OF-BROWSER-002",
+    "OF-BROWSER-003",
+    "OF-BROWSER-004",
+    "OF-VOICE-001",
+    "OF-VOICE-002",
+    "OF-OVERLAY-001",
+    "OF-NOTIFICATION-001",
+    "OF-SHARE-001",
+    "OF-PROVISION-001",
+    "OF-SETTINGS-001",
+    "OF-DIAGNOSTICS-001",
+    "OF-TRADING-001",
+    "OF-TRADING-002",
+    "OF-TRADING-003",
+    "OF-TRADING-004",
+    "OF-TRADING-005",
+    "OF-DEV-001",
+    "OF-DEV-002"
+  ],
+  "historical_readiness": "docs/audit/validation/artemis-before-final-registry/VAN_ARTEMIS_LIVE_READINESS_2026-10-07.json",
+  "native_handoff": "tools/certification/NATIVE_ARTEMIS_HANDOFF_PROMPT.md",
+  "scope": "Reviewed source preparation only. Existing legacy DDS/Hermes adapter is not the owner-selected native Artemis route. No host, phone, provider, pairing or trading action was executed.",
+  "local_validation_receipt": {
+    "path": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
+    "sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1"
+  },
+  "local_test_executions": {
+    "passed": 6574,
+    "skipped": 10,
+    "failed": 0,
+    "errors": 0
+  }
+}

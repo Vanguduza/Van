@@ -51,7 +51,7 @@ BINDINGS = {
     "document_type": "statement",
     "source_domain": DOMAIN,
     "source_path": "/statements",
-    "credential_alias": "connector://broker/primary",
+    "credential_alias": "",
 }
 
 
@@ -214,7 +214,7 @@ async def test_compile_produces_a_proposed_candidate_and_nothing_more(fabric):
             "signature": SIGNATURE,
             "template_id": "collect_normalise_ingest.v1",
             "bindings": BINDINGS,
-            "credential_ids": {"connector://broker/primary": "n8n-cred-1"},
+            "credential_ids": {},
         },
     )
     assert response.status_code == 200, response.text
@@ -306,7 +306,7 @@ async def _compile(ac) -> dict:
             "signature": SIGNATURE,
             "template_id": "collect_normalise_ingest.v1",
             "bindings": BINDINGS,
-            "credential_ids": {"connector://broker/primary": "n8n-cred-1"},
+            "credential_ids": {},
         },
     )
     assert response.status_code == 200, response.text
@@ -359,57 +359,22 @@ async def test_admission_is_a_guarded_transition(fabric):
     assert replayed.status_code == 409
 
 
-async def test_hot_publish_requires_an_admitted_artifact(fabric):
-    """§25 — the HOT index is reachable only through admission."""
-    ac, api, _store, _auth = fabric
+async def test_hot_publish_requires_an_admitted_artifact(executable):
+    """Candidates remain unroutable; only a manifested admitted artifact enters HOT."""
+    ac, api, _store = executable
     compiled = await _compile(ac)
-
-    refused = await ac.post(
-        "/v1/automation/hot/publish",
-        headers=HEADERS,
-        json={"capability_id": compiled["capability_id"], "signature": SIGNATURE},
-    )
-    assert refused.status_code == 409
-    assert refused.json()["detail"] == "CAPABILITY_NOT_ADMITTED"
+    refused = await ac.post("/v1/automation/hot/publish", headers=HEADERS,
+        json={"capability_id": compiled["capability_id"], "signature": SIGNATURE})
+    assert refused.status_code == 409 and refused.json()["detail"] == "CAPABILITY_NOT_ADMITTED"
     assert api.hot_index.size == 0
-
-    for expected, target in (
-        ("PROPOSED", "QUARANTINED"), ("QUARANTINED", "VALIDATED"), ("VALIDATED", "ADMITTED")
-    ):
-        step = await ac.post(
-            "/v1/automation/admit",
-            headers=HEADERS,
-            json={
-                "artifact_id": compiled["artifact_id"], "expected": expected,
-                "target": target, "n8n_workflow_id": "n8n-wf-1",
-            },
-        )
-        assert step.status_code == 200, step.text
-
-    published = await ac.post(
-        "/v1/automation/hot/publish",
-        headers=HEADERS,
-        json={"capability_id": compiled["capability_id"], "signature": SIGNATURE},
-    )
-    assert published.status_code == 200
-    assert published.json()["hot_index_size"] == 1
-
-    # And now the router takes the HOT path rather than compiling again.
-    routed = (
-        await ac.post(
-            "/v1/automation/route",
-            headers=HEADERS,
-            json={"goal": "collect statements", "signature": SIGNATURE},
-        )
-    ).json()
-    assert routed["medium"] == "N8N_HOT"
-    assert routed["capability_id"] == compiled["capability_id"]
-
-    withdrawn = await ac.post(
-        f"/v1/automation/hot/withdraw/{compiled['capability_id']}", headers=HEADERS
-    )
-    assert withdrawn.status_code == 200
-    assert withdrawn.json()["hot_index_size"] == 0
+    published = await ac.post("/v1/automation/hot/publish", headers=HEADERS,
+        json={"capability_id": "wfcap_statements", "signature": SIGNATURE})
+    assert published.status_code == 200 and published.json()["hot_index_size"] == 1
+    routed = (await ac.post("/v1/automation/route", headers=HEADERS,
+        json={"goal": "collect statements", "signature": SIGNATURE})).json()
+    assert routed["medium"] == "N8N_HOT" and routed["capability_id"] == "wfcap_statements"
+    withdrawn = await ac.post("/v1/automation/hot/withdraw/wfcap_statements", headers=HEADERS)
+    assert withdrawn.status_code == 200 and withdrawn.json()["hot_index_size"] == 0
 
 
 async def test_capability_lookup_reports_the_admitted_artifact(fabric):
@@ -569,43 +534,8 @@ async def test_standing_intent_without_an_owner_command_is_refused(fabric):
 # --------------------------------------------------------------------- execute
 
 
-ACTION_ID = "automation.trading.statement.collect"
+ACTION_ID = "automation.workflow.wfcap_statements"
 SIGNING_KEY = "api-test-signing-key"
-
-
-def _n8n_transport(engine_success: bool = True):
-    import json
-
-    import httpx
-
-    # P3-OPS-007 — shaped like the real n8n: the management API under /api/v1 can
-    # read and activate a workflow, and execution happens through the workflow's own
-    # webhook trigger at /webhook/<path>. The old fake served an invented
-    # `/workflows/{id}/run`, which is why the invented call was never caught.
-    webhook_path = "van/wfcap-statements"
-
-    def handler(request: httpx.Request) -> httpx.Response:
-        path = request.url.path
-        if path.endswith("/settings"):
-            return httpx.Response(200, json={"versionCli": "2.39.7"})
-        if path.startswith("/api/v1/workflows/") and request.method == "GET":
-            return httpx.Response(200, json={
-                "id": path.rsplit("/", 1)[-1],
-                "active": True,
-                "nodes": [{"name": "When called", "type": "n8n-nodes-base.webhook",
-                           "parameters": {"path": webhook_path, "httpMethod": "POST"}}],
-            })
-        if path == f"/webhook/{webhook_path}" and request.method == "POST":
-            body = json.loads(request.content)
-            # §§159-160 — the engine gets a run-scoped grant, never VAN's own token.
-            assert body["capability_grant"]
-            assert "X-Van-Internal-Token" not in request.headers
-            return httpx.Response(
-                200, json={"executionId": "n8n-exec-1", "success": engine_success}
-            )
-        return httpx.Response(404)
-
-    return httpx.MockTransport(handler)
 
 
 class _Observer:
@@ -621,7 +551,6 @@ async def executable(tmp_path):
     """The API with a dispatcher behind it, wired exactly as `create_app` does."""
     from tests.conftest_automation import (
         make_action_runtime,
-        sample_artifact,
         sample_capability,
     )
     from van_gateway.action.models import ActionDefinition, VerifierType
@@ -658,7 +587,10 @@ async def executable(tmp_path):
 
     registry = AutomationRegistry(store)
     await registry.upsert_capability(sample_capability(action_class=ActionClass.A2))
-    await registry.record_artifact(sample_artifact(lifecycle=WorkflowLifecycle.ADMITTED))
+    from automation_runtime_fixture import seed_runtime, StatefulN8n
+    _ir, compiled, artifact = await seed_runtime(store, registry, read_only=True, verifier={})
+    manager = StatefulN8n()
+    manager.seed(artifact.n8n_workflow_id, compiled.n8n_graph)
 
     runtime_registry = ExternalRuntimeRegistry(store)
     await runtime_registry.record_evidence(
@@ -675,7 +607,7 @@ async def executable(tmp_path):
         grants=RunGrantService(store, signing_key=SIGNING_KEY),
         client=N8nManagementClient(
             runtime_registry, base_url="http://127.0.0.1:5678/api/v1", api_key="k",
-            enabled=True, expected_version="2.39.7", transport=_n8n_transport(),
+            enabled=True, expected_version="2.39.7", transport=manager.transport,
         ),
         verifier=WorkflowVerifier(
             {"READ_BACK": _Observer({"exists": True, "evidence_pointer": "gateway://evidence/1"})}
@@ -713,15 +645,40 @@ def _execute_body(**overrides) -> dict:
 
 
 async def test_execute_reports_owner_success_only_when_verified(executable):
-    """§17 — an engine success is not an owner success, and the two are distinct."""
+    """§17 — an engine success is not an owner success, and the two are distinct.
+
+    Reviewer I M-1: the endpoint derives the postcondition from the capability, which today
+    declares only a verifier kind (``READ_BACK``) and no predicate. A kind alone cannot be
+    observed false, so the run is UNVERIFIABLE — the engine succeeded and the observer would
+    have said ``exists: True``, and neither is owner success.
+    """
     ac, _api, _store = executable
     response = await ac.post("/v1/automation/execute", headers=HEADERS, json=_execute_body())
     assert response.status_code == 200, response.text
     body = response.json()
-    assert body["status"] == "VERIFIED_SUCCESS"
-    assert body["owner_success"] is True
-    assert body["verification_outcome"] == "VERIFIED"
-    assert body["evidence_pointer"]
+    assert body["status"] == "UNVERIFIABLE"
+    assert body["owner_success"] is False
+    assert body["verification_outcome"] == "UNVERIFIABLE"
+
+
+async def test_replacement_candidate_preserves_active_capability_and_action(executable):
+    ac, api, _store = executable
+    current = await api.registry.get_capability("wfcap_statements")
+    active_artifact = await api.registry.admitted_artifact(current.capability_id)
+    response = await ac.post("/v1/automation/compile", headers=HEADERS, json={
+        "capability_id": current.capability_id, "semantic_name": current.semantic_name,
+        "signature": SIGNATURE, "template_id": "collect_normalise_ingest.v1",
+        "bindings": BINDINGS, "credential_ids": {},
+    })
+    assert response.status_code == 200, response.text
+    candidate = await api.registry.get_artifact(response.json()["artifact_id"])
+    unchanged = await api.registry.get_capability(current.capability_id)
+    definition = await api.dispatcher.actions.get_definition(ACTION_ID)
+    assert candidate.version == active_artifact.version + 1 and candidate.lifecycle_state is WorkflowLifecycle.PROPOSED
+    assert unchanged.lifecycle_state == current.lifecycle_state == WorkflowLifecycle.ADMITTED
+    assert unchanged.workflow_ir_digest == current.workflow_ir_digest
+    assert unchanged.action_class == definition.action_class == current.action_class == ActionClass.A2
+    assert (await api.registry.admitted_artifact(current.capability_id)).artifact_id == active_artifact.artifact_id
 
 
 async def test_execute_refuses_a_capability_that_was_never_admitted(executable):

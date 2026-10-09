@@ -72,6 +72,18 @@ class SessionDownstreamTest {
         assertEquals("mission_unknown", parsed.refusal)
     }
 
+    @Test fun `a pending result is distinguished from a final refusal`() {
+        val pending = frame("""{"accepted":false,"message_id":"msg_pending","refusal":"session_result_pending"}""")
+        assertTrue(pending is SessionDownstream.Frame.Acknowledgement)
+        assertTrue(pending.resultPending)
+    }
+
+    @Test fun `an acknowledgement without a boolean acceptance cannot settle work`() {
+        for (accepted in listOf("null", "\"false\"", "\"true\"", "0", "{}")) {
+            assertTrue(frame("""{"message_id":"msg_1","accepted":$accepted}""") is SessionDownstream.Frame.Unrecognised)
+        }
+    }
+
     @Test
     fun `an event with no sequence is refused rather than cursored at zero`() {
         // Taking zero would rewind the stream to the beginning on the next resume, and

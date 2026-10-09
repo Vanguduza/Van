@@ -21,6 +21,7 @@ Every one of the following ends the task rather than escalating it:
 
 from __future__ import annotations
 
+import inspect
 import ipaddress
 import re
 import time
@@ -49,7 +50,15 @@ _RANK = {ActionClass.A1: 1, ActionClass.A2: 2, ActionClass.A3: 3, ActionClass.A4
 class SubagentStop(str, Enum):
     """Why an autonomous run ended. Every one is terminal — none escalates."""
 
+    #: Owner decision 2026-09-29 §7: only after the independent postcondition verifier
+    #: returned VERIFIED for the worker's "done" claim. Never from the claim alone.
     GOAL_ACHIEVED = "GOAL_ACHIEVED"
+    #: The worker claimed done and the verifier observed the postcondition false.
+    #: Terminal for this run; Hermes may retry or fall back.
+    NOT_SATISFIED = "NOT_SATISFIED"
+    #: The worker claimed done and nothing could verify it (no postcondition, no verifier,
+    #: observer failure). Never success; the task is escalated, not completed.
+    UNVERIFIABLE = "UNVERIFIABLE"
     BUDGET_EXHAUSTED = "BUDGET_EXHAUSTED"
     DEADLINE_REACHED = "DEADLINE_REACHED"
     SCOPE_VIOLATION = "SCOPE_VIOLATION"
@@ -59,6 +68,10 @@ class SubagentStop(str, Enum):
     INJECTION_REFUSED = "INJECTION_REFUSED"
     WORKER_ERROR = "WORKER_ERROR"
     NO_PROGRESS = "NO_PROGRESS"
+    #: Owner decision 2026-09-29 §9 / review I M-4: the owner holds control of the
+    #: profile (or control state could not be read). Automation stops and hands over;
+    #: nothing further is proposed or executed. Never success.
+    OWNER_TAKEOVER = "OWNER_TAKEOVER"
 
 
 class SubagentAssignment(BaseModel):
@@ -109,14 +122,34 @@ class SubagentResult(BaseModel):
     steps: list[SubagentStep] = Field(default_factory=list)
     extraction: dict[str, Any] = Field(default_factory=dict)
     detail: str | None = None
+    #: The independent verifier's outcome for a "done" claim, when one was made.
+    verification_outcome: str | None = None
+
+    @property
+    def execution_completed(self) -> bool:
+        return self.succeeded
 
     @property
     def succeeded(self) -> bool:
-        return self.stop_reason is SubagentStop.GOAL_ACHIEVED
+        # GOAL_ACHIEVED is only ever set after VERIFIED; checking both keeps a future
+        # caller that constructs a result by hand from turning a claim into success.
+        return (
+            self.stop_reason is SubagentStop.GOAL_ACHIEVED
+            and self.verification_outcome == "VERIFIED"
+        )
 
     @property
     def step_count(self) -> int:
         return len(self.steps)
+
+
+class OwnerTakeoverRequired(RuntimeError):
+    """Raised by a worker's ``propose`` when the next step cannot be classified.
+
+    Reviewer I2 N-2: a Stagehand target the Harness cannot resolve has no observable
+    class, so the step is not proposable and the run hands over to the owner (owner
+    decision 2026-09-29 §9, lane 4) rather than ending as a generic worker error.
+    """
 
 
 class ProposedAction(BaseModel):
@@ -149,16 +182,48 @@ class SubagentWorker(Protocol):
         ...
 
 
+#: ``(task) -> bool | Awaitable[bool]``: True when the owner holds control of the task's
+#: profile. ``interaction_router.OwnerControlProbe`` is the production implementation.
+OwnerControlProbeFn = Callable[[BrowserTask], Any]
+
+
 class BrowserSubagentRunner:
     """Runs an assignment to completion or to a bounded stop.
 
     The loop is the enforcement point. Each proposed action is checked against the
     assignment *before* it executes, so a worker that drifts is stopped rather than
     corrected-and-continued.
+
+    Owner takeover preempts automation (owner decision 2026-09-29 §9; review I M-4).
+    ``owner_control_probe`` is consulted before every ``propose`` and every ``execute``;
+    when the owner holds control, when the probe fails, or when no probe was supplied
+    (control state unknowable), the run ends with ``OWNER_TAKEOVER`` and hands over.
     """
 
-    def __init__(self, policy: BrowserPolicyEngine | None = None) -> None:
+    def __init__(
+        self,
+        policy: BrowserPolicyEngine | None = None,
+        *,
+        owner_control_probe: OwnerControlProbeFn | None = None,
+        clock_ms: Callable[[], int] | None = None,
+    ) -> None:
         self.policy = policy or BrowserPolicyEngine()
+        self.owner_control_probe = owner_control_probe
+        self.clock_ms = clock_ms or (lambda: int(time.time() * 1000))
+
+    async def _owner_preempts(self, task: BrowserTask) -> str | None:
+        """Same rule as the router's ``_owner_preempts``: unknown control state = preempt."""
+        if self.owner_control_probe is None:
+            return "OWNER_CONTROL_STATE_UNKNOWN"
+        try:
+            held = self.owner_control_probe(task)
+            if inspect.isawaitable(held):
+                held = await held
+        except Exception as exc:  # noqa: BLE001 - unreadable control state hands over
+            return f"OWNER_CONTROL_PROBE_FAILED:{type(exc).__name__}"
+        if held is False:
+            return None
+        return "OWNER_HAS_CONTROL" if held is True else "OWNER_CONTROL_STATE_UNKNOWN"
 
     async def run(
         self,
@@ -167,8 +232,13 @@ class BrowserSubagentRunner:
         worker: SubagentWorker,
         task: BrowserTask,
         now_ms: int | None = None,
+        verifier: Any = None,
+        postcondition: Any = None,
         assert_lease_active: Callable[[], Awaitable[None]] | None = None,
     ) -> SubagentResult:
+        """``verifier``/``postcondition``: owner decision 2026-09-29 §7. A worker's ``done``
+        moves the run to VERIFYING and only ``verifier`` returning VERIFIED ends it with
+        GOAL_ACHIEVED. With no verifier the claim is UNVERIFIABLE — never success."""
         # The ladder cap is a policy decision, checked once before any step.
         try:
             self.policy.check_tier(assignment.autonomy_tier)
@@ -190,26 +260,39 @@ class BrowserSubagentRunner:
         extraction: dict[str, Any] = {}
         last_observation: str | None = None
         stagnant = 0
-        now = int(time.time() * 1000) if now_ms is None else now_ms
+        clock_start = self.clock_ms()
+        initial_ms = clock_start if now_ms is None else now_ms
+
+        def current_ms() -> int:
+            return initial_ms + max(0, self.clock_ms() - clock_start)
 
         def deadline_reached() -> bool:
-            current = int(time.time() * 1000) if now_ms is None else now
-            return assignment.deadline_ms is not None and current >= assignment.deadline_ms
+            return assignment.deadline_ms is not None and current_ms() >= assignment.deadline_ms
+
+        now = current_ms()
 
         for index in range(assignment.max_steps):
-            if now_ms is None:
-                now = int(time.time() * 1000)
+            now = current_ms()
             if assignment.deadline_ms is not None and now >= assignment.deadline_ms:
                 return self._stop(assignment, task, steps, extraction, SubagentStop.DEADLINE_REACHED)
 
+            preempt = await self._owner_preempts(task)
+            if preempt is not None:
+                return self._stop(
+                    assignment, task, steps, extraction, SubagentStop.OWNER_TAKEOVER, detail=preempt,
+                )
+
             try:
-                # Semantic proposals can inspect the browser too. Lease authority is
-                # checked before either a proposal or an action touches the profile.
                 if assert_lease_active is not None:
                     await assert_lease_active()
                 action = await worker.propose(assignment, list(steps))
                 if assert_lease_active is not None:
                     await assert_lease_active()
+            except OwnerTakeoverRequired as exc:
+                return self._stop(
+                    assignment, task, steps, extraction, SubagentStop.OWNER_TAKEOVER,
+                    detail=str(exc),
+                )
             except Exception as exc:  # noqa: BLE001 - a worker fault ends the task
                 return self._stop(
                     assignment, task, steps, extraction, SubagentStop.WORKER_ERROR,
@@ -218,13 +301,26 @@ class BrowserSubagentRunner:
 
             if deadline_reached():
                 return self._stop(assignment, task, steps, extraction, SubagentStop.DEADLINE_REACHED)
-            if action.done:
-                return self._stop(assignment, task, steps, extraction, SubagentStop.GOAL_ACHIEVED)
-
             violation = self._check(assignment, action)
             if violation is not None:
                 stop, detail = violation
                 return self._stop(assignment, task, steps, extraction, stop, detail=detail)
+
+            if action.done:
+                result = await self._verify_done(
+                    assignment, task, steps, extraction, verifier, postcondition
+                )
+                if deadline_reached():
+                    return self._stop(assignment, task, steps, extraction, SubagentStop.DEADLINE_REACHED)
+                return result
+
+            # Re-checked immediately before actuation: the owner may have taken control
+            # while the worker was proposing (a Stagehand observe can take seconds).
+            preempt = await self._owner_preempts(task)
+            if preempt is not None:
+                return self._stop(
+                    assignment, task, steps, extraction, SubagentStop.OWNER_TAKEOVER, detail=preempt,
+                )
 
             try:
                 if assert_lease_active is not None:
@@ -234,14 +330,19 @@ class BrowserSubagentRunner:
                 observation = await worker.execute(assignment, action)
                 if assert_lease_active is not None:
                     await assert_lease_active()
+            except OwnerTakeoverRequired as exc:
+                # Review I5: the Harness refused to act on the bound target (it moved,
+                # changed, lost focus, or the page left the task scope). Lane 4.
+                return self._stop(
+                    assignment, task, steps, extraction, SubagentStop.OWNER_TAKEOVER,
+                    detail=str(exc),
+                )
             except Exception as exc:  # noqa: BLE001
                 return self._stop(
                     assignment, task, steps, extraction, SubagentStop.WORKER_ERROR,
                     detail=f"{type(exc).__name__}",
                 )
 
-            if deadline_reached():
-                return self._stop(assignment, task, steps, extraction, SubagentStop.DEADLINE_REACHED)
             # Page content is data. It cannot raise the class or carry secrets, and
             # a page that tries to redirect the task ends it.
             try:
@@ -270,6 +371,8 @@ class BrowserSubagentRunner:
             )
             if observation.extraction:
                 extraction.update(observation.extraction)
+            if deadline_reached():
+                return self._stop(assignment, task, steps, extraction, SubagentStop.DEADLINE_REACHED)
 
             stagnant = stagnant + 1 if observation_digest == last_observation else 0
             if stagnant >= assignment.max_steps_without_progress:
@@ -285,13 +388,8 @@ class BrowserSubagentRunner:
         """Every bound the worker cannot widen, checked before the action runs."""
         if action.domain not in assignment.allowed_domains:
             return SubagentStop.SCOPE_VIOLATION, f"domain_outside_assignment:{action.domain}"
-        if _RANK[action.action_class] > _RANK[assignment.action_class_ceiling]:
-            return (
-                SubagentStop.ACTION_CLASS_VIOLATION,
-                f"{action.action_class.value}>{assignment.action_class_ceiling.value}",
-            )
-        if action.restated_goal and digest({"goal": action.restated_goal}) != assignment.goal_digest:
-            return SubagentStop.GOAL_DRIFT, "worker restated a different goal"
+        # Payments first: a pay button is also above any autonomous ceiling (A4), and the
+        # more specific refusal is the one the owner needs to read (reviewer I2 N-2).
         try:
             assert_not_automated_payment(
                 operation=action.kind, goal=action.instruction or "", url=action.url or "",
@@ -299,7 +397,49 @@ class BrowserSubagentRunner:
             )
         except PaymentBoundaryError as exc:
             return SubagentStop.PAYMENT_REFUSED, str(exc)
+        if _RANK[action.action_class] > _RANK[assignment.action_class_ceiling]:
+            return (
+                SubagentStop.ACTION_CLASS_VIOLATION,
+                f"{action.action_class.value}>{assignment.action_class_ceiling.value}",
+            )
+        if action.restated_goal and digest({"goal": action.restated_goal}) != assignment.goal_digest:
+            return SubagentStop.GOAL_DRIFT, "worker restated a different goal"
         return None
+
+    async def _verify_done(
+        self,
+        assignment: SubagentAssignment,
+        task: BrowserTask,
+        steps: list[SubagentStep],
+        extraction: dict[str, Any],
+        verifier: Any,
+        postcondition: Any,
+    ) -> SubagentResult:
+        """The worker says the goal is met. That is a claim; the verifier decides."""
+        if verifier is None:
+            result = self._stop(
+                assignment, task, steps, extraction, SubagentStop.UNVERIFIABLE,
+                detail="verifier_unavailable",
+            )
+            result.verification_outcome = "UNVERIFIABLE"
+            return result
+        try:
+            verdict = await verifier.verify(task, None, postcondition, claimed_done=True)
+            outcome = getattr(getattr(verdict, "outcome", None), "value", None)
+            detail = getattr(verdict, "detail", None)
+        except Exception as exc:  # noqa: BLE001 - a verifier fault is never success
+            outcome, detail = "UNVERIFIABLE", f"verifier_failed:{type(exc).__name__}"
+        if outcome == "VERIFIED":
+            stop = SubagentStop.GOAL_ACHIEVED
+        elif outcome == "FAILED":
+            stop = SubagentStop.NOT_SATISFIED
+        else:
+            # PARTIAL is not VERIFIED either: something exists that cannot be proved ours.
+            stop = SubagentStop.UNVERIFIABLE
+            outcome = outcome or "UNVERIFIABLE"
+        result = self._stop(assignment, task, steps, extraction, stop, detail=detail)
+        result.verification_outcome = outcome
+        return result
 
     @staticmethod
     def _stop(
@@ -402,6 +542,7 @@ def classify_boundary(
 __all__ = [
     "BrowserSubagentRunner",
     "classify_boundary",
+    "OwnerTakeoverRequired",
     "plausible_hostname",
     "ProposedAction",
     "SubagentAssignment",

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.trading.TradeBookTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:36:49" hostname="052fefa249ff" time="0.017">
+  <properties/>
+  <testcase name="currentRowsShowTicketAndUnconfirmedStopLoudly" classname="com.dial.van.trading.TradeBookTest" time="0.011"/>
+  <testcase name="pastRowsCarryOutcomeRAndConfidence" classname="com.dial.van.trading.TradeBookTest" time="0.003"/>
+  <testcase name="missingLedgerAndGarbageFailClosedWithoutInventingRows" classname="com.dial.van.trading.TradeBookTest" time="0.0"/>
+  <testcase name="bandThresholdsMatchBackend" classname="com.dial.van.trading.TradeBookTest" time="0.001"/>
+  <testcase name="potentialRowsIncludeCandidatesAndRiskRejections" classname="com.dial.van.trading.TradeBookTest" time="0.002"/>
+  <testcase name="surfaceHasNoActionVocabulary" classname="com.dial.van.trading.TradeBookTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

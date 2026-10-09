@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20260930-owner-derived-programme-b-review-i6-remediation",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "d0146342c93a886b370f0793b015110a3c9f8c43c32693d2a1e1b76bef9f76b5",
+  "owner_instruction_digest_input": "UTF-8 bytes of the verbatim section 10 paragraph of docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md, from '10.' to 'after tests pass.', its two line breaks replaced by single spaces, no trailing newline",
+  "owner_instruction_record": "docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md",
+  "owner_instruction_excerpt": "its findings remain blockers until closed. [...] Push every verified checkpoint immediately after tests pass.",
+  "excerpt_note": "Same parent instruction and reading as auth-20260930-owner-derived-programme-b-review-i5-remediation: a review's findings are blockers until closed (the integrator's reading of section 10), applied here to the findings of independent review I6 (M3, m1, m2, m3, m4, m5, m8).",
+  "derived_from": {
+    "owner_decisions_2026_09_29": {
+      "record": "docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md",
+      "record_sha256": "64f1c0560ef88776d0d199392d315767ea3576827e335ba2da8081d12e307c81",
+      "sections": [
+        "6",
+        "7",
+        "8",
+        "9",
+        "10"
+      ]
+    },
+    "owner_answers_2026_09_30": [
+      {
+        "record": "docs/decisions/OWNER-DECISION-20260930-BROWSER-TASK-SCOPE.md",
+        "record_sha256": "51099af731da4650ef4efe957574739284f50736ccc47e0694735888607db856",
+        "answers": {
+          "A": {
+            "verbatim": "I do not want to build  a fixed allowlist, pages should relevant to the task truth",
+            "sha256": "3bab5be4342e18f9ddb84ce612399aa51d7b42b4f368428a531e406760a4ea3c"
+          },
+          "B": {
+            "verbatim": "Record OWNER_DERIVED (Recommended)",
+            "sha256": "6a16a0f0bc8718a3aaf84ddefaf8261565916fa39a944e4055eb65b7a12821d3"
+          }
+        }
+      },
+      {
+        "record": "docs/decisions/OWNER-DECISION-20260930-OWNER-DERIVED-AND-LEDGER-ENFORCEMENT.md",
+        "record_sha256": "1642737a2e1f12aec9adc4f421b188477b79e00b0897bb86f3b9e16ccb471964",
+        "answer": {
+          "verbatim": "Yes to owner derived treatment and  enforce van's ledger",
+          "sha256": "1fb51f92482bc51e4c6d7fc1ef508b3070a56c0d024dd773927367162ce72dfb"
+        }
+      }
+    ],
+    "sibling_authorizations": [
+      "auth-20260930-owner-derived-programme-b-browser-deploy",
+      "auth-20260930-owner-derived-programme-b-remaining",
+      "auth-20260930-owner-van-ledger-enforcement"
+    ]
+  },
+  "task_scope_interpretation": {
+    "status": "PENDING_OWNER_CONFIRMATION",
+    "statement": "The fixes change HOW the task-scope rule is enforced (URL normalisation shared by gateway and Harness, the post-action landing check on the CDP frame URL, the isolated-world describe, approval deltas, fail-closed Harness scope), not WHAT the rule is. The rule itself implements the integrator's interpretation in section 3 of docs/decisions/OWNER-DECISION-20260930-BROWSER-TASK-SCOPE.md, which the repository's records still show as PENDING owner confirmation. The integrator relayed, through an agent message, that the owner has since answered 'Yes, confirmed'. That answer is not recorded in docs/decisions in this range: unit G9b's attempt to append it was refused by the session's permission check, because an agent-relayed answer is not owner consent this unit can record. This record therefore does NOT mark the rule owner-confirmed and does NOT claim OWNER_EXPLICIT for it. Recording the confirmation (and any OWNER_EXPLICIT record for the rule) is left to the owner or integrator, first-hand.",
+    "files_implementing_it": [
+      "backend/van_gateway/automation/production_gates.py",
+      "backend/van_gateway/browser/action_risk.py",
+      "backend/van_gateway/browser/adapters.py",
+      "backend/van_gateway/browser/api.py",
+      "backend/van_gateway/browser/interaction_router.py",
+      "backend/van_gateway/browser/jev_eligibility.py",
+      "backend/van_gateway/browser/task_scope.py",
+      "deploy/van-browser-core/browser/harness_service.py",
+      "hermes/mcp/owner_runtime_stdio.mjs"
+    ]
+  },
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "claude_code",
+    "request_id": "claude-code-session_01ELKqm4GCPmPvF3ggKkgB1J-20260930",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "signature_note": "No device, biometric or cryptographic signature is claimed. This record is not signed-ingress evidence. It records that the review-I6 remediation commits of unit G9b were derived from the owner decisions above. The owner did not approve each commit or each file.",
+  "limits": [
+    "No signature of any kind is claimed.",
+    "The authority is derived: it covers only what was necessary to close the findings of independent review I6 (M3, m1, m2, m3, m4, m5, m8) under owner decisions 2026-09-29 sections 6-10, in the listed files and commits.",
+    "It may not redefine product, business, security, legal, money/custody, locked-provider or owner-control intent. Where a covered commit is read as doing so, this record does not authorize that reading.",
+    "It does not open any production activation gate. It is not an OWNER_EXPLICIT record and cannot satisfy the jev_browser_effect owner_reference gate, which accepts only OWNER_EXPLICIT.",
+    "It does not confirm the integrator's interpretation of the 2026-09-30 browser-scope answer and does not record any owner confirmation of it (see task_scope_interpretation).",
+    "It does not cover review I6 M4 (handler-borne money, #w5/#w8), which waits on separate work (unit G9c); no request interception is part of these commits.",
+    "Not reusable: authorized_paths lists exactly the files the covered commits touched, plus this record and the ledger; no globs."
+  ],
+  "issued_at_utc": "2026-09-30T00:00:00Z",
+  "base_sha": "72e721205118ce5339fd6104daa27079fee613c1",
+  "commit_range": "72e721205118ce5339fd6104daa27079fee613c1..(unit-g9b head)",
+  "branch_scope": "unit-g9b, based on origin/gpt/jev-openmuse-convergence-r1-van-20260929 (72e72120)",
+  "units": {
+    "G9b": {
+      "base": "72e721205118ce5339fd6104daa27079fee613c1",
+      "findings": "review I6 M3 (URL normalisation shared by gateway and Harness with a shared vector file checked against real Chromium; post-action landing check on the CDP frame URL -> NOT_SATISFIED/lane 4, page closed; isolated-world describe/bind), m1 (approval widens by the approved delta only, ACTIVE and unexpired rows only), m2 (Harness requires task_scope on /navigate, /scroll, /upload), m3 (name/description masked in page script and sanitizer; B2 HARNESS_REDACTED; R11 covers name/description), m4 (closed-vocabulary step-ledger reasons; page role and exception text never reasons), m5 (comments state the rule implements the integrator's pending interpretation), m8 (owner_reference gate honours expires_at/expires_at_utc/not_after/not_after_utc, fail closed)",
+      "paths": [
+        "backend/tests/fixtures/task_scope/url_vectors.v1.json",
+        "backend/tests/test_browser_i5_integration_g8.py",
+        "backend/tests/test_browser_review_i4_fence.py",
+        "backend/tests/test_browser_review_i6_scope.py",
+        "backend/tests/test_harness_elements.py",
+        "backend/van_gateway/automation/production_gates.py",
+        "backend/van_gateway/browser/action_risk.py",
+        "backend/van_gateway/browser/adapters.py",
+        "backend/van_gateway/browser/api.py",
+        "backend/van_gateway/browser/interaction_router.py",
+        "backend/van_gateway/browser/jev_eligibility.py",
+        "backend/van_gateway/browser/task_scope.py",
+        "deploy/van-browser-core/browser/harness_service.py",
+        "hermes/mcp/owner_runtime_stdio.mjs",
+        "tests/contracts/test_jev_effect_owner_reference.py",
+        "tests/contracts/test_task_scope_shared_url_rule.py"
+      ],
+      "test_updates": "Three existing tests updated for the new behaviour: test_harness_elements (a 10,000-character single run is now masked in the name, so the clip/size-bound inputs use words), test_browser_i5_integration_g8 (the landing check is one more Harness call under the same profile lock), test_browser_review_i4_fence (its fake Harness replied with a page outside the task's own domain, which the gateway now refuses)."
+    }
+  },
+  "authorized_paths": [
+    "backend/tests/fixtures/task_scope/url_vectors.v1.json",
+    "backend/tests/test_browser_i5_integration_g8.py",
+    "backend/tests/test_browser_review_i4_fence.py",
+    "backend/tests/test_browser_review_i6_scope.py",
+    "backend/tests/test_harness_elements.py",
+    "backend/van_gateway/automation/production_gates.py",
+    "backend/van_gateway/browser/action_risk.py",
+    "backend/van_gateway/browser/adapters.py",
+    "backend/van_gateway/browser/api.py",
+    "backend/van_gateway/browser/interaction_router.py",
+    "backend/van_gateway/browser/jev_eligibility.py",
+    "backend/van_gateway/browser/task_scope.py",
+    "deploy/van-browser-core/browser/harness_service.py",
+    "hermes/mcp/owner_runtime_stdio.mjs",
+    "tests/contracts/test_jev_effect_owner_reference.py",
+    "tests/contracts/test_task_scope_shared_url_rule.py",
+    "docs/project-state/authorizations/auth-20260930-owner-derived-programme-b-review-i6-remediation.json",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl (append-only rows)"
+  ],
+  "covered_file_count": 16,
+  "decision_sections_in_scope": [
+    "2026-09-29 sections 6-10",
+    "2026-09-30 answers A (as context only; its reading is pending in the repository's records), B and question 1 of the ledger answer"
+  ],
+  "change_classes": [
+    "runtime_remediation",
+    "verification",
+    "project_truth_reconciliation"
+  ],
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false,
+  "reusable": false,
+  "revoked": false
+}

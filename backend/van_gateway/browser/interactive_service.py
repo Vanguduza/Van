@@ -272,7 +272,8 @@ class InteractiveSessionService:
         session = await self.get(session_id)
         if session is None:
             raise InteractiveSessionError("interactive_session_unknown")
-        await self._update(session_id, {"last_client_seen_at_ms": now})
+        if session.state.is_terminal or session.state is InteractiveSessionState.TERMINATING:
+            raise InteractiveSessionError("interactive_session_ended")
 
         row = await self.store.fetchone(
             "SELECT lease_expires_at_ms, lease_generation FROM browser_profiles WHERE lease_holder = ?",
@@ -299,6 +300,18 @@ class InteractiveSessionService:
                 await self._lease_lost(session, str(exc), now)
                 raise InteractiveSessionError(str(exc)) from exc
             await self._update(session_id, {"last_profile_lease_renewed_at_ms": now})
+
+        if session.control_holder is BrowserControlHolder.OWNER and session.control_lease_id:
+            try:
+                await self.control.renew_owner(
+                    session_id=session_id, control_lease_id=session.control_lease_id,
+                    generation=session.control_generation, device_id=session.owner_device_id,
+                    now_ms=now,
+                )
+            except ControlLeaseError as exc:
+                raise InteractiveSessionError(str(exc)) from exc
+        await self._update(session_id, {"last_client_seen_at_ms": now,
+                                        "expires_at_ms": now + SESSION_TTL_MS})
 
         updated = await self.get(session_id)
         assert updated is not None
@@ -369,6 +382,37 @@ class InteractiveSessionService:
         return session
 
     # ------------------------------------------------------------------ viewport
+
+    async def resume(self, *, session_id: str, now_ms: int | None = None) -> InteractiveBrowserSession:
+        """An owner resumes their paused browser with fresh fences and no stale input."""
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        session = await self.get(session_id)
+        if session is None:
+            raise InteractiveSessionError("interactive_session_unknown")
+        if session.state is not InteractiveSessionState.SUSPENDED:
+            raise InteractiveSessionError("interactive_session_not_suspended")
+        if session.expires_at_ms <= now:
+            raise InteractiveSessionError("interactive_session_expired")
+        profile = await self.store.fetchone("SELECT * FROM browser_profiles WHERE profile_alias=?", (session.profile_alias,))
+        try:
+            if (profile is not None and profile["lease_holder"] == session.profile_lease_id
+                    and profile["lease_holder_id"] == session_id and int(profile["lease_expires_at_ms"] or 0) > now):
+                lease = await self.broker.renew_lease(lease_id=session.profile_lease_id or "", holder_id=session_id,
+                    generation=int(profile["lease_generation"]), now_ms=now)
+            else:
+                lease = await self.broker.acquire_lease(profile_alias=session.profile_alias,
+                    holder_kind=ProfileLeaseHolderKind.INTERACTIVE_SESSION, holder_id=session_id, now_ms=now)
+        except BrowserPolicyError as exc:
+            raise InteractiveSessionError(str(exc)) from exc
+        await self._update(session_id, {"profile_lease_id": lease.lease_id,
+            "last_profile_lease_renewed_at_ms": now, "last_client_seen_at_ms": now,
+            "expires_at_ms": now + SESSION_TTL_MS, "acked_viewport_revision": None,
+            "acked_media_epoch": None, "acked_frame_sequence": None})
+        await self.control.owner_preempt(session_id=session_id, device_id=session.owner_device_id, now_ms=now)
+        await self.store.execute("UPDATE browser_stream_producers SET revoked_at_ms=?,revoke_reason='owner_resumed' WHERE session_id=? AND revoked_at_ms IS NULL", (now, session_id))
+        await self.store.execute("UPDATE browser_stream_grants SET revoked_at_ms=? WHERE session_id=? AND revoked_at_ms IS NULL", (now, session_id))
+        return await self.transition(session_id=session_id, target=InteractiveSessionState.CONNECTING,
+                                     reason="owner_resumed", now_ms=now)
 
     async def propose_viewport(
         self, *, session_id: str, viewport: Viewport, now_ms: int | None = None

@@ -82,6 +82,14 @@ def test_demonstrated_unreliability_suspends_an_owner_grant():
     assert recovered.effective_ceiling is AutonomyLevel.S4_STANDING_AUTHORITY
 
 
+@pytest.mark.parametrize("level", [AutonomyLevel.S0_RESPOND_ONLY, AutonomyLevel.S1_SUGGEST])
+def test_explicit_owner_ceiling_limits_even_a_reliable_domain(level):
+    trust = DomainTrust(domain="calendar", verified_successes=100, owner_granted_ceiling=level)
+    assert trust.earned_ceiling is AutonomyLevel.S2_PREPARE
+    assert trust.effective_ceiling is level
+    assert not trust.permits(ProactiveMissionType.OWNER_APPROVAL_REQUIRED)
+
+
 def test_autonomy_is_domain_specific():
     """§30 — competence in one place must not buy permission in another."""
     trusted = DomainTrust(domain="statements", verified_successes=20,
