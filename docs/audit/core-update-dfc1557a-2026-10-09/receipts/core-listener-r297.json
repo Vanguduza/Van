@@ -1,0 +1,10 @@
+{
+  "kind": "LIVE_CORE_GATEWAY_LISTENER_SCOPE",
+  "host": "van-trading-core",
+  "source_sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "process_pid": 3347293,
+  "gateway_listeners": [
+    "LISTEN 0      2048        127.0.0.1:8787       0.0.0.0:*    users:((\"python\",pid=3347293,fd=6))                      "
+  ],
+  "production_qualified": false
+}

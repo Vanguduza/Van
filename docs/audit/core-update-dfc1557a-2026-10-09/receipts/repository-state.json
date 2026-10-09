@@ -1,0 +1,28 @@
+{
+  "kind": "REPOSITORY_STATE_READBACK",
+  "checked_at": "2026-10-09T10:35:37.204759+00:00",
+  "repository": "Vanguduza/Van",
+  "application_source_sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "main_sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+  "prs": [
+    {
+      "number": 93,
+      "url": "https://github.com/Vanguduza/Van/pull/93",
+      "head": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+      "branch": "codex/van-canon-consolidation-2026-10-08",
+      "base": "main",
+      "state": "OPEN",
+      "draft": true
+    },
+    {
+      "number": 94,
+      "url": "https://github.com/Vanguduza/Van/pull/94",
+      "head": "296d647d8755b6036ddb6bc66a5526b78db07029",
+      "branch": "codex/van-project-truth-bootstrap-review-2026-10-09",
+      "base": "main",
+      "state": "OPEN",
+      "draft": true
+    }
+  ],
+  "merged_by_this_operation": false
+}

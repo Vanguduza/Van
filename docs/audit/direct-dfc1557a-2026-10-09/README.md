@@ -1,5 +1,9 @@
 # VAN direct continuation at dfc1557a — 9 October 2026
 
+## Later core source update
+
+The owner-authorized DIAL Admin update completed on 9 October at 10:24 UTC. VAN Trading Core now serves exact dfc1557a with schema 55. The earlier staged-only and old-active-runtime observations below are historical. See [the completed core update report and independent receipts](../core-update-dfc1557a-2026-10-09/README.md). Production qualification and physical execution remain pending.
+
 ## Outcome
 
 The confirmed application source remains **dfc1557ab99ad8d41cf84714e1bb671e89b045e6**. Direct Commander and owner-direct DIAL execution were available in this session. All five formerly skipped privileged firewall contracts now pass. The owned native Artemis subscription runtime has been rebound to verified files from this source, and the complete 826-case **native wireless** plan has been prepared.

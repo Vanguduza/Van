@@ -4,8 +4,8 @@
   "prior_evidence_sha": "c502cf7ab5c29b262719c4ed7eebf55ac3fe4647",
   "files": {
     "README.md": {
-      "bytes": 14508,
-      "sha256": "8d9aa5b0ef4b61b5b2733cd7605006c226cc64d055f3a81d256325dac4a86417"
+      "bytes": 14930,
+      "sha256": "85ec56f11048af487b27f743f0a929183fbb9bce933590bcc3cc227808713c7a"
     },
     "receipts/canon-direct-artemis-runtime-dfc1557a-r266.json": {
       "bytes": 2235,
@@ -70,5 +70,6 @@
   },
   "physical_cases_executed": 0,
   "production_qualified": false,
-  "new_audit_authorization": "UNCOVERED_REVIEW_WORK_NOT_TRUSTED_ADMISSION"
+  "new_audit_authorization": "UNCOVERED_REVIEW_WORK_NOT_TRUSTED_ADMISSION",
+  "later_core_update": "../core-update-dfc1557a-2026-10-09/README.md"
 }

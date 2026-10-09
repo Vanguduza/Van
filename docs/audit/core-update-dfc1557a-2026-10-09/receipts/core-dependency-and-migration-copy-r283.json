@@ -1,0 +1,23 @@
+{
+  "kind": "CORE_UPDATE_DEPENDENCY_AND_DATABASE_COPY_PREFLIGHT",
+  "expected_source": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "started_at": "2026-10-09T10:18:07.870221+00:00",
+  "requirements_sha256": "808e30cb3359c908597bab5fc49797a23bf1748d12831b6200f9505a005b40da",
+  "live_runtime_changed": false,
+  "live_database_changed": false,
+  "physical_cases_executed": 0,
+  "dependency_preparation": "PASS",
+  "migration_process_exit": 0,
+  "migration_copy": {
+    "old_schema": 30,
+    "new_schema": 55,
+    "expected_schema": 55,
+    "quick_check": "ok",
+    "original_table_count": 99,
+    "row_count_changes": [],
+    "legacy_value_changes": [],
+    "second_migration_idempotent": true
+  },
+  "outcome": "PREPARATION_PASS_REQUIRES_LIVE_CHECKPOINT",
+  "elapsed_seconds": 27.255
+}

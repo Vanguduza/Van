@@ -1,0 +1,44 @@
+{
+  "kind": "INDEPENDENT_LIVE_CORE_READBACK",
+  "checked_at": "2026-10-09T10:31:22.306025+00:00",
+  "host": "van-trading-core",
+  "expected_source": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "deployed_source": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "source_clean": true,
+  "runtime_files_verified": 632,
+  "runtime_python": "/home/ubuntu/.local/share/van/venvs/808e30cb3359c908597bab5fc49797a23bf1748d12831b6200f9505a005b40da/bin/python",
+  "requirements_sha256": "808e30cb3359c908597bab5fc49797a23bf1748d12831b6200f9505a005b40da",
+  "process": {
+    "pid": 3347293,
+    "cmdline_matches_expected": true,
+    "working_directory_matches_runtime": true,
+    "pythonpath_matches_runtime": true,
+    "active": "active",
+    "substate": "running",
+    "restart_count": 0,
+    "active_since": "Fri 2026-10-09 10:24:26 UTC"
+  },
+  "health": {
+    "authenticated_status": 200,
+    "without_ingress_token_status": 401,
+    "response_sha256": "4b182f852980f09342756e25e3dc5e6d5c06639b25cc595a225f0f2b2bf9d3e4",
+    "response_bytes": 3689
+  },
+  "database": {
+    "schema_version": 55,
+    "quick_check": "ok"
+  },
+  "configuration_files_unchanged": 2,
+  "configuration_bytes_unchanged": true,
+  "previous_runtime_source": "85ba485b2e375fcc777308492753a1a08c7f4307",
+  "checkpoint_exists": true,
+  "live_qualified": false,
+  "mtls_environment_switches": {},
+  "loopback_environment": {
+    "VAN_ALLOW_LOOPBACK_IN_PRODUCTION": "1"
+  },
+  "oracle_admin_used": false,
+  "hermes_engineering_queue_used": false,
+  "physical_cases_executed": 0,
+  "outcome": "LIVE_READBACK_PASS"
+}

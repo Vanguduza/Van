@@ -1,0 +1,30 @@
+{
+  "kind": "OWNER_DIRECT_CORE_SOURCE_UPDATE",
+  "expected_source": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "previous_source": "85ba485b2e375fcc777308492753a1a08c7f4307",
+  "started_at": "2026-10-09T10:24:21.545416+00:00",
+  "phase": "VERIFIED",
+  "runtime_updated": true,
+  "production_qualified": false,
+  "physical_cases_executed": 0,
+  "checkpoint_path": "/home/ubuntu/.local/share/van/checkpoints/pre-dfc1557a-r285",
+  "installer_exit_code": 0,
+  "outcome": "SOURCE_UPDATED_AND_HTTP_READY",
+  "deployed_source": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "source_clean": true,
+  "runtime_files_verified": 632,
+  "configuration_bytes_unchanged": true,
+  "database_schema_before": 30,
+  "database_schema_after": 55,
+  "database_quick_check": "ok",
+  "original_table_count": 99,
+  "original_table_row_count_reductions": [],
+  "unit": {
+    "MainPID": "3347293",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "previous_runtime_retained": true,
+  "owner_database_restored": false,
+  "elapsed_seconds": 9.508
+}

@@ -1,0 +1,34 @@
+{
+  "kind": "OWNER_DIRECT_CORE_UPDATE_EVIDENCE_MANIFEST",
+  "application_source_sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "parent_evidence_sha": "e25d03eb3d002c64f5d4af5c518151fc578b0810",
+  "files": {
+    "README.md": {
+      "bytes": 6282,
+      "sha256": "6671043fb85c9b6d8e247be670a14f36ab837aee9ea9eb8f161b66f55653a403"
+    },
+    "receipts/core-dependency-and-migration-copy-r283.json": {
+      "bytes": 786,
+      "sha256": "bd51d71d5fadc3f4f0c8117c7c868885e4fba9a6f3472f7e980a58fdcdf3ad1f"
+    },
+    "receipts/core-independent-readback-r293.json": {
+      "bytes": 1575,
+      "sha256": "59b687597b497edc62d00e3b67b85523e27f36fc50feb8594716070548412fb2"
+    },
+    "receipts/core-listener-r297.json": {
+      "bytes": 354,
+      "sha256": "7c9cf0942def37eaf69ef70c40cbdbed06eeb42bfe5bc5f402eabb4ac2939689"
+    },
+    "receipts/core-source-apply-r285.json": {
+      "bytes": 1035,
+      "sha256": "e562d8eef3aa72d8fce047402fb7f694ac5e741f869cabb2011553e8740c59f9"
+    },
+    "receipts/repository-state.json": {
+      "bytes": 866,
+      "sha256": "f40e0096ecb4283f483ae45f61e449dc1eebd2d54ff213ea8fd2568855ab7db1"
+    }
+  },
+  "production_qualified": false,
+  "physical_cases_executed": 0,
+  "publication_admission": "UNCOVERED_REVIEW_WORK_NOT_TRUSTED_ADMISSION"
+}
