@@ -1254,7 +1254,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1249",
+      "source": "backend/van_gateway/browser/api.py:1250",
       "summary": "Acquisition Evidence Verify",
       "tags": [
         "browser"
@@ -1309,7 +1309,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:912",
+      "source": "backend/van_gateway/browser/api.py:913",
       "summary": "Acquisition Item",
       "tags": [
         "browser"
@@ -1373,7 +1373,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1331",
+      "source": "backend/van_gateway/browser/api.py:1332",
       "summary": "Domain Skill Hot",
       "tags": [
         "browser"
@@ -1446,7 +1446,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1402",
+      "source": "backend/van_gateway/browser/api.py:1403",
       "summary": "List Escalations",
       "tags": [
         "browser"
@@ -2281,7 +2281,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1342",
+      "source": "backend/van_gateway/browser/api.py:1343",
       "summary": "Browser Policy",
       "tags": [
         "browser"
@@ -2309,7 +2309,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:865",
+      "source": "backend/van_gateway/browser/api.py:866",
       "summary": "Browser Status",
       "tags": [
         "browser"
@@ -2337,7 +2337,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1387",
+      "source": "backend/van_gateway/browser/api.py:1388",
       "summary": "List Tasks",
       "tags": [
         "browser"
@@ -2365,7 +2365,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1535",
+      "source": "backend/van_gateway/browser/api.py:1536",
       "summary": "Get Task",
       "tags": [
         "browser"
@@ -2413,7 +2413,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1371",
+      "source": "backend/van_gateway/browser/api.py:1372",
       "summary": "Task Evidence",
       "tags": [
         "browser"
@@ -12595,7 +12595,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:938",
+      "source": "backend/van_gateway/browser/api.py:939",
       "summary": "Acquisition Claim",
       "tags": [
         "browser"
@@ -12659,7 +12659,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:924",
+      "source": "backend/van_gateway/browser/api.py:925",
       "summary": "Acquisition Enqueue",
       "tags": [
         "browser"
@@ -12723,7 +12723,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1002",
+      "source": "backend/van_gateway/browser/api.py:1003",
       "summary": "Acquisition Checkpoint",
       "tags": [
         "browser"
@@ -12796,7 +12796,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1016",
+      "source": "backend/van_gateway/browser/api.py:1017",
       "summary": "Acquisition Complete",
       "tags": [
         "browser"
@@ -12869,7 +12869,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1225",
+      "source": "backend/van_gateway/browser/api.py:1226",
       "summary": "Acquisition Evidence Record",
       "tags": [
         "browser"
@@ -12942,7 +12942,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1046",
+      "source": "backend/van_gateway/browser/api.py:1047",
       "summary": "Acquisition Execute",
       "tags": [
         "browser"
@@ -13015,7 +13015,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1030",
+      "source": "backend/van_gateway/browser/api.py:1031",
       "summary": "Acquisition Fail",
       "tags": [
         "browser"
@@ -13088,7 +13088,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:964",
+      "source": "backend/van_gateway/browser/api.py:965",
       "summary": "Acquisition Renew",
       "tags": [
         "browser"
@@ -13161,7 +13161,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:978",
+      "source": "backend/van_gateway/browser/api.py:979",
       "summary": "Acquisition Route",
       "tags": [
         "browser"
@@ -13234,7 +13234,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:950",
+      "source": "backend/van_gateway/browser/api.py:951",
       "summary": "Acquisition Start",
       "tags": [
         "browser"
@@ -13307,7 +13307,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1256",
+      "source": "backend/van_gateway/browser/api.py:1257",
       "summary": "Acquisition Telemetry Record",
       "tags": [
         "browser"
@@ -13380,7 +13380,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1272",
+      "source": "backend/van_gateway/browser/api.py:1273",
       "summary": "Domain Skill Propose",
       "tags": [
         "browser"
@@ -13444,7 +13444,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1301",
+      "source": "backend/van_gateway/browser/api.py:1302",
       "summary": "Domain Skill Canary",
       "tags": [
         "browser"
@@ -13517,7 +13517,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1285",
+      "source": "backend/van_gateway/browser/api.py:1286",
       "summary": "Domain Skill Qualify",
       "tags": [
         "browser"
@@ -13590,7 +13590,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1317",
+      "source": "backend/van_gateway/browser/api.py:1318",
       "summary": "Domain Skill Quarantine",
       "tags": [
         "browser"
@@ -13777,7 +13777,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1608",
+      "source": "backend/van_gateway/browser/api.py:1609",
       "summary": "Run Assignment",
       "tags": [
         "browser"
@@ -15122,7 +15122,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1455",
+      "source": "backend/van_gateway/browser/api.py:1456",
       "summary": "Acquire Lease",
       "tags": [
         "browser"
@@ -15186,7 +15186,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1471",
+      "source": "backend/van_gateway/browser/api.py:1472",
       "summary": "Release Lease",
       "tags": [
         "browser"
@@ -15250,7 +15250,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1442",
+      "source": "backend/van_gateway/browser/api.py:1443",
       "summary": "Register Profile",
       "tags": [
         "browser"
@@ -15889,7 +15889,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1497",
+      "source": "backend/van_gateway/browser/api.py:1498",
       "summary": "Create Task",
       "tags": [
         "browser"
@@ -15953,7 +15953,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1571",
+      "source": "backend/van_gateway/browser/api.py:1572",
       "summary": "Complete Task",
       "tags": [
         "browser"
@@ -16026,7 +16026,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/browser/api.py:1553",
+      "source": "backend/van_gateway/browser/api.py:1554",
       "summary": "Seal Evidence",
       "tags": [
         "browser"

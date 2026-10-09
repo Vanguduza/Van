@@ -20800,7 +20800,7 @@
                 "file": "backend/van_gateway/automation/worker_runtime.py",
                 "line": 164,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "b9321ebdfe5bc03594c220c55ecdca608421cd2ff435d90625afe58da9a0df92"
+                "sha256": "8f321eb480e66bc4388adf147b336ec829e2f7b453a741a18d163c87a06ff990"
               },
               {
                 "file": "backend/van_gateway/automation/standing_runner.py",
@@ -20893,7 +20893,7 @@
                 "file": "backend/van_gateway/automation/worker_runtime.py",
                 "line": 164,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "b9321ebdfe5bc03594c220c55ecdca608421cd2ff435d90625afe58da9a0df92",
+                "sha256": "8f321eb480e66bc4388adf147b336ec829e2f7b453a741a18d163c87a06ff990",
                 "review_scope": "Reviewed current production entry."
               }
             ],
@@ -21055,7 +21055,7 @@
           "registration": "DEFAULT",
           "device_proof_required_when_bound": false,
           "frontend_access": "DIRECT_OWNER_ROUTE",
-          "source_ref": "backend/van_gateway/browser/api.py:865",
+          "source_ref": "backend/van_gateway/browser/api.py:866",
           "client_function": "browserStatus",
           "client_symbol": "browserStatus",
           "client_namespace": "VanGatewayClient",
@@ -21112,7 +21112,7 @@
           "registration": "DEFAULT",
           "device_proof_required_when_bound": false,
           "frontend_access": "DIRECT_OWNER_ROUTE",
-          "source_ref": "backend/van_gateway/browser/api.py:1342",
+          "source_ref": "backend/van_gateway/browser/api.py:1343",
           "client_function": "browserPolicy",
           "client_symbol": "browserPolicy",
           "client_namespace": "VanGatewayClient",
@@ -21169,7 +21169,7 @@
           "registration": "DEFAULT",
           "device_proof_required_when_bound": false,
           "frontend_access": "DIRECT_OWNER_ROUTE",
-          "source_ref": "backend/van_gateway/browser/api.py:1387",
+          "source_ref": "backend/van_gateway/browser/api.py:1388",
           "client_function": "browserTasks",
           "client_symbol": "browserTasks",
           "client_namespace": "VanGatewayClient",
@@ -21226,7 +21226,7 @@
           "registration": "DEFAULT",
           "device_proof_required_when_bound": false,
           "frontend_access": "DIRECT_OWNER_ROUTE",
-          "source_ref": "backend/van_gateway/browser/api.py:1535",
+          "source_ref": "backend/van_gateway/browser/api.py:1536",
           "client_citations": [],
           "android_callsites": [],
           "client_source_status": "no_exact_android_client_mapping",
@@ -21240,7 +21240,7 @@
           "registration": "DEFAULT",
           "device_proof_required_when_bound": false,
           "frontend_access": "DIRECT_OWNER_ROUTE",
-          "source_ref": "backend/van_gateway/browser/api.py:1371",
+          "source_ref": "backend/van_gateway/browser/api.py:1372",
           "client_function": "browserEvidence",
           "client_symbol": "browserEvidence",
           "client_namespace": "VanGatewayClient",
@@ -21281,7 +21281,7 @@
           "registration": "DEFAULT",
           "device_proof_required_when_bound": false,
           "frontend_access": "DIRECT_OWNER_ROUTE",
-          "source_ref": "backend/van_gateway/browser/api.py:1402",
+          "source_ref": "backend/van_gateway/browser/api.py:1403",
           "client_function": "browserEscalations",
           "client_symbol": "browserEscalations",
           "client_namespace": "VanGatewayClient",
@@ -44928,7 +44928,7 @@
     "android_receipt": null,
     "android_receipt_sha256": null,
     "scope": "Reviewed owner contracts and current source declarations; final build/integration and live acceptance remain separate.",
-    "source_review_manifest_sha256": "71edc92ec546b96d1e0367f53194db0bf75f7d2d1d7c0c7e86198f5d17830e2b"
+    "source_review_manifest_sha256": "76668e395b3ddd191f214db489bfa24a94a9f43668ecb8edeff4f5e42af62eec"
   },
   "functional_wiring_status_semantics": {
     "SOURCE_WIRED_REQUIRES_ACCEPTANCE": "Supported source producer/consumer path is reviewed; stated provider, deployment, visual or physical acceptance remains required.",
