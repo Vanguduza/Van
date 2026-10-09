@@ -1,0 +1,25 @@
+{
+  "changed_inputs": [],
+  "counts": {
+    "cases": 18,
+    "errors": 0,
+    "failed": 0,
+    "passed": 18,
+    "skipped": 0
+  },
+  "elapsed_seconds": 1.648,
+  "exit_code": 0,
+  "failed_cases": [],
+  "handset_cases_executed": 0,
+  "inputs_sha256": "e9a0ae2d5f1e1df3dc33064ae547bdaf3b544191cada5a7fd30502b518bca456",
+  "junit_sha256": "7f6acab0cdba9a0f1294164e969a918c83c21d4af4e4f26cb96a03c0d16be00c",
+  "live_production_qualified": false,
+  "log_sha256": "d9a82479d6ea58ade6ce32e4f38361b69cb6c62dfc4d0037772d48b3e2f611bb",
+  "private_short_tmp_removed": true,
+  "qualified": true,
+  "recorded_at_utc": "2026-10-09T07:01:07.740851+00:00",
+  "revision": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "schema_version": 1,
+  "skipped_cases": [],
+  "suite": "trading-affected-parser-consumers"
+}

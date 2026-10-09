@@ -1,0 +1,44 @@
+{
+  "record_kind": "CURRENT_CLOUD_RUNTIME_CAPABILITY_OBSERVATION",
+  "measured_at_utc": "2026-10-09 06:51:43 UTC",
+  "runtime": {
+    "environment_id": "ccarenv_b64_Y2NhcmVudl82YzFiZTg5NTM1ZDQ4MTkxODVhYzgxN2E2ZDYyMmUwOA",
+    "source_config_id": "7fe355d1-d734-4ad7-9bd4-954e1ee610c7~cecfg_6ac5f12cebd881908a3b99d3cfb42d37",
+    "source_config_version_id": "7fe355d1-d734-4ad7-9bd4-954e1ee610c7~cecfgver_6ac5f12cec888190bd2abfa96a1ffcf2",
+    "spec_revision": "2",
+    "observed_spec_revision": "2",
+    "observations_current": true,
+    "provider": "cloud",
+    "desired_phase": "running",
+    "observed_phase": "running",
+    "failure": null,
+    "connectivity": "connected",
+    "network_policy": {
+      "mode": "unrestricted",
+      "state": "unknown"
+    },
+    "capabilities": [],
+    "secrets": [],
+    "runtime_variables": [
+      {
+        "environment_variable": "ANDROID_HOME",
+        "optional": false,
+        "state": "unknown"
+      },
+      {
+        "environment_variable": "ANDROID_USER_HOME",
+        "optional": false,
+        "state": "unknown"
+      }
+    ],
+    "outbound_identities": []
+  },
+  "matching_callable_tools": [],
+  "actual_native_artemis_schema_discovery": false,
+  "actual_host_execution": false,
+  "physical_cases_executed": 0,
+  "limits": [
+    "Tool availability and managed runtime configuration are current observations. They do not challenge or verify the owner's separate DIAL admin authentication.",
+    "An external report that Commander is online does not expose that connector's tools in this cloud chat."
+  ]
+}

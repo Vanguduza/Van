@@ -1,0 +1,274 @@
+{
+  "anticipated_runtime_skips_are_not_final_run_outcomes": true,
+  "changed_existing_source_binding_paths": [
+    "android/app/build.gradle.kts",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl"
+  ],
+  "checklist_path": "/workspace/van-audit/VAN_PRE_PHONE_CANARY_CHECKLIST_DFC1557A_2026-10-09.md",
+  "checklist_sha256": "4fff9a551072fb17a6febfe77375a39a5aef23bfce099f68324c8779b16dd7ca",
+  "current_corrected_freeze_pending": false,
+  "existing_skip_call_count": 16,
+  "existing_skip_calls": [
+    {
+      "call": "pytest.mark.skipif(not kit.chromium_available() or not Path(OPENSSL).is_file() or ADDRESS is None, reason='needs the pinned Chromium, openssl and a local non-loopback address')",
+      "line": 240,
+      "path": "backend/tests/test_browser_canary_origin.py"
+    },
+    {
+      "call": "pytest.mark.skipif(not kit.chromium_available() or not Path('/usr/bin/openssl').is_file(), reason='needs the pinned Chromium and openssl')",
+      "line": 49,
+      "path": "backend/tests/test_browser_egress_proxy.py"
+    },
+    {
+      "call": "pytest.mark.skipif(not Path('/usr/bin/openssl').is_file(), reason='needs openssl')",
+      "line": 33,
+      "path": "backend/tests/test_browser_egress_proxy_i8.py"
+    },
+    {
+      "call": "pytest.mark.skipif(os.geteuid() != 0 or not shutil.which('setpriv'), reason='needs root and setpriv')",
+      "line": 227,
+      "path": "backend/tests/test_browser_egress_proxy_i8.py"
+    },
+    {
+      "call": "pytest.mark.skipif(not Path('/usr/bin/openssl').is_file(), reason='needs openssl')",
+      "line": 27,
+      "path": "backend/tests/test_browser_egress_proxy_i9.py"
+    },
+    {
+      "call": "pytest.mark.skipif(not kit.chromium_available() or not Path('/usr/bin/openssl').is_file(), reason='needs the pinned Chromium and openssl')",
+      "line": 43,
+      "path": "backend/tests/test_browser_guard_lost_regression.py"
+    },
+    {
+      "call": "pytest.mark.skipif(not kit.chromium_available() or not Path('/usr/bin/openssl').is_file(), reason='needs the pinned Chromium and openssl')",
+      "line": 48,
+      "path": "backend/tests/test_browser_late_block_callers.py"
+    },
+    {
+      "call": "pytest.mark.skipif(not kit.chromium_available(), reason='no Chromium for the network-effect guard')",
+      "line": 46,
+      "path": "backend/tests/test_browser_network_effect_guard.py"
+    },
+    {
+      "call": "pytest.mark.skipif(not kit.chromium_available(), reason='no Chromium for the network-effect guard')",
+      "line": 34,
+      "path": "backend/tests/test_browser_network_guard_lease.py"
+    },
+    {
+      "call": "pytest.skip('no Chromium/Playwright available')",
+      "line": 104,
+      "path": "backend/tests/test_browser_review_i5_task_scope.py"
+    },
+    {
+      "call": "pytest.skip('no Chromium/Playwright available')",
+      "line": 106,
+      "path": "backend/tests/test_browser_review_i6_scope.py"
+    },
+    {
+      "call": "pytest.mark.skipif(not PKI.is_file(), reason='pki script absent')",
+      "line": 178,
+      "path": "backend/tests/test_credential_expiry_and_rotation.py"
+    },
+    {
+      "call": "pytest.mark.skipif(not PKI.is_file(), reason='pki script absent')",
+      "line": 198,
+      "path": "backend/tests/test_credential_expiry_and_rotation.py"
+    },
+    {
+      "call": "pytest.skip('no Chromium/Playwright available for the real-browser element test')",
+      "line": 429,
+      "path": "backend/tests/test_harness_elements.py"
+    },
+    {
+      "call": "pytest.skip('DDS checkout not present; blob hashes pinned above')",
+      "line": 178,
+      "path": "backend/tests/test_jev_browser_eligibility.py"
+    },
+    {
+      "call": "pytest.skip('member of the B1 closed set by definition')",
+      "line": 76,
+      "path": "backend/tests/test_jev_no_generic_executor.py"
+    }
+  ],
+  "final_backend_basetemp": "/tmp/vbf-dfc1557a",
+  "final_backend_input_file_count": 4015,
+  "final_backend_inputs_path": "/workspace/van-audit/canon-corrected-backend-full-dfc1557a-2026-10-09-inputs.json",
+  "final_backend_inputs_sha256": "62f573dd65c90e728401fc2e7a2273dd298c6342feefac7cf4f76c0f1419f81f",
+  "final_backend_outcome_status": "PENDING",
+  "final_backend_outcomes_pending": true,
+  "final_backend_receipt_prefix": "/workspace/van-audit/canon-corrected-backend-full-dfc1557a-2026-10-09",
+  "final_backend_terminal_outcomes": null,
+  "final_browser_runtime_corrections": {
+    "new_real_chromium_regression_file": "backend/tests/test_harness_pseudo_hit_ownership.py",
+    "new_regression_adds_environment_skips": false,
+    "new_regression_case_count": 17,
+    "new_regression_file_sha256": "d7f82ce7718b2fe6ea6ab7dd83c2fe1bf436e7558a256c856c3fd6e5aef528b5",
+    "pseudo_hit_ownership": "Fresh exact direct before/after CDP ownership only; foreign overlay and nested control hits retain rejection",
+    "shared_url_parser": "Preserve encoded nondot segments to match Chromium; ambiguous encoded delimiters remain refused"
+  },
+  "handset_execution_route": {
+    "adapter_route": "NATIVE_ARTEMIS_MCP_DIRECT_COMMANDER",
+    "device_transport": "WIRELESS_ADB",
+    "executor_host": "dial-control",
+    "requires_current_paired_private_endpoint": true,
+    "usb_or_windows_prerequisite": false
+  },
+  "handset_tests_executed": 0,
+  "host_calls_executed": 0,
+  "input_file_count": 68,
+  "input_files": {
+    ".github/workflows/van-owner-release.yml": "968c7876a9806411bd2b675ee0f77847ec386c047f4927ba358529aeeb17ce15",
+    "android/app/build.gradle.kts": "af2f96c4c0008c623ba4840446234aa76ef1c3647a87425d7f591860b2643c58",
+    "android/tools/package_voice_assets.py": "2d33fccb7a6a926468733561840f767cf3c5a5c7b606d9675cd9cb9f4ccf5794",
+    "android/voice/voice_asset_manifest.json": "7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30",
+    "backend/tests/fixtures/task_scope/url_vectors.v1.json": "28ec605233db9958f90ef6339724bb4bf476534d855fac35bd800aba7657ce18",
+    "backend/tests/test_browser_canary_origin.py": "8143c31118c26c341f3913e8cf6064fe2e7853028b741b037916a93c7199e81c",
+    "backend/tests/test_browser_egress_proxy.py": "727f6dc73b55d84d4e8a142e64733044d4175e858aca21cb6bdb479326a930ab",
+    "backend/tests/test_browser_egress_proxy_i8.py": "f83c71d8f3e479b9b44687cff7a48bfb77795c9f9f47cc5e29b62d1a393ac9a3",
+    "backend/tests/test_browser_egress_proxy_i9.py": "fadffb123486321640f3f34222ad2bb995a57b60094deb49cc715c8c9752077f",
+    "backend/tests/test_browser_guard_lost_regression.py": "7198d5baee78e15415e706bfd3156db2c10d04dace91ad7d8bf131c719a6dbb3",
+    "backend/tests/test_browser_late_block_callers.py": "29f472727b8747d0bf2ef80e751cb1f458631a166a02bf988d15b19ebed335f9",
+    "backend/tests/test_browser_network_effect_guard.py": "c7d33f084324a6170870c43e7156a7bc0b8bf101f6c4a2254c78fb896ebc3e6c",
+    "backend/tests/test_browser_network_guard_lease.py": "dea4993fea282096ae2b8685a7e9386fa8c8bc92d0ddd8e63f4091064007c368",
+    "backend/tests/test_browser_review_i5_task_scope.py": "092641283a24ea3a87c2b4a7788a3a9434ce392593e6e5f63723365fbe0fd647",
+    "backend/tests/test_browser_review_i6_scope.py": "36cbf8c99d9c85adcec5e7b757a8e4b8f5bd197f5dbe1a6aea1710a1624eadd4",
+    "backend/tests/test_credential_expiry_and_rotation.py": "921f559ede26cfd8c875b5157021023cb8d25c8e0e82c937a79bf0dff2bfacf6",
+    "backend/tests/test_harness_elements.py": "3fffbd1ba46fdc48e0ed43ae58947802f51da64b8e70c56ba1edca0787f2a1d0",
+    "backend/tests/test_harness_pseudo_hit_ownership.py": "d7f82ce7718b2fe6ea6ab7dd83c2fe1bf436e7558a256c856c3fd6e5aef528b5",
+    "backend/tests/test_jev_browser_eligibility.py": "62a2c658529c5f0dfd0b05b2613dfc775b3445733369e34ae767f30aa08488be",
+    "backend/tests/test_jev_no_generic_executor.py": "1c068cbd999812350fb61139b2523e27ef19df72b1fe8c58dd5a38d98f239081",
+    "backend/van_gateway/browser/artifact_admission.py": "05a33953a6e7bba050eed0edaf34a28f2b427dbc2acd0e86faa52bae718cdb93",
+    "backend/van_gateway/browser/artifact_provider.py": "cb57834cd3db9091bdaf4a2fd7f2d1ad2c7ebab565b5bbe6d0896d56ae9cb091",
+    "backend/van_gateway/browser/task_scope.py": "692b76d358c3423413bcbfdc39d410e4bc345717129de7cd1db2e4eeb5a92800",
+    "backend/van_gateway/capability/readiness.py": "8ac34e98f56b97558a11dcafccf6550f8cd7fe926558085afea71c0163100d49",
+    "backend/van_gateway/google/mesh.py": "40a96b730ca461a42bbe51fed44b8b3f51cf4ac216a5926f8ad7a5540e51391a",
+    "backend/van_gateway/google/planes.py": "0d31c2187028a7d23e064eba139d1cbfd38561f5b3d420b9a29004da76620443",
+    "backend/van_gateway/google/service.py": "fe7150002185f86fddce456799167666fa475acc2c464e440f5e5f0b17651eaa",
+    "backend/van_gateway/hermes/bridge.py": "6cfa5adadb288af5130e8c867fd6375c1fa3be34028c15954911a1f4e23774c0",
+    "backend/van_gateway/knowledge/service.py": "bb75670b2d3a89daeb07971750c4e9effd0391cb9b342a2efc53984c181df2be",
+    "backend/van_gateway/knowledge/vekl.py": "6b114d9a1e60b485b7facffca60ce2c11328ce153b971983c25da42ad89301ba",
+    "backend/van_gateway/research/exa.py": "073fc3bd3bb4c0ab317071690f992d670bb922b28499caf0860d3c4b9a6daa84",
+    "backend/van_gateway/runtime_api.py": "4b902fb047df93d17b3fe7e1353b6fd4c5930caed2dce2de39306da11bccbec6",
+    "deploy/van-browser-core/browser/egress_proxy.py": "ae8de217cb3ea2ac49e5703a39653e26986480fb8a651945c857e7da77493dbe",
+    "deploy/van-browser-core/browser/guard_canary.py": "2294bedfda354b7669d2dfe5249e847ee25be5cabafca3ab5c267e6cfd53f320",
+    "deploy/van-browser-core/browser/harness_service.py": "8468a3fb849ce989d26f9a6b09ff35b37dbc1e035af405501b8d47c7d109bff5",
+    "deploy/van-browser-core/qualify.sh": "8208a494c26f5dce2ceadacd1d775ac7638642d3a86f71f3a55f3d550dc264b3",
+    "deploy/van-browser-stream/install_profiles.py": "1fd2d9e122da3c56d32d1911166aab3170855c0477926c7808e5512533d8a232",
+    "deploy/van-browser-stream/prepare_profiles.py": "eab7da5734d61f109cec77019f0a504984cf82acdc0b6d00429f2e6fd0302890",
+    "deploy/van-browser-stream/qualify.sh": "5ce5470429296d1ed848a31f35d590ccd715fd13abb785899141b930ac449fc9",
+    "deploy/van-browser-stream/qualify_chromium.py": "0b0f2ca4651c35d1f197234d89774d797dc199bb0a9cfc9c7ed3b44073e3fdee",
+    "deploy/van-browser-stream/qualify_tls.py": "ff9bdb0350588611e3fb48e9e72b3eeeb5e9484302638e36d5fc14cab27596b8",
+    "deploy/van-browser-stream/systemd/van-browser-chromium@.service": "558dab7192145e729d13e72240992542bc5b184baa743a0cc1db8dbb1ee8142e",
+    "deploy/van-browser-stream/systemd/van-browser-egress-proxy@.service": "8b586a5b504504ec1e43b5cdb26fd59d74e7a8eb8a7c8c3ec901a34d6d8719a1",
+    "deploy/van-computer-worker/qualify.sh": "a5a20c0a27db193a4f559e81508ece45626d83884c31c38411933226486144c8",
+    "deploy/van-owner-core/README.md": "5e1f4287beaccaff01044f697df61e8688cf07ad7640a8a915246ff5c631ec37",
+    "deploy/van-owner-core/profile.example.json": "0718be05eb0ce9b46cd4aa46959321a3e827241cb14a7946f91e042c41cc5d04",
+    "deploy/van-trading-core/automation/qualify-automation-runtime.sh": "ab07a7984fa55314b5863656c50cd72142249bbd358a9f5009434f220eef9f0c",
+    "deploy/van-trading-core/muse/qualify-muse-egress.sh": "53f740768417c87e1f99e82ccf7142abc969e5f4686534e710d7071f38952a37",
+    "deploy/van-trading-core/qualify.sh": "0aa31141da5cb5facdff6c0c17bbbdbd88137726ee0856b304ebecf90b2782ff",
+    "deploy/van-trading-core/supabase/qualify-supabase-runtime.sh": "7dd9b6fd8fe76dc6f35343eadb073b5af99b31b3d0bf16f06e74d68b0018052a",
+    "docs/decisions/VAN-ADOPT-BROWSER-HARNESS-001.yaml": "f9fca66df2023544f4cb22be384fa141afb7d2ddce2598cf646d79ca67d1e70a",
+    "docs/decisions/VAN-ADOPT-N8N-001.yaml": "e730a69bd087e8d1afeae6326e1947c0711b614967bcbd28b9e137f85fdd8c13",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl": "7c9ce9b7714ea1dd538f8a2018da50e4ce745336b1ef2d7b9e85d174954b7bfc",
+    "registries/capabilities.json": "6f6feeaf60442264074b378c243ada6abecbcb2cb8418ccc0827943d5389d30d",
+    "tests/contracts/test_task_scope_shared_url_rule.py": "a314f24442f6f6fb4e25590ef47fecfce8c024670965e87f9dcf2583ac0ec49b",
+    "tools/certification/artemis_acceptance.py": "3360686f0c1f6c1497a232050ca2f6268fde64c8a81df61787da9a6ccf1b4f5e",
+    "tools/certification/device_cert_probe.py": "646d267381235239e112fc77ffd6127eef684a3ea1d0bfb01ea916aa7a35cf4e",
+    "tools/certification/openmuse_van_convergence.py": "cd3630a2bf31bdded927fddbb592672308f638999fef6475385a36887955a12f",
+    "tools/certification/pre_phone_host_acceptance.py": "a6185543eee4b0928f68ea6e262ebbacb9807e6f11b13b44dd35e71fbd4fdf93",
+    "tools/certification/run_live_acceptance.py": "95203b97b4b045c60c3b3cc4441d18680b658b2e1ed82a98916a05e2ef744e92",
+    "tools/cognitive/qualify_glimmer.py": "bdd2f2d85c48673fadbac28e12a4062647c0b0d3cb3538f2ccac5627d1c74b4b",
+    "tools/provisioning/provision_owner_device.py": "1ce01cc8addd9c28a32d9e7d2598f19becef5023a7b2f849d07c2f989be67a49",
+    "tools/release/owner_release.py": "b9fae0ca6bb953618297f3854b477fca95334a86d012c0bcf6852487692eedfa",
+    "tools/runtime/owner_core_firewall_policy.py": "0515faff8af1cc73764d57193089883ac1cc7f10307f8d1eaac3393087ca3d86",
+    "tools/runtime/owner_core_network_observations.py": "02b290b8e8ad32f57fc4cab6ee419fc8614b2d50bf0273c0a78771cb75b164a8",
+    "tools/runtime/preflight_owner_core.py": "2634fe40fcaeef2a3b8d136b42910cb799e4e67ad3559b6bfc3beaaa268cc82d",
+    "tools/runtime/prepare_owner_core_deployment.py": "a70e2d779811cb67b53639cd076419829a653f4bb77a5ce1f5acec6e9e3912b4",
+    "tools/runtime/qualify_gateway_host.sh": "d70cd26401049455185380b39ceb26459e70108f7786488e9ff501c1c17bf978"
+  },
+  "intentional_b1_closed_set_skip_parameters": [
+    "click",
+    "scroll",
+    "select"
+  ],
+  "new_source_binding_paths": [
+    "backend/tests/test_harness_pseudo_hit_ownership.py",
+    "backend/van_gateway/browser/task_scope.py",
+    "backend/tests/fixtures/task_scope/url_vectors.v1.json",
+    "deploy/van-browser-core/browser/egress_proxy.py",
+    "deploy/van-browser-core/browser/harness_service.py",
+    "tests/contracts/test_task_scope_shared_url_rule.py"
+  ],
+  "observed_environment": {
+    "non_loopback_interface_present": true,
+    "openssl_present": true,
+    "selected_chromium_present": true,
+    "setpriv_present": true,
+    "uid": 1000,
+    "upstream_historical_dds_default_checkout_present": false
+  },
+  "observed_environment_are_prior_local_executor_observations": true,
+  "observed_environment_origin_inventory": "/workspace/van-audit/van-pre-phone-canary-source-and-skip-inventory-805f3b67-2026-10-09.json",
+  "physical_identity": {
+    "adb_descriptor_is_not_physical_identity": true,
+    "admitted_hardware_serial": "RFCX2054F5W",
+    "required_raw_ro_product_model": "SM-S928B"
+  },
+  "pre_phone_ready_claimed": false,
+  "previous_diagnostic_checklist_path": "/workspace/van-audit/VAN_PRE_PHONE_CANARY_CHECKLIST_805F3B67_2026-10-09.md",
+  "previous_diagnostic_checklist_sha256": "0c9976db98c1bf8ac2c845748d4958324ad5c1a5b7fcd3a5d6a9973057bf583d",
+  "previous_diagnostic_inventory_path": "/workspace/van-audit/van-pre-phone-canary-source-and-skip-inventory-805f3b67-2026-10-09.json",
+  "previous_diagnostic_inventory_sha256": "bd19e5191e4c8ba2713666ae13f35a3ac60ed4597236f7414b2d715bc1ed7fc7",
+  "previous_immutable_receipts_unchanged": true,
+  "prior_805f_backend_evidence": {
+    "complete_run": true,
+    "counts": {
+      "collected_junit_testcases": 5107,
+      "errors": 0,
+      "expected_failure": 0,
+      "failed": 2,
+      "junit_records_without_failure_error_or_skip": 5100,
+      "passed": 5100,
+      "skipped": 5
+    },
+    "exit_code": 1,
+    "failure_cases": [
+      {
+        "classname": "tests.test_browser_review_i5_task_scope",
+        "name": "test_major5_image_and_css_names_are_text_and_empty_names_are_a4"
+      },
+      {
+        "classname": "tests.test_browser_review_i6_scope",
+        "name": "test_m3_vectors_match_real_chromiums_whatwg_parser"
+      }
+    ],
+    "failures_corrected_in_final_source": true,
+    "installed_dependencies_unchanged": true,
+    "qualified_as_full_backend_pass": false,
+    "receipt_path": "/workspace/van-audit/canon-corrected-backend-full-805f3b67-2026-10-09-result.json",
+    "receipt_sha256": "0ce28568fa5242edc33946ffb583215892a7147c80cc88df8b915c260de42788",
+    "revision": "805f3b67c2b9eb68d887cd700f9443f476e26132",
+    "source_unchanged": true,
+    "status": "COMPLETE_DIAGNOSTIC_WITH_FAILURES",
+    "terminal_pytest_outcomes": {
+      "failed": 2,
+      "passed": 5100,
+      "skipped": 5
+    }
+  },
+  "prior_8d_backend_evidence": "Interrupted runner-environment diagnostic only; AF_UNIX path too long. No complete pass.",
+  "product_placement": {
+    "backend_host": "van-trading-core",
+    "hermes_host": "van-trading-core",
+    "ingress_host": "van-trading-core"
+  },
+  "production_deployed": false,
+  "provider_calls_executed": 0,
+  "recorded_at_utc": "2026-10-09T07:07:53.741136+00:00",
+  "reviewed_revision": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "schema_version": 1,
+  "skip_inventory_method": "Python AST Call locations over every backend/tests/**/*.py in the final clean checkout",
+  "source_checkout": "/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09",
+  "source_hashes_unchanged_during_inventory_refresh": true,
+  "source_status_after": ""
+}

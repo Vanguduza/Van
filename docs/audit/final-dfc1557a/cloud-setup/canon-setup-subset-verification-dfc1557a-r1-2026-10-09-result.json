@@ -1,0 +1,202 @@
+{
+  "after_snapshot": "/workspace/.onboarding/canon-setup-subset-verification-dfc1557a-r1-2026-10-09-after.json",
+  "after_snapshot_sha256": "63832b880644256c0eaee3e38678cabbf2cf232ecda4a0504a9479c706afef1a",
+  "before_snapshot": "/workspace/.onboarding/canon-setup-subset-verification-dfc1557a-r1-2026-10-09-before.json",
+  "before_snapshot_sha256": "63832b880644256c0eaee3e38678cabbf2cf232ecda4a0504a9479c706afef1a",
+  "changed_snapshot_fields": [],
+  "changed_source_files": [],
+  "checks": [
+    {
+      "argv": [
+        "python3",
+        "-c",
+        "import platform,sys\nif sys.version_info[:2] != (3,12) or platform.system() != 'Linux' or platform.machine() != 'x86_64':\n    raise RuntimeError('The measured browser wheel lock requires CPython 3.12 Linux x86_64; qualify another platform separately')"
+      ],
+      "label": "PLATFORM_CHECK",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "/workspace/van-audit/canon-backend-venv-2026-10-09/bin/python",
+        "-c",
+        "from importlib import metadata\nfrom pathlib import Path\nimport os,re\nrows=(Path(os.environ['VAN_CANON_ROOT'])/'backend/requirements.lock').read_text().splitlines()+['Pillow==11.3.0']\nfor line in rows:\n    if not line.strip() or line.lstrip().startswith('#'): continue\n    match=re.fullmatch(r'([A-Za-z0-9_.-]+)==([^\\s]+)',line.strip())\n    if match is None: raise RuntimeError('Backend lock must remain fully exact pinned')\n    if metadata.version(match[1]) != match[2]: raise RuntimeError('Installed backend version differs: '+match[1])"
+      ],
+      "label": "BACKEND_VERSIONS",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "/workspace/van-browser-runtime-venv/bin/python",
+        "-c",
+        "from importlib import metadata\nfrom pathlib import Path\nimport os,re\nrows=(Path(os.environ['VAN_CANON_ROOT'])/'deploy/van-browser-stream/requirements.lock').read_text().splitlines()\nrows+=['pytest==8.3.5','pytest-asyncio==0.24.0','iniconfig==2.3.1','packaging==26.3','pluggy==1.6.0']\nfor line in rows:\n    if not line.strip() or line.lstrip().startswith('#'): continue\n    match=re.match(r'([A-Za-z0-9_.-]+)==([^\\s]+)',line.strip())\n    if match is None: raise RuntimeError('Browser lock must remain exact pinned')\n    if metadata.version(match[1]) != match[2]: raise RuntimeError('Installed browser version differs: '+match[1])"
+      ],
+      "label": "BROWSER_VERSIONS",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-c",
+        "from pathlib import Path\nimport hashlib, os, subprocess, tempfile, urllib.request, zipfile\nbase=Path('/workspace/.onboarding')\ndef checked(path,digest,size=None):\n    if not path.is_file() or (size is not None and path.stat().st_size!=size): return False\n    with path.open('rb') as stream: return hashlib.file_digest(stream,'sha256').hexdigest()==digest\ndef fetch(url,path,digest,size=None):\n    if checked(path,digest,size): return\n    pending=path.with_suffix(path.suffix+'.canon-pending')\n    try:\n        with urllib.request.urlopen(url,timeout=60) as source, pending.open('wb') as target:\n            while block:=source.read(1024*1024): target.write(block)\n        if not checked(pending,digest,size): raise RuntimeError('Downloaded tool differs from its qualified digest: '+path.name)\n        pending.replace(path)\n    finally: pending.unlink(missing_ok=True)\ngradle=base/'gradle-8.11.1'\nif not (gradle/'bin/gradle').is_file():\n    archive=base/'gradle.zip'\n    fetch('https://services.gradle.org/distributions/gradle-8.11.1-bin.zip',archive,'f397b287023acdba1e9f6fc5ea72d22dd63669d59ed4a289a29b1a76eee151c6',136920070)\n    with zipfile.ZipFile(archive) as contents: contents.extractall(base)\n    (gradle/'bin/gradle').chmod(0o755)\njdk=base/'jdk'\nif not (jdk/'usr/lib/jvm/java-21-openjdk-amd64/bin/javac').is_file():\n    jdk.mkdir(exist_ok=True)\n    for name,digest,size in [\n        ('openjdk-21-jdk-headless_21.0.12.1+1-1~deb13u1_amd64.deb','f3abafb6c644b03df042824e707cd211ea33254761d7f7b75be3f8dc0df97c7a',83035048),\n        ('openjdk-21-jre-headless_21.0.12.1+1-1~deb13u1_amd64.deb','e95f36193e45464ac758e5436f940bf3eaecc77de67188275a42104f58aa7674',41900512)]:\n        archive=base/name\n        fetch('https://deb.debian.org/debian/pool/main/o/openjdk-21/'+name,archive,digest,size)\n        subprocess.run(['dpkg-deb','-x',str(archive),str(jdk)],check=True)\n    # Debian's JDK points at /etc/java-21-openjdk. If the managed base image\n    # lacks those non-secret configuration files, use the same authenticated\n    # package files already extracted under this private prefix.\n    for path in (jdk/'usr/lib/jvm/java-21-openjdk-amd64').rglob('*'):\n        if not path.is_symlink() or path.exists(): continue\n        target=os.readlink(path)\n        if target.startswith('/etc/java-21-openjdk/'):\n            private=jdk/target.lstrip('/')\n            if private.is_file():\n                path.unlink();path.symlink_to(os.path.relpath(private,path.parent))\nsdk=Path(os.environ['ANDROID_HOME']); user=Path(os.environ['ANDROID_USER_HOME'])\n(sdk/'cmdline-tools').mkdir(parents=True,exist_ok=True); user.mkdir(parents=True,exist_ok=True)\nif not (sdk/'cmdline-tools/latest/bin/sdkmanager').is_file():\n    archive=base/'android-commandline-tools.zip'\n    fetch('https://dl.google.com/android/repository/commandlinetools-linux-16111833_latest.zip',archive,'0877a1d048fe4a24efe2eff536ca4223f7adeb58648bb81909d33c446918cfa8',181052239)\n    temporary=Path(tempfile.mkdtemp(prefix='sdk-tools-',dir=base))\n    with zipfile.ZipFile(archive) as contents: contents.extractall(temporary)\n    for executable in (temporary/'cmdline-tools/bin').iterdir(): executable.chmod(0o755)\n    (temporary/'cmdline-tools').rename(sdk/'cmdline-tools/latest')\n# Verify current critical executable bytes; never overwrite an unexpected tool.\npins={\n    'gradle-8.11.1/bin/gradle':'02ab6f50b6361729fcb6d1efecaec111df5bed5068768d8314f5ccca52fe58ca',\n    'gradle-8.11.1/lib/gradle-launcher-8.11.1.jar':'caae97e14491e7efabaeaa81233d5869acdfb6b215fbb23671ec0af42d6ada4a',\n    'jdk/usr/lib/jvm/java-21-openjdk-amd64/bin/java':'6698f6f10143ed8463b06062281c727152d2e0ae2a3569b1716fbb2c6cedf0ba',\n    'jdk/usr/lib/jvm/java-21-openjdk-amd64/bin/javac':'94b4eb733f5d6b44ff7ae8437206de8428ac4e2e3e8efc50b204e54c5d84dcc3',\n    'android-sdk/cmdline-tools/latest/bin/sdkmanager':'5705db235fe2b11628e064b825b41afaa8eb42823d276454bff8f4145e8081f5'}\nfor relative,digest in pins.items():\n    if not checked(base/relative,digest): raise RuntimeError('Existing tool differs from its qualified digest: '+relative)"
+      ],
+      "label": "TOOLS_SETUP",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-c",
+        "from pathlib import Path\nimport os,subprocess,urllib.parse\nroot=Path(os.environ['ANDROID_HOME'])\nneeded=['platform-tools','platforms;android-36','build-tools;35.0.0','build-tools;36.0.0']\nif not all((root/name.replace(';','/')/'package.xml').is_file() for name in needed):\n    manager=[str(root/'cmdline-tools/latest/bin/sdkmanager'),f'--sdk_root={root}']\n    proxy=urllib.parse.urlparse(os.environ.get('HTTPS_PROXY',''))\n    if proxy.hostname: manager+=['--proxy=http',f'--proxy_host={proxy.hostname}',f'--proxy_port={proxy.port or 80}']\n    subprocess.run(manager+['--licenses'],input='y\\n'*100,text=True,check=True)\n    subprocess.run(manager+needed,check=True)"
+      ],
+      "label": "SDK_PACKAGES",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-c",
+        "from pathlib import Path\nimport hashlib,subprocess,urllib.request\nbase=Path('/workspace/.onboarding/browser-parser'); packages=base/'packages';root=base/'rsync-root'\npackages.mkdir(parents=True,exist_ok=True);root.mkdir(exist_ok=True)\ndef checked(path,digest):\n    if not path.is_file(): return False\n    with path.open('rb') as stream:return hashlib.file_digest(stream,'sha256').hexdigest()==digest\nif not (root/'usr/bin/rsync').is_file():\n    for name,digest,component in [\n        ('rsync_3.4.1+ds1-5+deb13u4_amd64.deb','8aa122f6ba8d2ff112c72bb9814ee096ee516f0213b36b98bbe79c83c92fb226','r/rsync'),\n        ('libpopt0_1.19+dfsg-2_amd64.deb','07f649b706852af937654295697dcfc7858f3295718ec18681dce1704663e4f2','p/popt')]:\n        archive=packages/name\n        if not checked(archive,digest):\n            pending=archive.with_suffix('.canon-pending')\n            try:\n                with urllib.request.urlopen('https://deb.debian.org/debian/pool/main/'+component+'/'+name,timeout=60) as source,pending.open('wb') as output:\n                    while block:=source.read(1024*1024): output.write(block)\n                if not checked(pending,digest): raise RuntimeError('rsync archive digest mismatch')\n                pending.replace(archive)\n            finally: pending.unlink(missing_ok=True)\n        subprocess.run(['dpkg-deb','-x',str(archive),str(root)],check=True)"
+      ],
+      "label": "RSYNC_SETUP",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-c",
+        "from pathlib import Path\nexpected=b'#!/bin/sh\\nexec env LD_LIBRARY_PATH=/workspace/.onboarding/browser-parser/rsync-root/usr/lib/x86_64-linux-gnu /workspace/.onboarding/browser-parser/rsync-root/usr/bin/rsync \"$@\"\\n'\nif Path('/workspace/.onboarding/bin/rsync').read_bytes()!=expected:\n    raise RuntimeError('Unexpected rsync wrapper; preserve and inspect it before execution')"
+      ],
+      "label": "RSYNC_WRAPPER_CHECK",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "/workspace/van-audit/canon-backend-venv-2026-10-09/bin/python",
+        "-c",
+        "from pathlib import Path\nimport hashlib,json,os,subprocess\nimport aiosqlite,cryptography,fastapi,httpx,pypdf,uvicorn\nfrom playwright.sync_api import sync_playwright\nbase=Path('/workspace/.onboarding')\npins={\n    'android-sdk/build-tools/36.0.0/aapt':'c076aeeee8bd3ce58395a093747202265ab80c6c12e59358f598a30a81fde13b',\n    'android-sdk/build-tools/36.0.0/apksigner':'b47549e373b895ce6ca620d0c7887e674d9615ffa837a86ac601dcfd04adb0f0',\n    'android-sdk/platform-tools/adb':'a902be8f45c6c62e76c9efaf6947a0fa747c9cabd89a2ac8e0d16ecb30b3ed01',\n    'playwright/chromium-1243/chrome-linux64/chrome':'8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e',\n    'browser-parser/rsync-root/usr/bin/rsync':'a56c05b960beb734169619d5760b43ff495e84f85a93eb1f54fe58118262fb20'}\nfor relative,digest in pins.items():\n    with (base/relative).open('rb') as stream:\n        if hashlib.file_digest(stream,'sha256').hexdigest()!=digest:raise RuntimeError('Tool artifact drift requires requalification: '+relative)\nexpected_wrapper=b'#!/bin/sh\\nexec env LD_LIBRARY_PATH=/workspace/.onboarding/browser-parser/rsync-root/usr/lib/x86_64-linux-gnu /workspace/.onboarding/browser-parser/rsync-root/usr/bin/rsync \"$@\"\\n'\nif (base/'bin/rsync').read_bytes()!=expected_wrapper:\n    raise RuntimeError('Unexpected rsync wrapper; preserve and inspect it before use')\nwith sync_playwright() as manager:\n    browser=manager.chromium.launch(executable_path=os.environ['VAN_TEST_CHROMIUM'],headless=True)\n    try:\n        page=browser.new_page();page.set_content('<title>VAN isolated readiness</title><p id=\"status\">ready</p>')\n        assert page.title()=='VAN isolated readiness' and page.locator('#status').inner_text()=='ready'\n    finally:browser.close()\nprint(json.dumps({'backend_dependency_imports':'PASS','local_chromium_functional_request':'PASS','production_browser_qualified':False}))"
+      ],
+      "label": "READINESS",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"backend_dependency_imports\": \"PASS\", \"local_chromium_functional_request\": \"PASS\", \"production_browser_qualified\": false}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "android/tools/package_voice_assets.py",
+        "--verify"
+      ],
+      "label": "generic_voice_verify",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"file_bytes\": 224852871, \"file_count\": 45, \"manifest_sha256\": \"7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30\", \"owner_profile_included\": false, \"status\": \"VERIFIED\"}\n"
+    },
+    {
+      "argv": [
+        "/workspace/van-audit/canon-backend-venv-2026-10-09/bin/python",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "label": "backend_pip_check",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "No broken requirements found.\n"
+    },
+    {
+      "argv": [
+        "/workspace/van-browser-runtime-venv/bin/python",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "label": "browser_pip_check",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "No broken requirements found.\n"
+    },
+    {
+      "argv": [
+        "/workspace/van-browser-runtime-venv/bin/python",
+        "-c",
+        "import aiohttp,aiortc,av,cryptography,PIL,pytest; print(\"Browser media/test dependency imports: PASS\")"
+      ],
+      "label": "browser_imports",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Browser media/test dependency imports: PASS\n"
+    },
+    {
+      "argv": [
+        "/workspace/.onboarding/gradle-8.11.1/bin/gradle",
+        "--version"
+      ],
+      "label": "gradle_toolchain_version",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "\n------------------------------------------------------------\nGradle 8.11.1\n------------------------------------------------------------\n\nBuild time:    2024-11-20 16:56:46 UTC\nRevision:      481cb05a490e0ef9f8620f7873b83bd8a72e7c39\n\nKotlin:        2.0.20\nGroovy:        3.0.22\nAnt:           Apache Ant(TM) version 1.10.14 compiled on August 16 2023\nLauncher JVM:  21.0.12.1 (Debian 21.0.12.1+1-1-deb13u1-Debian)\nDaemon JVM:    /workspace/.onboarding/jdk/usr/lib/jvm/java-21-openjdk-amd64 (no JDK specified, using current Java home)\nOS:            Linux 6.18.44 amd64\n\n"
+    },
+    {
+      "argv": [
+        "/workspace/.onboarding/bin/rsync",
+        "--version"
+      ],
+      "label": "rsync_wrapper_version",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "rsync  version 3.4.1  protocol version 32\nCopyright (C) 1996-2025 by Andrew Tridgell, Wayne Davison, and others.\nWeb site: https://rsync.samba.org/\nCapabilities:\n    64-bit files, 64-bit inums, 64-bit timestamps, 64-bit long ints,\n    socketpairs, symlinks, symtimes, hardlinks, hardlink-specials,\n    hardlink-symlinks, IPv6, atimes, batchfiles, inplace, append, ACLs,\n    xattrs, optional secluded-args, iconv, prealloc, stop-at, no crtimes\nOptimizations:\n    SIMD-roll, no asm-roll, openssl-crypto, no asm-MD5\nChecksum list:\n    xxh128 xxh3 xxh64 (xxhash) md5 md4 sha1 none\nCompress list:\n    zstd lz4 zlibx zlib none\nDaemon auth list:\n    sha512 sha256 sha1 md5 md4\n\nrsync comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\nare welcome to redistribute it under certain conditions.  See the GNU\nGeneral Public Licence for details.\n"
+    },
+    {
+      "argv": [
+        "/workspace/van-audit/canon-backend-venv-2026-10-09/bin/python",
+        "/workspace/.onboarding/canon-local-gateway.py"
+      ],
+      "label": "isolated_gateway_with_synthetic_parent_product_settings",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"PASS\", \"scope\": \"OWNED_ISOLATED_LOCAL_GATEWAY\", \"source_revision\": \"dfc1557ab99ad8d41cf84714e1bb671e89b045e6\", \"authenticated_health\": true, \"observability_readback\": true, \"unauthenticated_health_status\": 401, \"hermes_offline\": true, \"production_qualification\": false, \"handset_cases_executed\": 0}\n"
+    }
+  ],
+  "draft_updated": false,
+  "embedded_python_ast": "PASS",
+  "embedded_python_section_count": 13,
+  "empty_cache_voice_bootstrap_executed": false,
+  "fresh_task_restore_verified": false,
+  "full_install_script_executed": false,
+  "github_exact_clone_phase_executed": false,
+  "helper": "/workspace/.onboarding/canon-local-gateway.py",
+  "helper_sha256": "819fa2463cbb7891125dd64a93250107220edd54b387f788ae3867df73e24cb4",
+  "install_script": "/workspace/.onboarding/reusable-install-canon-dfc1557a-2026-10-09.sh",
+  "install_script_sha256": "16243ab17f6e3273a26656afb75899155a4f226c05399830de2773bf429ec583",
+  "limits": [
+    "Checks cover current installed/cache setup only; the full installer awaits source publication.",
+    "Selected critical tool artifacts are hashed; this is not a full extracted-tool tree manifest."
+  ],
+  "missing_tool_download_fallback_executed": false,
+  "physical_cases": 0,
+  "production_qualified": false,
+  "qualified_cached_setup_subset_pass": true,
+  "recorded_at_utc": "2026-10-09T07:02:58.399714+00:00",
+  "runner": "/workspace/.onboarding/verify-canon-setup-subset-dfc1557a-2026-10-09.py",
+  "runner_sha256": "1182d723770cf4ac7413abf671e9a06e14ac1c01656407e5414e92fbd40054b6",
+  "schema_version": 1,
+  "selected_revision": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "shell_syntax": "PASS",
+  "source_unchanged": true,
+  "start_skill": "/workspace/.onboarding/canon-start-skill-dfc1557a-2026-10-09.md",
+  "start_skill_sha256": "2f8a0e160e8ac689ae5645dd6a768f648ddb0d92284aa3c423f43b07b154b83b"
+}

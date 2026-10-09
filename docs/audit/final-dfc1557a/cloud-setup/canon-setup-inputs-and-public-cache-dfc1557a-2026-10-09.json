@@ -1,0 +1,65 @@
+{
+  "cache_objects": [
+    {
+      "bytes": 17626723,
+      "relative": "archives/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01.tar.bz2",
+      "sha256": "f170013b4716e41b62b9bfd809687c207cef798ef9bc6534d524e17af9b6561a"
+    },
+    {
+      "bytes": 310562559,
+      "relative": "archives/sherpa-onnx-zipformer-gigaspeech-2023-12-12.tar.bz2",
+      "sha256": "ec7f27abbbdba3b261deab9a853803b5ec72cb3295c01a77f34e6de5b62bf5c4"
+    },
+    {
+      "bytes": 109037061,
+      "relative": "archives/vits-ljs.tar.bz2",
+      "sha256": "78f7df445fcd42d1dd6df2c78c66c2c2fee8b7abecc6ae255a5950097a6558bc"
+    },
+    {
+      "bytes": 26534365,
+      "relative": "selected/speaker/model.onnx",
+      "sha256": "5ef208a9da1453335308a6b6f4e6dfbd7e183a38b604de0a57664f45d257fe94"
+    }
+  ],
+  "cache_objects_match_final_lock": true,
+  "cache_seed_written": false,
+  "draft_updated": false,
+  "final_source_revision": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "fresh_restore_verified": false,
+  "full_install_script_executed": false,
+  "live_service_or_physical_acceptance": false,
+  "read_only_public_cache": "/workspace/van-audit/canon-runtime-fix-2026-10-09/android/app/build/voice-acquisition",
+  "recorded_at_utc": "2026-10-09T07:04:27.892910+00:00",
+  "registry_r7_manifest": "/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r7.json",
+  "registry_r7_manifest_sha256": "6ff923de5bf1330b0291bcffb31bbb01900f19234e138328ff7d863768c4e462",
+  "registry_r7_reviewed_inputs": 399,
+  "remote_publication_observed": false,
+  "root_workspaces_or_dependent_envs_modified": false,
+  "schema_version": 1,
+  "unchanged_declared_setup_inputs": {
+    "android/app/src/main/java/com/dial/van/voice/VoiceBundlePin.kt": {
+      "same_as_805f": true,
+      "sha256": "c163205a130719f0ca85815b1cb70134b657c9e2925739d6f3429935754b2fd7"
+    },
+    "android/tools/package_voice_assets.py": {
+      "same_as_805f": true,
+      "sha256": "2d33fccb7a6a926468733561840f767cf3c5a5c7b606d9675cd9cb9f4ccf5794"
+    },
+    "android/voice/acquisition-lock.json": {
+      "same_as_805f": true,
+      "sha256": "8149b5e088e52aaf1a97639e0ca9bb82c7c60199cae88719f7b46ee704732b4b"
+    },
+    "android/voice/voice_asset_manifest.json": {
+      "same_as_805f": true,
+      "sha256": "7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30"
+    },
+    "backend/requirements.lock": {
+      "same_as_805f": true,
+      "sha256": "808e30cb3359c908597bab5fc49797a23bf1748d12831b6200f9505a005b40da"
+    },
+    "deploy/van-browser-stream/requirements.lock": {
+      "same_as_805f": true,
+      "sha256": "461e831b0c4ca03164fde49fb23824dd1a3e3d8f375e6a6564a991269f74f29d"
+    }
+  }
+}

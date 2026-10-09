@@ -1,0 +1,135 @@
+{
+  "apk": {
+    "bytes": 317997684,
+    "path": "/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/build/outputs/apk/debug/app-debug.apk",
+    "sha256_after": "afaf6371fb3dd536e37402939b6945a6e4222ff625710e08bb18c64750543c0e",
+    "sha256_before": "afaf6371fb3dd536e37402939b6945a6e4222ff625710e08bb18c64750543c0e"
+  },
+  "native_inspection_failure": null,
+  "native_libraries": [
+    {
+      "bytes": 1292904,
+      "elf_load_segment_alignments": [
+        16384,
+        16384,
+        16384,
+        16384
+      ],
+      "path": "lib/arm64-v8a/libc++_shared.so",
+      "sha256": "4397241b4bd20a8e579bfb41d21107857e12985f6a01ca0c2a5f83380d1270b4",
+      "supports_16k_pages": true,
+      "uncompressed_zip_data_offset": 68501504,
+      "zip_compression": 0
+    },
+    {
+      "bytes": 12287312,
+      "elf_load_segment_alignments": [
+        16384,
+        16384,
+        16384
+      ],
+      "path": "lib/arm64-v8a/libjingle_peerconnection_so.so",
+      "sha256": "7b299113fcd743de7dc5559686b21fc2681b2c8598347d8dc0743d2e004995ca",
+      "supports_16k_pages": true,
+      "uncompressed_zip_data_offset": 69795840,
+      "zip_compression": 0
+    },
+    {
+      "bytes": 22249560,
+      "elf_load_segment_alignments": [
+        16384,
+        16384,
+        16384,
+        16384
+      ],
+      "path": "lib/arm64-v8a/libonnxruntime.so",
+      "sha256": "33847ad43bffe204699fd4a27f7f3603452a8cdaf2f9a44983a0bc31ffcf2da1",
+      "supports_16k_pages": true,
+      "uncompressed_zip_data_offset": 82083840,
+      "zip_compression": 0
+    },
+    {
+      "bytes": 6848712,
+      "elf_load_segment_alignments": [
+        16384,
+        16384,
+        16384
+      ],
+      "path": "lib/arm64-v8a/librive-android.so",
+      "sha256": "b6c85138a3534f8a334d7896732e31e6fe93e8a6e9e350d7632a6779a74e8f26",
+      "supports_16k_pages": true,
+      "uncompressed_zip_data_offset": 104349696,
+      "zip_compression": 0
+    },
+    {
+      "bytes": 4465168,
+      "elf_load_segment_alignments": [
+        16384,
+        16384,
+        16384
+      ],
+      "path": "lib/arm64-v8a/libsherpa-onnx-c-api.so",
+      "sha256": "c85e2382e2ca12b0513826be926eaccfea896b4cbf568182e287671ba526f80d",
+      "supports_16k_pages": true,
+      "uncompressed_zip_data_offset": 111214592,
+      "zip_compression": 0
+    },
+    {
+      "bytes": 440688,
+      "elf_load_segment_alignments": [
+        16384,
+        16384,
+        16384
+      ],
+      "path": "lib/arm64-v8a/libsherpa-onnx-cxx-api.so",
+      "sha256": "5eabb2bcf5a8af66aeab37431c09fab4a9c65cdebf02bd7e50f8c589044bd70e",
+      "supports_16k_pages": true,
+      "uncompressed_zip_data_offset": 115687424,
+      "zip_compression": 0
+    },
+    {
+      "bytes": 4771760,
+      "elf_load_segment_alignments": [
+        16384,
+        16384,
+        16384
+      ],
+      "path": "lib/arm64-v8a/libsherpa-onnx-jni.so",
+      "sha256": "3c6492ea91ea68fd3b72b9495efdde6dd913f6b58c387e3b07389cf335f4d26f",
+      "supports_16k_pages": true,
+      "uncompressed_zip_data_offset": 116129792,
+      "zip_compression": 0
+    }
+  ],
+  "owner_release_built": false,
+  "physical_handset_tests_executed": 0,
+  "production_signing_verified": false,
+  "qualified_16kb_native_alignment": true,
+  "qualified_android_receipt": {
+    "path": "/workspace/van-audit/canon-corrected-android-dfc1557a-2026-10-09-result.json",
+    "sha256": "4ff7342b85d1d48091d38060da8a74bc33aa65a01c2162261210c969d9ae66fa"
+  },
+  "recorded_at_utc": "2026-10-09T07:10:00.257382+00:00",
+  "revision": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "runner_sha256": "e9fc4dbb905a9bae6f5daf5b23fcf8dceef620ee2507a0a4cd0db1d767017a6a",
+  "schema_version": 1,
+  "scope": "actual qualified debug APK ELF/ZIP alignment only; no owner release or deployment",
+  "source_head_after": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "source_release_validator_sha256": "b9fae0ca6bb953618297f3854b477fca95334a86d012c0bcf6852487692eedfa",
+  "source_status_after": "",
+  "zipalign": {
+    "binary_sha256": "c5f559e946de5a9e7d58792181db20383b228877812136bc469d97ae00a43b0a",
+    "command": [
+      "/workspace/.onboarding/android-sdk/build-tools/36.0.0/zipalign",
+      "-c",
+      "-P",
+      "16",
+      "-v",
+      "4",
+      "/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/build/outputs/apk/debug/app-debug.apk"
+    ],
+    "exit_code": 0,
+    "log_path": "/workspace/van-audit/canon-corrected-android-dfc1557a-2026-10-09-zipalign.log",
+    "log_sha256": "f937b9db0e4ab9d593b926797a086b293368543a25c68ac335127c87ceb41393"
+  }
+}

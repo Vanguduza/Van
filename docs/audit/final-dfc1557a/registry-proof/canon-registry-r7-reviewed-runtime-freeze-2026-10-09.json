@@ -1,0 +1,14 @@
+{
+  "record_kind": "PARENT_APPROVED_REVIEWED_RUNTIME_INPUT_FREEZE",
+  "measured_at_utc": "2026-10-09T06:58:05.071749+00:00",
+  "base_application_sha": "ffa18d578eae6dd2e484a60fa3fb912c4204635c",
+  "files": {
+    "backend/van_gateway/browser/task_scope.py": "692b76d358c3423413bcbfdc39d410e4bc345717129de7cd1db2e4eeb5a92800",
+    "deploy/van-browser-core/browser/harness_service.py": "8468a3fb849ce989d26f9a6b09ff35b37dbc1e035af405501b8d47c7d109bff5",
+    "deploy/van-browser-core/browser/egress_proxy.py": "ae8de217cb3ea2ac49e5703a39653e26986480fb8a651945c857e7da77493dbe",
+    "backend/tests/fixtures/task_scope/url_vectors.v1.json": "28ec605233db9958f90ef6339724bb4bf476534d855fac35bd800aba7657ce18",
+    "tests/contracts/test_task_scope_shared_url_rule.py": "a314f24442f6f6fb4e25590ef47fecfce8c024670965e87f9dcf2583ac0ec49b",
+    "backend/tests/test_harness_pseudo_hit_ownership.py": "d7f82ce7718b2fe6ea6ab7dd83c2fe1bf436e7558a256c856c3fd6e5aef528b5"
+  },
+  "scope": "Six actual parser/geometry runtime and regression inputs parent approved after 655 passing scoped checks; no tracked mode changes by registry review."
+}

@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="12" skipped="0" tests="24" time="0.354" timestamp="2026-10-09T06:39:58.616147+00:00" hostname="052fefa249ff"><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/a.b-/docs/a%2Eb-TASK_SCOPE_PAGE_PATH_OUTSIDE-gateway]" time="0.097"><failure message="AssertionError: assert None == 'TASK_SCOPE_PAGE_PATH_OUTSIDE'&#10; +  where None = &lt;function _vs_scope_violation at 0x7ff07dbd58a0&gt;([{'origin': 'https://docs.example.com', 'path_prefix': '/docs/a.b'}], ('https://docs.example.com' + '/docs/a%2Eb'))&#10; +    where &lt;function _vs_scope_violation at 0x7ff07dbd58a0&gt; = &lt;module 'van_gateway.browser.task_scope' from '/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/backend/van_gateway/browser/task_scope.py'&gt;._vs_scope_violation">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7ff07e40dd90&gt;
+tmp_path = PosixPath('/tmp/vscope-red/test_encoded_dot_paths_preserv0')
+side = 'gateway', prefix = '/docs/a.b', path = '/docs/a%2Eb'
+violation = 'TASK_SCOPE_PAGE_PATH_OUTSIDE'
+
+    @pytest.mark.parametrize("side", ["gateway", "harness", "egress_proxy"])
+    @pytest.mark.parametrize("prefix,path,violation", [
+        ("/docs/a.b", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb", None),
+        ("/docs/a%2Eb", "/docs/a.b", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb/next", None),
+        ("/docs/a%2Eb", "/docs/a%2Ebc", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2eb", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/", "/docs/%2e%2e%2fcheckout", "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"),
+        ("/docs/", "/docs/%2e%2e/checkout", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+    ])
+    def test_encoded_dot_paths_preserve_exact_scope_boundaries(monkeypatch, tmp_path, side, prefix, path, violation):
+        """An encoded dot in an ordinary segment is a distinct browser path; full dot
+        segments still traverse, and encoded separators still fail closed."""
+        module = _sides(monkeypatch, tmp_path)[side]
+        origin = "https://docs.example.com"
+        entries = [{"origin": origin, "path_prefix": prefix}]
+&gt;       assert module._vs_scope_violation(entries, origin + path) == violation
+E       AssertionError: assert None == 'TASK_SCOPE_PAGE_PATH_OUTSIDE'
+E        +  where None = &lt;function _vs_scope_violation at 0x7ff07dbd58a0&gt;([{'origin': 'https://docs.example.com', 'path_prefix': '/docs/a.b'}], ('https://docs.example.com' + '/docs/a%2Eb'))
+E        +    where &lt;function _vs_scope_violation at 0x7ff07dbd58a0&gt; = &lt;module 'van_gateway.browser.task_scope' from '/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/backend/van_gateway/browser/task_scope.py'&gt;._vs_scope_violation
+
+tests/contracts/test_task_scope_shared_url_rule.py:107: AssertionError</failure></testcase><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/a.b-/docs/a%2Eb-TASK_SCOPE_PAGE_PATH_OUTSIDE-harness]" time="0.007"><failure message="AssertionError: assert None == 'TASK_SCOPE_PAGE_PATH_OUTSIDE'&#10; +  where None = &lt;function _vs_scope_violation at 0x7ff07da5f2e0&gt;([{'origin': 'https://docs.example.com', 'path_prefix': '/docs/a.b'}], ('https://docs.example.com' + '/docs/a%2Eb'))&#10; +    where &lt;function _vs_scope_violation at 0x7ff07da5f2e0&gt; = &lt;module 'van_harness_shared_rule' from '/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/deploy/van-browser-core/browser/harness_service.py'&gt;._vs_scope_violation">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7ff07dc31910&gt;
+tmp_path = PosixPath('/tmp/vscope-red/test_encoded_dot_paths_preserv1')
+side = 'harness', prefix = '/docs/a.b', path = '/docs/a%2Eb'
+violation = 'TASK_SCOPE_PAGE_PATH_OUTSIDE'
+
+    @pytest.mark.parametrize("side", ["gateway", "harness", "egress_proxy"])
+    @pytest.mark.parametrize("prefix,path,violation", [
+        ("/docs/a.b", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb", None),
+        ("/docs/a%2Eb", "/docs/a.b", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb/next", None),
+        ("/docs/a%2Eb", "/docs/a%2Ebc", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2eb", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/", "/docs/%2e%2e%2fcheckout", "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"),
+        ("/docs/", "/docs/%2e%2e/checkout", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+    ])
+    def test_encoded_dot_paths_preserve_exact_scope_boundaries(monkeypatch, tmp_path, side, prefix, path, violation):
+        """An encoded dot in an ordinary segment is a distinct browser path; full dot
+        segments still traverse, and encoded separators still fail closed."""
+        module = _sides(monkeypatch, tmp_path)[side]
+        origin = "https://docs.example.com"
+        entries = [{"origin": origin, "path_prefix": prefix}]
+&gt;       assert module._vs_scope_violation(entries, origin + path) == violation
+E       AssertionError: assert None == 'TASK_SCOPE_PAGE_PATH_OUTSIDE'
+E        +  where None = &lt;function _vs_scope_violation at 0x7ff07da5f2e0&gt;([{'origin': 'https://docs.example.com', 'path_prefix': '/docs/a.b'}], ('https://docs.example.com' + '/docs/a%2Eb'))
+E        +    where &lt;function _vs_scope_violation at 0x7ff07da5f2e0&gt; = &lt;module 'van_harness_shared_rule' from '/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/deploy/van-browser-core/browser/harness_service.py'&gt;._vs_scope_violation
+
+tests/contracts/test_task_scope_shared_url_rule.py:107: AssertionError</failure></testcase><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/a.b-/docs/a%2Eb-TASK_SCOPE_PAGE_PATH_OUTSIDE-egress_proxy]" time="0.006"><failure message="AssertionError: assert None == 'TASK_SCOPE_PAGE_PATH_OUTSIDE'&#10; +  where None = &lt;function _vs_scope_violation at 0x7ff07d9e0540&gt;([{'origin': 'https://docs.example.com', 'path_prefix': '/docs/a.b'}], ('https://docs.example.com' + '/docs/a%2Eb'))&#10; +    where &lt;function _vs_scope_violation at 0x7ff07d9e0540&gt; = &lt;module 'van_egress_proxy_shared_rule' from '/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/deploy/van-browser-core/browser/egress_proxy.py'&gt;._vs_scope_violation">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7ff07dc31550&gt;
+tmp_path = PosixPath('/tmp/vscope-red/test_encoded_dot_paths_preserv2')
+side = 'egress_proxy', prefix = '/docs/a.b', path = '/docs/a%2Eb'
+violation = 'TASK_SCOPE_PAGE_PATH_OUTSIDE'
+
+    @pytest.mark.parametrize("side", ["gateway", "harness", "egress_proxy"])
+    @pytest.mark.parametrize("prefix,path,violation", [
+        ("/docs/a.b", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb", None),
+        ("/docs/a%2Eb", "/docs/a.b", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb/next", None),
+        ("/docs/a%2Eb", "/docs/a%2Ebc", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2eb", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/", "/docs/%2e%2e%2fcheckout", "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"),
+        ("/docs/", "/docs/%2e%2e/checkout", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+    ])
+    def test_encoded_dot_paths_preserve_exact_scope_boundaries(monkeypatch, tmp_path, side, prefix, path, violation):
+        """An encoded dot in an ordinary segment is a distinct browser path; full dot
+        segments still traverse, and encoded separators still fail closed."""
+        module = _sides(monkeypatch, tmp_path)[side]
+        origin = "https://docs.example.com"
+        entries = [{"origin": origin, "path_prefix": prefix}]
+&gt;       assert module._vs_scope_violation(entries, origin + path) == violation
+E       AssertionError: assert None == 'TASK_SCOPE_PAGE_PATH_OUTSIDE'
+E        +  where None = &lt;function _vs_scope_violation at 0x7ff07d9e0540&gt;([{'origin': 'https://docs.example.com', 'path_prefix': '/docs/a.b'}], ('https://docs.example.com' + '/docs/a%2Eb'))
+E        +    where &lt;function _vs_scope_violation at 0x7ff07d9e0540&gt; = &lt;module 'van_egress_proxy_shared_rule' from '/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/deploy/van-browser-core/browser/egress_proxy.py'&gt;._vs_scope_violation
+
+tests/contracts/test_task_scope_shared_url_rule.py:107: AssertionError</failure></testcase><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/a%2Eb-/docs/a%2Eb-None-gateway]" time="0.007"><failure message="AssertionError: assert 'TASK_SCOPE_PAGE_PATH_OUTSIDE' == None&#10; +  where 'TASK_SCOPE_PAGE_PATH_OUTSIDE' = &lt;function _vs_scope_violation at 0x7ff07dbd58a0&gt;([{'origin': 'https://docs.example.com', 'path_prefix': '/docs/a%2Eb'}], ('https://docs.example.com' + '/docs/a%2Eb'))&#10; +    where &lt;function _vs_scope_violation at 0x7ff07dbd58a0&gt; = &lt;module 'van_gateway.browser.task_scope' from '/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/backend/van_gateway/browser/task_scope.py'&gt;._vs_scope_violation">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7ff07dc3b8c0&gt;
+tmp_path = PosixPath('/tmp/vscope-red/test_encoded_dot_paths_preserv3')
+side = 'gateway', prefix = '/docs/a%2Eb', path = '/docs/a%2Eb', violation = None
+
+    @pytest.mark.parametrize("side", ["gateway", "harness", "egress_proxy"])
+    @pytest.mark.parametrize("prefix,path,violation", [
+        ("/docs/a.b", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb", None),
+        ("/docs/a%2Eb", "/docs/a.b", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb/next", None),
+        ("/docs/a%2Eb", "/docs/a%2Ebc", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2eb", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/", "/docs/%2e%2e%2fcheckout", "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"),
+        ("/docs/", "/docs/%2e%2e/checkout", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+    ])
+    def test_encoded_dot_paths_preserve_exact_scope_boundaries(monkeypatch, tmp_path, side, prefix, path, violation):
+        """An encoded dot in an ordinary segment is a distinct browser path; full dot
+        segments still traverse, and encoded separators still fail closed."""
+        module = _sides(monkeypatch, tmp_path)[side]
+        origin = "https://docs.example.com"
+        entries = [{"origin": origin, "path_prefix": prefix}]
+&gt;       assert module._vs_scope_violation(entries, origin + path) == violation
+E       AssertionError: assert 'TASK_SCOPE_PAGE_PATH_OUTSIDE' == None
+E        +  where 'TASK_SCOPE_PAGE_PATH_OUTSIDE' = &lt;function _vs_scope_violation at 0x7ff07dbd58a0&gt;([{'origin': 'https://docs.example.com', 'path_prefix': '/docs/a%2Eb'}], ('https://docs.example.com' + '/docs/a%2Eb'))
+E        +    where &lt;function _vs_scope_violation at 0x7ff07dbd58a0&gt; = &lt;module 'van_gateway.browser.task_scope' from '/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/backend/van_gateway/browser/task_scope.py'&gt;._vs_scope_violation
+
+tests/contracts/test_task_scope_shared_url_rule.py:107: AssertionError</failure></testcase><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/a%2Eb-/docs/a%2Eb-None-harness]" time="0.007"><failure message="AssertionError: assert 'TASK_SCOPE_PAGE_PATH_OUTSIDE' == None&#10; +  where 'TASK_SCOPE_PAGE_PATH_OUTSIDE' = &lt;function _vs_scope_violation at 0x7ff07d9aed40&gt;([{'origin': 'https://docs.example.com', 'path_prefix': '/docs/a%2Eb'}], ('https://docs.example.com' + '/docs/a%2Eb'))&#10; +    where &lt;function _vs_scope_violation at 0x7ff07d9aed40&gt; = &lt;module 'van_harness_shared_rule' from '/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/deploy/van-browser-core/browser/harness_service.py'&gt;._vs_scope_violation">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7ff07da86cf0&gt;
+tmp_path = PosixPath('/tmp/vscope-red/test_encoded_dot_paths_preserv4')
+side = 'harness', prefix = '/docs/a%2Eb', path = '/docs/a%2Eb', violation = None
+
+    @pytest.mark.parametrize("side", ["gateway", "harness", "egress_proxy"])
+    @pytest.mark.parametrize("prefix,path,violation", [
+        ("/docs/a.b", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb", None),
+        ("/docs/a%2Eb", "/docs/a.b", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb/next", None),
+        ("/docs/a%2Eb", "/docs/a%2Ebc", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2eb", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/", "/docs/%2e%2e%2fcheckout", "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"),
+        ("/docs/", "/docs/%2e%2e/checkout", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+    ])
+    def test_encoded_dot_paths_preserve_exact_scope_boundaries(monkeypatch, tmp_path, side, prefix, path, violation):
+        """An encoded dot in an ordinary segment is a distinct browser path; full dot
+        segments still traverse, and encoded separators still fail closed."""
+        module = _sides(monkeypatch, tmp_path)[side]
+        origin = "https://docs.example.com"
+        entries = [{"origin": origin, "path_prefix": prefix}]
+&gt;       assert module._vs_scope_violation(entries, origin + path) == violation
+E       AssertionError: assert 'TASK_SCOPE_PAGE_PATH_OUTSIDE' == None
+E        +  where 'TASK_SCOPE_PAGE_PATH_OUTSIDE' = &lt;function _vs_scope_violation at 0x7ff07d9aed40&gt;([{'origin': 'https://docs.example.com', 'path_prefix': '/docs/a%2Eb'}], ('https://docs.example.com' + '/docs/a%2Eb'))
+E        +    where &lt;function _vs_scope_violation at 0x7ff07d9aed40&gt; = &lt;module 'van_harness_shared_rule' from '/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/deploy/van-browser-core/browser/harness_service.py'&gt;._vs_scope_violation
+
+tests/contracts/test_task_scope_shared_url_rule.py:107: AssertionError</failure></testcase><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/a%2Eb-/docs/a%2Eb-None-egress_proxy]" time="0.006"><failure message="AssertionError: assert 'TASK_SCOPE_PAGE_PATH_OUTSIDE' == None&#10; +  where 'TASK_SCOPE_PAGE_PATH_OUTSIDE' = &lt;function _vs_scope_violation at 0x7ff07da028e0&gt;([{'origin': 'https://docs.example.com', 'path_prefix': '/docs/a%2Eb'}], ('https://docs.example.com' + '/docs/a%2Eb'))&#10; +    where &lt;function _vs_scope_violation at 0x7ff07da028e0&gt; = &lt;module 'van_egress_proxy_shared_rule' from '/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/deploy/van-browser-core/browser/egress_proxy.py'&gt;._vs_scope_violation">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7ff07da8b470&gt;
+tmp_path = PosixPath('/tmp/vscope-red/test_encoded_dot_paths_preserv5')
+side = 'egress_proxy', prefix = '/docs/a%2Eb', path = '/docs/a%2Eb'
+violation = None
+
+    @pytest.mark.parametrize("side", ["gateway", "harness", "egress_proxy"])
+    @pytest.mark.parametrize("prefix,path,violation", [
+        ("/docs/a.b", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb", None),
+        ("/docs/a%2Eb", "/docs/a.b", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb/next", None),
+        ("/docs/a%2Eb", "/docs/a%2Ebc", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2eb", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/", "/docs/%2e%2e%2fcheckout", "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"),
+        ("/docs/", "/docs/%2e%2e/checkout", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+    ])
+    def test_encoded_dot_paths_preserve_exact_scope_boundaries(monkeypatch, tmp_path, side, prefix, path, violation):
+        """An encoded dot in an ordinary segment is a distinct browser path; full dot
+        segments still traverse, and encoded separators still fail closed."""
+        module = _sides(monkeypatch, tmp_path)[side]
+        origin = "https://docs.example.com"
+        entries = [{"origin": origin, "path_prefix": prefix}]
+&gt;       assert module._vs_scope_violation(entries, origin + path) == violation
+E       AssertionError: assert 'TASK_SCOPE_PAGE_PATH_OUTSIDE' == None
+E        +  where 'TASK_SCOPE_PAGE_PATH_OUTSIDE' = &lt;function _vs_scope_violation at 0x7ff07da028e0&gt;([{'origin': 'https://docs.example.com', 'path_prefix': '/docs/a%2Eb'}], ('https://docs.example.com' + '/docs/a%2Eb'))
+E        +    where &lt;function _vs_scope_violation at 0x7ff07da028e0&gt; = &lt;module 'van_egress_proxy_shared_rule' from '/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/deploy/van-browser-core/browser/egress_proxy.py'&gt;._vs_scope_violation
+
+tests/contracts/test_task_scope_shared_url_rule.py:107: AssertionError</failure></testcase><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/a%2Eb-/docs/a.b-TASK_SCOPE_PAGE_PATH_OUTSIDE-gateway]" time="0.005"><failure message="van_gateway.browser.task_scope.TaskScopeError: TASK_SCOPE_ENTRY_PATH_NOT_NORMAL">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7ff07da92a20&gt;
+tmp_path = PosixPath('/tmp/vscope-red/test_encoded_dot_paths_preserv6')
+side = 'gateway', prefix = '/docs/a%2Eb', path = '/docs/a.b'
+violation = 'TASK_SCOPE_PAGE_PATH_OUTSIDE'
+
+    @pytest.mark.parametrize("side", ["gateway", "harness", "egress_proxy"])
+    @pytest.mark.parametrize("prefix,path,violation", [
+        ("/docs/a.b", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb", None),
+        ("/docs/a%2Eb", "/docs/a.b", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb/next", None),
+        ("/docs/a%2Eb", "/docs/a%2Ebc", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2eb", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/", "/docs/%2e%2e%2fcheckout", "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"),
+        ("/docs/", "/docs/%2e%2e/checkout", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+    ])
+    def test_encoded_dot_paths_preserve_exact_scope_boundaries(monkeypatch, tmp_path, side, prefix, path, violation):
+        """An encoded dot in an ordinary segment is a distinct browser path; full dot
+        segments still traverse, and encoded separators still fail closed."""
+        module = _sides(monkeypatch, tmp_path)[side]
+        origin = "https://docs.example.com"
+        entries = [{"origin": origin, "path_prefix": prefix}]
+        assert module._vs_scope_violation(entries, origin + path) == violation
+        if side == "gateway":
+            from van_gateway.browser.task_scope import parse_scope_entry
+    
+&gt;           assert parse_scope_entry(origin + prefix, "docs.example.com").path_prefix == prefix
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/contracts/test_task_scope_shared_url_rule.py:111: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = 'https://docs.example.com/docs/a%2Eb', target_domain = 'docs.example.com'
+
+    def parse_scope_entry(raw: str, target_domain: str) -&gt; ScopeEntry:
+        """``https://host[:port][/path/prefix]`` -&gt; ScopeEntry. No query, fragment or userinfo;
+        the path must already be in the normal form the browser would load (review I6 M3: no
+        dot segments, backslashes or encoded separators), since the prefix is compared with
+        the normalised path of every page and destination."""
+        text = str(raw or "").strip()
+        try:
+            parts = urlsplit(text)
+            parts.port  # noqa: B018 - raises on a malformed port
+        except ValueError as exc:
+            raise TaskScopeError("TASK_SCOPE_ENTRY_INVALID") from exc
+        if parts.scheme not in ("http", "https") or not parts.hostname:
+            raise TaskScopeError("TASK_SCOPE_ENTRY_SCHEME_OR_HOST_INVALID")
+        if parts.username or parts.password or parts.query or parts.fragment:
+            raise TaskScopeError("TASK_SCOPE_ENTRY_INVALID")
+        whatwg = _vs_parse(text)
+        if whatwg is None:
+            raise TaskScopeError("TASK_SCOPE_ENTRY_INVALID")
+        if reserved_host(whatwg[1]) or reserved_host(parts.hostname):
+            raise TaskScopeError("TASK_SCOPE_RESERVED_HOST")  # unit G14
+        domain = str(target_domain or "").strip().lower().rstrip(".")
+        if not domain or not _host_within(whatwg[1], domain):
+            raise TaskScopeError("TASK_SCOPE_OUTSIDE_TARGET_DOMAIN")
+        path = parts.path or "/"
+        if whatwg[3] != path or _vs_ambiguous(path):
+&gt;           raise TaskScopeError("TASK_SCOPE_ENTRY_PATH_NOT_NORMAL")
+E           van_gateway.browser.task_scope.TaskScopeError: TASK_SCOPE_ENTRY_PATH_NOT_NORMAL
+
+backend/van_gateway/browser/task_scope.py:338: TaskScopeError</failure></testcase><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/a%2Eb-/docs/a.b-TASK_SCOPE_PAGE_PATH_OUTSIDE-harness]" time="0.005" /><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/a%2Eb-/docs/a.b-TASK_SCOPE_PAGE_PATH_OUTSIDE-egress_proxy]" time="0.021" /><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/a%2Eb-/docs/a%2Eb/next-None-gateway]" time="0.005"><failure message="AssertionError: assert 'TASK_SCOPE_PAGE_PATH_OUTSIDE' == None&#10; +  where 'TASK_SCOPE_PAGE_PATH_OUTSIDE' = &lt;function _vs_scope_violation at 0x7ff07dbd58a0&gt;([{'origin': 'https://docs.example.com', 'path_prefix': '/docs/a%2Eb'}], ('https://docs.example.com' + '/docs/a%2Eb/next'))&#10; +    where &lt;function _vs_scope_violation at 0x7ff07dbd58a0&gt; = &lt;module 'van_gateway.browser.task_scope' from '/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/backend/van_gateway/browser/task_scope.py'&gt;._vs_scope_violation">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7ff07da8e4b0&gt;
+tmp_path = PosixPath('/tmp/vscope-red/test_encoded_dot_paths_preserv9')
+side = 'gateway', prefix = '/docs/a%2Eb', path = '/docs/a%2Eb/next'
+violation = None
+
+    @pytest.mark.parametrize("side", ["gateway", "harness", "egress_proxy"])
+    @pytest.mark.parametrize("prefix,path,violation", [
+        ("/docs/a.b", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb", None),
+        ("/docs/a%2Eb", "/docs/a.b", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb/next", None),
+        ("/docs/a%2Eb", "/docs/a%2Ebc", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2eb", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/", "/docs/%2e%2e%2fcheckout", "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"),
+        ("/docs/", "/docs/%2e%2e/checkout", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+    ])
+    def test_encoded_dot_paths_preserve_exact_scope_boundaries(monkeypatch, tmp_path, side, prefix, path, violation):
+        """An encoded dot in an ordinary segment is a distinct browser path; full dot
+        segments still traverse, and encoded separators still fail closed."""
+        module = _sides(monkeypatch, tmp_path)[side]
+        origin = "https://docs.example.com"
+        entries = [{"origin": origin, "path_prefix": prefix}]
+&gt;       assert module._vs_scope_violation(entries, origin + path) == violation
+E       AssertionError: assert 'TASK_SCOPE_PAGE_PATH_OUTSIDE' == None
+E        +  where 'TASK_SCOPE_PAGE_PATH_OUTSIDE' = &lt;function _vs_scope_violation at 0x7ff07dbd58a0&gt;([{'origin': 'https://docs.example.com', 'path_prefix': '/docs/a%2Eb'}], ('https://docs.example.com' + '/docs/a%2Eb/next'))
+E        +    where &lt;function _vs_scope_violation at 0x7ff07dbd58a0&gt; = &lt;module 'van_gateway.browser.task_scope' from '/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/backend/van_gateway/browser/task_scope.py'&gt;._vs_scope_violation
+
+tests/contracts/test_task_scope_shared_url_rule.py:107: AssertionError</failure></testcase><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/a%2Eb-/docs/a%2Eb/next-None-harness]" time="0.005"><failure message="AssertionError: assert 'TASK_SCOPE_PAGE_PATH_OUTSIDE' == None&#10; +  where 'TASK_SCOPE_PAGE_PATH_OUTSIDE' = &lt;function _vs_scope_violation at 0x7ff07d8ba5c0&gt;([{'origin': 'https://docs.example.com', 'path_prefix': '/docs/a%2Eb'}], ('https://docs.example.com' + '/docs/a%2Eb/next'))&#10; +    where &lt;function _vs_scope_violation at 0x7ff07d8ba5c0&gt; = &lt;module 'van_harness_shared_rule' from '/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/deploy/van-browser-core/browser/harness_service.py'&gt;._vs_scope_violation">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7ff07da96f90&gt;
+tmp_path = PosixPath('/tmp/vscope-red/test_encoded_dot_paths_preserv10')
+side = 'harness', prefix = '/docs/a%2Eb', path = '/docs/a%2Eb/next'
+violation = None
+
+    @pytest.mark.parametrize("side", ["gateway", "harness", "egress_proxy"])
+    @pytest.mark.parametrize("prefix,path,violation", [
+        ("/docs/a.b", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb", None),
+        ("/docs/a%2Eb", "/docs/a.b", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb/next", None),
+        ("/docs/a%2Eb", "/docs/a%2Ebc", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2eb", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/", "/docs/%2e%2e%2fcheckout", "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"),
+        ("/docs/", "/docs/%2e%2e/checkout", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+    ])
+    def test_encoded_dot_paths_preserve_exact_scope_boundaries(monkeypatch, tmp_path, side, prefix, path, violation):
+        """An encoded dot in an ordinary segment is a distinct browser path; full dot
+        segments still traverse, and encoded separators still fail closed."""
+        module = _sides(monkeypatch, tmp_path)[side]
+        origin = "https://docs.example.com"
+        entries = [{"origin": origin, "path_prefix": prefix}]
+&gt;       assert module._vs_scope_violation(entries, origin + path) == violation
+E       AssertionError: assert 'TASK_SCOPE_PAGE_PATH_OUTSIDE' == None
+E        +  where 'TASK_SCOPE_PAGE_PATH_OUTSIDE' = &lt;function _vs_scope_violation at 0x7ff07d8ba5c0&gt;([{'origin': 'https://docs.example.com', 'path_prefix': '/docs/a%2Eb'}], ('https://docs.example.com' + '/docs/a%2Eb/next'))
+E        +    where &lt;function _vs_scope_violation at 0x7ff07d8ba5c0&gt; = &lt;module 'van_harness_shared_rule' from '/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/deploy/van-browser-core/browser/harness_service.py'&gt;._vs_scope_violation
+
+tests/contracts/test_task_scope_shared_url_rule.py:107: AssertionError</failure></testcase><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/a%2Eb-/docs/a%2Eb/next-None-egress_proxy]" time="0.005"><failure message="AssertionError: assert 'TASK_SCOPE_PAGE_PATH_OUTSIDE' == None&#10; +  where 'TASK_SCOPE_PAGE_PATH_OUTSIDE' = &lt;function _vs_scope_violation at 0x7ff07d8fe160&gt;([{'origin': 'https://docs.example.com', 'path_prefix': '/docs/a%2Eb'}], ('https://docs.example.com' + '/docs/a%2Eb/next'))&#10; +    where &lt;function _vs_scope_violation at 0x7ff07d8fe160&gt; = &lt;module 'van_egress_proxy_shared_rule' from '/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/deploy/van-browser-core/browser/egress_proxy.py'&gt;._vs_scope_violation">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7ff07db22000&gt;
+tmp_path = PosixPath('/tmp/vscope-red/test_encoded_dot_paths_preserv11')
+side = 'egress_proxy', prefix = '/docs/a%2Eb', path = '/docs/a%2Eb/next'
+violation = None
+
+    @pytest.mark.parametrize("side", ["gateway", "harness", "egress_proxy"])
+    @pytest.mark.parametrize("prefix,path,violation", [
+        ("/docs/a.b", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb", None),
+        ("/docs/a%2Eb", "/docs/a.b", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb/next", None),
+        ("/docs/a%2Eb", "/docs/a%2Ebc", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2eb", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/", "/docs/%2e%2e%2fcheckout", "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"),
+        ("/docs/", "/docs/%2e%2e/checkout", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+    ])
+    def test_encoded_dot_paths_preserve_exact_scope_boundaries(monkeypatch, tmp_path, side, prefix, path, violation):
+        """An encoded dot in an ordinary segment is a distinct browser path; full dot
+        segments still traverse, and encoded separators still fail closed."""
+        module = _sides(monkeypatch, tmp_path)[side]
+        origin = "https://docs.example.com"
+        entries = [{"origin": origin, "path_prefix": prefix}]
+&gt;       assert module._vs_scope_violation(entries, origin + path) == violation
+E       AssertionError: assert 'TASK_SCOPE_PAGE_PATH_OUTSIDE' == None
+E        +  where 'TASK_SCOPE_PAGE_PATH_OUTSIDE' = &lt;function _vs_scope_violation at 0x7ff07d8fe160&gt;([{'origin': 'https://docs.example.com', 'path_prefix': '/docs/a%2Eb'}], ('https://docs.example.com' + '/docs/a%2Eb/next'))
+E        +    where &lt;function _vs_scope_violation at 0x7ff07d8fe160&gt; = &lt;module 'van_egress_proxy_shared_rule' from '/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/deploy/van-browser-core/browser/egress_proxy.py'&gt;._vs_scope_violation
+
+tests/contracts/test_task_scope_shared_url_rule.py:107: AssertionError</failure></testcase><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/a%2Eb-/docs/a%2Ebc-TASK_SCOPE_PAGE_PATH_OUTSIDE-gateway]" time="0.005"><failure message="van_gateway.browser.task_scope.TaskScopeError: TASK_SCOPE_ENTRY_PATH_NOT_NORMAL">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7ff07db2a2d0&gt;
+tmp_path = PosixPath('/tmp/vscope-red/test_encoded_dot_paths_preserv12')
+side = 'gateway', prefix = '/docs/a%2Eb', path = '/docs/a%2Ebc'
+violation = 'TASK_SCOPE_PAGE_PATH_OUTSIDE'
+
+    @pytest.mark.parametrize("side", ["gateway", "harness", "egress_proxy"])
+    @pytest.mark.parametrize("prefix,path,violation", [
+        ("/docs/a.b", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb", None),
+        ("/docs/a%2Eb", "/docs/a.b", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb/next", None),
+        ("/docs/a%2Eb", "/docs/a%2Ebc", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2eb", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/", "/docs/%2e%2e%2fcheckout", "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"),
+        ("/docs/", "/docs/%2e%2e/checkout", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+    ])
+    def test_encoded_dot_paths_preserve_exact_scope_boundaries(monkeypatch, tmp_path, side, prefix, path, violation):
+        """An encoded dot in an ordinary segment is a distinct browser path; full dot
+        segments still traverse, and encoded separators still fail closed."""
+        module = _sides(monkeypatch, tmp_path)[side]
+        origin = "https://docs.example.com"
+        entries = [{"origin": origin, "path_prefix": prefix}]
+        assert module._vs_scope_violation(entries, origin + path) == violation
+        if side == "gateway":
+            from van_gateway.browser.task_scope import parse_scope_entry
+    
+&gt;           assert parse_scope_entry(origin + prefix, "docs.example.com").path_prefix == prefix
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/contracts/test_task_scope_shared_url_rule.py:111: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = 'https://docs.example.com/docs/a%2Eb', target_domain = 'docs.example.com'
+
+    def parse_scope_entry(raw: str, target_domain: str) -&gt; ScopeEntry:
+        """``https://host[:port][/path/prefix]`` -&gt; ScopeEntry. No query, fragment or userinfo;
+        the path must already be in the normal form the browser would load (review I6 M3: no
+        dot segments, backslashes or encoded separators), since the prefix is compared with
+        the normalised path of every page and destination."""
+        text = str(raw or "").strip()
+        try:
+            parts = urlsplit(text)
+            parts.port  # noqa: B018 - raises on a malformed port
+        except ValueError as exc:
+            raise TaskScopeError("TASK_SCOPE_ENTRY_INVALID") from exc
+        if parts.scheme not in ("http", "https") or not parts.hostname:
+            raise TaskScopeError("TASK_SCOPE_ENTRY_SCHEME_OR_HOST_INVALID")
+        if parts.username or parts.password or parts.query or parts.fragment:
+            raise TaskScopeError("TASK_SCOPE_ENTRY_INVALID")
+        whatwg = _vs_parse(text)
+        if whatwg is None:
+            raise TaskScopeError("TASK_SCOPE_ENTRY_INVALID")
+        if reserved_host(whatwg[1]) or reserved_host(parts.hostname):
+            raise TaskScopeError("TASK_SCOPE_RESERVED_HOST")  # unit G14
+        domain = str(target_domain or "").strip().lower().rstrip(".")
+        if not domain or not _host_within(whatwg[1], domain):
+            raise TaskScopeError("TASK_SCOPE_OUTSIDE_TARGET_DOMAIN")
+        path = parts.path or "/"
+        if whatwg[3] != path or _vs_ambiguous(path):
+&gt;           raise TaskScopeError("TASK_SCOPE_ENTRY_PATH_NOT_NORMAL")
+E           van_gateway.browser.task_scope.TaskScopeError: TASK_SCOPE_ENTRY_PATH_NOT_NORMAL
+
+backend/van_gateway/browser/task_scope.py:338: TaskScopeError</failure></testcase><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/a%2Eb-/docs/a%2Ebc-TASK_SCOPE_PAGE_PATH_OUTSIDE-harness]" time="0.005" /><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/a%2Eb-/docs/a%2Ebc-TASK_SCOPE_PAGE_PATH_OUTSIDE-egress_proxy]" time="0.005" /><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/a%2eb-/docs/a%2Eb-TASK_SCOPE_PAGE_PATH_OUTSIDE-gateway]" time="0.004"><failure message="van_gateway.browser.task_scope.TaskScopeError: TASK_SCOPE_ENTRY_PATH_NOT_NORMAL">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7ff07db26720&gt;
+tmp_path = PosixPath('/tmp/vscope-red/test_encoded_dot_paths_preserv15')
+side = 'gateway', prefix = '/docs/a%2eb', path = '/docs/a%2Eb'
+violation = 'TASK_SCOPE_PAGE_PATH_OUTSIDE'
+
+    @pytest.mark.parametrize("side", ["gateway", "harness", "egress_proxy"])
+    @pytest.mark.parametrize("prefix,path,violation", [
+        ("/docs/a.b", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb", None),
+        ("/docs/a%2Eb", "/docs/a.b", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2Eb", "/docs/a%2Eb/next", None),
+        ("/docs/a%2Eb", "/docs/a%2Ebc", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/a%2eb", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+        ("/docs/", "/docs/%2e%2e%2fcheckout", "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"),
+        ("/docs/", "/docs/%2e%2e/checkout", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+    ])
+    def test_encoded_dot_paths_preserve_exact_scope_boundaries(monkeypatch, tmp_path, side, prefix, path, violation):
+        """An encoded dot in an ordinary segment is a distinct browser path; full dot
+        segments still traverse, and encoded separators still fail closed."""
+        module = _sides(monkeypatch, tmp_path)[side]
+        origin = "https://docs.example.com"
+        entries = [{"origin": origin, "path_prefix": prefix}]
+        assert module._vs_scope_violation(entries, origin + path) == violation
+        if side == "gateway":
+            from van_gateway.browser.task_scope import parse_scope_entry
+    
+&gt;           assert parse_scope_entry(origin + prefix, "docs.example.com").path_prefix == prefix
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/contracts/test_task_scope_shared_url_rule.py:111: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = 'https://docs.example.com/docs/a%2eb', target_domain = 'docs.example.com'
+
+    def parse_scope_entry(raw: str, target_domain: str) -&gt; ScopeEntry:
+        """``https://host[:port][/path/prefix]`` -&gt; ScopeEntry. No query, fragment or userinfo;
+        the path must already be in the normal form the browser would load (review I6 M3: no
+        dot segments, backslashes or encoded separators), since the prefix is compared with
+        the normalised path of every page and destination."""
+        text = str(raw or "").strip()
+        try:
+            parts = urlsplit(text)
+            parts.port  # noqa: B018 - raises on a malformed port
+        except ValueError as exc:
+            raise TaskScopeError("TASK_SCOPE_ENTRY_INVALID") from exc
+        if parts.scheme not in ("http", "https") or not parts.hostname:
+            raise TaskScopeError("TASK_SCOPE_ENTRY_SCHEME_OR_HOST_INVALID")
+        if parts.username or parts.password or parts.query or parts.fragment:
+            raise TaskScopeError("TASK_SCOPE_ENTRY_INVALID")
+        whatwg = _vs_parse(text)
+        if whatwg is None:
+            raise TaskScopeError("TASK_SCOPE_ENTRY_INVALID")
+        if reserved_host(whatwg[1]) or reserved_host(parts.hostname):
+            raise TaskScopeError("TASK_SCOPE_RESERVED_HOST")  # unit G14
+        domain = str(target_domain or "").strip().lower().rstrip(".")
+        if not domain or not _host_within(whatwg[1], domain):
+            raise TaskScopeError("TASK_SCOPE_OUTSIDE_TARGET_DOMAIN")
+        path = parts.path or "/"
+        if whatwg[3] != path or _vs_ambiguous(path):
+&gt;           raise TaskScopeError("TASK_SCOPE_ENTRY_PATH_NOT_NORMAL")
+E           van_gateway.browser.task_scope.TaskScopeError: TASK_SCOPE_ENTRY_PATH_NOT_NORMAL
+
+backend/van_gateway/browser/task_scope.py:338: TaskScopeError</failure></testcase><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/a%2eb-/docs/a%2Eb-TASK_SCOPE_PAGE_PATH_OUTSIDE-harness]" time="0.005" /><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/a%2eb-/docs/a%2Eb-TASK_SCOPE_PAGE_PATH_OUTSIDE-egress_proxy]" time="0.004" /><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/-/docs/%2e%2e%2fcheckout-TASK_SCOPE_PAGE_PATH_AMBIGUOUS-gateway]" time="0.006" /><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/-/docs/%2e%2e%2fcheckout-TASK_SCOPE_PAGE_PATH_AMBIGUOUS-harness]" time="0.005" /><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/-/docs/%2e%2e%2fcheckout-TASK_SCOPE_PAGE_PATH_AMBIGUOUS-egress_proxy]" time="0.005" /><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/-/docs/%2e%2e/checkout-TASK_SCOPE_PAGE_PATH_OUTSIDE-gateway]" time="0.006" /><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/-/docs/%2e%2e/checkout-TASK_SCOPE_PAGE_PATH_OUTSIDE-harness]" time="0.005" /><testcase classname="tests.contracts.test_task_scope_shared_url_rule" name="test_encoded_dot_paths_preserve_exact_scope_boundaries[/docs/-/docs/%2e%2e/checkout-TASK_SCOPE_PAGE_PATH_OUTSIDE-egress_proxy]" time="0.006" /></testsuite></testsuites>

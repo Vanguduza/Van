@@ -1,0 +1,178 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.11.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :buildSrc:compileJava UP-TO-DATE
+> Task :buildSrc:compileGroovy NO-SOURCE
+> Task :buildSrc:processResources NO-SOURCE
+> Task :buildSrc:classes UP-TO-DATE
+> Task :buildSrc:jar UP-TO-DATE
+
+> Configure project :app
+Unable to initialize metrics, ensure /home/agent/.android is writable, details: /home/agent/.android/analytics.settings (No such file or directory)
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+
+> Task :app:assertVoiceAssetsAreSealed
+{"file_bytes": 224852871, "file_count": 45, "manifest_sha256": "7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30", "owner_profile_included": false, "status": "VERIFIED"}
+
+> Task :app:assertVoiceRuntimeIsShippable
+> Task :app:checkKotlinGradlePluginConfigurationErrors
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig
+> Task :app:generateDebugResValues
+> Task :app:checkDebugAarMetadata
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:parseDebugLocalResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :app:mergeDebugResources
+
+> Task :app:processDebugMainManifest
+/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/debug/AndroidManifest.xml Warning:
+	meta-data#app.rive.runtime.kotlin.RiveInitializer was tagged at AndroidManifest.xml:0 to remove other declarations but no other declaration present
+
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :app:javaPreCompileDebug
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:mergeDebugShaders
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:generateVanBuildProvenance
+> Task :app:processDebugResources
+> Task :app:mergeDebugAssets
+> Task :app:packageDebugUnitTestForUnitTest
+> Task :app:generateDebugUnitTestConfig
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:compressDebugAssets
+> Task :app:desugarDebugFileDependencies
+> Task :app:checkDebugDuplicateClasses
+> Task :app:compileDebugKotlin
+> Task :app:mergeExtDexDebug
+> Task :app:mergeLibDexDebug
+> Task :app:mergeDebugJniLibFolders
+> Task :app:mergeDebugNativeLibs
+
+> Task :app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libc++_shared.so, libjingle_peerconnection_so.so, libonnxruntime.so, librive-android.so, libsherpa-onnx-c-api.so, libsherpa-onnx-cxx-api.so, libsherpa-onnx-jni.so. Run with --info option to learn more.
+
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:generateDebugAndroidTestResValues
+> Task :app:extractProguardFiles
+> Task :app:processDebugAndroidTestManifest
+> Task :app:generateDebugAndroidTestBuildConfig
+> Task :app:checkDebugAndroidTestAarMetadata
+> Task :app:mapDebugAndroidTestSourceSetPaths
+> Task :app:generateDebugAndroidTestResources
+> Task :app:mergeDebugAndroidTestResources
+> Task :app:processDebugAndroidTestResources
+> Task :app:javaPreCompileDebugAndroidTest
+> Task :app:mergeDebugAndroidTestShaders
+> Task :app:compileDebugAndroidTestShaders NO-SOURCE
+> Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :app:mergeDebugAndroidTestAssets
+> Task :app:compressDebugAndroidTestAssets
+> Task :app:desugarDebugAndroidTestFileDependencies
+> Task :app:checkDebugAndroidTestDuplicateClasses
+> Task :app:mergeExtDexDebugAndroidTest
+> Task :app:mergeLibDexDebugAndroidTest
+> Task :app:mergeDebugAndroidTestJniLibFolders
+> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebugAndroidTest
+> Task :app:writeDebugAndroidTestSigningConfigVersions
+
+> Task :app:compileDebugKotlin
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/browser/BrowserActivity.kt:316:97 Unnecessary non-null assertion (!!) on a non-null receiver of type BrowserSessionSnapshot
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/browser/BrowserModels.kt:127:70 Type mismatch: inferred type is Nothing? but String was expected
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/browser/BrowserModels.kt:138:88 Type mismatch: inferred type is Nothing? but String was expected
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/browser/BrowserPhoneActions.kt:257:63 Unnecessary non-null assertion (!!) on a non-null receiver of type File
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/browser/BrowserPhoneActions.kt:294:97 Unnecessary non-null assertion (!!) on a non-null receiver of type File
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/command/CommandNavigationChrome.kt:35:56 'Chat: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.Chat
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/command/CommandNavigationChrome.kt:36:62 'ShowChart: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ShowChart
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/command/CommandNavigationChrome.kt:37:60 'MenuBook: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.MenuBook
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/command/attention/AttentionRoute.kt:269:9 Variable 'tokens' is never used
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/command/dev/DevHubRoutes.kt:43:42 Parameter 'nav' is never used
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/command/dev/DevHubRoutes.kt:86:41 Parameter 'nav' is never used
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/command/dev/DevHubRoutes.kt:123:43 Parameter 'nav' is never used
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/command/dev/DevHubRoutes.kt:149:41 Parameter 'nav' is never used
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/command/dev/DevHubRoutes.kt:213:43 Parameter 'nav' is never used
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/command/dev/DevHubRoutes.kt:239:64 Parameter 'nav' is never used
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/command/dev/DevPlanRoute.kt:51:58 Parameter 'nav' is never used
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/command/modules/WorkModules.kt:110:53 Unnecessary non-null assertion (!!) on a non-null receiver of type String
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/command/settings/OwnerPermissionGrantSection.kt:48:47 Unnecessary safe call on a non-null receiver of type JSONObject!
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/memory/MemoryModels.kt:175:65 There is more than one label with such a name in this scope
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/memory/MemoryRoute.kt:72:38 Parameter 'onBack' is never used
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt:130:9 Variable 'app' is never used
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/overlay/VanOverlayPanels.kt:123:47 Parameter 'accent' is never used
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/share/ShareIntakeActivity.kt:53:9 'overridePendingTransition(Int, Int): Unit' is deprecated. Deprecated in Java
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/trading/ui/HistoryScreen.kt:49:44 Parameter 'nav' is never used
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/trading/ui/PositionDetailScreen.kt:55:51 Parameter 'nav' is never used
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/trading/ui/PositionDetailScreen.kt:250:35 Condition 'assessment != null' is always 'true'
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/trading/ui/PositionDetailScreen.kt:260:33 Condition 'health != null' is always 'true'
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/trading/ui/PositionDetailScreen.kt:269:35 Condition 'proposal != null' is always 'true'
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/trading/ui/PotentialScreen.kt:39:46 Parameter 'nav' is never used
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/trading/ui/StrategiesScreen.kt:170:43 There is more than one label with such a name in this scope
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/trading/ui/StrategiesScreen.kt:178:43 There is more than one label with such a name in this scope
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/trading/ui/StrategiesScreen.kt:184:43 There is more than one label with such a name in this scope
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/trading/ui/TradingRoute.kt:159:36 'ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/trading/ui/TradingRoute.kt:178:64 'ShowChart: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ShowChart
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/visual/VanAuraPlan.kt:186:9 Parameter 'bodyEdgeDp' is never used
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/visual/VanStateArt.kt:11:21 Parameter 'state' is never used
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/visual/VanTheme.kt:87:20 'setter for statusBarColor: Int' is deprecated. Deprecated in Java
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/visual/VanTheme.kt:88:20 'setter for navigationBarColor: Int' is deprecated. Deprecated in Java
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/visual/VanVisualRuntime.kt:64:9 Parameter 'ownerArtAvailable' is never used
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/voice/SherpaSecondPassAsr.kt:65:23 Parameter 'context' is never used
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/voice/SpeakerEnrollmentManager.kt:74:65 Unnecessary non-null assertion (!!) on a non-null receiver of type SpeakerProfileStore.Record
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/main/java/com/dial/van/voice/SpeakerEnrollmentPanel.kt:168:13 'LinearProgressIndicator(Float, Modifier = ..., Color = ..., Color = ..., StrokeCap = ...): Unit' is deprecated. Use the overload that takes `progress` as a lambda
+
+> Task :app:compileDebugJavaWithJavac
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:processDebugJavaRes
+
+> Task :app:compileDebugUnitTestKotlin
+w: file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/src/test/java/com/dial/van/visual/RiveContractTest.kt:85:25 Unsafe use of a nullable receiver of type ClassLoader?
+
+> Task :app:dexBuilderDebug
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:testDebugUnitTest
+> Task :app:mergeDebugGlobalSynthetics
+> Task :app:mergeProjectDexDebug
+> Task :app:mergeDebugJavaResource
+> Task :app:generateDebugAndroidTestLintModel
+> Task :app:generateDebugLintReportModel
+> Task :app:generateDebugUnitTestLintModel
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:assembleDebug
+
+> Task :app:lintAnalyzeDebugAndroidTest
+Warning: Unable to initialize metrics, ensure /home/agent/.android is writable, details: /home/agent/.android/analytics.settings (No such file or directory)
+
+> Task :app:lintAnalyzeDebugUnitTest
+> Task :app:compileDebugAndroidTestKotlin
+> Task :app:compileDebugAndroidTestJavaWithJavac
+> Task :app:lintAnalyzeDebug
+> Task :app:dexBuilderDebugAndroidTest
+> Task :app:mergeDebugAndroidTestGlobalSynthetics
+> Task :app:processDebugAndroidTestJavaRes
+> Task :app:mergeDebugAndroidTestJavaResource
+> Task :app:mergeProjectDexDebugAndroidTest
+> Task :app:packageDebugAndroidTest
+> Task :app:createDebugAndroidTestApkListingFileRedirect
+> Task :app:assembleDebugAndroidTest
+
+> Task :app:lintReportDebug
+Wrote HTML report to file:///workspace/van-audit/canon-chromium-runtime-fix-2026-10-09/android/app/build/reports/lint-results-debug.html
+
+> Task :app:lintDebug
+
+BUILD SUCCESSFUL in 4m 5s
+88 actionable tasks: 86 executed, 2 up-to-date

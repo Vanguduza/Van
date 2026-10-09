@@ -1,0 +1,25 @@
+{
+  "changed_inputs": [],
+  "counts": {
+    "cases": 198,
+    "errors": 0,
+    "failed": 0,
+    "passed": 198,
+    "skipped": 0
+  },
+  "elapsed_seconds": 3.6,
+  "exit_code": 0,
+  "failed_cases": [],
+  "handset_cases_executed": 0,
+  "inputs_sha256": "43055e1edb4b421aa2d533c5ab20ddf60849303d57cbc2eb86c7128761c8946b",
+  "junit_sha256": "dc268a95577757d4936986affd22811dac9551e7a454b8537af7e7963752617e",
+  "live_production_qualified": false,
+  "log_sha256": "d753f9136e8aaec112b414bb5c2c58fa90c12ce96075e8ff8de47296fa0e1f6a",
+  "private_short_tmp_removed": true,
+  "qualified": true,
+  "recorded_at_utc": "2026-10-09T06:07:42.886118+00:00",
+  "revision": "805f3b67c2b9eb68d887cd700f9443f476e26132",
+  "schema_version": 1,
+  "skipped_cases": [],
+  "suite": "native-browser-services"
+}

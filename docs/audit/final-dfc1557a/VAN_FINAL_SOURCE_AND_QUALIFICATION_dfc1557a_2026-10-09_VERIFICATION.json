@@ -1,0 +1,16 @@
+{
+  "all_originals_unchanged": true,
+  "archive_bytes": 7925782,
+  "archive_path": "/workspace/van-audit/VAN_FINAL_SOURCE_AND_QUALIFICATION_dfc1557a_2026-10-09.zip",
+  "archive_sha256": "c402b4e1a340972bf5d888daa5184958661b58bf6eafcc63f567f6b7b9361b9d",
+  "inventory_path": "/workspace/van-audit/VAN_FINAL_SOURCE_AND_QUALIFICATION_dfc1557a_2026-10-09_INVENTORY.json",
+  "inventory_sha256": "bf057fbe8090d9648069ab5384de6d70de2d6e7feaee0bb1a0d1c9a2c2f9884d",
+  "physical_cases_executed": 0,
+  "producer_path": "/workspace/van-audit/package_canon_final_evidence_2026_10_09.py",
+  "producer_sha256": "8459feb1506ee007026f2a0298305d2e77ebdcecef97b6d033f775810e3e820d",
+  "production_deployed": false,
+  "record_kind": "LOCAL_EVIDENCE_ZIP_INDEPENDENT_READBACK",
+  "source_sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "verified_file_count": 115,
+  "zip_readback_matches_all_selected_original_bytes": true
+}

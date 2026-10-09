@@ -1,0 +1,31 @@
+{
+  "changed_inputs": [],
+  "counts": {
+    "cases": 1486,
+    "errors": 0,
+    "failed": 0,
+    "passed": 1485,
+    "skipped": 1
+  },
+  "elapsed_seconds": 49.55,
+  "exit_code": 0,
+  "failed_cases": [],
+  "handset_cases_executed": 0,
+  "inputs_sha256": "e162215c72653ac86232f6d7e51d124417c5abed2f26dc1fde7d7c2ace3e0283",
+  "junit_sha256": "ce34d5314871f087b2daf3eacc4274b9cc385fd59f728ac3be917854d55dd0b1",
+  "live_production_qualified": false,
+  "log_sha256": "8eebe8743c4ce79270c778bd399d097360145b7b0e4293d327dfbdca3caf769f",
+  "private_short_tmp_removed": true,
+  "qualified": true,
+  "recorded_at_utc": "2026-10-09T06:08:28.762323+00:00",
+  "revision": "805f3b67c2b9eb68d887cd700f9443f476e26132",
+  "schema_version": 1,
+  "skipped_cases": [
+    {
+      "detail": "/workspace/van-audit/canon-runtime-fix-2026-10-09/trading/tests/test_infra_live.py:54: local PostgreSQL not reachable",
+      "message": "local PostgreSQL not reachable",
+      "name": "trading.tests.test_infra_live::test_postgres_ledger_matches_sqlite_chain_and_detects_tampering"
+    }
+  ],
+  "suite": "trading"
+}

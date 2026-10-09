@@ -1,0 +1,8 @@
+.................                                                        [100%]
+=============================== warnings summary ===============================
+tests/test_harness_pseudo_hit_ownership.py: 17 warnings
+  /workspace/van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/websockets/sync/connection.py:247: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+    yield self.recv()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+17 passed, 17 warnings in 42.58s

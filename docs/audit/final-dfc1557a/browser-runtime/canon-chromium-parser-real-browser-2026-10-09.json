@@ -1,0 +1,1692 @@
+{
+  "actual_chromium_fixture_parse_count": 46,
+  "blocks_and_fixture_unchanged_during_check": true,
+  "blocks_byte_identical": true,
+  "boundary_observations": [
+    {
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/a%2Eb"
+      },
+      "expected_violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+      "input": "https://docs.example.com/docs/a%2Eb",
+      "prefix": "/docs/a.b",
+      "sides": {
+        "egress_proxy": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/a%2Eb"
+          },
+          "violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+        },
+        "gateway": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/a%2Eb"
+          },
+          "violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+        },
+        "harness": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/a%2Eb"
+          },
+          "violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+        }
+      }
+    },
+    {
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/a%2Eb"
+      },
+      "expected_violation": null,
+      "input": "https://docs.example.com/docs/a%2Eb",
+      "prefix": "/docs/a%2Eb",
+      "sides": {
+        "egress_proxy": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/a%2Eb"
+          },
+          "violation": null
+        },
+        "gateway": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/a%2Eb"
+          },
+          "violation": null
+        },
+        "harness": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/a%2Eb"
+          },
+          "violation": null
+        }
+      }
+    },
+    {
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/a.b"
+      },
+      "expected_violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+      "input": "https://docs.example.com/docs/a.b",
+      "prefix": "/docs/a%2Eb",
+      "sides": {
+        "egress_proxy": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/a.b"
+          },
+          "violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+        },
+        "gateway": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/a.b"
+          },
+          "violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+        },
+        "harness": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/a.b"
+          },
+          "violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+        }
+      }
+    },
+    {
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/a%2Eb/next"
+      },
+      "expected_violation": null,
+      "input": "https://docs.example.com/docs/a%2Eb/next",
+      "prefix": "/docs/a%2Eb",
+      "sides": {
+        "egress_proxy": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/a%2Eb/next"
+          },
+          "violation": null
+        },
+        "gateway": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/a%2Eb/next"
+          },
+          "violation": null
+        },
+        "harness": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/a%2Eb/next"
+          },
+          "violation": null
+        }
+      }
+    },
+    {
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/a%2Ebc"
+      },
+      "expected_violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+      "input": "https://docs.example.com/docs/a%2Ebc",
+      "prefix": "/docs/a%2Eb",
+      "sides": {
+        "egress_proxy": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/a%2Ebc"
+          },
+          "violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+        },
+        "gateway": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/a%2Ebc"
+          },
+          "violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+        },
+        "harness": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/a%2Ebc"
+          },
+          "violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+        }
+      }
+    },
+    {
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/a%2Eb"
+      },
+      "expected_violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+      "input": "https://docs.example.com/docs/a%2Eb",
+      "prefix": "/docs/a%2eb",
+      "sides": {
+        "egress_proxy": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/a%2Eb"
+          },
+          "violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+        },
+        "gateway": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/a%2Eb"
+          },
+          "violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+        },
+        "harness": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/a%2Eb"
+          },
+          "violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+        }
+      }
+    },
+    {
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/%2e%2e%2fcheckout"
+      },
+      "expected_violation": "TASK_SCOPE_PAGE_PATH_AMBIGUOUS",
+      "input": "https://docs.example.com/docs/%2e%2e%2fcheckout",
+      "prefix": "/docs/",
+      "sides": {
+        "egress_proxy": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/%2e%2e%2fcheckout"
+          },
+          "violation": "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"
+        },
+        "gateway": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/%2e%2e%2fcheckout"
+          },
+          "violation": "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"
+        },
+        "harness": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/docs/%2e%2e%2fcheckout"
+          },
+          "violation": "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"
+        }
+      }
+    },
+    {
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/checkout"
+      },
+      "expected_violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+      "input": "https://docs.example.com/docs/%2e%2e/checkout",
+      "prefix": "/docs/",
+      "sides": {
+        "egress_proxy": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/checkout"
+          },
+          "violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+        },
+        "gateway": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/checkout"
+          },
+          "violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+        },
+        "harness": {
+          "parsed": {
+            "origin": "https://docs.example.com",
+            "path": "/checkout"
+          },
+          "violation": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+        }
+      }
+    }
+  ],
+  "browser_network_navigation_calls": 0,
+  "chromium_executable_sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+  "chromium_version": "153.0.8010.12",
+  "exact_prefix_boundary_count": 8,
+  "fixture_sha256": "28ec605233db9958f90ef6339724bb4bf476534d855fac35bd800aba7657ce18",
+  "fixture_vector_count": 53,
+  "host_handset_calls": 0,
+  "result": "PASS",
+  "runtime_sides": 3,
+  "schema": "van.audit.chromium_parser_parity.v1",
+  "scope": "Uncommitted bounded parser candidate; shared blocks extracted from actual three runtime files.",
+  "shared_blocks": {
+    "egress_proxy": {
+      "file": "deploy/van-browser-core/browser/egress_proxy.py",
+      "sha256": "39dddc6238670f8cb1aaa90c7c7f304b9c0946f9e3f3ad8f438cc81aa6047f24"
+    },
+    "gateway": {
+      "file": "backend/van_gateway/browser/task_scope.py",
+      "sha256": "39dddc6238670f8cb1aaa90c7c7f304b9c0946f9e3f3ad8f438cc81aa6047f24"
+    },
+    "harness": {
+      "file": "deploy/van-browser-core/browser/harness_service.py",
+      "sha256": "39dddc6238670f8cb1aaa90c7c7f304b9c0946f9e3f3ad8f438cc81aa6047f24"
+    }
+  },
+  "source_head": "ffa18d578eae6dd2e484a60fa3fb912c4204635c",
+  "source_head_is_qualified_commit": false,
+  "vector_observations": [
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/ok"
+      },
+      "index": 0,
+      "input": "https://docs.example.com/docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/checkout/pay"
+      },
+      "index": 1,
+      "input": "https://docs.example.com/docs/../checkout/pay",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/checkout/pay"
+      },
+      "index": 2,
+      "input": "https://docs.example.com/docs/%2e%2e/checkout/pay",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/checkout/pay"
+      },
+      "index": 3,
+      "input": "https://docs.example.com/docs/%2E%2E/checkout/pay",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/checkout/pay"
+      },
+      "index": 4,
+      "input": "https://docs.example.com/docs/.%2e/checkout/pay",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/checkout/pay"
+      },
+      "index": 5,
+      "input": "https://docs.example.com/docs/%2e./checkout/pay",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/checkout/pay"
+      },
+      "index": 6,
+      "input": "https://docs.example.com/docs/..\\checkout/pay",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/ok"
+      },
+      "index": 7,
+      "input": "https://docs.example.com/docs/./ok",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/ok"
+      },
+      "index": 8,
+      "input": "https://docs.example.com/docs/%2e/ok",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/"
+      },
+      "index": 9,
+      "input": "https://docs.example.com/docs/..",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/%2e%2e%2fcheckout"
+      },
+      "index": 10,
+      "input": "https://docs.example.com/docs/%2e%2e%2fcheckout",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/%2e%2e%2fcheckout"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/%2e%2e%2fcheckout"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/%2e%2e%2fcheckout"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_PATH_AMBIGUOUS",
+        "gateway": "TASK_SCOPE_PAGE_PATH_AMBIGUOUS",
+        "harness": "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/%2e%2e%5ccheckout"
+      },
+      "index": 11,
+      "input": "https://docs.example.com/docs/%2e%2e%5ccheckout",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/%2e%2e%5ccheckout"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/%2e%2e%5ccheckout"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/%2e%2e%5ccheckout"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_PATH_AMBIGUOUS",
+        "gateway": "TASK_SCOPE_PAGE_PATH_AMBIGUOUS",
+        "harness": "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/ok"
+      },
+      "index": 12,
+      "input": "https://docs.example.com./docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/ok"
+      },
+      "index": 13,
+      "input": "https://DOCS.Example.COM/docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/ok"
+      },
+      "index": 14,
+      "input": "HTTPS://docs.example.com/docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/ok"
+      },
+      "index": 15,
+      "input": "https://docs.example.com:443/docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "http://docs.example.com",
+        "path": "/docs/ok"
+      },
+      "index": 16,
+      "input": "http://docs.example.com:80/docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "http://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "gateway": {
+          "origin": "http://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "harness": {
+          "origin": "http://docs.example.com",
+          "path": "/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com:8443",
+        "path": "/docs/ok"
+      },
+      "index": 17,
+      "input": "https://docs.example.com:8443/docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com:8443",
+          "path": "/docs/ok"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com:8443",
+          "path": "/docs/ok"
+        },
+        "harness": {
+          "origin": "https://docs.example.com:8443",
+          "path": "/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/ok"
+      },
+      "index": 18,
+      "input": "https://user:pw@docs.example.com/docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://evil.example.net",
+        "path": "/docs/ok"
+      },
+      "index": 19,
+      "input": "https://docs.example.com@evil.example.net/docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://evil.example.net",
+          "path": "/docs/ok"
+        },
+        "gateway": {
+          "origin": "https://evil.example.net",
+          "path": "/docs/ok"
+        },
+        "harness": {
+          "origin": "https://evil.example.net",
+          "path": "/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/@evil.example.net/docs/ok"
+      },
+      "index": 20,
+      "input": "https://docs.example.com\\@evil.example.net/docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/@evil.example.net/docs/ok"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/@evil.example.net/docs/ok"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/@evil.example.net/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://evil.example.net",
+        "path": "/@docs.example.com/docs/ok"
+      },
+      "index": 21,
+      "input": "https://evil.example.net\\@docs.example.com/docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://evil.example.net",
+          "path": "/@docs.example.com/docs/ok"
+        },
+        "gateway": {
+          "origin": "https://evil.example.net",
+          "path": "/@docs.example.com/docs/ok"
+        },
+        "harness": {
+          "origin": "https://evil.example.net",
+          "path": "/@docs.example.com/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com.evil.example.net",
+        "path": "/docs/ok"
+      },
+      "index": 22,
+      "input": "https://docs.example.com%2eevil.example.net/docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com.evil.example.net",
+          "path": "/docs/ok"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com.evil.example.net",
+          "path": "/docs/ok"
+        },
+        "harness": {
+          "origin": "https://docs.example.com.evil.example.net",
+          "path": "/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://www.docs.example.com",
+        "path": "/docs/ok"
+      },
+      "index": 23,
+      "input": "https://www.docs.example.com/docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://www.docs.example.com",
+          "path": "/docs/ok"
+        },
+        "gateway": {
+          "origin": "https://www.docs.example.com",
+          "path": "/docs/ok"
+        },
+        "harness": {
+          "origin": "https://www.docs.example.com",
+          "path": "/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/ok"
+      },
+      "index": 24,
+      "input": "https:\\\\docs.example.com/docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/checkout"
+      },
+      "index": 25,
+      "input": " https://docs.example.com/docs/../checkout",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/checkout"
+      },
+      "index": 26,
+      "input": "https://docs.example.com/docs/\t../checkout",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/ok"
+      },
+      "index": 27,
+      "input": "https://docs.ex\nample.com/docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/a%20b"
+      },
+      "index": 28,
+      "input": "https://docs.example.com/docs/a b",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/a%20b"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/a%20b"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/a%20b"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/ok"
+      },
+      "index": 29,
+      "input": "https://docs.example.com/docs/ok?x=1#frag",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": null,
+      "index": 30,
+      "input": "https:docs.example.com/docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_URL_INVALID",
+        "gateway": "TASK_SCOPE_PAGE_URL_INVALID",
+        "harness": "TASK_SCOPE_PAGE_URL_INVALID"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": null,
+      "index": 31,
+      "input": "https:///docs.example.com/docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_URL_INVALID",
+        "gateway": "TASK_SCOPE_PAGE_URL_INVALID",
+        "harness": "TASK_SCOPE_PAGE_URL_INVALID"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": null,
+      "index": 32,
+      "input": "https://[::1]/docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_URL_INVALID",
+        "gateway": "TASK_SCOPE_PAGE_URL_INVALID",
+        "harness": "TASK_SCOPE_PAGE_URL_INVALID"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": null,
+      "index": 33,
+      "input": "javascript:pay()",
+      "parsed_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_URL_NOT_HTTP",
+        "gateway": "TASK_SCOPE_PAGE_URL_NOT_HTTP",
+        "harness": "TASK_SCOPE_PAGE_URL_NOT_HTTP"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": null,
+      "index": 34,
+      "input": "data:text/html,x",
+      "parsed_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_URL_NOT_HTTP",
+        "gateway": "TASK_SCOPE_PAGE_URL_NOT_HTTP",
+        "harness": "TASK_SCOPE_PAGE_URL_NOT_HTTP"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": null,
+      "index": 35,
+      "input": "",
+      "parsed_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_URL_UNKNOWN",
+        "gateway": "TASK_SCOPE_PAGE_URL_UNKNOWN",
+        "harness": "TASK_SCOPE_PAGE_URL_UNKNOWN"
+      }
+    },
+    {
+      "base": "https://docs.example.com/docs/guide/page",
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/next"
+      },
+      "index": 36,
+      "input": "/docs/next",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/next"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/next"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/next"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": "https://docs.example.com/docs/guide/page",
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/checkout/pay"
+      },
+      "index": 37,
+      "input": "/checkout/pay",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+      }
+    },
+    {
+      "base": "https://docs.example.com/docs/guide/page",
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/checkout/pay"
+      },
+      "index": 38,
+      "input": "../../checkout/pay",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout/pay"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+      }
+    },
+    {
+      "base": "https://docs.example.com/docs/guide/page",
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/x"
+      },
+      "index": 39,
+      "input": "../x",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/x"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/x"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/x"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": "https://docs.example.com/docs/guide/page",
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/y"
+      },
+      "index": 40,
+      "input": "x/../../y",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/y"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/y"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/y"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": "https://docs.example.com/docs/guide/page",
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/checkout"
+      },
+      "index": 41,
+      "input": "%2e%2e/%2e%2e/checkout",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+      }
+    },
+    {
+      "base": "https://docs.example.com/docs/guide/page",
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/checkout"
+      },
+      "index": 42,
+      "input": "..\\..\\checkout",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/checkout"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+      }
+    },
+    {
+      "base": "https://docs.example.com/docs/guide/page",
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/guide/page"
+      },
+      "index": 43,
+      "input": "?q=1",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/guide/page"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/guide/page"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/guide/page"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": "https://docs.example.com/docs/guide/page",
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/guide/page"
+      },
+      "index": 44,
+      "input": "#top",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/guide/page"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/guide/page"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/guide/page"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": "https://docs.example.com/docs/guide/page",
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/guide/page"
+      },
+      "index": 45,
+      "input": "",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/guide/page"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/guide/page"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/guide/page"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_URL_UNKNOWN",
+        "gateway": "TASK_SCOPE_PAGE_URL_UNKNOWN",
+        "harness": "TASK_SCOPE_PAGE_URL_UNKNOWN"
+      }
+    },
+    {
+      "base": "https://docs.example.com/docs/guide/page",
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/ok"
+      },
+      "index": 46,
+      "input": "//docs.example.com/docs/ok",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/ok"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": "https://docs.example.com/docs/guide/page",
+      "chromium_actual": {
+        "origin": "https://evil.example.net",
+        "path": "/x"
+      },
+      "index": 47,
+      "input": "\\\\evil.example.net/x",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://evil.example.net",
+          "path": "/x"
+        },
+        "gateway": {
+          "origin": "https://evil.example.net",
+          "path": "/x"
+        },
+        "harness": {
+          "origin": "https://evil.example.net",
+          "path": "/x"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_ORIGIN_OUTSIDE"
+      }
+    },
+    {
+      "base": "https://docs.example.com/docs/guide/page",
+      "chromium_actual": null,
+      "index": 48,
+      "input": "///evil.example.net/x",
+      "parsed_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_URL_INVALID",
+        "gateway": "TASK_SCOPE_PAGE_URL_INVALID",
+        "harness": "TASK_SCOPE_PAGE_URL_INVALID"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/%2F"
+      },
+      "index": 49,
+      "input": "https://docs.example.com/docs/%2F",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/%2F"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/%2F"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/%2F"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_PATH_AMBIGUOUS",
+        "gateway": "TASK_SCOPE_PAGE_PATH_AMBIGUOUS",
+        "harness": "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/y"
+      },
+      "index": 50,
+      "input": "https://docs.example.com/%64ocs/%2E%2E/y",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/y"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/y"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/y"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "gateway": "TASK_SCOPE_PAGE_PATH_OUTSIDE",
+        "harness": "TASK_SCOPE_PAGE_PATH_OUTSIDE"
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/a%2Eb"
+      },
+      "index": 51,
+      "input": "https://docs.example.com/docs/a%2Eb",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/a%2Eb"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/a%2Eb"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/a%2Eb"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    },
+    {
+      "base": null,
+      "chromium_actual": {
+        "origin": "https://docs.example.com",
+        "path": "/docs/%41%7e"
+      },
+      "index": 52,
+      "input": "https://docs.example.com/docs/%41%7e",
+      "parsed_by_side": {
+        "egress_proxy": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/%41%7e"
+        },
+        "gateway": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/%41%7e"
+        },
+        "harness": {
+          "origin": "https://docs.example.com",
+          "path": "/docs/%41%7e"
+        }
+      },
+      "violation_by_side": {
+        "egress_proxy": null,
+        "gateway": null,
+        "harness": null
+      }
+    }
+  ]
+}

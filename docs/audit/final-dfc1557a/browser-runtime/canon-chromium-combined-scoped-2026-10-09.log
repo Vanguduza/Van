@@ -1,0 +1,20 @@
+........................................................................ [ 10%]
+........................................................................ [ 21%]
+........................................................................ [ 32%]
+........................................................................ [ 43%]
+........................................................................ [ 54%]
+........................................................................ [ 65%]
+........................................................................ [ 76%]
+........................................................................ [ 87%]
+........................................................................ [ 98%]
+.......                                                                  [100%]
+=============================== warnings summary ===============================
+backend/tests/test_browser_review_i5_task_scope.py: 14 warnings
+backend/tests/test_browser_review_i6_scope.py: 13 warnings
+backend/tests/test_harness_elements.py: 3 warnings
+backend/tests/test_harness_pseudo_hit_ownership.py: 17 warnings
+  /workspace/van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/websockets/sync/connection.py:247: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+    yield self.recv()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+655 passed, 47 warnings in 206.06s (0:03:26)

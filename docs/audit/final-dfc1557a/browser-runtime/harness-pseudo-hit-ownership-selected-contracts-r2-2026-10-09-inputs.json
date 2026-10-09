@@ -1,0 +1,42 @@
+{
+  "checkout": "/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09",
+  "base_revision": "ffa18d578eae6dd2e484a60fa3fb912c4204635c",
+  "scope": "New real-Chromium pseudo ownership file; selected sources only; no full backend, live host or phone qualification",
+  "selected_source_sha256_before": {
+    "backend/tests/test_harness_pseudo_hit_ownership.py": "d7f82ce7718b2fe6ea6ab7dd83c2fe1bf436e7558a256c856c3fd6e5aef528b5",
+    "deploy/van-browser-core/browser/harness_service.py": "8468a3fb849ce989d26f9a6b09ff35b37dbc1e035af405501b8d47c7d109bff5",
+    "deploy/van-browser-core/browser/egress_proxy.py": "ae8de217cb3ea2ac49e5703a39653e26986480fb8a651945c857e7da77493dbe",
+    "backend/van_gateway/browser/action_risk.py": "a40c06f9b514959033da97f7c75a0d64cbc71d9ba4b53e04916ac4b2d90f68a9",
+    "backend/van_gateway/browser/adapters.py": "de6b595cdbbbeeee616f3717853f37d9cecc3635a616e522c7a56bfc46b9c989",
+    "backend/van_gateway/browser/interaction_router.py": "5a32e704a6c92e01b1bbed773828052308c4e3ea45458ebc8349aa50128a5931",
+    "backend/van_gateway/browser/task_scope.py": "692b76d358c3423413bcbfdc39d410e4bc345717129de7cd1db2e4eeb5a92800",
+    "backend/van_gateway/browser/models.py": "d566f4cd7671fd399f57a809111ead7a588569a729938328ae8d193480067a22",
+    "backend/van_gateway/config.py": "ec9e7cd27d98891513ec225014d7f93a440b4ec58125880718853745bc386c11",
+    "backend/tests/test_browser_review_i5_task_scope.py": "092641283a24ea3a87c2b4a7788a3a9434ce392593e6e5f63723365fbe0fd647",
+    "backend/tests/test_harness_elements.py": "3fffbd1ba46fdc48e0ed43ae58947802f51da64b8e70c56ba1edca0787f2a1d0",
+    "backend/tests/test_browser_interaction_router.py": "7ec745ba48382be1f09fe0720f83397ecda98a9fffadb6bb3203abca959a7e8f",
+    "backend/tests/test_browser_api.py": "b83d83c54aa7384b6f01ff1e1dc5b31e3e515bf443c80278f07cdd2c77d8fd75",
+    "backend/tests/cdp_harness_kit.py": "316bcf7bffb667c07e4ea8b23b02e4f027560946f4bce38c772c5ad16a77e6b8",
+    "backend/tests/fixtures/review_i5/media.html": "72239cfc9d9acb7fbc44e0e17914ddc0c7d3b9568d32c5d82dd29e899399fd3b",
+    "backend/pytest.ini": "aca3e25694a76c9f380ffd4e58d1681e51c9a8ad46e9eed607e83ebcfe6ac13a",
+    "backend/requirements.txt": "9ec6fd1e989d29ffc1732395591daa14d7f1653cea43927822e4359516f064a4"
+  },
+  "command": [
+    "/workspace/van-audit/canon-backend-venv-2026-10-09/bin/python",
+    "-u",
+    "-m",
+    "pytest",
+    "-q",
+    "-ra",
+    "backend/tests/test_harness_pseudo_hit_ownership.py",
+    "--junitxml=/workspace/van-audit/harness-pseudo-hit-ownership-selected-contracts-r2-2026-10-09.xml",
+    "--basetemp=/tmp/vhpo-r2-20261009",
+    "-o",
+    "cache_dir=/workspace/van-audit/harness-pseudo-hit-ownership-selected-contracts-r2-2026-10-09-cache"
+  ],
+  "tool_binaries_sha256": {
+    "/workspace/van-audit/canon-backend-venv-2026-10-09/bin/python": "fa67443527ed9647f760d807e2a38f26340757123e643c4639cf273ed15d5ea7",
+    "/workspace/.onboarding/playwright/chromium-1243/chrome-linux64/chrome": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e"
+  },
+  "runner_sha256": "975d43eb623314fc0dfa3a7c1441ae244b52fe7992dd5c1dc6629f811d964fde"
+}

@@ -1,0 +1,39 @@
+{
+  "record_kind": "NATIVE_ARTEMIS_SCHEMA_DISCOVERY",
+  "route": "NATIVE_ARTEMIS_MCP_DIRECT_COMMANDER",
+  "root": "/unit/native-artemis-not-live",
+  "tools": {
+    "mobile_manage_task": {},
+    "mobile_inspect_trace": {},
+    "mobile_get_device_state": {},
+    "mobile_diagnose": {},
+    "mobile_run_task": {
+      "properties": {
+        "device_serial": {
+          "type": "string"
+        },
+        "expected_output_desc": {
+          "type": "string"
+        },
+        "locked_app_package": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "task_desc": {
+          "type": "string"
+        },
+        "verification_level": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_desc"
+      ]
+    }
+  },
+  "source_fixture": true,
+  "actual_discovery": false,
+  "notice": "Synthetic source-contract fixture. No live tool was discovered and no runtime/device was admitted."
+}

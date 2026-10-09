@@ -1,0 +1,67 @@
+{
+  "base_revision": "ffa18d578eae6dd2e484a60fa3fb912c4204635c",
+  "dependencies_modified": false,
+  "external_results": {
+    "final": {
+      "errors": 0,
+      "failures": 0,
+      "receipt": "/workspace/van-audit/canon-chromium-parser-boundary-final-2026-10-09.xml",
+      "sha256": "a412c9849ec48d7106e846d7f6c1efed953da104fab7599481a765578bc46747",
+      "skipped": 0,
+      "tests": 28
+    },
+    "real_chromium": {
+      "actual_chromium_fixture_parse_count": 46,
+      "chromium_version": "153.0.8010.12",
+      "exact_prefix_boundary_count": 8,
+      "fixture_vector_count": 53,
+      "receipt": "/workspace/van-audit/canon-chromium-parser-real-browser-2026-10-09.json",
+      "runtime_sides": 3,
+      "sha256": "fd31edf201a72a23aa0c3009ed0adb2f77601dbaccaea17a9a9081f3ad8b74c2"
+    },
+    "red": {
+      "errors": 0,
+      "failures": 12,
+      "receipt": "/workspace/van-audit/canon-chromium-parser-boundary-red-2026-10-09.xml",
+      "sha256": "d9e3131a70207dcd67937d5781c48dcbb9e0a92fda59946d1150b167726060b2",
+      "skipped": 0,
+      "tests": 24
+    }
+  },
+  "fixture_change": "Three incorrect expected pathname values corrected; all violation decisions unchanged.",
+  "harness_file_also_contains_independently_owned_geometry_changes": true,
+  "ledger_registry_or_commits_created": false,
+  "original_frozen_clones": {
+    "/workspace/van-audit/canon-android-build-fix-2026-10-09": {
+      "head": "ffa18d578eae6dd2e484a60fa3fb912c4204635c",
+      "tracked_changes": "",
+      "untouched_by_this_agent": true
+    },
+    "/workspace/van-audit/canon-runtime-fix-2026-10-09": {
+      "head": "805f3b67c2b9eb68d887cd700f9443f476e26132",
+      "tracked_changes": "",
+      "untouched_by_this_agent": true
+    }
+  },
+  "physical_handset_calls": 0,
+  "qualified_commit": false,
+  "regression_count": 24,
+  "runtime_change": "Preserve percent-encoded dots except full WHATWG dot segments; retain ambiguous-separator refusal and strict exact-prefix matching.",
+  "schema": "van.audit.chromium_parser_source_fix.v1",
+  "source_authored_tests": "tests/contracts/test_task_scope_shared_url_rule.py",
+  "source_directory": "/workspace/van-audit/canon-chromium-runtime-fix-2026-10-09",
+  "source_files": {
+    "backend/tests/fixtures/task_scope/url_vectors.v1.json": "28ec605233db9958f90ef6339724bb4bf476534d855fac35bd800aba7657ce18",
+    "backend/van_gateway/browser/task_scope.py": "692b76d358c3423413bcbfdc39d410e4bc345717129de7cd1db2e4eeb5a92800",
+    "deploy/van-browser-core/browser/egress_proxy.py": "ae8de217cb3ea2ac49e5703a39653e26986480fb8a651945c857e7da77493dbe",
+    "deploy/van-browser-core/browser/harness_service.py": "8468a3fb849ce989d26f9a6b09ff35b37dbc1e035af405501b8d47c7d109bff5",
+    "tests/contracts/test_task_scope_shared_url_rule.py": "a314f24442f6f6fb4e25590ef47fecfce8c024670965e87f9dcf2583ac0ec49b"
+  },
+  "tracked_files_modified_by_parser_agent": [
+    "backend/van_gateway/browser/task_scope.py",
+    "deploy/van-browser-core/browser/harness_service.py",
+    "deploy/van-browser-core/browser/egress_proxy.py",
+    "backend/tests/fixtures/task_scope/url_vectors.v1.json",
+    "tests/contracts/test_task_scope_shared_url_rule.py"
+  ]
+}

@@ -1,0 +1,26 @@
+# VAN final source and local qualification
+
+Application source `dfc1557ab99ad8d41cf84714e1bb671e89b045e6` is published on `codex/van-canon-runtime-closure-2026-10-09`. The corrected application passes its complete backend run and Android checks. Project Truth admission and actual production-host acceptance remain unresolved; physical handset execution is **0/826**. Main was not merged and no production service or handset was changed by this cloud work.
+
+| Scope | Actual result | Scope limit |
+|---|---|---|
+| Full backend at `dfc1557a` | 5,119 passed, 5 skipped; no failures/errors | Five explicit applicability/environment skips; controlled services and real Chromium, not production-host acceptance |
+| Full contracts at `dfc1557a` | 1,521 passed, one Project Truth history failure, 5 privileged kernel skips | Admission stays RED; no firewall proof inferred from skips |
+| Android at `dfc1557a` | 1,282 JVM + 203 app tests; lint 0 errors/88 warnings | Debug APK; instrumentation assembled, unexecuted |
+| Actual APK native alignment | All 7 arm64 libraries and SDK zipalign passed 16KiB checks | No production signer/profile or handset qualification |
+| Affected trading consumers at `dfc1557a` | 18 passed | Remaining component evidence retained through separate explicit input/case equivalence on 805f |
+| Registry and native source contracts | 19 + 39 passed; 399 source inputs bound | Synthetic native schema; no actual discovery or handset evidence |
+
+The code corrections enforce typed automation predicates; safe terminal SSE refusal and cancellation cleanup; independent browser profile egress; non-public IP refusal; signed APK source/connection provenance; resident Android deep-link navigation; strict installer/native handset identity; and honest legacy authority and qualifier diagnostics. The final Chromium fixes preserve encoded dots in ordinary path segments while refusing ambiguous separators, and accept only fresh direct own-pseudo hits while retaining overlay, nested-control, binding and event guards. Their combined 655-case scoped run and original failing-case receipts remain separately bound and overlap the complete runs.
+
+The frontend design registry supplies **42 feature groups, 105 functions, 78 surfaces, 432 endpoints and 251 schema components**. Its 5,230 current citations and 588 original historical containers are preserved. Use the [registry guide](https://github.com/Vanguduza/Van/blob/dfc1557ab99ad8d41cf84714e1bb671e89b045e6/docs/audit/OWNER_FRONTEND_REGISTRY_GUIDE.md) and searchable contract for the redesign. The native 826-case source matrix covers happy, error, refusal and recovery paths; all physical execution remains pending.
+
+CORE_ONLY_V2 places gateway and product Hermes profile `van` on **van-trading-core**, with direct native Artemis on **dial-control**, outside Hermes engineering actuation. The genuine owner release and signed provisioning path supplies Android's connection values; it has no owner-facing host/token/CA/model configuration. The cloud-built debug artifact retains its historical debug profile and is not an install candidate for owner acceptance. Its SHA256 is `afaf6371fb3dd536e37402939b6945a6e4222ff625710e08bb18c64750543c0e`.
+
+Reusable setup was executed against an independent exact-source HTTPS checkout, and complete `install_script` / `start_skill` contents were saved as a draft. Review/save and publish through environment settings to activate it. Remove the obsolete unbound `DIAL_MCP_ACCESS_TOKEN` requirement during that review: the tested installer does not use it, and the draft API only permits removal in the review UI. This requirement is separate from native DIAL admin authentication. Existing original checkouts were preserved; neither draft saving nor this independent checkout test proves fresh-task snapshot restoration.
+
+Before S24 testing, the existing tool-enabled DIAL session must independently locate protected production bindings, complete source admission, produce owner-signed release/provisioning and rollback evidence, and qualify actual services/providers/TLS/ingress/kernel fences. Join those matching original receipts into PRE_PHONE_PASS before any phone effect. Then refresh the paired private wireless endpoint and require raw serial `RFCX2054F5W` and raw model `SM-S928B`; the old endpoint and sanitized device-list model are insufficient. Execute all 826 cases with native traces and independent effect/refusal readbacks.
+
+The repository's [first-adoption instruction](https://github.com/Vanguduza/Van/blob/296d647d8755b6036ddb6bc66a5526b78db07029/tools/ci/README.md#L162-L168) says: “The first landing of this change is therefore the owner's explicit act (merge with the old check red, or a direct push by the integrator), once.” PR94 at exact 296d647d8755b6036ddb6bc66a5526b78db07029 is framework-only. It does not approve application history or all 28 authorization records; separate trusted intake remains required. No authorization, signed approval or enforcement baseline was invented here.
+
+The [machine report](VAN_FINAL_QUALIFICATION_REVIEW_dfc1557a_2026-10-09.json) links original result/input/log/JUnit receipts and explicit equivalence scopes. Counts are not added across overlapping runs. Earlier diagnostics remain intact.

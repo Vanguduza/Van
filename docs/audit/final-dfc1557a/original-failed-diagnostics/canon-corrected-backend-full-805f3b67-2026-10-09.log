@@ -1,0 +1,184 @@
+........................................................................ [  1%]
+........................................................................ [  2%]
+........................................................................ [  4%]
+........................................................................ [  5%]
+........................................................................ [  7%]
+........................................................................ [  8%]
+........................................................................ [  9%]
+........................................................................ [ 11%]
+........................................................................ [ 12%]
+........................................................................ [ 14%]
+........................................................................ [ 15%]
+...................................................................s.... [ 16%]
+........................................................................ [ 18%]
+........................................................................ [ 19%]
+........................................................................ [ 21%]
+........................................................................ [ 22%]
+........................................................................ [ 23%]
+........................................................................ [ 25%]
+........................................................................ [ 26%]
+........................................................................ [ 28%]
+........................................................................ [ 29%]
+........................................................................ [ 31%]
+........................................................................ [ 32%]
+........................................................................ [ 33%]
+........................................................................ [ 35%]
+........................................................................ [ 36%]
+........................................................................ [ 38%]
+......F................................................................F [ 39%]
+........................................................................ [ 40%]
+........................................................................ [ 42%]
+........................................................................ [ 43%]
+........................................................................ [ 45%]
+........................................................................ [ 46%]
+........................................................................ [ 47%]
+........................................................................ [ 49%]
+........................................................................ [ 50%]
+........................................................................ [ 52%]
+........................................................................ [ 53%]
+........................................................................ [ 54%]
+........................................................................ [ 56%]
+........................................................................ [ 57%]
+........................................................................ [ 59%]
+........................................................................ [ 60%]
+........................................................................ [ 62%]
+........................................................................ [ 63%]
+........................................................................ [ 64%]
+.................s...................................................... [ 66%]
+........................................................................ [ 67%]
+....
+B2 FIXTURE corpus stats (not a live measurement)
+  dds57: {"eligibility_rate": 0.2105, "eligible": 12, "measurement_kind": "FIXTURE_CORPUS_NOT_LIVE", "per_class": {"CREDENTIAL": 9, "OWNER_PRIVATE": 19, "POLICY_DENIED": 10, "PUBLIC_ELIGIBLE": 8, "SANITIZABLE_ELIGIBLE": 4, "TRADING_PROTECTED": 7}, "policy_rejection_rate": 0.1754, "privacy_rejection_rate": 0.614, "total": 57}
+  adversarial: {"eligibility_rate": 0.2, "eligible": 9, "measurement_kind": "FIXTURE_CORPUS_NOT_LIVE", "per_class": {"CREDENTIAL": 2, "OWNER_PRIVATE": 26, "POLICY_DENIED": 8, "PUBLIC_ELIGIBLE": 1, "SANITIZABLE_ELIGIBLE": 8}, "policy_rejection_rate": 0.1778, "privacy_rejection_rate": 0.6222, "total": 45}
+  combined: {"eligibility_rate": 0.2059, "eligible": 21, "measurement_kind": "FIXTURE_CORPUS_NOT_LIVE", "per_class": {"CREDENTIAL": 11, "OWNER_PRIVATE": 45, "POLICY_DENIED": 18, "PUBLIC_ELIGIBLE": 9, "SANITIZABLE_ELIGIBLE": 12, "TRADING_PROTECTED": 7}, "policy_rejection_rate": 0.1765, "privacy_rejection_rate": 0.6176, "total": 102}
+.....................................s................ss............ [ 69%]
+........................................................................ [ 70%]
+........................................................................ [ 71%]
+........................................................................ [ 73%]
+........................................................................ [ 74%]
+........................................................................ [ 76%]
+........................................................................ [ 77%]
+........................................................................ [ 78%]
+........................................................................ [ 80%]
+........................................................................ [ 81%]
+........................................................................ [ 83%]
+........................................................................ [ 84%]
+........................................................................ [ 85%]
+........................................................................ [ 87%]
+........................................................................ [ 88%]
+........................................................................ [ 90%]
+........................................................................ [ 91%]
+........................................................................ [ 93%]
+........................................................................ [ 94%]
+........................................................................ [ 95%]
+........................................................................ [ 97%]
+........................................................................ [ 98%]
+...................................................................      [100%]
+=================================== FAILURES ===================================
+_______ test_major5_image_and_css_names_are_text_and_empty_names_are_a4 ________
+
+chromium = (<module 'van_harness_service_elements' from '/workspace/van-audit/canon-runtime-fix-2026-10-09/deploy/van-browser-cor...pe._Pages object at 0x7f3831ecb4d0>, <van_gateway.browser.adapters.HttpBrowserHarnessAdapter object at 0x7f3831e6aff0>)
+
+    async def test_major5_image_and_css_names_are_text_and_empty_names_are_a4(chromium):
+        _m, pw, harness = chromium
+        _goto(pw, "/i5/media")
+        img = (await harness.describe(_task(), "#imgbtn"))["element"]
+        assert "pay-now.png" in img["media"]
+        assert "checkout-button.svg" in (await harness.describe(_task(), "#bg"))["element"]["media"]
+        assert "Pay" in (await harness.describe(_task(), "#css"))["element"]["media"]
+        for loc in ("#imgbtn", "#bg", "#css"):
+            result, seen = await _route(pw, harness, "/i5/media", **_det("click", loc))
+            assert _lane4(result) and _money(seen) == [], (loc, result.reasons)
+>           assert any("R8_EMPTY_NAME" in r for r in result.reasons), result.reasons
+E           AssertionError: ['DETERMINISTIC_TARGET_UNRESOLVED:TARGET_OCCLUDED', 'DETERMINISTIC_ACTION_RISK:R6_UNRESOLVED_TARGET', 'DETERMINISTIC_ACTION_NOT_AUTOMATABLE:A4', 'OWNER_TAKEOVER:DETERMINISTIC_ACTION_REQUIRES_OWNER']
+E           assert False
+E            +  where False = any(<generator object test_major5_image_and_css_names_are_text_and_empty_names_are_a4.<locals>.<genexpr> at 0x7f3830db7c60>)
+
+backend/tests/test_browser_review_i5_task_scope.py:562: AssertionError
+----------------------------- Captured stdout call -----------------------------
+[van-browser-harness] 127.0.0.1 "POST /describe HTTP/1.1" 200 -
+[van-browser-harness] 127.0.0.1 "POST /describe HTTP/1.1" 200 -
+[van-browser-harness] 127.0.0.1 "POST /describe HTTP/1.1" 200 -
+[van-browser-harness] 127.0.0.1 "POST /describe HTTP/1.1" 200 -
+[van-browser-harness] 127.0.0.1 "POST /release HTTP/1.1" 200 -
+[van-browser-harness] 127.0.0.1 "POST /describe HTTP/1.1" 200 -
+[van-browser-harness] 127.0.0.1 "POST /release HTTP/1.1" 200 -
+[van-browser-harness] 127.0.0.1 "POST /describe HTTP/1.1" 200 -
+[van-browser-harness] 127.0.0.1 "POST /release HTTP/1.1" 200 -
+______________ test_m3_vectors_match_real_chromiums_whatwg_parser ______________
+
+chromium = (<module 'van_harness_service_elements' from '/workspace/van-audit/canon-runtime-fix-2026-10-09/deploy/van-browser-cor...pe._Pages object at 0x7f3831e5c2f0>, <van_gateway.browser.adapters.HttpBrowserHarnessAdapter object at 0x7f3831d22a20>)
+
+    async def test_m3_vectors_match_real_chromiums_whatwg_parser(chromium):
+        """Every vector the shared rule parses, it parses as Chromium's URL parser does (origin,
+        trailing host dot aside, and path). The ones it refuses are refused (fail closed)."""
+        _m, pw, _h = chromium
+        checked = 0
+        for vector in VECTORS["vectors"]:
+            if vector["parsed"] is None:
+                continue
+            got = pw.call(lambda page, cdp, v=vector: page.evaluate(
+                "([i, b]) => { const u = b === null ? new URL(i) : new URL(i, b);"
+                " return {origin: u.protocol + '//' + u.hostname.replace(/\\.$/, '') + (u.port ? ':' + u.port : ''), path: u.pathname}; }",
+                [v["input"], v["base"]]))
+>           assert got == vector["parsed"], vector
+E           AssertionError: {'input': 'https://docs.example.com/docs/%2e%2e%2fcheckout', 'base': None, 'parsed': {'origin': 'https://docs.example.com', 'path': '/docs/..%2fcheckout'}, 'violation_docs_scope': 'TASK_SCOPE_PAGE_PATH_AMBIGUOUS'}
+E           assert {'origin': 'h...e%2fcheckout'} == {'origin': 'h....%2fcheckout'}
+E             
+E             Omitting 1 identical items, use -vv to show
+E             Differing items:
+E             {'path': '/docs/%2e%2e%2fcheckout'} != {'path': '/docs/..%2fcheckout'}
+E             Use -v to get more diff
+
+backend/tests/test_browser_review_i6_scope.py:169: AssertionError
+=============================== warnings summary ===============================
+backend/tests/test_session_socket_binding.py:12
+  /workspace/van-audit/canon-runtime-fix-2026-10-09/backend/tests/test_session_socket_binding.py:12: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient
+
+../canon-backend-venv-2026-10-09/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_browser_canary_origin.py: 3 warnings
+tests/test_browser_egress_proxy.py: 20 warnings
+tests/test_browser_guard_lost_regression.py: 6 warnings
+tests/test_browser_i5_integration_g8.py: 3 warnings
+tests/test_browser_late_block_callers.py: 4 warnings
+tests/test_browser_network_effect_guard.py: 39 warnings
+tests/test_browser_network_guard_lease.py: 20 warnings
+tests/test_browser_review_i5_task_scope.py: 14 warnings
+tests/test_browser_review_i6_scope.py: 13 warnings
+tests/test_harness_elements.py: 3 warnings
+tests/test_harness_i5_redaction.py: 2 warnings
+  /workspace/van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/websockets/sync/connection.py:247: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+    yield self.recv()
+
+tests/test_command_success_contract.py::TestASourceMutationIsVerifiedAgainstTheSources::test_no_source_action_is_certified_by_the_notebook_existing
+  tests/test_command_success_contract.py:427: PytestWarning: The test <Function test_no_source_action_is_certified_by_the_notebook_existing> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_no_source_action_is_certified_by_the_notebook_existing(self):
+
+tests/test_command_success_contract.py::TestASourceMutationIsVerifiedAgainstTheSources::test_a_source_action_naming_nothing_gets_no_contract
+  tests/test_command_success_contract.py:451: PytestWarning: The test <Function test_a_source_action_naming_nothing_gets_no_contract> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_a_source_action_naming_nothing_gets_no_contract(self):
+
+tests/test_owner_memory_has_a_producer.py::TestStandingGoalsComeFromMissions::test_the_horizon_never_falls_whatever_the_inputs
+  tests/test_owner_memory_has_a_producer.py:193: PytestWarning: The test <Function test_the_horizon_never_falls_whatever_the_inputs> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_the_horizon_never_falls_whatever_the_inputs(self, store):
+
+tests/test_owner_memory_has_a_producer.py::TestStandingGoalsComeFromMissions::test_a_promotion_always_records_why
+  tests/test_owner_memory_has_a_producer.py:228: PytestWarning: The test <Function test_a_promotion_always_records_why> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_a_promotion_always_records_why(self, store):
+
+tests/test_verification_is_performed.py::TestUnwiredCapabilitiesFailHonestly::test_each_unobservable_strategy_has_an_adapter_waiting_for_its_source
+  tests/test_verification_is_performed.py:254: PytestWarning: The test <Function test_each_unobservable_strategy_has_an_adapter_waiting_for_its_source> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_each_unobservable_strategy_has_an_adapter_waiting_for_its_source(self):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] backend/tests/test_browser_egress_proxy_i8.py:227: needs root and setpriv
+SKIPPED [1] backend/tests/test_jev_browser_eligibility.py:178: DDS checkout not present; blob hashes pinned above
+SKIPPED [3] backend/tests/test_jev_no_generic_executor.py:76: member of the B1 closed set by definition
+FAILED backend/tests/test_browser_review_i5_task_scope.py::test_major5_image_and_css_names_are_text_and_empty_names_are_a4
+FAILED backend/tests/test_browser_review_i6_scope.py::test_m3_vectors_match_real_chromiums_whatwg_parser
+2 failed, 5100 passed, 5 skipped, 134 warnings in 1992.63s (0:33:12)

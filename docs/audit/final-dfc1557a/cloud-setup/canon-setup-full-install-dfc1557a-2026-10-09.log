@@ -1,0 +1,60 @@
+Cloning into '/workspace/.onboarding/canon/dfc1557ab99ad8d41cf84714e1bb671e89b045e6/Van-clone-kvsthyd_'...
+HEAD is now at dfc1557a fix(browser): align URL scopes and pseudo hit ownership with Chromium
+{"source_revision": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6", "dds_revision": "64d6b7158c723b7700e5b53175ea8048d4e92d00", "original_workspaces_modified": false}
+No broken requirements found.
+No broken requirements found.
+rsync  version 3.4.1  protocol version 32
+Copyright (C) 1996-2025 by Andrew Tridgell, Wayne Davison, and others.
+Web site: https://rsync.samba.org/
+Capabilities:
+    64-bit files, 64-bit inums, 64-bit timestamps, 64-bit long ints,
+    socketpairs, symlinks, symtimes, hardlinks, hardlink-specials,
+    hardlink-symlinks, IPv6, atimes, batchfiles, inplace, append, ACLs,
+    xattrs, optional secluded-args, iconv, prealloc, stop-at, no crtimes
+Optimizations:
+    SIMD-roll, no asm-roll, openssl-crypto, no asm-MD5
+Checksum list:
+    xxh128 xxh3 xxh64 (xxhash) md5 md4 sha1 none
+Compress list:
+    zstd lz4 zlibx zlib none
+Daemon auth list:
+    sha512 sha256 sha1 md5 md4
+
+rsync comes with ABSOLUTELY NO WARRANTY.  This is free software, and you
+are welcome to redistribute it under certain conditions.  See the GNU
+General Public Licence for details.
+Traceback (most recent call last):
+  File "/workspace/.onboarding/canon/dfc1557ab99ad8d41cf84714e1bb671e89b045e6/Van/android/tools/package_voice_assets.py", line 186, in <module>
+    main()
+  File "/workspace/.onboarding/canon/dfc1557ab99ad8d41cf84714e1bb671e89b045e6/Van/android/tools/package_voice_assets.py", line 179, in main
+    verify(args.output)
+  File "/workspace/.onboarding/canon/dfc1557ab99ad8d41cf84714e1bb671e89b045e6/Van/android/tools/package_voice_assets.py", line 79, in verify
+    raise ValueError("generated manifest differs from signed APK source manifest")
+ValueError: generated manifest differs from signed APK source manifest
+{"file_bytes": 224852871, "file_count": 45, "manifest_sha256": "7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30", "owner_profile_included": false, "status": "VERIFIED"}
+{"file_bytes": 224852871, "file_count": 45, "manifest_sha256": "7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30", "owner_profile_included": false, "status": "VERIFIED"}
+{"file_bytes": 224852871, "file_count": 45, "manifest_sha256": "7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30", "owner_profile_included": false, "status": "VERIFIED"}
+openjdk version "21.0.12.1" 2026-08-18
+OpenJDK Runtime Environment (build 21.0.12.1+1-1-deb13u1-Debian)
+OpenJDK 64-Bit Server VM (build 21.0.12.1+1-1-deb13u1-Debian, mixed mode, sharing)
+javac 21.0.12.1
+
+------------------------------------------------------------
+Gradle 8.11.1
+------------------------------------------------------------
+
+Build time:    2024-11-20 16:56:46 UTC
+Revision:      481cb05a490e0ef9f8620f7873b83bd8a72e7c39
+
+Kotlin:        2.0.20
+Groovy:        3.0.22
+Ant:           Apache Ant(TM) version 1.10.14 compiled on August 16 2023
+Launcher JVM:  21.0.12.1 (Debian 21.0.12.1+1-1-deb13u1-Debian)
+Daemon JVM:    /workspace/.onboarding/jdk/usr/lib/jvm/java-21-openjdk-amd64 (no JDK specified, using current Java home)
+OS:            Linux 6.18.44 amd64
+
+v24.19.0
+{"backend_dependency_imports": "PASS", "local_chromium_functional_request": "PASS", "production_browser_qualified": false}
+Browser media/test dependency imports: PASS
+{"status": "PASS", "scope": "OWNED_ISOLATED_LOCAL_GATEWAY", "source_revision": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6", "authenticated_health": true, "observability_readback": true, "unauthenticated_health_status": 401, "hermes_offline": true, "production_qualification": false, "handset_cases_executed": 0}
+{"setup": "PASS", "source_revision": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6", "original_git_states_unchanged": true, "scope": "CLOUD_DEVELOPMENT_ONLY", "full_suites_rerun": false, "production_deployed": false, "physical_handset_cases": 0}

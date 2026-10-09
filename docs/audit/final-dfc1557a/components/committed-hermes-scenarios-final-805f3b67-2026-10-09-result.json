@@ -1,0 +1,25 @@
+{
+  "changed_inputs": [],
+  "counts": {
+    "cases": 89,
+    "errors": 0,
+    "failed": 0,
+    "passed": 89,
+    "skipped": 0
+  },
+  "elapsed_seconds": 10.636,
+  "exit_code": 0,
+  "failed_cases": [],
+  "handset_cases_executed": 0,
+  "inputs_sha256": "8e8e43f39be869767b64376586fcc9969cf3a88c64814ecf9195a4b737fec2a6",
+  "junit_sha256": "24569ce66cd3ff18913eabc4bf1642fff6e7869ece3430c448500346e6afff64",
+  "live_production_qualified": false,
+  "log_sha256": "f3a731058da1d2539d5b7d92979d6ea276356115f0ad60b84a5d0fe576982384",
+  "private_short_tmp_removed": true,
+  "qualified": true,
+  "recorded_at_utc": "2026-10-09T06:07:49.870028+00:00",
+  "revision": "805f3b67c2b9eb68d887cd700f9443f476e26132",
+  "schema_version": 1,
+  "skipped_cases": [],
+  "suite": "hermes-scenarios"
+}

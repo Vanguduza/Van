@@ -1,0 +1,88 @@
+{
+  "after_path": "/workspace/van-audit/canon-setup-full-install-dfc1557a-2026-10-09-after.json",
+  "after_sha256": "3ee1940ff178b5f07b42939f92cc78f084d880d542da489e224a46dfc515aa70",
+  "backend_dependencies_unchanged": true,
+  "collection_errors": [],
+  "complete_application_suites_rerun_by_installer": false,
+  "completed_successfully": true,
+  "configuration_activated": false,
+  "dependency_differences": [],
+  "elapsed_seconds": 64.61,
+  "exit_code": 0,
+  "expected_https_clone_origin_verified": true,
+  "finished_at_utc": "2026-10-09T07:19:37.695027+00:00",
+  "fresh_task_snapshot_restoration_tested": false,
+  "independent_https_source_readback_matches": true,
+  "inputs_path": "/workspace/van-audit/canon-setup-full-install-dfc1557a-2026-10-09-inputs.json",
+  "inputs_sha256": "db94f6191a17e7912b5eeeaa2203882969393b7e6f0e6bf71e48d04fac2c7cfc",
+  "log_path": "/workspace/van-audit/canon-setup-full-install-dfc1557a-2026-10-09.log",
+  "log_sha256": "8fe7cc8237c70623d9ea881c805cf6f80e6b16b5884604a6b2d9256bf27a8312",
+  "observations": [
+    {
+      "dds_revision": "64d6b7158c723b7700e5b53175ea8048d4e92d00",
+      "original_workspaces_modified": false,
+      "source_revision": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6"
+    },
+    {
+      "file_bytes": 224852871,
+      "file_count": 45,
+      "manifest_sha256": "7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30",
+      "owner_profile_included": false,
+      "status": "VERIFIED"
+    },
+    {
+      "file_bytes": 224852871,
+      "file_count": 45,
+      "manifest_sha256": "7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30",
+      "owner_profile_included": false,
+      "status": "VERIFIED"
+    },
+    {
+      "file_bytes": 224852871,
+      "file_count": 45,
+      "manifest_sha256": "7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30",
+      "owner_profile_included": false,
+      "status": "VERIFIED"
+    },
+    {
+      "backend_dependency_imports": "PASS",
+      "local_chromium_functional_request": "PASS",
+      "production_browser_qualified": false
+    },
+    {
+      "authenticated_health": true,
+      "handset_cases_executed": 0,
+      "hermes_offline": true,
+      "observability_readback": true,
+      "production_qualification": false,
+      "scope": "OWNED_ISOLATED_LOCAL_GATEWAY",
+      "source_revision": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+      "status": "PASS",
+      "unauthenticated_health_status": 401
+    },
+    {
+      "full_suites_rerun": false,
+      "original_git_states_unchanged": true,
+      "physical_handset_cases": 0,
+      "production_deployed": false,
+      "scope": "CLOUD_DEVELOPMENT_ONLY",
+      "setup": "PASS",
+      "source_revision": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6"
+    }
+  ],
+  "original_differences": [],
+  "original_git_heads_status_and_tracked_bytes_modes_unchanged": true,
+  "original_untracked_file_bytes_measured": false,
+  "owned_local_gateway_functional_requests_pass": true,
+  "physical_cases_executed": 0,
+  "production_deployed": false,
+  "real_chromium_functional_request_pass": true,
+  "record_kind": "ACTUAL_COMPLETE_REUSABLE_CLOUD_INSTALLER_EXECUTION",
+  "reviewed_script_unchanged": true,
+  "script_path": "/workspace/.onboarding/reusable-install-canon-dfc1557a-2026-10-09.sh",
+  "script_sha256": "16243ab17f6e3273a26656afb75899155a4f226c05399830de2773bf429ec583",
+  "source_differences": [],
+  "source_readback_file_count": 4015,
+  "source_sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "started_at_utc": "2026-10-09T07:18:33.041418+00:00"
+}

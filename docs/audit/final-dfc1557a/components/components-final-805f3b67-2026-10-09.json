@@ -1,0 +1,164 @@
+{
+  "actual_executed_passes": 1773,
+  "all_source_bound_inputs_unchanged": true,
+  "bound_tracked_files": 4012,
+  "checkout": "/workspace/van-audit/canon-runtime-fix-2026-10-09",
+  "fresh_actual_postgres": {
+    "counts": {
+      "cases": 1,
+      "errors": 0,
+      "failed": 0,
+      "passed": 1,
+      "skipped": 0
+    },
+    "fixture_stopped": true,
+    "no_fixture_server_running": true,
+    "observed_runtime": {
+      "driver_impl": "binary",
+      "driver_libpq_version": 170005,
+      "driver_version": "3.2.9",
+      "listen_addresses": "127.0.0.1",
+      "server": "PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit"
+    },
+    "qualified": true,
+    "temporary_database_removed": true
+  },
+  "handset_cases_executed": 0,
+  "limits": [
+    "Private realPostgreSQL fixture does not qualify productioncredentials/roles/schema55completeness or arm64binarydeployment.",
+    "Native transports use loopback TLS/CDP/WebRTC andexplicitlycontrolledlocalupstreams; noinstalledsystemd/kernel/provider/S24qualification."
+  ],
+  "live_production_qualified": false,
+  "ordinary_components": {
+    "hermes-scenarios": {
+      "counts": {
+        "cases": 89,
+        "errors": 0,
+        "failed": 0,
+        "passed": 89,
+        "skipped": 0
+      },
+      "elapsed_seconds": 10.636,
+      "private_short_tmp_removed": true,
+      "qualified": true
+    },
+    "native-browser-services": {
+      "counts": {
+        "cases": 198,
+        "errors": 0,
+        "failed": 0,
+        "passed": 198,
+        "skipped": 0
+      },
+      "elapsed_seconds": 3.6,
+      "private_short_tmp_removed": true,
+      "qualified": true
+    },
+    "trading": {
+      "counts": {
+        "cases": 1486,
+        "errors": 0,
+        "failed": 0,
+        "passed": 1485,
+        "skipped": 1
+      },
+      "elapsed_seconds": 49.55,
+      "private_short_tmp_removed": true,
+      "qualified": true
+    }
+  },
+  "ordinary_optional_pg_skip_case": [
+    {
+      "detail": "/workspace/van-audit/canon-runtime-fix-2026-10-09/trading/tests/test_infra_live.py:54: local PostgreSQL not reachable",
+      "message": "local PostgreSQL not reachable",
+      "name": "trading.tests.test_infra_live::test_postgres_ledger_matches_sqlite_chain_and_detects_tampering"
+    }
+  ],
+  "ordinary_optional_pg_skip_separately_executed_and_verified": true,
+  "ordinary_totals": {
+    "cases": 1773,
+    "errors": 0,
+    "failed": 0,
+    "passed": 1772,
+    "skipped": 1
+  },
+  "prior_revision_results_counted": false,
+  "receipts": {
+    "/workspace/van-audit/committed-hermes-scenarios-final-805f3b67-2026-10-09-inputs.json": {
+      "bytes": 919794,
+      "sha256": "8e8e43f39be869767b64376586fcc9969cf3a88c64814ecf9195a4b737fec2a6"
+    },
+    "/workspace/van-audit/committed-hermes-scenarios-final-805f3b67-2026-10-09-result.json": {
+      "bytes": 777,
+      "sha256": "1cc79a7b7456f1bce9ae0ca4c00cdf9aa997d433fdbdf444a9ef43de4385f7e1"
+    },
+    "/workspace/van-audit/committed-hermes-scenarios-final-805f3b67-2026-10-09.log": {
+      "bytes": 179,
+      "sha256": "f3a731058da1d2539d5b7d92979d6ea276356115f0ad60b84a5d0fe576982384"
+    },
+    "/workspace/van-audit/committed-hermes-scenarios-final-805f3b67-2026-10-09.xml": {
+      "bytes": 12406,
+      "sha256": "24569ce66cd3ff18913eabc4bf1642fff6e7869ece3430c448500346e6afff64"
+    },
+    "/workspace/van-audit/committed-native-browser-services-final-805f3b67-2026-10-09-inputs.json": {
+      "bytes": 919414,
+      "sha256": "43055e1edb4b421aa2d533c5ab20ddf60849303d57cbc2eb86c7128761c8946b"
+    },
+    "/workspace/van-audit/committed-native-browser-services-final-805f3b67-2026-10-09-result.json": {
+      "bytes": 783,
+      "sha256": "ffc5ba05f6057113595986edcefcf1478502707e1e4091211578f71d72789e9f"
+    },
+    "/workspace/van-audit/committed-native-browser-services-final-805f3b67-2026-10-09.log": {
+      "bytes": 369,
+      "sha256": "d753f9136e8aaec112b414bb5c2c58fa90c12ce96075e8ff8de47296fa0e1f6a"
+    },
+    "/workspace/van-audit/committed-native-browser-services-final-805f3b67-2026-10-09.xml": {
+      "bytes": 35956,
+      "sha256": "dc268a95577757d4936986affd22811dac9551e7a454b8537af7e7963752617e"
+    },
+    "/workspace/van-audit/committed-trading-final-805f3b67-2026-10-09-inputs.json": {
+      "bytes": 919727,
+      "sha256": "e162215c72653ac86232f6d7e51d124417c5abed2f26dc1fde7d7c2ace3e0283"
+    },
+    "/workspace/van-audit/committed-trading-final-805f3b67-2026-10-09-result.json": {
+      "bytes": 1085,
+      "sha256": "a77fc2573562bf94a329f0a0ea35346f9aa049462f022fc39824b82d3b28e134"
+    },
+    "/workspace/van-audit/committed-trading-final-805f3b67-2026-10-09.log": {
+      "bytes": 3227,
+      "sha256": "8eebe8743c4ce79270c778bd399d097360145b7b0e4293d327dfbdca3caf769f"
+    },
+    "/workspace/van-audit/committed-trading-final-805f3b67-2026-10-09.xml": {
+      "bytes": 208782,
+      "sha256": "ce34d5314871f087b2daf3eacc4274b9cc385fd59f728ac3be917854d55dd0b1"
+    },
+    "/workspace/van-audit/postgres-current-source-final-805f3b67-2026-10-09-debian-signatures.txt": {
+      "bytes": 1572,
+      "sha256": "7b1734df9c188466750567dac7e3cd6ce9166bcae2bc5d045b2457aadb05ca99"
+    },
+    "/workspace/van-audit/postgres-current-source-final-805f3b67-2026-10-09-inputs.json": {
+      "bytes": 938961,
+      "sha256": "c647fe316ca07e7c5576375f6489264d984366a2be836c5dbb127a745eaffe4b"
+    },
+    "/workspace/van-audit/postgres-current-source-final-805f3b67-2026-10-09-server.log": {
+      "bytes": 1360,
+      "sha256": "377788f8a70250888d7894a7adcb0f7c039e11558ae4ec0388b5ae234892d054"
+    },
+    "/workspace/van-audit/postgres-current-source-final-805f3b67-2026-10-09.json": {
+      "bytes": 9979,
+      "sha256": "c54cdd26aaf1837464f3f6c9238b92dd36b185636cd7a25e3d19edd3c979e3d0"
+    },
+    "/workspace/van-audit/postgres-current-source-final-805f3b67-2026-10-09.log": {
+      "bytes": 98,
+      "sha256": "b4eb7be9000651a3e89c6a77e8b346d05d1d706d620aa6f8193e574a39b3ced1"
+    },
+    "/workspace/van-audit/postgres-current-source-final-805f3b67-2026-10-09.xml": {
+      "bytes": 386,
+      "sha256": "18bc9fc9720974e7700758b4cd1af774b6bb0083f5cb786c5bb52eb0e4ecc799"
+    }
+  },
+  "recorded_at_utc": "2026-10-09T06:10:02.661492+00:00",
+  "revision": "805f3b67c2b9eb68d887cd700f9443f476e26132",
+  "schema_version": 1,
+  "short_tmp_selector_used_and_removed": true
+}

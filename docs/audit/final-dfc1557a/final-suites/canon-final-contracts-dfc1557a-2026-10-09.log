@@ -1,0 +1,268 @@
+........................................................................ [  4%]
+........................................................................ [  9%]
+........................................................................ [ 14%]
+........................................................................ [ 18%]
+........................................................................ [ 23%]
+........................................................................ [ 28%]
+........................................................................ [ 33%]
+........................................................................ [ 37%]
+........................................................................ [ 42%]
+........................................................................ [ 47%]
+........................................................................ [ 51%]
+........................................................................ [ 56%]
+........................................................................ [ 61%]
+........................................................................ [ 66%]
+........................................................................ [ 70%]
+........................................................................ [ 75%]
+.F...................................................................... [ 80%]
+........................................................................ [ 84%]
+........................................................................ [ 89%]
+..............................................................sssss..... [ 94%]
+........................................................................ [ 99%]
+...............                                                          [100%]
+=================================== FAILURES ===================================
+____________________ test_the_real_branch_verifies_at_head _____________________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7fa436f64230>
+
+    @pytest.mark.skipif(not _history_available(), reason="shallow checkout: the project-truth-ledger CI job runs this with full history")
+    def test_the_real_branch_verifies_at_head(capsys):
+        rc = ptl.main(["--repo", str(ROOT), "verify", "--committed"])
+        out = capsys.readouterr().out
+>       assert rc == 0, out
+E       AssertionError: project-truth-ledger verify: BLOCKED — 447 commit(s) in a16f7cb80b01..dfc1557ab99a
+E           lineage: programme-b-jev-openmuse-convergence-r1
+E           baseline: a16f7cb80b0169f93471d71bf6adab6cf03f7bf5
+E           ledger_source: dfc1557ab99a:docs/project-state/LOCAL_CHANGE_LEDGER.jsonl
+E           trusted_records: dfc1557ab99a
+E           - MISSING_ROW b4bf830feaf7e346938c65b9cf880cc5f3994d5e: no ledger row binds to this commit (digest e94246346a6fa81c3dcc1aae033369532ca3f8a7cbc1053ac57f0e681f4e388c)
+E           - MISSING_ROW 7aac22ccf70789bc64bc523369a9b91243a4774c: no ledger row binds to this commit (digest 1de8d3a60e0cbd46a23a44d6399a4045da217e776eaa107b60eb25769db4ff7a)
+E           - MISSING_ROW 5800d46ba4001b44bb0b1036dbea85c126c99366: no ledger row binds to this commit (digest 3e3f0f219e9363fa1f1801abe616380968a4726b0ddb00b7b1582e85bec62ec2)
+E           - MISSING_ROW cfe2506b2564f000e70db5bfa3ae0fcbec3b3313: no ledger row binds to this commit (digest 3ab0606208fb0b98ddb1e5b2a2cafd90e068a6e3413389f92c1a79370e4fb787)
+E           - MISSING_ROW f07a8808245a8087f09c6339b98b9cb1388026b8: no ledger row binds to this commit (digest e3df4c09f94175886f7ae854c02e58c701b6ccd12074d72a2ea9844877f17da8)
+E           - MISSING_ROW 356157492aba3a0ffb7a80aa495a04e289867558: no ledger row binds to this commit (digest f5e85c5550ebe930f7d463957814961e0c5ff08ba6e3071b2152b4cdbb41698f)
+E           - MISSING_ROW 862efaac783d22055705017eb1b3ddd19ad522db: no ledger row binds to this commit (digest 19b8887077da8eea2806279d941311936547c1f2f064d115e38efca7e96196f7)
+E           - MISSING_ROW 3d3aad53cda555face141f9cc552f5097bc1e8d6: no ledger row binds to this commit (digest 6a200c590c79ab402673320a94249e10ca289085ab8ab8ca2687739d064223c9)
+E           - MISSING_ROW ebcda78b29f515a6492fa286dd936d942727dead: no ledger row binds to this commit (digest db0d8ff9bbd70385647135d7a82b2758433bb83d72b69accbcc2fb7efef98b0c)
+E           - MISSING_ROW 2c4bc1c9eda1bc085609b46294945127660a8c8f: no ledger row binds to this commit (digest 2840c23a8e1982731640e46071481cadd13b9e31322839f5f5e5298401422b98)
+E           - MISSING_ROW 94a2536b480730996a0fa6a85f966f1a7c02d3b8: no ledger row binds to this commit (digest 017306b149c8b872e336ff27f377d4318ee262ae639c6f1f60cb1fc9005377d2)
+E           - MISSING_ROW 8acf71c5cf1ed196d940be50a69daa985a9a1c4e: no ledger row binds to this commit (digest 5551863e2364a21cfc85352893177189b4ed0cb815938b33d2557d43f56afec8)
+E           - MISSING_ROW d53390032cd219ff1d1b532ac3e9e07a44ca3e4b: no ledger row binds to this commit (digest 109d6f25ef758350cfd343d12902b1e943a61e67d14bc95e8fb9607433ff00d7)
+E           - MISSING_ROW ecd425ef193331396a2bfc431586d9867f752bdd: no ledger row binds to this commit (digest 48fbd68a47dbbd995fb170c5b7c9597edc06421e3e3ab5c7fc85d09d8130303a)
+E           - MISSING_ROW 99f424599f420c1bf62db5aec3b15b8c8288176f: no ledger row binds to this commit (digest d464348ce038e06c8fed056c78e37269e570ca91feaf2c9982dd288acf9c5791)
+E           - MISSING_ROW 60ac573fdf9ecf7d709bffaccf11d0486e7a84c6: no ledger row binds to this commit (digest 13fd36d6bc9620b4986af440193199ffd9ce96c9dd4e8995ab3dff31e2cbf61c)
+E           - MISSING_ROW f88b144e17b0e36dceba489b02761b72d8005f30: no ledger row binds to this commit (digest 13d19b89f55fe4de8573680de7dda02c8cbc60188501ce7cc92370597fa37db7)
+E           - MISSING_ROW 78561c7bc67beb58c5abb3f88601ed837c0f6ab4: no ledger row binds to this commit (digest 33bb68cc54a59655ae93bdde745566d34558266a7bf19a59bf4c2cdd4b69f65a)
+E           - MISSING_ROW 7097e1b6f560d113e12cdd0a34bfd07fbbfa1320: no ledger row binds to this commit (digest 4be13e5b8ba85cab475f7b314ca716958be259a40acbb173a9e018fab5c686b3)
+E           - MISSING_ROW 8065eb12dfb8f94e599873ec65a0d379b1b1cd45: no ledger row binds to this commit (digest 44744464a05660ab0888a62ad0ba1f00de3dc739221eba91656b0f237418756d)
+E           - MISSING_ROW 56150fe5d12095bfcb52871155b6846623aa9de2: no ledger row binds to this commit (digest f171474006422b78675a0c8c40eed363cb7d271a7d0abee0d231c1e5e8d4e16e)
+E           - MISSING_ROW a42a2cdb11fff62ab1d5a488617846d9c4b87d6e: no ledger row binds to this commit (digest 773d6bec0d9656f28be19db62f087e5907a455b6923a7468d9e37c52e9ad642e)
+E           - MISSING_ROW 069ab14a318d2a55b585fc6498095d1464120adf: no ledger row binds to this commit (digest 91ec4901fa6af8daf381676b4699886806e364b4c3ee1f8fae86e82f71899084)
+E           - MISSING_ROW 80f3f0f304cf41945101dc502777fd8f02a4eab2: no ledger row binds to this commit (digest f8bb01b3a27f47628541842920da2f72bb33c0dbd25ee4c83f49b28c8ae2b962)
+E           - MISSING_ROW bd99dfc5e3ecc5b0a938aec872559a700643b123: no ledger row binds to this commit (digest 5eed65c3d29eeac1bdd03492efdca746e2fd33278cdb695c4ba671583f152ae7)
+E           - MISSING_ROW 5008c864057a53525d9e07aea54ca90910c8ead2: no ledger row binds to this commit (digest 37049d08e26b11baf14ef6b7e4c913af1dd74eb41b13a3380720028211f09b6b)
+E           - MISSING_ROW 2d218cd4f605de43fd58fbcd682724745b7f73c7: no ledger row binds to this commit (digest 2ad4d67d14dfc68b3396638d78abee36fc12d0f2f71617ed30e37013747c37d5)
+E           - MISSING_ROW f036951abb034ee032d36a8c8a4c1f085d5a6d3b: no ledger row binds to this commit (digest d3c5b5c8900341295cf62667ac8a1bd22900dd7806d74b15cdd30d6e6fdb61d0)
+E           - MISSING_ROW 191d96d476b64148c139d5bf70622891bf7de9a7: no ledger row binds to this commit (digest ec1e02021c55cda334fe74fe6713fd92c6bae4f51b8bf4839e4b7d61ff5757c2)
+E           - MISSING_ROW 8fcac379dcce67517c04e0fbcdaa687dcbf0d970: no ledger row binds to this commit (digest cb4cbdf2c4695e5c4c9feb9e70beaefd0028f8df94af9e39789861a397131ad6)
+E           - MISSING_ROW ede103ee228cf6f9f1f1e403dbfe242c1e8f7977: no ledger row binds to this commit (digest 3aa2a0a6e51ad5abf5b0c97dafeffe19698a39db87a6142999b94ff279db1658)
+E           - MISSING_ROW 58a538f55abb4c107f0d7db3e04d54aa4c863fba: no ledger row binds to this commit (digest 2e13a8854b2e058e2dec8bb1f1d61a0213547d4d354a7e4e2ff0c8a2f75e0abc)
+E           - MISSING_ROW 1a2fc31c0066cafbc4d1ed8211cfb45c7fcff1d3: no ledger row binds to this commit (digest de7cce543a7a654ba5dd7b00b1b63c33e091ced250f68980c54a1f89f6cd0217)
+E           - MISSING_ROW 9d1ef4b539be42123d7d727ae2f31d3299855f0d: no ledger row binds to this commit (digest a7335c4b1874f272d84bbf1170099a5bc5b34e4b389c539e9d3ab48af53c4d54)
+E           - MISSING_ROW 25089ba7a8648250d6f84f440162cd7ae243b94e: no ledger row binds to this commit (digest 28fce34e3b595e2bc2a9aa58b4e165f075cadf74ec52411a243a25b76d31ed30)
+E           - MISSING_ROW 055369b45669043c9bd222ef78fb795af9813932: no ledger row binds to this commit (digest af6e294d8064f39b5f7109bc62bd63eed7cbebc8d3f0b47bf08f10c82a502c47)
+E           - MISSING_ROW 250451767225f1191d5a28968c253e6e6ed040ab: no ledger row binds to this commit (digest 50082bf16ca24f76debcfca4c588b800c92d777e90b61f8f14c85d87b9e8b49a)
+E           - MISSING_ROW 78ca1baeccd859d57ade2f5f87c5723473544421: no ledger row binds to this commit (digest 0f2d2b3df42e2f27dde37a62400ccf8281c4d1d585fe05246a793c1e6fbce106)
+E           - MISSING_ROW 811d2ca5ac16b7bc0cb1944a8b373851436faeb6: no ledger row binds to this commit (digest 89a534a84fd084a2eba965bf0b55c4f0076560328e28e46078c6ac97ac40e106)
+E           - MISSING_ROW c5431609c8f9c65ace55d31d1becbefc05340017: no ledger row binds to this commit (digest 98ae68fcd41100284c262e02e9a8879d6ad039d3ad4e207b8581edd373182d3d)
+E           - MISSING_ROW c58198130ad4c8055531ef5a46663fe14b7c123c: no ledger row binds to this commit (digest 31c8a89518bd981b2a80ea7a2f117ea2c708f1fd9f7b2695f447c33b1d7ee74b)
+E           - MISSING_ROW 4205ad1234b4e5e1d3fc231986987f060812820a: no ledger row binds to this commit (digest cf03291c6477171b783c1540f5cdc6a846c22d6797ac9ad1f5a266b8028dc47d)
+E           - MISSING_ROW 126df7071f32a4118e2607fe06f66b85be5ca8f6: no ledger row binds to this commit (digest 13c4312be2ae116af3ffcfff4024f7872934ba22a12aec765c76215204cbe622)
+E           - MISSING_ROW 3843d8ba67ad9818a6d58163acc99da49044fcaa: no ledger row binds to this commit (digest 635e9c386f861200b72b115b18f9ce871b6c3f7aa686b0eef6c677eca8f65d07)
+E           - MISSING_ROW e7d30f45c5b546055048f15c6d278ee1994f6b7c: no ledger row binds to this commit (digest 930d5a3f4a957a3b0d463e69a1f56719aff6e56cf6e12b77577ad60abb6056ba)
+E           - MISSING_ROW 5868894a8b1a7750009ffab237c2d15ead2ea13e: no ledger row binds to this commit (digest 68d93421e76a10bd0bac5800de38bd01256544b8f4bd97850767a4eb79a5e559)
+E           - MISSING_ROW 3d5f387b165a7e4b78643e369cc9333140d8e5b7: no ledger row binds to this commit (digest 9e196a29e117757702a735202c3d8576d31371d4e5e274a9a51d572593e6aa74)
+E           - MISSING_ROW d0a13bc6aa051670a8193a5ac50f86e05c52078a: no ledger row binds to this commit (digest 825d0f90e5a1d6a944c4cd7bbc6448c428ef32cba6d1a2a21ac8615058c71971)
+E           - MISSING_ROW dfe52549559c32173cb3ffb34fa0f1b7c022def0: no ledger row binds to this commit (digest a68eea86110e4bb770b9b28baa76ad8ec3d5d16b59c930be29ba253465beac32)
+E           - MISSING_ROW 0f6cc9cf2e3437b068d7ce8c063e2bb895aa48d5: no ledger row binds to this commit (digest a681730eecdbf29a189f26f50b71ee12f43c987c25699294e2191a876449998c)
+E           - MISSING_ROW c83f6d8ceab090235cfe43f04b2ab0e3fbccd641: no ledger row binds to this commit (digest 740c04572cdbf7fb7a1b27e631d54f12a09f2351d3b4a7449fd4733fa14c96f6)
+E           - MISSING_ROW 61b6782765bae19d2017a3ae5ee26c4b8757edad: no ledger row binds to this commit (digest 601ce322c6db05e15fbcf58899c6fd9e16c09d68db732e7917510d1bc8b52b08)
+E           - MISSING_ROW 7731f5cc90beb4c467e4763f8157b140cd3b2ba4: no ledger row binds to this commit (digest aeecb33eb93c72533cebbe64f4d678bc0a0f053a0dcae56ba701b396113a5c89)
+E           - MISSING_ROW 9ca84967c9fd9fd9541d1750dfb92a7caef6ceb8: no ledger row binds to this commit (digest b4b3adaaf67fb4e22adeb464d68c601789e4ae217a12dd2f3060523fe4742aa7)
+E           - MISSING_ROW 649b558f1b5c3117d0fb2e48fbcbb9008d3d6c66: no ledger row binds to this commit (digest 381117eab59ce2cb74e7f98b87093c6291a276ca965780425d2f104ed383a0e2)
+E           - MISSING_ROW 8305a3d3aa04df93d2d7716211df9a9d10d58918: no ledger row binds to this commit (digest 76a14eaf4f95fe57f08d52569ec3122428ee12914f62de9214cafb560bee3fb0)
+E           - MISSING_ROW 700a513dda994e2f02ca4e408845a6f36e20fdbb: no ledger row binds to this commit (digest 0149dc9925b2119368ee33a87abccefc20234a671dda0d27d1f01edbd9767f53)
+E           - MISSING_ROW efb9a64cfdd2317265c0c99915cc4529f9666c6b: no ledger row binds to this commit (digest 87441a84ffcf1003e87ee1aa0a8322ec2cb2a1efb4a55bc044735af49987982a)
+E           - MISSING_ROW 9eac4d8f7b9881fbb0b568dbb5960dc1524e7045: no ledger row binds to this commit (digest e826dcc973e95ce203b11ad24897420585b564fc926037ae271f03f43dda9078)
+E           - MISSING_ROW bc724aa27a14c6de1616eafe5b407068176810ac: no ledger row binds to this commit (digest 1207e0b8bd5f791de4a2a7662dfc2ca01acfb136c7484cb64571cf5d33132854)
+E           - MISSING_ROW 32e57f1db71184b2440151e032d2a7e78bf04845: no ledger row binds to this commit (digest d1de89b5a9206ad3bc1cf39d6408a0a62e0849365a629dd5381a69bef8d55c0a)
+E           - MISSING_ROW 44909e75d3f53fb3f300ad8ee0122103dbd8f390: no ledger row binds to this commit (digest af60a4ee6b7341061c44f029e11420509df21a39de57e35cd40da15ec03b4e87)
+E           - MISSING_ROW 6f78ab754a3b7033d8e800f7ea41aa752440abc6: no ledger row binds to this commit (digest cd792de7e3811ebd33bb62152f063f805af6e5e06636afb9f2e8f7bb021c5c31)
+E           - MISSING_ROW c021b1bf0ee121854776fc76a5130d758c9f1dc3: no ledger row binds to this commit (digest ebb729e1417d99bb925f1246d56a3f8eb970c1f0f09ccbf76a93c19265bc8b67)
+E           - MISSING_ROW 7dfd36ea284d466cf7c62626cca7569ad9049a35: no ledger row binds to this commit (digest 54e9b32020422df008f54298d818821c7cf8fb2720494570019f75e381f6161b)
+E           - MISSING_ROW 0401f34ac6b73ef8bed0ba9f96db7838d4d88885: no ledger row binds to this commit (digest a736a7ade5b1d5e2885fb8e7e24ae5058e39f983cae2cce2823471b5fce13421)
+E           - MISSING_ROW cfda264c6bf048427df5f98787379c62cb26196d: no ledger row binds to this commit (digest c7d74facbd51e78252dda8e2004b2fb3da61efb72a66c77562554af00ea931d5)
+E           - MISSING_ROW fbabe525796ed20fb0d5fddc306897f664dcaf36: no ledger row binds to this commit (digest 382400dbb72facde9709f5e91d857df2b68c13f909463802c053ad15778d2534)
+E           - MISSING_ROW 4a12f90536cfc63f3b43cf59f888f59739a080b3: no ledger row binds to this commit (digest f00c1fb57d8bf7b48e235356656f713eaba2e39f0beafdc6f35af6f6283b6503)
+E           - MISSING_ROW 28086d281c7b9172a96abd382a90954c91acc9d1: no ledger row binds to this commit (digest 47ad5d79d5e53784e43e8784427f845ef9dcc5a29afecd3df4cedf27f4b12d0b)
+E           - MISSING_ROW 33510431120c3d1980aece5e98d162cf4a526882: no ledger row binds to this commit (digest 1c40ee913219374058cd2cea67593b6856efcc2b386edf4dcb455a82b3b2a893)
+E           - MISSING_ROW 8aeae23adbafafa41a5ddadfecff55a06aba023c: no ledger row binds to this commit (digest 969f338e6dbbf4af67ac3e0fda85d6e6b8eff66975422bb1abb065abba1a6090)
+E           - MISSING_ROW 3c3851697706e0ebd629bd68195e99b75ce9e107: no ledger row binds to this commit (digest d3f82a717e5fa486fddbdf14df0181029e14662aee687384333daa0ec18452b8)
+E           - MISSING_ROW 01cb652c5fa9a920ab700b464e3c1e2aa1e5ef6a: no ledger row binds to this commit (digest 0bae4ea0edd53a4660f6b80bd648b02784de71014b04aecd6efe86fa1c1109d1)
+E           - MISSING_ROW 4f8749ec755de78190e985caa599d740fe6939dc: no ledger row binds to this commit (digest 2a29961579ce85b48dc90ea421eb8d2b5375f0ba52facf7529a4178742fa2e56)
+E           - MISSING_ROW f407742ab20fa9bbafaf314a83be5077be662e7e: no ledger row binds to this commit (digest 45229b1ddca70ba36bc1ad62c405967398743bc611acd83871b94918d0d83c84)
+E           - MISSING_ROW 2350532cc07e66176c7cc161a104dd775538fe86: no ledger row binds to this commit (digest 783c27f8adf9cdc077c5270c06045f024a9533629bfb521efe27745184e6ab2d)
+E           - MISSING_ROW 2bf7baab117be44ff38a3af9d6f8440e737c88e2: no ledger row binds to this commit (digest f19564b9c03138e497f7a4f330feb68830cdca8722c21f1437891310165d8d40)
+E           - MISSING_ROW b735e3cd97aee8a86e80fd7a9b63927494b9ff62: no ledger row binds to this commit (digest 148189001c8693e1209f121c7af95a4f344fd40b7a040fc617966dacaf32771b)
+E           - MISSING_ROW 1c997a34fe45a63dc06556226259cdb41f040b87: no ledger row binds to this commit (digest adecbde4062d1dd6d51cbbf68e49554c6d0bae84fd9e7932ae10e4cd90377f52)
+E           - MISSING_ROW 86ffecf2d7d8a751fe0ac8836c6475ed9b30c09c: no ledger row binds to this commit (digest 01478fdf18160d9c9eae528bb4ece5798fb5f562e36fc3aecec6c7e43e985679)
+E           - MISSING_ROW e423c39a95238af65a7b07b78fb46f5be8937b6f: no ledger row binds to this commit (digest 23871762319575a3b4630b0ec6043926d4ef9a687336eafba892ce564fc1e8af)
+E           - MISSING_ROW 0adc8ccf3b2128767abf05a3e04ae4737f2280be: no ledger row binds to this commit (digest 86c49cbdc636f53ddb148f922f89af8ff5f201fd1ed0d5025b9c8e7a76e3386a)
+E           - MISSING_ROW cc0824a2d0d53c749a245a78772b3911faeb32a1: no ledger row binds to this commit (digest fb3f4e54cfec3d0fec0b2a9f0da2320f39432606935ab87c09d39a008269a9f1)
+E           - MISSING_ROW bdb1ae888dec37e577ac281ca56733fd1135f52c: no ledger row binds to this commit (digest bfac723358a7968bff65129e9dc3f933680ee2b627a31443181f2a43e0df25e2)
+E           - MISSING_ROW b79c6ab08700362cb5d70ec1802446f95690181f: no ledger row binds to this commit (digest 66481156ff104d7a74ec89842d1cf0f6b40f4f581eb5e1fd22b09977be5a462f)
+E           - MISSING_ROW 0c27dd6849a143017ba4c4fe8f2d299ddfe85260: no ledger row binds to this commit (digest d6eb70dad6d025e8180a7baae2c1a22edde1fe4b225add704154122826815a20)
+E           - MISSING_ROW d121a483bd77af08b294fe16ff30b2c44b5395be: no ledger row binds to this commit (digest 8a4ec5640b8704c6fb64219e0b673820ecd5fe88bcd221dd8a37b1c13f38da84)
+E           - MISSING_ROW 1d6817a71adc2d6072d67e91c82f1746912b6129: no ledger row binds to this commit (digest f82e44ee5b9be0f44477508919ca724d7d8ad2ea0939eb38bfca071b10708e0d)
+E           - MISSING_ROW f27231f09035359100c001f11533b2f5a838fa97: no ledger row binds to this commit (digest dfb2976ea9eaf7808465f8a5f14a075a6dd6ed9c46d2ddad5ac8175be2f6c243)
+E           - MISSING_ROW c880703ab1bfc4d4df3781b4f514a9faceb67fed: no ledger row binds to this commit (digest 2336578b799a81479050f7fe6bac393bf8036761db0bab75d9c541ec0e896fae)
+E           - MISSING_ROW 5f05b5fa957118b5a3399a55258c268bbb7271f6: no ledger row binds to this commit (digest 65019ea4216d53d71f52a543dd13e228c2dbf1ab351c34f051d1563e5e3fde25)
+E           - MISSING_ROW 4ef51259e87ca21e4d8ef7c9efdbc7d73b27ec54: no ledger row binds to this commit (digest 8b9850f355327e7f92078cd1f72400525b819225a34abc8e63b8ab361e0a9458)
+E           - MISSING_ROW 32f687f735a0dd017a2eec650a010d6d0cd381c6: no ledger row binds to this commit (digest 694dce7c7a52bebeb26665b13766466bc23494dd4b87fae7654f287f64d59d22)
+E           - MISSING_ROW f5ca4127bea941041d5c982a963aae35b47719c3: no ledger row binds to this commit (digest a5426d56de97b1102d11f25ab9fe25ff82e7cef61e7efca4b4a9f6b255300202)
+E           - MISSING_ROW 115613e145fb96e940d6b8edef307b7e87cc4f4c: no ledger row binds to this commit (digest 1e8dd7564d23f617ec5aebf05e14fd8ab5af138c17bb1dcc1b3a55d3fbd37046)
+E           - MISSING_ROW 986ef07e8c13323f7630e8a98b414712521063ad: no ledger row binds to this commit (digest 09ef734004db6f56b0317395fd263c60fe025ee2be941dceccbc83267c3a8e79)
+E           - MISSING_ROW 1dbc95e0d11cef8dd787cbdd73d4bc37a5ff1833: no ledger row binds to this commit (digest 372a919a2d0d6bd364be1da1275e8681b56dc039eb538718cba90cd59e4d2f52)
+E           - MISSING_ROW 8a46bf4a9196acd541ce8904474edf6cba9bc05d: no ledger row binds to this commit (digest 3e7c5d397b7619d5a55990128cc44eb685ad6e1e417353b752a02305c1476185)
+E           - MISSING_ROW 826cd700e29e62466d60acf959e8e989e7ff9173: no ledger row binds to this commit (digest bfaf2ff3d6eb67d671262a56fad34416ece72d1fb0515fbbe52456f7a95d2f21)
+E           - MISSING_ROW fa3b4208a91fa3457cf5c640ba960e61c56777f0: no ledger row binds to this commit (digest d5137a3c45be92a76682ca62b7b0a02355a50276b9c2bbed7313212879fccf02)
+E           - MISSING_ROW fc39e5dcc520934dc7fb7ce97c8406ec0b85ab82: no ledger row binds to this commit (digest b8a541d18f258fcf5b31a2553ac7564b7c4ba682b61e9e1426120243c8a0c8bc)
+E           - MISSING_ROW 4fa2f54277574522a55f1afbdd64fa37805670eb: no ledger row binds to this commit (digest 1941d27c4c8be6788985f74fc2deee5c67565bc7e85de3127a20328516e785eb)
+E           - MISSING_ROW cb9f4c2546dfbfac980f711a541731058b4c02d3: no ledger row binds to this commit (digest 74f30b4c7aafc0b5375d02cdca8232016db84aab7b6925fc67de3f7d9f4dd649)
+E           - MISSING_ROW 4205024d965e4e024e3e3c2870ae93b26d53757f: no ledger row binds to this commit (digest ca1e994b3d62452ef406ce8067fa8e00b3b66f07255db85d22ca4d48283b7184)
+E           - MISSING_ROW ec8f00a94d5a65bfeed3efcb13e2cba611379c59: no ledger row binds to this commit (digest 54a0b2f6961bfb97d5b1b1cbb448f58f3eff8087af9f34d59c87a60d55c8da59)
+E           - MISSING_ROW 4435540fe2ab64b1c1b27c001a8b5da6a4265e9c: no ledger row binds to this commit (digest 3e1a7251744e565c0d3e1808d406f9a18ac74ff754230bcc1aef2eecf3a87ce5)
+E           - MISSING_ROW 443dea26fb13d5fcd698fe22b77270e03d02a8e6: no ledger row binds to this commit (digest 238c910a32b128fa35ccb4b971791a57dc90be3f1ebc511ac35ab14cbe91a685)
+E           - MISSING_ROW add557436bfd6967f4b0669ff33db59a55165f97: no ledger row binds to this commit (digest dc05ef283407e2d6cf1a350a920b1cdb06ef4c390bc21f0e32d4c1efb1da5ff7)
+E           - MISSING_ROW 33c499c13c92958bbc3b43abf001e2053a0d1328: no ledger row binds to this commit (digest 8a3ed9cc11accbb94936c996000bfdd848ab461d9f773e7c1d6cb61834776f67)
+E           - MISSING_ROW 1d162f5734dcd7e3a9c1a089a9d12094f7548515: no ledger row binds to this commit (digest c169a19c78cae2954a29975171445d4365ef536222536124d994313f5718886a)
+E           - MISSING_ROW a9402cae3607c33cec2ddee9ecbdb10fa315800d: no ledger row binds to this commit (digest ba7de17b72934d2ea2f49936d5df387cfa7776ef948a6981838a645da41e29d2)
+E           - MISSING_ROW 542a004916415bbb13f16c49f30b4316c1b86b4d: no ledger row binds to this commit (digest 26afd3d3dc9e8139e28654701101e474c2ba2065a4c116546704aeffa9afd877)
+E           - MISSING_ROW b74eb84583f5375c4c44ea437dc28582734e21cc: no ledger row binds to this commit (digest 90231bfd90499ad529f5f83b3c63b23a11bd2a063d54858e58d30ce08410cbbc)
+E           - MISSING_ROW 253e2f012db2a5214d1bf35902cead2be53b097c: no ledger row binds to this commit (digest 89943e574ae0fd9ace906ffe2efd9b24d9fa27aa1984010213a994adf0531279)
+E           - MISSING_ROW 1bc7b8fc344e4f1ab14cda879dacf5e3c23825ea: no ledger row binds to this commit (digest c53c19946d1584d85bf7e82ac450e2bb52ecbdefd5bea6cc923bdf130afd8a3d)
+E           - MISSING_ROW 97b47792ac61477093b3253fa447ceb602078d3f: no ledger row binds to this commit (digest 2c764874d8aae8c7437e5ee941255f0d1a50cbd16f287edd16cfc2efda1f0351)
+E           - MISSING_ROW a00a2d590d5e69e0e0cfe8acc7e99718572de267: no ledger row binds to this commit (digest 58f7f98b7793f3fe2069faf76ca8289f223759db2be81ad3ca03236fe47e0610)
+E           - MISSING_ROW e7e60cb8e2d5562a62585bce6101c037b9301ec2: no ledger row binds to this commit (digest 7afba3014863302d1fc83cc4699f9380e7dea4c92dddcab4e85de715e7865dde)
+E           - MISSING_ROW 722a69503b192a014388bed7416752c3faeb5e3f: no ledger row binds to this commit (digest 10bed7ad8ce1439831533bf18f9a1e83ab1f637ed9e42470e5123ee142cc9746)
+E           - MISSING_ROW f17e0ce7839c8e226698ca39006e97bf4a020cd7: no ledger row binds to this commit (digest 62a7d20bf5ce4509d17faaa1259d3c55c9aa1ee05584c9db8924f88270360040)
+E           - MISSING_ROW abc43170068361432b4e5fc2e6b1163c30327d65: no ledger row binds to this commit (digest 2fcf6a3ed7fbc55871c8c5aa541f277f9125a1b74bf884237b43812fa930569f)
+E           - MISSING_ROW 727537ee66d360c83a3cc76f6778b354db429d61: no ledger row binds to this commit (digest b2f2dfc95a481665639a6375fd808750a5e28922a8a9a993322c64a31bd41178)
+E           - MISSING_ROW dd88cd032bb9b816c59aefde75985f42cb2070b2: no ledger row binds to this commit (digest 689832cb0e8afbeaf84541f312dce54cb09ac604a5a5728a17ca836d5ec831d1)
+E           - MISSING_ROW 0f46855f11747333e4ab568985385996a3a2c0bc: no ledger row binds to this commit (digest 7c796848a4ddeb4ffa8ac1e30518eb2e2d320773d3ef909d203e59f7ebfd365a)
+E           - MISSING_ROW d73dca07aa5eff286a6f7eeb9542640c85ec0330: no ledger row binds to this commit (digest 0fdc0064cd0e4e21538902b489ad93da3466432f697248adcf1c9e9dabc758fc)
+E           - MISSING_ROW 45172f94385d918300ab0c8df1682b1f9c01826b: no ledger row binds to this commit (digest 7e32338bd5616c9730219e6e4a45d23d1f9171a8227f598f2f3b6bbcdf754dae)
+E           - MISSING_ROW 3168529dfa2b269e8e01c1cdb287c7d6db7ffe16: no ledger row binds to this commit (digest 90a50a0f083213512bedf1730fe634915f3d31a82f70239d02dc2ae129461739)
+E           - MISSING_ROW 0048a1ff7bcabc89a1a2b5eed9900a54ee5f658d: no ledger row binds to this commit (digest 613b0bebab34575bd4477ead9d423628199a511cf3ec2b8fa6b0fd7b64f2f2d3)
+E           - MISSING_ROW 744aba6265647ccb017e0d5c9a59009758a35fff: no ledger row binds to this commit (digest 366395a0de7c962b23a9e21c71093ffb0f923847f96795faabc54b779a6a8cfb)
+E           - MISSING_ROW f4f4ec9721389a907a78185e12c5004be375c9b2: no ledger row binds to this commit (digest 12e0cbb581777ecd1bac5245871fba446063fa436619fa5fc4830fc6975be549)
+E           - MISSING_ROW 9d6c33f932b06cfcdf598861b68ef6de4ee8acda: no ledger row binds to this commit (digest 2ec461da408ee63956ac220256089f70c5af704dfd13da6c6cd8cbf12ad5ad9e)
+E           - MISSING_ROW b6832ace23c15df6910067251f904763443a7f35: no ledger row binds to this commit (digest dc71e28f92b54a6e68dabdce2498087883e05a477c05bb1c93306245cc35e86b)
+E           - MISSING_ROW 03c47aa33c9ddb99cc36167b7487a3ef498f70d0: no ledger row binds to this commit (digest df474ce28940460a436f8810487f19330934e4a8fbd3944af0eac8debf230b2b)
+E           - MISSING_ROW 858d7833ef492bd1df8a098206c0ead9485b2ff9: no ledger row binds to this commit (digest c82d1ee39e30a8014547a5eae3a94649ce9ff74d0f2fa1a4be064a1cb79c0276)
+E           - MISSING_ROW 51a1271825e76649a8d4f98d1beec9b22f130c43: no ledger row binds to this commit (digest 404a7d1c008802e2a8d79a7c80c7c518b4cca80831b71bb463faca8f4f084eca)
+E           - MISSING_ROW 7ff0d5e077654a755eaecf735a7e2989834640f8: no ledger row binds to this commit (digest db2e1546cbe6562bdabba99f0be358c56039b48b9a1979b5fe75bae714115e4e)
+E           - MISSING_ROW 28aeef5ebf56e17c3ecc6c7d7bb4c33a75b2b787: no ledger row binds to this commit (digest 6f3dbb1340742b19813563d67209bf1b5599f387ad569d3e208ec2530d28141e)
+E           - MISSING_ROW 3b2f04e7921c1c1e52b30ace4774a117b133d5ac: no ledger row binds to this commit (digest 183f78358a854d621bf13d8311277ff56ce67ebcfae2a9a7c5e4d87593f87f74)
+E           - MISSING_ROW f79b641f4d09ac0481f89fcbe509cd468c58ba50: no ledger row binds to this commit (digest 8d2ecccca41dbbf5d90080d936411b907d59409a5c3551d0178040c3d976be2a)
+E           - MISSING_ROW 1debb14f288df737e2636600f36e328bba81c094: no ledger row binds to this commit (digest f8601ee76ad9ea637ee8da20c264bd2e36c5660a33d61c456fbf227f7dbb3c47)
+E           - MISSING_ROW 3e899b54d541f8139657751ad4d23c9f0b678374: no ledger row binds to this commit (digest f6fec0de02343efe8f7d740eacab5bdab8d57f2ce926d23493f5e3696635e2aa)
+E           - MISSING_ROW cf9b28c28cc9e0344459b138ff78da0cd74aec4f: no ledger row binds to this commit (digest b3db0f4a8907f711ac1e226ee61f2fbf1592c6e44ea03f8dc7854ef70e88f26e)
+E           - MISSING_ROW 37581fe211aea80996c1f46be67e4374edb45eb3: no ledger row binds to this commit (digest 3eb24ac79b8d993700ce7d14e3e58d0a4d1ce4a91495e109cf9f378464379ad7)
+E           - MISSING_ROW e31a514924e7382efb2f4fddefed2d1906bb2c46: no ledger row binds to this commit (digest d603258486a41cf62233d574086def58cdad552316304666be4c003e1e61bc70)
+E           - MISSING_ROW 313097384297da7e7ab210e6cfd307ab5cf5b440: no ledger row binds to this commit (digest c74f0a2fe2411c5f46723154e5097e342580564b65aa9d1f24b3449f3bd328ea)
+E           - MISSING_ROW 4698c2d1161fd04614e61e5ce727e6df547be6c9: no ledger row binds to this commit (digest 999ac41d829d9ef06e0820fc9174d6756099f31781dc83838cf252345bbb1f8f)
+E           - MISSING_ROW c3ff056cb125ef7d0122c9dcb58e5c028a3e742d: no ledger row binds to this commit (digest ff5bd2cdfc89ac30dfd76d9f292246862f45b6cb8f258f12c8865a556fe86904)
+E           - MISSING_ROW 01e7d84a1edd6e902619b284fac1a1e560a2d38d: no ledger row binds to this commit (digest e3899c7af099c5e1ded3e530235d44f7b414907f9d2342d69878ad62574ace28)
+E           - MISSING_ROW fba19760fd3d7f50471a85b765108053b31b1153: no ledger row binds to this commit (digest 8ef596ab767923b0fbf595a6ebb3d6d0f5eb483aec1823c144ea0c2930399ccb)
+E           - MISSING_ROW 004bda0b90cc5594366b6ec082dcb09d30ebe9ba: no ledger row binds to this commit (digest 590f10e99706fc4d52ca9584b2caf1ae29f8618adf5a5d672c5d52ba9cd5e873)
+E           - MISSING_ROW 82c93af490dca964c6a21ae90960a040c842602d: no ledger row binds to this commit (digest 42d381fa961b81923938bcc18e039d2fbd55496a8a477c43080d3639e2c06f74)
+E           - MISSING_ROW c091d22ce21728de33b5c8318385a147809dc207: no ledger row binds to this commit (digest 8b978116684420d38305b169b8639a34ec89b3e86441a94328a04f04dd50f0f4)
+E           - MISSING_ROW 662a0c3b2328334cb8993dc3e765c5cb04a2d3df: no ledger row binds to this commit (digest 59d7a2be3a25f30b23904ead0127811c918458047c3ad38daed716ec74263114)
+E           - MISSING_ROW cc60ea8edacde5d545ada67b7af08e1e3623655c: no ledger row binds to this commit (digest b7788cc24f9f387b8fcd9dc345dc58a8a26335c8cba6cb3431ad6692249b401c)
+E           - MISSING_ROW 652ef3f38717c808f57fcbc97f92d1030f9ab4a8: no ledger row binds to this commit (digest f006de074c4800d51f45c65a888b7ec493cc450be1101485dda21d9b1c42faa0)
+E           - MISSING_ROW 75e2e95b734b29f8e6aa54eadde53a0348c9c499: no ledger row binds to this commit (digest d2433c7eca02714913e7358e017f9c11515ddbcfc57c3fee549c3f8868011460)
+E           - MISSING_ROW 184451e0789637a0d449ffc54da2ac7564e9d5ba: no ledger row binds to this commit (digest b2057e3fe58f6255cc1544b77bfa0b2ba99bd1ab9cf3716006416161a9434bfd)
+E           - MISSING_ROW 1e9e18a710d77cdc0ab046ad09f78d903cb7f3ec: no ledger row binds to this commit (digest 9578b99fcd77464b8c300c6edbc17ce6eb0dcbd157d7473976b9e926d32eb5f6)
+E           - MISSING_ROW 81d0a5780c3163bb567e84d64fe82b45d4df47e2: no ledger row binds to this commit (digest 928330b458e7a64d17f55fd6d7e8b5d744f6f44b4f2f985850348ad0a499b723)
+E           - MISSING_ROW 1698430078d8cd2e1309b7bfa24a0043349ea811: no ledger row binds to this commit (digest 3abc0e17d123bda880c62c9dc50879c04f3c2ea6b5ced887459128ff11419f63)
+E           - MISSING_ROW 21519d33056e3eb9526bea1389b87613efc4addc: no ledger row binds to this commit (digest 99decda71f5de7dddc7702f6817c0c93ef3a4cde6f9d26a18a7dcfae484731d9)
+E           - MISSING_ROW b8af36e4ed354ba7f55582dbdd8e2a36b15ae9a1: no ledger row binds to this commit (digest 014aa6d23ee79deeda7851b9984c40bd484fddefcc77b70d5a16fddb2efd7d57)
+E           - MISSING_ROW 29dd02d5ce894bd5d4320eed6e8193fd393f1aa5: no ledger row binds to this commit (digest b34f91062c305be9172a3d633a02ae20ee53904d095e3cbfacbad1c3b549c322)
+E           - MISSING_ROW 3c9c2c7a3828557f3664ac99cada25ea6c775c78: no ledger row binds to this commit (digest a2f90e05bebe79c8c253ec6195ffcde87bc59d0deb6baa9eb3c25b41872eeb99)
+E           - MISSING_ROW 71a01e7a5450b38e42068fe2b7a580e7230f2aa3: no ledger row binds to this commit (digest 1e9a81a132305ec0d95518a70b0d46897f72c3b3c817fe19fd7ec32bf6b0baf4)
+E           - MISSING_ROW 96bc3590a0cd48a6083441d7a27e4b8f8bf46683: no ledger row binds to this commit (digest c78ee86b1963e068998cc0412dcc6709225e11b9cd709bf441b2d499776eba13)
+E           - MISSING_ROW cfd92daf8f4c7ab033a5a941366ca527969b9ec5: no ledger row binds to this commit (digest c78ee86b1963e068998cc0412dcc6709225e11b9cd709bf441b2d499776eba13)
+E           - MISSING_ROW 98004e4e73eeb3a2593acf83b0eb74afcbccf6fa: no ledger row binds to this commit (digest 3152430ef21d7d4efb15242c06a8cd3f91012999962382731c65e5196cd974b9)
+E           - MISSING_ROW 7231caf101cf89f33316c133a2ac99e87eb3e9b4: no ledger row binds to this commit (digest 990dc57f7706030a22bbabc69d4050fe8084b05657e008c98ddf8d8c3b5ea99d)
+E           - MISSING_ROW ed2ad101365b5ac7167991dcbed6d75e2f3b71de: no ledger row binds to this commit (digest 39441297e1b7e499904413ba9ffb5995dbad443ba4dc43092fc4cab95819b5c6)
+E           - MISSING_ROW d0763b5edd7d08964e4673a2509715ed483ed94d: no ledger row binds to this commit (digest ea12529cffeabf73d35a652dbd2c9750a3a1dc3d561d4f6851fb87ba6799c9d2)
+E           - MISSING_ROW 4aa3f5dfaac3ea7c30a0e80e2533c92693e3f749: no ledger row binds to this commit (digest 7060c37a0ecf97578cc2ca627a8d09e9f96a944e5acad7b6480c84254a999060)
+E           - MISSING_ROW 7043d0aadd42322c16393e3fabb3a35113986de1: no ledger row binds to this commit (digest 659fcf6dad69457c78ef130729372ceb87e2301c6887f5e626651415bcd0047b)
+E           - MISSING_ROW 98d4e3e37e90df05f17fee58cda38ec0a704e88e: no ledger row binds to this commit (digest 4b69cb9a6971a44509e2bc8a0396f839e000e394ba2efc96cd0f8d11455f4f16)
+E           - MISSING_ROW 1583d4bb0cca394aae7550dabf35ec6e61a094ec: no ledger row binds to this commit (digest 25741313e329575f22870f5c454b6824f8cf7054e1ece0b5f50c60cfa2c3f2db)
+E           - MISSING_ROW ddc4bbc1dda85609a8a351a653ec93a57caec2b9: no ledger row binds to this commit (digest 9caffc39eb9c678fe82bee528a66b7cdc35eb5aa876da7deb0b26f634da3d80e)
+E           - MISSING_ROW 504a3f6759ffff9d13fe3528037be041a6536088: no ledger row binds to this commit (digest e06b35bdebd6d936dbea301c77d2ad5a29eda19c7860b7842301bc6d8a5ac7d1)
+E           - MISSING_ROW ea170af36add8e467dd0860d82e8a1d7d39255d8: no ledger row binds to this commit (digest 958e2bae8925bf99a4c7d2187fc05ffb6e3e987abfc8e571d0be4d2d8a23f80b)
+E           - MISSING_ROW f6d568e5fbb2ae1b9fca38cd1f13a9893193a66f: no ledger row binds to this commit (digest 4e293f4e2ea2d8036ae6106a0ef3643e21d3ad30374f7b7053ca661e2f0bcdbd)
+E           - MISSING_ROW 306834775ab3e0e33c54bc72828a04f04cd7f135: no ledger row binds to this commit (digest cb5cf2651915bca37b93074d52a7860aff4f663960967eaa5d6cb61db2c4fa9b)
+E           - MISSING_ROW 85ba485b2e375fcc777308492753a1a08c7f4307: no ledger row binds to this commit (digest 7ada62cbd1767949fd88d9422172181864423a18858abb213e9256a352789b87)
+E           - MISSING_ROW 5ffa59ef2bf0003b5248749c5692fdb1a4eceed4: no ledger row binds to this commit (digest a77aaf105ac77ee84b5a2a9cbf2e111d1fb1aeb31a45c95cfb75a87f7be7f510)
+E           - MISSING_ROW fc21caa60824c6bb436deb4162def5dccb90acd4: no ledger row binds to this commit (digest a77aaf105ac77ee84b5a2a9cbf2e111d1fb1aeb31a45c95cfb75a87f7be7f510)
+E           - MISSING_ROW 1b3c6d014f68a61e3360fde57d2c269d351ea239: no ledger row binds to this commit (digest d06a854bb8ea54add640f5771e300d247f7c5e6db643b2ae330cf9f8c7c5e2d8)
+E           - MISSING_ROW ba1106cd1f6035660bc47c44d306c2ef37574a20: no ledger row binds to this commit (digest d06a854bb8ea54add640f5771e300d247f7c5e6db643b2ae330cf9f8c7c5e2d8)
+E           - MISSING_ROW e22080c496dbc2862bb9cbdd47007116e99008af: no ledger row binds to this commit (digest d4b5f1c08483b3f1d547cbf479648db51521b232a6fec342fff4033577ea82c3)
+E           - MISSING_ROW c2c1dd43073f77211cf52a1d2d14b828f6baf500: no ledger row binds to this commit (digest d4b5f1c08483b3f1d547cbf479648db51521b232a6fec342fff4033577ea82c3)
+E           - MISSING_ROW 9cab59773476713b9ffa23f4d2277820bb6005df: no ledger row binds to this commit (digest d45f8a6683e97e2113ef357876014c8d39133b9d7d547616d0d660e91eace060)
+E           - MISSING_ROW 12e2844f024302a025c83dcbd527c8129403e960: no ledger row binds to this commit (digest d45f8a6683e97e2113ef357876014c8d39133b9d7d547616d0d660e91eace060)
+E           - MISSING_ROW c2ebee173406fdd10f732d62c79b65c12b6162c6: no ledger row binds to this commit (digest 035c2b9868611f0c4357c9e20b4c595c86f8b11c22567e6fa58261d4bde4732d)
+E           - MISSING_ROW ad02484f4f40f8e031fe0fe4693291d622ea1098: no ledger row binds to this commit (digest 905198551920986e979a035022964a4b0321a369b37b5cfc7ce8a191f87e65a2)
+E           - MISSING_ROW c0c2984e1eadfb47351aa7449e2129049cede55e: no ledger row binds to this commit (digest 3b97945474e24b74663b8bab3ee9890b8b53fcf8e8da50faa6afa4b43a154783)
+E           - MISSING_ROW 8eb1889822fc8a83f219977c15340172e16acd91: no ledger row binds to this commit (digest 3b97945474e24b74663b8bab3ee9890b8b53fcf8e8da50faa6afa4b43a154783)
+E           - MISSING_ROW c5355745798fff8248d910a10ad0422ee4698dd4: no ledger row binds to this commit (digest 26ef8c69751016ec5b6658203cc678a35d0de237e4e43e8ce37399c4a212f9a0)
+E           - MISSING_ROW 13a8969c3863d3f827500f47005b3b33eca750b8: no ledger row binds to this commit (digest c68cc17634b2418dc4579fa35c9fc1197b0cb417d3aa7dd39a9a8aa5c363ab2f)
+E           - MISSING_ROW e92027f987b527ccfdbe45d9332574aa7392fd07: no ledger row binds to this commit (digest 212053613fb73f2dbd670d89efe6d48abc56aeca4c8003d65b78cd81dcf74377)
+E           - MISSING_ROW f3cab5cb75d73f0255c60a6639a2df43dbb08d90: no ledger row binds to this commit (digest fadcf41ff8357fc8bda742cfe2bd5aa2bd518052fe155fa5df8f59dc5c8351a5)
+E           - MISSING_ROW f9d2965f27673afeff354b27ae98f07a8c9392e7: no ledger row binds to this commit (digest ba3a0f2fb1363687ae426612ba4c103e45cdede5deea8563610515b4382134d4)
+E           - MISSING_ROW 923ecf9bbb81a2b3b485a3730071279851596b06: no ledger row binds to this commit (digest c3316e58500094aac18bd9195a179e9f794593e64c9aa7dfad267cdd03b022f0)
+E           - MISSING_ROW 4f2631f06b36a85f8db5daa26ee110280bae3184: no ledger row binds to this commit (digest 62e400746e530b0754249e24cff9b0d6017019b5b9a2b9f0fe4431ecdfa8d6ea)
+E           - UNCOVERED_FILES e56e7fc4ec3f6ce90f3abe6580faba906698e204: 36 file(s) not covered by ['auth-20261006-owner-derived-cognitive-fabric-complete-closure']: .github/workflows/cognitive-fabric-r161-van.yml, backend/tests/fixtures/cognitive_twin_dds_compiler.json, backend/tests/fixtures/cognitive_twin_dds_compiler.provenance.json, backend/tests/test_cognitive_fabric.py, backend/tests/test_cognitive_twin.py, backend/tests/test_trading_api.py, backend/van_gateway/app.py, backend/van_gateway/auth/control_scopes.py (+28 more)
+E           - UNCOVERED_FILES 5004a5aaa91e46f07f037a1d5d23f1ef1144a8f1: 15 file(s) not covered by ['auth-20261006-owner-derived-cognitive-fabric-complete-closure']: .github/workflows/van-ci.yml, docs/character_forge/CANDIDATE_B_MECHANICS_TRANSPLANT.md, docs/character_forge/CANDIDATE_B_PREVIEWS.md, docs/character_forge/VAN_CHARACTER_FORGE_PRODUCTION_V3.md, tests/contracts/test_candidate_b_mechanics_prototype.py, tools/character_forge/build_candidate_b_rive_prototype.py, tools/ci/github-actions-ci.yml, visual-authority/character-forge/00-source/asset-pack/ASSET_REQUIREMENTS.yaml (+7 more)
+E           - UNCOVERED_FILES 9ec48a7415ab8a4faf7312ad14eff4578beea88e: 23 file(s) not covered by ['auth-20261006-owner-derived-cognitive-fabric-complete-closure']: backend/tests/test_web_acquisition.py, backend/tests/test_web_acquisition_api.py, backend/tests/test_web_acquisition_runtime.py, backend/van_gateway/automation/canonical.py, backend/van_gateway/browser/acquisition.py, backend/van_gateway/browser/acquisition_adapters.py, backend/van_gateway/browser/adapters.py, backend/van_gateway/browser/api.py (+15 more)
+E           - UNCOVERED_FILES 37a50ca6f9c87266a2274b9cb07a08ad05ebbffc: 1 file(s) not covered by ['auth-20261006-owner-derived-cognitive-fabric-complete-closure']: deploy/van-trading-core/oci/harden-oracle-image-firewall.sh
+E           - UNCOVERED_FILES 6de14bf6c938c261b56e202efacea46c929406c4: 31 file(s) not covered by ['auth-20261006-owner-derived-cognitive-fabric-complete-closure']: backend/tests/test_browser_assignment_execution.py, backend/tests/test_browser_interaction_router.py, backend/tests/test_browser_subagent.py, backend/tests/test_browser_task_read_auth.py, backend/tests/test_calendar_effect_readback.py, backend/tests/test_extra_apis.py, backend/tests/test_gmail_mime_and_frozen_send.py, backend/tests/test_google_openmuse_depth.py (+23 more)
+E           - UNCOVERED_FILES d9067978267226d7321b1e95fa510c0a341e896a: 5 file(s) not covered by ['auth-20261006-owner-derived-cognitive-fabric-complete-closure']: docs/VAN_VATI_OPPORTUNITY_TEMPERAMENT_MODES_REV1.md, trading/vati/arbiter/temperament.py, trading/vati/lifecycle/temperament.py, trading/vati/risk/__init__.py, trading/vati/risk/mandate.py
+E           - UNCOVERED_FILES b25f6c69056c4466f44fefa13e11780ecdfe51f9: 44 file(s) not covered by ['auth-20261006-owner-derived-cognitive-fabric-complete-closure']: backend/tests/test_network_candidate_projection.py, deploy/van-browser-core/browser/harness_service.py, deploy/van-trading-core/muse/CANON_RECONCILIATION_2026-10-08.md, deploy/van-trading-core/muse/README.md, deploy/van-trading-core/muse/danted.conf, deploy/van-trading-core/muse/install-muse-egress.sh, deploy/van-trading-core/muse/install-us-ca-exit.sh, deploy/van-trading-core/muse/muse-egress.env.example (+36 more)
+E           - UNCOVERED_FILES 6c87fc41e4dbe60d7e30ace371c17b5dfb23327d: 13 file(s) not covered by no authorization: backend/tests/test_browser_interactive_worker.py, backend/tests/test_jev_no_generic_executor.py, backend/van_gateway/computer_use/annotations.py, deploy/van-trading-core/muse/sandbox/install-muse-sandbox.sh, deploy/van-trading-core/muse/sandbox/runtime.env.example, deploy/van-trading-core/muse/sandbox/runtime/van-muse-sandbox-firewall.sh, docs/decisions/VAN-ADOPT-STAGEHAND-001.yaml, tests/contracts/test_automation_browser_governance.py (+5 more)
+E           - UNCOVERED_FILES 959f82e2c521300e61970b90e3b9126179590461: 1 file(s) not covered by no authorization: backend/pytest.ini
+E           - UNCOVERED_FILES e188be7bd1fd80583b3455555559314407721ef4: 2 file(s) not covered by no authorization: backend/tests/conftest_automation.py, backend/van_gateway/browser/api.py
+E           - UNCOVERED_FILES f68022fd70f7dcc5166e8b53139ba47e86d8c823: 22 file(s) not covered by no authorization: backend/tests/test_automation_dispatch.py, backend/tests/test_automation_worker_runtime.py, backend/tests/test_browser_api.py, backend/tests/test_browser_canary_origin.py, backend/tests/test_browser_completion_requires_verification.py, backend/tests/test_browser_injection_containment.py, backend/tests/test_browser_late_block_callers.py, backend/tests/test_browser_producer_api.py (+14 more)
+E           - UNCOVERED_FILES 00db4ea3e0df11fdc446753dcd7bd132af75da3f: 4 file(s) not covered by no authorization: docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-08.json, registries/owner_endpoints.json, registries/owner_features.json, registries/owner_screens.json
+E           - UNCOVERED_FILES 4ad31883d57ab518ba9af414aa849db6e240eb71: 5 file(s) not covered by no authorization: backend/tests/test_dial_dev_product_mtls.py, backend/van_gateway/dial_dev/client.py, docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-08.json, registries/owner_features.json, registries/owner_screens.json
+E           - UNCOVERED_FILES 7526d3e90928e1fc0b6be8558c8dc16be9e6c33f: 53 file(s) not covered by no authorization: .github/workflows/van-owner-release.yml, android/app/build.gradle.kts, android/app/src/androidTest/java/com/dial/van/instrumentation/CommandCentreLaunchTest.kt, android/app/src/main/AndroidManifest.xml, android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt, android/app/src/main/java/com/dial/van/command/nav/VanNavModel.kt, android/app/src/main/java/com/dial/van/dialdev/DialDevFabricModels.kt, android/verification/src/test/kotlin/com/dial/van/command/nav/VanNavModelTest.kt (+45 more)
+E           - UNCOVERED_FILES 8d0104f523c1ce1f3215b62bf6cce8abd5266ad0: 6 file(s) not covered by no authorization: deploy/van-owner-core/README.md, docs/audit/OWNER_FRONTEND_REGISTRY_GUIDE.md, docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r5.json, registries/owner_features.json, registries/owner_screens.json, services/browser_control_agent/tests/test_stream_host_package.py
+E           - UNCOVERED_FILES 805f3b67c2b9eb68d887cd700f9443f476e26132: 1 file(s) not covered by no authorization: tools/certification/openmuse_van_convergence.py
+E           - UNCOVERED_FILES ffa18d578eae6dd2e484a60fa3fb912c4204635c: 6 file(s) not covered by no authorization: android/app/build.gradle.kts, docs/audit/OWNER_FRONTEND_CONTRACT.html, docs/audit/OWNER_FRONTEND_REGISTRY_GUIDE.md, docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r6.json, registries/owner_features.json, registries/owner_screens.json
+E           - UNCOVERED_FILES dfc1557ab99ad8d41cf84714e1bb671e89b045e6: 10 file(s) not covered by no authorization: backend/tests/fixtures/task_scope/url_vectors.v1.json, backend/tests/test_harness_pseudo_hit_ownership.py, backend/van_gateway/browser/task_scope.py, deploy/van-browser-core/browser/egress_proxy.py, deploy/van-browser-core/browser/harness_service.py, docs/audit/OWNER_FRONTEND_REGISTRY_GUIDE.md, docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r7.json, registries/owner_features.json (+2 more)
+E         
+E       assert 1 == 0
+
+tests/contracts/test_project_truth_ledger.py:795: AssertionError
+=========================== short test summary info ============================
+SKIPPED [1] tests/contracts/test_van_browser_core_firewall.py:288: needs root, unshare -n, nft and setpriv
+SKIPPED [1] tests/contracts/test_van_browser_core_firewall.py:321: needs root, unshare -n, nft and setpriv
+SKIPPED [1] tests/contracts/test_van_browser_core_firewall.py:348: needs root, unshare -n, nft and setpriv
+SKIPPED [1] tests/contracts/test_van_browser_core_firewall.py:396: needs root, unshare -n, nft and setpriv
+SKIPPED [1] tests/contracts/test_van_browser_core_firewall.py:410: needs root, unshare -n, nft and setpriv
+FAILED tests/contracts/test_project_truth_ledger.py::test_the_real_branch_verifies_at_head
+1 failed, 1521 passed, 5 skipped in 147.07s (0:02:27)

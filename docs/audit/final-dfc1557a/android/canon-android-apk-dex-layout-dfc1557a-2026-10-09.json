@@ -1,0 +1,179 @@
+{
+  "apk_coverage_receipt_sha256": "b8d9d23052c9f635b297de2891a89faf4c02a0d7a8c81718ee3ab3f8b070685a",
+  "changed_dex_files": [
+    {
+      "after_counts": {
+        "classes": 1178,
+        "fields": 3396,
+        "methods": 7311,
+        "protos": 1545,
+        "strings": 10276,
+        "types": 1627
+      },
+      "after_sha256": "81636ddecbdbba75d07c73c8349645544a8fdf25b9a145a43c432a8d748cacb1",
+      "before_counts": {
+        "classes": 1178,
+        "fields": 3398,
+        "methods": 7311,
+        "protos": 1545,
+        "strings": 10276,
+        "types": 1627
+      },
+      "before_sha256": "0441bc84066805347e857e30bb749508cffdffc4dfb8f49c6528dc0ede4ba1ff",
+      "different_string_data": {
+        "after": [
+          {
+            "bytes": 40,
+            "known_source_sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+            "sha256": "e54f54646a600592ce25c8ada1b2a6db98322805e6cb016a627980d339e5faf0"
+          },
+          {
+            "bytes": 90526,
+            "known_source_sha": null,
+            "sha256": "83b25544a844f12e0c4278d5bcf94e61b1e43aad8d5e42413b515881c2e46f8c"
+          }
+        ],
+        "before": [
+          {
+            "bytes": 40,
+            "known_source_sha": "ffa18d578eae6dd2e484a60fa3fb912c4204635c",
+            "sha256": "9b05a12ce8917eb8ec14747c4060197ee67f2296116ac13abc5fdd02d434a4c4"
+          },
+          {
+            "bytes": 90527,
+            "known_source_sha": null,
+            "sha256": "81e3ad7af8a7d5a93e975cb296d9668388162966a5d14da8a42fe310fe264f56"
+          }
+        ]
+      },
+      "known_source_sha_literals_after": {
+        "dfc1557ab99ad8d41cf84714e1bb671e89b045e6": 1
+      },
+      "known_source_sha_literals_before": {
+        "ffa18d578eae6dd2e484a60fa3fb912c4204635c": 1
+      },
+      "path": "classes4.dex",
+      "table_identities": {
+        "class_definitions": {
+          "after_only_count": 0,
+          "before_only_count": 0,
+          "equal": true
+        },
+        "fields": {
+          "after_only_count": 0,
+          "before_only_count": 2,
+          "equal": false
+        },
+        "methods": {
+          "after_only_count": 0,
+          "before_only_count": 0,
+          "equal": true
+        },
+        "protos": {
+          "after_only_count": 0,
+          "before_only_count": 0,
+          "equal": true
+        },
+        "strings": {
+          "after_only_count": 2,
+          "before_only_count": 2,
+          "equal": false
+        },
+        "types": {
+          "after_only_count": 0,
+          "before_only_count": 0,
+          "equal": true
+        }
+      }
+    },
+    {
+      "after_counts": {
+        "classes": 393,
+        "fields": 1550,
+        "methods": 3574,
+        "protos": 1241,
+        "strings": 6118,
+        "types": 912
+      },
+      "after_sha256": "59230258f6284f897e9b526ac7dda276b3429020ecdb89ae76a00b3dca402835",
+      "before_counts": {
+        "classes": 393,
+        "fields": 1550,
+        "methods": 3574,
+        "protos": 1241,
+        "strings": 6118,
+        "types": 912
+      },
+      "before_sha256": "847169c7ad002f8493e411b76b0e08948e7817b9ec12e1e85b4ce8683cd8d037",
+      "different_string_data": {
+        "after": [
+          {
+            "bytes": 40,
+            "known_source_sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+            "sha256": "e54f54646a600592ce25c8ada1b2a6db98322805e6cb016a627980d339e5faf0"
+          },
+          {
+            "bytes": 26067,
+            "known_source_sha": null,
+            "sha256": "47600995ca45e4ea68f264d40f7250da40e91dccd180722882b6b0e1edd5e001"
+          }
+        ],
+        "before": [
+          {
+            "bytes": 40,
+            "known_source_sha": "ffa18d578eae6dd2e484a60fa3fb912c4204635c",
+            "sha256": "9b05a12ce8917eb8ec14747c4060197ee67f2296116ac13abc5fdd02d434a4c4"
+          },
+          {
+            "bytes": 26067,
+            "known_source_sha": null,
+            "sha256": "26b3aebed183dac8e6bce3cab8009fcbcc53f226cf6d3f761027c0699c1a4535"
+          }
+        ]
+      },
+      "known_source_sha_literals_after": {
+        "dfc1557ab99ad8d41cf84714e1bb671e89b045e6": 1
+      },
+      "known_source_sha_literals_before": {
+        "ffa18d578eae6dd2e484a60fa3fb912c4204635c": 1
+      },
+      "path": "classes16.dex",
+      "table_identities": {
+        "class_definitions": {
+          "after_only_count": 0,
+          "before_only_count": 0,
+          "equal": true
+        },
+        "fields": {
+          "after_only_count": 0,
+          "before_only_count": 0,
+          "equal": true
+        },
+        "methods": {
+          "after_only_count": 0,
+          "before_only_count": 0,
+          "equal": true
+        },
+        "protos": {
+          "after_only_count": 0,
+          "before_only_count": 0,
+          "equal": true
+        },
+        "strings": {
+          "after_only_count": 2,
+          "before_only_count": 2,
+          "equal": false
+        },
+        "types": {
+          "after_only_count": 0,
+          "before_only_count": 0,
+          "equal": true
+        }
+      }
+    }
+  ],
+  "physical_handset_tests_executed": 0,
+  "revision": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "schema_version": 1,
+  "scope": "read-only changed DEX identity/layout comparison; no bytecode semantics claim or rebuild"
+}

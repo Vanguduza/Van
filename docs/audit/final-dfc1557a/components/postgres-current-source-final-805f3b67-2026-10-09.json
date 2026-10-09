@@ -1,0 +1,208 @@
+{
+  "-debian-signatures.txt_sha256": "7b1734df9c188466750567dac7e3cd6ce9166bcae2bc5d045b2457aadb05ca99",
+  "-inputs.json_sha256": "c647fe316ca07e7c5576375f6489264d984366a2be836c5dbb127a745eaffe4b",
+  "-server.log_sha256": "377788f8a70250888d7894a7adcb0f7c039e11558ae4ec0388b5ae234892d054",
+  ".log_sha256": "b4eb7be9000651a3e89c6a77e8b346d05d1d706d620aa6f8193e574a39b3ced1",
+  ".xml_sha256": "18bc9fc9720974e7700758b4cd1af774b6bb0083f5cb786c5bb52eb0e4ecc799",
+  "changed_inputs": [],
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/gpg",
+        "--homedir",
+        "/tmp/vqpg-1pp2gfue/gpg",
+        "--batch",
+        "--no-default-keyring",
+        "--keyring",
+        "/usr/share/keyrings/debian-archive-keyring.gpg",
+        "--verify",
+        "/workspace/.onboarding/browser-parser/downloads/InRelease"
+      ],
+      "elapsed_seconds": 0.014,
+      "returncode": 0,
+      "stderr": "gpg: Signature made Sat Sep 12 07:56:18 2026 UTC\ngpg:                using RSA key 4CB50190207B4758A3F73A796ED0E7B82643E131\ngpg: /tmp/vqpg-1pp2gfue/gpg/trustdb.gpg: trustdb created\ngpg: Good signature from \"Debian Archive Automatic Signing Key (12/bookworm) <ftpmaster@debian.org>\" [unknown]\ngpg: WARNING: This key is not certified with a trusted signature!\ngpg:          There is no indication that the signature belongs to the owner.\nPrimary key fingerprint: B8B8 0B5B 623E AB6A D877  5C45 B7C5 D7D6 3509 47F8\n     Subkey fingerprint: 4CB5 0190 207B 4758 A3F7  3A79 6ED0 E7B8 2643 E131\ngpg: Signature made Sat Sep 12 07:56:19 2026 UTC\ngpg:                using RSA key B8E5F13176D2A7A75220028078DBA3BC47EF2265\ngpg: Good signature from \"Debian Archive Automatic Signing Key (13/trixie) <ftpmaster@debian.org>\" [unknown]\ngpg: WARNING: This key is not certified with a trusted signature!\ngpg:          There is no indication that the signature belongs to the owner.\nPrimary key fingerprint: 04B5 4C3C DCA7 9751 B16B  C6B5 2256 29DF 75B1 88BD\n     Subkey fingerprint: B8E5 F131 76D2 A7A7 5220  0280 78DB A3BC 47EF 2265\ngpg: Signature made Sat Sep 12 07:57:47 2026 UTC\ngpg:                using EDDSA key 41587F7DB8C774BCCF131416762F67A0B2C39DE4\ngpg: Good signature from \"Debian Stable Release Key (13/trixie) <debian-release@lists.debian.org>\" [unknown]\ngpg: WARNING: This key is not certified with a trusted signature!\ngpg:          There is no indication that the signature belongs to the owner.\nPrimary key fingerprint: 4158 7F7D B8C7 74BC CF13  1416 762F 67A0 B2C3 9DE4\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "/workspace/.onboarding/browser-parser/postgres-root/usr/lib/postgresql/17/bin/postgres",
+        "--version"
+      ],
+      "elapsed_seconds": 0.012,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)\n"
+    },
+    {
+      "argv": [
+        "/workspace/.onboarding/browser-parser/postgres-root/usr/lib/postgresql/17/bin/initdb",
+        "-D",
+        "/tmp/vqpg-1pp2gfue/data",
+        "-L",
+        "/workspace/.onboarding/browser-parser/postgres-root/usr/share/postgresql/17",
+        "-A",
+        "trust",
+        "-U",
+        "van_fixture",
+        "--encoding=UTF8",
+        "--locale=C",
+        "--no-instructions"
+      ],
+      "elapsed_seconds": 0.449,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "The files belonging to this database system will be owned by user \"agent\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are disabled.\n\ncreating directory /tmp/vqpg-1pp2gfue/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... posix\nselecting default \"max_connections\" ... 100\nselecting default \"shared_buffers\" ... 128MB\nselecting default time zone ... Etc/UTC\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n"
+    },
+    {
+      "argv": [
+        "/workspace/.onboarding/browser-parser/postgres-root/usr/lib/postgresql/17/bin/pg_ctl",
+        "-D",
+        "/tmp/vqpg-1pp2gfue/data",
+        "-l",
+        "/tmp/vqpg-1pp2gfue/postgres.log",
+        "-w",
+        "-t",
+        "15",
+        "-o",
+        "-h 127.0.0.1 -p 40231 -k /tmp/vqpg-1pp2gfue/socket -c shared_buffers=16MB -c max_connections=10",
+        "start"
+      ],
+      "elapsed_seconds": 0.11,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "waiting for server to start.... done\nserver started\n"
+    },
+    {
+      "argv": [
+        "/workspace/van-audit/canon-backend-venv-2026-10-09/bin/python",
+        "-c",
+        "import json,os,psycopg; c=psycopg.connect(os.environ[\"VATI_TEST_PG_DSN\"],autocommit=True); c.execute(\"CREATE SCHEMA vati\"); print(json.dumps({\"driver_version\":psycopg.__version__,\"driver_impl\":psycopg.pq.__impl__,\"driver_libpq_version\":psycopg.pq.version(),\"server\":c.execute(\"SELECT version()\").fetchone()[0],\"listen_addresses\":c.execute(\"SHOW listen_addresses\").fetchone()[0]})); c.close()"
+      ],
+      "elapsed_seconds": 0.125,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"driver_version\": \"3.2.9\", \"driver_impl\": \"binary\", \"driver_libpq_version\": 170005, \"server\": \"PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit\", \"listen_addresses\": \"127.0.0.1\"}\n"
+    },
+    {
+      "argv": [
+        "/workspace/van-audit/canon-backend-venv-2026-10-09/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-ra",
+        "trading/tests/test_infra_live.py::test_postgres_ledger_matches_sqlite_chain_and_detects_tampering",
+        "-o",
+        "cache_dir=/tmp/vqpg-1pp2gfue/cache",
+        "--basetemp=/tmp/vqpg-1pp2gfue/pt",
+        "--junitxml=/workspace/van-audit/postgres-current-source-final-805f3b67-2026-10-09.xml"
+      ],
+      "elapsed_seconds": 0.8,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ".                                                                        [100%]\n1 passed in 0.38s\n"
+    },
+    {
+      "argv": [
+        "/workspace/.onboarding/browser-parser/postgres-root/usr/lib/postgresql/17/bin/pg_ctl",
+        "-D",
+        "/tmp/vqpg-1pp2gfue/data",
+        "-m",
+        "fast",
+        "-w",
+        "-t",
+        "15",
+        "stop"
+      ],
+      "elapsed_seconds": 0.102,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "waiting for server to shut down.... done\nserver stopped\n"
+    },
+    {
+      "argv": [
+        "/workspace/.onboarding/browser-parser/postgres-root/usr/lib/postgresql/17/bin/pg_ctl",
+        "-D",
+        "/tmp/vqpg-1pp2gfue/data",
+        "status"
+      ],
+      "elapsed_seconds": 0.002,
+      "returncode": 3,
+      "stderr": "",
+      "stdout": "pg_ctl: no server running\n"
+    }
+  ],
+  "counts": {
+    "cases": 1,
+    "errors": 0,
+    "failed": 0,
+    "passed": 1,
+    "skipped": 0
+  },
+  "fixture_stopped": true,
+  "fixture_user_uid": 1000,
+  "handset_cases_executed": 0,
+  "limits": [
+    "Loopback trust authentication exists only in the owned temporary fixture; no production authentication was exercised.",
+    "The test creates the private fixture schema before exercising current production ledger code; it does not qualify deployed runtime privileges or all schema55 tables.",
+    "Driver psycopg[binary]3.2.9 matches the production Python pin; this fixture is x86_64, while the declared core host is arm64.",
+    "Actual concurrent ledger connections, PostgreSQL/SQLite hash equivalence and tamper detection are verified only when this case passes."
+  ],
+  "live_production_qualified": false,
+  "measured_private_loopback_port": 40231,
+  "no_fixture_server_running": true,
+  "observed_runtime": {
+    "driver_impl": "binary",
+    "driver_libpq_version": 170005,
+    "driver_version": "3.2.9",
+    "listen_addresses": "127.0.0.1",
+    "server": "PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit"
+  },
+  "package_trust": {
+    "archives": [
+      {
+        "archive": "/workspace/.onboarding/browser-parser/downloads/libpq5_17.11-0+deb13u1_amd64.deb",
+        "bytes": 237376,
+        "mode": "0o600",
+        "package": "libpq5",
+        "sha256": "20a4c9ef58b4baf90deda67cfb2cc062871c062830dddc234d28f5ac7931b86b",
+        "version": "17.11-0+deb13u1"
+      },
+      {
+        "archive": "/workspace/.onboarding/browser-parser/downloads/postgresql-17_17.11-0+deb13u1_amd64.deb",
+        "bytes": 16678028,
+        "mode": "0o600",
+        "package": "postgresql-17",
+        "sha256": "d2ce1ddffafa783f9acda4c92c86fc21e8288bff3782d739294f14fa797d7886",
+        "version": "17.11-0+deb13u1"
+      },
+      {
+        "archive": "/workspace/.onboarding/browser-parser/downloads/postgresql-client-17_17.11-0+deb13u1_amd64.deb",
+        "bytes": 2071508,
+        "mode": "0o600",
+        "package": "postgresql-client-17",
+        "sha256": "9d8558f8dd57c8e92e218a20698383575d53742ca3f9e7c2b7fe5f246d5216ae",
+        "version": "17.11-0+deb13u1"
+      }
+    ],
+    "executed_binaries_match_authenticated_archive_payloads": true,
+    "fresh_signature_verified": true,
+    "index": {
+      "bytes": 9678380,
+      "mode": "0o600",
+      "sha256": "7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498"
+    },
+    "release": {
+      "bytes": 140421,
+      "mode": "0o600",
+      "sha256": "0584fba32e13e0ab8285fb16c27adea1ec03a73669c18702821094fd6ca86675"
+    }
+  },
+  "qualified": true,
+  "recorded_at_utc": "2026-10-09T06:07:39.239864+00:00",
+  "revision": "805f3b67c2b9eb68d887cd700f9443f476e26132",
+  "schema_version": 1,
+  "scope": "current-source actual VATI ledger test on private temporary PostgreSQL",
+  "shared_or_production_database_used": false,
+  "temporary_database_removed": true,
+  "test_exit_code": 0
+}

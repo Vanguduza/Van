@@ -1,0 +1,29 @@
+{
+  "record_kind": "ACTUAL_FINAL_CLOUD_SETUP_DRAFT_SAVE_AND_READBACK",
+  "application_sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "draft_id": "7fe355d1-d734-4ad7-9bd4-954e1ee610c7~cecfgdraft_6ac5f2c2ead881909c4f334c58255a49",
+  "status": "saved",
+  "requires_publish": true,
+  "revision_before": 13,
+  "revision_after": 14,
+  "script_paths": {
+    "install_script": "/workspace/.onboarding/reusable-install-canon-dfc1557a-2026-10-09.sh",
+    "start_skill": "/workspace/.onboarding/canon-start-skill-dfc1557a-r2-2026-10-09.md"
+  },
+  "script_sha256": {
+    "install_script": "16243ab17f6e3273a26656afb75899155a4f226c05399830de2773bf429ec583",
+    "start_skill": "43ac6b86f44584b5bc4ed487c815cb7a1be78f898f5a79f41af75d20f67100ff"
+  },
+  "complete_saved_script_contents_verified_by_readback": true,
+  "unmodified_settings": [
+    "repositories",
+    "network_policy",
+    "secrets",
+    "runtime_requirements",
+    "pending_runtime_requirements"
+  ],
+  "configuration_activated": false,
+  "fresh_task_restoration_verified": false,
+  "physical_cases_executed": 0,
+  "settings_action": "Remove the obsolete unused unbound DIAL_MCP_ACCESS_TOKEN requirement in the review UI, then review/save and publish. The additive draft API cannot remove requirements; no replacement token is required. Native DIAL admin authentication is separate."
+}

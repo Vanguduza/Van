@@ -1,0 +1,59 @@
+{
+  "counts": {
+    "endpoints": 432,
+    "features": 42,
+    "functions": 105,
+    "schemas": 251,
+    "surfaces": 78
+  },
+  "created_at_utc": "2026-10-09T07:28:51.531074+00:00",
+  "files": {
+    "docs/audit/OWNER_FRONTEND_CONTRACT.html": {
+      "bytes": 4688010,
+      "matches_independently_published_source": true,
+      "path": "/workspace/van-audit/VAN_OWNER_FRONTEND_CONTRACT_DFC1557A_2026-10-09.html",
+      "sha256": "671232589c42ac45c975ecc276cf252a9f9e0d234321e9dacc6f933aac8ce3a6"
+    },
+    "docs/audit/OWNER_FRONTEND_REGISTRY_GUIDE.md": {
+      "bytes": 11412,
+      "matches_independently_published_source": true,
+      "path": "/workspace/van-audit/VAN_OWNER_REGISTRY_GUIDE_DFC1557A_2026-10-09.md",
+      "sha256": "785b4792b225ee9ffe13342f3edc7afc674b91c059c82b7dd6d7059f1e930dbf"
+    },
+    "docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r7.json": {
+      "bytes": 58153,
+      "matches_independently_published_source": true,
+      "path": "/workspace/van-audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_R7_DFC1557A_2026-10-09.json",
+      "sha256": "6ff923de5bf1330b0291bcffb31bbb01900f19234e138328ff7d863768c4e462"
+    },
+    "registries/owner_endpoint_schemas.json": {
+      "bytes": 277778,
+      "matches_independently_published_source": true,
+      "path": "/workspace/van-audit/VAN_OWNER_ENDPOINT_SCHEMAS_DFC1557A_2026-10-09.json",
+      "sha256": "f24618b77098d8c4bcb84032f0f7994bbb8ebc65113d009dbf55b2c015585c34"
+    },
+    "registries/owner_endpoints.json": {
+      "bytes": 613765,
+      "matches_independently_published_source": true,
+      "path": "/workspace/van-audit/VAN_OWNER_ENDPOINTS_DFC1557A_2026-10-09.json",
+      "sha256": "bf32db3d86cb26a94b6fdcf6290d7818ade2f95d7c15ee0dd79d926e08a19aba"
+    },
+    "registries/owner_features.json": {
+      "bytes": 2234565,
+      "matches_independently_published_source": true,
+      "path": "/workspace/van-audit/VAN_OWNER_FEATURES_DFC1557A_2026-10-09.json",
+      "sha256": "27093c00dce0676466ce7dc072bd557dbb94a5a9f7dbb314d75814a2c9259bc6"
+    },
+    "registries/owner_screens.json": {
+      "bytes": 3515928,
+      "matches_independently_published_source": true,
+      "path": "/workspace/van-audit/VAN_OWNER_SCREENS_DFC1557A_2026-10-09.json",
+      "sha256": "cafb46a15ff8394f7dd55608e1764eafc63ed7b275b0161cae56c6b4c0dde07d"
+    }
+  },
+  "live_host_qualified": false,
+  "notice": "Design/source inventory only; runtime and admission statuses remain as audited. No owner data or production credential bindings are present.",
+  "physical_cases_executed": 0,
+  "record_kind": "SOURCE_BOUND_FRONTEND_REGISTRY_EXPORT",
+  "source_sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6"
+}

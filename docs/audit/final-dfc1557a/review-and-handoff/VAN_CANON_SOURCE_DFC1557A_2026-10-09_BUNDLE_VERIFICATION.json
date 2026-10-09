@@ -1,0 +1,19 @@
+{
+  "bundle_bytes": 167841,
+  "bundle_path": "/workspace/van-audit/VAN_CANON_SOURCE_DFC1557A_2026-10-09.bundle",
+  "bundle_sha256": "ed2314e698bfcf9a387b14dc5222f12701812a7d2641912f141c42d0ee3266a5",
+  "created_at_utc": "2026-10-09T07:20:45.082776+00:00",
+  "full_backend_qualification_pending_at_packaging": true,
+  "included_new_commit_count": 5,
+  "list_heads": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6 refs/heads/codex/van-canon-runtime-closure-2026-10-09",
+  "physical_cases_executed": 0,
+  "production_deployed": false,
+  "record_kind": "INCREMENTAL_SOURCE_BUNDLE_ACTUAL_GIT_VERIFICATION",
+  "required_base_sha": "4ad31883d57ab518ba9af414aa849db6e240eb71",
+  "source_and_base_checkouts_clean": true,
+  "source_sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "verified_from_exact_base_checkout": "/workspace/van-audit/canon-pr93-4ad31883-2026-10-09",
+  "verify_exit_code": 0,
+  "verify_stderr": "/workspace/van-audit/VAN_CANON_SOURCE_DFC1557A_2026-10-09.bundle is okay\n",
+  "verify_stdout": "The bundle contains this ref:\ndfc1557ab99ad8d41cf84714e1bb671e89b045e6 refs/heads/codex/van-canon-runtime-closure-2026-10-09\nThe bundle requires this ref:\n4ad31883d57ab518ba9af414aa849db6e240eb71 \nThe bundle uses this hash algorithm: sha1\n"
+}

@@ -1,0 +1,706 @@
+{
+  "all_contracts_pass": false,
+  "files": [
+    {
+      "archive_path": "final-suites/canon-corrected-backend-full-dfc1557a-2026-10-09-inputs.json",
+      "kind": "input_manifest",
+      "path": "/workspace/van-audit/canon-corrected-backend-full-dfc1557a-2026-10-09-inputs.json",
+      "reviewed_sha256": "62f573dd65c90e728401fc2e7a2273dd298c6342feefac7cf4f76c0f1419f81f"
+    },
+    {
+      "archive_path": "final-suites/canon-corrected-backend-full-dfc1557a-2026-10-09-result.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/canon-corrected-backend-full-dfc1557a-2026-10-09-result.json",
+      "reviewed_sha256": "61db7bf0cac9a63664a387aa9946565cca98b17b3cd00e2fddf1c74265038d57"
+    },
+    {
+      "archive_path": "final-suites/canon-corrected-backend-full-dfc1557a-2026-10-09.log",
+      "kind": "test_log",
+      "path": "/workspace/van-audit/canon-corrected-backend-full-dfc1557a-2026-10-09.log",
+      "reviewed_sha256": "b7cecd9222b6797afdd008514b63348eb05bad44671f4f4f6c6ba3e3e611b711"
+    },
+    {
+      "archive_path": "final-suites/canon-corrected-backend-full-dfc1557a-2026-10-09.xml",
+      "kind": "junit",
+      "path": "/workspace/van-audit/canon-corrected-backend-full-dfc1557a-2026-10-09.xml",
+      "reviewed_sha256": "ee6780057da1d3024b79d37e9866e5239515fb0cf361b6e8d5ef517efa6eddcf"
+    },
+    {
+      "archive_path": "final-suites/canon-final-contracts-dfc1557a-2026-10-09-inputs.json",
+      "kind": "input_manifest",
+      "path": "/workspace/van-audit/canon-final-contracts-dfc1557a-2026-10-09-inputs.json",
+      "reviewed_sha256": "7cb7d097a98fcec16700710851ed4883d9d8794a8a337e4de44b4e5e8ca753c6"
+    },
+    {
+      "archive_path": "final-suites/canon-final-contracts-dfc1557a-2026-10-09-result.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/canon-final-contracts-dfc1557a-2026-10-09-result.json",
+      "reviewed_sha256": "04e075250c9459cd64db81652b5468a5ce3ef48beb18735404e36a1287b3b4dc"
+    },
+    {
+      "archive_path": "final-suites/canon-final-contracts-dfc1557a-2026-10-09.log",
+      "kind": "test_log",
+      "path": "/workspace/van-audit/canon-final-contracts-dfc1557a-2026-10-09.log",
+      "reviewed_sha256": "f869be8a8846bbe3ac4aca57d69078eb6b1a6fb469bf6ef86791d25ed598fecb"
+    },
+    {
+      "archive_path": "final-suites/canon-final-contracts-dfc1557a-2026-10-09.xml",
+      "kind": "junit",
+      "path": "/workspace/van-audit/canon-final-contracts-dfc1557a-2026-10-09.xml",
+      "reviewed_sha256": "2e12cc451806156376ca1289c95288c1a4770db4a94d7665988e9c96c9e5c388"
+    },
+    {
+      "archive_path": "android/canon-corrected-android-dfc1557a-2026-10-09-inputs.json",
+      "kind": "input_manifest",
+      "path": "/workspace/van-audit/canon-corrected-android-dfc1557a-2026-10-09-inputs.json",
+      "reviewed_sha256": "d0894d18a6f7dcb226e80d6e41da3d75c04e8028dbf328e9c7496d07fa833c3a"
+    },
+    {
+      "archive_path": "android/canon-corrected-android-dfc1557a-2026-10-09-result.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/canon-corrected-android-dfc1557a-2026-10-09-result.json",
+      "reviewed_sha256": "4ff7342b85d1d48091d38060da8a74bc33aa65a01c2162261210c969d9ae66fa"
+    },
+    {
+      "archive_path": "android/canon-corrected-android-dfc1557a-2026-10-09-1.log",
+      "kind": "test_log",
+      "path": "/workspace/van-audit/canon-corrected-android-dfc1557a-2026-10-09-1.log",
+      "reviewed_sha256": "68b53daffe56290373cec132806ad8df1173168981b17e0c90f1656c53f2e869"
+    },
+    {
+      "archive_path": "android/canon-corrected-android-dfc1557a-2026-10-09-2.log",
+      "kind": "test_log",
+      "path": "/workspace/van-audit/canon-corrected-android-dfc1557a-2026-10-09-2.log",
+      "reviewed_sha256": "fe6b62f5d23c0873a600b21c2f485b3f9f01f54de0cd45e95bfffe0464f510d6"
+    },
+    {
+      "archive_path": "android/canon-corrected-android-dfc1557a-2026-10-09-apk-badging.txt",
+      "kind": "public_apk_metadata",
+      "path": "/workspace/van-audit/canon-corrected-android-dfc1557a-2026-10-09-apk-badging.txt",
+      "reviewed_sha256": "3d0f46e4ffff9424e20371271024726699f8b7a608bc14097cd7688b8fd0381b"
+    },
+    {
+      "archive_path": "android/canon-corrected-android-dfc1557a-2026-10-09-apk-signer.txt",
+      "kind": "public_apk_metadata",
+      "path": "/workspace/van-audit/canon-corrected-android-dfc1557a-2026-10-09-apk-signer.txt",
+      "reviewed_sha256": "b7c5305655d4e419ba4473c4c9fd35af1f66c683542c74fed93abba7038163f7"
+    },
+    {
+      "archive_path": "android/canon-corrected-android-dfc1557a-2026-10-09-native-alignment.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/canon-corrected-android-dfc1557a-2026-10-09-native-alignment.json",
+      "reviewed_sha256": "6ad7b113d294ca6acdb49becdba4473872c4141852e8e59926b24a136f362817"
+    },
+    {
+      "archive_path": "android/canon-corrected-android-dfc1557a-2026-10-09-zipalign.log",
+      "kind": "test_log",
+      "path": "/workspace/van-audit/canon-corrected-android-dfc1557a-2026-10-09-zipalign.log",
+      "reviewed_sha256": "f937b9db0e4ab9d593b926797a086b293368543a25c68ac335127c87ceb41393"
+    },
+    {
+      "archive_path": "android/canon-android-apk-content-layout-dfc1557a-2026-10-09.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/canon-android-apk-content-layout-dfc1557a-2026-10-09.json",
+      "reviewed_sha256": "b8d9d23052c9f635b297de2891a89faf4c02a0d7a8c81718ee3ab3f8b070685a"
+    },
+    {
+      "archive_path": "android/canon-android-apk-dex-layout-dfc1557a-2026-10-09.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/canon-android-apk-dex-layout-dfc1557a-2026-10-09.json",
+      "reviewed_sha256": "178d1d43dd8affc38d24a4a95f7c7e72676a3ce32d0a3bc8cea754f9f9cb2f12"
+    },
+    {
+      "archive_path": "android/CANON_ANDROID_FINAL_QUALIFICATION_DFC1557A_2026-10-09.md",
+      "kind": "audit_report",
+      "path": "/workspace/van-audit/CANON_ANDROID_FINAL_QUALIFICATION_DFC1557A_2026-10-09.md",
+      "reviewed_sha256": "e63c16b0f49b20a2f0c4b0c74eccbc892bb7f985f391f88c71534d7a14f9cf76"
+    },
+    {
+      "archive_path": "components/committed-hermes-scenarios-final-805f3b67-2026-10-09-inputs.json",
+      "kind": "input_manifest",
+      "path": "/workspace/van-audit/committed-hermes-scenarios-final-805f3b67-2026-10-09-inputs.json",
+      "reviewed_sha256": "8e8e43f39be869767b64376586fcc9969cf3a88c64814ecf9195a4b737fec2a6"
+    },
+    {
+      "archive_path": "components/committed-hermes-scenarios-final-805f3b67-2026-10-09-result.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/committed-hermes-scenarios-final-805f3b67-2026-10-09-result.json",
+      "reviewed_sha256": "1cc79a7b7456f1bce9ae0ca4c00cdf9aa997d433fdbdf444a9ef43de4385f7e1"
+    },
+    {
+      "archive_path": "components/committed-hermes-scenarios-final-805f3b67-2026-10-09.log",
+      "kind": "test_log",
+      "path": "/workspace/van-audit/committed-hermes-scenarios-final-805f3b67-2026-10-09.log",
+      "reviewed_sha256": "f3a731058da1d2539d5b7d92979d6ea276356115f0ad60b84a5d0fe576982384"
+    },
+    {
+      "archive_path": "components/committed-hermes-scenarios-final-805f3b67-2026-10-09.xml",
+      "kind": "junit",
+      "path": "/workspace/van-audit/committed-hermes-scenarios-final-805f3b67-2026-10-09.xml",
+      "reviewed_sha256": "24569ce66cd3ff18913eabc4bf1642fff6e7869ece3430c448500346e6afff64"
+    },
+    {
+      "archive_path": "components/committed-native-browser-services-final-805f3b67-2026-10-09-inputs.json",
+      "kind": "input_manifest",
+      "path": "/workspace/van-audit/committed-native-browser-services-final-805f3b67-2026-10-09-inputs.json",
+      "reviewed_sha256": "43055e1edb4b421aa2d533c5ab20ddf60849303d57cbc2eb86c7128761c8946b"
+    },
+    {
+      "archive_path": "components/committed-native-browser-services-final-805f3b67-2026-10-09-result.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/committed-native-browser-services-final-805f3b67-2026-10-09-result.json",
+      "reviewed_sha256": "ffc5ba05f6057113595986edcefcf1478502707e1e4091211578f71d72789e9f"
+    },
+    {
+      "archive_path": "components/committed-native-browser-services-final-805f3b67-2026-10-09.log",
+      "kind": "test_log",
+      "path": "/workspace/van-audit/committed-native-browser-services-final-805f3b67-2026-10-09.log",
+      "reviewed_sha256": "d753f9136e8aaec112b414bb5c2c58fa90c12ce96075e8ff8de47296fa0e1f6a"
+    },
+    {
+      "archive_path": "components/committed-native-browser-services-final-805f3b67-2026-10-09.xml",
+      "kind": "junit",
+      "path": "/workspace/van-audit/committed-native-browser-services-final-805f3b67-2026-10-09.xml",
+      "reviewed_sha256": "dc268a95577757d4936986affd22811dac9551e7a454b8537af7e7963752617e"
+    },
+    {
+      "archive_path": "components/committed-trading-affected-parser-consumers-final-dfc1557a-2026-10-09-inputs.json",
+      "kind": "input_manifest",
+      "path": "/workspace/van-audit/committed-trading-affected-parser-consumers-final-dfc1557a-2026-10-09-inputs.json",
+      "reviewed_sha256": "e9a0ae2d5f1e1df3dc33064ae547bdaf3b544191cada5a7fd30502b518bca456"
+    },
+    {
+      "archive_path": "components/committed-trading-affected-parser-consumers-final-dfc1557a-2026-10-09-result.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/committed-trading-affected-parser-consumers-final-dfc1557a-2026-10-09-result.json",
+      "reviewed_sha256": "000bf4e3534e8cd85d4429030cceb9ccfbabfb8e48c2cf398e0a36b7903527bb"
+    },
+    {
+      "archive_path": "components/committed-trading-affected-parser-consumers-final-dfc1557a-2026-10-09.log",
+      "kind": "test_log",
+      "path": "/workspace/van-audit/committed-trading-affected-parser-consumers-final-dfc1557a-2026-10-09.log",
+      "reviewed_sha256": "d9a82479d6ea58ade6ce32e4f38361b69cb6c62dfc4d0037772d48b3e2f611bb"
+    },
+    {
+      "archive_path": "components/committed-trading-affected-parser-consumers-final-dfc1557a-2026-10-09.xml",
+      "kind": "junit",
+      "path": "/workspace/van-audit/committed-trading-affected-parser-consumers-final-dfc1557a-2026-10-09.xml",
+      "reviewed_sha256": "7f6acab0cdba9a0f1294164e969a918c83c21d4af4e4f26cb96a03c0d16be00c"
+    },
+    {
+      "archive_path": "components/committed-trading-final-805f3b67-2026-10-09-inputs.json",
+      "kind": "input_manifest",
+      "path": "/workspace/van-audit/committed-trading-final-805f3b67-2026-10-09-inputs.json",
+      "reviewed_sha256": "e162215c72653ac86232f6d7e51d124417c5abed2f26dc1fde7d7c2ace3e0283"
+    },
+    {
+      "archive_path": "components/committed-trading-final-805f3b67-2026-10-09-result.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/committed-trading-final-805f3b67-2026-10-09-result.json",
+      "reviewed_sha256": "a77fc2573562bf94a329f0a0ea35346f9aa049462f022fc39824b82d3b28e134"
+    },
+    {
+      "archive_path": "components/committed-trading-final-805f3b67-2026-10-09.log",
+      "kind": "test_log",
+      "path": "/workspace/van-audit/committed-trading-final-805f3b67-2026-10-09.log",
+      "reviewed_sha256": "8eebe8743c4ce79270c778bd399d097360145b7b0e4293d327dfbdca3caf769f"
+    },
+    {
+      "archive_path": "components/committed-trading-final-805f3b67-2026-10-09.xml",
+      "kind": "junit",
+      "path": "/workspace/van-audit/committed-trading-final-805f3b67-2026-10-09.xml",
+      "reviewed_sha256": "ce34d5314871f087b2daf3eacc4274b9cc385fd59f728ac3be917854d55dd0b1"
+    },
+    {
+      "archive_path": "components/postgres-current-source-final-805f3b67-2026-10-09-debian-signatures.txt",
+      "kind": "package_signature_proof",
+      "path": "/workspace/van-audit/postgres-current-source-final-805f3b67-2026-10-09-debian-signatures.txt",
+      "reviewed_sha256": "7b1734df9c188466750567dac7e3cd6ce9166bcae2bc5d045b2457aadb05ca99"
+    },
+    {
+      "archive_path": "components/postgres-current-source-final-805f3b67-2026-10-09-inputs.json",
+      "kind": "input_manifest",
+      "path": "/workspace/van-audit/postgres-current-source-final-805f3b67-2026-10-09-inputs.json",
+      "reviewed_sha256": "c647fe316ca07e7c5576375f6489264d984366a2be836c5dbb127a745eaffe4b"
+    },
+    {
+      "archive_path": "components/postgres-current-source-final-805f3b67-2026-10-09-server.log",
+      "kind": "test_log",
+      "path": "/workspace/van-audit/postgres-current-source-final-805f3b67-2026-10-09-server.log",
+      "reviewed_sha256": "377788f8a70250888d7894a7adcb0f7c039e11558ae4ec0388b5ae234892d054"
+    },
+    {
+      "archive_path": "components/postgres-current-source-final-805f3b67-2026-10-09.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/postgres-current-source-final-805f3b67-2026-10-09.json",
+      "reviewed_sha256": "c54cdd26aaf1837464f3f6c9238b92dd36b185636cd7a25e3d19edd3c979e3d0"
+    },
+    {
+      "archive_path": "components/postgres-current-source-final-805f3b67-2026-10-09.log",
+      "kind": "test_log",
+      "path": "/workspace/van-audit/postgres-current-source-final-805f3b67-2026-10-09.log",
+      "reviewed_sha256": "b4eb7be9000651a3e89c6a77e8b346d05d1d706d620aa6f8193e574a39b3ced1"
+    },
+    {
+      "archive_path": "components/postgres-current-source-final-805f3b67-2026-10-09.xml",
+      "kind": "junit",
+      "path": "/workspace/van-audit/postgres-current-source-final-805f3b67-2026-10-09.xml",
+      "reviewed_sha256": "18bc9fc9720974e7700758b4cd1af774b6bb0083f5cb786c5bb52eb0e4ecc799"
+    },
+    {
+      "archive_path": "components/component-scope-equivalence-805f-to-final-dfc1557a-2026-10-09.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/component-scope-equivalence-805f-to-final-dfc1557a-2026-10-09.json",
+      "reviewed_sha256": "d5e36009d25b5d61827dc38a53bf6e7fbfe84da12db9ca593c6a92a0b06c7f11"
+    },
+    {
+      "archive_path": "components/components-final-805f3b67-2026-10-09.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/components-final-805f3b67-2026-10-09.json",
+      "reviewed_sha256": "7ca82101a18bc8673e67ad30cb42ddb6c3d1db095d56fd13a3b666d8294e60ba"
+    },
+    {
+      "archive_path": "registry-proof/canon-registry-and-native-contracts-qualification-2026-10-09-r7.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/canon-registry-and-native-contracts-qualification-2026-10-09-r7.json",
+      "reviewed_sha256": "ac0787f5cea442234879fbd464d8dfdd468f74f1053b792c24e00b0882f44012"
+    },
+    {
+      "archive_path": "registry-proof/canon-registry-r7-before-tests-inputs-2026-10-09.json",
+      "kind": "input_manifest",
+      "path": "/workspace/van-audit/canon-registry-r7-before-tests-inputs-2026-10-09.json",
+      "reviewed_sha256": "60ebdaa243b100e717d059dfcae406c2d3846cd71b0a9a2606ee67dbea414f8e"
+    },
+    {
+      "archive_path": "registry-proof/canon-registry-r7-reviewed-runtime-freeze-2026-10-09.json",
+      "kind": "input_manifest",
+      "path": "/workspace/van-audit/canon-registry-r7-reviewed-runtime-freeze-2026-10-09.json",
+      "reviewed_sha256": "96ad67a03b02a02cbec6f76af351d23a96004830f16bc076e2adb1ae089f5441"
+    },
+    {
+      "archive_path": "registry-proof/canon-current-registry-contracts-2026-10-09-r7.xml",
+      "kind": "junit",
+      "path": "/workspace/van-audit/canon-current-registry-contracts-2026-10-09-r7.xml",
+      "reviewed_sha256": "c39e14af58eca409782b12f256fb6f27bbd459ae2e78c93381b76ac98a0ad813"
+    },
+    {
+      "archive_path": "registry-proof/canon-native-plan-contracts-2026-10-09-r7.xml",
+      "kind": "junit",
+      "path": "/workspace/van-audit/canon-native-plan-contracts-2026-10-09-r7.xml",
+      "reviewed_sha256": "558c5fab282cdb6b5b5592c58d52d174779ddf6007dccdf0e023858f30ee74b9"
+    },
+    {
+      "archive_path": "registry-proof/canon-native-826-source-fixture-proof-2026-10-09-r7.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/canon-native-826-source-fixture-proof-2026-10-09-r7.json",
+      "reviewed_sha256": "5fe55b28bb94e09aefade92147c4d09ab7a5024f6f8479980a278bcad6f55e2c"
+    },
+    {
+      "archive_path": "registry-proof/NATIVE_ARTEMIS_SCHEMA_FIXTURE_NOT_DISCOVERY_2026-10-09-r7.json",
+      "kind": "input_manifest",
+      "path": "/workspace/van-audit/NATIVE_ARTEMIS_SCHEMA_FIXTURE_NOT_DISCOVERY_2026-10-09-r7.json",
+      "reviewed_sha256": "99bcc37d2b476033095c8185410de2e8550aa6813c248b24b153e536de10a57d"
+    },
+    {
+      "archive_path": "registry-proof/VAN_NATIVE_ARTEMIS_SOURCE_FIXTURE_PLAN_2026-10-09-r7.json",
+      "kind": "audit_report",
+      "path": "/workspace/van-audit/VAN_NATIVE_ARTEMIS_SOURCE_FIXTURE_PLAN_2026-10-09-r7.json",
+      "reviewed_sha256": "b5cfbc0ef919b9778e1a055766931a389f1c6d98e8bd4e4cfaee6e89521c77a3"
+    },
+    {
+      "archive_path": "frontend/VAN_OWNER_FEATURES_DFC1557A_2026-10-09.json",
+      "kind": "frontend_registry",
+      "path": "/workspace/van-audit/VAN_OWNER_FEATURES_DFC1557A_2026-10-09.json",
+      "reviewed_sha256": "27093c00dce0676466ce7dc072bd557dbb94a5a9f7dbb314d75814a2c9259bc6"
+    },
+    {
+      "archive_path": "frontend/VAN_OWNER_SCREENS_DFC1557A_2026-10-09.json",
+      "kind": "frontend_registry",
+      "path": "/workspace/van-audit/VAN_OWNER_SCREENS_DFC1557A_2026-10-09.json",
+      "reviewed_sha256": "cafb46a15ff8394f7dd55608e1764eafc63ed7b275b0161cae56c6b4c0dde07d"
+    },
+    {
+      "archive_path": "frontend/VAN_OWNER_ENDPOINTS_DFC1557A_2026-10-09.json",
+      "kind": "frontend_registry",
+      "path": "/workspace/van-audit/VAN_OWNER_ENDPOINTS_DFC1557A_2026-10-09.json",
+      "reviewed_sha256": "bf32db3d86cb26a94b6fdcf6290d7818ade2f95d7c15ee0dd79d926e08a19aba"
+    },
+    {
+      "archive_path": "frontend/VAN_OWNER_ENDPOINT_SCHEMAS_DFC1557A_2026-10-09.json",
+      "kind": "frontend_registry",
+      "path": "/workspace/van-audit/VAN_OWNER_ENDPOINT_SCHEMAS_DFC1557A_2026-10-09.json",
+      "reviewed_sha256": "f24618b77098d8c4bcb84032f0f7994bbb8ebc65113d009dbf55b2c015585c34"
+    },
+    {
+      "archive_path": "frontend/VAN_OWNER_FRONTEND_CONTRACT_DFC1557A_2026-10-09.html",
+      "kind": "frontend_registry",
+      "path": "/workspace/van-audit/VAN_OWNER_FRONTEND_CONTRACT_DFC1557A_2026-10-09.html",
+      "reviewed_sha256": "671232589c42ac45c975ecc276cf252a9f9e0d234321e9dacc6f933aac8ce3a6"
+    },
+    {
+      "archive_path": "frontend/VAN_OWNER_REGISTRY_GUIDE_DFC1557A_2026-10-09.md",
+      "kind": "frontend_registry",
+      "path": "/workspace/van-audit/VAN_OWNER_REGISTRY_GUIDE_DFC1557A_2026-10-09.md",
+      "reviewed_sha256": "785b4792b225ee9ffe13342f3edc7afc674b91c059c82b7dd6d7059f1e930dbf"
+    },
+    {
+      "archive_path": "frontend/VAN_OWNER_REGISTRY_SOURCE_REVIEW_R7_DFC1557A_2026-10-09.json",
+      "kind": "frontend_registry",
+      "path": "/workspace/van-audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_R7_DFC1557A_2026-10-09.json",
+      "reviewed_sha256": "6ff923de5bf1330b0291bcffb31bbb01900f19234e138328ff7d863768c4e462"
+    },
+    {
+      "archive_path": "frontend/VAN_OWNER_REGISTRY_EXPORT_DFC1557A_2026-10-09.json",
+      "kind": "frontend_registry",
+      "path": "/workspace/van-audit/VAN_OWNER_REGISTRY_EXPORT_DFC1557A_2026-10-09.json",
+      "reviewed_sha256": "d8abdd30d86e3f63dc87ed38def523d21da879d2ed476f65660dd683cd5fac39"
+    },
+    {
+      "archive_path": "original-failed-diagnostics/canon-corrected-backend-full-805f3b67-2026-10-09-inputs.json",
+      "kind": "input_manifest",
+      "path": "/workspace/van-audit/canon-corrected-backend-full-805f3b67-2026-10-09-inputs.json",
+      "reviewed_sha256": "64dfc76e69b0d095bd22f63d13b26fbb7e74737c01ff1eec7ab1fbdb958a909a"
+    },
+    {
+      "archive_path": "original-failed-diagnostics/canon-corrected-backend-full-805f3b67-2026-10-09-result.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/canon-corrected-backend-full-805f3b67-2026-10-09-result.json",
+      "reviewed_sha256": "0ce28568fa5242edc33946ffb583215892a7147c80cc88df8b915c260de42788"
+    },
+    {
+      "archive_path": "original-failed-diagnostics/canon-corrected-backend-full-805f3b67-2026-10-09.log",
+      "kind": "test_log",
+      "path": "/workspace/van-audit/canon-corrected-backend-full-805f3b67-2026-10-09.log",
+      "reviewed_sha256": "21bde935de78685abc80ed9231604a1bb2643c4f0a7f2793cbf781762c5d167c"
+    },
+    {
+      "archive_path": "original-failed-diagnostics/canon-corrected-backend-full-805f3b67-2026-10-09.xml",
+      "kind": "junit",
+      "path": "/workspace/van-audit/canon-corrected-backend-full-805f3b67-2026-10-09.xml",
+      "reviewed_sha256": "9fa6a0dde0379e523e8daa9df6ee0606a0eecfca7d0348e6192c322de6f43547"
+    },
+    {
+      "archive_path": "browser-runtime/canon-chromium-combined-scoped-2026-10-09-inputs.json",
+      "kind": "input_manifest",
+      "path": "/workspace/van-audit/canon-chromium-combined-scoped-2026-10-09-inputs.json",
+      "reviewed_sha256": "cb71a692b12d97d977444591a9739fed9852787d7bc6a175c9d89ebabaa86620"
+    },
+    {
+      "archive_path": "browser-runtime/canon-chromium-combined-scoped-2026-10-09-result.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/canon-chromium-combined-scoped-2026-10-09-result.json",
+      "reviewed_sha256": "fec46ecf0cf915e41373dadee047d20450d552bf9379031ce5378677954c3604"
+    },
+    {
+      "archive_path": "browser-runtime/canon-chromium-combined-scoped-2026-10-09.log",
+      "kind": "test_log",
+      "path": "/workspace/van-audit/canon-chromium-combined-scoped-2026-10-09.log",
+      "reviewed_sha256": "30c056b5b4c757f5caac47460f074c678c0400fd398ce3583c8c953e51cfe86b"
+    },
+    {
+      "archive_path": "browser-runtime/canon-chromium-combined-scoped-2026-10-09.xml",
+      "kind": "junit",
+      "path": "/workspace/van-audit/canon-chromium-combined-scoped-2026-10-09.xml",
+      "reviewed_sha256": "dc88fa9ddf948dfea0ce2e030c2954caefb556f916d05ee88ec85c142ae4747a"
+    },
+    {
+      "archive_path": "browser-runtime/harness-pseudo-hit-ownership-selected-contracts-r2-2026-10-09-inputs.json",
+      "kind": "input_manifest",
+      "path": "/workspace/van-audit/harness-pseudo-hit-ownership-selected-contracts-r2-2026-10-09-inputs.json",
+      "reviewed_sha256": "d42277ba9f4c8e48bb09278c136e0dd7fa1f69363c4232fc6994cb63c1a499a1"
+    },
+    {
+      "archive_path": "browser-runtime/harness-pseudo-hit-ownership-selected-contracts-r2-2026-10-09-result.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/harness-pseudo-hit-ownership-selected-contracts-r2-2026-10-09-result.json",
+      "reviewed_sha256": "135d96a71b460ca1f9f6891f7a8cbd12a2297a7abaae8b60c89192579195e03b"
+    },
+    {
+      "archive_path": "browser-runtime/harness-pseudo-hit-ownership-selected-contracts-r2-2026-10-09.log",
+      "kind": "test_log",
+      "path": "/workspace/van-audit/harness-pseudo-hit-ownership-selected-contracts-r2-2026-10-09.log",
+      "reviewed_sha256": "0ff2054318ea23cc6afaf97de3284fe24eac33a0c3ebaf13fe553b37833e7411"
+    },
+    {
+      "archive_path": "browser-runtime/harness-pseudo-hit-ownership-selected-contracts-r2-2026-10-09.xml",
+      "kind": "junit",
+      "path": "/workspace/van-audit/harness-pseudo-hit-ownership-selected-contracts-r2-2026-10-09.xml",
+      "reviewed_sha256": "fdebc145f71736df16d08c46db4b9df2f73bc96b991bbbcc2b7ae468bfc79575"
+    },
+    {
+      "archive_path": "browser-runtime/canon-chromium-parser-source-fix-2026-10-09.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/canon-chromium-parser-source-fix-2026-10-09.json",
+      "reviewed_sha256": "ab741eeb7ae7c154be220bd10494c637c2082dce0dbe77a42ae2e9b16719a3e3"
+    },
+    {
+      "archive_path": "browser-runtime/canon-chromium-parser-real-browser-2026-10-09.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/canon-chromium-parser-real-browser-2026-10-09.json",
+      "reviewed_sha256": "fd31edf201a72a23aa0c3009ed0adb2f77601dbaccaea17a9a9081f3ad8b74c2"
+    },
+    {
+      "archive_path": "browser-runtime/canon-chromium-parser-boundary-red-2026-10-09.xml",
+      "kind": "junit",
+      "path": "/workspace/van-audit/canon-chromium-parser-boundary-red-2026-10-09.xml",
+      "reviewed_sha256": "d9e3131a70207dcd67937d5781c48dcbb9e0a92fda59946d1150b167726060b2"
+    },
+    {
+      "archive_path": "browser-runtime/canon-chromium-parser-boundary-final-2026-10-09.xml",
+      "kind": "junit",
+      "path": "/workspace/van-audit/canon-chromium-parser-boundary-final-2026-10-09.xml",
+      "reviewed_sha256": "a412c9849ec48d7106e846d7f6c1efed953da104fab7599481a765578bc46747"
+    },
+    {
+      "archive_path": "cloud-setup/canon-setup-full-install-dfc1557a-2026-10-09-inputs.json",
+      "kind": "input_manifest",
+      "path": "/workspace/van-audit/canon-setup-full-install-dfc1557a-2026-10-09-inputs.json",
+      "reviewed_sha256": "db94f6191a17e7912b5eeeaa2203882969393b7e6f0e6bf71e48d04fac2c7cfc"
+    },
+    {
+      "archive_path": "cloud-setup/canon-setup-full-install-dfc1557a-2026-10-09-after.json",
+      "kind": "input_manifest",
+      "path": "/workspace/van-audit/canon-setup-full-install-dfc1557a-2026-10-09-after.json",
+      "reviewed_sha256": "3ee1940ff178b5f07b42939f92cc78f084d880d542da489e224a46dfc515aa70"
+    },
+    {
+      "archive_path": "cloud-setup/canon-setup-full-install-dfc1557a-2026-10-09-result.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/canon-setup-full-install-dfc1557a-2026-10-09-result.json",
+      "reviewed_sha256": "5738b62ff952c8819ddd4892c683ae637b7e0d3d910dd6717b4c63b207faa108"
+    },
+    {
+      "archive_path": "cloud-setup/canon-setup-full-install-dfc1557a-2026-10-09.log",
+      "kind": "test_log",
+      "path": "/workspace/van-audit/canon-setup-full-install-dfc1557a-2026-10-09.log",
+      "reviewed_sha256": "8fe7cc8237c70623d9ea881c805cf6f80e6b16b5884604a6b2d9256bf27a8312"
+    },
+    {
+      "archive_path": "cloud-setup/canon-final-cloud-setup-draft-save-dfc1557a-2026-10-09.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/canon-final-cloud-setup-draft-save-dfc1557a-2026-10-09.json",
+      "reviewed_sha256": "ae25addb7c99fc53a9652ad3744544903461ca033a307e7211117341ddfd44e4"
+    },
+    {
+      "archive_path": "cloud-setup/reusable-install-canon-dfc1557a-2026-10-09.sh",
+      "kind": "setup_script",
+      "path": "/workspace/.onboarding/reusable-install-canon-dfc1557a-2026-10-09.sh",
+      "reviewed_sha256": "16243ab17f6e3273a26656afb75899155a4f226c05399830de2773bf429ec583"
+    },
+    {
+      "archive_path": "cloud-setup/canon-start-skill-dfc1557a-r2-2026-10-09.md",
+      "kind": "setup_start_skill",
+      "path": "/workspace/.onboarding/canon-start-skill-dfc1557a-r2-2026-10-09.md",
+      "reviewed_sha256": "43ac6b86f44584b5bc4ed487c815cb7a1be78f898f5a79f41af75d20f67100ff"
+    },
+    {
+      "archive_path": "cloud-setup/canon-setup-inputs-and-public-cache-dfc1557a-2026-10-09.json",
+      "kind": "setup_receipt",
+      "path": "/workspace/.onboarding/canon-setup-inputs-and-public-cache-dfc1557a-2026-10-09.json",
+      "reviewed_sha256": "8f13b10f875978969c6d0d52572c2b4ac2130461529c58a485a649f1e1856149"
+    },
+    {
+      "archive_path": "cloud-setup/canon-setup-subset-verification-dfc1557a-r1-2026-10-09-result.json",
+      "kind": "setup_receipt",
+      "path": "/workspace/.onboarding/canon-setup-subset-verification-dfc1557a-r1-2026-10-09-result.json",
+      "reviewed_sha256": "0ea3819b8e437ca08dbedf61fce84e1dedc2e91f3f99b4a42123c400ce0fd631"
+    },
+    {
+      "archive_path": "review-and-handoff/canon-source-publication-dfc1557a-2026-10-09.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/canon-source-publication-dfc1557a-2026-10-09.json",
+      "reviewed_sha256": "039aac9a042416994fafc17e2b1abbdc81a0af288710440b46a1da685965f2ee"
+    },
+    {
+      "archive_path": "review-and-handoff/VAN_CANON_SOURCE_DFC1557A_2026-10-09.bundle",
+      "kind": "source_bundle",
+      "path": "/workspace/van-audit/VAN_CANON_SOURCE_DFC1557A_2026-10-09.bundle",
+      "reviewed_sha256": "ed2314e698bfcf9a387b14dc5222f12701812a7d2641912f141c42d0ee3266a5"
+    },
+    {
+      "archive_path": "review-and-handoff/VAN_CANON_SOURCE_DFC1557A_2026-10-09_BUNDLE_VERIFICATION.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/VAN_CANON_SOURCE_DFC1557A_2026-10-09_BUNDLE_VERIFICATION.json",
+      "reviewed_sha256": "89818bf72130be791726001a5f3d13ff4cba9e7376623220176d033f0d4a4902"
+    },
+    {
+      "archive_path": "review-and-handoff/VAN_FINAL_QUALIFICATION_REVIEW_dfc1557a_2026-10-09.json",
+      "kind": "audit_report",
+      "path": "/workspace/van-audit/VAN_FINAL_QUALIFICATION_REVIEW_dfc1557a_2026-10-09.json",
+      "reviewed_sha256": "6e4dc2a139281816ba4cdd196e7b8cf4e6494474b04f20d480c24c3bc281d104"
+    },
+    {
+      "archive_path": "review-and-handoff/VAN_FINAL_QUALIFICATION_REVIEW_dfc1557a_2026-10-09.md",
+      "kind": "audit_report",
+      "path": "/workspace/van-audit/VAN_FINAL_QUALIFICATION_REVIEW_dfc1557a_2026-10-09.md",
+      "reviewed_sha256": "ee24b13d57399f4b31344a497cc358fb89db67e4a8fb8178a743b3f1daaf4693"
+    },
+    {
+      "archive_path": "review-and-handoff/VAN_FINAL_DIRECT_DIAL_CONTINUATION_2026-10-09_dfc1557a.json",
+      "kind": "audit_report",
+      "path": "/workspace/van-audit/VAN_FINAL_DIRECT_DIAL_CONTINUATION_2026-10-09_dfc1557a.json",
+      "reviewed_sha256": "10f75af79a4f236fc70a17310d6b88d90d74df8953e99e12aa1deca0c534155f"
+    },
+    {
+      "archive_path": "review-and-handoff/VAN_FINAL_DIRECT_DIAL_CONTINUATION_PROMPT_2026-10-09_dfc1557a.md",
+      "kind": "audit_report",
+      "path": "/workspace/van-audit/VAN_FINAL_DIRECT_DIAL_CONTINUATION_PROMPT_2026-10-09_dfc1557a.md",
+      "reviewed_sha256": "f08f0796f2089366ad873568a21a9061b6b9d2d4062f6e6a86c5a61ab9992d95"
+    },
+    {
+      "archive_path": "review-and-handoff/VAN_FINAL_DIRECT_DIAL_CONTINUATION_SOURCE_RECEIPT_2026-10-09_dfc1557a.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/VAN_FINAL_DIRECT_DIAL_CONTINUATION_SOURCE_RECEIPT_2026-10-09_dfc1557a.json",
+      "reviewed_sha256": "68c829697135244d93c2b0a96816014f7c9739bba1861fc560bc7af3e9c37372"
+    },
+    {
+      "archive_path": "review-and-handoff/VAN_PRE_PHONE_CANARY_CHECKLIST_DFC1557A_2026-10-09.md",
+      "kind": "audit_report",
+      "path": "/workspace/van-audit/VAN_PRE_PHONE_CANARY_CHECKLIST_DFC1557A_2026-10-09.md",
+      "reviewed_sha256": "4fff9a551072fb17a6febfe77375a39a5aef23bfce099f68324c8779b16dd7ca"
+    },
+    {
+      "archive_path": "review-and-handoff/van-pre-phone-canary-source-and-skip-inventory-dfc1557a-2026-10-09.json",
+      "kind": "input_manifest",
+      "path": "/workspace/van-audit/van-pre-phone-canary-source-and-skip-inventory-dfc1557a-2026-10-09.json",
+      "reviewed_sha256": "cb251b188cd37374c43613fd468d57e051289adc19da10d23c193a26a3e3c404"
+    },
+    {
+      "archive_path": "review-and-handoff/VAN_CLOUD_RUNTIME_CAPABILITY_OBSERVATION_2026-10-09-r2.json",
+      "kind": "qualification_receipt",
+      "path": "/workspace/van-audit/VAN_CLOUD_RUNTIME_CAPABILITY_OBSERVATION_2026-10-09-r2.json",
+      "reviewed_sha256": "53461db5ba321b64aac07aaa8c331db318a5fecd5d901247ec73c6f538796ec8"
+    },
+    {
+      "archive_path": "producers/prepare_canon_final_qualification_report_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/prepare_canon_final_qualification_report_2026_10_09.py",
+      "reviewed_sha256": "70ebf69bc8c79e2af01ec749b32effdfc84a18e5c24e9a2d84542e7f00c78171"
+    },
+    {
+      "archive_path": "producers/prepare_final_dial_continuation_runtime_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/prepare_final_dial_continuation_runtime_2026_10_09.py",
+      "reviewed_sha256": "c7e682a04e617090b13c1aaa175c79af5830ea5a9eef3d27729a0164f8550b61"
+    },
+    {
+      "archive_path": "producers/package_canon_final_evidence_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/package_canon_final_evidence_2026_10_09.py",
+      "reviewed_sha256": "8459feb1506ee007026f2a0298305d2e77ebdcecef97b6d033f775810e3e820d"
+    },
+    {
+      "archive_path": "producers/publish_canon_final_evidence_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/publish_canon_final_evidence_2026_10_09.py",
+      "reviewed_sha256": "df02856cc6a0621bbc9241e997f5483f34bb9d123a8e466591ae762a359dedc7"
+    },
+    {
+      "archive_path": "producers/publish_canon_source_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/publish_canon_source_2026_10_09.py",
+      "reviewed_sha256": "0a17f62c0aaa490ca1554dcb4903e6aea213d0dc71cbf8cb96c5a19036f35686"
+    },
+    {
+      "archive_path": "producers/run_canon_full_setup_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/run_canon_full_setup_2026_10_09.py",
+      "reviewed_sha256": "6c31575ae16336b598076080d53829d9c1f525cc50ff1c52ffe4b40ecdc472dd"
+    },
+    {
+      "archive_path": "producers/run_canon_corrected_backend_qualification_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/run_canon_corrected_backend_qualification_2026_10_09.py",
+      "reviewed_sha256": "7c89632ec7359c7793dc4a309a5e3847f3032b6124f59f643eec720bdd499c7c"
+    },
+    {
+      "archive_path": "producers/qualify_canon_android_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/qualify_canon_android_2026_10_09.py",
+      "reviewed_sha256": "5bc131497bde872268667fefe71c246903a078b36d48802b6fae12b10e230e01"
+    },
+    {
+      "archive_path": "producers/qualify_canon_android_native_alignment_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/qualify_canon_android_native_alignment_2026_10_09.py",
+      "reviewed_sha256": "e9fc4dbb905a9bae6f5daf5b23fcf8dceef620ee2507a0a4cd0db1d767017a6a"
+    },
+    {
+      "archive_path": "producers/compare_canon_android_apk_coverage_dfc1557a_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/compare_canon_android_apk_coverage_dfc1557a_2026_10_09.py",
+      "reviewed_sha256": "466bd651f796cb5ba66477a757c809a251b3dcb8f88e01152d45bcd456ed9d2c"
+    },
+    {
+      "archive_path": "producers/qualify_committed_components_shorttmp_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/qualify_committed_components_shorttmp_2026_10_09.py",
+      "reviewed_sha256": "5cb0a334caec529f9edc0b2d9b30e34f3f232072813bd59ec296c4c70392140b"
+    },
+    {
+      "archive_path": "producers/prove_parser_child_component_scope_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/prove_parser_child_component_scope_2026_10_09.py",
+      "reviewed_sha256": "d2cd5dc3a5dc164cf14309f43cfba33f684269dcd47f8615b245de3fe08c4e46"
+    },
+    {
+      "archive_path": "producers/prepare_registry_r7_qualification_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/prepare_registry_r7_qualification_2026_10_09.py",
+      "reviewed_sha256": "3e07648ba24c8bc52069865de489e65c539e50a9824b430abd20f8315c779e7a"
+    },
+    {
+      "archive_path": "producers/finish_registry_r7_qualification_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/finish_registry_r7_qualification_2026_10_09.py",
+      "reviewed_sha256": "276d4ba53f1c8caaec4653e1699fec912368a21f225d226766418fa73e250f04"
+    },
+    {
+      "archive_path": "producers/refresh_current_canon_registry_2026_10_09_r7.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/refresh_current_canon_registry_2026_10_09_r7.py",
+      "reviewed_sha256": "9cbc3039fd13a1121c6a639ccc833c92d19db38f9b29ec2e67aca736d4a29d9d"
+    },
+    {
+      "archive_path": "producers/qualify_canon_chromium_parser_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/qualify_canon_chromium_parser_2026_10_09.py",
+      "reviewed_sha256": "34928c6c1d8d3fe919ffbb11d596b8c010203169debd32d63d6f84b0ba7ebf99"
+    },
+    {
+      "archive_path": "producers/run_canon_chromium_scope_qualification_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/run_canon_chromium_scope_qualification_2026_10_09.py",
+      "reviewed_sha256": "f0f2b3363e9f69828b4d51d363d3a558831e7a247c6211fae2dc2b29422abcfa"
+    },
+    {
+      "archive_path": "producers/run_pseudo_hit_contracts_r2_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/run_pseudo_hit_contracts_r2_2026_10_09.py",
+      "reviewed_sha256": "975d43eb623314fc0dfa3a7c1441ae244b52fe7992dd5c1dc6629f811d964fde"
+    },
+    {
+      "archive_path": "producers/refresh_pre_phone_dfc1557a_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/refresh_pre_phone_dfc1557a_2026_10_09.py",
+      "reviewed_sha256": "d91adf8d1d950f1f95b694f796dbf5ff778becfba8b7b54927c2e498a05919a5"
+    },
+    {
+      "archive_path": "producers/prepare_canon_final_packet_spec_2026_10_09.py",
+      "kind": "helper_source",
+      "path": "/workspace/van-audit/prepare_canon_final_packet_spec_2026_10_09.py",
+      "reviewed_sha256": "6bd8ee54c33212e659b9c4107dcf4f9da33d222810492c934e158f99e771a372"
+    }
+  ],
+  "notice": "Public source/controlled qualification only. No APK, weights, private owner files, uploads or credentials.",
+  "physical_cases_executed": 0,
+  "production_deployed": false,
+  "record_kind": "FINITE_REVIEWED_PUBLIC_EVIDENCE_SELECTION",
+  "selection_revision": 2,
+  "source_sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "supersedes_selection_only": {
+    "path": "/workspace/van-audit/canon-final-evidence-packet-spec-dfc1557a-2026-10-09.json",
+    "reason": "Bind final evidence publisher metadata/index additions and include the finite selection producer; no application inputs or results change.",
+    "sha256": "7379f309e4f065048143845a555511e187ba4571f89ab1c115874b2032e019df"
+  }
+}
