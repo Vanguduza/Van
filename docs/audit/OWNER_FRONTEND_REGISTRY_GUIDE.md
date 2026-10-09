@@ -4,7 +4,7 @@ The current source inventory contains **42 owner features, 105 source functions,
 78 screens/hosted surfaces, 432 endpoint declarations and 251 schema components**.
 Use the [searchable contract](OWNER_FRONTEND_CONTRACT.html) and JSON files below as
 the design input. The October 9 review corrects current CORE_ONLY_V2 topology and
-runtime refusal/recovery contracts. Its [new source-review manifest](VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r4.json)
+runtime refusal/recovery contracts. Its [new source-review manifest](VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r5.json)
 binds current cited files; earlier source freezes and qualification receipts remain
 historical for changed inputs. Registry/source checks, final whole-workspace checks,
 production release/deployment/provider qualification and handset acceptance are

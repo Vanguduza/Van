@@ -20,6 +20,7 @@ import re
 import json
 import os
 import subprocess
+import textwrap
 from pathlib import Path
 
 import pytest
@@ -173,16 +174,68 @@ class TestQualifyIsHonest:
         assert 'record "egress_refuses_private"' in QUALIFY.read_text()
         assert 'record "chromium_uses_exact_ip_proxy"' in QUALIFY.read_text()
 
-    def test_every_recorded_check_can_fail(self):
+    def test_every_recorded_check_can_fail(self, tmp_path):
         """A check with no RED branch is a decoration."""
         script = QUALIFY.read_text()
         names = set(re.findall(r'record "(\w+)"', script))
         assert names, "qualify.sh records nothing"
         for name in names:
             statuses = set(re.findall(rf'record "{name}" "(\w+)"', script))
-            assert "RED" in statuses or "UNKNOWN" in statuses, (
-                f"{name} can only ever report GREEN"
-            )
+            if "RED" in statuses or "UNKNOWN" in statuses:
+                continue
+            # A helper-derived status needs executed failure paths, not a name
+            # exemption or a decorative literal UNKNOWN in the source.
+            blocks = list(re.finditer(
+                r'(?m)^observed=\$\(python3 "\$CHROMIUM_PROBE" --check kernel [^\n]* \|\| true\)\n'
+                r'status=[^\n]*\n'
+                r'detail=[^\n]*\n'
+                rf'record "{name}" "\$\{{status:-UNKNOWN\}}" [^\n]*$', script))
+            assert len(blocks) == 1, f"{name} has no tested failure-producing branch"
+            self._assert_kernel_helper_failure_paths(script, blocks[0].group(), name, tmp_path)
+
+    def _assert_kernel_helper_failure_paths(self, script, block, name, tmp_path):
+        record = re.search(r'(?ms)^record\(\) \{.*?^\}', script)
+        assert record, "the actual qualification record implementation is missing"
+        probe = tmp_path / "kernel_failure_probe.py"
+        probe.write_text(textwrap.dedent("""\
+            import importlib.util
+            import json
+            import os
+
+            spec = importlib.util.spec_from_file_location("actual_qualifier", os.environ["VAN_TEST_QUALIFY_HELPER"])
+            helper = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(helper)
+            # Controlled observation inputs exercise the real helper without
+            # reading or changing a host firewall. They grant no live acceptance.
+            declaration = {"instances": [{
+                "instance": instance,
+                "users": ["van-browser-" + instance, "van-control-" + instance, "van-stream-" + instance],
+                "egress_user": "van-egress-" + instance,
+                "cdp_port": 9222 + index, "egress_port": 8899 + index,
+            } for index, instance in enumerate(("public", "owner"))]}
+            identities = {user: 2000 + index for index, user in enumerate(
+                user for entry in declaration["instances"] for user in entry["users"] + [entry["egress_user"]])}
+            mode = os.environ["VAN_TEST_QUALIFY_FAILURE"]
+            observation = None if mode == "missing_observation" else {}
+            if mode == "conflicting_uid_declaration":
+                identities["van-egress-owner"] = identities["van-browser-public"]
+                observation = {"nftables": []}
+            result = helper.firewall_status(observation, declaration, identities)
+            print(json.dumps(result))
+            raise SystemExit(0 if result["status"] == "GREEN" else 1)
+            """))
+        harness = '\n'.join((
+            "set -uo pipefail", "results=()", "overall=0", record.group(), block,
+            'printf \'{"checks":[%s]}\\n\' "$(IFS=,; echo "${results[*]}")"', 'exit "$overall"',
+        ))
+        for mode, expected in (("missing_observation", "UNKNOWN"), ("malformed_observation", "UNKNOWN"),
+                               ("conflicting_uid_declaration", "RED")):
+            result = subprocess.run(["bash", "-c", harness], capture_output=True, text=True, timeout=5,
+                env={**os.environ, "CHROMIUM_PROBE": str(probe), "INSTANCE": "public", "EGRESS_PORT": "8899",
+                    "VAN_TEST_QUALIFY_HELPER": str(PACKAGE / "qualify_chromium.py"), "VAN_TEST_QUALIFY_FAILURE": mode})
+            assert result.returncode == 1, (name, mode, result.stdout, result.stderr)
+            checks = json.loads(result.stdout)["checks"]
+            assert len(checks) == 1 and checks[0]["check"] == name and checks[0]["status"] == expected, checks
 
     def test_the_exit_code_is_the_verdict(self):
         assert 'exit "$overall"' in QUALIFY.read_text()

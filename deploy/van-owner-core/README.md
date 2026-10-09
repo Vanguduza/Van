@@ -135,7 +135,7 @@ authorized installer and existing device identity. Real OS/biometric consent and
 private speaker enrollment remain required.
 
 Run the current candidate 826-case Artemis matrix directly through DIAL/Commander
-only after pre-handset qualification, on S24 RFCX2054F5W / SM_S928B, using the selected
+only after pre-handset qualification, on S24 RFCX2054F5W / SM-S928B, using the selected
 paired private wireless ADB endpoint and fresh hardware readbacks. A Windows USB/private
 bridge is an explicitly selected alternative with separate applicability evidence.
 Join native evidence to canonical actions and independent effects. A prepared matrix

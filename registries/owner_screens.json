@@ -73383,11 +73383,11 @@
     "physical_cases_executed": 0,
     "owner_release": false,
     "deployment_accepted": false,
-    "source_review_manifest": "docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r4.json",
+    "source_review_manifest": "docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r5.json",
     "android_receipt": null,
     "android_receipt_sha256": null,
     "scope": "Current scoped CORE_ONLY_V2 registry and runtime source review. No current Android/backend full-suite, production/provider or handset qualification is inferred from historical receipts.",
-    "source_review_manifest_sha256": "d2a21730c96323879d382fa020c607312324475810824169c88765d4c7a92364"
+    "source_review_manifest_sha256": "060e4c1653ba1c3f4f4ff761ec9f2faa04d07fb1c736acd6f0391faf5631d5af"
   },
   "repaired_mutations": [
     {
@@ -73879,6 +73879,17 @@
       "android_receipt_sha256": null,
       "scope": "Current scoped CORE_ONLY_V2 registry and runtime source review. No current Android/backend full-suite, production/provider or handset qualification is inferred from historical receipts.",
       "source_review_manifest_sha256": "88aae512e9c28f98132bcd1d5b14f3d9d7ec11669952a35c94ca3aa524999a27"
+    },
+    "pre_oct9_r5_final_static_doc_correction": {
+      "status": "SOURCE_REVIEWED_FINAL_VALIDATION_PENDING",
+      "physical_cases_executed": 0,
+      "owner_release": false,
+      "deployment_accepted": false,
+      "source_review_manifest": "docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r4.json",
+      "android_receipt": null,
+      "android_receipt_sha256": null,
+      "scope": "Current scoped CORE_ONLY_V2 registry and runtime source review. No current Android/backend full-suite, production/provider or handset qualification is inferred from historical receipts.",
+      "source_review_manifest_sha256": "d2a21730c96323879d382fa020c607312324475810824169c88765d4c7a92364"
     }
   },
   "current_audit_note": "Current Oct9 source review uses a new immutable manifest. Prior Oct8 validation is historical for changed inputs; final whole-workspace qualification is separate. Native Artemis plan coverage is 826 prepared candidate cases, physical execution 0, owner release/deployment unqualified.",
