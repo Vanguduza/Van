@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-02",
+  "scope": "META_MUSE_SECURE_ACCESS_ONLY",
+  "repository_baseline": "12feb9033dfc1dd68d7b4d41ac477f0d9dbbc4af",
+  "path": {
+    "owner_device": "S24",
+    "owner_wireguard": "10.66.66.2/32",
+    "host_wireguard": "10.66.66.1",
+    "novnc": "10.66.66.1:6085",
+    "muse_url": "https://muse.ai/"
+  },
+  "authenticated_session": {
+    "page_title": "Chat — van muse",
+    "url": "https://muse.ai/",
+    "secrets_inspected": false
+  },
+  "browser_restart": {
+    "before_pid": 524277,
+    "after_pid": 595572,
+    "session_persisted": true
+  },
+  "egress_observations": [
+    {
+      "ip": "212.104.215.152",
+      "country": "CA"
+    },
+    {
+      "ip": "185.98.171.249",
+      "country": "CA"
+    }
+  ],
+  "fail_closed": {
+    "vpn_stopped": true,
+    "muse_browser_stopped": true,
+    "muse_process_remaining": false,
+    "result": "MUSE_FAIL_CLOSED_GREEN"
+  },
+  "recovery": {
+    "vpn_restored": true,
+    "muse_restored": true,
+    "session_restored": true,
+    "owner_listener_restored": true,
+    "result": "MUSE_RECOVERY_GREEN"
+  },
+  "network_namespace": {
+    "gluetun_pid": 599282,
+    "muse_pid": 600053,
+    "gluetun": "net:[4026533669]",
+    "muse": "net:[4026533669]",
+    "same": true
+  },
+  "access_boundary": {
+    "listener": "10.66.66.1:6085",
+    "firewall_source": "10.66.66.2/32",
+    "firewall_destination": "10.66.66.1/32",
+    "firewall_port": 6085,
+    "persistent_profile_mode": "0700"
+  },
+  "host_default_route": "default via 10.0.1.1 dev enp0s6 proto dhcp src 10.0.1.233 metric 100",
+  "vati_services": {
+    "vati-automation.service": "active",
+    "vati-commander.service": "active",
+    "vati-mt5-pull.service": "active",
+    "vati-supabase.service": "active",
+    "vati-vekl.service": "active"
+  },
+  "gates": [
+    "META_MUSE_SECURE_ACCESS_GREEN",
+    "MUSE_SESSION_PERSISTENCE_GREEN",
+    "MUSE_FAIL_CLOSED_GREEN",
+    "MUSE_RECOVERY_GREEN",
+    "MUSE_GLUETUN_NETNS_GREEN",
+    "MUSE_OWNER_PRIVATE_ACCESS_GREEN",
+    "VATI_REGRESSION_GREEN"
+  ],
+  "dial_integration_designed": false
+}
