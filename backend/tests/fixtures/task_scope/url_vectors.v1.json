@@ -1,6 +1,6 @@
 {
  "schema": "van.task_scope.url_vectors.v1",
- "note": "Review I6 M3. Run by the gateway (task_scope.py) and the Harness (VAN_HELPERS_PY) tests, and checked against real Chromium's WHATWG URL parser (Chromium additionally decodes %2E in a path; the rule does too). parsed=null means the shared rule refuses to parse it (fail closed).",
+ "note": "Review I6 M3. Run by the gateway (task_scope.py) and the Harness (VAN_HELPERS_PY) tests, and checked against real Chromium's WHATWG URL parser. Encoded dots are interpreted only in full dot segments; other encoded bytes stay encoded. parsed=null means the shared rule refuses to parse it (fail closed).",
  "scope_entries": [
   {
    "origin": "https://docs.example.com",
@@ -103,7 +103,7 @@
    "base": null,
    "parsed": {
     "origin": "https://docs.example.com",
-    "path": "/docs/..%2fcheckout"
+    "path": "/docs/%2e%2e%2fcheckout"
    },
    "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"
   },
@@ -112,7 +112,7 @@
    "base": null,
    "parsed": {
     "origin": "https://docs.example.com",
-    "path": "/docs/..%5ccheckout"
+    "path": "/docs/%2e%2e%5ccheckout"
    },
    "violation_docs_scope": "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"
   },
@@ -451,7 +451,7 @@
    "base": null,
    "parsed": {
     "origin": "https://docs.example.com",
-    "path": "/docs/a.b"
+    "path": "/docs/a%2Eb"
    },
    "violation_docs_scope": null
   },

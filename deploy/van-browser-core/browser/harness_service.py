@@ -1082,8 +1082,8 @@ def _van_digest(el):
 # A URL is parsed the way the WHATWG URL parser parses an http(s) URL (the parser the
 # browser uses), so the check sees the page the browser will load: tab/newline removed,
 # C0/space trimmed, scheme and host lower-cased, host percent-decoded, a trailing host dot
-# dropped, the default port dropped, userinfo ignored, backslash read as slash, %2E read as
-# "." (as Chromium does), and dot segments (".", "..") removed. Anything the rule does
+# dropped, the default port dropped, userinfo ignored, backslash read as slash, and full
+# dot segments (including %2E forms) removed. Other encoded dots stay encoded. What the rule does
 # not model exactly (IPv6, non-ASCII hosts, other than two slashes after the scheme) is
 # not parsed: it is out of scope (fail closed). A path whose segment percent-decodes to a
 # slash, a backslash, a NUL or a dot segment is ambiguous (a server may decode it before
@@ -1112,9 +1112,9 @@ def _vs_path(path):
             encoded.extend("%%%02X" % b for b in ch.encode("utf-8"))
         else:
             encoded.append(ch)
-    # Chromium (the browser the Harness drives) also decodes %2E to "." anywhere in a path
-    # (checked against it in backend/tests/test_browser_review_i6_scope.py).
-    segments = _vs_re.sub(r"%2[eE]", ".", "".join(encoded)).split("/")[1:]
+    # WHATWG recognises encoded dots only when the whole segment is a dot segment.
+    # Preserve all other percent-encoded bytes as Chromium does.
+    segments = "".join(encoded).split("/")[1:]
     out = []
     for i, seg in enumerate(segments):
         last = i == len(segments) - 1
@@ -1273,6 +1273,21 @@ def _van_world():
     frame = cdp("Page.getFrameTree")["frameTree"]["frame"]
     return cdp("Page.createIsolatedWorld", frameId=frame["id"], worldName="van-harness-describe",
                grantUniveralAccess=False)["executionContextId"]
+
+def _van_hit_object(bound_object_id, backend_node_id, context_id):
+    # Chromium can report generated ::before/::after content with no JS parent link.
+    # Only fresh CDP ownership of THIS bound node may normalize that hit to self;
+    # overlays, nested controls, frames and shadow descendants keep the ordinary test.
+    if type(backend_node_id) is not int or backend_node_id <= 0:
+        raise ValueError("invalid hit backend node")
+    node = cdp("DOM.describeNode", objectId=bound_object_id, depth=0)["node"]
+    for pseudo in node.get("pseudoElements") or []:
+        if (isinstance(pseudo, dict) and pseudo.get("pseudoType") in ("before", "after")
+                and type(pseudo.get("backendNodeId")) is int
+                and pseudo["backendNodeId"] == backend_node_id):
+            return bound_object_id
+    return cdp("DOM.resolveNode", backendNodeId=backend_node_id,
+               executionContextId=context_id)["object"]["objectId"]
 """
 exec(compile(VAN_HELPERS_PY, "<van-helpers>", "exec"))  # noqa: S102 - the fixed helper source above
 
@@ -1389,7 +1404,7 @@ def _van_hit(obj, el):
     x, y = float(box["x"]), float(box["y"])
     try:
         at = cdp("DOM.getNodeForLocation", x=int(x), y=int(y), includeUserAgentShadowDOM=False)
-        hit = cdp("DOM.resolveNode", backendNodeId=int(at["backendNodeId"]), executionContextId=_VAN_CTX[0])["object"]["objectId"]
+        hit = _van_hit_object(obj, at["backendNodeId"], _VAN_CTX[0])
     except Exception:
         raise _VanRefused("TARGET_HIT_TEST_FAILED")
     verdict = _van_call(obj, __HIT_FN__, [{"objectId": hit}]).get("value")
@@ -2888,7 +2903,7 @@ else:
                 if box.get("in_viewport"):
                     try:
                         at = cdp("DOM.getNodeForLocation", x=int(box["x"]), y=int(box["y"]), includeUserAgentShadowDOM=False)
-                        hit = cdp("DOM.resolveNode", backendNodeId=int(at["backendNodeId"]), executionContextId=ctx)["object"]["objectId"]
+                        hit = _van_hit_object(obj, at["backendNodeId"], ctx)
                         v = cdp("Runtime.callFunctionOn", objectId=obj, functionDeclaration=__HIT_FN__,
                                 arguments=[{"objectId": hit}], returnByValue=True)
                         occluded = ((v.get("result") or {}).get("value")) not in ("SELF", "DESCENDANT")

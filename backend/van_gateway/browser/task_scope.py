@@ -69,8 +69,8 @@ from pydantic import BaseModel, Field
 # A URL is parsed the way the WHATWG URL parser parses an http(s) URL (the parser the
 # browser uses), so the check sees the page the browser will load: tab/newline removed,
 # C0/space trimmed, scheme and host lower-cased, host percent-decoded, a trailing host dot
-# dropped, the default port dropped, userinfo ignored, backslash read as slash, %2E read as
-# "." (as Chromium does), and dot segments (".", "..") removed. Anything the rule does
+# dropped, the default port dropped, userinfo ignored, backslash read as slash, and full
+# dot segments (including %2E forms) removed. Other encoded dots stay encoded. What the rule does
 # not model exactly (IPv6, non-ASCII hosts, other than two slashes after the scheme) is
 # not parsed: it is out of scope (fail closed). A path whose segment percent-decodes to a
 # slash, a backslash, a NUL or a dot segment is ambiguous (a server may decode it before
@@ -99,9 +99,9 @@ def _vs_path(path):
             encoded.extend("%%%02X" % b for b in ch.encode("utf-8"))
         else:
             encoded.append(ch)
-    # Chromium (the browser the Harness drives) also decodes %2E to "." anywhere in a path
-    # (checked against it in backend/tests/test_browser_review_i6_scope.py).
-    segments = _vs_re.sub(r"%2[eE]", ".", "".join(encoded)).split("/")[1:]
+    # WHATWG recognises encoded dots only when the whole segment is a dot segment.
+    # Preserve all other percent-encoded bytes as Chromium does.
+    segments = "".join(encoded).split("/")[1:]
     out = []
     for i, seg in enumerate(segments):
         last = i == len(segments) - 1

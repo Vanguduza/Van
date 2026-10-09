@@ -85,3 +85,27 @@ def test_both_sides_run_the_shared_vectors(monkeypatch, tmp_path, side):
         for vector in VECTORS["vectors"]:
             if vector["base"] is None:
                 assert module._van_scope_violation({"entries": entries}, vector["input"]) == vector["violation_docs_scope"]
+
+
+@pytest.mark.parametrize("side", ["gateway", "harness", "egress_proxy"])
+@pytest.mark.parametrize("prefix,path,violation", [
+    ("/docs/a.b", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+    ("/docs/a%2Eb", "/docs/a%2Eb", None),
+    ("/docs/a%2Eb", "/docs/a.b", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+    ("/docs/a%2Eb", "/docs/a%2Eb/next", None),
+    ("/docs/a%2Eb", "/docs/a%2Ebc", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+    ("/docs/a%2eb", "/docs/a%2Eb", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+    ("/docs/", "/docs/%2e%2e%2fcheckout", "TASK_SCOPE_PAGE_PATH_AMBIGUOUS"),
+    ("/docs/", "/docs/%2e%2e/checkout", "TASK_SCOPE_PAGE_PATH_OUTSIDE"),
+])
+def test_encoded_dot_paths_preserve_exact_scope_boundaries(monkeypatch, tmp_path, side, prefix, path, violation):
+    """An encoded dot in an ordinary segment is a distinct browser path; full dot
+    segments still traverse, and encoded separators still fail closed."""
+    module = _sides(monkeypatch, tmp_path)[side]
+    origin = "https://docs.example.com"
+    entries = [{"origin": origin, "path_prefix": prefix}]
+    assert module._vs_scope_violation(entries, origin + path) == violation
+    if side == "gateway":
+        from van_gateway.browser.task_scope import parse_scope_entry
+
+        assert parse_scope_entry(origin + prefix, "docs.example.com").path_prefix == prefix

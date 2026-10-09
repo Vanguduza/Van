@@ -46284,11 +46284,11 @@
     "physical_cases_executed": 0,
     "owner_release": false,
     "deployment_accepted": false,
-    "source_review_manifest": "docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r6.json",
+    "source_review_manifest": "docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r7.json",
     "android_receipt": null,
     "android_receipt_sha256": null,
     "scope": "Current scoped CORE_ONLY_V2 registry and runtime source review. No current Android/backend full-suite, production/provider or handset qualification is inferred from historical receipts.",
-    "source_review_manifest_sha256": "9f92777dee9a5b08d239f86fb1a23e38900bfcaea6c7fd76b13befb4fd371539"
+    "source_review_manifest_sha256": "6ff923de5bf1330b0291bcffb31bbb01900f19234e138328ff7d863768c4e462"
   },
   "functional_wiring_status_semantics": {
     "SOURCE_WIRED_REQUIRES_ACCEPTANCE": "Supported source producer/consumer path is reviewed; stated provider, deployment, visual or physical acceptance remains required.",
@@ -46377,6 +46377,17 @@
       "android_receipt_sha256": null,
       "scope": "Current scoped CORE_ONLY_V2 registry and runtime source review. No current Android/backend full-suite, production/provider or handset qualification is inferred from historical receipts.",
       "source_review_manifest_sha256": "060e4c1653ba1c3f4f4ff761ec9f2faa04d07fb1c736acd6f0391faf5631d5af"
+    },
+    "pre_oct9_r7_chromium_runtime_correction": {
+      "status": "SOURCE_REVIEWED_FINAL_VALIDATION_PENDING",
+      "physical_cases_executed": 0,
+      "owner_release": false,
+      "deployment_accepted": false,
+      "source_review_manifest": "docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r6.json",
+      "android_receipt": null,
+      "android_receipt_sha256": null,
+      "scope": "Current scoped CORE_ONLY_V2 registry and runtime source review. No current Android/backend full-suite, production/provider or handset qualification is inferred from historical receipts.",
+      "source_review_manifest_sha256": "9f92777dee9a5b08d239f86fb1a23e38900bfcaea6c7fd76b13befb4fd371539"
     }
   },
   "historical_current_audit_note_pre_oct9": "Current production-source wiring review is bound to the frozen manifest and current local Android receipt. Original baseline and pre-final-wiring registries remain historical evidence. Supported implemented functions are distinct from missing source contracts, deferred visual/Rive redesign, deployment/provider qualification and physical acceptance. Physical Android cases executed: 0. The locally built debug APK is not an owner release. Current full local validation:6,574 runner passes / 10 skipped / 0 failures; see the source-bound closure validation receipt.",
