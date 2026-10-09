@@ -138,7 +138,8 @@ class RiveContractTest {
         assertTrue("gaze extremes are pixel-identical", meanAbsRgb(gazeA, gazeB) > 0.001)
         val mouth0 = capture(rig, "mouth-0", state = 9, speaking = true, mouthOpen = 0f, viseme = 2)
         val mouth1 = capture(rig, "mouth-1", state = 9, speaking = true, mouthOpen = 1f, viseme = 2)
-        assertTrue("mouth_open 0 and 1 are pixel-identical", meanAbsRgb(mouth0, mouth1) > 0.001)
+        val mouthDiff = meanAbsRgbRegion(mouth0, mouth1, 0.38, 0.20, 0.58, 0.36)
+        assertTrue("mouth_open 0 and 1 are visually identical in the mouth region ($mouthDiff)", mouthDiff > 0.004)
 
         for (state in listOf(2, 4, 5, 9)) capture(rig, "core-state-$state", state = state)
         for ((action, trigger) in listOf(1 to "wave", 2 to "ack", 7 to "point")) {
@@ -394,12 +395,21 @@ class RiveContractTest {
         launchScenario(rig, background, state, speaking, listening, attentionX, attentionY, mouthOpen, urgency, viseme, action, trigger, sizeDp).use {
             instrumentation.waitForIdleSync()
             SystemClock.sleep(settleMs)
-            val screen = instrumentation.uiAutomation.takeScreenshot()
-            val density = targetContext.resources.displayMetrics.density
-            val size = min((sizeDp * density).toInt(), min(screen.width, screen.height))
-            val x = ((screen.width - size) / 2).coerceAtLeast(0)
-            val y = ((screen.height - size) / 2).coerceAtLeast(0)
-            val crop = Bitmap.createBitmap(screen, x, y, size, size)
+            fun takeCrop(): Bitmap {
+                val screen = instrumentation.uiAutomation.takeScreenshot()
+                val density = targetContext.resources.displayMetrics.density
+                val size = min((sizeDp * density).toInt(), min(screen.width, screen.height))
+                val x = ((screen.width - size) / 2).coerceAtLeast(0)
+                val y = ((screen.height - size) / 2).coerceAtLeast(0)
+                return Bitmap.createBitmap(screen, x, y, size, size)
+            }
+            var crop = takeCrop()
+            repeat(2) {
+                if (looksBlank(crop)) {
+                    SystemClock.sleep(400L)
+                    crop = takeCrop()
+                }
+            }
             val out = outputDir(rig).resolve("$name.png")
             out.parentFile?.mkdirs()
             FileOutputStream(out).use { crop.compress(Bitmap.CompressFormat.PNG, 100, it) }
@@ -439,6 +449,33 @@ class RiveContractTest {
         abs(Color.green(a) - Color.green(b)),
         abs(Color.blue(a) - Color.blue(b)),
     )
+
+    private fun meanAbsRgbRegion(
+        a: Bitmap,
+        b: Bitmap,
+        x0f: Double,
+        y0f: Double,
+        x1f: Double,
+        y1f: Double,
+    ): Double {
+        val w = min(a.width, b.width)
+        val h = min(a.height, b.height)
+        val x0 = (w * x0f).toInt().coerceIn(0, w - 1)
+        val y0 = (h * y0f).toInt().coerceIn(0, h - 1)
+        val x1 = (w * x1f).toInt().coerceIn(x0 + 1, w)
+        val y1 = (h * y1f).toInt().coerceIn(y0 + 1, h)
+        var total = 0.0
+        var count = 0L
+        for (y in y0 until y1 step 2) for (x in x0 until x1 step 2) {
+            val ca = a.getPixel(x, y)
+            val cb = b.getPixel(x, y)
+            total += abs(Color.red(ca) - Color.red(cb))
+            total += abs(Color.green(ca) - Color.green(cb))
+            total += abs(Color.blue(ca) - Color.blue(cb))
+            count += 3
+        }
+        return if (count == 0L) 0.0 else total / (count * 255.0)
+    }
 
     private fun meanAbsRgb(a: Bitmap, b: Bitmap): Double {
         val w = min(a.width, b.width); val h = min(a.height, b.height)

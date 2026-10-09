@@ -5,8 +5,13 @@
     <application android:usesCleartextTraffic="true">
         <activity
             android:name=".visual.RiveCandidateHostActivity"
-            android:exported="false"
-            android:label="VAN Rive candidate"
-            android:theme="@style/Theme.Van" />
+            android:exported="true"
+            android:label="VAN Character Rig Lab"
+            android:theme="@style/Theme.Van">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
