@@ -25,6 +25,7 @@ object VanRoute {
     const val HOME = "home"
     const val ATTENTION = "attention"
     const val WORK = "work"
+    const val WORK_COGNITIVE_TWIN = "work/cognitive-twin"
     const val WORK_ACTIVITY = "work/activity"
     const val WORK_ARTEMIS = "work/artemis"
     const val WORK_BROWSER = "work/browser"
@@ -90,7 +91,7 @@ object VanRoute {
 
     /** Every template this app's `NavHost` declares a `composable` for. */
     val ALL_TEMPLATES: List<String> = listOf(
-        HOME, ATTENTION, WORK, WORK_ACTIVITY, WORK_ARTEMIS, WORK_BROWSER, WORK_BROWSER_TASKS, WORK_BROWSER_ESCALATIONS,
+        HOME, ATTENTION, WORK, WORK_COGNITIVE_TWIN, WORK_ACTIVITY, WORK_ARTEMIS, WORK_BROWSER, WORK_BROWSER_TASKS, WORK_BROWSER_ESCALATIONS,
         WORK_BROWSER_SESSIONS, WORK_BROWSER_POLICY, WORK_MISSION_TEMPLATE, TRADING, MEMORY,
         PROJECTS, PROJECT_DETAIL_TEMPLATE, CONNECTED, SETTINGS,
         SETTINGS_VOICE, SETTINGS_NOTIFICATIONS,
@@ -111,6 +112,7 @@ object VanRoute {
         WORK to HOME,
         WORK_ACTIVITY to WORK,
         WORK_ARTEMIS to WORK,
+        WORK_COGNITIVE_TWIN to WORK,
         WORK_BROWSER to WORK,
         WORK_BROWSER_TASKS to WORK_BROWSER,
         WORK_BROWSER_ESCALATIONS to WORK_BROWSER,

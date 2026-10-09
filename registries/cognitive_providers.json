@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "authority": "ADVISORY_CANDIDATE",
+  "free_only": true,
+  "providers": [
+    {
+      "id": "personal-muse-free",
+      "dispatch_class": "OWNER_INTERACTIVE_EXTERNAL_AGENT",
+      "latency": "T3",
+      "state": "IMPLEMENTED",
+      "transport": "EXPLICIT_OWNER_IMPORT",
+      "cost_policy": "FREE_QUOTA_ONLY",
+      "cloud_data_ceiling": [
+        "PUBLIC",
+        "INTERNAL_SANITIZED"
+      ]
+    },
+    {
+      "id": "meta-ai-free-spark-surface",
+      "dispatch_class": "OWNER_INTERACTIVE_EXTERNAL_AGENT",
+      "latency": "T3",
+      "state": "IMPLEMENTED",
+      "transport": "EXPLICIT_OWNER_IMPORT",
+      "cost_policy": "FREE_QUOTA_ONLY"
+    },
+    {
+      "id": "muse-glimmer-local",
+      "dispatch_class": "DOMAIN_LOCAL_ANALYST",
+      "latency": "T2",
+      "state": "EXTERNALLY_BLOCKED_PLACEMENT_PENDING_CAPACITY",
+      "required_gates": [
+        "artifact_hash",
+        "license_review",
+        "placement_ref",
+        "capacity_ref",
+        "sandbox_ref",
+        "qualification_ref"
+      ],
+      "qualification_evaluator": "trading/vati/cognition/glimmer_qualification.py",
+      "benchmark_cli": "tools/cognitive/qualify_glimmer.py",
+      "activation_requires_governed_admission": true
+    },
+    {
+      "id": "muse-spark-api",
+      "state": "DISABLED_PAID_OPTION"
+    },
+    {
+      "id": "muse-code",
+      "state": "DISABLED_PAID_OPTION"
+    },
+    {
+      "id": "muse-image",
+      "state": "DISABLED_PAID_OPTION"
+    },
+    {
+      "id": "muse-voice",
+      "state": "DISABLED_PAID_OPTION"
+    },
+    {
+      "id": "openai-dot",
+      "dispatch_class": "EXTERNAL_PULL_COGNITIVE_AGENT",
+      "latency": "T3",
+      "state": "EXTERNAL_QUALIFICATION_REQUIRED"
+    },
+    {
+      "id": "openai-programmatic",
+      "dispatch_class": "DOMAIN_LOCAL_ANALYST",
+      "latency": "T2",
+      "state": "RUNTIME_QUALIFICATION_REQUIRED"
+    },
+    {
+      "id": "van-native",
+      "dispatch_class": "DOMAIN_LOCAL_ANALYST",
+      "latency": "T2",
+      "state": "RUNTIME_QUALIFICATION_REQUIRED"
+    }
+  ]
+}

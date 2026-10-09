@@ -386,6 +386,8 @@ class VanGatewayClient(context: Context) {
 
     suspend fun tradingRisk(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/risk") }
 
+    suspend fun cognitiveTwin(): String = withContext(Dispatchers.IO) { rawGet("/v1/cognitive/twin") }
+
     suspend fun tradingCognition(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/cognition") }
 
     suspend fun tradingTradeDetail(tradeIntentId: String): String = withContext(Dispatchers.IO) {

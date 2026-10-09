@@ -77,6 +77,8 @@ class ServiceConfig:
     #: did: an explicit MODEL_UNAVAILABLE abstention and an untouched
     #: deterministic decision.
     cognition: dict = field(default_factory=dict)
+    # Operator-admitted provider/model qualifications; packets cannot set these.
+    cognitive_fabric: dict = field(default_factory=dict)
     #: Where `secretref://` credential handles resolve. Mirrors the gateway's
     #: `vati_secrets_dir`; the credential value itself is never configuration.
     secrets_dir: str = ""

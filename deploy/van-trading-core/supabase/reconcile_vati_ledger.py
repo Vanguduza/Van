@@ -44,6 +44,8 @@ def update_core_env(path, password):
     st = p.stat()
     tmp = p.with_name(p.name + ".tmp")
     fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, st.st_mode & 0o777)
+    # Preserve the existing mode even under a stricter operator umask.
+    os.fchmod(fd, st.st_mode & 0o777)
     with os.fdopen(fd, "w", encoding="utf-8") as handle:
         handle.write(updated)
         handle.flush()

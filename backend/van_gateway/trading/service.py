@@ -153,6 +153,69 @@ class TradingService:
         from van_gateway.trading.cognition import cognition_from_ledger, empty_cognition_read_model
         return self._with_ledger(cognition_from_ledger, empty=empty_cognition_read_model())
 
+    def cognitive_fabric(self, account_alias: str) -> dict:
+        _import_vati()
+        from vati.cognition.fabric import TriAnalystPlane
+        return self._with_ledger(lambda led: TriAnalystPlane(led, account_alias=account_alias).projection(),
+                                 empty={"ledger_available": False, "records": []})
+
+    def cognitive_slice(self, operation: str) -> dict:
+        """Separate bounded semantic reads; no account money/size/credential fields."""
+        _import_vati()
+        from vati.core.events import EventKind
+        from vati.app.portfolio import market_state
+        kinds = {
+            'strategy-health': (EventKind.CAPSULE_STATE, EventKind.TRADE_HEALTH),
+            'performance': (EventKind.COGNITIVE_PERFORMANCE,),
+            'tca': (EventKind.TCA_RECORD,),
+            'learning-episodes': (EventKind.COGNITIVE_FABRIC,),
+        }
+        fields = {
+            'strategy-health': {'strategy_id', 'state', 'health', 'weighted_samples', 'state_recommendation', 'reasons', 'verdict', 'thesis_health'},
+            'performance': {'model_id', 'assessments', 'refusals', 'abstentions', 'resolved', 'divergences', 'mean_delta_r', 'brier_score', 'qualified', 'qualification', 'sample_sufficient'},
+            'tca': {'slippage', 'delay_cost', 'modelled_cost_pct', 'realised_cost_pct', 'cost_ratio'},
+            'learning-episodes': {'record_type', 'episode_id', 'candidate_id', 'evidence_epoch', 'discovery_origin', 'analyst_packets', 'outcome_state', 'state', 'process_outcome_class', 'ex_ante_validity_frozen', 'evidence_refs', 'risk_decisions', 'execution_receipts'},
+        }
+        if operation != 'trading-market' and operation not in kinds:
+            raise ValueError('UNKNOWN_TRADING_COGNITIVE_SLICE')
+        def read(ledger):
+            if operation == 'trading-market':
+                projection = market_state(ledger)
+                allowed = {'symbol', 'as_of_ms', 'session', 'regime', 'integrity', 'event_window', 'minutes_to_next_event', 'quote_age_ms', 'features', 'activation_id', 'data_state'}
+                return {'symbols': [{k: v for k, v in row.items() if k in allowed} for row in projection['symbols'][:30]],
+                        'source_ledger_hash': ledger.head(), 'state': 'AVAILABLE'}
+            rows = []
+            for kind in kinds[operation]:
+                for event in ledger.iter(kind):
+                    if operation == 'learning-episodes' and event.payload.get('record_type') not in ('TradeLearningEpisode', 'TradeLearningOutcome'):
+                        continue
+                    rows.append({'source_event_hash': event.hash, 'observed_at_ms': event.event_time_ms,
+                        **{k: v for k, v in event.payload.items() if k in fields[operation]}})
+            return {'records': sorted(rows, key=lambda r: r['observed_at_ms'])[-30:],
+                    'source_ledger_hash': ledger.head(), 'state': 'AVAILABLE' if rows else 'AVAILABLE_EMPTY'}
+        return self._with_ledger(read, empty={'state': 'DEGRADED', 'reason': 'TRADING_LEDGER_UNAVAILABLE', 'records': []})
+
+    def cognitive_import(self, account_alias: str, operation: str, body: dict) -> dict:
+        _import_vati()
+        from vati.cognition.fabric import TriAnalystPlane, FabricError
+        if not self.available():
+            raise FabricError("TRADING_LEDGER_UNAVAILABLE")
+        _, _, ledger = self._open()
+        try:
+            plane = TriAnalystPlane(ledger, account_alias=account_alias)
+            now = int(time.time() * 1000)
+            if operation == "discovery":
+                return plane.discover(body, now_ms=now)
+            if operation == "packet":
+                return plane.packet(body, now_ms=now)
+            if operation == "focus" and set(body) == {"candidate_id", "evidence_epoch", "reason"}:
+                return plane.focus(**body, now_ms=now)
+            if operation == "admission" and set(body) == {"candidate_id", "evidence_epoch"}:
+                return plane.admission(**body, now_ms=now)
+            raise FabricError("CANDIDATE_IMPORT_OPERATION")
+        finally:
+            ledger.close()
+
     # ------------------------------------------- active-trade read models (GAP-F-003)
     def positions(self) -> dict[str, Any]:
         """Open positions with thesis, health, exposure, protection and events.

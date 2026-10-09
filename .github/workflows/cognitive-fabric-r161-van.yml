@@ -1,0 +1,79 @@
+name: cognitive-fabric-r161-van
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cognitive-fabric-r161-van-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: backend:trading
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backend/requirements.lock
+      - name: Install supported locked dependencies
+        run: python -m pip install -r backend/requirements.lock
+      - name: Required cognitive test surfaces exist
+        run: |
+          test -f trading/tests/test_vati_cognitive_fabric.py
+          test -f trading/tests/test_glimmer_qualification.py
+          test -f backend/tests/test_cognitive_fabric.py
+          test -f backend/tests/test_cognitive_twin.py
+          test -f backend/tests/fixtures/cognitive_twin_dds_compiler.json
+      - name: Focused cognitive authority and transport checks
+        run: python -m pytest -q trading/tests/test_vati_cognitive_fabric.py trading/tests/test_glimmer_qualification.py backend/tests/test_cognitive_fabric.py backend/tests/test_cognitive_twin.py --junitxml=cognitive-focused.xml
+      - name: Broad trading and owner-context regression checks
+        run: python -m pytest -q trading/tests backend/tests/test_cognitive_fabric.py backend/tests/test_cognitive_twin.py backend/tests/test_context_admission_api.py backend/tests/test_context_lifecycle_governance.py --junitxml=cognitive-broad.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cognitive-python-results
+          path: cognitive-*.xml
+          if-no-files-found: error
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - name: Required real-source harness tests exist
+        run: test -f android/verification/src/test/kotlin/com/dial/van/cognitive/CognitiveTwinTest.kt
+      - name: Actual Android pure-source JVM harness
+        working-directory: android/verification
+        run: gradle test --no-daemon --console=plain
+      - name: Android package, unit-test and lint gate
+        working-directory: android
+        run: bash gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug --no-daemon --console=plain
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cognitive-android-results
+          path: |
+            android/verification/build/test-results/
+            android/verification/build/reports/tests/
+            android/app/build/reports/
+            android/app/build/test-results/
+          if-no-files-found: error
