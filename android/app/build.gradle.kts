@@ -120,7 +120,7 @@ android {
     // building. They are embedded in the signed APK, then installed privately
     // on first launch; the phone never chooses URLs, hashes or model files.
     sourceSets.getByName("main").assets.srcDir(layout.buildDirectory.dir("generated/voice-assets"))
-    sourceSets.getByName("main").assets.srcDir(vanBuildProvenanceDirectory)
+    sourceSets.getByName("main").assets.srcDir(generateVanBuildProvenance.map { vanBuildProvenanceDirectory.get() })
 
     defaultConfig {
         applicationId = "com.dial.van"
@@ -431,6 +431,12 @@ val voiceAssetsGuard = tasks.register<Exec>("assertVoiceAssetsAreSealed") {
 
 tasks.matching { it.name.startsWith("merge") && it.name.endsWith("Assets") }
     .configureEach { dependsOn(voiceAssetsGuard, generateVanBuildProvenance) }
+
+// AGP's lint consumers flatten source-set directories and lose their provider's
+// producer dependency. Preserve ordering for every variant's models and analysis.
+tasks.matching { it.name.startsWith("lint") ||
+    (it.name.startsWith("generate") && it.name.contains("Lint") && it.name.endsWith("Model")) }
+    .configureEach { dependsOn(generateVanBuildProvenance) }
 
 val voiceRuntimeGuard = tasks.register("assertVoiceRuntimeIsShippable") {
     val policySource = layout.projectDirectory

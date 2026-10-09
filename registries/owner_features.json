@@ -34458,7 +34458,7 @@
             "file": "android/app/build.gradle.kts",
             "line": 49,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "940746ba14195b4ce3afa645570771b59e0cd680dfeacb89301f4c18bdda3899"
+            "sha256": "af2f96c4c0008c623ba4840446234aa76ef1c3647a87425d7f591860b2643c58"
           },
           {
             "file": "android/buildSrc/src/main/java/com/dial/van/buildconfig/VanProductionTarget.java",
@@ -34478,7 +34478,28 @@
         "topology": "CORE_ONLY_V2",
         "ingress_host": "van-trading-core",
         "artemis_host": "dial-control",
-        "oracle_admin_runtime_dependency": false
+        "oracle_admin_runtime_dependency": false,
+        "historical_source_citations_pre_oct9_r6": [
+          {
+            "file": "android/app/build.gradle.kts",
+            "line": 49,
+            "ref": "WORKSPACE_PATCH",
+            "sha256": "940746ba14195b4ce3afa645570771b59e0cd680dfeacb89301f4c18bdda3899"
+          },
+          {
+            "file": "android/buildSrc/src/main/java/com/dial/van/buildconfig/VanProductionTarget.java",
+            "line": 17,
+            "ref": "WORKSPACE_PATCH",
+            "sha256": "b8ef5483dac9de5647bb01abb98029d5707b2d2662a7ff7341a7fbe0e5c9d6c5"
+          },
+          {
+            "file": "tools/runtime/prepare_owner_core_deployment.py",
+            "line": 71,
+            "ref": "WORKSPACE_PATCH",
+            "sha256": "a70e2d779811cb67b53639cd076419829a653f4bb77a5ce1f5acec6e9e3912b4",
+            "review_scope": "CORE_ONLY_V2 validates schema2 and colocated backend/Hermes/direct ingress on core."
+          }
+        ]
       },
       "historical_source_state": {
         "scope": "Historical pre-final-wiring claims; not current qualification",
@@ -35322,7 +35343,7 @@
             "file": "android/app/build.gradle.kts",
             "line": 49,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "940746ba14195b4ce3afa645570771b59e0cd680dfeacb89301f4c18bdda3899"
+            "sha256": "af2f96c4c0008c623ba4840446234aa76ef1c3647a87425d7f591860b2643c58"
           },
           {
             "file": "android/buildSrc/src/main/java/com/dial/van/buildconfig/VanProductionTarget.java",
@@ -35342,7 +35363,28 @@
         "topology": "CORE_ONLY_V2",
         "ingress_host": "van-trading-core",
         "artemis_host": "dial-control",
-        "oracle_admin_runtime_dependency": false
+        "oracle_admin_runtime_dependency": false,
+        "historical_source_citations_pre_oct9_r6": [
+          {
+            "file": "android/app/build.gradle.kts",
+            "line": 49,
+            "ref": "WORKSPACE_PATCH",
+            "sha256": "940746ba14195b4ce3afa645570771b59e0cd680dfeacb89301f4c18bdda3899"
+          },
+          {
+            "file": "android/buildSrc/src/main/java/com/dial/van/buildconfig/VanProductionTarget.java",
+            "line": 17,
+            "ref": "WORKSPACE_PATCH",
+            "sha256": "b8ef5483dac9de5647bb01abb98029d5707b2d2662a7ff7341a7fbe0e5c9d6c5"
+          },
+          {
+            "file": "tools/runtime/prepare_owner_core_deployment.py",
+            "line": 71,
+            "ref": "WORKSPACE_PATCH",
+            "sha256": "a70e2d779811cb67b53639cd076419829a653f4bb77a5ce1f5acec6e9e3912b4",
+            "review_scope": "CORE_ONLY_V2 validates schema2 and colocated backend/Hermes/direct ingress on core."
+          }
+        ]
       },
       "historical_source_state": {
         "scope": "Historical pre-final-wiring claims; not current qualification",
@@ -46242,11 +46284,11 @@
     "physical_cases_executed": 0,
     "owner_release": false,
     "deployment_accepted": false,
-    "source_review_manifest": "docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r5.json",
+    "source_review_manifest": "docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r6.json",
     "android_receipt": null,
     "android_receipt_sha256": null,
     "scope": "Current scoped CORE_ONLY_V2 registry and runtime source review. No current Android/backend full-suite, production/provider or handset qualification is inferred from historical receipts.",
-    "source_review_manifest_sha256": "060e4c1653ba1c3f4f4ff761ec9f2faa04d07fb1c736acd6f0391faf5631d5af"
+    "source_review_manifest_sha256": "9f92777dee9a5b08d239f86fb1a23e38900bfcaea6c7fd76b13befb4fd371539"
   },
   "functional_wiring_status_semantics": {
     "SOURCE_WIRED_REQUIRES_ACCEPTANCE": "Supported source producer/consumer path is reviewed; stated provider, deployment, visual or physical acceptance remains required.",
@@ -46324,6 +46366,17 @@
       "android_receipt_sha256": null,
       "scope": "Current scoped CORE_ONLY_V2 registry and runtime source review. No current Android/backend full-suite, production/provider or handset qualification is inferred from historical receipts.",
       "source_review_manifest_sha256": "d2a21730c96323879d382fa020c607312324475810824169c88765d4c7a92364"
+    },
+    "pre_oct9_r6_actual_agp_asset_dependency": {
+      "status": "SOURCE_REVIEWED_FINAL_VALIDATION_PENDING",
+      "physical_cases_executed": 0,
+      "owner_release": false,
+      "deployment_accepted": false,
+      "source_review_manifest": "docs/audit/VAN_OWNER_REGISTRY_SOURCE_REVIEW_2026-10-09-r5.json",
+      "android_receipt": null,
+      "android_receipt_sha256": null,
+      "scope": "Current scoped CORE_ONLY_V2 registry and runtime source review. No current Android/backend full-suite, production/provider or handset qualification is inferred from historical receipts.",
+      "source_review_manifest_sha256": "060e4c1653ba1c3f4f4ff761ec9f2faa04d07fb1c736acd6f0391faf5631d5af"
     }
   },
   "historical_current_audit_note_pre_oct9": "Current production-source wiring review is bound to the frozen manifest and current local Android receipt. Original baseline and pre-final-wiring registries remain historical evidence. Supported implemented functions are distinct from missing source contracts, deferred visual/Rive redesign, deployment/provider qualification and physical acceptance. Physical Android cases executed: 0. The locally built debug APK is not an owner release. Current full local validation:6,574 runner passes / 10 skipped / 0 failures; see the source-bound closure validation receipt.",
