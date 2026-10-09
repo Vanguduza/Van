@@ -32,9 +32,20 @@ def test_bootstrap_applies_and_qualification_verifies_oci_firewall():
 
 def test_rebuild_protects_vekl_worker_and_control_nodes():
     text = REBUILD.read_text()
-    assert "(\'oracle-admin\',\'dial-hermes-control\',\'vekl-worker\')" in text
+    # The Hermes A1 named dial-hermes-control was terminated 2026-09-25 (DEC-060); Hermes now runs on
+    # Netcup dial-control, outside this compartment, so the OCI control nodes are these two.
+    assert "PROTECTED_CONTROL_NODES=('oracle-admin','vekl-worker')" in text
+    assert "by['dial-hermes-control']" not in text
     assert "VEKL_OCID" in text
     assert "protected instance selected for termination" in text
+
+
+def test_rebuild_selects_image_before_any_mutation():
+    text = REBUILD.read_text()
+    main = text[text.index("def main():"):]
+    assert main.index("image=select_image(doomed)") < main.index("harden_subnet(sub)")
+    assert main.index("image=select_image(doomed)") < main.index("terminate_trading(active)")
+    assert "VAN_TRADING_IMAGE_OCID" in text
 
 
 

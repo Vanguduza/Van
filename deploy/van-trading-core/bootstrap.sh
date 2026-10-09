@@ -8,7 +8,7 @@
 #   repo checkout, venv with requirements-vm.txt [+ nautilus_trader at --with-nautilus]
 #   local Supabase (PostgreSQL authority store) + post-bootstrap VATI ledger reconciliation
 #   systemd: vati-supabase, vati-vekl, vati-commander, vati-session@<alias> (enabled per account)
-#   ufw: deny incoming; 22 and 9133 only from oracle-admin + dial-hermes-control /32s
+#   ufw: deny incoming; 22 and 9133 only from oracle-admin and the dial-control overlay (the old dial-hermes-control A1 was terminated 2026-09-25)
 #
 # MetaTrader 5 CANNOT run on this host: MT5 is a Windows x86-64 program and this VM is ARM64
 # Linux. The MT5 bridge worker runs on a Windows host (windows/mt5_worker) and this VM holds only
@@ -332,7 +332,7 @@ echo "[bootstrap] next: 1) copy $SECRETS/pki/mt5-worker.{crt,key} + ca.crt to th
 echo "[bootstrap]       2) sudo -u vati $VENV/bin/python -m vati accounts add --registry $CONFIG/accounts.json --alias <alias> --broker MT5|DERIV|PAPER ..."
 echo "[bootstrap]       3) write $CONFIG/sessions/<alias>.json and: systemctl enable --now vati-session@<alias>"
 echo "[bootstrap]       4) as ubuntu on van-trading-core, if reported PAIRING_REQUIRED: ~/.local/share/van/spmrf/codex/node_modules/.bin/codex login"
-echo "[bootstrap]       5) on dial-hermes-control: bash deploy/van-trading-core/hermes/install-full-commander-transport.sh"
-echo "[bootstrap]       6) on dial-hermes-control: bash deploy/van-trading-core/hermes/register-commander-mcp.sh && bash deploy/van-trading-core/hermes/register-full-desktop-commander-mcp.sh"
-echo "[bootstrap]       7) on dial-hermes-control: bash deploy/van-trading-core/hermes/qualify-full-desktop-commander-mcp.sh"
+echo "[bootstrap]       5) on dial-control (Hermes): bash deploy/van-trading-core/hermes/install-full-commander-transport.sh"
+echo "[bootstrap]       6) on dial-control (Hermes): bash deploy/van-trading-core/hermes/register-commander-mcp.sh && bash deploy/van-trading-core/hermes/register-full-desktop-commander-mcp.sh"
+echo "[bootstrap]       7) on dial-control (Hermes): bash deploy/van-trading-core/hermes/qualify-full-desktop-commander-mcp.sh"
 echo "[bootstrap]       8) bash deploy/van-trading-core/qualify.sh"

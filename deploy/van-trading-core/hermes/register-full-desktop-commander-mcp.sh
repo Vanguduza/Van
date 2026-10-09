@@ -13,7 +13,8 @@ WRAPPER="$VAN_REPO/deploy/van-trading-core/hermes/van-trading-full-commander-std
 DRY_RUN=0; [[ "${1:-}" == "--dry-run" ]] && DRY_RUN=1
 
 fail(){ echo "ERROR: $*" >&2; exit 1; }
-[[ "$(hostname)" == "${DIAL_HERMES_HOST_ID:-dial-hermes-control}" ]] || fail "must run on dial-hermes-control"
+# Hermes runs on the Netcup host dial-control; dial-hermes-control is its fabric alias.
+case "$(hostname)" in "${DIAL_HERMES_HOST_ID:-dial-control}"|dial-control|dial-hermes-control) ;; *) false ;; esac || fail "must run on the Hermes host dial-control (alias dial-hermes-control)"
 command -v node >/dev/null 2>&1 || fail "node is required"
 python3 -c 'import yaml' 2>/dev/null || fail "python3 PyYAML is required"
 [[ -f "$HERMES_CONFIG" ]] || fail "Hermes config not found"

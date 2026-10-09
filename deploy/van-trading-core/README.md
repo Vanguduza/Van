@@ -42,7 +42,7 @@ sudo env VAN_EXPECTED_REPOSITORY_SHA="$EXPECTED_SHA" bash deploy/van-trading-cor
 # JSON report exits 0 only when every required check is GREEN and the deployed clean checkout is exactly EXPECTED_SHA.
 ```
 
-Then on `dial-hermes-control`:
+Then on the Hermes host `dial-control` (fabric alias `dial-hermes-control`; the old Oracle A1 of that name was terminated 2026-09-25):
 
 ```bash
 scp van-trading-core:/opt/van-trading/secrets/commander.token.hermes ~/.van/commander.hermes.token && chmod 600 ~/.van/commander.hermes.token

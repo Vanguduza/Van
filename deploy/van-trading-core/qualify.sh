@@ -109,10 +109,10 @@ if [[ -x "$REVIEW_HOME/.local/bin/dial-shared-memory-chatgpt-stdio" && -x "$REVI
 else
   add spmrf_memory_clients RED "isolated shared-memory stdio clients missing"
 fi
-if sudo -u "$REVIEW_USER" ssh-keygen -F "${DIAL_HERMES_CONTROL_HOST:-dial-hermes-control}" -f "$REVIEW_HOME/.ssh/known_hosts" >/dev/null 2>&1; then
+if sudo -u "$REVIEW_USER" ssh-keygen -F "${DIAL_HERMES_CONTROL_HOST:-10.77.0.1}" -f "$REVIEW_HOME/.ssh/known_hosts" >/dev/null 2>&1; then
   add spmrf_hermes_host_key GREEN "trusted Hermes host key present for isolated reviewer"
 else
-  add spmrf_hermes_host_key RED "trusted dial-hermes-control host key missing for isolated reviewer"
+  add spmrf_hermes_host_key RED "trusted dial-control (10.77.0.1) host key missing for isolated reviewer"
 fi
 declare -A commander_token_hashes=()
 for f in "$BASE/secrets/commander.token" "$BASE/secrets/commander.token.hermes" "$BASE/secrets/commander.token.van-gateway"; do

@@ -4,7 +4,9 @@ set -euo pipefail
 EXPECTED_HOST="${VAN_TRADING_HOST_ID:-van-trading-core}"
 REVIEW_USER="${VAN_SPMRF_REVIEW_USER:-vanreviewer}"
 HOME_DIR="${VAN_SPMRF_REVIEW_HOME:-/var/lib/van-reviewer}"
-HERMES_HOST="${DIAL_HERMES_CONTROL_HOST:-dial-hermes-control}"
+# Hermes runs on Netcup dial-control, reached over the estate overlay at 10.77.0.1. The old
+# dial-hermes-control Oracle A1 (and its VCN DNS name) was terminated 2026-09-25.
+HERMES_HOST="${DIAL_HERMES_CONTROL_HOST:-10.77.0.1}"
 HERMES_USER="${DIAL_HERMES_CONTROL_USER:-ubuntu}"
 SSH_DIR="$HOME_DIR/.ssh"
 BIN_DIR="$HOME_DIR/.local/bin"
@@ -60,7 +62,7 @@ if sudo -u "$REVIEW_USER" ssh-keygen -F "$HERMES_HOST" -f "$SSH_DIR/known_hosts"
   echo "SPMRF_HERMES_HOST_KEY=READY"
 else
   echo "SPMRF_HERMES_HOST_KEY=PENDING"
-  echo "Seed $HERMES_HOST into $SSH_DIR/known_hosts from trusted Oracle host-key evidence before first use."
+  echo "Seed $HERMES_HOST into $SSH_DIR/known_hosts from trusted dial-control host-key evidence before first use."
 fi
 
 echo "SPMRF_TRADING_MEMORY_CLIENT=INSTALLED"
