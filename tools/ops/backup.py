@@ -39,6 +39,11 @@ def _default_config_paths(repo_root: Path) -> list[Path]:
     return [repo_root / "backend" / ".env", repo_root / "registries" / "projects.json"]
 
 
+def _document_dir(database: str) -> Path:
+    # DocumentService's canonical default: sibling of the gateway database.
+    return Path(database).resolve().parent / "documents"
+
+
 def main(argv: list[str] | None = None) -> int:
     repo_root = Path(__file__).resolve().parents[2]
     parser = argparse.ArgumentParser(description=__doc__,
@@ -70,6 +75,7 @@ def main(argv: list[str] | None = None) -> int:
             configuration_paths=_default_config_paths(repo_root),
             evidence_dir=repo_root / "evidence",
             project_state_dir=repo_root / "docs" / "project-state",
+            document_dir=_document_dir(args.database),
         )
         print(json.dumps({"destination": str(destination),
                           "entries": len(manifest.entries),
@@ -83,7 +89,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "restore":
         print(json.dumps(ops_backup.restore(
-            args.backup_dir, database_path=args.database, overwrite=args.overwrite
+            args.backup_dir, database_path=args.database, overwrite=args.overwrite,
+            document_dir=_document_dir(args.database),
         ), indent=2))
         return 0
 
@@ -93,6 +100,7 @@ def main(argv: list[str] | None = None) -> int:
         configuration_paths=_default_config_paths(repo_root),
         evidence_dir=repo_root / "evidence",
         project_state_dir=repo_root / "docs" / "project-state",
+        document_dir=_document_dir(args.database),
     )
     print(json.dumps(report, indent=2))
     return 0 if report["ok"] else 1

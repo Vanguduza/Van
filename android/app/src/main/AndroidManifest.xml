@@ -211,6 +211,19 @@
           BroadcastReceiver carrying these same filters, which meant VAN never appeared in
           the share sheet at all and nothing anywhere reported the absence.
         -->
+        <!-- OMV-001 — outbound document sharing grants one read-only content URI.
+             The provider is private; another app receives only the URI selected by the
+             owner through ACTION_SEND. It exposes only the dedicated export cache path. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/van_file_paths" />
+        </provider>
+
         <activity
             android:name=".share.ShareIntakeActivity"
             android:exported="true"

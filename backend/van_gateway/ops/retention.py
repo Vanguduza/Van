@@ -132,6 +132,16 @@ POLICIES: tuple[TablePolicy, ...] = (
     _p("runtime_meta", _OWNER),
     _p("project_truth_cache", _OWNER, note="Small, keyed by project; a stale row is replaced, not accumulated."),
     _p("action_definitions", _OWNER, note="The declared action catalogue, not a log."),
+    # ---- OpenMuse→VAN convergence owner state (migrations 31/32) ---------
+    _p("owner_artifacts", _OWNER, note="Owner-visible generated results; deletion is an owner lifecycle decision."),
+    _p("documents", _OWNER, note="Source/output document provenance owned by the owner; files are not aged out silently."),
+    _p("owner_goals", _OWNER),
+    _p("watches", _OWNER, note="The owner decides when a standing watch stops."),
+    _p("suggestions", _OWNER, note="Acceptance/dismissal is an owner decision and remains auditable."),
+    _p("conversation_threads", _OWNER),
+    _p("conversation_messages", _OWNER, note="Conversation history is owner state, not execution truth."),
+    _p("conversation_drafts", _OWNER, note="Unsent owner-authored text must not expire by system policy."),
+    _p("conversation_followups", _OWNER, note="Queued owner-facing continuation state is retained until owner lifecycle action."),
     _p("capability_registry", _OWNER, note="Declarations. Withdrawal is recorded, not deleted."),
     _p("sqlite_sequence", _OWNER, note="SQLite's own AUTOINCREMENT bookkeeping."),
 
@@ -146,6 +156,7 @@ POLICIES: tuple[TablePolicy, ...] = (
     _p("learning_outcomes", _EV, "recorded_at_ms"),
     _p("external_reality", _EV, "observed_at_ms"),
     _p("computer_operations", _EV, "started_at_ms"),
+    _p("computer_worker_receipts", _EV, "created_at_ms", note="Digest-bound proof of what the subordinate worker returned."),
     _p("google_artifacts", _EV, "created_at_unix", TimeUnit.SECONDS),
     _p("automation_artifacts", _EV, "created_at_ms"),
     _p("automation_repairs", _EV, "created_at_ms"),
@@ -160,6 +171,7 @@ POLICIES: tuple[TablePolicy, ...] = (
     _p("automation_workflow_health", _TEL, "updated_at_ms"),
     _p("automation_runs", _TEL, "updated_at_ms"),
     _p("browser_tasks", _TEL, "updated_at_ms"),
+    _p("watch_runs", _TEL, "created_at_ms", note="Individual watch observations are operational history; triggered owner state lives in Attention."),
 
     # ---- Remote Browser Rev 1.5 (migration 27) ------------------------------
     #
@@ -224,6 +236,7 @@ POLICIES: tuple[TablePolicy, ...] = (
        "Seven days is far longer than any command's replay window, so pruning "
        "can never make a replayed command look fresh."),
     _p("automation_run_nonces", _EPH, "issued_at_ms"),
+    _p("computer_worker_leases", _EPH, "updated_at_ms", note="Short-lived generation fences; receipts preserve durable evidence."),
     _p("pairing_tickets", _EPH, "created_at_unix", TimeUnit.SECONDS),
     _p("idempotency", _EPH, "updated_at_unix", TimeUnit.SECONDS,
        "Retained well past any client's retry horizon; an idempotency record that "
@@ -253,6 +266,8 @@ POLICIES: tuple[TablePolicy, ...] = (
     _p("mission_events", _CHILD, parent=("mission_id", "missions")),
     _p("mission_activities", _CHILD, parent=("mission_id", "missions")),
     _p("action_receipts", _CHILD, parent=("execution_id", "action_executions")),
+    _p("goal_milestones", _CHILD, parent=("goal_id", "owner_goals")),
+    _p("goal_mission_links", _CHILD, parent=("goal_id", "owner_goals")),
 )
 
 BY_TABLE: dict[str, TablePolicy] = {policy.table: policy for policy in POLICIES}
@@ -410,6 +425,7 @@ _PRIMARY_KEY = {
     "action_executions": "execution_id",
     "browser_interactive_sessions": "session_id",
     "van_sessions": "van_session_id",
+    "owner_goals": "goal_id",
 }
 
 

@@ -62,6 +62,9 @@ import com.dial.van.command.nav.VanRoute
 import com.dial.van.command.settings.SettingsNotificationsRoute
 import com.dial.van.command.settings.SettingsRoute
 import com.dial.van.command.settings.SettingsVoiceRoute
+import com.dial.van.command.work.ConvergenceRoute
+import com.dial.van.command.work.ConversationThreadRoute
+import com.dial.van.command.work.DocumentRoute
 import com.dial.van.command.work.WorkActivityRoute
 import com.dial.van.command.work.WorkRoute
 import com.dial.van.design.LocalVanTokens
@@ -210,6 +213,7 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             onOpenBrowser = { nav.navigate(VanRoute.WORK_BROWSER) },
                             onOpenArtemis = { nav.navigate(VanRoute.WORK_ARTEMIS) },
                             onOpenActivity = { nav.navigate(VanRoute.WORK_ACTIVITY) },
+                            onOpenConvergence = { nav.navigate(VanRoute.WORK_ASSETS) },
                             onOpenDevelopment = { nav.navigate(VanRoute.devHomeRoute()) },
                         )
                     }
@@ -218,6 +222,36 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                     }
                     composable(VanRoute.WORK_ARTEMIS) {
                         ArtemisConsoleRoute(app, onBack = { nav.popBackStack() })
+                    }
+                    composable(VanRoute.WORK_ASSETS) {
+                        ConvergenceRoute(
+                            app = app,
+                            onBack = { nav.popBackStack() },
+                            onOpenDocument = { documentId -> nav.navigate(VanRoute.documentRoute(documentId)) },
+                            onOpenThread = { threadId -> nav.navigate(VanRoute.threadRoute(threadId)) },
+                        )
+                    }
+                    composable(
+                        VanRoute.WORK_DOCUMENT_TEMPLATE,
+                        arguments = listOf(navArgument("documentId") { type = NavType.StringType }),
+                    ) { entry ->
+                        val documentId = entry.arguments?.getString("documentId") ?: ""
+                        DocumentRoute(
+                            app = app,
+                            documentId = documentId,
+                            onBack = { nav.popBackStack() },
+                        )
+                    }
+                    composable(
+                        VanRoute.WORK_THREAD_TEMPLATE,
+                        arguments = listOf(navArgument("threadId") { type = NavType.StringType }),
+                    ) { entry ->
+                        val threadId = entry.arguments?.getString("threadId") ?: ""
+                        ConversationThreadRoute(
+                            app = app,
+                            threadId = threadId,
+                            onBack = { nav.popBackStack() },
+                        )
                     }
                     composable(VanRoute.WORK_BROWSER) {
                         val glass = legacyGlass(app)
@@ -255,6 +289,7 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             onOpenBrowser = { nav.navigate(VanRoute.WORK_BROWSER) },
                             onOpenArtemis = { nav.navigate(VanRoute.WORK_ARTEMIS) },
                             onOpenActivity = { nav.navigate(VanRoute.WORK_ACTIVITY) },
+                            onOpenConvergence = { nav.navigate(VanRoute.WORK_ASSETS) },
                             onOpenDevelopment = { nav.navigate(VanRoute.devHomeRoute()) },
                         )
                     }

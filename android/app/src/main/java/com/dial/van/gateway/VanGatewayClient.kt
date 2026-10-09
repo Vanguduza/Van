@@ -372,6 +372,145 @@ class VanGatewayClient(context: Context) {
 
     suspend fun briefing(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/briefing") }
 
+    /** OMV-005/001/003/004/006 — owner-facing OpenMuse convergence projections. */
+    suspend fun convergenceArtifacts(limit: Int = 50): String = withContext(Dispatchers.IO) {
+        rawGet("/v1/artifacts?limit=${limit.coerceIn(1, 100)}")
+    }
+
+    suspend fun convergenceDocuments(limit: Int = 50): String = withContext(Dispatchers.IO) {
+        rawGet("/v1/documents?limit=${limit.coerceIn(1, 100)}")
+    }
+
+    suspend fun convergenceDocument(documentId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/documents/${encodeSegment(documentId)}")
+    }
+
+    suspend fun convergenceDocumentContent(documentId: String, variant: String): ByteArray =
+        withContext(Dispatchers.IO) {
+            require(variant == "source" || variant == "output") { "document_variant_invalid" }
+            rawGetBytes("/v1/documents/${encodeSegment(documentId)}/content/$variant")
+        }
+
+    suspend fun convergenceFillDocument(documentId: String, values: JSONObject): JSONObject =
+        withContext(Dispatchers.IO) {
+            postProved(
+                "/v1/documents/${encodeSegment(documentId)}/fill",
+                JSONObject().put("values", values),
+            )
+        }
+
+    suspend fun convergenceGoals(limit: Int = 50): String = withContext(Dispatchers.IO) {
+        rawGet("/v1/goals?limit=${limit.coerceIn(1, 100)}")
+    }
+
+    suspend fun convergenceCreateGoal(title: String, description: String = ""): JSONObject =
+        withContext(Dispatchers.IO) {
+            postProved(
+                "/v1/goals",
+                JSONObject()
+                    .put("title", title)
+                    .put("description", description)
+                    .put("priority", 50)
+                    .put("evidence_refs", JSONArray())
+                    .put("milestones", JSONArray()),
+            )
+        }
+
+    suspend fun convergenceWatches(limit: Int = 50): String = withContext(Dispatchers.IO) {
+        rawGet("/v1/watches?limit=${limit.coerceIn(1, 100)}")
+    }
+
+    suspend fun convergenceCreatePageWatch(title: String, target: String): JSONObject =
+        withContext(Dispatchers.IO) {
+            postProved(
+                "/v1/watches",
+                JSONObject()
+                    .put("title", title)
+                    .put("source_kind", "BROWSER")
+                    .put("target", target)
+                    .put("condition", JSONObject().put("kind", "CHANGED"))
+                    .put("interval_seconds", 3600),
+            )
+        }
+
+    suspend fun convergenceSuggestions(limit: Int = 50): String = withContext(Dispatchers.IO) {
+        rawGet("/v1/suggestions?limit=${limit.coerceIn(1, 100)}")
+    }
+
+    suspend fun convergenceSuggestionDecision(
+        suggestionId: String,
+        action: String,
+        editedPrompt: String? = null,
+    ): JSONObject = withContext(Dispatchers.IO) {
+        require(action in setOf("accept", "edit", "dismiss")) { "suggestion_action_invalid" }
+        postProved(
+            "/v1/suggestions/${encodeSegment(suggestionId)}/decision",
+            JSONObject().put("action", action).apply {
+                if (!editedPrompt.isNullOrBlank()) put("edited_prompt", editedPrompt)
+            },
+        )
+    }
+
+    suspend fun convergenceThreads(limit: Int = 50): String = withContext(Dispatchers.IO) {
+        rawGet("/v1/conversations?limit=${limit.coerceIn(1, 100)}")
+    }
+
+    suspend fun convergenceThread(threadId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/conversations/${encodeSegment(threadId)}")
+    }
+
+    suspend fun convergenceCreateThread(title: String): JSONObject = withContext(Dispatchers.IO) {
+        postProved("/v1/conversations", JSONObject().put("title", title))
+    }
+
+    suspend fun convergenceRenameThread(threadId: String, title: String): JSONObject =
+        withContext(Dispatchers.IO) {
+            jsonProved(
+                "PATCH",
+                "/v1/conversations/${encodeSegment(threadId)}/title",
+                JSONObject().put("title", title),
+            )
+        }
+
+    suspend fun convergenceSetThreadStatus(threadId: String, status: String): JSONObject =
+        withContext(Dispatchers.IO) {
+            require(status == "ACTIVE" || status == "ARCHIVED") { "thread_status_invalid" }
+            jsonProved(
+                "PATCH",
+                "/v1/conversations/${encodeSegment(threadId)}/status",
+                JSONObject().put("status", status),
+            )
+        }
+
+    suspend fun convergenceSaveThreadDraft(threadId: String, text: String): JSONObject =
+        withContext(Dispatchers.IO) {
+            jsonProved(
+                "PUT",
+                "/v1/conversations/${encodeSegment(threadId)}/draft",
+                JSONObject().put("text", text),
+            )
+        }
+
+    suspend fun convergenceQueueThreadFollowUp(threadId: String, prompt: String): JSONObject =
+        withContext(Dispatchers.IO) {
+            postProved(
+                "/v1/conversations/${encodeSegment(threadId)}/followups",
+                JSONObject().put("prompt", prompt),
+            )
+        }
+
+    suspend fun convergenceDecideThreadFollowUp(
+        threadId: String,
+        followupId: String,
+        action: String,
+    ): JSONObject = withContext(Dispatchers.IO) {
+        require(action == "promote" || action == "dismiss") { "followup_action_invalid" }
+        postProved(
+            "/v1/conversations/${encodeSegment(threadId)}/followups/${encodeSegment(followupId)}/decision",
+            JSONObject().put("action", action),
+        )
+    }
+
     suspend fun tradingTrades(view: String, limit: Int = 12): String = withContext(Dispatchers.IO) {
         rawGet("/v1/trading/trades?view=${encodeQuery(view)}&limit=$limit")
     }
@@ -1500,6 +1639,28 @@ class VanGatewayClient(context: Context) {
         )
     }
 
+    private fun jsonProved(method: String, path: String, body: JSONObject): JSONObject = withRetry {
+        require(method == "PATCH" || method == "PUT") { "proved_method_invalid" }
+        val payload = body.toString()
+        val conn = open("$baseUrl$path").apply {
+            requestMethod = method
+            doOutput = true
+            setRequestProperty("Content-Type", "application/json")
+            applyIngressAuth(this)
+            proofHeaders(method, path, payload).forEach { (name, value) ->
+                setRequestProperty(name, value)
+            }
+            connectTimeout = 15_000
+            readTimeout = 30_000
+        }
+        conn.outputStream.use { it.write(payload.toByteArray(Charsets.UTF_8)) }
+        val code = conn.responseCode
+        val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+        val responseText = stream?.bufferedReader()?.readText() ?: "{}"
+        if (code !in 200..299) throw GatewayHttpException(code, responseText)
+        JSONObject(responseText)
+    }
+
     private fun deleteProved(path: String): JSONObject = withRetry {
         val conn = open("$baseUrl$path").apply {
             requestMethod = "DELETE"
@@ -1524,6 +1685,21 @@ class VanGatewayClient(context: Context) {
         val device = deviceAccessToken?.takeIf { it.isNotBlank() } ?: error("device_access_token_unconfigured")
         conn.setRequestProperty("X-Van-Ingress-Token", ingress)
         conn.setRequestProperty("X-Van-Device-Token", device)
+    }
+
+    private fun rawGetBytes(path: String): ByteArray = withRetry {
+        val conn = open("$baseUrl$path").apply {
+            requestMethod = "GET"
+            applyIngressAuth(this)
+            connectTimeout = 15_000
+            readTimeout = 30_000
+        }
+        val code = conn.responseCode
+        if (code !in 200..299) {
+            val error = conn.errorStream?.bufferedReader()?.readText() ?: "{}"
+            throw GatewayHttpException(code, error)
+        }
+        conn.inputStream.use { it.readBytes() }
     }
 
     private fun rawGet(path: String): String = withRetry {

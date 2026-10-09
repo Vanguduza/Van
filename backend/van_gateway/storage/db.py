@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 30
+SCHEMA_VERSION = 33
 
 
 MIGRATION_17 = """
@@ -609,6 +609,232 @@ CREATE TABLE IF NOT EXISTS visual_acceptances (
 );
 CREATE INDEX IF NOT EXISTS idx_visual_acceptances_latest
   ON visual_acceptances(verified_at DESC);
+"""
+
+MIGRATION_31 = """
+-- OpenMuse→VAN Convergence Rev 1. Owner Artifact Projection, Document Fabric,
+-- Goals/Watches, Suggestions and self-hosted conversation state. These are all
+-- subordinate to existing VAN command/mission/action authority.
+
+CREATE TABLE IF NOT EXISTS owner_artifacts (
+  artifact_id TEXT PRIMARY KEY,
+  owner_id TEXT NOT NULL DEFAULT 'owner',
+  project_id TEXT,
+  command_id TEXT,
+  mission_id TEXT,
+  execution_id TEXT,
+  kind TEXT NOT NULL,
+  title TEXT NOT NULL,
+  summary TEXT NOT NULL DEFAULT '',
+  mime_type TEXT,
+  byte_size INTEGER,
+  canonical_source_type TEXT NOT NULL,
+  canonical_source_id TEXT NOT NULL,
+  canonical_source_digest TEXT NOT NULL,
+  content_ref TEXT,
+  preview_ref TEXT,
+  evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+  sensitivity TEXT NOT NULL DEFAULT 'OWNER_PRIVATE',
+  created_at_ms INTEGER NOT NULL,
+  expires_at_ms INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_owner_artifacts_mission
+  ON owner_artifacts(mission_id, created_at_ms);
+CREATE INDEX IF NOT EXISTS idx_owner_artifacts_project
+  ON owner_artifacts(project_id, created_at_ms);
+CREATE INDEX IF NOT EXISTS idx_owner_artifacts_kind
+  ON owner_artifacts(kind, created_at_ms);
+
+CREATE TABLE IF NOT EXISTS documents (
+  document_id TEXT PRIMARY KEY,
+  filename TEXT NOT NULL,
+  mime_type TEXT NOT NULL,
+  project_id TEXT,
+  command_id TEXT,
+  mission_id TEXT,
+  execution_id TEXT,
+  source_artifact_id TEXT NOT NULL,
+  output_artifact_id TEXT,
+  source_path TEXT NOT NULL,
+  output_path TEXT,
+  source_sha256 TEXT NOT NULL,
+  output_sha256 TEXT,
+  page_count INTEGER NOT NULL,
+  form_kind TEXT NOT NULL,
+  fields_json TEXT NOT NULL DEFAULT '[]',
+  status TEXT NOT NULL,
+  error_code TEXT,
+  created_at_ms INTEGER NOT NULL,
+  updated_at_ms INTEGER NOT NULL,
+  FOREIGN KEY(source_artifact_id) REFERENCES owner_artifacts(artifact_id),
+  FOREIGN KEY(output_artifact_id) REFERENCES owner_artifacts(artifact_id)
+);
+CREATE INDEX IF NOT EXISTS idx_documents_mission ON documents(mission_id, created_at_ms);
+CREATE INDEX IF NOT EXISTS idx_documents_project ON documents(project_id, created_at_ms);
+
+CREATE TABLE IF NOT EXISTS owner_goals (
+  goal_id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'ACTIVE',
+  priority INTEGER NOT NULL DEFAULT 50,
+  project_id TEXT,
+  evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+  created_at_ms INTEGER NOT NULL,
+  updated_at_ms INTEGER NOT NULL,
+  completed_at_ms INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_owner_goals_state ON owner_goals(status, priority, updated_at_ms);
+
+CREATE TABLE IF NOT EXISTS goal_milestones (
+  milestone_id TEXT PRIMARY KEY,
+  goal_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  done INTEGER NOT NULL DEFAULT 0,
+  due_at_ms INTEGER,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at_ms INTEGER NOT NULL,
+  updated_at_ms INTEGER NOT NULL,
+  FOREIGN KEY(goal_id) REFERENCES owner_goals(goal_id)
+);
+CREATE INDEX IF NOT EXISTS idx_goal_milestones_goal ON goal_milestones(goal_id, sort_order);
+
+CREATE TABLE IF NOT EXISTS goal_mission_links (
+  goal_id TEXT NOT NULL,
+  mission_id TEXT NOT NULL,
+  linked_at_ms INTEGER NOT NULL,
+  PRIMARY KEY(goal_id, mission_id),
+  FOREIGN KEY(goal_id) REFERENCES owner_goals(goal_id)
+);
+
+CREATE TABLE IF NOT EXISTS watches (
+  watch_id TEXT PRIMARY KEY,
+  goal_id TEXT,
+  title TEXT NOT NULL,
+  source_kind TEXT NOT NULL,
+  target TEXT NOT NULL,
+  condition_json TEXT NOT NULL DEFAULT '{}',
+  interval_seconds INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'ACTIVE',
+  consecutive_failures INTEGER NOT NULL DEFAULT 0,
+  failure_streak INTEGER NOT NULL DEFAULT 0,
+  next_run_at_ms INTEGER NOT NULL,
+  last_success_at_ms INTEGER,
+  last_observation_json TEXT,
+  created_at_ms INTEGER NOT NULL,
+  updated_at_ms INTEGER NOT NULL,
+  FOREIGN KEY(goal_id) REFERENCES owner_goals(goal_id)
+);
+CREATE INDEX IF NOT EXISTS idx_watches_due ON watches(status, next_run_at_ms);
+
+CREATE TABLE IF NOT EXISTS watch_runs (
+  run_id TEXT PRIMARY KEY,
+  watch_id TEXT NOT NULL,
+  status TEXT NOT NULL,
+  observation_json TEXT,
+  changed INTEGER NOT NULL DEFAULT 0,
+  error_code TEXT,
+  created_at_ms INTEGER NOT NULL,
+  FOREIGN KEY(watch_id) REFERENCES watches(watch_id)
+);
+CREATE INDEX IF NOT EXISTS idx_watch_runs_watch ON watch_runs(watch_id, created_at_ms);
+
+CREATE TABLE IF NOT EXISTS suggestions (
+  suggestion_id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  rationale TEXT NOT NULL,
+  proposed_prompt TEXT NOT NULL,
+  edited_prompt TEXT,
+  source_refs_json TEXT NOT NULL DEFAULT '[]',
+  status TEXT NOT NULL DEFAULT 'NEW',
+  attention_id TEXT,
+  project_id TEXT,
+  created_at_ms INTEGER NOT NULL,
+  updated_at_ms INTEGER NOT NULL,
+  decided_at_ms INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_suggestions_state ON suggestions(status, created_at_ms);
+
+CREATE TABLE IF NOT EXISTS conversation_threads (
+  thread_id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  kind TEXT NOT NULL DEFAULT 'SIDE',
+  status TEXT NOT NULL DEFAULT 'ACTIVE',
+  project_id TEXT,
+  created_at_ms INTEGER NOT NULL,
+  updated_at_ms INTEGER NOT NULL,
+  archived_at_ms INTEGER
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_main_conversation
+  ON conversation_threads(kind) WHERE kind = 'MAIN';
+
+CREATE TABLE IF NOT EXISTS conversation_messages (
+  message_id TEXT PRIMARY KEY,
+  thread_id TEXT NOT NULL,
+  role TEXT NOT NULL,
+  body TEXT NOT NULL,
+  command_id TEXT,
+  mission_id TEXT,
+  artifact_refs_json TEXT NOT NULL DEFAULT '[]',
+  terminal INTEGER NOT NULL DEFAULT 0,
+  created_at_ms INTEGER NOT NULL,
+  FOREIGN KEY(thread_id) REFERENCES conversation_threads(thread_id)
+);
+CREATE INDEX IF NOT EXISTS idx_conversation_messages_thread
+  ON conversation_messages(thread_id, created_at_ms);
+
+CREATE TABLE IF NOT EXISTS conversation_drafts (
+  thread_id TEXT PRIMARY KEY,
+  draft_text TEXT NOT NULL DEFAULT '',
+  updated_at_ms INTEGER NOT NULL,
+  FOREIGN KEY(thread_id) REFERENCES conversation_threads(thread_id)
+);
+"""
+
+MIGRATION_32 = """
+-- OMV-002/009 — a computer worker is an executor, not authority. A durable lease generation
+-- fences stale executors after restart/preemption before they can publish completion.
+CREATE TABLE IF NOT EXISTS computer_worker_leases (
+  surface TEXT PRIMARY KEY,
+  lease_id TEXT NOT NULL,
+  generation INTEGER NOT NULL,
+  holder_id TEXT NOT NULL,
+  expires_at_ms INTEGER NOT NULL,
+  released_at_ms INTEGER,
+  updated_at_ms INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS computer_worker_receipts (
+  receipt_id TEXT PRIMARY KEY,
+  operation_id TEXT NOT NULL,
+  surface TEXT NOT NULL,
+  lease_id TEXT NOT NULL,
+  generation INTEGER NOT NULL,
+  output_sha256 TEXT NOT NULL,
+  exit_code INTEGER,
+  truncated INTEGER NOT NULL DEFAULT 0,
+  created_at_ms INTEGER NOT NULL,
+  FOREIGN KEY(operation_id) REFERENCES computer_operations(operation_id)
+);
+CREATE INDEX IF NOT EXISTS idx_computer_worker_receipts_operation
+  ON computer_worker_receipts(operation_id, created_at_ms);
+"""
+
+MIGRATION_33 = """
+-- OMV-006 — queued follow-ups belong to a conversation thread but are not execution
+-- authority. They become work only when promoted through the normal owner/Hermes command path.
+CREATE TABLE IF NOT EXISTS conversation_followups (
+  followup_id TEXT PRIMARY KEY,
+  thread_id TEXT NOT NULL,
+  prompt TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'QUEUED',
+  command_id TEXT,
+  created_at_ms INTEGER NOT NULL,
+  updated_at_ms INTEGER NOT NULL,
+  FOREIGN KEY(thread_id) REFERENCES conversation_threads(thread_id)
+);
+CREATE INDEX IF NOT EXISTS idx_conversation_followups_thread
+  ON conversation_followups(thread_id, status, created_at_ms);
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -1943,6 +2169,9 @@ MIGRATIONS: dict[int, str] = {
     28: MIGRATION_28,
     29: MIGRATION_29,
     30: MIGRATION_30,
+    31: MIGRATION_31,
+    32: MIGRATION_32,
+    33: MIGRATION_33,
 }
 
 

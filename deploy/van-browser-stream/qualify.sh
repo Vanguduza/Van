@@ -12,6 +12,7 @@
 set -uo pipefail
 
 CDP_PORT="${VAN_BROWSER_CDP_PORT:-9222}"
+EGRESS_PORT="${VAN_BROWSER_EGRESS_PORT:-8899}"
 AGENT_PORT="${VAN_BROWSER_CONTROL_PORT:-9443}"
 STREAM_PORT="${VAN_BROWSER_STREAM_PORT:-8443}"
 PKI_DIR="${VAN_BROWSER_PKI_DIR:-/opt/van-browser-stream/pki}"
@@ -50,6 +51,41 @@ if timeout 2 bash -c "</dev/tcp/127.0.0.1/$CDP_PORT" 2>/dev/null; then
   record "cdp_on_loopback" "GREEN" "debugger answers on 127.0.0.1:$CDP_PORT"
 else
   record "cdp_on_loopback" "RED" "nothing is listening on 127.0.0.1:$CDP_PORT, so the fencing check above proves nothing"
+fi
+
+# ---------------------------------------------------------------- 1b. OMV-008 exact-IP public-web egress
+if timeout 2 bash -c "</dev/tcp/127.0.0.1/$EGRESS_PORT" 2>/dev/null; then
+  record "egress_on_loopback" "GREEN" "exact-IP proxy answers on 127.0.0.1:$EGRESS_PORT"
+else
+  record "egress_on_loopback" "RED" "nothing is listening on 127.0.0.1:$EGRESS_PORT"
+fi
+
+if [ -z "$non_loopback" ]; then
+  record "egress_not_public" "UNKNOWN" "no global addresses found; cannot prove the egress proxy is loopback-only"
+else
+  egress_exposed=""
+  for addr in $non_loopback; do
+    if timeout 2 bash -c "</dev/tcp/$addr/$EGRESS_PORT" 2>/dev/null; then
+      egress_exposed="$egress_exposed $addr"
+    fi
+  done
+  if [ -n "$egress_exposed" ]; then
+    record "egress_not_public" "RED" "the egress proxy answered on:$egress_exposed"
+  else
+    record "egress_not_public" "GREEN" "egress proxy did not answer on global addresses"
+  fi
+fi
+
+if ! command -v curl >/dev/null 2>&1; then
+  record "egress_refuses_private" "UNKNOWN" "curl is not installed"
+else
+  status=$(curl --noproxy "" --max-time 5 -sS -o /dev/null -w '%{http_code}' \
+    -x "http://127.0.0.1:$EGRESS_PORT" "http://127.0.0.1:$CDP_PORT/" 2>/dev/null || true)
+  if [ "$status" = "403" ]; then
+    record "egress_refuses_private" "GREEN" "proxy rejected a request to loopback"
+  else
+    record "egress_refuses_private" "RED" "proxy private-address refusal returned HTTP ${status:-none}, expected 403"
+  fi
 fi
 
 # ---------------------------------------------------------------- 2. mTLS refusals
@@ -112,6 +148,26 @@ if [ -S /var/run/docker.sock ] && [ -n "$chromium_user" ] && id -nG "$chromium_u
   record "no_docker_socket_reach" "RED" "$chromium_user is in the docker group, which is root one API call away"
 else
   record "no_docker_socket_reach" "GREEN" "the browser user cannot reach the docker socket"
+fi
+
+chromium_pid=$(pgrep -o -u van-browser chromium 2>/dev/null || pgrep -o -u van-browser chrome 2>/dev/null || true)
+if [ -z "$chromium_pid" ] || [ ! -r "/proc/$chromium_pid/cmdline" ]; then
+  record "chromium_uses_exact_ip_proxy" "UNKNOWN" "cannot read a live van-browser Chromium command line"
+else
+  chromium_cmd=$(tr '\0' ' ' < "/proc/$chromium_pid/cmdline")
+  missing_flags=""
+  for flag in \
+    "--proxy-server=http://127.0.0.1:$EGRESS_PORT" \
+    "--proxy-bypass-list=<-loopback>" \
+    "--disable-quic" \
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp"; do
+    case "$chromium_cmd" in *"$flag"*) ;; *) missing_flags="$missing_flags $flag" ;; esac
+  done
+  if [ -n "$missing_flags" ]; then
+    record "chromium_uses_exact_ip_proxy" "RED" "Chromium is missing:$missing_flags"
+  else
+    record "chromium_uses_exact_ip_proxy" "GREEN" "HTTP(S), QUIC and non-proxied WebRTC flags are fenced"
+  fi
 fi
 
 printf '{"host":"%s","checked_at":"%s","checks":[%s]}\n' \
