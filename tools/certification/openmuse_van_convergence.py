@@ -87,7 +87,7 @@ MARKERS: dict[str, tuple[tuple[str, str], ...]] = {
         ("services/browser_control_agent/egress_proxy.py", "class ExactIpEgressProxy"),
         ("services/browser_control_agent/agent.py", "validate_public_url_syntax"),
         ("deploy/van-browser-stream/qualify.sh", 'record "egress_refuses_private"'),
-        ("services/browser_control_agent/tests/test_egress_proxy.py", "test_resolver_rejects_hostname_if_any_dns_answer_is_private"),
+        ("services/browser_control_agent/tests/test_egress_proxy.py", "test_resolver_rejects_hostname_if_any_dns_answer_is_non_public"),
     ),
     "OMV-009": (
         ("backend/tests/test_openmuse_regressions.py", "test_terminal_reviewed_action_never_reverts_to_pending_on_replay"),
