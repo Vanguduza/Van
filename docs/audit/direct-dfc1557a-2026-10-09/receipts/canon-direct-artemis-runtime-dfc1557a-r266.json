@@ -1,0 +1,62 @@
+{
+  "kind": "DIRECT_NATIVE_ARTEMIS_SOURCE_BINDING",
+  "observed_at": "2026-10-09T09:17:52.793231+00:00",
+  "source_head": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "prior_runtime": "/home/ubuntu/.local/share/van/artemis-subscription/runtime-4ad31883d57ab51",
+  "runtime_path": "/home/ubuntu/.local/share/van/artemis-subscription/runtime-dfc1557ab99ad8d",
+  "current_resolves_to_exact_runtime": true,
+  "manifest": [
+    {
+      "name": "README.md",
+      "bytes": 4468,
+      "sha256": "bb412ec2ef58130105a61cca5b1b99a1def670b0d3e274e284ca8f82e8b7957b"
+    },
+    {
+      "name": "__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "llm-config.override.jsonc",
+      "bytes": 4612,
+      "sha256": "5cd26d3e7968c8fdba26f68b3e7ceef671a095412f85800a5506124724de6aea"
+    },
+    {
+      "name": "mcp_launcher.py",
+      "bytes": 1631,
+      "sha256": "8ffcb6f0c1aeef90da8aa7875ef55ba59bb10d495232de92663f14a502026054"
+    },
+    {
+      "name": "profile.json",
+      "bytes": 4612,
+      "sha256": "5cd26d3e7968c8fdba26f68b3e7ceef671a095412f85800a5506124724de6aea"
+    },
+    {
+      "name": "provider.py",
+      "bytes": 18634,
+      "sha256": "37d27744c1f6bb1dd7f2ea443230d01d4af1ee2335ecdb2169ee3166a3f6e350"
+    },
+    {
+      "name": "sitecustomize.py",
+      "bytes": 522,
+      "sha256": "b3af1779059b431973a9891acd4a1fd92959505f1265ca9fa801db20aca873be"
+    }
+  ],
+  "adapter_bytes_changed": false,
+  "native_vendor_source_edited": false,
+  "native_process_launched": false,
+  "device_contacted": false,
+  "physical_cases_executed": 0,
+  "subscription_account_evidence": {
+    "type": "chatgpt",
+    "email": "tapiwaguduza@gmail.com",
+    "planType": "prolite"
+  },
+  "subscription_account_evidence_receipt": "canon-direct-artemis-runtime-r252.json",
+  "subscription_inference_repeated": false,
+  "model": "gpt-5.6-sol",
+  "roles_and_fallbacks": 20,
+  "acceptance_runner": "/home/ubuntu/work/van-direct-artemis-20261008-7b8py_fg/live-source-dfc1557a/tools/certification/artemis_acceptance.py",
+  "acceptance_runner_sha256": "3360686f0c1f6c1497a232050ca2f6268fde64c8a81df61787da9a6ccf1b4f5e",
+  "hermes_engineering_queue_used": false
+}

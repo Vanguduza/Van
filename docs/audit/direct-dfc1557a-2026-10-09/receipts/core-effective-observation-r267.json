@@ -1,0 +1,1184 @@
+{
+  "kind": "READ_ONLY_EFFECTIVE_CORE_OBSERVATION",
+  "observed_at": "2026-10-09T09:19:34.218613+00:00",
+  "host": "van-trading-core",
+  "architecture": "aarch64",
+  "expected_source": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "configuration_checks": {
+    "core_only_profile": false,
+    "core_only_endpoint_bindings": false,
+    "ingress_credential_present": true,
+    "separate_service_credentials_present": false,
+    "enrolment_credential_separated_from_runtime": false,
+    "legacy_all_scope_control_disabled": true,
+    "owner_release_signer_bound": false,
+    "google_attestation_roots_bound": false
+  },
+  "browser_credential_checks": {},
+  "memory_headroom": true,
+  "mtls_directory_configured": false,
+  "google_env_bytes": 0,
+  "device_contacted": false,
+  "physical_cases_executed": 0,
+  "production_qualified": false,
+  "deployment_metadata": {
+    "DEPLOYED_SHA": {
+      "exists": true,
+      "value": "85ba485b2e375fcc777308492753a1a08c7f4307"
+    },
+    "DEPLOYED_SOURCE.json": {
+      "exists": false
+    }
+  },
+  "not_probed": [
+    {
+      "name": "runtime",
+      "reason": "one_narrow_existing_credential_unavailable",
+      "candidate_count": 0
+    },
+    {
+      "name": "automation",
+      "reason": "one_narrow_existing_credential_unavailable",
+      "candidate_count": 0
+    },
+    {
+      "name": "browser",
+      "reason": "one_narrow_existing_credential_unavailable",
+      "candidate_count": 0
+    },
+    {
+      "name": "observability",
+      "reason": "one_narrow_existing_credential_unavailable",
+      "candidate_count": 0
+    }
+  ],
+  "health_observations": [
+    {
+      "name": "gateway",
+      "http_status": 200,
+      "body_sha256": "44ed1e2656280fe8160dfcb6c77e291f7c011e3102d4e00ffc0c3d1f200d4f09",
+      "status": null,
+      "ready": null,
+      "top_level_keys": [
+        "ok",
+        "service",
+        "hermes",
+        "owner_runtime",
+        "google",
+        "google_mesh",
+        "degraded",
+        "credentials",
+        "enrolment_grants"
+      ]
+    }
+  ],
+  "firewall_read_exit": 0,
+  "nft_structure": [
+    {
+      "table": {
+        "family": "ip",
+        "name": "filter",
+        "handle": 1
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-before-logging-input",
+        "handle": 1
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-before-logging-output",
+        "handle": 2
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-before-logging-forward",
+        "handle": 3
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-before-input",
+        "handle": 4
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-before-output",
+        "handle": 5
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-before-forward",
+        "handle": 6
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-after-input",
+        "handle": 7
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-after-output",
+        "handle": 8
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-after-forward",
+        "handle": 9
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-after-logging-input",
+        "handle": 10
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-after-logging-output",
+        "handle": 11
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-after-logging-forward",
+        "handle": 12
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-reject-input",
+        "handle": 13
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-reject-output",
+        "handle": 14
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-reject-forward",
+        "handle": 15
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-track-input",
+        "handle": 16
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-track-output",
+        "handle": 17
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-track-forward",
+        "handle": 18
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "INPUT",
+        "handle": 19,
+        "type": "filter",
+        "hook": "input",
+        "prio": 0,
+        "policy": "drop"
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "OUTPUT",
+        "handle": 26,
+        "type": "filter",
+        "hook": "output",
+        "prio": 0,
+        "policy": "accept"
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "FORWARD",
+        "handle": 33,
+        "type": "filter",
+        "hook": "forward",
+        "prio": 0,
+        "policy": "drop"
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-logging-deny",
+        "handle": 42
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-logging-allow",
+        "handle": 43
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-skip-to-policy-input",
+        "handle": 44
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-skip-to-policy-output",
+        "handle": 45
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-skip-to-policy-forward",
+        "handle": 46
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-not-local",
+        "handle": 94
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-user-input",
+        "handle": 126
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-user-output",
+        "handle": 127
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-user-forward",
+        "handle": 128
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-user-logging-input",
+        "handle": 129
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-user-logging-output",
+        "handle": 130
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-user-logging-forward",
+        "handle": 131
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-user-limit",
+        "handle": 132
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "ufw-user-limit-accept",
+        "handle": 133
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "DOCKER",
+        "handle": 159
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "DOCKER-FORWARD",
+        "handle": 160
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "DOCKER-BRIDGE",
+        "handle": 161
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "DOCKER-CT",
+        "handle": 162
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "DOCKER-INTERNAL",
+        "handle": 163
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "DOCKER-USER",
+        "handle": 190
+      }
+    },
+    {
+      "table": {
+        "family": "ip6",
+        "name": "filter",
+        "handle": 2
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-before-logging-input",
+        "handle": 1
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-before-logging-output",
+        "handle": 2
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-before-logging-forward",
+        "handle": 3
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-before-input",
+        "handle": 4
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-before-output",
+        "handle": 5
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-before-forward",
+        "handle": 6
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-after-input",
+        "handle": 7
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-after-output",
+        "handle": 8
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-after-forward",
+        "handle": 9
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-after-logging-input",
+        "handle": 10
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-after-logging-output",
+        "handle": 11
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-after-logging-forward",
+        "handle": 12
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-reject-input",
+        "handle": 13
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-reject-output",
+        "handle": 14
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-reject-forward",
+        "handle": 15
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-track-input",
+        "handle": 16
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-track-output",
+        "handle": 17
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-track-forward",
+        "handle": 18
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "INPUT",
+        "handle": 19,
+        "type": "filter",
+        "hook": "input",
+        "prio": 0,
+        "policy": "drop"
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "OUTPUT",
+        "handle": 26,
+        "type": "filter",
+        "hook": "output",
+        "prio": 0,
+        "policy": "accept"
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "FORWARD",
+        "handle": 33,
+        "type": "filter",
+        "hook": "forward",
+        "prio": 0,
+        "policy": "drop"
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-logging-deny",
+        "handle": 42
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-logging-allow",
+        "handle": 43
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-skip-to-policy-input",
+        "handle": 44
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-skip-to-policy-output",
+        "handle": 45
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-skip-to-policy-forward",
+        "handle": 46
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-user-input",
+        "handle": 121
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-user-output",
+        "handle": 122
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-user-forward",
+        "handle": 123
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-user-logging-input",
+        "handle": 124
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-user-logging-output",
+        "handle": 125
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-user-logging-forward",
+        "handle": 126
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-user-limit",
+        "handle": 127
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "ufw6-user-limit-accept",
+        "handle": 128
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "DOCKER",
+        "handle": 148
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "DOCKER-FORWARD",
+        "handle": 149
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "DOCKER-BRIDGE",
+        "handle": 150
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "DOCKER-CT",
+        "handle": 151
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "DOCKER-INTERNAL",
+        "handle": 152
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "filter",
+        "name": "DOCKER-USER",
+        "handle": 157
+      }
+    },
+    {
+      "table": {
+        "family": "inet",
+        "name": "meta_muse_access",
+        "handle": 5
+      }
+    },
+    {
+      "chain": {
+        "family": "inet",
+        "table": "meta_muse_access",
+        "name": "input",
+        "handle": 1,
+        "type": "filter",
+        "hook": "input",
+        "prio": -40,
+        "policy": "accept"
+      }
+    },
+    {
+      "table": {
+        "family": "ip",
+        "name": "nat",
+        "handle": 6
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "nat",
+        "name": "DOCKER",
+        "handle": 2
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "nat",
+        "name": "PREROUTING",
+        "handle": 3,
+        "type": "nat",
+        "hook": "prerouting",
+        "prio": -100,
+        "policy": "accept"
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "nat",
+        "name": "OUTPUT",
+        "handle": 5,
+        "type": "nat",
+        "hook": "output",
+        "prio": -100,
+        "policy": "accept"
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "nat",
+        "name": "POSTROUTING",
+        "handle": 7,
+        "type": "nat",
+        "hook": "postrouting",
+        "prio": 100,
+        "policy": "accept"
+      }
+    },
+    {
+      "table": {
+        "family": "ip6",
+        "name": "nat",
+        "handle": 7
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "nat",
+        "name": "DOCKER",
+        "handle": 2
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "nat",
+        "name": "PREROUTING",
+        "handle": 3,
+        "type": "nat",
+        "hook": "prerouting",
+        "prio": -100,
+        "policy": "accept"
+      }
+    },
+    {
+      "chain": {
+        "family": "ip6",
+        "table": "nat",
+        "name": "OUTPUT",
+        "handle": 5,
+        "type": "nat",
+        "hook": "output",
+        "prio": -100,
+        "policy": "accept"
+      }
+    },
+    {
+      "table": {
+        "family": "ip",
+        "name": "raw",
+        "handle": 8
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "raw",
+        "name": "PREROUTING",
+        "handle": 1,
+        "type": "filter",
+        "hook": "prerouting",
+        "prio": -300,
+        "policy": "accept"
+      }
+    }
+  ],
+  "nft_rule_count": 257,
+  "interface_addresses": [
+    {
+      "name": "lo",
+      "addresses": [
+        {
+          "local": "127.0.0.1",
+          "family": "inet",
+          "prefixlen": 8
+        },
+        {
+          "local": "::1",
+          "family": "inet6",
+          "prefixlen": 128
+        }
+      ]
+    },
+    {
+      "name": "enp0s6",
+      "addresses": [
+        {
+          "local": "10.0.1.233",
+          "family": "inet",
+          "prefixlen": 24
+        },
+        {
+          "local": "fe80::17ff:fe01:73a8",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "wg0",
+      "addresses": [
+        {
+          "local": "10.66.66.1",
+          "family": "inet",
+          "prefixlen": 24
+        }
+      ]
+    },
+    {
+      "name": "tailscale0",
+      "addresses": [
+        {
+          "local": "fe80::ae5e:d3bc:7569:a2df",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "br-311469bdba2c",
+      "addresses": [
+        {
+          "local": "172.18.0.1",
+          "family": "inet",
+          "prefixlen": 16
+        },
+        {
+          "local": "fe80::54d6:33ff:feb1:ca5",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "docker0",
+      "addresses": [
+        {
+          "local": "172.17.0.1",
+          "family": "inet",
+          "prefixlen": 16
+        },
+        {
+          "local": "fe80::d0f3:5bff:fe2c:df99",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "br-9713e9600069",
+      "addresses": [
+        {
+          "local": "172.20.0.1",
+          "family": "inet",
+          "prefixlen": 16
+        },
+        {
+          "local": "fe80::c4af:cbff:fe4b:a220",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "br-0b29d9111320",
+      "addresses": [
+        {
+          "local": "172.19.0.1",
+          "family": "inet",
+          "prefixlen": 16
+        },
+        {
+          "local": "fe80::c49b:9aff:fe29:4337",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "veth0d95dee",
+      "addresses": [
+        {
+          "local": "fe80::1874:9fff:fee4:b41a",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "veth131be8b",
+      "addresses": [
+        {
+          "local": "fe80::20c1:c4ff:fe3a:2200",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "veth2f422b1",
+      "addresses": [
+        {
+          "local": "fe80::f0ae:b2ff:fe11:125f",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "veth5c14391",
+      "addresses": [
+        {
+          "local": "fe80::ac05:95ff:fe35:991",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "veth3d18dd8",
+      "addresses": [
+        {
+          "local": "fe80::c870:ebff:fe6e:8406",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "veth7034f82",
+      "addresses": [
+        {
+          "local": "fe80::f42d:41ff:fe05:25a4",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "vethcb45f06",
+      "addresses": [
+        {
+          "local": "fe80::40c1:c8ff:fecc:6132",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "vetha3fa9b0",
+      "addresses": [
+        {
+          "local": "fe80::4ca5:9eff:fe8a:96e3",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "vethea7f5a2",
+      "addresses": [
+        {
+          "local": "fe80::24e3:58ff:fe98:4766",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "vethd72052d",
+      "addresses": [
+        {
+          "local": "fe80::7011:f9ff:fe82:4143",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "vethadc077e",
+      "addresses": [
+        {
+          "local": "fe80::3418:fbff:fe49:fee0",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "veth3c70cda",
+      "addresses": [
+        {
+          "local": "fe80::c4de:1cff:fe17:508a",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "veth5a3eed1",
+      "addresses": [
+        {
+          "local": "fe80::c49a:a1ff:feb8:ae80",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "vethfda9ff8",
+      "addresses": [
+        {
+          "local": "fe80::58fb:31ff:fe54:6c31",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "veth663f01d",
+      "addresses": [
+        {
+          "local": "fe80::6c9f:71ff:fe6d:8dda",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "vethd5e291d",
+      "addresses": [
+        {
+          "local": "fe80::5801:31ff:fe39:eba",
+          "family": "inet6",
+          "prefixlen": 64
+        }
+      ]
+    },
+    {
+      "name": "wg-dial",
+      "addresses": [
+        {
+          "local": "10.77.0.4",
+          "family": "inet",
+          "prefixlen": 32
+        }
+      ]
+    }
+  ],
+  "production_missing_path_selectors": [
+    "VAN_MTLS_DIR",
+    "VAN_CONNECTIVITY_SIGNING_KEY_FILE",
+    "VAN_COMMANDER_TOKEN_FILE",
+    "VAN_COMMANDER_CA_FILE",
+    "VAN_PUBLIC_BASE_URL",
+    "VAN_MTLS_INTERFACE",
+    "VAN_HERMES_BASE_URL"
+  ]
+}

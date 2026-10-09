@@ -1,0 +1,59 @@
+{
+  "record_kind": "CURRENT_CANON_DIRECT_ARTEMIS_RUNTIME_BINDING",
+  "source_head": "4ad31883d57ab518ba9af414aa849db6e240eb71",
+  "prior_runtime": "/home/ubuntu/.local/share/van/artemis-subscription/runtime-f3cab5cb75d73f0",
+  "runtime_path": "/home/ubuntu/.local/share/van/artemis-subscription/runtime-4ad31883d57ab51",
+  "adapter_bytes_changed": false,
+  "manifest": [
+    {
+      "name": "README.md",
+      "bytes": 4468,
+      "sha256": "bb412ec2ef58130105a61cca5b1b99a1def670b0d3e274e284ca8f82e8b7957b"
+    },
+    {
+      "name": "__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "llm-config.override.jsonc",
+      "bytes": 4612,
+      "sha256": "5cd26d3e7968c8fdba26f68b3e7ceef671a095412f85800a5506124724de6aea"
+    },
+    {
+      "name": "mcp_launcher.py",
+      "bytes": 1631,
+      "sha256": "8ffcb6f0c1aeef90da8aa7875ef55ba59bb10d495232de92663f14a502026054"
+    },
+    {
+      "name": "profile.json",
+      "bytes": 4612,
+      "sha256": "5cd26d3e7968c8fdba26f68b3e7ceef671a095412f85800a5506124724de6aea"
+    },
+    {
+      "name": "provider.py",
+      "bytes": 18634,
+      "sha256": "37d27744c1f6bb1dd7f2ea443230d01d4af1ee2335ecdb2169ee3166a3f6e350"
+    },
+    {
+      "name": "sitecustomize.py",
+      "bytes": 522,
+      "sha256": "b3af1779059b431973a9891acd4a1fd92959505f1265ca9fa801db20aca873be"
+    }
+  ],
+  "account": {
+    "type": "chatgpt",
+    "email": "tapiwaguduza@gmail.com",
+    "planType": "prolite"
+  },
+  "requested_model": "gpt-5.6-sol",
+  "native_adapter_contract_exit": 0,
+  "native_adapter_contract_tail": ".\u2139 Activated local ADB server endpoint 127.0.0.1:5037\n.................\n----------------------------------------------------------------------\nRan 18 tests in 5.792s\n\nOK\n",
+  "elapsed_seconds": 9.892,
+  "upstream_runtime_source_edited": false,
+  "auth_copied_or_exported": false,
+  "api_billing_enabled": false,
+  "hermes_engineering_queue_used": false,
+  "physical_cases_executed": 0,
+  "current_resolves_to_exact_runtime": true
+}

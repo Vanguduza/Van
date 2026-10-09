@@ -1,0 +1,74 @@
+{
+  "kind": "DIRECT_CONTINUATION_EVIDENCE_MANIFEST",
+  "application_source_sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "prior_evidence_sha": "c502cf7ab5c29b262719c4ed7eebf55ac3fe4647",
+  "files": {
+    "README.md": {
+      "bytes": 14508,
+      "sha256": "8d9aa5b0ef4b61b5b2733cd7605006c226cc64d055f3a81d256325dac4a86417"
+    },
+    "receipts/canon-direct-artemis-runtime-dfc1557a-r266.json": {
+      "bytes": 2235,
+      "sha256": "043eac8e7545c9eebc28bacc590039abb1b36f47ad10c33437a5a75dba8a4141"
+    },
+    "receipts/canon-privileged-firewall-dfc1557a-r261.json": {
+      "bytes": 499,
+      "sha256": "6d2803867898642c9e0ae754175f64b0f7768cdf18f14a7e2bbfb226d8c49ad0"
+    },
+    "receipts/canon-task-inode-recovery-r274.json": {
+      "bytes": 1746,
+      "sha256": "c60604177bc356d84fc33c3c7104b820f1f164a178e40967e3bc336b8ee65d61"
+    },
+    "receipts/cloud-review-change-required.json": {
+      "bytes": 1093,
+      "sha256": "8c1a67eaa647f6f5c52e97813a4a2960e06e491cd3ff1b60b1d713c5f765d632"
+    },
+    "receipts/core-effective-observation-r267.json": {
+      "bytes": 22967,
+      "sha256": "191a6cb2f3690b845256fd20ab522806feee9bb9f7bd08cd452c5ecd6b5bc70e"
+    },
+    "receipts/core-protected-inventory-r262.json": {
+      "bytes": 1797,
+      "sha256": "86b12cab6e05d514c1633f5ad64db025f18edd7cd857db6b58ad9d86c4779d2a"
+    },
+    "receipts/core-source-staging-r270.json": {
+      "bytes": 586,
+      "sha256": "4514b7044a5040d16440f7ca148a72872254bd8e5db585d1d3fcbe7da15a59fb"
+    },
+    "receipts/firewall-r261.log": {
+      "bytes": 113,
+      "sha256": "4393a34e8ce1e3079392f9df042bc98b3625a2f2134aec49aa2149d06dfcf45e"
+    },
+    "receipts/firewall-r261.xml": {
+      "bytes": 971,
+      "sha256": "a1661ee4adb6f906301f9611c1b188bd3f828c2346fecfe7122669645a068735"
+    },
+    "receipts/native-plan-summary-r277.json": {
+      "bytes": 1599,
+      "sha256": "592001d0525d95293d002475492db55f9ff4d8e2d95ae0dd249cd6155b24563d"
+    },
+    "receipts/native-wireless-826-plan-r277.json": {
+      "bytes": 2213553,
+      "sha256": "97d2325c88686633eace7200716403aae5da3f60a092a2dd9f585a4245a333f5"
+    },
+    "receipts/pr93-source-readback-r275.json": {
+      "bytes": 492,
+      "sha256": "6ea5e50772daa08d608501f2967a5cf867fcefb1e0fe69d9cb4dc7f8360da4d4"
+    },
+    "receipts/prior-android-qualification-r249.json": {
+      "bytes": 677,
+      "sha256": "69d48ce7363d1b15ad2e1246b299614fd35d415a7e6a0c02e696fb45cdf7498b"
+    },
+    "receipts/prior-subscription-runtime-r252.json": {
+      "bytes": 2074,
+      "sha256": "d7b6e30d394f7b2556af1c7ba02de740a0d177b7020b45fd8eadf5e802d6ee97"
+    },
+    "receipts/retained-actual-native-artemis-schema.json": {
+      "bytes": 6056,
+      "sha256": "b1d9f83ffd4ced8983c2963e19554522c82401f43648424a71b788d588d47990"
+    }
+  },
+  "physical_cases_executed": 0,
+  "production_qualified": false,
+  "new_audit_authorization": "UNCOVERED_REVIEW_WORK_NOT_TRUSTED_ADMISSION"
+}

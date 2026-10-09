@@ -1,0 +1,62 @@
+{
+  "observed_utc": "2026-10-09T09:08:20.078355+00:00",
+  "host": "van-trading-core",
+  "units": [
+    {
+      "MainPID": "3621083",
+      "EnvironmentFiles": "/home/ubuntu/.config/van/trading-commander.env (ignore_errors=yes)",
+      "WorkingDirectory": "/home/ubuntu/.local/share/van/runtime/backend",
+      "ActiveState": "active",
+      "SubState": "running",
+      "FragmentPath": "/home/ubuntu/.config/systemd/user/van-gateway.service",
+      "unit": "van-gateway.service",
+      "relevant_environment_key_names": [
+        "VAN_ALLOW_LOOPBACK_IN_PRODUCTION",
+        "VAN_BROWSER_ENABLED",
+        "VAN_BROWSER_HARNESS_BASE_URL",
+        "VAN_BROWSER_HARNESS_EXPECTED_VERSION",
+        "VAN_BROWSER_STAGEHAND_BASE_URL",
+        "VAN_BROWSER_STAGEHAND_EXPECTED_VERSION",
+        "VAN_DATABASE_PATH",
+        "VAN_DEVICE_SECRET_FERNET_KEY",
+        "VAN_ENV",
+        "VAN_GOOGLE_TOKEN_FERNET_KEY",
+        "VAN_INGRESS_TOKEN",
+        "VAN_INTERNAL_CONTROL_SCOPED_TOKENS",
+        "VAN_REQUIRE_DEVICE_BINDING"
+      ],
+      "file_selectors": {
+        "VAN_DATABASE_PATH": {
+          "path": "/home/ubuntu/.local/share/van/van_gateway.sqlite3",
+          "exists": true,
+          "bytes": 2150400,
+          "mode": "0o600"
+        }
+      }
+    }
+  ],
+  "file_candidates": [
+    {
+      "path": "/home/ubuntu/.config/van/gateway.env",
+      "bytes": 718,
+      "mode": "0o600",
+      "uid": 1001
+    },
+    {
+      "path": "/home/ubuntu/.config/van/google-workspace.env",
+      "bytes": 0,
+      "mode": "0o600",
+      "uid": 1001
+    }
+  ],
+  "secret_values_exported": false,
+  "searched_roots": [
+    "/etc/van",
+    "/opt/van",
+    "/var/lib/van",
+    "/home/ubuntu/.config/van",
+    "/home/ubuntu/.local/share/van",
+    "/home/ubuntu/.local/state/van"
+  ],
+  "files_examined": 995
+}

@@ -1,0 +1,278 @@
+{
+  "record_kind": "NATIVE_ARTEMIS_SCHEMA_DISCOVERY",
+  "route": "NATIVE_ARTEMIS_MCP_DIRECT_COMMANDER",
+  "root": "/opt/hermes-mobile-fabric/artemis/371aa6df56880643da57b30da936e9812fb0ec66",
+  "tools": {
+    "mobile_get_device_state": {
+      "properties": {
+        "view_type": {
+          "title": "View Type",
+          "type": "string"
+        },
+        "device_serial": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Device Serial"
+        }
+      },
+      "required": [
+        "view_type"
+      ],
+      "title": "mobile_get_device_stateArguments",
+      "type": "object"
+    },
+    "mobile_diagnose": {
+      "properties": {
+        "attempt_fix": {
+          "default": false,
+          "title": "Attempt Fix",
+          "type": "boolean"
+        },
+        "device_serial": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Device Serial"
+        },
+        "launch_avd": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Launch Avd"
+        },
+        "verify_credentials": {
+          "default": false,
+          "title": "Verify Credentials",
+          "type": "boolean"
+        },
+        "probe_device": {
+          "default": false,
+          "title": "Probe Device",
+          "type": "boolean"
+        }
+      },
+      "title": "mobile_diagnoseArguments",
+      "type": "object"
+    },
+    "mobile_inspect_trace": {
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "trace_id": {
+          "title": "Trace Id",
+          "type": "string"
+        },
+        "step_number": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Step Number"
+        },
+        "query": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Query"
+        },
+        "step_range": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Step Range"
+        },
+        "max_results": {
+          "default": 5,
+          "title": "Max Results",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "action",
+        "trace_id"
+      ],
+      "title": "mobile_inspect_traceArguments",
+      "type": "object"
+    },
+    "mobile_manage_task": {
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "trace_id": {
+          "title": "Trace Id",
+          "type": "string"
+        },
+        "instruction": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Instruction"
+        },
+        "release_loop": {
+          "default": false,
+          "title": "Release Loop",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "action",
+        "trace_id"
+      ],
+      "title": "mobile_manage_taskArguments",
+      "type": "object"
+    },
+    "mobile_run_task": {
+      "properties": {
+        "task_desc": {
+          "title": "Task Desc",
+          "type": "string"
+        },
+        "conversation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conversation Id"
+        },
+        "model": {
+          "default": "Flash",
+          "title": "Model",
+          "type": "string"
+        },
+        "locked_app_package": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Locked App Package"
+        },
+        "app_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "App Path"
+        },
+        "expected_output_desc": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Output Desc"
+        },
+        "device_serial": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Device Serial"
+        },
+        "verification_level": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Verification Level"
+        },
+        "explorer_mode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Explorer Mode"
+        }
+      },
+      "required": [
+        "task_desc"
+      ],
+      "title": "mobile_run_taskArguments",
+      "type": "object"
+    }
+  },
+  "dds_readiness_required": false,
+  "handset_cases_run": 0
+}

@@ -1,0 +1,20 @@
+{
+  "source_head": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "exit_code": 0,
+  "elapsed_seconds": 33.527,
+  "uid": 0,
+  "scope": "DISPOSABLE_NETWORK_NAMESPACE_CONTRACTS",
+  "host_firewall_changed": false,
+  "production_qualified": false,
+  "physical_cases_executed": 0,
+  "junit": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "5",
+    "time": "33.218",
+    "timestamp": "2026-10-09T09:07:32.930792+00:00",
+    "hostname": "dial-control"
+  }
+}

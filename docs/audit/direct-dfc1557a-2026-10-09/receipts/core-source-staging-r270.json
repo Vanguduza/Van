@@ -1,0 +1,16 @@
+{
+  "kind": "OWNER_CORE_CANDIDATE_SOURCE_STAGING",
+  "started_at": "2026-10-09T09:26:48.105272+00:00",
+  "expected_source": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "candidate_path": "/home/ubuntu/work/van-owner-core-dfc1557a-20261009/source",
+  "deployed": false,
+  "active_runtime_changed": false,
+  "owner_database_changed": false,
+  "production_qualified": false,
+  "physical_cases_executed": 0,
+  "outcome": "STAGED_SOURCE_ONLY",
+  "source_head": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "source_clean": true,
+  "git_history_shallow": true,
+  "elapsed_seconds": 20.363
+}

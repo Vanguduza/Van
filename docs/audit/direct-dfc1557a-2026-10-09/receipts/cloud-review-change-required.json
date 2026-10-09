@@ -1,0 +1,16 @@
+{
+  "kind": "CLOUD_REVIEW_CHANGE_REQUIRED",
+  "draft_id": "7fe355d1-d734-4ad7-9bd4-954e1ee610c7~cecfgdraft_6ac5f2c2ead881909c4f334c58255a49",
+  "last_confirmed_saved_revision": 14,
+  "install_script_sha256": "16243ab17f6e3273a26656afb75899155a4f226c05399830de2773bf429ec583",
+  "start_skill_sha256": "43ac6b86f44584b5bc4ed487c815cb7a1be78f898f5a79f41af75d20f67100ff",
+  "installer_references_to_DIAL_MCP_ACCESS_TOKEN": 0,
+  "required_review_change": "Remove the unused DIAL_MCP_ACCESS_TOKEN runtime requirement, save and publish the existing draft.",
+  "preserve": "Existing installer, start skill, repositories, network settings, unrelated secrets and requirements, and connected owner-direct DIAL authentication.",
+  "replacement_secret_required": false,
+  "change_applied": false,
+  "published": false,
+  "fresh_task_restoration_verified": false,
+  "blocker": "No draft-editing tool is exposed and no settings review tab is open in this session.",
+  "source_evidence": "https://github.com/Vanguduza/Van/tree/c502cf7ab5c29b262719c4ed7eebf55ac3fe4647/docs/audit/final-dfc1557a/cloud-setup"
+}

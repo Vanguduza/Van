@@ -1,0 +1,32 @@
+{
+  "kind": "VERIFIED_TASK_INODE_RECOVERY",
+  "observed_at": "2026-10-09T09:30:50.756149+00:00",
+  "interrupted_only_owned_cleanup_pid": 77533,
+  "interruption_reason": "Owned process stalled at mem_cgroup_handle_over_high during whole-APK hash readback",
+  "completion_used_streaming_hashes": true,
+  "removed_remaining_paths": [
+    "/home/ubuntu/work/van-direct-artemis-20261008-7b8py_fg/source/android/app/build/tmp",
+    "/home/ubuntu/work/van-direct-artemis-20261008-7b8py_fg/source/android/app/build/intermediates"
+  ],
+  "disposable_paths_absent": true,
+  "retained_outputs_sha256": {
+    "outputs/logs/manifest-merger-debug-report.txt": "84ea2b4a9ece82b99b6786a97389088656b5bfc9a480fa794bc5cbd92d03e213",
+    "outputs/apk/debug/output-metadata.json": "5ea89cebf5f92caacbe514cfd6f86824caef441e48a81ff218d23c58acb94192",
+    "outputs/apk/debug/app-debug.apk": "e84eb8ed6e0cb923f229a80bf2aed96e2021dac648a48ef7a4fe07f812e755d6",
+    "outputs/apk/androidTest/debug/output-metadata.json": "c80ce35e915d744c60ed03fc41fd6c7a3be518a2934ddbfdc17d76fdc5c88da5",
+    "outputs/apk/androidTest/debug/app-debug-androidTest.apk": "2e811de42d6827864b4e4ebc829f24911896eb8325ea2e0bfe769ad9a0cf9a7a"
+  },
+  "reports_retained": true,
+  "test_xml_retained": true,
+  "generated_provenance_retained": true,
+  "voice_acquisition_retained": true,
+  "free_inodes": 30789,
+  "free_bytes": 11943874560,
+  "source_files_changed": false,
+  "production_firewall_changed": false,
+  "device_contacted": false,
+  "clarification_of": "canon-task-inode-recovery-r272.json",
+  "debug_apk_matches_prior_android_qualification": true,
+  "prior_android_qualification_receipt": "canon-android-final-r249.json",
+  "prior_inspection_receipt_does_not_record_an_apk_digest": true
+}

@@ -1,0 +1,23 @@
+{
+  "source_head": "4ad31883d57ab518ba9af414aa849db6e240eb71",
+  "exit_code": 0,
+  "elapsed_seconds": 237.839,
+  "source_changed": false,
+  "working_tree_clean": true,
+  "owner_release": false,
+  "installed": false,
+  "physical_cases_executed": 0,
+  "handset_cases_total": 826,
+  "android_unit_tests": {
+    "tests": 203,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "debug_apk": {
+    "path": "/home/ubuntu/work/van-direct-artemis-20261008-7b8py_fg/source/android/app/build/outputs/apk/debug/app-debug.apk",
+    "bytes": 319796920,
+    "sha256": "e84eb8ed6e0cb923f229a80bf2aed96e2021dac648a48ef7a4fe07f812e755d6"
+  },
+  "build_config_source_sha_present": true
+}

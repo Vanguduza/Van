@@ -1,0 +1,13 @@
+{
+  "kind": "CANON_DRAFT_PR_SOURCE_ADVANCEMENT",
+  "pr": 93,
+  "url": "https://github.com/Vanguduza/Van/pull/93",
+  "prior_head": "4ad31883d57ab518ba9af414aa849db6e240eb71",
+  "source_head": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "draft": true,
+  "merged": false,
+  "force_push": false,
+  "branch": "codex/van-canon-consolidation-2026-10-08",
+  "physical_cases_executed": 0,
+  "verification": "Fresh Git remote ref and PR readback after initial PATCH response returned a stale head"
+}

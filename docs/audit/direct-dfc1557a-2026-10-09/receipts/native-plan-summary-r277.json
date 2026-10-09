@@ -1,0 +1,39 @@
+{
+  "kind": "NATIVE_ARTEMIS_PLAN_PREPARATION_USING_RETAINED_ACTUAL_SCHEMA",
+  "source_head": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+  "observed_at": "2026-10-09T09:44:44.277952+00:00",
+  "status": "NATIVE_PLAN_PREPARED_NOT_EXECUTED",
+  "target": {
+    "backend": "van-trading-core",
+    "handset": "Samsung S24 Ultra",
+    "device_model": "SM-S928B",
+    "phone_connection": "paired_private_wireless_adb_via_native_artemis",
+    "product_ingress": "DEDICATED_PINNED_TLS_INGRESS_REQUIRED",
+    "hermes": "van-trading-core",
+    "artemis": "dial-control",
+    "device_serial": "RFCX2054F5W",
+    "package_name": "com.dial.van",
+    "device_transport": "WIRELESS_ADB"
+  },
+  "coverage": {
+    "features": 42,
+    "functions": 105,
+    "surfaces": 78,
+    "cases": 826
+  },
+  "input_files_bound": 955,
+  "plan_sha256": "b08e0e49bfbfbb9100d253b4d589d7d99905332eade8926817f7aa9905ade883",
+  "plan_file_sha256": "97d2325c88686633eace7200716403aae5da3f60a092a2dd9f585a4245a333f5",
+  "plan_bytes": 2213553,
+  "adapter_route": "NATIVE_ARTEMIS_MCP_DIRECT_COMMANDER",
+  "dds_readiness_required": false,
+  "native_schema_sha256": "4daee0b8a5acae806345271490aafe35624c8ded3641a02c97da6cb238702005",
+  "retained_schema_file_sha256": "b1d9f83ffd4ced8983c2963e19554522c82401f43648424a71b788d588d47990",
+  "retained_schema_receipt": "native-artemis-schemas.json",
+  "native_schema_discovery_repeated": false,
+  "fresh_native_schema_discovery_pending_for_execution": true,
+  "physical_cases_executed": 0,
+  "device_contacted": false,
+  "model": "gpt-5.6-sol",
+  "subscription_account": "tapiwaguduza@gmail.com"
+}
