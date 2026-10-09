@@ -1,0 +1,34 @@
+# Web Acquisition Fabric Rev 2 Hardened §1-§2 — Crawlee adoption proposal. NOT owner-signed.
+# Raised by the 2026-10-09 canon audit: Crawlee is pinned in
+# deploy/van-trading-core/web-acquisition/requirements.txt without an adoption record.
+decision_id: VAN-ADOPT-CRAWLEE-001
+schema_version: 1
+subject: apify/crawlee-python optional bounded public bulk-crawl backend
+blueprint_sections: ["Web Acquisition Fabric Rev 2 Hardened §1", "§2"]
+
+upstream_repository: apify/crawlee-python
+package: crawlee[beautifulsoup]
+licence: Apache-2.0              # PyPI crawlee 1.10.2 license_expression, checked 2026-10-09
+licence_class: PERMISSIVE
+
+intended_use:
+  - optional backend for broad public multi-page crawls inside one bounded crawl job
+  - internal request queue, adaptive concurrency, session pool and retries used within that job only
+
+technical_boundary:
+  owner_authority: false
+  frontier_authority: false        # discovered URLs return to the VAN-owned frontier
+  account_visible_or_authenticated_profiles: forbidden
+  network_exposure: loopback_only
+  private_or_metadata_targets: forbidden
+
+update_policy:
+  latest_tag_install: forbidden
+  production_install: exact_pinned_version_with_locked_dependencies
+
+observed_runtime:
+  pinned_version: "1.10.2"
+  pin_source: deploy/van-trading-core/web-acquisition/requirements.txt
+
+owner_signature_status: UNSIGNED
+owner_decision_record: null

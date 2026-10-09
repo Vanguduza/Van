@@ -1,6 +1,8 @@
 # VAN Autonomous Web Acquisition Fabric — Rev 1
 
 **Status:** implementation candidate on an isolated branch.  
+
+> **SUPERSEDED by `docs/VAN_WEB_ACQUISITION_FABRIC_REV_2_HARDENED.md` — provenance only.** Rev 2 makes Crawlee 1.10.2 an available optional backend now (not a future one), pins Scrapling 0.4.15, and defers Postgres/Valkey/Redpanda/DBOS/Steel. The shipped worker (`deploy/van-trading-core/web-acquisition/`) follows Rev 2.
 **Authority:** subordinate to Hermes and the existing VAN Browser Fabric. This document does not supersede Project Truth or the security policy.
 
 ## Goal

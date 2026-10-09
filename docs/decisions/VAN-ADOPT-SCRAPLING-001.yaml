@@ -1,0 +1,34 @@
+# Web Acquisition Fabric Rev 2 Hardened §2 — Scrapling adoption proposal. NOT owner-signed.
+# Raised by the 2026-10-09 canon audit: Scrapling is pinned in
+# deploy/van-trading-core/web-acquisition/requirements.txt without an adoption record.
+decision_id: VAN-ADOPT-SCRAPLING-001
+schema_version: 1
+subject: D4Vinci/Scrapling public HTTP and public dynamic extraction worker
+blueprint_sections: ["Web Acquisition Fabric Rev 2 Hardened §2", "§66"]
+
+upstream_repository: D4Vinci/Scrapling
+package: scrapling[rag]
+licence: BSD-3-Clause            # PyPI scrapling 0.4.15 metadata, checked 2026-10-09
+licence_class: PERMISSIVE
+
+intended_use:
+  - public, read-only HTTP and dynamic extraction inside the loopback-only van-web-acquisition-worker
+  - Markdown/structured extraction of public pages for the VAN-owned acquisition frontier
+
+technical_boundary:
+  owner_authority: false
+  account_visible_or_authenticated_profiles: forbidden   # Rev 2 §36: routes to Harness/Stagehand instead
+  frontier_authority: false                               # VAN owns the frontier
+  network_exposure: loopback_only
+  private_or_metadata_targets: forbidden
+
+update_policy:
+  latest_tag_install: forbidden
+  production_install: exact_pinned_version_with_locked_dependencies
+
+observed_runtime:
+  pinned_version: "0.4.15"
+  pin_source: deploy/van-trading-core/web-acquisition/requirements.txt
+
+owner_signature_status: UNSIGNED
+owner_decision_record: null
