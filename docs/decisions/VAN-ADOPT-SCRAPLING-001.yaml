@@ -32,6 +32,19 @@ observed_runtime:
 
 owner_signature_status: SIGNED
 owner_signed_at: 2026-10-10
+owner_signature_semantics:
+  basis: PROJECT_TRUTH_OWNER_INSTRUCTION
+  authority_tier: Project Truth recorded intent, not device-signed ingress
+  device_signed: false
+  evidence_scope: OWNER_SESSION_INSTRUCTION_2026-10-10
+  authorization_id: auth-20261010-owner-adoption-artemis-transfer-dead-kotlin
+signed_ingress:
+  status: ABSENT
+  evidence_ref: null
+  scope: REPOSITORY_RECORD
+  note: >-
+    No device-signed ingress evidence exists for this decision. SIGNED records the owner's
+    2026-10-10 Claude Code session instruction "Conclude scrapling and crawlee adoption".
 owner_signature_evidence_ref: owner session instruction, Claude Code session_01PA46CKBgNLwnekdwQUNNBD, 2026-10-10
 
 owner_decision_record:
