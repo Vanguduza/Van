@@ -2166,8 +2166,7 @@
       "closure": {
         "summary": "The air gap is a dp contract. It was `bodyEdge * 0.055`, which at the shipping 96 dp avatar is 5.3 dp against a 10-14 dp requirement — and at the 400 dp evidence board the same fraction gives 22 dp, so one expression was too tight in one place and too loose in another. A gap is a physical distance the eye reads and cannot be a proportion of an arbitrary render size. `gapDp` now returns a value clamped into the 10-14 dp band and the profile converts it to pixels using the body's dp size. A caller that cannot supply a density — the JVM renderer works in raw pixels — gets the legacy fraction and a null dp claim, so 'out of band' stays distinguishable from 'nobody said what a dp is here'.",
         "changed": [
-          "android/app/src/main/java/com/dial/van/visual/VanBodyExclusionProfile.kt",
-          "android/app/src/main/java/com/dial/van/visual/VanFieldGeometry.kt"
+          "android/app/src/main/java/com/dial/van/visual/VanBodyExclusionProfile.kt"
         ],
         "verified_by": [
           "android/verification/src/test/kotlin/com/dial/van/visual/VanAuraGeometryTest.kt"
@@ -2175,7 +2174,8 @@
         "runtime_evidence": [
           "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
         ],
-        "state": "INTEGRATED_AND_EVIDENCED"
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "subsequent_change": "2026-10-10: the strand engine (VanFieldGeometryEngine in VanFieldGeometry.kt) was removed in commit 077bc517 under CF-D-06-REV1. It had no runtime caller since CF-D-06 stopped the aura plan drawing strands, so this closure's citation of that file is retired; the original state is at 8d7bc2f3:android/app/src/main/java/com/dial/van/visual/VanFieldGeometry.kt. The dp gap contract in VanBodyExclusionProfile and its tests in VanAuraGeometryTest are unchanged, but no runtime path consumes the profile now; it is evidence of the contract, not of a drawn gap."
       }
     },
     {
@@ -2442,7 +2442,7 @@
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
-        "android/app/src/main/java/com/dial/van/visual/VanFieldGeometry.kt:74-76,415-444",
+        "8d7bc2f3:android/app/src/main/java/com/dial/van/visual/VanFieldGeometry.kt:74-76,415-444",
         "android/app/src/main/java/com/dial/van/visual/VanEffectBudget.kt:58",
         "android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt:159"
       ],
@@ -2460,7 +2460,6 @@
         "changed": [
           "android/app/src/main/java/com/dial/van/visual/VanFrameBudget.kt",
           "android/app/src/main/java/com/dial/van/visual/VanBodyExclusionProfile.kt",
-          "android/app/src/main/java/com/dial/van/visual/VanFieldGeometry.kt",
           "android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt"
         ],
         "verified_by": [
@@ -2473,7 +2472,8 @@
         "residual": "The field's per-frame strand coordinates are still recomputed each frame, and no on-device frame-time measurement exists in this environment.",
         "residual_reason": "The strand coordinates are the animation; caching them would stop the motion, which a test asserts against. Real device frame times arrive through POST /v1/observability/device-telemetry (P3-OBS-002) once the client posts them, and the gateway reports them as unobserved until then rather than inventing values.",
         "residual_class": "DELIBERATE_SCOPE",
-        "state": "INTEGRATED_AND_EVIDENCED"
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "subsequent_change": "2026-10-10: the strand engine (VanFieldGeometryEngine in VanFieldGeometry.kt) was removed in commit 077bc517 under CF-D-06-REV1. It had no runtime caller since CF-D-06 stopped the aura plan drawing strands, so this closure's citation of that file is retired; the original state is at 8d7bc2f3:android/app/src/main/java/com/dial/van/visual/VanFieldGeometry.kt. The per-frame strand rebuild this finding described no longer exists. The two verification tests that drove frames through the engine (one rebuild across 120 frames; strands still move) were removed with it. The silhouette cache keeps its rebuild and float-wobble tests, and VanFrameBudgetSampler keeps VanFrameBudgetTest."
       }
     },
     {
