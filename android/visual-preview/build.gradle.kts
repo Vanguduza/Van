@@ -29,7 +29,7 @@ private val sharedVisualSources = listOf(
     "visual/VanAnimationClock.kt",
     "visual/VanFrameBudget.kt",
     "visual/VanTradeSemantic.kt",
-    "visual/VanBodyExclusionProfile.kt",
+    "visual/VanExclusionPrimitive.kt",
     "visual/VanFieldPoint.kt",
     // GAP-F-012 — the dependency-free half of the embodiment producer registry (no JSON,
     // unlike VanEmbodimentReducer.kt, which visual-preview has no JSON library to compile).

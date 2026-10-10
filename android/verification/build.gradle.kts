@@ -77,7 +77,7 @@ sourceSets {
             "com/dial/van/visual/VanAnimationClock.kt",
             "com/dial/van/visual/VanAuraPlan.kt",
             "com/dial/van/visual/VanAuraSpec.kt",
-            "com/dial/van/visual/VanBodyExclusionProfile.kt",
+            "com/dial/van/visual/VanExclusionPrimitive.kt",
             "com/dial/van/visual/VanBodyLayout.kt",
             "com/dial/van/visual/VanFlameAura.kt",
             "com/dial/van/visual/VanSilhouette.kt",
