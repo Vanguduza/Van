@@ -1,6 +1,6 @@
 # VAN-ARTEMIS-OWNERSHIP-PROPOSAL-001 — Artemis model adapter ownership
 
-**Status:** PROPOSAL — not owner-signed. An agent raised this; only the owner decides it.
+**Status:** DECIDED 2026-10-10 by the owner — option 2 with direct Global DIAL MCP access (DIAL `DEC-079`).
 **Raised:** 2026-10-09, VAN canon audit of `codex/van-canon-consolidation-2026-10-08`.
 
 ## Conflict
@@ -29,5 +29,14 @@ Recommendation: option 2 keeps one owner per concern (DIAL `DEC-024`); option 1 
 
 ## Owner decision
 
-decision: null
-owner_signature_status: UNSIGNED
+decision: OPTION_2_MOVE_TO_DIAL_DEVELOPMENT_SYSTEM_WITH_DIRECT_GLOBAL_DIAL_MCP_ACCESS
+owner_signature_status: SIGNED
+owner_signed_at: 2026-10-10
+owner_words: "transfer ownership of the artemis adapter to dial development system but give dial mcp direct access to the adapter that does not go through hermes"
+provenance: Owner instruction in a Claude Code session; no device or cryptographic signature is claimed.
+
+Outcome: the adapter now lives at `Vanguduza/dial-development-system:deploy/netcup/hermes-control/artemis/subscription/`
+(moved byte-for-byte; DIAL `DEC-079`, amending `DEC-051`). Global DIAL MCP gets a direct typed route to it that does
+not pass through Hermes (`agent-system/registries/GLOBAL_DIAL_MCP_ARTEMIS_DIRECT_ROUTE.json` there). VAN removed
+`tools/artemis_subscription/` and `tests/test_artemis_subscription.py` and keeps only its owner console
+(`backend/van_gateway/artemis/console.py`).
