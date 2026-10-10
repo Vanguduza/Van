@@ -1,4 +1,4 @@
-# Web Acquisition Fabric Rev 2 Hardened §1-§2 — Crawlee adoption proposal. NOT owner-signed.
+# Web Acquisition Fabric Rev 2 Hardened §1-§2 — Crawlee adoption record. Owner-approved 2026-10-10.
 # Raised by the 2026-10-09 canon audit: Crawlee is pinned in
 # deploy/van-trading-core/web-acquisition/requirements.txt without an adoption record.
 decision_id: VAN-ADOPT-CRAWLEE-001
@@ -30,5 +30,16 @@ observed_runtime:
   pinned_version: "1.10.2"
   pin_source: deploy/van-trading-core/web-acquisition/requirements.txt
 
-owner_signature_status: UNSIGNED
-owner_decision_record: null
+owner_signature_status: SIGNED
+owner_signed_at: 2026-10-10
+owner_signature_evidence_ref: owner session instruction, Claude Code session_01PA46CKBgNLwnekdwQUNNBD, 2026-10-10
+
+owner_decision_record:
+  decided_on: 2026-10-10
+  decision: APPROVED
+  owner_words: >-
+    "Conclude scrapling and crawlee adoption"
+  provenance: >-
+    Owner instruction given directly in a Claude Code session. No device, biometric or
+    cryptographic signature is claimed. Approval covers the pinned version and the technical
+    boundary above; any version change follows the update policy.
