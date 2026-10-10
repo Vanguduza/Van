@@ -80,14 +80,11 @@ fun VanAvatar(
                 decision = VanVisualRuntime.decide(
                     assetBytes = null,
                     riveRuntimeAvailable = false,
-                    ownerArtAvailable = VanStateArt.artAvailable(context),
                     loadFailed = true,
                     candidateBAvailable = true,
                 )
             },
         )
-
-        VanRenderer.OWNER_ART -> VanOwnerArtAvatar(state = state, modifier = modifier)
 
         VanRenderer.CANDIDATE_B -> VanCandidateBAvatar(
             state = state,
@@ -187,38 +184,6 @@ private fun unitAlphaOf(image: ImageBitmap): ByteArray? = try {
     ByteArray(n * n) { (pixels[it] ushr 24).toByte() }
 } catch (_: Throwable) {
     null
-}
-
-/** Owner-art fallback stays opaque but receives tiny state-aware micro-motion. */
-@Composable
-fun VanOwnerArtAvatar(state: VanVisualState, modifier: Modifier = Modifier) {
-    val palette = VanStatusPalette.forState(state.durableState)
-    val resId = VanStateArt.drawableFor(state.durableState) ?: return
-    val description = vanContentDescription(state)
-    val reducedMotion = rememberReducedMotion()
-    val phase = vanIdlePhase(state.durableState, reducedMotion)
-    val motion = VanCharacterMotion.sample(state, phase, reducedMotion)
-
-    val filter = if (palette.desaturation > 0.01f) {
-        ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(1f - palette.desaturation) })
-    } else {
-        null
-    }
-
-    Image(
-        painter = painterResource(id = resId),
-        contentDescription = description,
-        modifier = modifier
-            .offset(x = motion.offsetXDp.dp, y = motion.offsetYDp.dp)
-            .graphicsLayer {
-                rotationZ = motion.rotationDeg
-                scaleX = motion.scale
-                scaleY = motion.scale
-            },
-        contentScale = ContentScale.Fit,
-        alpha = palette.dim,
-        colorFilter = filter,
-    )
 }
 
 /**
@@ -437,7 +402,6 @@ private fun resolveRenderer(context: Context): VanRenderDecision {
     return VanVisualRuntime.decide(
         assetBytes = bytes,
         riveRuntimeAvailable = riveRuntimeAvailable(),
-        ownerArtAvailable = VanStateArt.artAvailable(context),
         // Bundled with the app (res/drawable-nodpi/van_candidate_b_front.png).
         candidateBAvailable = true,
     )

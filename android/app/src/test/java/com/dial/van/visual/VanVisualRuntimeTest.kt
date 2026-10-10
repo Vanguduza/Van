@@ -68,8 +68,13 @@ class VanVisualRuntimeTest {
         assertEquals(VanCanvasReason.LOAD_FAILED, failed.reason)
         val rive = VanVisualRuntime.decide(assetBytes = 4096L, riveRuntimeAvailable = true, candidateBAvailable = true)
         assertEquals(VanRenderer.RIVE, rive.renderer)
-        val retired = VanVisualRuntime.decide(assetBytes = null, riveRuntimeAvailable = true, ownerArtAvailable = true)
-        assertEquals("the retired owner-art rung must never return", VanRenderer.CANVAS, retired.renderer)
+        val noArt = VanVisualRuntime.decide(assetBytes = null, riveRuntimeAvailable = true, candidateBAvailable = false)
+        assertEquals(VanRenderer.CANVAS, noArt.renderer)
+        assertEquals(
+            "the retired owner-art rung must not come back",
+            setOf(VanRenderer.RIVE, VanRenderer.CANDIDATE_B, VanRenderer.CANVAS),
+            VanRenderer.values().toSet(),
+        )
     }
 
     @Test

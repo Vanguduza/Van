@@ -85,22 +85,6 @@ class VanAuraGeometryTest {
     // ------------------------------------------------------------- P2-PERF-001
 
     @Test
-    fun `the silhouette is built once and reused across frames`() {
-        repeat(120) { index ->
-            VanFieldGeometryEngine.build(
-                spec = VanAuraSpecs.forState(VanDurableState.LISTENING),
-                phase = index / 120f,
-                budget = VanEffectBudget.FULL,
-                bodyEdge = 480f, centerX = 240f, centerY = 240f, bodyEdgeDp = 96f,
-            )
-        }
-        assertEquals(
-            1L, VanBodyExclusionProfile.rebuilds,
-            "the silhouette was rebuilt ${VanBodyExclusionProfile.rebuilds} times over 120 frames",
-        )
-    }
-
-    @Test
     fun `resizing the body does rebuild it`() {
         VanBodyExclusionProfile.compactCached(480f, 240f, 240f, bodyEdgeDp = 96f)
         VanBodyExclusionProfile.compactCached(480f, 240f, 240f, bodyEdgeDp = 96f)
@@ -116,22 +100,5 @@ class VanAuraGeometryTest {
         VanBodyExclusionProfile.compactCached(480.0f, 240.0f, 240.0f, bodyEdgeDp = 96f)
         VanBodyExclusionProfile.compactCached(480.0001f, 240.00002f, 240.0f, bodyEdgeDp = 96f)
         assertEquals(1L, VanBodyExclusionProfile.rebuilds)
-    }
-
-    @Test
-    fun `the field still animates while the silhouette is cached`() {
-        // Caching the wrong thing would freeze the aura. The strands must still move.
-        val spec = VanAuraSpecs.forState(VanDurableState.LISTENING)
-        fun frame(phase: Float) = VanFieldGeometryEngine.build(
-            spec = spec, phase = phase, budget = VanEffectBudget.FULL,
-            bodyEdge = 480f, centerX = 240f, centerY = 240f, bodyEdgeDp = 96f,
-        )
-        val first = frame(0.10f)
-        val second = frame(0.35f)
-        assertTrue(first.strokes.isNotEmpty(), "no strokes at all")
-        assertTrue(
-            first.strokes.first().points != second.strokes.first().points,
-            "the field stopped moving when the silhouette was cached",
-        )
     }
 }

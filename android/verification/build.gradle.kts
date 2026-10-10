@@ -95,7 +95,7 @@ sourceSets {
             // that lets `visual/` publish it without depending on `degraded/`.
             "com/dial/van/visual/VanRendererStatus.kt",
             "com/dial/van/visual/DegradedBridge.kt",
-            "com/dial/van/visual/VanFieldGeometry.kt",
+            "com/dial/van/visual/VanFieldPoint.kt",
             "com/dial/van/visual/VanFrameBudget.kt",
             "com/dial/van/visual/VanGlassTokens.kt",
             "com/dial/van/visual/VanPalette.kt",

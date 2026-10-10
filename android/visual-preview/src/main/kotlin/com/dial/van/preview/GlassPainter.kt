@@ -8,8 +8,6 @@ import com.dial.van.visual.VanFlameAura
 import com.dial.van.visual.VanAuraPlanner
 import com.dial.van.visual.VanAuraSpec
 import com.dial.van.visual.VanEffectBudget
-import com.dial.van.visual.VanFieldGeometryEngine
-import com.dial.van.visual.VanFieldInk
 import com.dial.van.visual.VanGlassStyle
 import com.dial.van.visual.VanGlassTokens
 import com.dial.van.visual.VanPathSeg
@@ -33,9 +31,8 @@ import kotlin.math.sin
 /**
  * Java2D painter for DIAL Glass and VAN's living electrical field.
  *
- * Zone B/C geometry is produced by [VanFieldGeometryEngine], the exact same pure-Kotlin geometry
- * engine used by the shipping Compose overlay. [spec] owns local activity/Zone B while
- * [semanticSpec] independently owns Zone C, so evidence can certify orthogonal runtime states.
+ * [spec] owns local activity/Zone B while [semanticSpec] independently owns Zone C, so evidence can
+ * certify orthogonal runtime states.
  */
 object GlassPainter {
 

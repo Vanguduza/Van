@@ -99,7 +99,6 @@ class RiveContractTest {
             val decision = VanVisualRuntime.decide(
                 assetBytes = rig.bytes.size.toLong(),
                 riveRuntimeAvailable = true,
-                ownerArtAvailable = true,
             )
             assertEquals("production asset must select the Rive renderer", VanRenderer.RIVE, decision.renderer)
         }
@@ -108,7 +107,7 @@ class RiveContractTest {
     /**
      * The shipped asset must load and bind through the composable production renders
      * (`VanAvatar` -> `VanRiveAvatar`), not only through the debug frame host: a load or bind
-     * failure there flips the decision to OWNER_ART/CANVAS with LOAD_FAILED.
+     * failure there flips the decision to CANDIDATE_B/CANVAS with LOAD_FAILED.
      */
     @Test
     fun productionAvatarPathKeepsRive() {
@@ -305,10 +304,10 @@ class RiveContractTest {
 
     @Test
     fun brokenAssetFallsBack() {
-        val unusable = VanVisualRuntime.decide(assetBytes = 512L, riveRuntimeAvailable = true, ownerArtAvailable = true)
+        val unusable = VanVisualRuntime.decide(assetBytes = 512L, riveRuntimeAvailable = true)
         assertEquals(VanRenderer.CANVAS, unusable.renderer)
         assertEquals(VanCanvasReason.ASSET_UNUSABLE, unusable.reason)
-        val failed = VanVisualRuntime.decide(assetBytes = 4096L, riveRuntimeAvailable = true, ownerArtAvailable = true, loadFailed = true)
+        val failed = VanVisualRuntime.decide(assetBytes = 4096L, riveRuntimeAvailable = true, loadFailed = true)
         assertEquals(VanRenderer.CANVAS, failed.renderer)
         assertEquals(VanCanvasReason.LOAD_FAILED, failed.reason)
     }

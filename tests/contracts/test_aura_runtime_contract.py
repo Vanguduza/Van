@@ -97,6 +97,8 @@ def test_no_line_geometry_reaches_the_plan():
     plan = (VIS / "VanAuraPlan.kt").read_text(encoding="utf-8")
     body = plan[plan.index("fun plan("):plan.index("private fun zoneA(")]
     assert "VanFieldGeometryEngine.build" not in body, "CF-D-06-REV1: the plan must not draw field strands again"
+    strand_engines = [f.name for f in VIS.glob("*.kt") if "object VanFieldGeometryEngine" in f.read_text(encoding="utf-8")]
+    assert not strand_engines, f"CF-D-06-REV1: the retired strand engine is back in {strand_engines}"
     assert "VanAuraOp.Polyline(" not in body and "VanAuraOp.Quad(" not in body
 
 
