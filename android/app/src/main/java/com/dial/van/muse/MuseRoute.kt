@@ -39,9 +39,34 @@ private fun JSONObject.binding(): JSONObject = JSONObject().also { body ->
 }
 private fun JSONObject.live(now: Long): Boolean {
     val relay = optJSONObject("relay") ?: return false
-    val observed = relay.optLong("last_source_at_ms", -1)
-    return relay.optString("state") == "live" && observed > 0 && now - observed in 0..90_000L &&
-        optJSONObject("health")?.optString("state") == "GREEN" && optJSONObject("watchdog")?.optString("state") == "GREEN"
+    return MuseSourceHealth(
+        sessionGreen = optJSONObject("health")?.optString("state") == "GREEN",
+        watchdogGreen = optJSONObject("watchdog")?.optString("state") == "GREEN",
+        relayLive = relay.optString("state") == "live",
+        lastSourceAtEpochMs = relay.optLong("last_source_at_ms", -1).takeIf { it > 0 },
+    ).fresh(now)
+}
+
+/** The provider's current prompt is the only source of selectable permission choices. */
+private fun JSONObject.approvalFence(): MuseApprovalFence {
+    val offered = optJSONArray("allowed_actions") ?: JSONArray()
+    val choices = (0 until offered.length()).mapNotNull {
+        runCatching { MuseDecision.valueOf(offered.optString(it)) }.getOrNull()
+    }.toSet()
+    return MuseApprovalFence(
+        approvalId = optString("id"),
+        sessionId = optString("session_id"),
+        taskId = optString("task_id"),
+        projectId = optString("project_id").takeIf { it.isNotBlank() },
+        actionFingerprint = optString("action_fingerprint"),
+        controlGeneration = optLong("control_generation"),
+        revision = optLong("revision"),
+        expiresAtEpochMs = optLong("expires_at_epoch_ms"),
+        state = optString("state"),
+        actionClass = optString("action_class"),
+        description = optString("description"),
+        allowed = choices,
+    )
 }
 
 /** Native VAN UI. Typed actions and data are shared with the Site; no web page is embedded. */
@@ -248,16 +273,18 @@ fun MuseRoute(app: VanApplication, onBack: () -> Unit, initialApprovalId: String
                     Text(p.optString("description"))
                     Text("Task: ${p.optString("task_id")}", style = MaterialTheme.typography.bodySmall)
                     val state = p.optString("state")
-                    val valid = fresh && state == "AWAITING_OWNER" && p.optLong("expires_at_epoch_ms") > now && pendingIntent.isBlank() && !busy
+                    val fence = remember(p.toString()) { p.approvalFence() }
                     Text(state.replace('_', ' '), style = MaterialTheme.typography.labelMedium)
-                    val offered = p.optJSONArray("allowed_actions") ?: JSONArray()
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        listOf("ALLOW_ONCE", "DENY").forEach { choice ->
-                            val hasChoice = (0 until offered.length()).any { offered.optString(it) == choice }
-                            val isAllow = choice == "ALLOW_ONCE"
-                            val stepUp = isAllow && p.optString("action_class") !in setOf("A1", "A2", "A3")
+                        listOf(MuseDecision.ALLOW_ONCE, MuseDecision.DENY).forEach { decision ->
+                            val choice = decision.name
+                            val isAllow = decision == MuseDecision.ALLOW_ONCE
+                            val stepUp = isAllow && fence.actionClass == "A4"
+                            val valid = (fence.canAct(decision, now, fresh) ||
+                                (stepUp && fence.canRequestStepUp(now, fresh))) &&
+                                pendingIntent.isBlank() && !busy
                             val key = "approval:" + UUID.nameUUIDFromBytes((p.optString("id")+":"+p.optLong("revision")+":"+p.optLong("control_generation")+":"+choice).toByteArray())
-                            OutlinedButton(enabled = valid && hasChoice && !(isAllow && p.optString("action_class") == "A5"), onClick = {
+                            OutlinedButton(enabled = valid, onClick = {
                                 submitInteraction(p.binding().put("action", "DECIDE_APPROVAL").put("approval_id", p.optString("id")).put("expected_revision", p.optLong("revision")).put("action_fingerprint", p.optString("action_fingerprint")).put("choice", choice).put("idempotency_key", key), stepUp)
                             }) { Text(if (isAllow) (if (stepUp) "Allow once · verify" else "Allow once") else "Deny") }
                         }

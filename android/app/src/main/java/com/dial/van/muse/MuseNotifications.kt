@@ -4,6 +4,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import android.Manifest
+import androidx.core.content.ContextCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.dial.van.command.CommandCentreActivity
@@ -33,6 +37,11 @@ object MuseNotifications {
         val system = context.getSystemService(NotificationManager::class.java)
         system.createNotificationChannel(NotificationChannel(CHANNEL, "Muse work and decisions", NotificationManager.IMPORTANCE_HIGH))
         if (!manager.areNotificationsEnabled()) return
+        // POST_NOTIFICATIONS is revocable on Android 13+. The notification listener
+        // must not attempt a notification without the owner's runtime permission.
+        if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(
+            context, Manifest.permission.POST_NOTIFICATIONS,
+        ) != PackageManager.PERMISSION_GRANTED) return
         val intent = CommandCentreActivity.deepLinkIntent(context, if (data.optString("approval_id").isBlank()) VanRoute.WORK_MUSE else VanRoute.museApprovalRoute(data.optString("approval_id")))
             .setAction("com.dial.van.MUSE_UPDATE." + key)
             .putExtra("muse_approval_id", data.optString("approval_id"))

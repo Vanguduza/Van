@@ -22,14 +22,22 @@ data class MuseApprovalFence(
     val description: String,
     val allowed: Set<MuseDecision>,
 ) {
-    fun canAct(choice: MuseDecision, nowEpochMs: Long, sourceFresh: Boolean): Boolean =
+    private fun validFence(choice: MuseDecision, nowEpochMs: Long, sourceFresh: Boolean): Boolean =
         sourceFresh && choice in allowed && state == "AWAITING_OWNER" &&
             approvalId.isNotBlank() && sessionId.isNotBlank() && taskId.isNotBlank() &&
             actionFingerprint.matches(Regex("^[a-fA-F0-9]{64}$")) &&
-            controlGeneration > 0L && revision > 0L &&
-            expiresAtEpochMs > nowEpochMs &&
+            controlGeneration > 0L && revision > 0L && expiresAtEpochMs > nowEpochMs
+
+    /** A1–A3 allow and owner denial can be presented without elevated step-up. */
+    fun canAct(choice: MuseDecision, nowEpochMs: Long, sourceFresh: Boolean): Boolean =
+        validFence(choice, nowEpochMs, sourceFresh) &&
             (choice == MuseDecision.DENY ||
                 (actionClass in setOf("A1", "A2", "A3") && description.isNotBlank()))
+
+    /** A4 allow is only OFFERED through VAN's existing biometric challenge, never directly executed. */
+    fun canRequestStepUp(nowEpochMs: Long, sourceFresh: Boolean): Boolean =
+        validFence(MuseDecision.ALLOW_ONCE, nowEpochMs, sourceFresh) &&
+            actionClass == "A4" && description.isNotBlank()
 }
 
 /** Never infer a valid approval from a green worker heartbeat. */
