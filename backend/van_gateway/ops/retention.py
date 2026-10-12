@@ -135,6 +135,19 @@ POLICIES: tuple[TablePolicy, ...] = (
     _p("capability_registry", _OWNER, note="Declarations. Withdrawal is recorded, not deleted."),
     _p("sqlite_sequence", _OWNER, note="SQLite's own AUTOINCREMENT bookkeeping."),
 
+    # ---- shared Muse owner interaction (migration 31) -----------------------
+    # These records are identity/receipt fences, not a disposable polling cache.
+    # Age-pruning a consumed command or source watermark would permit a retry to
+    # look new; explicit owner archival must preserve equivalent tombstones.
+    _p("muse_sources", _OWNER,
+       note="Keyed source sequence and digest prevent old snapshots becoming fresh after a prune."),
+    _p("muse_sessions", _OWNER,
+       note="Owner conversations and immutable task/scope bindings; session reuse must not erase lineage."),
+    _p("muse_approvals", _OWNER,
+       note="Consumed or superseded permission identities cannot be resurrected by retention."),
+    _p("muse_commands", _OWNER,
+       note="Durable owner intent and cross-client receipts prevent duplicate execution after lost replies."),
+
     # ---- evidence -----------------------------------------------------------
     _p("action_executions", _EV, "updated_at_unix_ms"),
     _p("research_evidence", _EV, "retrieved_at_unix_ms"),

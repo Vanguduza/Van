@@ -144,6 +144,14 @@ class Settings(BaseSettings):
     # forwards typed owner commands; it never plans or executes DIAL work. The DIAL-scoped
     # bearer lives in a gateway-side token file and never reaches Android. Off by default:
     # an unconfigured deployment answers 404 on /v1/dial-dev/* rather than inventing state.
+    muse_enabled: bool = False
+    muse_actuation_enabled: bool = False
+    muse_producer_id: str = "van-muse-browser"
+    muse_relay_token_file: str = ""
+    muse_command_signing_key_file: str = ""
+    muse_site_policy_file: str = ""
+    muse_tasks_config_file: str = ""
+
     dial_dev_enabled: bool = False
     dial_dev_base_url: str = ""
     dial_dev_token_file: str = ""

@@ -44,6 +44,8 @@ from van_gateway.dial_dev.attention import DialDevAttentionIngest
 from van_gateway.dial_dev.client import DialDevClient
 from van_gateway.dial_dev.config import ACTIONS_PATH as DIAL_DEV_ACTIONS_PATH, DialDevConfig
 from van_gateway.events.bus import EventBus
+from van_gateway.muse.api import build_muse_router, SPECIAL_POSTS as MUSE_SPECIAL_POSTS, OWNER_MUTATIONS as MUSE_OWNER_MUTATIONS
+from van_gateway.muse.service import MuseService
 from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
 from van_gateway.google.planes import plane_health, summarise
 from van_gateway.google.mesh import GoogleCapabilityRegistry, GoogleCapabilityRouter, GoogleIdentityBroker, GoogleRouteRequest
@@ -922,6 +924,9 @@ def create_app() -> FastAPI:
     app.state.strategy_promotions = strategy_promotions
     app.state.dial_dev_config = dial_dev_config
     app.state.dial_dev_client = dial_dev_client
+    muse_service = MuseService(store, producer_id=settings.muse_producer_id)
+    app.state.muse_service = muse_service
+    app.include_router(build_muse_router(muse_service, settings, auth=auth))
     app.state.dial_dev_attention = dial_dev_attention
     app.include_router(owner_runtime.router)
     app.include_router(build_dial_dev_router(
@@ -1274,6 +1279,7 @@ def create_app() -> FastAPI:
             # VAN-DEV-001 — the one DIAL development mutation. Reads under /v1/dial-dev
             # stay on owner-device authentication without a proof, like every poll.
             or path == DIAL_DEV_ACTIONS_PATH
+            or path in MUSE_OWNER_MUTATIONS
         )
 
     async def enforce_device_proof(request: Request, device_id: str) -> JSONResponse | None:
@@ -1374,6 +1380,10 @@ def create_app() -> FastAPI:
 
     @app.middleware("http")
     async def require_ingress_auth(request: Request, call_next):
+        # Exact Muse relay/Site POST handlers enforce independent scoped credentials.
+        # Neither credential admits ordinary owner-device operations.
+        if request.method == "POST" and request.url.path in MUSE_SPECIAL_POSTS:
+            return await call_next(request)
         # The embedded ARTEMIS browser surface uses a short-lived HttpOnly session
         # minted only after a normal owner-device proof. The one-use launch URL and
         # subsequent cookie-authenticated GETs do not carry Android bearer headers.

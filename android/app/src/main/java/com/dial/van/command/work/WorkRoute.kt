@@ -72,6 +72,7 @@ fun WorkRoute(
     onOpenArtemis: () -> Unit,
     onOpenActivity: () -> Unit,
     onOpenDevelopment: () -> Unit = {},
+    onOpenMuse: () -> Unit = {},
 ) {
     val tokens = LocalVanTokens.current
     val scope = rememberCoroutineScope()
@@ -161,6 +162,12 @@ fun WorkRoute(
                         ) { Text("Approve") }
                     }
                 }
+            }
+        }
+
+        item {
+            OutlinedButton(onClick = onOpenMuse) {
+                Text("Muse — Live Work & Approvals")
             }
         }
 

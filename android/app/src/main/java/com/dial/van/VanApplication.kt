@@ -582,6 +582,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     private fun startEmbodimentEventWatch() {
         appScope.launch {
             eventStream.newRecords.collect { record ->
+                com.dial.van.muse.MuseNotifications.onEvent(this@VanApplication, record.type, record.payloadJson)
                 applyEmbodimentEffect(VanEmbodimentReducer.forMissionEvent(record.type, record.payloadJson))
                 applyEmbodimentEffect(VanEmbodimentReducer.forAttentionEventJson(record.type, record.payloadJson))
                 applyEmbodimentEffect(VanEmbodimentReducer.forTradingEventJson(record.type, record.payloadJson))

@@ -8,7 +8,9 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 30
+from van_gateway.muse.schema import MIGRATION_31
+
+SCHEMA_VERSION = 31
 
 
 MIGRATION_17 = """
@@ -1943,6 +1945,7 @@ MIGRATIONS: dict[int, str] = {
     28: MIGRATION_28,
     29: MIGRATION_29,
     30: MIGRATION_30,
+    31: MIGRATION_31,
 }
 
 
