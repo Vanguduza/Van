@@ -1068,6 +1068,22 @@ class VanGatewayClient(context: Context) {
         JSONObject().put("degraded", JSONArray(rawGet("/v1/degraded")))
     }
 
+    // ------------------------------------------------------- Muse owner interactions
+
+    /**
+     * The VAN Gateway mediates the same canonical Muse event/command ledger as the Site.
+     * No browser cookie, Muse access token, VPN secret or Site token enters Android.
+     * When the server-side qualified adapter is absent, these routes MUST return 503.
+     */
+    suspend fun museOverview(): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/muse/overview")
+    }
+
+    /** A signed device intent; acknowledgement means queued, not approved or executed. */
+    suspend fun museOwnerAction(body: JSONObject): JSONObject = withContext(Dispatchers.IO) {
+        postProved("/v1/muse/actions", body)
+    }
+
     // ------------------------------------------------------- DIAL development projection
 
     /**

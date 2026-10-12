@@ -23,6 +23,7 @@ object VanNavModel {
         "tasks" to VanRoute.WORK,
         "missions" to VanRoute.WORK,
         "activity" to VanRoute.WORK,
+        "muse" to VanRoute.WORK_MUSE,
         "decisions" to VanRoute.ATTENTION,
         "projects" to VanRoute.PROJECTS,
         "browser_automation" to VanRoute.WORK_BROWSER,

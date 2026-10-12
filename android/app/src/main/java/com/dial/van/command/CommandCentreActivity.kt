@@ -59,6 +59,7 @@ import com.dial.van.command.modules.BrowserTasksPage
 import com.dial.van.command.modules.BrowserAutomationModule
 import com.dial.van.command.nav.VanNavModel
 import com.dial.van.command.nav.VanRoute
+import com.dial.van.muse.MuseRoute
 import com.dial.van.command.settings.SettingsNotificationsRoute
 import com.dial.van.command.settings.SettingsRoute
 import com.dial.van.command.settings.SettingsVoiceRoute
@@ -211,6 +212,7 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             onOpenArtemis = { nav.navigate(VanRoute.WORK_ARTEMIS) },
                             onOpenActivity = { nav.navigate(VanRoute.WORK_ACTIVITY) },
                             onOpenDevelopment = { nav.navigate(VanRoute.devHomeRoute()) },
+                            onOpenMuse = { nav.navigate(VanRoute.WORK_MUSE) },
                         )
                     }
                     composable(VanRoute.WORK_ACTIVITY) {
@@ -218,6 +220,9 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                     }
                     composable(VanRoute.WORK_ARTEMIS) {
                         ArtemisConsoleRoute(app, onBack = { nav.popBackStack() })
+                    }
+                    composable(VanRoute.WORK_MUSE) {
+                        MuseRoute(app, onBack = { nav.popBackStack() })
                     }
                     composable(VanRoute.WORK_BROWSER) {
                         val glass = legacyGlass(app)
@@ -256,6 +261,7 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             onOpenArtemis = { nav.navigate(VanRoute.WORK_ARTEMIS) },
                             onOpenActivity = { nav.navigate(VanRoute.WORK_ACTIVITY) },
                             onOpenDevelopment = { nav.navigate(VanRoute.devHomeRoute()) },
+                            onOpenMuse = { nav.navigate(VanRoute.WORK_MUSE) },
                         )
                     }
                     composable(VanRoute.TRADING) {
