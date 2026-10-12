@@ -18,8 +18,6 @@ object MuseNotifications {
         val data = runCatching { JSONObject(payload) }.getOrNull() ?: return
         val eventTime = data.optLong("observed_at_ms")
         if (eventTime <= 0 || System.currentTimeMillis() - eventTime !in 0..300_000L) return
-        val eventTime = data.optLong("observed_at_ms")
-        if (eventTime <= 0 || System.currentTimeMillis() - eventTime !in 0..300_000L) return
         val key = data.optString("approval_id").ifBlank { data.optString("command_id", "muse-watchdog") }
         val manager = NotificationManagerCompat.from(context)
         val id = key.hashCode()

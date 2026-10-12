@@ -152,3 +152,7 @@ Both VAN_MUSE_ENABLED and VAN_MUSE_ACTUATION_ENABLED default false. Source risk 
 ## Original Site integration
 
 Serve client.mjs and muse-live-controls.mjs as same-origin modules and add the custom element inside the existing Muse portal while retaining its task/history/project/inbox pages. Register createMuseBff before generic route handling. Supply the real requireOwner, signOwnerEnvelope, existing fixed authenticated transport, and invokeExistingTask from the original Site. Configure only the server-side public gateway key and exact owner/audience. The current package returns unavailable when these connections are absent. Do not create a lookalike replacement site and call the task complete.
+
+## First exact-head CI corrections
+
+GitHub run 38270400872 on 6462d4e77c3b7a4756a4a5f14a9957a9230c09d0 found two real integration failures: a duplicate `eventTime` local in MuseNotifications.kt and four Muse tables missing retention classification. The full backend suite had 1971 passes and one retention failure; the earlier 155-test subset did not cover that policy. Both are corrected in the following commit. Muse owner intent, consumed permission IDs, immutable bindings and source watermarks are OWNER_STATE to avoid timer-driven replay or history loss. Offline focused retention/Muse tests are rerun before commit; fresh CI still required. No browser control test or runtime deployment is part of these corrections.

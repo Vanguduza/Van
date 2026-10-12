@@ -255,3 +255,10 @@ async def test_site_verification_cannot_turn_native_denial_into_allow(broker):
     assert (await broker.receipt(request['command_id'],'site:owner'))['state']=='SUPERSEDED'
     [command]=await broker.claim()
     assert command['intent']['choice']=='DENY'
+
+
+def test_retention_preserves_muse_replay_and_owner_intent_fences():
+    from van_gateway.ops.retention import BY_TABLE, RetentionClass, RETENTION_DAYS
+    for table in ("muse_sources", "muse_sessions", "muse_approvals", "muse_commands"):
+        assert BY_TABLE[table].retention == RetentionClass.OWNER_STATE
+        assert RETENTION_DAYS[BY_TABLE[table].retention] is None
