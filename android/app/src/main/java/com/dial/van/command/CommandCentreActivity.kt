@@ -85,6 +85,7 @@ import com.dial.van.voice.WakeListenerService
  * and a "More" sheet for Projects/Connected/Settings. Deep links: `van://<route>`.
  */
 class CommandCentreActivity : FragmentActivity() {
+    private val incomingRoutes = kotlinx.coroutines.flow.MutableSharedFlow<String>(replay = 1, extraBufferCapacity = 1)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val app = application as VanApplication
@@ -100,7 +101,7 @@ class CommandCentreActivity : FragmentActivity() {
                 Box(
                     modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
                 ) {
-                    CommandCentreScreen(app, initial)
+                    CommandCentreScreen(app, initial, incomingRoutes)
                 }
             }
         }
@@ -125,11 +126,7 @@ class CommandCentreActivity : FragmentActivity() {
         // rather than a second one threaded in after the fact.
         val route = intent.data?.toString()?.let(VanNavModel::deepLink)
         if (route != null) {
-            startActivity(
-                Intent(this, CommandCentreActivity::class.java)
-                    .putExtra(EXTRA_MODULE, route)
-                    .setData(intent.data),
-            )
+            incomingRoutes.tryEmit(route)
         }
     }
 
@@ -155,13 +152,18 @@ private val PRIMARY_DESTINATIONS = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun CommandCentreScreen(app: VanApplication, initial: String) {
+internal fun CommandCentreScreen(app: VanApplication, initial: String, incomingRoutes: kotlinx.coroutines.flow.Flow<String> = kotlinx.coroutines.flow.emptyFlow()) {
     val viewModel: CommandCentreViewModel = viewModel()
     // Synchronous, not a LaunchedEffect: NavHost reads `viewModel.startDestination` once, at
     // its own first composition, so the fresh-vs-restored decision has to be settled before
     // that — a `start` called from a side effect would run one frame too late.
     remember(viewModel) { viewModel.also { it.start(initial) } }
     val nav = rememberNavController()
+    LaunchedEffect(incomingRoutes, nav) {
+        incomingRoutes.collect { route ->
+            if (VanRoute.isKnown(route)) nav.navigate(route) { launchSingleTop = true; restoreState = true }
+        }
+    }
     val currentRoute by viewModel.currentRoute.collectAsState()
     var moreSheetOpen by remember { mutableStateOf(false) }
 
@@ -223,6 +225,9 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                     }
                     composable(VanRoute.WORK_MUSE) {
                         MuseRoute(app, onBack = { nav.popBackStack() })
+                    }
+                    composable(VanRoute.WORK_MUSE_APPROVAL, arguments = listOf(navArgument("approvalId") { type = NavType.StringType })) { entry ->
+                        MuseRoute(app, onBack = { nav.popBackStack() }, initialApprovalId = entry.arguments?.getString("approvalId"))
                     }
                     composable(VanRoute.WORK_BROWSER) {
                         val glass = legacyGlass(app)

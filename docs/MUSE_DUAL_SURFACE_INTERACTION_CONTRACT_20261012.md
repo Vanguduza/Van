@@ -1,6 +1,6 @@
 # Muse dual-surface owner interaction — implementation contract (2026-10-12)
 
-**Status:** implementation candidate, not qualified or merged. Owner requirement: the mobile implementation is inside the existing **VAN Android app** (`com.dial.van`, Jetpack Compose); the private **DIAL Work Tracker Site** must independently expose **the same live capabilities**. The Site is not a WebView substitute for native Android and Android is not an embedded Site.
+**Status:** implementation candidate, not qualified or merged. The current source and remaining deployment gates are recorded in `docs/project-state/MUSE_DUAL_SURFACE_CANDIDATE_20261012.md`; earlier initial-stage notes below are historical and do not supersede that evidence.  Owner requirement: the mobile implementation is inside the existing **VAN Android app** (`com.dial.van`, Jetpack Compose); the private **DIAL Work Tracker Site** must independently expose **the same live capabilities**. The Site is not a WebView substitute for native Android and Android is not an embedded Site.
 
 ## Authority and placement
 

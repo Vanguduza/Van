@@ -1084,6 +1084,49 @@ class VanGatewayClient(context: Context) {
         postProved("/v1/muse/actions", body)
     }
 
+    suspend fun museChallenge(body: JSONObject): JSONObject = withContext(Dispatchers.IO) {
+        postProved("/v1/muse/challenge", body)
+    }
+
+    suspend fun museReceiptByKey(key: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/muse/commands/by-key/${encodeSegment(key)}")
+    }
+
+    suspend fun museReceipt(commandId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/muse/commands/${encodeSegment(commandId)}")
+    }
+
+    suspend fun museTasks(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/muse/tasks") }
+
+    suspend fun museTaskCall(operation: String, arguments: JSONObject): JSONObject = withContext(Dispatchers.IO) {
+        postProved("/v1/muse/tasks/query", JSONObject().put("operation", operation).put("arguments", arguments))
+    }
+
+    /** Foreground stream. The caller owns reconnect and only advances after applying a frame. */
+    fun museEvents(after: Long): Flow<com.dial.van.muse.MuseEventParser.Event> = callbackFlow {
+        val connection = open("$baseUrl/v1/muse/events?after=${after.coerceAtLeast(0)}")
+        val reader = launch(Dispatchers.IO) {
+            try {
+                connection.requestMethod = "GET"
+                applyIngressAuth(connection)
+                connection.setRequestProperty("Accept", "text/event-stream")
+                connection.connectTimeout = 15_000
+                connection.readTimeout = 75_000
+                val code = connection.responseCode
+                if (code !in 200..299) throw GatewayHttpException(code, "Muse stream unavailable")
+                val parser = com.dial.van.muse.MuseEventParser()
+                connection.inputStream.bufferedReader().use { lines ->
+                    while (true) {
+                        val line = lines.readLine() ?: break
+                        parser.feed(line)?.let { send(it) }
+                    }
+                }
+                close()
+            } catch (exc: Throwable) { close(exc) }
+        }
+        awaitClose { runCatching { connection.disconnect() }; reader.cancel() }
+    }
+
     // ------------------------------------------------------- DIAL development projection
 
     /**

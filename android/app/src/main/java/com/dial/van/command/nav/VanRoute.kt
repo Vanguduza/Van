@@ -28,6 +28,8 @@ object VanRoute {
     const val WORK_ACTIVITY = "work/activity"
     const val WORK_ARTEMIS = "work/artemis"
     const val WORK_MUSE = "work/muse"
+    const val WORK_MUSE_APPROVAL = "work/muse/approvals/{approvalId}"
+    fun museApprovalRoute(id: String): String = "work/muse/approvals/${encode(id)}"
     const val WORK_BROWSER = "work/browser"
     const val WORK_BROWSER_TASKS = "work/browser/tasks"
     const val WORK_BROWSER_ESCALATIONS = "work/browser/escalations"
@@ -91,7 +93,7 @@ object VanRoute {
 
     /** Every template this app's `NavHost` declares a `composable` for. */
     val ALL_TEMPLATES: List<String> = listOf(
-        HOME, ATTENTION, WORK, WORK_ACTIVITY, WORK_ARTEMIS, WORK_MUSE, WORK_BROWSER, WORK_BROWSER_TASKS, WORK_BROWSER_ESCALATIONS,
+        HOME, ATTENTION, WORK, WORK_ACTIVITY, WORK_ARTEMIS, WORK_MUSE, WORK_MUSE_APPROVAL, WORK_BROWSER, WORK_BROWSER_TASKS, WORK_BROWSER_ESCALATIONS,
         WORK_BROWSER_SESSIONS, WORK_BROWSER_POLICY, WORK_MISSION_TEMPLATE, TRADING, MEMORY,
         PROJECTS, PROJECT_DETAIL_TEMPLATE, CONNECTED, SETTINGS,
         SETTINGS_VOICE, SETTINGS_NOTIFICATIONS,
@@ -113,6 +115,7 @@ object VanRoute {
         WORK_ACTIVITY to WORK,
         WORK_ARTEMIS to WORK,
         WORK_MUSE to WORK,
+        WORK_MUSE_APPROVAL to WORK_MUSE,
         WORK_BROWSER to WORK,
         WORK_BROWSER_TASKS to WORK_BROWSER,
         WORK_BROWSER_ESCALATIONS to WORK_BROWSER,
