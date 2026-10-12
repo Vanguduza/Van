@@ -3,7 +3,7 @@ globalThis.crypto ??= webcrypto;
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createMuseBff,canonical,digest} from './bff.mjs';
-import {MuseClient,sourceFresh} from './client.mjs';
+import {MuseClient,sourceFresh,mayDecideApproval} from './client.mjs';
 const site='https://fixture.chatgpt.site',subject='user:fixture',audience='fixture-site';
 const pair=await crypto.subtle.generateKey('Ed25519',true,['sign','verify']);
 const publicJwk=await crypto.subtle.exportKey('jwk',pair.publicKey);
@@ -19,3 +19,22 @@ test('unrelated service operations are not admitted',async()=>{const r=await fix
 test('expired native attestation is refused',async()=>{const r=await fixture().handle(new Request(site+'/api/muse/van-owner',{method:'POST',body:JSON.stringify(await request({expires_at_ms:99999}))}));assert.equal(r.status,403);});
 test('client retry retains its exact intent',async()=>{const bodies=[];const client=new MuseClient({fetcher:async(url,opt)=>{bodies.push(opt.body);if(bodies.length===1)throw Error('fixture lost reply');return new Response(JSON.stringify({command_id:'musecmd_fixture',state:'QUEUED'}));}});const action={idempotency_key:'same-request',action:'SEND_MESSAGE',text:'fixture'};await assert.rejects(client.send(action));await client.send(action);assert.equal(bodies[0],bodies[1]);});
 test('stale observation is never shown as live',()=>{assert.equal(sourceFresh({relay:{last_source_at_ms:1,state:'live'},health:{state:'GREEN'},watchdog:{state:'GREEN'}},90002),false);});
+
+test('health unobserved never unlocks Site controls even when relay is fresh',()=>{
+ const snapshot={relay:{last_source_at_ms:1000,state:'live'},health:{state:'UNOBSERVED'},watchdog:{state:'GREEN'},control_admitted:true};
+ assert.equal(sourceFresh(snapshot,1200),false);
+ assert.equal(sourceFresh({...snapshot,health:{state:'GREEN'},watchdog:{state:'DEGRADED'}},1200),false);
+ assert.equal(sourceFresh({...snapshot,health:{state:'GREEN'}},1200),true);
+});
+test('Site approval choices require exact provider prompt identity and scope',()=>{
+ const p={id:'approval-1',session_id:'session-1',thread_id:'thread-1',task_id:'task-1',scope_binding_sha256:'a'.repeat(64),action_fingerprint:'f'.repeat(64),control_generation:2,revision:1,expires_at_epoch_ms:5000,action_class:'A2',description:'Read a project file',state:'AWAITING_OWNER',allowed_actions:['ALLOW_ONCE','DENY']};
+ assert.equal(mayDecideApproval(p,'ALLOW_ONCE',true,1000),true);
+ assert.equal(mayDecideApproval({...p,scope_binding_sha256:'bad'},'ALLOW_ONCE',true,1000),false);
+ assert.equal(mayDecideApproval({...p,control_generation:0},'DENY',true,1000),false);
+ assert.equal(mayDecideApproval({...p,revision:0},'ALLOW_ONCE',true,1000),false);
+ assert.equal(mayDecideApproval({...p,action_fingerprint:'changed'},'DENY',true,1000),false);
+ assert.equal(mayDecideApproval({...p,action_class:'A5'},'ALLOW_ONCE',true,1000),false);
+ assert.equal(mayDecideApproval({...p,action_class:'A5'},'DENY',true,1000),true);
+ assert.equal(mayDecideApproval(p,'ALLOW_ONCE',false,1000),false);
+ assert.equal(mayDecideApproval(p,'ALLOW_ONCE',true,5001),false);
+});
