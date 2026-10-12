@@ -156,3 +156,34 @@ Serve client.mjs and muse-live-controls.mjs as same-origin modules and add the c
 ## First exact-head CI corrections
 
 GitHub run 38270400872 on 6462d4e77c3b7a4756a4a5f14a9957a9230c09d0 found two real integration failures: a duplicate `eventTime` local in MuseNotifications.kt and four Muse tables missing retention classification. The full backend suite had 1971 passes and one retention failure; the earlier 155-test subset did not cover that policy. Both are corrected in the following commit. Muse owner intent, consumed permission IDs, immutable bindings and source watermarks are OWNER_STATE to avoid timer-driven replay or history loss. Offline focused retention/Muse tests are rerun before commit; fresh CI still required. No browser control test or runtime deployment is part of these corrections.
+
+
+## Continuation evidence — 2026-10-12 (Site relay and dual-client controls)
+
+**Still a draft candidate; no release or live provider permission grant was qualified.**
+
+### Site relay validation and recovery
+
+- The original private Site returned HTTP 422 with `INVALID_ARGUMENT`: `progress_summary must contain 0–4000 printable characters.` The durable outbound event sequence **852** contained 177 task records and a maximum preview length of 8,065 characters.
+- The dedicated relay source was cloned into a new immutable release rather than modified in place. Preview normalization is per-record, capped below the 4,000-character limit, with explicit coverage notes and full captured artifacts preserved separately.
+- Isolated tests against all 177 records passed: 177 records retained, no invalid previews, maximum preview 3,888 characters. The original rejected event was retained under the root-protected repair quarantine, SHA-256 `ce001e797c64b267324755f2dc2b7cc89f828f7a044d8c459961e1feeec998fc`. The corrected event retained sequence 852 but uses a distinct immutable event ID; later acknowledged Site source observations resumed. No historical task was deleted.
+- Active dedicated relay release: `/opt/dial-muse-site/releases/muse-site-owner-v1-preview-contract-20261012`; corrected relay script SHA-256 `d66eaa69468327d39fb18350fd0a5ae215fb6696847a711fc900efb3261ac1a3`. Only `dial-muse-site-relay.service` was stopped/started for this specific release change.
+- The recorded before/after IP address, routes and policy-rule hashes matched. A raw nftables ruleset hash varied during the observation interval and is **not** evidence of a firewall configuration change or a completed network-invariance certification. No VPN/firewall/routing/browser configuration was intentionally mutated.
+- The relay is **receiving** again, not operationally qualified: Global DIAL native host health reports `MUSE_HOST_UNREACHABLE`; the fixed SSH route to the existing VAN host timed out. The existing `wg-dial` interface is up and the route to `10.77.0.4` is present, but this does not prove a live WireGuard peer or a healthy Muse browser.
+- A short-lived observation exposed a separate original-Site logic risk: controls may appear available when the source is fresh but native session health is `UNOBSERVED`. Later source observations reported `NOT_READY` / `DEGRADED` and the original Site disabled controls. A runtime health-gate tightening operation was **blocked before execution** by the owner execution approval system and was not rerouted; it is **not deployed**. The candidate Site client requires both health and watchdog GREEN, independently of control admission.
+
+### PR 95 source improvements and unit qualification
+
+- Initial Android issue corrections: Android 13+ notification permission check, actual Compose use of typed live approval/source-health fences. Six exact-head checks succeeded on `7fa406e9f7909dd96c722c4f0b83e406c21f385a`; these do not qualify browser interaction.
+- Added DOM-identity fencing for visually identical replacement Muse approval prompts, rejects persistent/Always Allow controls, requires current complete source observations before browser actuation, and refuses to equate a disappeared button with an actual provider-confirmed permission grant.
+- Added Site presentation checks for exact prompt binding/revision/fingerprint and refusal when source health or watchdog is degraded.
+- At candidate source `b5320201b19a835b5a29aee3da6c2a03847da640`, **26/26 isolated Node tests passed** on DIAL control (browser adapter, signed protocol and Site BFF/client tests). These use fakes and contain no real Muse clicks. The new exact-head CI/Zuul evidence, live session acceptance, Android device delivery and original Site publication remain separate requirements.
+- No branch merge, VAN gateway deployment, Android APK installation, original Site publication, VPN change, or new browser actuator activation was performed by these source corrections.
+
+### Required acceptance order
+
+1. Restore and verify the existing VAN Muse host/watchdog via approved unchanged transport; do **not** rewrite VPN, DNS, WireGuard, routing, firewall, VNC or browser profiles in response to the outage.
+2. Qualify the live browser source adapter with realistic provider prompt fixtures, exact mutable DOM identity, persistent-toggle rejection, and independent provider-side outcome confirmation. Only then admit permission actuation.
+3. Wire and publish the BFF + live web controls to the **original** private ChatGPT Site via its actual authenticated identity and signed DIAL transport. Do not deploy a lookalike replacement.
+4. Qualify signed VAN gateway producer/command path, S24 Android A4 biometric approval, live Web/Android message convergence and push delivery with traceable receipts.
+5. Reconcile concurrent VAN PR lineages and Zuul qualification, then owner-accept the exact release. Do not mark `QUALIFIED` from unit tests or Site relay liveness.
