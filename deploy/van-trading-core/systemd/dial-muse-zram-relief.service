@@ -1,0 +1,15 @@
+[Unit]
+Description=DIAL Muse host compressed-memory resilience (two 2 GiB LZ4 devices)
+Documentation=man:zramctl(8)
+After=local-fs.target systemd-modules-load.service
+Before=docker.service meta-muse-owner-browser.service meta-muse-browser.service vati-browser-harness.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/libexec/dial-muse-zram-relief.py
+RemainAfterExit=yes
+TimeoutStartSec=90
+# Intentionally no ExecStop: swapoff could force an OOM on a pressured host.
+
+[Install]
+WantedBy=multi-user.target
