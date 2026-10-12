@@ -68,7 +68,7 @@ export class MuseBrowserAdapter {
     assert(choices.ALLOW_ONCE&&choices.DENY,'PROMPT_CHOICES_CHANGED');
     // An embedded checked toggle could turn a one-time click into a permanent grant.
     // If the provider surfaces a remember/always-allow option, do not guess its state.
-    const persistentControls=await handle.$('input[type="checkbox"],[role="checkbox"],[role="switch"],[aria-checked]');
+    const persistentControls=await handle.$$('input[type="checkbox"],[role="checkbox"],[role="switch"],[aria-checked]');
     assert(!persistentControls.length&&!/\b(always allow|always approve|remember (?:this|my)|don.t ask again|persist(?:ent)? permission)\b/i.test(text),'PERSISTENT_PERMISSION_NOT_SUPPORTED');
     const fingerprint=digest({description:text,choices:Object.keys(choices).sort(),task_id:binding.task_id,scope_binding_sha256:binding.scope_binding_sha256});
     let id=null,entry=null;
