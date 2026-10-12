@@ -15,6 +15,8 @@ class MuseInteractionProtocolTest {
         revision = 5L,
         expiresAtEpochMs = now + 1000L,
         state = "AWAITING_OWNER",
+        actionClass = "A2",
+        description = "Read a project file",
         allowed = setOf(MuseDecision.ALLOW_ONCE, MuseDecision.DENY),
     )
 
@@ -32,6 +34,9 @@ class MuseInteractionProtocolTest {
         assertFalse(prompt(now).copy(revision = 0L).canAct(MuseDecision.ALLOW_ONCE, now, true))
         assertFalse(prompt(now).copy(actionFingerprint = "not-a-digest").canAct(MuseDecision.ALLOW_ONCE, now, true))
         assertFalse(prompt(now).canAct(MuseDecision.ALLOW_ONCE, now + 1001L, true))
+        assertFalse(prompt(now).copy(actionClass = "A4").canAct(MuseDecision.ALLOW_ONCE, now, true))
+        assertFalse(prompt(now).copy(actionClass = "UNCLASSIFIED").canAct(MuseDecision.ALLOW_ONCE, now, true))
+        assertTrue(prompt(now).copy(actionClass = "A4").canAct(MuseDecision.DENY, now, true))
     }
 
     @Test fun onlyProviderOfferedChoiceCanBeSelected() {

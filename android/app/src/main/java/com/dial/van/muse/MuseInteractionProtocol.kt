@@ -18,6 +18,8 @@ data class MuseApprovalFence(
     val revision: Long,
     val expiresAtEpochMs: Long,
     val state: String,
+    val actionClass: String,
+    val description: String,
     val allowed: Set<MuseDecision>,
 ) {
     fun canAct(choice: MuseDecision, nowEpochMs: Long, sourceFresh: Boolean): Boolean =
@@ -25,7 +27,9 @@ data class MuseApprovalFence(
             approvalId.isNotBlank() && sessionId.isNotBlank() && taskId.isNotBlank() &&
             actionFingerprint.matches(Regex("^[a-fA-F0-9]{64}$")) &&
             controlGeneration > 0L && revision > 0L &&
-            expiresAtEpochMs > nowEpochMs
+            expiresAtEpochMs > nowEpochMs &&
+            (choice == MuseDecision.DENY ||
+                (actionClass in setOf("A1", "A2", "A3") && description.isNotBlank()))
 }
 
 /** Never infer a valid approval from a green worker heartbeat. */

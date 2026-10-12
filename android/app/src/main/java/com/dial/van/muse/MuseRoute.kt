@@ -73,6 +73,8 @@ private fun JSONObject.approvalFence(): MuseApprovalFence {
         revision = optLong("revision"),
         expiresAtEpochMs = optLong("expires_at_epoch_ms"),
         state = optString("state"),
+        actionClass = optString("action_class", "UNCLASSIFIED"),
+        description = optString("description"),
         allowed = allowed,
     )
 }
@@ -95,6 +97,9 @@ fun MuseRoute(app: VanApplication, onBack: () -> Unit) {
     var busy by remember { mutableStateOf(false) }
     var draft by rememberSaveable { mutableStateOf("") }
     var selectedProject by rememberSaveable { mutableStateOf("") }
+    var selectedThread by rememberSaveable { mutableStateOf("") }
+    var messageIdempotencyKey by rememberSaveable { mutableStateOf("") }
+    var pendingApprovals by remember { mutableStateOf(emptySet<String>()) }
 
     // Foreground-only observation: Android background notifications use the existing
     // VAN notification channel, never an always-on mobile polling service.
@@ -107,6 +112,12 @@ fun MuseRoute(app: VanApplication, onBack: () -> Unit) {
             }
             delay(10_000L)
         }
+    }
+
+    LaunchedEffect(current) {
+        // Keep uncertain approvals blocked until the provider actually advances/removes them.
+        val observedIds = current?.array("approvals").orEmpty().map { it.optString("id") }.toSet()
+        pendingApprovals = pendingApprovals.intersect(observedIds)
     }
 
     val status = current?.sourceHealth()
@@ -169,7 +180,7 @@ fun MuseRoute(app: VanApplication, onBack: () -> Unit) {
                                         .put("action", "CANCEL_TASK")
                                         .put("job_id", jobId)
                                         .put("confirmed_job_id", jobId)
-                                        .put("idempotency_key", UUID.randomUUID().toString()))
+                                        .put("idempotency_key", UUID.nameUUIDFromBytes(("muse-cancel:" + jobId).toByteArray()).toString()))
                                 }) { Text("Cancel this task") }
                             }
                         }
@@ -177,7 +188,19 @@ fun MuseRoute(app: VanApplication, onBack: () -> Unit) {
                 }
             }
             Pane.CONVERSATION -> {
+                val threads = current?.array("threads").orEmpty()
+                if (threads.isEmpty()) item { Text("No bound Muse conversation thread is available.") }
+                items(threads, key = { "thread-${it.optString("id")}" }) { thread ->
+                    OutlinedButton(
+                        onClick = { selectedThread = thread.optString("id") },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text((if (selectedThread == thread.optString("id")) "✓ " else "") +
+                            thread.optString("title", "Muse conversation"))
+                    }
+                }
                 val messages = current?.array("messages").orEmpty()
+                    .filter { selectedThread.isNotBlank() && it.optString("thread_id") == selectedThread }
                 items(messages, key = { "message-${it.optString("id")}" }) { message ->
                     Card {
                         Column(Modifier.fillMaxWidth().padding(12.dp)) {
@@ -189,17 +212,26 @@ fun MuseRoute(app: VanApplication, onBack: () -> Unit) {
                 item {
                     OutlinedTextField(
                         value = draft,
-                        onValueChange = { draft = it.take(4000) },
+                        onValueChange = { updated ->
+                            draft = updated.take(4000)
+                            messageIdempotencyKey = ""
+                        },
                         label = { Text("Message Muse") },
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 2,
                     )
-                    Button(enabled = fresh && !busy && draft.isNotBlank(), onClick = {
-                        submit(JSONObject()
-                            .put("action", "SEND_MESSAGE")
-                            .put("text", draft)
-                            .put("idempotency_key", UUID.randomUUID().toString()))
-                    }) { Text("Send") }
+                    Button(
+                        enabled = fresh && !busy && draft.isNotBlank() && selectedThread.isNotBlank(),
+                        onClick = {
+                            val key = messageIdempotencyKey.ifBlank { UUID.randomUUID().toString() }
+                            messageIdempotencyKey = key
+                            submit(JSONObject()
+                                .put("action", "SEND_MESSAGE")
+                                .put("thread_id", selectedThread)
+                                .put("text", draft)
+                                .put("idempotency_key", key))
+                        },
+                    ) { Text("Send") }
                 }
             }
             Pane.APPROVALS -> {
@@ -213,10 +245,15 @@ fun MuseRoute(app: VanApplication, onBack: () -> Unit) {
                             Text(obj.optString("description", "The provider supplied no description."))
                             Text("Task: ${fence.taskId}")
                             Text("Scope: ${obj.optString("scope", "Unverified")}")
+                            if (fence.actionClass !in setOf("A1", "A2", "A3")) {
+                                Text("Approval needs a separate verified biometric or provider-native step.",
+                                    color = MaterialTheme.colorScheme.error)
+                            }
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 listOf(MuseDecision.ALLOW_ONCE, MuseDecision.DENY).forEach { choice ->
                                     val permitted = fence.canAct(choice, System.currentTimeMillis(), fresh)
-                                    OutlinedButton(enabled = permitted && !busy, onClick = {
+                                    OutlinedButton(enabled = permitted && !busy && fence.approvalId !in pendingApprovals, onClick = {
+                                        pendingApprovals = pendingApprovals + fence.approvalId
                                         submit(JSONObject()
                                             .put("action", "DECIDE_APPROVAL")
                                             .put("choice", choice.name)
@@ -227,7 +264,7 @@ fun MuseRoute(app: VanApplication, onBack: () -> Unit) {
                                             .put("action_fingerprint", fence.actionFingerprint)
                                             .put("control_generation", fence.controlGeneration)
                                             .put("expected_revision", fence.revision)
-                                            .put("idempotency_key", UUID.randomUUID().toString()))
+                                            .put("idempotency_key", UUID.nameUUIDFromBytes(("muse-approval:" + fence.approvalId + ":" + fence.revision + ":" + choice.name).toByteArray()).toString()))
                                     }) { Text(if (choice == MuseDecision.ALLOW_ONCE) "Allow once" else "Deny") }
                                 }
                             }

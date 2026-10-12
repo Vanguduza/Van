@@ -35,7 +35,7 @@ The observer should read the existing provider DOM/accessibility tree and inspec
 
 ## Owner actions and admission
 
-A verified owner chooses from **provider-offered** options. Initially expose `ALLOW_ONCE` and `DENY`; `ALWAYS_ALLOW` is **not** a default or an implicit permission. Explicit high-risk actions use VAN's existing A4 biometric challenge on Android; the Site requires equivalently strong owner step-up, not just a logged-in Site session.
+A verified owner chooses from **provider-offered** options. The candidate refuses ALLOW_ONCE for A4/unclassified requests pending a qualified biometric challenge; it never downgrades such prompts to ordinary device proof. Initially expose `ALLOW_ONCE` and `DENY`; `ALWAYS_ALLOW` is **not** a default or an implicit permission. Explicit high-risk actions use VAN's existing A4 biometric challenge on Android; the Site requires equivalently strong owner step-up, not just a logged-in Site session.
 
 A decision envelope binds: owner principal + verified device/session, exact approval ID, task/project/scope, `session_id`, action fingerprint, control generation, `expected_revision`, `idempotency_key`, expiry and choice. The gateway verifies device proof and appropriate A4 evidence; the broker atomically compares this fence against the *currently rendered provider prompt*, dispatches exactly once, and requires a subsequent provider-state observation before reporting completion. Refuse stale generation, changed prompt, expired approval, mismatched project/branch, reused idempotency key with different body, unqualified session or unreliable capture. Never silently retry a click on uncertain outcome.
 
@@ -45,7 +45,7 @@ Conversation messages, project creation, task submission, scope previews, contin
 
 - `Work → Muse` opens a **Jetpack Compose** workspace with conversations, current tasks, approval cards, project picker and captured results. Do not package a second Muse APK or add a WebView wrapper.
 - Read via the already paired VAN gateway and its pinned mTLS/device-token path. Mutations use existing `postProved`, requiring a valid device proof; A4 retains biometric binding. Nothing sends the Site service credential to Android.
-- Use a foreground SSE/stream with durable cursor/reconnect and a bounded fallback fetch, not rapid polling while the app is backgrounded. Show source age and wait/no-data states. Native push/notification taps deep link `van://work/muse` then re-fetch the *current* approval before offering actions.
+- Use a foreground SSE/stream with durable cursor/reconnect and a bounded fallback fetch, not rapid polling while the app is backgrounded. This candidate currently has a screen-scoped 10-second fetch; SSE and native notification transport are not yet implemented. Show source age and wait/no-data states. Native push/notification taps deep link `van://work/muse` then re-fetch the *current* approval before offering actions.
 - This branch establishes the screen/protocol baseline but `/v1/muse/overview` and `/v1/muse/actions` are **not yet implemented in the VAN gateway**; the native UI intentionally fails closed and cannot claim live permissions. This is not a production-ready handoff.
 
 ## DIAL Work Tracker Site
