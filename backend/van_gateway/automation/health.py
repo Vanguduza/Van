@@ -11,6 +11,9 @@ fabric is merely switched off.
 from __future__ import annotations
 
 import json
+import hashlib
+import marshal
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -75,6 +78,7 @@ class AutomationHealthApi:
         *,
         degraded: DegradedRegistry,
         hot_index: HotWorkflowIndex | None = None,
+        computer_use: ComputerInteractionFabric | None = None,
     ) -> None:
         self.store = store
         self.settings = settings
@@ -112,7 +116,7 @@ class AutomationHealthApi:
         # health surface is here rather than in its own module because the three fabrics
         # degrade on the same terms and an owner asking "what can VAN act through?" should
         # not have to know they were written separately.
-        self.computer_use = ComputerInteractionFabric(store)
+        self.computer_use = computer_use or ComputerInteractionFabric(store)
         self.router = APIRouter(prefix="/v1", tags=["automation-browser"])
         self._install_routes()
 
@@ -221,6 +225,42 @@ class AutomationHealthApi:
             },
         }
 
+    def computer_source_identity(self) -> dict[str, Any]:
+        """Read checked-out source separately from the functions actually loaded here."""
+        checked = {"commit": None, "dirty": None, "state": "UNAVAILABLE"}
+        try:
+            head = subprocess.run(
+                ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, capture_output=True,
+                text=True, timeout=3, check=True,
+            ).stdout.strip()
+            dirty = subprocess.run(
+                ["git", "status", "--porcelain"], cwd=REPO_ROOT, capture_output=True,
+                text=True, timeout=3, check=True,
+            ).stdout
+            checked = {"commit": head, "dirty": bool(dirty), "state": "OBSERVED"}
+        except (OSError, subprocess.SubprocessError):
+            pass
+        methods = {"fabric.execute_operation": self.computer_use.execute_operation}
+        methods.update({f"worker.{surface.value}.execute": worker.execute
+                        for surface, worker in self.computer_use.worker_impls.items()})
+        loaded = {}
+        for name, method in methods.items():
+            code = getattr(method, "__code__", None)
+            item = {"loaded_code_sha256": None, "current_source_file_sha256": None}
+            if code is not None:
+                item["loaded_code_sha256"] = hashlib.sha256(marshal.dumps(code)).hexdigest()
+                try:
+                    item["current_source_file_sha256"] = hashlib.sha256(
+                        Path(code.co_filename).read_bytes()
+                    ).hexdigest()
+                except OSError:
+                    pass
+            loaded[name] = item
+        return {"checked_out": checked, "loaded_methods": loaded,
+                "loaded_digest_kind": "PYTHON_CODE_OBJECT_SHA256",
+                "qualified_source": None,
+                "authority": "RUNTIME_OBSERVATION_ONLY"}
+
     async def computer_use_health(self) -> dict[str, Any]:
         """P2-CU-001 — which surfaces can be acted on, and what happens if one cannot.
 
@@ -228,12 +268,26 @@ class AutomationHealthApi:
         is the difference between a capability that is honestly unavailable and one a
         matrix lists as BUILT because the code compiles.
         """
-        surfaces = self.computer_use.surfaces()
+        registered = self.computer_use.surfaces()
+        surfaces = dict(registered)
+        worker_status: dict[str, Any] = {}
+        for surface, worker in self.computer_use.worker_impls.items():
+            status_fn = getattr(worker, "status", None)
+            if status_fn is None:
+                worker_status[surface.value] = {"state": "UNKNOWN", "ready": False}
+                surfaces[surface.value] = False
+                continue
+            status = await status_fn()
+            worker_status[surface.value] = status
+            surfaces[surface.value] = bool(status.get("ready"))
         available = sorted(name for name, ready in surfaces.items() if ready)
         self.degraded.set(DegradedCode.COMPUTER_USE_NO_SURFACE_WORKER, not available)
         return {
             "capability": "computer_interaction_fabric",
+            "registered_surfaces": registered,
+            "source_identity": self.computer_source_identity(),
             "surfaces": surfaces,
+            "worker_status": worker_status,
             "surfaces_with_a_worker": available,
             # A refusal before the ledger write, so an operation nobody can perform never
             # appears as a PENDING row the owner would read as queued work.

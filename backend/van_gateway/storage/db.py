@@ -10,7 +10,7 @@ import aiosqlite
 
 from van_gateway.muse.schema import MIGRATION_31
 
-SCHEMA_VERSION = 31
+SCHEMA_VERSION = 32
 
 
 MIGRATION_17 = """
@@ -612,6 +612,8 @@ CREATE TABLE IF NOT EXISTS visual_acceptances (
 CREATE INDEX IF NOT EXISTS idx_visual_acceptances_latest
   ON visual_acceptances(verified_at DESC);
 """
+
+REV3_COMPUTER_WORKER_MIGRATION = '\n-- OMV-002/009 — a computer worker is an executor, not authority. A durable lease generation\n-- fences stale executors after restart/preemption before they can publish completion.\nCREATE TABLE IF NOT EXISTS computer_worker_leases (\n  surface TEXT PRIMARY KEY,\n  lease_id TEXT NOT NULL,\n  generation INTEGER NOT NULL,\n  holder_id TEXT NOT NULL,\n  expires_at_ms INTEGER NOT NULL,\n  released_at_ms INTEGER,\n  updated_at_ms INTEGER NOT NULL\n);\n\nCREATE TABLE IF NOT EXISTS computer_worker_receipts (\n  receipt_id TEXT PRIMARY KEY,\n  operation_id TEXT NOT NULL,\n  surface TEXT NOT NULL,\n  lease_id TEXT NOT NULL,\n  generation INTEGER NOT NULL,\n  output_sha256 TEXT NOT NULL,\n  exit_code INTEGER,\n  truncated INTEGER NOT NULL DEFAULT 0,\n  created_at_ms INTEGER NOT NULL,\n  FOREIGN KEY(operation_id) REFERENCES computer_operations(operation_id)\n);\nCREATE INDEX IF NOT EXISTS idx_computer_worker_receipts_operation\n  ON computer_worker_receipts(operation_id, created_at_ms);\n'
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -1946,6 +1948,7 @@ MIGRATIONS: dict[int, str] = {
     29: MIGRATION_29,
     30: MIGRATION_30,
     31: MIGRATION_31,
+    32: REV3_COMPUTER_WORKER_MIGRATION,
 }
 
 

@@ -37,6 +37,9 @@ from van_gateway.auth.throttle import GLOBAL_SUBJECT, AuthThrottle, Throttled
 from van_gateway.command.mission_link import CommandMissionLink
 from van_gateway.briefing.service import BriefingService
 from van_gateway.config import get_settings
+from van_gateway.computer_use.api import build_computer_use_router
+from van_gateway.computer_use.fabric import ComputerInteractionFabric, Surface
+from van_gateway.computer_use.worker import DockerComputerConfig, DockerComputerWorker
 from van_gateway.decisions.service import DecisionCreate, DecisionService
 from van_gateway.degraded.registry import DegradedRegistry
 from van_gateway.dial_dev.api import build_dial_dev_router
@@ -459,10 +462,23 @@ def create_app() -> FastAPI:
     )
     automation_registry = AutomationRegistry(store)
     automation_hot_index = HotWorkflowIndex()
+    computer_worker = DockerComputerWorker(DockerComputerConfig(
+        enabled=settings.computer_worker_enabled,
+        image=settings.computer_worker_image,
+        deployment_id=settings.computer_worker_deployment_id,
+        timeout_seconds=settings.computer_worker_timeout_seconds,
+        qualification_file=settings.computer_worker_qualification_file,
+    ))
+    computer_use = ComputerInteractionFabric(
+        store, worker_impls=(
+            {Surface.TERMINAL: computer_worker} if settings.computer_worker_enabled else {}
+        ),
+    )
     # One index, so `/v1/automation/health` reports the index work is routed
     # through rather than an empty copy of it.
     automation_health = AutomationHealthApi(
-        store, settings, degraded=degraded, hot_index=automation_hot_index
+        store, settings, degraded=degraded, hot_index=automation_hot_index,
+        computer_use=computer_use,
     )
     # The dispatcher shares the owner runtime's ActionRuntime and command
     # authority: an automation run must meet the same single final authority
@@ -903,6 +919,7 @@ def create_app() -> FastAPI:
     app.state.orchestrator = orchestrator
     app.state.owner_runtime = owner_runtime
     app.state.automation_health = automation_health
+    app.state.computer_use = computer_use
     app.state.automation = automation
     app.state.temporal_automation = temporal_automation
     app.state.automation_registry = automation_registry
@@ -937,6 +954,7 @@ def create_app() -> FastAPI:
         audit=audit,
     ))
     app.include_router(automation_health.router)
+    app.include_router(build_computer_use_router(computer_use))
     app.include_router(automation.router)
     app.include_router(temporal_automation.router)
     app.include_router(browser.router)
