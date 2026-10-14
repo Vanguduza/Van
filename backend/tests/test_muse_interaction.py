@@ -49,10 +49,24 @@ async def broker(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_migration_keeps_existing_event_sequence(broker):
-    row=await broker.store.fetchone("SELECT MAX(version) AS v FROM schema_migrations")
-    assert row['v']==31
-    assert (await broker.overview())['event_cursor']>0
+async def test_migration_keeps_existing_event_sequence(tmp_path, monkeypatch):
+    import van_gateway.storage.db as db_module
+    store=Store(str(tmp_path/'upgrade.db'))
+    current_version=db_module.SCHEMA_VERSION
+    monkeypatch.setattr(db_module,'SCHEMA_VERSION',31)
+    await store.migrate()
+    service=MuseService(store,producer_id="fixture-browser",now=lambda:NOW,
+        classification_policy=lambda prompt:prompt.action_class)
+    await service.ingest(snapshot())
+    before=(await service.overview())['event_cursor']
+    assert before>0
+    monkeypatch.setattr(db_module,'SCHEMA_VERSION',current_version)
+    await store.migrate()
+    assert (await store.fetchone("SELECT version FROM schema_migrations WHERE version=31"))['version']==31
+    assert (await store.fetchone("SELECT MAX(version) AS v FROM schema_migrations"))['v']==current_version
+    assert (await service.overview())['event_cursor']==before
+    await service.enqueue(action(),'device:owner')
+    assert (await service.overview())['event_cursor']>before
 
 
 @pytest.mark.asyncio

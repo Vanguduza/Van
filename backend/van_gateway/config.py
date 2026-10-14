@@ -21,6 +21,13 @@ def _is_loopback_url(value: str) -> bool:
 
 
 class Settings(BaseSettings):
+    # REV3 S2-07: subordinate typed worker, disabled until image qualification.
+    computer_worker_enabled: bool = False
+    computer_worker_image: str = "van-computer:openmuse-r1"
+    computer_worker_deployment_id: str = "van"
+    computer_worker_timeout_seconds: int = 60
+    computer_worker_qualification_file: str = ""
+
     model_config = SettingsConfigDict(env_prefix="VAN_", env_file=".env", extra="ignore")
 
     app_name: str = "van-gateway"
