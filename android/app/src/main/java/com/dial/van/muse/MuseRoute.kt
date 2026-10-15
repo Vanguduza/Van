@@ -28,7 +28,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
 
-private enum class Pane(val label: String) { CHAT("Chat"), TASKS("Tasks"), APPROVALS("Approvals"), PROJECTS("Projects"), INBOX("Inbox") }
+private enum class Pane(val label: String) { CHAT("Chat"), TASKS("Tasks"), CONTROLS("Resources / sessions"), APPROVALS("Approvals"), PROJECTS("Projects"), INBOX("Inbox") }
 private fun JSONObject.rows(key: String): List<JSONObject> = (optJSONArray(key) ?: JSONArray()).let { a ->
     (0 until a.length()).mapNotNull { a.optJSONObject(it) }
 }
@@ -271,7 +271,8 @@ fun MuseRoute(app: VanApplication, onBack: () -> Unit, initialApprovalId: String
                 items(approvals, key = { it.optString("id") }) { p -> Card { Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Permission requested", style = MaterialTheme.typography.titleLarge)
                     Text(p.optString("description"))
-                    Text("Task: ${p.optString("task_id")}", style = MaterialTheme.typography.bodySmall)
+                    Text("Task: ${p.optString("task_id")} · Session: ${p.optString("session_id")} · Revision: ${p.optLong("revision")}", style = MaterialTheme.typography.bodySmall)
+                    Text("Action: ${p.optString("action_fingerprint")}", style = MaterialTheme.typography.bodySmall)
                     val state = p.optString("state")
                     val fence = remember(p.toString()) { p.approvalFence() }
                     Text(state.replace('_', ' '), style = MaterialTheme.typography.labelMedium)
@@ -291,6 +292,7 @@ fun MuseRoute(app: VanApplication, onBack: () -> Unit, initialApprovalId: String
                     }
                 } } }
             }
+            Pane.CONTROLS -> { item { MuseOwnerControls(app) } }
             Pane.TASKS -> {
                 item { Button(enabled = tasksLive && !busy, onClick = { parentJob = ""; showTaskForm = true }) { Text("New task") } }
                 tasksError?.let { item { Text(it) } }

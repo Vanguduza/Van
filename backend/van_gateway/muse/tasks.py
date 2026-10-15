@@ -12,13 +12,27 @@ import httpx
 from .models import MuseError, canonical, digest
 from .security import protected_read, signer
 
+OWNER_OPERATIONS = frozenset({"dial_owner_contexts", "dial_owner_discover", "dial_owner_profiles", "dial_owner_route", "dial_owner_status", "dial_owner_control", "dial_owner_session", "dial_owner_artifact"})
 READS = frozenset({"muse_get_overview", "muse_get_job", "muse_get_command"})
 WRITES = frozenset({"muse_create_project", "muse_resolve_project", "muse_submit_task", "muse_continue_task", "muse_cancel_task"})
 
 
 def validate_task_call(operation, args):
-    if operation not in READS | WRITES or not isinstance(args, dict) or len(canonical(args)) > 48000:
+    if operation not in READS | WRITES | OWNER_OPERATIONS or not isinstance(args, dict) or len(canonical(args)) > 48000:
         raise MuseError("muse_task_operation_invalid", 422)
+    if operation in OWNER_OPERATIONS:
+        if operation == "dial_owner_contexts":
+            if args: raise MuseError("owner_context_arguments_invalid", 422)
+        elif (set(args) != {"context_ref", "input"} or not isinstance(args["context_ref"], str)
+              or not args["context_ref"] or not isinstance(args["input"], dict)):
+            raise MuseError("owner_control_arguments_invalid", 422)
+        elif operation == "dial_owner_control":
+            control = args["input"]
+            if (control.get("action") not in {"pause", "cancel", "checkpoint", "resume"}
+                    or not isinstance(control.get("request_id"), str) or len(control["request_id"]) < 8):
+                raise MuseError("owner_control_binding_required", 422)
+        elif operation == "dial_owner_session" and args["input"].get("method") not in {"inspect", "view", "takeover", "release", "control"}:
+            raise MuseError("owner_session_method_invalid", 422)
     if operation == "muse_get_overview" and args:
         raise MuseError("muse_task_arguments_invalid", 422)
     if operation == "muse_get_job" and (set(args) != {"job_id"} or not str(args["job_id"]).startswith("muse_")):
