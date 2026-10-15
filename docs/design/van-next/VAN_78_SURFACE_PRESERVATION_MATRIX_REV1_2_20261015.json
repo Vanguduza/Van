@@ -6483,6 +6483,22 @@
       "status": "SPEC_ONLY"
     },
     {
+      "id": "van.next.intel.news-live",
+      "title": "News Live (live headlines, armed releases, latency)",
+      "new_zone": "Trading / Intelligence",
+      "presentation": "navigation_screen",
+      "requirement": "VAN-NX-033",
+      "status": "SPEC_ONLY"
+    },
+    {
+      "id": "van.next.trading.armed-ticket",
+      "title": "Armed news ticket (pre-signed, one tap at release)",
+      "new_zone": "Trading / Terminal",
+      "presentation": "modal_sheet",
+      "requirement": "VAN-NX-033",
+      "status": "SPEC_ONLY"
+    },
+    {
       "id": "van.next.work.flow",
       "title": "Project task flow graph",
       "new_zone": "Work / Spatial Flow",

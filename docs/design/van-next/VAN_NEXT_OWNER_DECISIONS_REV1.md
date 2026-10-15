@@ -3,7 +3,7 @@
 **Record ID:** `VAN-NEXT-OD-REV1-20261015`
 **Status:** `RECORDED_FROM_OWNER_CHAT / AWAITING_OWNER_SIGNATURE`
 **Recorded:** 15 October 2026, from the owner's instructions in a Claude Code session reviewing `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_20261015.md`.
-**Applies to:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_2_20261015.md` and its companion matrix. OD-07…OD-11 were added on 15 October 2026 after the owner reviewed Rev 1.1.
+**Applies to:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_3_20261015.md` and its companion matrix. OD-07…OD-12 were added on 15 October 2026 after the owner reviewed Rev 1.1.
 
 Under the VAN Project Truth Protocol an owner-signed, device-authenticated instruction outranks this record. These decisions bind development packets once the owner signs this record (blueprint §2.1, §17 F0). Until then they are the owner's stated intent, and no trading mandate, live permission or production change follows from them.
 
@@ -21,6 +21,7 @@ Under the VAN Project Truth Protocol an owner-signed, device-authenticated instr
 | OD-09 | "There should be a feature to switch a manual trade to auto." | §7.4.7 Hand to VAN (Protect and manage / Adopt by a strategy) and Take back. |
 | OD-10 | "Add positions to a winning auto trade manually, governed by the trade's risk profile." | §7.4.6: owner-requested add under that trade's strategy budget, scale policy, family envelope and temperament. |
 | OD-11 | "The news feature needs more than one live news feed source and comprehensive analysis and history comparison that actually influences trading decisions." | §8: minimum independent sources per category with cross-checking and health; story analysis; headline episodes and history profiles; decision paths D1–D7. |
+| OD-12 | "Your revised blueprint should have the news bundle that allows live news trading in real time." | §8.10 live news trading bundle: feeds, armed plans, unscheduled-headline classes, owner armed tickets, latency ledger, staged promotion. |
 
 ## Open owner decisions
 
@@ -33,4 +34,7 @@ Under the VAN Project Truth Protocol an owner-signed, device-authenticated instr
 | OQ-06 | Which news, wire and calendar providers to license (vendor review of cost, latency, licence terms) | DU-14a |
 | OQ-07 | Whether the stop re-attach sequence (§7.4.3) also replaces the router's immediate flatten-and-halt for automated trades | DU-28 |
 | OQ-08 | Promotion of each news decision path D1–D6 from shadow to live, on its shadow evidence | DU-14c, per path |
+| OQ-10 | Speed mode: may an armed plan enter on one release-grade source, with an immediate cross-check and exit on disagreement (§8.10.3)? | DU-14e |
+| OQ-11 | Feed bundle selection and monthly budget (about $85 minimum, $230–650 full, §8.10.2) | DU-14a / DU-14e |
+| OQ-12 | `event.*` strategy budget, daily news-loss cap and first event classes to paper-trade | DU-14e |
 | OQ-09 | Whether news may ever *directly* increase risk (recommended: no; news creates trades only through validated event strategies, D7) | DU-14c |

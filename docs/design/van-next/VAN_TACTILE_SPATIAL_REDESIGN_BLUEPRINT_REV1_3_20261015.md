@@ -1,9 +1,9 @@
 # VAN Tactile Spatial Experience — Complete Frontend Rebuild, Functional Preservation & Capability Expansion
 
-**Document ID:** `VAN-TSE-FR-REV1.2-20261015`  
-**Revision:** 1.2 — forensic-design specification / implementation programme candidate (supersedes Rev 1.1; Rev 1.0 is kept beside it for lineage, Rev 1.1 is in git history)  
+**Document ID:** `VAN-TSE-FR-REV1.3-20261015`  
+**Revision:** 1.3 — forensic-design specification / implementation programme candidate (supersedes Rev 1.2; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.2 are in git history)  
 **Date:** 15 October 2026 (Africa/Harare)  
-**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-11), which captures the two locked dark/light references and the 15 October review decisions  
+**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-12), which captures the two locked dark/light references and the 15 October review decisions  
 **Repository:** [`Vanguduza/Van`](https://github.com/Vanguduza/Van)  
 **Audit baseline A:** merged `main` SHA `8eb1889822fc8a83f219977c15340172e16acd91`  
 **Audit baseline B:** unmerged, draft owner-core [PR #93](https://github.com/Vanguduza/Van/pull/93) SHA `dfc1557ab99ad8d41cf84714e1bb671e89b045e6`  
@@ -13,6 +13,13 @@
 **Companion artifacts:** `VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.md` (78 surfaces + additive surfaces; CSV and JSON for automation), `VAN_NEXT_OWNER_DECISIONS_REV1.md`, `reference/` (locked originals and relabelled Rev 1.1 references).  
 
 > **Executive decision:** Rebuild the entire visible frontend using the newly accepted Tactile Spatial UI, not the old VAN panels or older aesthetic blueprints; comprehensively inspect and preserve qualified product functions, underlying service/contracts, security, existing worthwhile UX flows, Floating VAN and interaction behaviours. Introduce the state-aware Home orb, small quick-access sheet, richer Trading entry points, full news intelligence, and genuinely live project/task/agent spatial workflow diagrams. Reconcile large, unmerged source candidates before porting; no silent legacy-file imports or feature loss.
+
+## Rev 1.3 change log (15 October 2026)
+
+| # | Change | Where |
+|---|---|---|
+| T1 | **Live news trading bundle** (OD-12): a defined feed bundle (official release pages at the release second, a paid calendar with consensus, a paid text squawk with an API, pay-per-read X squawk accounts, free context feeds), armed plans for scheduled releases, whitelisted unscheduled-headline classes needing two fast sources, owner pre-signed armed tickets for one-tap news trades, a latency ledger, news-specific risk limits, and replay → paper → shadow → owner-signed promotion per event class. Honest latency tier: about 1–10 seconds, not institutional milliseconds. | §8.10 |
+| T2 | Source research report added to the pack. | `research/FREE_TRADING_NEWS_AND_CALENDAR_FEEDS_20261015.md` |
 
 ## Rev 1.2 change log (15 October 2026)
 
@@ -58,7 +65,7 @@ VAN Next is one Android application with two photometrically and structurally co
 3. One tap on the Home orb opens a deliberately **compact** read-only summary and navigation sheet; position performance, priority tasks, project progress, notifications and quick destinations appear as concise rows. It must **not** become a dashboard within a popup.
 4. The global Trading Home visibly provides **Markets, Watchlist, Potential trades, Chart and Intelligence** entry points and a restrained equity/portfolio-heat context. The locked images show three of the five tiles; **Chart** and **Intelligence** tiles are an owner-requested addition (OD-03, visual delta VD-02), so the native golden includes them and this is not drift.
 5. Dedicated Trading screens preserve professional live charts, indicators, position lines, SL/TP, depth where supported, history, orders and safe control paths; not all data is crammed onto one portrait page.
-6. Intelligence has substantive **News** and **News Analysis** (OD-11): several independent live sources, cross-checked; macro/event context, provenance, contradicting evidence, affected instruments, relevant strategies/positions, timing and freshness; and **comparison with how similar past events actually moved the market**, which feeds real trading decisions through defined, tested paths (§8).
+6. Intelligence has substantive **News** and **News Analysis** (OD-11): several independent live sources, cross-checked; macro/event context, provenance, contradicting evidence, affected instruments, relevant strategies/positions, timing and freshness; and **comparison with how similar past events actually moved the market**, which feeds real trading decisions through defined, tested paths (§8). A **live news trading bundle** lets VAN and the owner trade news as it breaks, within seconds, through pre-validated event strategies and armed plans (§8.10).
 7. Projects/Tasks offer live spatial diagrams of phases, tasks, dependencies, agents, handoffs, blocked edges, evidence, completed work and current progress; a list alternative remains available.
 8. Floating VAN retains meaningful gestures, modes, dialogue, voice, workboards, dock/minimise/recovery, contextual controls and system-wide usefulness. Re-skinning must not regress these capabilities.
 9. Earlier blueprints are evidence and starting hypotheses, not immutable implementation strategies. Improvements found through validated research, including REA-assisted MT5/TradingView study **when separately ready**, can revise this blueprint. Trading and owner-authority changes still require their proper separate domain approval/evidence.
@@ -668,7 +675,7 @@ News acts through these defined paths and no others. Each path is computed and l
 | **D4 Open trades before a scheduled high-impact event** | If history says a typical adverse move would eat most of the stop cushion and the trade is not yet protected (break-even or better), VAN-managed trades get a preservation action: partial close or move to break-even, per that trade's lifecycle policy | Owner-managed (manual, not handed over) trades are never touched; the owner gets an alert with those options and the history behind them |
 | **D5 Open trades after adverse unscheduled news** | Corroborated or official adverse news moves the thesis to RISKIER or WEAKER; if trade health turns FAILING, preservation acts on VAN-managed trades; owner-managed trades get an alert | `SINGLE_SOURCE` news alone cannot trigger an exit |
 | **D6 Ranking of potential trades** | Confidence lowered through the existing event-risk multiplier; candidates that conflict with corroborated adverse news are suppressed with the reason shown | Confidence stays display/ranking only |
-| **D7 New trades created from news** | Patterns found in the episode library (for example, continuation after a large verified surprise) become **event-driven strategies**. They go through backtest, paper and shadow like any strategy and are promoted live only by owner signature; once live they generate potential trades that the Risk Authority sizes normally | This is the only way news can lead VAN to open or enlarge a trade. A headline alone never does (`unvalidated_research_to_live` is forbidden). |
+| **D7 New trades created from news** (made fast by the live bundle, §8.10) | Patterns found in the episode library (for example, continuation after a large verified surprise) become **event-driven strategies**. They go through backtest, paper and shadow like any strategy and are promoted live only by owner signature; once live they generate potential trades that the Risk Authority sizes normally | This is the only way news can lead VAN to open or enlarge a trade. A headline alone never does (`unvalidated_research_to_live` is forbidden). |
 
 My recommendation is to keep the rule that news can never *directly* increase risk (D1–D6 only reduce risk or change timing), and to let news create trades only through D7's validated strategies. Allowing a headline to raise size directly would bypass the evidence the strategy pipeline requires. Changing that is an owner decision (OQ-09).
 
@@ -735,6 +742,94 @@ New read models, served by extending `GET /v1/trading/events` (or sibling `GET /
 ### 8.9 Acceptance and negative tests
 
 Two syndicated copies of one wire count as one source; a story seen only from one wire stays `SINGLE_SOURCE` and cannot trigger D4/D5; an official correction moves the cluster to `CORRECTED` and re-computes effects; a feed outage below the category minimum shows "coverage degraded" and triggers D2 only inside a high-impact window; an unexplained price jump raises caution until a story arrives; history with fewer than the minimum analogues reports `EVIDENCE_THIN` and D1 falls back to the default multiplier; a D1 multiplier is never above 1 and no stop is widened; D2 never shortens a calendar blackout; D4 never acts on an owner-managed trade; every D-path in `SHADOW` mode produces a logged "would have" record and no order; a path is live only with an owner-signed promotion record; a D7 strategy without promotion evidence cannot produce a live potential trade; a model rewrite that adds a price, instrument, count or direction is rejected; history counts in briefs match the episode records exactly; replaying the ledger reproduces the same profiles and effects; briefs never contain a forbidden word (lint); notification dedupe survives restart and multiple devices.
+
+
+### 8.10 Live news trading bundle — trading the news in real time (OD-12)
+
+The owner wants VAN to **trade news as it breaks**, not only avoid it or adjust for it. This section adds a bundle that does that inside the existing safety model: news trades are made by **event strategies** (D7) that are pre-validated, armed before the news, and executed in seconds, with the stop inside the order. Evidence for every source, price and limit below is in `research/FREE_TRADING_NEWS_AND_CALENDAR_FEEDS_20261015.md` (prices as seen 2026-10-15).
+
+#### 8.10.1 What "real time" can honestly mean here
+
+| Tier | Typical delay from event to VAN | Who gets this | What it supports |
+|---|---|---|---|
+| Institutional machine-readable feeds (wire-grade release and headline feeds) | Milliseconds | Banks and HFT firms on contracts priced far above retail | First-tick reaction trading. **Not in this bundle.** |
+| **This bundle** — official release pages polled at the release second, paid text squawk with an API, pay-per-read X squawk accounts | About 1–10 seconds (target; to be measured) | Retail and prop traders | Trading the move after the first seconds, when it continues; trading unscheduled headlines a squawk desk reports early |
+| Free feeds alone (RSS, free API tiers, MT5 calendar, GDELT) | 10 seconds to several minutes (MT5 actuals reported 1–5+ minutes late) | Everyone | Avoiding news, protecting trades, post-release positioning and history. Not first-move trading. |
+
+So the bundle can trade news live, but it will not be first. VAN's edge has to come from what it does with the seconds it gets: armed plans decided in advance, automatic direction from verified surprise, history-sized stops and targets, strict spread and slippage limits, and the discipline to stand aside when the spread blows out. Practitioners report spreads of 5–10× normal in the seconds after NFP-class releases, and some argue the first-spike trade has been unprofitable for retail since around 2016. The bundle therefore treats "trade the first seconds" as something to **prove in paper trading per event class**, not assume.
+
+#### 8.10.2 The feed bundle
+
+| Role | Source | Cost (2026-10-15) | Status |
+|---|---|---|---|
+| Scheduled release values, fastest legitimate retail route | Official release pages and APIs fetched at the scheduled second: BLS, BEA (free key), Census, Eurostat, ONS, StatCan, ABS, ECB, central-bank RSS; RBZ/ZIMSTAT pages for Zimbabwe | Free | Verified working. BLS locks its site at release time and once posted CPI 30 minutes early, so a value is accepted only if it arrives at or after its scheduled time and parses to the expected series. |
+| Release cross-check | A second structured source for the same figure: paid calendar API with actuals (EODHD Fundamentals $59.99/mo verified; Trading Economics about $149+/mo, third-party figure, the only one that clearly separates survey consensus) | $60–150/mo | Required for consensus anyway |
+| Consensus for surprise scoring | Trading Economics `Forecast` (survey consensus) preferred; EODHD `estimate` if its source is confirmed | Included above | Provenance to confirm in vendor review |
+| Unscheduled headlines, fast | One paid text squawk **with a machine-readable API or stream**: Newsquawk (Basic $199/mo, API availability to confirm), FinancialJuice paid (about $23/mo third-party figure; API and licence to confirm) | $23–199/mo | Must confirm an API and automated-use licence before selection |
+| Unscheduled headlines, second fast source | X API pay-per-read on a short list of squawk accounts ($0.005 per post read, cap 3M/month per X's page) | About $150–250/mo (estimate) | X's terms on automated monitoring to confirm |
+| Context and corroboration | investingLive RSS, central-bank RSS, SEC EDGAR Atom, GDELT raw files | Free | Verified live |
+| History | ALFRED first releases, Philadelphia Fed real-time data, GDELT, Dukascopy/TrueFX ticks; Massive (formerly Polygon) $49/mo for clean 1-minute FX history | Free to $49/mo | As in the research report |
+
+Indicative total for the full bundle: about **$230–650 per month** depending on squawk and calendar choice, before X usage is measured. The cheapest workable configuration (official pages + EODHD + FinancialJuice paid if it has an API + free context feeds) is around **$85/month**, but with a single fast headline source. Final selection is OQ-06 and needs vendor review of APIs, latency guarantees and licences; nothing above is purchased or chosen by this blueprint.
+
+#### 8.10.3 Scheduled releases: armed plans
+
+For each high-impact release on the calendar, an event strategy prepares an **armed plan** before the release (default T−15 min), shown to the owner and frozen at T−2 min:
+
+- **Instrument and direction mapping** from the normaliser's declared "stronger" direction (e.g. US CPI above consensus → USD stronger → EURUSD sell).
+- **Thresholds** in surprise units from the event's own history (e.g. trade only if |surprise| ≥ 1.0 of its usual miss), and a no-trade band in the middle.
+- **Stop and target from history**: stop beyond the historical adverse move at the chosen percentile, target near the typical move, time exit at the history's `time_to_settle` — the stop and target travel inside the order.
+- **Execution guards**: maximum spread at entry (e.g. ≤ 3× normal), slippage cap (`MARKET_WITH_SLIPPAGE_CAP` or limit), maximum delay after release (e.g. no entry later than 20 s after the release time), quote freshness.
+- **Size** from the event strategy's own budget in the mandate (`event.*` strategies), reduced by drawdown tiers and the account's limits like any trade.
+
+At the release second VAN fetches the official value, computes the surprise against consensus, and if every condition holds sends one order with its stop and target. Everything is decided before the release; nothing waits for a model.
+
+**Speed versus "one source is not a fact".** The recorder's normal rule needs two agreeing sources. Waiting for the second source costs seconds. In speed mode an armed plan may enter on **one release-grade source** (the official issuer, or a feed the owner has designated release-grade), and the cross-check runs immediately after: if the second source disagrees materially or the value fails sanity checks, the position is closed at once and the plan is disabled for that event class until reviewed. This is a deliberate trade-off that needs owner signature (OQ-10); the alternative is to enter only after two sources agree, which is safer and slower.
+
+#### 8.10.4 Unscheduled headlines
+
+- Only headlines from the paid fast sources can trigger entries; free and model-classified headlines cannot.
+- A deterministic classifier matches headlines to **whitelisted event classes** that have a validated strategy (for example: unscheduled central-bank rate move, confirmed currency intervention, a named commodity supply shock). Each class has a declared direction map, thresholds and history profile.
+- **Two fast sources must agree** (squawk + X, or squawk + official) before an unscheduled entry, unless the first source is the official issuer itself. Rumour wording ("sources say", "reportedly") never triggers an entry.
+- Language models are not on the entry path — too slow and not deterministic. They may write the brief afterwards.
+- Entries use smaller size than scheduled-release trades by default and the same stop-inside-order, spread and delay guards.
+
+#### 8.10.5 Owner live news trading
+
+The owner can trade news manually through the same bundle:
+
+- **News Live screen**: live squawk and official headlines as they arrive (source, status, seconds since release), countdown to armed releases, the history card ("last 14 releases: EURUSD fell 10 times, typical 42 pips, settles in 25 min").
+- **Armed manual ticket**: before a release the owner prepares a ticket — instrument, maximum risk, stop and TP from history, and which direction to take for an upside or downside surprise — and signs it with biometrics in advance. The signature is bound to that ticket, that event and a short window (e.g. T−10 min to T+60 s). At the release the owner needs **one tap**, no biometric step, so the order goes out in under a second of the decision. Outside the window or with any parameter changed, the ticket is void.
+- After the release, ordinary manual entries (§7.4) remain available, with the brief and history shown on the review sheet.
+
+#### 8.10.6 Infrastructure and latency discipline
+
+- The bundle runs on the always-on trading server (`van-trading-core`), not on the phone; the phone shows and confirms.
+- Feed clients use websockets or streams where offered; official pages are fetched by a release-second scheduler with tight timeouts and no retries that could double-act.
+- Server clock disciplined (chrony/NTP); every hop timestamped: source publish time, received, parsed, decided, order sent, broker acknowledged, fill.
+- A **latency ledger** records those timestamps for every release and headline, per source. If a source's measured delay drifts beyond its threshold, it is downgraded from "release-grade" automatically and armed plans that depend on it disarm.
+- Server location relative to the broker's trade server is measured; moving the server closer is an operational decision, not assumed.
+
+#### 8.10.7 Risk limits specific to news trading
+
+- News trades belong to `event.*` strategies with their own budget in the signed mandate, well below the normal per-trade budget at first; a daily cap on news-trade losses; at most one news trade per instrument per event.
+- No entry if spread, quote age or delay limits are exceeded — the plan simply stands down and says why.
+- Feed disagreement, a value that fails sanity checks, or a broker reject on a news trade disarms that event class for the session.
+- Stops are inside the order; history-based stops are never widened after entry; time exits are mandatory.
+- All forbidden behaviours (martingale, stop removal, revenge risk, trading on stale data) apply unchanged.
+
+#### 8.10.8 Proving it before it trades live
+
+1. **Replay** each event strategy over history with realistic delays (the measured latency ledger, or conservative assumed delays before measurement exists), real spreads around releases (tick data), and slippage.
+2. **Paper trade** live with the real feeds for a minimum number of events per class, recording the full latency ledger and what would have happened.
+3. **Shadow on the live account**: decisions made and logged, no orders.
+4. **Owner-signed promotion** per event class, with a small live budget first, then reviewed monthly in the "did news help" report (§8.5).
+
+An event class whose paper results do not survive realistic spreads and delays stays in shadow, however attractive the idea.
+
+#### 8.10.9 Bundle acceptance tests
+
+Release value arriving before its scheduled time is rejected; official site lockup at release time stands the plan down without retries that double-act; surprise inside the no-trade band produces no order; spread above the cap at entry stands down with reason; entry later than the maximum delay is refused; single-source speed entry followed by a disagreeing second source closes the trade and disarms the class; rumour-worded headline produces no entry; unscheduled headline from one fast source only produces no entry; stop and TP are inside the single order request; armed manual ticket used outside its window or with a changed parameter is refused; latency drift downgrades a source and disarms dependent plans; daily news-loss cap stops further news trades; replay with realistic spreads is reproducible from the ledger.
 
 ---
 
@@ -1120,6 +1215,7 @@ Each requirement ID must have Product Truth binding, one or more Development Uni
 | VAN-NX-026 | REA architectural improvement gate, versioned changes | DU-27 | Research recommendation with evidence; owner-ready scheduling |
 | VAN-NX-027 | Owner manual trading: risk-governed entries and adds, stop and optional TP inside the opening order, always-available exits | DU-28 | §7.4; §18.2 manual-trading cases; demo before live |
 | VAN-NX-031 | Hand a manual trade to VAN and take it back; take manual control of an automatic trade; manual adds to automatic trades under that trade's risk profile | DU-28b | §7.4.6–§7.4.7; §18.2 handover and add cases |
+| VAN-NX-033 | Live news trading bundle: feeds, armed release plans, unscheduled-headline classes, owner armed tickets, latency ledger, news risk limits, staged promotion | DU-14e | §8.10.9; per-class paper and shadow evidence; owner signature per class |
 | VAN-NX-032 | Event history comparison for scheduled and unscheduled news, wired into trading decisions D1–D7 through shadow-then-live promotion | DU-14c | §8.4–§8.5; per-path shadow evidence and owner-signed promotion |
 | VAN-NX-028 | Repository consolidation, Feature Ledger and parity oracle before rebuild | DU-00 | Every ledger row classified; parity checker fails on an induced omission |
 | VAN-NX-029 | Structural frontend isolation (modules, tokens, strings, release checks) | DU-24 | Legacy import fails compilation; banned-word and literal-style lints fail when induced |
@@ -1157,6 +1253,9 @@ flowchart TD
   NB --> N
   NC --> N
   NC --> Z
+  NC --> NE[DU-14e Live news trading bundle]
+  MT --> NE
+  NE --> Z
   MT --> MH[DU-28b Adds, Hand to VAN, take back]
   MH --> L
   E --> O[DU-15 Project data adapter]
