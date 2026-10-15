@@ -52,11 +52,6 @@ sourceSets {
         // which actions need owner approval — is held to the gateway's by
         // backend/tests/test_account_approval_contract.py instead.
         kotlin.include(
-            // Blueprint Rev 1.5 §7.8 — the VAN Next chart engine core. Pure Kotlin by design
-            // (no Android, no Compose, no legacy UI): viewport and price maths, level of
-            // detail, indicators, drawings, the display list, the capability contract, the
-            // bridge gate, replay and the frame scheduler are all executed here.
-            "com/dial/van/next/chart/**",
             "com/dial/van/status/**",
             "com/dial/van/mission/MissionModels.kt",
             // Gate 6 — the pure half of the visual runtime. These files have no Android and
@@ -251,9 +246,6 @@ sourceSets {
             // most — an agent's "done" never renders as passed — is executed, not asserted.
             "com/dial/van/dialdev/**",
         )
-        // The Android host (TextureView, render thread) needs the Android SDK; it is
-        // qualified by the :app build and on device, not here.
-        kotlin.exclude("com/dial/van/next/chart/android/**")
     }
 }
 
