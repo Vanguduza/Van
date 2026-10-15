@@ -1147,5 +1147,9 @@ New surfaces have their own IDs and tests. They do not count toward the 78 inher
 | `van.next.trading.behaviour` | Manual trading habits and behaviour flags | Trading / Positions | `inline_section` | VAN-NX-034 | SPEC_ONLY |
 | `van.next.trading.pattern-candidates` | Patterns from your trades (candidate strategies) | Trading / Intelligence | `navigation_screen` | VAN-NX-035 | SPEC_ONLY |
 | `van.next.intel.keyword-watchlists` | News keyword watchlists | Trading / Intelligence | `modal_sheet` | VAN-NX-037 | SPEC_ONLY |
+| `van.next.trading.replay` | Chart replay sandbox | Trading / Terminal | `navigation_screen` | VAN-NX-044 | SPEC_ONLY |
+| `van.next.trading.alerts` | Alerts (price, indicator, drawing, keyword) | Trading / Intelligence | `navigation_screen` | VAN-NX-047 | SPEC_ONLY |
+| `van.next.trading.screener` | Screener | Trading / Markets | `navigation_screen` | VAN-NX-047 | SPEC_ONLY |
+| `van.next.trading.chart-tools` | Indicators, drawings and workspaces sheets | Trading / Terminal | `modal_sheet` | VAN-NX-043 | SPEC_ONLY |
 | `van.next.work.flow` | Project task flow graph | Work / Spatial Flow | `navigation_screen` | VAN-NX-015 | SPEC_ONLY |
 | `van.next.work.agent-map` | Agent handoff map | Work / Spatial Flow | `navigation_screen` | VAN-NX-016 | SPEC_ONLY |

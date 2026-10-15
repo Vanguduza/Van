@@ -1,9 +1,9 @@
 # VAN Tactile Spatial Experience — Complete Frontend Rebuild, Functional Preservation & Capability Expansion
 
-**Document ID:** `VAN-TSE-FR-REV1.4-20261015`  
-**Revision:** 1.4 — forensic-design specification / implementation programme candidate (supersedes Rev 1.3; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.3 are in git history)  
+**Document ID:** `VAN-TSE-FR-REV1.5-20261015`  
+**Revision:** 1.5 — forensic-design specification / implementation programme candidate (supersedes Rev 1.4; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.4 are in git history)  
 **Date:** 15 October 2026 (Africa/Harare)  
-**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-14), which captures the two locked dark/light references and the 15 October review decisions  
+**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-15), which captures the two locked dark/light references and the 15 October review decisions  
 **Repository:** [`Vanguduza/Van`](https://github.com/Vanguduza/Van)  
 **Audit baseline A:** merged `main` SHA `8eb1889822fc8a83f219977c15340172e16acd91`  
 **Audit baseline B:** unmerged, draft owner-core [PR #93](https://github.com/Vanguduza/Van/pull/93) SHA `dfc1557ab99ad8d41cf84714e1bb671e89b045e6`  
@@ -13,6 +13,22 @@
 **Companion artifacts:** `VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.md` (78 surfaces + additive surfaces; CSV and JSON for automation), `VAN_NEXT_OWNER_DECISIONS_REV1.md`, `reference/` (locked originals and relabelled Rev 1.1 references).  
 
 > **Executive decision:** Rebuild the entire visible frontend using the newly accepted Tactile Spatial UI, not the old VAN panels or older aesthetic blueprints; comprehensively inspect and preserve qualified product functions, underlying service/contracts, security, existing worthwhile UX flows, Floating VAN and interaction behaviours. Introduce the state-aware Home orb, small quick-access sheet, richer Trading entry points, full news intelligence, and genuinely live project/task/agent spatial workflow diagrams. Reconcile large, unmerged source candidates before porting; no silent legacy-file imports or feature loss.
+
+## Rev 1.5 change log (15 October 2026)
+
+Owner decision OD-15 applies the MetaTrader 5 / TradingView reverse-engineering study (`research/VAN_REA_MT5_TRADINGVIEW_FULL_RESEARCH_20261015.md`, reviewed in `research/VAN_REA_REVIEW_20261015.md`) to the trading system and the Android app. Architecture lessons only; no competitor code, assets or design.
+
+| # | Change | Where |
+|---|---|---|
+| W1 | One shared reactive market and portfolio projection with demand-driven subscriptions and freshness as data (replaces per-screen polling) | §7.8.1 |
+| W2 | Native preview charts plus a professional chart workstation with its own renderer lifecycle, behind a renderer-independent capability contract | §7.8.2 |
+| W3 | Chart bridge envelope rules for any web-based renderer | §7.8.3 |
+| W4 | Indicators, drawings and workspaces as saved, versioned models | §7.8.4 |
+| W5 | Replay sandbox for practice and review, with no route to orders | §7.8.5 |
+| W6 | Complete order vocabulary in VATI (stop-limit, fill policies, specified expiry, WORKING state) driven by a per-venue capability matrix | §7.8.6 |
+| W7 | Consented chart observations feeding research and pattern extraction | §7.8.7 |
+| W8 | Alerts as a server-side domain with canonical event IDs | §7.8.8 |
+| W9 | Dynamic watchlists and a typed screener | §7.8.9 |
 
 ## Rev 1.4 change log (15 October 2026)
 
@@ -635,6 +651,63 @@ Compact depth, professional ladder, volume profile, market profile and order flo
 The planned MT5/TradingView Android architectural investigation runs on `van-trading-core` only when explicitly declared ready by the owner. Its outputs may improve the chart pipeline, incremental dataflow, technical indicator execution, order-book presentation, broker-account lifecycle, persistence and fault recovery, **including amendments to this blueprint**. Each external finding must be graded (verified client structure vs observed behaviour vs server-side inference) and assigned `ADOPT`, `ADAPT`, `KEEP_VAN` or `REJECT`, with implementation/test migration. No proprietary asset/code copying by default and no assumption a client APK exposes server internals.
 
 ---
+
+### 7.8 Trading workstation architecture — applying the REA study (OD-15)
+
+Source: `research/VAN_REA_MT5_TRADINGVIEW_FULL_RESEARCH_20261015.md` (static study of MetaTrader 5 `500.6260` and TradingView `1.20.84.0.1002505` Android clients; neither app was run) and the review in `research/VAN_REA_REVIEW_20261015.md`. These are **architecture lessons, not code or design imports**: no competitor code, assets, layouts, styles or paywall logic are used, and VAN's locked visual design and authority model govern. Each item below has its own requirement (VAN-NX-040…047) and tests.
+
+**What VAN has today (checked in code, 15 October):** each Android trading screen fetches its own data once per refresh tick through one-shot repository calls (`TradingRepository.kt`, `LaunchedEffect(tick)` in `OverviewScreen.kt`/`PositionsScreen.kt`); there is no shared reactive store and no de-duplication of subscriptions. The chart is a single Compose `Canvas` (`TradeChartCanvas.kt`) with pan/zoom/crosshair and price levels, drawn inside recomposition, with no separate renderer lifecycle and no indicator or drawing model. On the backend, VATI's `ExecutionReceipt` already distinguishes `ACCEPTED`, `PARTIAL`, `FILLED`, `REJECTED`, `CANCELLED`, `EXPIRED` and `UNKNOWN`; order entry types are `MARKET | LIMIT | STOP | PASSIVE_LIMIT | CONTRACT_BUY` with time-in-force `DAY | GTC30`.
+
+#### 7.8.1 One shared market and portfolio projection (REA-VAN-007, -011)
+
+- A single on-device store exposes quotes, bars, positions, orders, account and risk state as reactive streams (`StateFlow`), keyed by canonical instrument identity (venue, symbol, asset class, tick size, digits, contract size, quote currency) — never by ticker string alone.
+- **Demand-driven subscriptions:** screens declare what they show; the store subscribes once per instrument and stream, however many screens show it, and unsubscribes when nothing visible needs it. Fast price ticks are coalesced separately from slower portfolio, approval and strategy changes.
+- **Freshness is data:** every value carries source, event time, received time, revision and a stale/offline/unknown state. After a gap, the store reloads a revisioned snapshot from the gateway; cached values are shown as cached with their age.
+- Home, Trading Home, chart, positions, Quick Hub and Floating VAN all read this store, so they always agree on the same revision. Only the broker reconciler can assert that a position exists or is protected.
+- Replaces the current per-screen polling.
+
+#### 7.8.2 Two chart budgets, one chart model (REA-VAN-002, -003)
+
+- **Native preview charts** (sparklines and small candle previews) for Trading Home, watchlists, search results, potential-trade cards and position cards: cheap, no heavy chart engine per row.
+- **Professional chart workstation** for the instrument terminal, with its own renderer that owns frame production outside Compose recomposition: rendering pauses when hidden, survives surface or texture loss, keeps the viewport across rotation and process death, and has an accessible flat fallback. Compose owns the controls, sheets and account and security chrome around it.
+- A **renderer-independent chart capability contract** defines what the chart can do: chart types, intervals, symbol and layout, drawings, indicators, replay, alerts, news markers, trading overlays, zoom, undo/redo, multi-chart sync and theme. Any renderer (the existing native canvas, a new native engine, or a qualified web engine) implements the same contract, so a renderer can be swapped or degraded without rewriting navigation, research or trading. The renderer choice is made by measurement on the Samsung S24 (OQ-14), not fixed in advance.
+
+#### 7.8.3 Chart bridge rules (REA-VAN-004)
+
+If any part of the chart runs in a web engine, messages between the app and the engine use a typed, versioned envelope (schema, session ID, message ID, sequence number, expiry, capability name, payload, data revision, `authority_effect: NONE`), with one allowed origin, size limits, capability allow-listing, deny-by-default, no arbitrary JavaScript, cancellation and teardown per session. The engine never receives broker sessions, owner tokens or VATI grants. Allowed outputs remain those in §14.3.
+
+#### 7.8.4 Indicators and drawings as saved models (REA-VAN-008)
+
+- Indicators are typed, versioned instances (type, parameters, pane, source timeframe, provenance tier `PRESENTATION | VATI_SOURCE | RESEARCH`), saved per instrument and workspace, with add, edit, reset-to-default and undo/redo.
+- Drawings (trend lines, levels, channels, Fibonacci, risk/reward boxes, notes) are durable records with exact price and time anchors, revision history and optional notes, not overlay pixels; they sync across layouts and devices and survive restarts.
+- Workspaces (layout, intervals, indicator set, drawings) are saved and restorable.
+
+#### 7.8.5 Replay sandbox (REA-VAN-009)
+
+An isolated historical chart session that steps bar by bar through past data, for owner practice, reviewing past trades and testing ideas. Replay has no route to any order endpoint by construction; practice trades in replay are recorded separately and feed the owner's behaviour diagnostics (§7.4.12) as practice data, never as real results. Replay sessions are deterministic from the bar data and seed, so a review can be reproduced.
+
+#### 7.8.6 Complete order vocabulary (REA-VAN-005, -006)
+
+- Backend additions, venue by venue as each adapter supports them: **stop-limit** entries; **fill policies** (fill-or-kill, immediate-or-cancel, return) where the venue offers them; **specified expiry** in addition to day and good-till-cancelled; and a distinct **WORKING** state for a pending order resting at the broker (today `ACCEPTED` covers it).
+- A per-venue **capability matrix** decides which order types, fill policies and expiries the app offers; the app never offers what the venue cannot do.
+- The app never collapses order states into one spinner or "success": requested, working, partial, filled, rejected, cancelled, expired and outcome-unknown are shown distinctly, and an uncertain result is reconciled against the broker before any repeat is allowed.
+- Chart handles for entry, stop and take-profit create draft proposals only; the §7.4 flows execute them. Symbol or unit conflicts (different tick or lot units across sources) block the proposal instead of rounding silently.
+
+#### 7.8.7 Chart observations feed VAN's research (REA-VAN-012)
+
+With the owner's consent, the chart can send structured observations to the backend: instrument and timeframe under study, viewport and selected bars, indicator settings, drawn levels with exact anchors, the owner's notes, replay experiments, and why a potential trade was taken, dismissed or judged wrong. They are stored with provenance, retention limits and replay protection, and used by research, the analyst, pattern extraction (§7.4.13) and the history engine. They never change risk authority, strategy qualification or create an order.
+
+#### 7.8.8 Alerts as their own domain
+
+Price, indicator, drawing-crossing and news-keyword alerts are created, edited, paused and deleted from the chart, watchlist or News screen; they are evaluated on `van-trading-core` (not on the phone), carry one canonical event ID into Attention, the orb and Android notifications, and are deduplicated across devices. An alert can open the chart or the manual-trade review sheet; it never places an order.
+
+#### 7.8.9 Watchlists and screener
+
+Owner watchlists plus dynamic lists (open positions, potential trades, instruments with active news, near-alert) share the projection in §7.8.1; a screener runs typed, rate-limited scans over the instrument universe, with price age shown on every row, and opens the chart workstation in one tap.
+
+#### 7.8.10 Workstation acceptance cases
+
+Open and close the chart 500 times across background, restore, rotation and surface loss with no stale overlays; two screens on one instrument share one subscription; a feed disconnect recovers from a revisioned snapshot with no fake live timestamps; dragging SL/TP creates a proposal only; a repeated request after a timeout never duplicates an order; a symbol or unit conflict blocks the proposal; replay cannot reach an order endpoint; chart, replay, drawings and previews are measured for memory, CPU, GPU and battery on the S24; every chart gesture has an accessible alternative; dark and light match the approved goldens.
 
 ## 8. News and Event Intelligence — live sources, analysis, history, decisions (OD-04, OD-11)
 
@@ -1259,6 +1332,14 @@ Each requirement ID must have Product Truth binding, one or more Development Uni
 | VAN-NX-026 | REA architectural improvement gate, versioned changes | DU-27 | Research recommendation with evidence; owner-ready scheduling |
 | VAN-NX-027 | Owner manual trading: risk-governed entries and adds, stop and optional TP inside the opening order, always-available exits | DU-28 | §7.4; §18.2 manual-trading cases; demo before live |
 | VAN-NX-031 | Hand a manual trade to VAN and take it back; take manual control of an automatic trade; manual adds to automatic trades under that trade's risk profile | DU-28b | §7.4.6–§7.4.7; §18.2 handover and add cases |
+| VAN-NX-040 | Shared reactive market and portfolio projection | DU-12a | §7.8.1; one subscription per instrument and stream; revisioned recovery |
+| VAN-NX-041 | Native preview charts and chart workstation with renderer lifecycle | DU-10 | §7.8.2; 500-cycle lifecycle test; S24 budgets |
+| VAN-NX-042 | Renderer-independent chart capability contract and bridge rules | DU-10 | §7.8.2–§7.8.3; renderer swap; bridge fuzzing; forbidden order call |
+| VAN-NX-043 | Saved indicators, drawings and workspaces | DU-10b | §7.8.4; anchor round-trip; undo/redo; cross-device sync |
+| VAN-NX-044 | Replay sandbox | DU-10c | §7.8.5; no order route; deterministic replay |
+| VAN-NX-045 | Complete order vocabulary and venue capability matrix | DU-28e | §7.8.6; per-venue tests; no state collapse; no silent unit rounding |
+| VAN-NX-046 | Chart observations to research | DU-10d | §7.8.7; consent, provenance, no authority effect |
+| VAN-NX-047 | Server-side alerts and dynamic watchlists/screener | DU-12b | §7.8.8–§7.8.9; dedupe across devices; alerts never trade |
 | VAN-NX-034 | Owner trading-behaviour diagnostics | DU-28c | §7.4.12; minimum sample; findings cite trades; soft notices never block |
 | VAN-NX-035 | Owner pattern extraction into candidate strategies | DU-28d | §7.4.13; learns from winners and losers; candidates pass deflated Sharpe, PBO and walk-forward before paper |
 | VAN-NX-036 | Prediction-market expectations (two sources, liquidity floor) | DU-14f | §8.2, §8.4; reachability and terms verified |
@@ -1309,6 +1390,15 @@ flowchart TD
   MT --> MD[DU-28c Behaviour diagnostics]
   MD --> MP[DU-28d Pattern extraction to candidates]
   MP --> Z
+  E --> MK[DU-12a Shared market projection]
+  MK --> I
+  MK --> K
+  J --> JB[DU-10b Indicators, drawings, workspaces]
+  J --> JC[DU-10c Replay sandbox]
+  JB --> JD[DU-10d Chart observations]
+  MT --> OV[DU-28e Order vocabulary + venue capabilities]
+  OV --> L
+  MK --> AL[DU-12b Alerts, watchlists, screener]
   NB --> NF[DU-14f Prediction-market expectations]
   NF --> NE
   MT --> MH[DU-28b Adds, Hand to VAN, take back]

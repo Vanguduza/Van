@@ -6523,6 +6523,38 @@
       "status": "SPEC_ONLY"
     },
     {
+      "id": "van.next.trading.replay",
+      "title": "Chart replay sandbox",
+      "new_zone": "Trading / Terminal",
+      "presentation": "navigation_screen",
+      "requirement": "VAN-NX-044",
+      "status": "SPEC_ONLY"
+    },
+    {
+      "id": "van.next.trading.alerts",
+      "title": "Alerts (price, indicator, drawing, keyword)",
+      "new_zone": "Trading / Intelligence",
+      "presentation": "navigation_screen",
+      "requirement": "VAN-NX-047",
+      "status": "SPEC_ONLY"
+    },
+    {
+      "id": "van.next.trading.screener",
+      "title": "Screener",
+      "new_zone": "Trading / Markets",
+      "presentation": "navigation_screen",
+      "requirement": "VAN-NX-047",
+      "status": "SPEC_ONLY"
+    },
+    {
+      "id": "van.next.trading.chart-tools",
+      "title": "Indicators, drawings and workspaces sheets",
+      "new_zone": "Trading / Terminal",
+      "presentation": "modal_sheet",
+      "requirement": "VAN-NX-043",
+      "status": "SPEC_ONLY"
+    },
+    {
       "id": "van.next.work.flow",
       "title": "Project task flow graph",
       "new_zone": "Work / Spatial Flow",
