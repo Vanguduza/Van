@@ -12,6 +12,7 @@ import json
 import os
 import re
 import stat
+import tempfile
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Optional
@@ -134,15 +135,50 @@ class AccountRegistry:
         self.accounts[a.alias] = a
 
     def add(self, a: Account) -> Account:
+        """Register a new account. Revert the in-memory change on any write failure."""
         if a.alias in self.accounts:
             raise AccountRegistryError(f"alias {a.alias} already registered; remove it first")
-        self._put(a)
-        self.save()
+        a.validate()
+        before = dict(self.accounts)
+        self.accounts[a.alias] = a
+        try:
+            self.save()
+        except Exception:
+            self.accounts = before
+            raise
+        return a
+
+    def replace(self, a: Account) -> Account:
+        """Validate first, then atomically replace the record without a delete gap.
+
+        This updates VAN's local registry, not any account owned by the broker.
+        The gateway's signed owner approval remains the mutation authority.
+        """
+        a.validate()
+        if a.alias not in self.accounts:
+            raise AccountRegistryError(f"unknown account alias {a.alias}")
+        before = self.accounts[a.alias]
+        self.accounts[a.alias] = a
+        try:
+            self.save()
+        except Exception:
+            self.accounts[a.alias] = before
+            raise
         return a
 
     def remove(self, alias: str) -> None:
-        self.accounts.pop(alias)
-        self.save()
+        """Unlink a local record only; this does not close the broker account.
+
+        A higher-level owning service must prove safe exposure state before
+        authorising this operation, and must never present it as broker closure.
+        """
+        before = self.accounts[alias]
+        del self.accounts[alias]
+        try:
+            self.save()
+        except Exception:
+            self.accounts[alias] = before
+            raise
 
     def get(self, alias: str) -> Account:
         try:
@@ -151,8 +187,28 @@ class AccountRegistry:
             raise AccountRegistryError(f"unknown account alias {alias}") from None
 
     def save(self) -> None:
+        """Write the complete registry through same-directory atomic replacement.
+
+        Direct write_text could truncate the only valid record on interruption.
+        Existing permission bits are preserved; new files default to owner-only.
+        """
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(json.dumps({"schema_version": 1, "accounts": [asdict(a) for a in sorted(self.accounts.values(), key=lambda x: x.alias)]}, indent=2) + "\n", encoding="utf-8")
+        payload = json.dumps(
+            {"schema_version": 1, "accounts": [asdict(a) for a in sorted(self.accounts.values(), key=lambda x: x.alias)]},
+            indent=2,
+        ) + "\n"
+        fd, temp_name = tempfile.mkstemp(prefix=f".{self.path.name}.", suffix=".tmp", dir=str(self.path.parent))
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as stream:
+                stream.write(payload)
+                stream.flush()
+                os.fsync(stream.fileno())
+            mode = stat.S_IMODE(self.path.stat().st_mode) if self.path.exists() else 0o600
+            os.chmod(temp_name, mode)
+            os.replace(temp_name, self.path)
+        finally:
+            if os.path.exists(temp_name):
+                os.unlink(temp_name)
 
     def credentials(self, alias: str) -> dict[str, str]:
         """Resolve the secret for an account. Returned dict is for the transport only; never log it."""
