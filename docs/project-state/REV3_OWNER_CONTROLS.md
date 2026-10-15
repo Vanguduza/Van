@@ -1,0 +1,13 @@
+# REV3 S4-08 owner surface integration
+
+`createOwnerSurfacePort` binds the current native owner workspace to existing capability discovery, Hermes profile eligibility, software operation lifecycle, artifact verifier and interactive session ports. Its context factory derives the tenant, project, workflow and selected profile from native state. It does not accept caller-authored authority, create workflows or create a second job/lease store.
+
+The original VAN Muse gateway and original Site BFF share this port through the signed gateway-to-Site bridge. Existing project, repository-scoped and non-project Muse task creation uses its unchanged original API. Profile/workspace selection applies to the selected native workflow; it cannot secretly change the registered Muse task profile. Native sessions retain their original exclusive lease and generation checks. Workflow controls use an existing native control reservation plus a fresh exact observation digest. Acceptance remains distinct from actual effects, verification and qualification.
+
+Native `listOwnerContexts` returns existing context references, operation references and session inspection requests. `withOwnerContext` must re-read current owner authorization and scope, and supply the already verified native actor. `lifecycleForContext` must bind the existing scoped workflow owner. `withNativeControlReservation` must use the existing action owner, atomically preserve the exact request digest, retain uncertain outcomes and reconcile replay without dispatch. No in-memory fixture reservation may be installed as a production qualification producer. Unbound ports report unavailable.
+
+Android uses native Compose controls and existing hardware-proved gateway calls. The web component extends the existing Muse controls with task/project forms, capability search, profile/workspace selection, native progress, pause/cancel/checkpoint/resume, session takeover/release, native contextual input and original artifact review. Remote session pixels are supplementary. Existing VAN browser keyboard, clipboard, file upload and viewport controls remain available.
+
+Disconnect and background transitions stop observation only. They never cancel server work, create replacement tasks, replay approvals or resend session input. Notifications retain their existing generic text and open a fresh owner read. No VPN, firewall, routing or raw listener changes are part of this packet.
+
+Source fixtures and compilation do not establish S4-08-T01..04. Actual original-Site mounting, trusted native context/control-reservation binding, an admitted Android device, notification delivery, cross-client exclusive-input checks and independent exact-candidate review require native receipts before packet acceptance.

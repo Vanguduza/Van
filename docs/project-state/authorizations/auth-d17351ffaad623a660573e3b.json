@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-d17351ffaad623a660573e3b",
+  "project": "dial",
+  "authority": "OWNER_EXPLICIT",
+  "owner_instruction_sha256": "f3eac7a8427a56fa989a4d7ef322066adff19fb3ca484306b27b036f4275ff58",
+  "owner_instruction_excerpt": "Current authenticated owner direction: implement the improved DIAL REV3 Execution Pack produced in this conversation. Programme: canonical consolidation, modular resources, software-use adoption and Cinematic Frontend Studio, with all 70 or",
+  "source": {
+    "kind": "oracle_owner_instruction",
+    "channel": "chatgpt",
+    "actor": "owner",
+    "request_id": "rev3-implement-owner-direction-20261013-1105",
+    "job_id": "steer-35df6e85-7844-494c-a7b4-5752e613b686",
+    "inherited_by": null,
+    "transport": "chatgpt_http_mcp"
+  },
+  "issued_at_utc": "2026-10-15T12:35:25.793Z",
+  "base_sha": "081a547117ea7d585e2cb6089e2c88c76acc2355",
+  "branch_scope": "platform/rev3-owner-controls-20261015",
+  "authorized_paths": [
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+    "android/app/src/main/java/com/dial/van/muse/MuseOwnerControls.kt",
+    "android/app/src/main/java/com/dial/van/muse/MuseRoute.kt",
+    "android/app/src/test/java/com/dial/van/muse/MuseOwnerControlsTest.kt",
+    "backend/tests/test_muse_owner_controls.py",
+    "backend/van_gateway/muse/tasks.py",
+    "docs/project-state/REV3_OWNER_CONTROLS.md",
+    "web/muse-interaction/bff.mjs",
+    "web/muse-interaction/muse-live-controls.mjs",
+    "web/muse-interaction/owner-controls-client.mjs",
+    "web/muse-interaction/owner-controls.mjs",
+    "web/muse-interaction/owner-controls.test.mjs"
+  ],
+  "change_classes": [
+    "documentation",
+    "technical_implementation",
+    "verification"
+  ],
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false,
+  "reusable": false,
+  "revoked": false
+}

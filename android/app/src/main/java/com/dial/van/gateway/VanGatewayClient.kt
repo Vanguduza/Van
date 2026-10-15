@@ -1098,6 +1098,12 @@ class VanGatewayClient(context: Context) {
 
     suspend fun museTasks(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/muse/tasks") }
 
+    suspend fun museOwnerCall(operation: String, arguments: JSONObject): JSONObject {
+        require(operation in setOf("dial_owner_contexts", "dial_owner_discover", "dial_owner_profiles", "dial_owner_route", "dial_owner_status", "dial_owner_control", "dial_owner_session", "dial_owner_artifact")) { "Unsupported native owner control" }
+        val value = museTaskCall(operation, arguments)
+        return if (value.optBoolean("ok") && value.optJSONObject("result") != null) value.getJSONObject("result") else value
+    }
+
     suspend fun museTaskCall(operation: String, arguments: JSONObject): JSONObject = withContext(Dispatchers.IO) {
         postProved("/v1/muse/tasks/query", JSONObject().put("operation", operation).put("arguments", arguments))
     }

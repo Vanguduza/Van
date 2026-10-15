@@ -1,3 +1,4 @@
+import {OWNER_OPERATIONS,invokeOwnerControl,createDialOwnerSurfaceAdapter} from './owner-controls.mjs';
 /** Server-only adapter for the existing private Site. No browser or VM credential is returned. */
 const TASKS=new Set(['muse_get_overview','muse_get_job','muse_get_command','muse_create_project','muse_resolve_project','muse_submit_task','muse_continue_task','muse_cancel_task']);
 export function canonical(value) {
@@ -21,9 +22,10 @@ async function body(request,max=65536){
  * owner signer. transport uses the existing authenticated DIAL route to /v1/muse/site.
  * invokeExistingTask reuses its real task implementation/DB; it must never be a mock in production.
  */
-export function createMuseBff({siteOrigin,audience,ownerSubject,policyGeneration=1,requireOwner,signOwnerEnvelope,transport,gatewayPublicJwk,invokeExistingTask,now=()=>Date.now()}) {
+export function createMuseBff({siteOrigin,audience,ownerSubject,policyGeneration=1,requireOwner,signOwnerEnvelope,transport,gatewayPublicJwk,invokeExistingTask,nativeOwnerControls,callExistingOwnerTool,now=()=>Date.now()}) {
+ nativeOwnerControls??=createDialOwnerSurfaceAdapter(callExistingOwnerTool);
  const root=new URL(siteOrigin);if(root.protocol!=='https:'||root.origin!==siteOrigin)throw Error('SITE_ORIGIN_INVALID');
- const matches=request=>{const p=new URL(request.url).pathname;return p==='/api/muse/van-owner'||p==='/api/muse/interaction'||p.startsWith('/api/muse/interaction/');};
+ const matches=request=>{const p=new URL(request.url).pathname;return p==='/api/muse/van-owner'||p==='/api/muse/tasks'||p==='/api/muse/owner-controls'||p==='/api/muse/interaction'||p.startsWith('/api/muse/interaction/');};
  async function rpc(operation,args){
    if(typeof signOwnerEnvelope!=='function'||typeof transport!=='function')throw Error('INTERACTION_NOT_CONNECTED');
    const time=now();const envelope={schema_version:1,principal:'MUSE_SITE_OWNER',authority_class:'OWNER_SITE_MUSE_TYPED',audience,site_origin:siteOrigin,subject:ownerSubject,policy_generation:policyGeneration,command_id:crypto.randomUUID(),operation,arguments:args,payload_hash:await digest({operation,arguments:args}),issued_at:new Date(time).toISOString(),expires_at:new Date(time+60000).toISOString(),nonce:crypto.randomUUID()};
@@ -38,13 +40,14 @@ export function createMuseBff({siteOrigin,audience,ownerSubject,policyGeneration
    const value=await body(request),e=value.envelope;
    const fields=['schema_version','issuer','audience','subject','principal','operation','arguments','payload_hash','request_id','issued_at_ms','expires_at_ms'].sort();
    if(Object.keys(value).sort().join(',')!=='envelope,signature'||!e||Object.keys(e).sort().join(',')!==fields.join(','))throw Error('GATEWAY_ENVELOPE_INVALID');
-   if(e.schema_version!==1||e.issuer!=='VAN_MUSE_GATEWAY'||e.audience!==audience||e.subject!==ownerSubject||!/^device:[A-Za-z0-9_.:-]{1,160}$/.test(e.principal)||!TASKS.has(e.operation))throw Error('GATEWAY_AUTHORITY_INVALID');
+   if(e.schema_version!==1||e.issuer!=='VAN_MUSE_GATEWAY'||e.audience!==audience||e.subject!==ownerSubject||!/^device:[A-Za-z0-9_.:-]{1,160}$/.test(e.principal)||!TASKS.has(e.operation)&&!OWNER_OPERATIONS.includes(e.operation))throw Error('GATEWAY_AUTHORITY_INVALID');
    const time=now();if(!Number.isSafeInteger(e.issued_at_ms)||!Number.isSafeInteger(e.expires_at_ms)||e.issued_at_ms>time+5000||e.expires_at_ms<=time||e.expires_at_ms-e.issued_at_ms>120000)throw Error('GATEWAY_ENVELOPE_EXPIRED');
    if(e.payload_hash!==await digest({operation:e.operation,arguments:e.arguments}))throw Error('GATEWAY_PAYLOAD_CHANGED');
    const key=await crypto.subtle.importKey('jwk',gatewayPublicJwk,{name:'Ed25519'},false,['verify']);
    if(!await crypto.subtle.verify('Ed25519',key,from64(value.signature),new TextEncoder().encode(canonical(e))))throw Error('GATEWAY_SIGNATURE_INVALID');
    // Trusted server context is created here after verification, never accepted from JSON.
-   const result=await invokeExistingTask(e.operation,e.arguments,{ownerSubject,verifiedGatewayPrincipal:e.principal,proofReference:'sha256:'+await digest(e)});
+   const context={ownerSubject,verifiedGatewayPrincipal:e.principal,proofReference:'sha256:'+await digest(e)};
+   const result=OWNER_OPERATIONS.includes(e.operation)?await invokeOwnerControl(nativeOwnerControls,e.operation,e.arguments,context):await invokeExistingTask(e.operation,e.arguments,context);
    return json(result);
  }
  async function handle(request){
@@ -56,6 +59,16 @@ export function createMuseBff({siteOrigin,audience,ownerSubject,policyGeneration
    const actor=await requireOwner(request);
    if(actor?.id!==ownerSubject||actor.auth_method!=='sites_identity')return json({error:'OWNER_REQUIRED'},403);
    if(request.method==='POST'&&request.headers.get('Origin')!==siteOrigin)return json({error:'SAME_ORIGIN_REQUIRED'},403);
+   if(url.pathname==='/api/muse/owner-controls'&&request.method==='POST'){
+     const value=await body(request);if(Object.keys(value).sort().join(',')!=='arguments,operation')throw Error('OWNER_CONTROL_ARGUMENTS_INVALID');
+     return json(await invokeOwnerControl(nativeOwnerControls,value.operation,value.arguments,{ownerSubject,verifiedSiteActor:actor}));
+   }
+   if(url.pathname==='/api/muse/tasks'){
+     if(typeof invokeExistingTask!=='function')throw Error('MUSE_TASKS_NOT_CONNECTED');
+     const value=request.method==='GET'?{operation:'muse_get_overview',arguments:{}}:request.method==='POST'?await body(request):null;
+     if(!value||Object.keys(value).sort().join(',')!=='arguments,operation'||!TASKS.has(value.operation))throw Error('MUSE_TASK_OPERATION_INVALID');
+     return json(await invokeExistingTask(value.operation,value.arguments,{ownerSubject,verifiedSiteActor:actor}));
+   }
    if(url.pathname==='/api/muse/interaction'&&request.method==='GET')return json(await rpc('muse_interaction_read',{}));
    if(url.pathname==='/api/muse/interaction'&&request.method==='POST')return json(await rpc('muse_interaction_action',await body(request,32768)),202);
    if(url.pathname.startsWith('/api/muse/interaction/commands/')&&request.method==='GET'){
