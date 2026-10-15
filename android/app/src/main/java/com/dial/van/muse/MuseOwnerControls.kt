@@ -11,7 +11,8 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalContext
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.repeatOnLifecycle
 import com.dial.van.VanApplication
 import kotlinx.coroutines.CancellationException
@@ -29,7 +30,7 @@ private fun JSONObject.ownerRows(key: String): List<JSONObject> = (optJSONArray(
 @Composable
 fun MuseOwnerControls(app: VanApplication) {
     val scope = rememberCoroutineScope()
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val lifecycle = (LocalContext.current as? FragmentActivity)?.lifecycle
     val clipboard = LocalClipboardManager.current
     var contexts by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
     var selected by rememberSaveable { mutableStateOf("") }
@@ -60,7 +61,8 @@ fun MuseOwnerControls(app: VanApplication) {
         }
     }
     LaunchedEffect(app, lifecycle) {
-        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+        val currentLifecycle = lifecycle ?: return@LaunchedEffect
+        currentLifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             while (true) {
                 now = System.currentTimeMillis()
                 try {
@@ -166,7 +168,9 @@ fun MuseOwnerControls(app: VanApplication) {
                     TextButton(onClick = { assistanceText = clipboard.getText()?.text.orEmpty() }) { Text("Paste text") }
                     TextButton(onClick = { clipboard.setText(AnnotatedString(assistanceText)) }) { Text("Copy text") }
                     Button(enabled = !busy && pending.isBlank(), onClick = { act {
-                        val observation = value.getJSONObject("observation"), input = request(), id = input.getString("request_id")
+                        val observation = value.getJSONObject("observation")
+                        val input = request()
+                        val id = input.getString("request_id")
                         val action = JSONObject().put("schema_version", 1).put("contract_kind", "INTERACTIVE_ACTION").put("action_id", id).put("native_operation", helper.getString("native_operation")).put("mode", helper.getString("mode")).put("native_args", JSONObject(helper.optJSONObject("native_args")?.toString() ?: "{}").put("text", assistanceText)).put("observation_id", observation.getString("observation_id")).put("context_digest", observation.getString("context_digest"))
                         if (helper.has("node_ref")) action.put("node_ref", helper.getString("node_ref")).put("tree_digest", observation.getString("scene_digest")).put("frame_ref", observation.get("frame_ref"))
                         input.put("action", action); pending = JSONObject().put("kind", "SESSION").put("context_ref", selected).put("input", input).toString()
