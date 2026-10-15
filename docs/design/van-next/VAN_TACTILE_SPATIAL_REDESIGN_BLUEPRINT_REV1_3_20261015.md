@@ -18,6 +18,7 @@
 
 | # | Change | Where |
 |---|---|---|
+| T3 | Owner decision OD-13 (resolves OQ-10): armed plans enter only after **both** sources have delivered the release figure and agree; the single-source speed mode is removed. | §8.10.3, §8.10.9 |
 | T1 | **Live news trading bundle** (OD-12): a defined feed bundle (official release pages at the release second, a paid calendar with consensus, a paid text squawk with an API, pay-per-read X squawk accounts, free context feeds), armed plans for scheduled releases, whitelisted unscheduled-headline classes needing two fast sources, owner pre-signed armed tickets for one-tap news trades, a latency ledger, news-specific risk limits, and replay → paper → shadow → owner-signed promotion per event class. Honest latency tier: about 1–10 seconds, not institutional milliseconds. | §8.10 |
 | T2 | Source research report added to the pack. | `research/FREE_TRADING_NEWS_AND_CALENDAR_FEEDS_20261015.md` |
 
@@ -784,7 +785,7 @@ For each high-impact release on the calendar, an event strategy prepares an **ar
 
 At the release second VAN fetches the official value, computes the surprise against consensus, and if every condition holds sends one order with its stop and target. Everything is decided before the release; nothing waits for a model.
 
-**Speed versus "one source is not a fact".** The recorder's normal rule needs two agreeing sources. Waiting for the second source costs seconds. In speed mode an armed plan may enter on **one release-grade source** (the official issuer, or a feed the owner has designated release-grade), and the cross-check runs immediately after: if the second source disagrees materially or the value fails sanity checks, the position is closed at once and the plan is disabled for that event class until reviewed. This is a deliberate trade-off that needs owner signature (OQ-10); the alternative is to enter only after two sources agree, which is safer and slower.
+**Two sources must agree before entry (OD-13).** At the release second VAN fetches the figure from the official issuer and from the second structured source (the paid calendar feed) in parallel. An armed plan enters only when both have delivered the figure and they agree (exact match after unit normalisation; a forecast-only or revised-previous mismatch does not block, an actual mismatch does). If the second source has not delivered within the plan's maximum entry delay, or the two disagree, the plan stands down for that release and records why. This follows the recorder's existing rule that one source is not a fact. The cost is a few seconds per release; the latency ledger measures exactly how many, per event class, and replay and paper trading (§8.10.8) use that measured wait so results reflect it.
 
 #### 8.10.4 Unscheduled headlines
 
@@ -829,7 +830,7 @@ An event class whose paper results do not survive realistic spreads and delays s
 
 #### 8.10.9 Bundle acceptance tests
 
-Release value arriving before its scheduled time is rejected; official site lockup at release time stands the plan down without retries that double-act; surprise inside the no-trade band produces no order; spread above the cap at entry stands down with reason; entry later than the maximum delay is refused; single-source speed entry followed by a disagreeing second source closes the trade and disarms the class; rumour-worded headline produces no entry; unscheduled headline from one fast source only produces no entry; stop and TP are inside the single order request; armed manual ticket used outside its window or with a changed parameter is refused; latency drift downgrades a source and disarms dependent plans; daily news-loss cap stops further news trades; replay with realistic spreads is reproducible from the ledger.
+Release value arriving before its scheduled time is rejected; official site lockup at release time stands the plan down without retries that double-act; surprise inside the no-trade band produces no order; spread above the cap at entry stands down with reason; entry later than the maximum delay is refused; a release with only one source delivered, or two sources disagreeing on the actual, produces no order and a recorded stand-down; the second source arriving after the plan's maximum entry delay produces no order; rumour-worded headline produces no entry; unscheduled headline from one fast source only produces no entry; stop and TP are inside the single order request; armed manual ticket used outside its window or with a changed parameter is refused; latency drift downgrades a source and disarms dependent plans; daily news-loss cap stops further news trades; replay with realistic spreads is reproducible from the ledger.
 
 ---
 
