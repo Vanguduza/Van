@@ -1,0 +1,534 @@
+{
+  "count": 9,
+  "machines": [
+    {
+      "id": "VNX-SM-ACCOUNT_LIFECYCLE",
+      "states": [
+        "UNLINKED",
+        "DISCOVERED",
+        "AUTH_PENDING",
+        "LINKED_READ_ONLY",
+        "KYC_PENDING",
+        "ACTIVE_ELIGIBLE",
+        "RESTRICTED",
+        "UNLINK_REQUESTED",
+        "UNLINK_BLOCKED",
+        "UNLINKED_LOCAL",
+        "REMOTE_CLOSURE_REQUESTED",
+        "REMOTE_CLOSURE_PENDING",
+        "REMOTE_CLOSED",
+        "UNKNOWN"
+      ],
+      "allowed_transitions": [
+        {
+          "from": "UNLINKED",
+          "to": "DISCOVERED"
+        },
+        {
+          "from": "DISCOVERED",
+          "to": "AUTH_PENDING"
+        },
+        {
+          "from": "AUTH_PENDING",
+          "to": "LINKED_READ_ONLY"
+        },
+        {
+          "from": "LINKED_READ_ONLY",
+          "to": "KYC_PENDING"
+        },
+        {
+          "from": "KYC_PENDING",
+          "to": "ACTIVE_ELIGIBLE"
+        },
+        {
+          "from": "LINKED_READ_ONLY",
+          "to": "RESTRICTED"
+        },
+        {
+          "from": "ACTIVE_ELIGIBLE",
+          "to": "RESTRICTED"
+        },
+        {
+          "from": "LINKED_READ_ONLY",
+          "to": "UNLINK_REQUESTED"
+        },
+        {
+          "from": "ACTIVE_ELIGIBLE",
+          "to": "UNLINK_REQUESTED"
+        },
+        {
+          "from": "UNLINK_REQUESTED",
+          "to": "UNLINK_BLOCKED"
+        },
+        {
+          "from": "UNLINK_REQUESTED",
+          "to": "UNLINKED_LOCAL"
+        },
+        {
+          "from": "ACTIVE_ELIGIBLE",
+          "to": "REMOTE_CLOSURE_REQUESTED"
+        },
+        {
+          "from": "REMOTE_CLOSURE_REQUESTED",
+          "to": "REMOTE_CLOSURE_PENDING"
+        },
+        {
+          "from": "REMOTE_CLOSURE_PENDING",
+          "to": "REMOTE_CLOSED"
+        }
+      ],
+      "invariant": "REMOTE_CLOSED requires broker readback; UNLINKED_LOCAL is never equivalent to REMOTE_CLOSED",
+      "stage": "PROPOSED"
+    },
+    {
+      "id": "VNX-SM-FUND_DEPOSIT",
+      "states": [
+        "DRAFT",
+        "QUOTED",
+        "AWAITING_OWNER",
+        "AUTHORIZED",
+        "PROVIDER_PENDING",
+        "SENT",
+        "PENDING_SETTLEMENT",
+        "SETTLED",
+        "REJECTED",
+        "FAILED",
+        "OUTCOME_UNKNOWN",
+        "REVERSED",
+        "EXPIRED"
+      ],
+      "allowed_transitions": [
+        {
+          "from": "DRAFT",
+          "to": "QUOTED"
+        },
+        {
+          "from": "QUOTED",
+          "to": "AWAITING_OWNER"
+        },
+        {
+          "from": "AWAITING_OWNER",
+          "to": "AUTHORIZED"
+        },
+        {
+          "from": "AUTHORIZED",
+          "to": "PROVIDER_PENDING"
+        },
+        {
+          "from": "PROVIDER_PENDING",
+          "to": "SENT"
+        },
+        {
+          "from": "SENT",
+          "to": "PENDING_SETTLEMENT"
+        },
+        {
+          "from": "PENDING_SETTLEMENT",
+          "to": "SETTLED"
+        },
+        {
+          "from": "PENDING_SETTLEMENT",
+          "to": "REVERSED"
+        },
+        {
+          "from": "PROVIDER_PENDING",
+          "to": "OUTCOME_UNKNOWN"
+        },
+        {
+          "from": "SENT",
+          "to": "OUTCOME_UNKNOWN"
+        },
+        {
+          "from": "OUTCOME_UNKNOWN",
+          "to": "PENDING_SETTLEMENT"
+        }
+      ],
+      "invariant": "SETTLED only by external balance/transaction reconciliation, never web redirect",
+      "stage": "PROPOSED"
+    },
+    {
+      "id": "VNX-SM-FUND_WITHDRAWAL",
+      "states": [
+        "DRAFT",
+        "BENEFICIARY_VERIFIED",
+        "QUOTED",
+        "AWAITING_A4",
+        "AUTHORIZED",
+        "SUBMITTED",
+        "PROVIDER_PENDING",
+        "PAID",
+        "REJECTED",
+        "OUTCOME_UNKNOWN",
+        "REVERSED",
+        "EXPIRED"
+      ],
+      "allowed_transitions": [
+        {
+          "from": "DRAFT",
+          "to": "BENEFICIARY_VERIFIED"
+        },
+        {
+          "from": "BENEFICIARY_VERIFIED",
+          "to": "QUOTED"
+        },
+        {
+          "from": "QUOTED",
+          "to": "AWAITING_A4"
+        },
+        {
+          "from": "AWAITING_A4",
+          "to": "AUTHORIZED"
+        },
+        {
+          "from": "AUTHORIZED",
+          "to": "SUBMITTED"
+        },
+        {
+          "from": "SUBMITTED",
+          "to": "PROVIDER_PENDING"
+        },
+        {
+          "from": "SUBMITTED",
+          "to": "OUTCOME_UNKNOWN"
+        },
+        {
+          "from": "OUTCOME_UNKNOWN",
+          "to": "PROVIDER_PENDING"
+        },
+        {
+          "from": "PROVIDER_PENDING",
+          "to": "PAID"
+        },
+        {
+          "from": "PROVIDER_PENDING",
+          "to": "REVERSED"
+        }
+      ],
+      "invariant": "PAID requires authoritative provider receipt/settlement, quote and beneficiary hash bound to A4",
+      "stage": "PROPOSED"
+    },
+    {
+      "id": "VNX-SM-TRADE_ORDER",
+      "states": [
+        "DRAFT",
+        "RISK_REVIEW",
+        "OWNER_REVIEW",
+        "AUTHORIZED",
+        "BROKER_PENDING",
+        "PLACED",
+        "PARTIAL",
+        "FILLED",
+        "MODIFY_PENDING",
+        "CANCEL_PENDING",
+        "CANCELLED",
+        "REJECTED",
+        "EXPIRED",
+        "OUTCOME_UNKNOWN"
+      ],
+      "allowed_transitions": [
+        {
+          "from": "DRAFT",
+          "to": "RISK_REVIEW"
+        },
+        {
+          "from": "RISK_REVIEW",
+          "to": "OWNER_REVIEW"
+        },
+        {
+          "from": "OWNER_REVIEW",
+          "to": "AUTHORIZED"
+        },
+        {
+          "from": "AUTHORIZED",
+          "to": "BROKER_PENDING"
+        },
+        {
+          "from": "BROKER_PENDING",
+          "to": "PLACED"
+        },
+        {
+          "from": "BROKER_PENDING",
+          "to": "OUTCOME_UNKNOWN"
+        },
+        {
+          "from": "PLACED",
+          "to": "PARTIAL"
+        },
+        {
+          "from": "PARTIAL",
+          "to": "FILLED"
+        },
+        {
+          "from": "PLACED",
+          "to": "FILLED"
+        },
+        {
+          "from": "PLACED",
+          "to": "MODIFY_PENDING"
+        },
+        {
+          "from": "PLACED",
+          "to": "CANCEL_PENDING"
+        },
+        {
+          "from": "CANCEL_PENDING",
+          "to": "CANCELLED"
+        },
+        {
+          "from": "BROKER_PENDING",
+          "to": "REJECTED"
+        },
+        {
+          "from": "OUTCOME_UNKNOWN",
+          "to": "PLACED"
+        }
+      ],
+      "invariant": "Broker and protection readback precede any success state; chart never direct order authority",
+      "stage": "PROPOSED"
+    },
+    {
+      "id": "VNX-SM-ORB_PRESENTATION",
+      "states": [
+        "QUIET",
+        "MONITORING",
+        "ACTIVE_WORK",
+        "ATTENTION",
+        "HIGH_RISK",
+        "CRITICAL",
+        "OFFLINE",
+        "STALE"
+      ],
+      "allowed_transitions": [],
+      "invariant": "These are reducer output categories; inputs are orthogonal domain state axes with precedence, TTL and no visible state legend",
+      "stage": "PROPOSED"
+    },
+    {
+      "id": "VNX-SM-CHART_SESSION",
+      "states": [
+        "UNINITIALIZED",
+        "CREATING",
+        "LOADING_DATA",
+        "READY",
+        "STALE",
+        "OFFLINE",
+        "CRASHED",
+        "NATIVE_FALLBACK",
+        "DESTROYED"
+      ],
+      "allowed_transitions": [
+        {
+          "from": "UNINITIALIZED",
+          "to": "CREATING"
+        },
+        {
+          "from": "CREATING",
+          "to": "LOADING_DATA"
+        },
+        {
+          "from": "LOADING_DATA",
+          "to": "READY"
+        },
+        {
+          "from": "READY",
+          "to": "STALE"
+        },
+        {
+          "from": "STALE",
+          "to": "OFFLINE"
+        },
+        {
+          "from": "READY",
+          "to": "CRASHED"
+        },
+        {
+          "from": "CRASHED",
+          "to": "NATIVE_FALLBACK"
+        },
+        {
+          "from": "OFFLINE",
+          "to": "NATIVE_FALLBACK"
+        },
+        {
+          "from": "NATIVE_FALLBACK",
+          "to": "READY"
+        },
+        {
+          "from": "READY",
+          "to": "DESTROYED"
+        }
+      ],
+      "invariant": "Chart crash cannot invalidate VATI risk state nor claim order success",
+      "stage": "PROPOSED"
+    },
+    {
+      "id": "VNX-SM-TASK_EXECUTION",
+      "states": [
+        "CREATED",
+        "QUEUED",
+        "LEASED",
+        "RUNNING",
+        "WAITING_INPUT",
+        "BLOCKED",
+        "VERIFYING",
+        "QUALIFIED",
+        "FAILED",
+        "CANCELLED",
+        "OUTCOME_UNKNOWN"
+      ],
+      "allowed_transitions": [
+        {
+          "from": "CREATED",
+          "to": "QUEUED"
+        },
+        {
+          "from": "QUEUED",
+          "to": "LEASED"
+        },
+        {
+          "from": "LEASED",
+          "to": "RUNNING"
+        },
+        {
+          "from": "RUNNING",
+          "to": "WAITING_INPUT"
+        },
+        {
+          "from": "RUNNING",
+          "to": "BLOCKED"
+        },
+        {
+          "from": "RUNNING",
+          "to": "VERIFYING"
+        },
+        {
+          "from": "VERIFYING",
+          "to": "QUALIFIED"
+        },
+        {
+          "from": "VERIFYING",
+          "to": "FAILED"
+        },
+        {
+          "from": "RUNNING",
+          "to": "OUTCOME_UNKNOWN"
+        },
+        {
+          "from": "BLOCKED",
+          "to": "QUEUED"
+        },
+        {
+          "from": "RUNNING",
+          "to": "CANCELLED"
+        }
+      ],
+      "invariant": "QUALIFIED only on independent evidence; agent claim alone never increments completion",
+      "stage": "PROPOSED"
+    },
+    {
+      "id": "VNX-SM-NEWS_ANALYSIS",
+      "states": [
+        "INGESTED",
+        "DEDUPED",
+        "SOURCED",
+        "CONTEXTUALIZED",
+        "VERIFIED",
+        "PUBLISHED",
+        "STALE",
+        "RETRACTED",
+        "UNVERIFIABLE"
+      ],
+      "allowed_transitions": [
+        {
+          "from": "INGESTED",
+          "to": "DEDUPED"
+        },
+        {
+          "from": "DEDUPED",
+          "to": "SOURCED"
+        },
+        {
+          "from": "SOURCED",
+          "to": "CONTEXTUALIZED"
+        },
+        {
+          "from": "CONTEXTUALIZED",
+          "to": "VERIFIED"
+        },
+        {
+          "from": "VERIFIED",
+          "to": "PUBLISHED"
+        },
+        {
+          "from": "PUBLISHED",
+          "to": "STALE"
+        },
+        {
+          "from": "PUBLISHED",
+          "to": "RETRACTED"
+        },
+        {
+          "from": "SOURCED",
+          "to": "UNVERIFIABLE"
+        }
+      ],
+      "invariant": "Retraction/correction and provenance must propagate; no stale story can trigger owner order",
+      "stage": "PROPOSED"
+    },
+    {
+      "id": "VNX-SM-FLOATING_VAN",
+      "states": [
+        "FULL",
+        "WORKBOARD_COMPACT",
+        "WORKBOARD_EXPANDED",
+        "WORKBOARD_MAXIMIZED",
+        "MINIMIZED",
+        "DOCKED",
+        "STOPPED"
+      ],
+      "allowed_transitions": [
+        {
+          "from": "FULL",
+          "to": "WORKBOARD_COMPACT"
+        },
+        {
+          "from": "WORKBOARD_COMPACT",
+          "to": "FULL"
+        },
+        {
+          "from": "WORKBOARD_COMPACT",
+          "to": "WORKBOARD_EXPANDED"
+        },
+        {
+          "from": "WORKBOARD_EXPANDED",
+          "to": "WORKBOARD_MAXIMIZED"
+        },
+        {
+          "from": "WORKBOARD_MAXIMIZED",
+          "to": "FULL"
+        },
+        {
+          "from": "FULL",
+          "to": "MINIMIZED"
+        },
+        {
+          "from": "MINIMIZED",
+          "to": "FULL"
+        },
+        {
+          "from": "FULL",
+          "to": "DOCKED"
+        },
+        {
+          "from": "DOCKED",
+          "to": "FULL"
+        },
+        {
+          "from": "FULL",
+          "to": "STOPPED"
+        }
+      ],
+      "invariant": "Preserve gesture and Android overlay ownership; no accidental double-tap/single-tap overlap",
+      "stage": "PROPOSED"
+    }
+  ]
+}

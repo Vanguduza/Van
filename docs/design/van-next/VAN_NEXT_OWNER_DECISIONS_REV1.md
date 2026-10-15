@@ -3,7 +3,7 @@
 **Record ID:** `VAN-NEXT-OD-REV1-20261015`
 **Status:** `RECORDED_FROM_OWNER_CHAT / AWAITING_OWNER_SIGNATURE`
 **Recorded:** 15 October 2026, from the owner's instructions in a Claude Code session reviewing `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_20261015.md`.
-**Applies to:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_7_20261015.md` and its companion matrix. OD-07…OD-17 were added on 15 October 2026 after the owner reviewed Rev 1.1.
+**Applies to:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_8_20261015.md` and its companion matrix. OD-07…OD-22 were added on 15 October 2026 after the owner reviewed Rev 1.1.
 
 Under the VAN Project Truth Protocol an owner-signed, device-authenticated instruction outranks this record. These decisions bind development packets once the owner signs this record (blueprint §2.1, §17 F0). Until then they are the owner's stated intent, and no trading mandate, live permission or production change follows from them.
 
@@ -27,6 +27,11 @@ Under the VAN Project Truth Protocol an owner-signed, device-authenticated instr
 | OD-15 | "Review this REA analysis of MT5 and TradingView and use it to improve VAN's trading system and the Android app." | §7.8 trading workstation architecture (shared market projection, two chart budgets with a renderer-independent contract, bridge rules, saved indicators/drawings, replay, order vocabulary, chart observations, alerts, watchlists/screener); review in `research/VAN_REA_REVIEW_20261015.md`. |
 | OD-16 | "Build a new chart engine that produces the best results from the research we've done… study how they handle accounts management (creation, deleting editing, funding and supporting different brokers) so that we have a comprehensive account management system for VAN as well." | §7.8.11 native chart engine built under `android/app/.../van/next/chart/` with JVM tests; §7.9 account management (lifecycle, broker adapters, funding ledger, flow-adjusted drawdown fixing F-033). The 39 original REA evidence records were not reachable at first; see OD-17. |
 | OD-17 | "Use commander to access van trading core through dial admin or oracle-admin" | The 39 records were read through `dial-control` → `van-trading-core` (`dial-oracle-admin` key). The study (`research/VAN_REA_EVIDENCE_STUDY_39_RECORDS_20261015.md`) led to the engine extensions in §7.8.11 and account additions A1–A10 in §7.9.11. |
+| OD-18 | D1: "yes" — VAN orchestrates deposits, withdrawals and transfers in the app, through each provider's verified API or hosted flow, settled only on broker readback. | §7.9.0, §7.9.5, §7.9.12; replaces Rev 1.6's unauthorised "VAN never moves money". |
+| OD-19 | D2: "keep your blueprint as base and bring in the pack's stronger parts" | Rev 1.8 (Y1–Y7); `research/VAN_NEXT_PACK_REV2_COMPARISON_20261015.md`. |
+| OD-20 | D3: "Yes I want trading modes, they should be documented or partially built inside the repo" | §7.10. Found on PR #92 (`923ecf9`) with design and tests; adopted through DU-00 consolidation and DU-30. |
+| OD-21 | D4: "yes" — the owner may add to winning manual and automatic trades, sized by the trade's risk profile (OD-08, OD-10). | §7.4 unchanged; the pack's "ADD only if VATI proposes" is not adopted. |
+| OD-22 | D5: "Potential trades" | §2.6 label confirmed over the pack's "Opportunities". |
 
 ## Open owner decisions
 
@@ -45,5 +50,8 @@ Under the VAN Project Truth Protocol an owner-signed, device-authenticated instr
 | OQ-14 | Chart workstation renderer. Narrowed by OD-16: the native engine is built; what stays open is whether it is enough on the S24 or a qualified web engine is still needed for the full workstation | DU-10 |
 | OQ-15 | Grace period before a deleted account's records are purged (recommended 30 days, cancellable) | DU-29 |
 | OQ-16 | Portfolio base currency for multi-account totals and funding reports | DU-29a |
+| OQ-18 | D6: quarantine `feature/rea-trading-accounts-tactile-20261015` (`3b2c9e04`) alongside the chart spike, reviewed only when the account packet opens? (Unanswered.) | DU-29 |
+| OQ-19 | Which provider is the first admitted funds rail (e.g. Deriv with `payment` scope), in sandbox or demo first | DU-29c |
+| OQ-20 | Owner signature of the trading-mode percentages and the AGGRESSIVE evidence thresholds before any live use | DU-30 live use |
 | OQ-17 | Whether chart replay may offer simulated practice trades (TradingView has this; VAN's engine currently refuses drafts in replay). Simulated only, never an order. | DU-10c |
 | OQ-09 | Whether news may ever *directly* increase risk (recommended: no; news creates trades only through validated event strategies, D7) | DU-14c |

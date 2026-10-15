@@ -24,7 +24,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 PACK = HERE.parent
-BLUEPRINT = PACK / "VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_7_20261015.md"
+BLUEPRINT = PACK / "VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_8_20261015.md"
 DECISIONS = PACK / "VAN_NEXT_OWNER_DECISIONS_REV1.md"
 OUT_MD = HERE / "VAN_NEXT_DEVELOPMENT_PLAN_REV1.md"
 OUT_JSON = HERE / "VAN_NEXT_DEVELOPMENT_PLAN_REV1.json"
@@ -50,7 +50,7 @@ PLAN_CHOICES = {
         "DU-09": "Trading", "DU-10": "Trading", "DU-10b": "Trading", "DU-10c": "Trading", "DU-10d": "Trading",
         "DU-11": "Trading", "DU-12": "Trading", "DU-12a": "Trading", "DU-12b": "Trading", "DU-13": "Trading",
         "DU-28": "Trading", "DU-28b": "Trading", "DU-28c": "Trading", "DU-28d": "Trading", "DU-28e": "Trading",
-        "DU-29": "Trading", "DU-29a": "Trading", "DU-29b": "Trading",
+        "DU-29": "Trading", "DU-29a": "Trading", "DU-29b": "Trading", "DU-29c": "Trading", "DU-30": "Trading",
         "DU-14a": "News", "DU-14b": "News", "DU-14c": "News", "DU-14d": "News", "DU-14e": "News", "DU-14f": "News",
         "DU-15": "Work Graph", "DU-16": "Work Graph", "DU-17": "Work Graph", "DU-18": "Work Graph",
         "DU-08": "Continuity", "DU-19": "Continuity", "DU-20": "Continuity", "DU-21": "Continuity",
@@ -352,7 +352,7 @@ def render(dus, edges, dotted, reqs, oqs, choices, seq, deps, findings, unreq, s
             w(f"  - `{x}`")
     else:
         w("- Findings: none. The DAG is acyclic; every requirement and every open question maps to a DU in the DAG; every DU has a lane; no DU depends on a later phase.")
-    w(f"- DUs with no requirement row (kept, flagged for the Rev 1.7 freeze list): {', '.join(unreq) if unreq else 'none'}.")
+    w(f"- DUs with no requirement row (kept, flagged for the freeze list): {', '.join(unreq) if unreq else 'none'}.")
     for d, why in choices["complete"].items():
         w(f"- {d} is not a packet: {why}")
     w("")

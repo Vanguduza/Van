@@ -1,9 +1,9 @@
 # VAN Tactile Spatial Experience — Complete Frontend Rebuild, Functional Preservation & Capability Expansion
 
-**Document ID:** `VAN-TSE-FR-REV1.7-20261015`  
-**Revision:** 1.7 — **freeze candidate** (supersedes Rev 1.6; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.6 are in git history). Development follows `plan/VAN_NEXT_DEVELOPMENT_PLAN_REV1.md`, derived from this document; freeze criteria in `VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_7.md`  
+**Document ID:** `VAN-TSE-FR-REV1.8-20261015`  
+**Revision:** 1.8 — **freeze candidate** (supersedes Rev 1.7; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.7 are in git history). Development follows `plan/VAN_NEXT_DEVELOPMENT_PLAN_REV1.md`, derived from this document; freeze criteria in `VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_8.md`  
 **Date:** 15 October 2026 (Africa/Harare)  
-**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-17), which captures the two locked dark/light references and the 15 October review decisions  
+**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-22), which captures the two locked dark/light references and the 15 October review decisions  
 **Repository:** [`Vanguduza/Van`](https://github.com/Vanguduza/Van)  
 **Audit baseline A:** merged `main` SHA `8eb1889822fc8a83f219977c15340172e16acd91`  
 **Audit baseline B:** unmerged, draft owner-core [PR #93](https://github.com/Vanguduza/Van/pull/93) SHA `dfc1557ab99ad8d41cf84714e1bb671e89b045e6`  
@@ -13,6 +13,20 @@
 **Companion artifacts:** `VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.md` (78 surfaces + additive surfaces; CSV and JSON for automation), `VAN_NEXT_OWNER_DECISIONS_REV1.md`, `reference/` (locked originals and relabelled Rev 1.1 references).  
 
 > **Executive decision:** Rebuild the entire visible frontend using the newly accepted Tactile Spatial UI, not the old VAN panels or older aesthetic blueprints; comprehensively inspect and preserve qualified product functions, underlying service/contracts, security, existing worthwhile UX flows, Floating VAN and interaction behaviours. Introduce the state-aware Home orb, small quick-access sheet, richer Trading entry points, full news intelligence, and genuinely live project/task/agent spatial workflow diagrams. Reconcile large, unmerged source candidates before porting; no silent legacy-file imports or feature loss.
+
+## Rev 1.8 change log (15 October 2026) — Rev 2 pack merged in
+
+The owner compared this blueprint with the Rev 2 "Quantum" pack (`research/VAN_NEXT_PACK_REV2_COMPARISON_20261015.md`) and decided D1–D5 (OD-18…OD-22): this blueprint stays the base and the pack's stronger parts are brought in.
+
+| # | Change | Where |
+|---|---|---|
+| Y1 | **Funds move inside VAN (OD-18).** Deposits, withdrawals and transfers are orchestrated through each provider's verified API or hosted flow, and settled only on broker readback. This removes Rev 1.6's "VAN never moves money", which was not an owner decision and wrongly cited §0.3. | §7.9.0, §7.9.5, §7.9.12 |
+| Y2 | From the pack: six ownership planes, canonical financial models, exact money types, account creation, and local unlink kept separate from remote closure. State names follow the pack's `STATE_MACHINES.json`. | §7.9.0, §7.9.1 |
+| Y3 | **Trading modes Normal / Risky / Aggressive (OD-20)** documented from PR #92 (`923ecf9`): its design and code, and test evidence measured on 15 October. Admission goes through DU-00 consolidation; the new unit is DU-30. | §7.10 |
+| Y4 | Manual adds stay as in OD-08/OD-10 (OD-21); the pack's "ADD only if VATI proposes" is not adopted. Tile label "Potential trades" confirmed (OD-22). | §7.4, §2.6 |
+| Y5 | Order-state names aligned with the pack; trade history separates funding cash flow from trading P&L; device scope extended. | §7.8.6, §7.5, §15 |
+| Y6 | Requirements VAN-NX-055…060; DAG units DU-29c (funds orchestration) and DU-30 (trading modes); plan regenerated. | §16 |
+| Y7 | The reviewed pack contracts are imported, with a note on their naming inconsistencies. | `contracts/` |
 
 ## Rev 1.7 change log (15 October 2026) — freeze candidate
 
@@ -24,7 +38,7 @@ The owner observed that building had started before the blueprint was final and 
 | Z2 | **Deterministic development plan** generated from §16.1, §16.2, §19.1 and the open questions by `plan/generate_plan.py`: 68 packets, validated (acyclic, every requirement and open question mapped, no phase inversion), with a self-test that proves each check catches a broken input. | §16.5, `plan/` |
 | Z3 | Requirement rows added for the two DUs that had none, restating existing text: VAN-NX-053 (DU-01, §17 F0) and VAN-NX-054 (migration/retirement, §19.1 P5–P6). | §16.1 |
 | Z4 | OQ-05 (signature) aligned with §19.1: needed by the end of P0 (DU-01 exit); OQ-17 assigned to the replay unit DU-10c. | Decision record |
-| Z5 | Freeze criteria and their status listed for owner approval. | `VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_7.md` |
+| Z5 | Freeze criteria and their status listed for owner approval. | `VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_7.md` (now `_REV1_8.md`) |
 
 ## Rev 1.6 change log (15 October 2026)
 
@@ -668,6 +682,8 @@ This keeps §7.4.10's rule intact: manual trades do not train or promote existin
 
 Live cards display at-a-glance P&L/direction/SL/TP and protection, while tapping presents a native position sheet and then full detail. Position detail has `Chart`, `Protection`, `Risk`, `Thesis`, `Execution`, `Timeline`, `Review`, `Analyst`; not all at once. Trade histories and pending/closed order states are distinct. Account-supported netting/hedging, lot/contract units, tick size, decimal precision and instrument-specific order types must be modelled from provider capabilities, never inferred solely from screenshots. Portfolio-level and position-level summary must agree on source revisions and timestamp semantics.
 
+**Cash flow is not P&L (Rev 2 pack §8.2).** Trade history separates verified funding cash flows from trading results, so a deposit never reads as profit and a withdrawal never reads as a loss (F-033). History filters include account, broker, symbol, strategy, mode, state, outcome and source age.
+
 ### 7.6 Depth / DOM and richer intelligence
 
 Compact depth, professional ladder, volume profile, market profile and order flow only if actual venues/feed contracts provide that data; no invented synthetic live depth presented as authentic. Causal and source badges distinguish market observations from VATI eligibility and VAN/JEV interpretation. Live Analyst explains supports/against, invalidation, risk, event changes, freshness and divergence between JEV and VATI. An LLM narrative is verified against deterministic facts and labelled when aging/stale/unavailable. A model never supplies lots, stop, target, leverage or broker route authority.
@@ -716,7 +732,7 @@ An isolated historical chart session that steps bar by bar through past data, fo
 
 - Backend additions, venue by venue as each adapter supports them: **stop-limit** entries; **fill policies** (fill-or-kill, immediate-or-cancel, return) where the venue offers them; **specified expiry** in addition to day and good-till-cancelled; and a distinct **WORKING** state for a pending order resting at the broker (today `ACCEPTED` covers it).
 - A per-venue **capability matrix** decides which order types, fill policies and expiries the app offers; the app never offers what the venue cannot do.
-- The app never collapses order states into one spinner or "success": requested, working, partial, filled, rejected, cancelled, expired and outcome-unknown are shown distinctly, and an uncertain result is reconciled against the broker before any repeat is allowed.
+- The app never collapses order states into one spinner or "success". The state names follow the pack's `VNX-SM-TRADE_ORDER`: `DRAFT, RISK_REVIEW, OWNER_REVIEW, AUTHORIZED, BROKER_PENDING, PLACED (working), PARTIAL, FILLED, MODIFY_PENDING, CANCEL_PENDING, CANCELLED, REJECTED, EXPIRED, OUTCOME_UNKNOWN`. Each is shown distinctly, and an uncertain result is reconciled against the broker before any repeat is allowed. A stop request is not a cancellation, and a partial fill still carries exposure.
 - Chart handles for entry, stop and take-profit create draft proposals only; the §7.4 flows execute them. Symbol or unit conflicts (different tick or lot units across sources) block the proposal instead of rounding silently.
 
 #### 7.8.7 Chart observations feed VAN's research (REA-VAN-012)
@@ -767,9 +783,38 @@ A native chart engine was built ahead of the plan (Rev 1.6) and extended from th
 
 **F-033 (defect, reproduced):** VATI has no notion of deposits or withdrawals. Peak and day-start equity are raw broker equity (`app/cycle.py:211`, `app/account_service.py:609`). Probe with VATI's own `drawdown_verdict` and default tiers: an account at 10,000 whose owner withdraws 3,000 reads as a 30 % drawdown → trading **suspended** and top-tier-only; withdrawing 500 cuts risk to 0.40×. A deposit would likewise hide real losses. The daily-loss limit uses the same raw equity, so an intraday withdrawal can also look like a daily loss (inferred from the same code path; not separately probed). The funding ledger below fixes this.
 
+#### 7.9.0 Ownership planes and money types (Rev 2 pack §5.1–§5.2, OD-18)
+
+Six planes, each with its own owner. The app never infers one from another.
+
+| Plane | Owner | The app must never infer |
+|---|---|---|
+| Broker account identity | Broker / platform | That a local link is a legally opened brokerage account |
+| VAN account link and settings | VATI account registry and signed gateway | That an unlink is a remote closure or a liquidation |
+| Execution and risk | VATI risk, router and signed mandate | That a chart drag, model confidence or tap gives execution authority |
+| Money movement | Broker, payment provider or custodian, per account capability | That "initiated", "redirected" or "accepted" means settled |
+| Balances and P&L | Broker statements and the reconciled ledger | That a UI sum or cached quote is available funding |
+| Analytics and intelligence | Qualified VATI, JEV and LLM services behind evidence gates | That a narrative or drawing is a signed trade intent |
+
+**Typed models.** Account, wallet, payment method, transaction, trading mandate and session are separate types with separate IDs. The canonical models are:
+- `BrokerIdentity` and `AccountLink`;
+- `ProviderCapability`, per operation;
+- `PaymentMethodQuote` and `PaymentIntent`, the latter with an idempotency key;
+- `FinancialMovement` and `AccountClosureIntent`.
+
+They follow `contracts/ACCOUNTS_FUNDS_TECHNICAL_CONTRACT.md`.
+
+**Money is exact.** Amounts use integer minor units or fixed-precision decimal, with the currency carried separately. Floating point is forbidden for amounts, fees, deposits, withdrawals and executed quantities.
+
 #### 7.9.1 Account lifecycle
 
-`DRAFT → LINKING → VERIFYING → ACTIVE (DEMO | LIVE) ⇄ SUSPENDED → DISCONNECTED → ARCHIVING (grace) → ARCHIVED`. `SUSPENDED` carries a reason (credentials expired, broker disabled the account, kill switch, verification failed); `ARCHIVING` can be cancelled until the grace period ends. Every transition is recorded with who, when and why; transitions that change trading or credentials need the existing device-signed owner approval. New accounts always start in `OBSERVE`; moving to demo or live trading is a mandate change (§7.4.2).
+State names follow the pack's `VNX-SM-ACCOUNT_LIFECYCLE`. The happy path is `UNLINKED → DISCOVERED → AUTH_PENDING → LINKED_READ_ONLY → (KYC_PENDING) → ACTIVE_ELIGIBLE`. `RESTRICTED` carries a reason (credentials expired, broker disabled the account, kill switch, verification failed).
+
+Leaving VAN and closing at the broker are two separate paths that never merge:
+- **Local:** `UNLINK_REQUESTED → (UNLINK_BLOCKED) → UNLINKED_LOCAL`. During the grace period (OQ-15) the unlink can be cancelled.
+- **Remote:** `REMOTE_CLOSURE_REQUESTED → REMOTE_CLOSURE_PENDING → REMOTE_CLOSED`. `REMOTE_CLOSED` requires broker readback.
+
+`UNKNOWN` is a real state, never a success. **Creating an account:** the add flow offers `Demo`, `Link existing` or `Open new live account`. A live opening happens through the provider's API or its verified hosted onboarding, with KYC kept at the provider (A9); a provider "accepted" never counts as an active account. Every transition is recorded with who, when and why; transitions that change trading or credentials need the existing device-signed owner approval. New accounts always start in `OBSERVE`; moving to demo or live trading is a mandate change (§7.4.2).
 
 #### 7.9.2 Adding an account
 
@@ -797,8 +842,9 @@ Label, colour and icon, default chart and instruments; trading mode and risk bud
 
 #### 7.9.5 Funding
 
-VAN never moves money (§0.3). Funding works in three parts:
-1. **Deposit / withdraw shortcuts:** per broker, a deep link to the broker's own cashier, opened in the browser; VAN shows what the broker states about methods, limits and fees but takes no part in the transfer.
+**VAN orchestrates funding inside the app (OD-18).** Funding works in three parts:
+
+1. **Deposits, withdrawals and transfers in VAN** (§7.9.12). Each is offered only where a fresh capability check says the account supports it. It runs through the provider's verified API or its verified hosted flow, and counts as done only on broker readback. Where a provider supports neither, VAN shows why and links to the broker's cashier.
 2. **Funding ledger:** deposits, withdrawals, internal transfers, credits and bonuses, and fees are read from the broker's balance-operation history (MT5 balance and credit deals, cTrader cash-flow history, Deriv statement), reconciled, timestamped and shown per account. Unclassified operations are flagged for the owner to label.
 3. **Flow-adjusted risk and performance (fixes F-033):** drawdown is measured against a peak adjusted for external flows (a withdrawal lowers the peak by the same amount; a deposit raises it), daily loss excludes the day's net flows, and performance is reported time-weighted so deposits and withdrawals do not look like profits or losses. Broker credits and bonuses that cannot be withdrawn are excluded from risk capital by default. A withdrawal request that would leave open positions under-margined triggers a warning on the account screen.
 
@@ -835,7 +881,66 @@ A withdrawal does not move drawdown tiers or the daily-loss limit (F-033 regress
 | A7 | Credential types include an OTP binding and a client certificate or key, each stored only as a credential reference. | MT5 `OTP*`, `Certificates*`, `KeysFragment` |
 | A8 | Pair the MT5 Expert Advisor bridge by QR code instead of typing a key. | MT5 `QRCredentials` |
 | A9 | Real-account opening stays at the broker. VAN does not collect KYC data. | MT5 `PersonalData/FinanceData/RealExperienceFragment` |
-| A10 | Funding stance unchanged (§0.3). Next to each broker's cashier link, show its stated methods and commissions. | MT5 `net.metaquotes.payments.*` |
+| A10 | Funding is orchestrated in-app (OD-18, §7.9.12). Show each provider's stated methods, commissions, limits and currency before the owner approves, as MT5's payment flow does. | MT5 `net.metaquotes.payments.*` |
+
+#### 7.9.12 Deposits, withdrawals and transfers (OD-18; Rev 2 pack §5.3–§5.8)
+
+**Capability first.** `GET /v2/accounts/{accountId}/capabilities` returns, per operation:
+- one of `AVAILABLE | BROKER_HOSTED | REQUIRES_KYC | REQUIRES_LINK | REQUIRES_APPROVAL | TEMPORARILY_UNAVAILABLE | NOT_SUPPORTED | UNKNOWN_UNVERIFIED`;
+- the reason, fees, limits and source age.
+
+The check runs fresh before a money button is enabled and again at submission. Nothing in Android hard-codes "this broker supports withdrawals". Unknown is not available.
+
+**State machines** (pack `STATE_MACHINES.json`):
+- **Deposit:** `DRAFT → QUOTED → AWAITING_OWNER → AUTHORIZED → PROVIDER_PENDING → SENT → PENDING_SETTLEMENT → SETTLED`.
+- **Withdrawal:** `DRAFT → BENEFICIARY_VERIFIED → QUOTED → AWAITING_A4 → AUTHORIZED → SUBMITTED → PROVIDER_PENDING → PAID`.
+- **Alternatives for both:** `REJECTED | FAILED | OUTCOME_UNKNOWN | REVERSED | EXPIRED`.
+- **Transfer:** follows the deposit shape and needs both the debit and the credit read back.
+- `SETTLED` and `PAID` come only from broker or provider reconciliation, never from a redirect, an HTTP 200 or a model.
+
+**Exactly once.** Every intent carries an idempotency key. A timeout after submission becomes `OUTCOME_UNKNOWN` and is reconciled by intent or transaction ID; it is never resent. A reversal is a new compensating event, and the original is never erased. Provider references survive process death.
+
+**Approval.** The device-signed approval binds:
+- the exact action, account and provider;
+- the amount, fees and net;
+- the quote, the beneficiary digest and the expiry.
+
+A changed quote needs re-approval, and the amount is immutable after approval. Beneficiaries are masked vault references. Card numbers, CVVs, bank secrets, OAuth codes and one-time passwords are never stored in Android or written to logs. A newly added beneficiary carries a safety delay before its first withdrawal.
+
+**Rollout.** One admitted provider rail first (OQ-19), in sandbox or demo, then failure and reversal reconciliation, then more providers only with evidence. No production provider credentials or live transfers are used during preparation.
+
+**Interaction with risk.** Settled flows feed the funding ledger (part 2) and the flow-adjusted risk (part 3, F-033). Pending deposits are never counted as available collateral. A withdrawal that would leave open positions under-margined is blocked with its reason, not merely warned about.
+
+### 7.10 Trading modes — Normal, Risky, Aggressive (OD-20; PR #92)
+
+The owner wants trading modes. They are **already designed and partly built** on PR #92 (`chatgpt/vati-opportunity-modes-20261008`, head `923ecf9`; design `docs/VAN_VATI_OPPORTUNITY_TEMPERAMENT_MODES_REV1.md`). This section adopts that design. It does not re-invent it.
+
+**What a mode changes.** A mode changes the quality bar and the share of the **already-signed** per-strategy risk budget the system requests. It never raises the ceiling, never changes the mandate or its authority mode (OBSERVE … AUTONOMOUS_LIVE), and never enables adds or pyramiding.
+
+| Mode | Behaviour (PR #92 starting values, not yet calibrated) |
+|---|---|
+| NORMAL | Selective and consistent; requests 25–55 % of the signed strategy budget |
+| RISKY | Admits broader valid setups; requests 45–85 % of the budget; the ordinary Risk Authority still decides |
+| AGGRESSIVE | Highly selective: needs high market quality **and independently admitted positive-edge statistics**. Requests 70 % of the budget, or up to 100 % for exceptional evidence, never above it. Without evidence it does **not trade**. Caps early partial-take at 15 % of the remaining position. |
+
+**Authority.** A mode is set per account or per strategy in a new mandate version, carrying a second, content-bound owner signature (`trading-temperament-admit`). Any later change to the mandate invalidates that signature. There is no hot switching: a change needs a new signed mandate, a restart and reconciliation.
+
+**Every entry is still checked in full.** Each entry still passes a sealed `TradeIntent` → Risk Authority → router check.
+
+**Evidence (measured 15 October, isolated worktree):**
+- PR #92's own suite passes: 177 tests across the seven listed files, against 155 for the same files minus the new one on `main` (`8eb1889`). That is 22 new tests and no regressions in the six existing files.
+- The rule that AGGRESSIVE does not trade without an evidence source was broken deliberately. Exactly `test_aggressive_is_not_an_all_trades_high_risk_switch` failed, and the code was restored.
+- The parallel branch `muse/vati-opportunity-modes-20261008` sits at `main`'s commit, so it contains no alternative implementation.
+
+**Not yet done** (from PR #92's own list, now DU-30 exit criteria):
+1. An independently qualified edge-evidence producer. Today AGGRESSIVE is deliberately unbound and refuses to trade.
+2. Backtest and walk-forward of each mode, with costs, slippage, correlation and regime shifts.
+3. Owner signature of the percentage values (OQ-20).
+4. Passive monitoring of mode, refused candidates and requested risk before any demo use.
+
+In the app, Trading Home and the position screen show the active mode, its limits and why candidates were refused. Changing the mode opens the signed-mandate flow.
+
+**How PR #92 enters the codebase.** PR #92 is classified in DU-00's Feature Ledger like every other candidate branch (expected `CONSOLIDATE`). It is never merged as-is.
 
 ## 8. News and Event Intelligence — live sources, analysis, history, decisions (OD-04, OD-11)
 
@@ -1410,6 +1515,12 @@ Keep explicit pairing, revocation, secure storage, native biometric handling, si
 
 Do not implement performance as a universal timer. Measure actual physical device and network under cold start, rotation, background, offline and memory pressure. Escalation tiers: full material effects → lower-resolution shaders → simpler specular highlights → static goldens **while preserving status, text and controls**. A premium design should degrade gracefully rather than suddenly becoming the generic flat UI that the owner rejected.
 
+**Device scope (Rev 2 pack PT-16).** Qualification also covers:
+- restoring state after process death, including pending provider and order references;
+- tablet, landscape and split-screen layouts;
+- dynamic type and Android-native system bars;
+- battery and thermal budgets on the S24.
+
 ### 15.2 Accessibility contract
 
 Each interactive physical module has a native semantic role/state/name, 48dp minimum target where applicable, clear focus order and explicit action. The orb has an accessible label stating the actual condition without requiring colour detection. Screen readers must reach tasks in deterministic dependency order through the alternate list view. Icon-only quick actions have names; critical approval and SL/TP values read with units and account context. Text scaling, TalkBack, switch access, contrast, large font and reduced motion are required on **both** themes. No essential information is embedded only in rasterised image text.
@@ -1485,6 +1596,12 @@ Each requirement ID must have Product Truth binding, one or more Development Uni
 | VAN-NX-029 | Structural frontend isolation (modules, tokens, strings, release checks) | DU-24 | Legacy import fails compilation; banned-word and literal-style lints fail when induced |
 | VAN-NX-030 | Mockup labels follow system vocabulary | DU-02 | §2.6 table applied in string catalogue and goldens |
 | VAN-NX-053 | Product Truth and preservation reconciliation; owner-signed decision record | DU-01 | §17 F0; Feature Ledger reconciled with Product Truth; record signed (OQ-05) |
+| VAN-NX-055 | Deposits, withdrawals and transfers inside VAN, via verified provider API or hosted flow, settled only on broker readback, exactly once | DU-29c | §7.9.12; timeout → OUTCOME_UNKNOWN never resubmits; redirect never SETTLED; sandbox provider |
+| VAN-NX-056 | Six ownership planes, typed financial models and exact money types | DU-29 | §7.9.0; no float money (static check fails when induced); typed IDs |
+| VAN-NX-057 | Account creation (demo, link existing, open live) and local unlink kept separate from remote closure | DU-29 | §7.9.1; REMOTE_CLOSED only on broker readback |
+| VAN-NX-058 | Trading modes Normal, Risky and Aggressive under the signed mandate | DU-30 | §7.10; PR #92 suite green after consolidation; AGGRESSIVE refuses without admitted edge (gate broken on purpose) |
+| VAN-NX-059 | History separates funding cash flow from trading P&L | DU-29a | §7.5; a deposit never shown as profit |
+| VAN-NX-060 | Process-death restore, tablet, landscape, split screen and dynamic type | DU-23 | §15.1; device cases on the S24 |
 | VAN-NX-054 | Controlled rollout and legacy retirement without feature loss | DU-MR | §19.1 P5–P6; signed APK, tested rollback; retirement only after full parity, with its own negative tests |
 
 ### 16.2 Development Unit dependency DAG
@@ -1538,6 +1655,12 @@ flowchart TD
   AC --> AF[DU-29a Funding ledger + flow-adjusted risk]
   AF --> MT
   AC --> AP[DU-29b Portfolio, health, statements]
+  AC --> FO[DU-29c Funds orchestration]
+  AF --> FO
+  FO --> Z
+  B --> TM[DU-30 Trading modes]
+  TM --> I
+  TM --> Z
   MK --> AP
   AF --> Z
   NB --> NF[DU-14f Prediction-market expectations]
