@@ -6499,6 +6499,30 @@
       "status": "SPEC_ONLY"
     },
     {
+      "id": "van.next.trading.behaviour",
+      "title": "Manual trading habits and behaviour flags",
+      "new_zone": "Trading / Positions",
+      "presentation": "inline_section",
+      "requirement": "VAN-NX-034",
+      "status": "SPEC_ONLY"
+    },
+    {
+      "id": "van.next.trading.pattern-candidates",
+      "title": "Patterns from your trades (candidate strategies)",
+      "new_zone": "Trading / Intelligence",
+      "presentation": "navigation_screen",
+      "requirement": "VAN-NX-035",
+      "status": "SPEC_ONLY"
+    },
+    {
+      "id": "van.next.intel.keyword-watchlists",
+      "title": "News keyword watchlists",
+      "new_zone": "Trading / Intelligence",
+      "presentation": "modal_sheet",
+      "requirement": "VAN-NX-037",
+      "status": "SPEC_ONLY"
+    },
+    {
       "id": "van.next.work.flow",
       "title": "Project task flow graph",
       "new_zone": "Work / Spatial Flow",

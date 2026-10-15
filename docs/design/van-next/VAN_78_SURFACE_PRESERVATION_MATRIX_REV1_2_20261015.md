@@ -1144,5 +1144,8 @@ New surfaces have their own IDs and tests. They do not count toward the 78 inher
 | `van.next.intel.news-coverage` | News source coverage and health | Trading / Intelligence | `inline_section` | VAN-NX-013 | SPEC_ONLY |
 | `van.next.intel.news-live` | News Live (live headlines, armed releases, latency) | Trading / Intelligence | `navigation_screen` | VAN-NX-033 | SPEC_ONLY |
 | `van.next.trading.armed-ticket` | Armed news ticket (pre-signed, one tap at release) | Trading / Terminal | `modal_sheet` | VAN-NX-033 | SPEC_ONLY |
+| `van.next.trading.behaviour` | Manual trading habits and behaviour flags | Trading / Positions | `inline_section` | VAN-NX-034 | SPEC_ONLY |
+| `van.next.trading.pattern-candidates` | Patterns from your trades (candidate strategies) | Trading / Intelligence | `navigation_screen` | VAN-NX-035 | SPEC_ONLY |
+| `van.next.intel.keyword-watchlists` | News keyword watchlists | Trading / Intelligence | `modal_sheet` | VAN-NX-037 | SPEC_ONLY |
 | `van.next.work.flow` | Project task flow graph | Work / Spatial Flow | `navigation_screen` | VAN-NX-015 | SPEC_ONLY |
 | `van.next.work.agent-map` | Agent handoff map | Work / Spatial Flow | `navigation_screen` | VAN-NX-016 | SPEC_ONLY |

@@ -1,9 +1,9 @@
 # VAN Tactile Spatial Experience — Complete Frontend Rebuild, Functional Preservation & Capability Expansion
 
-**Document ID:** `VAN-TSE-FR-REV1.3-20261015`  
-**Revision:** 1.3 — forensic-design specification / implementation programme candidate (supersedes Rev 1.2; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.2 are in git history)  
+**Document ID:** `VAN-TSE-FR-REV1.4-20261015`  
+**Revision:** 1.4 — forensic-design specification / implementation programme candidate (supersedes Rev 1.3; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.3 are in git history)  
 **Date:** 15 October 2026 (Africa/Harare)  
-**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-12), which captures the two locked dark/light references and the 15 October review decisions  
+**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-14), which captures the two locked dark/light references and the 15 October review decisions  
 **Repository:** [`Vanguduza/Van`](https://github.com/Vanguduza/Van)  
 **Audit baseline A:** merged `main` SHA `8eb1889822fc8a83f219977c15340172e16acd91`  
 **Audit baseline B:** unmerged, draft owner-core [PR #93](https://github.com/Vanguduza/Van/pull/93) SHA `dfc1557ab99ad8d41cf84714e1bb671e89b045e6`  
@@ -13,6 +13,19 @@
 **Companion artifacts:** `VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.md` (78 surfaces + additive surfaces; CSV and JSON for automation), `VAN_NEXT_OWNER_DECISIONS_REV1.md`, `reference/` (locked originals and relabelled Rev 1.1 references).  
 
 > **Executive decision:** Rebuild the entire visible frontend using the newly accepted Tactile Spatial UI, not the old VAN panels or older aesthetic blueprints; comprehensively inspect and preserve qualified product functions, underlying service/contracts, security, existing worthwhile UX flows, Floating VAN and interaction behaviours. Introduce the state-aware Home orb, small quick-access sheet, richer Trading entry points, full news intelligence, and genuinely live project/task/agent spatial workflow diagrams. Reconcile large, unmerged source candidates before porting; no silent legacy-file imports or feature loss.
+
+## Rev 1.4 change log (15 October 2026)
+
+Owner decision OD-14 adds the six candidates from `research/EXTERNAL_REPO_AUDIT_VIBE_TRADING_FINCEPT_20261015.md`. All are native VAN reimplementations of patterns studied as reference under DEC-039; no external code or dependency is adopted.
+
+| # | Change | Where |
+|---|---|---|
+| U1 | Owner trading-behaviour diagnostics (cutting winners/holding losers, overtrading, chasing, anchoring) with soft notices | §7.4.12 |
+| U2 | Owner pattern extraction from all manual trades into candidate strategies that go through normal validation | §7.4.13 |
+| U3 | Prediction-market implied probabilities (Polymarket + Kalshi) as an expectation source | §8.2, §8.4 |
+| U4 | News attention detectors (velocity spike, triangulation, keyword surge) and owner keyword watchlists | §8.3, §8.8 |
+| U5 | Additional public RSS feeds for the context tier, each after a terms check | §8.2 |
+| U6 | Look-ahead sentinel and network kill-switch in VATI research and backtest tests | §18.1 |
 
 ## Rev 1.3 change log (15 October 2026)
 
@@ -71,7 +84,7 @@ VAN Next is one Android application with two photometrically and structurally co
 8. Floating VAN retains meaningful gestures, modes, dialogue, voice, workboards, dock/minimise/recovery, contextual controls and system-wide usefulness. Re-skinning must not regress these capabilities.
 9. Earlier blueprints are evidence and starting hypotheses, not immutable implementation strategies. Improvements found through validated research, including REA-assisted MT5/TradingView study **when separately ready**, can revise this blueprint. Trading and owner-authority changes still require their proper separate domain approval/evidence.
 10. Architecture and product acceptance are different from implementation and production qualification. Never treat mockups, source-only tests, historical branch claims or this blueprint as a deployed result.
-11. **Owner manual trading** (OD-01, OD-07…OD-10): the owner can open, add to and close trades manually. Manual entries are governed by the account's signed risk profile (mandate, per-strategy budget and, once admitted, trading temperament), always carry a **strict, automated, broker-side stop-loss attached inside the opening order**, and take an **optional take-profit**. Adding to a winning manual trade works like a new entry. A manual trade can be **handed to VAN** for automatic management and taken back. The owner can **add to a winning automatic trade**, governed by that trade's own risk profile. Manual exits reduce risk and stay available when new entries are blocked. Manual trading is a new origin into the existing VATI path, never a second execution path (§7.4).
+11. **Owner manual trading** (OD-01, OD-07…OD-10): the owner can open, add to and close trades manually. Manual entries are governed by the account's signed risk profile (mandate, per-strategy budget and, once admitted, trading temperament), always carry a **strict, automated, broker-side stop-loss attached inside the opening order**, and take an **optional take-profit**. Adding to a winning manual trade works like a new entry. A manual trade can be **handed to VAN** for automatic management and taken back. The owner can **add to a winning automatic trade**, governed by that trade's own risk profile. Manual exits reduce risk and stay available when new entries are blocked. Manual trading is a new origin into the existing VATI path, never a second execution path (§7.4). VAN also reviews the owner's trading habits and turns proven winning patterns into candidate strategies for normal validation (§7.4.12–§7.4.13).
 12. **Consolidate before rebuilding** (OD-05): functions that exist on unmerged branches or are documented for porting are consolidated and inventoried before the new frontend replaces anything, so the rebuild cannot silently thin the product. The new frontend is built so legacy presentation code cannot leak into it (§12.5–§12.6).
 
 ### 0.3 Explicit exclusions
@@ -585,6 +598,30 @@ New: `vati/execution/manual.py` (`ManualStopPolicy`, `ManualIntentFactory`, owne
 
 **Owner decisions still needed:** (a) the `owner.manual` risk budget in the next signed mandate (OQ-01); (b) ATR multiples per instrument class for the stop policy (OQ-02); (c) demo period before `LIMITED_LIVE` manual trading (OQ-03); (d) whether the stop re-attach sequence also replaces the immediate flatten for automated trades (OQ-07).
 
+#### 7.4.12 Owner trading-behaviour diagnostics (OD-14, from the external audit §3.1)
+
+VAN reviews the owner's own manual trading from the ledger (no export needed) and shows plain, evidence-backed findings on the manual history and review screens:
+
+| Profile | Behaviour flags (each with severity and the numbers behind it) |
+|---|---|
+| Win rate, average win vs average loss, profit factor, holding time, trades per day/week, results by instrument, session and hour, largest drawdown | **Cutting winners, holding losers** (winners closed much sooner than losers) · **Overtrading** (trade bursts above the owner's own norm, especially after a loss) · **Chasing** (entries after an unusually large move in the same direction) · **Anchoring** (repeated entries or exits at the same round or previous price despite changed conditions) |
+
+Rules:
+- Findings are descriptive and cite the trades ("in the last 30 manual trades, losers were held 3.4× longer than winners").
+- They may add a **soft notice** on the manual review sheet (for example "this is your 6th trade in 40 minutes; your results after bursts like this average −1.2R"). They never block an order; hard limits stay with the mandate and Risk Authority.
+- Minimum sample before any flag is shown (default 20 closed manual trades); below that the screen says there is not enough history.
+
+#### 7.4.13 Owner pattern extraction — turning winning habits into a candidate strategy (OD-14, audit §3.2)
+
+VAN studies the owner's manual trades to find setups where the owner does well, and offers them as **candidate strategies**:
+
+1. Learn from **all** manual trades, winners and losers, using features known at entry (instrument, session, recent move and volatility, trend state, news context, time held). Learning only from winners — as the reference implementation does — cannot tell whether the same conditions also lose often, so it is not allowed.
+2. Express each pattern as an explicit, readable rule ("EURUSD buys in the London session after a pullback of 0.5–1× the normal day, trend up on H4") with how often it occurred and its result versus the owner's other trades.
+3. A pattern that beats the owner's average becomes a **candidate strategy** and goes through VATI's normal validation (deflated Sharpe, probability of backtest overfitting, walk-forward windows), then paper and shadow, then owner-signed promotion. It never trades directly from extraction.
+4. While it is a candidate, VAN can show "this setup matches your best past trades" on the chart and review sheet, as information only.
+
+This keeps §7.4.10's rule intact: manual trades do not train or promote existing automated strategies; extraction creates a *new, separately validated* proposal.
+
 ### 7.5 Positions and order history
 
 Live cards display at-a-glance P&L/direction/SL/TP and protection, while tapping presents a native position sheet and then full detail. Position detail has `Chart`, `Protection`, `Risk`, `Thesis`, `Execution`, `Timeline`, `Review`, `Analyst`; not all at once. Trade histories and pending/closed order states are distinct. Account-supported netting/hedging, lot/contract units, tick size, decimal precision and instrument-specific order types must be modelled from provider capabilities, never inferred solely from screenshots. Portfolio-level and position-level summary must agree on source revisions and timestamp semantics.
@@ -625,6 +662,8 @@ So the measurement machinery is there and honest. What is missing is live multi-
 | Official primary (T1) | The issuer's own statement or release | Every issuer relevant to traded instruments | Central banks (Fed, ECB, BoE, BoJ, RBZ), statistics offices (BLS, BEA, Eurostat, ONS, ZIMSTAT), exchanges and regulators (ZSE, VFEX, SECZim) |
 | Real-time newswires (T2) | Fast reporting of scheduled and unscheduled events | **At least two independent wires** | Licensed institutional wires and market-news APIs evaluated through vendor review |
 | Economic calendar with consensus | Scheduled times, forecasts, actuals — needed for surprise scoring | **At least two calendar sources**, matching the recorder's "two agreeing = VERIFIED" rule | Calendar/consensus data providers evaluated through vendor review |
+| Prediction markets (OD-14, audit §3.3) | Real-money implied probabilities for central-bank decisions, elections and geopolitical events, where there is often no economists' consensus | **Two:** Polymarket (public no-key API) and Kalshi (regulated exchange); markets below a liquidity floor are ignored | Reachability from `van-trading-core` (Polymarket is geo-blocked in some places), terms on automated reads and liquidity floors to be verified before use |
+| Additional public RSS (context tier, OD-14, audit §3.5) | Breadth and corroboration for unscheduled stories | Added feed by feed, only after a terms-of-use check and a live probe | Candidates: Dow Jones markets and world news, Bloomberg markets, FXStreet, Investing.com, Seeking Alpha market currents, OilPrice, Mining.com, CNBC section feeds, ECB daily reference rates. All polled; never a fast trading source (§8.10). |
 | Market-derived | Price, volatility and spread jumps from VAN's own quote feed | Always on | Detects an **unexplained move** (a jump of several normal-range units with no matching story) and raises caution until a story explains it |
 
 **Cross-checking.** Each story cluster carries a status: `OFFICIAL` (seen from the T1 issuer), `CORROBORATED` (two or more *independent* sources; syndicated copies of one wire count as one), `SINGLE_SOURCE`, `DISPUTED` (sources disagree on a fact), `CORRECTED` or `RETRACTED`. Automatic decisions (§8.5) weight by status; a single unverified source can only ever trigger the mildest caution.
@@ -643,6 +682,8 @@ For every story cluster VAN records:
 - **How reliable:** source status (§8.2), contradictions between sources, whether the market's first reaction agrees with the story.
 - **What history says:** the event history profile (§8.4).
 - **Uncertainty:** stated, not hidden; "direction unclear" is a valid result.
+- **Attention signals (OD-14, audit §3.4):** deterministic detectors run on every refresh: a **velocity spike** (a topic's story count in the last hour well above the previous hour), **triangulation** (the same story from several independent outlets) and **keyword surges**. They feed story ranking, corroboration and the caution rules; on their own they never trigger a trade. Thresholds are calibrated on VAN's own feeds, and detectors that fire on publisher metadata rather than content are not allowed (the reference implementation removed one for exactly that reason).
+- **Owner keyword watchlists:** the owner adds keyword monitors (for example "RBZ", "ZiG", "gold export", a ZSE company name); matching stories are tagged, ranked up and can alert.
 
 A classifier proposes event class, severity and concern for raw stories: deterministic rules first; a bounded language model may fill gaps. Every proposal records `classified_by`, a model-only classification is weighted below a rule-based one, and a model can never set source status, history numbers or any decision output.
 
@@ -661,6 +702,8 @@ A classifier proposes event class, severity and concern for raw stories: determi
 | `volatility_expansion`, `spread_widening` | "Spreads usually double for about 10 minutes" |
 | `time_to_settle` | "Usually settles within 25 minutes" |
 | `evidence` | `SUFFICIENT` (default ≥ 10 close analogues) or `EVIDENCE_THIN` |
+
+4. **Market-implied expectations.** For events with liquid prediction markets (§8.2), the profile also records the implied probability before the event and how far it moved, so a rate decision can be scored as a surprise against what the market expected, not only against economists' forecasts. Armed plans (§8.10.3) for such events may use it as their expectation, with the same two-source rule (Polymarket and Kalshi agreeing within a tolerance).
 
 Thin evidence is shown honestly and limits automatic use: with `EVIDENCE_THIN`, only the default caution rules apply, never history-scaled ones.
 
@@ -734,7 +777,7 @@ New read models, served by extending `GET /v1/trading/events` (or sibling `GET /
 
 ### 8.8 Where it appears
 
-- **Intelligence → News:** coverage state, then the lead brief for the most material story affecting the owner's trades, then a short list. Filters: my trades, instrument, region, asset class, scheduled/unscheduled.
+- **Intelligence → News:** coverage state and the owner's keyword watchlists, then the lead brief for the most material story affecting the owner's trades, then a short list. Filters: my trades, instrument, region, asset class, scheduled/unscheduled.
 - **Story detail:** the six answers first; "Effect on trading" with D-path details; "History" showing the similar past events (date, surprise, what the market did at each horizon) with an option to open any of them; sources and evidence under an expandable section.
 - **Economic calendar view:** upcoming releases with their history profile ("usually moves EURUSD about 40 pips; settles in 25 min") and any D2/D4 plans for the event.
 - **Position, potential trade and manual review sheet:** the brief and history line for that instrument.
@@ -1216,6 +1259,12 @@ Each requirement ID must have Product Truth binding, one or more Development Uni
 | VAN-NX-026 | REA architectural improvement gate, versioned changes | DU-27 | Research recommendation with evidence; owner-ready scheduling |
 | VAN-NX-027 | Owner manual trading: risk-governed entries and adds, stop and optional TP inside the opening order, always-available exits | DU-28 | §7.4; §18.2 manual-trading cases; demo before live |
 | VAN-NX-031 | Hand a manual trade to VAN and take it back; take manual control of an automatic trade; manual adds to automatic trades under that trade's risk profile | DU-28b | §7.4.6–§7.4.7; §18.2 handover and add cases |
+| VAN-NX-034 | Owner trading-behaviour diagnostics | DU-28c | §7.4.12; minimum sample; findings cite trades; soft notices never block |
+| VAN-NX-035 | Owner pattern extraction into candidate strategies | DU-28d | §7.4.13; learns from winners and losers; candidates pass deflated Sharpe, PBO and walk-forward before paper |
+| VAN-NX-036 | Prediction-market expectations (two sources, liquidity floor) | DU-14f | §8.2, §8.4; reachability and terms verified |
+| VAN-NX-037 | News attention detectors and owner keyword watchlists | DU-14b | §8.3; detectors never trade alone |
+| VAN-NX-038 | Additional public RSS context feeds | DU-14a | Terms check and live probe per feed |
+| VAN-NX-039 | Look-ahead sentinel and network kill-switch in research tests | DU-24 | Both proven to fail when deliberately broken |
 | VAN-NX-033 | Live news trading bundle: feeds, armed release plans, unscheduled-headline classes, owner armed tickets, latency ledger, news risk limits, staged promotion | DU-14e | §8.10.9; per-class paper and shadow evidence; owner signature per class |
 | VAN-NX-032 | Event history comparison for scheduled and unscheduled news, wired into trading decisions D1–D7 through shadow-then-live promotion | DU-14c | §8.4–§8.5; per-path shadow evidence and owner-signed promotion |
 | VAN-NX-028 | Repository consolidation, Feature Ledger and parity oracle before rebuild | DU-00 | Every ledger row classified; parity checker fails on an induced omission |
@@ -1257,6 +1306,11 @@ flowchart TD
   NC --> NE[DU-14e Live news trading bundle]
   MT --> NE
   NE --> Z
+  MT --> MD[DU-28c Behaviour diagnostics]
+  MD --> MP[DU-28d Pattern extraction to candidates]
+  MP --> Z
+  NB --> NF[DU-14f Prediction-market expectations]
+  NF --> NE
   MT --> MH[DU-28b Adds, Hand to VAN, take back]
   MH --> L
   E --> O[DU-15 Project data adapter]
@@ -1361,6 +1415,8 @@ A qualified fallback state is a first-class success criterion. For example, a ch
 
 ### 18.1 Foundational static checks
 
+**Research integrity checks (OD-14, audit §3.6):** every VATI backtest and research test suite runs (1) a **look-ahead sentinel** — a fixture whose future rows are poisoned, so any strategy or feature that reads the future fails the test — and (2) a **network kill-switch**, so tests cannot silently fetch live data. Both checks are proven by deliberately breaking them once (a feature that peeks one bar ahead must fail; a test that opens a socket must fail).
+
 Enforce no imports of legacy presentation packages in `next` screens; permitted typed domain imports registered and hashed; all 78 historic screen IDs route/host to a new equivalent or owner-approved retirement record; every owner action has a new visible entry, actual backend binding, disallowed state and readback. Enforce no inline production screenshot fixtures, fake P&L, fake task % or hardcoded operational count; all hardcoded style literals are token-owned and approved by visual authority. Compose previews cannot enter release with sample data visible as live.
 
 ### 18.2 High-risk adversarial cases
@@ -1398,6 +1454,12 @@ Enforce no imports of legacy presentation packages in `next` screens; permitted 
 | Manual trade outcome | Counted in account risk; excluded from capsule learning and promotion |
 | News materiality 1.0 on a T1 source | New-trade multiplier exactly 0.25, never lower; no position closed by news |
 | Model rewrite of a brief adds a price | Rewrite rejected, template text shown |
+| Behaviour flags with fewer than the minimum closed manual trades | No flag shown; "not enough history" |
+| Pattern extraction run on winners only | Refused by the extractor; losers must be included |
+| Extracted pattern fails deflated Sharpe, PBO or walk-forward | Stays a research note; never reaches paper |
+| Prediction market below the liquidity floor, or Polymarket unreachable | Not used; expectation falls back to consensus with the reason shown |
+| Velocity spike with no trade-relevant story | Ranking change only; no trade, no D-path action |
+| Strategy feature reads one bar ahead | Look-ahead sentinel test fails |
 | A consolidated PR feature removed from the new route registry | Parity checker fails with `FEATURE_LOSS` |
 | New UI imports `design/VanTokens` | Compilation fails (not on classpath) |
 | WebView chart tries raw order command | Denied by bridge/native boundary, negative test passes |
