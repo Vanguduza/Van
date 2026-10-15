@@ -1,18 +1,31 @@
 # VAN Tactile Spatial Experience — Complete Frontend Rebuild, Functional Preservation & Capability Expansion
 
-**Document ID:** `VAN-TSE-FR-REV1.1-20261015`  
-**Revision:** 1.1 — forensic-design specification / implementation programme candidate (supersedes Rev 1.0 of the same date; Rev 1.0 is kept beside it for lineage)  
+**Document ID:** `VAN-TSE-FR-REV1.2-20261015`  
+**Revision:** 1.2 — forensic-design specification / implementation programme candidate (supersedes Rev 1.1; Rev 1.0 is kept beside it for lineage, Rev 1.1 is in git history)  
 **Date:** 15 October 2026 (Africa/Harare)  
-**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-01…OD-09), which captures the two locked dark/light references and the 15 October review decisions  
+**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-11), which captures the two locked dark/light references and the 15 October review decisions  
 **Repository:** [`Vanguduza/Van`](https://github.com/Vanguduza/Van)  
 **Audit baseline A:** merged `main` SHA `8eb1889822fc8a83f219977c15340172e16acd91`  
 **Audit baseline B:** unmerged, draft owner-core [PR #93](https://github.com/Vanguduza/Van/pull/93) SHA `dfc1557ab99ad8d41cf84714e1bb671e89b045e6`  
 **Status:** `FORENSIC_SOURCE_REVIEW_PARTIAL / BLUEPRINT_CANDIDATE / NOT_DEVICE_QUALIFIED / NOT_OWNER_ACCEPTED_FOR_IMPLEMENTATION`  
 **Governing development method:** `DIAL-FFDRM-R1` / `DIAL_FABLE_FORENSIC_PREDEVELOPMENT_STANDARD` (F0–F15).  
 **Governance:** Documentation does **not** modify Project Truth, owner grants, trading policy, deployment or protected branches; no green gate is implied by publication of this blueprint.  
-**Companion artifacts:** `VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_1_20261015.md` (78 surfaces + additive surfaces; CSV and JSON for automation), `VAN_NEXT_OWNER_DECISIONS_REV1.md`, `reference/` (locked originals and relabelled Rev 1.1 references).  
+**Companion artifacts:** `VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.md` (78 surfaces + additive surfaces; CSV and JSON for automation), `VAN_NEXT_OWNER_DECISIONS_REV1.md`, `reference/` (locked originals and relabelled Rev 1.1 references).  
 
 > **Executive decision:** Rebuild the entire visible frontend using the newly accepted Tactile Spatial UI, not the old VAN panels or older aesthetic blueprints; comprehensively inspect and preserve qualified product functions, underlying service/contracts, security, existing worthwhile UX flows, Floating VAN and interaction behaviours. Introduce the state-aware Home orb, small quick-access sheet, richer Trading entry points, full news intelligence, and genuinely live project/task/agent spatial workflow diagrams. Reconcile large, unmerged source candidates before porting; no silent legacy-file imports or feature loss.
+
+## Rev 1.2 change log (15 October 2026)
+
+Driven by the owner's second round of decisions (OD-07…OD-11) and a further code check.
+
+| # | Change | Where |
+|---|---|---|
+| R1 | The stop is attached **inside the opening order**, so a manual trade is never open without it. Rev 1.1 described closing after the fill as if it were the mechanism; it is only the last-resort fallback, and Rev 1.2 adds re-attach attempts before any close. The venue adapters already do this (MT5 refuses orders without SL "in the same request"; cTrader sends `relativeStopLoss` in the same request). | §7.4.3, F-031 |
+| R2 | Rev 1.1 said `OrderCommand` has no take-profit field; it has `targets`, which both adapters send as the TP in the same request. Corrected. | §7.4.4 |
+| R3 | Adding to a winning manual trade works exactly like a new manual entry (same screen, same automatic stop), with risk judged on the whole position family. | §7.4.6 |
+| R4 | **Hand to VAN**: switch a manual trade to automatic management, and take it back. | §7.4.7 |
+| R5 | **Manual add to a winning automatic trade**, governed by that trade's own risk profile (strategy budget, scale policy, family envelope, temperament). | §7.4.6 |
+| R6 | News rebuilt again: several independent live sources per category with cross-checking, full analysis, and **history comparison** using the event research engine that already exists on `main` (surprise, measured reactions, episodes, analogues), wired into actual trading decisions through defined, tested paths. | §8, F-032 |
 
 ## Rev 1.1 change log (15 October 2026)
 
@@ -45,12 +58,12 @@ VAN Next is one Android application with two photometrically and structurally co
 3. One tap on the Home orb opens a deliberately **compact** read-only summary and navigation sheet; position performance, priority tasks, project progress, notifications and quick destinations appear as concise rows. It must **not** become a dashboard within a popup.
 4. The global Trading Home visibly provides **Markets, Watchlist, Potential trades, Chart and Intelligence** entry points and a restrained equity/portfolio-heat context. The locked images show three of the five tiles; **Chart** and **Intelligence** tiles are an owner-requested addition (OD-03, visual delta VD-02), so the native golden includes them and this is not drift.
 5. Dedicated Trading screens preserve professional live charts, indicators, position lines, SL/TP, depth where supported, history, orders and safe control paths; not all data is crammed onto one portrait page.
-6. Intelligence has substantive **News** and **News Analysis**, including macro/event context, provenance, contradicting evidence, affected instruments, relevant strategies/positions, timing and freshness.
+6. Intelligence has substantive **News** and **News Analysis** (OD-11): several independent live sources, cross-checked; macro/event context, provenance, contradicting evidence, affected instruments, relevant strategies/positions, timing and freshness; and **comparison with how similar past events actually moved the market**, which feeds real trading decisions through defined, tested paths (§8).
 7. Projects/Tasks offer live spatial diagrams of phases, tasks, dependencies, agents, handoffs, blocked edges, evidence, completed work and current progress; a list alternative remains available.
 8. Floating VAN retains meaningful gestures, modes, dialogue, voice, workboards, dock/minimise/recovery, contextual controls and system-wide usefulness. Re-skinning must not regress these capabilities.
 9. Earlier blueprints are evidence and starting hypotheses, not immutable implementation strategies. Improvements found through validated research, including REA-assisted MT5/TradingView study **when separately ready**, can revise this blueprint. Trading and owner-authority changes still require their proper separate domain approval/evidence.
 10. Architecture and product acceptance are different from implementation and production qualification. Never treat mockups, source-only tests, historical branch claims or this blueprint as a deployed result.
-11. **Owner manual trading** (OD-01): the owner can open and close trades manually. Manual entries are governed by the account's signed risk profile (mandate, per-strategy budget and, once admitted, trading temperament), always carry a **strict, automated, broker-side stop-loss** computed by the system, and take an **optional take-profit**. Manual exits reduce risk and stay available when new entries are blocked. Manual trading is a new origin into the existing VATI path, never a second execution path (§7.4).
+11. **Owner manual trading** (OD-01, OD-07…OD-10): the owner can open, add to and close trades manually. Manual entries are governed by the account's signed risk profile (mandate, per-strategy budget and, once admitted, trading temperament), always carry a **strict, automated, broker-side stop-loss attached inside the opening order**, and take an **optional take-profit**. Adding to a winning manual trade works like a new entry. A manual trade can be **handed to VAN** for automatic management and taken back. The owner can **add to a winning automatic trade**, governed by that trade's own risk profile. Manual exits reduce risk and stay available when new entries are blocked. Manual trading is a new origin into the existing VATI path, never a second execution path (§7.4).
 12. **Consolidate before rebuilding** (OD-05): functions that exist on unmerged branches or are documented for porting are consolidated and inventoried before the new frontend replaces anything, so the rebuild cannot silently thin the product. The new frontend is built so legacy presentation code cannot leak into it (§12.5–§12.6).
 
 ### 0.3 Explicit exclusions
@@ -233,6 +246,8 @@ Use DIAL-FFDRM-R1 categories such as `INTEGRATED_AND_EVIDENCED`, `IMPLEMENTED_NO
 | F-027 | 35 of the 78 surfaces cite source files that exist only on unmerged PR #93: 53 distinct files, including voice speaker enrolment, `backend/van_gateway/mission/control.py`, browser download/file-provider panels, `trading/ui/TicketsScreen.kt`, memory erasure and owner permission grants. 185 of the matrix's 428 source references are pinned to the PR #93 head. | Repository consolidation is DU-00 and precedes new-UI work (§12.5). | Counted from matrix vs `git ls-tree` of both heads |
 | F-028 | No owner-initiated trade entry or exit path exists on `main` or PR #93. Owner trading writes are `POST /v1/trading/halt`, account actions, strategy promotion and ZSE ticket confirmation (`backend/van_gateway/app.py`). The mockup's one-tap "Place Order" therefore has no backend. | Design and build owner manual trading on the existing authority chain (§7.4, DU-28). | E2 negative search, both heads |
 | F-029 | The system's trading safeguards that manual trading must reuse already exist on `main`: signed `TradingMandate` with `HARD_FORBIDDEN_BEHAVIOURS` (incl. `trade_without_broker_side_stop`, `stop_widening_on_loss`, `revenge_risk_increase`), `PlatformCeilings`, drawdown tiers, per-strategy `strategy_risk_budgets`, reduce-only sizing multipliers, the pre-trade gate's stop-integrity check and tighten-only `protection.py`. PR #92 adds owner-signed `NORMAL`/`RISKY`/`AGGRESSIVE` trading temperaments. | Reuse; do not duplicate (§7.4). | E2 |
+| F-031 | The stop and TP already travel **inside the opening order**: `mt5_bridge.py` sends `sl`/`tp` in the order request and rejects an order without SL ("MT5 orders require SL in the same request"); `ctrader/adapter.py` sends `relativeStopLoss`/`relativeTakeProfit` (market) or `stopLoss`/`takeProfit` (limit) in `ProtoOANewOrderReq`; Deriv stake contracts cap loss at the stake. If a filled order's stop is not confirmed, `router.py:230-236` flattens at once and trips the kill switch. | Manual entry uses the same atomic attachment; Rev 1.2 inserts bounded re-attach attempts before the flatten fallback (§7.4.3). | E2 |
+| F-032 | A full event research engine is wired on `main` (`EventResearchRuntime` in `app/account_service.py`): the calendar recorder keeps every source's release values and marks a value VERIFIED only when two sources agree; `events/normaliser.py` declares which direction is "stronger"; `events/reaction.py` scores surprise against forecast and measures market reaction at 1 min, 5 min, 30 min and 4 h in units of the instrument's normal range; `events/episodes.py` closes episodes; `cognition/analogues.py` retrieves the closest past episodes deterministically and reports when evidence is thin. Its outputs go only into model context and offline research ("never authorises a trade"), and it covers scheduled releases, not headlines. | Extend to headlines and connect to decisions through the governed paths in §8.5. | E2 |
 | F-030 | The trading confidence score is `RULES_V0_UNCALIBRATED … display/ranking only, never a size` (`vati/arbiter/confidence.py`); the Android band labels are High/Medium/Low/Minimal. The mockups' "High probability" misstates it. | Relabel (§2.6). | E2 |
 
 ### 3.3 Root-cause clusters and priority
@@ -449,28 +464,30 @@ The portrait chart is the dominant live surface. The minimal header shows symbol
 
 The earlier proposed OpenAlgo Charts integration is a candidate implementation path. It is **not canonically locked** ahead of on-device performance, licensing, security and eventual REA-assisted architectural evidence. Keep the existing native `TradeChartCanvas` or a measured replacement as a deterministic fallback. Chart code/embedded WebView **cannot** place, modify, size or cancel orders directly.
 
-### 7.4 Owner manual trading — entries, exits, stops and targets (OD-01)
+### 7.4 Owner manual trading — entries, adds, handover, exits (OD-01, OD-07…OD-10)
 
-**Recommendation.** Treat a manual trade as one more *origin* of a `TradeIntent`, not as a separate order path. The owner decides *what* and *which way*; the system decides *how much* and *where the stop goes*, using the same signed mandate, Risk Authority, pre-trade gate, router, protection and reconciliation that govern automated trades. That gives the owner real manual control while keeping every guarantee the system already makes, and it avoids building a second, weaker execution path that would have to be secured and tested on its own.
+**Recommendation.** Treat a manual trade as one more *origin* of a `TradeIntent`, not as a separate order path. The owner decides *what* and *which way*; the system decides *how much* and *where the stop goes*, using the same signed mandate, Risk Authority, pre-trade gate, router, protection, position-family accounting and reconciliation that govern automated trades. That gives real manual control while keeping every guarantee the system already makes.
 
-Today there is no manual path at all (F-028); every safeguard it needs already exists (F-029). The work is a thin intake layer plus the screens.
+Today there is no manual path (F-028). Everything it needs exists: the safeguards (F-029), stop and TP attached inside the opening order (F-031), and position families, scale policies and lifecycle management for adds and handover (`vati/lifecycle/family.py`, `scale_policy.py`, `envelope.py`, `preservation.py`, `trade_health.py`). The work is a thin intake layer, two lifecycle extensions (handover, owner-requested adds) and the screens.
 
 #### 7.4.1 Where manual trading sits in the authority chain
 
 ```text
 Owner: instrument + direction (+ optional limit/stop entry price, optional TP, optional smaller risk)
         |
-ManualTradePreview (read-only)  ── system computes stop, size, risk, R multiple, checks
+ManualTradePreview (read-only)  ── system computes stop, size, risk, R multiple, family exposure, event risk
         |
 Review order sheet  ── exact effect shown; owner confirms
         |
 Biometric owner token: act "trading-manual-entry", subject = hash of the exact intent, ≤ 60 s life, single use
         |
-ManualIntentFactory  →  TradeIntent(strategy_id="owner.manual", origin=OWNER_MANUAL)
+ManualIntentFactory  →  TradeIntent(strategy_id="owner.manual" or the auto trade's strategy for adds, origin=OWNER_MANUAL)
         |
 unchanged: Risk Authority → pre-trade gate (stop integrity, off-market, lot step) → router (kill switch, idempotency)
         |
-venue order WITH protective stop (StopMode.VENUE) → fill + stop readback → protection rule registered
+ONE venue request: order + protective stop (+ TP if set)   ← the stop is never a second step
+        |
+fill + stop readback → family + protection rule registered
         |
 VERIFIED_SUCCESS | REFUSED(reason) | FAILED | OUTCOME_UNKNOWN
 ```
@@ -481,27 +498,60 @@ VERIFIED_SUCCESS | REFUSED(reason) | FAILED | OUTCOME_UNKNOWN
 |---|---|---|
 | Permission to trade manually | `owner.manual` must be in the mandate's `allowed_strategies`; a mandate without it refuses manual entries. Adding it is an owner-signed new mandate version. | `TradingMandate.allowed_strategies` |
 | Account mode | Entries only in order-sending modes (`DEMO_TRADER`, `LIMITED_LIVE`, `AUTONOMOUS_LIVE`). `OBSERVE`/`ADVISOR`/`SHADOW_TRADER`/`HALTED` refuse entries. Recommended rollout: demo first, then `LIMITED_LIVE` after the owner signs it. | `AuthorizationMode`, `ORDER_SENDING_MODES` |
-| Risk per trade | Base risk = `mandate.risk_budget_for("owner.manual")` (never above `max_risk_per_trade`). The owner may pick a *smaller* share (25 / 50 / 75 / 100 % of that budget); never more. With PR #92 admitted, the account's signed temperament (NORMAL / RISKY / AGGRESSIVE) sets the default share. | `strategy_risk_budgets`, PR #92 temperaments |
-| Account limits | Manual trades count toward the same open-stop risk, daily loss, weekly drawdown, currency-leg exposure, positions-per-instrument and total-positions limits as automated trades. There is no separate manual budget that could double the account's risk. | `PlatformCeilings`, mandate limits, `RiskSnapshot` |
-| Losing streaks | Drawdown tiers shrink manual risk the same way (0.75×, then 0.40×, then no new trades). After `max_consecutive_losses`, manual entries pause until the next session or an owner-signed reset. This enforces the forbidden `revenge_risk_increase` and `risk_doubling_after_loss`. | `DEFAULT_DRAWDOWN_TIERS`, `HARD_FORBIDDEN_BEHAVIOURS` |
-| Market conditions | Stale quotes, a disconnected broker, an unverified account or a calendar blackout refuse the entry. Material news shrinks size through the reduce-only event multiplier and is shown in plain words (§8.3). | `RiskSnapshot` checks, calendar blackout, `event_risk_multiplier_for` |
+| Risk per trade | Base risk = `mandate.risk_budget_for("owner.manual")` (never above `max_risk_per_trade`). The owner may pick a *smaller* share (25 / 50 / 75 / 100 % of that budget); never more. With PR #92 admitted, the account's signed temperament sets the default share. | `strategy_risk_budgets`, PR #92 temperaments |
+| Account limits | Manual trades count toward the same open-stop risk, daily loss, weekly drawdown, currency-leg exposure, positions-per-instrument and total-positions limits as automated trades. No separate manual budget can double the account's risk. | `PlatformCeilings`, mandate limits, `RiskSnapshot` |
+| Losing streaks | Drawdown tiers shrink manual risk the same way (0.75×, 0.40×, then no new trades). After `max_consecutive_losses`, manual entries pause until the next session or an owner-signed reset (`revenge_risk_increase`, `risk_doubling_after_loss` are forbidden). | `DEFAULT_DRAWDOWN_TIERS`, `HARD_FORBIDDEN_BEHAVIOURS` |
+| Market conditions | Stale quotes, a disconnected broker, an unverified account or a calendar blackout refuse the entry. Event risk (§8.5) reduces size or defers the entry and is explained in plain words. | `RiskSnapshot` checks, calendar blackout, §8.5 |
 | Duplicates | Each review sheet carries one idempotency key; a double tap or retry cannot open two trades. | router idempotency, forbidden `duplicate_order` |
 
-#### 7.4.3 Strict automated stop-loss (mandatory)
+#### 7.4.3 Strict automated stop-loss, attached inside the order
 
 - **The system sets the stop.** A versioned, deterministic `ManualStopPolicy` computes it from the instrument's volatility on the chosen timeframe (an ATR multiple per instrument class), floored at the venue's `min_stop_distance`. The owner sees it before confirming; there is no "no stop" option.
-- **Size follows the stop.** Lots = allowed risk ÷ stop distance, rounded **down** to the venue step; if that falls below the venue minimum the answer is "too small to trade at this risk", never a rounded-up size.
-- **The owner may tighten, never widen.** The SL stepper and chart drag move the stop closer only. A tighter stop does not increase size beyond the preview the owner approved; a re-preview is required. Widening is refused by `protection.py` and the pre-trade stop-integrity check.
-- **The stop lives at the broker.** The order carries `protective_stop` with `StopMode.VENUE`. If the stop is not confirmed on the broker within a short deadline after the fill, the position is closed immediately (protect-or-flatten) and the outcome is shown as such. Venues without broker stops (ZSE/VFEX, `StopMode.SOFTWARE`) are excluded from manual entry until the owner explicitly accepts software-stop risk for them.
-- **Automatic management.** Break-even and trailing moves from `protection.py` are optional per trade; they only tighten.
+- **The stop goes in the same request as the order.** The `OrderCommand` carries `protective_stop` (and `targets` for a TP), and the adapter sends them together: MT5 `sl`/`tp` fields; cTrader `relativeStopLoss`/`relativeTakeProfit` for market orders and `stopLoss`/`takeProfit` for limit orders. The broker therefore opens the position *with* its stop, or rejects the whole order; the account is never holding a manual position that is waiting for a stop. Pending manual orders carry their stop and TP from the moment they rest at the broker.
+- **Rejections are prevented before sending.** The preview checks the stop against the venue's live stop level, freeze level and current spread, so the broker does not reject the order for a stop that is too close. If the market moves during review, the sheet re-prices instead of sending a stop the broker would refuse.
+- **If the broker's reply does not confirm the stop** (a rare transport or reporting gap, not the normal path), Rev 1.2 changes the fallback from "close immediately" to: (1) re-read the position from the broker, since confirmation can lag the fill report; (2) if the stop is genuinely missing, re-attach the same stop with `modify_stop`, up to two attempts within a few seconds; (3) only if the position is still unprotected after that, close it and alert. Each step is recorded. This avoids paying spread and commission to close and reopen a position whose stop was merely reported late, without ever leaving an unprotected position open for more than seconds. The current router does step 3 at once and trips the kill switch (F-031); whether Rev 1.2's sequence also replaces that for automated trades is an owner decision (OQ-07) — the trade-off is a few seconds' exposure versus a guaranteed spread cost and a halted account.
+- **Size follows the stop.** Lots = allowed risk ÷ stop distance, rounded **down** to the venue step; below the venue minimum the answer is "too small to trade at this risk", never a rounded-up size.
+- **The owner may tighten, never widen.** The SL stepper and chart drag move the stop closer only. Widening is refused by `protection.py` and the pre-trade stop-integrity check.
+- Venues without broker stops (ZSE/VFEX, `StopMode.SOFTWARE`) are excluded from manual entry until the owner explicitly accepts software-stop risk for them.
+- Break-even and trailing moves from `protection.py` are optional per trade; they only tighten.
 
 #### 7.4.4 Optional take-profit
 
-- The owner may set a TP, leave it empty, or change or remove it later; TP changes never add risk, so they use the lighter exit confirmation (§7.4.5).
-- Validation: on the correct side of entry, at least the venue's minimum distance; the sheet shows the resulting R multiple (for example "TP is 1.8× your risk").
-- Gap to close: `OrderCommand` has no take-profit field today, so a TP is held by `ProtectionManager` as a software exit. Add an optional venue TP to `OrderCommand` for venues that support it; keep the software exit as the fallback and show which one is active.
+- The owner may set a TP, leave it empty, or change or remove it later. A TP set at entry goes in the same order request as the stop (`OrderCommand.targets`). TP changes never add risk, so they use the lighter exit confirmation (§7.4.8).
+- Validation: on the correct side of entry, at least the venue's minimum distance; the sheet shows the R multiple ("TP is 1.8× your risk").
+- Where a venue cannot hold a TP, `ProtectionManager` holds it as a software exit and the screen says so.
 
-#### 7.4.5 Manual exits
+#### 7.4.5 Entry types
+
+Market (`MARKET_WITH_SLIPPAGE_CAP` template) and limit or stop pending orders (`LIMIT_AT_TOUCH` and related sealed templates). A pending manual order expires (default end of session) and is re-checked against risk limits when it fills; if limits would be breached at fill time it is cancelled, not filled.
+
+#### 7.4.6 Adding to positions
+
+Every add joins the existing trade's **position family** (`lifecycle/family.py`): risk, exposure and the family stop are judged on the family as a whole, so three adds cannot become three separately "within limits" trades that are jointly over the limit.
+
+| Add to… | How it works for the owner | What governs it |
+|---|---|---|
+| **A manual trade** (OD-08) | Exactly like a new manual entry: same screen, same automatic stop inside the order, same optional TP, same review and biometric approval. There is no extra "must be winning" condition. | The manual risk profile (§7.4.2) applied to the **family**: the add's risk plus the family's existing open risk must fit the `owner.manual` budget and account limits; `max_positions_per_instrument` caps the number of adds; averaging down is allowed only within those same limits. |
+| **An automatic (VATI) trade** (OD-10) | From the trade's position screen: "Add to this trade". Same review sheet; the system shows which of the trade's rules allowed or refused the add. | **That trade's own risk profile**: its strategy's risk budget (`risk_budget_for(strategy_id)`), its strategy's `ScalePolicy` (e.g. the position has already paid for itself, family healthy, time since last add, each add smaller than the last), its family risk envelope, preservation having nothing outstanding, and the account's temperament. The add is attributed to the strategy family with `origin=OWNER_MANUAL`. A strategy with no registered scale policy (`NO_SCALING`) cannot be added to manually either. |
+
+In both cases the add's stop is placed inside its order, and the family stop rule applies: a new add can never make the family's worst-case loss larger than its profile allows. The automatic expansion engine (`lifecycle/expansion.py`) remains in its current SHADOW mode; owner-requested adds use the same scale-policy checks without waiting for that engine to go live.
+
+#### 7.4.7 Hand to VAN, and take back (OD-09)
+
+**Hand to VAN** switches a manual trade (or family) to automatic management. On the position screen the owner chooses one of two management modes, both shown with exactly what VAN will and will not do:
+
+| Mode | What VAN does | When it is offered |
+|---|---|---|
+| **Protect and manage** | Runs the lifecycle's protection on the trade: break-even and trailing per a declared protection template, preservation actions (`lifecycle/preservation.py`) when trade health turns FAILING, partial take-profit at declared R levels, and exits on news or event risk per §8.5. VAN does **not** add to the trade. | Always |
+| **Adopt by a strategy** | The trade is adopted by a VATI strategy that currently has its own valid setup on the same instrument and direction. VAN then manages it with that strategy's thesis, invalidation, targets and — if that strategy's scale policy and the expansion mode allow — adds. | Only when such a strategy setup exists; the sheet names the strategy and shows its thesis |
+
+Rules for handover:
+- The owner's stop is kept or tightened, never widened, even if the adopting strategy's own invalidation is further away.
+- Handover is an owner-confirmed, recorded event (`MANAGEMENT_HANDOVER`, from `OWNER_MANUAL` to `VATI:<mode>`); the trade keeps its manual risk budget for limits.
+- **Take back** returns management to the owner at any time with one confirm; VAN stops managing at once and any pending VAN action on that trade is cancelled. The same control lets the owner **take manual control of an automatic trade**; it is recorded as an owner override and the lifecycle stops managing that position.
+- Handed-over and adopted trades are tagged so learning stays honest: they count for account risk and for the management-quality record, but are excluded from strategy entry statistics and promotion evidence.
+
+#### 7.4.8 Manual exits
 
 | Action | Allowed when | Confirmation |
 |---|---|---|
@@ -509,32 +559,23 @@ VERIFIED_SUCCESS | REFUSED(reason) | FAILED | OUTCOME_UNKNOWN
 | Tighten stop / move to break-even | Always | Same as close |
 | Set, change or remove TP | Always | Same as close |
 | Cancel a pending manual order | Always | Same as close |
-| Close a VATI-managed (automated) position | Always; recorded as `OWNER_EXIT` with reason, and the lifecycle stops managing that position | Same as close, plus an explicit "this overrides VAN's plan for this trade" line |
-| Add to a position | Only as a new manual entry subject to every limit above; averaging down beyond `max_positions_per_instrument` is refused | Biometric, as an entry |
+| Take back / take manual control | Always | Same as close, plus an explicit "VAN stops managing this trade" line |
 
 Exits go through the venue adapters' existing `close(position_id, quantity)` and `modify_stop` operations and are read back from the broker before success is shown. A lost response is `OUTCOME_UNKNOWN`: VAN checks the position at the broker and never resends a close blindly.
 
-#### 7.4.6 Entry types
+#### 7.4.9 Screens (mapping to the locked terminal)
 
-Market (`MARKET_WITH_SLIPPAGE_CAP` template) and limit or stop pending orders (`LIMIT_AT_TOUCH` and related sealed templates). A pending manual order holds its system stop and optional TP from the moment it is placed, expires (default end of session), and is re-checked against risk limits when it fills; if limits would be breached at fill time it is cancelled, not filled.
+Sell / Buy choose direction and open the review sheet; "Auto" shows the system size; SL shows the system stop with a tighten-only stepper; TP is optional; "Review order" opens the sheet. The review sheet shows, in plain words: direction and instrument, entry type and price, stop and what it costs if hit ("you risk $62, 0.5 % of equity"), TP and R multiple if set, the family total if this is an add, portfolio heat after the trade, daily loss remaining, the event-risk line from §8.6 with its history ("this release moved EURUSD further than your stop in 3 of the last 14 cases"), and which limits applied. One clear confirm, then biometric. Positions shows "+ Manual trade", a "Manual" or "VAN-managed" badge, and per-position Add / Close / Partial / Protection / TP / Hand to VAN / Take back controls.
 
-#### 7.4.7 Screens (mapping to the locked terminal)
+#### 7.4.10 Records and learning
 
-Sell / Buy choose direction and open the review sheet; "Auto" shows the system size; SL shows the system stop with a tighten-only stepper; TP is optional; "Review order" opens the sheet. The review sheet shows, in plain words: direction and instrument, entry type and price, stop and what it costs if hit ("you risk $62, 0.5 % of equity"), TP and R multiple if set, portfolio heat after the trade, daily loss remaining, any news or event warning, and which limits applied ("size reduced by drawdown tier"). One clear confirm, then biometric. Positions shows "+ Manual trade" and per-position Close / Partial / Protection / TP controls. Manual positions carry a "Manual" badge.
+Every manual entry, add, handover and exit is tagged in the ledger (`origin=OWNER_MANUAL`, management owner, family ID). Manual trades count fully for account risk and appear in the owner's history and review, but are excluded from strategy capsule learning and promotion statistics, so the owner's discretionary trades do not train or promote automated strategies.
 
-#### 7.4.8 Learning and records
+#### 7.4.11 Backend work (DU-28)
 
-Manual trades are tagged `origin=OWNER_MANUAL` in the ledger. They count fully for account risk and appear in the owner's history and review, but are excluded from strategy capsule learning and promotion statistics so the owner's discretionary trades do not train or promote automated strategies.
+New: `vati/execution/manual.py` (`ManualStopPolicy`, `ManualIntentFactory`, owner-exit service, stop re-attach sequence), lifecycle `MANAGEMENT_HANDOVER` event and management-owner field on the family, owner-requested add path through `ScalePolicy` and the family envelope, owner authority acts `trading-manual-entry` / `trading-manual-add` / `trading-manual-exit` / `trading-handover`, gateway `POST /v1/trading/manual/preview` (read-only), `POST /v1/trading/manual/submit` (signed), `POST /v1/trading/positions/{id}/add/preview` and `/add`, `POST /v1/trading/positions/{id}/close`, `/protection`, `/handover`, `/take-back`, `DELETE /v1/trading/manual/orders/{id}`; ledger origin and management tags. Unchanged: Risk Authority, pre-trade gate, router (except OQ-07), adapters' atomic stop/TP, protection rules, reconciliation.
 
-#### 7.4.9 Backend work (DU-28)
-
-New: `vati/execution/manual.py` (`ManualStopPolicy`, `ManualIntentFactory`, owner-exit service), owner authority act names `trading-manual-entry` / `trading-manual-exit`, gateway `POST /v1/trading/manual/preview` (read-only), `POST /v1/trading/manual/submit` (signed), `POST /v1/trading/positions/{id}/close`, `POST /v1/trading/positions/{id}/protection`, `DELETE /v1/trading/manual/orders/{id}`; optional venue TP on `OrderCommand`; ledger origin tag. Unchanged: Risk Authority, pre-trade gate, router, protection rules, reconciliation.
-
-**Owner decisions still needed before DU-28 implementation:** (a) the `owner.manual` risk budget in the next signed mandate; (b) ATR multiples per instrument class for the stop policy; (c) demo period length before `LIMITED_LIVE` manual trading; (d) whether manual adds to a winning position are allowed at all.
-
-Pending-order create/modify/cancel, trailing stop, partial reduction and position exit all use the contracts above; MT5-like button appearance is not authority.
-
-`HOLD`, `ADD`, `REDUCE`, `MOVE_PROTECTION`, `PARTIAL_TAKE` and `EXIT` remain typed proposal/lifecycle states where governed. A candidate `WAIT` cannot acquire a direct BUY/SELL execution path. No chart-side arithmetic becomes executable sizing authority. State `SUCCESS` requires corroborated ledger/broker result; uncertain operations remain `OUTCOME_UNKNOWN` pending reconciliation.
+**Owner decisions still needed:** (a) the `owner.manual` risk budget in the next signed mandate (OQ-01); (b) ATR multiples per instrument class for the stop policy (OQ-02); (c) demo period before `LIMITED_LIVE` manual trading (OQ-03); (d) whether the stop re-attach sequence also replaces the immediate flatten for automated trades (OQ-07).
 
 ### 7.5 Positions and order history
 
@@ -550,97 +591,150 @@ The planned MT5/TradingView Android architectural investigation runs on `van-tra
 
 ---
 
-## 8. Intelligence and News — built on the existing pipeline (OD-04)
+## 8. News and Event Intelligence — live sources, analysis, history, decisions (OD-04, OD-11)
+
+The goal: VAN reads several live news sources, checks them against each other, works out what happened and what usually happens next by comparing with its own record of similar past events, and **uses that to change what it trades, how big, when, and how it protects open trades** — through defined paths that are tested and can be switched on one at a time. The owner sees all of it in plain words.
 
 ### 8.1 What already exists (E2, `main` 8eb1889)
 
-| Layer | Source | What it does |
+| Layer | Source | What it does today |
 |---|---|---|
-| Ingest | `trading/vati/events/news_ingress.py` (`news-ingress/5.1.0`) | Records `Headline`s with a declared source trust (`T1_PRIMARY` issuer, `T2_SECONDARY` reporting, `UNTRUSTED`), dedupes by a hash of the normalised title, keeps every relay as an observation |
-| Relevance | `RelevanceMapper` + `EventRegistry` | Links a headline to instruments only through declared exposure: symbol, event class, currency leg, asset class; an undeclared instrument is treated as *possibly* affected by a T1 headline (fail-closed) |
-| Impact | `EventImpactAssessment` | Per position or candidate: `concern` (`ADVERSE_TO_LONG`, `ADVERSE_TO_SHORT`, `TWO_SIDED`, `UNCLEAR`), `materiality` = severity × trust weight × relevance weight × freshness over a 6-hour window, `uncertainty`, evidence refs |
-| Effect on trading | `event_risk_multiplier_for` | **Reduce-only.** Below materiality 0.2 nothing changes; above it, new-trade size shrinks toward a floor of 0.25×. News can never raise risk, never opens or closes a trade, and never sets a blackout. The economic calendar remains the blackout authority |
-| Thesis and confidence | `ThesisAssessment` (`RISKIER`), `vati/arbiter/confidence.py` | Event risk feeds the thesis state of open trades and is one of the confidence multipliers, so material news lowers a candidate's confidence band |
-| Serving | `GET /v1/trading/events` | Headlines, calendar releases and impacts, each labelled with its authority |
-| Android | `OverviewScreen.kt` "Significant events", `PotentialScreen.kt` / `PositionDetailScreen.kt` "Linked events" | Lists events; no plain-language explanation and no News screen |
+| Headline ingest | `events/news_ingress.py` | Records headlines with declared source trust (`T1_PRIMARY`, `T2_SECONDARY`, `UNTRUSTED`); dedupes by normalised-title hash; links headlines to instruments only through declared exposure; computes per-trade `EventImpactAssessment` (concern, materiality, uncertainty). Fed only from files (F-026). |
+| Headline effect | `event_risk_multiplier_for` | Reduce-only size multiplier, floor 0.25×, no effect below materiality 0.2, 6-hour window |
+| Calendar | `calendar/recorder.py` | Keeps every source's scheduled and released values, never overwrites; one source = PROVISIONAL, two agreeing = VERIFIED, two disagreeing = DISPUTED. Blackout authority. |
+| Surprise and reaction | `events/normaliser.py`, `events/reaction.py` | Surprise = actual vs forecast scaled by that release's usual miss; reaction = market move at 1 min, 5 min, 30 min, 4 h in units of the instrument's normal range; missing marks stay MISSING |
+| History | `events/episodes.py`, `cognition/analogues.py` | Closes an episode per release; retrieves the most similar past episodes by a fixed, named feature vector; reports coverage and distance so thin evidence is visible |
+| Wiring | `EventResearchRuntime` in `app/account_service.py`; `GET /v1/trading/events`; Android "Significant events" / "Linked events" | Runs the above; history feeds model context and research only — **nothing uses it to change a trade** (F-032) |
 
-Rev 1.0's separate ingest/dedupe/entity-mapping pipeline and its bullish/bearish `directional_scenarios` are withdrawn. The existing design deliberately says VAN is "not forecasting from news" and asks only whether an open or proposed trade is more exposed; the new work keeps that rule.
+So the measurement machinery is there and honest. What is missing is live multi-source input, headline (unscheduled) history, and the connection to decisions.
 
-### 8.2 Gaps and how they close
+### 8.2 Live sources — several, independent, cross-checked
 
-| Gap | Change | Rule that must hold |
-|---|---|---|
-| No live feed (F-026) | Source adapters that produce rows for the existing `NewsIngress.ingest`: T1 official releases (central banks, statistics offices, exchanges including ZSE announcements) and licensed T2 wires. Each source is registered with its trust tier and a licence record | No scraping of restricted content; full article text is not stored or shown unless the licence allows it |
-| Severity and concern are hand-declared | A classifier proposes `event_class`, `severity` and `concern` for each new headline: deterministic rules from the `EventRegistry` taxonomy first; an optional bounded model may fill gaps. Every proposal records `classified_by` and is weighted below a declared value | The classifier cannot touch the multiplier floor, the 0.2 threshold or blackout authority; its worst case is an extra, bounded size reduction |
-| Exact-title dedupe only | Add story clustering (same event, different wording, different outlets) on top of the existing hash, so ten reports of one decision read as one story with ten sources | A cluster's trust is its best source's trust; reports do not count as corroboration of each other |
-| No explanation | **News briefs** (§8.3) | Every number and instrument in a brief comes from ledger facts |
-| No News screen | Intelligence → News, and briefs inside Position and Potential-trade detail (§8.5) | |
+**Source categories and minimum coverage** (per instrument group the account trades):
 
-### 8.3 News brief — plain language, tied to trades
+| Category | Purpose | Minimum | Examples (candidates; none chosen, licences and costs to be verified in vendor review) |
+|---|---|---|---|
+| Official primary (T1) | The issuer's own statement or release | Every issuer relevant to traded instruments | Central banks (Fed, ECB, BoE, BoJ, RBZ), statistics offices (BLS, BEA, Eurostat, ONS, ZIMSTAT), exchanges and regulators (ZSE, VFEX, SECZim) |
+| Real-time newswires (T2) | Fast reporting of scheduled and unscheduled events | **At least two independent wires** | Licensed institutional wires and market-news APIs evaluated through vendor review |
+| Economic calendar with consensus | Scheduled times, forecasts, actuals — needed for surprise scoring | **At least two calendar sources**, matching the recorder's "two agreeing = VERIFIED" rule | Calendar/consensus data providers evaluated through vendor review |
+| Market-derived | Price, volatility and spread jumps from VAN's own quote feed | Always on | Detects an **unexplained move** (a jump of several normal-range units with no matching story) and raises caution until a story explains it |
 
-A `NewsBrief` is generated for each story cluster that is relevant to at least one open position, pending manual order or potential trade. It is built from the headline, its `EventImpactAssessment`s, the calendar and the affected trades' `ThesisAssessment`, using templates. A language model may smooth the wording, but its output is checked: any number, instrument, time or direction not present in the facts rejects the rewrite and the template text is shown instead.
+**Cross-checking.** Each story cluster carries a status: `OFFICIAL` (seen from the T1 issuer), `CORROBORATED` (two or more *independent* sources; syndicated copies of one wire count as one), `SINGLE_SOURCE`, `DISPUTED` (sources disagree on a fact), `CORRECTED` or `RETRACTED`. Automatic decisions (§8.5) weight by status; a single unverified source can only ever trigger the mildest caution.
 
-Every brief answers five questions, in this order, in everyday words (target: readable by a non-trader in under 20 seconds):
+**Source health.** Every source has a heartbeat, a measured delay versus the others, gap detection and a licence record. If a category drops below its minimum healthy sources, VAN shows "news coverage degraded" and — inside a high-impact window — treats the gap itself as a risk (new entries deferred, §8.5 D2). Feeds fail over automatically; nothing is scraped from restricted sites, and full article text is kept or shown only where the licence allows.
 
-1. **What happened** — one sentence with the source named and its trust shown in words: *Official source*, *Reported by* (outlet), or *Unverified*.
-2. **Why it matters for you** — which of your trades or watched instruments it touches, and through what ("affects the euro side of EURUSD").
-3. **What VAN did** — the exact, deterministic effect, or "nothing".
-4. **What it means for your open trades** — per position: "works against your EURUSD buy", "works against your sell", "adds uncertainty both ways" or "direction unclear".
-5. **What would change this** — the next scheduled release, or when the headline stops counting (end of the 6-hour window).
+Ingest uses adapters into the existing `NewsIngress.ingest` and `CalendarRecorder`, so dedupe, trust, relevance and the ledger record stay as they are.
 
-**Translation table (deterministic; the brief's "What VAN did" line comes only from here):**
+### 8.3 Analysis of each story
 
-| Condition | What the owner reads |
+For every story cluster VAN records:
+
+- **What it is:** event class (from the `EventRegistry` taxonomy), entities, affected currencies, assets and instruments (declared exposure only), scheduled or unscheduled.
+- **How surprising:** for scheduled releases, the existing surprise score; for unscheduled news, a novelty grade — new, follow-up, correction, or already reflected in price (the market had moved before the story).
+- **Which way it cuts for each trade:** the existing `concern` per position and candidate (against longs, against shorts, both, unclear).
+- **How reliable:** source status (§8.2), contradictions between sources, whether the market's first reaction agrees with the story.
+- **What history says:** the event history profile (§8.4).
+- **Uncertainty:** stated, not hidden; "direction unclear" is a valid result.
+
+A classifier proposes event class, severity and concern for raw stories: deterministic rules first; a bounded language model may fill gaps. Every proposal records `classified_by`, a model-only classification is weighted below a rule-based one, and a model can never set source status, history numbers or any decision output.
+
+### 8.4 History comparison
+
+1. **Headline episodes.** Extend `events/episodes.py` to unscheduled news: the reaction is measured from the moment the story was first seen, at the same 1 min / 5 min / 30 min / 4 h horizons, in normal-range units, with MISSING marks kept. Scheduled-release episodes continue as now.
+2. **Analogue search.** Add event class, surprise or novelty bucket, source status and direction-of-surprise to the analogue feature vector (`cognition/analogues.py`), keeping retrieval deterministic and replayable.
+3. **Event history profile.** For the current story and instrument, from the closest analogues:
+
+| Field | Meaning (owner wording) |
 |---|---|
-| Materiality below 0.2 | "Noted. No change to trading." |
-| Materiality ≥ 0.2, affects new trades | "New XAUUSD trades are sized at 70 % of normal until 14:30." (percentage = `event_risk_multiplier_for(materiality)`, time = end of relevance window) |
-| Linked to a potential trade | "Confidence for this potential trade dropped from High to Medium because of this news." |
-| Concern is against an open position's direction | "This works against your EURUSD buy. VAN has marked the trade as riskier. Your stop at 1.0780 is unchanged." plus buttons for the §7.4.5 exit actions (review stop, close part, close) |
-| `TWO_SIDED` | "This adds uncertainty in both directions for GBPJPY." |
-| Calendar blackout (scheduled tier-1 event) | "No new EURUSD trades from 13:25 to 13:45 around the US jobs report." (from the calendar, not from news) |
-| Source unavailable or stale | "News source unavailable since 09:12. Briefs may be out of date." — never a cached model summary presented as current |
+| `sample_size`, `coverage`, `mean_distance` | "Based on 14 similar events since 2024" / "Too few similar events to rely on" |
+| `direction_split` | "EURUSD fell in 10 of 14" |
+| `typical_move` (median, normal-range units and price) | "Typical move: 0.6 of a normal day (about 42 pips)" |
+| `adverse_p90` versus each open stop and proposed stop | "In 3 of 14 cases the move against a buy was larger than your stop distance" |
+| `volatility_expansion`, `spread_widening` | "Spreads usually double for about 10 minutes" |
+| `time_to_settle` | "Usually settles within 25 minutes" |
+| `evidence` | `SUFFICIENT` (default ≥ 10 close analogues) or `EVIDENCE_THIN` |
 
-Words that are never used in a brief or anywhere in News: "buy signal", "sell signal", "probability", "guaranteed", "will rise/fall". Confidence is described as VAN's ranking, not a chance of winning.
+Thin evidence is shown honestly and limits automatic use: with `EVIDENCE_THIN`, only the default caution rules apply, never history-scaled ones.
 
-`NewsBrief` contract (new read model; replaces Rev 1.0's `NewsAnalysisArtifact`):
+### 8.5 How news changes trading decisions
+
+News acts through these defined paths and no others. Each path is computed and logged from day one; it **changes live trading only after it has run in shadow mode**, been scored against what actually happened, and the owner has signed it live for that path (OQ-08). The owner sees a monthly "did news help" report per path: losses avoided, gains missed, sample size.
+
+| Path | What changes | Rule |
+|---|---|---|
+| **D1 Size of new trades** (auto and manual) | New-trade size multiplier = the lower of the existing materiality multiplier and a history multiplier that shrinks size when `adverse_p90` is large relative to the stop | Never above 1; stops are never widened to fit; floor stays 0.25× except under D2 |
+| **D2 Timing of new trades** | Defer new entries after a high-impact event until history's `time_to_settle` has passed, and during "coverage degraded" or "unexplained move" states | Can extend but never shorten the calendar blackout; the calendar stays the blackout authority |
+| **D3 How orders are placed** | When history shows spread widening, choose passive or limit templates or `DO_NOT_EXECUTE` for the window | Uses the existing sealed execution templates and their `cancel_on_event_state` |
+| **D4 Open trades before a scheduled high-impact event** | If history says a typical adverse move would eat most of the stop cushion and the trade is not yet protected (break-even or better), VAN-managed trades get a preservation action: partial close or move to break-even, per that trade's lifecycle policy | Owner-managed (manual, not handed over) trades are never touched; the owner gets an alert with those options and the history behind them |
+| **D5 Open trades after adverse unscheduled news** | Corroborated or official adverse news moves the thesis to RISKIER or WEAKER; if trade health turns FAILING, preservation acts on VAN-managed trades; owner-managed trades get an alert | `SINGLE_SOURCE` news alone cannot trigger an exit |
+| **D6 Ranking of potential trades** | Confidence lowered through the existing event-risk multiplier; candidates that conflict with corroborated adverse news are suppressed with the reason shown | Confidence stays display/ranking only |
+| **D7 New trades created from news** | Patterns found in the episode library (for example, continuation after a large verified surprise) become **event-driven strategies**. They go through backtest, paper and shadow like any strategy and are promoted live only by owner signature; once live they generate potential trades that the Risk Authority sizes normally | This is the only way news can lead VAN to open or enlarge a trade. A headline alone never does (`unvalidated_research_to_live` is forbidden). |
+
+My recommendation is to keep the rule that news can never *directly* increase risk (D1–D6 only reduce risk or change timing), and to let news create trades only through D7's validated strategies. Allowing a headline to raise size directly would bypass the evidence the strategy pipeline requires. Changing that is an owner decision (OQ-09).
+
+### 8.6 News briefs — plain language, tied to trades
+
+Each story affecting an open trade, pending order, potential trade or watched instrument gets a brief built from ledger facts with templates. A language model may smooth the wording; any number, instrument, time or direction not in the facts rejects the rewrite and the template text is shown.
+
+Every brief answers, in this order and in everyday words:
+
+1. **What happened** — one sentence, sources named, status in words: *Official*, *Confirmed by 3 sources*, *Single source — unconfirmed*, *Sources disagree*, *Corrected*.
+2. **Why it matters for you** — which trades or instruments, and through what ("affects the euro side of EURUSD").
+3. **What usually happens** — the history profile in one or two lines ("In 14 similar releases EURUSD fell 10 times; typical move about 42 pips; usually settles within 25 minutes"), or "Too few similar events to rely on".
+4. **What VAN is doing** — the exact D1–D7 actions in force, or "nothing".
+5. **What it means for your open trades** — per position: "works against your EURUSD buy; in 3 of 14 similar cases the move was bigger than your stop", with the exit and protection buttons from §7.4.8.
+6. **What would change this** — next scheduled release, a confirmation or correction, or when the story stops counting.
+
+Examples of "What VAN is doing" lines:
+
+| Path | Owner reads |
+|---|---|
+| none | "Noted. No change to trading." |
+| D1 | "New XAUUSD trades are sized at 60 % of normal until 14:30 — similar events have moved gold sharply." |
+| D2 | "No new EURUSD trades until 13:55; this release usually takes 25 minutes to settle." |
+| D3 | "Using limit orders only for GBPJPY until spreads normalise." |
+| D4 | "Moved your VAN-managed EURUSD buy to break-even before the US jobs report." / for a manual trade: "Your EURUSD buy is not yet protected; similar releases moved further than your stop in 3 of 14 cases. Options: move to break-even, close part, keep." |
+| D5 | "Confirmed by 3 sources and against your USDJPY sell. VAN has marked the trade riskier." |
+| D6 | "Confidence for this potential trade dropped from High to Medium because of this news." |
+| D7 | "Event strategy 'CPI surprise continuation' proposes a EURUSD sell — see the potential trade." |
+| shadow | Shadow-mode paths are shown under Evidence as "VAN would have…", never as an action |
+| degraded | "Only one news source is responding since 09:12. VAN is deferring new trades around the 13:30 release." |
+
+Words never used in News: "buy signal", "sell signal", "probability", "guaranteed", "will rise/fall". History is stated as counts ("10 of 14"), not as a chance of winning.
+
+### 8.7 Contracts
+
+New read models, served by extending `GET /v1/trading/events` (or sibling `GET /v1/trading/news/*` routes if contract comparison shows the response is too large):
 
 ```json
 {
-  "brief_id": "opaque",
-  "cluster_id": "opaque",
-  "headline_ids": ["…"],
-  "sources": [{"source_id": "…", "trust": "T1_PRIMARY|T2_SECONDARY|UNTRUSTED", "label": "…", "published_ms": 0, "url": "…"}],
-  "what_happened": "…",
-  "why_it_matters": "…",
-  "vati_effect": {"kind": "NONE|SIZE_REDUCED|CONFIDENCE_LOWERED|THESIS_RISKIER|CALENDAR_BLACKOUT", "multiplier": "0.70", "until_ms": 0, "text": "…"},
-  "position_effects": [{"position_id": "…", "symbol": "…", "direction": "LONG|SHORT", "concern": "ADVERSE_TO_LONG|…", "text": "…"}],
-  "candidate_effects": [{"candidate_id": "…", "confidence_before": "HIGH", "confidence_after": "MEDIUM"}],
-  "what_would_change_this": "…",
-  "impact_refs": ["EventImpactAssessment.impact_id…"],
-  "materiality": "0.00-1.00", "uncertainty": "0.00-1.00",
-  "freshness": "LIVE|AGING|STALE|UNKNOWN",
-  "wording": {"generator": "TEMPLATE|TEMPLATE+MODEL_CHECKED", "template_version": "…"},
-  "authority": "REDUCE_ONLY_CALENDAR_REMAINS_BLACKOUT_AUTHORITY"
+  "story_cluster": {"cluster_id": "…", "status": "OFFICIAL|CORROBORATED|SINGLE_SOURCE|DISPUTED|CORRECTED|RETRACTED",
+                    "sources": [{"source_id": "…", "category": "T1|WIRE|CALENDAR|MARKET", "trust": "…", "first_seen_ms": 0, "url": "…"}],
+                    "event_class": "…", "scheduled": true, "surprise": "…|null", "novelty": "NEW|FOLLOW_UP|CORRECTION|PRICED_IN",
+                    "classified_by": "RULES|MODEL|DECLARED"},
+  "event_history_profile": {"cluster_id": "…", "symbol": "…", "sample_size": 14, "coverage": 0, "mean_distance": "…",
+                            "direction_split": {"up": 4, "down": 10}, "typical_move_range_units": "0.6", "typical_move_price": "0.0042",
+                            "adverse_p90_range_units": "1.4", "time_to_settle_ms": 1500000, "spread_widening": "2.0",
+                            "evidence": "SUFFICIENT|EVIDENCE_THIN", "analogue_ids": ["…"]},
+  "decision_effects": [{"path": "D1|D2|D3|D4|D5|D6|D7", "mode": "SHADOW|LIVE", "subject": "…", "effect": "…", "until_ms": 0, "evidence_refs": ["…"]}],
+  "news_brief": {"brief_id": "…", "cluster_id": "…", "what_happened": "…", "why_it_matters": "…", "what_usually_happens": "…",
+                 "what_van_is_doing": "…", "position_effects": [{"position_id": "…", "text": "…"}], "what_would_change_this": "…",
+                 "wording": {"generator": "TEMPLATE|TEMPLATE+MODEL_CHECKED", "template_version": "…"}},
+  "coverage": {"category": "WIRE", "healthy_sources": 2, "minimum": 2, "state": "OK|DEGRADED"}
 }
 ```
 
-Served by extending `GET /v1/trading/events` with a `briefs` array (or a sibling `GET /v1/trading/news/briefs` if contract comparison shows the response is too large); `impact_refs` link each brief to the existing impact records.
+### 8.8 Where it appears
 
-### 8.4 Where briefs appear
+- **Intelligence → News:** coverage state, then the lead brief for the most material story affecting the owner's trades, then a short list. Filters: my trades, instrument, region, asset class, scheduled/unscheduled.
+- **Story detail:** the six answers first; "Effect on trading" with D-path details; "History" showing the similar past events (date, surprise, what the market did at each horizon) with an option to open any of them; sources and evidence under an expandable section.
+- **Economic calendar view:** upcoming releases with their history profile ("usually moves EURUSD about 40 pips; settles in 25 min") and any D2/D4 plans for the event.
+- **Position, potential trade and manual review sheet:** the brief and history line for that instrument.
+- **Home orb / Quick Hub / Attention:** only for D4/D5 alerts on open trades and for coverage loss inside a high-impact window, one canonical event ID each.
 
-- **Intelligence → News:** the lead brief for the most material story affecting the owner's trades, then a short list (headline, time, trust word, affected instruments, one-line effect). Filters: my trades, instrument, region, asset class.
-- **Story detail:** the five answers first; then "Effect on trading" with the exact numbers; then sources, timestamps, trust, materiality and uncertainty under an expandable "Evidence" section.
-- **Position and Potential-trade detail:** "Linked events" becomes linked briefs.
-- **Manual trade review sheet (§7.4.7):** any active brief for that instrument, with its effect on the proposed size.
-- **Home orb / Quick Hub / Attention:** only when a brief is actionable (materiality ≥ 0.2) **and** works against an open position, under one canonical event ID; never for every headline.
+### 8.9 Acceptance and negative tests
 
-### 8.5 Intelligence information architecture
-
-Child destinations: `Potential` (candidates), `Analysis / Live Analyst`, `News`, `Strategies`, `Research`, `Reviews / Learning`. Live Analyst may quote briefs; it does not produce its own news effects.
-
-### 8.6 Acceptance and negative tests
-
-Duplicate syndicated stories cluster into one brief with several sources; a source correction re-generates the brief and invalidates the old one; materiality 0.19 produces "No change" and no multiplier; materiality 1.0 never takes the multiplier below 0.25; a model rewrite that adds a price, instrument or direction is rejected and the template text is shown; a T2 report of a T1 event is labelled as a report; an untrusted source is shown as unverified and weighted 0.2; a brief never contains a forbidden word (lint); an expired relevance window removes the "What VAN did" effect; feed outage shows source-specific degraded state; no brief can create, size, close or cancel a trade; notification dedupe survives restart and multiple devices. Readability check: briefs in the test corpus meet the target reading level.
+Two syndicated copies of one wire count as one source; a story seen only from one wire stays `SINGLE_SOURCE` and cannot trigger D4/D5; an official correction moves the cluster to `CORRECTED` and re-computes effects; a feed outage below the category minimum shows "coverage degraded" and triggers D2 only inside a high-impact window; an unexplained price jump raises caution until a story arrives; history with fewer than the minimum analogues reports `EVIDENCE_THIN` and D1 falls back to the default multiplier; a D1 multiplier is never above 1 and no stop is widened; D2 never shortens a calendar blackout; D4 never acts on an owner-managed trade; every D-path in `SHADOW` mode produces a logged "would have" record and no order; a path is live only with an owner-signed promotion record; a D7 strategy without promotion evidence cannot produce a live potential trade; a model rewrite that adds a price, instrument, count or direction is rejected; history counts in briefs match the episode records exactly; replaying the ledger reproduces the same profiles and effects; briefs never contain a forbidden word (lint); notification dedupe survives restart and multiple devices.
 
 ---
 
@@ -1010,7 +1104,7 @@ Each requirement ID must have Product Truth binding, one or more Development Uni
 | VAN-NX-010 | Position/order and SL/TP management through trusted control | DU-11 | Independent broker/protection receipts |
 | VAN-NX-011 | Trading markets, watchlists and price freshness | DU-12 | Fast supported symbol access |
 | VAN-NX-012 | Live Analyst and VATI/JEV separation | DU-13 | Verified facts and clear disagreement |
-| VAN-NX-013 | News briefs on the existing `news_ingress` pipeline: feed adapters, classifier, clustering, plain-language trade effect | DU-14 | §8.6; reduce-only invariant holds; checked wording |
+| VAN-NX-013 | Multi-source live news with cross-checking, story analysis and plain-language briefs on the existing ingest | DU-14a/b, DU-14d | §8.9; minimum independent sources per category; checked wording |
 | VAN-NX-014 | Preserve project and task data/provenance | DU-15 | 78-surface obligations and readback |
 | VAN-NX-015 | True spatial project/task dependency flow | DU-16 | Source-authenticated nodes/edges and deterministic layout |
 | VAN-NX-016 | Live agent/multi-worker handoff map | DU-17 | Assignments and receipts, no fake status |
@@ -1024,7 +1118,9 @@ Each requirement ID must have Product Truth binding, one or more Development Uni
 | VAN-NX-024 | DIAL Zuul and independent verification | DU-25 | Every applicable F0–F15 gate has receipt |
 | VAN-NX-025 | Real S24 Ultra dark/light visual and functional acceptance | DU-26 | Owner on-device decision, immutable APK |
 | VAN-NX-026 | REA architectural improvement gate, versioned changes | DU-27 | Research recommendation with evidence; owner-ready scheduling |
-| VAN-NX-027 | Owner manual trading: risk-governed entries, mandatory system stop, optional TP, always-available exits | DU-28 | §7.4; §18.2 manual-trading cases; demo before live |
+| VAN-NX-027 | Owner manual trading: risk-governed entries and adds, stop and optional TP inside the opening order, always-available exits | DU-28 | §7.4; §18.2 manual-trading cases; demo before live |
+| VAN-NX-031 | Hand a manual trade to VAN and take it back; take manual control of an automatic trade; manual adds to automatic trades under that trade's risk profile | DU-28b | §7.4.6–§7.4.7; §18.2 handover and add cases |
+| VAN-NX-032 | Event history comparison for scheduled and unscheduled news, wired into trading decisions D1–D7 through shadow-then-live promotion | DU-14c | §8.4–§8.5; per-path shadow evidence and owner-signed promotion |
 | VAN-NX-028 | Repository consolidation, Feature Ledger and parity oracle before rebuild | DU-00 | Every ledger row classified; parity checker fails on an induced omission |
 | VAN-NX-029 | Structural frontend isolation (modules, tokens, strings, release checks) | DU-24 | Legacy import fails compilation; banned-word and literal-style lints fail when induced |
 | VAN-NX-030 | Mockup labels follow system vocabulary | DU-02 | §2.6 table applied in string catalogue and goldens |
@@ -1054,7 +1150,15 @@ flowchart TD
   I --> K[DU-12 Markets and Watchlists]
   J --> L[DU-11 Positions/Orders/Protection]
   I --> M[DU-13 Analyst]
-  M --> N[DU-14 News briefs on existing pipeline]
+  B --> NA[DU-14a Multi-source feeds + health]
+  NA --> NB[DU-14b Story analysis + headline episodes + history profiles]
+  NB --> NC[DU-14c Decision paths D1-D7, shadow then live]
+  M --> N[DU-14d News briefs + News UI]
+  NB --> N
+  NC --> N
+  NC --> Z
+  MT --> MH[DU-28b Adds, Hand to VAN, take back]
+  MH --> L
   E --> O[DU-15 Project data adapter]
   O --> Q[DU-16 Spatial task graph]
   Q --> R[DU-17 Agent/Handoff flow]
@@ -1093,7 +1197,7 @@ Every arrow is a declared dependency, not a guarantee that a downstream task can
 - **Foundation lane:** source truth, screen mapping, new navigation, material system, golden previews.
 - **Orb / Floating lane:** typed event projection, orb reducer/renderer, compact hub, overlay gesture preservation.
 - **Trading lane:** manual trading backend (DU-28), markets, rich chart, positions/orders, risk and analyst with source provenance.
-- **News lane:** feed adapters and classifier into the existing `news_ingress`, story clustering, News briefs, News UI.
+- **News lane:** multi-source feed adapters and health into the existing `news_ingress` and calendar recorder; story analysis and cross-checking; headline episodes and history profiles on the existing event research engine; decision paths D1–D7 in shadow, then live per owner signature; News briefs and UI.
 - **Work Graph lane:** stable ProjectFlow contract, DAG layout, agent links, evidence and Muse integration.
 - **Continuity lane:** Memory, Connected, Settings, voice, browser, automation, provisioning and native lifecycle.
 - **Qualification lane:** source- and device-bound tests, failure injection, visual goldens, anti-gap and owner review.
@@ -1178,7 +1282,14 @@ Enforce no imports of legacy presentation packages in `next` screens; permitted 
 | Manual entry with `owner.manual` absent from mandate | Refused before preview, reason shown |
 | Manual entry requested above the strategy budget | Impossible in UI; API request refused by Risk Authority |
 | Owner drags manual stop wider | Refused; stop stays; pre-trade stop integrity also refuses |
-| Fill confirmed but broker stop not confirmed in time | Position closed (protect-or-flatten); outcome shown; no silent unprotected trade |
+| Manual order sent | Exactly one venue request carrying order, stop and (if set) TP; no separate stop request on the normal path |
+| Stop too close for the venue's stop or freeze level | Caught in preview; re-priced; the broker never sees an invalid stop |
+| Fill reported without stop confirmation | Position re-read; stop re-attached (max two attempts, seconds); closed only if still unprotected; every step recorded |
+| Add to a manual trade | Same flow as entry; family risk (existing + add) checked against the manual budget; `max_positions_per_instrument` enforced |
+| Manual add to an automatic trade whose strategy has `NO_SCALING` or whose scale-policy conditions fail | Refused, naming the failed condition |
+| Hand to VAN with an adopting strategy whose invalidation is wider than the owner's stop | Owner's stop kept; never widened |
+| Take back while VAN has a pending protection action | VAN action cancelled; management returns to owner; recorded |
+| Handed-over trade closes | Counted for account risk and management record; excluded from strategy entry statistics |
 | Manual entry while kill switch / drawdown tier 0 / blackout | Entry refused with reason; close, partial close, tighten and TP still work |
 | Double tap on Review order confirm | One order (idempotency key) |
 | Biometric token replayed or used after 60 s or for a different intent | Refused (act + subject + single use) |
@@ -1269,7 +1380,7 @@ Minimum deliverable pack before implementation:
 - Reusable Source Gate: past `implemented`/`partial` registry labels describe a historical static audit; not the present live device condition.
 - No rich chart runtime, interactive task canvas or News analysis screen was found by the specified exact-symbol search in the inspected merged-main and PR #93 scope. Further semantic/static or runtime inspection could discover differently named implementations.
 - REA MT5/TradingView analysis is not complete; user will separately signal when `van-trading-core` is ready. Findings are allowed to amend architecture.
-- Rev 1.1 relabelled the mockups and specified manual trading, News briefs and consolidation; none of these is implemented. Manual trading needs four owner decisions (§7.4.9) and an owner-signed mandate version before any live use.
+- Rev 1.1–1.2 relabelled the mockups and specified manual trading (entries, adds, handover), multi-source news with history-driven decisions, and consolidation; none of these is implemented. Manual trading needs owner decisions (§7.4.11) and an owner-signed mandate version before any live use; each news decision path needs shadow evidence and an owner signature before it changes live trading.
 - `VAN_NEXT_OWNER_DECISIONS_REV1.md` records chat decisions and awaits owner signature.
 - No feature merge or frontend mutation was performed to production VAN. Existing PR candidates remain independent and need source/qualification reconciliation.
 

@@ -3,11 +3,11 @@
 **Record ID:** `VAN-NEXT-OD-REV1-20261015`
 **Status:** `RECORDED_FROM_OWNER_CHAT / AWAITING_OWNER_SIGNATURE`
 **Recorded:** 15 October 2026, from the owner's instructions in a Claude Code session reviewing `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_20261015.md`.
-**Applies to:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_1_20261015.md` and its companion matrix.
+**Applies to:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_2_20261015.md` and its companion matrix. OD-07…OD-11 were added on 15 October 2026 after the owner reviewed Rev 1.1.
 
 Under the VAN Project Truth Protocol an owner-signed, device-authenticated instruction outranks this record. These decisions bind development packets once the owner signs this record (blueprint §2.1, §17 F0). Until then they are the owner's stated intent, and no trading mandate, live permission or production change follows from them.
 
-| ID | Decision (owner's words, condensed) | Effect in Rev 1.1 |
+| ID | Decision (owner's words, condensed) | Effect in the blueprint |
 |---|---|---|
 | OD-00 | The two dark/light screenshots are the visual authority (prior instruction). | Locked originals kept unaltered in `reference/` with their SHA-256 hashes. |
 | OD-01 | "A setup that allows manual trade entries or exits that are governed by the system's risk profiles, where manual entries will also have strict automated stop losses and optional take profits." | Blueprint §0.2 item 11 and §7.4; DU-28; requirement VAN-NX-027. Four sub-decisions still open (§7.4.9). |
@@ -16,6 +16,11 @@ Under the VAN Project Truth Protocol an owner-signed, device-authenticated instr
 | OD-04 | "Change the news plan to match the code and make improvements to ensure news analysis is provided in simple terms and how it translates to trades." | §8 rebuilt on `news_ingress`; News briefs with a deterministic trade-effect table. |
 | OD-05 | Repository consolidation is a priority, so the new build does not silently thin or omit features and functions that are documented or meant to be ported from the old build; it must also stop pollution of the new frontend UX/UI. | §0.2 item 12, §12.5 (DU-00 first), §12.6 module isolation, §19.1 P0. |
 | OD-06 | Remaining review findings are fixed as recommended. | Change log C6–C9: coverage numbers, dependency graph, this record, native goldens, status line, matrix nulls, typo. |
+| OD-07 | "A manual entry should have a stop loss attached to it automatically instead of waiting for a trade to get accepted then closing immediately if the broker does not confirm." | §7.4.3: stop (and TP) sent inside the opening order, as the adapters already do; pre-send validation; re-attach before any close. |
+| OD-08 | "Adding to a winning manual trade should just work the same as entering a new trade." | §7.4.6: same flow as entry; risk judged on the position family. Resolves former OQ-04. |
+| OD-09 | "There should be a feature to switch a manual trade to auto." | §7.4.7 Hand to VAN (Protect and manage / Adopt by a strategy) and Take back. |
+| OD-10 | "Add positions to a winning auto trade manually, governed by the trade's risk profile." | §7.4.6: owner-requested add under that trade's strategy budget, scale policy, family envelope and temperament. |
+| OD-11 | "The news feature needs more than one live news feed source and comprehensive analysis and history comparison that actually influences trading decisions." | §8: minimum independent sources per category with cross-checking and health; story analysis; headline episodes and history profiles; decision paths D1–D7. |
 
 ## Open owner decisions
 
@@ -24,5 +29,8 @@ Under the VAN Project Truth Protocol an owner-signed, device-authenticated instr
 | OQ-01 | Risk budget for `owner.manual` in the next signed mandate | DU-28 live use |
 | OQ-02 | Stop-distance ATR multiples per instrument class for `ManualStopPolicy` | DU-28 implementation |
 | OQ-03 | Demo period before `LIMITED_LIVE` manual trading | DU-28 live use |
-| OQ-04 | Whether manual adds to an open winning position are allowed | DU-28 implementation |
 | OQ-05 | Signature of this record | DU-02 golden freeze |
+| OQ-06 | Which news, wire and calendar providers to license (vendor review of cost, latency, licence terms) | DU-14a |
+| OQ-07 | Whether the stop re-attach sequence (§7.4.3) also replaces the router's immediate flatten-and-halt for automated trades | DU-28 |
+| OQ-08 | Promotion of each news decision path D1–D6 from shadow to live, on its shadow evidence | DU-14c, per path |
+| OQ-09 | Whether news may ever *directly* increase risk (recommended: no; news creates trades only through validated event strategies, D7) | DU-14c |

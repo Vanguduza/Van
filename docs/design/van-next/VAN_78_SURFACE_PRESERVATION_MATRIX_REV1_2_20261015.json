@@ -6376,7 +6376,7 @@
       "pr93_only_files": []
     }
   ],
-  "revision": "1.1",
+  "revision": "1.2",
   "baselines": {
     "main": "8eb1889822fc8a83f219977c15340172e16acd91",
     "pr93": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6"
@@ -6419,6 +6419,22 @@
       "status": "SPEC_ONLY"
     },
     {
+      "id": "van.next.trading.add-sheet",
+      "title": "Add to position sheet (manual or automatic trade)",
+      "new_zone": "Trading / Positions",
+      "presentation": "modal_sheet",
+      "requirement": "VAN-NX-027/031",
+      "status": "SPEC_ONLY"
+    },
+    {
+      "id": "van.next.trading.handover-sheet",
+      "title": "Hand to VAN / take back sheet",
+      "new_zone": "Trading / Positions",
+      "presentation": "modal_sheet",
+      "requirement": "VAN-NX-031",
+      "status": "SPEC_ONLY"
+    },
+    {
       "id": "van.next.trading.markets",
       "title": "Markets & watchlists",
       "new_zone": "Trading / Markets",
@@ -6439,6 +6455,30 @@
       "title": "News story brief & trading effect",
       "new_zone": "Trading / Intelligence",
       "presentation": "navigation_screen",
+      "requirement": "VAN-NX-013",
+      "status": "SPEC_ONLY"
+    },
+    {
+      "id": "van.next.intel.calendar",
+      "title": "Economic calendar with event history",
+      "new_zone": "Trading / Intelligence",
+      "presentation": "navigation_screen",
+      "requirement": "VAN-NX-032",
+      "status": "SPEC_ONLY"
+    },
+    {
+      "id": "van.next.intel.event-history",
+      "title": "Similar past events for a story",
+      "new_zone": "Trading / Intelligence",
+      "presentation": "inline_section",
+      "requirement": "VAN-NX-032",
+      "status": "SPEC_ONLY"
+    },
+    {
+      "id": "van.next.intel.news-coverage",
+      "title": "News source coverage and health",
+      "new_zone": "Trading / Intelligence",
+      "presentation": "inline_section",
       "requirement": "VAN-NX-013",
       "status": "SPEC_ONLY"
     },

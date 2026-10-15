@@ -1,15 +1,15 @@
-# VAN 78-Surface Preservation & Rebuild Register — Rev 1.1, 2026-10-15
+# VAN 78-Surface Preservation & Rebuild Register — Rev 1.2, 2026-10-15
 
 **Source:** `VAN_FRONTEND_SCREEN_REGISTRY_2026-10-09.md`, snapshot 9 October 2026. **Not a live qualification receipt.**
 **Source lineage:** 9 October audit tracks draft owner-core PR #93 (`dfc1557a...`), while current merged main is `8eb18898...`.
 **Interpretation:** Current snapshot coverage labels indicate documented/source wiring, not device acceptance. The owner-approved dark/light screenshots and conversation control the new appearance.
 
-## Rev 1.1 changes
+## Rev 1.1–1.2 changes
 
 - Route fields that held the prose placeholders "none" / "Not declared" are now empty (CSV) or `null` (JSON), so checkers cannot read them as routes. The 23 non-routed surfaces are unchanged in substance.
-- New per-surface fields `source_dependency` and `pr93_only_files`. **35 of 78 surfaces** cite **53 source files** that exist on unmerged PR #93 (`dfc1557`) but not on `main` (`8eb1889`). Those surfaces cannot be migrated from `main` alone; repository consolidation (blueprint Rev 1.1 §12.5, DU-00) comes first.
-- Additive VAN Next surfaces are listed separately below; the 78-row obligation inventory is unchanged.
-- Trading vocabulary follows the system (blueprint Rev 1.1 §2.6): "Potential trades", "Confidence" (uncalibrated, display only), "Equity", "Portfolio heat".
+- New per-surface fields `source_dependency` and `pr93_only_files`. **35 of 78 surfaces** cite **53 source files** that exist on unmerged PR #93 (`dfc1557`) but not on `main` (`8eb1889`). Those surfaces cannot be migrated from `main` alone; repository consolidation (blueprint Rev 1.2 §12.5, DU-00) comes first.
+- Additive VAN Next surfaces are listed separately below (Rev 1.2 adds the add-to-position and handover sheets, the economic calendar with event history, similar-past-events and news coverage); the 78-row obligation inventory is unchanged.
+- Trading vocabulary follows the system (blueprint Rev 1.2 §2.6): "Potential trades", "Confidence" (uncalibrated, display only), "Equity", "Portfolio heat".
 
 ## Completeness
 
@@ -1124,7 +1124,7 @@ Every entry below carries its original interaction type and owner actions; the n
 
 The source register documents 78 surfaces and their recorded functional obligations. It does not assert that the 9 October source was merged, that all features operate on the physical owner handset, or that later branch changes have been qualified. Revalidate source hashes, routes, upstream providers and device behaviour during each development unit.
 
-## Additive VAN Next surfaces (Rev 1.1)
+## Additive VAN Next surfaces (Rev 1.2)
 
 New surfaces have their own IDs and tests. They do not count toward the 78 inherited obligations.
 
@@ -1134,8 +1134,13 @@ New surfaces have their own IDs and tests. They do not count toward the 78 inher
 | `van.next.trading.chart` | Instrument chart terminal | Trading / Terminal | `navigation_screen` | VAN-NX-009 | SPEC_ONLY |
 | `van.next.trading.manual-review` | Manual trade review & approval sheet | Trading / Terminal | `modal_sheet` | VAN-NX-027 | SPEC_ONLY |
 | `van.next.trading.exit-sheet` | Position exit / protection sheet | Trading / Positions | `modal_sheet` | VAN-NX-027 | SPEC_ONLY |
+| `van.next.trading.add-sheet` | Add to position sheet (manual or automatic trade) | Trading / Positions | `modal_sheet` | VAN-NX-027/031 | SPEC_ONLY |
+| `van.next.trading.handover-sheet` | Hand to VAN / take back sheet | Trading / Positions | `modal_sheet` | VAN-NX-031 | SPEC_ONLY |
 | `van.next.trading.markets` | Markets & watchlists | Trading / Markets | `navigation_screen` | VAN-NX-011 | SPEC_ONLY |
 | `van.next.intel.news` | News briefs | Trading / Intelligence | `navigation_screen` | VAN-NX-013 | SPEC_ONLY |
 | `van.next.intel.news-story` | News story brief & trading effect | Trading / Intelligence | `navigation_screen` | VAN-NX-013 | SPEC_ONLY |
+| `van.next.intel.calendar` | Economic calendar with event history | Trading / Intelligence | `navigation_screen` | VAN-NX-032 | SPEC_ONLY |
+| `van.next.intel.event-history` | Similar past events for a story | Trading / Intelligence | `inline_section` | VAN-NX-032 | SPEC_ONLY |
+| `van.next.intel.news-coverage` | News source coverage and health | Trading / Intelligence | `inline_section` | VAN-NX-013 | SPEC_ONLY |
 | `van.next.work.flow` | Project task flow graph | Work / Spatial Flow | `navigation_screen` | VAN-NX-015 | SPEC_ONLY |
 | `van.next.work.agent-map` | Agent handoff map | Work / Spatial Flow | `navigation_screen` | VAN-NX-016 | SPEC_ONLY |
