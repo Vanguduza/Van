@@ -1,9 +1,9 @@
 # VAN Tactile Spatial Experience — Complete Frontend Rebuild, Functional Preservation & Capability Expansion
 
-**Document ID:** `VAN-TSE-FR-REV1.5-20261015`  
-**Revision:** 1.5 — forensic-design specification / implementation programme candidate (supersedes Rev 1.4; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.4 are in git history)  
+**Document ID:** `VAN-TSE-FR-REV1.6-20261015`  
+**Revision:** 1.6 — forensic-design specification / implementation programme candidate (supersedes Rev 1.5; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.5 are in git history)  
 **Date:** 15 October 2026 (Africa/Harare)  
-**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-15), which captures the two locked dark/light references and the 15 October review decisions  
+**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-16), which captures the two locked dark/light references and the 15 October review decisions  
 **Repository:** [`Vanguduza/Van`](https://github.com/Vanguduza/Van)  
 **Audit baseline A:** merged `main` SHA `8eb1889822fc8a83f219977c15340172e16acd91`  
 **Audit baseline B:** unmerged, draft owner-core [PR #93](https://github.com/Vanguduza/Van/pull/93) SHA `dfc1557ab99ad8d41cf84714e1bb671e89b045e6`  
@@ -13,6 +13,17 @@
 **Companion artifacts:** `VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.md` (78 surfaces + additive surfaces; CSV and JSON for automation), `VAN_NEXT_OWNER_DECISIONS_REV1.md`, `reference/` (locked originals and relabelled Rev 1.1 references).  
 
 > **Executive decision:** Rebuild the entire visible frontend using the newly accepted Tactile Spatial UI, not the old VAN panels or older aesthetic blueprints; comprehensively inspect and preserve qualified product functions, underlying service/contracts, security, existing worthwhile UX flows, Floating VAN and interaction behaviours. Introduce the state-aware Home orb, small quick-access sheet, richer Trading entry points, full news intelligence, and genuinely live project/task/agent spatial workflow diagrams. Reconcile large, unmerged source candidates before porting; no silent legacy-file imports or feature loss.
+
+## Rev 1.6 change log (15 October 2026)
+
+Owner decision OD-16: build the chart engine and design comprehensive account management.
+
+| # | Change | Where |
+|---|---|---|
+| X1 | **Chart engine core built** in `android/app/src/main/java/com/dial/van/next/chart/` with 42 tests; full JVM harness green (1,027 tests). Android host written, not yet compiled or device-qualified. | §7.8.11 |
+| X2 | **Account management**: lifecycle, broker directory and linking, editing and credential rotation, guarded disconnect/delete with grace period, funding shortcuts and ledger, multi-broker portfolio, connection health, statements, screens, tests | §7.9 |
+| X3 | **F-033 defect reproduced:** withdrawals read as drawdown (a 30 % withdrawal suspends trading); funding ledger and flow-adjusted risk added to fix it | §3.2, §7.9.5 |
+| X4 | Remote REA evidence still unread: Desktop Commander's device is a sandbox without a route to `van-trading-core` | §20.2 |
 
 ## Rev 1.5 change log (15 October 2026)
 
@@ -285,6 +296,7 @@ Use DIAL-FFDRM-R1 categories such as `INTEGRATED_AND_EVIDENCED`, `IMPLEMENTED_NO
 | F-029 | The system's trading safeguards that manual trading must reuse already exist on `main`: signed `TradingMandate` with `HARD_FORBIDDEN_BEHAVIOURS` (incl. `trade_without_broker_side_stop`, `stop_widening_on_loss`, `revenge_risk_increase`), `PlatformCeilings`, drawdown tiers, per-strategy `strategy_risk_budgets`, reduce-only sizing multipliers, the pre-trade gate's stop-integrity check and tighten-only `protection.py`. PR #92 adds owner-signed `NORMAL`/`RISKY`/`AGGRESSIVE` trading temperaments. | Reuse; do not duplicate (§7.4). | E2 |
 | F-031 | The stop and TP already travel **inside the opening order**: `mt5_bridge.py` sends `sl`/`tp` in the order request and rejects an order without SL ("MT5 orders require SL in the same request"); `ctrader/adapter.py` sends `relativeStopLoss`/`relativeTakeProfit` (market) or `stopLoss`/`takeProfit` (limit) in `ProtoOANewOrderReq`; Deriv stake contracts cap loss at the stake. If a filled order's stop is not confirmed, `router.py:230-236` flattens at once and trips the kill switch. | Manual entry uses the same atomic attachment; Rev 1.2 inserts bounded re-attach attempts before the flatten fallback (§7.4.3). | E2 |
 | F-032 | A full event research engine is wired on `main` (`EventResearchRuntime` in `app/account_service.py`): the calendar recorder keeps every source's release values and marks a value VERIFIED only when two sources agree; `events/normaliser.py` declares which direction is "stronger"; `events/reaction.py` scores surprise against forecast and measures market reaction at 1 min, 5 min, 30 min and 4 h in units of the instrument's normal range; `events/episodes.py` closes episodes; `cognition/analogues.py` retrieves the closest past episodes deterministically and reports when evidence is thin. Its outputs go only into model context and offline research ("never authorises a trade"), and it covers scheduled releases, not headlines. | Extend to headlines and connect to decisions through the governed paths in §8.5. | E2 |
+| F-033 | VATI treats deposits and withdrawals as profit and loss: peak and day-start equity are raw broker equity (`app/cycle.py:211`, `app/account_service.py:609`). Reproduced with `drawdown_verdict` and default tiers: withdrawing 3,000 from 10,000 → 30 % "drawdown", trading suspended; withdrawing 500 → risk 0.40×. | Funding ledger and flow-adjusted peak, daily loss and returns (§7.9.5); regression test in §7.9.10. | Reproduced 15 Oct |
 | F-030 | The trading confidence score is `RULES_V0_UNCALIBRATED … display/ranking only, never a size` (`vati/arbiter/confidence.py`); the Android band labels are High/Medium/Low/Minimal. The mockups' "High probability" misstates it. | Relabel (§2.6). | E2 |
 
 ### 3.3 Root-cause clusters and priority
@@ -708,6 +720,92 @@ Owner watchlists plus dynamic lists (open positions, potential trades, instrumen
 #### 7.8.10 Workstation acceptance cases
 
 Open and close the chart 500 times across background, restore, rotation and surface loss with no stale overlays; two screens on one instrument share one subscription; a feed disconnect recovers from a revisioned snapshot with no fake live timestamps; dragging SL/TP creates a proposal only; a repeated request after a timeout never duplicates an order; a symbol or unit conflict blocks the proposal; replay cannot reach an order endpoint; chart, replay, drawings and previews are measured for memory, CPU, GPU and battery on the S24; every chart gesture has an accessible alternative; dark and light match the approved goldens.
+
+#### 7.8.11 Chart engine — built (OD-16)
+
+The engine core now exists in code under `android/app/src/main/java/com/dial/van/next/chart/` (the blueprint's new `next` namespace; no legacy UI imports):
+
+| Part | File | What it does |
+|---|---|---|
+| Data model | `core/ChartData.kt` | Canonical instrument (venue, symbol, digits, tick size); validated OHLCV bars; revisioned bar series that updates the forming bar or appends, and refuses gaps or out-of-order bars so the host resyncs instead of drawing corrupted history; data quality (LIVE, DELAYED, STALE, CACHED, OFFLINE, UNKNOWN) |
+| Viewport and scales | `core/Viewport.kt` | Continuous pan and zoom that keeps the bar under the fingers still; bounded zoom; clamping; linear and log price scales; "nice" axis ticks |
+| Level of detail | `core/Lod.kt` | Merges bars per pixel column keeping true open/high/low/close, aligned to absolute indices so candles do not flicker while panning |
+| Indicators | `indicators/` | SMA, EMA, RSI (Wilder), MACD, ATR (Wilder), Bollinger, session VWAP, Heikin-Ashi; typed, versioned instances with provenance tier and pane |
+| Drawings | `drawings/Drawings.kt` | Horizontal line, trend line, ray, rectangle, Fibonacci retracement, risk/reward, note; time/price anchors; revisions; locking; exact undo/redo; hit testing |
+| Scene | `scene/` | Builds a display list with semantic style roles (no colours in the engine): grid, axes, candles/Heikin-Ashi/line/area, volume, overlay and separate-pane indicators, drawings, positions, working orders, unconfirmed stops, drafts, last price, crosshair with OHLC, replay cursor, data-quality badge in words |
+| Contract and bridge | `contract/` | Renderer-independent capability commands and events; bridge gate that denies unknown or forbidden capabilities, authority claims, replays, reordering, expiry, wrong origin or session, oversized payloads |
+| Engine | `ChartEngine.kt` | Applies commands, streamed bars, overlays and replay; turns a dragged trade handle into a tick-rounded draft proposal (rejected during replay) |
+| Frame scheduler | `runtime/FrameScheduler.kt` | No frames without a surface or while hidden; bursts coalesce; full redraw after surface loss |
+| Android host | `android/ChartTextureHost.kt` | Render thread on a `TextureView`, vsync-driven, replays the display list with theme-mapped paints |
+
+**Evidence (15 October, `android/verification` JVM harness):** 42 engine tests pass, covering series integrity, zoom anchoring, clamping, scales, ticks, level of detail, every indicator, drawings, undo/redo, hit testing, scene rules (unconfirmed stop never drawn as confirmed, resting vs finished orders, quality badge, warm-up gaps, separate panes), replay hiding the future and refusing drafts, draft rounding, gap → stale → resync, bridge denials, scheduler lifecycle and a 100,000-bar frame-budget check (296 merged candles, 908 commands). The full harness passes: 115 suites, 1,027 tests, 0 failures. One defect was found and fixed during testing: an overlay line and a separate-pane line could share a colour role; each indicator now gets a stable colour slot. The fix was proven by restoring the old logic and watching the test fail.
+
+**Not yet proven:** the Android host is not compiled in this environment (no Android SDK) — it needs the `:app` build and the §7.8.10 device cases on the S24. Not built yet: persistence of drawings, indicators and workspaces; inertial fling; multi-chart sync; axis-label collision handling; touch gesture mapping in the host; theme palette from the VAN Next tokens. The engine is not wired into any screen, so the current app is unchanged. OQ-14 is now narrowed to: qualify this native engine on the S24 before considering any web engine.
+
+### 7.9 Account management (OD-16)
+
+**Sources.** TradingView Android 1.20.84 class and method inventories from the REA pack (static; app not run) and VAN's own code. The 39 remote REA records, including all MetaTrader 5 detail, could not be read from this session (§20.2), so MT5 account behaviour below is general knowledge, marked as such.
+
+**What the references show (TradingView, from the inventory):** a broker directory with ratings, tier, regulators, per-country minimum deposit, fees, tradable instrument types and an "open account" referral; broker sign-in by browser OAuth with explicit start, callback, pending, cancel and discard states, plus login and 2FA dialogs; a live broker-connection-status stream that also filters symbol search to tradable instruments; account deletion scheduled with a grace period, a "cancel deletion" banner and confirmation; paper trading. TradingView does not move money: deposits happen at the broker. **MT5 (general knowledge, unverified here):** in-app demo account opening, broker server search, login by server + login + password, an investor (read-only) password, several saved accounts with quick switching, password change and one-time-password support.
+
+**What VAN has today (code, `main` 8eb1889):** a registry of non-secret account records (`vati/accounts/registry.py`) for MT5 bridge, MT5 Expert Advisor pull-bridge, Deriv, cTrader, paper and ZSE owner tickets, with credential references (env var or 0600 secrets file) and refusal of secrets pasted into records; gateway account actions (`backend/van_gateway/trading/accounts.py`): upsert, credentials, remove, verify, Deriv email verification and demo creation, Deriv and cTrader OAuth linking, cTrader account discovery, MT5 bridge key issuance, with device-signed owner approval for every action that changes an account and encrypted short-lived OAuth state; Android Accounts and Add-account screens.
+
+**F-033 (defect, reproduced):** VATI has no notion of deposits or withdrawals. Peak and day-start equity are raw broker equity (`app/cycle.py:211`, `app/account_service.py:609`). Probe with VATI's own `drawdown_verdict` and default tiers: an account at 10,000 whose owner withdraws 3,000 reads as a 30 % drawdown → trading **suspended** and top-tier-only; withdrawing 500 cuts risk to 0.40×. A deposit would likewise hide real losses. The daily-loss limit uses the same raw equity, so an intraday withdrawal can also look like a daily loss (inferred from the same code path; not separately probed). The funding ledger below fixes this.
+
+#### 7.9.1 Account lifecycle
+
+`DRAFT → LINKING → VERIFYING → ACTIVE (DEMO | LIVE) ⇄ SUSPENDED → DISCONNECTED → ARCHIVING (grace) → ARCHIVED`. `SUSPENDED` carries a reason (credentials expired, broker disabled the account, kill switch, verification failed); `ARCHIVING` can be cancelled until the grace period ends. Every transition is recorded with who, when and why; transitions that change trading or credentials need the existing device-signed owner approval. New accounts always start in `OBSERVE`; moving to demo or live trading is a mandate change (§7.4.2).
+
+#### 7.9.2 Adding an account
+
+A **broker directory** lists the brokers VAN supports, each with its capability matrix (order types, fill policies, expiries, stop mode, hedging or netting, minimum lot, instruments, demo availability — the same matrix as §7.8.6), regulator, account currencies, minimum deposit and a link to open an account at the broker. Linking methods per broker:
+
+| Broker kind | How the owner links it | Notes |
+|---|---|---|
+| Deriv | OAuth in the browser, or create a demo account in VAN | Exists today |
+| cTrader | OAuth, then pick from discovered accounts | Exists today |
+| MT5 | Expert Advisor pull-bridge key, or Windows bridge; server + login; **investor (read-only) password** for observe-only | Investor-password option is new |
+| Paper | Instant, with a chosen virtual balance | Exists today |
+| ZSE / VFEX | Broker name + CSD account reference; trades by owner ticket | No broker API |
+
+Every OAuth or login attempt has visible states — waiting for browser, callback received, verifying, linked, cancelled, failed (with reason) — and can be cancelled; abandoned attempts are discarded automatically. 2FA prompts from a broker are routed to the owner on the phone.
+
+#### 7.9.3 Editing an account
+
+Label, colour and icon, default chart and instruments; trading mode and risk budget (through a new signed mandate version); credential **rotation** (new secret → verify → swap → old secret destroyed, with a receipt); server or login change (forces re-verification). Every edit is versioned and audited; secrets are never shown again after entry.
+
+#### 7.9.4 Disconnecting and deleting
+
+- **Disconnect** stops trading on the account, revokes or destroys its credentials immediately and keeps all history.
+- **Delete** schedules archiving after a grace period (default 7 days, OQ-15) with a "cancel deletion" banner, then archives; history is kept under the retention policy, credentials are destroyed at once.
+- Both are **blocked while the account has open positions or working orders**: the owner must close or cancel them, or explicitly mark them "unmanaged by VAN" first. Pending OAuth attempts are discarded and strategies bound to the account are unassigned, each listed on the confirmation sheet.
+
+#### 7.9.5 Funding
+
+VAN never moves money (§0.3). Funding works in three parts:
+1. **Deposit / withdraw shortcuts:** per broker, a deep link to the broker's own cashier, opened in the browser; VAN shows what the broker states about methods, limits and fees but takes no part in the transfer.
+2. **Funding ledger:** deposits, withdrawals, internal transfers, credits and bonuses, and fees are read from the broker's balance-operation history (MT5 balance and credit deals, cTrader cash-flow history, Deriv statement), reconciled, timestamped and shown per account. Unclassified operations are flagged for the owner to label.
+3. **Flow-adjusted risk and performance (fixes F-033):** drawdown is measured against a peak adjusted for external flows (a withdrawal lowers the peak by the same amount; a deposit raises it), daily loss excludes the day's net flows, and performance is reported time-weighted so deposits and withdrawals do not look like profits or losses. Broker credits and bonuses that cannot be withdrawn are excluded from risk capital by default. A withdrawal request that would leave open positions under-margined triggers a warning on the account screen.
+
+#### 7.9.6 All accounts together
+
+One portfolio view across brokers: per-account and combined equity, exposure and heat in a chosen base currency (OQ-16), with the FX rates' source and time shown. Demo and live are never added together. Limits remain per account and mandate; the combined view is information.
+
+#### 7.9.7 Connection health
+
+Each account reports `CONNECTED | DEGRADED | DISCONNECTED | AUTH_EXPIRED | BROKER_MAINTENANCE` with its last heartbeat, through the shared projection (§7.8.1). Tokens are refreshed before expiry; reconnection backs off; a lost connection on an account with open positions raises an Attention item and an orb state.
+
+#### 7.9.8 Statements and records
+
+Monthly statements and yearly summaries per account (trades, fees, swaps, funding, flow-adjusted return), exportable as CSV and PDF; retained after deletion under the retention policy.
+
+#### 7.9.9 Screens
+
+**Accounts** list (broker logo, demo/live badge, equity with privacy masking, connection state) → **Add account** (broker directory → link method → verification) → **Account detail** with tabs: Overview, Funding (shortcuts + ledger), Connection, Credentials, Trading mode and mandate, Statements, and a Danger zone (disconnect, delete). Built in the locked Tactile Spatial style.
+
+#### 7.9.10 Account acceptance tests
+
+A withdrawal does not move drawdown tiers or the daily-loss limit (F-033 regression, using the probe above); a deposit does not mask a loss; delete is blocked with open positions or working orders and lists them; cancel during the grace period restores the account; credentials are destroyed on disconnect with a receipt; rotation never leaves the account without valid credentials; OAuth cancel and timeout discard the attempt; investor-password MT5 accounts cannot be put in an order-sending mode; demo and live never sum; every mutating action fails without device-signed owner approval; an unclassified balance operation is flagged, not guessed.
 
 ## 8. News and Event Intelligence — live sources, analysis, history, decisions (OD-04, OD-11)
 
@@ -1332,6 +1430,11 @@ Each requirement ID must have Product Truth binding, one or more Development Uni
 | VAN-NX-026 | REA architectural improvement gate, versioned changes | DU-27 | Research recommendation with evidence; owner-ready scheduling |
 | VAN-NX-027 | Owner manual trading: risk-governed entries and adds, stop and optional TP inside the opening order, always-available exits | DU-28 | §7.4; §18.2 manual-trading cases; demo before live |
 | VAN-NX-031 | Hand a manual trade to VAN and take it back; take manual control of an automatic trade; manual adds to automatic trades under that trade's risk profile | DU-28b | §7.4.6–§7.4.7; §18.2 handover and add cases |
+| VAN-NX-048 | Account lifecycle, broker directory and linking (incl. MT5 investor-password observe mode) | DU-29 | §7.9.1–§7.9.2 |
+| VAN-NX-049 | Account editing and credential rotation | DU-29 | §7.9.3 |
+| VAN-NX-050 | Guarded disconnect and delete with grace period | DU-29 | §7.9.4 |
+| VAN-NX-051 | Funding shortcuts, funding ledger and flow-adjusted risk and performance (fixes F-033) | DU-29a | §7.9.5, §7.9.10 F-033 regression |
+| VAN-NX-052 | Multi-broker portfolio view, connection health, statements | DU-29b | §7.9.6–§7.9.8 |
 | VAN-NX-040 | Shared reactive market and portfolio projection | DU-12a | §7.8.1; one subscription per instrument and stream; revisioned recovery |
 | VAN-NX-041 | Native preview charts and chart workstation with renderer lifecycle | DU-10 | §7.8.2; 500-cycle lifecycle test; S24 budgets |
 | VAN-NX-042 | Renderer-independent chart capability contract and bridge rules | DU-10 | §7.8.2–§7.8.3; renderer swap; bridge fuzzing; forbidden order call |
@@ -1399,6 +1502,12 @@ flowchart TD
   MT --> OV[DU-28e Order vocabulary + venue capabilities]
   OV --> L
   MK --> AL[DU-12b Alerts, watchlists, screener]
+  B --> AC[DU-29 Account lifecycle, linking, edit, delete]
+  AC --> AF[DU-29a Funding ledger + flow-adjusted risk]
+  AF --> MT
+  AC --> AP[DU-29b Portfolio, health, statements]
+  MK --> AP
+  AF --> Z
   NB --> NF[DU-14f Prediction-market expectations]
   NF --> NE
   MT --> MH[DU-28b Adds, Hand to VAN, take back]
@@ -1634,6 +1743,8 @@ Minimum deliverable pack before implementation:
 - REA MT5/TradingView analysis is not complete; user will separately signal when `van-trading-core` is ready. Findings are allowed to amend architecture.
 - Rev 1.1–1.2 relabelled the mockups and specified manual trading (entries, adds, handover), multi-source news with history-driven decisions, and consolidation; none of these is implemented. Manual trading needs owner decisions (§7.4.11) and an owner-signed mandate version before any live use; each news decision path needs shadow evidence and an owner signature before it changes live trading.
 - `VAN_NEXT_OWNER_DECISIONS_REV1.md` records chat decisions and awaits owner signature.
+- The 39 REA evidence records on `van-trading-core` (`/opt/van-rea-lab/evidence/`) remain unread: this session has no Global DIAL MCP, and Desktop Commander's device (`vm`) is a sandbox with no SSH keys, host entry or route to the trading server. MT5 findings and MT5 account behaviour stay unverified until a session with the Global DIAL MCP reads them.
+- The chart engine's Android host (`next/chart/android/ChartTextureHost.kt`) has not been compiled; the `:app` build and S24 device cases are required.
 - No feature merge or frontend mutation was performed to production VAN. Existing PR candidates remain independent and need source/qualification reconciliation.
 
 ---
