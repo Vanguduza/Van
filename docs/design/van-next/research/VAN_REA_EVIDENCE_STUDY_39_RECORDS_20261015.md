@@ -2,6 +2,8 @@
 
 **Date:** 15 October 2026 · **Owner decisions:** OD-16, OD-17 · **Feeds:** blueprint Rev 1.6 §7.8.11, §7.9
 
+> **Rev 1.7 note:** the engine changes in §3 were built ahead of the development plan. They now exist only on branch `spike/van-next-chart-engine-20261015` as unqualified reference material and are not part of the rebuild branch (blueprint Rev 1.7 Z1). The findings themselves remain design inputs to the DU-10 contract (PKT-023) and the DU-29 contracts.
+
 ## 1. Access and provenance
 
 - **Path:** Desktop Commander device `dial-control` (online) → SSH as `ubuntu` to `van-trading-core` (10.77.0.4) with the existing `dial-oracle-admin` key. The `oracle-admin` devices were offline (last seen 521 h or more ago). The read was read-only: nothing on `van-trading-core` was changed. A study script ran there and only its printed summary came back.

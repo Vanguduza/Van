@@ -1,9 +1,9 @@
 # VAN Tactile Spatial Experience — Complete Frontend Rebuild, Functional Preservation & Capability Expansion
 
-**Document ID:** `VAN-TSE-FR-REV1.6-20261015`  
-**Revision:** 1.6 — forensic-design specification / implementation programme candidate (supersedes Rev 1.5; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.5 are in git history)  
+**Document ID:** `VAN-TSE-FR-REV1.7-20261015`  
+**Revision:** 1.7 — **freeze candidate** (supersedes Rev 1.6; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.6 are in git history). Development follows `plan/VAN_NEXT_DEVELOPMENT_PLAN_REV1.md`, derived from this document; freeze criteria in `VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_7.md`  
 **Date:** 15 October 2026 (Africa/Harare)  
-**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-16), which captures the two locked dark/light references and the 15 October review decisions  
+**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-17), which captures the two locked dark/light references and the 15 October review decisions  
 **Repository:** [`Vanguduza/Van`](https://github.com/Vanguduza/Van)  
 **Audit baseline A:** merged `main` SHA `8eb1889822fc8a83f219977c15340172e16acd91`  
 **Audit baseline B:** unmerged, draft owner-core [PR #93](https://github.com/Vanguduza/Van/pull/93) SHA `dfc1557ab99ad8d41cf84714e1bb671e89b045e6`  
@@ -13,6 +13,18 @@
 **Companion artifacts:** `VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.md` (78 surfaces + additive surfaces; CSV and JSON for automation), `VAN_NEXT_OWNER_DECISIONS_REV1.md`, `reference/` (locked originals and relabelled Rev 1.1 references).  
 
 > **Executive decision:** Rebuild the entire visible frontend using the newly accepted Tactile Spatial UI, not the old VAN panels or older aesthetic blueprints; comprehensively inspect and preserve qualified product functions, underlying service/contracts, security, existing worthwhile UX flows, Floating VAN and interaction behaviours. Introduce the state-aware Home orb, small quick-access sheet, richer Trading entry points, full news intelligence, and genuinely live project/task/agent spatial workflow diagrams. Reconcile large, unmerged source candidates before porting; no silent legacy-file imports or feature loss.
+
+## Rev 1.7 change log (15 October 2026) — freeze candidate
+
+The owner observed that building had started before the blueprint was final and before a deterministic development plan existed. That was correct: the chart engine (DU-10) was built while DU-00…DU-09 had not started, against §12.5 and the §16.2 DAG.
+
+| # | Change | Where |
+|---|---|---|
+| Z1 | **Chart engine removed from the rebuild branch.** It is preserved, unqualified, on branch `spike/van-next-chart-engine-20261015` (commit `30bc2d0`) as reference material for the DU-10 contract. The verification harness without it: 106 suites, 986 tests, 0 failures (the pre-engine baseline). | §7.8.11, §20.2 |
+| Z2 | **Deterministic development plan** generated from §16.1, §16.2, §19.1 and the open questions by `plan/generate_plan.py`: 68 packets, validated (acyclic, every requirement and open question mapped, no phase inversion), with a self-test that proves each check catches a broken input. | §16.5, `plan/` |
+| Z3 | Requirement rows added for the two DUs that had none, restating existing text: VAN-NX-053 (DU-01, §17 F0) and VAN-NX-054 (migration/retirement, §19.1 P5–P6). | §16.1 |
+| Z4 | OQ-05 (signature) aligned with §19.1: needed by the end of P0 (DU-01 exit); OQ-17 assigned to the replay unit DU-10c. | Decision record |
+| Z5 | Freeze criteria and their status listed for owner approval. | `VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_7.md` |
 
 ## Rev 1.6 change log (15 October 2026)
 
@@ -723,51 +735,17 @@ Owner watchlists plus dynamic lists (open positions, potential trades, instrumen
 
 Open and close the chart 500 times across background, restore, rotation and surface loss with no stale overlays; two screens on one instrument share one subscription; a feed disconnect recovers from a revisioned snapshot with no fake live timestamps; dragging SL/TP creates a proposal only; a repeated request after a timeout never duplicates an order; a symbol or unit conflict blocks the proposal; replay cannot reach an order endpoint; chart, replay, drawings and previews are measured for memory, CPU, GPU and battery on the S24; every chart gesture has an accessible alternative; dark and light match the approved goldens.
 
-#### 7.8.11 Chart engine — built (OD-16)
+#### 7.8.11 Chart engine spike (OD-16, OD-17) — reference only, not part of the build
 
-The engine core now exists in code under `android/app/src/main/java/com/dial/van/next/chart/` (the blueprint's new `next` namespace; no legacy UI imports):
+A native chart engine was built ahead of the plan (Rev 1.6) and extended from the 39 REA records. That was out of sequence (Rev 1.7 Z1). It now lives only on branch `spike/van-next-chart-engine-20261015` (commit `30bc2d0`) and is **not** an implementation of DU-10.
 
-| Part | File | What it does |
-|---|---|---|
-| Data model | `core/ChartData.kt` | Canonical instrument (venue, symbol, digits, tick size); validated OHLCV bars; revisioned bar series that updates the forming bar or appends, and refuses gaps or out-of-order bars so the host resyncs instead of drawing corrupted history; data quality (LIVE, DELAYED, STALE, CACHED, OFFLINE, UNKNOWN) |
-| Viewport and scales | `core/Viewport.kt` | Continuous pan and zoom that keeps the bar under the fingers still; bounded zoom; clamping; linear and log price scales; "nice" axis ticks |
-| Level of detail | `core/Lod.kt` | Merges bars per pixel column keeping true open/high/low/close, aligned to absolute indices so candles do not flicker while panning |
-| Indicators | `indicators/` | SMA, EMA, RSI (Wilder), MACD, ATR (Wilder), Bollinger, session VWAP, Heikin-Ashi; typed, versioned instances with provenance tier and pane |
-| Drawings | `drawings/Drawings.kt` | Horizontal line, trend line, ray, rectangle, Fibonacci retracement, risk/reward, note; time/price anchors; revisions; locking; exact undo/redo; hit testing |
-| Scene | `scene/` | Builds a display list with semantic style roles (no colours in the engine): grid, axes, candles/Heikin-Ashi/line/area, volume, overlay and separate-pane indicators, drawings, positions, working orders, unconfirmed stops, drafts, last price, crosshair with OHLC, replay cursor, data-quality badge in words |
-| Contract and bridge | `contract/` | Renderer-independent capability commands and events; bridge gate that denies unknown or forbidden capabilities, authority claims, replays, reordering, expiry, wrong origin or session, oversized payloads |
-| Engine | `ChartEngine.kt` | Applies commands, streamed bars, overlays and replay; turns a dragged trade handle into a tick-rounded draft proposal (rejected during replay) |
-| Frame scheduler | `runtime/FrameScheduler.kt` | No frames without a surface or while hidden; bursts coalesce; full redraw after surface loss |
-| Android host | `android/ChartTextureHost.kt` | Render thread on a `TextureView`, vsync-driven, replays the display list with theme-mapped paints |
+**Status:** `SPIKE / UNQUALIFIED`. It has no acceptance contract, was not reviewed, and is not wired to any screen. Its Android host was never compiled. It is no evidence for any VAN-NX requirement.
 
-**Evidence (15 October, `android/verification` JVM harness):** 42 engine tests pass, covering series integrity, zoom anchoring, clamping, scales, ticks, level of detail, every indicator, drawings, undo/redo, hit testing, scene rules (unconfirmed stop never drawn as confirmed, resting vs finished orders, quality badge, warm-up gaps, separate panes), replay hiding the future and refusing drafts, draft rounding, gap → stale → resync, bridge denials, scheduler lifecycle and a 100,000-bar frame-budget check (296 merged candles, 908 commands). The full harness passes: 115 suites, 1,027 tests, 0 failures. One defect was found and fixed during testing: an overlay line and a separate-pane line could share a colour role; each indicator now gets a stable colour slot. The fix was proven by restoring the old logic and watching the test fail.
-
-**Extended from the 39 REA records (OD-17).** Each change traces to a named record. The full table is in `research/VAN_REA_EVIDENCE_STUDY_39_RECORDS_20261015.md` §3.
-
-- **Load state** (MT5 `ChartRenderer.CHART_REQUESTING/READY/SYMBOL_CHANGED`). A symbol or interval change emits `SnapshotRequested`. While the chart loads:
-  - the old instrument's candles are not drawn under the new name;
-  - trade drafts are refused and any open draft is cleared;
-  - streamed bars are ignored;
-  - a late snapshot for the previous symbol is refused.
-
-  Drawings belong to an instrument, and undo cannot cross an instrument change.
-- **Ruler** (MT5 `CA_RULER_*`), measuring in price, percent, ticks and bars.
-- **Magnet** (TradingView `magnetMode`), snapping to the bar's open, high, low or close within 14 dp.
-- **Indicator memory and levels** (MT5 `IndicatorCollection.getPreviousSettings/resetLevelsToDefault`).
-- **Layers and lock-all** (TradingView `hide…ShowOthers`, `lockAllDrawingTools`). Hidden layers are announced in words, and hiding trades never hides a stop the broker has not confirmed.
-- **Go to time** (TradingView `goToTime`).
-- **Modify- and cancel-requested order states** (MT5 `ORDER_STATE_REQUEST_MODIFY/CANCEL`).
-- **Unsaved-changes tracking** (TradingView `hasChartChanges`).
-
-**Updated evidence:** 64 engine tests (22 new) pass. A clean full-harness run gives 125 suites, 1,050 tests and 0 failures. Two gates were broken deliberately: making `LoadRequest.matches` always true and removing the hidden-trades unconfirmed-stop line failed exactly the three tests guarding them, and the code was then restored.
-
-**Seen but not built:**
-- Replay practice trading (TradingView `barReplayBuy/Sell`; proposed OQ-17, because the engine refuses drafts in replay by design).
-- Multi-chart sync and layouts.
-- Glyph-atlas text (measure on the S24 first).
-- Separate real/tick volume modes.
-
-**Not yet proven:** the Android host is not compiled in this environment (no Android SDK) — it needs the `:app` build and the §7.8.10 device cases on the S24. Not built yet: persistence of drawings, indicators and workspaces; inertial fling; multi-chart sync; axis-label collision handling; touch gesture mapping in the host; theme palette from the VAN Next tokens. The engine is not wired into any screen, so the current app is unchanged. OQ-14 is now narrowed to: qualify this native engine on the S24 before considering any web engine.
+**Use:** when PKT-023 (DU-10 M1) opens, its contract is written first, from §7.8 and the REA findings (`research/VAN_REA_EVIDENCE_STUDY_39_RECORDS_20261015.md` §3). The spike may then be reviewed against that contract, and parts may be adopted only through the packet's own review and tests. The design lessons it captured remain inputs to that contract:
+- load-state handling (no drafts while loading, late snapshots refused);
+- unconfirmed stops never hidden;
+- the ruler, magnet, indicator memory and levels;
+- modify- and cancel-requested order states.
 
 ### 7.9 Account management (OD-16)
 
@@ -1506,6 +1484,8 @@ Each requirement ID must have Product Truth binding, one or more Development Uni
 | VAN-NX-028 | Repository consolidation, Feature Ledger and parity oracle before rebuild | DU-00 | Every ledger row classified; parity checker fails on an induced omission |
 | VAN-NX-029 | Structural frontend isolation (modules, tokens, strings, release checks) | DU-24 | Legacy import fails compilation; banned-word and literal-style lints fail when induced |
 | VAN-NX-030 | Mockup labels follow system vocabulary | DU-02 | §2.6 table applied in string catalogue and goldens |
+| VAN-NX-053 | Product Truth and preservation reconciliation; owner-signed decision record | DU-01 | §17 F0; Feature Ledger reconciled with Product Truth; record signed (OQ-05) |
+| VAN-NX-054 | Controlled rollout and legacy retirement without feature loss | DU-MR | §19.1 P5–P6; signed APK, tested rollback; retirement only after full parity, with its own negative tests |
 
 ### 16.2 Development Unit dependency DAG
 
@@ -1587,7 +1567,7 @@ flowchart TD
   U --> Z
   V --> Z
   Z --> AA[DU-26 Physical S24 + owner acceptance]
-  AA --> AB[Controlled migration/retirement]
+  AA --> AB[DU-MR Controlled migration/retirement]
   J -. study after owner says ready .-> REA[DU-27 REA MT5/TradingView research]
   REA -. evidence-backed amendment .-> J
 ```
@@ -1612,6 +1592,17 @@ Parallel development requires isolated branches/worktrees, explicit ownership, s
 ### 16.4 Developer packet fields
 
 Each DU task packet must contain: project/repository/source SHA; owner authority and design-golden digests; objective and exact component/module/files; prerequisite DUs; previous functionality preserved; newly required behaviour; negative/failure cases; data-source/authority endpoints; screen IDs/flows; accessibility and performance constraints; source-change budget; acceptance commands and receipts; sandbox/VM selection and safe execution fence; blockers; rollback; reviewer and merge/Zuul admission requirement. Worker autonomy may improve implementation strategy, but cannot silently rewrite Product Truth or protected approvals.
+
+### 16.5 Development plan
+
+The order of work is **derived, not chosen by hand**: `plan/generate_plan.py` reads §16.1, §16.2, §19.1 and the decision record's open questions, validates them and writes `plan/VAN_NEXT_DEVELOPMENT_PLAN_REV1.md` and `.json`. The order key is:
+
+1. phase (§19.1);
+2. dependency depth;
+3. lane (§16.3);
+4. DU number.
+
+Every packet must meet the plan's entry gate (contract approved, dependencies exited, start-blocking questions answered) and exit gate (acceptance commands green, new gates broken on purpose and seen to fail, no `FEATURE_LOSS`, independent review). Any amendment to this blueprint regenerates the plan; a packet in progress stops if its contract is affected.
 
 ---
 
@@ -1800,7 +1791,7 @@ Minimum deliverable pack before implementation:
   - No account class body was inspected.
   - The TradingView material is a byte-equivalent copy whose signing was not promoted, not a Play Store install; the 10:28 receipt still says `NOT_ACQUIRED`.
 - On `dial-control`, `/etc/ssh/ssh_config.d/60-dial-migration-source.conf` has bad owner or permissions, which breaks plain `ssh`. It was bypassed with `ssh -F ~/.ssh/config` and not changed; it needs fixing by whoever administers that host.
-- The chart engine's Android host (`next/chart/android/ChartTextureHost.kt`) has not been compiled; the `:app` build and S24 device cases are required.
+- The chart engine exists only as an unqualified spike on `spike/van-next-chart-engine-20261015`; it is not part of the rebuild branch or of any requirement's evidence (Rev 1.7 Z1).
 - No feature merge or frontend mutation was performed to production VAN. Existing PR candidates remain independent and need source/qualification reconciliation.
 
 ---

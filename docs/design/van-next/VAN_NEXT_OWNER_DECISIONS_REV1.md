@@ -3,7 +3,7 @@
 **Record ID:** `VAN-NEXT-OD-REV1-20261015`
 **Status:** `RECORDED_FROM_OWNER_CHAT / AWAITING_OWNER_SIGNATURE`
 **Recorded:** 15 October 2026, from the owner's instructions in a Claude Code session reviewing `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_20261015.md`.
-**Applies to:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_6_20261015.md` and its companion matrix. OD-07…OD-17 were added on 15 October 2026 after the owner reviewed Rev 1.1.
+**Applies to:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_7_20261015.md` and its companion matrix. OD-07…OD-17 were added on 15 October 2026 after the owner reviewed Rev 1.1.
 
 Under the VAN Project Truth Protocol an owner-signed, device-authenticated instruction outranks this record. These decisions bind development packets once the owner signs this record (blueprint §2.1, §17 F0). Until then they are the owner's stated intent, and no trading mandate, live permission or production change follows from them.
 
@@ -35,7 +35,7 @@ Under the VAN Project Truth Protocol an owner-signed, device-authenticated instr
 | OQ-01 | Risk budget for `owner.manual` in the next signed mandate | DU-28 live use |
 | OQ-02 | Stop-distance ATR multiples per instrument class for `ManualStopPolicy` | DU-28 implementation |
 | OQ-03 | Demo period before `LIMITED_LIVE` manual trading | DU-28 live use |
-| OQ-05 | Signature of this record | DU-02 golden freeze |
+| OQ-05 | Signature of this record | DU-01 exit (end of P0, blueprint §19.1) |
 | OQ-06 | Which news, wire and calendar providers to license (vendor review of cost, latency, licence terms) | DU-14a |
 | OQ-07 | Whether the stop re-attach sequence (§7.4.3) also replaces the router's immediate flatten-and-halt for automated trades | DU-28 |
 | OQ-08 | Promotion of each news decision path D1–D6 from shadow to live, on its shadow evidence | DU-14c, per path |
@@ -45,5 +45,5 @@ Under the VAN Project Truth Protocol an owner-signed, device-authenticated instr
 | OQ-14 | Chart workstation renderer. Narrowed by OD-16: the native engine is built; what stays open is whether it is enough on the S24 or a qualified web engine is still needed for the full workstation | DU-10 |
 | OQ-15 | Grace period before a deleted account's records are purged (recommended 30 days, cancellable) | DU-29 |
 | OQ-16 | Portfolio base currency for multi-account totals and funding reports | DU-29a |
-| OQ-17 | Whether chart replay may offer simulated practice trades (TradingView has this; VAN's engine currently refuses drafts in replay). Simulated only, never an order. | DU-10 |
+| OQ-17 | Whether chart replay may offer simulated practice trades (TradingView has this; VAN's engine currently refuses drafts in replay). Simulated only, never an order. | DU-10c |
 | OQ-09 | Whether news may ever *directly* increase risk (recommended: no; news creates trades only through validated event strategies, D7) | DU-14c |
