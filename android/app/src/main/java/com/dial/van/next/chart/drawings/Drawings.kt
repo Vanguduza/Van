@@ -119,6 +119,9 @@ class DrawingHistory(initial: Map<String, Drawing> = emptyMap()) {
     }
 
     fun put(d: Drawing) = commit(current + (d.id to d))
+
+    /** Start over with [drawings] (another instrument's set); undo cannot cross an instrument change. */
+    fun reset(drawings: Map<String, Drawing>) { undo.clear(); redo.clear(); current = drawings }
     fun remove(id: String) { if (id in current) commit(current - id) }
     fun canUndo() = undo.isNotEmpty()
     fun canRedo() = redo.isNotEmpty()

@@ -139,9 +139,9 @@ class EngineTest {
         assertTrue(e.state.indicators.isEmpty())
     }
 
-    @Test fun `symbol changes are the host's job`() {
+    @Test fun `a symbol change asks the host for a snapshot`() {
         val e = ChartEngine(series(50), LAYOUT)
-        assertIs<ChartEvent.Rejected>(e.apply(ChartCommand.SetSymbol("X", "GBPUSD")).single())
+        assertEquals(ChartEvent.SnapshotRequested("X", "GBPUSD", M1), e.apply(ChartCommand.SetSymbol("X", "GBPUSD")).single())
     }
 }
 

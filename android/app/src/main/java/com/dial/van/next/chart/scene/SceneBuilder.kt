@@ -1,5 +1,6 @@
 package com.dial.van.next.chart.scene
 
+import com.dial.van.next.chart.contract.Layer
 import com.dial.van.next.chart.core.BarSeries
 import com.dial.van.next.chart.core.DataQuality
 import com.dial.van.next.chart.core.Lod
@@ -14,6 +15,7 @@ import com.dial.van.next.chart.indicators.IndicatorInstance
 import com.dial.van.next.chart.indicators.IndicatorType
 import com.dial.van.next.chart.indicators.Indicators
 import com.dial.van.next.chart.indicators.Pane
+import com.dial.van.next.chart.tools.Measurement
 import kotlin.math.max
 import kotlin.math.min
 
@@ -33,7 +35,30 @@ data class ChartState(
     val logScale: Boolean = false,
     /** Replay cursor (bar index) — bars after it are hidden. Null when live. */
     val replayCursor: Int? = null,
+    val hiddenLayers: Set<Layer> = emptySet(),
+    val magnet: Boolean = false,
+    val drawingsLocked: Boolean = false,
+    val ruler: Measurement? = null,
+    /** A snapshot the chart is waiting for. While set, no trade drafts are accepted. */
+    val loading: LoadRequest? = null,
 )
+
+/**
+ * A pending symbol/interval load. MT5's renderer tracks the same lifecycle explicitly
+ * (REA evidence: `ChartRenderer.CHART_REQUESTING/CHART_READY/CHART_SYMBOL_CHANGED`).
+ */
+data class LoadRequest(val venue: String, val symbol: String, val timeframeMs: Long) {
+    fun matches(s: BarSeries) = s.instrument.venue == venue && s.instrument.symbol == symbol && s.timeframeMs == timeframeMs
+    fun label(): String = "$symbol ${tfLabel(timeframeMs)}"
+    companion object {
+        fun tfLabel(ms: Long): String = when {
+            ms % 86_400_000L == 0L -> "D${ms / 86_400_000L}"
+            ms % 3_600_000L == 0L -> "H${ms / 3_600_000L}"
+            ms % 60_000L == 0L -> "M${ms / 60_000L}"
+            else -> "${ms / 1000}s"
+        }
+    }
+}
 
 /** Layout constants in density-independent units, scaled by [density]. */
 data class ChartLayout(val width: Float, val height: Float, val density: Float = 1f) {
@@ -56,7 +81,8 @@ object SceneBuilder {
         val out = ArrayList<DrawCmd>(1024)
         val series = state.series
         val visibleLimit = state.replayCursor?.coerceIn(-1, series.size - 1) ?: (series.size - 1)
-        val separate = state.indicators.filter { it.visible && it.type.pane == Pane.SEPARATE }
+        val showIndicators = Layer.INDICATORS !in state.hiddenLayers
+        val separate = if (showIndicators) state.indicators.filter { it.visible && it.type.pane == Pane.SEPARATE } else emptyList()
         val plotRight = layout.width - layout.axisWidth
         val bottom = layout.height - layout.timeAxisHeight
         val paneH = if (separate.isEmpty()) 0f else min(bottom * 0.22f, 120f * layout.density)
@@ -73,13 +99,20 @@ object SceneBuilder {
         val range = if (full.isEmpty() || visibleLimit < full.first) IntRange.EMPTY else full.first..min(full.last, visibleLimit)
         val extent = Lod.extent(series, range)
 
+        // Switching instrument: never show the old instrument's candles under the new name.
+        val switching = state.loading?.let { it.symbol != series.instrument.symbol || it.venue != series.instrument.venue } ?: false
+        if (switching) {
+            out += DrawCmd.Text(main.width / 2, main.height / 2, "Loading ${state.loading!!.label()}…", StyleRole.NOTICE, Align.CENTER)
+            return Frame(DisplayList(out), main, null, panes)
+        }
+
         if (extent == null) {
             out += DrawCmd.Text(main.width / 2, main.height / 2, emptyMessage(series.quality), StyleRole.AXIS_TEXT, Align.CENTER)
             qualityBadge(series.quality)?.let { out += DrawCmd.Text(4f * layout.density, layout.textSize + 4f, it, StyleRole.QUALITY_BADGE) }
             return Frame(DisplayList(out), main, null, panes)
         }
 
-        val overlayLines = state.indicators.filter { it.visible && it.type.pane == Pane.OVERLAY }.map { it to it.compute(series) }
+        val overlayLines = if (!showIndicators) emptyList() else state.indicators.filter { it.visible && it.type.pane == Pane.OVERLAY }.map { it to it.compute(series) }
         var lo = extent.first
         var hi = extent.second
         for ((_, lines) in overlayLines) for (arr in lines.values) for (i in range) {
@@ -116,8 +149,9 @@ object SceneBuilder {
                 polylines(arr, range, vp, main) { scale.priceToY(it, main) }.forEach { (xs, ys) -> out += DrawCmd.Polyline(xs, ys, role) }
             }
         }
-        drawings(state, scale, main, out)
-        tradeOverlays(state.overlays, scale, main, series.instrument.digits, out)
+        if (Layer.DRAWINGS !in state.hiddenLayers) drawings(state, scale, main, out)
+        tradeOverlays(state.overlays, scale, main, series.instrument.digits, Layer.TRADES in state.hiddenLayers, out)
+        state.ruler?.let { ruler(it, state, scale, main, layout, out) }
         out += DrawCmd.Unclip
 
         // Last price line: from the newest bar actually shown (replay hides the future).
@@ -134,6 +168,7 @@ object SceneBuilder {
         }
         state.crosshair?.let { (cx, cy) -> crosshair(cx, cy, vp, scale, main, bottom, series, layout, out) }
         qualityBadge(series.quality)?.let { out += DrawCmd.Text(4f * layout.density, layout.textSize + 4f, it, StyleRole.QUALITY_BADGE) }
+        notices(state)?.let { out += DrawCmd.Text(main.right - 4f * layout.density, layout.textSize + 4f, it, StyleRole.NOTICE, Align.RIGHT) }
         return Frame(DisplayList(out), main, scale, panes)
     }
 
@@ -145,6 +180,24 @@ object SceneBuilder {
         DataQuality.CACHED -> "Cached — not live"
         DataQuality.OFFLINE -> "Offline — last known"
         DataQuality.UNKNOWN -> "Feed status unknown"
+    }
+
+    /** Hidden layers and interval loads are said in words, so a decluttered chart is never mistaken for an empty account. */
+    internal fun notices(state: ChartState): String? {
+        val parts = ArrayList<String>()
+        state.loading?.let { parts += "Loading ${it.label()}…" }
+        if (Layer.TRADES in state.hiddenLayers) parts += "Trades hidden"
+        if (Layer.DRAWINGS in state.hiddenLayers) parts += "Drawings hidden"
+        if (Layer.INDICATORS in state.hiddenLayers) parts += "Indicators hidden"
+        return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")
+    }
+
+    private fun ruler(m: Measurement, state: ChartState, scale: PriceScale, plot: RectF, layout: ChartLayout, out: MutableList<DrawCmd>) {
+        val proj = DrawingProjector(state.viewport, scale, plot) { t -> state.series.indexAtOrBefore(t).toDouble() }
+        val x1 = proj.x(m.from); val y1 = proj.y(m.from); val x2 = proj.x(m.to); val y2 = proj.y(m.to)
+        out += DrawCmd.Line(x1, y1, x2, y2, StyleRole.MEASURE, dashed = true)
+        out += DrawCmd.Rect(min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2), StyleRole.MEASURE, filled = false)
+        out += DrawCmd.Text(x2 + 4f * layout.density, y2 - 4f * layout.density, m.label(state.series.instrument.digits), StyleRole.MEASURE)
     }
 
     private fun emptyMessage(q: DataQuality) = if (q == DataQuality.OFFLINE) "Offline — no bars cached" else "No bars to show"
@@ -208,7 +261,7 @@ object SceneBuilder {
         if (hi <= lo) { hi = lo + 1.0 }
         val s = PriceScale(lo, hi)
         out += DrawCmd.Line(pane.left, pane.top, pane.right, pane.top, StyleRole.GRID)
-        if (ind.type == IndicatorType.RSI) for (lvl in listOf(30.0, 70.0)) {
+        for (lvl in ind.levels) if (lvl in s.min..s.max) {
             val y = s.priceToY(lvl, pane); out += DrawCmd.Line(pane.left, y, pane.right, y, StyleRole.GRID, dashed = true)
         }
         out += DrawCmd.Clip(pane.left, pane.top, pane.right, pane.bottom)
@@ -256,13 +309,16 @@ object SceneBuilder {
         }
     }
 
-    private fun tradeOverlays(o: TradeOverlays, scale: PriceScale, plot: RectF, digits: Int, out: MutableList<DrawCmd>) {
+    private fun tradeOverlays(o: TradeOverlays, scale: PriceScale, plot: RectF, digits: Int, hidden: Boolean, out: MutableList<DrawCmd>) {
         fun hline(price: Double, role: StyleRole, text: String, dashed: Boolean = false) {
             val y = scale.priceToY(price, plot)
             out += DrawCmd.Line(plot.left, y, plot.right, y, role, dashed)
             out += DrawCmd.Text(plot.left + 4f, y - 3f, "$text ${fmt(price, digits)}", role)
         }
-        for (p in o.positions) {
+        if (hidden) {
+            // Decluttering never hides a stop the broker has not confirmed (§7.4.3), nor the owner's own draft.
+            for (p in o.positions) p.stop?.takeIf { !p.stopConfirmed }?.let { hline(it, StyleRole.POSITION_STOP_UNCONFIRMED, "SL not confirmed", dashed = true) }
+        } else for (p in o.positions) {
             hline(p.entry, StyleRole.POSITION_ENTRY, p.label)
             p.stop?.let {
                 if (p.stopConfirmed) hline(it, StyleRole.POSITION_STOP_CONFIRMED, "SL")
@@ -270,7 +326,7 @@ object SceneBuilder {
             }
             p.target?.let { hline(it, StyleRole.POSITION_TARGET, "TP") }
         }
-        for (ord in o.orders) if (ord.drawn) hline(ord.price, StyleRole.PENDING_ORDER, "${ord.label} ${ord.state.name.lowercase()}", dashed = true)
+        if (!hidden) for (ord in o.orders) if (ord.drawn) hline(ord.price, StyleRole.PENDING_ORDER, "${ord.label} ${ord.state.name.lowercase().replace('_', ' ')}", dashed = true)
         o.draft?.let { d ->
             d.entry?.let { hline(it, StyleRole.DRAFT_PROPOSAL, "Draft entry", dashed = true) }
             d.stop?.let { hline(it, StyleRole.DRAFT_PROPOSAL, "Draft SL", dashed = true) }

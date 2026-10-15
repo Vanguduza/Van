@@ -20,11 +20,20 @@ data class PositionOverlay(
     val label: String,
 )
 
-enum class OrderState { REQUESTED, WORKING, PARTIAL, FILLED, REJECTED, CANCELLED, EXPIRED, OUTCOME_UNKNOWN }
+/**
+ * Mirrors a broker order's lifecycle, including the in-flight modify and cancel requests
+ * MT5 tracks separately (REA evidence: `TradeOrder.ORDER_STATE_REQUEST_MODIFY/CANCEL`).
+ * An order being modified or cancelled is still resting at the broker until it confirms.
+ */
+enum class OrderState { REQUESTED, WORKING, PARTIAL, MODIFY_REQUESTED, CANCEL_REQUESTED, FILLED, REJECTED, CANCELLED, EXPIRED, OUTCOME_UNKNOWN }
 
 data class OrderOverlay(val orderId: String, val side: Side, val price: Double, val state: OrderState, val label: String) {
     /** Only orders still resting at the broker are drawn as lines. */
-    val drawn: Boolean get() = state == OrderState.WORKING || state == OrderState.PARTIAL || state == OrderState.REQUESTED
+    val drawn: Boolean get() = state in RESTING
+
+    companion object {
+        val RESTING = setOf(OrderState.REQUESTED, OrderState.WORKING, OrderState.PARTIAL, OrderState.MODIFY_REQUESTED, OrderState.CANCEL_REQUESTED)
+    }
 }
 
 data class DraftOverlay(val draftId: String, val side: Side, val entry: Double?, val stop: Double?, val target: Double?)

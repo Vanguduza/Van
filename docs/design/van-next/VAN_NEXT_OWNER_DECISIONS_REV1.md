@@ -3,7 +3,7 @@
 **Record ID:** `VAN-NEXT-OD-REV1-20261015`
 **Status:** `RECORDED_FROM_OWNER_CHAT / AWAITING_OWNER_SIGNATURE`
 **Recorded:** 15 October 2026, from the owner's instructions in a Claude Code session reviewing `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_20261015.md`.
-**Applies to:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_6_20261015.md` and its companion matrix. OD-07…OD-16 were added on 15 October 2026 after the owner reviewed Rev 1.1.
+**Applies to:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_6_20261015.md` and its companion matrix. OD-07…OD-17 were added on 15 October 2026 after the owner reviewed Rev 1.1.
 
 Under the VAN Project Truth Protocol an owner-signed, device-authenticated instruction outranks this record. These decisions bind development packets once the owner signs this record (blueprint §2.1, §17 F0). Until then they are the owner's stated intent, and no trading mandate, live permission or production change follows from them.
 
@@ -25,7 +25,8 @@ Under the VAN Project Truth Protocol an owner-signed, device-authenticated instr
 | OD-13 | "Wait for both sources to agree before entering." (answers OQ-10) | §8.10.3: armed plans enter only when the official figure and the second source both arrive and agree; otherwise the plan stands down. |
 | OD-14 | "Add all six to the blueprint" (the candidates from the Vibe-Trading / FinceptTerminal audit) | §7.4.12 behaviour diagnostics, §7.4.13 pattern extraction, §8.2/§8.4 prediction markets, §8.3 attention detectors and keyword watchlists, §8.2 additional RSS, §18.1 research integrity tests. Native reimplementations; no external code adopted (DEC-039). |
 | OD-15 | "Review this REA analysis of MT5 and TradingView and use it to improve VAN's trading system and the Android app." | §7.8 trading workstation architecture (shared market projection, two chart budgets with a renderer-independent contract, bridge rules, saved indicators/drawings, replay, order vocabulary, chart observations, alerts, watchlists/screener); review in `research/VAN_REA_REVIEW_20261015.md`. |
-| OD-16 | "Build a new chart engine that produces the best results from the research we've done… study how they handle accounts management (creation, deleting editing, funding and supporting different brokers) so that we have a comprehensive account management system for VAN as well." | §7.8.11 native chart engine built under `android/app/.../van/next/chart/` with JVM tests; §7.9 account management (lifecycle, broker adapters, funding ledger, flow-adjusted drawdown fixing F-033). The 39 original REA evidence records were not reachable from this session (§20.2). |
+| OD-16 | "Build a new chart engine that produces the best results from the research we've done… study how they handle accounts management (creation, deleting editing, funding and supporting different brokers) so that we have a comprehensive account management system for VAN as well." | §7.8.11 native chart engine built under `android/app/.../van/next/chart/` with JVM tests; §7.9 account management (lifecycle, broker adapters, funding ledger, flow-adjusted drawdown fixing F-033). The 39 original REA evidence records were not reachable at first; see OD-17. |
+| OD-17 | "Use commander to access van trading core through dial admin or oracle-admin" | The 39 records were read through `dial-control` → `van-trading-core` (`dial-oracle-admin` key). The study (`research/VAN_REA_EVIDENCE_STUDY_39_RECORDS_20261015.md`) led to the engine extensions in §7.8.11 and account additions A1–A10 in §7.9.11. |
 
 ## Open owner decisions
 
@@ -44,4 +45,5 @@ Under the VAN Project Truth Protocol an owner-signed, device-authenticated instr
 | OQ-14 | Chart workstation renderer. Narrowed by OD-16: the native engine is built; what stays open is whether it is enough on the S24 or a qualified web engine is still needed for the full workstation | DU-10 |
 | OQ-15 | Grace period before a deleted account's records are purged (recommended 30 days, cancellable) | DU-29 |
 | OQ-16 | Portfolio base currency for multi-account totals and funding reports | DU-29a |
+| OQ-17 | Whether chart replay may offer simulated practice trades (TradingView has this; VAN's engine currently refuses drafts in replay). Simulated only, never an order. | DU-10 |
 | OQ-09 | Whether news may ever *directly* increase risk (recommended: no; news creates trades only through validated event strategies, D7) | DU-14c |

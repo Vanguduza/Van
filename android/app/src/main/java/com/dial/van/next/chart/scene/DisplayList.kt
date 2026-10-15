@@ -18,6 +18,10 @@ enum class StyleRole {
     POSITION_ENTRY, POSITION_STOP_CONFIRMED, POSITION_STOP_UNCONFIRMED, POSITION_TARGET, PENDING_ORDER,
     DRAFT_PROPOSAL,
     QUALITY_BADGE, EVENT_MARKER, REPLAY_CURSOR,
+    /** Ruler line and its reading. */
+    MEASURE,
+    /** Plain-word state notices that are not data quality: loading, layers hidden. */
+    NOTICE,
 }
 
 sealed interface DrawCmd {

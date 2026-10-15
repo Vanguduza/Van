@@ -23,7 +23,9 @@ Owner decision OD-16: build the chart engine and design comprehensive account ma
 | X1 | **Chart engine core built** in `android/app/src/main/java/com/dial/van/next/chart/` with 42 tests; full JVM harness green (1,027 tests). Android host written, not yet compiled or device-qualified. | §7.8.11 |
 | X2 | **Account management**: lifecycle, broker directory and linking, editing and credential rotation, guarded disconnect/delete with grace period, funding shortcuts and ledger, multi-broker portfolio, connection health, statements, screens, tests | §7.9 |
 | X3 | **F-033 defect reproduced:** withdrawals read as drawdown (a 30 % withdrawal suspends trading); funding ledger and flow-adjusted risk added to fix it | §3.2, §7.9.5 |
-| X4 | Remote REA evidence still unread: Desktop Commander's device is a sandbox without a route to `van-trading-core` | §20.2 |
+| X4 | **The 39 REA records read** (OD-17) via Desktop Commander `dial-control` → `van-trading-core` with the `dial-oracle-admin` key; study in `research/VAN_REA_EVIDENCE_STUDY_39_RECORDS_20261015.md` | §7.8.11, §7.9, §20.2 |
+| X5 | **Engine extended from the records:** load-state machine (no drafts while loading, late snapshots refused), ruler, magnet, indicator memory and levels, layers and lock (unconfirmed stop never hidden), go to time, modify/cancel-requested order states, unsaved-changes tracking; 64 engine tests, full harness 1,050 tests green | §7.8.11 |
+| X6 | **Account management additions A1–A10** from MT5 and TradingView account, broker, OTP, migration, leverage-tier, payment and deletion classes | §7.9.11 |
 
 ## Rev 1.5 change log (15 October 2026)
 
@@ -740,13 +742,48 @@ The engine core now exists in code under `android/app/src/main/java/com/dial/van
 
 **Evidence (15 October, `android/verification` JVM harness):** 42 engine tests pass, covering series integrity, zoom anchoring, clamping, scales, ticks, level of detail, every indicator, drawings, undo/redo, hit testing, scene rules (unconfirmed stop never drawn as confirmed, resting vs finished orders, quality badge, warm-up gaps, separate panes), replay hiding the future and refusing drafts, draft rounding, gap → stale → resync, bridge denials, scheduler lifecycle and a 100,000-bar frame-budget check (296 merged candles, 908 commands). The full harness passes: 115 suites, 1,027 tests, 0 failures. One defect was found and fixed during testing: an overlay line and a separate-pane line could share a colour role; each indicator now gets a stable colour slot. The fix was proven by restoring the old logic and watching the test fail.
 
+**Extended from the 39 REA records (OD-17).** Each change traces to a named record. The full table is in `research/VAN_REA_EVIDENCE_STUDY_39_RECORDS_20261015.md` §3.
+
+- **Load state** (MT5 `ChartRenderer.CHART_REQUESTING/READY/SYMBOL_CHANGED`). A symbol or interval change emits `SnapshotRequested`. While the chart loads:
+  - the old instrument's candles are not drawn under the new name;
+  - trade drafts are refused and any open draft is cleared;
+  - streamed bars are ignored;
+  - a late snapshot for the previous symbol is refused.
+
+  Drawings belong to an instrument, and undo cannot cross an instrument change.
+- **Ruler** (MT5 `CA_RULER_*`), measuring in price, percent, ticks and bars.
+- **Magnet** (TradingView `magnetMode`), snapping to the bar's open, high, low or close within 14 dp.
+- **Indicator memory and levels** (MT5 `IndicatorCollection.getPreviousSettings/resetLevelsToDefault`).
+- **Layers and lock-all** (TradingView `hide…ShowOthers`, `lockAllDrawingTools`). Hidden layers are announced in words, and hiding trades never hides a stop the broker has not confirmed.
+- **Go to time** (TradingView `goToTime`).
+- **Modify- and cancel-requested order states** (MT5 `ORDER_STATE_REQUEST_MODIFY/CANCEL`).
+- **Unsaved-changes tracking** (TradingView `hasChartChanges`).
+
+**Updated evidence:** 64 engine tests (22 new) pass. A clean full-harness run gives 125 suites, 1,050 tests and 0 failures. Two gates were broken deliberately: making `LoadRequest.matches` always true and removing the hidden-trades unconfirmed-stop line failed exactly the three tests guarding them, and the code was then restored.
+
+**Seen but not built:**
+- Replay practice trading (TradingView `barReplayBuy/Sell`; proposed OQ-17, because the engine refuses drafts in replay by design).
+- Multi-chart sync and layouts.
+- Glyph-atlas text (measure on the S24 first).
+- Separate real/tick volume modes.
+
 **Not yet proven:** the Android host is not compiled in this environment (no Android SDK) — it needs the `:app` build and the §7.8.10 device cases on the S24. Not built yet: persistence of drawings, indicators and workspaces; inertial fling; multi-chart sync; axis-label collision handling; touch gesture mapping in the host; theme palette from the VAN Next tokens. The engine is not wired into any screen, so the current app is unchanged. OQ-14 is now narrowed to: qualify this native engine on the S24 before considering any web engine.
 
 ### 7.9 Account management (OD-16)
 
-**Sources.** TradingView Android 1.20.84 class and method inventories from the REA pack (static; app not run) and VAN's own code. The 39 remote REA records, including all MetaTrader 5 detail, could not be read from this session (§20.2), so MT5 account behaviour below is general knowledge, marked as such.
+**Sources.** TradingView Android 1.20.84 class and method inventories from the REA pack, the 39 original REA records on `van-trading-core` (read 15 October under OD-17), and VAN's own code. All the REA material is static: no app was run. None of the 39 records inspects an account class directly, so the account findings come from class names in the full MT5 (500.6260, 9,030 classes) and TradingView (7 DEX shards) inventories. See `research/VAN_REA_EVIDENCE_STUDY_39_RECORDS_20261015.md` §4.
 
-**What the references show (TradingView, from the inventory):** a broker directory with ratings, tier, regulators, per-country minimum deposit, fees, tradable instrument types and an "open account" referral; broker sign-in by browser OAuth with explicit start, callback, pending, cancel and discard states, plus login and 2FA dialogs; a live broker-connection-status stream that also filters symbol search to tradable instruments; account deletion scheduled with a grace period, a "cancel deletion" banner and confirmation; paper trading. TradingView does not move money: deposits happen at the broker. **MT5 (general knowledge, unverified here):** in-app demo account opening, broker server search, login by server + login + password, an investor (read-only) password, several saved accounts with quick switching, password change and one-time-password support.
+**What the references show (TradingView, from the inventory):** a broker directory with ratings, tier, regulators, per-country minimum deposit, fees, tradable instrument types and an "open account" referral; broker sign-in by browser OAuth with explicit start, callback, pending, cancel and discard states, plus login and 2FA dialogs; a live broker-connection-status stream that also filters symbol search to tradable instruments; account deletion scheduled with a grace period, a "cancel deletion" banner and confirmation; paper trading. TradingView does not move money: deposits happen at the broker. **MT5 (now evidenced by class names):**
+- Several saved accounts.
+- Broker search, then a server list per broker, with signed broker information.
+- Login by password, **QR code**, or **certificate and key**.
+- Password change and a built-in **OTP** generator bound to the account.
+- Demo account opening, plus a **real-account application questionnaire** (personal, financial and experience data, with agreements).
+- **Server migration**.
+- **Tiered leverage** and a per-symbol margin calculator.
+- **In-app deposits** through payment institutions, with commission, currency, invoice and a web-view redirect (`net.metaquotes.payments`).
+
+**Still general knowledge:** the investor (read-only) password; no class name shows it.
 
 **What VAN has today (code, `main` 8eb1889):** a registry of non-secret account records (`vati/accounts/registry.py`) for MT5 bridge, MT5 Expert Advisor pull-bridge, Deriv, cTrader, paper and ZSE owner tickets, with credential references (env var or 0600 secrets file) and refusal of secrets pasted into records; gateway account actions (`backend/van_gateway/trading/accounts.py`): upsert, credentials, remove, verify, Deriv email verification and demo creation, Deriv and cTrader OAuth linking, cTrader account discovery, MT5 bridge key issuance, with device-signed owner approval for every action that changes an account and encrypted short-lived OAuth state; Android Accounts and Add-account screens.
 
@@ -805,7 +842,22 @@ Monthly statements and yearly summaries per account (trades, fees, swaps, fundin
 
 #### 7.9.10 Account acceptance tests
 
-A withdrawal does not move drawdown tiers or the daily-loss limit (F-033 regression, using the probe above); a deposit does not mask a loss; delete is blocked with open positions or working orders and lists them; cancel during the grace period restores the account; credentials are destroyed on disconnect with a receipt; rotation never leaves the account without valid credentials; OAuth cancel and timeout discard the attempt; investor-password MT5 accounts cannot be put in an order-sending mode; demo and live never sum; every mutating action fails without device-signed owner approval; an unclassified balance operation is flagged, not guessed.
+A withdrawal does not move drawdown tiers or the daily-loss limit (F-033 regression, using the probe above); a deposit does not mask a loss; delete is blocked with open positions or working orders and lists them; cancel during the grace period restores the account; credentials are destroyed on disconnect with a receipt; rotation never leaves the account without valid credentials; OAuth cancel and timeout discard the attempt; investor-password MT5 accounts cannot be put in an order-sending mode; demo and live never sum; every mutating action fails without device-signed owner approval; an unclassified balance operation is flagged, not guessed. From §7.9.11: an OAuth attempt interrupted by killing the app resumes or reports a named lost state; delete fails without fresh re-authentication and locks after repeated failures; a server migration triggers re-verification; position sizing uses the broker's leverage tier for the intended volume.
+
+#### 7.9.11 Additions from the REA records (OD-17)
+
+| # | Addition | Evidence |
+|---|---|---|
+| A1 | Link and OAuth attempts are persisted and survive the app being killed. A lost session or outcome is a visible state the owner can retry or discard. | TV `HeldOutcomeStore`, `CallbackSettlingStore`, `BrokerOAuth*LostException` |
+| A2 | Broker maintenance is shown in the directory and before linking. | TV `BrokerMaintenanceStatus/WarningPayload` |
+| A3 | Delete and disconnect need fresh re-authentication on top of device-signed approval. Failed attempts are rate-limited. Personal data is anonymised; trade records are kept under retention. | TV `PasswordState`, `TooManyAttemptsException`, `AnonymizeResponse` |
+| A4 | Keep the block on deleting while positions or orders are open. It matches TradingView's block on deleting with paid services. | TV `PaidServicesExistException` |
+| A5 | The capability matrix records tiered leverage and margin per account. Sizing reads the broker's actual tier for the intended volume. | MT5 `ConLeverageTier`, `SymbolMarginCalculator` |
+| A6 | A broker server migration is detected and triggers re-verification, not "disconnected". | MT5 `MigrationFragment`, `ServerRecord` |
+| A7 | Credential types include an OTP binding and a client certificate or key, each stored only as a credential reference. | MT5 `OTP*`, `Certificates*`, `KeysFragment` |
+| A8 | Pair the MT5 Expert Advisor bridge by QR code instead of typing a key. | MT5 `QRCredentials` |
+| A9 | Real-account opening stays at the broker. VAN does not collect KYC data. | MT5 `PersonalData/FinanceData/RealExperienceFragment` |
+| A10 | Funding stance unchanged (§0.3). Next to each broker's cashier link, show its stated methods and commissions. | MT5 `net.metaquotes.payments.*` |
 
 ## 8. News and Event Intelligence — live sources, analysis, history, decisions (OD-04, OD-11)
 
@@ -1743,7 +1795,11 @@ Minimum deliverable pack before implementation:
 - REA MT5/TradingView analysis is not complete; user will separately signal when `van-trading-core` is ready. Findings are allowed to amend architecture.
 - Rev 1.1–1.2 relabelled the mockups and specified manual trading (entries, adds, handover), multi-source news with history-driven decisions, and consolidation; none of these is implemented. Manual trading needs owner decisions (§7.4.11) and an owner-signed mandate version before any live use; each news decision path needs shadow evidence and an owner signature before it changes live trading.
 - `VAN_NEXT_OWNER_DECISIONS_REV1.md` records chat decisions and awaits owner signature.
-- The 39 REA evidence records on `van-trading-core` (`/opt/van-rea-lab/evidence/`) remain unread: this session has no Global DIAL MCP, and Desktop Commander's device (`vm`) is a sandbox with no SSH keys, host entry or route to the trading server. MT5 findings and MT5 account behaviour stay unverified until a session with the Global DIAL MCP reads them.
+- The 39 REA records were read on 15 October (OD-17), via Desktop Commander `dial-control` → `van-trading-core` with the `dial-oracle-admin` key; no `oracle-admin` device was online. Limits:
+  - They are static class, method and field structure only: no runtime, broker or chart behaviour was observed.
+  - No account class body was inspected.
+  - The TradingView material is a byte-equivalent copy whose signing was not promoted, not a Play Store install; the 10:28 receipt still says `NOT_ACQUIRED`.
+- On `dial-control`, `/etc/ssh/ssh_config.d/60-dial-migration-source.conf` has bad owner or permissions, which breaks plain `ssh`. It was bypassed with `ssh -F ~/.ssh/config` and not changed; it needs fixing by whoever administers that host.
 - The chart engine's Android host (`next/chart/android/ChartTextureHost.kt`) has not been compiled; the `:app` build and S24 device cases are required.
 - No feature merge or frontend mutation was performed to production VAN. Existing PR candidates remain independent and need source/qualification reconciliation.
 

@@ -15,13 +15,13 @@ enum class ProvenanceTier {
 
 enum class Pane { OVERLAY, SEPARATE }
 
-enum class IndicatorType(val pane: Pane, val defaults: Map<String, Double>) {
+enum class IndicatorType(val pane: Pane, val defaults: Map<String, Double>, val defaultLevels: List<Double> = emptyList()) {
     SMA(Pane.OVERLAY, mapOf("period" to 20.0)),
     EMA(Pane.OVERLAY, mapOf("period" to 20.0)),
     BOLLINGER(Pane.OVERLAY, mapOf("period" to 20.0, "k" to 2.0)),
     VWAP(Pane.OVERLAY, emptyMap()),
-    RSI(Pane.SEPARATE, mapOf("period" to 14.0)),
-    MACD(Pane.SEPARATE, mapOf("fast" to 12.0, "slow" to 26.0, "signal" to 9.0)),
+    RSI(Pane.SEPARATE, mapOf("period" to 14.0), listOf(30.0, 70.0)),
+    MACD(Pane.SEPARATE, mapOf("fast" to 12.0, "slow" to 26.0, "signal" to 9.0), listOf(0.0)),
     ATR(Pane.SEPARATE, mapOf("period" to 14.0)),
 }
 
@@ -38,11 +38,15 @@ data class IndicatorInstance(
     val version: Int = 1,
     val tier: ProvenanceTier = ProvenanceTier.PRESENTATION,
     val visible: Boolean = true,
+    /** Horizontal reference levels (RSI 30/70 by default), editable per instance like MT5's indicator levels. */
+    val levels: List<Double> = type.defaultLevels,
 ) {
     init {
         val unknown = params.keys - type.defaults.keys
         require(unknown.isEmpty()) { "unknown parameters for $type: $unknown" }
         params.forEach { (k, v) -> require(v.isFinite() && v > 0) { "parameter $k must be positive" } }
+        require(levels.all { it.isFinite() }) { "levels must be finite" }
+        require(levels.size <= MAX_LEVELS) { "at most $MAX_LEVELS levels" }
         if (type == IndicatorType.MACD) require(param("fast") < param("slow")) { "MACD fast must be < slow" }
     }
 
@@ -50,7 +54,8 @@ data class IndicatorInstance(
     private fun intParam(name: String) = param(name).toInt()
 
     fun withParams(changes: Map<String, Double>) = copy(params = params + changes, version = version + 1)
-    fun resetToDefaults() = copy(params = type.defaults, version = version + 1)
+    fun withLevels(newLevels: List<Double>) = copy(levels = newLevels.distinct().sorted(), version = version + 1)
+    fun resetToDefaults() = copy(params = type.defaults, levels = type.defaultLevels, version = version + 1)
 
     /** Named output lines, each the same length as the series. */
     fun compute(series: BarSeries): Map<String, DoubleArray> {
@@ -68,4 +73,6 @@ data class IndicatorInstance(
             IndicatorType.ATR -> mapOf("atr" to Indicators.atr(bars, intParam("period")))
         }
     }
+
+    companion object { const val MAX_LEVELS = 8 }
 }
