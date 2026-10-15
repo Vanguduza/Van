@@ -1,8 +1,17 @@
 # VAN Next — Deterministic Development Plan, Rev 1
 
 **Status:** `DRAFT / AWAITING_OWNER_APPROVAL`. No packet starts until the owner approves this plan.
-**Derived from:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_8_20261015.md` §16.1, §16.2, §19.1 and `VAN_NEXT_OWNER_DECISIONS_REV1.md` (open questions), source SHA-256 `4367690e306367a0`.
-**Generator:** `plan/generate_plan.py`. Re-running it on the same inputs gives byte-identical output; `--check` validates, `--selftest` proves each check catches a deliberately broken input.
+**Derived from:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9_20261015.md` §16.1, §16.2, §19.1 and `VAN_NEXT_OWNER_DECISIONS_REV1.md` (open questions).
+
+| Input | SHA-256 (full file bytes) |
+|---|---|
+| `docs/design/van-next/VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9_20261015.md` | `af8ca74906e3f5a7f4958b593e28e78767ac4024768588e654495c7d8893e772` |
+| `docs/design/van-next/VAN_NEXT_OWNER_DECISIONS_REV1.md` | `61909b8adef17d596d2bd91015991eea48a72861d46825dcdf3b7b1b8c3de81f` |
+| `docs/design/van-next/plan/generate_plan.py` | `b99e8c392d690b31bd2e513b70d33cf3f5f01c3055a132c2ea37fbb269988795` |
+
+Aggregate input digest `78033ecdfdb1bb7fd5dba71c63625166cb902c2b27f6765b173cdb3851c44b1f` = SHA-256 of the blueprint bytes, one newline byte, the decision-record bytes and the generator bytes. `PLAN_INPUT_PROVENANCE.json` records these values and the hashes of the generated plan.
+
+**Generator:** `plan/generate_plan.py`. Re-running it on the same inputs gives byte-identical output. `--check` validates the inputs **and** fails if this file is stale; `--selftest` proves each check catches a deliberately broken input.
 
 ## 1. Rules
 
@@ -15,11 +24,11 @@
 
 ## 2. Validation of the blueprint inputs
 
-- Development Units in the DAG: 49; solid dependency edges: 83; non-blocking (dotted) edges: 2.
-- Requirements parsed: 60; open questions parsed: 18.
-- Findings: none. The DAG is acyclic; every requirement and every open question maps to a DU in the DAG; every DU has a lane; no DU depends on a later phase.
+- Development Units in the DAG: 49; solid dependency edges: 89; non-blocking (dotted) edges: 2.
+- Requirements parsed: 69; open questions parsed: 18.
+- Findings: none. The DAG is acyclic; every requirement and every open question maps to a DU in the DAG; every DU has a lane; no DU depends on a later phase; every build unit has a dependency path to DU-25, DU-26 and DU-MR.
 - DUs with no requirement row (kept, flagged for the freeze list): none.
-- DU-27 is not a packet: REA studies done (Rev 1.5–1.6, OD-15/16/17); amendments are inputs to the DU-10 contract, not a packet.
+- DU-27 is not a packet: REA research (static) done under OD-15/16/17. Its admission record is VAN-NX-026, carried by DU-01; its findings are inputs to the DU-10 and DU-29 contracts.
 
 ## 3. Plan-level choices awaiting owner approval
 
@@ -88,13 +97,13 @@ These are the only inputs not read from the blueprint.
 
 | Packet | DU | Title | Phase | Milestone | Lane | Depends on | Requirements | Owner decisions (start / live / exit) |
 |---|---|---|---|---|---|---|---|---|
-| PKT-001 | DU-00 | Consolidation, Feature Ledger, parity oracle | P0 | FULL | Consolidation | — | VAN-NX-028 | — / — |
-| PKT-002 | DU-01 | Product Truth and preservation reconciliation | P0 | FULL | Foundation | PKT-001 | VAN-NX-053 | — / — / exit: OQ-05 |
+| PKT-001 | DU-00 | Consolidation, Feature Ledger, parity oracle | P0 | FULL | Consolidation | — | VAN-NX-028 | OQ-05 / — |
+| PKT-002 | DU-01 | Product Truth and preservation reconciliation | P0 | FULL | Foundation | PKT-001 | VAN-NX-026, VAN-NX-053 | — / — |
 | PKT-003 | DU-02 | Visual golden authority + labels | P1 | FULL | Foundation | PKT-002 | VAN-NX-001, VAN-NX-030 | — / — |
 | PKT-004 | DU-24 | Anti-loss checker + module isolation | P1 | FULL | Foundation | PKT-002 | VAN-NX-023, VAN-NX-029, VAN-NX-039 | — / — |
 | PKT-005 | DU-03 | Clean theme and component system | P1 | FULL | Foundation | PKT-003, PKT-004 | VAN-NX-002 | — / — |
 | PKT-006 | DU-04 | Adaptive app shell | P1 | FULL | Foundation | PKT-004, PKT-005 | VAN-NX-003 | — / — |
-| PKT-007 | DU-29 | Account lifecycle, linking, edit, delete | P2 | M1 | Trading | PKT-002 | VAN-NX-048, VAN-NX-049, VAN-NX-050, VAN-NX-056, VAN-NX-057 | OQ-15, OQ-18 / — |
+| PKT-007 | DU-29 | Account lifecycle, linking, edit, delete | P2 | M1 | Trading | PKT-002 | VAN-NX-048, VAN-NX-049, VAN-NX-050, VAN-NX-056, VAN-NX-057, VAN-NX-064 | OQ-15, OQ-18 / — |
 | PKT-008 | DU-30 | Trading modes | P2 | M1 | Trading | PKT-002 | VAN-NX-058 | — / OQ-20 |
 | PKT-009 | DU-14a | Multi-source feeds + health | P2 | M1 | News | PKT-002 | VAN-NX-013, VAN-NX-038 | OQ-06, OQ-11 / — |
 | PKT-010 | DU-29a | Funding ledger + flow-adjusted risk | P2 | M1 | Trading | PKT-007 | VAN-NX-051, VAN-NX-059 | OQ-16 / — |
@@ -108,15 +117,15 @@ These are the only inputs not read from the blueprint.
 | PKT-018 | DU-28e | Order vocabulary + venue capabilities | P2 | M1 | Trading | PKT-012 | VAN-NX-045 | — / — |
 | PKT-019 | DU-15 | Project data adapter | P2 | M1 | Work Graph | PKT-006 | VAN-NX-014 | — / — |
 | PKT-020 | DU-08 | Attention/Approvals | P2 | M1 | Continuity | PKT-006 | VAN-NX-007 | — / — |
-| PKT-021 | DU-21 | Browser/Voice/ARTEMIS | P2 | M1 | Continuity | PKT-006 | VAN-NX-020 | — / — |
+| PKT-021 | DU-21 | Browser/Voice/ARTEMIS | P2 | M1 | Continuity | PKT-006 | VAN-NX-020, VAN-NX-069 | — / — |
 | PKT-022 | DU-09 | Trading Home | P2 | M1 | Trading | PKT-006, PKT-008, PKT-016 | VAN-NX-008 | — / — |
 | PKT-023 | DU-16 | Spatial task graph | P2 | M1 | Work Graph | PKT-019 | VAN-NX-015 | — / — |
 | PKT-024 | DU-10 | Rich Chart | P2 | M1 | Trading | PKT-022 | VAN-NX-009, VAN-NX-041, VAN-NX-042 | OQ-14 / — |
 | PKT-025 | DU-13 | Analyst | P2 | M1 | Trading | PKT-022 | VAN-NX-012 | — / — |
-| PKT-026 | DU-11 | Positions/Orders/Protection | P2 | M1 | Trading | PKT-012, PKT-017, PKT-018, PKT-024 | VAN-NX-010 | — / — |
-| PKT-027 | DU-14d | News briefs + News UI | P2 | M1 | News | PKT-011, PKT-013, PKT-025 | VAN-NX-013 | — / — |
-| PKT-028 | DU-06 | Compact Quick Hub | P2 | M1 | Orb/Floating | PKT-014, PKT-019, PKT-020, PKT-022, PKT-026 | VAN-NX-005 | — / — |
-| PKT-029 | DU-29 | Account lifecycle, linking, edit, delete | P3 | M2 | Trading | PKT-002, PKT-007 | VAN-NX-048, VAN-NX-049, VAN-NX-050, VAN-NX-056, VAN-NX-057 | OQ-15, OQ-18 / — |
+| PKT-026 | DU-11 | Positions/Orders/Protection | P2 | M1 | Trading | PKT-012, PKT-017, PKT-018, PKT-024 | VAN-NX-010, VAN-NX-061, VAN-NX-062 | — / — |
+| PKT-027 | DU-14d | News briefs + News UI | P2 | M1 | News | PKT-011, PKT-013, PKT-025 | VAN-NX-013, VAN-NX-065 | — / — |
+| PKT-028 | DU-06 | Compact Quick Hub | P2 | M1 | Orb/Floating | PKT-014, PKT-019, PKT-020, PKT-022, PKT-026 | VAN-NX-005, VAN-NX-063 | — / — |
+| PKT-029 | DU-29 | Account lifecycle, linking, edit, delete | P3 | M2 | Trading | PKT-002, PKT-007 | VAN-NX-048, VAN-NX-049, VAN-NX-050, VAN-NX-056, VAN-NX-057, VAN-NX-064 | OQ-15, OQ-18 / — |
 | PKT-030 | DU-30 | Trading modes | P3 | M2 | Trading | PKT-002, PKT-008 | VAN-NX-058 | — / OQ-20 |
 | PKT-031 | DU-14a | Multi-source feeds + health | P3 | M2 | News | PKT-002, PKT-009 | VAN-NX-013, VAN-NX-038 | OQ-06, OQ-11 / — |
 | PKT-032 | DU-29a | Funding ledger + flow-adjusted risk | P3 | M2 | Trading | PKT-010, PKT-029 | VAN-NX-051, VAN-NX-059 | OQ-16 / — |
@@ -134,9 +143,9 @@ These are the only inputs not read from the blueprint.
 | PKT-044 | DU-14e | Live news trading bundle | P3 | FULL | News | PKT-034, PKT-036, PKT-037 | VAN-NX-033 | OQ-11, OQ-12 / — |
 | PKT-045 | DU-15 | Project data adapter | P3 | M2 | Work Graph | PKT-006, PKT-019 | VAN-NX-014 | — / — |
 | PKT-046 | DU-08 | Attention/Approvals | P3 | M2 | Continuity | PKT-006, PKT-020 | VAN-NX-007 | — / — |
-| PKT-047 | DU-19 | Memory/Automation continuity | P3 | FULL | Continuity | PKT-006 | VAN-NX-018 | — / — |
+| PKT-047 | DU-19 | Memory/Automation continuity | P3 | FULL | Continuity | PKT-006 | VAN-NX-018, VAN-NX-066, VAN-NX-067, VAN-NX-068 | — / — |
 | PKT-048 | DU-20 | Settings/Connected | P3 | FULL | Continuity | PKT-006 | VAN-NX-019 | — / — |
-| PKT-049 | DU-21 | Browser/Voice/ARTEMIS | P3 | M2 | Continuity | PKT-006, PKT-021 | VAN-NX-020 | — / — |
+| PKT-049 | DU-21 | Browser/Voice/ARTEMIS | P3 | M2 | Continuity | PKT-006, PKT-021 | VAN-NX-020, VAN-NX-069 | — / — |
 | PKT-050 | DU-09 | Trading Home | P3 | M2 | Trading | PKT-006, PKT-022, PKT-030, PKT-040 | VAN-NX-008 | — / — |
 | PKT-051 | DU-12b | Alerts, watchlists, screener | P3 | FULL | Trading | PKT-040 | VAN-NX-047 | — / — |
 | PKT-052 | DU-28d | Pattern extraction to candidates | P3 | FULL | Trading | PKT-042 | VAN-NX-035 | — / — |
@@ -149,13 +158,13 @@ These are the only inputs not read from the blueprint.
 | PKT-059 | DU-17 | Agent/Handoff flow | P3 | FULL | Work Graph | PKT-054 | VAN-NX-016 | — / — |
 | PKT-060 | DU-10b | Indicators, drawings, workspaces | P3 | FULL | Trading | PKT-056 | VAN-NX-043 | — / — |
 | PKT-061 | DU-10c | Replay sandbox | P3 | FULL | Trading | PKT-056 | VAN-NX-044 | OQ-17 / — |
-| PKT-062 | DU-11 | Positions/Orders/Protection | P3 | M2 | Trading | PKT-026, PKT-034, PKT-041, PKT-043, PKT-056 | VAN-NX-010 | — / — |
-| PKT-063 | DU-14d | News briefs + News UI | P3 | M2 | News | PKT-027, PKT-033, PKT-036, PKT-058 | VAN-NX-013 | — / — |
-| PKT-064 | DU-06 | Compact Quick Hub | P3 | M2 | Orb/Floating | PKT-028, PKT-038, PKT-045, PKT-046, PKT-050, PKT-062 | VAN-NX-005 | — / — |
+| PKT-062 | DU-11 | Positions/Orders/Protection | P3 | M2 | Trading | PKT-026, PKT-034, PKT-041, PKT-043, PKT-056 | VAN-NX-010, VAN-NX-061, VAN-NX-062 | — / — |
+| PKT-063 | DU-14d | News briefs + News UI | P3 | M2 | News | PKT-027, PKT-033, PKT-036, PKT-058 | VAN-NX-013, VAN-NX-065 | — / — |
+| PKT-064 | DU-06 | Compact Quick Hub | P3 | M2 | Orb/Floating | PKT-028, PKT-038, PKT-045, PKT-046, PKT-050, PKT-062 | VAN-NX-005, VAN-NX-063 | — / — |
 | PKT-065 | DU-10d | Chart observations | P3 | FULL | Trading | PKT-060 | VAN-NX-046 | — / — |
 | PKT-066 | DU-22 | Cross-domain privacy/failure | P4 | FULL | Qualification | PKT-039, PKT-059, PKT-062, PKT-063, PKT-064 | VAN-NX-021 | — / — |
 | PKT-067 | DU-23 | Performance and accessibility | P4 | FULL | Qualification | PKT-066 | VAN-NX-022, VAN-NX-060 | — / — |
-| PKT-068 | DU-25 | Integrated verification/Zuul | P4 | FULL | Qualification | PKT-004, PKT-030, PKT-032, PKT-034, PKT-035, PKT-036, PKT-044, PKT-046, PKT-047, PKT-048, PKT-049, PKT-052, PKT-055, PKT-067 | VAN-NX-024 | — / — |
+| PKT-068 | DU-25 | Integrated verification/Zuul | P4 | FULL | Qualification | PKT-004, PKT-030, PKT-032, PKT-034, PKT-035, PKT-036, PKT-044, PKT-046, PKT-047, PKT-048, PKT-049, PKT-051, PKT-052, PKT-053, PKT-055, PKT-057, PKT-060, PKT-061, PKT-065, PKT-067 | VAN-NX-024 | — / — |
 | PKT-069 | DU-26 | Physical S24 + owner acceptance | P4 | FULL | Qualification | PKT-068 | VAN-NX-025 | — / — |
 | PKT-070 | DU-MR | Controlled migration/retirement | P5 | ROLLOUT | Qualification | PKT-069 | VAN-NX-054 | — / — |
 | PKT-071 | DU-MR | Controlled migration/retirement | P6 | RETIREMENT | Qualification | PKT-069, PKT-070 | VAN-NX-054 | — / — |
@@ -202,7 +211,32 @@ Within a phase, packets at the same DAG depth do not depend on each other.
 | P5 | 14 | PKT-070 (DU-MR) |
 | P6 | 14 | PKT-071 (DU-MR) |
 
-## 7. Exit evidence by requirement
+## 7. Open questions by packet
+
+Generated from the decision record, so packet numbers here are always current. Freeze lists cite this section instead of copying packet numbers.
+
+| Question | Gate | Packets |
+|---|---|---|
+| OQ-01 | live | PKT-012 (DU-28 M1), PKT-034 (DU-28 M2) |
+| OQ-02 | start | PKT-012 (DU-28 M1), PKT-034 (DU-28 M2) |
+| OQ-03 | live | PKT-012 (DU-28 M1), PKT-034 (DU-28 M2) |
+| OQ-05 | start | PKT-001 (DU-00 FULL) |
+| OQ-06 | start | PKT-009 (DU-14a M1), PKT-031 (DU-14a M2) |
+| OQ-07 | start | PKT-012 (DU-28 M1), PKT-034 (DU-28 M2) |
+| OQ-08 | live | PKT-013 (DU-14c M1), PKT-036 (DU-14c M2) |
+| OQ-09 | start | PKT-013 (DU-14c M1), PKT-036 (DU-14c M2) |
+| OQ-11 | start | PKT-009 (DU-14a M1), PKT-031 (DU-14a M2), PKT-044 (DU-14e FULL) |
+| OQ-12 | start | PKT-044 (DU-14e FULL) |
+| OQ-13 | start | PKT-042 (DU-28c FULL) |
+| OQ-14 | start | PKT-024 (DU-10 M1), PKT-056 (DU-10 M2) |
+| OQ-15 | start | PKT-007 (DU-29 M1), PKT-029 (DU-29 M2) |
+| OQ-16 | start | PKT-010 (DU-29a M1), PKT-032 (DU-29a M2) |
+| OQ-17 | start | PKT-061 (DU-10c FULL) |
+| OQ-18 | start | PKT-007 (DU-29 M1), PKT-029 (DU-29 M2) |
+| OQ-19 | start | PKT-035 (DU-29c FULL) |
+| OQ-20 | live | PKT-008 (DU-30 M1), PKT-030 (DU-30 M2) |
+
+## 8. Exit evidence by requirement
 
 A DU's last packet exits only with every listed requirement's key acceptance (blueprint §16.1).
 
@@ -233,7 +267,7 @@ A DU's last packet exits only with every listed requirement's key acceptance (bl
 | VAN-NX-023 | DU-24 | Static lint + route/feature bijection |
 | VAN-NX-024 | DU-25 | Every applicable F0–F15 gate has receipt |
 | VAN-NX-025 | DU-26 | Owner on-device decision, immutable APK |
-| VAN-NX-026 | DU-27 | Research recommendation with evidence; owner-ready scheduling |
+| VAN-NX-026 | DU-01 | Research-input admission record (`RESEARCH_INPUT_ACCEPTANCE.json`): the 39 REA record IDs and hashes, APK identities, static-only limits and owner acknowledgement; DU-27 supplies the research |
 | VAN-NX-027 | DU-28 | §7.4; §18.2 manual-trading cases; demo before live |
 | VAN-NX-028 | DU-00 | Every ledger row classified; parity checker fails on an induced omission |
 | VAN-NX-029 | DU-24 | Legacy import fails compilation; banned-word and literal-style lints fail when induced |
@@ -268,4 +302,13 @@ A DU's last packet exits only with every listed requirement's key acceptance (bl
 | VAN-NX-058 | DU-30 | §7.10; PR #92 suite green after consolidation; AGGRESSIVE refuses without admitted edge (gate broken on purpose) |
 | VAN-NX-059 | DU-29a | §7.5; a deposit never shown as profit |
 | VAN-NX-060 | DU-23 | §15.1; device cases on the S24 |
+| VAN-NX-061 | DU-11 | Derived from VATI and broker data with unit and freshness provenance; no unsourced number |
+| VAN-NX-062 | DU-11 | Every figure traced to its policy; a fail-open risk path is a P0 blocker |
+| VAN-NX-063 | DU-06 | Sources cited; budget not exceeded; stale marked |
+| VAN-NX-064 | DU-29 | A local change never claims a broker update |
+| VAN-NX-065 | DU-14d | Provenance on every element; no authority effect |
+| VAN-NX-066 | DU-19 | Erasure readback; source deletion is not claimed as model unlearning |
+| VAN-NX-067 | DU-19 | Goal changes audited |
+| VAN-NX-068 | DU-19 | No silent failed run |
+| VAN-NX-069 | DU-21 | Unknown never shown as pass |
 

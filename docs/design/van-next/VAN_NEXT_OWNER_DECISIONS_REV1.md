@@ -3,7 +3,7 @@
 **Record ID:** `VAN-NEXT-OD-REV1-20261015`
 **Status:** `RECORDED_FROM_OWNER_CHAT / AWAITING_OWNER_SIGNATURE`
 **Recorded:** 15 October 2026, from the owner's instructions in a Claude Code session reviewing `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_20261015.md`.
-**Applies to:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_8_20261015.md` and its companion matrix. OD-07…OD-22 were added on 15 October 2026 after the owner reviewed Rev 1.1.
+**Applies to:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9_20261015.md` and its companion matrix. OD-07…OD-27 were added on 15 October 2026 after the owner reviewed Rev 1.1.
 
 Under the VAN Project Truth Protocol an owner-signed, device-authenticated instruction outranks this record. These decisions bind development packets once the owner signs this record (blueprint §2.1, §17 F0). Until then they are the owner's stated intent, and no trading mandate, live permission or production change follows from them.
 
@@ -32,6 +32,11 @@ Under the VAN Project Truth Protocol an owner-signed, device-authenticated instr
 | OD-20 | D3: "Yes I want trading modes, they should be documented or partially built inside the repo" | §7.10. Found on PR #92 (`923ecf9`) with design and tests; adopted through DU-00 consolidation and DU-30. |
 | OD-21 | D4: "yes" — the owner may add to winning manual and automatic trades, sized by the trade's risk profile (OD-08, OD-10). | §7.4 unchanged; the pack's "ADD only if VATI proposes" is not adopted. |
 | OD-22 | D5: "Potential trades" | §2.6 label confirmed over the pack's "Opportunities". |
+| OD-23 | E1: "yes" — manual adds only to **winning** trades: in profit on a fresh quote, within the family's original risk budget. | §7.4.6; corrects Rev 1.5–1.8, which allowed adds to losing trades beyond the owner's words (AUD-21). |
+| OD-24 | E2: "yes" — the one-tap news ticket also requires both sources to deliver and agree. | §8.10.5 `NewsArmedTicketGrant` (AUD-04). |
+| OD-25 | E3: "yes" — no "unmanaged by VAN" escape; unlink and delete are blocked while positions, orders, in-flight funds or unknown outcomes exist. | §7.9.4 (AUD-06). |
+| OD-26 | E4: "yes" — the decision record is signed before PKT-001. | OQ-05 now gates DU-00 start (AUD-15). |
+| OD-27 | E5: "yes" — the 18 product truths and 93 features are mapped in Rev 1.9; the 171-atom mapping is DU-01's job. | `crosswalk/`, §16.1 (AUD-07). |
 
 ## Open owner decisions
 
@@ -40,7 +45,7 @@ Under the VAN Project Truth Protocol an owner-signed, device-authenticated instr
 | OQ-01 | Risk budget for `owner.manual` in the next signed mandate | DU-28 live use |
 | OQ-02 | Stop-distance ATR multiples per instrument class for `ManualStopPolicy` | DU-28 implementation |
 | OQ-03 | Demo period before `LIMITED_LIVE` manual trading | DU-28 live use |
-| OQ-05 | Signature of this record | DU-01 exit (end of P0, blueprint §19.1) |
+| OQ-05 | Signature of this record (OD-26: before PKT-001) | DU-00 start |
 | OQ-06 | Which news, wire and calendar providers to license (vendor review of cost, latency, licence terms) | DU-14a |
 | OQ-07 | Whether the stop re-attach sequence (§7.4.3) also replaces the router's immediate flatten-and-halt for automated trades | DU-28 |
 | OQ-08 | Promotion of each news decision path D1–D6 from shadow to live, on its shadow evidence | DU-14c, per path |

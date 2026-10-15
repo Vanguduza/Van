@@ -24,10 +24,14 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 PACK = HERE.parent
-BLUEPRINT = PACK / "VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_8_20261015.md"
+BLUEPRINT = PACK / "VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9_20261015.md"
 DECISIONS = PACK / "VAN_NEXT_OWNER_DECISIONS_REV1.md"
 OUT_MD = HERE / "VAN_NEXT_DEVELOPMENT_PLAN_REV1.md"
 OUT_JSON = HERE / "VAN_NEXT_DEVELOPMENT_PLAN_REV1.json"
+OUT_PROV = HERE / "PLAN_INPUT_PROVENANCE.json"
+GENERATOR = Path(__file__).resolve()
+# Units every build unit must reach (blueprint Rev 1.9, AUD-01).
+QUALIFICATION = ["DU-25", "DU-26", "DU-MR"]
 
 # ---------------------------------------------------------------- plan-level choices
 # Phases follow blueprint §19.1. P2 builds one real vertical slice per domain (milestone
@@ -65,7 +69,7 @@ PLAN_CHOICES = {
         "S5 Floating VAN → Voice / Work": ["DU-07", "DU-21"],
     },
     # Research that is complete as research; its amendments enter through DU-10's contract.
-    "complete": {"DU-27": "REA studies done (Rev 1.5–1.6, OD-15/16/17); amendments are inputs to the DU-10 contract, not a packet."},
+    "complete": {"DU-27": "REA research (static) done under OD-15/16/17. Its admission record is VAN-NX-026, carried by DU-01; its findings are inputs to the DU-10 and DU-29 contracts."},
 }
 
 # --------------------------------------------------------------------------- parsing
@@ -198,7 +202,27 @@ def validate(dus, edges, reqs, oqs, choices) -> list[str]:
             continue
         if ph(a) > ph(b):
             f.append(f"PHASE_INVERSION: {b} ({choices['phase'].get(b, 'P2/P3')}) depends on {a} ({choices['phase'].get(a, 'P2/P3')})")
-    # 6. DUs that carry no requirement (reported, not fatal — listed in the plan)
+    # 6. every build unit reaches integrated verification, device acceptance and rollout (AUD-01)
+    deps_of: dict[str, set[str]] = {d: set() for d in known}
+    for a, b in edges:
+        deps_of[b].add(a)
+    def ancestors(d):
+        acc, todo = set(), [d]
+        while todo:
+            for x in deps_of.get(todo.pop(), ()):
+                if x not in acc:
+                    acc.add(x)
+                    todo.append(x)
+        return acc
+    for q in QUALIFICATION:
+        if q not in known:
+            f.append(f"QUAL_UNIT_MISSING: {q}")
+            continue
+        anc = ancestors(q)
+        downstream = {d for d in known if q in ancestors(d)}
+        for d in sorted(known - anc - downstream - {q} - set(choices["complete"]) - set(QUALIFICATION)):
+            f.append(f"QUAL_UNREACHED: {d} has no dependency path to {q}")
+    # 7. DUs that carry no requirement (reported, not fatal — listed in the plan)
     return f
 
 
@@ -295,7 +319,7 @@ MILESTONE_TEXT = {
 }
 
 
-def render(dus, edges, dotted, reqs, oqs, choices, seq, deps, findings, unreq, src_hash):
+def render(dus, edges, dotted, reqs, oqs, choices, seq, deps, findings, unreq, prov):
     by_du_reqs: dict[str, list[str]] = {}
     for rid, r in reqs.items():
         for d in r["dus"]:
@@ -330,8 +354,16 @@ def render(dus, edges, dotted, reqs, oqs, choices, seq, deps, findings, unreq, s
     w("# VAN Next — Deterministic Development Plan, Rev 1")
     w("")
     w("**Status:** `DRAFT / AWAITING_OWNER_APPROVAL`. No packet starts until the owner approves this plan.")
-    w(f"**Derived from:** `{BLUEPRINT.name}` §16.1, §16.2, §19.1 and `{DECISIONS.name}` (open questions), source SHA-256 `{src_hash}`.")
-    w("**Generator:** `plan/generate_plan.py`. Re-running it on the same inputs gives byte-identical output; `--check` validates, `--selftest` proves each check catches a deliberately broken input.")
+    w(f"**Derived from:** `{BLUEPRINT.name}` §16.1, §16.2, §19.1 and `{DECISIONS.name}` (open questions).")
+    w("")
+    w("| Input | SHA-256 (full file bytes) |")
+    w("|---|---|")
+    for k in ("blueprint", "owner_decisions", "generator"):
+        w(f"| `{prov[k]['path']}` | `{prov[k]['sha256']}` |")
+    w("")
+    w(f"Aggregate input digest `{prov['aggregate_input_sha256']}` = SHA-256 of the blueprint bytes, one newline byte, the decision-record bytes and the generator bytes. `PLAN_INPUT_PROVENANCE.json` records these values and the hashes of the generated plan.")
+    w("")
+    w("**Generator:** `plan/generate_plan.py`. Re-running it on the same inputs gives byte-identical output. `--check` validates the inputs **and** fails if this file is stale; `--selftest` proves each check catches a deliberately broken input.")
     w("")
     w("## 1. Rules")
     w("")
@@ -351,7 +383,7 @@ def render(dus, edges, dotted, reqs, oqs, choices, seq, deps, findings, unreq, s
         for x in findings:
             w(f"  - `{x}`")
     else:
-        w("- Findings: none. The DAG is acyclic; every requirement and every open question maps to a DU in the DAG; every DU has a lane; no DU depends on a later phase.")
+        w("- Findings: none. The DAG is acyclic; every requirement and every open question maps to a DU in the DAG; every DU has a lane; no DU depends on a later phase; every build unit has a dependency path to DU-25, DU-26 and DU-MR.")
     w(f"- DUs with no requirement row (kept, flagged for the freeze list): {', '.join(unreq) if unreq else 'none'}.")
     for d, why in choices["complete"].items():
         w(f"- {d} is not a packet: {why}")
@@ -401,7 +433,17 @@ def render(dus, edges, dotted, reqs, oqs, choices, seq, deps, findings, unreq, s
     for (p, lvl), items in waves.items():
         w(f"| {p} | {lvl} | {', '.join(items)} |")
     w("")
-    w("## 7. Exit evidence by requirement")
+    w("## 7. Open questions by packet")
+    w("")
+    w("Generated from the decision record, so packet numbers here are always current. Freeze lists cite this section instead of copying packet numbers.")
+    w("")
+    w("| Question | Gate | Packets |")
+    w("|---|---|---|")
+    for oid in sorted(oqs, key=lambda o: int(o.split("-")[1])):
+        pk = [f"{s['packet']} ({s['du']} {s['milestone']})" for s in seq if s["du"] in oqs[oid]["dus"]]
+        w(f"| {oid} | {oqs[oid]['blocks']} | {', '.join(pk) or '—'} |")
+    w("")
+    w("## 8. Exit evidence by requirement")
     w("")
     w("A DU's last packet exits only with every listed requirement's key acceptance (blueprint §16.1).")
     w("")
@@ -412,6 +454,31 @@ def render(dus, edges, dotted, reqs, oqs, choices, seq, deps, findings, unreq, s
         w(f"| {rid} | {', '.join(r['dus'])} | {r['acceptance']} |")
     w("")
     return "\n".join(L) + "\n"
+
+
+def provenance(bp_bytes: bytes, dec_bytes: bytes, gen_bytes: bytes) -> dict:
+    h = lambda b: hashlib.sha256(b).hexdigest()
+    return {
+        "blueprint": {"path": f"docs/design/van-next/{BLUEPRINT.name}", "sha256": h(bp_bytes)},
+        "owner_decisions": {"path": f"docs/design/van-next/{DECISIONS.name}", "sha256": h(dec_bytes)},
+        "generator": {"path": "docs/design/van-next/plan/generate_plan.py", "sha256": h(gen_bytes)},
+        "aggregate_input_sha256": h(bp_bytes + b"\n" + dec_bytes + gen_bytes),
+        "aggregate_algorithm": "sha256(blueprint_bytes + b'\\n' + decisions_bytes + generator_bytes)",
+    }
+
+
+def produce(bp_bytes: bytes, dec_bytes: bytes, gen_bytes: bytes):
+    bp, dec = bp_bytes.decode(), dec_bytes.decode()
+    dus, edges, dotted, reqs, oqs, findings = build(bp, dec)
+    seq, deps, level = order(dus, edges, PLAN_CHOICES)
+    prov = provenance(bp_bytes, dec_bytes, gen_bytes)
+    md = render(dus, edges, dotted, reqs, oqs, PLAN_CHOICES, seq, deps, findings, unrequired(dus, reqs, PLAN_CHOICES), prov)
+    js = json.dumps({"provenance": prov, "findings": findings, "packets": seq}, indent=1) + "\n"
+    return md, js, prov, findings, seq
+
+
+def stale(expected_md: str, on_disk_md: str) -> list[str]:
+    return [] if expected_md == on_disk_md else ["STALE_PLAN: the committed plan does not match its current inputs; regenerate it"]
 
 
 def build(bp_text: str, dec_text: str, choices=PLAN_CHOICES):
@@ -434,6 +501,7 @@ def selftest() -> int:
         "open question to unknown DU": (bp, dec.replace("| DU-29 |", "| DU-98 |", 1), PLAN_CHOICES, "OQ_DU_NOT_IN_DAG"),
         "DU without lane": (bp, dec, {**PLAN_CHOICES, "lane": {k: v for k, v in PLAN_CHOICES["lane"].items() if k != "DU-16"}}, "DU_NO_LANE"),
         "phase inversion": (bp, dec, {**PLAN_CHOICES, "phase": {**PLAN_CHOICES["phase"], "DU-01": "P4"}}, "PHASE_INVERSION"),
+        "feature unit cut off from qualification": (bp.replace("  K --> Z\n", "", 1), dec, PLAN_CHOICES, "QUAL_UNREACHED"),
     }
     bad = 0
     for name, (b, d, ch, expect) in cases.items():
@@ -442,23 +510,35 @@ def selftest() -> int:
         ok = any(x.startswith(expect) for x in got)
         print(f"{'caught' if ok else 'MISSED'}: {name} → {[x for x in got if x.startswith(expect)][:1] or got[:1]}")
         bad += 0 if ok else 1
+    # staleness: a plan produced from the real inputs must be flagged stale against altered inputs
+    gen = GENERATOR.read_bytes()
+    real_md = produce(BLUEPRINT.read_bytes(), DECISIONS.read_bytes(), gen)[0]
+    altered_md = produce(BLUEPRINT.read_bytes(), DECISIONS.read_bytes() + b"\n", gen)[0]
+    got = stale(altered_md, real_md)
+    print(f"{'caught' if got else 'MISSED'}: stale plan → {got[:1]}")
+    bad += 0 if got else 1
     return 1 if bad else 0
 
 
 def main(argv):
     if "--selftest" in argv:
         return selftest()
-    bp, dec = BLUEPRINT.read_text(), DECISIONS.read_text()
-    dus, edges, dotted, reqs, oqs, findings = build(bp, dec)
+    md, js, prov, findings, seq = produce(BLUEPRINT.read_bytes(), DECISIONS.read_bytes(), GENERATOR.read_bytes())
+    if "--check" in argv:
+        findings = findings + stale(md, OUT_MD.read_text() if OUT_MD.exists() else "")
+        for x in findings:
+            print("FINDING", x)
+        print(f"{len(findings)} findings")
+        return 1 if findings else 0
     for x in findings:
         print("FINDING", x)
-    if "--check" in argv:
-        return 1 if findings else 0
-    seq, deps, level = order(dus, edges, PLAN_CHOICES)
-    src_hash = hashlib.sha256((bp + "\n" + dec).encode()).hexdigest()[:16]
-    md = render(dus, edges, dotted, reqs, oqs, PLAN_CHOICES, seq, deps, findings, unrequired(dus, reqs, PLAN_CHOICES), src_hash)
     OUT_MD.write_text(md)
-    OUT_JSON.write_text(json.dumps({"source_sha256_16": src_hash, "findings": findings, "packets": seq}, indent=1) + "\n")
+    OUT_JSON.write_text(js)
+    h = lambda b: hashlib.sha256(b).hexdigest()
+    OUT_PROV.write_text(json.dumps({**prov, "generated_plan_md_sha256": h(md.encode()), "generated_plan_json_sha256": h(js.encode()),
+                                    "packet_count": len(seq), "du_count": len({x["du"] for x in seq}),
+                                    "all_build_units_reach_qualification": not any(x.startswith("QUAL_") for x in findings),
+                                    "independent_f0_f15_certificate": "NOT_ISSUED"}, indent=1) + "\n")
     print(f"{len(seq)} packets, {len(findings)} findings → {OUT_MD.name}")
     return 1 if findings else 0
 

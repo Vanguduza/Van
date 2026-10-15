@@ -1,0 +1,22 @@
+{
+ "blueprint": {
+  "path": "docs/design/van-next/VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9_20261015.md",
+  "sha256": "af8ca74906e3f5a7f4958b593e28e78767ac4024768588e654495c7d8893e772"
+ },
+ "owner_decisions": {
+  "path": "docs/design/van-next/VAN_NEXT_OWNER_DECISIONS_REV1.md",
+  "sha256": "61909b8adef17d596d2bd91015991eea48a72861d46825dcdf3b7b1b8c3de81f"
+ },
+ "generator": {
+  "path": "docs/design/van-next/plan/generate_plan.py",
+  "sha256": "b99e8c392d690b31bd2e513b70d33cf3f5f01c3055a132c2ea37fbb269988795"
+ },
+ "aggregate_input_sha256": "78033ecdfdb1bb7fd5dba71c63625166cb902c2b27f6765b173cdb3851c44b1f",
+ "aggregate_algorithm": "sha256(blueprint_bytes + b'\\n' + decisions_bytes + generator_bytes)",
+ "generated_plan_md_sha256": "527fe77755a5909b711f8daea6bde5c754f8e755f5097441727088adae6f04bd",
+ "generated_plan_json_sha256": "040b21b7f3209c261f986923f0c96f0a42df4383b6b23c7036e9d817d2f42079",
+ "packet_count": 71,
+ "du_count": 48,
+ "all_build_units_reach_qualification": true,
+ "independent_f0_f15_certificate": "NOT_ISSUED"
+}

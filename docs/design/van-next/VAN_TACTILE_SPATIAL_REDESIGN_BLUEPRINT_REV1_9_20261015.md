@@ -1,9 +1,9 @@
 # VAN Tactile Spatial Experience — Complete Frontend Rebuild, Functional Preservation & Capability Expansion
 
-**Document ID:** `VAN-TSE-FR-REV1.8-20261015`  
-**Revision:** 1.8 — **freeze candidate** (supersedes Rev 1.7; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.7 are in git history). Development follows `plan/VAN_NEXT_DEVELOPMENT_PLAN_REV1.md`, derived from this document; freeze criteria in `VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_8.md`  
+**Document ID:** `VAN-TSE-FR-REV1.9-20261015`  
+**Revision:** 1.9 — **freeze candidate** (supersedes Rev 1.8; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.8 are in git history). Development follows `plan/VAN_NEXT_DEVELOPMENT_PLAN_REV1.md`, derived from this document; freeze criteria in `VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_9.md`  
 **Date:** 15 October 2026 (Africa/Harare)  
-**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-22), which captures the two locked dark/light references and the 15 October review decisions  
+**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-27), which captures the two locked dark/light references and the 15 October review decisions  
 **Repository:** [`Vanguduza/Van`](https://github.com/Vanguduza/Van)  
 **Audit baseline A:** merged `main` SHA `8eb1889822fc8a83f219977c15340172e16acd91`  
 **Audit baseline B:** unmerged, draft owner-core [PR #93](https://github.com/Vanguduza/Van/pull/93) SHA `dfc1557ab99ad8d41cf84714e1bb671e89b045e6`  
@@ -13,6 +13,24 @@
 **Companion artifacts:** `VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.md` (78 surfaces + additive surfaces; CSV and JSON for automation), `VAN_NEXT_OWNER_DECISIONS_REV1.md`, `reference/` (locked originals and relabelled Rev 1.1 references).  
 
 > **Executive decision:** Rebuild the entire visible frontend using the newly accepted Tactile Spatial UI, not the old VAN panels or older aesthetic blueprints; comprehensively inspect and preserve qualified product functions, underlying service/contracts, security, existing worthwhile UX flows, Floating VAN and interaction behaviours. Introduce the state-aware Home orb, small quick-access sheet, richer Trading entry points, full news intelligence, and genuinely live project/task/agent spatial workflow diagrams. Reconcile large, unmerged source candidates before porting; no silent legacy-file imports or feature loss.
+
+## Rev 1.9 change log (15 October 2026) — independent audit corrections
+
+An independent audit of Rev 1.8 against the Rev 2 pack (`research/VAN_NEXT_REV18_INDEPENDENT_AUDIT_RESPONSE_20261015.md`) raised 22 findings, AUD-01…AUD-22. Each claim was checked against the repository before it was adopted. The owner decided E1–E5 (OD-23…OD-27).
+
+| # | Change | Finding | Where |
+|---|---|---|---|
+| V1 | Six feature units now feed integrated verification. The plan generator rejects any build unit that does not reach DU-25, DU-26 and DU-MR; a self-test breaks this check on purpose. | AUD-01 | §16.2, `plan/` |
+| V2 | The impossible "cancelled at fill time" promise is replaced: worst-case risk is reserved at placement, cancellation is attempted before an ineligible fill, and an unexpected fill is reconciled. | AUD-02 | §7.4.5 |
+| V3 | **VAN-owned state machines** with the missing recovery, race and failure transitions, checked by a model checker whose rules are each shown to fail when broken. | AUD-03, AUD-10, AUD-19 | §7.9.1, §7.9.12, §7.8.6, `contracts/` |
+| V4 | The one-tap news ticket becomes a typed, single-use `NewsArmedTicketGrant`. Both sources must agree (OD-24). | AUD-04 | §8.10.5 |
+| V5 | An under-margin withdrawal is refused, not warned about. The "unmanaged by VAN" escape is removed (OD-25). Cancelling a deletion never restores destroyed credentials. | AUD-05, AUD-06, AUD-10 | §7.9.4, §7.9.5, §7.9.10 |
+| V6 | Manual adds only to **winning** trades (OD-23), with anti-martingale tests. | AUD-21 | §7.4.6 |
+| V7 | Lints narrowed so legitimate terms survive: "probability" is banned only as uncalibrated trade confidence (market-implied likelihood and PBO are allowed); release checks target fixtures, not real demo-account labels. | AUD-11, AUD-12 | §2.6, §8.6, §12.6, §18 |
+| V8 | The Rev 2 crosswalk covers all 18 product truths and 93 features (OD-27). Nine partly covered features get requirement rows VAN-NX-061…069. The 171-atom mapping is an obligation of DU-01. | AUD-07, AUD-08, AUD-16 | §16.1, `crosswalk/` |
+| V9 | VAN-NX-026 (REA research) is assigned to DU-01 as a research-input admission record, not left unpacketed. | AUD-09 | §16.1 |
+| V10 | Plan provenance: full SHA-256 of every input file, and a staleness check that fails if the committed plan does not match its inputs. | AUD-13 | `plan/` |
+| V11 | Stale text corrected: packet references are by DU, not packet number; REA status; latency and cost marked as estimates; the v1→v2 account API bridge; OQ-05 signed before PKT-001 (OD-26). | AUD-14, AUD-15, AUD-17, AUD-18 | §0.3, §7.8.11, §8.10, §7.9.12, §20.2 |
 
 ## Rev 1.8 change log (15 October 2026) — Rev 2 pack merged in
 
@@ -35,7 +53,7 @@ The owner observed that building had started before the blueprint was final and 
 | # | Change | Where |
 |---|---|---|
 | Z1 | **Chart engine removed from the rebuild branch.** It is preserved, unqualified, on branch `spike/van-next-chart-engine-20261015` (commit `30bc2d0`) as reference material for the DU-10 contract. The verification harness without it: 106 suites, 986 tests, 0 failures (the pre-engine baseline). | §7.8.11, §20.2 |
-| Z2 | **Deterministic development plan** generated from §16.1, §16.2, §19.1 and the open questions by `plan/generate_plan.py`: 68 packets, validated (acyclic, every requirement and open question mapped, no phase inversion), with a self-test that proves each check catches a broken input. | §16.5, `plan/` |
+| Z2 | **Deterministic development plan** generated from §16.1, §16.2, §19.1 and the open questions by `plan/generate_plan.py`: 68 packets at Rev 1.7 (the count changes with each revision; see the plan), validated (acyclic, every requirement and open question mapped, no phase inversion), with a self-test that proves each check catches a broken input. | §16.5, `plan/` |
 | Z3 | Requirement rows added for the two DUs that had none, restating existing text: VAN-NX-053 (DU-01, §17 F0) and VAN-NX-054 (migration/retirement, §19.1 P5–P6). | §16.1 |
 | Z4 | OQ-05 (signature) aligned with §19.1: needed by the end of P0 (DU-01 exit); OQ-17 assigned to the replay unit DU-10c. | Decision record |
 | Z5 | Freeze criteria and their status listed for owner approval. | `VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_7.md` (now `_REV1_8.md`) |
@@ -146,7 +164,7 @@ VAN Next is one Android application with two photometrically and structurally co
 
 - No trading-policy amendment, broker activation, production order, live fund movement or privileged bypass is authorised by this design document. Manual trading (§7.4) needs its own owner-signed mandate version before any live use; the design does not grant it.
 - No automatic merge of PR #93/#95/#97/#92/#70/#72/#77 or deletion of legacy source on the basis of visual preferences alone.
-- No installation or running of REA on `van-trading-core` until the owner separately says that host is ready.
+- No installation or running of REA on `van-trading-core` until the owner separately says that host is ready. *(Superseded by later owner instruction: OD-15 and OD-17 directed the REA study. Its 39 static records were read on 15 October; no live Android runtime trial was performed.)*
 - No VPN, WireGuard, firewall, OCI/IAM, Cloudflare tunnel, host credentials, device pairing or release-signing changes in the frontend programme without distinct operational authorisation and evidence.
 - No invented current balances, prices, performance, task counts, agent states, news, subscriptions, sources or completion percentages in shipping screens.
 - No new standalone page merely because a capability exists. Preserve sheet, modal, inline, activity and intake semantics where those are safer or more coherent.
@@ -258,7 +276,7 @@ The locked images are concept composites (phone frames, taglines, illustrative n
 
 ### 2.6 Label reconciliation (owner decision OD-02)
 
-Mockup text uses the system's own vocabulary. The relabelled references in `reference/` apply this table; native screens take labels from one string catalogue built from it, and a lint rule rejects "probability" anywhere in trading UI strings.
+Mockup text uses the system's own vocabulary. The relabelled references in `reference/` apply this table; native screens take labels from one string catalogue built from it, and a lint rule rejects **uncalibrated certainty wording** in trading UI strings: "high probability" or "probability" attached to a VAN trade candidate or confidence band, "guaranteed" and win-rate claims. Source-qualified probabilities are allowed when they are labelled with their market, time and limitation: prediction-market implied likelihood (§8.4) and PBO in validation (§7.4.13). `RULES_V0_UNCALIBRATED` scores are always called *confidence*, never a chance of winning.
 
 | Screen | Mockup label | System label | Source of truth |
 |---|---|---|---|
@@ -600,7 +618,14 @@ VERIFIED_SUCCESS | REFUSED(reason) | FAILED | OUTCOME_UNKNOWN
 
 #### 7.4.5 Entry types
 
-Market (`MARKET_WITH_SLIPPAGE_CAP` template) and limit or stop pending orders (`LIMIT_AT_TOUCH` and related sealed templates). A pending manual order expires (default end of session) and is re-checked against risk limits when it fills; if limits would be breached at fill time it is cancelled, not filled.
+Market (`MARKET_WITH_SLIPPAGE_CAP` template) and limit or stop pending orders (`LIMIT_AT_TOUCH` and related sealed templates). A pending manual order expires (default end of session).
+
+**Pending orders and risk (Rev 1.9, AUD-02).**
+- **While resting:** the order reserves its **full worst-case risk, margin and exposure**, including partial fills and sibling orders. New pending orders and modifications pass the current risk gate before transmission.
+- **If the order becomes ineligible:** VATI watches risk, news blackouts, mandate or mode changes and data freshness. When an order becomes ineligible, VATI tries to cancel or replace it **before** it fills, where the broker protocol allows.
+- **If it fills anyway:** a broker can execute a resting order before a cancellation arrives, so VAN never claims it can prevent a fill after the fact. On an unexpected fill, VAN keeps the broker's result as authoritative, reconciles family and portfolio exposure at once, applies authorised protection and risk-reduction controls, and raises Attention.
+- **Unknown outcomes:** never resent automatically.
+- **Tests:** a cancel racing a fill, partial fills, several outstanding orders, and a lost response.
 
 #### 7.4.6 Adding to positions
 
@@ -608,10 +633,18 @@ Every add joins the existing trade's **position family** (`lifecycle/family.py`)
 
 | Add to… | How it works for the owner | What governs it |
 |---|---|---|
-| **A manual trade** (OD-08) | Exactly like a new manual entry: same screen, same automatic stop inside the order, same optional TP, same review and biometric approval. There is no extra "must be winning" condition. | The manual risk profile (§7.4.2) applied to the **family**: the add's risk plus the family's existing open risk must fit the `owner.manual` budget and account limits; `max_positions_per_instrument` caps the number of adds; averaging down is allowed only within those same limits. |
+| **A winning manual trade** (OD-08, OD-23) | Exactly like a new manual entry: same screen, same automatic stop inside the order, same optional TP, same review and biometric approval. **Offered only while the position is winning**: in profit on a fresh quote at the moment of approval. | The manual risk profile (§7.4.2) applied to the **family**: the add's risk plus the family's existing open risk must stay within the family's **original** risk budget, the `owner.manual` budget and account limits. `max_positions_per_instrument` caps the number of adds. **No adds to a losing position** (no averaging down; `martingale` and `unlimited_averaging_down` remain hard-forbidden). |
 | **An automatic (VATI) trade** (OD-10) | From the trade's position screen: "Add to this trade". Same review sheet; the system shows which of the trade's rules allowed or refused the add. | **That trade's own risk profile**: its strategy's risk budget (`risk_budget_for(strategy_id)`), its strategy's `ScalePolicy` (e.g. the position has already paid for itself, family healthy, time since last add, each add smaller than the last), its family risk envelope, preservation having nothing outstanding, and the account's temperament. The add is attributed to the strategy family with `origin=OWNER_MANUAL`. A strategy with no registered scale policy (`NO_SCALING`) cannot be added to manually either. |
 
-In both cases the add's stop is placed inside its order, and the family stop rule applies: a new add can never make the family's worst-case loss larger than its profile allows. The automatic expansion engine (`lifecycle/expansion.py`) remains in its current SHADOW mode; owner-requested adds use the same scale-policy checks without waiting for that engine to go live.
+In both cases the add's stop is placed inside its order, and the family stop rule applies: a new add can never make the family's worst-case loss larger than its profile allows.
+
+**Anti-martingale tests (AUD-21):**
+- A losing position offers no add, and a direct request is refused.
+- A position that turns losing between review and approval refuses the add at approval.
+- A sequence of adds never takes family risk above its original budget.
+- Simultaneous fills of two adds are counted once against the family.
+- Concentration across currency legs is included.
+- A loss streak never raises the size of the next add. The automatic expansion engine (`lifecycle/expansion.py`) remains in its current SHADOW mode; owner-requested adds use the same scale-policy checks without waiting for that engine to go live.
 
 #### 7.4.7 Hand to VAN, and take back (OD-09)
 
@@ -730,9 +763,9 @@ An isolated historical chart session that steps bar by bar through past data, fo
 
 #### 7.8.6 Complete order vocabulary (REA-VAN-005, -006)
 
-- Backend additions, venue by venue as each adapter supports them: **stop-limit** entries; **fill policies** (fill-or-kill, immediate-or-cancel, return) where the venue offers them; **specified expiry** in addition to day and good-till-cancelled; and a distinct **WORKING** state for a pending order resting at the broker (today `ACCEPTED` covers it).
+- Backend additions, venue by venue as each adapter supports them: **stop-limit** entries; **fill policies** (fill-or-kill, immediate-or-cancel, return) where the venue offers them; **specified expiry** in addition to day and good-till-cancelled; and a distinct broker-confirmed resting state. In code it is **`PLACED`**, and the screen label is *Working* (AUD-19). Today `ACCEPTED` covers it. Each venue adapter maps its raw states (MT5, cTrader, Deriv) to the canonical enum with tests, and an unknown raw state becomes `OUTCOME_UNKNOWN`, never success.
 - A per-venue **capability matrix** decides which order types, fill policies and expiries the app offers; the app never offers what the venue cannot do.
-- The app never collapses order states into one spinner or "success". The state names follow the pack's `VNX-SM-TRADE_ORDER`: `DRAFT, RISK_REVIEW, OWNER_REVIEW, AUTHORIZED, BROKER_PENDING, PLACED (working), PARTIAL, FILLED, MODIFY_PENDING, CANCEL_PENDING, CANCELLED, REJECTED, EXPIRED, OUTCOME_UNKNOWN`. Each is shown distinctly, and an uncertain result is reconciled against the broker before any repeat is allowed. A stop request is not a cancellation, and a partial fill still carries exposure.
+- The app never collapses order states into one spinner or "success". The state names follow `contracts/VAN_STATE_MACHINES_REV1_9.json` (`VAN-SM-TRADE_ORDER`, extended from the pack's `VNX-SM-TRADE_ORDER` with race transitions): `DRAFT, RISK_REVIEW, OWNER_REVIEW, AUTHORIZED, BROKER_PENDING, PLACED (working), PARTIAL, FILLED, MODIFY_PENDING, CANCEL_PENDING, CANCELLED, REJECTED, EXPIRED, OUTCOME_UNKNOWN`. Each is shown distinctly, and an uncertain result is reconciled against the broker before any repeat is allowed. A stop request is not a cancellation, and a partial fill still carries exposure.
 - Chart handles for entry, stop and take-profit create draft proposals only; the §7.4 flows execute them. Symbol or unit conflicts (different tick or lot units across sources) block the proposal instead of rounding silently.
 
 #### 7.8.7 Chart observations feed VAN's research (REA-VAN-012)
@@ -757,7 +790,7 @@ A native chart engine was built ahead of the plan (Rev 1.6) and extended from th
 
 **Status:** `SPIKE / UNQUALIFIED`. It has no acceptance contract, was not reviewed, and is not wired to any screen. Its Android host was never compiled. It is no evidence for any VAN-NX requirement.
 
-**Use:** when PKT-023 (DU-10 M1) opens, its contract is written first, from §7.8 and the REA findings (`research/VAN_REA_EVIDENCE_STUDY_39_RECORDS_20261015.md` §3). The spike may then be reviewed against that contract, and parts may be adopted only through the packet's own review and tests. The design lessons it captured remain inputs to that contract:
+**Use:** when the first DU-10 packet (M1; its number is in the plan) opens, its contract is written first, from §7.8 and the REA findings (`research/VAN_REA_EVIDENCE_STUDY_39_RECORDS_20261015.md` §3). The spike may then be reviewed against that contract, and parts may be adopted only through the packet's own review and tests. The design lessons it captured remain inputs to that contract:
 - load-state handling (no drafts while loading, late snapshots refused);
 - unconfirmed stops never hidden;
 - the ruler, magnet, indicator memory and levels;
@@ -808,7 +841,7 @@ They follow `contracts/ACCOUNTS_FUNDS_TECHNICAL_CONTRACT.md`.
 
 #### 7.9.1 Account lifecycle
 
-State names follow the pack's `VNX-SM-ACCOUNT_LIFECYCLE`. The happy path is `UNLINKED → DISCOVERED → AUTH_PENDING → LINKED_READ_ONLY → (KYC_PENDING) → ACTIVE_ELIGIBLE`. `RESTRICTED` carries a reason (credentials expired, broker disabled the account, kill switch, verification failed).
+State names follow `contracts/VAN_STATE_MACHINES_REV1_9.json` (`VAN-SM-ACCOUNT_LIFECYCLE`). It extends the pack's machine with unlink cancellation (`RELINK_REQUIRED`), recovery from restriction (`REAUTH_PENDING`) and refused or unknown remote closure (AUD-03). The happy path is `UNLINKED → DISCOVERED → AUTH_PENDING → LINKED_READ_ONLY → (KYC_PENDING) → ACTIVE_ELIGIBLE`. `RESTRICTED` carries a reason (credentials expired, broker disabled the account, kill switch, verification failed).
 
 Leaving VAN and closing at the broker are two separate paths that never merge:
 - **Local:** `UNLINK_REQUESTED → (UNLINK_BLOCKED) → UNLINKED_LOCAL`. During the grace period (OQ-15) the unlink can be cancelled.
@@ -837,8 +870,9 @@ Label, colour and icon, default chart and instruments; trading mode and risk bud
 #### 7.9.4 Disconnecting and deleting
 
 - **Disconnect** stops trading on the account, revokes or destroys its credentials immediately and keeps all history.
-- **Delete** schedules archiving after a grace period (default 7 days, OQ-15) with a "cancel deletion" banner, then archives; history is kept under the retention policy, credentials are destroyed at once.
-- Both are **blocked while the account has open positions or working orders**: the owner must close or cancel them, or explicitly mark them "unmanaged by VAN" first. Pending OAuth attempts are discarded and strategies bound to the account are unassigned, each listed on the confirmation sheet.
+- **Delete** schedules archiving after a grace period (default 7 days, OQ-15) with a "cancel deletion" banner, then archives. History is kept under the retention policy; credentials are destroyed at once.
+- **Both are blocked** while the account has open positions, working orders, unsettled or in-flight funds, unknown-outcome operations or live risk leases (OD-25). The owner must close, cancel or let them settle first. There is **no** "mark unmanaged" escape. The block is checked against fresh broker and VATI state; a stale "no positions" never passes. Pending OAuth attempts are discarded and strategies bound to the account are unassigned, each listed on the confirmation sheet.
+- **Cancelling a deletion** restores the record, its history and its link intent. It does **not** restore destroyed credentials, OAuth grants or broker entitlements. The account returns as `RELINK_REQUIRED`: re-authentication, broker readback and, where needed, A4 re-enrolment come before any trading. A cancellation never resurrects an account the broker has already closed.
 
 #### 7.9.5 Funding
 
@@ -846,7 +880,7 @@ Label, colour and icon, default chart and instruments; trading mode and risk bud
 
 1. **Deposits, withdrawals and transfers in VAN** (§7.9.12). Each is offered only where a fresh capability check says the account supports it. It runs through the provider's verified API or its verified hosted flow, and counts as done only on broker readback. Where a provider supports neither, VAN shows why and links to the broker's cashier.
 2. **Funding ledger:** deposits, withdrawals, internal transfers, credits and bonuses, and fees are read from the broker's balance-operation history (MT5 balance and credit deals, cTrader cash-flow history, Deriv statement), reconciled, timestamped and shown per account. Unclassified operations are flagged for the owner to label.
-3. **Flow-adjusted risk and performance (fixes F-033):** drawdown is measured against a peak adjusted for external flows (a withdrawal lowers the peak by the same amount; a deposit raises it), daily loss excludes the day's net flows, and performance is reported time-weighted so deposits and withdrawals do not look like profits or losses. Broker credits and bonuses that cannot be withdrawn are excluded from risk capital by default. A withdrawal request that would leave open positions under-margined triggers a warning on the account screen.
+3. **Flow-adjusted risk and performance (fixes F-033):** drawdown is measured against a peak adjusted for external flows (a withdrawal lowers the peak by the same amount; a deposit raises it), daily loss excludes the day's net flows, and performance is reported time-weighted so deposits and withdrawals do not look like profits or losses. Broker credits and bonuses that cannot be withdrawn are excluded from risk capital by default. A withdrawal that would leave open positions under-margined is **refused** with its reason (AUD-05). The refusal is a server-side check against fresh provider margin, open positions, working orders, reserved funding intents and quote age. Pending or unknown collateral fails closed.
 
 #### 7.9.6 All accounts together
 
@@ -866,7 +900,7 @@ Monthly statements and yearly summaries per account (trades, fees, swaps, fundin
 
 #### 7.9.10 Account acceptance tests
 
-A withdrawal does not move drawdown tiers or the daily-loss limit (F-033 regression, using the probe above); a deposit does not mask a loss; delete is blocked with open positions or working orders and lists them; cancel during the grace period restores the account; credentials are destroyed on disconnect with a receipt; rotation never leaves the account without valid credentials; OAuth cancel and timeout discard the attempt; investor-password MT5 accounts cannot be put in an order-sending mode; demo and live never sum; every mutating action fails without device-signed owner approval; an unclassified balance operation is flagged, not guessed. From §7.9.11: an OAuth attempt interrupted by killing the app resumes or reports a named lost state; delete fails without fresh re-authentication and locks after repeated failures; a server migration triggers re-verification; position sizing uses the broker's leverage tier for the intended volume.
+A withdrawal does not move drawdown tiers or the daily-loss limit (F-033 regression, using the probe above); a deposit does not mask a loss; delete and disconnect are blocked with open positions, working orders, in-flight funds or unknown outcomes, and list them; there is no unmanaged escape; cancel during the grace period restores the record as `RELINK_REQUIRED` and never revives destroyed credentials or a broker-closed account; credentials are destroyed on disconnect with a receipt; rotation never leaves the account without valid credentials; OAuth cancel and timeout discard the attempt; investor-password MT5 accounts cannot be put in an order-sending mode; demo and live never sum; every mutating action fails without device-signed owner approval; an unclassified balance operation is flagged, not guessed. From §7.9.11: an OAuth attempt interrupted by killing the app resumes or reports a named lost state; delete fails without fresh re-authentication and locks after repeated failures; a server migration triggers re-verification; position sizing uses the broker's leverage tier for the intended volume.
 
 #### 7.9.11 Additions from the REA records (OD-17)
 
@@ -891,7 +925,7 @@ A withdrawal does not move drawdown tiers or the daily-loss limit (F-033 regress
 
 The check runs fresh before a money button is enabled and again at submission. Nothing in Android hard-codes "this broker supports withdrawals". Unknown is not available.
 
-**State machines** (pack `STATE_MACHINES.json`):
+**State machines** (`contracts/VAN_STATE_MACHINES_REV1_9.json`, model-checked; it extends the pack's machines with the withdrawal `FAILED` state, unknown-outcome reconciliation and compensating reversals):
 - **Deposit:** `DRAFT → QUOTED → AWAITING_OWNER → AUTHORIZED → PROVIDER_PENDING → SENT → PENDING_SETTLEMENT → SETTLED`.
 - **Withdrawal:** `DRAFT → BENEFICIARY_VERIFIED → QUOTED → AWAITING_A4 → AUTHORIZED → SUBMITTED → PROVIDER_PENDING → PAID`.
 - **Alternatives for both:** `REJECTED | FAILED | OUTCOME_UNKNOWN | REVERSED | EXPIRED`.
@@ -906,6 +940,15 @@ The check runs fresh before a money button is enabled and again at submission. N
 - the quote, the beneficiary digest and the expiry.
 
 A changed quote needs re-approval, and the amount is immutable after approval. Beneficiaries are masked vault references. Card numbers, CVVs, bank secrets, OAuth codes and one-time passwords are never stored in Android or written to logs. A newly added beneficiary carries a safety delay before its first withdrawal.
+
+**API migration (AUD-17).** The new capability and funds endpoints sit beside today's `GET /v1/trading/accounts` and `POST /v1/trading/accounts/action` through a compatibility bridge:
+- stable internal account IDs;
+- regression tests for `account_upsert` and the existing signed OAuth flows;
+- capability revisions that expire;
+- verified provider web origins;
+- redaction of source data.
+
+A method never appears enabled just because a button exists.
 
 **Rollout.** One admitted provider rail first (OQ-19), in sandbox or demo, then failure and reversal reconciliation, then more providers only with evidence. No production provider credentials or live transfers are used during preparation.
 
@@ -1057,7 +1100,7 @@ Examples of "What VAN is doing" lines:
 | shadow | Shadow-mode paths are shown under Evidence as "VAN would have…", never as an action |
 | degraded | "Only one news source is responding since 09:12. VAN is deferring new trades around the 13:30 release." |
 
-Words never used in News: "buy signal", "sell signal", "probability", "guaranteed", "will rise/fall". History is stated as counts ("10 of 14"), not as a chance of winning.
+Words never used in News: "buy signal", "sell signal", "guaranteed", "will rise/fall", and "probability" except as a labelled market-implied likelihood (§8.4). History is stated as counts ("10 of 14"), not as a chance of winning.
 
 ### 8.7 Contracts
 
@@ -1120,7 +1163,7 @@ So the bundle can trade news live, but it will not be first. VAN's edge has to c
 | Context and corroboration | investingLive RSS, central-bank RSS, SEC EDGAR Atom, GDELT raw files | Free | Verified live |
 | History | ALFRED first releases, Philadelphia Fed real-time data, GDELT, Dukascopy/TrueFX ticks; Massive (formerly Polygon) $49/mo for clean 1-minute FX history | Free to $49/mo | As in the research report |
 
-Indicative total for the full bundle: about **$230–650 per month** depending on squawk and calendar choice, before X usage is measured. The cheapest workable configuration (official pages + EODHD + FinancialJuice paid if it has an API + free context feeds) is around **$85/month**, but with a single fast headline source. Final selection is OQ-06 and needs vendor review of APIs, latency guarantees and licences; nothing above is purchased or chosen by this blueprint.
+Indicative total for the full bundle (**vendor research estimates, not verified service levels**; each source is admitted only with its measured p50/p95/p99 latency, outages and current terms): about **$230–650 per month** depending on squawk and calendar choice, before X usage is measured. The cheapest workable configuration (official pages + EODHD + FinancialJuice paid if it has an API + free context feeds) is around **$85/month**, but with a single fast headline source. Final selection is OQ-06 and needs vendor review of APIs, latency guarantees and licences; nothing above is purchased or chosen by this blueprint.
 
 #### 8.10.3 Scheduled releases: armed plans
 
@@ -1149,7 +1192,19 @@ At the release second VAN fetches the official value, computes the surprise agai
 The owner can trade news manually through the same bundle:
 
 - **News Live screen**: live squawk and official headlines as they arrive (source, status, seconds since release), countdown to armed releases, the history card ("last 14 releases: EURUSD fell 10 times, typical 42 pips, settles in 25 min").
-- **Armed manual ticket**: before a release the owner prepares a ticket — instrument, maximum risk, stop and TP from history, and which direction to take for an upside or downside surprise — and signs it with biometrics in advance. The signature is bound to that ticket, that event and a short window (e.g. T−10 min to T+60 s). At the release the owner needs **one tap**, no biometric step, so the order goes out in under a second of the decision. Outside the window or with any parameter changed, the ticket is void.
+- **Armed manual ticket**: before a release the owner prepares a ticket and signs it with biometrics in advance. The ticket covers the instrument, maximum risk, stop and TP from history, and which direction to take for an upside or downside surprise. At the release the owner needs **one tap**, with no biometric step.
+- **The pre-signature is a typed, narrow grant** (`NewsArmedTicketGrant`, Rev 1.9, AUD-04), bound to:
+  - the account and the owner's device;
+  - the exact event instance and event strategy;
+  - the direction-rule digest and the maximum risk in exact minor units;
+  - the stop-policy and limit-policy revisions (spread, slippage, quote age, price bounds);
+  - the mandate digest;
+  - the earliest-use and expiry times (e.g. T−10 min to T+60 s), and a one-use nonce.
+- **What the tap can do:** choose only within that envelope. The order goes out only if:
+  - **both sources have delivered the figure and agree** (OD-24, as OD-13 requires for armed plans);
+  - the current mandate, account state and VATI risk gate pass;
+  - the nonce is unused.
+- **What voids it:** any change to the stop policy, the mandate or source health, a feed failure, quote drift or the window expiring voids the grant. No model, chart or bridge can sign one. Before any live use, an independent authority review and owner acceptance are required.
 - After the release, ordinary manual entries (§7.4) remain available, with the brief and history shown on the review sheet.
 
 #### 8.10.6 Infrastructure and latency discipline
@@ -1420,8 +1475,8 @@ The new UI must look and behave like the locked design, not like the old app wea
 1. **Separate Gradle modules.** `:van-next:ui` (screens, components, theme) depends only on `:van-next:contracts` (view-state types, ports, route IDs) and the admitted domain modules listed in `VAN_NEXT_ADMITTED_DEPENDENCIES.json`. Legacy presentation packages (`command/*` screens, `trading/ui`, `design/VanTokens`, `design/components`, `overlay` renderers, legacy aura renderers) are **not on its classpath**, so importing them fails compilation instead of relying on a lint warning.
 2. **Adapters are the only bridge.** Legacy functions reach the new UI through port adapters in `:van-next:bridge`, which may call legacy controllers and repositories but exports only `:van-next:contracts` types. Copy-pasting a legacy composable into the new module is rejected in review and caught by a duplicate-code check against the legacy UI packages.
 3. **Token-only styling.** Colours, dimensions, radii, elevation and motion come from the `:van-next:ui` design tokens; a lint rule rejects literal colours and dimensions in screens.
-4. **One string catalogue** built from §2.6; a lint rule rejects "probability", "signal" and other banned trading words in UI strings.
-5. **No preview data in release.** Preview fixtures live in a debug-only source set; a release-build check fails if any fixture class or `DEMO / NOT LIVE` string is present.
+4. **One string catalogue** built from §2.6. A lint rule rejects uncalibrated certainty wording (§2.6), "signal" and other banned trading phrases in UI strings. A positive test proves labelled market-implied likelihood and PBO text pass.
+5. **No preview data in release.** Preview fixtures live in a debug-only source set. A release-build check fails if any **fixture or mock class, preview asset or fixture source set** is present, checked by compiled source-set and asset provenance, not by searching UI strings. `DEMO / NOT LIVE` is a fixture watermark. Real demo and read-only account badges ("Demo", "Read-only") are legitimate production labels. A mutation test injects mock data and must fail the build; a positive test shows a real demo account badge renders.
 6. **Admission record for exceptions.** Any new dependency of `:van-next:ui` is added to the admitted-dependency file with a reason, owner, expiry and replacement plan; the file is hashed and the hash is checked in CI.
 7. **Visual check.** Screenshot tests compare each new screen with the owner-approved native goldens (§2.5) in both themes; "old hierarchy in new colours" fails VA8.
 
@@ -1568,7 +1623,7 @@ Each requirement ID must have Product Truth binding, one or more Development Uni
 | VAN-NX-023 | No-feature-loss and no-old-UI-import admission | DU-24 | Static lint + route/feature bijection |
 | VAN-NX-024 | DIAL Zuul and independent verification | DU-25 | Every applicable F0–F15 gate has receipt |
 | VAN-NX-025 | Real S24 Ultra dark/light visual and functional acceptance | DU-26 | Owner on-device decision, immutable APK |
-| VAN-NX-026 | REA architectural improvement gate, versioned changes | DU-27 | Research recommendation with evidence; owner-ready scheduling |
+| VAN-NX-026 | REA architectural improvement gate, versioned changes | DU-01 | Research-input admission record (`RESEARCH_INPUT_ACCEPTANCE.json`): the 39 REA record IDs and hashes, APK identities, static-only limits and owner acknowledgement; DU-27 supplies the research |
 | VAN-NX-027 | Owner manual trading: risk-governed entries and adds, stop and optional TP inside the opening order, always-available exits | DU-28 | §7.4; §18.2 manual-trading cases; demo before live |
 | VAN-NX-031 | Hand a manual trade to VAN and take it back; take manual control of an automatic trade; manual adds to automatic trades under that trade's risk profile | DU-28b | §7.4.6–§7.4.7; §18.2 handover and add cases |
 | VAN-NX-048 | Account lifecycle, broker directory and linking (incl. MT5 investor-password observe mode) | DU-29 | §7.9.1–§7.9.2 |
@@ -1602,6 +1657,15 @@ Each requirement ID must have Product Truth binding, one or more Development Uni
 | VAN-NX-058 | Trading modes Normal, Risky and Aggressive under the signed mandate | DU-30 | §7.10; PR #92 suite green after consolidation; AGGRESSIVE refuses without admitted edge (gate broken on purpose) |
 | VAN-NX-059 | History separates funding cash flow from trading P&L | DU-29a | §7.5; a deposit never shown as profit |
 | VAN-NX-060 | Process-death restore, tablet, landscape, split screen and dynamic type | DU-23 | §15.1; device cases on the S24 |
+| VAN-NX-061 | Trade history and execution quality (TCA): fill quality, expected vs actual price, spread, fees, slippage, partial fills, latency, venue and strategy attribution (Rev 2 VNX-F-ORDERS-09) | DU-11 | Derived from VATI and broker data with unit and freshness provenance; no unsourced number |
+| VAN-NX-062 | Risk Command Centre: per-account and combined heat, daily/weekly loss, drawdown, margin, concentration, correlation, protection and kill switch as CURRENT / LIMIT / REMAINING with mandate provenance (Rev 2 VNX-F-ORDERS-10) | DU-11 | Every figure traced to its policy; a fail-open risk path is a P0 blocker |
+| VAN-NX-063 | Smart briefing on Home and the orb Quick Hub, within the §6.1 information budget (Rev 2 VNX-F-HOME-05) | DU-06 | Sources cited; budget not exceeded; stale marked |
+| VAN-NX-064 | Broker-side account profile edits only where the broker capability allows, confirmed by provider readback (Rev 2 VNX-F-ACCOUNTS-06) | DU-29 | A local change never claims a broker update |
+| VAN-NX-065 | Cross-signal intelligence packet joining chart observation, news and analyst notes, read-only into research (Rev 2 VNX-F-INTEL-10) | DU-14d | Provenance on every element; no authority effect |
+| VAN-NX-066 | Memory privacy, consent and erasure, with an erasure receipt (Rev 2 VNX-F-MEMORY-03) | DU-19 | Erasure readback; source deletion is not claimed as model unlearning |
+| VAN-NX-067 | Memory learning goals the owner can view and edit (Rev 2 VNX-F-MEMORY-04) | DU-19 | Goal changes audited |
+| VAN-NX-068 | Automation scheduling with next-run, last-run and failure readback (Rev 2 VNX-F-MORE-03) | DU-19 | No silent failed run |
+| VAN-NX-069 | ARTEMIS native testing UI: device readiness, plan, progress, screenshots and pass/fail/unknown receipts (Rev 2 VNX-F-WORK-08) | DU-21 | Unknown never shown as pass |
 | VAN-NX-054 | Controlled rollout and legacy retirement without feature loss | DU-MR | §19.1 P5–P6; signed APK, tested rollback; retirement only after full parity, with its own negative tests |
 
 ### 16.2 Development Unit dependency DAG
@@ -1691,11 +1755,19 @@ flowchart TD
   V --> Z
   Z --> AA[DU-26 Physical S24 + owner acceptance]
   AA --> AB[DU-MR Controlled migration/retirement]
+  K --> Z
+  AL --> Z
+  AP --> Z
+  JB --> Z
+  JC --> Z
+  JD --> Z
   J -. study after owner says ready .-> REA[DU-27 REA MT5/TradingView research]
   REA -. evidence-backed amendment .-> J
 ```
 
 Rev 1.1 changes: DU-00 is consolidation, not only audit closure; DU-24 (anti-loss checker and module isolation) now gates the theme and the shell, so the rules exist before the first new screen; DU-06 depends on the domains its rows open (Attention DU-08, Trading DU-09/DU-11, Work DU-15); DU-28 (manual trading backend) precedes DU-11 positions/orders.
+
+**Rev 1.9 (AUD-01):** six feature units (DU-12, DU-12b, DU-29b, DU-10b, DU-10c, DU-10d) had no path to integrated verification. They now feed DU-25 directly, and the plan generator rejects any build unit that does not reach DU-25, DU-26 and DU-MR.
 
 Every arrow is a declared dependency, not a guarantee that a downstream task can skip its own tests. DU-27 does not block all new UI work while the REA host is not ready, but future architecture findings must reconcile against any already implemented chart/execution decisions before final qualification.
 
@@ -1715,6 +1787,10 @@ Parallel development requires isolated branches/worktrees, explicit ownership, s
 ### 16.4 Developer packet fields
 
 Each DU task packet must contain: project/repository/source SHA; owner authority and design-golden digests; objective and exact component/module/files; prerequisite DUs; previous functionality preserved; newly required behaviour; negative/failure cases; data-source/authority endpoints; screen IDs/flows; accessibility and performance constraints; source-change budget; acceptance commands and receipts; sandbox/VM selection and safe execution fence; blockers; rollback; reviewer and merge/Zuul admission requirement. Worker autonomy may improve implementation strategy, but cannot silently rewrite Product Truth or protected approvals.
+
+**DU-01 obligations added in Rev 1.9 (OD-27):**
+- Map all 171 Rev 2 requirement atoms and 115 surface contexts to VAN-NX requirements, surfaces, actions, DUs and tests, or record an owner-approved supersession or non-applicability. The seeds are in `crosswalk/`.
+- Admit the REA research inputs (VAN-NX-026).
 
 ### 16.5 Development plan
 
@@ -1906,7 +1982,7 @@ Minimum deliverable pack before implementation:
 - No independent forensic challenge certificate, FFDRM `F15` certificate, current exact-source Android build receipt or physical S24 completion was generated in this audit turn.
 - Reusable Source Gate: past `implemented`/`partial` registry labels describe a historical static audit; not the present live device condition.
 - No rich chart runtime, interactive task canvas or News analysis screen was found by the specified exact-symbol search in the inspected merged-main and PR #93 scope. Further semantic/static or runtime inspection could discover differently named implementations.
-- REA MT5/TradingView analysis is not complete; user will separately signal when `van-trading-core` is ready. Findings are allowed to amend architecture.
+- REA status: the 39 **static** records were obtained and reviewed (OD-17, `research/VAN_REA_EVIDENCE_STUDY_39_RECORDS_20261015.md`). **No live Android runtime or UI trial** of MT5 or TradingView has been performed. The formal research-input admission record is a DU-01 obligation (VAN-NX-026).
 - Rev 1.1–1.2 relabelled the mockups and specified manual trading (entries, adds, handover), multi-source news with history-driven decisions, and consolidation; none of these is implemented. Manual trading needs owner decisions (§7.4.11) and an owner-signed mandate version before any live use; each news decision path needs shadow evidence and an owner signature before it changes live trading.
 - `VAN_NEXT_OWNER_DECISIONS_REV1.md` records chat decisions and awaits owner signature.
 - The 39 REA records were read on 15 October (OD-17), via Desktop Commander `dial-control` → `van-trading-core` with the `dial-oracle-admin` key; no `oracle-admin` device was online. Limits:
