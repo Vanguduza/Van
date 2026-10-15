@@ -1,0 +1,203 @@
+[
+ {
+  "box": [
+   103,
+   503,
+   237,
+   521
+  ],
+  "old": "All systems operational",
+  "text": "Ready when you are.",
+  "weight": "Regular"
+ },
+ {
+  "box": [
+   101,
+   556,
+   156,
+   572
+  ],
+  "old": "Atention",
+  "text": "Attention",
+  "weight": "SemiBold"
+ },
+ {
+  "box": [
+   101,
+   704,
+   223,
+   721
+  ],
+  "old": "Market Opportunity",
+  "text": "Potential trade",
+  "weight": "SemiBold"
+ },
+ {
+  "box": [
+   101,
+   724,
+   243,
+   741
+  ],
+  "old": "EURUSD \u2022 High probability",
+  "text": "EURUSD \u2022 High confidence",
+  "weight": "Regular"
+ },
+ {
+  "box": [
+   95,
+   811,
+   128,
+   826
+  ],
+  "old": "Trade",
+  "text": "Trading",
+  "weight": "Medium",
+  "align": "center",
+  "size": 8.75
+ },
+ {
+  "box": [
+   382,
+   270,
+   470,
+   287
+  ],
+  "old": "Portfolio Value",
+  "text": "Equity",
+  "weight": "Regular"
+ },
+ {
+  "box": [
+   351,
+   409,
+   416,
+   425
+  ],
+  "old": "Risk Usage",
+  "text": "Portfolio heat",
+  "weight": "Regular",
+  "maxw": 68
+ },
+ {
+  "box": [
+   410,
+   688,
+   498,
+   706
+  ],
+  "old": "Opportunities",
+  "text": "Potential trades",
+  "weight": "SemiBold"
+ },
+ {
+  "box": [
+   410,
+   708,
+   511,
+   725
+  ],
+  "old": "3 high probability",
+  "text": "3 high confidence",
+  "weight": "Regular"
+ },
+ {
+  "box": [
+   393,
+   813,
+   428,
+   829
+  ],
+  "old": "Trade",
+  "text": "Trading",
+  "weight": "Medium",
+  "align": "center",
+  "size": 8.75
+ },
+ {
+  "box": [
+   749,
+   671,
+   772,
+   687
+  ],
+  "old": "0.1",
+  "text": "Auto",
+  "weight": "Regular",
+  "align": "center"
+ },
+ {
+  "box": [
+   733,
+   771,
+   806,
+   789
+  ],
+  "old": "Place Order",
+  "text": "Review order",
+  "weight": "Medium",
+  "align": "center"
+ },
+ {
+  "box": [
+   1055,
+   748,
+   1121,
+   764
+  ],
+  "old": "New Order",
+  "text": "Manual trade",
+  "weight": "Medium"
+ },
+ {
+  "box": [
+   1005,
+   823,
+   1037,
+   837
+  ],
+  "old": "Trade",
+  "text": "Trading",
+  "weight": "Medium",
+  "align": "center",
+  "size": 8.75
+ },
+ {
+  "box": [
+   1276,
+   262,
+   1344,
+   278
+  ],
+  "old": "Opportunities",
+  "text": "Potential",
+  "weight": "Medium",
+  "align": "center"
+ },
+ {
+  "box": [
+   1322,
+   393,
+   1393,
+   408
+  ],
+  "old": "High Probability",
+  "text": "High confidence",
+  "weight": "Medium",
+  "align": "center",
+  "maxw": 72
+ },
+ {
+  "box": [
+   1308,
+   822,
+   1343,
+   838
+  ],
+  "old": "Trade",
+  "text": "Trading",
+  "weight": "Medium",
+  "align": "center",
+  "size": 8.75
+ }
+]
