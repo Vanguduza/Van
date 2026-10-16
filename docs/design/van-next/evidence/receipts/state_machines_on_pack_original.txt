@@ -1,0 +1,73 @@
+$ cd docs/design/van-next && python3 contracts/check_state_machines.py contracts/STATE_MACHINES.json
+exit=1
+
+VAN-SM-FUND_TRANSFER: MISSING_MACHINE
+VAN-SM-NEWS_ARMED_TICKET: MISSING_MACHINE
+VAN-SM-ACCOUNT_LIFECYCLE: R1 unreachable state UNKNOWN
+VAN-SM-ACCOUNT_LIFECYCLE: R2 dead end REMOTE_CLOSED (non-terminal, no exit)
+VAN-SM-ACCOUNT_LIFECYCLE: R2 dead end RESTRICTED (non-terminal, no exit)
+VAN-SM-ACCOUNT_LIFECYCLE: R2 dead end UNKNOWN (non-terminal, no exit)
+VAN-SM-ACCOUNT_LIFECYCLE: R2 dead end UNLINKED_LOCAL (non-terminal, no exit)
+VAN-SM-ACCOUNT_LIFECYCLE: R2 dead end UNLINK_BLOCKED (non-terminal, no exit)
+VAN-SM-ACCOUNT_LIFECYCLE: R4 missing obligation UNLINK_REQUESTED->RELINK_REQUIRED (AUD-03/AUD-10 cancel deletion)
+VAN-SM-ACCOUNT_LIFECYCLE: R4 missing obligation RESTRICTED->REAUTH_PENDING (AUD-03 recover from restriction)
+VAN-SM-ACCOUNT_LIFECYCLE: R4 missing obligation REAUTH_PENDING->LINKED_READ_ONLY (AUD-03 recover after re-verification)
+VAN-SM-ACCOUNT_LIFECYCLE: R4 missing obligation REMOTE_CLOSURE_PENDING->REMOTE_CLOSURE_REFUSED (AUD-03 refused closure)
+VAN-SM-ACCOUNT_LIFECYCLE: R4 missing obligation REMOTE_CLOSURE_PENDING->CLOSURE_OUTCOME_UNKNOWN (AUD-03 unknown closure)
+VAN-SM-CHART_SESSION: R2 dead end DESTROYED (non-terminal, no exit)
+VAN-SM-FLOATING_VAN: R2 dead end STOPPED (non-terminal, no exit)
+VAN-SM-FUND_DEPOSIT: R1 unreachable state EXPIRED
+VAN-SM-FUND_DEPOSIT: R1 unreachable state FAILED
+VAN-SM-FUND_DEPOSIT: R1 unreachable state REJECTED
+VAN-SM-FUND_DEPOSIT: R2 dead end EXPIRED (non-terminal, no exit)
+VAN-SM-FUND_DEPOSIT: R2 dead end FAILED (non-terminal, no exit)
+VAN-SM-FUND_DEPOSIT: R2 dead end REJECTED (non-terminal, no exit)
+VAN-SM-FUND_DEPOSIT: R2 dead end REVERSED (non-terminal, no exit)
+VAN-SM-FUND_DEPOSIT: R2 dead end SETTLED (non-terminal, no exit)
+VAN-SM-FUND_DEPOSIT: R4 missing obligation SETTLED->REVERSED (AUD-03 compensating reversal)
+VAN-SM-FUND_WITHDRAWAL: R1 unreachable state EXPIRED
+VAN-SM-FUND_WITHDRAWAL: R1 unreachable state REJECTED
+VAN-SM-FUND_WITHDRAWAL: R2 dead end EXPIRED (non-terminal, no exit)
+VAN-SM-FUND_WITHDRAWAL: R2 dead end PAID (non-terminal, no exit)
+VAN-SM-FUND_WITHDRAWAL: R2 dead end REJECTED (non-terminal, no exit)
+VAN-SM-FUND_WITHDRAWAL: R2 dead end REVERSED (non-terminal, no exit)
+VAN-SM-FUND_WITHDRAWAL: R4 missing obligation PROVIDER_PENDING->FAILED (AUD-03 withdrawal FAILED)
+VAN-SM-FUND_WITHDRAWAL: R4 missing obligation PAID->REVERSED (AUD-03 compensating reversal)
+VAN-SM-FUND_WITHDRAWAL: R4 missing obligation QUOTED->REFUSED_MARGIN (AUD-05 under-margin refusal)
+VAN-SM-FUND_WITHDRAWAL: R4 missing obligation AUTHORIZED->REFUSED_MARGIN (AUD-05 recheck at submission)
+VAN-SM-NEWS_ANALYSIS: R2 dead end RETRACTED (non-terminal, no exit)
+VAN-SM-NEWS_ANALYSIS: R2 dead end STALE (non-terminal, no exit)
+VAN-SM-NEWS_ANALYSIS: R2 dead end UNVERIFIABLE (non-terminal, no exit)
+VAN-SM-ORB_PRESENTATION: R1 unreachable state ACTIVE_WORK
+VAN-SM-ORB_PRESENTATION: R1 unreachable state ATTENTION
+VAN-SM-ORB_PRESENTATION: R1 unreachable state CRITICAL
+VAN-SM-ORB_PRESENTATION: R1 unreachable state HIGH_RISK
+VAN-SM-ORB_PRESENTATION: R1 unreachable state MONITORING
+VAN-SM-ORB_PRESENTATION: R1 unreachable state OFFLINE
+VAN-SM-ORB_PRESENTATION: R1 unreachable state STALE
+VAN-SM-ORB_PRESENTATION: R2 dead end ACTIVE_WORK (non-terminal, no exit)
+VAN-SM-ORB_PRESENTATION: R2 dead end ATTENTION (non-terminal, no exit)
+VAN-SM-ORB_PRESENTATION: R2 dead end CRITICAL (non-terminal, no exit)
+VAN-SM-ORB_PRESENTATION: R2 dead end HIGH_RISK (non-terminal, no exit)
+VAN-SM-ORB_PRESENTATION: R2 dead end MONITORING (non-terminal, no exit)
+VAN-SM-ORB_PRESENTATION: R2 dead end OFFLINE (non-terminal, no exit)
+VAN-SM-ORB_PRESENTATION: R2 dead end QUIET (non-terminal, no exit)
+VAN-SM-ORB_PRESENTATION: R2 dead end STALE (non-terminal, no exit)
+VAN-SM-TASK_EXECUTION: R2 dead end CANCELLED (non-terminal, no exit)
+VAN-SM-TASK_EXECUTION: R2 dead end FAILED (non-terminal, no exit)
+VAN-SM-TASK_EXECUTION: R2 dead end OUTCOME_UNKNOWN (non-terminal, no exit)
+VAN-SM-TASK_EXECUTION: R2 dead end QUALIFIED (non-terminal, no exit)
+VAN-SM-TASK_EXECUTION: R2 dead end WAITING_INPUT (non-terminal, no exit)
+VAN-SM-TRADE_ORDER: R1 unreachable state EXPIRED
+VAN-SM-TRADE_ORDER: R2 dead end CANCELLED (non-terminal, no exit)
+VAN-SM-TRADE_ORDER: R2 dead end EXPIRED (non-terminal, no exit)
+VAN-SM-TRADE_ORDER: R2 dead end FILLED (non-terminal, no exit)
+VAN-SM-TRADE_ORDER: R2 dead end MODIFY_PENDING (non-terminal, no exit)
+VAN-SM-TRADE_ORDER: R2 dead end REJECTED (non-terminal, no exit)
+VAN-SM-TRADE_ORDER: R4 missing obligation CANCEL_PENDING->PARTIAL (AUD-03 cancel/fill race)
+VAN-SM-TRADE_ORDER: R4 missing obligation CANCEL_PENDING->FILLED (AUD-03 cancel/fill race)
+VAN-SM-TRADE_ORDER: R4 missing obligation CANCEL_PENDING->OUTCOME_UNKNOWN (AUD-03 lost cancel response)
+VAN-SM-TRADE_ORDER: R4 missing obligation BROKER_PENDING->EXPIRED (AUD-03)
+VAN-SM-TRADE_ORDER: R4 missing obligation MODIFY_PENDING->PLACED (AUD-03 modify confirmed or rejected)
+VAN-SM-TRADE_ORDER: R4 missing obligation PARTIAL->CANCEL_PENDING (AUD-03)
+69 findings in STATE_MACHINES.json

@@ -1,0 +1,11 @@
+$ cd docs/design/van-next && python3 contracts/check_state_machines.py --selftest
+exit=0
+
+caught: R1 unreachable state -> ['VAN-SM-TRADE_ORDER: R1 unreachable state ORPHAN']
+caught: R2 dead end -> ['VAN-SM-FUND_DEPOSIT: R2 dead end LIMBO (non-terminal, no exit)']
+caught: R3 receipt without proof -> ['VAN-SM-FUND_WITHDRAWAL: R3 PROVIDER_PENDING->PAID enters receipt state without a required receipt']
+caught: R4 missing cancel/fill race -> ['VAN-SM-TRADE_ORDER: R4 missing obligation CANCEL_PENDING->FILLED (AUD-03 cancel/fill race)']
+caught: R5 cancelled deletion skips re-auth -> ['VAN-SM-ACCOUNT_LIFECYCLE: R5 forbidden RELINK_REQUIRED->LINKED_READ_ONLY (AUD-10 cancelled deletion must re-authenticate)']
+caught: R6 unknown outcome resends -> ['VAN-SM-FUND_WITHDRAWAL: R6 OUTCOME_UNKNOWN->SUBMITTED resends']
+caught: R6 second unknown state leaves without readback -> ['VAN-SM-ACCOUNT_LIFECYCLE: R6 CLOSURE_OUTCOME_UNKNOWN->LINKED_READ_ONLY_X leaves unknown without a readback']
+caught: R7 undeclared receipt state -> ['VAN-SM-FUND_DEPOSIT: R7 receipt state GHOST not in states']
