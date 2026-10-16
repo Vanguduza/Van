@@ -1,9 +1,9 @@
 # VAN Tactile Spatial Experience — Complete Frontend Rebuild, Functional Preservation & Capability Expansion
 
-**Document ID:** `VAN-TSE-FR-REV1.9A-20261016`  
-**Revision:** 1.9a — **freeze candidate** (supersedes Rev 1.9; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.9 are in git history). Development follows `plan/VAN_NEXT_DEVELOPMENT_PLAN_REV1.md`, derived from this document; freeze criteria in `VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_9A.md`; evidence in `evidence/`  
+**Document ID:** `VAN-TSE-FR-REV1.9B-20261016`  
+**Revision:** 1.9b — **freeze candidate** (supersedes Rev 1.9a; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.9a are in git history). Development follows `plan/VAN_NEXT_DEVELOPMENT_PLAN_REV1.md`, derived from this document; freeze criteria in `VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_9B.md`; evidence in `evidence/`  
 **Date:** 15 October 2026 (Africa/Harare)  
-**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-31), which captures the two locked dark/light references and the 15 October review decisions  
+**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-36), which captures the two locked dark/light references and the 15 October review decisions  
 **Repository:** [`Vanguduza/Van`](https://github.com/Vanguduza/Van)  
 **Audit baseline A:** merged `main` SHA `8eb1889822fc8a83f219977c15340172e16acd91`  
 **Audit baseline B:** unmerged, draft owner-core [PR #93](https://github.com/Vanguduza/Van/pull/93) SHA `dfc1557ab99ad8d41cf84714e1bb671e89b045e6`  
@@ -13,6 +13,20 @@
 **Companion artifacts:** `VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.md` (78 surfaces + additive surfaces; CSV and JSON for automation), `VAN_NEXT_OWNER_DECISIONS_REV1.md`, `reference/` (locked originals and relabelled Rev 1.1 references).  
 
 > **Executive decision:** Rebuild the entire visible frontend using the newly accepted Tactile Spatial UI, not the old VAN panels or older aesthetic blueprints; comprehensively inspect and preserve qualified product functions, underlying service/contracts, security, existing worthwhile UX flows, Floating VAN and interaction behaviours. Introduce the state-aware Home orb, small quick-access sheet, richer Trading entry points, full news intelligence, and genuinely live project/task/agent spatial workflow diagrams. Reconcile large, unmerged source candidates before porting; no silent legacy-file imports or feature loss.
+
+## Rev 1.9b change log (16 October 2026) — forensic evidence audit corrections
+
+A third independent audit replayed the Rev 1.9a evidence pack (`research/VAN_NEXT_REV19A_FORENSIC_AUDIT_RESPONSE_20261016.md`). Every receipt reproduced, but in-memory mutations showed the validators could be evaded: shortcut transitions, deleted requirements and duplicate IDs all passed with zero findings (NXA-01…NXA-07). Each counterexample was rerun against the repository before it was accepted. The owner approved G1–G5 (OD-32…OD-36).
+
+| # | Change | Finding | Where |
+|---|---|---|---|
+| W1 | **Approved transition list.** `contracts/VAN_TRANSITION_GUARDS_REV1_9B.json` lists every permitted `(machine, from, to)` transition with a stable ID and the exact set of typed proofs it requires (35 proof types, each bound to guard fields). The checker fails on any unlisted transition, any changed guard set, any listed transition missing and any untyped proof (R8, R9). Mandatory waypoints held in the checker itself (approval, submission, readback) refuse every shortcut even if the approved list is edited (R10). The list's SHA-256 is pinned in the decision record (R11). | NXA-01 | §7.9.12, `contracts/` |
+| W2 | **Locked requirement set.** `plan/REQUIREMENT_LOCK_REV1_9B.json` locks every §16.1 row (ID and text) and the 78 legacy surfaces with their 349 owner actions; its SHA-256 is pinned in the decision record. A removed, changed, unlocked or duplicated requirement or surface obligation fails `--check`; removal needs a recorded owner supersession. | NXA-02 | §16.1, `plan/` |
+| W3 | **Collisions fail.** Duplicate machine IDs, states, transitions, approved-list entries, requirement rows, open questions and DAG nodes are findings, not silent overwrites. | NXA-03 | `contracts/`, `plan/` |
+| W4 | **Feature preservation in two stages.** PKT-001…PKT-003 (read-only) use a preservation-inventory gate; DU-00b exits only with the parity checker qualified; every later packet needs it. F2 no longer requires a parity checker before F15 (the same timing error, found while applying this fix). Generator rule `PARITY_BEFORE_CHECKER` keeps every code-bearing unit downstream of DU-00b. | NXA-04 | §16.5, §17 F2, plan §1 |
+| W5 | The Rev 1.9 response is restored to the bytes sealed in the Rev 1.9a pack; the lines added afterwards become a separate addendum with that hash. The evidence pack is rebuilt as Rev 1.9b with the new negative tests. | NXA-06 | `research/`, `evidence/` |
+
+NXA-05 (the 171-atom and 115-context mapping) and NXA-07 (independent retrieval of the visual authority) remain DU-01 obligations, unchanged.
 
 ## Rev 1.9a change log (16 October 2026) — follow-up audit corrections
 
@@ -949,7 +963,7 @@ A withdrawal does not move drawdown tiers or the daily-loss limit (F-033 regress
 
 The check runs fresh before a money button is enabled and again at submission. Nothing in Android hard-codes "this broker supports withdrawals". Unknown is not available.
 
-**State machines** (`contracts/VAN_STATE_MACHINES_REV1_9.json`, model-checked; it extends the pack's machines with the withdrawal `FAILED` state, unknown-outcome reconciliation and compensating reversals):
+**State machines** (`contracts/VAN_STATE_MACHINES_REV1_9.json`, model-checked; it extends the pack's machines with the withdrawal `FAILED` state, unknown-outcome reconciliation and compensating reversals). From Rev 1.9b the model must equal the owner-pinned approved transition list (`contracts/VAN_TRANSITION_GUARDS_REV1_9B.json`), and no success state is reachable without its approval, submission and readback waypoints:
 - **Deposit:** `DRAFT → QUOTED → AWAITING_OWNER → AUTHORIZED → PROVIDER_PENDING → SENT → PENDING_SETTLEMENT → SETTLED`.
 - **Withdrawal:** `DRAFT → BENEFICIARY_VERIFIED → QUOTED → AWAITING_A4 → AUTHORIZED → SUBMITTED → PROVIDER_PENDING → PAID`.
 - **Alternatives for both:** `REJECTED | FAILED | OUTCOME_UNKNOWN | REVERSED | EXPIRED`.
@@ -1830,7 +1844,7 @@ The order of work is **derived, not chosen by hand**: `plan/generate_plan.py` re
 3. lane (§16.3);
 4. DU number.
 
-Every packet must meet the plan's entry gate (contract approved, dependencies exited, start-blocking questions answered) and exit gate (acceptance commands green, new gates broken on purpose and seen to fail, no `FEATURE_LOSS`, independent review). Any amendment to this blueprint regenerates the plan; a packet in progress stops if its contract is affected.
+Every packet must meet the plan's entry gate (contract approved, dependencies exited, start-blocking questions answered) and exit gate (acceptance commands green, new gates broken on purpose and seen to fail, feature preservation, independent review). Feature preservation has two stages (Rev 1.9b): before DU-00b builds the parity checker, the read-only packets pass a preservation-inventory gate (no source change, frozen heads unchanged, the owner-pinned requirement lock and 78-surface obligations intact); DU-00b exits only with the checker qualified, and from then on every packet needs no `FEATURE_LOSS`. Any amendment to this blueprint regenerates the plan; a packet in progress stops if its contract is affected.
 
 ---
 
@@ -1842,7 +1856,7 @@ The DIAL forensic standard has 16 core gates. **Not one is asserted green for th
 |---|---|
 | `F0_OWNER_INTENT_PRODUCT_TRUTH` | `VAN_NEXT_OWNER_DECISIONS_REV1.md` owner-confirmed; original and relabelled image hashes recorded; visual deltas VD-01…VD-03 listed; no conflicting visual authority |
 | `F1_DEVELOPMENT_UNIT_DECOMPOSITION` | DU DAG, atomic ownership, dependencies, bounded tasks, no invisible shared work |
-| `F2_FEATURE_SURFACE_COVERAGE` | Feature Ledger fully classified; 78/78 legacy mappings + all consolidated PR features + additive surfaces mapped to actual screens/modal/overlay/actions; parity checker green |
+| `F2_FEATURE_SURFACE_COVERAGE` | Feature Ledger fully classified; 78/78 legacy mappings + all candidate PR features + additive surfaces mapped to actual screens/modal/overlay/actions; requirement lock intact; the parity baseline and checker specified (inputs, failure rule, induced omission). The checker itself is built and proven green by DU-00b after F15 (Rev 1.9b, NXA-04) |
 | `F3_AUTHORITY_MODEL` | Every effect bound to owning gateway/VATI/device policy, no visual escalation |
 | `F4_STATE_PERSISTENCE_MODEL` | Per-source state, freshness, offline, command IDs, cross-rotation/restart persistence |
 | `F5_CAUSAL_PATH_PROOF` | Each feature traced producer→state→consumer→caller→authority→effect→readback |

@@ -1,15 +1,17 @@
 # VAN Next — Deterministic Development Plan, Rev 1
 
 **Status:** `DRAFT / AWAITING_OWNER_APPROVAL`. No packet starts until the owner approves this plan.
-**Derived from:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9A_20261016.md` §16.1, §16.2, §19.1 and `VAN_NEXT_OWNER_DECISIONS_REV1.md` (open questions).
+**Derived from:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9B_20261016.md` §16.1, §16.2, §19.1 and `VAN_NEXT_OWNER_DECISIONS_REV1.md` (open questions).
 
 | Input | SHA-256 (full file bytes) |
 |---|---|
-| `docs/design/van-next/VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9A_20261016.md` | `2bec90b3338e0391f186aa5b12b0daa880874038d95adb605516daacfed0b00a` |
-| `docs/design/van-next/VAN_NEXT_OWNER_DECISIONS_REV1.md` | `26469778d7d07fba55fd0776cf393f208601109cb4753933ad51aa060c9628be` |
-| `docs/design/van-next/plan/generate_plan.py` | `43f2e899d2ad4d5c4fd7ed2951b47fe1bb42d2da61cc1546754788542e5e8a2e` |
+| `docs/design/van-next/VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9B_20261016.md` | `f708229674eb95c47f99375faf242388a6b3741ebe9a118fc1c15beebe71e0f7` |
+| `docs/design/van-next/VAN_NEXT_OWNER_DECISIONS_REV1.md` | `e4da1830dae75ed33e0d5ea894ae7324c6a16c2d4b5ef07ac96599e80ed3b3a9` |
+| `docs/design/van-next/plan/generate_plan.py` | `62794a01eb7d3a9a02808ee262f1c6a616924bfb787b2f2ee29730f8392b2d2f` |
+| `docs/design/van-next/plan/REQUIREMENT_LOCK_REV1_9B.json` | `7e102f249c89f030edbbb6cb91dc12a1a095feb2d1ba6b94275a21e3d597558d` |
+| `docs/design/van-next/VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.json` | `34b97daaf8d92951833bc0270998e9ae5159fdeffa078844a8d2d4241cf52d1d` |
 
-Aggregate input digest `d37f9a962519a433b6b7ffb5cb9decf6a03db7d019ba218491836f099c29bb81` = SHA-256 of the blueprint bytes, one newline byte, the decision-record bytes and the generator bytes. `PLAN_INPUT_PROVENANCE.json` records these values and the hashes of the generated plan.
+Aggregate input digest `216f26e53dad7c8f423aacd725b71fe304d54fd237487d39602965e24fb3e3d0` = SHA-256 of the blueprint bytes, one newline byte, then the decision-record, generator, requirement-lock and surface-matrix bytes. `PLAN_INPUT_PROVENANCE.json` records these values and the hashes of the generated plan.
 
 **Generator:** `plan/generate_plan.py`. Re-running it on the same inputs gives byte-identical output. `--check` validates the inputs **and** fails if this file is stale; `--selftest` proves each check catches a deliberately broken input.
 
@@ -17,7 +19,8 @@ Aggregate input digest `d37f9a962519a433b6b7ffb5cb9decf6a03db7d019ba218491836f09
 
 1. **One packet at a time, in sequence order.** A packet starts only when its entry gate holds; the next packet starts only when the current one has exited. Parallel work is allowed only when the owner assigns another worker, and then only to packets of the same wave (§6) whose dependencies have exited.
 2. **Entry gate (every packet):** for every code-bearing packet (any unit other than DU-00a, DU-01 and DU-31), a current independent F15 `FORENSIC_BUILD_READY` certificate from DU-31 and a passing deterministic predevelopment gate (PRD-DDP-R2 §19); all dependency packets exited; the packet's acceptance contract written and owner-approved (fields of blueprint §16.4, including exact source SHA, files, negative cases, acceptance commands, rollback); every open question that blocks its start resolved.
-3. **Exit gate (every packet):** the contract's acceptance commands pass on a recorded commit; each new gate is broken deliberately and seen to fail before it is trusted; the parity checker (from PKT-001 onward) shows no `FEATURE_LOSS`; independent review recorded; artifact state at least `REPOSITORY_PROVEN` (§17.1). Device, live and owner-acceptance states are reached in P4–P5 and are never claimed earlier.
+3. **Exit gate (every packet):** the contract's acceptance commands pass on a recorded commit; each new gate is broken deliberately and seen to fail before it is trusted; feature preservation holds as in rule 3a; independent review recorded; artifact state at least `REPOSITORY_PROVEN` (§17.1). Device, live and owner-acceptance states are reached in P4–P5 and are never claimed earlier.
+3a. **Feature preservation, in two stages** (Rev 1.9b, NXA-04). The parity checker is built by PKT-004 (DU-00b), so it cannot gate earlier packets. **PKT-001–PKT-003 (read-only):** the *preservation-inventory gate* — no source file changes; the frozen heads still resolve to the recorded SHAs; `generate_plan.py --check` passes, so the owner-pinned requirement lock and the 78 legacy surfaces with their owner actions are intact; after DU-00a exits, its Feature Ledger changes only through recorded rows, each with a reason. **PKT-004:** exits only with the parity checker qualified — an induced omission fails it — and no `FEATURE_LOSS` on consolidated `main`. **PKT-005 onward:** every packet's exit requires the parity checker to show no `FEATURE_LOSS`. Validator rule `PARITY_BEFORE_CHECKER` keeps every code-bearing unit downstream of DU-00b.
 4. **No code outside a packet.** Work not in an open packet is not done. A discovery that changes scope stops the packet and goes to the owner as a blueprint amendment; the plan is regenerated.
 5. **Order key** (deterministic): phase (§19.1) → dependency depth in the §16.2 DAG → lane order of §16.3 → DU number. P2 builds the five §19.1 vertical slices as milestone M1 of each DU in a slice and of every DU those slices depend on; P3 completes each DU (M2), then the remaining DUs in full.
 6. **Owner-only steps** are listed per packet and are never assumed: signatures, open-question answers, `OWNER_RETIRE` dispositions, live promotion.
@@ -26,7 +29,7 @@ Aggregate input digest `d37f9a962519a433b6b7ffb5cb9decf6a03db7d019ba218491836f09
 
 - Development Units in the DAG: 51; solid dependency edges: 92; non-blocking (dotted) edges: 2.
 - Requirements parsed: 71; open questions parsed: 18.
-- Findings: none. The DAG is acyclic; every requirement and every open question maps to a DU in the DAG; every DU has a lane; no DU depends on a later phase; every build unit has a dependency path to DU-25, DU-26 and DU-MR; no code-bearing unit runs before the F15 gate DU-31; every unit a requirement needs is built upstream of it.
+- Findings: none. The DAG is acyclic; every requirement and every open question maps to a DU in the DAG; every DU has a lane; no DU depends on a later phase; every build unit has a dependency path to DU-25, DU-26 and DU-MR; no code-bearing unit runs before the F15 gate DU-31; every unit a requirement needs is built upstream of it; every code-bearing unit is downstream of the parity checker; no DAG node, requirement or open question is duplicated; the requirement IDs and text and the 78 legacy surfaces' owner actions match the owner-pinned requirement lock.
 - DUs with no requirement row (kept, flagged for the freeze list): none.
 - DU-27 is not a packet: REA research (static) done under OD-15/16/17. Its admission record is VAN-NX-026, carried by DU-01; its findings are inputs to the DU-10 and DU-29 contracts.
 

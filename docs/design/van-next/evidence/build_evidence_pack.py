@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the VAN Next predevelopment evidence pack (OD-31, V19-A08).
+"""Build the VAN Next predevelopment evidence pack (OD-31, V19-A08; Rev 1.9b, OD-36).
 
 1. Refuses to run unless every input file is identical to the committed HEAD,
    so the pack is bound to one commit.
@@ -26,12 +26,12 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent  # docs/design/van-next
 RECEIPTS = HERE / "receipts"
 MANIFEST = HERE / "EVIDENCE_MANIFEST.json"
-ZIP = HERE / "VAN_NEXT_PREDEV_EVIDENCE_PACK_REV1_9A.zip"
+ZIP = HERE / "VAN_NEXT_PREDEV_EVIDENCE_PACK_REV1_9B.zip"
 
 INPUTS = [
-    "VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9A_20261016.md",
+    "VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9B_20261016.md",
     "VAN_NEXT_OWNER_DECISIONS_REV1.md",
-    "VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_9A.md",
+    "VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_9B.md",
     "VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.md",
     "VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.csv",
     "VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.json",
@@ -39,8 +39,10 @@ INPUTS = [
     "plan/VAN_NEXT_DEVELOPMENT_PLAN_REV1.md",
     "plan/VAN_NEXT_DEVELOPMENT_PLAN_REV1.json",
     "plan/PLAN_INPUT_PROVENANCE.json",
+    "plan/REQUIREMENT_LOCK_REV1_9B.json",
     "contracts/check_state_machines.py",
     "contracts/VAN_STATE_MACHINES_REV1_9.json",
+    "contracts/VAN_TRANSITION_GUARDS_REV1_9B.json",
     "contracts/STATE_MACHINES.json",
     "contracts/ACCOUNTS_FUNDS_TECHNICAL_CONTRACT.md",
     "contracts/FUNDING_INTENT.schema.json",
@@ -51,6 +53,8 @@ INPUTS = [
     "crosswalk/REV2_171_ATOM_SEED_UNREVIEWED.csv",
     "research/VAN_NEXT_REV18_INDEPENDENT_AUDIT_RESPONSE_20261015.md",
     "research/VAN_NEXT_REV19_FOLLOWUP_AUDIT_RESPONSE_20261016.md",
+    "research/VAN_NEXT_REV19_FOLLOWUP_AUDIT_RESPONSE_ADDENDUM_A1_20261016.md",
+    "research/VAN_NEXT_REV19A_FORENSIC_AUDIT_RESPONSE_20261016.md",
 ]
 
 CHECKS = [
@@ -62,7 +66,7 @@ CHECKS = [
 ]
 
 ABSENT_BY_DESIGN = {
-    "signed VAN_NEXT_OWNER_DECISIONS_REV1.md": "Owner signature pending (OQ-05, B3). The included record is unsigned.",
+    "signed VAN_NEXT_OWNER_DECISIONS_REV1.md": "Owner signature pending (OQ-05, B3). The included record is unsigned, so the two lock hashes it pins are prepared, not yet owner-approved.",
     "Feature Ledger (VAN_NEXT_FUNCTIONAL_PRESERVATION_LEDGER_REV1.csv)": "Produced by PKT-001 (DU-00a).",
     "171-atom / 115-context admitted mapping": "Produced by PKT-002 (DU-01); only the unreviewed seed is included.",
     "RESEARCH_INPUT_ACCEPTANCE.json (39 REA records)": "Produced by PKT-002 (DU-01), VAN-NX-026.",

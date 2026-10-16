@@ -1,20 +1,28 @@
 {
  "blueprint": {
-  "path": "docs/design/van-next/VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9A_20261016.md",
-  "sha256": "2bec90b3338e0391f186aa5b12b0daa880874038d95adb605516daacfed0b00a"
+  "path": "docs/design/van-next/VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9B_20261016.md",
+  "sha256": "f708229674eb95c47f99375faf242388a6b3741ebe9a118fc1c15beebe71e0f7"
  },
  "owner_decisions": {
   "path": "docs/design/van-next/VAN_NEXT_OWNER_DECISIONS_REV1.md",
-  "sha256": "26469778d7d07fba55fd0776cf393f208601109cb4753933ad51aa060c9628be"
+  "sha256": "e4da1830dae75ed33e0d5ea894ae7324c6a16c2d4b5ef07ac96599e80ed3b3a9"
  },
  "generator": {
   "path": "docs/design/van-next/plan/generate_plan.py",
-  "sha256": "43f2e899d2ad4d5c4fd7ed2951b47fe1bb42d2da61cc1546754788542e5e8a2e"
+  "sha256": "62794a01eb7d3a9a02808ee262f1c6a616924bfb787b2f2ee29730f8392b2d2f"
  },
- "aggregate_input_sha256": "d37f9a962519a433b6b7ffb5cb9decf6a03db7d019ba218491836f099c29bb81",
- "aggregate_algorithm": "sha256(blueprint_bytes + b'\\n' + decisions_bytes + generator_bytes)",
- "generated_plan_md_sha256": "51865899801f7a26d54a933e034c7b3aff493e9c6b377db8c916d80e3edc5a38",
- "generated_plan_json_sha256": "57393514fd38fc7c0b992d77bc59450bfe03d19334db49fb9d651123ff22bff8",
+ "requirement_lock": {
+  "path": "docs/design/van-next/plan/REQUIREMENT_LOCK_REV1_9B.json",
+  "sha256": "7e102f249c89f030edbbb6cb91dc12a1a095feb2d1ba6b94275a21e3d597558d"
+ },
+ "surface_matrix": {
+  "path": "docs/design/van-next/VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.json",
+  "sha256": "34b97daaf8d92951833bc0270998e9ae5159fdeffa078844a8d2d4241cf52d1d"
+ },
+ "aggregate_input_sha256": "216f26e53dad7c8f423aacd725b71fe304d54fd237487d39602965e24fb3e3d0",
+ "aggregate_algorithm": "sha256(blueprint_bytes + b'\\n' + decisions_bytes + generator_bytes + requirement_lock_bytes + surface_matrix_bytes)",
+ "generated_plan_md_sha256": "ca36f60dd3f91caa64f010596b7aff31e883a6834f0308f122a91b6186d31f63",
+ "generated_plan_json_sha256": "c8c91d14ce87e521cdc65d00c9ad647f510333c8e468b6ed436ad61dd2631c12",
  "packet_count": 73,
  "du_count": 50,
  "all_build_units_reach_qualification": true,

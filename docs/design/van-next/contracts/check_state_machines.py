@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Model-check the VAN Next state machines (blueprint Rev 1.9, Amendment C).
+"""Model-check the VAN Next state machines (blueprint Rev 1.9, Amendment C; Rev 1.9b).
 
 Rules, each proven by --selftest to fail when deliberately broken:
+  R0 no duplicate machine IDs, states or (from, to) transitions (Rev 1.9b, NXA-03)
   R1 every state is reachable from the initial state
   R2 every non-terminal state has an outgoing transition (no dead ends)
   R3 every transition into a receipt state names the receipt it requires
@@ -10,9 +11,18 @@ Rules, each proven by --selftest to fail when deliberately broken:
   R6 an unknown outcome never leads straight back to a sending state, and every
      exit from it requires a readback (no automatic resend)
   R7 every declared terminal / receipt / send state exists in the machine
+  R8 the model's transition relation equals the approved transition list
+     (VAN_TRANSITION_GUARDS_REV1_9B.json): no unlisted transition, no changed
+     guard set, no listed transition missing (Rev 1.9b, NXA-01)
+  R9 every proof a transition requires is a typed proof in that list (NXA-01)
+  R10 every success state is reachable only through its mandatory waypoints
+     (approval, submission, readback); held here, so it holds even if the
+     approved list itself is edited (NXA-01)
+  R11 the approved list's SHA-256 equals the hash pinned in the owner decision
+     record (OD-32)
 
-Obligations live here, not in the JSON, so editing a machine cannot quietly
-remove them.
+Obligations, forbidden transitions and waypoints live here, not in the JSON,
+so editing a machine cannot quietly remove them.
 
 Usage:
   python3 check_state_machines.py [machines.json]   # default: VAN_STATE_MACHINES_REV1_9.json
@@ -21,12 +31,16 @@ Usage:
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 DEFAULT = HERE / "VAN_STATE_MACHINES_REV1_9.json"
+GUARDS = HERE / "VAN_TRANSITION_GUARDS_REV1_9B.json"
+DECISIONS = HERE.parent / "VAN_NEXT_OWNER_DECISIONS_REV1.md"
 
 OBLIGATIONS = {  # machine -> [(from, to, source)]
     "VAN-SM-ACCOUNT_LIFECYCLE": [
@@ -85,11 +99,106 @@ FORBIDDEN = {  # machine -> [(from, to, why)]
     ],
 }
 
+# machine -> {success state: states every path from the initial state must pass through}
+WAYPOINTS = {
+    "VAN-SM-ACCOUNT_LIFECYCLE": {
+        "ACTIVE_ELIGIBLE": ["AUTH_PENDING", "LINKED_READ_ONLY"],
+        "REMOTE_CLOSED": ["AUTH_PENDING"],
+    },
+    "VAN-SM-FUND_DEPOSIT": {
+        "SETTLED": ["QUOTED", "AWAITING_OWNER", "AUTHORIZED", "PROVIDER_PENDING", "PENDING_SETTLEMENT"],
+    },
+    "VAN-SM-FUND_WITHDRAWAL": {
+        "PAID": ["BENEFICIARY_VERIFIED", "QUOTED", "AWAITING_A4", "AUTHORIZED", "SUBMITTED", "PROVIDER_PENDING"],
+    },
+    "VAN-SM-FUND_TRANSFER": {
+        "SETTLED": ["QUOTED", "AWAITING_A4", "AUTHORIZED", "SUBMITTED", "DEBIT_CONFIRMED"],
+    },
+    "VAN-SM-TRADE_ORDER": {
+        s: ["RISK_REVIEW", "OWNER_REVIEW", "AUTHORIZED", "BROKER_PENDING"] for s in ("PLACED", "PARTIAL", "FILLED")
+    },
+    "VAN-SM-NEWS_ARMED_TICKET": {
+        "USED": ["SIGNED", "ARMED"],
+    },
+}
+
 REQUIRED_MACHINES = set(OBLIGATIONS)
 
 
-def check(doc: dict) -> list[str]:
+def guards_of(t: dict) -> frozenset:
+    return frozenset(x for x in t.get("requires", "").split("+") if x)
+
+
+def pinned_guard_hash(decisions_text: str) -> str | None:
+    m = re.search(r"^\|\s*TRANSITION_GUARDS\s*\|[^|]*\|\s*`?([0-9a-f]{64})`?\s*\|", decisions_text, re.M)
+    return m.group(1) if m else None
+
+
+def load_guards(guards_bytes: bytes | None = None, decisions_text: str | None = None) -> tuple[dict, list[str]]:
+    """The approved transition list and any R11 finding about its pin."""
+    gb = GUARDS.read_bytes() if guards_bytes is None else guards_bytes
+    dt = (DECISIONS.read_text() if DECISIONS.exists() else "") if decisions_text is None else decisions_text
+    out = []
+    pin = pinned_guard_hash(dt)
+    actual = hashlib.sha256(gb).hexdigest()
+    if pin is None:
+        out.append(f"{GUARDS.name}: R11 no TRANSITION_GUARDS hash pinned in the owner decision record")
+    elif pin != actual:
+        out.append(f"{GUARDS.name}: R11 approved list changed without re-approval (pinned {pin[:12]}, actual {actual[:12]})")
+    return json.loads(gb), out
+
+
+def check_guard_list(g: dict) -> list[str]:
+    out = []
+    for mid, rows in sorted(g.get("machines", {}).items()):
+        ids, pairs = set(), set()
+        for r in rows:
+            if r["id"] in ids:
+                out.append(f"{mid}: R0 duplicate approved transition ID {r['id']}")
+            if (r["from"], r["to"]) in pairs:
+                out.append(f"{mid}: R0 duplicate approved transition {r['from']}->{r['to']}")
+            ids.add(r["id"])
+            pairs.add((r["from"], r["to"]))
+            for p in r["guards"]:
+                if p not in g.get("proof_types", {}):
+                    out.append(f"{mid}: R9 approved transition {r['id']} names untyped proof '{p}'")
+    return out
+
+
+def reachable_avoiding(init: str, trans: list, avoid: str) -> set:
+    seen = set() if init == avoid else {init}
+    todo = list(seen)
+    while todo:
+        x = todo.pop()
+        for a, b in trans:
+            if a == x and b != avoid and b not in seen:
+                seen.add(b)
+                todo.append(b)
+    return seen
+
+
+def check(doc: dict, guards: dict | None = None, guard_findings: list[str] | None = None) -> list[str]:
+    """guards=None loads the approved list from disk and checks its pin (R11)."""
     out: list[str] = []
+    if guards is None:
+        guards, pin_findings = load_guards()
+        out += pin_findings
+    out += guard_findings or []
+    out += check_guard_list(guards)
+    approved = {mid: {(r["from"], r["to"]): (r["id"], frozenset(r["guards"])) for r in rows}
+                for mid, rows in guards.get("machines", {}).items()}
+    proof_types = set(guards.get("proof_types", {}))
+    # R0 duplicates
+    ids = [m["id"] for m in doc.get("machines", [])]
+    for mid in sorted({x for x in ids if ids.count(x) > 1}):
+        out.append(f"{mid}: R0 duplicate machine ID ({ids.count(mid)} definitions)")
+    for m in doc.get("machines", []):
+        st = m["states"]
+        for s_ in sorted({x for x in st if st.count(x) > 1}):
+            out.append(f"{m['id']}: R0 duplicate state {s_}")
+        pairs = [(t["from"], t["to"]) for t in m["transitions"]]
+        for a, b in sorted({p for p in pairs if pairs.count(p) > 1}):
+            out.append(f"{m['id']}: R0 duplicate transition {a}->{b} ({pairs.count((a, b))} definitions)")
     machines = {m["id"]: m for m in doc.get("machines", [])}
     for mid in sorted(REQUIRED_MACHINES - set(machines)):
         out.append(f"{mid}: MISSING_MACHINE")
@@ -147,6 +256,30 @@ def check(doc: dict) -> list[str]:
                 out.append(f"{mid}: R6 {a}->{b} resends")
             if not t.get("requires"):
                 out.append(f"{mid}: R6 {a}->{b} leaves unknown without a readback")
+        # R8 / R9: the transition relation equals the approved list, with typed proofs
+        allowed = approved.get(mid)
+        if allowed is None:
+            out.append(f"{mid}: R8 machine has no approved transition list")
+            allowed = {}
+        for t in m["transitions"]:
+            a, b, g = t["from"], t["to"], guards_of(t)
+            for p in sorted(g - proof_types):
+                out.append(f"{mid}: R9 {a}->{b} requires untyped proof '{p}'")
+            if (a, b) not in allowed:
+                out.append(f"{mid}: R8 unapproved transition {a}->{b}")
+            elif g != allowed[(a, b)][1]:
+                out.append(f"{mid}: R8 {a}->{b} guard set {sorted(g)} differs from approved "
+                           f"{allowed[(a, b)][0]} {sorted(allowed[(a, b)][1])}")
+        for (a, b), (tid, _) in sorted(allowed.items()):
+            if (a, b) not in tmap:
+                out.append(f"{mid}: R8 approved transition {tid} {a}->{b} missing from the model")
+        # R10 mandatory waypoints
+        for target, ways in sorted(WAYPOINTS.get(mid, {}).items()):
+            for w_ in ways:
+                if target in reachable_avoiding(m["initial"], trans, w_):
+                    out.append(f"{mid}: R10 {target} reachable without passing {w_}")
+    for mid in sorted(set(approved) - set(machines)):
+        out.append(f"{mid}: R8 approved list names a machine absent from the model")
     return out
 
 
@@ -169,24 +302,70 @@ def selftest(path: Path) -> int:
             next(t for t in ms[mid]["transitions"] if (t["from"], t["to"]) == (a, b)).pop("requires", None)
         return f
 
+    def add(mid, a, b, req):
+        return mutate(lambda ms: ms[mid]["transitions"].append({"from": a, "to": b, "requires": req}))
+
+    def set_requires(mid, a, b, req):
+        def f(ms):
+            next(t for t in ms[mid]["transitions"] if (t["from"], t["to"]) == (a, b))["requires"] = req
+        return f
+
+    gbytes = GUARDS.read_bytes()
+    approved = json.loads(gbytes)
+
+    def guards_plus(mid, a, b, g):
+        d = copy.deepcopy(approved)
+        d["machines"][mid].append({"id": "X-T99", "from": a, "to": b, "guards": g})
+        return d
+
+    dup_doc = copy.deepcopy(base)
+    dup_doc["machines"].append(copy.deepcopy(dup_doc["machines"][0]))
+
+    # (rule, model, approved list or None for the file on disk, extra pin findings)
     cases = {
-        "R1 unreachable state": ("R1", mutate(lambda ms: ms["VAN-SM-TRADE_ORDER"]["states"].append("ORPHAN"))),
+        "R1 unreachable state": ("R1", mutate(lambda ms: ms["VAN-SM-TRADE_ORDER"]["states"].append("ORPHAN")), None, None),
         "R2 dead end": ("R2", mutate(lambda ms: (ms["VAN-SM-FUND_DEPOSIT"]["states"].append("LIMBO"),
-                                                ms["VAN-SM-FUND_DEPOSIT"]["transitions"].append({"from": "DRAFT", "to": "LIMBO"})))),
-        "R3 receipt without proof": ("R3", mutate(strip_requires("VAN-SM-FUND_WITHDRAWAL", "PROVIDER_PENDING", "PAID"))),
-        "R4 missing cancel/fill race": ("R4", mutate(drop("VAN-SM-TRADE_ORDER", "CANCEL_PENDING", "FILLED"))),
+                                                ms["VAN-SM-FUND_DEPOSIT"]["transitions"].append({"from": "DRAFT", "to": "LIMBO"}))), None, None),
+        "R3 receipt without proof": ("R3", mutate(strip_requires("VAN-SM-FUND_WITHDRAWAL", "PROVIDER_PENDING", "PAID")), None, None),
+        "R4 missing cancel/fill race": ("R4", mutate(drop("VAN-SM-TRADE_ORDER", "CANCEL_PENDING", "FILLED")), None, None),
         "R5 cancelled deletion skips re-auth": ("R5", mutate(lambda ms: ms["VAN-SM-ACCOUNT_LIFECYCLE"]["transitions"].append(
-            {"from": "RELINK_REQUIRED", "to": "LINKED_READ_ONLY", "requires": "broker_readback"}))),
+            {"from": "RELINK_REQUIRED", "to": "LINKED_READ_ONLY", "requires": "broker_readback"})), None, None),
         "R6 unknown outcome resends": ("R6", mutate(lambda ms: ms["VAN-SM-FUND_WITHDRAWAL"]["transitions"].append(
-            {"from": "OUTCOME_UNKNOWN", "to": "SUBMITTED", "requires": "reconciliation_readback"}))),
+            {"from": "OUTCOME_UNKNOWN", "to": "SUBMITTED", "requires": "reconciliation_readback"})), None, None),
         "R6 second unknown state leaves without readback": ("R6", mutate(lambda ms: ms["VAN-SM-ACCOUNT_LIFECYCLE"]["transitions"].append(
             {"from": "CLOSURE_OUTCOME_UNKNOWN", "to": "LINKED_READ_ONLY_X"}) or ms["VAN-SM-ACCOUNT_LIFECYCLE"]["states"].append("LINKED_READ_ONLY_X")
-            or ms["VAN-SM-ACCOUNT_LIFECYCLE"]["terminal"].append("LINKED_READ_ONLY_X"))),
-        "R7 undeclared receipt state": ("R7", mutate(lambda ms: ms["VAN-SM-FUND_DEPOSIT"]["receipt_states"].append("GHOST"))),
+            or ms["VAN-SM-ACCOUNT_LIFECYCLE"]["terminal"].append("LINKED_READ_ONLY_X")), None, None),
+        "R7 undeclared receipt state": ("R7", mutate(lambda ms: ms["VAN-SM-FUND_DEPOSIT"]["receipt_states"].append("GHOST")), None, None),
+        # Rev 1.9b (NXA-01): the four shortcuts, each carrying a real, typed proof label
+        "R8 shortcut deposit DRAFT->SETTLED": ("R8", add("VAN-SM-FUND_DEPOSIT", "DRAFT", "SETTLED", "broker_balance_readback"), None, None),
+        "R8 shortcut withdrawal DRAFT->PAID": ("R8", add("VAN-SM-FUND_WITHDRAWAL", "DRAFT", "PAID", "provider_settlement_receipt"), None, None),
+        "R8 shortcut order DRAFT->FILLED": ("R8", add("VAN-SM-TRADE_ORDER", "DRAFT", "FILLED", "broker_fill"), None, None),
+        "R8 shortcut news DRAFT_UNAPPROVED->USED": ("R8", add("VAN-SM-NEWS_ARMED_TICKET", "DRAFT_UNAPPROVED", "USED",
+                                                             "two_source_agreement+mandate_and_risk_gate+unused_nonce"), None, None),
+        "R8 weakened guard on PAID": ("R8", mutate(set_requires("VAN-SM-FUND_WITHDRAWAL", "PROVIDER_PENDING", "PAID", "broker_readback")), None, None),
+        "R8 approved transition removed": ("R8", mutate(drop("VAN-SM-FUND_DEPOSIT", "DRAFT", "CANCELLED")), None, None),
+        "R9 untyped proof string": ("R9", mutate(set_requires("VAN-SM-FUND_WITHDRAWAL", "PROVIDER_PENDING", "PAID", "arbitrary_nonempty_string")), None, None),
+        # even with the approved list edited (and re-pinned), the waypoints still refuse every shortcut
+        "R10 deposit shortcut with edited approved list": ("R10", add("VAN-SM-FUND_DEPOSIT", "DRAFT", "SETTLED", "broker_balance_readback"),
+                                                           guards_plus("VAN-SM-FUND_DEPOSIT", "DRAFT", "SETTLED", ["broker_balance_readback"]), []),
+        "R10 withdrawal shortcut with edited approved list": ("R10", add("VAN-SM-FUND_WITHDRAWAL", "DRAFT", "PAID", "provider_settlement_receipt"),
+                                                              guards_plus("VAN-SM-FUND_WITHDRAWAL", "DRAFT", "PAID", ["provider_settlement_receipt"]), []),
+        "R10 order shortcut with edited approved list": ("R10", add("VAN-SM-TRADE_ORDER", "DRAFT", "FILLED", "broker_fill"),
+                                                         guards_plus("VAN-SM-TRADE_ORDER", "DRAFT", "FILLED", ["broker_fill"]), []),
+        "R10 news shortcut with edited approved list": ("R10", add("VAN-SM-NEWS_ARMED_TICKET", "DRAFT_UNAPPROVED", "USED", "unused_nonce"),
+                                                        guards_plus("VAN-SM-NEWS_ARMED_TICKET", "DRAFT_UNAPPROVED", "USED", ["unused_nonce"]), []),
+        "R11 approved list edited without re-approval": ("R11", base, None,
+            load_guards(json.dumps(guards_plus("VAN-SM-FUND_DEPOSIT", "DRAFT", "SETTLED", ["broker_balance_readback"])).encode())[1]),
+        # Rev 1.9b (NXA-03): collisions
+        "R0 duplicate machine ID": ("R0", dup_doc, None, None),
+        "R0 duplicate state": ("R0", mutate(lambda ms: ms["VAN-SM-TRADE_ORDER"]["states"].append("FILLED")), None, None),
+        "R0 duplicate transition with a different proof": ("R0", add("VAN-SM-FUND_WITHDRAWAL", "PROVIDER_PENDING", "PAID", "broker_readback"), None, None),
+        "R0 duplicate approved transition": ("R0", base, guards_plus("VAN-SM-FUND_DEPOSIT", "DRAFT", "CANCELLED", []), []),
     }
     bad = 0
-    for name, (rule, doc) in cases.items():
-        got = [x for x in check(doc) if f": {rule} " in x]
+    for name, (rule, doc, guards, pin) in cases.items():
+        got = [x for x in (check(doc) if guards is None and pin is None
+                           else check(doc, guards if guards is not None else approved, pin)) if f": {rule} " in x]
         print(f"{'caught' if got else 'MISSED'}: {name} -> {got[:1]}")
         bad += 0 if got else 1
     return 1 if bad else 0

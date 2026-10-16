@@ -21,11 +21,5 @@
 **Found while applying the fixes.**
 - The generator's DAG parser accepted only letter node keys. The new key `A0` (DU-00a) was silently dropped from the graph. The validator caught it straight away: DU-00a showed up as an unknown unit in four findings. The pattern was widened to `[A-Z][A-Z0-9]{0,2}`.
 - The self-test's own guard then caught a case whose anchor text no longer existed (`self-test case 'cycle' did not change its input`), so that case could not pass silently. Its anchor was updated.
-- The evidence builder's refusal gate ("inputs must equal the committed HEAD") was tested by modifying an input on purpose, and it **failed**: the pack was built anyway. The cause was git pathspecs resolved against the wrong directory, so nothing ever looked modified. After the fix, the gate refuses both a modified input and a deleted one (exit 2), and the pack was rebuilt from clean inputs.
-
-**Evidence pack (U8).**
-- Pack: `evidence/VAN_NEXT_PREDEV_EVIDENCE_PACK_REV1_9A.zip`, bound to source commit `8ac8992`, zip SHA-256 `3dfb6518c4617a8bfef8a63ef143dfa413bb8e4bbb725bd170092df170b45648`.
-- Build: deterministic, byte-identical on rebuild.
-- Rerun: unzipped into an empty directory, every input matched its manifest hash, and all five commands reproduced their receipts exactly (four exit 0; the run on the pack's original machines exits 1 with its 69 findings, as expected).
 
 **Still owner-only:** signing the decision record (OQ-05, now the start gate of the read-only PKT-001) and decisions B1–B6. **Still independent-only:** the F15 certificate at DU-31. No assistant or worker may self-issue it.

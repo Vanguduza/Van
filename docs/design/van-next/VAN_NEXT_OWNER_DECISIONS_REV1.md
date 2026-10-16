@@ -3,7 +3,7 @@
 **Record ID:** `VAN-NEXT-OD-REV1-20261015`
 **Status:** `RECORDED_FROM_OWNER_CHAT / AWAITING_OWNER_SIGNATURE`
 **Recorded:** 15 October 2026, from the owner's instructions in a Claude Code session reviewing `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_20261015.md`.
-**Applies to:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9A_20261016.md` and its companion matrix. OD-07…OD-31 were added on 15 October 2026 after the owner reviewed Rev 1.1.
+**Applies to:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9B_20261016.md` and its companion matrix. OD-07…OD-31 were added on 15 October 2026 after the owner reviewed Rev 1.1; OD-32…OD-36 on 16 October 2026.
 
 Under the VAN Project Truth Protocol an owner-signed, device-authenticated instruction outranks this record. These decisions bind development packets once the owner signs this record (blueprint §2.1, §17 F0). Until then they are the owner's stated intent, and no trading mandate, live permission or production change follows from them.
 
@@ -41,6 +41,20 @@ Under the VAN Project Truth Protocol an owner-signed, device-authenticated instr
 | OD-29 | F2: "yes" — F13 is a predevelopment matrix; an independent F15 certificate is required before any code-bearing packet. | §17, DU-31 |
 | OD-30 | F3: "yes" — DU-00 is split: read-only inventory → Product Truth (171/115) → F15 → code-bearing consolidation. | §12.5, §16.2 |
 | OD-31 | F4: "yes" — a hash-pinned predevelopment evidence pack. | `evidence/` |
+| OD-32 | G1: "yes" — an approved transition list with typed proofs; any transition or guard set outside it fails, and the four shortcuts become permanent failing tests. | Rev 1.9b W1; `contracts/VAN_TRANSITION_GUARDS_REV1_9B.json` (NXA-01) |
+| OD-33 | G2: "yes" — the requirement IDs (and the 78 legacy surfaces' owner actions) are locked to an owner-signed list; removal needs an explicit owner supersession. | Rev 1.9b W2; `plan/REQUIREMENT_LOCK_REV1_9B.json` (NXA-02) |
+| OD-34 | G3: "yes" — duplicate machine, state, transition and requirement IDs are failures. | Rev 1.9b W3 (NXA-03) |
+| OD-35 | G4: "yes" — PKT-001…PKT-003 use a preservation-inventory gate; the parity checker gates every packet from PKT-005, after PKT-004 builds and qualifies it. | Rev 1.9b W4, plan §1 rule 3a (NXA-04) |
+| OD-36 | G5: "yes" — the post-pack lines become a numbered addendum with its own fingerprint, and the evidence pack is rebuilt as Rev 1.9b. | Rev 1.9b W5 (NXA-06) |
+
+## Locked contracts
+
+Each file below changes only with the owner's approval of its new SHA-256 here. The checkers read these hashes and fail if a file differs (state-machine rule R11; plan findings `LOCK_NOT_PINNED`, `LOCK_CHANGED_WITHOUT_APPROVAL`). They bind development once this record is signed (OQ-05).
+
+| Lock | File | SHA-256 |
+|---|---|---|
+| TRANSITION_GUARDS | `contracts/VAN_TRANSITION_GUARDS_REV1_9B.json` | `9da17bd95dce0f5c673143c37f86a18bb30208645f811a84c8f212ea5e727466` |
+| REQUIREMENT_LOCK | `plan/REQUIREMENT_LOCK_REV1_9B.json` | `7e102f249c89f030edbbb6cb91dc12a1a095feb2d1ba6b94275a21e3d597558d` |
 
 ## Open owner decisions
 
