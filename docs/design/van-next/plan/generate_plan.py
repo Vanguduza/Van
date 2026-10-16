@@ -24,7 +24,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 PACK = HERE.parent
-BLUEPRINT = PACK / "VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9_20261015.md"
+BLUEPRINT = PACK / "VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9A_20261016.md"
 DECISIONS = PACK / "VAN_NEXT_OWNER_DECISIONS_REV1.md"
 OUT_MD = HERE / "VAN_NEXT_DEVELOPMENT_PLAN_REV1.md"
 OUT_JSON = HERE / "VAN_NEXT_DEVELOPMENT_PLAN_REV1.json"
@@ -32,6 +32,9 @@ OUT_PROV = HERE / "PLAN_INPUT_PROVENANCE.json"
 GENERATOR = Path(__file__).resolve()
 # Units every build unit must reach (blueprint Rev 1.9, AUD-01).
 QUALIFICATION = ["DU-25", "DU-26", "DU-MR"]
+# The predevelopment F15 gate (Rev 1.9a, V19-A02) and the read-only units allowed before it.
+F15_GATE = "DU-31"
+READ_ONLY_BEFORE_F15 = {"DU-00a", "DU-01", "DU-31"}
 
 # ---------------------------------------------------------------- plan-level choices
 # Phases follow blueprint §19.1. P2 builds one real vertical slice per domain (milestone
@@ -41,14 +44,14 @@ LANES = ["Consolidation", "Foundation", "Orb/Floating", "Trading", "News", "Work
 
 PLAN_CHOICES = {
     "phase": {
-        "DU-00": "P0", "DU-01": "P0",
+        "DU-00a": "P0", "DU-01": "P0", "DU-31": "P0", "DU-00b": "P0",
         "DU-02": "P1", "DU-24": "P1", "DU-03": "P1", "DU-04": "P1",
         "DU-22": "P4", "DU-23": "P4", "DU-25": "P4", "DU-26": "P4",
         "DU-MR": "P5",
         # every other DU is a domain DU: M1 in P2 if it is in a slice closure, M2 in P3
     },
     "lane": {
-        "DU-00": "Consolidation",
+        "DU-00a": "Consolidation", "DU-31": "Consolidation", "DU-00b": "Consolidation",
         "DU-01": "Foundation", "DU-02": "Foundation", "DU-24": "Foundation", "DU-03": "Foundation", "DU-04": "Foundation",
         "DU-05": "Orb/Floating", "DU-06": "Orb/Floating", "DU-07": "Orb/Floating",
         "DU-09": "Trading", "DU-10": "Trading", "DU-10b": "Trading", "DU-10c": "Trading", "DU-10d": "Trading",
@@ -96,12 +99,12 @@ def parse_dag(bp: str):
     block = section(bp, "### 16.2 Development Unit dependency DAG", "### 16.3")
     mer = block[block.index("```mermaid"): block.index("```", block.index("```mermaid") + 3)]
     labels: dict[str, str] = {}
-    for key, label in re.findall(r"\b([A-Z]{1,3})\[([^\]]+)\]", mer):
+    for key, label in re.findall(r"\b([A-Z][A-Z0-9]{0,2})\[([^\]]+)\]", mer):
         labels.setdefault(key, label)
     solid, dotted = [], []
     for line in mer.splitlines():
         line = line.strip()
-        m = re.match(r"^([A-Z]{1,3})(?:\[[^\]]+\])?\s*(-->|-\..*?\.->)\s*([A-Z]{1,3})", line)
+        m = re.match(r"^([A-Z][A-Z0-9]{0,2})(?:\[[^\]]+\])?\s*(-->|-\..*?\.->)\s*([A-Z][A-Z0-9]{0,2})", line)
         if not m:
             continue
         (solid if m.group(2) == "-->" else dotted).append((m.group(1), m.group(3)))
@@ -125,7 +128,9 @@ def parse_requirements(bp: str) -> dict[str, dict]:
     for row in block.splitlines():
         cells = [c.strip() for c in row.strip().strip("|").split("|")]
         if len(cells) == 4 and cells[0].startswith("VAN-NX-"):
-            reqs[cells[0]] = {"behaviour": cells[1], "dus": expand_du(cells[2]), "acceptance": cells[3]}
+            m = re.search(r"Needs:\s*([^|]*)", cells[3])
+            reqs[cells[0]] = {"behaviour": cells[1], "dus": expand_du(cells[2]), "acceptance": cells[3],
+                              "needs": expand_du(m.group(1)) if m else []}
     return reqs
 
 
@@ -222,7 +227,25 @@ def validate(dus, edges, reqs, oqs, choices) -> list[str]:
         downstream = {d for d in known if q in ancestors(d)}
         for d in sorted(known - anc - downstream - {q} - set(choices["complete"]) - set(QUALIFICATION)):
             f.append(f"QUAL_UNREACHED: {d} has no dependency path to {q}")
-    # 7. DUs that carry no requirement (reported, not fatal — listed in the plan)
+    # 7. no code-bearing unit runs before the predevelopment F15 gate (V19-A02)
+    if F15_GATE in known:
+        for d in sorted(known - READ_ONLY_BEFORE_F15 - set(choices["complete"])):
+            if F15_GATE not in ancestors(d):
+                f.append(f"CODE_BEFORE_F15: {d} does not depend on {F15_GATE}")
+    else:
+        f.append(f"F15_GATE_MISSING: {F15_GATE}")
+    # 8. every unit a requirement needs is built upstream of (or is) the requirement's unit (V19-A03)
+    for rid, r in sorted(reqs.items()):
+        for owner in r["dus"]:
+            if owner not in known:
+                continue
+            up = ancestors(owner) | {owner}
+            for need in r.get("needs", []):
+                if need not in known:
+                    f.append(f"REQ_NEEDS_UNKNOWN: {rid} needs {need}")
+                elif need not in up:
+                    f.append(f"REQ_NEEDS_NOT_UPSTREAM: {rid} on {owner} needs {need}, which is not upstream")
+    # 9. DUs that carry no requirement (reported, not fatal — listed in the plan)
     return f
 
 
@@ -368,7 +391,7 @@ def render(dus, edges, dotted, reqs, oqs, choices, seq, deps, findings, unreq, p
     w("## 1. Rules")
     w("")
     w("1. **One packet at a time, in sequence order.** A packet starts only when its entry gate holds; the next packet starts only when the current one has exited. Parallel work is allowed only when the owner assigns another worker, and then only to packets of the same wave (§6) whose dependencies have exited.")
-    w("2. **Entry gate (every packet):** all dependency packets exited; the packet's acceptance contract written and owner-approved (fields of blueprint §16.4, including exact source SHA, files, negative cases, acceptance commands, rollback); every open question that blocks its start resolved.")
+    w("2. **Entry gate (every packet):** for every code-bearing packet (any unit other than DU-00a, DU-01 and DU-31), a current independent F15 `FORENSIC_BUILD_READY` certificate from DU-31 and a passing deterministic predevelopment gate (PRD-DDP-R2 §19); all dependency packets exited; the packet's acceptance contract written and owner-approved (fields of blueprint §16.4, including exact source SHA, files, negative cases, acceptance commands, rollback); every open question that blocks its start resolved.")
     w("3. **Exit gate (every packet):** the contract's acceptance commands pass on a recorded commit; each new gate is broken deliberately and seen to fail before it is trusted; the parity checker (from PKT-001 onward) shows no `FEATURE_LOSS`; independent review recorded; artifact state at least `REPOSITORY_PROVEN` (§17.1). Device, live and owner-acceptance states are reached in P4–P5 and are never claimed earlier.")
     w("4. **No code outside a packet.** Work not in an open packet is not done. A discovery that changes scope stops the packet and goes to the owner as a blueprint amendment; the plan is regenerated.")
     w("5. **Order key** (deterministic): phase (§19.1) → dependency depth in the §16.2 DAG → lane order of §16.3 → DU number. P2 builds the five §19.1 vertical slices as milestone M1 of each DU in a slice and of every DU those slices depend on; P3 completes each DU (M2), then the remaining DUs in full.")
@@ -383,7 +406,7 @@ def render(dus, edges, dotted, reqs, oqs, choices, seq, deps, findings, unreq, p
         for x in findings:
             w(f"  - `{x}`")
     else:
-        w("- Findings: none. The DAG is acyclic; every requirement and every open question maps to a DU in the DAG; every DU has a lane; no DU depends on a later phase; every build unit has a dependency path to DU-25, DU-26 and DU-MR.")
+        w("- Findings: none. The DAG is acyclic; every requirement and every open question maps to a DU in the DAG; every DU has a lane; no DU depends on a later phase; every build unit has a dependency path to DU-25, DU-26 and DU-MR; no code-bearing unit runs before the F15 gate DU-31; every unit a requirement needs is built upstream of it.")
     w(f"- DUs with no requirement row (kept, flagged for the freeze list): {', '.join(unreq) if unreq else 'none'}.")
     for d, why in choices["complete"].items():
         w(f"- {d} is not a packet: {why}")
@@ -496,12 +519,14 @@ def selftest() -> int:
         print("baseline has findings; fix them before the self-test:", base)
         return 1
     cases = {
-        "cycle": (bp.replace("  A[DU-00 Consolidation", "  J --> A\n  A[DU-00 Consolidation", 1), dec, PLAN_CHOICES, "CYCLE"),
+        "cycle": (bp.replace("  A0[DU-00a Read-only inventory", "  J --> A0\n  A0[DU-00a Read-only inventory", 1), dec, PLAN_CHOICES, "CYCLE"),
         "requirement to unknown DU": (bp.replace("| VAN-NX-044 | Replay sandbox | DU-10c |", "| VAN-NX-044 | Replay sandbox | DU-99 |", 1), dec, PLAN_CHOICES, "REQ_DU_NOT_IN_DAG"),
         "open question to unknown DU": (bp, dec.replace("| DU-29 |", "| DU-98 |", 1), PLAN_CHOICES, "OQ_DU_NOT_IN_DAG"),
         "DU without lane": (bp, dec, {**PLAN_CHOICES, "lane": {k: v for k, v in PLAN_CHOICES["lane"].items() if k != "DU-16"}}, "DU_NO_LANE"),
         "phase inversion": (bp, dec, {**PLAN_CHOICES, "phase": {**PLAN_CHOICES["phase"], "DU-01": "P4"}}, "PHASE_INVERSION"),
         "feature unit cut off from qualification": (bp.replace("  K --> Z\n", "", 1), dec, PLAN_CHOICES, "QUAL_UNREACHED"),
+        "code-bearing work before the F15 gate": (bp.replace("  A --> C[DU-02 Visual golden authority + labels]", "  B --> C[DU-02 Visual golden authority + labels]", 1), dec, PLAN_CHOICES, "CODE_BEFORE_F15"),
+        "requirement producer not upstream": (bp.replace("  N --> JD\n", "", 1), dec, PLAN_CHOICES, "REQ_NEEDS_NOT_UPSTREAM"),
     }
     bad = 0
     for name, (b, d, ch, expect) in cases.items():

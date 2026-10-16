@@ -1,9 +1,9 @@
 # VAN Tactile Spatial Experience — Complete Frontend Rebuild, Functional Preservation & Capability Expansion
 
-**Document ID:** `VAN-TSE-FR-REV1.9-20261015`  
-**Revision:** 1.9 — **freeze candidate** (supersedes Rev 1.8; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.8 are in git history). Development follows `plan/VAN_NEXT_DEVELOPMENT_PLAN_REV1.md`, derived from this document; freeze criteria in `VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_9.md`  
+**Document ID:** `VAN-TSE-FR-REV1.9A-20261016`  
+**Revision:** 1.9a — **freeze candidate** (supersedes Rev 1.9; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.9 are in git history). Development follows `plan/VAN_NEXT_DEVELOPMENT_PLAN_REV1.md`, derived from this document; freeze criteria in `VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_9A.md`; evidence in `evidence/`  
 **Date:** 15 October 2026 (Africa/Harare)  
-**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-27), which captures the two locked dark/light references and the 15 October review decisions  
+**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-31), which captures the two locked dark/light references and the 15 October review decisions  
 **Repository:** [`Vanguduza/Van`](https://github.com/Vanguduza/Van)  
 **Audit baseline A:** merged `main` SHA `8eb1889822fc8a83f219977c15340172e16acd91`  
 **Audit baseline B:** unmerged, draft owner-core [PR #93](https://github.com/Vanguduza/Van/pull/93) SHA `dfc1557ab99ad8d41cf84714e1bb671e89b045e6`  
@@ -13,6 +13,22 @@
 **Companion artifacts:** `VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.md` (78 surfaces + additive surfaces; CSV and JSON for automation), `VAN_NEXT_OWNER_DECISIONS_REV1.md`, `reference/` (locked originals and relabelled Rev 1.1 references).  
 
 > **Executive decision:** Rebuild the entire visible frontend using the newly accepted Tactile Spatial UI, not the old VAN panels or older aesthetic blueprints; comprehensively inspect and preserve qualified product functions, underlying service/contracts, security, existing worthwhile UX flows, Floating VAN and interaction behaviours. Introduce the state-aware Home orb, small quick-access sheet, richer Trading entry points, full news intelligence, and genuinely live project/task/agent spatial workflow diagrams. Reconcile large, unmerged source candidates before porting; no silent legacy-file imports or feature loss.
+
+## Rev 1.9a change log (16 October 2026) — follow-up audit corrections
+
+A follow-up independent audit of Rev 1.9 (`research/VAN_NEXT_REV19_FOLLOWUP_AUDIT_RESPONSE_20261016.md`) raised V19-A01…A09. Each finding was checked against the repository and against the DIAL standard PRD-DDP-R2 §17–§19. The owner approved F1–F4 (OD-28…OD-31).
+
+| # | Change | Finding | Where |
+|---|---|---|---|
+| U1 | **F13 is a predevelopment runtime/external qualification *matrix*** (what each external capability must prove, how and when), per PRD-DDP-R2 §17. Signed-APK, device and provider proofs move to the post-implementation artifact states. **F15 is the predevelopment Build-Ready certificate**; it does not claim production readiness. | V19-A01 | §17 |
+| U2 | **DU-00 split; F15 gate before any code change.** The new order is DU-00a (read-only inventory) → DU-01 (Product Truth, including the 171-atom and 115-context mapping) → **DU-31 (predevelopment closure and independent F15 certificate)** → DU-00b (code-bearing consolidation) → everything else. The plan generator refuses any code-bearing unit that does not depend on DU-31. | V19-A02 | §12.5, §16.2, §19.1 |
+| U3 | The cross-signal intelligence feature (VAN-NX-065) moves to DU-10d, which now depends on the News UI (DU-14d). Requirements may now declare the units they need (`Needs:`), and the generator checks that those units are built upstream. | V19-A03 | §16.1, §16.2 |
+| U4 | The stale "cancelled, not filled" negative test is replaced with cancel/fill race tests. | V19-A04 | §18.2 |
+| U5 | The news test is split: D1 never closes or enlarges a position; D4/D5 may reduce a **VAN-managed** position only once owner-signed for live use; owner-managed positions only get alerts. | V19-A05 | §18.2 |
+| U6 | "The stop is sent with the order" is stated as a **request invariant**, and protection after fill is a state: `CONFIRMED_PROTECTED`, `PROTECTION_UNCONFIRMED` or `CONFIRMED_UNPROTECTED`. No bounded-seconds promise. | V19-A06 | §7.4.3, R1 |
+| U7 | Owner adds to **automatic** trades also require the trade to be winning at approval and again at submission (OD-10's own words). | V19-A07 | §7.4.6 |
+| U8 | A hash-pinned predevelopment evidence pack with re-runnable receipts. | V19-A08 | `evidence/` |
+| U9 | REA status wording made current. | V19-A09 | §16.2, §0.3 |
 
 ## Rev 1.9 change log (15 October 2026) — independent audit corrections
 
@@ -114,7 +130,7 @@ Driven by the owner's second round of decisions (OD-07…OD-11) and a further co
 
 | # | Change | Where |
 |---|---|---|
-| R1 | The stop is attached **inside the opening order**, so a manual trade is never open without it. Rev 1.1 described closing after the fill as if it were the mechanism; it is only the last-resort fallback, and Rev 1.2 adds re-attach attempts before any close. The venue adapters already do this (MT5 refuses orders without SL "in the same request"; cTrader sends `relativeStopLoss` in the same request). | §7.4.3, F-031 |
+| R1 | The stop is attached **inside the opening order** (a request invariant; after a fill the protection state is tracked as `CONFIRMED_PROTECTED`, `PROTECTION_UNCONFIRMED` or `CONFIRMED_UNPROTECTED`, Rev 1.9a). Rev 1.1 described closing after the fill as if it were the mechanism; it is only the last-resort fallback, and Rev 1.2 adds re-attach attempts before any close. The venue adapters already do this (MT5 refuses orders without SL "in the same request"; cTrader sends `relativeStopLoss` in the same request). | §7.4.3, F-031 |
 | R2 | Rev 1.1 said `OrderCommand` has no take-profit field; it has `targets`, which both adapters send as the TP in the same request. Corrected. | §7.4.4 |
 | R3 | Adding to a winning manual trade works exactly like a new manual entry (same screen, same automatic stop), with risk judged on the whole position family. | §7.4.6 |
 | R4 | **Hand to VAN**: switch a manual trade to automatic management, and take it back. | §7.4.7 |
@@ -337,7 +353,7 @@ Use DIAL-FFDRM-R1 categories such as `INTEGRATED_AND_EVIDENCED`, `IMPLEMENTED_NO
 | F-024 | Old blueprint proposes OpenAlgo, JEV and analyst features not established by current source/static audit. | Treat as feature requirements/candidates, not completed runtime components. | E1/E2 |
 | F-025 | Source-level visual tokens and old comps may be perfectly valid internally but unfit for the approved tangible style. | Do not call every old file defective; categorise each by admitted capability vs rendering. | E2 + owner reference |
 | F-026 | News headlines enter only through `python -m vati news-ingest --file headlines.jsonl` (`vati/__main__.py`) or a configured file; no licensed or official live feed adapter exists. Severity and concern are declared per row; nothing produces them from a raw article. | Feed adapters and a bounded classifier feeding the existing `NewsIngress.ingest` (§8.2). | E2 |
-| F-027 | 35 of the 78 surfaces cite source files that exist only on unmerged PR #93: 53 distinct files, including voice speaker enrolment, `backend/van_gateway/mission/control.py`, browser download/file-provider panels, `trading/ui/TicketsScreen.kt`, memory erasure and owner permission grants. 185 of the matrix's 428 source references are pinned to the PR #93 head. | Repository consolidation is DU-00 and precedes new-UI work (§12.5). | Counted from matrix vs `git ls-tree` of both heads |
+| F-027 | 35 of the 78 surfaces cite source files that exist only on unmerged PR #93: 53 distinct files, including voice speaker enrolment, `backend/van_gateway/mission/control.py`, browser download/file-provider panels, `trading/ui/TicketsScreen.kt`, memory erasure and owner permission grants. 185 of the matrix's 428 source references are pinned to the PR #93 head. | Repository consolidation (read-only inventory DU-00a, then DU-00b after the F15 gate DU-31) precedes new-UI work (§12.5). | Counted from matrix vs `git ls-tree` of both heads |
 | F-028 | No owner-initiated trade entry or exit path exists on `main` or PR #93. Owner trading writes are `POST /v1/trading/halt`, account actions, strategy promotion and ZSE ticket confirmation (`backend/van_gateway/app.py`). The mockup's one-tap "Place Order" therefore has no backend. | Design and build owner manual trading on the existing authority chain (§7.4, DU-28). | E2 negative search, both heads |
 | F-029 | The system's trading safeguards that manual trading must reuse already exist on `main`: signed `TradingMandate` with `HARD_FORBIDDEN_BEHAVIOURS` (incl. `trade_without_broker_side_stop`, `stop_widening_on_loss`, `revenge_risk_increase`), `PlatformCeilings`, drawdown tiers, per-strategy `strategy_risk_budgets`, reduce-only sizing multipliers, the pre-trade gate's stop-integrity check and tighten-only `protection.py`. PR #92 adds owner-signed `NORMAL`/`RISKY`/`AGGRESSIVE` trading temperaments. | Reuse; do not duplicate (§7.4). | E2 |
 | F-031 | The stop and TP already travel **inside the opening order**: `mt5_bridge.py` sends `sl`/`tp` in the order request and rejects an order without SL ("MT5 orders require SL in the same request"); `ctrader/adapter.py` sends `relativeStopLoss`/`relativeTakeProfit` (market) or `stopLoss`/`takeProfit` (limit) in `ProtoOANewOrderReq`; Deriv stake contracts cap loss at the stake. If a filled order's stop is not confirmed, `router.py:230-236` flattens at once and trips the kill switch. | Manual entry uses the same atomic attachment; Rev 1.2 inserts bounded re-attach attempts before the flatten fallback (§7.4.3). | E2 |
@@ -604,7 +620,14 @@ VERIFIED_SUCCESS | REFUSED(reason) | FAILED | OUTCOME_UNKNOWN
 - **The system sets the stop.** A versioned, deterministic `ManualStopPolicy` computes it from the instrument's volatility on the chosen timeframe (an ATR multiple per instrument class), floored at the venue's `min_stop_distance`. The owner sees it before confirming; there is no "no stop" option.
 - **The stop goes in the same request as the order.** The `OrderCommand` carries `protective_stop` (and `targets` for a TP), and the adapter sends them together: MT5 `sl`/`tp` fields; cTrader `relativeStopLoss`/`relativeTakeProfit` for market orders and `stopLoss`/`takeProfit` for limit orders. The broker therefore opens the position *with* its stop, or rejects the whole order; the account is never holding a manual position that is waiting for a stop. Pending manual orders carry their stop and TP from the moment they rest at the broker.
 - **Rejections are prevented before sending.** The preview checks the stop against the venue's live stop level, freeze level and current spread, so the broker does not reject the order for a stop that is too close. If the market moves during review, the sheet re-prices instead of sending a stop the broker would refuse.
-- **If the broker's reply does not confirm the stop** (a rare transport or reporting gap, not the normal path), Rev 1.2 changes the fallback from "close immediately" to: (1) re-read the position from the broker, since confirmation can lag the fill report; (2) if the stop is genuinely missing, re-attach the same stop with `modify_stop`, up to two attempts within a few seconds; (3) only if the position is still unprotected after that, close it and alert. Each step is recorded. This avoids paying spread and commission to close and reopen a position whose stop was merely reported late, without ever leaving an unprotected position open for more than seconds. The current router does step 3 at once and trips the kill switch (F-031); whether Rev 1.2's sequence also replaces that for automated trades is an owner decision (OQ-07) — the trade-off is a few seconds' exposure versus a guaranteed spread cost and a halted account.
+- **If the broker's reply does not confirm the stop** (a rare transport or reporting gap, not the normal path), Rev 1.2 changes the fallback from "close immediately" to: (1) re-read the position from the broker, since confirmation can lag the fill report; (2) if the stop is genuinely missing, re-attach the same stop with `modify_stop`, up to two attempts within a few seconds; (3) only if the position is still unprotected after that, close it and alert. Each step is recorded. This avoids paying spread and commission to close and reopen a position whose stop was merely reported late.
+
+**Protection is a tracked state, not a promise (Rev 1.9a, V19-A06).** Sending the stop with the order is a **request invariant**: an order without one is never sent. What happens after the fill is recorded as one of three states:
+- `CONFIRMED_PROTECTED`, when the broker read back the stop;
+- `PROTECTION_UNCONFIRMED`, while re-reading or re-attaching;
+- `CONFIRMED_UNPROTECTED`, which leads to an emergency reconcile, reduction or halt.
+
+While protection is unconfirmed, the position's full exposure is shown as at risk and Attention is raised. VAN does not promise how many seconds this lasts when the broker or network fails. The current router does step 3 at once and trips the kill switch (F-031); whether Rev 1.2's sequence also replaces that for automated trades is an owner decision (OQ-07) — the trade-off is a few seconds' exposure versus a guaranteed spread cost and a halted account.
 - **Size follows the stop.** Lots = allowed risk ÷ stop distance, rounded **down** to the venue step; below the venue minimum the answer is "too small to trade at this risk", never a rounded-up size.
 - **The owner may tighten, never widen.** The SL stepper and chart drag move the stop closer only. Widening is refused by `protection.py` and the pre-trade stop-integrity check.
 - Venues without broker stops (ZSE/VFEX, `StopMode.SOFTWARE`) are excluded from manual entry until the owner explicitly accepts software-stop risk for them.
@@ -634,13 +657,14 @@ Every add joins the existing trade's **position family** (`lifecycle/family.py`)
 | Add to… | How it works for the owner | What governs it |
 |---|---|---|
 | **A winning manual trade** (OD-08, OD-23) | Exactly like a new manual entry: same screen, same automatic stop inside the order, same optional TP, same review and biometric approval. **Offered only while the position is winning**: in profit on a fresh quote at the moment of approval. | The manual risk profile (§7.4.2) applied to the **family**: the add's risk plus the family's existing open risk must stay within the family's **original** risk budget, the `owner.manual` budget and account limits. `max_positions_per_instrument` caps the number of adds. **No adds to a losing position** (no averaging down; `martingale` and `unlimited_averaging_down` remain hard-forbidden). |
-| **An automatic (VATI) trade** (OD-10) | From the trade's position screen: "Add to this trade". Same review sheet; the system shows which of the trade's rules allowed or refused the add. | **That trade's own risk profile**: its strategy's risk budget (`risk_budget_for(strategy_id)`), its strategy's `ScalePolicy` (e.g. the position has already paid for itself, family healthy, time since last add, each add smaller than the last), its family risk envelope, preservation having nothing outstanding, and the account's temperament. The add is attributed to the strategy family with `origin=OWNER_MANUAL`. A strategy with no registered scale policy (`NO_SCALING`) cannot be added to manually either. |
+| **An automatic (VATI) trade** (OD-10) | From the trade's position screen: "Add to this trade". Same review sheet; the system shows which of the trade's rules allowed or refused the add. | **That trade's own risk profile**: its strategy's risk budget (`risk_budget_for(strategy_id)`), its strategy's `ScalePolicy` (e.g. the position has already paid for itself, family healthy, time since last add, each add smaller than the last), its family risk envelope, preservation having nothing outstanding, and the account's temperament. **And, as for manual trades (OD-10, OD-23): the trade must be winning, meaning in profit on a fresh quote at owner approval and again at broker submission.** A quote that flips between the two refuses the add. The add is attributed to the strategy family with `origin=OWNER_MANUAL`. A strategy with no registered scale policy (`NO_SCALING`) cannot be added to manually either. |
 
 In both cases the add's stop is placed inside its order, and the family stop rule applies: a new add can never make the family's worst-case loss larger than its profile allows.
 
 **Anti-martingale tests (AUD-21):**
 - A losing position offers no add, and a direct request is refused.
-- A position that turns losing between review and approval refuses the add at approval.
+- A position that turns losing between review and approval refuses the add at approval, and one that turns losing between approval and submission refuses it at submission; this applies to manual and automatic trades alike.
+- A direct API request to add to a losing automatic trade is refused.
 - A sequence of adds never takes family risk above its original budget.
 - Simultaneous fills of two adds are counted once against the family.
 - Concentration across currency legs is included.
@@ -983,7 +1007,7 @@ The owner wants trading modes. They are **already designed and partly built** on
 
 In the app, Trading Home and the position screen show the active mode, its limits and why candidates were refused. Changing the mode opens the signed-mandate flow.
 
-**How PR #92 enters the codebase.** PR #92 is classified in DU-00's Feature Ledger like every other candidate branch (expected `CONSOLIDATE`). It is never merged as-is.
+**How PR #92 enters the codebase.** PR #92 is classified in DU-00a's Feature Ledger like every other candidate branch (expected `CONSOLIDATE`). It is never merged as-is.
 
 ## 8. News and Event Intelligence — live sources, analysis, history, decisions (OD-04, OD-11)
 
@@ -1455,11 +1479,11 @@ For each retained feature, prove `legacy feature ID → current source location 
 
 Existing event handling, secure queues, pairing, overlay and trading repositories may remain physically in old packages while they are used through audited interfaces. No risky big-bang backend rewrite. Retire old Compose views only after route-to-route parity tests and new visual owner approval, preserving rollback ability.
 
-### 12.5 Repository consolidation first (DU-00, OD-05)
+### 12.5 Repository consolidation first (DU-00a/DU-00b, OD-05)
 
 **Why it comes first.** The rebuild can only preserve what it can see. Measured on 15 October: 35 of the 78 surfaces cite 53 source files that exist only on unmerged PR #93, and 185 of the matrix's 428 source references point at the PR #93 head (F-027). Further owner-value work sits on PR #95 / #97 (native Muse, receipts), #92 (trading temperaments, which §7.4 uses), #70 (JEV owner surface), #72 (character mechanics) and #77 (cognitive fabric). Documented features in the `docs/` blueprints and `IMPLEMENTATION_LEDGER.md` may exist on no branch at all. If the new frontend is built against `main` alone, those functions disappear without anyone deciding to remove them.
 
-**Steps (DU-00, blocks DU-03 onward):**
+**Steps.** Steps 1–3 are **DU-00a**, read-only with no source change. Steps 4–6 are **DU-00b**, which runs only after DU-01 and the F15 certificate (DU-31, Rev 1.9a):
 
 1. **Freeze heads.** Record the exact head SHA of `main` and of every open candidate PR. Later changes to a PR re-enter through this step.
 2. **Build the Feature Ledger** (`VAN_NEXT_FUNCTIONAL_PRESERVATION_LEDGER_REV1.csv`). One row per feature, from three sources: the 78-surface matrix (349 owner-action obligations), each candidate PR's feature-bearing changes, and features described in VAN blueprints and implementation ledgers. Columns: feature ID, owner goal, where it lives (branch, files, symbols, tests), backend contract, current status, disposition, owner decision reference.
@@ -1647,7 +1671,9 @@ Each requirement ID must have Product Truth binding, one or more Development Uni
 | VAN-NX-039 | Look-ahead sentinel and network kill-switch in research tests | DU-24 | Both proven to fail when deliberately broken |
 | VAN-NX-033 | Live news trading bundle: feeds, armed release plans, unscheduled-headline classes, owner armed tickets, latency ledger, news risk limits, staged promotion | DU-14e | §8.10.9; per-class paper and shadow evidence; owner signature per class |
 | VAN-NX-032 | Event history comparison for scheduled and unscheduled news, wired into trading decisions D1–D7 through shadow-then-live promotion | DU-14c | §8.4–§8.5; per-path shadow evidence and owner-signed promotion |
-| VAN-NX-028 | Repository consolidation, Feature Ledger and parity oracle before rebuild | DU-00 | Every ledger row classified; parity checker fails on an induced omission |
+| VAN-NX-071 | Read-only inventory before any change: frozen branch heads, Feature Ledger, every row classified | DU-00a | No source change; every ledger row classified with provenance |
+| VAN-NX-028 | Repository consolidation and parity oracle before rebuild | DU-00b | Parity checker fails on an induced omission. Needs: DU-00a, DU-31 |
+| VAN-NX-070 | Predevelopment closure: signed decision record, 171-atom/115-context mapping admitted, state and financial contracts model-checked, F0–F14 preparation evidence, F13 matrix, **independent F15 `FORENSIC_BUILD_READY`** | DU-31 | Certificate by an independent verifier; a code-bearing packet whose unit does not depend on DU-31 fails generation (induced) |
 | VAN-NX-029 | Structural frontend isolation (modules, tokens, strings, release checks) | DU-24 | Legacy import fails compilation; banned-word and literal-style lints fail when induced |
 | VAN-NX-030 | Mockup labels follow system vocabulary | DU-02 | §2.6 table applied in string catalogue and goldens |
 | VAN-NX-053 | Product Truth and preservation reconciliation; owner-signed decision record | DU-01 | §17 F0; Feature Ledger reconciled with Product Truth; record signed (OQ-05) |
@@ -1661,7 +1687,7 @@ Each requirement ID must have Product Truth binding, one or more Development Uni
 | VAN-NX-062 | Risk Command Centre: per-account and combined heat, daily/weekly loss, drawdown, margin, concentration, correlation, protection and kill switch as CURRENT / LIMIT / REMAINING with mandate provenance (Rev 2 VNX-F-ORDERS-10) | DU-11 | Every figure traced to its policy; a fail-open risk path is a P0 blocker |
 | VAN-NX-063 | Smart briefing on Home and the orb Quick Hub, within the §6.1 information budget (Rev 2 VNX-F-HOME-05) | DU-06 | Sources cited; budget not exceeded; stale marked |
 | VAN-NX-064 | Broker-side account profile edits only where the broker capability allows, confirmed by provider readback (Rev 2 VNX-F-ACCOUNTS-06) | DU-29 | A local change never claims a broker update |
-| VAN-NX-065 | Cross-signal intelligence packet joining chart observation, news and analyst notes, read-only into research (Rev 2 VNX-F-INTEL-10) | DU-14d | Provenance on every element; no authority effect |
+| VAN-NX-065 | Cross-signal intelligence packet joining chart observation, news and analyst notes, read-only into research (Rev 2 VNX-F-INTEL-10) | DU-10d | Provenance on every element; no authority effect. Needs: DU-10d, DU-14d, DU-13 |
 | VAN-NX-066 | Memory privacy, consent and erasure, with an erasure receipt (Rev 2 VNX-F-MEMORY-03) | DU-19 | Erasure readback; source deletion is not claimed as model unlearning |
 | VAN-NX-067 | Memory learning goals the owner can view and edit (Rev 2 VNX-F-MEMORY-04) | DU-19 | Goal changes audited |
 | VAN-NX-068 | Automation scheduling with next-run, last-run and failure readback (Rev 2 VNX-F-MORE-03) | DU-19 | No silent failed run |
@@ -1672,9 +1698,11 @@ Each requirement ID must have Product Truth binding, one or more Development Uni
 
 ```mermaid
 flowchart TD
-  A[DU-00 Consolidation, Feature Ledger, parity oracle] --> B[DU-01 Product Truth and preservation reconciliation]
-  B --> C[DU-02 Visual golden authority + labels]
-  B --> P[DU-24 Anti-loss checker + module isolation]
+  A0[DU-00a Read-only inventory: frozen heads, Feature Ledger, classification] --> B[DU-01 Product Truth and preservation reconciliation]
+  B --> FG[DU-31 Predevelopment closure and independent F15 certificate]
+  FG --> A[DU-00b Source consolidation and parity oracle]
+  A --> C[DU-02 Visual golden authority + labels]
+  A --> P[DU-24 Anti-loss checker + module isolation]
   P --> D[DU-03 Clean theme and component system]
   C --> D
   D --> E[DU-04 Adaptive app shell]
@@ -1685,7 +1713,7 @@ flowchart TD
   I --> G
   L --> G
   O --> G
-  B --> MT[DU-28 Manual trading backend]
+  A --> MT[DU-28 Manual trading backend]
   MT --> L
   E --> H[DU-07 Floating VAN remodel]
   E --> I[DU-09 Trading Home]
@@ -1693,7 +1721,7 @@ flowchart TD
   I --> K[DU-12 Markets and Watchlists]
   J --> L[DU-11 Positions/Orders/Protection]
   I --> M[DU-13 Analyst]
-  B --> NA[DU-14a Multi-source feeds + health]
+  A --> NA[DU-14a Multi-source feeds + health]
   NA --> NB[DU-14b Story analysis + headline episodes + history profiles]
   NB --> NC[DU-14c Decision paths D1-D7, shadow then live]
   M --> N[DU-14d News briefs + News UI]
@@ -1712,17 +1740,18 @@ flowchart TD
   J --> JB[DU-10b Indicators, drawings, workspaces]
   J --> JC[DU-10c Replay sandbox]
   JB --> JD[DU-10d Chart observations]
+  N --> JD
   MT --> OV[DU-28e Order vocabulary + venue capabilities]
   OV --> L
   MK --> AL[DU-12b Alerts, watchlists, screener]
-  B --> AC[DU-29 Account lifecycle, linking, edit, delete]
+  A --> AC[DU-29 Account lifecycle, linking, edit, delete]
   AC --> AF[DU-29a Funding ledger + flow-adjusted risk]
   AF --> MT
   AC --> AP[DU-29b Portfolio, health, statements]
   AC --> FO[DU-29c Funds orchestration]
   AF --> FO
   FO --> Z
-  B --> TM[DU-30 Trading modes]
+  A --> TM[DU-30 Trading modes]
   TM --> I
   TM --> Z
   MK --> AP
@@ -1765,11 +1794,11 @@ flowchart TD
   REA -. evidence-backed amendment .-> J
 ```
 
-Rev 1.1 changes: DU-00 is consolidation, not only audit closure; DU-24 (anti-loss checker and module isolation) now gates the theme and the shell, so the rules exist before the first new screen; DU-06 depends on the domains its rows open (Attention DU-08, Trading DU-09/DU-11, Work DU-15); DU-28 (manual trading backend) precedes DU-11 positions/orders.
+Rev 1.1 changes (Rev 1.9a splits DU-00 into DU-00a and DU-00b around the F15 gate DU-31): DU-00 is consolidation, not only audit closure; DU-24 (anti-loss checker and module isolation) now gates the theme and the shell, so the rules exist before the first new screen; DU-06 depends on the domains its rows open (Attention DU-08, Trading DU-09/DU-11, Work DU-15); DU-28 (manual trading backend) precedes DU-11 positions/orders.
 
 **Rev 1.9 (AUD-01):** six feature units (DU-12, DU-12b, DU-29b, DU-10b, DU-10c, DU-10d) had no path to integrated verification. They now feed DU-25 directly, and the plan generator rejects any build unit that does not reach DU-25, DU-26 and DU-MR.
 
-Every arrow is a declared dependency, not a guarantee that a downstream task can skip its own tests. DU-27 does not block all new UI work while the REA host is not ready, but future architecture findings must reconcile against any already implemented chart/execution decisions before final qualification.
+Every arrow is a declared dependency, not a guarantee that a downstream task can skip its own tests. DU-27's static REA research is complete (39 records, OD-17); its admission record is VAN-NX-026 under DU-01. No live Android runtime study has been done; if one is run later, its findings must reconcile against already implemented chart and execution decisions before final qualification.
 
 ### 16.3 Independent work lanes
 
@@ -1824,9 +1853,9 @@ The DIAL forensic standard has 16 core gates. **Not one is asserted green for th
 | `F10_VERIFICATION_EVIDENCE_CONTRACT` | Unit, contract, UI, performance, screenshot, functional, device and source-bound receipts |
 | `F11_ADVERSARIAL_FORENSICS` | Independent second pass challenges file/function mapping and reports false positives/missed paths |
 | `F12_SYMBIOTIC_LOOP_PROOF` | Observe→reason→propose→authorise→act→observe→reconcile→learn without AI minting authority |
-| `F13_PRODUCTION_REACHABILITY` | Real signed APK, registered service route, installed owner-device caller and provider readback |
+| `F13_RUNTIME_EXTERNAL_QUALIFICATION_MATRIX` (predevelopment, PRD-DDP-R2 §17) | For every capability not provable in-repo: current repository state, live environment, required future evidence (signed APK, registered route, owner-device caller, provider readback, S24 cases), responsible authority or owner action, staleness and promotion condition. The *actual* proofs are post-implementation artifact states (§17.1: `RUNTIME_QUALIFIED` → `DEVICE_QUALIFIED` → `LIVE_ELIGIBLE` → `OWNER_ACCEPTED`), recorded by DU-25, DU-26 and DU-MR, not F13 preconditions |
 | `F14_ANTI_GAP_MUTATION_PROOF` | Broken source, missing node, revoked grant, chart injection, stale news and UI regression negative tests |
-| `F15_FORENSIC_BUILD_READY_CERTIFICATION` | Current unambiguous project-scoped readiness certificate after all gates, not inherited historical green |
+| `F15_FORENSIC_BUILD_READY_CERTIFICATION` (predevelopment, PRD-DDP-R2 §19) | A current, project-scoped certificate issued by an **independent verifier** at DU-31. It binds the standard version, Product Truth (signed decision record), the DU registry, the feature and screen graphs (including the 171/115 mapping), F0–F14 preparation evidence, the F13 matrix and a passing deterministic predevelopment gate. **Normal implementation (any code-bearing packet) starts only with `FORENSIC_BUILD_READY`.** It does **not** claim production readiness. It is never self-issued, inherited or historical |
 
 ### 17.1 Artifact states are deliberately distinct
 
@@ -1891,9 +1920,11 @@ Enforce no imports of legacy presentation packages in `next` screens; permitted 
 | Double tap on Review order confirm | One order (idempotency key) |
 | Biometric token replayed or used after 60 s or for a different intent | Refused (act + subject + single use) |
 | Close response lost | `OUTCOME_UNKNOWN`; broker position checked; no blind resend |
-| Pending manual order fills when limits would be breached | Cancelled, not filled |
+| Pending order becomes ineligible (limits, blackout, mandate change) | VATI attempts cancel or replace before fill. Both interleavings are tested: cancel acknowledged before fill → `CANCELLED`; fill before cancel → the broker-confirmed `PARTIAL`/`FILLED` is kept, exposure reconciled, authorised protection/reduce-only applied, Attention raised. Cancellation is never claimed without broker confirmation; nothing is resent on an unknown outcome |
 | Manual trade outcome | Counted in account risk; excluded from capsule learning and promotion |
-| News materiality 1.0 on a T1 source | New-trade multiplier exactly 0.25, never lower; no position closed by news |
+| News materiality 1.0 on a T1 source (path D1) | New-trade multiplier exactly 0.25, never lower; D1 alone never closes, reduces or enlarges an open position |
+| D4/D5 in shadow mode | Emits *would-have* evidence only; no position changes |
+| D4/D5 promoted live (owner-signed per path) | May reduce or exit **VAN-managed** positions per their lifecycle; **owner-managed** positions only receive an alert |
 | Model rewrite of a brief adds a price | Rewrite rejected, template text shown |
 | Behaviour flags with fewer than the minimum closed manual trades | No flag shown; "not enough history" |
 | Pattern extraction run on winners only | Refused by the extractor; losers must be included |
@@ -1930,7 +1961,7 @@ Synthetic market prices and project data are permitted **only** under test/previ
 
 ### 19.1 Phased release, no feature thinning
 
-**P0 Consolidation and evidence closure (priority one):** freeze heads; build and fully classify the Feature Ledger; consolidate PR #93 functional and legacy-UI code (35 surfaces depend on it) and the other admitted PR features into `main` through reviewed branches; generate the parity oracle and prove the checker fails on an induced omission; owner-confirm `VAN_NEXT_OWNER_DECISIONS_REV1.md`; independent challenge of the source classifications. No new-UI module work starts until P0 exits.
+**P0 Consolidation and evidence closure (priority one):** read-only first (DU-00a): freeze heads and build and fully classify the Feature Ledger. Then DU-01, Product Truth, with the 171/115 mapping. Then DU-31: the independent F15 certificate. Only then DU-00b: consolidate PR #93 functional and legacy-UI code (35 surfaces depend on it) and the other admitted PR features into `main` through reviewed branches; generate the parity oracle and prove the checker fails on an induced omission; owner-confirm `VAN_NEXT_OWNER_DECISIONS_REV1.md`; independent challenge of the source classifications. No new-UI module work starts until P0 exits.
 
 **P1 Design system:** Build independent `next` token/component library with exact dark/light goldens and new Home orb prototypes. Run owner visual acceptance; no broad navigation cutover.
 

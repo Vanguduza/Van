@@ -3,7 +3,7 @@
 **Record ID:** `VAN-NEXT-OD-REV1-20261015`
 **Status:** `RECORDED_FROM_OWNER_CHAT / AWAITING_OWNER_SIGNATURE`
 **Recorded:** 15 October 2026, from the owner's instructions in a Claude Code session reviewing `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_20261015.md`.
-**Applies to:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9_20261015.md` and its companion matrix. OD-07…OD-27 were added on 15 October 2026 after the owner reviewed Rev 1.1.
+**Applies to:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9A_20261016.md` and its companion matrix. OD-07…OD-31 were added on 15 October 2026 after the owner reviewed Rev 1.1.
 
 Under the VAN Project Truth Protocol an owner-signed, device-authenticated instruction outranks this record. These decisions bind development packets once the owner signs this record (blueprint §2.1, §17 F0). Until then they are the owner's stated intent, and no trading mandate, live permission or production change follows from them.
 
@@ -37,6 +37,10 @@ Under the VAN Project Truth Protocol an owner-signed, device-authenticated instr
 | OD-25 | E3: "yes" — no "unmanaged by VAN" escape; unlink and delete are blocked while positions, orders, in-flight funds or unknown outcomes exist. | §7.9.4 (AUD-06). |
 | OD-26 | E4: "yes" — the decision record is signed before PKT-001. | OQ-05 now gates DU-00 start (AUD-15). |
 | OD-27 | E5: "yes" — the 18 product truths and 93 features are mapped in Rev 1.9; the 171-atom mapping is DU-01's job. | `crosswalk/`, §16.1 (AUD-07). |
+| OD-28 | F1: "yes" — apply the follow-up audit's contradiction fixes (V19-A03…A07, A09). | Rev 1.9a U3–U7, U9 |
+| OD-29 | F2: "yes" — F13 is a predevelopment matrix; an independent F15 certificate is required before any code-bearing packet. | §17, DU-31 |
+| OD-30 | F3: "yes" — DU-00 is split: read-only inventory → Product Truth (171/115) → F15 → code-bearing consolidation. | §12.5, §16.2 |
+| OD-31 | F4: "yes" — a hash-pinned predevelopment evidence pack. | `evidence/` |
 
 ## Open owner decisions
 
@@ -45,7 +49,7 @@ Under the VAN Project Truth Protocol an owner-signed, device-authenticated instr
 | OQ-01 | Risk budget for `owner.manual` in the next signed mandate | DU-28 live use |
 | OQ-02 | Stop-distance ATR multiples per instrument class for `ManualStopPolicy` | DU-28 implementation |
 | OQ-03 | Demo period before `LIMITED_LIVE` manual trading | DU-28 live use |
-| OQ-05 | Signature of this record (OD-26: before PKT-001) | DU-00 start |
+| OQ-05 | Signature of this record (OD-26: before PKT-001) | DU-00a start |
 | OQ-06 | Which news, wire and calendar providers to license (vendor review of cost, latency, licence terms) | DU-14a |
 | OQ-07 | Whether the stop re-attach sequence (§7.4.3) also replaces the router's immediate flatten-and-halt for automated trades | DU-28 |
 | OQ-08 | Promotion of each news decision path D1–D6 from shadow to live, on its shadow evidence | DU-14c, per path |

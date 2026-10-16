@@ -1,24 +1,24 @@
 {
  "provenance": {
   "blueprint": {
-   "path": "docs/design/van-next/VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9_20261015.md",
-   "sha256": "af8ca74906e3f5a7f4958b593e28e78767ac4024768588e654495c7d8893e772"
+   "path": "docs/design/van-next/VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9A_20261016.md",
+   "sha256": "2bec90b3338e0391f186aa5b12b0daa880874038d95adb605516daacfed0b00a"
   },
   "owner_decisions": {
    "path": "docs/design/van-next/VAN_NEXT_OWNER_DECISIONS_REV1.md",
-   "sha256": "61909b8adef17d596d2bd91015991eea48a72861d46825dcdf3b7b1b8c3de81f"
+   "sha256": "26469778d7d07fba55fd0776cf393f208601109cb4753933ad51aa060c9628be"
   },
   "generator": {
    "path": "docs/design/van-next/plan/generate_plan.py",
-   "sha256": "b99e8c392d690b31bd2e513b70d33cf3f5f01c3055a132c2ea37fbb269988795"
+   "sha256": "43f2e899d2ad4d5c4fd7ed2951b47fe1bb42d2da61cc1546754788542e5e8a2e"
   },
-  "aggregate_input_sha256": "78033ecdfdb1bb7fd5dba71c63625166cb902c2b27f6765b173cdb3851c44b1f",
+  "aggregate_input_sha256": "d37f9a962519a433b6b7ffb5cb9decf6a03db7d019ba218491836f099c29bb81",
   "aggregate_algorithm": "sha256(blueprint_bytes + b'\\n' + decisions_bytes + generator_bytes)"
  },
  "findings": [],
  "packets": [
   {
-   "du": "DU-00",
+   "du": "DU-00a",
    "phase": "P0",
    "milestone": "FULL",
    "packet": "PKT-001",
@@ -32,487 +32,501 @@
    "level": 1
   },
   {
-   "du": "DU-02",
-   "phase": "P1",
+   "du": "DU-31",
+   "phase": "P0",
    "milestone": "FULL",
    "packet": "PKT-003",
    "level": 2
   },
   {
-   "du": "DU-24",
-   "phase": "P1",
+   "du": "DU-00b",
+   "phase": "P0",
    "milestone": "FULL",
    "packet": "PKT-004",
-   "level": 2
-  },
-  {
-   "du": "DU-03",
-   "phase": "P1",
-   "milestone": "FULL",
-   "packet": "PKT-005",
    "level": 3
   },
   {
-   "du": "DU-04",
+   "du": "DU-02",
+   "phase": "P1",
+   "milestone": "FULL",
+   "packet": "PKT-005",
+   "level": 4
+  },
+  {
+   "du": "DU-24",
    "phase": "P1",
    "milestone": "FULL",
    "packet": "PKT-006",
    "level": 4
   },
   {
+   "du": "DU-03",
+   "phase": "P1",
+   "milestone": "FULL",
+   "packet": "PKT-007",
+   "level": 5
+  },
+  {
+   "du": "DU-04",
+   "phase": "P1",
+   "milestone": "FULL",
+   "packet": "PKT-008",
+   "level": 6
+  },
+  {
    "du": "DU-29",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-007",
-   "level": 2
+   "packet": "PKT-009",
+   "level": 4
   },
   {
    "du": "DU-30",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-008",
-   "level": 2
+   "packet": "PKT-010",
+   "level": 4
   },
   {
    "du": "DU-14a",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-009",
-   "level": 2
+   "packet": "PKT-011",
+   "level": 4
   },
   {
    "du": "DU-29a",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-010",
-   "level": 3
+   "packet": "PKT-012",
+   "level": 5
   },
   {
    "du": "DU-14b",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-011",
-   "level": 3
+   "packet": "PKT-013",
+   "level": 5
   },
   {
    "du": "DU-28",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-012",
-   "level": 4
+   "packet": "PKT-014",
+   "level": 6
   },
   {
    "du": "DU-14c",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-013",
-   "level": 4
+   "packet": "PKT-015",
+   "level": 6
   },
   {
    "du": "DU-05",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-014",
-   "level": 5
+   "packet": "PKT-016",
+   "level": 7
   },
   {
    "du": "DU-07",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-015",
-   "level": 5
+   "packet": "PKT-017",
+   "level": 7
   },
   {
    "du": "DU-12a",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-016",
-   "level": 5
+   "packet": "PKT-018",
+   "level": 7
   },
   {
    "du": "DU-28b",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-017",
-   "level": 5
+   "packet": "PKT-019",
+   "level": 7
   },
   {
    "du": "DU-28e",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-018",
-   "level": 5
+   "packet": "PKT-020",
+   "level": 7
   },
   {
    "du": "DU-15",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-019",
-   "level": 5
+   "packet": "PKT-021",
+   "level": 7
   },
   {
    "du": "DU-08",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-020",
-   "level": 5
+   "packet": "PKT-022",
+   "level": 7
   },
   {
    "du": "DU-21",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-021",
-   "level": 5
+   "packet": "PKT-023",
+   "level": 7
   },
   {
    "du": "DU-09",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-022",
-   "level": 6
+   "packet": "PKT-024",
+   "level": 8
   },
   {
    "du": "DU-16",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-023",
-   "level": 6
+   "packet": "PKT-025",
+   "level": 8
   },
   {
    "du": "DU-10",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-024",
-   "level": 7
+   "packet": "PKT-026",
+   "level": 9
   },
   {
    "du": "DU-13",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-025",
-   "level": 7
+   "packet": "PKT-027",
+   "level": 9
   },
   {
    "du": "DU-11",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-026",
-   "level": 8
+   "packet": "PKT-028",
+   "level": 10
   },
   {
    "du": "DU-14d",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-027",
-   "level": 8
+   "packet": "PKT-029",
+   "level": 10
   },
   {
    "du": "DU-06",
    "phase": "P2",
    "milestone": "M1",
-   "packet": "PKT-028",
-   "level": 9
+   "packet": "PKT-030",
+   "level": 11
   },
   {
    "du": "DU-29",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-029",
-   "level": 2
+   "packet": "PKT-031",
+   "level": 4
   },
   {
    "du": "DU-30",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-030",
-   "level": 2
+   "packet": "PKT-032",
+   "level": 4
   },
   {
    "du": "DU-14a",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-031",
-   "level": 2
+   "packet": "PKT-033",
+   "level": 4
   },
   {
    "du": "DU-29a",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-032",
-   "level": 3
+   "packet": "PKT-034",
+   "level": 5
   },
   {
    "du": "DU-14b",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-033",
-   "level": 3
+   "packet": "PKT-035",
+   "level": 5
   },
   {
    "du": "DU-28",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-034",
-   "level": 4
+   "packet": "PKT-036",
+   "level": 6
   },
   {
    "du": "DU-29c",
    "phase": "P3",
    "milestone": "FULL",
-   "packet": "PKT-035",
-   "level": 4
+   "packet": "PKT-037",
+   "level": 6
   },
   {
    "du": "DU-14c",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-036",
-   "level": 4
+   "packet": "PKT-038",
+   "level": 6
   },
   {
    "du": "DU-14f",
    "phase": "P3",
    "milestone": "FULL",
-   "packet": "PKT-037",
-   "level": 4
+   "packet": "PKT-039",
+   "level": 6
   },
   {
    "du": "DU-05",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-038",
-   "level": 5
+   "packet": "PKT-040",
+   "level": 7
   },
   {
    "du": "DU-07",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-039",
-   "level": 5
+   "packet": "PKT-041",
+   "level": 7
   },
   {
    "du": "DU-12a",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-040",
-   "level": 5
+   "packet": "PKT-042",
+   "level": 7
   },
   {
    "du": "DU-28b",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-041",
-   "level": 5
+   "packet": "PKT-043",
+   "level": 7
   },
   {
    "du": "DU-28c",
    "phase": "P3",
    "milestone": "FULL",
-   "packet": "PKT-042",
-   "level": 5
+   "packet": "PKT-044",
+   "level": 7
   },
   {
    "du": "DU-28e",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-043",
-   "level": 5
+   "packet": "PKT-045",
+   "level": 7
   },
   {
    "du": "DU-14e",
    "phase": "P3",
    "milestone": "FULL",
-   "packet": "PKT-044",
-   "level": 5
+   "packet": "PKT-046",
+   "level": 7
   },
   {
    "du": "DU-15",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-045",
-   "level": 5
+   "packet": "PKT-047",
+   "level": 7
   },
   {
    "du": "DU-08",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-046",
-   "level": 5
+   "packet": "PKT-048",
+   "level": 7
   },
   {
    "du": "DU-19",
    "phase": "P3",
    "milestone": "FULL",
-   "packet": "PKT-047",
-   "level": 5
+   "packet": "PKT-049",
+   "level": 7
   },
   {
    "du": "DU-20",
    "phase": "P3",
    "milestone": "FULL",
-   "packet": "PKT-048",
-   "level": 5
+   "packet": "PKT-050",
+   "level": 7
   },
   {
    "du": "DU-21",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-049",
-   "level": 5
+   "packet": "PKT-051",
+   "level": 7
   },
   {
    "du": "DU-09",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-050",
-   "level": 6
+   "packet": "PKT-052",
+   "level": 8
   },
   {
    "du": "DU-12b",
    "phase": "P3",
    "milestone": "FULL",
-   "packet": "PKT-051",
-   "level": 6
+   "packet": "PKT-053",
+   "level": 8
   },
   {
    "du": "DU-28d",
    "phase": "P3",
    "milestone": "FULL",
-   "packet": "PKT-052",
-   "level": 6
+   "packet": "PKT-054",
+   "level": 8
   },
   {
    "du": "DU-29b",
    "phase": "P3",
    "milestone": "FULL",
-   "packet": "PKT-053",
-   "level": 6
+   "packet": "PKT-055",
+   "level": 8
   },
   {
    "du": "DU-16",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-054",
-   "level": 6
+   "packet": "PKT-056",
+   "level": 8
   },
   {
    "du": "DU-18",
    "phase": "P3",
    "milestone": "FULL",
-   "packet": "PKT-055",
-   "level": 6
+   "packet": "PKT-057",
+   "level": 8
   },
   {
    "du": "DU-10",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-056",
-   "level": 7
+   "packet": "PKT-058",
+   "level": 9
   },
   {
    "du": "DU-12",
    "phase": "P3",
    "milestone": "FULL",
-   "packet": "PKT-057",
-   "level": 7
+   "packet": "PKT-059",
+   "level": 9
   },
   {
    "du": "DU-13",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-058",
-   "level": 7
+   "packet": "PKT-060",
+   "level": 9
   },
   {
    "du": "DU-17",
    "phase": "P3",
    "milestone": "FULL",
-   "packet": "PKT-059",
-   "level": 7
+   "packet": "PKT-061",
+   "level": 9
   },
   {
    "du": "DU-10b",
    "phase": "P3",
    "milestone": "FULL",
-   "packet": "PKT-060",
-   "level": 8
+   "packet": "PKT-062",
+   "level": 10
   },
   {
    "du": "DU-10c",
    "phase": "P3",
    "milestone": "FULL",
-   "packet": "PKT-061",
-   "level": 8
+   "packet": "PKT-063",
+   "level": 10
   },
   {
    "du": "DU-11",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-062",
-   "level": 8
+   "packet": "PKT-064",
+   "level": 10
   },
   {
    "du": "DU-14d",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-063",
-   "level": 8
+   "packet": "PKT-065",
+   "level": 10
   },
   {
    "du": "DU-06",
    "phase": "P3",
    "milestone": "M2",
-   "packet": "PKT-064",
-   "level": 9
+   "packet": "PKT-066",
+   "level": 11
   },
   {
    "du": "DU-10d",
    "phase": "P3",
    "milestone": "FULL",
-   "packet": "PKT-065",
-   "level": 9
-  },
-  {
-   "du": "DU-22",
-   "phase": "P4",
-   "milestone": "FULL",
-   "packet": "PKT-066",
-   "level": 10
-  },
-  {
-   "du": "DU-23",
-   "phase": "P4",
-   "milestone": "FULL",
    "packet": "PKT-067",
    "level": 11
   },
   {
-   "du": "DU-25",
+   "du": "DU-22",
    "phase": "P4",
    "milestone": "FULL",
    "packet": "PKT-068",
    "level": 12
   },
   {
-   "du": "DU-26",
+   "du": "DU-23",
    "phase": "P4",
    "milestone": "FULL",
    "packet": "PKT-069",
    "level": 13
   },
   {
+   "du": "DU-25",
+   "phase": "P4",
+   "milestone": "FULL",
+   "packet": "PKT-070",
+   "level": 14
+  },
+  {
+   "du": "DU-26",
+   "phase": "P4",
+   "milestone": "FULL",
+   "packet": "PKT-071",
+   "level": 15
+  },
+  {
    "du": "DU-MR",
    "phase": "P5",
    "milestone": "ROLLOUT",
-   "packet": "PKT-070",
-   "level": 14
+   "packet": "PKT-072",
+   "level": 16
   },
   {
    "du": "DU-MR",
    "phase": "P6",
    "milestone": "RETIREMENT",
-   "packet": "PKT-071",
-   "level": 14
+   "packet": "PKT-073",
+   "level": 16
   }
  ]
 }
