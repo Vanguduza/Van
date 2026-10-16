@@ -1,6 +1,6 @@
 # VAN Next — Blueprint Rev 1.9b Freeze List
 
-**Status:** `AWAITING_OWNER_DECISION`. The blueprint is frozen when every item below is `PREPARATION_VERIFIED` or `OWNER_ACCEPTED`. After the freeze, it changes only by a numbered amendment, which regenerates the plan. Any packet in progress stops if the amendment affects its contract.
+**Status:** `AWAITING_OWNER_DECISION / GATED_PREDEVELOPMENT_EVIDENCE`. Design freeze is owner approval of the complete product and its plan, **not acceptance of incomplete engineering**. Before-F15 obligations must be closed by independently verified evidence; build- and device-dependent obligations remain hard gates at implementation/qualification and cannot be waived by design freeze. After freeze, contract changes require a numbered amendment and a regenerated plan.
 
 Rev 1.9b applies the forensic evidence audit NXA-01…NXA-07 and the owner's answers G1–G5 (OD-32…OD-36), on top of Rev 1.9a (V19-A01…A09, F1–F4).
 
@@ -22,16 +22,20 @@ Rev 1.9b applies the forensic evidence audit NXA-01…NXA-07 and the owner's ans
 | A8 | Trading modes evidenced | PREPARATION_VERIFIED | PR #92 `923ecf9`: 177 versus 155 passed; the AGGRESSIVE no-evidence gate was broken deliberately and the expected test failed |
 | A9 | Evidence pack | PREPARATION_VERIFIED | `evidence/EVIDENCE_MANIFEST.json` records the source commit, the SHA-256 of every input and receipt, and what is deliberately absent |
 
-## B. Owner decisions needed to freeze
+## B. Corrected freeze controls — full scope, no incomplete-work waiver
 
-| # | Decision | Recommendation |
+| # | Control and scope | Authority / disposition |
 |---|---|---|
-| B1 | Approve the plan-level choices: phase and lane per DU, and the five vertical slices (plan §3) | Approve |
-| B2 | Approve the packet rules (plan §1), including the F15 entry gate for code-bearing packets and the two-stage feature-preservation rule 3a | Approve |
-| B3 | **Sign the decision record before PKT-001** (OD-26). PKT-001 is now the read-only inventory. Signing also approves the two pinned lock hashes (transition list, requirement lock) | Sign |
-| B4 | Accept the known limitations (§20.2) | Accept |
-| B5 | Chart spike (`30bc2d0`): `REFERENCE_ONLY / QUARANTINED_UNQUALIFIED` | Keep quarantined |
-| B6 | OQ-18: `feature/rea-trading-accounts-tactile-20261015` (`3b2c9e04`), same disposition | Quarantine |
+| **B1** | **Approve the complete VAN Next delivery contract**, encompassing every owner-approved new capability, the existing 78 historical surfaces and 349 action obligations, all admitted branch functions, all 71 currently locked VAN-NX requirements, and semantic reconciliation of 18 Rev 2 Product Truths, 93 features, 171 atoms and 115 contexts. Approve phase/lane ordering only as **dependency sequencing**, not priority for five preferred features. The five P2 vertical slices are *nonexclusive* early integration probes; mandatory full-domain completion is P3/P4 and validated before retirement. | **Owner product/design scope approval only**, conditional on DU-01 semantic closure and independent DU-31/F15 before implementation. No product requirement or admitted function may be silently dropped. |
+| B2 | Approve the packet rules (plan §1), the independent F15 gate before code, per-feature causal acceptance, zero feature loss and the two-stage preservation rule 3a. | Owner approval of governing procedure, not a waiver of unfinished features. |
+| B3 | Sign the exact owner decision record before read-only PKT-001, including the two pinned contract hashes; independently verify full Product Truth mappings in DU-01 before F15. | **Owner-only signature**, not engineer-generated or inferred. |
+| **B4** | **Close every §20.2 limitation at its appropriate evidence gate** using `research/VAN_NEXT_B1_TOTAL_SCOPE_B4_NO_WAIVER_CLOSURE_20261016.md`. The prior instruction to *accept known limitations* is **withdrawn from the freeze request**. File availability for all 4,015 PR #93 tracked paths has been checked and newly indexed; semantic review and other proofs remain mandatory. | **Engineering-owned required work; no owner acceptance or general-purpose deferral.** Unresolved predevelopment items block independent F15. Unbuilt app/device/provider proofs block later P4/P5/P6 or LIVE qualification, never silently pass. |
+| B5 | Chart spike (`30bc2d0`): `REFERENCE_ONLY / QUARANTINED_UNQUALIFIED`. | Owner may approve quarantine disposition; DU-10 still requires full contracted feature tests. |
+| B6 | OQ-18: `feature/rea-trading-accounts-tactile-20261015` (`3b2c9e04`), likewise isolated from canonical source. | Owner may approve quarantine disposition; DU-29 still requires full contracted feature tests. |
+
+**Coverage rule for B1:** App completeness is not five completed sample journeys. Every required feature must reach an authorised and observable functional outcome, or an explicit owner-approved supersession. Every existing action, route/intake, Floating VAN behaviour and connected capability remains a migration obligation. No module is declared finished merely because its showcase screen works.
+
+**No-waiver rule for B4:** The owner does not sign away a known gap. Engineering must close it with a source/test/receipt, or leave it visibly blocking the first gate where the evidence is required. An S24 result for a not-yet-built app is logically a later P4/P5 gate, not a reason to demand acceptance of an incomplete app today.
 
 ## C. Open questions
 
