@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-f7e0f843aab2f17832cc1ef6",
+  "project": "dial",
+  "authority": "OWNER_EXPLICIT",
+  "owner_instruction_sha256": "f3eac7a8427a56fa989a4d7ef322066adff19fb3ca484306b27b036f4275ff58",
+  "owner_instruction_excerpt": "Current authenticated owner direction: implement the improved DIAL REV3 Execution Pack produced in this conversation. Programme: canonical consolidation, modular resources, software-use adoption and Cinematic Frontend Studio, with all 70 or",
+  "source": {
+    "kind": "oracle_owner_instruction",
+    "channel": "chatgpt",
+    "actor": "owner",
+    "request_id": "rev3-implement-owner-direction-20261013-1105",
+    "job_id": "steer-35df6e85-7844-494c-a7b4-5752e613b686",
+    "inherited_by": null,
+    "transport": "chatgpt_http_mcp"
+  },
+  "issued_at_utc": "2026-10-16T03:28:47.619Z",
+  "base_sha": "68394af3c6e53ed764062b19cb4f2c0ab3b3b608",
+  "branch_scope": "platform/rev3-cinematic-studio-20261016",
+  "authorized_paths": [
+    "docs/project-state/REV3_CINEMATIC_STUDIO.md",
+    "web/muse-interaction/bff.mjs",
+    "web/muse-interaction/cinematic-studio-client.mjs",
+    "web/muse-interaction/cinematic-studio.browser.node.mjs",
+    "web/muse-interaction/cinematic-studio.mjs",
+    "web/muse-interaction/cinematic-studio.test.mjs",
+    "web/muse-interaction/muse-live-controls.mjs"
+  ],
+  "change_classes": [
+    "documentation",
+    "technical_implementation",
+    "verification"
+  ],
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false,
+  "reusable": false,
+  "revoked": false
+}

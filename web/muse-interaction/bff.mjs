@@ -22,10 +22,10 @@ async function body(request,max=65536){
  * owner signer. transport uses the existing authenticated DIAL route to /v1/muse/site.
  * invokeExistingTask reuses its real task implementation/DB; it must never be a mock in production.
  */
-export function createMuseBff({siteOrigin,audience,ownerSubject,policyGeneration=1,requireOwner,signOwnerEnvelope,transport,gatewayPublicJwk,invokeExistingTask,nativeOwnerControls,callExistingOwnerTool,now=()=>Date.now()}) {
+export function createMuseBff({siteOrigin,audience,ownerSubject,policyGeneration=1,requireOwner,signOwnerEnvelope,transport,gatewayPublicJwk,invokeExistingTask,nativeOwnerControls,nativeStudio,callExistingOwnerTool,now=()=>Date.now()}) {
  nativeOwnerControls??=createDialOwnerSurfaceAdapter(callExistingOwnerTool);
  const root=new URL(siteOrigin);if(root.protocol!=='https:'||root.origin!==siteOrigin)throw Error('SITE_ORIGIN_INVALID');
- const matches=request=>{const p=new URL(request.url).pathname;return p==='/api/muse/van-owner'||p==='/api/muse/tasks'||p==='/api/muse/owner-controls'||p==='/api/muse/interaction'||p.startsWith('/api/muse/interaction/');};
+ const matches=request=>{const p=new URL(request.url).pathname;return p==='/api/muse/studio'||p==='/api/muse/van-owner'||p==='/api/muse/tasks'||p==='/api/muse/owner-controls'||p==='/api/muse/interaction'||p.startsWith('/api/muse/interaction/');};
  async function rpc(operation,args){
    if(typeof signOwnerEnvelope!=='function'||typeof transport!=='function')throw Error('INTERACTION_NOT_CONNECTED');
    const time=now();const envelope={schema_version:1,principal:'MUSE_SITE_OWNER',authority_class:'OWNER_SITE_MUSE_TYPED',audience,site_origin:siteOrigin,subject:ownerSubject,policy_generation:policyGeneration,command_id:crypto.randomUUID(),operation,arguments:args,payload_hash:await digest({operation,arguments:args}),issued_at:new Date(time).toISOString(),expires_at:new Date(time+60000).toISOString(),nonce:crypto.randomUUID()};
@@ -59,6 +59,11 @@ export function createMuseBff({siteOrigin,audience,ownerSubject,policyGeneration
    const actor=await requireOwner(request);
    if(actor?.id!==ownerSubject||actor.auth_method!=='sites_identity')return json({error:'OWNER_REQUIRED'},403);
    if(request.method==='POST'&&request.headers.get('Origin')!==siteOrigin)return json({error:'SAME_ORIGIN_REQUIRED'},403);
+   if(url.pathname==='/api/muse/studio'){
+     if(request.method!=='POST')return json({error:'METHOD_NOT_ALLOWED'},405);
+     if(typeof nativeStudio?.call!=='function')return json({error:'STUDIO_NATIVE_NOT_CONNECTED'},503);
+     const value=await body(request,65536);return json(await nativeStudio.call(value,{ownerSubject,verifiedSiteActor:actor}));
+   }
    if(url.pathname==='/api/muse/owner-controls'&&request.method==='POST'){
      const value=await body(request);if(Object.keys(value).sort().join(',')!=='arguments,operation')throw Error('OWNER_CONTROL_ARGUMENTS_INVALID');
      return json(await invokeOwnerControl(nativeOwnerControls,value.operation,value.arguments,{ownerSubject,verifiedSiteActor:actor}));
