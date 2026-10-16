@@ -14,8 +14,63 @@ VAN-SM-ACCOUNT_LIFECYCLE: R4 missing obligation RESTRICTED->REAUTH_PENDING (AUD-
 VAN-SM-ACCOUNT_LIFECYCLE: R4 missing obligation REAUTH_PENDING->LINKED_READ_ONLY (AUD-03 recover after re-verification)
 VAN-SM-ACCOUNT_LIFECYCLE: R4 missing obligation REMOTE_CLOSURE_PENDING->REMOTE_CLOSURE_REFUSED (AUD-03 refused closure)
 VAN-SM-ACCOUNT_LIFECYCLE: R4 missing obligation REMOTE_CLOSURE_PENDING->CLOSURE_OUTCOME_UNKNOWN (AUD-03 unknown closure)
+VAN-SM-ACCOUNT_LIFECYCLE: R8 AUTH_PENDING->LINKED_READ_ONLY guard set [] differs from approved ACC-T04 ['broker_readback']
+VAN-SM-ACCOUNT_LIFECYCLE: R8 KYC_PENDING->ACTIVE_ELIGIBLE guard set [] differs from approved ACC-T14 ['broker_readback', 'signed_mandate']
+VAN-SM-ACCOUNT_LIFECYCLE: R8 UNLINK_REQUESTED->UNLINK_BLOCKED guard set [] differs from approved ACC-T25 ['fresh_exposure_check']
+VAN-SM-ACCOUNT_LIFECYCLE: R8 UNLINK_REQUESTED->UNLINKED_LOCAL guard set [] differs from approved ACC-T28 ['exposure_clear_readback', 'grace_elapsed']
+VAN-SM-ACCOUNT_LIFECYCLE: R8 REMOTE_CLOSURE_REQUESTED->REMOTE_CLOSURE_PENDING guard set [] differs from approved ACC-T34 ['a4_approval', 'fresh_exposure_check']
+VAN-SM-ACCOUNT_LIFECYCLE: R8 REMOTE_CLOSURE_PENDING->REMOTE_CLOSED guard set [] differs from approved ACC-T36 ['broker_readback']
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T18 ACTIVE_ELIGIBLE->LINKED_READ_ONLY missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T11 AUTH_FAILED->ABANDONED missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T10 AUTH_FAILED->AUTH_PENDING missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T09 AUTH_OUTCOME_UNKNOWN->AUTH_FAILED missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T08 AUTH_OUTCOME_UNKNOWN->LINKED_READ_ONLY missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T05 AUTH_PENDING->AUTH_FAILED missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T06 AUTH_PENDING->AUTH_OUTCOME_UNKNOWN missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T07 AUTH_PENDING->REMOTE_CLOSED missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T39 CLOSURE_OUTCOME_UNKNOWN->REMOTE_CLOSED missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T40 CLOSURE_OUTCOME_UNKNOWN->REMOTE_CLOSURE_REFUSED missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T03 DISCOVERED->ABANDONED missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T15 KYC_PENDING->RESTRICTED missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T13 LINKED_READ_ONLY->ACTIVE_ELIGIBLE missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T33 LINKED_READ_ONLY->REMOTE_CLOSURE_REQUESTED missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T20 REAUTH_PENDING->LINKED_READ_ONLY missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T21 REAUTH_PENDING->RESTRICTED missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T30 RELINK_REQUIRED->AUTH_PENDING missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T31 RELINK_REQUIRED->UNLINK_REQUESTED missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T38 REMOTE_CLOSURE_PENDING->CLOSURE_OUTCOME_UNKNOWN missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T37 REMOTE_CLOSURE_PENDING->REMOTE_CLOSURE_REFUSED missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T41 REMOTE_CLOSURE_REFUSED->LINKED_READ_ONLY missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T35 REMOTE_CLOSURE_REQUESTED->LINKED_READ_ONLY missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T19 RESTRICTED->REAUTH_PENDING missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T24 RESTRICTED->UNLINK_REQUESTED missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T27 UNLINK_BLOCKED->LINKED_READ_ONLY missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T26 UNLINK_BLOCKED->UNLINK_REQUESTED missing from the model
+VAN-SM-ACCOUNT_LIFECYCLE: R8 approved transition ACC-T29 UNLINK_REQUESTED->RELINK_REQUIRED missing from the model
 VAN-SM-CHART_SESSION: R2 dead end DESTROYED (non-terminal, no exit)
+VAN-SM-CHART_SESSION: R8 machine has no approved transition list
+VAN-SM-CHART_SESSION: R8 unapproved transition UNINITIALIZED->CREATING
+VAN-SM-CHART_SESSION: R8 unapproved transition CREATING->LOADING_DATA
+VAN-SM-CHART_SESSION: R8 unapproved transition LOADING_DATA->READY
+VAN-SM-CHART_SESSION: R8 unapproved transition READY->STALE
+VAN-SM-CHART_SESSION: R8 unapproved transition STALE->OFFLINE
+VAN-SM-CHART_SESSION: R8 unapproved transition READY->CRASHED
+VAN-SM-CHART_SESSION: R8 unapproved transition CRASHED->NATIVE_FALLBACK
+VAN-SM-CHART_SESSION: R8 unapproved transition OFFLINE->NATIVE_FALLBACK
+VAN-SM-CHART_SESSION: R8 unapproved transition NATIVE_FALLBACK->READY
+VAN-SM-CHART_SESSION: R8 unapproved transition READY->DESTROYED
 VAN-SM-FLOATING_VAN: R2 dead end STOPPED (non-terminal, no exit)
+VAN-SM-FLOATING_VAN: R8 machine has no approved transition list
+VAN-SM-FLOATING_VAN: R8 unapproved transition FULL->WORKBOARD_COMPACT
+VAN-SM-FLOATING_VAN: R8 unapproved transition WORKBOARD_COMPACT->FULL
+VAN-SM-FLOATING_VAN: R8 unapproved transition WORKBOARD_COMPACT->WORKBOARD_EXPANDED
+VAN-SM-FLOATING_VAN: R8 unapproved transition WORKBOARD_EXPANDED->WORKBOARD_MAXIMIZED
+VAN-SM-FLOATING_VAN: R8 unapproved transition WORKBOARD_MAXIMIZED->FULL
+VAN-SM-FLOATING_VAN: R8 unapproved transition FULL->MINIMIZED
+VAN-SM-FLOATING_VAN: R8 unapproved transition MINIMIZED->FULL
+VAN-SM-FLOATING_VAN: R8 unapproved transition FULL->DOCKED
+VAN-SM-FLOATING_VAN: R8 unapproved transition DOCKED->FULL
+VAN-SM-FLOATING_VAN: R8 unapproved transition FULL->STOPPED
 VAN-SM-FUND_DEPOSIT: R1 unreachable state EXPIRED
 VAN-SM-FUND_DEPOSIT: R1 unreachable state FAILED
 VAN-SM-FUND_DEPOSIT: R1 unreachable state REJECTED
@@ -25,6 +80,27 @@ VAN-SM-FUND_DEPOSIT: R2 dead end REJECTED (non-terminal, no exit)
 VAN-SM-FUND_DEPOSIT: R2 dead end REVERSED (non-terminal, no exit)
 VAN-SM-FUND_DEPOSIT: R2 dead end SETTLED (non-terminal, no exit)
 VAN-SM-FUND_DEPOSIT: R4 missing obligation SETTLED->REVERSED (AUD-03 compensating reversal)
+VAN-SM-FUND_DEPOSIT: R8 DRAFT->QUOTED guard set [] differs from approved DEP-T01 ['fresh_capability_check']
+VAN-SM-FUND_DEPOSIT: R8 AWAITING_OWNER->AUTHORIZED guard set [] differs from approved DEP-T06 ['a4_approval_bound_to_quote']
+VAN-SM-FUND_DEPOSIT: R8 AUTHORIZED->PROVIDER_PENDING guard set [] differs from approved DEP-T10 ['fresh_capability_check']
+VAN-SM-FUND_DEPOSIT: R8 PROVIDER_PENDING->SENT guard set [] differs from approved DEP-T12 ['provider_ack']
+VAN-SM-FUND_DEPOSIT: R8 SENT->PENDING_SETTLEMENT guard set [] differs from approved DEP-T15 ['provider_ack']
+VAN-SM-FUND_DEPOSIT: R8 PENDING_SETTLEMENT->SETTLED guard set [] differs from approved DEP-T21 ['broker_balance_readback']
+VAN-SM-FUND_DEPOSIT: R8 PENDING_SETTLEMENT->REVERSED guard set [] differs from approved DEP-T23 ['provider_reversal_id']
+VAN-SM-FUND_DEPOSIT: R8 OUTCOME_UNKNOWN->PENDING_SETTLEMENT guard set [] differs from approved DEP-T18 ['reconciliation_readback']
+VAN-SM-FUND_DEPOSIT: R8 approved transition DEP-T11 AUTHORIZED->EXPIRED missing from the model
+VAN-SM-FUND_DEPOSIT: R8 approved transition DEP-T09 AWAITING_OWNER->CANCELLED missing from the model
+VAN-SM-FUND_DEPOSIT: R8 approved transition DEP-T08 AWAITING_OWNER->EXPIRED missing from the model
+VAN-SM-FUND_DEPOSIT: R8 approved transition DEP-T07 AWAITING_OWNER->QUOTED missing from the model
+VAN-SM-FUND_DEPOSIT: R8 approved transition DEP-T02 DRAFT->CANCELLED missing from the model
+VAN-SM-FUND_DEPOSIT: R8 approved transition DEP-T19 OUTCOME_UNKNOWN->FAILED missing from the model
+VAN-SM-FUND_DEPOSIT: R8 approved transition DEP-T20 OUTCOME_UNKNOWN->REJECTED missing from the model
+VAN-SM-FUND_DEPOSIT: R8 approved transition DEP-T22 PENDING_SETTLEMENT->FAILED missing from the model
+VAN-SM-FUND_DEPOSIT: R8 approved transition DEP-T13 PROVIDER_PENDING->REJECTED missing from the model
+VAN-SM-FUND_DEPOSIT: R8 approved transition DEP-T05 QUOTED->CANCELLED missing from the model
+VAN-SM-FUND_DEPOSIT: R8 approved transition DEP-T04 QUOTED->EXPIRED missing from the model
+VAN-SM-FUND_DEPOSIT: R8 approved transition DEP-T16 SENT->FAILED missing from the model
+VAN-SM-FUND_DEPOSIT: R8 approved transition DEP-T24 SETTLED->REVERSED missing from the model
 VAN-SM-FUND_WITHDRAWAL: R1 unreachable state EXPIRED
 VAN-SM-FUND_WITHDRAWAL: R1 unreachable state REJECTED
 VAN-SM-FUND_WITHDRAWAL: R2 dead end EXPIRED (non-terminal, no exit)
@@ -35,9 +111,43 @@ VAN-SM-FUND_WITHDRAWAL: R4 missing obligation PROVIDER_PENDING->FAILED (AUD-03 w
 VAN-SM-FUND_WITHDRAWAL: R4 missing obligation PAID->REVERSED (AUD-03 compensating reversal)
 VAN-SM-FUND_WITHDRAWAL: R4 missing obligation QUOTED->REFUSED_MARGIN (AUD-05 under-margin refusal)
 VAN-SM-FUND_WITHDRAWAL: R4 missing obligation AUTHORIZED->REFUSED_MARGIN (AUD-05 recheck at submission)
+VAN-SM-FUND_WITHDRAWAL: R8 DRAFT->BENEFICIARY_VERIFIED guard set [] differs from approved WDR-T01 ['beneficiary_verification']
+VAN-SM-FUND_WITHDRAWAL: R8 BENEFICIARY_VERIFIED->QUOTED guard set [] differs from approved WDR-T03 ['fresh_capability_check']
+VAN-SM-FUND_WITHDRAWAL: R8 QUOTED->AWAITING_A4 guard set [] differs from approved WDR-T05 ['server_margin_check']
+VAN-SM-FUND_WITHDRAWAL: R8 AWAITING_A4->AUTHORIZED guard set [] differs from approved WDR-T09 ['a4_approval_bound_to_quote_and_beneficiary']
+VAN-SM-FUND_WITHDRAWAL: R8 AUTHORIZED->SUBMITTED guard set [] differs from approved WDR-T13 ['server_margin_recheck']
+VAN-SM-FUND_WITHDRAWAL: R8 SUBMITTED->PROVIDER_PENDING guard set [] differs from approved WDR-T16 ['provider_ack']
+VAN-SM-FUND_WITHDRAWAL: R8 OUTCOME_UNKNOWN->PROVIDER_PENDING guard set [] differs from approved WDR-T19 ['reconciliation_readback']
+VAN-SM-FUND_WITHDRAWAL: R8 PROVIDER_PENDING->PAID guard set [] differs from approved WDR-T22 ['provider_settlement_receipt']
+VAN-SM-FUND_WITHDRAWAL: R8 unapproved transition PROVIDER_PENDING->REVERSED
+VAN-SM-FUND_WITHDRAWAL: R8 approved transition WDR-T15 AUTHORIZED->EXPIRED missing from the model
+VAN-SM-FUND_WITHDRAWAL: R8 approved transition WDR-T14 AUTHORIZED->REFUSED_MARGIN missing from the model
+VAN-SM-FUND_WITHDRAWAL: R8 approved transition WDR-T12 AWAITING_A4->CANCELLED missing from the model
+VAN-SM-FUND_WITHDRAWAL: R8 approved transition WDR-T11 AWAITING_A4->EXPIRED missing from the model
+VAN-SM-FUND_WITHDRAWAL: R8 approved transition WDR-T10 AWAITING_A4->QUOTED missing from the model
+VAN-SM-FUND_WITHDRAWAL: R8 approved transition WDR-T04 BENEFICIARY_VERIFIED->CANCELLED missing from the model
+VAN-SM-FUND_WITHDRAWAL: R8 approved transition WDR-T02 DRAFT->CANCELLED missing from the model
+VAN-SM-FUND_WITHDRAWAL: R8 approved transition WDR-T21 OUTCOME_UNKNOWN->FAILED missing from the model
+VAN-SM-FUND_WITHDRAWAL: R8 approved transition WDR-T20 OUTCOME_UNKNOWN->REJECTED missing from the model
+VAN-SM-FUND_WITHDRAWAL: R8 approved transition WDR-T25 PAID->REVERSED missing from the model
+VAN-SM-FUND_WITHDRAWAL: R8 approved transition WDR-T23 PROVIDER_PENDING->FAILED missing from the model
+VAN-SM-FUND_WITHDRAWAL: R8 approved transition WDR-T24 PROVIDER_PENDING->OUTCOME_UNKNOWN missing from the model
+VAN-SM-FUND_WITHDRAWAL: R8 approved transition WDR-T08 QUOTED->CANCELLED missing from the model
+VAN-SM-FUND_WITHDRAWAL: R8 approved transition WDR-T07 QUOTED->EXPIRED missing from the model
+VAN-SM-FUND_WITHDRAWAL: R8 approved transition WDR-T06 QUOTED->REFUSED_MARGIN missing from the model
+VAN-SM-FUND_WITHDRAWAL: R8 approved transition WDR-T17 SUBMITTED->REJECTED missing from the model
 VAN-SM-NEWS_ANALYSIS: R2 dead end RETRACTED (non-terminal, no exit)
 VAN-SM-NEWS_ANALYSIS: R2 dead end STALE (non-terminal, no exit)
 VAN-SM-NEWS_ANALYSIS: R2 dead end UNVERIFIABLE (non-terminal, no exit)
+VAN-SM-NEWS_ANALYSIS: R8 machine has no approved transition list
+VAN-SM-NEWS_ANALYSIS: R8 unapproved transition INGESTED->DEDUPED
+VAN-SM-NEWS_ANALYSIS: R8 unapproved transition DEDUPED->SOURCED
+VAN-SM-NEWS_ANALYSIS: R8 unapproved transition SOURCED->CONTEXTUALIZED
+VAN-SM-NEWS_ANALYSIS: R8 unapproved transition CONTEXTUALIZED->VERIFIED
+VAN-SM-NEWS_ANALYSIS: R8 unapproved transition VERIFIED->PUBLISHED
+VAN-SM-NEWS_ANALYSIS: R8 unapproved transition PUBLISHED->STALE
+VAN-SM-NEWS_ANALYSIS: R8 unapproved transition PUBLISHED->RETRACTED
+VAN-SM-NEWS_ANALYSIS: R8 unapproved transition SOURCED->UNVERIFIABLE
 VAN-SM-ORB_PRESENTATION: R1 unreachable state ACTIVE_WORK
 VAN-SM-ORB_PRESENTATION: R1 unreachable state ATTENTION
 VAN-SM-ORB_PRESENTATION: R1 unreachable state CRITICAL
@@ -53,11 +163,24 @@ VAN-SM-ORB_PRESENTATION: R2 dead end MONITORING (non-terminal, no exit)
 VAN-SM-ORB_PRESENTATION: R2 dead end OFFLINE (non-terminal, no exit)
 VAN-SM-ORB_PRESENTATION: R2 dead end QUIET (non-terminal, no exit)
 VAN-SM-ORB_PRESENTATION: R2 dead end STALE (non-terminal, no exit)
+VAN-SM-ORB_PRESENTATION: R8 machine has no approved transition list
 VAN-SM-TASK_EXECUTION: R2 dead end CANCELLED (non-terminal, no exit)
 VAN-SM-TASK_EXECUTION: R2 dead end FAILED (non-terminal, no exit)
 VAN-SM-TASK_EXECUTION: R2 dead end OUTCOME_UNKNOWN (non-terminal, no exit)
 VAN-SM-TASK_EXECUTION: R2 dead end QUALIFIED (non-terminal, no exit)
 VAN-SM-TASK_EXECUTION: R2 dead end WAITING_INPUT (non-terminal, no exit)
+VAN-SM-TASK_EXECUTION: R8 machine has no approved transition list
+VAN-SM-TASK_EXECUTION: R8 unapproved transition CREATED->QUEUED
+VAN-SM-TASK_EXECUTION: R8 unapproved transition QUEUED->LEASED
+VAN-SM-TASK_EXECUTION: R8 unapproved transition LEASED->RUNNING
+VAN-SM-TASK_EXECUTION: R8 unapproved transition RUNNING->WAITING_INPUT
+VAN-SM-TASK_EXECUTION: R8 unapproved transition RUNNING->BLOCKED
+VAN-SM-TASK_EXECUTION: R8 unapproved transition RUNNING->VERIFYING
+VAN-SM-TASK_EXECUTION: R8 unapproved transition VERIFYING->QUALIFIED
+VAN-SM-TASK_EXECUTION: R8 unapproved transition VERIFYING->FAILED
+VAN-SM-TASK_EXECUTION: R8 unapproved transition RUNNING->OUTCOME_UNKNOWN
+VAN-SM-TASK_EXECUTION: R8 unapproved transition BLOCKED->QUEUED
+VAN-SM-TASK_EXECUTION: R8 unapproved transition RUNNING->CANCELLED
 VAN-SM-TRADE_ORDER: R1 unreachable state EXPIRED
 VAN-SM-TRADE_ORDER: R2 dead end CANCELLED (non-terminal, no exit)
 VAN-SM-TRADE_ORDER: R2 dead end EXPIRED (non-terminal, no exit)
@@ -70,4 +193,42 @@ VAN-SM-TRADE_ORDER: R4 missing obligation CANCEL_PENDING->OUTCOME_UNKNOWN (AUD-0
 VAN-SM-TRADE_ORDER: R4 missing obligation BROKER_PENDING->EXPIRED (AUD-03)
 VAN-SM-TRADE_ORDER: R4 missing obligation MODIFY_PENDING->PLACED (AUD-03 modify confirmed or rejected)
 VAN-SM-TRADE_ORDER: R4 missing obligation PARTIAL->CANCEL_PENDING (AUD-03)
-69 findings in STATE_MACHINES.json
+VAN-SM-TRADE_ORDER: R8 RISK_REVIEW->OWNER_REVIEW guard set [] differs from approved ORD-T03 ['risk_gate_pass']
+VAN-SM-TRADE_ORDER: R8 OWNER_REVIEW->AUTHORIZED guard set [] differs from approved ORD-T05 ['biometric_intent_token']
+VAN-SM-TRADE_ORDER: R8 AUTHORIZED->BROKER_PENDING guard set [] differs from approved ORD-T07 ['worst_case_risk_reserved']
+VAN-SM-TRADE_ORDER: R8 BROKER_PENDING->PLACED guard set [] differs from approved ORD-T09 ['broker_ack']
+VAN-SM-TRADE_ORDER: R8 PLACED->PARTIAL guard set [] differs from approved ORD-T21 ['broker_fill']
+VAN-SM-TRADE_ORDER: R8 PARTIAL->FILLED guard set [] differs from approved ORD-T27 ['broker_fill']
+VAN-SM-TRADE_ORDER: R8 PLACED->FILLED guard set [] differs from approved ORD-T22 ['broker_fill']
+VAN-SM-TRADE_ORDER: R8 PLACED->MODIFY_PENDING guard set [] differs from approved ORD-T23 ['risk_gate_pass']
+VAN-SM-TRADE_ORDER: R8 CANCEL_PENDING->CANCELLED guard set [] differs from approved ORD-T35 ['broker_ack']
+VAN-SM-TRADE_ORDER: R8 BROKER_PENDING->REJECTED guard set [] differs from approved ORD-T12 ['broker_response']
+VAN-SM-TRADE_ORDER: R8 OUTCOME_UNKNOWN->PLACED guard set [] differs from approved ORD-T15 ['broker_readback']
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T08 AUTHORIZED->EXPIRED missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T13 BROKER_PENDING->EXPIRED missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T11 BROKER_PENDING->FILLED missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T10 BROKER_PENDING->PARTIAL missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T38 CANCEL_PENDING->EXPIRED missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T37 CANCEL_PENDING->FILLED missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T39 CANCEL_PENDING->OUTCOME_UNKNOWN missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T36 CANCEL_PENDING->PARTIAL missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T02 DRAFT->ABANDONED missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T33 MODIFY_PENDING->FILLED missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T34 MODIFY_PENDING->OUTCOME_UNKNOWN missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T32 MODIFY_PENDING->PARTIAL missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T31 MODIFY_PENDING->PLACED missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T19 OUTCOME_UNKNOWN->CANCELLED missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T20 OUTCOME_UNKNOWN->EXPIRED missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T17 OUTCOME_UNKNOWN->FILLED missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T16 OUTCOME_UNKNOWN->PARTIAL missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T18 OUTCOME_UNKNOWN->REJECTED missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T06 OWNER_REVIEW->ABANDONED missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T28 PARTIAL->CANCEL_PENDING missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T30 PARTIAL->EXPIRED missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T29 PARTIAL->MODIFY_PENDING missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T26 PARTIAL->PARTIAL missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T25 PLACED->EXPIRED missing from the model
+VAN-SM-TRADE_ORDER: R8 approved transition ORD-T04 RISK_REVIEW->RISK_REFUSED missing from the model
+VAN-SM-FUND_TRANSFER: R8 approved list names a machine absent from the model
+VAN-SM-NEWS_ARMED_TICKET: R8 approved list names a machine absent from the model
+230 findings in STATE_MACHINES.json

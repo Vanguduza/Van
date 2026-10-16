@@ -3,33 +3,37 @@
  "status": "PREPARATION_EVIDENCE_ONLY",
  "f15_forensic_build_ready": "NOT_ISSUED",
  "source_repository": "Vanguduza/Van",
- "source_commit": "8ac899277c1bdf0d0452c6456bc2cc266841556f",
+ "source_commit": "228ef7b670d3fc14c1fbceb2e3a0eac472fdb8c8",
  "source_root": "docs/design/van-next",
  "python": "3.13.16",
- "builder_sha256": "fbc716eb310829e4dd3e02fb27f7b8147dfb26fd7ce1de1fa8e7c6099b8252cb",
+ "builder_sha256": "fcc7449cec222e4a9ab751220350c5bef4165463891b5539c00a05ddc1173258",
  "inputs": {
-  "VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9A_20261016.md": "2bec90b3338e0391f186aa5b12b0daa880874038d95adb605516daacfed0b00a",
-  "VAN_NEXT_OWNER_DECISIONS_REV1.md": "26469778d7d07fba55fd0776cf393f208601109cb4753933ad51aa060c9628be",
-  "VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_9A.md": "feed61142c612735df0971369c2307d4a71dcd9a92d367d689e62237d244623a",
+  "VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9B_20261016.md": "f708229674eb95c47f99375faf242388a6b3741ebe9a118fc1c15beebe71e0f7",
+  "VAN_NEXT_OWNER_DECISIONS_REV1.md": "e4da1830dae75ed33e0d5ea894ae7324c6a16c2d4b5ef07ac96599e80ed3b3a9",
+  "VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_9B.md": "10b7077aff1a12c675bfec4c1f112abb2d3cce6811e162a34aefc8a6fd4e1399",
   "VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.md": "45313e45801eaab43115e9c7a642fffda9f8c398b867d2f1f6718a9ec8a6ef80",
   "VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.csv": "6d064327d73a077e23fcf05a6fe22708ab4b0bc1ac574b447e574844201cac84",
   "VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.json": "34b97daaf8d92951833bc0270998e9ae5159fdeffa078844a8d2d4241cf52d1d",
-  "plan/generate_plan.py": "43f2e899d2ad4d5c4fd7ed2951b47fe1bb42d2da61cc1546754788542e5e8a2e",
-  "plan/VAN_NEXT_DEVELOPMENT_PLAN_REV1.md": "51865899801f7a26d54a933e034c7b3aff493e9c6b377db8c916d80e3edc5a38",
-  "plan/VAN_NEXT_DEVELOPMENT_PLAN_REV1.json": "57393514fd38fc7c0b992d77bc59450bfe03d19334db49fb9d651123ff22bff8",
-  "plan/PLAN_INPUT_PROVENANCE.json": "10e37bf29ca4171c41de930a79ad26729349a7225ae86edd35f0dac7dbd0a5f9",
-  "contracts/check_state_machines.py": "92fbc37e25d445459c7426c06e7473008114ef0c42c824a6a50fdf900ed571dd",
+  "plan/generate_plan.py": "62794a01eb7d3a9a02808ee262f1c6a616924bfb787b2f2ee29730f8392b2d2f",
+  "plan/VAN_NEXT_DEVELOPMENT_PLAN_REV1.md": "ca36f60dd3f91caa64f010596b7aff31e883a6834f0308f122a91b6186d31f63",
+  "plan/VAN_NEXT_DEVELOPMENT_PLAN_REV1.json": "c8c91d14ce87e521cdc65d00c9ad647f510333c8e468b6ed436ad61dd2631c12",
+  "plan/PLAN_INPUT_PROVENANCE.json": "146c61e1db08e8d26711e0d3db09ac6421c8817e1bf30286e451a4bd7fa7e068",
+  "plan/REQUIREMENT_LOCK_REV1_9B.json": "7e102f249c89f030edbbb6cb91dc12a1a095feb2d1ba6b94275a21e3d597558d",
+  "contracts/check_state_machines.py": "ad7faa5500776e3ba8b313392420bbf2627204abb64113e49dd6417bd76fc98d",
   "contracts/VAN_STATE_MACHINES_REV1_9.json": "7c45ed6cf3eadfdf045e7a08aa446a2227b920b4a0bf75fd8a8e6794fa0fc4c0",
+  "contracts/VAN_TRANSITION_GUARDS_REV1_9B.json": "9da17bd95dce0f5c673143c37f86a18bb30208645f811a84c8f212ea5e727466",
   "contracts/STATE_MACHINES.json": "5ed1bb73165ebb1e748b30cb96181fba11eb0203d1af6aa57b9103c76bc6b008",
   "contracts/ACCOUNTS_FUNDS_TECHNICAL_CONTRACT.md": "e173fe2a197a6b9408b13190f1f7e8f7c39bdfde058995aa5b2804dd47577866",
   "contracts/FUNDING_INTENT.schema.json": "9b81a9bd08140298f3a4d1ce8e3251a0dc63031c1eab654587cbf58e33515e9f",
-  "contracts/README.md": "43e5b3027fc6dd327b456cf7f5f5e797a0e3a330330bd7b38a3d10fd2a997778",
+  "contracts/README.md": "de7933be98d5755d8a7bc973c9b483bf118cd34e00bdd2bf5e628f521c1158ee",
   "crosswalk/README.md": "5c0d099dbf91783a733a0e3d7ea47d0500961b63f2796f494bbcae4658566615",
   "crosswalk/REV2_18_PRODUCT_TRUTH_CROSSWALK_REV1_9.csv": "2e86258d3dbf5cb6edfc8b692fe5fb3b90dc5199fc12e892e09a21221d56eb30",
   "crosswalk/REV2_93_FEATURE_CROSSWALK_REV1_9.csv": "49d6696c38f4de6f4dd8efb7215944039e4766e9a0563c2c9f33d3f3ea9f6a78",
   "crosswalk/REV2_171_ATOM_SEED_UNREVIEWED.csv": "b7c2c5650844302857ce6beb61e60f0d3df859e909fdf2188c2a1a4dec07a4a7",
   "research/VAN_NEXT_REV18_INDEPENDENT_AUDIT_RESPONSE_20261015.md": "e4fabb4f9eae033aa4b79bb88de9cf2726227fbdf7113dc05c315d790c5e0f1e",
-  "research/VAN_NEXT_REV19_FOLLOWUP_AUDIT_RESPONSE_20261016.md": "2711905d657eaeeaed52a50127ea92f7f46a6740867a7a37c9c857d068b46fff"
+  "research/VAN_NEXT_REV19_FOLLOWUP_AUDIT_RESPONSE_20261016.md": "2711905d657eaeeaed52a50127ea92f7f46a6740867a7a37c9c857d068b46fff",
+  "research/VAN_NEXT_REV19_FOLLOWUP_AUDIT_RESPONSE_ADDENDUM_A1_20261016.md": "9bbb35550bfde8f012c99a5d8e5af41b787105de04bdb039856d54acacd77c16",
+  "research/VAN_NEXT_REV19A_FORENSIC_AUDIT_RESPONSE_20261016.md": "274210f97c2276ea9c6b92963a07fdbd0840f8f58cb8fa08baa457a261f14ca2"
  },
  "receipts": {
   "plan_check": {
@@ -42,7 +46,7 @@
    "command": "python3 plan/generate_plan.py --selftest",
    "exit": 0,
    "receipt": "evidence/receipts/plan_selftest.txt",
-   "sha256": "e08ac27e0c60a470601648d077d3449f3f47f80e3462d0574568a7ea67651290"
+   "sha256": "c7589f800c0588d1e8cc1177b31027ff0f7b59805260ad4e187d692ff265975c"
   },
   "state_machines_check": {
    "command": "python3 contracts/check_state_machines.py",
@@ -54,13 +58,13 @@
    "command": "python3 contracts/check_state_machines.py contracts/STATE_MACHINES.json",
    "exit": 1,
    "receipt": "evidence/receipts/state_machines_on_pack_original.txt",
-   "sha256": "ab65fa4c3a5729a7476f06f5fb7607a44390c6ac3df176f5126ff5f3d9630068"
+   "sha256": "be2046c814642c9282e4c16f41c49ff4f87ec5c2bad648a525189d2f4558d993"
   },
   "state_machines_selftest": {
    "command": "python3 contracts/check_state_machines.py --selftest",
    "exit": 0,
    "receipt": "evidence/receipts/state_machines_selftest.txt",
-   "sha256": "463e1e27d3bf0997b1b048ab124763166c61a11fad7b2d56e239c901d0fbc240"
+   "sha256": "9dc1ef85b5649954f138470cf34a9735577f754179a662b1af0bd4019595a8a7"
   }
  },
  "expected_exit_codes": {
@@ -72,7 +76,7 @@
  },
  "all_exit_codes_as_expected": true,
  "absent_by_design": {
-  "signed VAN_NEXT_OWNER_DECISIONS_REV1.md": "Owner signature pending (OQ-05, B3). The included record is unsigned.",
+  "signed VAN_NEXT_OWNER_DECISIONS_REV1.md": "Owner signature pending (OQ-05, B3). The included record is unsigned, so the two lock hashes it pins are prepared, not yet owner-approved.",
   "Feature Ledger (VAN_NEXT_FUNCTIONAL_PRESERVATION_LEDGER_REV1.csv)": "Produced by PKT-001 (DU-00a).",
   "171-atom / 115-context admitted mapping": "Produced by PKT-002 (DU-01); only the unreviewed seed is included.",
   "RESEARCH_INPUT_ACCEPTANCE.json (39 REA records)": "Produced by PKT-002 (DU-01), VAN-NX-026.",
