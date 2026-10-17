@@ -260,8 +260,18 @@ class RouteRegistry:
         if stop is not None:
             if entry is None or direction is None:
                 raise QuantisationRefused("a stop cannot be quantised without entry and direction")
-            q_stop = quantise_stop(c, entry=entry, stop=stop, direction=direction)
-            distance = abs((q_entry if q_entry is not None else entry) - q_stop)
+            # P1-TRADE-EXEC-003: the stop was rounded toward the *unrounded* entry, and the
+            # entry was then rounded to the nearest tick on its own. When the entry rounded
+            # away from the stop the distance grew by up to half a tick and pre-trade refused
+            # the order (STOP_WIDER_THAN_APPROVED: 0.00526 > approved 0.005256). Round the
+            # stop toward the rounded entry, then step it one more tick inward if the
+            # rounded distance still exceeds the approved one, so it can never be wider.
+            q_ref = q_entry if q_entry is not None else entry
+            q_stop = quantise_stop(c, entry=q_ref, stop=stop, direction=direction)
+            approved = abs(entry - stop)
+            if abs(q_ref - q_stop) > approved:
+                q_stop = q_stop + c.tick_size if direction is Direction.LONG else q_stop - c.tick_size
+            distance = abs(q_ref - q_stop)
             if c.min_stop_distance > ZERO and distance < c.min_stop_distance:
                 # Widening to reach the venue minimum is exactly the move
                 # INV-RISK-001 forbids, so the trade is not placeable instead.

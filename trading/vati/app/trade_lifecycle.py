@@ -66,6 +66,9 @@ class AccountTradeLifecycle:
     entries: dict[str, dict] = field(default_factory=dict)
     reviews: list = field(default_factory=list)
     consecutive_losses: int = 0
+    #: P1-TRADE-RISK-005: recoverable per-strategy/account losing-streak governor,
+    #: rebuilt from the ledger by the account service (vati.risk.lockouts).
+    streaks: Optional[object] = None
     families: FamilyRegistry = field(init=False)
     envelope_calculator: EnvelopeCalculator = field(init=False)
     trade_health: TradeHealthEngine = field(init=False)
@@ -1301,7 +1304,12 @@ class AccountTradeLifecycle:
         entry["trade_intent_id"] = intent_id
         pnl, pnl_known = self._realised_pnl(entry, exit_price)
         if pnl_known:
-            self.consecutive_losses = self.consecutive_losses + 1 if pnl < ZERO else 0
+            if self.streaks is not None:
+                for lock_event in self.streaks.on_close(entry["strategy_id"], pnl, now_ms):
+                    self._log(EventKind.SESSION, lock_event, now_ms=now_ms, corr=intent_id)
+                self.consecutive_losses = self.streaks.verdict(entry["strategy_id"], now_ms).losses
+            else:
+                self.consecutive_losses = self.consecutive_losses + 1 if pnl < ZERO else 0
 
         review = review_trade(
             trade_intent_id=intent_id,

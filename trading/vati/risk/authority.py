@@ -26,6 +26,7 @@ from vati.risk.contracts import (
 )
 from vati.risk.conformal import ConformalAdmissionGate, ConformalAdmissionRefused
 from vati.risk.governor import drawdown_verdict
+from vati.risk.lockouts import at_or_above
 from vati.risk.heat import currency_leg_exposure, open_stop_risk
 from vati.risk.mandate import AuthorizationMode, PlatformCeilings, TradingMandate
 from vati.risk.sizing import Multipliers, SizingRejected, size_illiquid_equity, size_stake_contract, size_stop_contract
@@ -250,6 +251,9 @@ class RiskAuthority:
         # 8. Loss limits and drawdown governor
         if snapshot.consecutive_losses >= m.max_consecutive_losses:
             return rej("CONSECUTIVE_LOSSES", f"{snapshot.consecutive_losses} >= {m.max_consecutive_losses}")
+        if snapshot.loss_streak_lock:
+            # P1-TRADE-RISK-005: a cooldown or an owner-reset suspension, not a permanent lock.
+            return rej("CONSECUTIVE_LOSSES", snapshot.loss_streak_lock)
         if snapshot.day_start_equity > ZERO:
             day_loss = (snapshot.day_start_equity - snapshot.equity) / snapshot.day_start_equity
             if day_loss >= m.max_daily_loss:
@@ -265,8 +269,12 @@ class RiskAuthority:
         dd = drawdown_verdict(snapshot.peak_equity, snapshot.equity, m.drawdown_tiers)
         if dd.suspended:
             return rej("DRAWDOWN_SUSPENDED", f"drawdown {dd.drawdown}")
-        if dd.top_tier_only and intent.strategy_state is not StrategyState.CERTIFIED_LIVE:
-            return rej("DRAWDOWN_TOP_TIER_ONLY", f"drawdown {dd.drawdown}")
+        # P1-TRADE-RISK-005: "top tier" is the highest promotion state the mandate's
+        # strategies actually hold, so a restricted account keeps trading its best-proven
+        # strategies at the tier's reduced size and can recover. Legacy floor when unset.
+        top_floor = snapshot.drawdown_top_state or StrategyState.CERTIFIED_LIVE
+        if dd.top_tier_only and not at_or_above(intent.strategy_state, top_floor):
+            return rej("DRAWDOWN_TOP_TIER_ONLY", f"drawdown {dd.drawdown}; trading limited to {top_floor.value}")
 
         # 9. Position count limits
         same_symbol = sum(1 for p in snapshot.open_positions if p.symbol.upper() == symbol)
@@ -294,10 +302,12 @@ class RiskAuthority:
             liquidity=liquidity,
             event_risk=intent.event_risk_multiplier,
             correlation=intent.correlation_multiplier,
-            drawdown=dd.multiplier,
+            drawdown=dd.multiplier * min(ONE, max(ZERO, snapshot.loss_streak_multiplier)),
         )
         if dd.tier_index >= 0:
             constraints.append(f"DRAWDOWN_TIER_{dd.tier_index}")
+        if snapshot.loss_streak_multiplier < ONE:
+            constraints.append("LOSS_STREAK_PROBATION")
 
         # 10b. Edge must clear round-trip cost (Rev 3: cost is the first edge)
         if intent.expected_gross_move_pct is not None and contract.round_trip_cost_pct > ZERO:
