@@ -5,13 +5,13 @@
 
 | Input | SHA-256 (full file bytes) |
 |---|---|
-| `docs/design/van-next/VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9B_20261016.md` | `f708229674eb95c47f99375faf242388a6b3741ebe9a118fc1c15beebe71e0f7` |
-| `docs/design/van-next/VAN_NEXT_OWNER_DECISIONS_REV1.md` | `e4da1830dae75ed33e0d5ea894ae7324c6a16c2d4b5ef07ac96599e80ed3b3a9` |
+| `docs/design/van-next/VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9B_20261016.md` | `79b7cf6909ad6cd865e103dc6ff7f81d69598465ab0905779371fac630c68124` |
+| `docs/design/van-next/VAN_NEXT_OWNER_DECISIONS_REV1.md` | `c4eca930edaf0d42e0b5cffb19ec46c305b454b685501c90ab0cee7699dfd1c8` |
 | `docs/design/van-next/plan/generate_plan.py` | `62794a01eb7d3a9a02808ee262f1c6a616924bfb787b2f2ee29730f8392b2d2f` |
-| `docs/design/van-next/plan/REQUIREMENT_LOCK_REV1_9B.json` | `7e102f249c89f030edbbb6cb91dc12a1a095feb2d1ba6b94275a21e3d597558d` |
+| `docs/design/van-next/plan/REQUIREMENT_LOCK_REV1_9B.json` | `0171397fd1e7e3042a13ba36c0a3ab6f0a8e020d52064b964d33fef9de4bdc49` |
 | `docs/design/van-next/VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.json` | `34b97daaf8d92951833bc0270998e9ae5159fdeffa078844a8d2d4241cf52d1d` |
 
-Aggregate input digest `216f26e53dad7c8f423aacd725b71fe304d54fd237487d39602965e24fb3e3d0` = SHA-256 of the blueprint bytes, one newline byte, then the decision-record, generator, requirement-lock and surface-matrix bytes. `PLAN_INPUT_PROVENANCE.json` records these values and the hashes of the generated plan.
+Aggregate input digest `33a5e27a8d5026eb4f326b9ab9b4ca507e67ae0108d9ff32a6c10da5acf65d0d` = SHA-256 of the blueprint bytes, one newline byte, then the decision-record, generator, requirement-lock and surface-matrix bytes. `PLAN_INPUT_PROVENANCE.json` records these values and the hashes of the generated plan.
 
 **Generator:** `plan/generate_plan.py`. Re-running it on the same inputs gives byte-identical output. `--check` validates the inputs **and** fails if this file is stale; `--selftest` proves each check catches a deliberately broken input.
 
@@ -28,7 +28,7 @@ Aggregate input digest `216f26e53dad7c8f423aacd725b71fe304d54fd237487d39602965e2
 ## 2. Validation of the blueprint inputs
 
 - Development Units in the DAG: 51; solid dependency edges: 92; non-blocking (dotted) edges: 2.
-- Requirements parsed: 71; open questions parsed: 18.
+- Requirements parsed: 72; open questions parsed: 18.
 - Findings: none. The DAG is acyclic; every requirement and every open question maps to a DU in the DAG; every DU has a lane; no DU depends on a later phase; every build unit has a dependency path to DU-25, DU-26 and DU-MR; no code-bearing unit runs before the F15 gate DU-31; every unit a requirement needs is built upstream of it; every code-bearing unit is downstream of the parity checker; no DAG node, requirement or open question is duplicated; the requirement IDs and text and the 78 legacy surfaces' owner actions match the owner-pinned requirement lock.
 - DUs with no requirement row (kept, flagged for the freeze list): none.
 - DU-27 is not a packet: REA research (static) done under OD-15/16/17. Its admission record is VAN-NX-026, carried by DU-01; its findings are inputs to the DU-10 and DU-29 contracts.
@@ -155,7 +155,7 @@ These are the only inputs not read from the blueprint.
 | PKT-051 | DU-21 | Browser/Voice/ARTEMIS | P3 | M2 | Continuity | PKT-008, PKT-023 | VAN-NX-020, VAN-NX-069 | — / — |
 | PKT-052 | DU-09 | Trading Home | P3 | M2 | Trading | PKT-008, PKT-024, PKT-032, PKT-042 | VAN-NX-008 | — / — |
 | PKT-053 | DU-12b | Alerts, watchlists, screener | P3 | FULL | Trading | PKT-042 | VAN-NX-047 | — / — |
-| PKT-054 | DU-28d | Pattern extraction to candidates | P3 | FULL | Trading | PKT-044 | VAN-NX-035 | — / — |
+| PKT-054 | DU-28d | Pattern extraction to candidates | P3 | FULL | Trading | PKT-044 | VAN-NX-035, VAN-NX-072 | — / — |
 | PKT-055 | DU-29b | Portfolio, health, statements | P3 | FULL | Trading | PKT-031, PKT-042 | VAN-NX-052 | — / — |
 | PKT-056 | DU-16 | Spatial task graph | P3 | M2 | Work Graph | PKT-025, PKT-047 | VAN-NX-015 | — / — |
 | PKT-057 | DU-18 | Muse qualified interaction | P3 | FULL | Work Graph | PKT-047 | VAN-NX-017 | — / — |
@@ -322,4 +322,5 @@ A DU's last packet exits only with every listed requirement's key acceptance (bl
 | VAN-NX-069 | DU-21 | Unknown never shown as pass |
 | VAN-NX-070 | DU-31 | Certificate by an independent verifier; a code-bearing packet whose unit does not depend on DU-31 fails generation (induced) |
 | VAN-NX-071 | DU-00a | No source change; every ledger row classified with provenance |
+| VAN-NX-072 | DU-28d | §7.4.14; induced: a failing candidate never reaches the owner; a passing candidate cannot change live trading without a signed promotion; a protected-path candidate is held; the weekly run is scheduled and replays identically from the ledger |
 

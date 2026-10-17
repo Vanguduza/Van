@@ -3,7 +3,7 @@
 **Document ID:** `VAN-TSE-FR-REV1.9B-20261016`  
 **Revision:** 1.9b — **freeze candidate** (supersedes Rev 1.9a; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.9a are in git history). Development follows `plan/VAN_NEXT_DEVELOPMENT_PLAN_REV1.md`, derived from this document; freeze criteria in `VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_9B.md`; evidence in `evidence/`  
 **Date:** 15 October 2026 (Africa/Harare)  
-**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-36), which captures the two locked dark/light references and the 15 October review decisions  
+**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-37), which captures the two locked dark/light references and the 15 October review decisions  
 **Repository:** [`Vanguduza/Van`](https://github.com/Vanguduza/Van)  
 **Audit baseline A:** merged `main` SHA `8eb1889822fc8a83f219977c15340172e16acd91`  
 **Audit baseline B:** unmerged, draft owner-core [PR #93](https://github.com/Vanguduza/Van/pull/93) SHA `dfc1557ab99ad8d41cf84714e1bb671e89b045e6`  
@@ -25,6 +25,7 @@ A third independent audit replayed the Rev 1.9a evidence pack (`research/VAN_NEX
 | W3 | **Collisions fail.** Duplicate machine IDs, states, transitions, approved-list entries, requirement rows, open questions and DAG nodes are findings, not silent overwrites. | NXA-03 | `contracts/`, `plan/` |
 | W4 | **Feature preservation in two stages.** PKT-001…PKT-003 (read-only) use a preservation-inventory gate; DU-00b exits only with the parity checker qualified; every later packet needs it. F2 no longer requires a parity checker before F15 (the same timing error, found while applying this fix). Generator rule `PARITY_BEFORE_CHECKER` keeps every code-bearing unit downstream of DU-00b. | NXA-04 | §16.5, §17 F2, plan §1 |
 | W5 | The Rev 1.9 response is restored to the bytes sealed in the Rev 1.9a pack; the lines added afterwards become a separate addendum with that hash. The evidence pack is rebuilt as Rev 1.9b with the new negative tests. | NXA-06 | `research/`, `evidence/` |
+| W6 | **Continuous strategy development** (added 17 October 2026 at the owner's request): a scheduled offline loop proposes, backtests and validates strategy candidates and sends only passing ones to the owner; live trading changes only by owner-signed promotion. | OD-37 | §7.4.14, VAN-NX-072 |
 
 NXA-05 (the 171-atom and 115-context mapping) and NXA-07 (independent retrieval of the visual authority) remain DU-01 obligations, unchanged.
 
@@ -748,6 +749,18 @@ VAN studies the owner's manual trades to find setups where the owner does well, 
 4. While it is a candidate, VAN can show "this setup matches your best past trades" on the chart and review sheet, as information only.
 
 This keeps §7.4.10's rule intact: manual trades do not train or promote existing automated strategies; extraction creates a *new, separately validated* proposal.
+
+#### 7.4.14 Continuous strategy development (OD-37)
+
+VAN keeps developing its strategies, but **never changes live trading by itself**. The loop runs offline on VATI's existing machinery (`vati.learning.evolution`, `vati.learning.drift`, `vati.evolution`, `vati.backtest`, `vati.validation`), which exists on `main` but is not scheduled today.
+
+1. **Weekly review, automatic.** After each trading week, for every strategy: group its losing trades by condition (session, volatility, trend state, event proximity) and check whether its inputs still carry information (feature drift). Write the findings to the ledger.
+2. **Candidates, automatic.** Turn findings into candidate versions in `RESEARCH` (for example "skip Asia session in high volatility"), plus candidates from owner pattern extraction (§7.4.13) and from research missions. The parent version is always kept.
+3. **Validation, automatic.** Backtest each candidate with VATI's own engine on recorded history, then apply the validation policy: deflated Sharpe probability ≥ 0.95, probability of backtest overfitting ≤ 0.10, at least 30 trades, at least 3 walk-forward windows, the leakage (peek) test, and costs at or above observed spreads. The trial count includes every variant tried, so testing many ideas raises the bar.
+4. **Only winners reach the owner.** A candidate that fails is archived with its numbers and reasons and is not shown as an opportunity. A candidate that passes is sent to the owner with its evidence (trades, expectancy in R, drawdown, the validation numbers, what changed versus the parent) for a one-tap decision.
+5. **Promotion stays governed.** Approval moves a candidate one state at a time (`RESEARCH → BACKTEST → VALIDATION → DEMO → SHADOW → LIMITED_LIVE → CERTIFIED_LIVE`), each with the owner's signature; live states also need recorded shadow or demo evidence. A candidate that touches risk limits, order routing or the kill switch is held for owner review (protected paths).
+6. **Demotion is automatic, promotion never is.** A live strategy whose health or drift degrades is reduced, then suspended, without waiting; it returns only through the same path.
+7. **Honest reporting.** A monthly "strategy development" report lists candidates tried, passed, failed and promoted, so a run of failures is visible rather than silent.
 
 ### 7.5 Positions and order history
 
@@ -1686,6 +1699,7 @@ Each requirement ID must have Product Truth binding, one or more Development Uni
 | VAN-NX-033 | Live news trading bundle: feeds, armed release plans, unscheduled-headline classes, owner armed tickets, latency ledger, news risk limits, staged promotion | DU-14e | §8.10.9; per-class paper and shadow evidence; owner signature per class |
 | VAN-NX-032 | Event history comparison for scheduled and unscheduled news, wired into trading decisions D1–D7 through shadow-then-live promotion | DU-14c | §8.4–§8.5; per-path shadow evidence and owner-signed promotion |
 | VAN-NX-071 | Read-only inventory before any change: frozen branch heads, Feature Ledger, every row classified | DU-00a | No source change; every ledger row classified with provenance |
+| VAN-NX-072 | Continuous governed strategy development: weekly loss clustering and drift review, automatic candidate generation, automatic backtest and validation, only passing candidates sent to the owner, owner-signed one-step promotion, automatic demotion | DU-28d | §7.4.14; induced: a failing candidate never reaches the owner; a passing candidate cannot change live trading without a signed promotion; a protected-path candidate is held; the weekly run is scheduled and replays identically from the ledger |
 | VAN-NX-028 | Repository consolidation and parity oracle before rebuild | DU-00b | Parity checker fails on an induced omission. Needs: DU-00a, DU-31 |
 | VAN-NX-070 | Predevelopment closure: signed decision record, 171-atom/115-context mapping admitted, state and financial contracts model-checked, F0–F14 preparation evidence, F13 matrix, **independent F15 `FORENSIC_BUILD_READY`** | DU-31 | Certificate by an independent verifier; a code-bearing packet whose unit does not depend on DU-31 fails generation (induced) |
 | VAN-NX-029 | Structural frontend isolation (modules, tokens, strings, release checks) | DU-24 | Legacy import fails compilation; banned-word and literal-style lints fail when induced |
