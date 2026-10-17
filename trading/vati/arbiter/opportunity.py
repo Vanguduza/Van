@@ -190,6 +190,7 @@ class OpportunityEngine:
                 is_event_certified=cap.event_certified, meta_label=mv.label.value,
                 evidence_refs=tuple(mv.reasons) + self._lesson_evidence(
                     cap.strategy_id, state, regime_label),
+                entry_type=sig.entry_type,
             ).sealed())
         return tuple(out)
 

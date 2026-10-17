@@ -34,6 +34,7 @@ from vati.arbiter.candidate import CandidateOpportunity
 from vati.arbiter.intent_factory import IntentFactory
 from vati.app.instrument_evaluator import InstrumentEvaluator
 from vati.core.canonical import canonical_hash
+from vati.execution.router import RouterError
 from vati.market_data.bars import Bar
 from vati.observability import metrics
 from vati.observability.enhancement_metrics import (
@@ -271,7 +272,17 @@ class AccountDecisionCoordinator:
                                                      snap_hash, decision))
                     continue
                 lease_epoch = self.lease.epoch if self.lease is not None else None
-                self.execute_fn(cand, intent, decision, tuple(cand.targets), lease_epoch)
+                try:
+                    self.execute_fn(cand, intent, decision, tuple(cand.targets), lease_epoch)
+                except RouterError as exc:
+                    # The router refused this order (for example a STOP entry on a venue
+                    # without stop orders). That ends this candidate, not the pass.
+                    self.pool.mark(cand.candidate_id, CandidateState.RISK_REJECTED,
+                                   reason=f"router_refused: {exc}"[:300], now_ms=now_ms)
+                    outcomes.append(AdmissionOutcome(cand.candidate_id, cand.symbol, d.rank,
+                                                     "EXECUTION_REFUSED", str(exc)[:300],
+                                                     snap_hash, decision))
+                    continue
                 self.pool.mark(cand.candidate_id, CandidateState.SELECTED,
                                reason=str(approved), now_ms=now_ms)
                 outcomes.append(AdmissionOutcome(cand.candidate_id, cand.symbol, d.rank,

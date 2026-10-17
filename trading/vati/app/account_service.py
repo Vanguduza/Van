@@ -728,7 +728,7 @@ class AccountCoordinatorService:
             event_proximity=state.event_window.value, direction=candidate.direction.value)
         policy_decision = self.policy.select(
             candidate_id=candidate.candidate_id, bucket=bucket,
-            event_state=state.event_window.value)
+            event_state=state.event_window.value, entry_type=candidate.entry_type)
         metrics.inc(
             EXECUTION_POLICY_SELECTED,
             account_alias=self.account.alias, symbol=candidate.symbol,
@@ -751,6 +751,7 @@ class AccountCoordinatorService:
             intent, decision, self.mandate, now_ms=self.clock(),
             stop_mode=StopMode.SOFTWARE if software else StopMode.VENUE,
             targets=targets, time_in_force=self.specs[candidate.symbol.upper()].time_in_force,
+            entry_type=candidate.entry_type,
             lease_epoch=lease_epoch, execution_policy_decision=policy_decision,
             market_reference=MarketReference(
                 last_price=state.features.close,

@@ -361,6 +361,9 @@ class DecisionCycle:
                 "session": state.session.value, "symbol": cfg.symbol,
                 "opened_in_blackout": state.event_window.value in ("PRE_BLACKOUT", "POST_BLACKOUT"),
                 "best_price": intent.entry, "worst_price": intent.entry,
+                "event_window": state.event_window.value,
+                # In memory only: the fill seals the thesis from the approval that admitted it.
+                "_approval": (intent, decision, state, tuple(targets)),
             }
             self._log(EventKind.SESSION, {"event": "ENTRY_RESTING", "entry_type": oa.entry_type, "order": rec.broker_order_id},
                       now_ms=now_ms, corr=intent.trade_intent_id)
@@ -387,23 +390,7 @@ class DecisionCycle:
                 "symbol": cfg.symbol,
             }
             self._seal_thesis(intent, decision, state, targets, entry_price, now_ms)
-            if rec.average_fill is not None and rec.filled_qty > ZERO:
-                tca = compute_tca(rec, direction=intent.direction, qty=rec.filled_qty, value_per_unit=cfg.contract.value_per_price_unit_per_lot if cfg.contract.loss_model is LossModel.STOP_DISTANCE else Decimal(1), modelled_cost_pct=cost)
-                tca_payload = tca.as_dict()
-                if self.learning is not None:
-                    tca_payload |= {
-                        "learning_environment": self.learning.environment.value,
-                        "broker": self.learning.broker,
-                        "symbol": cfg.symbol,
-                        "session": state.session.value,
-                        "event_window": state.event_window.value,
-                        "rejected": False,
-                    }
-                self._log(EventKind.TCA_RECORD, tca_payload, now_ms=now_ms, corr=intent.trade_intent_id)
-                self._entries[intent.trade_intent_id]["cost_ratio"] = tca.cost_ratio
-                if self.learning is not None:
-                    self.learning.on_tca(symbol=cfg.symbol, session=state.session.value, event_window=state.event_window.value, cost_ratio=tca.cost_ratio, slippage=tca.slippage)
-                    self.engine.m.broker_liquidity[cfg.symbol] = self.learning.broker_liquidity(cfg.symbol)
+            self._record_tca(rec, intent.direction, cost, state.session.value, state.event_window.value, now_ms=now_ms)
         return CycleResult(state.as_of_ms, state.state_hash, decision.decision.value, "", decision.approved_size)
 
     # ------------------------------------------------- owner-signed recovery (A4)
@@ -440,6 +427,27 @@ class DecisionCycle:
                 self._on_close(r.trade_intent_id, r.average_fill, r.reject_reason, now_ms)
                 self.protection.forget(r.broker_position_id)
 
+    def _record_tca(self, rec, direction, cost: Decimal, session: str, event_window: str, *, now_ms: int) -> None:
+        cfg = self.cfg
+        if rec.average_fill is None or rec.filled_qty <= ZERO:
+            return
+        tca = compute_tca(rec, direction=direction, qty=rec.filled_qty, value_per_unit=cfg.contract.value_per_price_unit_per_lot if cfg.contract.loss_model is LossModel.STOP_DISTANCE else Decimal(1), modelled_cost_pct=cost)
+        tca_payload = tca.as_dict()
+        if self.learning is not None:
+            tca_payload |= {
+                "learning_environment": self.learning.environment.value,
+                "broker": self.learning.broker,
+                "symbol": cfg.symbol,
+                "session": session,
+                "event_window": event_window,
+                "rejected": False,
+            }
+        self._log(EventKind.TCA_RECORD, tca_payload, now_ms=now_ms, corr=rec.trade_intent_id)
+        self._entries[rec.trade_intent_id]["cost_ratio"] = tca.cost_ratio
+        if self.learning is not None:
+            self.learning.on_tca(symbol=cfg.symbol, session=session, event_window=event_window, cost_ratio=tca.cost_ratio, slippage=tca.slippage)
+            self.engine.m.broker_liquidity[cfg.symbol] = self.learning.broker_liquidity(cfg.symbol)
+
     def _settle_pending(self, r, row: dict, *, now_ms: int) -> None:
         """A resting entry filled (becomes a position) or expired (reserves nothing)."""
         self._log(EventKind.EXECUTION_RECEIPT, {k: (v.value if hasattr(v, "value") else v) for k, v in asdict(r).items()},
@@ -455,6 +463,11 @@ class DecisionCycle:
                                                 software_stop=bool(self.cfg.software_stops))
             self._log(EventKind.SESSION, {"event": "ENTRY_FILLED_FROM_REST", "fill": str(r.average_fill), "position": r.broker_position_id},
                       now_ms=now_ms, corr=r.trade_intent_id)
+            approval = row.pop("_approval", None)
+            if approval is not None:
+                intent, decision, state, targets = approval
+                self._seal_thesis(intent, decision, state, targets, r.average_fill, now_ms)
+            self._record_tca(r, row["direction"], row["cost_pct"], row["session"], row.get("event_window", ""), now_ms=now_ms)
         elif r.status in ("EXPIRED", "CANCELLED", "REJECTED"):
             self._entries.pop(r.trade_intent_id, None)
             self._log(EventKind.SESSION, {"event": "ENTRY_REST_ENDED", "status": r.status, "reason": r.reject_reason},

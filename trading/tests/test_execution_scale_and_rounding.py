@@ -264,3 +264,40 @@ def test_the_cycle_sends_the_strategy_s_own_entry_type(eurusd, tmp_path):
     pullback = [c for c in cmds if c["strategy_id"] == "FX-TREND-PULLBACK-01"]
     assert london and all(c["entry_type"] == "STOP" for c in london)
     assert all(c["entry_type"] in ("LIMIT", "PASSIVE_LIMIT", "MARKET") for c in pullback)
+
+
+def test_an_entry_filled_from_rest_gets_its_thesis_and_tca(eurusd):
+    """A resting STOP that later fills is a position like any other: claim sealed, cost measured."""
+    from test_backtest_runner_cli import fx_cfg, fx_engine, synthetic_bars
+    from vati.app import DecisionCycle
+    from vati.execution import PaperAdapter
+    cfg = fx_cfg(eurusd)
+    led = Ledger()
+    cyc = DecisionCycle(cfg=cfg, adapter=PaperAdapter(venue="paper", account_alias="fx_primary"), ledger=led, engine=fx_engine(cfg),
+                        cost_fn=lambda st: D("0.0003"), calendar=FX_CALENDAR, events=EventMatrix())
+    bars = synthetic_bars()
+    for i in range(60, len(bars)):
+        for px in (bars[i].open, bars[i].low, bars[i].high, bars[i].close):
+            cyc.mark(px - D("0.00005"), px + D("0.00005"), now_ms=bars[i].end_ms)
+        cyc.step(bars[: i + 1], now_ms=bars[i].end_ms, last_quote_ms=bars[i].end_ms)
+    filled = {e.correlation_id for e in led.iter(EventKind.SESSION) if e.payload.get("event") == "ENTRY_FILLED_FROM_REST"}
+    assert filled, "the scenario must contain an entry that rested and then filled"
+    tca = {e.correlation_id for e in led.iter(EventKind.TCA_RECORD)}
+    assert filled <= tca, "a fill from rest must record its execution cost"
+    sealed = {e.correlation_id: e.payload for e in led.iter(EventKind.TRADE_THESIS)}
+    assert filled <= set(sealed), "a fill from rest must seal its thesis"
+    fills = {e.correlation_id: D(e.payload["fill"]) for e in led.iter(EventKind.SESSION) if e.payload.get("event") == "ENTRY_FILLED_FROM_REST"}
+    assert all(D(str(sealed[i]["entry"])) == fills[i] for i in filled), "the thesis entry is the actual fill, not the trigger"
+
+
+def test_the_account_service_path_carries_the_entry_type():
+    """The live path must hand the strategy's own type to policy and router, not the LIMIT default."""
+    from vati.arbiter.candidate import CandidateOpportunity
+    assert CandidateOpportunity.__dataclass_fields__["entry_type"].default == "LIMIT"
+    src = (Path(__file__).resolve().parents[1] / "vati" / "app" / "account_service.py").read_text()
+    body = src[src.index("    def _execute(self, candidate"):]
+    body = body[: body.index("\n    def ", 10)]
+    assert "entry_type=candidate.entry_type" in body.split("self.router.execute(")[0], "policy.select must get the entry type"
+    assert "entry_type=candidate.entry_type" in body.split("self.router.execute(")[1], "router.execute must get the entry type"
+    eng_src = (Path(__file__).resolve().parents[1] / "vati" / "arbiter" / "opportunity.py").read_text()
+    assert eng_src.count("entry_type=sig.entry_type") >= 2, "candidates must carry the signal's entry type"
