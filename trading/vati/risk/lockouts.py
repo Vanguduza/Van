@@ -31,9 +31,11 @@ Drawdown:
     `drawdown-resume` re-baselines the high-water mark.
   * The high-water mark is restored from the ledger on start, never re-baselined by it.
 
-Manual (owner-initiated) trades are the owner's own decisions: they never count
-toward a strategy's or the account's autonomous streak. Their own limits belong to the
-manual-trading packet (blueprint §7.4.2, DU-28); nothing here admits a manual order.
+Manual (owner-initiated) trades, strategy `owner.manual` (blueprint §7.4.2), have their
+own scope with the same cooldown, probation and suspension: a manual losing streak
+pauses manual entries only (no revenge trading), never an autonomous strategy, and an
+autonomous cooldown never blocks the owner. Nothing here admits a manual order; that
+is the manual-trading packet (DU-28).
 """
 
 from __future__ import annotations
@@ -49,8 +51,8 @@ ACCOUNT_SCOPE = "*ACCOUNT*"
 HOUR_MS = 3_600_000
 WEEK_MS = 7 * 24 * HOUR_MS
 
-#: strategy_id prefixes that mark an owner's own trade (excluded from streaks).
-MANUAL_STRATEGY_PREFIXES = ("OWNER_MANUAL",)
+#: The mandate strategy of owner-initiated trades (blueprint §7.4.2).
+MANUAL_STRATEGY_ID = "owner.manual"
 
 PROMOTION_ORDER = (
     StrategyState.RESEARCH, StrategyState.BACKTEST, StrategyState.VALIDATION, StrategyState.DEMO,
@@ -88,7 +90,12 @@ class StreakVerdict:
 
 
 def is_manual(strategy_id: str) -> bool:
-    return strategy_id.startswith(MANUAL_STRATEGY_PREFIXES)
+    return strategy_id == MANUAL_STRATEGY_ID or strategy_id.startswith(MANUAL_STRATEGY_ID + ".")
+
+
+def _scopes(strategy_id: str) -> tuple[str, ...]:
+    """A manual trade counts only in its own scope; an autonomous one also in the account's."""
+    return (strategy_id,) if is_manual(strategy_id) else (strategy_id, ACCOUNT_SCOPE)
 
 
 class LossStreakGovernor:
@@ -101,11 +108,9 @@ class LossStreakGovernor:
 
     # ----------------------------------------------------------------- events
     def on_close(self, strategy_id: str, pnl: Decimal, now_ms: int) -> list[dict]:
-        """Record one closed autonomous trade. Returns lockout events to log."""
-        if is_manual(strategy_id):
-            return []
+        """Record one closed trade. Returns lockout events to log."""
         out: list[dict] = []
-        for key in (strategy_id, ACCOUNT_SCOPE):
+        for key in _scopes(strategy_id):
             s = self._scope(key)
             if pnl > ZERO:
                 s.losses, s.probation = 0, False
@@ -131,7 +136,7 @@ class LossStreakGovernor:
     # ---------------------------------------------------------------- verdict
     def verdict(self, strategy_id: str, now_ms: int) -> StreakVerdict:
         mult = ONE
-        for key in (strategy_id, ACCOUNT_SCOPE):
+        for key in _scopes(strategy_id):
             s = self._scopes.get(key)
             if s is None:
                 continue
@@ -214,7 +219,7 @@ def at_or_above(state: StrategyState, floor: StrategyState) -> bool:
 
 
 __all__ = [
-    "ACCOUNT_SCOPE", "COOLDOWN_EVENT", "DRAWDOWN_RESUME_EVENT", "LockoutPolicy", "LossStreakGovernor",
+    "ACCOUNT_SCOPE", "COOLDOWN_EVENT", "DRAWDOWN_RESUME_EVENT", "MANUAL_STRATEGY_ID", "LockoutPolicy", "LossStreakGovernor",
     "RESET_EVENT", "SUSPEND_EVENT", "StreakVerdict", "at_or_above", "is_manual", "relative_top_state",
     "restore_peak_equity",
 ]

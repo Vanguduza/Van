@@ -17,7 +17,7 @@ from conftest import intent as make_intent, mandate_dict, snapshot
 from vati.core import EventKind, Ledger
 from vati.risk import Decision, RiskAuthority, StrategyState, TradingMandate
 from vati.risk.lockouts import (
-    ACCOUNT_SCOPE, COOLDOWN_EVENT, DRAWDOWN_RESUME_EVENT, HOUR_MS, LockoutPolicy, LossStreakGovernor, relative_top_state,
+    ACCOUNT_SCOPE, COOLDOWN_EVENT, DRAWDOWN_RESUME_EVENT, HOUR_MS, MANUAL_STRATEGY_ID, LockoutPolicy, LossStreakGovernor, relative_top_state,
     restore_equity_baselines,
 )
 
@@ -77,10 +77,19 @@ def test_repeated_cooldowns_in_a_week_escalate_to_the_owner():
     assert g.verdict("A", t).lock == ""
 
 
-def test_manual_trades_never_count_toward_an_autonomous_streak():
+def test_a_manual_streak_pauses_manual_entries_only():
     g = LossStreakGovernor(POLICY)
-    _lose(g, "OWNER_MANUAL", 10)
-    assert g.verdict("A", 1).lock == "" and g.verdict("OWNER_MANUAL", 1).lock == ""
+    _lose(g, MANUAL_STRATEGY_ID, 4)
+    assert g.verdict(MANUAL_STRATEGY_ID, 10).lock, "four manual losses in a row pause manual entries"
+    assert g.verdict("A", 10).lock == "", "the owner's losses never stop an autonomous strategy"
+    assert g.verdict(MANUAL_STRATEGY_ID, 24 * HOUR_MS + 10).risk_multiplier == D("0.5")
+
+
+def test_an_autonomous_account_cooldown_never_blocks_the_owner():
+    g = LossStreakGovernor(POLICY)
+    for k, sid in enumerate(("A", "B", "C", "D")):
+        g.on_close(sid, LOSS, k)
+    assert g.verdict("E", 10).lock and g.verdict(MANUAL_STRATEGY_ID, 10).lock == ""
 
 
 def test_the_state_is_a_fold_over_the_ledger_so_a_restart_cannot_reset_it():
