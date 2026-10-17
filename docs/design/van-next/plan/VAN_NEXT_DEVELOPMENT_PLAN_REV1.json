@@ -2,11 +2,11 @@
  "provenance": {
   "blueprint": {
    "path": "docs/design/van-next/VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9B_20261016.md",
-   "sha256": "79b7cf6909ad6cd865e103dc6ff7f81d69598465ab0905779371fac630c68124"
+   "sha256": "709c68492bd4e939fff1ffd8deec843bbd605d79bf54d584c62e768a20dfdc9d"
   },
   "owner_decisions": {
    "path": "docs/design/van-next/VAN_NEXT_OWNER_DECISIONS_REV1.md",
-   "sha256": "c4eca930edaf0d42e0b5cffb19ec46c305b454b685501c90ab0cee7699dfd1c8"
+   "sha256": "488806b5639e5d5b806149ddd849bcf48cf14fcd1128580aea904478ab2ff74d"
   },
   "generator": {
    "path": "docs/design/van-next/plan/generate_plan.py",
@@ -14,13 +14,13 @@
   },
   "requirement_lock": {
    "path": "docs/design/van-next/plan/REQUIREMENT_LOCK_REV1_9B.json",
-   "sha256": "0171397fd1e7e3042a13ba36c0a3ab6f0a8e020d52064b964d33fef9de4bdc49"
+   "sha256": "9b3954fd896f68467abe91571332f0fa2f4596da8be7c8528fbe4bcdd4809c49"
   },
   "surface_matrix": {
    "path": "docs/design/van-next/VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.json",
    "sha256": "34b97daaf8d92951833bc0270998e9ae5159fdeffa078844a8d2d4241cf52d1d"
   },
-  "aggregate_input_sha256": "33a5e27a8d5026eb4f326b9ab9b4ca507e67ae0108d9ff32a6c10da5acf65d0d",
+  "aggregate_input_sha256": "fb9eb48dcf299194455143d4381a7a7d5884803beed45cd0f21c7b3ad9a3fb42",
   "aggregate_algorithm": "sha256(blueprint_bytes + b'\\n' + decisions_bytes + generator_bytes + requirement_lock_bytes + surface_matrix_bytes)"
  },
  "findings": [],

@@ -2,7 +2,7 @@
 
 **Status:** `AWAITING_OWNER_DECISION`. The blueprint is frozen when every item below is `PREPARATION_VERIFIED` or `OWNER_ACCEPTED`. After the freeze, it changes only by a numbered amendment, which regenerates the plan. Any packet in progress stops if the amendment affects its contract.
 
-Rev 1.9b applies the forensic evidence audit NXA-01…NXA-07 and the owner's answers G1–G5 (OD-32…OD-36), plus continuous strategy development (OD-37, §7.4.14), on top of Rev 1.9a (V19-A01…A09, F1–F4).
+Rev 1.9b applies the forensic evidence audit NXA-01…NXA-07 and the owner's answers G1–G5 (OD-32…OD-36), plus continuous strategy development (OD-37, §7.4.14) and the trading-path corrections (OD-38, §7.4.15), on top of Rev 1.9a (V19-A01…A09, F1–F4).
 
 **What `PREPARATION_VERIFIED` means:** the claim was re-derived by a command anyone can rerun. The commands and their recorded outputs are in `evidence/`, bound to a commit. It is **not** a DIAL F0–F15 PASS. **F15 is issued only by an independent verifier at DU-31** and stays `NOT_ISSUED` until then.
 
@@ -12,13 +12,13 @@ Rev 1.9b applies the forensic evidence audit NXA-01…NXA-07 and the owner's ans
 
 | # | Criterion | Status | Command and result |
 |---|---|---|---|
-| A1 | No implementation on the rebuild branch ahead of the plan | PREPARATION_VERIFIED | Chart engine only on `spike/van-next-chart-engine-20261015`; harness on this branch 106 suites, 986 tests, 0 failures |
+| A1 | No implementation on the rebuild branch ahead of the plan | PREPARATION_VERIFIED | Chart engine only on `spike/van-next-chart-engine-20261015`; harness on this branch 106 suites, 986 tests, 0 failures. **One owner-ordered exception (OD-38):** fixes to five defects in the existing VATI trading engine (`trading/`, commits `fbf3a5f`, `d985434`, `d6c5681`), not VAN Next rebuild code. Trading suite 1326 passed, 2 skipped, 1 failed (the mTLS round-trip test, which fails identically on the base commit). They reach `main` only by a pull request the owner approves |
 | A2 | Inputs valid; every build unit reaches DU-25, DU-26 and DU-MR; no code-bearing unit before the F15 gate DU-31; every requirement's needed units built upstream; **every code-bearing unit downstream of the parity checker (DU-00b)**; **no duplicate IDs**; **requirements and the 78 surfaces' 349 owner actions match the owner-pinned lock** | PREPARATION_VERIFIED | `python3 plan/generate_plan.py --check` → 0 findings (51 DUs, 92 edges, 72 requirements, 18 questions, 78 surfaces) |
 | A3 | The committed plan is current | PREPARATION_VERIFIED | Same command: it regenerates the plan and compares; full input SHA-256 values are in `plan/PLAN_INPUT_PROVENANCE.json` |
 | A4 | The plan checks are known to work | PREPARATION_VERIFIED | `--selftest` → 23 of 23 broken inputs caught, including deleting the money requirement VAN-NX-055 and the visual requirement VAN-NX-004, a duplicated requirement, an edited lock, a dropped legacy owner action and a code unit outside the parity checker's reach |
 | A5 | State machines closed **and equal to the owner-pinned approved transition list** | PREPARATION_VERIFIED | `python3 contracts/check_state_machines.py` → 0 findings (230 on the pack's original, which has no approved list); `--selftest` 24 of 24, including the auditor's four shortcuts (deposit, withdrawal, order, news) with real proof labels, the same shortcuts with the approved list edited, and duplicate machines, states and transitions |
 | A6 | Rev 2 product truths and features mapped | PREPARATION_VERIFIED | `crosswalk/`: 18 of 18 and 93 of 93; the 171/115 mapping is PKT-002 (DU-01) and is required for F15 |
-| A7 | The plan is reproducible | PREPARATION_VERIFIED | Byte-identical on rerun; plan MD5 `19273b48…` |
+| A7 | The plan is reproducible | PREPARATION_VERIFIED | Byte-identical on rerun; plan MD5 `53cd7991…` |
 | A8 | Trading modes evidenced | PREPARATION_VERIFIED | PR #92 `923ecf9`: 177 versus 155 passed; the AGGRESSIVE no-evidence gate was broken deliberately and the expected test failed |
 | A9 | Evidence pack | PREPARATION_VERIFIED | `evidence/EVIDENCE_MANIFEST.json` records the source commit, the SHA-256 of every input and receipt, and what is deliberately absent |
 

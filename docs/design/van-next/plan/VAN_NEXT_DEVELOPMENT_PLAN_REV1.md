@@ -5,13 +5,13 @@
 
 | Input | SHA-256 (full file bytes) |
 |---|---|
-| `docs/design/van-next/VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9B_20261016.md` | `79b7cf6909ad6cd865e103dc6ff7f81d69598465ab0905779371fac630c68124` |
-| `docs/design/van-next/VAN_NEXT_OWNER_DECISIONS_REV1.md` | `c4eca930edaf0d42e0b5cffb19ec46c305b454b685501c90ab0cee7699dfd1c8` |
+| `docs/design/van-next/VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9B_20261016.md` | `709c68492bd4e939fff1ffd8deec843bbd605d79bf54d584c62e768a20dfdc9d` |
+| `docs/design/van-next/VAN_NEXT_OWNER_DECISIONS_REV1.md` | `488806b5639e5d5b806149ddd849bcf48cf14fcd1128580aea904478ab2ff74d` |
 | `docs/design/van-next/plan/generate_plan.py` | `62794a01eb7d3a9a02808ee262f1c6a616924bfb787b2f2ee29730f8392b2d2f` |
-| `docs/design/van-next/plan/REQUIREMENT_LOCK_REV1_9B.json` | `0171397fd1e7e3042a13ba36c0a3ab6f0a8e020d52064b964d33fef9de4bdc49` |
+| `docs/design/van-next/plan/REQUIREMENT_LOCK_REV1_9B.json` | `9b3954fd896f68467abe91571332f0fa2f4596da8be7c8528fbe4bcdd4809c49` |
 | `docs/design/van-next/VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.json` | `34b97daaf8d92951833bc0270998e9ae5159fdeffa078844a8d2d4241cf52d1d` |
 
-Aggregate input digest `33a5e27a8d5026eb4f326b9ab9b4ca507e67ae0108d9ff32a6c10da5acf65d0d` = SHA-256 of the blueprint bytes, one newline byte, then the decision-record, generator, requirement-lock and surface-matrix bytes. `PLAN_INPUT_PROVENANCE.json` records these values and the hashes of the generated plan.
+Aggregate input digest `fb9eb48dcf299194455143d4381a7a7d5884803beed45cd0f21c7b3ad9a3fb42` = SHA-256 of the blueprint bytes, one newline byte, then the decision-record, generator, requirement-lock and surface-matrix bytes. `PLAN_INPUT_PROVENANCE.json` records these values and the hashes of the generated plan.
 
 **Generator:** `plan/generate_plan.py`. Re-running it on the same inputs gives byte-identical output. `--check` validates the inputs **and** fails if this file is stale; `--selftest` proves each check catches a deliberately broken input.
 
@@ -28,7 +28,7 @@ Aggregate input digest `33a5e27a8d5026eb4f326b9ab9b4ca507e67ae0108d9ff32a6c10da5
 ## 2. Validation of the blueprint inputs
 
 - Development Units in the DAG: 51; solid dependency edges: 92; non-blocking (dotted) edges: 2.
-- Requirements parsed: 72; open questions parsed: 18.
+- Requirements parsed: 77; open questions parsed: 19.
 - Findings: none. The DAG is acyclic; every requirement and every open question maps to a DU in the DAG; every DU has a lane; no DU depends on a later phase; every build unit has a dependency path to DU-25, DU-26 and DU-MR; no code-bearing unit runs before the F15 gate DU-31; every unit a requirement needs is built upstream of it; every code-bearing unit is downstream of the parity checker; no DAG node, requirement or open question is duplicated; the requirement IDs and text and the 78 legacy surfaces' owner actions match the owner-pinned requirement lock.
 - DUs with no requirement row (kept, flagged for the freeze list): none.
 - DU-27 is not a packet: REA research (static) done under OD-15/16/17. Its admission record is VAN-NX-026, carried by DU-01; its findings are inputs to the DU-10 and DU-29 contracts.
@@ -115,13 +115,13 @@ These are the only inputs not read from the blueprint.
 | PKT-011 | DU-14a | Multi-source feeds + health | P2 | M1 | News | PKT-004 | VAN-NX-013, VAN-NX-038 | OQ-06, OQ-11 / — |
 | PKT-012 | DU-29a | Funding ledger + flow-adjusted risk | P2 | M1 | Trading | PKT-009 | VAN-NX-051, VAN-NX-059 | OQ-16 / — |
 | PKT-013 | DU-14b | Story analysis + headline episodes + history profiles | P2 | M1 | News | PKT-011 | VAN-NX-013, VAN-NX-037 | — / — |
-| PKT-014 | DU-28 | Manual trading backend | P2 | M1 | Trading | PKT-004, PKT-012 | VAN-NX-027 | OQ-02, OQ-07 / OQ-01, OQ-03 |
+| PKT-014 | DU-28 | Manual trading backend | P2 | M1 | Trading | PKT-004, PKT-012 | VAN-NX-027, VAN-NX-073, VAN-NX-077 | OQ-02, OQ-07 / OQ-01, OQ-03, OQ-21 |
 | PKT-015 | DU-14c | Decision paths D1-D7, shadow then live | P2 | M1 | News | PKT-013 | VAN-NX-032 | OQ-09 / OQ-08 |
 | PKT-016 | DU-05 | Orb semantics and rendering | P2 | M1 | Orb/Floating | PKT-008 | VAN-NX-004 | — / — |
 | PKT-017 | DU-07 | Floating VAN remodel | P2 | M1 | Orb/Floating | PKT-008 | VAN-NX-006 | — / — |
 | PKT-018 | DU-12a | Shared market projection | P2 | M1 | Trading | PKT-008 | VAN-NX-040 | — / — |
 | PKT-019 | DU-28b | Adds, Hand to VAN, take back | P2 | M1 | Trading | PKT-014 | VAN-NX-031 | — / — |
-| PKT-020 | DU-28e | Order vocabulary + venue capabilities | P2 | M1 | Trading | PKT-014 | VAN-NX-045 | — / — |
+| PKT-020 | DU-28e | Order vocabulary + venue capabilities | P2 | M1 | Trading | PKT-014 | VAN-NX-045, VAN-NX-074, VAN-NX-075, VAN-NX-076 | — / — |
 | PKT-021 | DU-15 | Project data adapter | P2 | M1 | Work Graph | PKT-008 | VAN-NX-014 | — / — |
 | PKT-022 | DU-08 | Attention/Approvals | P2 | M1 | Continuity | PKT-008 | VAN-NX-007 | — / — |
 | PKT-023 | DU-21 | Browser/Voice/ARTEMIS | P2 | M1 | Continuity | PKT-008 | VAN-NX-020, VAN-NX-069 | — / — |
@@ -137,7 +137,7 @@ These are the only inputs not read from the blueprint.
 | PKT-033 | DU-14a | Multi-source feeds + health | P3 | M2 | News | PKT-004, PKT-011 | VAN-NX-013, VAN-NX-038 | OQ-06, OQ-11 / — |
 | PKT-034 | DU-29a | Funding ledger + flow-adjusted risk | P3 | M2 | Trading | PKT-012, PKT-031 | VAN-NX-051, VAN-NX-059 | OQ-16 / — |
 | PKT-035 | DU-14b | Story analysis + headline episodes + history profiles | P3 | M2 | News | PKT-013, PKT-033 | VAN-NX-013, VAN-NX-037 | — / — |
-| PKT-036 | DU-28 | Manual trading backend | P3 | M2 | Trading | PKT-004, PKT-014, PKT-034 | VAN-NX-027 | OQ-02, OQ-07 / OQ-01, OQ-03 |
+| PKT-036 | DU-28 | Manual trading backend | P3 | M2 | Trading | PKT-004, PKT-014, PKT-034 | VAN-NX-027, VAN-NX-073, VAN-NX-077 | OQ-02, OQ-07 / OQ-01, OQ-03, OQ-21 |
 | PKT-037 | DU-29c | Funds orchestration | P3 | FULL | Trading | PKT-031, PKT-034 | VAN-NX-055 | OQ-19 / — |
 | PKT-038 | DU-14c | Decision paths D1-D7, shadow then live | P3 | M2 | News | PKT-015, PKT-035 | VAN-NX-032 | OQ-09 / OQ-08 |
 | PKT-039 | DU-14f | Prediction-market expectations | P3 | FULL | News | PKT-035 | VAN-NX-036 | — / — |
@@ -146,7 +146,7 @@ These are the only inputs not read from the blueprint.
 | PKT-042 | DU-12a | Shared market projection | P3 | M2 | Trading | PKT-008, PKT-018 | VAN-NX-040 | — / — |
 | PKT-043 | DU-28b | Adds, Hand to VAN, take back | P3 | M2 | Trading | PKT-019, PKT-036 | VAN-NX-031 | — / — |
 | PKT-044 | DU-28c | Behaviour diagnostics | P3 | FULL | Trading | PKT-036 | VAN-NX-034 | OQ-13 / — |
-| PKT-045 | DU-28e | Order vocabulary + venue capabilities | P3 | M2 | Trading | PKT-020, PKT-036 | VAN-NX-045 | — / — |
+| PKT-045 | DU-28e | Order vocabulary + venue capabilities | P3 | M2 | Trading | PKT-020, PKT-036 | VAN-NX-045, VAN-NX-074, VAN-NX-075, VAN-NX-076 | — / — |
 | PKT-046 | DU-14e | Live news trading bundle | P3 | FULL | News | PKT-036, PKT-038, PKT-039 | VAN-NX-033 | OQ-11, OQ-12 / — |
 | PKT-047 | DU-15 | Project data adapter | P3 | M2 | Work Graph | PKT-008, PKT-021 | VAN-NX-014 | — / — |
 | PKT-048 | DU-08 | Attention/Approvals | P3 | M2 | Continuity | PKT-008, PKT-022 | VAN-NX-007 | — / — |
@@ -244,6 +244,7 @@ Generated from the decision record, so packet numbers here are always current. F
 | OQ-18 | start | PKT-009 (DU-29 M1), PKT-031 (DU-29 M2) |
 | OQ-19 | start | PKT-037 (DU-29c FULL) |
 | OQ-20 | live | PKT-010 (DU-30 M1), PKT-032 (DU-30 M2) |
+| OQ-21 | live | PKT-014 (DU-28 M1), PKT-036 (DU-28 M2) |
 
 ## 8. Exit evidence by requirement
 
@@ -323,4 +324,9 @@ A DU's last packet exits only with every listed requirement's key acceptance (bl
 | VAN-NX-070 | DU-31 | Certificate by an independent verifier; a code-bearing packet whose unit does not depend on DU-31 fails generation (induced) |
 | VAN-NX-071 | DU-00a | No source change; every ledger row classified with provenance |
 | VAN-NX-072 | DU-28d | §7.4.14; induced: a failing candidate never reaches the owner; a passing candidate cannot change live trading without a signed promotion; a protected-path candidate is held; the weekly run is scheduled and replays identically from the ledger |
+| VAN-NX-073 | DU-28 | §7.4.15 #1; induced: a tampered new row, a re-chained old row and a deleted row are caught at once; an in-place old-row edit is caught by the next full verification |
+| VAN-NX-074 | DU-28e | §7.4.15 #2; JPY and metals orders fill under normal slippage; slippage beyond the bound is still refused |
+| VAN-NX-075 | DU-28e | §7.4.15 #3; randomised both-direction test; induced widening fails |
+| VAN-NX-076 | DU-28e | §7.4.15 #4; induced: STOP→LIMIT refused, unsupported type refused, paper limit not filled away from the market; live STOP only after per-venue demo qualification |
+| VAN-NX-077 | DU-28 | §7.4.15 lockout design; induced: no expiry, legacy top floor, no rebuild, manual counted in the account scope, no probation and unconditional baseline restore each fail a test |
 
