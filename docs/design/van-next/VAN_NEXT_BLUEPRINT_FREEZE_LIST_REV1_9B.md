@@ -18,7 +18,7 @@ Rev 1.9b applies the forensic evidence audit NXA-01…NXA-07 and the owner's ans
 | A4 | The plan checks are known to work | PREPARATION_VERIFIED | `--selftest` → 23 of 23 broken inputs caught, including deleting the money requirement VAN-NX-055 and the visual requirement VAN-NX-004, a duplicated requirement, an edited lock, a dropped legacy owner action and a code unit outside the parity checker's reach |
 | A5 | State machines closed **and equal to the owner-pinned approved transition list** | PREPARATION_VERIFIED | `python3 contracts/check_state_machines.py` → 0 findings (230 on the pack's original, which has no approved list); `--selftest` 24 of 24, including the auditor's four shortcuts (deposit, withdrawal, order, news) with real proof labels, the same shortcuts with the approved list edited, and duplicate machines, states and transitions |
 | A6 | Rev 2 product truths and features mapped | PREPARATION_VERIFIED | `crosswalk/`: 18 of 18 and 93 of 93; the 171/115 mapping is PKT-002 (DU-01) and is required for F15 |
-| A7 | The plan is reproducible | PREPARATION_VERIFIED | Byte-identical on rerun; plan MD5 `53cd7991…` |
+| A7 | The plan is reproducible | PREPARATION_VERIFIED | Byte-identical on rerun; plan MD5 `1382609b…` |
 | A8 | Trading modes evidenced | PREPARATION_VERIFIED | PR #92 `923ecf9`: 177 versus 155 passed; the AGGRESSIVE no-evidence gate was broken deliberately and the expected test failed |
 | A9 | Evidence pack | PREPARATION_VERIFIED | `evidence/EVIDENCE_MANIFEST.json` records the source commit, the SHA-256 of every input and receipt, and what is deliberately absent |
 

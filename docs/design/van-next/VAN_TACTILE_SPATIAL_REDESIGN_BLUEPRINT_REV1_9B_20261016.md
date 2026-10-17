@@ -3,7 +3,7 @@
 **Document ID:** `VAN-TSE-FR-REV1.9B-20261016`  
 **Revision:** 1.9b — **freeze candidate** (supersedes Rev 1.9a; Rev 1.0 is kept beside it for lineage, Rev 1.1–1.9a are in git history). Development follows `plan/VAN_NEXT_DEVELOPMENT_PLAN_REV1.md`, derived from this document; freeze criteria in `VAN_NEXT_BLUEPRINT_FREEZE_LIST_REV1_9B.md`; evidence in `evidence/`  
 **Date:** 15 October 2026 (Africa/Harare)  
-**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-38), which captures the two locked dark/light references and the 15 October review decisions  
+**Owner instruction:** Recorded in `VAN_NEXT_OWNER_DECISIONS_REV1.md` (OD-00…OD-39), which captures the two locked dark/light references and the 15 October review decisions  
 **Repository:** [`Vanguduza/Van`](https://github.com/Vanguduza/Van)  
 **Audit baseline A:** merged `main` SHA `8eb1889822fc8a83f219977c15340172e16acd91`  
 **Audit baseline B:** unmerged, draft owner-core [PR #93](https://github.com/Vanguduza/Van/pull/93) SHA `dfc1557ab99ad8d41cf84714e1bb671e89b045e6`  
@@ -788,7 +788,7 @@ The backtest research of 17 October 2026 (`research/strategy_backtest_20261017/`
 **Still to qualify (not done by this change):**
 - **Live STOP entries.** MT5 bridge and cTrader declare MARKET, LIMIT and PASSIVE_LIMIT. The MT5 pull adapter declares MARKET only, because its EA sends every order at market. So a STOP strategy is refused on live venues until each adapter places broker stop orders and is qualified on a demo account (§7.8.6, DU-28e).
 - **Live resting orders.** On live venues, the lifecycle of a resting order (working, fill, expiry, cancel race) is the `PLACED` state work in §7.8.6.
-- **Signature defaults.** The cooldown length, probation multiplier and weekly limit are code defaults. They become signed mandate fields with the next mandate version (OQ-21).
+- **Lockout values (OD-39).** The owner accepted the defaults: cooldown 24 h, probation 0.5×, suspension after more than 2 cooldowns in 7 days, for each strategy, the account and `owner.manual`. They are written into the next signed mandate version; until then they are the code defaults, pinned by a test.
 
 ### 7.5 Positions and order history
 

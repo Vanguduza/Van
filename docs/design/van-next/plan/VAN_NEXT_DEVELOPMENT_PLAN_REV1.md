@@ -5,13 +5,13 @@
 
 | Input | SHA-256 (full file bytes) |
 |---|---|
-| `docs/design/van-next/VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9B_20261016.md` | `709c68492bd4e939fff1ffd8deec843bbd605d79bf54d584c62e768a20dfdc9d` |
-| `docs/design/van-next/VAN_NEXT_OWNER_DECISIONS_REV1.md` | `488806b5639e5d5b806149ddd849bcf48cf14fcd1128580aea904478ab2ff74d` |
+| `docs/design/van-next/VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9B_20261016.md` | `855e2aca3ab6ffdc965c823c147ef7d3143453c7f49708404f052aee7348f7fc` |
+| `docs/design/van-next/VAN_NEXT_OWNER_DECISIONS_REV1.md` | `696cecf07d871f23a15809e2e4c3af9411461064c2da2d5254905846e69c3aad` |
 | `docs/design/van-next/plan/generate_plan.py` | `62794a01eb7d3a9a02808ee262f1c6a616924bfb787b2f2ee29730f8392b2d2f` |
 | `docs/design/van-next/plan/REQUIREMENT_LOCK_REV1_9B.json` | `9b3954fd896f68467abe91571332f0fa2f4596da8be7c8528fbe4bcdd4809c49` |
 | `docs/design/van-next/VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.json` | `34b97daaf8d92951833bc0270998e9ae5159fdeffa078844a8d2d4241cf52d1d` |
 
-Aggregate input digest `fb9eb48dcf299194455143d4381a7a7d5884803beed45cd0f21c7b3ad9a3fb42` = SHA-256 of the blueprint bytes, one newline byte, then the decision-record, generator, requirement-lock and surface-matrix bytes. `PLAN_INPUT_PROVENANCE.json` records these values and the hashes of the generated plan.
+Aggregate input digest `9993481530b45579ff5a3718c0a9571c2e0d24141ffb210184193703133aae3e` = SHA-256 of the blueprint bytes, one newline byte, then the decision-record, generator, requirement-lock and surface-matrix bytes. `PLAN_INPUT_PROVENANCE.json` records these values and the hashes of the generated plan.
 
 **Generator:** `plan/generate_plan.py`. Re-running it on the same inputs gives byte-identical output. `--check` validates the inputs **and** fails if this file is stale; `--selftest` proves each check catches a deliberately broken input.
 
@@ -28,7 +28,7 @@ Aggregate input digest `fb9eb48dcf299194455143d4381a7a7d5884803beed45cd0f21c7b3a
 ## 2. Validation of the blueprint inputs
 
 - Development Units in the DAG: 51; solid dependency edges: 92; non-blocking (dotted) edges: 2.
-- Requirements parsed: 77; open questions parsed: 19.
+- Requirements parsed: 77; open questions parsed: 18.
 - Findings: none. The DAG is acyclic; every requirement and every open question maps to a DU in the DAG; every DU has a lane; no DU depends on a later phase; every build unit has a dependency path to DU-25, DU-26 and DU-MR; no code-bearing unit runs before the F15 gate DU-31; every unit a requirement needs is built upstream of it; every code-bearing unit is downstream of the parity checker; no DAG node, requirement or open question is duplicated; the requirement IDs and text and the 78 legacy surfaces' owner actions match the owner-pinned requirement lock.
 - DUs with no requirement row (kept, flagged for the freeze list): none.
 - DU-27 is not a packet: REA research (static) done under OD-15/16/17. Its admission record is VAN-NX-026, carried by DU-01; its findings are inputs to the DU-10 and DU-29 contracts.
@@ -115,7 +115,7 @@ These are the only inputs not read from the blueprint.
 | PKT-011 | DU-14a | Multi-source feeds + health | P2 | M1 | News | PKT-004 | VAN-NX-013, VAN-NX-038 | OQ-06, OQ-11 / — |
 | PKT-012 | DU-29a | Funding ledger + flow-adjusted risk | P2 | M1 | Trading | PKT-009 | VAN-NX-051, VAN-NX-059 | OQ-16 / — |
 | PKT-013 | DU-14b | Story analysis + headline episodes + history profiles | P2 | M1 | News | PKT-011 | VAN-NX-013, VAN-NX-037 | — / — |
-| PKT-014 | DU-28 | Manual trading backend | P2 | M1 | Trading | PKT-004, PKT-012 | VAN-NX-027, VAN-NX-073, VAN-NX-077 | OQ-02, OQ-07 / OQ-01, OQ-03, OQ-21 |
+| PKT-014 | DU-28 | Manual trading backend | P2 | M1 | Trading | PKT-004, PKT-012 | VAN-NX-027, VAN-NX-073, VAN-NX-077 | OQ-02, OQ-07 / OQ-01, OQ-03 |
 | PKT-015 | DU-14c | Decision paths D1-D7, shadow then live | P2 | M1 | News | PKT-013 | VAN-NX-032 | OQ-09 / OQ-08 |
 | PKT-016 | DU-05 | Orb semantics and rendering | P2 | M1 | Orb/Floating | PKT-008 | VAN-NX-004 | — / — |
 | PKT-017 | DU-07 | Floating VAN remodel | P2 | M1 | Orb/Floating | PKT-008 | VAN-NX-006 | — / — |
@@ -137,7 +137,7 @@ These are the only inputs not read from the blueprint.
 | PKT-033 | DU-14a | Multi-source feeds + health | P3 | M2 | News | PKT-004, PKT-011 | VAN-NX-013, VAN-NX-038 | OQ-06, OQ-11 / — |
 | PKT-034 | DU-29a | Funding ledger + flow-adjusted risk | P3 | M2 | Trading | PKT-012, PKT-031 | VAN-NX-051, VAN-NX-059 | OQ-16 / — |
 | PKT-035 | DU-14b | Story analysis + headline episodes + history profiles | P3 | M2 | News | PKT-013, PKT-033 | VAN-NX-013, VAN-NX-037 | — / — |
-| PKT-036 | DU-28 | Manual trading backend | P3 | M2 | Trading | PKT-004, PKT-014, PKT-034 | VAN-NX-027, VAN-NX-073, VAN-NX-077 | OQ-02, OQ-07 / OQ-01, OQ-03, OQ-21 |
+| PKT-036 | DU-28 | Manual trading backend | P3 | M2 | Trading | PKT-004, PKT-014, PKT-034 | VAN-NX-027, VAN-NX-073, VAN-NX-077 | OQ-02, OQ-07 / OQ-01, OQ-03 |
 | PKT-037 | DU-29c | Funds orchestration | P3 | FULL | Trading | PKT-031, PKT-034 | VAN-NX-055 | OQ-19 / — |
 | PKT-038 | DU-14c | Decision paths D1-D7, shadow then live | P3 | M2 | News | PKT-015, PKT-035 | VAN-NX-032 | OQ-09 / OQ-08 |
 | PKT-039 | DU-14f | Prediction-market expectations | P3 | FULL | News | PKT-035 | VAN-NX-036 | — / — |
@@ -244,7 +244,6 @@ Generated from the decision record, so packet numbers here are always current. F
 | OQ-18 | start | PKT-009 (DU-29 M1), PKT-031 (DU-29 M2) |
 | OQ-19 | start | PKT-037 (DU-29c FULL) |
 | OQ-20 | live | PKT-010 (DU-30 M1), PKT-032 (DU-30 M2) |
-| OQ-21 | live | PKT-014 (DU-28 M1), PKT-036 (DU-28 M2) |
 
 ## 8. Exit evidence by requirement
 

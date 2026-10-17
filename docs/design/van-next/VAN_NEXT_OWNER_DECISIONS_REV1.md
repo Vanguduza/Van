@@ -3,7 +3,7 @@
 **Record ID:** `VAN-NEXT-OD-REV1-20261015`
 **Status:** `RECORDED_FROM_OWNER_CHAT / AWAITING_OWNER_SIGNATURE`
 **Recorded:** 15 October 2026, from the owner's instructions in a Claude Code session reviewing `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_20261015.md`.
-**Applies to:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9B_20261016.md` and its companion matrix. OD-07…OD-31 were added on 15 October 2026 after the owner reviewed Rev 1.1; OD-32…OD-36 on 16 October 2026; OD-37 and OD-38 on 17 October 2026.
+**Applies to:** `VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9B_20261016.md` and its companion matrix. OD-07…OD-31 were added on 15 October 2026 after the owner reviewed Rev 1.1; OD-32…OD-36 on 16 October 2026; OD-37…OD-39 on 17 October 2026.
 
 Under the VAN Project Truth Protocol an owner-signed, device-authenticated instruction outranks this record. These decisions bind development packets once the owner signs this record (blueprint §2.1, §17 F0). Until then they are the owner's stated intent, and no trading mandate, live permission or production change follows from them.
 
@@ -48,6 +48,7 @@ Under the VAN Project Truth Protocol an owner-signed, device-authenticated instr
 | OD-36 | G5: "yes" — the post-pack lines become a numbered addendum with its own fingerprint, and the evidence pack is rebuilt as Rev 1.9b. | Rev 1.9b W5 (NXA-06) |
 | OD-37 | 17 Oct: "Yes add it" — VAN keeps developing strategies through a scheduled offline loop (weekly review, candidates, automatic backtest and validation); only passing candidates reach the owner; live changes only by owner-signed promotion. | §7.4.14, VAN-NX-072 |
 | OD-38 | 17 Oct: "Fix defects 1 to 4 and add them to the blueprint and fix 5 according to the best solution that suits autonomous trading and optional manual trading" — the five trading-path defects found by the backtest research are fixed in VATI and become blueprint rules; lockouts recover by cooldown and probation, escalate to an owner-signed reset, use a relative drawdown top tier, survive restarts, and keep manual trades in their own scope. | §7.4.15, VAN-NX-073…077 |
+| OD-39 | 17 Oct: "Accept the OQ-21 defaults" — lockout values: cooldown 24 h, probation size 0.5×, suspension after more than 2 cooldowns in 7 days; the same for each strategy, the account and `owner.manual`. They enter the next signed mandate version; until then the code defaults are these values. | §7.4.15, OQ-21 closed |
 
 ## Locked contracts
 
@@ -78,6 +79,5 @@ Each file below changes only with the owner's approval of its new SHA-256 here. 
 | OQ-18 | D6: quarantine `feature/rea-trading-accounts-tactile-20261015` (`3b2c9e04`) alongside the chart spike, reviewed only when the account packet opens? (Unanswered.) | DU-29 |
 | OQ-19 | Which provider is the first admitted funds rail (e.g. Deriv with `payment` scope), in sandbox or demo first | DU-29c |
 | OQ-20 | Owner signature of the trading-mode percentages and the AGGRESSIVE evidence thresholds before any live use | DU-30 live use |
-| OQ-21 | Lockout values to sign into the next mandate version: cooldown length (default 24 h), probation size (default 0.5×) and cooldowns per week before suspension (default 2), per strategy, for the account and for `owner.manual` (§7.4.15) | DU-28 live use |
 | OQ-17 | Whether chart replay may offer simulated practice trades (TradingView has this; VAN's engine currently refuses drafts in replay). Simulated only, never an order. | DU-10c |
 | OQ-09 | Whether news may ever *directly* increase risk (recommended: no; news creates trades only through validated event strategies, D7) | DU-14c |

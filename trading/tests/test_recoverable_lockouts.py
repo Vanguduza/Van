@@ -214,3 +214,9 @@ def test_a_loss_streak_suspension_reset_needs_the_owner_s_signature(eurusd):
                               authority=owner.verifier, now_ms=NOW_MS)
     cyc.reset_loss_streak("FX-TREND-PULLBACK-01", owner_signature_ref=owner.token(act="loss-streak-reset", subject="fx_primary:FX-TREND-PULLBACK-01"),
                           authority=owner.verifier, now_ms=NOW_MS)
+
+
+def test_the_defaults_are_the_owner_accepted_values():
+    """OD-39: the owner accepted these values; changing one is a new owner decision."""
+    p = LockoutPolicy(max_consecutive_losses=4)
+    assert (p.cooldown_ms, p.probation_risk_multiplier, p.max_cooldowns_per_week) == (24 * HOUR_MS, D("0.5"), 2)
