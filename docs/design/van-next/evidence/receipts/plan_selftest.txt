@@ -13,7 +13,7 @@ caught: money requirement deleted (VAN-NX-055) → ['REQ_REMOVED: VAN-NX-055 is 
 caught: visual requirement deleted (VAN-NX-004) → ['REQ_REMOVED: VAN-NX-004 is locked but missing from §16.1']
 caught: requirement text changed → ['REQ_CHANGED: VAN-NX-055 text differs from the locked row']
 caught: requirement added without locking → ['REQ_NOT_LOCKED: VAN-NX-099 is not in the requirement lock']
-caught: lock edited without re-approval → ['LOCK_CHANGED_WITHOUT_APPROVAL: pinned 7e102f249c89, actual 916274ae16f0']
+caught: lock edited without re-approval → ['LOCK_CHANGED_WITHOUT_APPROVAL: pinned 0171397fd1e7, actual d449986194fc']
 caught: lock not pinned → ['LOCK_NOT_PINNED: no REQUIREMENT_LOCK hash in the owner decision record']
 caught: legacy surface removed → ['SURFACE_REMOVED: van.home']
 caught: legacy owner action dropped → ['SURFACE_OBLIGATIONS_CHANGED: van.home']
