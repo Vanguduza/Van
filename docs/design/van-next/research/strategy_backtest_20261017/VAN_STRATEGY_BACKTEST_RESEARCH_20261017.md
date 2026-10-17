@@ -1,0 +1,130 @@
+# VAN strategy backtest research — 17 October 2026
+
+**Question (owner):** how strong is VAN's trading system: its forecasting, predictions and strategies?
+**Status:** research only. Paper simulation. No broker, account, order or production change. Not a promotion record.
+
+## Answer
+
+The one strategy that could be tested faithfully, **FX-TREND-PULLBACK-01, has no edge after costs**. On EURUSD and GBPUSD it is break-even to slightly negative over 6¾ years. On USDJPY it is slightly positive, but it fails VAN's own validation gate. No strategy is ready to promote.
+
+The research also found **four defects on the live trading path** and **two permanent lockouts**. All of them were reproduced, and they matter more than the strategy result.
+
+## Method
+
+- **Code:** VAN's own trading engine from `main` at `8eb1889822fc8a83f219977c15340172e16acd91` (`trading/`), run unchanged through its `DecisionCycle`, `RiskAuthority`, execution router and `PaperAdapter`. `harness.py` is the same loop as `vati.backtest.BacktestEngine.run`.
+- **Data:** HistData.com 1-minute bid OHLC, via the Hugging Face export `vessel888/histdata_fx_1m`. Licence: "unknown". It was used as a research input only and is not stored in the repository.
+
+  | File | SHA-256 |
+  |---|---|
+  | `eurusd.parquet` | `3a40d3b1…be4d5` |
+  | `gbpusd.parquet` | `badf9117…808b` |
+  | `usdjpy.parquet` | `fceedb6f…e8` |
+
+  The data runs from 2000 to 21 March 2025. Dukascopy, the repository's own downloader, refused this environment (connection reset, then HTTP 429).
+- **Bars:** H1, 1 July 2018 to 21 March 2025 (about 41,000 bars per pair). The first months are warm-up and also count as trades.
+- **Costs:**
+
+  | Pair | Spread | Slippage per side | Round-trip cost passed to the risk check |
+  |---|---|---|---|
+  | EURUSD | 0.8 pip | 0.2 pip | 1.0 pip |
+  | GBPUSD | 1.2 pip | 0.2 pip | 1.2 pip |
+  | USDJPY | 1.2 pip, slippage folded in | 0 | 0.8 bp |
+
+- **Scoring:** VAN's own functions in `vati.backtest.metrics` and `vati.validation.policy` (`validation-policy/1.0.0`). The gate requires:
+  - DSR probability ≥ 0.95;
+  - PBO ≤ 0.10;
+  - at least 30 trades;
+  - at least 3 walk-forward windows.
+
+  Each calendar year is one window. The strategy has fixed parameters, so nothing was fitted. Trials = 3 (one per pair).
+
+### Deviations from the stock engine
+
+Each deviation was measured before it was used.
+
+| Deviation | Why | Proof that it does not change results |
+|---|---|---|
+| The cycle sees a trailing 400-bar window, not the full history | `compute_features` recomputes the EMAs over the whole list on every bar (quadratic) | 2,500 EURUSD bars: 80 trades and identical R multiples with the full history and with the 400-bar window (`runs/eq_full.json`, `runs/eq_w400.json`) |
+| The per-decision `verify_chain()` is replaced by one full verification at the end (`BT_FAST_CHAIN`) | Finding 1 (below). A 3,000-bar run took 220 s against 27 s for 1,000 bars | 1,500 bars: 48 trades, P&L −186.64, identical decisions both ways (`runs/eq_slow.json`, `runs/eq_fast.json`). The chain verifies `true` at the end of every run |
+| `--raw`: consecutive-loss and drawdown-tier lockouts disabled | Finding 5 (below). With them on, every run stopped trading for good (in 2018 or 2021) | Not equivalent by design. This measures the strategy, not the account rules |
+| Signal prices aligned to the tick, stop rounded toward entry (`BT_TICK_ALIGN`) | Finding 3 (below) | Removes only the `STOP_WIDER_THAN_APPROVED` refusals |
+| USDJPY slippage folded into the spread | Finding 2 (below) | Same cost per side; lets the orders fill |
+
+**Leakage check.** The engine's `peek` mode feeds the next bar in, so the result should change. It does (4,000 EURUSD bars): net −46.2 without peek against −51.4 with peek, 122 trades each. The engine is sensitive to lookahead, and peeking did not improve this strategy.
+
+## Results: FX-TREND-PULLBACK-01 (H1, 2018-07 to 2025-03)
+
+| Pair | Trades | Win rate | Expectancy | Total R | Profit factor | Max drawdown | Net on $10k | Years positive | DSR probability | PBO | Gate |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| EURUSD | 1,129 | 49.5% | −0.008 R | −8.9 | 0.99 | 8.4% | −$85 | 4/8 | 0.15 | 0.29 | **FAIL** |
+| GBPUSD | 1,126 | 48.8% | −0.007 R | −8.4 | 0.97 | 7.2% | −$289 | 3/8 | 0.16 | 0.29 | **FAIL** |
+| USDJPY | 975 | 50.8% | +0.021 R | +20.8 | 1.09 | 2.7% | +$856\* | 5/8 | 0.68 | 0.29 | **FAIL** |
+
+\* The USDJPY dollar P&L uses a fixed conversion of 667 USD per yen unit per lot. The R figures are unaffected.
+
+Expectancy by year, in R:
+
+| Year | EURUSD | GBPUSD | USDJPY |
+|---|---|---|---|
+| 2018 | −0.047 | +0.064 | −0.003 |
+| 2019 | +0.035 | −0.015 | +0.053 |
+| 2020 | +0.063 | +0.043 | +0.021 |
+| 2021 | −0.072 | −0.106 | +0.064 |
+| 2022 | +0.088 | +0.068 | +0.012 |
+| 2023 | −0.076 | −0.020 | +0.007 |
+| 2024 | −0.067 | −0.048 | −0.008 |
+| 2025 Q1 | +0.008 | −0.022 | −0.016 |
+
+**What this means:**
+- The rule wins about half the time with a 3-ATR target against a stop of up to 2 ATR. Spread and slippage take the edge to roughly zero.
+- No year is consistently positive.
+- USDJPY is the best case, but a DSR probability of 0.68 means it is not distinguishable from luck at the policy's 0.95 bar.
+- **Not tested:**
+  - **FX-LONDON-BREAKOUT-01:** cannot be simulated faithfully (finding 4).
+  - **FX-EVENT-DRIFT-01:** there is no historical NFP/CPI/FOMC release calendar in the repository.
+  - **GOLD and the ZSE strategies:** remain in `RESEARCH` without data here.
+
+## Findings on the trading system
+
+Each was reproduced in this run. Paths refer to `trading/` on `main`.
+
+1. **Decisions get slower the longer VAN runs.**
+   - `DecisionCycle._risk_store_ok` (`vati/app/cycle.py:183-193`) calls `ledger.verify_chain()` on every risk snapshot. That re-hashes the whole ledger from genesis.
+   - The live service builds the same cycle (`vati/app/service.py:204`), and `vati/app/account_service.py:598` does the same.
+   - Profile of a 2,000-bar run: 149 of 164 s were spent in `verify_chain`. Run time grew 8× for 3× the bars.
+   - **Fix:** verify incrementally from the last verified head.
+2. **Slippage caps are absolute price units, so JPY (and likely gold) orders cannot fill.**
+   - `LIMIT_AT_TOUCH` caps slippage at `0.0001` (`vati/execution/policy_templates.py:76`; the others are 0.0002 and 0.0005).
+   - That is 1 pip on EURUSD but 0.01 pip on USDJPY. With 0.2 pip of slippage, every USDJPY order was refused (`reject_reason="max_slippage"`). The first run had 11,379 approvals and 0 trades.
+   - **Fix:** express the caps in pips or ticks per instrument.
+3. **Tick rounding can widen an approved stop.** After approval the stop is quantised away from the entry. The pre-trade check then refuses with `STOP_WIDER_THAN_APPROVED` (`vati/execution/pretrade.py:255-260`), for example 0.00526 against an approved 0.005256. That hit 72 London-breakout orders in 3,000 bars. **Fix:** round stops toward the entry, or approve on the quantised prices.
+4. **The order type is hard-coded to LIMIT, and the paper simulator fills limits at the requested price.**
+   - `DecisionCycle.step` sends `entry_type="LIMIT"` whatever the signal asks for.
+   - The London breakout asks for a STOP entry above the range. As a LIMIT it is either refused (`PRICE_OFF_MARKET`, 87 in 3,000 bars) or would buy before the breakout.
+   - `PaperAdapter` fills a LIMIT at the requested price whether or not the market traded there (`vati/execution/paper.py:57`). Breakout and passive-limit strategies (ZSE liquidity provision) therefore cannot be backtested faithfully.
+   - **Fix:** honour `Signal.entry_type`, and make the paper adapter fill only when the bar's range reaches the price.
+5. **Two lockouts are permanent once triggered.**
+   - `consecutive_losses` resets only on a win (`vati/app/cycle.py:567`). Once it reaches `max_consecutive_losses` (4), no trade can win, so the strategy never trades again, until a process restart silently resets the in-memory counter to 0.
+   - The default drawdown tier at 4% allows only `CERTIFIED_LIVE` strategies (`vati/risk/mandate.py:90-93`). Peak equity is never regained without trades, so a DEMO strategy is blocked indefinitely.
+   - In this study, the first stopped trading after 13 trades in 2018, and the second stopped the EURUSD and GBPUSD pullback runs in 2021.
+   - These may be intended as circuit breakers that need the owner. If so, the reset path should be an explicit owner action, not a restart.
+
+## Recommendations
+
+1. Fix findings 1–4 on the live path before any strategy is promoted. Each fix needs a negative test (break it on purpose and watch it fail).
+2. Decide (owner) whether the lockouts in finding 5 are intended, and give them an explicit, owner-signed reset.
+3. Keep FX-TREND-PULLBACK-01 in DEMO. It does not pass VAN's own validation gate. This is the kind of result the continuous development loop (blueprint §7.4.14, OD-37) should produce automatically, and it should send nothing to the owner until a candidate passes.
+4. Before judging the London breakout or event drift, fix finding 4 and add a historical release calendar.
+
+## Reproduce
+
+1. Unpack `trading/` from `main` at `8eb1889` into `van/trading` next to `harness.py`.
+2. Put the three parquet files in `data/`.
+3. Install `pandas`, `pyarrow` and `pytest`. The harness imports the test owner key from `trading/tests` to sign a paper mandate.
+4. Run:
+   ```
+   BT_FAST_CHAIN=1 BT_TICK_ALIGN=1 python3 -I harness.py --symbol EURUSD --strategy FX-TREND-PULLBACK-01 --raw --out runs/EURUSD_pullback.json
+   python3 -I analyze.py runs/*_pullback.json
+   ```
+
+Each full run takes about 4–5 minutes. Per-trade outputs are in `runs/` and the scored results are in `RESULTS_TREND_PULLBACK.json`.
