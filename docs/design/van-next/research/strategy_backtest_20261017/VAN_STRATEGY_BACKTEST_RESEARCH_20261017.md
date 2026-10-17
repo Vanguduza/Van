@@ -9,6 +9,8 @@ The one strategy that could be tested faithfully, **FX-TREND-PULLBACK-01, has no
 
 The research also found **four defects on the live trading path** and **two permanent lockouts**. All of them were reproduced, and they matter more than the strategy result.
 
+**Update, same day (OD-38).** The owner ordered all five fixed. They are fixed in `trading/` on branch `ccr-8f1201e9-w1xm0r` (blueprint §7.4.15), and the study was rerun on the fixed engine with every workaround removed (see [After the fixes](#after-the-fixes-od-38)). The strategy conclusion stands: the trend pullback still has no edge. The London breakout can now be tested, and it loses clearly (−0.26 R and −0.23 R per trade). The governed accounts no longer stop trading for good.
+
 ## Method
 
 - **Code:** VAN's own trading engine from `main` at `8eb1889822fc8a83f219977c15340172e16acd91` (`trading/`), run unchanged through its `DecisionCycle`, `RiskAuthority`, execution router and `PaperAdapter`. `harness.py` is the same loop as `vati.backtest.BacktestEngine.run`.
@@ -86,7 +88,7 @@ Expectancy by year, in R:
 
 ## Findings on the trading system
 
-Each was reproduced in this run. Paths refer to `trading/` on `main`.
+Each was reproduced in this run. Paths refer to `trading/` on `main`. All five are now fixed (OD-38); see [After the fixes](#after-the-fixes-od-38).
 
 1. **Decisions get slower the longer VAN runs.**
    - `DecisionCycle._risk_store_ok` (`vati/app/cycle.py:183-193`) calls `ledger.verify_chain()` on every risk snapshot. That re-hashes the whole ledger from genesis.
@@ -116,15 +118,82 @@ Each was reproduced in this run. Paths refer to `trading/` on `main`.
 3. Keep FX-TREND-PULLBACK-01 in DEMO. It does not pass VAN's own validation gate. This is the kind of result the continuous development loop (blueprint §7.4.14, OD-37) should produce automatically, and it should send nothing to the owner until a candidate passes.
 4. Before judging the London breakout or event drift, fix finding 4 and add a historical release calendar.
 
+## After the fixes (OD-38)
+
+**Engine:** `trading/` at commit `d6c5681` on `ccr-8f1201e9-w1xm0r` (fixes 1–5 plus the two follow-ups: thesis and TCA on a fill from rest, entry type on the live path). Same data, bars, costs, harness loop and scoring as above.
+
+**Workarounds removed:**
+- no `BT_FAST_CHAIN`: the ledger is verified on every decision, as in production;
+- no `BT_TICK_ALIGN`;
+- USDJPY slippage is no longer folded into the spread (0.8 pip spread plus 0.2 pip slippage, the same cost per side);
+- governed runs keep every lockout on.
+
+The only deviation left is the 400-bar window (shown equivalent above).
+
+### Each fix, measured
+
+| Fix | Before (`main`) | After | Evidence |
+|---|---|---|---|
+| 1 Incremental ledger check | 1,500 bars with per-decision verification: 54.0 s (7.0 s with it switched off) | 1,500 bars with per-decision verification: 10.5 s, same 48 trades and identical R multiples. A full 41,000-bar run with verification on completes in 6–12 min (4 runs in parallel), and every chain verifies `true` | `runs/eq_slow.json`, `runs/eq_fast.json`, `runs_after_fixes/eq_fixed_1500_raw_idle.json` |
+| 2 Price-relative slippage | Every USDJPY order refused with real slippage | USDJPY fills with 0.2 pip slippage: 976 trades (975 with the old workaround) | `runs_after_fixes/USDJPY_*` |
+| 3 Stop rounding | 72 `STOP_WIDER_THAN_APPROVED` in 3,000 London-breakout bars | 0 in all ten full runs, without tick alignment | `decisions` in each run file |
+| 4 Entry type and resting orders | London breakout sent as LIMIT; 87 `PRICE_OFF_MARKET` in 3,000 bars | Sent as STOP, rests until price trades through, 0 `PRICE_OFF_MARKET`. STOP fills land a median 0.028 R beyond the trigger (p90 0.082 R; spread plus slippage), so the result is not a fill artefact | `probe_stop_fills.py` |
+| 5 Recoverable lockouts | Governed pullback runs stopped for good in 2018 or 2021 | Governed pullback runs trade every year to 2025 (1,117–1,118 trades on EURUSD/GBPUSD, 970 on USDJPY), with 136–257 entries refused during cooldowns | `runs_after_fixes/*_governed.json` |
+
+### FX-TREND-PULLBACK-01 on the fixed engine (lockouts off, 3 trials)
+
+| Pair | Trades | Win rate | Expectancy | Total R | Profit factor | Max drawdown | Net on $10k | Years positive | DSR probability | PBO | Gate |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| EURUSD | 1,129 | 49.6% | −0.008 R | −8.5 | 0.99 | 8.4% | −$78 | 4/8 | 0.17 | 0.40 | **FAIL** |
+| GBPUSD | 1,123 | 48.7% | −0.009 R | −10.4 | 0.97 | 7.7% | −$346 | 3/8 | 0.15 | 0.40 | **FAIL** |
+| USDJPY | 976 | 50.7% | +0.017 R | +16.7 | 1.08 | 3.1% | +$734 | 5/8 | 0.63 | 0.40 | **FAIL** |
+
+These are within a few hundredths of an R of the original study (−0.008, −0.007, +0.021). The workarounds did not change the conclusion. Small differences come from position sizes that now follow unaligned stop distances. PBO moved from 0.29 to 0.40 on three trials; the estimate is coarse with so few trials, and both values fail the 0.10 bar.
+
+### FX-LONDON-BREAKOUT-01, now testable (lockouts off, 2 trials)
+
+| Pair | Trades | Win rate | Expectancy | Total R | Profit factor | Max drawdown | Net on $10k | Years positive | DSR probability | Gate |
+|---|---|---|---|---|---|---|---|---|---|---|
+| EURUSD | 333 | 35.4% | −0.262 R | −87.3 | 0.15 | 30.8% | −$3,075 | 0/8 | 0.00 | **FAIL** |
+| GBPUSD | 314 | 41.1% | −0.233 R | −73.1 | 0.20 | 25.6% | −$2,551 | 0/8 | 0.00 | **FAIL** |
+
+Every year is negative on both pairs. On H1 bars, with these costs, the breakout as written loses about a quarter of its risk per trade. When all five configurations are scored as one trial set, the breakout's very negative Sharpe ratios dominate the trial variance (DSR 0.00 for every run). The two families are therefore scored separately, as in the original study.
+
+### Governed runs (every lockout on)
+
+| Run | Trades | Expectancy | Max drawdown | Traded until | Refused by lockouts |
+|---|---|---|---|---|---|
+| EURUSD pullback | 1,118 | −0.006 R | 5.8% | 2025-03 | 257 cooldown |
+| GBPUSD pullback | 1,117 | −0.003 R | 5.2% | 2025-03 | 154 cooldown |
+| USDJPY pullback | 970 | +0.007 R | 4.9% | 2025-03 | 136 cooldown |
+| EURUSD breakout | 77 | −0.339 R | 6.0% | 2020-01 | 38 cooldown, then 6,827 at the suspending drawdown tier |
+| GBPUSD breakout | 129 | −0.224 R | 6.1% | 2021-08 | 23 cooldown, then 4,682 at the suspending drawdown tier |
+
+- **The pullback runs show the fix working.** Cooldowns pause a losing streak, probation trades at half size, and trading resumes by itself. Compared with lockouts off, the drawdown is lower on EURUSD (5.8% against 8.4%) and GBPUSD (5.2% against 7.7%). On USDJPY it is higher (4.9% against 3.1%), and the run gives up part of its small gain (+0.007 R against +0.017 R): probation's half size after a streak also halves the recovery trades.
+- **The breakout runs show the hard stop working.** A strategy that keeps losing reaches the 6% suspending tier and stops. It resumes only through an owner-signed `drawdown-resume`, as §7.4.15 intends. That is the right outcome for a strategy with this result.
+
+### Conclusions after the fixes
+
+1. The trading path now does what the strategies ask: it fills JPY, keeps approved stops, sends STOP orders as STOPs, and verifies the ledger without slowing down.
+2. Neither FX strategy has an edge. Keep FX-TREND-PULLBACK-01 in DEMO. FX-LONDON-BREAKOUT-01 should not be promoted. As written it is a clear loser and is the first candidate for the continuous development loop (§7.4.14).
+3. Still untested: FX-EVENT-DRIFT-01 (no historical release calendar in the repository) and the gold and ZSE strategies (no data here).
+
 ## Reproduce
 
 1. Unpack `trading/` from `main` at `8eb1889` into `van/trading` next to `harness.py`.
 2. Put the three parquet files in `data/`.
 3. Install `pandas`, `pyarrow` and `pytest`. The harness imports the test owner key from `trading/tests` to sign a paper mandate.
-4. Run:
+4. Run the original study (engine from `main`):
    ```
-   BT_FAST_CHAIN=1 BT_TICK_ALIGN=1 python3 -I harness.py --symbol EURUSD --strategy FX-TREND-PULLBACK-01 --raw --out runs/EURUSD_pullback.json
+   BT_FAST_CHAIN=1 BT_TICK_ALIGN=1 BT_JPY_FOLD=1 python3 -I harness.py --symbol EURUSD --strategy FX-TREND-PULLBACK-01 --raw --out runs/EURUSD_pullback.json
    python3 -I analyze.py runs/*_pullback.json
    ```
+5. Run the rerun after the fixes: unpack `trading/` from `d6c5681` instead, and run with no environment flags. Use `--raw` for the strategy measurement and leave it out for the governed run:
+   ```
+   python3 -I harness.py --symbol EURUSD --strategy FX-LONDON-BREAKOUT-01 --raw --out runs_after_fixes/EURUSD_FX-LONDON-BREAKOUT-01_raw.json
+   python3 -I analyze.py runs_after_fixes/*PULLBACK-01_raw.json
+   python3 -I analyze.py runs_after_fixes/*BREAKOUT-01_raw.json
+   python3 -I probe_stop_fills.py
+   ```
 
-Each full run takes about 4–5 minutes. Per-trade outputs are in `runs/` and the scored results are in `RESULTS_TREND_PULLBACK.json`.
+Each full run takes about 4–5 minutes. Per-trade outputs are in `runs/` (original) and `runs_after_fixes/`. The scored results are in `RESULTS_TREND_PULLBACK.json`, `RESULTS_AFTER_FIXES_TREND_PULLBACK.json` and `RESULTS_AFTER_FIXES_LONDON_BREAKOUT.json`.

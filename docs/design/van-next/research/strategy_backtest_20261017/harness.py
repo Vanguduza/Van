@@ -46,9 +46,12 @@ D = Decimal
 SPEC = {  # spread, slippage, round-trip cost fraction, USD per 1.0 price unit per lot, tick
     "EURUSD": dict(spread=D("0.00008"), slip=D("0.00002"), cost=D("0.00010"), vpu=D("100000"), tick=D("0.00001"), minstop=D("0.00030")),
     "GBPUSD": dict(spread=D("0.00012"), slip=D("0.00002"), cost=D("0.00012"), vpu=D("100000"), tick=D("0.00001"), minstop=D("0.00030")),
-    # USDJPY: slippage folded into the spread (same per-side cost), because VAN's execution
-    # templates cap slippage at an absolute 0.0001 price units, which refuses every JPY fill.
-    "USDJPY": dict(spread=D("0.012"), slip=D("0"), cost=D("0.00008"), vpu=D("667"), tick=D("0.001"), minstop=D("0.030")),
+    # USDJPY: per-side cost 0.006 (half spread + slippage), split like the other pairs. On main
+    # (8eb1889) that slippage refused every JPY fill (finding 2); BT_JPY_FOLD=1 reproduces the
+    # original study's workaround of folding the slippage into the spread.
+    "USDJPY": (dict(spread=D("0.012"), slip=D("0"), cost=D("0.00008"), vpu=D("667"), tick=D("0.001"), minstop=D("0.030"))
+               if os.environ.get("BT_JPY_FOLD") == "1" else
+               dict(spread=D("0.008"), slip=D("0.002"), cost=D("0.00008"), vpu=D("667"), tick=D("0.001"), minstop=D("0.030"))),
 }
 TF_RULE = {"H1": "1h", "M15": "15min"}
 TF_MS = {"H1": 3_600_000, "M15": 900_000}
