@@ -11,7 +11,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 from decimal import Decimal, ROUND_DOWN
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, ClassVar
 
 from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCommand, VenuePosition, VenueUnavailable
 from vati.execution.ctrader.transport import CtraderApiError, CtraderTransport
@@ -43,6 +43,9 @@ class SymbolInfo:
 
 @dataclass
 class CtraderAdapter:
+    #: P1-TRADE-EXEC-004: the entry types this venue really executes (orderType is MARKET or LIMIT; no stop-entry request is built).
+    #: The router refuses anything else instead of sending it as a different order.
+    supported_entry_types: ClassVar[tuple] = ("MARKET", "LIMIT", "PASSIVE_LIMIT")
     transport: CtraderTransport
     client_id: str
     client_secret_provider: Callable[[], str]

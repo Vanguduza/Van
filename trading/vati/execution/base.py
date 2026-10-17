@@ -39,7 +39,7 @@ class OrderCommand:
     loss_model: LossModel
     targets: tuple[Decimal, ...] = ()
     time_in_force: str = "DAY"  # DAY | GTC30
-    max_slippage: Optional[Decimal] = None
+    max_slippage: Optional[Decimal] = None   # price units of this instrument (router converts the template fraction)
     expires_at_ms: Optional[int] = None
     strategy_id: str = ""
     strategy_version: str = ""

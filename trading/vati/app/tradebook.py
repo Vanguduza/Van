@@ -76,7 +76,12 @@ def _base_row(c: _Chain) -> Optional[dict[str, Any]]:
 
 
 def _entry_receipt(c: _Chain) -> Optional[Event]:
-    return next((r for r in c.receipts if r.payload.get("status") in ENTRY_STATUSES and not r.payload.get("exit_action")), None)
+    first = next((r for r in c.receipts if r.payload.get("status") in ENTRY_STATUSES and not r.payload.get("exit_action")), None)
+    if first is not None and first.payload.get("reject_reason") == "PENDING":
+        # A resting entry (P1-TRADE-EXEC-004): its fill arrives later as PENDING_FILLED.
+        filled = next((r for r in c.receipts if r.payload.get("reject_reason") == "PENDING_FILLED"), None)
+        return filled or first
+    return first
 
 
 def past_trades(chains: Iterable[_Chain]) -> list[dict]:

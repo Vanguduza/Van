@@ -10,7 +10,7 @@ import hashlib
 import time
 from dataclasses import dataclass, field
 from decimal import Decimal
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, ClassVar
 
 from vati.core.canonical import canonical_json
 from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCommand, VenuePosition, VenueUnavailable
@@ -64,6 +64,9 @@ class Mt5BridgeClient:
 
 @dataclass
 class Mt5BridgeAdapter:
+    #: P1-TRADE-EXEC-004: the entry types this venue really executes (the worker sends MARKET as a deal and every other type as a pending limit).
+    #: The router refuses anything else instead of sending it as a different order.
+    supported_entry_types: ClassVar[tuple] = ("MARKET", "LIMIT", "PASSIVE_LIMIT")
     client: Mt5BridgeClient
     account_alias: str = "fx_primary"
     venue: str = "mt5"

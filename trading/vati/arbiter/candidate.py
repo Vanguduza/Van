@@ -86,6 +86,9 @@ class CandidateOpportunity:
     is_event_certified: bool = False
     meta_label: str = ""
     evidence_refs: tuple[str, ...] = ()
+    #: The strategy's order type (P1-TRADE-EXEC-004). Execution honours it or refuses;
+    #: it is never coerced to another type.
+    entry_type: str = "LIMIT"
     candidate_hash: str = ""
 
     #: `account_alias + symbol + strategy_id + direction + setup identity`. A

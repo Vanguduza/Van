@@ -76,4 +76,8 @@ def snapshot_from_dict(d: dict) -> RiskSnapshot:
     kw["open_positions"] = tuple(position_from_dict(p) for p in kw["open_positions"])
     kw["market_integrity"] = MarketIntegrityState(kw["market_integrity"])
     kw["kill_switch_triggers"] = frozenset(KillSwitchTrigger(t) for t in kw.get("kill_switch_triggers", []))
+    if "loss_streak_multiplier" in kw:
+        kw["loss_streak_multiplier"] = _D(kw["loss_streak_multiplier"])
+    if kw.get("drawdown_top_state") is not None:
+        kw["drawdown_top_state"] = StrategyState(kw["drawdown_top_state"])
     return RiskSnapshot(**kw)

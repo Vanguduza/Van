@@ -36,6 +36,7 @@ from vati.execution.policy_templates import (
     PASSIVE,
     PASSIVE_THEN_CROSS,
     ExecutionTemplate,
+    entry_compatible,
     template,
 )
 
@@ -199,17 +200,26 @@ class ExecutionPolicyEngine:
         bucket: ExecutionBucket,
         event_state: str = "NONE",
         urgent: bool = False,
+        entry_type: str = "LIMIT",
     ) -> ExecutionPolicyDecision:
-        """Pick a template from measured quality, or fall back safely."""
+        """Pick a template from measured quality, or fall back safely.
+
+        Only templates that can carry out the strategy's requested `entry_type`
+        (ENTRY_COMPATIBILITY) are eligible; with none, the answer is DO_NOT_EXECUTE.
+        """
         # A blackout cancels regardless of evidence: the template's own bound.
         if event_state in ("PRE_BLACKOUT", "POST_BLACKOUT"):
             return self._decision(candidate_id, bucket, DO_NOT_EXECUTE, EVIDENCE_ABSENT, 0,
                                   reason=f"event_state:{event_state}")
 
+        eligible = [tid for tid in self.templates if tid != DO_NOT_EXECUTE
+                    and any(entry_compatible(entry_type, e) for e in template(tid, self.templates).allowed_entry_types)]
+        if not eligible:
+            return self._decision(candidate_id, bucket, DO_NOT_EXECUTE, EVIDENCE_ABSENT, 0,
+                                  reason=f"no template can execute entry type {entry_type}")
+
         scored: list[tuple[Decimal, str, ExecutionEvidence]] = []
-        for tid in self.templates:
-            if tid == DO_NOT_EXECUTE:
-                continue
+        for tid in eligible:
             ev = self._evidence.get((bucket.key(), tid))
             if ev is None or ev.samples < self.min_sample:
                 continue
@@ -222,7 +232,8 @@ class ExecutionPolicyEngine:
             # Exactly what the router does today. An unlearned path is unchanged.
             total = sum(e.samples for (k, _t), e in self._evidence.items() if k == bucket.key())
             state = EVIDENCE_THIN if total else EVIDENCE_ABSENT
-            return self._decision(candidate_id, bucket, self.default_template_id, state, total,
+            fallback = self.default_template_id if self.default_template_id in eligible else eligible[0]
+            return self._decision(candidate_id, bucket, fallback, state, total,
                                   reason=f"insufficient evidence (<{self.min_sample} per template)")
 
         if urgent:
