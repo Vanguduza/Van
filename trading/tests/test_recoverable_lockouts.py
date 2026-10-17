@@ -22,7 +22,8 @@ from vati.risk.lockouts import (
 )
 
 D = Decimal
-NOW_MS = int(time.time() * 1000)   # owner tokens are signed against the real clock
+def now_ms() -> int:
+    return int(time.time() * 1000)   # owner tokens are signed against the real clock, so read it when used
 LOSS, WIN = D("-10"), D("12")
 POLICY = LockoutPolicy(max_consecutive_losses=4)
 
@@ -197,9 +198,9 @@ def test_resuming_after_suspension_needs_the_owner_s_signature(eurusd):
     for bad in ("", owner.token(act="kill-switch-clear", subject="fx_primary"), owner.token(act="drawdown-resume", subject="other"),
                 owner.stranger_token(act="drawdown-resume", subject="fx_primary")):
         with pytest.raises(PermissionError):
-            cyc.resume_after_drawdown(owner_signature_ref=bad, authority=owner.verifier, now_ms=NOW_MS)
+            cyc.resume_after_drawdown(owner_signature_ref=bad, authority=owner.verifier, now_ms=now_ms())
         assert cyc.peak_equity == D("20000")
-    cyc.resume_after_drawdown(owner_signature_ref=owner.token(act="drawdown-resume", subject="fx_primary"), authority=owner.verifier, now_ms=NOW_MS)
+    cyc.resume_after_drawdown(owner_signature_ref=owner.token(act="drawdown-resume", subject="fx_primary"), authority=owner.verifier, now_ms=now_ms())
     assert cyc.peak_equity == cyc.adapter.sync_account().equity
     assert any(e.payload.get("event") == DRAWDOWN_RESUME_EVENT for e in led.iter(EventKind.SESSION))
     assert _cycle(eurusd, led).peak_equity == cyc.peak_equity, "the owner's re-baseline survives a restart"
@@ -211,9 +212,9 @@ def test_a_loss_streak_suspension_reset_needs_the_owner_s_signature(eurusd):
     cyc = _cycle(eurusd, Ledger())
     with pytest.raises(PermissionError):
         cyc.reset_loss_streak("FX-TREND-PULLBACK-01", owner_signature_ref=owner.token(act="loss-streak-reset", subject="fx_primary:OTHER"),
-                              authority=owner.verifier, now_ms=NOW_MS)
+                              authority=owner.verifier, now_ms=now_ms())
     cyc.reset_loss_streak("FX-TREND-PULLBACK-01", owner_signature_ref=owner.token(act="loss-streak-reset", subject="fx_primary:FX-TREND-PULLBACK-01"),
-                          authority=owner.verifier, now_ms=NOW_MS)
+                          authority=owner.verifier, now_ms=now_ms())
 
 
 def test_the_defaults_are_the_owner_accepted_values():
