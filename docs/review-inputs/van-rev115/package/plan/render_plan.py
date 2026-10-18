@@ -12,11 +12,41 @@ def pairs(items):
  return d
 def read(p):return json.loads((ROOT/p).read_text(),object_pairs_hook=pairs)
 def cell(x):return str(x).replace('|','\\|').replace('\n',' ')
+def acceptance_index(plan,tests):
+ """Derived references only; TEST_CONTRACTS remains the owner of test objects."""
+ result={u['id']:[] for u in plan['units']};seen=set()
+ for t in tests:
+  if t['id'] in seen:raise ValueError('DUPLICATE_ACCEPTANCE_TEST:'+t['id'])
+  seen.add(t['id'])
+  for uid in dict.fromkeys([t['unit'],*t.get('additional_units',[])]):
+   if uid not in result:raise ValueError('UNKNOWN_ACCEPTANCE_UNIT:'+uid)
+   result[uid].append(t['id'])
+ return result
+def scope_summary(plan,requirements,tests,surfaces,actions):
+ return f'{len(requirements)} requirements; {len(tests)} planned test contracts; all {len(surfaces)} contexts and {len(actions)} inherited actions; all new loops before BG; no claim of new all-branch semantic certification'
+def binding_errors(plan,tests,summary):
+ expected=acceptance_index(plan,tests);errors=[]
+ if plan.get('acceptance_contract_source')!='verification/TEST_CONTRACTS.json':errors.append('WRONG_ACCEPTANCE_SOURCE')
+ if plan.get('preservation_invariant')!=summary:errors.append('STALE_SCOPE_SUMMARY')
+ for u in plan['units']:
+  if u.get('acceptance_test_ids')!=expected[u['id']]:errors.append('STALE_UNIT_ACCEPTANCE:'+u['id'])
+ return errors
+def current_scope(plan,requirements,tests):
+ return scope_summary(plan,requirements,tests,read('design/ALL_SURFACE_CONTRACTS.json')['surfaces'],read('traceability/LEGACY_349_ACTIONS.json')['actions'])
+def sync_acceptance():
+ plan=read('plan/DEVELOPMENT_PLAN.json');tests=read('verification/TEST_CONTRACTS.json')['tests'];requirements=read('traceability/REQUIREMENTS_AND_DU_MAPPING.json')['requirements']
+ index=acceptance_index(plan,tests)
+ for u in plan['units']:u['acceptance_test_ids']=index[u['id']]
+ plan['acceptance_contract_source']='verification/TEST_CONTRACTS.json'
+ plan['acceptance_binding_rule']='Generated from primary unit and additional_units in registry order; exact equality checked before rendering. Test objects and execution_state remain registry-owned.'
+ plan['preservation_invariant']=current_scope(plan,requirements,tests)
+ (ROOT/'plan/DEVELOPMENT_PLAN.json').write_text(json.dumps(plan,indent=2,sort_keys=True)+'\n')
+ print('Generated unit acceptance references and scope summary; refresh unsigned scope lock, then render the plan.')
 def render():
  plan=read('plan/DEVELOPMENT_PLAN.json');req=read('traceability/REQUIREMENTS_AND_DU_MAPPING.json')['requirements'];tests=read('verification/TEST_CONTRACTS.json')['tests'];aliases=read('traceability/FORECAST_PACKET_CROSSWALK.json')['mappings']
- units=plan['units'];by={u['id']:u for u in units};rq={r['id']:r for r in req};testby={}
- for t in tests:
-  for uid in [t['unit'],*t.get('additional_units',[])]:testby.setdefault(uid,[]).append(t)
+ errors=binding_errors(plan,tests,current_scope(plan,req,tests))
+ if errors:raise ValueError(';'.join(errors))
+ units=plan['units'];by={u['id']:u for u in units};rq={r['id']:r for r in req};testby={t['id']:t for t in tests}
  inputs=['CANONICAL_AUTHORITY.json','plan/DEVELOPMENT_PLAN.json','traceability/REQUIREMENTS_AND_DU_MAPPING.json','contracts/BACKEND_SERVICE_CATALOG.json','verification/TEST_CONTRACTS.json','design/ALL_SURFACE_CONTRACTS.json','traceability/LEGACY_349_ACTIONS.json','traceability/FORECAST_PACKET_CROSSWALK.json','plan/PROPOSED_SCOPE_LOCK.json','plan/render_plan.py','VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV3_20261018.md','contracts/self_optimization/STATE_MACHINES.json','contracts/self_optimization/PROOF_PREDICATES.json','contracts/self_optimization/SEMANTIC_INVARIANTS.json','contracts/self_optimization/AUTHORITY_MATRIX.json','contracts/self_optimization/SELF_OPTIMIZATION_RECORDS.schema.json','ASTRA_CODEX_REVIEW_AND_OPTIMIZATION_PROMPT.md','traceability/REV115_REQUIREMENTS.json','verification/REV115_ACCEPTANCE_CONTRACTS.json','review/DESIGN_CHANGE_PROPOSALS.json','review/SOURCE_ADMISSION_CROSSWALK.json']
  hashes={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in inputs}
  digest=hashlib.sha256(json.dumps(hashes,sort_keys=True,separators=(',',':')).encode()).hexdigest()
@@ -32,7 +62,7 @@ def render():
   lines += [f'### {u["packet_id"]} — {u["id"]}: {u["title"]}',f'**Kind/stage:** {u["kind"]} / {u["stage"]}. **Required completion:** FULL. **Actual implementation state:** NOT_STARTED.',f'**Entry prerequisites:** {", ".join(u["dependencies"]) or "read-only source access and approved packet scope"}.',f'**Requirement owners:** {", ".join(ids) or "integration/qualification evidence for every dependent required capability"}.','', '**Exit contract:** '+u['exit_contract'],'']
   if u.get('full_deliverables'):lines+=['**All deliverables:**']+[f'- {x}' for x in u['full_deliverables']]+['']
   for ob in u.get('merged_obligations',[]):lines += [f'**Merged obligation {ob["source_packet"]}:**']+[f'- {x}' for x in ob['deliverables']]+[f'- Evidence: {x}' for x in ob['exit_evidence']]+['']
-  ts=testby.get(u['id'],[])
+  ts=[testby[tid] for tid in u['acceptance_test_ids']]
   if ts:lines+=['**Planned test obligations (all NOT_RUN):**']+[f'- `{t["id"]}` — {t.get("expectation",t.get("contract","Explicit source test contract"))}' for t in ts]+['']
   lines += ['**Receipt and rollback:** Record exact source/config/dependency hashes, executed commands, source/provider/device identities, independent result, exception/skip justification, and rollback/recovery proof. Never mark a packet complete by changing this file’s status.','']
  lines += ['## 6. Owner decisions and signed activation','', 'OQ-21 values are accepted by OD-39 and are not reopened. Their runtime policy binding and activation still require the exact signed mandate. Current owner questions remain in the source record until resolved; unavailable or stale signatures cannot be replaced by code defaults.','', '| ID | State | Question |','|---|---|---|']
@@ -41,7 +71,8 @@ def render():
  return '\n'.join(lines),hashes,digest
 
 def main():
- ap=argparse.ArgumentParser();ap.add_argument('--check',action='store_true');args=ap.parse_args()
+ ap=argparse.ArgumentParser();mode=ap.add_mutually_exclusive_group();mode.add_argument('--check',action='store_true');mode.add_argument('--sync-acceptance',action='store_true');args=ap.parse_args()
+ if args.sync_acceptance:sync_acceptance();return 0
  text,hashes,digest=render();p=ROOT/'plan/VAN_NEXT_DETERMINISTIC_PLAN_REV1_15.md';prov=ROOT/'plan/PLAN_INPUT_PROVENANCE.json'
  info=json.dumps({'schema':'van.canonical.plan.provenance/1.0','inputs':hashes,'aggregate_input_digest':digest,'rendered_plan_sha256':hashlib.sha256(text.encode()).hexdigest(),'scope':'Deterministic document identity only; not owner signature or F15'},indent=2,sort_keys=True)+'\n'
  if args.check:

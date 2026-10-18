@@ -605,7 +605,7 @@ The desired product is **a coherent trading application with a disciplined learn
 
 ## 16. Specification qualification and exact delivery boundary
 
-This revision preserves 237 parent requirement objects and 1,328 parent application-test contracts, adding 64 requirements and 192 explicit positive/adverse/recovery acceptance contracts. The resulting 301 requirements and 1,520 planned application tests are all unimplemented/unexecuted claims until actual receipts exist. The 131 stable plan units, 82 backend capabilities, 12 backend verifier units, 234 screen/context obligations and 349 historical owner-action entries are retained; four new Product Truth clauses make 22 truth atoms. These inventories overlap; never sum them into a fabricated feature count.
+Rev1.15 preserves all 301 Rev1.14 requirement objects and all 1,520 Rev1.14 application-test contracts, adding eight review refinements and 24 positive/adverse/recovery acceptance contracts. The active totals are 309 requirements and 1,544 planned application tests; every test has execution_state NOT_RUN. The 131 stable plan units, 82 backend capabilities, 12 backend verifier units, 234 screen/context obligations, 349 historical owner-action entries and 22 Product Truth atoms are retained. Delivery correction 1.15.1 changes counts and generated acceptance references only; it adds no product scope or application result. These inventories overlap; never sum them into a fabricated feature count.
 
 The machine-readable contracts specify 12 strict record variants, five linked lifecycle machines, their typed proof predicates and independent semantic invariants. Passing a JSON Schema, a graph mutation test or a hash check does not verify money, source truth, an authentic grant, selector correctness, simulation fidelity, backtest profitability, F15, BG or a live production loop. A receipt containing those claims must be independently resolved against actual source/runtime/venue evidence.
 
@@ -614,7 +614,7 @@ The current pack's checks are document-processing and synthetic contract tests o
 
 # Part B — Complete inherited VAN product specification
 
-> **Preserved source text, exact parent Rev1.13.** Apply the narrowly scoped Part A precedence rules and current machine identifiers/counts. This full text is retained for feature and design coverage, not as a competing executable plan. An exact separate copy remains in `lineage/rev1_13/`.
+> **Historical Rev1.13 product text, with the explicit Rev1.15 source and plan annotations below.** Apply the narrowly scoped Part A precedence rules and current machine identifiers/counts. This full text is retained for feature and design coverage, not as a competing executable plan. An exact separate copy remains in `lineage/rev1_13/`.
 
 # VAN Next — Unified Backend-First Rebuild Blueprint
 
@@ -2157,7 +2157,7 @@ Record non-sensitive screen transition latency, GPU/CPU/memory usage, orb frame 
 
 ## 16. Canonical requirements, dependency graph and packets
 
-**237 requirements; 131 FULL-scope units/packets.** One generated plan replaces the separate Opus, Rev1.10 and forecasting schedules. Source IDs, source meanings and prior packet identities are preserved in crosswalks. Full mapping exists in `traceability/REQUIREMENTS_AND_DU_MAPPING.json`; no count alone establishes semantic acceptance.
+**Historical Rev1.13 baseline: 237 requirements; 131 FULL-scope units/packets. Active Rev1.15 scope: 309 requirements and 1,544 planned tests; the same 131 units.** One generated plan replaces the separate Opus, Rev1.10 and forecasting schedules. Source IDs, source meanings and prior packet identities are preserved in crosswalks. Full mapping exists in `traceability/REQUIREMENTS_AND_DU_MAPPING.json`; no count alone establishes semantic acceptance.
 
 ### 16.1 Authority and single graph
 

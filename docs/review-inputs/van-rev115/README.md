@@ -1,8 +1,9 @@
-# VAN Next Rev1.15 — review package
+# VAN Next Rev1.15 — corrective delivery 1.15.1
 
 Published at the owner's explicit request: “Commit and push the zip and rev 1.15”. This is a specification-review candidate, not application implementation, a merge of the source candidates, or an issued F15/BG certificate.
 
-- [Download the exact ZIP](VAN_NEXT_REVIEWED_BLUEPRINT_PACK_REV1_15_20261018.zip)
+- [Download the exact ZIP](VAN_NEXT_REVIEWED_BLUEPRINT_PACK_REV1_15_1_20261018.zip)
+- [Correction details](package/review/REV115_CORRECTIONS.md)
 - [Start here](package/README_START_HERE.md)
 - [Prioritized independent audit](package/review/INDEPENDENT_AUDIT.md)
 - [Unified master specification](package/VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_15_20261018.md)
@@ -12,6 +13,8 @@ Published at the owner's explicit request: “Commit and push the zip and rev 1.
 - [Design-change proposals](package/review/DESIGN_CHANGE_PROPOSALS.json)
 - [Final archive verification receipt](REV1_15_FINAL_PACKAGE_RECEIPT.json)
 
-ZIP SHA-256: `889b9f910e45b17403bfaac23547ed0ca9799a991f46ec4019ca02951b3a1ce7`. The unpacked package preserves the delivered bytes and includes its MANIFEST. The exact Rev1.14 parent archive is retained inside it.
+ZIP SHA-256: `f6094a15e4c90f735903fa4b66ae7532dbbdd4a6e3fef071f29dcaeb17a01cd0`. The unpacked package preserves the delivered bytes and includes its MANIFEST. The exact Rev1.14 parent archive is retained inside it.
 
 The package contains 309 requirements, 1,544 planned application acceptance contracts, 131 units and 234 contexts. All application acceptance remains NOT_RUN. Documentary checks passed; native DIAL runtime verification, provider qualification, application implementation and S24/Artemis acceptance are not claimed by publication.
+
+Delivery 1.15.1 corrects current versus historical counts and generates explicit acceptance references on all 131 plan units. The previous delivery remains available at commit `b5f56ebbc056bbd8eb3e9f7a562a8cd5d5b74bdf`. No product scope or application test state changed.

@@ -1,4 +1,4 @@
-# VAN Next reviewed specification candidate — Rev1.15
+# VAN Next reviewed specification candidate — Rev1.15 (corrective delivery 1.15.1)
 
 Start with `CANONICAL_AUTHORITY.json`, then `review/INDEPENDENT_AUDIT.md`.
 
@@ -23,3 +23,5 @@ python3 -B verification/verify_rev115.py --check-package --json
 ```
 
 These commands validate documents and reference fixtures only. The revised lifecycle and record schema v2 are proposed contracts, not deployed migrations. Native schema/version compatibility and signed authority are required in implementation.
+
+Correction details: `review/REV115_CORRECTIONS.md`. Unit acceptance references are generated with `python3 -B plan/render_plan.py --sync-acceptance`; refresh unsigned fingerprints before rendering. `--check` rejects stale references or scope totals.

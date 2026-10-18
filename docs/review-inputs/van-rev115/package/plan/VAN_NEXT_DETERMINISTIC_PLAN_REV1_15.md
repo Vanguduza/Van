@@ -24,17 +24,17 @@
 
 | Input | SHA-256 |
 |---|---|
-| `CANONICAL_AUTHORITY.json` | `bdfbcbe8969ecbdda74e51c258fef8ef31ec7d607512deb0a6482e5d11e33ff9` |
-| `plan/DEVELOPMENT_PLAN.json` | `f01cfb1c44620aff2f8bcadfcfa1373dd7da995073afdf9b5b5819870df7d420` |
+| `CANONICAL_AUTHORITY.json` | `5b28af767fa809c02d7163275889064b542b6a03083b4524dedada9fc24f1067` |
+| `plan/DEVELOPMENT_PLAN.json` | `0ab8e0a1ecc4c156dcf839652085d0489c921f28d1e3266aea9baca4af43a74e` |
 | `traceability/REQUIREMENTS_AND_DU_MAPPING.json` | `374a89b0d261d98292eb2d0900e1ccff959df33a751f19f5b9024b6a80ca18b2` |
 | `contracts/BACKEND_SERVICE_CATALOG.json` | `b90aaf1c3af8ba5ac8becefda59acf97b0139ade7887a5da3de9d69a90e88591` |
 | `verification/TEST_CONTRACTS.json` | `3382469a377958806e4ae900a90a975f45f3fdd41fef4934a3d857144cbf1087` |
 | `design/ALL_SURFACE_CONTRACTS.json` | `ef001ae6643b85c1543cae481478e4eed39a9860bc31d18838824daddc1cda1e` |
 | `traceability/LEGACY_349_ACTIONS.json` | `4fe9dd0b7050203e0cac8a479c0a21993b890082aed15b28ab85250410c7830d` |
 | `traceability/FORECAST_PACKET_CROSSWALK.json` | `135e1690f920427a9e79c1554064ed3a30b29a3af50825b388adccb4f66858b5` |
-| `plan/PROPOSED_SCOPE_LOCK.json` | `495e87d84249ebe9127788427ed41a7d347d0135ee2201835ea23e2bc923f4ba` |
-| `plan/render_plan.py` | `41e86069f4e2ce09301ebeb55e46e48573dd2eecebde69d5ae996dc55d05f24d` |
-| `VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV3_20261018.md` | `5d3c4ece8f229d5de1cd1d0dfa1f1aaa1a973a2eb88103e405cd394af2eb0c12` |
+| `plan/PROPOSED_SCOPE_LOCK.json` | `9074da7b2c50891ac662fe4d6c48f625c7791fc6689fecc6a328a9338b08d1d4` |
+| `plan/render_plan.py` | `c9971c837664e71bf89de70cd142ba44ea8224db3622d36bf9d59cb8fcb60198` |
+| `VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV3_20261018.md` | `4d205c95df363f8a7aef86532d8461a13cd70d5bbca2abaebb8824fe106ab95c` |
 | `contracts/self_optimization/STATE_MACHINES.json` | `5fec962405fe8a82febfb5d2b3febec31c729fd2002982ecb3a65033f4080303` |
 | `contracts/self_optimization/PROOF_PREDICATES.json` | `bfeff228238e354995892dd614126cb57bf9b75cfa4638b606c894689ec092f3` |
 | `contracts/self_optimization/SEMANTIC_INVARIANTS.json` | `97fb28a5358f35161954846f5659feb27aa50d0dfa85ba7a24dcf9526865548f` |
@@ -46,7 +46,7 @@
 | `review/DESIGN_CHANGE_PROPOSALS.json` | `565dd16483329788978bf91259b3e3e34b29eeff9cf2d446511bb7eac968d454` |
 | `review/SOURCE_ADMISSION_CROSSWALK.json` | `ba2313efc061a98cc6c9821e843b819bbd91b495f773dcaeb324e88ebd6ee073` |
 
-**Aggregate input digest:** `673f814681cb3347b5c06f782776b9dc90f79076b5d977af496010f6cfbf8ea7`. Deterministic canonical JSON of the filename→SHA-256 map, UTF-8; no timestamps in generated output.
+**Aggregate input digest:** `44fe3de0b013cc2f3d8bb0f132b81bb69ef3ebf984a1f77ca69b3fe050feb5a4`. Deterministic canonical JSON of the filename→SHA-256 map, UTF-8; no timestamps in generated output.
 
 ## 3. Entire packet sequence
 

@@ -83,5 +83,38 @@ focus=(P/d['authority']['focused_blueprint']).read_text().rstrip();master=(P/d['
 require('MASTER_EMBEDS_FOCUSED_SPEC',focus in master)
 require('NO_NET_INVENTORY_BUDGET_FORMULA','cumulative_net_filled' not in focus)
 require('NO_EXTRA_DEPLOYABLES',d['plan']['new_deployable_services_required']==0)
+# Test the binding guard without relying on scope-lock fingerprints.
+rspec=importlib.util.spec_from_file_location('renderer',P/'plan/render_plan.py')
+r=importlib.util.module_from_spec(rspec);rspec.loader.exec_module(r)
+plan=d['plan'];tests=d['tests']['tests']
+summary=r.current_scope(plan,d['requirements']['requirements'],tests)
+expected={u['id']:[t['id'] for t in tests if u['id']==t['unit'] or u['id'] in t.get('additional_units',[])] for u in plan['units']}
+require('EXACT_REGISTRY_BINDINGS',all(u.get('acceptance_test_ids')==expected[u['id']] for u in plan['units']))
+require('ALL_TESTS_EXPLICIT_IN_PLAN',set().union(*(set(u['acceptance_test_ids']) for u in plan['units']))==ts)
+require('POSITIVE_BINDING_GUARD',r.binding_errors(plan,tests,summary)==[])
+newtests=v.read('verification/REV115_ACCEPTANCE_CONTRACTS.json')['tests']
+require('ALL_24_ADDITIONS_EXPLICIT',len(newtests)==24 and all(t['id'] in expected[t['unit']] for t in newtests))
+sample=newtests[0];uid=sample['unit'];tid=sample['id']
+for mutation in ('missing','duplicate','invented','misassigned'):
+ x=copy.deepcopy(plan);u=next(u for u in x['units'] if u['id']==uid)
+ if mutation=='missing':u['acceptance_test_ids'].remove(tid)
+ elif mutation=='duplicate':u['acceptance_test_ids'].append(tid)
+ elif mutation=='invented':u['acceptance_test_ids'].append('NONEXISTENT-TEST')
+ else:
+  u['acceptance_test_ids'].remove(tid)
+  next(u for u in x['units'] if tid not in expected[u['id']])['acceptance_test_ids'].append(tid)
+ require('REJECT_BINDING_'+mutation,any(e.startswith('STALE_UNIT_ACCEPTANCE:') for e in r.binding_errors(x,tests,summary)))
+x=copy.deepcopy(plan);x['preservation_invariant']='301 requirements; 1520 planned test contracts'
+require('REJECT_STALE_SCOPE_SUMMARY','STALE_SCOPE_SUMMARY' in r.binding_errors(x,tests,summary))
+x=copy.deepcopy(plan);x['acceptance_contract_source']='verification/REV115_ACCEPTANCE_CONTRACTS.json'
+require('REJECT_PARTIAL_REGISTRY_SOURCE','WRONG_ACCEPTANCE_SOURCE' in r.binding_errors(x,tests,summary))
+for mutation in ('duplicate_test','unknown_unit'):
+ changed=copy.deepcopy(tests)
+ if mutation=='duplicate_test':changed.append(copy.deepcopy(changed[0]));error='DUPLICATE_ACCEPTANCE_TEST:'+changed[0]['id']
+ else:changed[0]['additional_units']=['NONEXISTENT-UNIT'];error='UNKNOWN_ACCEPTANCE_UNIT:NONEXISTENT-UNIT'
+ try:r.acceptance_index(plan,changed);actual=None
+ except ValueError as exc:actual=str(exc)
+ require('REJECT_REGISTRY_'+mutation,actual==error,actual)
+require('ACTIVE_BLUEPRINT_COUNTS','The active totals are 309 requirements and 1,544 planned application tests' in focus and 'Historical Rev1.13 baseline: 237 requirements' in master)
 out={'scope':'DOCUMENT_ONLY_NOT_APPLICATION_OR_ECONOMIC_VALIDATION','passed':sum(r['passed'] for r in rows),'total':len(rows),'application_tests_executed':0,'cases':rows}
 print(json.dumps(out,indent=2));raise SystemExit(0 if all(r['passed'] for r in rows) else 1)
