@@ -1,0 +1,13 @@
+{
+  "evidence_refs": [],
+  "gate_id": "PRE-003",
+  "independent_receipt_verification": "NOT_PERFORMED",
+  "issuer": null,
+  "plan_revision": "1.11",
+  "project_id": "16f2f43a-8d8b-4f18-a6ac-5bd8df620414",
+  "reason": "Generated specification does not issue operational readiness. Exact independent receipt and owner trust binding required.",
+  "schema": "van.canonical.gate-certificate/1.0",
+  "scope_digest": null,
+  "signature": null,
+  "status": "NOT_ISSUED"
+}

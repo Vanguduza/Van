@@ -1,0 +1,127 @@
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:android/app/src/main/java/com/dial/van/muse/MuseOwnerControls.kt:31:fun MuseOwnerControls(app: VanApplication) {
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:android/app/src/main/java/com/dial/van/muse/MuseRoute.kt:295:            Pane.CONTROLS -> { item { MuseOwnerControls(app) } }
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:502:        supervisor.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_automation_api.py:91:    app.include_router(api.router)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_automation_api.py:275:    app.include_router(api.router)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_automation_api.py:695:    app.include_router(api.router)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_browser_api.py:81:    app.include_router(api.router)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_browser_fabric.py:372:    await adapter.observe(task, "find the download link")
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_browser_input_protocol.py:263:            verdict = c.observe(_sample(available_bitrate_kbps=12_000))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_browser_input_protocol.py:272:            verdict = capped.observe(_sample(metered=True))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_browser_input_protocol.py:279:            allowed = lifted.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_browser_input_protocol.py:288:        verdict = c.observe(_sample(metered=True, rendered_fps=35.0, available_bitrate_kbps=2_500))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_browser_input_protocol.py:293:        same_link = unmetered.observe(_sample(rendered_fps=35.0))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_browser_input_protocol.py:300:        verdict = c.observe(_sample(metered=True, rendered_fps=60.0, packet_loss=0.0))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_browser_input_protocol.py:307:        verdict = c.observe(_sample(rtt_ms=400.0))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_browser_input_protocol.py:314:        dropped = c.observe(_sample(available_bitrate_kbps=1_600))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_browser_input_protocol.py:318:        first = c.observe(_sample(available_bitrate_kbps=9_000))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_browser_input_protocol.py:320:        c.observe(_sample(available_bitrate_kbps=9_000))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_browser_input_protocol.py:321:        third = c.observe(_sample(available_bitrate_kbps=9_000))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_browser_input_protocol.py:327:            verdict = c.observe(_sample(available_bitrate_kbps=20_000))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_browser_input_protocol.py:334:        verdict = c.observe(_sample(metered=True))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_cognition_is_real.py:220:        assertion = await model.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_cognition_is_real.py:326:        await model.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_credential_expiry_and_rotation.py:119:        age = await rot.observe("ingress_token", "t" * 40)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_credential_expiry_and_rotation.py:125:        await rot.observe("ingress_token", "t" * 40, now=now)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_credential_expiry_and_rotation.py:127:        assert (await rot.observe("ingress_token", "t" * 40, now=now + policy + 1)).state == "OVERDUE"
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_credential_expiry_and_rotation.py:128:        warned = await rot.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_credential_expiry_and_rotation.py:137:        await rot.observe("ingress_token", "old-token-value-0123456789", now=now)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_credential_expiry_and_rotation.py:139:        rotated = await rot.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_credential_expiry_and_rotation.py:147:        await rot.observe("ingress_token", secret)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_credential_expiry_and_rotation.py:155:        assert (await rot.observe("ingress_token", "")).state == "UNCONFIGURED"
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_epistemics_context_understanding.py:200:        assertion = await model.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_epistemics_context_understanding.py:216:        assertion = await model.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_epistemics_context_understanding.py:236:            await model.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_epistemics_context_understanding.py:249:        assertion = await model.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_epistemics_context_understanding.py:265:    a = await model.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_epistemics_context_understanding.py:271:        again = await model.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_epistemics_context_understanding.py:283:    original = await model.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_epistemics_context_understanding.py:340:    old = await graph.observe(owner_goal="keep the fabric minimal", project_id="van")
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_epistemics_context_understanding.py:341:    new = await graph.observe(owner_goal="add every integration we can", project_id="van")
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_epistemics_context_understanding.py:352:    node = await graph.observe(owner_goal="ship the trading core", now_ms=0)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_epistemics_context_understanding.py:356:    await graph.observe(owner_goal="ship the trading core", now_ms=NOW)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_external_reality_and_benchmarks.py:75:            await ExternalRealityModel(store).observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_mission_binding_api.py:107:    app.include_router(api.router)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_mission_binding_api.py:464:    app.include_router(browser.router)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_mission_binding_api.py:499:    app.include_router(browser.router)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_mission_binding_api.py:525:    app.include_router(browser.router)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_muse_interaction.py:188:    app=FastAPI();app.include_router(build_muse_router(broker,settings))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_observability_alerts.py:105:        registry.observe(name, 1.0, labels={
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_observability_metrics.py:55:        registry.observe("van_error_total", 1.0)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_observability_metrics.py:227:        registry.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_owner_memory_has_a_producer.py:103:        node = await graph.observe(owner_goal="an old plan", now_ms=0)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_owner_memory_has_a_producer.py:107:        await graph.observe(owner_goal="an old plan", now_ms=graph.STALE_AFTER_MS + DAY_MS)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_owner_memory_has_a_producer.py:112:        node = await graph.observe(owner_goal="a current plan", now_ms=0)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_owner_memory_has_a_producer.py:172:        node = await graph.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_owner_memory_has_a_producer.py:181:        await graph.observe(owner_goal="finish the migration", project_id="van")
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_owner_memory_has_a_producer.py:182:        node = await graph.observe(owner_goal="finish the migration", project_id="van")
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_owner_memory_has_a_producer.py:189:        await graph.observe(owner_goal="a goal", owner_declared_standing=True)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_owner_memory_has_a_producer.py:190:        node = await graph.observe(owner_goal="a goal")
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_owner_memory_has_a_producer.py:268:        old = await graph.observe(owner_goal="never trade on margin")
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_owner_memory_has_a_producer.py:269:        new = await graph.observe(owner_goal="use leverage to hit the quarterly target")
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_proactive_evolution_eval.py:211:        await reality.observe(subject="model-x", claim="deprecated",
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_proactive_evolution_eval.py:218:    await reality.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_proactive_followups.py:220:        node = await intents.observe(owner_goal="Ship the Q3 report", now_ms=NOW - NINETY_ONE_DAYS_MS)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_proactive_followups.py:237:        await intents.observe(owner_goal="Ship the Q3 report", now_ms=NOW)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_proactive_followups.py:246:        await intents.observe(owner_goal="Ship the Q3 report", now_ms=NOW - NINETY_ONE_DAYS_MS)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_relationship_calibration.py:53:        assertion = await model.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_relationship_calibration.py:116:        await model.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_relationship_calibration.py:126:    await model.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_relationship_calibration.py:200:    app.include_router(api.router)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_relationship_calibration.py:225:    first = await api.owner_model.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_relationship_calibration.py:229:    second = await api.owner_model.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_relationship_calibration.py:262:    confirmable = await api.owner_model.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/tests/test_relationship_calibration.py:266:    rejectable = await api.owner_model.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/app.py:946:    app.include_router(build_muse_router(muse_service, settings, auth=auth))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/app.py:948:    app.include_router(owner_runtime.router)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/app.py:949:    app.include_router(build_dial_dev_router(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/app.py:956:    app.include_router(automation_health.router)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/app.py:957:    app.include_router(build_computer_use_router(computer_use))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/app.py:958:    app.include_router(automation.router)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/app.py:959:    app.include_router(temporal_automation.router)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/app.py:960:    app.include_router(browser.router)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/app.py:978:        app.include_router(build_interactive_router(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/app.py:993:        app.include_router(build_download_report_router(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/app.py:998:        app.include_router(build_quality_router(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/app.py:1143:    app.include_router(build_session_router(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/app.py:1183:    app.include_router(mission_api.router)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/app.py:1184:    app.include_router(understanding_api.router)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/auth/rotation.py:118:        ages = [await self.observe(name, value, now=now) for name, value in credentials.items()]
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/automation/verifier.py:93:            observed = await observer.observe(spec, context)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/browser/quality.py:262:        verdict = self.observe(replace(sample))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/browser/quality_api.py:153:        verdict = controller.observe(sample)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/browser/worker.py:269:        observation = await self.stagehand.observe(task, instruction)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/learning/feed.py:117:        intent = await self.intents.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/observability/instruments.py:45:    registry.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/observability/instruments.py:53:    registry.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/observability/instruments.py:61:    registry.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/observability/instruments.py:69:    registry.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/observability/instruments.py:92:    registry.observe("van_trade_halt_latency_ms", max(duration_ms, 0.0))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/observability/instruments.py:96:    registry.observe("van_event_bus_lag_ms", max(lag_ms, 0.0), labels={"topic": _clean(topic)})
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/observability/instruments.py:124:    registry.observe("van_browser_session_connect_ms", max(duration_ms, 0.0))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/observability/instruments.py:133:    registry.observe("van_browser_control_preempt_ms", max(duration_ms, 0.0))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/observability/instruments.py:256:        lambda m, v, l: registry.observe(m, max(v, 0.0), labels=l),
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/observability/metrics.py:377:            histogram.observe(float(value))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/research/exa.py:127:                await self.reality.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:backend/van_gateway/understanding/api.py:362:            assertion = await self.owner_model.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:trading/vati/calendar/recorder.py:303:                self.observe(obs)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:trading/vati/events/runtime.py:88:            recorder.observe(ReleaseObservation(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:trading/vati/execution/policy.py:191:        self.evidence(bucket, template_id).observe(**outcome)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:trading/vati/learning/hooks.py:56:        self.brokers.observe(broker=self.broker, symbol=symbol, session=session, environment=self.environment, cost_ratio=cost_ratio, slippage_pips=slippage,
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:trading/vati/learning/hooks.py:67:        self.health.observe(HealthObservation(strategy_id, self.environment, r_multiple, process_ok, min(cost_ratio, Decimal("10")), regime_fit, ep.artifact_hash if ep else trade_intent_id))
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:trading/vati/learning/replay.py:187:        learning.brokers.observe(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:trading/vati/learning/replay.py:217:        learning.health.observe(HealthObservation(
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:trading/vati/research/workflow.py:112:        observation = self.feature_drift.observe(segment, **kwargs)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:trading/vati/research/workflow.py:120:        observation = self.edge_drift.observe(**kwargs)
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:web/muse-interaction/bff.mjs:1:import {OWNER_OPERATIONS,invokeOwnerControl,createDialOwnerSurfaceAdapter} from './owner-controls.mjs';
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:web/muse-interaction/bff.mjs:28: const matches=request=>{const p=new URL(request.url).pathname;return p==='/api/muse/van-owner'||p==='/api/muse/tasks'||p==='/api/muse/owner-controls'||p==='/api/muse/interaction'||p.startsWith('/api/muse/interaction/');};
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:web/muse-interaction/bff.mjs:62:   if(url.pathname==='/api/muse/owner-controls'&&request.method==='POST'){
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:web/muse-interaction/muse-live-controls.mjs:1:import {OwnerControlsClient,MuseTasksClient} from './owner-controls-client.mjs';
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:web/muse-interaction/muse-live-controls.mjs:2:import {sourceAge,workflowLabels} from './owner-controls.mjs';
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:web/muse-interaction/owner-controls-client.mjs:1:import {validateOwnerCall} from './owner-controls.mjs';
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:web/muse-interaction/owner-controls-client.mjs:5: constructor({fetcher=fetch,storage=globalThis.sessionStorage,base='/api/muse/owner-controls'}={}) {this.fetcher=fetcher;this.storage=storage;this.base=base;this.pending=new Map();try{for(const row of JSON.parse(storage?.getItem('muse-owner-pending')||'[]'))this.pending.set(row.input?.request_id,row);}catch{/* A fresh native read is still required. */}}
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:web/muse-interaction/owner-controls.test.mjs:5:import {OwnerControlsClient,MuseTasksClient} from './owner-controls-client.mjs';
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:web/muse-interaction/owner-controls.test.mjs:6:import {workflowLabels,validateOwnerCall} from './owner-controls.mjs';
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:web/muse-interaction/owner-controls.test.mjs:11:test('native resource controls receive verified Site identity through the server',async()=>{const r=await fixture().handle(request('/api/muse/owner-controls',{operation:'dial_owner_contexts',arguments:{}}));assert.equal(r.status,200);assert.equal((await r.json()).actor.verifiedSiteActor.id,'fixture-owner');});
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:web/muse-interaction/owner-controls.test.mjs:12:test('unconnected native owner is unavailable and never fabricated',async()=>{const r=await fixture({nativeOwnerControls:null}).handle(request('/api/muse/owner-controls',{operation:'dial_owner_contexts',arguments:{}}));assert.equal(r.status,503);});
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:web/muse-interaction/owner-controls.test.mjs:13:test('cross-origin and service identities cannot control native work',async()=>{assert.equal((await fixture().handle(request('/api/muse/owner-controls',{operation:'dial_owner_contexts',arguments:{}},'https://other.invalid'))).status,403);assert.equal((await fixture({requireOwner:async()=>({id:'fixture-owner',auth_method:'service_key'})}).handle(request('/api/muse/owner-controls',{operation:'dial_owner_contexts',arguments:{}}))).status,403);});

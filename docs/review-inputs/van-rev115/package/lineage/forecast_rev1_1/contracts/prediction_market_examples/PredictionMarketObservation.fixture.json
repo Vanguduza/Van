@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0",
+  "record_id": "fixture:PredictionMarketObservation",
+  "environment": "FIXTURE",
+  "authority_effect": "NONE",
+  "evidence_refs": [
+    "fixture:synthetic-only-not-real-evidence"
+  ],
+  "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "provider": "FIXTURE_PROVIDER",
+  "market_id": "fixture:CPI-GTE3",
+  "canonical_event_id": "fixture:CPI-2026-10",
+  "contract_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "provider_event_at": "2026-10-17T10:59:58Z",
+  "received_at": "2026-10-17T10:59:59Z",
+  "available_at": "2026-10-17T11:00:00Z",
+  "decision_cutoff": "2026-10-17T11:00:00Z",
+  "availability_method": "FIXTURE",
+  "input_mode": "FIXTURE_REPLAY",
+  "book_state": "VALID",
+  "sequence": 100,
+  "gap_count": 0,
+  "yes_bids": [
+    {
+      "price": "0.4000",
+      "quantity": "10.00"
+    },
+    {
+      "price": "0.4200",
+      "quantity": "13.00"
+    }
+  ],
+  "no_bids": [
+    {
+      "price": "0.5000",
+      "quantity": "9.50"
+    },
+    {
+      "price": "0.5600",
+      "quantity": "17.25"
+    }
+  ],
+  "derived_yes_ask": "0.4400",
+  "derived_no_ask": "0.5800",
+  "permission_ref": null,
+  "archive_cutoff_ref": "fixture:archive-boundary"
+}

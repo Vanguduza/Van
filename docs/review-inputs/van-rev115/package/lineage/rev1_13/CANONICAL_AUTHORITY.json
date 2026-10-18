@@ -1,0 +1,28 @@
+{
+  "application_code_changed_by_this_pack": false,
+  "base_head": "8eb1889822fc8a83f219977c15340172e16acd91",
+  "master": "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_13_20261018.md",
+  "no_frontend_before_backend": true,
+  "no_silent_feature_retirement": true,
+  "plan": "plan/DEVELOPMENT_PLAN.json",
+  "project_id": "16f2f43a-8d8b-4f18-a6ac-5bd8df620414",
+  "rendered_plan": "plan/VAN_NEXT_DETERMINISTIC_PLAN_REV1_13.md",
+  "repository": "Vanguduza/Van",
+  "repository_heads_observed_utc": "2026-10-18T04:29:37Z",
+  "revision": "1.13",
+  "schema": "van.canonical.authority/1.0",
+  "scope_lock": "plan/PROPOSED_SCOPE_LOCK.json",
+  "signed_authority": false,
+  "sole_f15": "PRE-003",
+  "sole_frontend_entry_gate": "BG-001",
+  "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+  "source_review_ref": "consolidation/REV113_LIVE_REPOSITORY_BRANCH_REVIEW.json",
+  "status": "RECONCILED_BLUEPRINT_WITH_REVIEWED_STYLE_PENDING_OWNER_AND_INDEPENDENT_ADMISSION",
+  "superseded_schedules": [
+    "Rev1.9b mixed 73-packet schedule including later OD37–39",
+    "Rev1.10 standalone 76-packet schedule",
+    "Forecast Rev1.1 standalone 48-packet schedule",
+    "Rev1.11 plan: preserved as lineage, replaced in this delivered candidate only"
+  ],
+  "visual_style_contract": "design/VAN_MATERIAL_TOKENS_REV2.json"
+}

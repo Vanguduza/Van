@@ -1,0 +1,18 @@
+{
+  "evidence_grade": "FIXTURE_ONLY",
+  "fixtures": [
+    "examples/ExecutionObjective.fixture.json",
+    "examples/OperationalOptimizationGrant.fixture.json",
+    "examples/ExecutionDecision.fixture.json",
+    "examples/ExecutionOutcome.fixture.json",
+    "examples/ExecutionEvidenceSnapshot.fixture.json",
+    "examples/ExecutionPolicyCandidate.fixture.json",
+    "examples/PolicyQualification.fixture.json",
+    "examples/PolicyBinding.fixture.json",
+    "examples/CryptoVenueProfile.fixture.json",
+    "examples/ExecutionStudySpec.fixture.json",
+    "examples/ExecutionQualityMeasurement.fixture.json",
+    "examples/DesignChangeProposal.fixture.json"
+  ],
+  "no_qualification_or_financial_authority": true
+}

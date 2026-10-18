@@ -1,0 +1,183 @@
+{
+  "schema": "van.news.readiness.amendment/1.0",
+  "status": "PROPOSED_PENDING_OWNER_LOCK_AND_INDEPENDENT_ADMISSION",
+  "parent_commit": "d8a207cb00b3c8e3104041390a861a78a00b7ff7",
+  "parent_guard_sha256": "9da17bd95dce0f5c673143c37f86a18bb30208645f811a84c8f212ea5e727466",
+  "machine": {
+    "id": "VAN-SM-NEWS_ARMED_TICKET",
+    "extends": "none (Rev 1.9, AUD-04)",
+    "initial": "DRAFT_UNAPPROVED",
+    "states": [
+      "DRAFT_UNAPPROVED",
+      "SIGNED",
+      "VOIDED",
+      "ARMED",
+      "EXPIRED",
+      "USED"
+    ],
+    "terminal": [
+      "USED",
+      "VOIDED",
+      "EXPIRED"
+    ],
+    "receipt_states": [
+      "ARMED",
+      "SIGNED",
+      "USED"
+    ],
+    "send_states": [],
+    "unknown_state": null,
+    "transitions": [
+      {
+        "from": "DRAFT_UNAPPROVED",
+        "to": "SIGNED",
+        "requires": "owner_biometric_over_frozen_grant"
+      },
+      {
+        "from": "DRAFT_UNAPPROVED",
+        "to": "VOIDED"
+      },
+      {
+        "from": "SIGNED",
+        "to": "ARMED",
+        "kind": "readiness_verified_in_allowed_prearm_window",
+        "requires": "grant_signature_valid+arming_window_open+account_mandate_current+policy_revisions_current+required_sources_healthy+unused_nonce"
+      },
+      {
+        "from": "SIGNED",
+        "to": "VOIDED"
+      },
+      {
+        "from": "SIGNED",
+        "to": "EXPIRED"
+      },
+      {
+        "from": "ARMED",
+        "to": "USED",
+        "requires": "two_source_agreement+mandate_and_risk_gate+unused_nonce"
+      },
+      {
+        "from": "ARMED",
+        "to": "VOIDED",
+        "kind": "policy_mandate_feed_or_quote_change"
+      },
+      {
+        "from": "ARMED",
+        "to": "EXPIRED"
+      }
+    ],
+    "invariant": "One use; the tap only chooses within the signed envelope; both sources must agree (OD-24)"
+  },
+  "added_arming_proof_types": {
+    "grant_signature_valid": {
+      "issuer": "Qualified device owner authority",
+      "fields": [
+        "grant_digest",
+        "device_id",
+        "account_id",
+        "event_instance_id",
+        "signature",
+        "issuer_key_id",
+        "signed_at",
+        "valid_until"
+      ],
+      "failures": [
+        "unsigned",
+        "wrong device",
+        "wrong account",
+        "revoked key"
+      ]
+    },
+    "arming_window_open": {
+      "issuer": "Trusted server clock and signed grant",
+      "fields": [
+        "earliest_arm_at",
+        "expires_at",
+        "observed_server_time",
+        "clock_health"
+      ],
+      "failures": [
+        "too early",
+        "expired",
+        "clock uncertainty"
+      ]
+    },
+    "account_mandate_current": {
+      "issuer": "VATI and account reconciler",
+      "fields": [
+        "account_id",
+        "account_revision",
+        "mandate_digest",
+        "authorization_mode",
+        "broker_health",
+        "observed_at",
+        "valid_until"
+      ],
+      "failures": [
+        "restricted account",
+        "changed mandate",
+        "stale broker"
+      ]
+    },
+    "policy_revisions_current": {
+      "issuer": "Signed policy registry",
+      "fields": [
+        "stop_policy_revision",
+        "execution_policy_revision",
+        "grant_policy_digests",
+        "current_policy_digests"
+      ],
+      "failures": [
+        "policy changed",
+        "missing rule",
+        "downgraded policy"
+      ]
+    },
+    "required_sources_healthy": {
+      "issuer": "Source health/independence registry",
+      "fields": [
+        "required_source_ids",
+        "independence_groups",
+        "health_revision",
+        "last_observed_at",
+        "maximum_health_age"
+      ],
+      "failures": [
+        "missing required source",
+        "stale health",
+        "same syndicated source"
+      ]
+    },
+    "unused_nonce": {
+      "issuer": "Durable nonce/intent store",
+      "fields": [
+        "nonce",
+        "grant_digest",
+        "intent_id",
+        "consumption_state",
+        "scope_epoch"
+      ],
+      "failures": [
+        "consumed",
+        "unknown scope",
+        "replayed grant"
+      ]
+    }
+  },
+  "approved_arming_proofs": [
+    "grant_signature_valid",
+    "arming_window_open",
+    "account_mandate_current",
+    "policy_revisions_current",
+    "required_sources_healthy",
+    "unused_nonce"
+  ],
+  "use_requires": [
+    "two_source_agreement",
+    "mandate_and_risk_gate",
+    "unused_nonce"
+  ],
+  "no_future_actual_required_to_arm": true,
+  "meaning_of_used": "Grant nonce durably claimed for one exact intent, not proof of broker fill; order outcome remains in canonical order machine.",
+  "model_limit": "Metadata checks do not verify cryptographic signatures or runtime field truth. BE-017/BQ-003 must implement those guards and produce real refusal/race/readback evidence."
+}

@@ -1,0 +1,1653 @@
+{
+  "composition_rule": "BE-010 baseline execution ports complete first; BE-012 outcome producer; BE-036 complete adaptive integration; all BQ and BG prerequisites remain.",
+  "extensions": [
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-043",
+        "VAN-LEAN-001",
+        "VAN-LEAN-002",
+        "VAN-LEAN-003",
+        "VAN-LEAN-005"
+      ],
+      "operations": [
+        "DesignChangeProposal binds source/data/evaluator/alternatives/uncertainty, complexity effects and affected contracts.",
+        "Extend existing boundaries; justify any new process/store with measured isolation/correctness benefit.",
+        "Each candidate lists operational cost, maintenance/state burden, alternatives and incremental evidence; safety complexity is mandatory.",
+        "All inherited requirement/action/context objects remain, with explicit semantic additions not automatic deletion.",
+        "Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit."
+      ],
+      "tests": [
+        "T-VAN-SO-043-POS",
+        "T-VAN-SO-043-NEG",
+        "T-VAN-SO-043-REC",
+        "T-VAN-LEAN-001-POS",
+        "T-VAN-LEAN-001-NEG",
+        "T-VAN-LEAN-001-REC",
+        "T-VAN-LEAN-002-POS",
+        "T-VAN-LEAN-002-NEG",
+        "T-VAN-LEAN-002-REC",
+        "T-VAN-LEAN-003-POS",
+        "T-VAN-LEAN-003-NEG",
+        "T-VAN-LEAN-003-REC",
+        "T-VAN-LEAN-005-POS",
+        "T-VAN-LEAN-005-NEG",
+        "T-VAN-LEAN-005-REC"
+      ],
+      "unit_id": "PRE-002"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-LEAN-001",
+        "VAN-LEAN-003",
+        "VAN-RV-006"
+      ],
+      "operations": [
+        "Extend existing boundaries; justify any new process/store with measured isolation/correctness benefit.",
+        "All inherited requirement/action/context objects remain, with explicit semantic additions not automatic deletion.",
+        "Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds.",
+        "Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance.",
+        "Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection."
+      ],
+      "tests": [
+        "T-VAN-LEAN-001-POS",
+        "T-VAN-LEAN-001-NEG",
+        "T-VAN-LEAN-001-REC",
+        "T-VAN-LEAN-003-POS",
+        "T-VAN-LEAN-003-NEG",
+        "T-VAN-LEAN-003-REC",
+        "T-VAN-RV-006-POS",
+        "T-VAN-RV-006-NEG",
+        "T-VAN-RV-006-REC"
+      ],
+      "unit_id": "BE-001"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-002",
+        "VAN-SO-003",
+        "VAN-SO-004",
+        "VAN-SO-034",
+        "VAN-SO-039",
+        "VAN-CRYPTO-004",
+        "VAN-CRYPTO-013",
+        "VAN-RV-002"
+      ],
+      "operations": [
+        "Operational choices are automatic under qualified grants; novel policies require independent qualification and authorized promotion.",
+        "Evidence update, operational selection and policy mutation are three different typed effects.",
+        "Bind policy/artifact/qualification/venue/account/product/expiry and tested joint parameters to existing mandate.",
+        "New bindings require qualified and authenticated promotion; open parents retain policy unless explicit compatible migration.",
+        "Learned state can evolve under qualified rule; rule/action/reward/scope changes use policy evolution; risk changes keep own authority.",
+        "Trading workers lack withdrawal scope; secret references and account grants remain per environment.",
+        "Spot support does not imply margin/perps/options/DEX/withdraw authority; any extension needs product-specific qualification.",
+        "Dispatch resolves current qualified policy, mandate, reservation, epoch and objective; positive decimal venue increments and complete mature costs validate.",
+        "Remove only POLICY_QUALIFIED at dispatch and reseal unsigned locks; named semantic check still fails. Reject zero tick and mature unknown costs.",
+        "Expiry/revocation at any preactivation or drain stage blocks new risk, reconciles in-flight effects and cannot reactivate revoked fallback."
+      ],
+      "tests": [
+        "T-VAN-SO-002-POS",
+        "T-VAN-SO-002-NEG",
+        "T-VAN-SO-002-REC",
+        "T-VAN-SO-003-POS",
+        "T-VAN-SO-003-NEG",
+        "T-VAN-SO-003-REC",
+        "T-VAN-SO-004-POS",
+        "T-VAN-SO-004-NEG",
+        "T-VAN-SO-004-REC",
+        "T-VAN-SO-034-POS",
+        "T-VAN-SO-034-NEG",
+        "T-VAN-SO-034-REC",
+        "T-VAN-SO-039-POS",
+        "T-VAN-SO-039-NEG",
+        "T-VAN-SO-039-REC",
+        "T-VAN-CRYPTO-004-POS",
+        "T-VAN-CRYPTO-004-NEG",
+        "T-VAN-CRYPTO-004-REC",
+        "T-VAN-CRYPTO-013-POS",
+        "T-VAN-CRYPTO-013-NEG",
+        "T-VAN-CRYPTO-013-REC",
+        "T-VAN-RV-002-POS",
+        "T-VAN-RV-002-NEG",
+        "T-VAN-RV-002-REC"
+      ],
+      "unit_id": "BE-002"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-011",
+        "VAN-SO-013",
+        "VAN-SO-019",
+        "VAN-SO-020",
+        "VAN-SO-022",
+        "VAN-SO-023",
+        "VAN-RV-003",
+        "VAN-RV-006"
+      ],
+      "operations": [
+        "Live/demo/paper/shadow/backtest/counterfactual provenance stays separate and source-authorized.",
+        "Exact command and causal/fence identity committed before side effect; no exactly-once network assumption.",
+        "Authoritative fill identity, correction/bust and fee currency feed one cash/position state.",
+        "Verified anchor plus tail reduces repeated work without accepting tampered history.",
+        "Observation contribution, consumed revision and cursor/snapshot publish atomically.",
+        "No retroactive editing of issued decision; affected future statistics/models are invalidated or restated.",
+        "Real registered consumer applies newer observation revision once, persists cursor/contribution/snapshot atomically, and later eligible selector consumes its fingerprint.",
+        "Deliver older revision after correction and conflicting equal revision; older evidence cannot overwrite current contribution and conflict is quarantined.",
+        "Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
+        "Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds.",
+        "Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance.",
+        "Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection."
+      ],
+      "tests": [
+        "T-VAN-SO-011-POS",
+        "T-VAN-SO-011-NEG",
+        "T-VAN-SO-011-REC",
+        "T-VAN-SO-013-POS",
+        "T-VAN-SO-013-NEG",
+        "T-VAN-SO-013-REC",
+        "T-VAN-SO-019-POS",
+        "T-VAN-SO-019-NEG",
+        "T-VAN-SO-019-REC",
+        "T-VAN-SO-020-POS",
+        "T-VAN-SO-020-NEG",
+        "T-VAN-SO-020-REC",
+        "T-VAN-SO-022-POS",
+        "T-VAN-SO-022-NEG",
+        "T-VAN-SO-022-REC",
+        "T-VAN-SO-023-POS",
+        "T-VAN-SO-023-NEG",
+        "T-VAN-SO-023-REC",
+        "T-VAN-RV-003-POS",
+        "T-VAN-RV-003-NEG",
+        "T-VAN-RV-003-REC",
+        "T-VAN-RV-006-POS",
+        "T-VAN-RV-006-NEG",
+        "T-VAN-RV-006-REC"
+      ],
+      "unit_id": "BE-003"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-CRYPTO-001",
+        "VAN-CRYPTO-002",
+        "VAN-CRYPTO-013",
+        "VAN-RV-008"
+      ],
+      "operations": [
+        "At least one eligible supported CEX spot integration; same risk/router/lifecycle owners and current markets preserved.",
+        "API family, account/subaccount, native product, spot type, base/quote/network identities are versioned.",
+        "Spot support does not imply margin/perps/options/DEX/withdraw authority; any extension needs product-specific qualification.",
+        "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts.",
+        "Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration.",
+        "Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate."
+      ],
+      "tests": [
+        "T-VAN-CRYPTO-001-POS",
+        "T-VAN-CRYPTO-001-NEG",
+        "T-VAN-CRYPTO-001-REC",
+        "T-VAN-CRYPTO-002-POS",
+        "T-VAN-CRYPTO-002-NEG",
+        "T-VAN-CRYPTO-002-REC",
+        "T-VAN-CRYPTO-013-POS",
+        "T-VAN-CRYPTO-013-NEG",
+        "T-VAN-CRYPTO-013-REC",
+        "T-VAN-RV-008-POS",
+        "T-VAN-RV-008-NEG",
+        "T-VAN-RV-008-REC"
+      ],
+      "unit_id": "BE-004"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-CRYPTO-004",
+        "VAN-CRYPTO-010",
+        "VAN-RV-008"
+      ],
+      "operations": [
+        "Trading workers lack withdrawal scope; secret references and account grants remain per environment.",
+        "Provider chosen by eligible current access; mocked Coinbase Advanced output cannot qualify matching or latency.",
+        "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts.",
+        "Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration.",
+        "Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate."
+      ],
+      "tests": [
+        "T-VAN-CRYPTO-004-POS",
+        "T-VAN-CRYPTO-004-NEG",
+        "T-VAN-CRYPTO-004-REC",
+        "T-VAN-CRYPTO-010-POS",
+        "T-VAN-CRYPTO-010-NEG",
+        "T-VAN-CRYPTO-010-REC",
+        "T-VAN-RV-008-POS",
+        "T-VAN-RV-008-NEG",
+        "T-VAN-RV-008-REC"
+      ],
+      "unit_id": "BE-005"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-CRYPTO-005",
+        "VAN-RV-004"
+      ],
+      "operations": [
+        "Buy reserves quote, sell owned base; fees/base/quote/third assets and cash conversion explicit; no leverage.",
+        "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation.",
+        "Fees, exits or netting cannot reopen entry allowance; TCA decomposition must equal direct signed fill-versus-reference cost plus nonembedded charges.",
+        "Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry."
+      ],
+      "tests": [
+        "T-VAN-CRYPTO-005-POS",
+        "T-VAN-CRYPTO-005-NEG",
+        "T-VAN-CRYPTO-005-REC",
+        "T-VAN-RV-004-POS",
+        "T-VAN-RV-004-NEG",
+        "T-VAN-RV-004-REC"
+      ],
+      "unit_id": "BE-006"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-CRYPTO-004"
+      ],
+      "operations": [
+        "Trading workers lack withdrawal scope; secret references and account grants remain per environment."
+      ],
+      "tests": [
+        "T-VAN-CRYPTO-004-POS",
+        "T-VAN-CRYPTO-004-NEG",
+        "T-VAN-CRYPTO-004-REC"
+      ],
+      "unit_id": "BE-007"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-009",
+        "VAN-CRYPTO-002",
+        "VAN-CRYPTO-003",
+        "VAN-CRYPTO-006",
+        "VAN-CRYPTO-008"
+      ],
+      "operations": [
+        "Version canonical bucket key, product, side, amount/participation, fees, volatility, event and regime.",
+        "API family, account/subaccount, native product, spot type, base/quote/network identities are versioned.",
+        "Tick/step/min-notional/max limits and fee reserves apply before exact risk approval.",
+        "Sequence/checksum, timestamps, snapshot boundaries, fill IDs and resync per selected provider.",
+        "24/7 operation still handles maintenance; nonce/clock constraints; cancel/query headroom protected."
+      ],
+      "tests": [
+        "T-VAN-SO-009-POS",
+        "T-VAN-SO-009-NEG",
+        "T-VAN-SO-009-REC",
+        "T-VAN-CRYPTO-002-POS",
+        "T-VAN-CRYPTO-002-NEG",
+        "T-VAN-CRYPTO-002-REC",
+        "T-VAN-CRYPTO-003-POS",
+        "T-VAN-CRYPTO-003-NEG",
+        "T-VAN-CRYPTO-003-REC",
+        "T-VAN-CRYPTO-006-POS",
+        "T-VAN-CRYPTO-006-NEG",
+        "T-VAN-CRYPTO-006-REC",
+        "T-VAN-CRYPTO-008-POS",
+        "T-VAN-CRYPTO-008-NEG",
+        "T-VAN-CRYPTO-008-REC"
+      ],
+      "unit_id": "BE-008"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-004",
+        "VAN-SO-005",
+        "VAN-SO-012",
+        "VAN-SO-039",
+        "VAN-SO-040",
+        "VAN-CRYPTO-003",
+        "VAN-CRYPTO-005",
+        "VAN-CRYPTO-013",
+        "VAN-RV-004",
+        "VAN-RV-005"
+      ],
+      "operations": [
+        "Bind policy/artifact/qualification/venue/account/product/expiry and tested joint parameters to existing mandate.",
+        "Filter authorization, venue capability, order semantics, data, urgency, deadline and protection before scoring.",
+        "Account coordinator owns total worst-case exposure, including uncertain and cancel-pending children.",
+        "Learned state can evolve under qualified rule; rule/action/reward/scope changes use policy evolution; risk changes keep own authority.",
+        "Target delta accounts for actual holdings/working orders, netting mode and manual/strategy ownership.",
+        "Tick/step/min-notional/max limits and fee reserves apply before exact risk approval.",
+        "Buy reserves quote, sell owned base; fees/base/quote/third assets and cash conversion explicit; no leverage.",
+        "Spot support does not imply margin/perps/options/DEX/withdraw authority; any extension needs product-specific qualification.",
+        "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation.",
+        "Fees, exits or netting cannot reopen entry allowance; TCA decomposition must equal direct signed fill-versus-reference cost plus nonembedded charges.",
+        "Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
+        "Quantized slices jointly satisfy parent quantity, fresh depth participation, minimum lot/notional, maximum slices, deadline and command budget.",
+        "Quantity 200, depth 10, participation 0.25 and max 8 slices is infeasible for a one-snapshot plan; never issue eight slices of 25 claiming a cap of 2.5.",
+        "Replanning uses newly observed depth/time under same grant; restart retains lifetime counters and does not repeat unconfirmed slices."
+      ],
+      "tests": [
+        "T-VAN-SO-004-POS",
+        "T-VAN-SO-004-NEG",
+        "T-VAN-SO-004-REC",
+        "T-VAN-SO-005-POS",
+        "T-VAN-SO-005-NEG",
+        "T-VAN-SO-005-REC",
+        "T-VAN-SO-012-POS",
+        "T-VAN-SO-012-NEG",
+        "T-VAN-SO-012-REC",
+        "T-VAN-SO-039-POS",
+        "T-VAN-SO-039-NEG",
+        "T-VAN-SO-039-REC",
+        "T-VAN-SO-040-POS",
+        "T-VAN-SO-040-NEG",
+        "T-VAN-SO-040-REC",
+        "T-VAN-CRYPTO-003-POS",
+        "T-VAN-CRYPTO-003-NEG",
+        "T-VAN-CRYPTO-003-REC",
+        "T-VAN-CRYPTO-005-POS",
+        "T-VAN-CRYPTO-005-NEG",
+        "T-VAN-CRYPTO-005-REC",
+        "T-VAN-CRYPTO-013-POS",
+        "T-VAN-CRYPTO-013-NEG",
+        "T-VAN-CRYPTO-013-REC",
+        "T-VAN-RV-004-POS",
+        "T-VAN-RV-004-NEG",
+        "T-VAN-RV-004-REC",
+        "T-VAN-RV-005-POS",
+        "T-VAN-RV-005-NEG",
+        "T-VAN-RV-005-REC"
+      ],
+      "unit_id": "BE-009"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-002",
+        "VAN-SO-004",
+        "VAN-SO-005",
+        "VAN-SO-006",
+        "VAN-SO-007",
+        "VAN-SO-012",
+        "VAN-SO-013",
+        "VAN-SO-014",
+        "VAN-SO-015",
+        "VAN-SO-016",
+        "VAN-SO-017",
+        "VAN-SO-018",
+        "VAN-SO-025",
+        "VAN-SO-034",
+        "VAN-SO-040",
+        "VAN-SO-041",
+        "VAN-CRYPTO-001",
+        "VAN-CRYPTO-003",
+        "VAN-CRYPTO-006",
+        "VAN-CRYPTO-007",
+        "VAN-CRYPTO-008",
+        "VAN-CRYPTO-009",
+        "VAN-CRYPTO-010",
+        "VAN-CRYPTO-012",
+        "VAN-CRYPTO-013",
+        "VAN-RV-001",
+        "VAN-RV-002",
+        "VAN-RV-004",
+        "VAN-RV-005",
+        "VAN-RV-006",
+        "VAN-RV-008"
+      ],
+      "operations": [
+        "Operational choices are automatic under qualified grants; novel policies require independent qualification and authorized promotion.",
+        "Bind policy/artifact/qualification/venue/account/product/expiry and tested joint parameters to existing mandate.",
+        "Filter authorization, venue capability, order semantics, data, urgency, deadline and protection before scoring.",
+        "Empty urgent-compatible candidates choose explicit emergency route or refusal appropriate to objective purpose.",
+        "Registry insertion order never decides fallback; decision binds immutable chosen semantics.",
+        "Account coordinator owns total worst-case exposure, including uncertain and cancel-pending children.",
+        "Exact command and causal/fence identity committed before side effect; no exactly-once network assumption.",
+        "Cancel request does not release exposure; all feasible interleavings join authoritative facts.",
+        "Distinguish atomic amend, cancel-replace, identity/priority change and unsupported operations.",
+        "Immediate and pending fills share confirmed-protection/recovery behavior; flatten request is not flatness.",
+        "Use approved deadline/TIF; adapter defaults and restarts cannot extend it.",
+        "Preserve requested order type and side-correct limit; touching does not imply unlimited fills.",
+        "Qualified hysteresis, tie tolerance, persistence and joint action envelope constrain parameter changes.",
+        "New bindings require qualified and authenticated promotion; open parents retain policy unless explicit compatible migration.",
+        "Target delta accounts for actual holdings/working orders, netting mode and manual/strategy ownership.",
+        "Immediate/passive/chase/TWAP/participation/target methods have positive supported paths and constrained unsupported refusal.",
+        "At least one eligible supported CEX spot integration; same risk/router/lifecycle owners and current markets preserved.",
+        "Tick/step/min-notional/max limits and fee reserves apply before exact risk approval.",
+        "Sequence/checksum, timestamps, snapshot boundaries, fill IDs and resync per selected provider.",
+        "No silent coercion, native/synthetic stop distinction, amend priority and trigger sources explicit.",
+        "24/7 operation still handles maintenance; nonce/clock constraints; cancel/query headroom protected.",
+        "Account-wide cancellation must be assessed against protective/manual orders; no automatic blanket enabling.",
+        "Provider chosen by eligible current access; mocked Coinbase Advanced output cannot qualify matching or latency.",
+        "Chain discovery remains read-only; only independently admitted exchange products may enter actual order universe.",
+        "Spot support does not imply margin/perps/options/DEX/withdraw authority; any extension needs product-specific qualification.",
+        "Lose cancel reply; authenticated lookup proves cancelled with partial fills; record fills once, retain protection and release only proven unused reservation.",
+        "A timeout, absent REST result or expired local timer never proves cancellation or flat exposure.",
+        "Restart at cancel-send and query boundaries, then accept late fill/correction without resubmission.",
+        "Dispatch resolves current qualified policy, mandate, reservation, epoch and objective; positive decimal venue increments and complete mature costs validate.",
+        "Remove only POLICY_QUALIFIED at dispatch and reseal unsigned locks; named semantic check still fails. Reject zero tick and mature unknown costs.",
+        "Expiry/revocation at any preactivation or drain stage blocks new risk, reconciles in-flight effects and cannot reactivate revoked fallback.",
+        "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation.",
+        "Fees, exits or netting cannot reopen entry allowance; TCA decomposition must equal direct signed fill-versus-reference cost plus nonembedded charges.",
+        "Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
+        "Quantized slices jointly satisfy parent quantity, fresh depth participation, minimum lot/notional, maximum slices, deadline and command budget.",
+        "Quantity 200, depth 10, participation 0.25 and max 8 slices is infeasible for a one-snapshot plan; never issue eight slices of 25 claiming a cap of 2.5.",
+        "Replanning uses newly observed depth/time under same grant; restart retains lifetime counters and does not repeat unconfirmed slices.",
+        "Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds.",
+        "Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance.",
+        "Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
+        "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts.",
+        "Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration.",
+        "Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate."
+      ],
+      "tests": [
+        "T-VAN-SO-002-POS",
+        "T-VAN-SO-002-NEG",
+        "T-VAN-SO-002-REC",
+        "T-VAN-SO-004-POS",
+        "T-VAN-SO-004-NEG",
+        "T-VAN-SO-004-REC",
+        "T-VAN-SO-005-POS",
+        "T-VAN-SO-005-NEG",
+        "T-VAN-SO-005-REC",
+        "T-VAN-SO-006-POS",
+        "T-VAN-SO-006-NEG",
+        "T-VAN-SO-006-REC",
+        "T-VAN-SO-007-POS",
+        "T-VAN-SO-007-NEG",
+        "T-VAN-SO-007-REC",
+        "T-VAN-SO-012-POS",
+        "T-VAN-SO-012-NEG",
+        "T-VAN-SO-012-REC",
+        "T-VAN-SO-013-POS",
+        "T-VAN-SO-013-NEG",
+        "T-VAN-SO-013-REC",
+        "T-VAN-SO-014-POS",
+        "T-VAN-SO-014-NEG",
+        "T-VAN-SO-014-REC",
+        "T-VAN-SO-015-POS",
+        "T-VAN-SO-015-NEG",
+        "T-VAN-SO-015-REC",
+        "T-VAN-SO-016-POS",
+        "T-VAN-SO-016-NEG",
+        "T-VAN-SO-016-REC",
+        "T-VAN-SO-017-POS",
+        "T-VAN-SO-017-NEG",
+        "T-VAN-SO-017-REC",
+        "T-VAN-SO-018-POS",
+        "T-VAN-SO-018-NEG",
+        "T-VAN-SO-018-REC",
+        "T-VAN-SO-025-POS",
+        "T-VAN-SO-025-NEG",
+        "T-VAN-SO-025-REC",
+        "T-VAN-SO-034-POS",
+        "T-VAN-SO-034-NEG",
+        "T-VAN-SO-034-REC",
+        "T-VAN-SO-040-POS",
+        "T-VAN-SO-040-NEG",
+        "T-VAN-SO-040-REC",
+        "T-VAN-SO-041-POS",
+        "T-VAN-SO-041-NEG",
+        "T-VAN-SO-041-REC",
+        "T-VAN-CRYPTO-001-POS",
+        "T-VAN-CRYPTO-001-NEG",
+        "T-VAN-CRYPTO-001-REC",
+        "T-VAN-CRYPTO-003-POS",
+        "T-VAN-CRYPTO-003-NEG",
+        "T-VAN-CRYPTO-003-REC",
+        "T-VAN-CRYPTO-006-POS",
+        "T-VAN-CRYPTO-006-NEG",
+        "T-VAN-CRYPTO-006-REC",
+        "T-VAN-CRYPTO-007-POS",
+        "T-VAN-CRYPTO-007-NEG",
+        "T-VAN-CRYPTO-007-REC",
+        "T-VAN-CRYPTO-008-POS",
+        "T-VAN-CRYPTO-008-NEG",
+        "T-VAN-CRYPTO-008-REC",
+        "T-VAN-CRYPTO-009-POS",
+        "T-VAN-CRYPTO-009-NEG",
+        "T-VAN-CRYPTO-009-REC",
+        "T-VAN-CRYPTO-010-POS",
+        "T-VAN-CRYPTO-010-NEG",
+        "T-VAN-CRYPTO-010-REC",
+        "T-VAN-CRYPTO-012-POS",
+        "T-VAN-CRYPTO-012-NEG",
+        "T-VAN-CRYPTO-012-REC",
+        "T-VAN-CRYPTO-013-POS",
+        "T-VAN-CRYPTO-013-NEG",
+        "T-VAN-CRYPTO-013-REC",
+        "T-VAN-RV-001-POS",
+        "T-VAN-RV-001-NEG",
+        "T-VAN-RV-001-REC",
+        "T-VAN-RV-002-POS",
+        "T-VAN-RV-002-NEG",
+        "T-VAN-RV-002-REC",
+        "T-VAN-RV-004-POS",
+        "T-VAN-RV-004-NEG",
+        "T-VAN-RV-004-REC",
+        "T-VAN-RV-005-POS",
+        "T-VAN-RV-005-NEG",
+        "T-VAN-RV-005-REC",
+        "T-VAN-RV-006-POS",
+        "T-VAN-RV-006-NEG",
+        "T-VAN-RV-006-REC",
+        "T-VAN-RV-008-POS",
+        "T-VAN-RV-008-NEG",
+        "T-VAN-RV-008-REC"
+      ],
+      "unit_id": "BE-010"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-CRYPTO-001"
+      ],
+      "operations": [
+        "At least one eligible supported CEX spot integration; same risk/router/lifecycle owners and current markets preserved."
+      ],
+      "tests": [
+        "T-VAN-CRYPTO-001-POS",
+        "T-VAN-CRYPTO-001-NEG",
+        "T-VAN-CRYPTO-001-REC"
+      ],
+      "unit_id": "BE-011"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-008",
+        "VAN-SO-009",
+        "VAN-SO-010",
+        "VAN-SO-011",
+        "VAN-SO-014",
+        "VAN-SO-016",
+        "VAN-SO-019",
+        "VAN-SO-021",
+        "VAN-SO-035",
+        "VAN-SO-036",
+        "VAN-SO-040",
+        "VAN-CRYPTO-005",
+        "VAN-CRYPTO-007",
+        "VAN-CRYPTO-009",
+        "VAN-RV-001",
+        "VAN-RV-003",
+        "VAN-RV-004"
+      ],
+      "operations": [
+        "Do not call a mixture of medians an expectation or missing cost zero; record units, estimator and uncertainty.",
+        "Version canonical bucket key, product, side, amount/participation, fees, volatility, event and regime.",
+        "Order finality, cash/fee finality and markout maturity are separate; child messages are not independent trades.",
+        "Live/demo/paper/shadow/backtest/counterfactual provenance stays separate and source-authorized.",
+        "Cancel request does not release exposure; all feasible interleavings join authoritative facts.",
+        "Immediate and pending fills share confirmed-protection/recovery behavior; flatten request is not flatness.",
+        "Authoritative fill identity, correction/bust and fee currency feed one cash/position state.",
+        "Register actual outcome consumer, persist update and prove later decision effect.",
+        "Safety response immediate; economic monitoring uses qualified windows/sequential method; rollback never restores account history.",
+        "Frozen benchmark/horizon includes partial/non-fill costs and explicit fees without double counting.",
+        "Target delta accounts for actual holdings/working orders, netting mode and manual/strategy ownership.",
+        "Buy reserves quote, sell owned base; fees/base/quote/third assets and cash conversion explicit; no leverage.",
+        "No silent coercion, native/synthetic stop distinction, amend priority and trigger sources explicit.",
+        "Account-wide cancellation must be assessed against protective/manual orders; no automatic blanket enabling.",
+        "Lose cancel reply; authenticated lookup proves cancelled with partial fills; record fills once, retain protection and release only proven unused reservation.",
+        "A timeout, absent REST result or expired local timer never proves cancellation or flat exposure.",
+        "Restart at cancel-send and query boundaries, then accept late fill/correction without resubmission.",
+        "Real registered consumer applies newer observation revision once, persists cursor/contribution/snapshot atomically, and later eligible selector consumes its fingerprint.",
+        "Deliver older revision after correction and conflicting equal revision; older evidence cannot overwrite current contribution and conflict is quarantined.",
+        "Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
+        "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation.",
+        "Fees, exits or netting cannot reopen entry allowance; TCA decomposition must equal direct signed fill-versus-reference cost plus nonembedded charges.",
+        "Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry."
+      ],
+      "tests": [
+        "T-VAN-SO-008-POS",
+        "T-VAN-SO-008-NEG",
+        "T-VAN-SO-008-REC",
+        "T-VAN-SO-009-POS",
+        "T-VAN-SO-009-NEG",
+        "T-VAN-SO-009-REC",
+        "T-VAN-SO-010-POS",
+        "T-VAN-SO-010-NEG",
+        "T-VAN-SO-010-REC",
+        "T-VAN-SO-011-POS",
+        "T-VAN-SO-011-NEG",
+        "T-VAN-SO-011-REC",
+        "T-VAN-SO-014-POS",
+        "T-VAN-SO-014-NEG",
+        "T-VAN-SO-014-REC",
+        "T-VAN-SO-016-POS",
+        "T-VAN-SO-016-NEG",
+        "T-VAN-SO-016-REC",
+        "T-VAN-SO-019-POS",
+        "T-VAN-SO-019-NEG",
+        "T-VAN-SO-019-REC",
+        "T-VAN-SO-021-POS",
+        "T-VAN-SO-021-NEG",
+        "T-VAN-SO-021-REC",
+        "T-VAN-SO-035-POS",
+        "T-VAN-SO-035-NEG",
+        "T-VAN-SO-035-REC",
+        "T-VAN-SO-036-POS",
+        "T-VAN-SO-036-NEG",
+        "T-VAN-SO-036-REC",
+        "T-VAN-SO-040-POS",
+        "T-VAN-SO-040-NEG",
+        "T-VAN-SO-040-REC",
+        "T-VAN-CRYPTO-005-POS",
+        "T-VAN-CRYPTO-005-NEG",
+        "T-VAN-CRYPTO-005-REC",
+        "T-VAN-CRYPTO-007-POS",
+        "T-VAN-CRYPTO-007-NEG",
+        "T-VAN-CRYPTO-007-REC",
+        "T-VAN-CRYPTO-009-POS",
+        "T-VAN-CRYPTO-009-NEG",
+        "T-VAN-CRYPTO-009-REC",
+        "T-VAN-RV-001-POS",
+        "T-VAN-RV-001-NEG",
+        "T-VAN-RV-001-REC",
+        "T-VAN-RV-003-POS",
+        "T-VAN-RV-003-NEG",
+        "T-VAN-RV-003-REC",
+        "T-VAN-RV-004-POS",
+        "T-VAN-RV-004-NEG",
+        "T-VAN-RV-004-REC"
+      ],
+      "unit_id": "BE-012"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-026"
+      ],
+      "operations": [
+        "Remote interpretation/training stays off decision/protection path; bounded queues and credentials."
+      ],
+      "tests": [
+        "T-VAN-SO-026-POS",
+        "T-VAN-SO-026-NEG",
+        "T-VAN-SO-026-REC"
+      ],
+      "unit_id": "BE-021"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-026"
+      ],
+      "operations": [
+        "Remote interpretation/training stays off decision/protection path; bounded queues and credentials."
+      ],
+      "tests": [
+        "T-VAN-SO-026-POS",
+        "T-VAN-SO-026-NEG",
+        "T-VAN-SO-026-REC"
+      ],
+      "unit_id": "BE-024"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-026",
+        "VAN-SO-027"
+      ],
+      "operations": [
+        "Remote interpretation/training stays off decision/protection path; bounded queues and credentials.",
+        "Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate."
+      ],
+      "tests": [
+        "T-VAN-SO-026-POS",
+        "T-VAN-SO-026-NEG",
+        "T-VAN-SO-026-REC",
+        "T-VAN-SO-027-POS",
+        "T-VAN-SO-027-NEG",
+        "T-VAN-SO-027-REC"
+      ],
+      "unit_id": "BE-028"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-038"
+      ],
+      "operations": [
+        "Expose active binding, changed decision, evidence/maturity, authority and fallback without ungrounded profit claims."
+      ],
+      "tests": [
+        "T-VAN-SO-038-POS",
+        "T-VAN-SO-038-NEG",
+        "T-VAN-SO-038-REC"
+      ],
+      "unit_id": "BE-030"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-008",
+        "VAN-SO-018",
+        "VAN-SO-028",
+        "VAN-SO-029",
+        "VAN-SO-030",
+        "VAN-SO-031",
+        "VAN-SO-036",
+        "VAN-SO-041",
+        "VAN-SO-043",
+        "VAN-CRYPTO-007",
+        "VAN-CRYPTO-011",
+        "VAN-LEAN-005",
+        "VAN-RV-004",
+        "VAN-RV-005",
+        "VAN-RV-007"
+      ],
+      "operations": [
+        "Do not call a mixture of medians an expectation or missing cost zero; record units, estimator and uncertainty.",
+        "Preserve requested order type and side-correct limit; touching does not imply unlimited fills.",
+        "Price/time/cost/account oracle and causal tests are prerequisites to candidate efficacy.",
+        "Fit/selection/calibration/test records reflect actual chronology, with overlap controls.",
+        "Mutating later information cannot affect earlier features, decisions or commands.",
+        "Each arm has its own cash/reservations/holdings while receiving same permissible information and resource limits.",
+        "Frozen benchmark/horizon includes partial/non-fill costs and explicit fees without double counting.",
+        "Immediate/passive/chase/TWAP/participation/target methods have positive supported paths and constrained unsupported refusal.",
+        "DesignChangeProposal binds source/data/evaluator/alternatives/uncertainty, complexity effects and affected contracts.",
+        "No silent coercion, native/synthetic stop distinction, amend priority and trigger sources explicit.",
+        "Crypto full-account arms include correct data conventions, fees, liquidity drought, maintenance, delisting and stablecoin stress.",
+        "Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit.",
+        "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation.",
+        "Fees, exits or netting cannot reopen entry allowance; TCA decomposition must equal direct signed fill-versus-reference cost plus nonembedded charges.",
+        "Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
+        "Quantized slices jointly satisfy parent quantity, fresh depth participation, minimum lot/notional, maximum slices, deadline and command budget.",
+        "Quantity 200, depth 10, participation 0.25 and max 8 slices is infeasible for a one-snapshot plan; never issue eight slices of 25 claiming a cap of 2.5.",
+        "Replanning uses newly observed depth/time under same grant; restart retains lifetime counters and does not repeat unconfirmed slices.",
+        "Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty.",
+        "Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L.",
+        "Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies."
+      ],
+      "tests": [
+        "T-VAN-SO-008-POS",
+        "T-VAN-SO-008-NEG",
+        "T-VAN-SO-008-REC",
+        "T-VAN-SO-018-POS",
+        "T-VAN-SO-018-NEG",
+        "T-VAN-SO-018-REC",
+        "T-VAN-SO-028-POS",
+        "T-VAN-SO-028-NEG",
+        "T-VAN-SO-028-REC",
+        "T-VAN-SO-029-POS",
+        "T-VAN-SO-029-NEG",
+        "T-VAN-SO-029-REC",
+        "T-VAN-SO-030-POS",
+        "T-VAN-SO-030-NEG",
+        "T-VAN-SO-030-REC",
+        "T-VAN-SO-031-POS",
+        "T-VAN-SO-031-NEG",
+        "T-VAN-SO-031-REC",
+        "T-VAN-SO-036-POS",
+        "T-VAN-SO-036-NEG",
+        "T-VAN-SO-036-REC",
+        "T-VAN-SO-041-POS",
+        "T-VAN-SO-041-NEG",
+        "T-VAN-SO-041-REC",
+        "T-VAN-SO-043-POS",
+        "T-VAN-SO-043-NEG",
+        "T-VAN-SO-043-REC",
+        "T-VAN-CRYPTO-007-POS",
+        "T-VAN-CRYPTO-007-NEG",
+        "T-VAN-CRYPTO-007-REC",
+        "T-VAN-CRYPTO-011-POS",
+        "T-VAN-CRYPTO-011-NEG",
+        "T-VAN-CRYPTO-011-REC",
+        "T-VAN-LEAN-005-POS",
+        "T-VAN-LEAN-005-NEG",
+        "T-VAN-LEAN-005-REC",
+        "T-VAN-RV-004-POS",
+        "T-VAN-RV-004-NEG",
+        "T-VAN-RV-004-REC",
+        "T-VAN-RV-005-POS",
+        "T-VAN-RV-005-NEG",
+        "T-VAN-RV-005-REC",
+        "T-VAN-RV-007-POS",
+        "T-VAN-RV-007-NEG",
+        "T-VAN-RV-007-REC"
+      ],
+      "unit_id": "BE-035"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-042"
+      ],
+      "operations": [
+        "Required forecasting plugins are complete integrations, while active selection uses qualified minimal stack."
+      ],
+      "tests": [
+        "T-VAN-SO-042-POS",
+        "T-VAN-SO-042-NEG",
+        "T-VAN-SO-042-REC"
+      ],
+      "unit_id": "BE-013"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-027"
+      ],
+      "operations": [
+        "Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate."
+      ],
+      "tests": [
+        "T-VAN-SO-027-POS",
+        "T-VAN-SO-027-NEG",
+        "T-VAN-SO-027-REC"
+      ],
+      "unit_id": "BE-022"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-CRYPTO-012"
+      ],
+      "operations": [
+        "Chain discovery remains read-only; only independently admitted exchange products may enter actual order universe."
+      ],
+      "tests": [
+        "T-VAN-CRYPTO-012-POS",
+        "T-VAN-CRYPTO-012-NEG",
+        "T-VAN-CRYPTO-012-REC"
+      ],
+      "unit_id": "BE-037"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-029",
+        "VAN-SO-030"
+      ],
+      "operations": [
+        "Fit/selection/calibration/test records reflect actual chronology, with overlap controls.",
+        "Mutating later information cannot affect earlier features, decisions or commands."
+      ],
+      "tests": [
+        "T-VAN-SO-029-POS",
+        "T-VAN-SO-029-NEG",
+        "T-VAN-SO-029-REC",
+        "T-VAN-SO-030-POS",
+        "T-VAN-SO-030-NEG",
+        "T-VAN-SO-030-REC"
+      ],
+      "unit_id": "VAN-ML-PKT-008"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-CRYPTO-012"
+      ],
+      "operations": [
+        "Chain discovery remains read-only; only independently admitted exchange products may enter actual order universe."
+      ],
+      "tests": [
+        "T-VAN-CRYPTO-012-POS",
+        "T-VAN-CRYPTO-012-NEG",
+        "T-VAN-CRYPTO-012-REC"
+      ],
+      "unit_id": "BE-041"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-031",
+        "VAN-CRYPTO-011"
+      ],
+      "operations": [
+        "Each arm has its own cash/reservations/holdings while receiving same permissible information and resource limits.",
+        "Crypto full-account arms include correct data conventions, fees, liquidity drought, maintenance, delisting and stablecoin stress."
+      ],
+      "tests": [
+        "T-VAN-SO-031-POS",
+        "T-VAN-SO-031-NEG",
+        "T-VAN-SO-031-REC",
+        "T-VAN-CRYPTO-011-POS",
+        "T-VAN-CRYPTO-011-NEG",
+        "T-VAN-CRYPTO-011-REC"
+      ],
+      "unit_id": "VAN-ML-PKT-010"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-042"
+      ],
+      "operations": [
+        "Required forecasting plugins are complete integrations, while active selection uses qualified minimal stack."
+      ],
+      "tests": [
+        "T-VAN-SO-042-POS",
+        "T-VAN-SO-042-NEG",
+        "T-VAN-SO-042-REC"
+      ],
+      "unit_id": "VAN-ML-PKT-025"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-CRYPTO-012"
+      ],
+      "operations": [
+        "Chain discovery remains read-only; only independently admitted exchange products may enter actual order universe."
+      ],
+      "tests": [
+        "T-VAN-CRYPTO-012-POS",
+        "T-VAN-CRYPTO-012-NEG",
+        "T-VAN-CRYPTO-012-REC"
+      ],
+      "unit_id": "BE-043"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-001",
+        "VAN-SO-002",
+        "VAN-SO-003",
+        "VAN-SO-008",
+        "VAN-SO-009",
+        "VAN-SO-010",
+        "VAN-SO-011",
+        "VAN-SO-021",
+        "VAN-SO-022",
+        "VAN-SO-023",
+        "VAN-SO-024",
+        "VAN-SO-025",
+        "VAN-SO-027",
+        "VAN-SO-028",
+        "VAN-SO-029",
+        "VAN-SO-031",
+        "VAN-SO-032",
+        "VAN-SO-033",
+        "VAN-SO-034",
+        "VAN-SO-035",
+        "VAN-SO-036",
+        "VAN-SO-037",
+        "VAN-SO-039",
+        "VAN-SO-042",
+        "VAN-SO-043",
+        "VAN-LEAN-002",
+        "VAN-LEAN-005",
+        "VAN-RV-003",
+        "VAN-RV-006",
+        "VAN-RV-007"
+      ],
+      "operations": [
+        "Actual outcome producer, durable evidence, selector and evolution consumers form one integrated VATI loop.",
+        "Operational choices are automatic under qualified grants; novel policies require independent qualification and authorized promotion.",
+        "Evidence update, operational selection and policy mutation are three different typed effects.",
+        "Do not call a mixture of medians an expectation or missing cost zero; record units, estimator and uncertainty.",
+        "Version canonical bucket key, product, side, amount/participation, fees, volatility, event and regime.",
+        "Order finality, cash/fee finality and markout maturity are separate; child messages are not independent trades.",
+        "Live/demo/paper/shadow/backtest/counterfactual provenance stays separate and source-authorized.",
+        "Register actual outcome consumer, persist update and prove later decision effect.",
+        "Observation contribution, consumed revision and cursor/snapshot publish atomically.",
+        "No retroactive editing of issued decision; affected future statistics/models are invalidated or restated.",
+        "Use only fresh mature compatible evidence; pooling/fallback is versioned and justified.",
+        "Qualified hysteresis, tie tolerance, persistence and joint action envelope constrain parameter changes.",
+        "Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate.",
+        "Price/time/cost/account oracle and causal tests are prerequisites to candidate efficacy.",
+        "Fit/selection/calibration/test records reflect actual chronology, with overlap controls.",
+        "Each arm has its own cash/reservations/holdings while receiving same permissible information and resource limits.",
+        "No live randomized exploration by default; off-policy claims require propensity/overlap assumptions.",
+        "Qualification binds exact cohort/evaluator/artifact, uncertainty and operational limits; author cannot self-certify.",
+        "New bindings require qualified and authenticated promotion; open parents retain policy unless explicit compatible migration.",
+        "Safety response immediate; economic monitoring uses qualified windows/sequential method; rollback never restores account history.",
+        "Frozen benchmark/horizon includes partial/non-fill costs and explicit fees without double counting.",
+        "Full positive loop is mandatory; real candidate may correctly fail economic tests.",
+        "Learned state can evolve under qualified rule; rule/action/reward/scope changes use policy evolution; risk changes keep own authority.",
+        "Required forecasting plugins are complete integrations, while active selection uses qualified minimal stack.",
+        "DesignChangeProposal binds source/data/evaluator/alternatives/uncertainty, complexity effects and affected contracts.",
+        "Each candidate lists operational cost, maintenance/state burden, alternatives and incremental evidence; safety complexity is mandatory.",
+        "Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit.",
+        "Real registered consumer applies newer observation revision once, persists cursor/contribution/snapshot atomically, and later eligible selector consumes its fingerprint.",
+        "Deliver older revision after correction and conflicting equal revision; older evidence cannot overwrite current contribution and conflict is quarantined.",
+        "Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
+        "Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds.",
+        "Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance.",
+        "Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
+        "Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty.",
+        "Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L.",
+        "Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies."
+      ],
+      "tests": [
+        "T-VAN-SO-001-POS",
+        "T-VAN-SO-001-NEG",
+        "T-VAN-SO-001-REC",
+        "T-VAN-SO-002-POS",
+        "T-VAN-SO-002-NEG",
+        "T-VAN-SO-002-REC",
+        "T-VAN-SO-003-POS",
+        "T-VAN-SO-003-NEG",
+        "T-VAN-SO-003-REC",
+        "T-VAN-SO-008-POS",
+        "T-VAN-SO-008-NEG",
+        "T-VAN-SO-008-REC",
+        "T-VAN-SO-009-POS",
+        "T-VAN-SO-009-NEG",
+        "T-VAN-SO-009-REC",
+        "T-VAN-SO-010-POS",
+        "T-VAN-SO-010-NEG",
+        "T-VAN-SO-010-REC",
+        "T-VAN-SO-011-POS",
+        "T-VAN-SO-011-NEG",
+        "T-VAN-SO-011-REC",
+        "T-VAN-SO-021-POS",
+        "T-VAN-SO-021-NEG",
+        "T-VAN-SO-021-REC",
+        "T-VAN-SO-022-POS",
+        "T-VAN-SO-022-NEG",
+        "T-VAN-SO-022-REC",
+        "T-VAN-SO-023-POS",
+        "T-VAN-SO-023-NEG",
+        "T-VAN-SO-023-REC",
+        "T-VAN-SO-024-POS",
+        "T-VAN-SO-024-NEG",
+        "T-VAN-SO-024-REC",
+        "T-VAN-SO-025-POS",
+        "T-VAN-SO-025-NEG",
+        "T-VAN-SO-025-REC",
+        "T-VAN-SO-027-POS",
+        "T-VAN-SO-027-NEG",
+        "T-VAN-SO-027-REC",
+        "T-VAN-SO-028-POS",
+        "T-VAN-SO-028-NEG",
+        "T-VAN-SO-028-REC",
+        "T-VAN-SO-029-POS",
+        "T-VAN-SO-029-NEG",
+        "T-VAN-SO-029-REC",
+        "T-VAN-SO-031-POS",
+        "T-VAN-SO-031-NEG",
+        "T-VAN-SO-031-REC",
+        "T-VAN-SO-032-POS",
+        "T-VAN-SO-032-NEG",
+        "T-VAN-SO-032-REC",
+        "T-VAN-SO-033-POS",
+        "T-VAN-SO-033-NEG",
+        "T-VAN-SO-033-REC",
+        "T-VAN-SO-034-POS",
+        "T-VAN-SO-034-NEG",
+        "T-VAN-SO-034-REC",
+        "T-VAN-SO-035-POS",
+        "T-VAN-SO-035-NEG",
+        "T-VAN-SO-035-REC",
+        "T-VAN-SO-036-POS",
+        "T-VAN-SO-036-NEG",
+        "T-VAN-SO-036-REC",
+        "T-VAN-SO-037-POS",
+        "T-VAN-SO-037-NEG",
+        "T-VAN-SO-037-REC",
+        "T-VAN-SO-039-POS",
+        "T-VAN-SO-039-NEG",
+        "T-VAN-SO-039-REC",
+        "T-VAN-SO-042-POS",
+        "T-VAN-SO-042-NEG",
+        "T-VAN-SO-042-REC",
+        "T-VAN-SO-043-POS",
+        "T-VAN-SO-043-NEG",
+        "T-VAN-SO-043-REC",
+        "T-VAN-LEAN-002-POS",
+        "T-VAN-LEAN-002-NEG",
+        "T-VAN-LEAN-002-REC",
+        "T-VAN-LEAN-005-POS",
+        "T-VAN-LEAN-005-NEG",
+        "T-VAN-LEAN-005-REC",
+        "T-VAN-RV-003-POS",
+        "T-VAN-RV-003-NEG",
+        "T-VAN-RV-003-REC",
+        "T-VAN-RV-006-POS",
+        "T-VAN-RV-006-NEG",
+        "T-VAN-RV-006-REC",
+        "T-VAN-RV-007-POS",
+        "T-VAN-RV-007-NEG",
+        "T-VAN-RV-007-REC"
+      ],
+      "unit_id": "BE-036"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-CRYPTO-012"
+      ],
+      "operations": [
+        "Chain discovery remains read-only; only independently admitted exchange products may enter actual order universe."
+      ],
+      "tests": [
+        "T-VAN-CRYPTO-012-POS",
+        "T-VAN-CRYPTO-012-NEG",
+        "T-VAN-CRYPTO-012-REC"
+      ],
+      "unit_id": "BE-044"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-038",
+        "VAN-SO-044",
+        "VAN-CRYPTO-014",
+        "VAN-LEAN-004",
+        "VAN-RV-008"
+      ],
+      "operations": [
+        "Expose active binding, changed decision, evidence/maturity, authority and fallback without ungrounded profit claims.",
+        "Every new lifecycle/crypto operation has producer, caller, tests and scoped evidence before frontend.",
+        "Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states.",
+        "Internal optimizer states become contextual typed views; no new default global tab or dense Home.",
+        "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts.",
+        "Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration.",
+        "Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate."
+      ],
+      "tests": [
+        "T-VAN-SO-038-POS",
+        "T-VAN-SO-038-NEG",
+        "T-VAN-SO-038-REC",
+        "T-VAN-SO-044-POS",
+        "T-VAN-SO-044-NEG",
+        "T-VAN-SO-044-REC",
+        "T-VAN-CRYPTO-014-POS",
+        "T-VAN-CRYPTO-014-NEG",
+        "T-VAN-CRYPTO-014-REC",
+        "T-VAN-LEAN-004-POS",
+        "T-VAN-LEAN-004-NEG",
+        "T-VAN-LEAN-004-REC",
+        "T-VAN-RV-008-POS",
+        "T-VAN-RV-008-NEG",
+        "T-VAN-RV-008-REC"
+      ],
+      "unit_id": "BE-032"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-020",
+        "VAN-SO-026",
+        "VAN-SO-035",
+        "VAN-CRYPTO-008",
+        "VAN-LEAN-001"
+      ],
+      "operations": [
+        "Verified anchor plus tail reduces repeated work without accepting tampered history.",
+        "Remote interpretation/training stays off decision/protection path; bounded queues and credentials.",
+        "Safety response immediate; economic monitoring uses qualified windows/sequential method; rollback never restores account history.",
+        "24/7 operation still handles maintenance; nonce/clock constraints; cancel/query headroom protected.",
+        "Extend existing boundaries; justify any new process/store with measured isolation/correctness benefit."
+      ],
+      "tests": [
+        "T-VAN-SO-020-POS",
+        "T-VAN-SO-020-NEG",
+        "T-VAN-SO-020-REC",
+        "T-VAN-SO-026-POS",
+        "T-VAN-SO-026-NEG",
+        "T-VAN-SO-026-REC",
+        "T-VAN-SO-035-POS",
+        "T-VAN-SO-035-NEG",
+        "T-VAN-SO-035-REC",
+        "T-VAN-CRYPTO-008-POS",
+        "T-VAN-CRYPTO-008-NEG",
+        "T-VAN-CRYPTO-008-REC",
+        "T-VAN-LEAN-001-POS",
+        "T-VAN-LEAN-001-NEG",
+        "T-VAN-LEAN-001-REC"
+      ],
+      "unit_id": "BE-033"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-016",
+        "VAN-CRYPTO-001",
+        "VAN-CRYPTO-010",
+        "VAN-RV-002",
+        "VAN-RV-008"
+      ],
+      "operations": [
+        "Immediate and pending fills share confirmed-protection/recovery behavior; flatten request is not flatness.",
+        "At least one eligible supported CEX spot integration; same risk/router/lifecycle owners and current markets preserved.",
+        "Provider chosen by eligible current access; mocked Coinbase Advanced output cannot qualify matching or latency.",
+        "Dispatch resolves current qualified policy, mandate, reservation, epoch and objective; positive decimal venue increments and complete mature costs validate.",
+        "Remove only POLICY_QUALIFIED at dispatch and reseal unsigned locks; named semantic check still fails. Reject zero tick and mature unknown costs.",
+        "Expiry/revocation at any preactivation or drain stage blocks new risk, reconciles in-flight effects and cannot reactivate revoked fallback.",
+        "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts.",
+        "Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration.",
+        "Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate."
+      ],
+      "tests": [
+        "T-VAN-SO-016-POS",
+        "T-VAN-SO-016-NEG",
+        "T-VAN-SO-016-REC",
+        "T-VAN-CRYPTO-001-POS",
+        "T-VAN-CRYPTO-001-NEG",
+        "T-VAN-CRYPTO-001-REC",
+        "T-VAN-CRYPTO-010-POS",
+        "T-VAN-CRYPTO-010-NEG",
+        "T-VAN-CRYPTO-010-REC",
+        "T-VAN-RV-002-POS",
+        "T-VAN-RV-002-NEG",
+        "T-VAN-RV-002-REC",
+        "T-VAN-RV-008-POS",
+        "T-VAN-RV-008-NEG",
+        "T-VAN-RV-008-REC"
+      ],
+      "unit_id": "BQ-001"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-012",
+        "VAN-CRYPTO-009",
+        "VAN-CRYPTO-010",
+        "VAN-RV-001",
+        "VAN-RV-005",
+        "VAN-RV-008"
+      ],
+      "operations": [
+        "Account coordinator owns total worst-case exposure, including uncertain and cancel-pending children.",
+        "Account-wide cancellation must be assessed against protective/manual orders; no automatic blanket enabling.",
+        "Provider chosen by eligible current access; mocked Coinbase Advanced output cannot qualify matching or latency.",
+        "Lose cancel reply; authenticated lookup proves cancelled with partial fills; record fills once, retain protection and release only proven unused reservation.",
+        "A timeout, absent REST result or expired local timer never proves cancellation or flat exposure.",
+        "Restart at cancel-send and query boundaries, then accept late fill/correction without resubmission.",
+        "Quantized slices jointly satisfy parent quantity, fresh depth participation, minimum lot/notional, maximum slices, deadline and command budget.",
+        "Quantity 200, depth 10, participation 0.25 and max 8 slices is infeasible for a one-snapshot plan; never issue eight slices of 25 claiming a cap of 2.5.",
+        "Replanning uses newly observed depth/time under same grant; restart retains lifetime counters and does not repeat unconfirmed slices.",
+        "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts.",
+        "Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration.",
+        "Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate."
+      ],
+      "tests": [
+        "T-VAN-SO-012-POS",
+        "T-VAN-SO-012-NEG",
+        "T-VAN-SO-012-REC",
+        "T-VAN-CRYPTO-009-POS",
+        "T-VAN-CRYPTO-009-NEG",
+        "T-VAN-CRYPTO-009-REC",
+        "T-VAN-CRYPTO-010-POS",
+        "T-VAN-CRYPTO-010-NEG",
+        "T-VAN-CRYPTO-010-REC",
+        "T-VAN-RV-001-POS",
+        "T-VAN-RV-001-NEG",
+        "T-VAN-RV-001-REC",
+        "T-VAN-RV-005-POS",
+        "T-VAN-RV-005-NEG",
+        "T-VAN-RV-005-REC",
+        "T-VAN-RV-008-POS",
+        "T-VAN-RV-008-NEG",
+        "T-VAN-RV-008-REC"
+      ],
+      "unit_id": "BQ-002"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-001",
+        "VAN-SO-002",
+        "VAN-SO-003",
+        "VAN-SO-006",
+        "VAN-SO-021",
+        "VAN-SO-028",
+        "VAN-SO-033",
+        "VAN-SO-037",
+        "VAN-RV-003",
+        "VAN-RV-006"
+      ],
+      "operations": [
+        "Actual outcome producer, durable evidence, selector and evolution consumers form one integrated VATI loop.",
+        "Operational choices are automatic under qualified grants; novel policies require independent qualification and authorized promotion.",
+        "Evidence update, operational selection and policy mutation are three different typed effects.",
+        "Empty urgent-compatible candidates choose explicit emergency route or refusal appropriate to objective purpose.",
+        "Register actual outcome consumer, persist update and prove later decision effect.",
+        "Price/time/cost/account oracle and causal tests are prerequisites to candidate efficacy.",
+        "Qualification binds exact cohort/evaluator/artifact, uncertainty and operational limits; author cannot self-certify.",
+        "Full positive loop is mandatory; real candidate may correctly fail economic tests.",
+        "Real registered consumer applies newer observation revision once, persists cursor/contribution/snapshot atomically, and later eligible selector consumes its fingerprint.",
+        "Deliver older revision after correction and conflicting equal revision; older evidence cannot overwrite current contribution and conflict is quarantined.",
+        "Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
+        "Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds.",
+        "Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance.",
+        "Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection."
+      ],
+      "tests": [
+        "T-VAN-SO-001-POS",
+        "T-VAN-SO-001-NEG",
+        "T-VAN-SO-001-REC",
+        "T-VAN-SO-002-POS",
+        "T-VAN-SO-002-NEG",
+        "T-VAN-SO-002-REC",
+        "T-VAN-SO-003-POS",
+        "T-VAN-SO-003-NEG",
+        "T-VAN-SO-003-REC",
+        "T-VAN-SO-006-POS",
+        "T-VAN-SO-006-NEG",
+        "T-VAN-SO-006-REC",
+        "T-VAN-SO-021-POS",
+        "T-VAN-SO-021-NEG",
+        "T-VAN-SO-021-REC",
+        "T-VAN-SO-028-POS",
+        "T-VAN-SO-028-NEG",
+        "T-VAN-SO-028-REC",
+        "T-VAN-SO-033-POS",
+        "T-VAN-SO-033-NEG",
+        "T-VAN-SO-033-REC",
+        "T-VAN-SO-037-POS",
+        "T-VAN-SO-037-NEG",
+        "T-VAN-SO-037-REC",
+        "T-VAN-RV-003-POS",
+        "T-VAN-RV-003-NEG",
+        "T-VAN-RV-003-REC",
+        "T-VAN-RV-006-POS",
+        "T-VAN-RV-006-NEG",
+        "T-VAN-RV-006-REC"
+      ],
+      "unit_id": "BQ-007"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-032",
+        "VAN-SO-033",
+        "VAN-LEAN-002",
+        "VAN-RV-004",
+        "VAN-RV-007"
+      ],
+      "operations": [
+        "No live randomized exploration by default; off-policy claims require propensity/overlap assumptions.",
+        "Qualification binds exact cohort/evaluator/artifact, uncertainty and operational limits; author cannot self-certify.",
+        "Each candidate lists operational cost, maintenance/state burden, alternatives and incremental evidence; safety complexity is mandatory.",
+        "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation.",
+        "Fees, exits or netting cannot reopen entry allowance; TCA decomposition must equal direct signed fill-versus-reference cost plus nonembedded charges.",
+        "Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
+        "Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty.",
+        "Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L.",
+        "Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies."
+      ],
+      "tests": [
+        "T-VAN-SO-032-POS",
+        "T-VAN-SO-032-NEG",
+        "T-VAN-SO-032-REC",
+        "T-VAN-SO-033-POS",
+        "T-VAN-SO-033-NEG",
+        "T-VAN-SO-033-REC",
+        "T-VAN-LEAN-002-POS",
+        "T-VAN-LEAN-002-NEG",
+        "T-VAN-LEAN-002-REC",
+        "T-VAN-RV-004-POS",
+        "T-VAN-RV-004-NEG",
+        "T-VAN-RV-004-REC",
+        "T-VAN-RV-007-POS",
+        "T-VAN-RV-007-NEG",
+        "T-VAN-RV-007-REC"
+      ],
+      "unit_id": "BQ-009"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-044",
+        "VAN-LEAN-003",
+        "VAN-LEAN-006"
+      ],
+      "operations": [
+        "Every new lifecycle/crypto operation has producer, caller, tests and scoped evidence before frontend.",
+        "All inherited requirement/action/context objects remain, with explicit semantic additions not automatic deletion.",
+        "All new capabilities feed sole BG and existing context/material contracts; no early native renderer."
+      ],
+      "tests": [
+        "T-VAN-SO-044-POS",
+        "T-VAN-SO-044-NEG",
+        "T-VAN-SO-044-REC",
+        "T-VAN-LEAN-003-POS",
+        "T-VAN-LEAN-003-NEG",
+        "T-VAN-LEAN-003-REC",
+        "T-VAN-LEAN-006-POS",
+        "T-VAN-LEAN-006-NEG",
+        "T-VAN-LEAN-006-REC"
+      ],
+      "unit_id": "BQ-006"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-001",
+        "VAN-SO-044",
+        "VAN-LEAN-006",
+        "VAN-RV-001",
+        "VAN-RV-002",
+        "VAN-RV-003",
+        "VAN-RV-004",
+        "VAN-RV-005",
+        "VAN-RV-006",
+        "VAN-RV-007",
+        "VAN-RV-008"
+      ],
+      "operations": [
+        "Actual outcome producer, durable evidence, selector and evolution consumers form one integrated VATI loop.",
+        "Every new lifecycle/crypto operation has producer, caller, tests and scoped evidence before frontend.",
+        "All new capabilities feed sole BG and existing context/material contracts; no early native renderer.",
+        "Lose cancel reply; authenticated lookup proves cancelled with partial fills; record fills once, retain protection and release only proven unused reservation.",
+        "A timeout, absent REST result or expired local timer never proves cancellation or flat exposure.",
+        "Restart at cancel-send and query boundaries, then accept late fill/correction without resubmission.",
+        "Dispatch resolves current qualified policy, mandate, reservation, epoch and objective; positive decimal venue increments and complete mature costs validate.",
+        "Remove only POLICY_QUALIFIED at dispatch and reseal unsigned locks; named semantic check still fails. Reject zero tick and mature unknown costs.",
+        "Expiry/revocation at any preactivation or drain stage blocks new risk, reconciles in-flight effects and cannot reactivate revoked fallback.",
+        "Real registered consumer applies newer observation revision once, persists cursor/contribution/snapshot atomically, and later eligible selector consumes its fingerprint.",
+        "Deliver older revision after correction and conflicting equal revision; older evidence cannot overwrite current contribution and conflict is quarantined.",
+        "Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
+        "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation.",
+        "Fees, exits or netting cannot reopen entry allowance; TCA decomposition must equal direct signed fill-versus-reference cost plus nonembedded charges.",
+        "Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
+        "Quantized slices jointly satisfy parent quantity, fresh depth participation, minimum lot/notional, maximum slices, deadline and command budget.",
+        "Quantity 200, depth 10, participation 0.25 and max 8 slices is infeasible for a one-snapshot plan; never issue eight slices of 25 claiming a cap of 2.5.",
+        "Replanning uses newly observed depth/time under same grant; restart retains lifetime counters and does not repeat unconfirmed slices.",
+        "Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds.",
+        "Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance.",
+        "Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
+        "Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty.",
+        "Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L.",
+        "Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies.",
+        "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts.",
+        "Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration.",
+        "Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate."
+      ],
+      "tests": [
+        "T-VAN-SO-001-POS",
+        "T-VAN-SO-001-NEG",
+        "T-VAN-SO-001-REC",
+        "T-VAN-SO-044-POS",
+        "T-VAN-SO-044-NEG",
+        "T-VAN-SO-044-REC",
+        "T-VAN-LEAN-006-POS",
+        "T-VAN-LEAN-006-NEG",
+        "T-VAN-LEAN-006-REC",
+        "T-VAN-RV-001-POS",
+        "T-VAN-RV-001-NEG",
+        "T-VAN-RV-001-REC",
+        "T-VAN-RV-002-POS",
+        "T-VAN-RV-002-NEG",
+        "T-VAN-RV-002-REC",
+        "T-VAN-RV-003-POS",
+        "T-VAN-RV-003-NEG",
+        "T-VAN-RV-003-REC",
+        "T-VAN-RV-004-POS",
+        "T-VAN-RV-004-NEG",
+        "T-VAN-RV-004-REC",
+        "T-VAN-RV-005-POS",
+        "T-VAN-RV-005-NEG",
+        "T-VAN-RV-005-REC",
+        "T-VAN-RV-006-POS",
+        "T-VAN-RV-006-NEG",
+        "T-VAN-RV-006-REC",
+        "T-VAN-RV-007-POS",
+        "T-VAN-RV-007-NEG",
+        "T-VAN-RV-007-REC",
+        "T-VAN-RV-008-POS",
+        "T-VAN-RV-008-NEG",
+        "T-VAN-RV-008-REC"
+      ],
+      "unit_id": "BG-001"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-LEAN-004"
+      ],
+      "operations": [
+        "Internal optimizer states become contextual typed views; no new default global tab or dense Home."
+      ],
+      "tests": [
+        "T-VAN-LEAN-004-POS",
+        "T-VAN-LEAN-004-NEG",
+        "T-VAN-LEAN-004-REC"
+      ],
+      "unit_id": "UX-001"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-LEAN-006"
+      ],
+      "operations": [
+        "All new capabilities feed sole BG and existing context/material contracts; no early native renderer."
+      ],
+      "tests": [
+        "T-VAN-LEAN-006-POS",
+        "T-VAN-LEAN-006-NEG",
+        "T-VAN-LEAN-006-REC"
+      ],
+      "unit_id": "UX-002"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-LEAN-004"
+      ],
+      "operations": [
+        "Internal optimizer states become contextual typed views; no new default global tab or dense Home."
+      ],
+      "tests": [
+        "T-VAN-LEAN-004-POS",
+        "T-VAN-LEAN-004-NEG",
+        "T-VAN-LEAN-004-REC"
+      ],
+      "unit_id": "UX-003"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-LEAN-006"
+      ],
+      "operations": [
+        "All new capabilities feed sole BG and existing context/material contracts; no early native renderer."
+      ],
+      "tests": [
+        "T-VAN-LEAN-006-POS",
+        "T-VAN-LEAN-006-NEG",
+        "T-VAN-LEAN-006-REC"
+      ],
+      "unit_id": "FE-002"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-CRYPTO-014"
+      ],
+      "operations": [
+        "Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states."
+      ],
+      "tests": [
+        "T-VAN-CRYPTO-014-POS",
+        "T-VAN-CRYPTO-014-NEG",
+        "T-VAN-CRYPTO-014-REC"
+      ],
+      "unit_id": "FE-006"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-CRYPTO-014"
+      ],
+      "operations": [
+        "Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states."
+      ],
+      "tests": [
+        "T-VAN-CRYPTO-014-POS",
+        "T-VAN-CRYPTO-014-NEG",
+        "T-VAN-CRYPTO-014-REC"
+      ],
+      "unit_id": "FE-007"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-CRYPTO-014"
+      ],
+      "operations": [
+        "Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states."
+      ],
+      "tests": [
+        "T-VAN-CRYPTO-014-POS",
+        "T-VAN-CRYPTO-014-NEG",
+        "T-VAN-CRYPTO-014-REC"
+      ],
+      "unit_id": "FE-008"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-038",
+        "VAN-CRYPTO-014"
+      ],
+      "operations": [
+        "Expose active binding, changed decision, evidence/maturity, authority and fallback without ungrounded profit claims.",
+        "Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states."
+      ],
+      "tests": [
+        "T-VAN-SO-038-POS",
+        "T-VAN-SO-038-NEG",
+        "T-VAN-SO-038-REC",
+        "T-VAN-CRYPTO-014-POS",
+        "T-VAN-CRYPTO-014-NEG",
+        "T-VAN-CRYPTO-014-REC"
+      ],
+      "unit_id": "FE-009"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-CRYPTO-014"
+      ],
+      "operations": [
+        "Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states."
+      ],
+      "tests": [
+        "T-VAN-CRYPTO-014-POS",
+        "T-VAN-CRYPTO-014-NEG",
+        "T-VAN-CRYPTO-014-REC"
+      ],
+      "unit_id": "FE-011"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-SO-038"
+      ],
+      "operations": [
+        "Expose active binding, changed decision, evidence/maturity, authority and fallback without ungrounded profit claims."
+      ],
+      "tests": [
+        "T-VAN-SO-038-POS",
+        "T-VAN-SO-038-NEG",
+        "T-VAN-SO-038-REC"
+      ],
+      "unit_id": "FE-013"
+    }
+  ],
+  "no_new_required_deployable_services": true,
+  "no_new_units": true,
+  "revision": "1.15",
+  "schema": "van.self-optimization.unit-extensions/1.0"
+}

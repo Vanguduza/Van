@@ -1,0 +1,29 @@
+{
+  "actual_runtime_receipt_ref": null,
+  "available_at": "2026-10-17T10:00:00Z",
+  "capability_id": "fixture:crypto-intelligence",
+  "completion_by_fixture": false,
+  "decision_cutoff": "2026-10-17T10:01:00Z",
+  "economic_state": "NOT_EVALUATED",
+  "engineering_state": "NOT_STARTED",
+  "expires_at": "2026-10-17T10:05:00Z",
+  "financial_authority_state": "NONE_GRANTED_BY_ADDITIVE",
+  "funnel_counts": {
+    "discovered": 100,
+    "rejected": 60,
+    "research_eligible": 5,
+    "unknown": 35
+  },
+  "implementation_evidence_level": "SPEC_ONLY",
+  "new_frontend_gate": "BG-001",
+  "provider_state": "CONTRACT_FIXTURE",
+  "reality": "SYNTHETIC",
+  "record_id": "fixture:ResearchCapabilityReadModel:1",
+  "research_source_class": "SYNTHETIC",
+  "schema_version": "1.0",
+  "source_reality_label": "SYNTHETIC",
+  "source_refs": [
+    "fixture:controlled-input-only"
+  ],
+  "trade_authorized": false
+}

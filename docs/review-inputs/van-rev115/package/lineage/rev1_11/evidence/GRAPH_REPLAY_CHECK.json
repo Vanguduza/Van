@@ -1,0 +1,78 @@
+{
+  "findings": [],
+  "graph_sha256": "46c95aa140b8855af05e4eea1a14377774b8b9e27aa32004b856e25e64d85ef1",
+  "plan_sha256": "a732f7a28c0aa7cae3cbce055e6e861a31fb4e6ee293cc6efded7a62df51b94e",
+  "scope": "Compact document graph only",
+  "negative_cases": [
+    {
+      "case": "duplicate",
+      "expected": "DUPLICATE_UNIT",
+      "caught": true
+    },
+    {
+      "case": "cycle",
+      "expected": "CYCLE",
+      "caught": true
+    },
+    {
+      "case": "unknown",
+      "expected": "MISSING_DEPENDENCY",
+      "caught": true
+    },
+    {
+      "case": "missing bg member",
+      "expected": "BG_SCOPE",
+      "caught": true
+    },
+    {
+      "case": "wrong scope",
+      "expected": "SCOPE_MISMATCH",
+      "caught": true
+    },
+    {
+      "case": "ux shortcut",
+      "expected": "UI_BEFORE_BG",
+      "caught": true
+    },
+    {
+      "case": "frontend shortcut",
+      "expected": "UI_BEFORE_BG",
+      "caught": true
+    },
+    {
+      "case": "code before f15",
+      "expected": "NO_F15",
+      "caught": true
+    },
+    {
+      "case": "evaluator missing",
+      "expected": "PRODUCER_ORDER",
+      "caught": true
+    },
+    {
+      "case": "catalog missing",
+      "expected": "PRODUCER_ORDER",
+      "caught": true
+    },
+    {
+      "case": "backward ui",
+      "expected": "BACKEND_AFTER_UI",
+      "caught": true
+    },
+    {
+      "case": "duplicate dependency",
+      "expected": "DUPLICATE_DEPENDENCY",
+      "caught": true
+    },
+    {
+      "case": "parity skipped",
+      "expected": "NO_PARITY",
+      "caught": true
+    },
+    {
+      "case": "training shortcut",
+      "expected": "PRODUCER_ORDER",
+      "caught": true
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "BG001": "NOT_ISSUED",
+  "BG_sequence": 98,
+  "F15": "NOT_ISSUED",
+  "application_tests_executed": 0,
+  "backend": 82,
+  "backend_verifiers": 12,
+  "findings": [],
+  "first_UX_sequence": 99,
+  "graph_sha256": "8cf20c07b1b248ea92ff97d934ea818a6aca40152d129426d76ca419021ff644",
+  "host": "van-trading-core",
+  "negative_cases": [
+    {
+      "case": "duplicate",
+      "caught": true,
+      "expected": "DUPLICATE_UNIT"
+    },
+    {
+      "case": "cycle",
+      "caught": true,
+      "expected": "CYCLE"
+    },
+    {
+      "case": "unknown",
+      "caught": true,
+      "expected": "MISSING_DEPENDENCY"
+    },
+    {
+      "case": "missing bg member",
+      "caught": true,
+      "expected": "BG_SCOPE"
+    },
+    {
+      "case": "wrong scope",
+      "caught": true,
+      "expected": "SCOPE_MISMATCH"
+    },
+    {
+      "case": "ux shortcut",
+      "caught": true,
+      "expected": "UI_BEFORE_BG"
+    },
+    {
+      "case": "frontend shortcut",
+      "caught": true,
+      "expected": "UI_BEFORE_BG"
+    },
+    {
+      "case": "code before f15",
+      "caught": true,
+      "expected": "NO_F15"
+    },
+    {
+      "case": "evaluator missing",
+      "caught": true,
+      "expected": "PRODUCER_ORDER"
+    },
+    {
+      "case": "catalog missing",
+      "caught": true,
+      "expected": "PRODUCER_ORDER"
+    },
+    {
+      "case": "backward ui",
+      "caught": true,
+      "expected": "BACKEND_AFTER_UI"
+    },
+    {
+      "case": "duplicate dependency",
+      "caught": true,
+      "expected": "DUPLICATE_DEPENDENCY"
+    },
+    {
+      "case": "parity skipped",
+      "caught": true,
+      "expected": "NO_PARITY"
+    },
+    {
+      "case": "training shortcut",
+      "caught": true,
+      "expected": "PRODUCER_ORDER"
+    },
+    {
+      "case": "domain scientific bypass",
+      "caught": true,
+      "expected": "PRODUCER_ORDER"
+    },
+    {
+      "case": "domain verifier bypass",
+      "caught": true,
+      "expected": "PRODUCER_ORDER"
+    },
+    {
+      "case": "new unit early UI",
+      "caught": true,
+      "expected": "BACKEND_AFTER_UI"
+    },
+    {
+      "case": "new unit self cycle",
+      "caught": true,
+      "expected": "CYCLE"
+    }
+  ],
+  "negative_cases_caught": 18,
+  "nodes": 131,
+  "observed_at": "2026-10-17T18:44:59.445058+00:00",
+  "parent_graph_sha256": "b32197e4185ad594df77fcf0a64a5d87bae0b1d84fc3e76878694d629b14923d",
+  "plan_sha256": "ff047ac31e746967ee7c68f67eb0bc4abb0eb6dbae9acac3fcf56a51c88d6a70",
+  "scope": "Exact Rev1.12 exported document DAG only; no full-document semantic admission, application tests, provider calls, model training, repository merge or deployment.",
+  "source_parent_graph": "/home/ubuntu/work/van-canonical-reconciliation-20261017/CANONICAL_GRAPH_EXPORT.json",
+  "uid": 1001,
+  "workspace": "/home/ubuntu/work/van-rev112-document-verification-20261017-7_jbb9y6"
+}

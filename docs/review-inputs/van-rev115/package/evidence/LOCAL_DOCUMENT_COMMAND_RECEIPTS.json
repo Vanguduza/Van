@@ -1,0 +1,110 @@
+{
+  "application_tests_run": 0,
+  "commands": [
+    {
+      "command": [
+        "python",
+        "verification/verify_unified.py",
+        "--selftest",
+        "--json-output",
+        "evidence/UNIFIED_STRUCTURE_AND_MUTATIONS.json"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "receipt": "UNIFIED_STRUCTURE_AND_MUTATIONS.json"
+    },
+    {
+      "command": [
+        "python",
+        "plan/render_plan.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "receipt": "PLAN_RENDER_CHECK.json"
+    },
+    {
+      "command": [
+        "python",
+        "verification/verify_graph_export.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "receipt": "GRAPH_REPLAY_CHECK.json"
+    },
+    {
+      "command": [
+        "python",
+        "verification/verify_hva_contracts.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "receipt": "HIGH_VALUE_SCHEMA_FIXTURE_CHECK.json"
+    },
+    {
+      "command": [
+        "python",
+        "verification/verify_integration_preservation.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "receipt": "PRESERVATION_CHECK.json"
+    },
+    {
+      "command": [
+        "python",
+        "verification/verify_forecast_contracts.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "receipt": "FORECAST_SCHEMA_FIXTURE_CHECK.json"
+    },
+    {
+      "command": [
+        "python",
+        "verification/verify_news_readiness.py"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "receipt": "NEWS_READINESS_CHECK.json"
+    },
+    {
+      "command": [
+        "python",
+        "verification/verify_news_readiness.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "receipt": "NEWS_READINESS_MUTATIONS.json"
+    },
+    {
+      "command": [
+        "python",
+        "verification/assert_readiness.py",
+        "--gate",
+        "F15"
+      ],
+      "exit_code": 2,
+      "expected_exit_code": 2,
+      "receipt": "F15_REFUSAL.json"
+    },
+    {
+      "command": [
+        "python",
+        "verification/assert_readiness.py",
+        "--gate",
+        "BG"
+      ],
+      "exit_code": 2,
+      "expected_exit_code": 2,
+      "receipt": "BG_REFUSAL.json"
+    }
+  ],
+  "environment": "CHATGPT_DOCUMENT_AUTHORING_CONTAINER",
+  "scope": "Document creation, checking and packaging; not VAN VM implementation execution"
+}

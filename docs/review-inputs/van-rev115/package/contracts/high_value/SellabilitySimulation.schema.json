@@ -1,0 +1,193 @@
+{
+  "$id": "urn:van:hva:SellabilitySimulation:1.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Proposed Rev1.12 application contract. Examples and schema checks are documentary only; no implementation/permission implied.",
+  "properties": {
+    "asset_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "assumptions": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "available_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "buy_result": {
+      "enum": [
+        "PASS",
+        "REVERT",
+        "UNKNOWN",
+        "UNSUPPORTED"
+      ]
+    },
+    "caller_context_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "decision_cutoff": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "future_sell_guaranteed": {
+      "const": false
+    },
+    "implementation_evidence_level": {
+      "enum": [
+        "SPEC_ONLY",
+        "E0_OWNER_REFERENCE",
+        "E1_DOCUMENTED",
+        "E2_SOURCE_STATIC",
+        "E3_TEST_RECEIPT",
+        "E4_RUNTIME_OBSERVED",
+        "E5_DEVICE_CERTIFIED",
+        "E6_OWNER_VISUALLY_ACCEPTED"
+      ]
+    },
+    "pool_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "quantity": {
+      "pattern": "^(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$",
+      "type": "string"
+    },
+    "quantity_unit": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reality": {
+      "enum": [
+        "SYNTHETIC",
+        "OBSERVED",
+        "MODELED",
+        "DERIVED"
+      ]
+    },
+    "record_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "research_source_class": {
+      "enum": [
+        "RS1_PRIMARY",
+        "RS2_REPEATABLE_RESEARCH",
+        "RS3_VENDOR_CAPABILITY",
+        "RS4_SELF_REPORTED",
+        "RS5_UNVERIFIED_CREATOR",
+        "SYNTHETIC",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "router_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "sell_result": {
+      "enum": [
+        "PASS",
+        "REVERT",
+        "UNKNOWN",
+        "UNSUPPORTED"
+      ]
+    },
+    "simulation_engine_version": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "source_refs": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "state_anchor": {
+      "additionalProperties": false,
+      "properties": {
+        "chain_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "finality": {
+          "enum": [
+            "FINALIZED",
+            "CONFIRMED",
+            "UNFINALIZED",
+            "UNKNOWN"
+          ]
+        },
+        "hash": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "height": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "state_epoch": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "chain_id",
+        "height",
+        "hash",
+        "finality",
+        "state_epoch"
+      ],
+      "type": "object"
+    },
+    "submitted_transaction": {
+      "const": false
+    },
+    "trade_authorized": {
+      "const": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_id",
+    "reality",
+    "research_source_class",
+    "implementation_evidence_level",
+    "available_at",
+    "decision_cutoff",
+    "expires_at",
+    "source_refs",
+    "trade_authorized",
+    "asset_id",
+    "pool_id",
+    "router_id",
+    "state_anchor",
+    "buy_result",
+    "sell_result",
+    "quantity",
+    "quantity_unit",
+    "caller_context_hash",
+    "simulation_engine_version",
+    "assumptions",
+    "future_sell_guaranteed",
+    "submitted_transaction"
+  ],
+  "title": "SellabilitySimulation",
+  "type": "object"
+}

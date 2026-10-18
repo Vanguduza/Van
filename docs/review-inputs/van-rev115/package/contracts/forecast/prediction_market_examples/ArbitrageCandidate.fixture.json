@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "record_id": "fixture:ArbitrageCandidate",
+  "environment": "FIXTURE",
+  "authority_effect": "NONE",
+  "evidence_refs": [
+    "fixture:synthetic-only-not-real-evidence"
+  ],
+  "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "candidate_id": "fixture:complement-pair",
+  "contract_relation_ref": "fixture:reviewed-identical-event",
+  "relation_state": "COMPLEMENT_REVIEWED",
+  "payoff_states": [
+    {
+      "state": "YES",
+      "portfolio_payout": "1.00"
+    },
+    {
+      "state": "NO",
+      "portfolio_payout": "1.00"
+    }
+  ],
+  "purchase_cost": "0.95",
+  "fees_and_costs": "0.02",
+  "min_conditional_net_payoff": "0.03",
+  "exceptional_resolution_policy_ref": "fixture:no-void-proposition-for-arithmetic-example-only",
+  "venue_cash_separate": true,
+  "atomic_execution_assumed": false,
+  "same_currency_assumed": false,
+  "hedge_failure_scenario_ref": "fixture:first-leg-only-loss",
+  "claim": "CONDITIONAL_PAYOFF_HEDGE_NOT_EXECUTION_GUARANTEE",
+  "live_enabled": false
+}

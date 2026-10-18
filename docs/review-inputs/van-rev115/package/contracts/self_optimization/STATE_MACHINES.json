@@ -1,0 +1,1201 @@
+{
+  "authority": "Proposed transition contracts; no signature or completed runtime enforcement",
+  "external_fact_rule": "Never suppress genuine fills because an authorization is expired or violated. Record actual effects and violations; restrict new commands and training eligibility separately.",
+  "machines": [
+    {
+      "id": "SO-PARENT",
+      "initial": "APPROVED",
+      "runtime_implementation": "NOT_RUN; map into existing owners not new parallel state engine",
+      "states": [
+        "APPROVED",
+        "RESERVED",
+        "PLANNED",
+        "WORKING",
+        "CANCEL_REQUESTED",
+        "RECONCILING",
+        "ECONOMICALLY_RECONCILED",
+        "EVALUATION_PENDING",
+        "EVALUATED",
+        "ABORTED",
+        "UNRESOLVED"
+      ],
+      "terminal_states": [
+        "EVALUATED",
+        "ABORTED"
+      ],
+      "transitions": [
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Hold exact approved parent/account resources.",
+          "from": "APPROVED",
+          "id": "SO-PARENT-T001",
+          "proof_predicates": [
+            "OBJECTIVE_APPROVED",
+            "RESERVATION_CURRENT"
+          ],
+          "to": "RESERVED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Seal feasible method and parameters.",
+          "from": "RESERVED",
+          "id": "SO-PARENT-T002",
+          "proof_predicates": [
+            "GRANT_CURRENT",
+            "POLICY_QUALIFIED",
+            "FEASIBLE_ACTION",
+            "FENCE_CURRENT"
+          ],
+          "to": "PLANNED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Dispatch via router only.",
+          "from": "PLANNED",
+          "id": "SO-PARENT-T003",
+          "proof_predicates": [
+            "COMMAND_DURABLE",
+            "RESERVATION_CURRENT",
+            "FENCE_CURRENT"
+          ],
+          "to": "WORKING",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Record the authenticated actual fill even if it breaches authority; reconcile exposure and invoke protective recovery independently. Never discard the fact.",
+          "from": "WORKING",
+          "id": "SO-PARENT-T004",
+          "proof_predicates": [
+            "VENUE_FILL"
+          ],
+          "to": "WORKING",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Request remaining cancellation; retain exposure.",
+          "from": "WORKING",
+          "id": "SO-PARENT-T005",
+          "proof_predicates": [
+            "COMMAND_DURABLE",
+            "FENCE_CURRENT",
+            "CANCEL_SCOPE_AUTHORIZED"
+          ],
+          "to": "CANCEL_REQUESTED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Reconcile child and account truth.",
+          "from": "WORKING",
+          "id": "SO-PARENT-T006",
+          "proof_predicates": [
+            "VENUE_TERMINAL"
+          ],
+          "to": "RECONCILING",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Account for fills and terminal remainder.",
+          "from": "CANCEL_REQUESTED",
+          "id": "SO-PARENT-T007",
+          "proof_predicates": [
+            "CANCEL_FINAL"
+          ],
+          "to": "RECONCILING",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Persist uncertain outcome, block conflicting new risk.",
+          "from": "WORKING",
+          "id": "SO-PARENT-T008",
+          "proof_predicates": [
+            "SOURCE_VALID"
+          ],
+          "to": "UNRESOLVED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Apply authoritative late evidence.",
+          "from": "UNRESOLVED",
+          "id": "SO-PARENT-T009",
+          "proof_predicates": [
+            "SOURCE_VALID"
+          ],
+          "to": "RECONCILING",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Finish economic work without waiting for all research horizons.",
+          "from": "RECONCILING",
+          "id": "SO-PARENT-T010",
+          "proof_predicates": [
+            "EXPOSURE_RECONCILED",
+            "CASH_RECONCILED",
+            "PROTECTION_RESOLVED"
+          ],
+          "to": "ECONOMICALLY_RECONCILED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Await eligible analytics maturity.",
+          "from": "ECONOMICALLY_RECONCILED",
+          "id": "SO-PARENT-T011",
+          "proof_predicates": [
+            "SOURCE_VALID"
+          ],
+          "to": "EVALUATION_PENDING",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Record cost/reward evaluation, not new mandate.",
+          "from": "EVALUATION_PENDING",
+          "id": "SO-PARENT-T012",
+          "proof_predicates": [
+            "MATURE_OBSERVATION",
+            "SNAPSHOT_COMMITTED"
+          ],
+          "to": "EVALUATED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "No side effect and no held unknown exposure.",
+          "from": "APPROVED",
+          "id": "SO-PARENT-T013",
+          "proof_predicates": [
+            "OBJECTIVE_APPROVED",
+            "EXPOSURE_RECONCILED"
+          ],
+          "to": "ABORTED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Release only known unused reservation.",
+          "from": "RESERVED",
+          "id": "SO-PARENT-T014",
+          "proof_predicates": [
+            "EXPOSURE_RECONCILED"
+          ],
+          "to": "ABORTED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Trusted external evidence resolver; factual recording is not an order approval",
+          "effect": "Append revised economic status after a genuine corrected child/cash event; invalidate descendant evidence, preserve historical decisions and reconcile without new parent authority.",
+          "from": "EVALUATED",
+          "id": "SO-PARENT-T015",
+          "proof_predicates": [
+            "SOURCE_CORRECTION"
+          ],
+          "to": "RECONCILING",
+          "unresolved_proof_result": "QUARANTINE_UNTRUSTED_INPUT; preserve authentic external facts and protective recovery"
+        },
+        {
+          "authority": "Trusted external evidence resolver; factual recording is not an order approval",
+          "effect": "A genuine fill despite aborted intent is an observed exposure, not a forbidden observation. Record, reconcile and protect; do not reactivate entry authority.",
+          "from": "ABORTED",
+          "id": "SO-PARENT-T016",
+          "proof_predicates": [
+            "VENUE_FILL"
+          ],
+          "to": "UNRESOLVED",
+          "unresolved_proof_result": "QUARANTINE_UNTRUSTED_INPUT; preserve authentic external facts and protective recovery"
+        }
+      ]
+    },
+    {
+      "id": "SO-CHILD",
+      "initial": "CREATED",
+      "runtime_implementation": "NOT_RUN; map into existing owners not new parallel state engine",
+      "states": [
+        "CREATED",
+        "OUTBOX_COMMITTED",
+        "SUBMITTING",
+        "OUTCOME_UNKNOWN",
+        "WORKING",
+        "PARTIALLY_FILLED",
+        "FILLED",
+        "CANCEL_REQUESTED",
+        "CANCELLED",
+        "EXPIRED",
+        "REJECTED",
+        "RECONCILED"
+      ],
+      "terminal_states": [
+        "RECONCILED"
+      ],
+      "transitions": [
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Commit exact new command.",
+          "from": "CREATED",
+          "id": "SO-CHILD-T001",
+          "proof_predicates": [
+            "OBJECTIVE_APPROVED",
+            "RESERVATION_CURRENT",
+            "GRANT_CURRENT",
+            "FEASIBLE_ACTION",
+            "FENCE_CURRENT"
+          ],
+          "to": "OUTBOX_COMMITTED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Attempt transport.",
+          "from": "OUTBOX_COMMITTED",
+          "id": "SO-CHILD-T002",
+          "proof_predicates": [
+            "COMMAND_DURABLE",
+            "GRANT_CURRENT",
+            "FENCE_CURRENT",
+            "RESERVATION_CURRENT",
+            "FEASIBLE_ACTION",
+            "POLICY_QUALIFIED"
+          ],
+          "to": "SUBMITTING",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Record acknowledgement, not fill.",
+          "from": "SUBMITTING",
+          "id": "SO-CHILD-T003",
+          "proof_predicates": [
+            "VENUE_ACK"
+          ],
+          "to": "WORKING",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Record genuine fill even if ACK was not observed.",
+          "from": "SUBMITTING",
+          "id": "SO-CHILD-T004",
+          "proof_predicates": [
+            "VENUE_FILL"
+          ],
+          "to": "FILLED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Record actual partial effect.",
+          "from": "SUBMITTING",
+          "id": "SO-CHILD-T005",
+          "proof_predicates": [
+            "VENUE_FILL"
+          ],
+          "to": "PARTIALLY_FILLED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "No blind retry or reservation release.",
+          "from": "SUBMITTING",
+          "id": "SO-CHILD-T006",
+          "proof_predicates": [
+            "SOURCE_VALID"
+          ],
+          "to": "OUTCOME_UNKNOWN",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Record genuine rejection.",
+          "from": "SUBMITTING",
+          "id": "SO-CHILD-T007",
+          "proof_predicates": [
+            "VENUE_TERMINAL"
+          ],
+          "to": "REJECTED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Recover actual working order.",
+          "from": "OUTCOME_UNKNOWN",
+          "id": "SO-CHILD-T008",
+          "proof_predicates": [
+            "VENUE_ACK"
+          ],
+          "to": "WORKING",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Recover fill facts independent of present grant validity.",
+          "from": "OUTCOME_UNKNOWN",
+          "id": "SO-CHILD-T009",
+          "proof_predicates": [
+            "VENUE_FILL"
+          ],
+          "to": "FILLED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Recover partial exposure.",
+          "from": "OUTCOME_UNKNOWN",
+          "id": "SO-CHILD-T010",
+          "proof_predicates": [
+            "VENUE_FILL"
+          ],
+          "to": "PARTIALLY_FILLED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Reconcile definitive rejected result.",
+          "from": "OUTCOME_UNKNOWN",
+          "id": "SO-CHILD-T011",
+          "proof_predicates": [
+            "VENUE_TERMINAL"
+          ],
+          "to": "REJECTED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Protect each fill through actual lifecycle.",
+          "from": "WORKING",
+          "id": "SO-CHILD-T012",
+          "proof_predicates": [
+            "VENUE_FILL"
+          ],
+          "to": "PARTIALLY_FILLED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Record complete fill, separate protection state.",
+          "from": "WORKING",
+          "id": "SO-CHILD-T013",
+          "proof_predicates": [
+            "VENUE_FILL"
+          ],
+          "to": "FILLED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Deduplicated increment/revision only.",
+          "from": "PARTIALLY_FILLED",
+          "id": "SO-CHILD-T014",
+          "proof_predicates": [
+            "VENUE_FILL"
+          ],
+          "to": "PARTIALLY_FILLED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Record completed actual quantity.",
+          "from": "PARTIALLY_FILLED",
+          "id": "SO-CHILD-T015",
+          "proof_predicates": [
+            "VENUE_FILL"
+          ],
+          "to": "FILLED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Request cancel only.",
+          "from": "WORKING",
+          "id": "SO-CHILD-T016",
+          "proof_predicates": [
+            "COMMAND_DURABLE",
+            "FENCE_CURRENT",
+            "CANCEL_SCOPE_AUTHORIZED"
+          ],
+          "to": "CANCEL_REQUESTED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Keep filled and possible remainder exposure.",
+          "from": "PARTIALLY_FILLED",
+          "id": "SO-CHILD-T017",
+          "proof_predicates": [
+            "COMMAND_DURABLE",
+            "FENCE_CURRENT",
+            "CANCEL_SCOPE_AUTHORIZED"
+          ],
+          "to": "CANCEL_REQUESTED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Late fill is not cancellation success.",
+          "from": "CANCEL_REQUESTED",
+          "id": "SO-CHILD-T018",
+          "proof_predicates": [
+            "VENUE_FILL"
+          ],
+          "to": "FILLED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Late partial retains remaining cancel reconciliation.",
+          "from": "CANCEL_REQUESTED",
+          "id": "SO-CHILD-T019",
+          "proof_predicates": [
+            "VENUE_FILL"
+          ],
+          "to": "PARTIALLY_FILLED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Record terminal remainder; filled quantity persists.",
+          "from": "CANCEL_REQUESTED",
+          "id": "SO-CHILD-T020",
+          "proof_predicates": [
+            "CANCEL_FINAL"
+          ],
+          "to": "CANCELLED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Expiry backed by actual outcome.",
+          "from": "WORKING",
+          "id": "SO-CHILD-T021",
+          "proof_predicates": [
+            "VENUE_TERMINAL"
+          ],
+          "to": "EXPIRED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Remaining expires, prior fills persist.",
+          "from": "PARTIALLY_FILLED",
+          "id": "SO-CHILD-T022",
+          "proof_predicates": [
+            "VENUE_TERMINAL"
+          ],
+          "to": "EXPIRED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Join economics and protection.",
+          "from": "FILLED",
+          "id": "SO-CHILD-T023",
+          "proof_predicates": [
+            "EXPOSURE_RECONCILED",
+            "PROTECTION_RESOLVED"
+          ],
+          "to": "RECONCILED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Join residual actual exposure.",
+          "from": "CANCELLED",
+          "id": "SO-CHILD-T024",
+          "proof_predicates": [
+            "EXPOSURE_RECONCILED",
+            "PROTECTION_RESOLVED"
+          ],
+          "to": "RECONCILED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Join residual actual exposure.",
+          "from": "EXPIRED",
+          "id": "SO-CHILD-T025",
+          "proof_predicates": [
+            "EXPOSURE_RECONCILED",
+            "PROTECTION_RESOLVED"
+          ],
+          "to": "RECONCILED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "No effect or authoritative corrected outcome.",
+          "from": "REJECTED",
+          "id": "SO-CHILD-T026",
+          "proof_predicates": [
+            "EXPOSURE_RECONCILED"
+          ],
+          "to": "RECONCILED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Trusted external evidence resolver; factual recording is not an order approval",
+          "effect": "Append a new state revision for late authenticated fill/bust/correction, invalidate related measurement and reopen reconciliation/protection. Never blindly resend the order.",
+          "from": "CANCELLED",
+          "id": "SO-CHILD-T027",
+          "proof_predicates": [
+            "SOURCE_CORRECTION"
+          ],
+          "to": "OUTCOME_UNKNOWN",
+          "unresolved_proof_result": "QUARANTINE_UNTRUSTED_INPUT; preserve authentic external facts and protective recovery"
+        },
+        {
+          "authority": "Trusted external evidence resolver; factual recording is not an order approval",
+          "effect": "Append a new state revision for late authenticated fill/bust/correction, invalidate related measurement and reopen reconciliation/protection. Never blindly resend the order.",
+          "from": "EXPIRED",
+          "id": "SO-CHILD-T028",
+          "proof_predicates": [
+            "SOURCE_CORRECTION"
+          ],
+          "to": "OUTCOME_UNKNOWN",
+          "unresolved_proof_result": "QUARANTINE_UNTRUSTED_INPUT; preserve authentic external facts and protective recovery"
+        },
+        {
+          "authority": "Trusted external evidence resolver; factual recording is not an order approval",
+          "effect": "Append a new state revision for late authenticated fill/bust/correction, invalidate related measurement and reopen reconciliation/protection. Never blindly resend the order.",
+          "from": "REJECTED",
+          "id": "SO-CHILD-T029",
+          "proof_predicates": [
+            "SOURCE_CORRECTION"
+          ],
+          "to": "OUTCOME_UNKNOWN",
+          "unresolved_proof_result": "QUARANTINE_UNTRUSTED_INPUT; preserve authentic external facts and protective recovery"
+        },
+        {
+          "authority": "Trusted external evidence resolver; factual recording is not an order approval",
+          "effect": "Append a new state revision for late authenticated fill/bust/correction, invalidate related measurement and reopen reconciliation/protection. Never blindly resend the order.",
+          "from": "RECONCILED",
+          "id": "SO-CHILD-T030",
+          "proof_predicates": [
+            "SOURCE_CORRECTION"
+          ],
+          "to": "OUTCOME_UNKNOWN",
+          "unresolved_proof_result": "QUARANTINE_UNTRUSTED_INPUT; preserve authentic external facts and protective recovery"
+        },
+        {
+          "authority": "Existing typed owner; artifact verification required",
+          "effect": "Authenticated terminal readback; reconcile fills and protection; no blind resend or premature reservation release.",
+          "from": "OUTCOME_UNKNOWN",
+          "id": "SO-CHILD-T031",
+          "proof_predicates": [
+            "CANCEL_FINAL"
+          ],
+          "to": "CANCELLED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual facts and recovery"
+        },
+        {
+          "authority": "Existing typed owner; artifact verification required",
+          "effect": "Authenticated terminal readback; reconcile fills and protection; no blind resend or premature reservation release.",
+          "from": "OUTCOME_UNKNOWN",
+          "id": "SO-CHILD-T032",
+          "proof_predicates": [
+            "VENUE_TERMINAL"
+          ],
+          "to": "EXPIRED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual facts and recovery"
+        },
+        {
+          "authority": "Existing typed owner; artifact verification required",
+          "effect": "Persist lost/ambiguous response under original command identity and keep worst-case remaining exposure.",
+          "from": "CANCEL_REQUESTED",
+          "id": "SO-CHILD-T033",
+          "proof_predicates": [
+            "SOURCE_VALID"
+          ],
+          "to": "OUTCOME_UNKNOWN",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual facts and recovery"
+        },
+        {
+          "authority": "Existing typed owner; artifact verification required",
+          "effect": "Retain filled history, append bust/correction and reconcile without reauthorizing entry.",
+          "from": "FILLED",
+          "id": "SO-CHILD-T034",
+          "proof_predicates": [
+            "SOURCE_CORRECTION"
+          ],
+          "to": "OUTCOME_UNKNOWN",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual facts and recovery"
+        }
+      ]
+    },
+    {
+      "id": "SO-EVIDENCE",
+      "initial": "OBSERVED",
+      "runtime_implementation": "NOT_RUN; map into existing owners not new parallel state engine",
+      "states": [
+        "OBSERVED",
+        "PENDING_MATURITY",
+        "VALIDATED",
+        "APPLIED",
+        "INVALIDATED",
+        "QUARANTINED"
+      ],
+      "terminal_states": [
+        "QUARANTINED"
+      ],
+      "transitions": [
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Register facts without inventing supervised outcome.",
+          "from": "OBSERVED",
+          "id": "SO-EVIDENCE-T001",
+          "proof_predicates": [
+            "SOURCE_VALID"
+          ],
+          "to": "PENDING_MATURITY",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Apply target-specific maturity/censoring.",
+          "from": "PENDING_MATURITY",
+          "id": "SO-EVIDENCE-T002",
+          "proof_predicates": [
+            "SOURCE_VALID",
+            "MATURE_OBSERVATION"
+          ],
+          "to": "VALIDATED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Atomic contribution, cursor and snapshot.",
+          "from": "VALIDATED",
+          "id": "SO-EVIDENCE-T003",
+          "proof_predicates": [
+            "MATURE_OBSERVATION",
+            "SOURCE_VALID",
+            "COHORT_COMPATIBLE",
+            "NOT_APPLIED",
+            "UPDATE_RULE_QUALIFIED",
+            "SNAPSHOT_COMMITTED"
+          ],
+          "to": "APPLIED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Restate descendants, preserve as-decided history.",
+          "from": "APPLIED",
+          "id": "SO-EVIDENCE-T004",
+          "proof_predicates": [
+            "SOURCE_CORRECTION"
+          ],
+          "to": "INVALIDATED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "New observation revision, no double-count old version.",
+          "from": "INVALIDATED",
+          "id": "SO-EVIDENCE-T005",
+          "proof_predicates": [
+            "SOURCE_CORRECTION",
+            "SOURCE_VALID"
+          ],
+          "to": "PENDING_MATURITY",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Record unsupported/invalid source facts and exclude from eligible estimator.",
+          "from": "OBSERVED",
+          "id": "SO-EVIDENCE-T006",
+          "proof_predicates": [
+            "INVALID_EVIDENCE_DETECTED"
+          ],
+          "to": "QUARANTINED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Record unresolved invalid cohort without fabricated zero.",
+          "from": "PENDING_MATURITY",
+          "id": "SO-EVIDENCE-T007",
+          "proof_predicates": [
+            "INVALID_EVIDENCE_DETECTED"
+          ],
+          "to": "QUARANTINED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        }
+      ]
+    },
+    {
+      "id": "SO-CANDIDATE",
+      "initial": "HYPOTHESIS_REGISTERED",
+      "runtime_implementation": "NOT_RUN; map into existing owners not new parallel state engine",
+      "states": [
+        "HYPOTHESIS_REGISTERED",
+        "BUILDING",
+        "OFFLINE_EVALUATING",
+        "OFFLINE_ACCEPTED",
+        "PROSPECTIVE_EVALUATING",
+        "QUALIFIED_CANDIDATE",
+        "AWAITING_AUTHORIZATION",
+        "AUTHORIZED",
+        "ACTIVE_BINDING",
+        "REJECTED",
+        "INCONCLUSIVE",
+        "FAILED",
+        "CANCELLED",
+        "SUSPENDED",
+        "RETIRED"
+      ],
+      "terminal_states": [
+        "REJECTED",
+        "INCONCLUSIVE",
+        "FAILED",
+        "CANCELLED",
+        "RETIRED"
+      ],
+      "transitions": [
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Run bounded candidate work.",
+          "from": "HYPOTHESIS_REGISTERED",
+          "id": "SO-CANDIDATE-T001",
+          "proof_predicates": [
+            "RESEARCH_GRANT"
+          ],
+          "to": "BUILDING",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Evaluate immutable candidate on registered protocol.",
+          "from": "BUILDING",
+          "id": "SO-CANDIDATE-T002",
+          "proof_predicates": [
+            "ARTIFACT_SEALED",
+            "EVALUATOR_QUALIFIED"
+          ],
+          "to": "OFFLINE_EVALUATING",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Candidate only; no financial activation.",
+          "from": "OFFLINE_EVALUATING",
+          "id": "SO-CANDIDATE-T003",
+          "proof_predicates": [
+            "OFFLINE_ACCEPTANCE"
+          ],
+          "to": "OFFLINE_ACCEPTED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Keep negative evidence/all trials.",
+          "from": "OFFLINE_EVALUATING",
+          "id": "SO-CANDIDATE-T004",
+          "proof_predicates": [
+            "SOURCE_VALID"
+          ],
+          "to": "REJECTED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Insufficient evidence is not promotion.",
+          "from": "OFFLINE_EVALUATING",
+          "id": "SO-CANDIDATE-T005",
+          "proof_predicates": [
+            "SOURCE_VALID"
+          ],
+          "to": "INCONCLUSIVE",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Use separately permitted forward/demo context.",
+          "from": "OFFLINE_ACCEPTED",
+          "id": "SO-CANDIDATE-T006",
+          "proof_predicates": [
+            "RESEARCH_GRANT",
+            "ARTIFACT_SEALED"
+          ],
+          "to": "PROSPECTIVE_EVALUATING",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Independent scoped qualifier, not self-score.",
+          "from": "PROSPECTIVE_EVALUATING",
+          "id": "SO-CANDIDATE-T007",
+          "proof_predicates": [
+            "PROSPECTIVE_EVIDENCE",
+            "INDEPENDENT_QUALIFICATION"
+          ],
+          "to": "QUALIFIED_CANDIDATE",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Owner-facing precise candidate.",
+          "from": "QUALIFIED_CANDIDATE",
+          "id": "SO-CANDIDATE-T008",
+          "proof_predicates": [
+            "INDEPENDENT_QUALIFICATION"
+          ],
+          "to": "AWAITING_AUTHORIZATION",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Bind exact signed use scope.",
+          "from": "AWAITING_AUTHORIZATION",
+          "id": "SO-CANDIDATE-T009",
+          "proof_predicates": [
+            "PROMOTION_AUTHORIZED",
+            "INDEPENDENT_QUALIFICATION"
+          ],
+          "to": "AUTHORIZED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Atomic active epoch; open parent rules retained.",
+          "from": "AUTHORIZED",
+          "id": "SO-CANDIDATE-T010",
+          "proof_predicates": [
+            "ACTIVATION_READBACK",
+            "GRANT_CURRENT"
+          ],
+          "to": "ACTIVE_BINDING",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "New risk use stopped, mandatory protection retained.",
+          "from": "ACTIVE_BINDING",
+          "id": "SO-CANDIDATE-T011",
+          "proof_predicates": [
+            "SUSPENSION_CAUSE"
+          ],
+          "to": "SUSPENDED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Keep audit and pending-parent dependencies.",
+          "from": "SUSPENDED",
+          "id": "SO-CANDIDATE-T012",
+          "proof_predicates": [
+            "RETIREMENT_SAFE"
+          ],
+          "to": "RETIRED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Record failed attempt.",
+          "from": "BUILDING",
+          "id": "SO-CANDIDATE-T013",
+          "proof_predicates": [
+            "SOURCE_VALID"
+          ],
+          "to": "FAILED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Cancel bounded worker; no economic sender involved.",
+          "from": "BUILDING",
+          "id": "SO-CANDIDATE-T014",
+          "proof_predicates": [
+            "RESEARCH_STOP_AUTHORIZED"
+          ],
+          "to": "CANCELLED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Existing typed owner; artifact verification required",
+          "effect": "Persist terminal research attempt and partial artifacts in all-trial census; no promotion.",
+          "from": "OFFLINE_EVALUATING",
+          "id": "SO-CANDIDATE-T015",
+          "proof_predicates": [
+            "SOURCE_VALID"
+          ],
+          "to": "FAILED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual facts and recovery"
+        },
+        {
+          "authority": "Existing typed owner; artifact verification required",
+          "effect": "Persist terminal research attempt and partial artifacts in all-trial census; no promotion.",
+          "from": "OFFLINE_EVALUATING",
+          "id": "SO-CANDIDATE-T016",
+          "proof_predicates": [
+            "RESEARCH_STOP_AUTHORIZED"
+          ],
+          "to": "CANCELLED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual facts and recovery"
+        },
+        {
+          "authority": "Existing typed owner; artifact verification required",
+          "effect": "Persist terminal research attempt and partial artifacts in all-trial census; no promotion.",
+          "from": "PROSPECTIVE_EVALUATING",
+          "id": "SO-CANDIDATE-T017",
+          "proof_predicates": [
+            "SOURCE_VALID"
+          ],
+          "to": "FAILED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual facts and recovery"
+        },
+        {
+          "authority": "Existing typed owner; artifact verification required",
+          "effect": "Persist terminal research attempt and partial artifacts in all-trial census; no promotion.",
+          "from": "PROSPECTIVE_EVALUATING",
+          "id": "SO-CANDIDATE-T018",
+          "proof_predicates": [
+            "RESEARCH_STOP_AUTHORIZED"
+          ],
+          "to": "CANCELLED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual facts and recovery"
+        },
+        {
+          "authority": "Existing typed owner; artifact verification required",
+          "effect": "Record prospective result without inventing qualification.",
+          "from": "PROSPECTIVE_EVALUATING",
+          "id": "SO-CANDIDATE-T019",
+          "proof_predicates": [
+            "PROSPECTIVE_EVIDENCE"
+          ],
+          "to": "REJECTED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual facts and recovery"
+        },
+        {
+          "authority": "Existing typed owner; artifact verification required",
+          "effect": "Record prospective result without inventing qualification.",
+          "from": "PROSPECTIVE_EVALUATING",
+          "id": "SO-CANDIDATE-T020",
+          "proof_predicates": [
+            "PROSPECTIVE_EVIDENCE"
+          ],
+          "to": "INCONCLUSIVE",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual facts and recovery"
+        }
+      ]
+    },
+    {
+      "id": "SO-BINDING",
+      "initial": "PROPOSED",
+      "runtime_implementation": "NOT_RUN; map into existing owners not new parallel state engine",
+      "states": [
+        "PROPOSED",
+        "AUTHORIZED",
+        "ACTIVE",
+        "DRAINING",
+        "SUSPENDED",
+        "REVOKED",
+        "RETIRED",
+        "EXPIRED"
+      ],
+      "terminal_states": [
+        "RETIRED"
+      ],
+      "transitions": [
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Exact binding authorized.",
+          "from": "PROPOSED",
+          "id": "SO-BINDING-T001",
+          "proof_predicates": [
+            "INDEPENDENT_QUALIFICATION",
+            "PROMOTION_AUTHORIZED"
+          ],
+          "to": "AUTHORIZED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Publish atomic epoch.",
+          "from": "AUTHORIZED",
+          "id": "SO-BINDING-T002",
+          "proof_predicates": [
+            "INDEPENDENT_QUALIFICATION",
+            "PROMOTION_AUTHORIZED",
+            "GRANT_CURRENT",
+            "POLICY_QUALIFIED",
+            "ACTIVATION_READBACK"
+          ],
+          "to": "ACTIVE",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "New parents use successor; old parents retain binding.",
+          "from": "ACTIVE",
+          "id": "SO-BINDING-T003",
+          "proof_predicates": [
+            "PROMOTION_AUTHORIZED",
+            "COMPATIBLE_FALLBACK"
+          ],
+          "to": "DRAINING",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Disable affected new use immediately under existing safety policy.",
+          "from": "ACTIVE",
+          "id": "SO-BINDING-T004",
+          "proof_predicates": [
+            "SUSPENSION_CAUSE"
+          ],
+          "to": "SUSPENDED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Refuse new economic use and preserve real outcomes.",
+          "from": "ACTIVE",
+          "id": "SO-BINDING-T005",
+          "proof_predicates": [
+            "SUSPENSION_CAUSE"
+          ],
+          "to": "REVOKED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Record durable revocation.",
+          "from": "SUSPENDED",
+          "id": "SO-BINDING-T006",
+          "proof_predicates": [
+            "SUSPENSION_CAUSE"
+          ],
+          "to": "REVOKED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "No dependent live parent or consumer.",
+          "from": "DRAINING",
+          "id": "SO-BINDING-T007",
+          "proof_predicates": [
+            "RETIREMENT_SAFE"
+          ],
+          "to": "RETIRED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Relevant existing owner per proof, never JSON boolean",
+          "effect": "Retain history and corrected evidence.",
+          "from": "REVOKED",
+          "id": "SO-BINDING-T008",
+          "proof_predicates": [
+            "RETIREMENT_SAFE"
+          ],
+          "to": "RETIRED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual external facts and recovery"
+        },
+        {
+          "authority": "Existing typed owner; artifact verification required",
+          "effect": "Stop new binding effects at expiry; retain original external facts and protection; reconcile in-flight work.",
+          "from": "AUTHORIZED",
+          "id": "SO-BINDING-T009",
+          "proof_predicates": [
+            "BINDING_EXPIRED"
+          ],
+          "to": "EXPIRED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual facts and recovery"
+        },
+        {
+          "authority": "Existing typed owner; artifact verification required",
+          "effect": "Stop new binding effects at expiry; retain original external facts and protection; reconcile in-flight work.",
+          "from": "ACTIVE",
+          "id": "SO-BINDING-T010",
+          "proof_predicates": [
+            "BINDING_EXPIRED"
+          ],
+          "to": "EXPIRED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual facts and recovery"
+        },
+        {
+          "authority": "Existing typed owner; artifact verification required",
+          "effect": "Stop new binding effects at expiry; retain original external facts and protection; reconcile in-flight work.",
+          "from": "SUSPENDED",
+          "id": "SO-BINDING-T011",
+          "proof_predicates": [
+            "BINDING_EXPIRED"
+          ],
+          "to": "EXPIRED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual facts and recovery"
+        },
+        {
+          "authority": "Existing typed owner; artifact verification required",
+          "effect": "Stop new binding effects at expiry; retain original external facts and protection; reconcile in-flight work.",
+          "from": "DRAINING",
+          "id": "SO-BINDING-T012",
+          "proof_predicates": [
+            "BINDING_EXPIRED"
+          ],
+          "to": "EXPIRED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual facts and recovery"
+        },
+        {
+          "authority": "Existing typed owner; artifact verification required",
+          "effect": "Persist revocation; reject new effects and fallback resurrection; reconcile existing exposure.",
+          "from": "PROPOSED",
+          "id": "SO-BINDING-T013",
+          "proof_predicates": [
+            "SUSPENSION_CAUSE"
+          ],
+          "to": "REVOKED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual facts and recovery"
+        },
+        {
+          "authority": "Existing typed owner; artifact verification required",
+          "effect": "Persist revocation; reject new effects and fallback resurrection; reconcile existing exposure.",
+          "from": "AUTHORIZED",
+          "id": "SO-BINDING-T014",
+          "proof_predicates": [
+            "SUSPENSION_CAUSE"
+          ],
+          "to": "REVOKED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual facts and recovery"
+        },
+        {
+          "authority": "Existing typed owner; artifact verification required",
+          "effect": "Persist revocation; reject new effects and fallback resurrection; reconcile existing exposure.",
+          "from": "DRAINING",
+          "id": "SO-BINDING-T015",
+          "proof_predicates": [
+            "SUSPENSION_CAUSE"
+          ],
+          "to": "REVOKED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual facts and recovery"
+        },
+        {
+          "authority": "Existing typed owner; artifact verification required",
+          "effect": "Retire expired binding only after no dependent active parent; preserve history.",
+          "from": "EXPIRED",
+          "id": "SO-BINDING-T016",
+          "proof_predicates": [
+            "RETIREMENT_SAFE"
+          ],
+          "to": "RETIRED",
+          "unresolved_proof_result": "REFUSE_EFFECT; retain actual facts and recovery"
+        }
+      ]
+    }
+  ],
+  "orthogonal_dimensions": [
+    "order status",
+    "protection",
+    "cash reconciliation",
+    "label maturity"
+  ],
+  "revision": "1.15",
+  "schema": "van.so.state-machines/1.0",
+  "terminal_state_meaning": "Terminal for a reconciled revision, not permission to discard later genuine fills/busts/corrections. New authenticated facts append a new revision and reopen reconciliation without blind resubmission; old states and decisions remain immutable."
+}

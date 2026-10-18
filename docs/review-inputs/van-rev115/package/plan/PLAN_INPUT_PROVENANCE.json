@@ -1,0 +1,29 @@
+{
+  "aggregate_input_digest": "673f814681cb3347b5c06f782776b9dc90f79076b5d977af496010f6cfbf8ea7",
+  "inputs": {
+    "ASTRA_CODEX_REVIEW_AND_OPTIMIZATION_PROMPT.md": "90d021334ff1c3b68ed7c93c3820b9649558d79f84c07910064c18cf44b76cd5",
+    "CANONICAL_AUTHORITY.json": "bdfbcbe8969ecbdda74e51c258fef8ef31ec7d607512deb0a6482e5d11e33ff9",
+    "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV3_20261018.md": "5d3c4ece8f229d5de1cd1d0dfa1f1aaa1a973a2eb88103e405cd394af2eb0c12",
+    "contracts/BACKEND_SERVICE_CATALOG.json": "b90aaf1c3af8ba5ac8becefda59acf97b0139ade7887a5da3de9d69a90e88591",
+    "contracts/self_optimization/AUTHORITY_MATRIX.json": "5e3f842f4ec02bcb1831280d874fb6c9af54abb61af48f490df280f8866eeab2",
+    "contracts/self_optimization/PROOF_PREDICATES.json": "bfeff228238e354995892dd614126cb57bf9b75cfa4638b606c894689ec092f3",
+    "contracts/self_optimization/SELF_OPTIMIZATION_RECORDS.schema.json": "3b00415c2253d2a8e0cfc70fc7ccc27026bfa846aee39720f25ef8b82ddd7803",
+    "contracts/self_optimization/SEMANTIC_INVARIANTS.json": "97fb28a5358f35161954846f5659feb27aa50d0dfa85ba7a24dcf9526865548f",
+    "contracts/self_optimization/STATE_MACHINES.json": "5fec962405fe8a82febfb5d2b3febec31c729fd2002982ecb3a65033f4080303",
+    "design/ALL_SURFACE_CONTRACTS.json": "ef001ae6643b85c1543cae481478e4eed39a9860bc31d18838824daddc1cda1e",
+    "plan/DEVELOPMENT_PLAN.json": "f01cfb1c44620aff2f8bcadfcfa1373dd7da995073afdf9b5b5819870df7d420",
+    "plan/PROPOSED_SCOPE_LOCK.json": "495e87d84249ebe9127788427ed41a7d347d0135ee2201835ea23e2bc923f4ba",
+    "plan/render_plan.py": "41e86069f4e2ce09301ebeb55e46e48573dd2eecebde69d5ae996dc55d05f24d",
+    "review/DESIGN_CHANGE_PROPOSALS.json": "565dd16483329788978bf91259b3e3e34b29eeff9cf2d446511bb7eac968d454",
+    "review/SOURCE_ADMISSION_CROSSWALK.json": "ba2313efc061a98cc6c9821e843b819bbd91b495f773dcaeb324e88ebd6ee073",
+    "traceability/FORECAST_PACKET_CROSSWALK.json": "135e1690f920427a9e79c1554064ed3a30b29a3af50825b388adccb4f66858b5",
+    "traceability/LEGACY_349_ACTIONS.json": "4fe9dd0b7050203e0cac8a479c0a21993b890082aed15b28ab85250410c7830d",
+    "traceability/REQUIREMENTS_AND_DU_MAPPING.json": "374a89b0d261d98292eb2d0900e1ccff959df33a751f19f5b9024b6a80ca18b2",
+    "traceability/REV115_REQUIREMENTS.json": "a772effd29b3a41f7cbfb588a803fe9ea116c4b55860744806290359bede39af",
+    "verification/REV115_ACCEPTANCE_CONTRACTS.json": "872f1d58236fe8265fed890dbed9d3d1a7237a5fe71d3c19d19c7912cb68162f",
+    "verification/TEST_CONTRACTS.json": "3382469a377958806e4ae900a90a975f45f3fdd41fef4934a3d857144cbf1087"
+  },
+  "rendered_plan_sha256": "6e9f5fe85f3e28c0c6f5741de95b7e06ea1d1357b24ff98b1e433b8d798a1771",
+  "schema": "van.canonical.plan.provenance/1.0",
+  "scope": "Deterministic document identity only; not owner signature or F15"
+}

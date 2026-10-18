@@ -1,0 +1,57 @@
+{
+  "scope": "FINAL_ARCHIVE_IDENTITY_AND_FRESH_EXTRACTION_DOCUMENT_CHECKS",
+  "archive": "VAN_NEXT_REVIEWED_BLUEPRINT_PACK_REV1_15_20261018.zip",
+  "sha256": "889b9f910e45b17403bfaac23547ed0ca9799a991f46ec4019ca02951b3a1ce7",
+  "bytes": 31605623,
+  "application_tests_executed": 0,
+  "economic_experiments_executed": 0,
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "plan/render_plan.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "0 findings: rendered plan and input provenance match\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "verification/verify_rev115.py",
+        "--json"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"BG\": \"NOT_ISSUED\",\n  \"F15\": \"NOT_ISSUED\",\n  \"application_tests_executed\": 0,\n  \"findings\": [],\n  \"planned_application_contracts\": 1544,\n  \"requirements\": 309,\n  \"schema_examples\": 12,\n  \"scope\": \"DOCUMENT_SCHEMA_GRAPH_AND_SYNTHETIC_MODEL_ONLY\",\n  \"synthetic_loop\": {\n    \"cold_replay_equal\": true,\n    \"mature_distinct_parents\": 4,\n    \"mean_benchmark_cost\": {\n      \"A\": \"1.20\",\n      \"B\": \"0.65\"\n    },\n    \"not_actual_VATI_execution\": true,\n    \"selections\": {\n      \"1\": \"A\",\n      \"2\": \"A\",\n      \"3\": \"A\",\n      \"4\": \"A\",\n      \"5\": \"B\",\n      \"6\": \"B\"\n    }\n  },\n  \"units\": 131\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "verification/verify_review_contracts.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"scope\": \"DOCUMENT_ONLY_NOT_APPLICATION_OR_ECONOMIC_VALIDATION\",\n  \"passed\": 66,\n  \"total\": 66,\n  \"application_tests_executed\": 0,\n  \"cases\": [\n    {\n      \"id\": \"EXACT_PARENT_ARCHIVE\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"PARENT_MEMBERS\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"PRESERVE_requirements\",\n      \"passed\": true,\n      \"detail\": {\n        \"parent\": 301,\n        \"current\": 309\n      }\n    },\n    {\n      \"id\": \"PRESERVE_tests\",\n      \"passed\": true,\n      \"detail\": {\n        \"parent\": 1520,\n        \"current\": 1544\n      }\n    },\n    {\n      \"id\": \"PRESERVE_actions\",\n      \"passed\": true,\n      \"detail\": {\n        \"parent\": 349,\n        \"current\": 349\n      }\n    },\n    {\n      \"id\": \"PRESERVE_truth_atoms\",\n      \"passed\": true,\n      \"detail\": {\n        \"parent\": 22,\n        \"current\": 22\n      }\n    },\n    {\n      \"id\": \"PRESERVE_surfaces\",\n      \"passed\": true,\n      \"detail\": {\n        \"parent\": 234,\n        \"current\": 234\n      }\n    },\n    {\n      \"id\": \"PRESERVE_UNIT_IDENTITIES\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"VISUAL_VAN_LOCKED_DARK.png\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"VISUAL_VAN_LOCKED_LIGHT.png\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"VISUAL_VAN_MATERIAL_TOKENS_REV2.json\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"SEMANTIC_DISPATCH_WITH_LOCKS_RESEALED\",\n      \"passed\": true,\n      \"detail\": [\n        \"CRITICAL_EDGE_PROOF_MISSING:SO-CHILD-T002:POLICY_QUALIFIED\"\n      ]\n    },\n    {\n      \"id\": \"SEMANTIC_DROP_CANCEL_SCOPE_AUTHORIZED\",\n      \"passed\": true,\n      \"detail\": [\n        \"CRITICAL_EDGE_PROOF_MISSING:SO-CHILD-T016:CANCEL_SCOPE_AUTHORIZED\"\n      ]\n    },\n    {\n      \"id\": \"SEMANTIC_DROP_BINDING_EXPIRED\",\n      \"passed\": true,\n      \"detail\": [\n        \"CRITICAL_EDGE_PROOF_MISSING:SO-BINDING-T009:BINDING_EXPIRED\",\n        \"INVALID_PROOF_SET:SO-BINDING-T009\"\n      ]\n    },\n    {\n      \"id\": \"SEMANTIC_DROP_RESEARCH_STOP_AUTHORIZED\",\n      \"passed\": true,\n      \"detail\": [\n        \"CRITICAL_EDGE_PROOF_MISSING:SO-CANDIDATE-T014:RESEARCH_STOP_AUTHORIZED\",\n        \"INVALID_PROOF_SET:SO-CANDIDATE-T014\"\n      ]\n    },\n    {\n      \"id\": \"SEMANTIC_EXPIRY_AUTHORIZED\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"SEMANTIC_EXPIRY_ACTIVE\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"SEMANTIC_EXPIRY_SUSPENDED\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"SEMANTIC_EXPIRY_DRAINING\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"SEMANTIC_REMOVE_OUTCOME_UNKNOWN_CANCELLED\",\n      \"passed\": true,\n      \"detail\": [\n        \"MISSING_UNKNOWN_RECOVERY:OUTCOME_UNKNOWN:CANCELLED\"\n      ]\n    },\n    {\n      \"id\": \"SEMANTIC_REMOVE_OUTCOME_UNKNOWN_EXPIRED\",\n      \"passed\": true,\n      \"detail\": [\n        \"MISSING_UNKNOWN_RECOVERY:OUTCOME_UNKNOWN:EXPIRED\"\n      ]\n    },\n    {\n      \"id\": \"SEMANTIC_REMOVE_CANCEL_REQUESTED_OUTCOME_UNKNOWN\",\n      \"passed\": true,\n      \"detail\": [\n        \"MISSING_UNKNOWN_RECOVERY:CANCEL_REQUESTED:OUTCOME_UNKNOWN\"\n      ]\n    },\n    {\n      \"id\": \"SEMANTIC_REMOVE_FILLED_OUTCOME_UNKNOWN\",\n      \"passed\": true,\n      \"detail\": [\n        \"MISSING_UNKNOWN_RECOVERY:FILLED:OUTCOME_UNKNOWN\"\n      ]\n    },\n    {\n      \"id\": \"ALL_POSITIVE_SCHEMA_FIXTURES\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"ZERO_REJECTED_price_tick\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"POSITIVE_DECIMAL_price_tick\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"ZERO_REJECTED_base_step\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"POSITIVE_DECIMAL_base_step\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"ZERO_REJECTED_maximum_quantity_base\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"POSITIVE_DECIMAL_maximum_quantity_base\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"MATURE_UNKNOWN_COST_REJECTED\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"UNKNOWN_COST_PRESERVED\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"IMMATURE_ELIGIBILITY_REJECTED\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"POSITIVE_REFERENCE_LOOP\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"STALE_REVISION_DOES_NOT_CHANGE_CHOICE\",\n      \"passed\": true,\n      \"detail\": {\n        \"before\": {\n          \"A\": \"0.20\",\n          \"B\": \"0.65\"\n        },\n        \"after\": {\n          \"A\": \"0.20\",\n          \"B\": \"0.65\"\n        }\n      }\n    },\n    {\n      \"id\": \"REFERENCE_REPLAY\",\n      \"passed\": true,\n      \"detail\": \"Fresh-memory reference replay only; actual process durability NOT_TESTED\"\n    },\n    {\n      \"id\": \"EQUAL_REVISION_CONFLICT\",\n      \"passed\": true,\n      \"detail\": \"CONFLICTING_REVISION\"\n    },\n    {\n      \"id\": \"NEW_REQUIREMENT_VAN-RV-001\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"NEW_REQUIREMENT_VAN-RV-002\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"NEW_REQUIREMENT_VAN-RV-003\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"NEW_REQUIREMENT_VAN-RV-004\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"NEW_REQUIREMENT_VAN-RV-005\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"NEW_REQUIREMENT_VAN-RV-006\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"NEW_REQUIREMENT_VAN-RV-007\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"NEW_REQUIREMENT_VAN-RV-008\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"COUNTS\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"COMPONENT_VAN-RV-001\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"COMPONENT_VAN-RV-002\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"COMPONENT_VAN-RV-003\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"COMPONENT_VAN-RV-004\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"COMPONENT_VAN-RV-005\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"COMPONENT_VAN-RV-006\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"COMPONENT_VAN-RV-007\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"COMPONENT_VAN-RV-008\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"NO_CERTIFICATES_OR_APP_RESULTS\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"DCP_LINKS_DCP-001\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"DCP_LINKS_DCP-002\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"DCP_LINKS_DCP-003\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"DCP_LINKS_DCP-004\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"DCP_LINKS_DCP-005\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"DCP_LINKS_DCP-006\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"DCP_LINKS_DCP-007\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"DCP_LINKS_DCP-008\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"MASTER_EMBEDS_FOCUSED_SPEC\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"NO_NET_INVENTORY_BUDGET_FORMULA\",\n      \"passed\": true,\n      \"detail\": null\n    },\n    {\n      \"id\": \"NO_EXTRA_DEPLOYABLES\",\n      \"passed\": true,\n      \"detail\": null\n    }\n  ]\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "verification/verify_rev115.py",
+        "--check-package",
+        "--json"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"files_checked\": 786,\n  \"findings\": [],\n  \"scope\": \"ARCHIVE_MEMBER_IDENTITY_ONLY\"\n}\n",
+      "stderr": ""
+    }
+  ],
+  "crc_all_members_ok": true,
+  "archive_members": 787,
+  "passed": true
+}

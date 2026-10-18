@@ -1,0 +1,28 @@
+{
+  "BG": "NOT_ISSUED",
+  "F15": "NOT_ISSUED",
+  "application_tests_executed": 0,
+  "findings": [],
+  "planned_application_contracts": 1520,
+  "requirements": 301,
+  "schema_examples": 12,
+  "scope": "DOCUMENT_SCHEMA_GRAPH_AND_SYNTHETIC_MODEL_ONLY",
+  "synthetic_loop": {
+    "cold_replay_equal": true,
+    "mature_distinct_parents": 4,
+    "mean_benchmark_cost": {
+      "A": "1.20",
+      "B": "0.65"
+    },
+    "not_actual_VATI_execution": true,
+    "selections": {
+      "1": "A",
+      "2": "A",
+      "3": "A",
+      "4": "A",
+      "5": "B",
+      "6": "B"
+    }
+  },
+  "units": 131
+}

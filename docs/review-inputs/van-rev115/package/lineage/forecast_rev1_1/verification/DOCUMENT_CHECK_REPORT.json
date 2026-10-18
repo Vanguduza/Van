@@ -1,0 +1,617 @@
+{
+  "document_id": "VAN-FORECAST-ADOPTION-REV1.1-20261017",
+  "report_type": "DOCUMENT_CONSISTENCY_ONLY",
+  "generated_at": "2026-10-17T11:33:21.427811+00:00",
+  "result": "PASS",
+  "execution_environment": "ChatGPT artifact-packaging container; not a DIAL VM or VAN application environment",
+  "document_check_toolchain": {
+    "python": "3.13.5",
+    "jsonschema": "4.26.0"
+  },
+  "checked_counts": {
+    "child_packets": 48,
+    "parent_lineage_packets": 76,
+    "requirements": 90,
+    "unexecuted_application_test_contracts": 180,
+    "principal_schemas": 18,
+    "fixture_examples": 12,
+    "source_entries": 42,
+    "document_check_groups": 43,
+    "deliberate_document_fixture_mutations": 64
+  },
+  "checks": [
+    {
+      "name": "plan DAG, ownership references, coverage and authority declarations",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "all JSON documents parse without nonstandard NaN/Infinity",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "Draft2020-12 schema shape: TrainingJobSpec.schema",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "Draft2020-12 schema shape: EventPositionProposal.schema",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "Draft2020-12 schema shape: PredictionMarketStudySpec.schema",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "Draft2020-12 schema shape: DatasetManifest.schema",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "Draft2020-12 schema shape: PredictionMarketSourceProfile.schema",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "Draft2020-12 schema shape: EventAssetResponse.schema",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "Draft2020-12 schema shape: DeploymentBinding.schema",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "Draft2020-12 schema shape: ArbitrageCandidate.schema",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "Draft2020-12 schema shape: PredictionMarketObservation.schema",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "Draft2020-12 schema shape: ModelArtifactManifest.schema",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "Draft2020-12 schema shape: TargetSpec.schema",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "Draft2020-12 schema shape: ForecastPacket.schema",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "Draft2020-12 schema shape: EventExecutionScenario.schema",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "Draft2020-12 schema shape: PredictionMarketContract.schema",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "Draft2020-12 schema shape: MarketMakingPolicy.schema",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "Draft2020-12 schema shape: FeatureManifest.schema",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "Draft2020-12 schema shape: EventProbabilitySnapshot.schema",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "Draft2020-12 schema shape: QualificationRecord.schema",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "synthetic READY forecast example shape/local semantics",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "synthetic ABSTAINED forecast example shape/local semantics",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "master source IDs resolve",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "human plan includes all packet exit sections",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "human requirement/test contracts include every exact ID",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "research example has no resolved live/paid/market permission",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "parent fingerprint references agree with retrieved material record",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "original obligations, schemas and parent lineage preserved",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "hosted research profile separates procurement, source use and authority",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "four study templates align with research profile and no result is asserted",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "parent delta preserves authority boundary and exact new IDs",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "synthetic PM fixture shape/local semantics: ArbitrageCandidate",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "synthetic PM fixture shape/local semantics: EventAssetResponse",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "synthetic PM fixture shape/local semantics: EventExecutionScenario",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "synthetic PM fixture shape/local semantics: EventPositionProposal",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "synthetic PM fixture shape/local semantics: EventProbabilitySnapshot",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "synthetic PM fixture shape/local semantics: MarketMakingPolicy",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "synthetic PM fixture shape/local semantics: PredictionMarketContract",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "synthetic PM fixture shape/local semantics: PredictionMarketObservation",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "synthetic PM fixture shape/local semantics: PredictionMarketSourceProfile",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "synthetic PM fixture shape/local semantics: PredictionMarketStudySpec",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "all 18 principal schemas and 12 synthetic examples present",
+      "result": "PASS",
+      "findings": []
+    },
+    {
+      "name": "all deliberate document/fixture mutations detected",
+      "result": "PASS",
+      "findings": []
+    }
+  ],
+  "mutations": [
+    {
+      "name": "dependency cycle",
+      "result": "DETECTED",
+      "finding_count": 2
+    },
+    {
+      "name": "code detached from F15",
+      "result": "DETECTED",
+      "finding_count": 45
+    },
+    {
+      "name": "second order sender",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "automatic live promotion",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "frontend disguised as backend",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "missing adversarial test",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "duplicate requirement ID",
+      "result": "DETECTED",
+      "finding_count": 6
+    },
+    {
+      "name": "application test falsely reported PASS",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "incomplete independent backend inventory",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "missing parent global barrier",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "unknown parent unit",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "procurement incorrectly gates document/code",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "event market given order-sender authority",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "hosting asserted to prove operator eligibility",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "event research labs made optional",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "uncalibrated score advertised as calibrated probability",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "NaN output",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "future input availability",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "expiry before generation",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "crossed quantiles",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "ready without output",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "abstention contains forecast payload",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "fixture relabelled live",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "forecast injected order quantity",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "scenario count without actual artifact",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "joint claim without joint artifact",
+      "result": "DETECTED",
+      "finding_count": 1
+    },
+    {
+      "name": "PM procurement introduced as requirement",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM purchase authorized",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM host inferred as operator eligibility",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM fixture relabelled authorized capture",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM threshold absent",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM reviewless exact equivalence",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM missing opposite bid replaced with ask",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM wrong complementary ask",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM sequence gap marked healthy",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM observation available after decision",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM negative book quantity",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM threshold survival increases",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM exclusive bins do not sum to one",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM calibrated probability has no calibration",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM outcome known before expectation frozen",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM probability change hides contract roll",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM two-source claim hides duplicate",
+      "result": "DETECTED",
+      "finding_count": 2,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM two-source claim mismatches event",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM agreement treated as independence",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM fixture turns on armed eligibility",
+      "result": "DETECTED",
+      "finding_count": 2,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM event probability copied as trade-win probability",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM response trained in the future",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM asset probability lacks calibrator",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM news proposal expands risk",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM binary EV omits costs",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM binary maximum loss understated",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM proposal enables live",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM study splits individual quotes",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM study drops exposure-matched control",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM study claims unrun economic success",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM cash ignores fee debit",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM settlement cash released early",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM price touch guarantees fill",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM arbitrage has hidden losing state",
+      "result": "DETECTED",
+      "finding_count": 2,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM cross-venue legs assumed atomic",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM quote cancel releases exposure before confirmation",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM maker assumes privileges",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM maker allows live order submission",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    }
+  ],
+  "claims_not_made": [
+    "Licence procurement or source-use permission",
+    "Operator eligibility",
+    "Actual provider capture or event-contract trading",
+    "Application implementation",
+    "Runtime model/service integration",
+    "Dataset or model training",
+    "Statistical/economic validation",
+    "Independent semantic review",
+    "Expanded parent DAG qualification",
+    "Cryptographic authority validation",
+    "Parent F15 or BG-001 issuance",
+    "Device acceptance",
+    "Live financial permission"
+  ],
+  "application_test_state": "NOT_RUN",
+  "independent_qualification": "NOT_ISSUED",
+  "execution_or_trading_authority": "NONE"
+}

@@ -1,0 +1,76 @@
+{
+  "current_head_drift_vs_rev112": 0,
+  "distinct_head_commits": 63,
+  "heads": 66,
+  "key_branches": {
+    "ccr-71397b02-lm6fid": "bdd63a40174d36ccdd0ceb8f3fb258c612df8bbe",
+    "ccr-8f1201e9-w1xm0r": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+    "chatgpt/vati-opportunity-modes-20261008": "923ecf9bbb81a2b3b485a3730071279851596b06",
+    "codex/van-canon-consolidation-2026-10-08": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+    "feature/muse-dual-surface-control-20261012": "0e825b44f559f44815cc9925f5dcbcaec5d7eb53",
+    "main": "8eb1889822fc8a83f219977c15340172e16acd91",
+    "platform/rev3-cinematic-studio-20261016": "4ad12183d9f65a23a2b4de51ed8ba6d1b6ca48c2",
+    "platform/rev3-interaction-pr93-contribution-20261014": "081a547117ea7d585e2cb6089e2c88c76acc2355",
+    "platform/rev3-owner-controls-20261015": "68394af3c6e53ed764062b19cb4f2c0ab3b3b608",
+    "review/van-next-universal-coverage-b4-closure-20261016": "0a694a998cfed119e116c68d3248de1cb84f120f",
+    "spike/van-next-chart-engine-20261015": "30bc2d03d018b2592d2209aa674b6db0a69938c2"
+  },
+  "main_sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+  "missing_admission_rules": [
+    "For each feature-bearing commit choose ADOPT/ADAPT/REBUILD_PRESENTATION/REJECT_WITH_CAUSE/DEFER_UNQUALIFIED",
+    "No implicit merging of PR101 old Rev1.9b plan or any legacy visual theme",
+    "All PR-only effects validated against current service caller, production registration and test",
+    "Exact branch heads refreshed again before source admission"
+  ],
+  "named_prs": [
+    {
+      "candidate": "functional canon/source/callers; admit selectively before new UX",
+      "head": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+      "number": 93
+    },
+    {
+      "candidate": "signed NORMAL/RISKY/AGGRESSIVE modes; evidence and risk limits",
+      "head": "923ecf9bbb81a2b3b485a3730071279851596b06",
+      "number": 92
+    },
+    {
+      "candidate": "native Muse task interaction, events, notification and lease model",
+      "head": "0e825b44f559f44815cc9925f5dcbcaec5d7eb53",
+      "number": 95
+    },
+    {
+      "candidate": "computer-worker receipt ownership and fail-closed provider controls",
+      "head": "081a547117ea7d585e2cb6089e2c88c76acc2355",
+      "number": 97
+    },
+    {
+      "candidate": "mobile/site owner controls; signed action and revalidation",
+      "head": "68394af3c6e53ed764062b19cb4f2c0ab3b3b608",
+      "number": 98
+    },
+    {
+      "candidate": "authenticated cinematic studio navigation; preserve useful non-visual route contracts, not legacy appearance",
+      "head": "4ad12183d9f65a23a2b4de51ed8ba6d1b6ca48c2",
+      "number": 99
+    },
+    {
+      "candidate": "whole-product no-waiver specification corrections; documentation only",
+      "head": "0a694a998cfed119e116c68d3248de1cb84f120f",
+      "number": 100
+    },
+    {
+      "candidate": "trading path, pending and ledger changes plus older plan; retain source selectively, never blanket merge",
+      "head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "number": 101
+    }
+  ],
+  "observed_utc": "2026-10-18T04:29:37Z",
+  "opus_source_sha": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+  "repository": "Vanguduza/Van",
+  "schema": "van.git.branch.scope-review/1.0",
+  "scope_limits": [
+    "Only advertised remote branch heads, not uncommitted files, tag-only histories, forks or active binaries",
+    "Review summary is not a semantic audit of every compiled code path"
+  ],
+  "source": "git ls-remote --heads on authorised van-trading-core via Global DIAL MCP; GitHub branch/PR discovery corroborated"
+}

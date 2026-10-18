@@ -1,0 +1,1046 @@
+{
+  "files": [
+    {
+      "bytes": 1005,
+      "original_path": "CANONICAL_AUTHORITY.json",
+      "preserved_at": "lineage/rev1_11/CANONICAL_AUTHORITY.json",
+      "sha256": "0c4baf531afb4757c664e5b9b17add6901d929c77fb342f9546df4e1f4c19e66"
+    },
+    {
+      "bytes": 3391,
+      "original_path": "CONSOLIDATION_APPLY_PROTOCOL.md",
+      "preserved_at": "lineage/rev1_11/CONSOLIDATION_APPLY_PROTOCOL.md",
+      "sha256": "c24979e25606d0f385203d6ac89d19a0bdc1eed16062cc05513a510e9397e0cc"
+    },
+    {
+      "bytes": 3346,
+      "original_path": "CONSOLIDATION_REPORT.md",
+      "preserved_at": "lineage/rev1_11/CONSOLIDATION_REPORT.md",
+      "sha256": "b6a22b85a3286deb3bf97f55e71865cf38653d18bd887eeaea7faf3f7051cade"
+    },
+    {
+      "bytes": 32462,
+      "original_path": "MANIFEST.json",
+      "preserved_at": "lineage/rev1_11/MANIFEST.json",
+      "sha256": "aa3a4f211b6de5d33da1bb96b5545be8ab672bf28ade74457c10ff68d7cf300c"
+    },
+    {
+      "bytes": 2661,
+      "original_path": "OPUS_CONTINUATION_HANDOFF.md",
+      "preserved_at": "lineage/rev1_11/OPUS_CONTINUATION_HANDOFF.md",
+      "sha256": "526eafb51c531f982448c4cbfb084043107f1f91691c17a80ffe63e96b02a485"
+    },
+    {
+      "bytes": 3465,
+      "original_path": "OWNER_DECISIONS_AND_CONSOLIDATION.md",
+      "preserved_at": "lineage/rev1_11/OWNER_DECISIONS_AND_CONSOLIDATION.md",
+      "sha256": "b898d5828a1adcff2ad4ec50fa8d59ed6acffa13a3c12fac904a818ea48cb195"
+    },
+    {
+      "bytes": 5838,
+      "original_path": "README_START_HERE.md",
+      "preserved_at": "lineage/rev1_11/README_START_HERE.md",
+      "sha256": "2eb8b1cfe147ad83da8d67357e6fa8669e1fe1b8310094239832b2795cdb9a0a"
+    },
+    {
+      "bytes": 376626,
+      "original_path": "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_11_20261017.md",
+      "preserved_at": "lineage/rev1_11/VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_11_20261017.md",
+      "sha256": "442d6a1d843d035651a239112372825b2f6a0a0cdc6cd4cc15044c68eaac4414"
+    },
+    {
+      "bytes": 12375,
+      "original_path": "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json",
+      "preserved_at": "lineage/rev1_11/consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json",
+      "sha256": "0996ddf9ecaed3861ecd46061b6be588e3f483e0da087af7475b3cbf71132547"
+    },
+    {
+      "bytes": 3589,
+      "original_path": "consolidation/OPUS_IMPLEMENTATION_DECISIONS.md",
+      "preserved_at": "consolidation/OPUS_IMPLEMENTATION_DECISIONS.md",
+      "sha256": "4cf5ea2a4c3a63bfc5a813c097240c688589c76a66bfff10dec847f66c58752b"
+    },
+    {
+      "bytes": 660,
+      "original_path": "consolidation/SOURCE_MANIFEST_REFERENCE.json",
+      "preserved_at": "consolidation/SOURCE_MANIFEST_REFERENCE.json",
+      "sha256": "959cd3762f3d433e2600be9087acb216910c29abedabe9ab809725762bbab2d0"
+    },
+    {
+      "bytes": 2826,
+      "original_path": "consolidation/SOURCE_REGISTER.json",
+      "preserved_at": "lineage/rev1_11/consolidation/SOURCE_REGISTER.json",
+      "sha256": "53f06e93efddf408eb84d2fae440c3e4e784e4babd7728dc31b29e21ed879254"
+    },
+    {
+      "bytes": 5510,
+      "original_path": "contracts/BACKEND_COMPLETE_GATE.md",
+      "preserved_at": "contracts/BACKEND_COMPLETE_GATE.md",
+      "sha256": "3717b7293763478cad213978277e6ca41df350a2abed8f150c473a1c67a49bfa"
+    },
+    {
+      "bytes": 99626,
+      "original_path": "contracts/BACKEND_SERVICE_CATALOG.json",
+      "preserved_at": "lineage/rev1_11/contracts/BACKEND_SERVICE_CATALOG.json",
+      "sha256": "20b7b54c6cfa52dfd71723b521dde5da84634286b69fd0db281f90fa714dc855"
+    },
+    {
+      "bytes": 66175,
+      "original_path": "contracts/BACKEND_SERVICE_COMPLETION_CONTRACTS.md",
+      "preserved_at": "lineage/rev1_11/contracts/BACKEND_SERVICE_COMPLETION_CONTRACTS.md",
+      "sha256": "0200c46710abdedf0397eefd0a317b3ad3e9726b22706e83dc93cca7e4b6563a"
+    },
+    {
+      "bytes": 5625,
+      "original_path": "contracts/BACKEND_TO_FRONTEND_CONSUMPTION_CONTRACT.md",
+      "preserved_at": "lineage/rev1_11/contracts/BACKEND_TO_FRONTEND_CONSUMPTION_CONTRACT.md",
+      "sha256": "aee95018e2d0b45213275dde928df8f24d5c95e97cf7f72b21906f0d03b8d911"
+    },
+    {
+      "bytes": 27100,
+      "original_path": "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+      "preserved_at": "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+      "sha256": "4ec002643398e889eb38c8c7ab91f3144494c01a34687dc2fb6e029d87e74a4f"
+    },
+    {
+      "bytes": 24309,
+      "original_path": "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.md",
+      "preserved_at": "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.md",
+      "sha256": "edd60c0230c46b553171f9911f8790a7b6dfba16e288b4bebed54fc6ab2e4f5c"
+    },
+    {
+      "bytes": 6810,
+      "original_path": "contracts/CRITICAL_STATE_AND_FINANCIAL_CLARIFICATIONS.md",
+      "preserved_at": "contracts/CRITICAL_STATE_AND_FINANCIAL_CLARIFICATIONS.md",
+      "sha256": "2de4cec908dcf194c40b8d2baa0c3382a1a90e7ff8d9f791d619010a4b471230"
+    },
+    {
+      "bytes": 4732,
+      "original_path": "contracts/NEWS_ARMING_READINESS_AMENDMENT_REV1_10.json",
+      "preserved_at": "contracts/NEWS_ARMING_READINESS_AMENDMENT_REV1_10.json",
+      "sha256": "1d1f1487a969c0cdae75d9aac4ee339bf20df00641c128dbee8ba34009076337"
+    },
+    {
+      "bytes": 2981,
+      "original_path": "contracts/forecast/ArbitrageCandidate.schema.json",
+      "preserved_at": "contracts/forecast/ArbitrageCandidate.schema.json",
+      "sha256": "29953702f9a6c53817c99c87fdd57cf523e1f14ba1c04d62cadd58e88ec35cae"
+    },
+    {
+      "bytes": 16220,
+      "original_path": "contracts/forecast/CONTRACTS_AND_SEMANTICS.md",
+      "preserved_at": "contracts/forecast/CONTRACTS_AND_SEMANTICS.md",
+      "sha256": "3b068ac30acfce788ad4dacd34167bd5206954cca7cc5c49f6bd79f8b04abac2"
+    },
+    {
+      "bytes": 4254,
+      "original_path": "contracts/forecast/DatasetManifest.schema.json",
+      "preserved_at": "contracts/forecast/DatasetManifest.schema.json",
+      "sha256": "e89903af45916133f02286957a5ddceee6fae8007d17cac6b4cce2c09d412143"
+    },
+    {
+      "bytes": 4057,
+      "original_path": "contracts/forecast/DeploymentBinding.schema.json",
+      "preserved_at": "contracts/forecast/DeploymentBinding.schema.json",
+      "sha256": "54d19cb4077551fceb44feb7968cd780479edd9e8a9c25d42be765f83903b0c9"
+    },
+    {
+      "bytes": 3108,
+      "original_path": "contracts/forecast/EventAssetResponse.schema.json",
+      "preserved_at": "contracts/forecast/EventAssetResponse.schema.json",
+      "sha256": "259c8a8f33a95e510650585f3c9da2bda6077d23bfa3c1e936f298b82058300a"
+    },
+    {
+      "bytes": 3208,
+      "original_path": "contracts/forecast/EventExecutionScenario.schema.json",
+      "preserved_at": "contracts/forecast/EventExecutionScenario.schema.json",
+      "sha256": "612a8b512e6be77707e0e209b5ae64a7c3656b546ffdccd9a56ea09053660b01"
+    },
+    {
+      "bytes": 3584,
+      "original_path": "contracts/forecast/EventPositionProposal.schema.json",
+      "preserved_at": "contracts/forecast/EventPositionProposal.schema.json",
+      "sha256": "cab4ffa56e8684578184d35361348381edece61124c68f26b2a8a811603a9de7"
+    },
+    {
+      "bytes": 5865,
+      "original_path": "contracts/forecast/EventProbabilitySnapshot.schema.json",
+      "preserved_at": "contracts/forecast/EventProbabilitySnapshot.schema.json",
+      "sha256": "06a133439e63479524949461451f839822e054c72a0397fc77f573d941260c89"
+    },
+    {
+      "bytes": 4436,
+      "original_path": "contracts/forecast/FeatureManifest.schema.json",
+      "preserved_at": "contracts/forecast/FeatureManifest.schema.json",
+      "sha256": "5630ef44275e57cea3ad42322bc860bf6699129cd6d277c460603dfff3327082"
+    },
+    {
+      "bytes": 14503,
+      "original_path": "contracts/forecast/ForecastPacket.schema.json",
+      "preserved_at": "contracts/forecast/ForecastPacket.schema.json",
+      "sha256": "6043d42abb88170b28e8c8ed51d4d814415e6d18acad1d57ea02ae68a85c322d"
+    },
+    {
+      "bytes": 2677,
+      "original_path": "contracts/forecast/MarketMakingPolicy.schema.json",
+      "preserved_at": "contracts/forecast/MarketMakingPolicy.schema.json",
+      "sha256": "9fc182985b110c7aee92be2e2cdc8f6e94544a7fce7a7e94168b5d393c9cda50"
+    },
+    {
+      "bytes": 4924,
+      "original_path": "contracts/forecast/ModelArtifactManifest.schema.json",
+      "preserved_at": "contracts/forecast/ModelArtifactManifest.schema.json",
+      "sha256": "228716fd7a1aab5cc7eacc2a7a96894026da51ce27bbe4a3febbc0f351f9e55f"
+    },
+    {
+      "bytes": 4044,
+      "original_path": "contracts/forecast/PredictionMarketContract.schema.json",
+      "preserved_at": "contracts/forecast/PredictionMarketContract.schema.json",
+      "sha256": "2aeae173c6aa6aaa26d170a40c094e7b55ad24f5310642d6ee5004c4df5e5df7"
+    },
+    {
+      "bytes": 4494,
+      "original_path": "contracts/forecast/PredictionMarketObservation.schema.json",
+      "preserved_at": "contracts/forecast/PredictionMarketObservation.schema.json",
+      "sha256": "acce5ad1b148e50c14ed6a2d4bb70e81090fcf7088ed66d50e701f68aa4b0c2e"
+    },
+    {
+      "bytes": 2920,
+      "original_path": "contracts/forecast/PredictionMarketSourceProfile.schema.json",
+      "preserved_at": "contracts/forecast/PredictionMarketSourceProfile.schema.json",
+      "sha256": "15802e4ac07b234f6e597cfbe293033845909c154816f820c7825d54b9bf199f"
+    },
+    {
+      "bytes": 3253,
+      "original_path": "contracts/forecast/PredictionMarketStudySpec.schema.json",
+      "preserved_at": "contracts/forecast/PredictionMarketStudySpec.schema.json",
+      "sha256": "0a2a3912e3ec09a29a47c64e2e301473355c65202ad6a025fa406ac180441632"
+    },
+    {
+      "bytes": 5213,
+      "original_path": "contracts/forecast/QualificationRecord.schema.json",
+      "preserved_at": "contracts/forecast/QualificationRecord.schema.json",
+      "sha256": "78d6f9950156cc57dbc88bb9bedd444e891cc00665f9b0830985a21a68fcb609"
+    },
+    {
+      "bytes": 4629,
+      "original_path": "contracts/forecast/TargetSpec.schema.json",
+      "preserved_at": "contracts/forecast/TargetSpec.schema.json",
+      "sha256": "0ab99d697f30db8c97a6c706c7fd742b2694fb15790131bffb9aed08db3e36b0"
+    },
+    {
+      "bytes": 3895,
+      "original_path": "contracts/forecast/TrainingJobSpec.schema.json",
+      "preserved_at": "contracts/forecast/TrainingJobSpec.schema.json",
+      "sha256": "375c6dada95299a5238f9092d5696107b09d3b63a9f137e98aaf215192ceff39"
+    },
+    {
+      "bytes": 1577,
+      "original_path": "contracts/forecast/examples/ForecastPacket.fixture.abstained.json",
+      "preserved_at": "contracts/forecast/examples/ForecastPacket.fixture.abstained.json",
+      "sha256": "2c6d7807536cce1662e5f1b6573117ab38b56dea9e89286924369ad9c2bbd1c9"
+    },
+    {
+      "bytes": 2026,
+      "original_path": "contracts/forecast/examples/ForecastPacket.fixture.ready.json",
+      "preserved_at": "contracts/forecast/examples/ForecastPacket.fixture.ready.json",
+      "sha256": "abf938447bce26f346c1a8270751ca0a870287a53de6ea4b4b978d29dcdd8423"
+    },
+    {
+      "bytes": 1050,
+      "original_path": "contracts/forecast/prediction_market_examples/ArbitrageCandidate.fixture.json",
+      "preserved_at": "contracts/forecast/prediction_market_examples/ArbitrageCandidate.fixture.json",
+      "sha256": "5ffc9c497ec0628700aff4baef52fd79372e6bf85a66864960899d5b8c90cebe"
+    },
+    {
+      "bytes": 1114,
+      "original_path": "contracts/forecast/prediction_market_examples/EventAssetResponse.fixture.json",
+      "preserved_at": "contracts/forecast/prediction_market_examples/EventAssetResponse.fixture.json",
+      "sha256": "cfbe713cf25a603ae1d94862c817b6b95aee5671282586baa6c9f925cbbcd0dd"
+    },
+    {
+      "bytes": 1093,
+      "original_path": "contracts/forecast/prediction_market_examples/EventExecutionScenario.fixture.json",
+      "preserved_at": "contracts/forecast/prediction_market_examples/EventExecutionScenario.fixture.json",
+      "sha256": "0c0c8c70e79642abe60cde4191189d7aa02625ae71d909277f7419573ec3c1b4"
+    },
+    {
+      "bytes": 1086,
+      "original_path": "contracts/forecast/prediction_market_examples/EventPositionProposal.fixture.json",
+      "preserved_at": "contracts/forecast/prediction_market_examples/EventPositionProposal.fixture.json",
+      "sha256": "e66ac417ae5cb2e58a52f1ebfd94ada66bf32d0de908f50cf850a51c29688716"
+    },
+    {
+      "bytes": 1694,
+      "original_path": "contracts/forecast/prediction_market_examples/EventProbabilitySnapshot.fixture.json",
+      "preserved_at": "contracts/forecast/prediction_market_examples/EventProbabilitySnapshot.fixture.json",
+      "sha256": "c07a82ac9c66dd6ea218886b710e4a52cf9e038eaaf76d003b4d26c61c647bcc"
+    },
+    {
+      "bytes": 968,
+      "original_path": "contracts/forecast/prediction_market_examples/MarketMakingPolicy.fixture.json",
+      "preserved_at": "contracts/forecast/prediction_market_examples/MarketMakingPolicy.fixture.json",
+      "sha256": "44da805f34976bb9e690a51b357f2aebaade94763ea0f1889fbc55b34648f872"
+    },
+    {
+      "bytes": 1343,
+      "original_path": "contracts/forecast/prediction_market_examples/PredictionMarketContract.fixture.json",
+      "preserved_at": "contracts/forecast/prediction_market_examples/PredictionMarketContract.fixture.json",
+      "sha256": "ea62dcfc13cd350f3468dfb98156c32d2a8b30da24846924272f707663aec628"
+    },
+    {
+      "bytes": 1247,
+      "original_path": "contracts/forecast/prediction_market_examples/PredictionMarketObservation.fixture.json",
+      "preserved_at": "contracts/forecast/prediction_market_examples/PredictionMarketObservation.fixture.json",
+      "sha256": "2d2c82a196de4075cbbd4a8e7b6153737d7f8babdde38801cfdb320d98928afe"
+    },
+    {
+      "bytes": 867,
+      "original_path": "contracts/forecast/prediction_market_examples/PredictionMarketSourceProfile.fixture.json",
+      "preserved_at": "contracts/forecast/prediction_market_examples/PredictionMarketSourceProfile.fixture.json",
+      "sha256": "04c02bbbb467a97b77a25a09c8a80061ed377fff4aee489930030f4ba1002bcb"
+    },
+    {
+      "bytes": 1284,
+      "original_path": "contracts/forecast/prediction_market_examples/PredictionMarketStudySpec.fixture.json",
+      "preserved_at": "contracts/forecast/prediction_market_examples/PredictionMarketStudySpec.fixture.json",
+      "sha256": "7f016416cb25b19cf6323c2fa67b1ad50951e434a2e2ac2ccffff61d75a8fa0d"
+    },
+    {
+      "bytes": 364371,
+      "original_path": "design/ALL_SCREEN_TACTILE_SPECIFICATIONS.md",
+      "preserved_at": "lineage/rev1_11/design/ALL_SCREEN_TACTILE_SPECIFICATIONS.md",
+      "sha256": "cad91cd3f635dedfb967dd03eb034683623a0c4fd395e95fd2265d16fbc7476f"
+    },
+    {
+      "bytes": 674945,
+      "original_path": "design/ALL_SURFACE_CONTRACTS.json",
+      "preserved_at": "lineage/rev1_11/design/ALL_SURFACE_CONTRACTS.json",
+      "sha256": "591377771234ec32402626bbf817a210038136138dc1e4b85d204fe838ae05f0"
+    },
+    {
+      "bytes": 300849,
+      "original_path": "design/VAN_LOCKED_DARK.png",
+      "preserved_at": "design/VAN_LOCKED_DARK.png",
+      "sha256": "e3bca85b2c523bbb171048ec7947b40227f38766eec100e216c1d0643b456a17"
+    },
+    {
+      "bytes": 247690,
+      "original_path": "design/VAN_LOCKED_LIGHT.png",
+      "preserved_at": "design/VAN_LOCKED_LIGHT.png",
+      "sha256": "76662dca3ba69bc47e1f04d227e4d86aa90b9872adcf2f0e25aa907583c0a2b7"
+    },
+    {
+      "bytes": 389,
+      "original_path": "evidence/BG_REFUSAL.json",
+      "preserved_at": "lineage/rev1_11/evidence/BG_REFUSAL.json",
+      "sha256": "83bdd01d820e2cdfd9f2acdf8906b0869e073de791ba0aa9f9bcd94b8e3417d6"
+    },
+    {
+      "bytes": 2198,
+      "original_path": "evidence/CANONICAL_GRAPH_VM_RECEIPT.json",
+      "preserved_at": "lineage/rev1_11/evidence/CANONICAL_GRAPH_VM_RECEIPT.json",
+      "sha256": "46db55108494d11c654e6bd851a6181b02111ae64cb8bb0588739915d58bb8ac"
+    },
+    {
+      "bytes": 8222,
+      "original_path": "evidence/CANONICAL_MUTATION_CHECK.json",
+      "preserved_at": "lineage/rev1_11/evidence/CANONICAL_MUTATION_CHECK.json",
+      "sha256": "4a24b877fa934080ff9e2170be76e93f6a5403d0c71d5cde3126daa19671ab24"
+    },
+    {
+      "bytes": 576,
+      "original_path": "evidence/CANONICAL_STRUCTURE_CHECK.json",
+      "preserved_at": "lineage/rev1_11/evidence/CANONICAL_STRUCTURE_CHECK.json",
+      "sha256": "37ccc5588362d8b3bd1b6f47ae203fdc68098a6d98175ec9ac1fda7c78aee482"
+    },
+    {
+      "bytes": 1354,
+      "original_path": "evidence/CONSOLIDATION_VERIFICATION_SUMMARY.json",
+      "preserved_at": "lineage/rev1_11/evidence/CONSOLIDATION_VERIFICATION_SUMMARY.json",
+      "sha256": "a181f39b1a254a9e078f306615dafce1d14bc1d832a86be890ed3baf73b7605a"
+    },
+    {
+      "bytes": 390,
+      "original_path": "evidence/F15_REFUSAL.json",
+      "preserved_at": "lineage/rev1_11/evidence/F15_REFUSAL.json",
+      "sha256": "2f79e158f0e9dea801eae2fb361cc2c9d20fda01fbc3660631b2e8d247e5a857"
+    },
+    {
+      "bytes": 2310,
+      "original_path": "evidence/FINAL_DOCUMENT_VALIDATION.json",
+      "preserved_at": "lineage/rev1_11/evidence/FINAL_DOCUMENT_VALIDATION.json",
+      "sha256": "187c6ffbca954efa18fa1b3343b98db7be7f4671f3031d7fff5c1007ad33621e"
+    },
+    {
+      "bytes": 6351,
+      "original_path": "evidence/FORECAST_SCHEMA_FIXTURE_CHECK.json",
+      "preserved_at": "lineage/rev1_11/evidence/FORECAST_SCHEMA_FIXTURE_CHECK.json",
+      "sha256": "f707f0ca8184910ffa33236b2fb1ef36ec951100fc0c0cb2db643955b7d7209e"
+    },
+    {
+      "bytes": 18581,
+      "original_path": "evidence/GRAPH_EXPORT.json",
+      "preserved_at": "lineage/rev1_11/evidence/GRAPH_EXPORT.json",
+      "sha256": "b32197e4185ad594df77fcf0a64a5d87bae0b1d84fc3e76878694d629b14923d"
+    },
+    {
+      "bytes": 1658,
+      "original_path": "evidence/GRAPH_REPLAY_CHECK.json",
+      "preserved_at": "lineage/rev1_11/evidence/GRAPH_REPLAY_CHECK.json",
+      "sha256": "1a0b53549b87e0bf1de4d3c7401c9db7a35d35a9ce647c630030905eab41b13c"
+    },
+    {
+      "bytes": 56,
+      "original_path": "evidence/NEWS_READINESS_CHECK.json",
+      "preserved_at": "lineage/rev1_11/evidence/NEWS_READINESS_CHECK.json",
+      "sha256": "8e4fca4ac8ad63edd5e6b8abbfe2bfbfcc942beb24db5b99852201699a743976"
+    },
+    {
+      "bytes": 2254,
+      "original_path": "evidence/NEWS_READINESS_MUTATIONS.json",
+      "preserved_at": "lineage/rev1_11/evidence/NEWS_READINESS_MUTATIONS.json",
+      "sha256": "6703ac7be53a613d04b1447769a006b08d1c133ae5b79cca35a539078a08266a"
+    },
+    {
+      "bytes": 752,
+      "original_path": "evidence/OPUS_LIMIT_EXPIRY_COUNTEREXAMPLES.json",
+      "preserved_at": "lineage/rev1_11/evidence/OPUS_LIMIT_EXPIRY_COUNTEREXAMPLES.json",
+      "sha256": "bddb6814cd64b0a4996efac60428a3c570fb6055199b378b9e31edf6f5ab5a9e"
+    },
+    {
+      "bytes": 2523,
+      "original_path": "lineage/forecast_rev1_1/CHANGELOG_REV1_1.md",
+      "preserved_at": "lineage/forecast_rev1_1/CHANGELOG_REV1_1.md",
+      "sha256": "1d3198a0b71ced12c8006ad15892fa61f1e59f52341d8c91e81dd59792fe4d5f"
+    },
+    {
+      "bytes": 9165,
+      "original_path": "lineage/forecast_rev1_1/CODING_AGENT_HANDOFF.md",
+      "preserved_at": "lineage/forecast_rev1_1/CODING_AGENT_HANDOFF.md",
+      "sha256": "540f2e74674b5958436c30923d57b337e88f4a2fe50909a00c41b61ac56bd05a"
+    },
+    {
+      "bytes": 4071,
+      "original_path": "lineage/forecast_rev1_1/README.md",
+      "preserved_at": "lineage/forecast_rev1_1/README.md",
+      "sha256": "75b0c75971e9dc63f342176ad07118411baf7ffbc0f0c2813f960c62480b54c2"
+    },
+    {
+      "bytes": 6388,
+      "original_path": "lineage/forecast_rev1_1/SHA256SUMS",
+      "preserved_at": "lineage/forecast_rev1_1/SHA256SUMS",
+      "sha256": "557dde23ec80be861c8821f3ada25c76bd7a2645e0510cd55f27ddf84babfd9b"
+    },
+    {
+      "bytes": 136237,
+      "original_path": "lineage/forecast_rev1_1/VAN_FORECAST_ADOPTION_BLUEPRINT_REV1_1_20261017.md",
+      "preserved_at": "lineage/forecast_rev1_1/VAN_FORECAST_ADOPTION_BLUEPRINT_REV1_1_20261017.md",
+      "sha256": "544e77a2bc46317ff319c86da646b1c7c937b9c88ee7328b9cafef2f72cff750"
+    },
+    {
+      "bytes": 3240,
+      "original_path": "lineage/forecast_rev1_1/config/PREDICTION_MARKET_PROFILE.json",
+      "preserved_at": "lineage/forecast_rev1_1/config/PREDICTION_MARKET_PROFILE.json",
+      "sha256": "2fb75a33af23317a61b63b3769acede5b270b486d0e1252c27ee28fb5ea5eba8"
+    },
+    {
+      "bytes": 3285,
+      "original_path": "lineage/forecast_rev1_1/config/RESEARCH_STARTING_PROFILE.json",
+      "preserved_at": "lineage/forecast_rev1_1/config/RESEARCH_STARTING_PROFILE.json",
+      "sha256": "23841dc0434ee35acbda734e8efb8a3c398259ecd1bf07c764633a3a0e23bc59"
+    },
+    {
+      "bytes": 2981,
+      "original_path": "lineage/forecast_rev1_1/contracts/ArbitrageCandidate.schema.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/ArbitrageCandidate.schema.json",
+      "sha256": "29953702f9a6c53817c99c87fdd57cf523e1f14ba1c04d62cadd58e88ec35cae"
+    },
+    {
+      "bytes": 16220,
+      "original_path": "lineage/forecast_rev1_1/contracts/CONTRACTS_AND_SEMANTICS.md",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/CONTRACTS_AND_SEMANTICS.md",
+      "sha256": "3b068ac30acfce788ad4dacd34167bd5206954cca7cc5c49f6bd79f8b04abac2"
+    },
+    {
+      "bytes": 4254,
+      "original_path": "lineage/forecast_rev1_1/contracts/DatasetManifest.schema.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/DatasetManifest.schema.json",
+      "sha256": "e89903af45916133f02286957a5ddceee6fae8007d17cac6b4cce2c09d412143"
+    },
+    {
+      "bytes": 4057,
+      "original_path": "lineage/forecast_rev1_1/contracts/DeploymentBinding.schema.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/DeploymentBinding.schema.json",
+      "sha256": "54d19cb4077551fceb44feb7968cd780479edd9e8a9c25d42be765f83903b0c9"
+    },
+    {
+      "bytes": 3108,
+      "original_path": "lineage/forecast_rev1_1/contracts/EventAssetResponse.schema.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/EventAssetResponse.schema.json",
+      "sha256": "259c8a8f33a95e510650585f3c9da2bda6077d23bfa3c1e936f298b82058300a"
+    },
+    {
+      "bytes": 3208,
+      "original_path": "lineage/forecast_rev1_1/contracts/EventExecutionScenario.schema.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/EventExecutionScenario.schema.json",
+      "sha256": "612a8b512e6be77707e0e209b5ae64a7c3656b546ffdccd9a56ea09053660b01"
+    },
+    {
+      "bytes": 3584,
+      "original_path": "lineage/forecast_rev1_1/contracts/EventPositionProposal.schema.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/EventPositionProposal.schema.json",
+      "sha256": "cab4ffa56e8684578184d35361348381edece61124c68f26b2a8a811603a9de7"
+    },
+    {
+      "bytes": 5865,
+      "original_path": "lineage/forecast_rev1_1/contracts/EventProbabilitySnapshot.schema.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/EventProbabilitySnapshot.schema.json",
+      "sha256": "06a133439e63479524949461451f839822e054c72a0397fc77f573d941260c89"
+    },
+    {
+      "bytes": 4436,
+      "original_path": "lineage/forecast_rev1_1/contracts/FeatureManifest.schema.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/FeatureManifest.schema.json",
+      "sha256": "5630ef44275e57cea3ad42322bc860bf6699129cd6d277c460603dfff3327082"
+    },
+    {
+      "bytes": 14503,
+      "original_path": "lineage/forecast_rev1_1/contracts/ForecastPacket.schema.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/ForecastPacket.schema.json",
+      "sha256": "6043d42abb88170b28e8c8ed51d4d814415e6d18acad1d57ea02ae68a85c322d"
+    },
+    {
+      "bytes": 2677,
+      "original_path": "lineage/forecast_rev1_1/contracts/MarketMakingPolicy.schema.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/MarketMakingPolicy.schema.json",
+      "sha256": "9fc182985b110c7aee92be2e2cdc8f6e94544a7fce7a7e94168b5d393c9cda50"
+    },
+    {
+      "bytes": 4924,
+      "original_path": "lineage/forecast_rev1_1/contracts/ModelArtifactManifest.schema.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/ModelArtifactManifest.schema.json",
+      "sha256": "228716fd7a1aab5cc7eacc2a7a96894026da51ce27bbe4a3febbc0f351f9e55f"
+    },
+    {
+      "bytes": 4044,
+      "original_path": "lineage/forecast_rev1_1/contracts/PredictionMarketContract.schema.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/PredictionMarketContract.schema.json",
+      "sha256": "2aeae173c6aa6aaa26d170a40c094e7b55ad24f5310642d6ee5004c4df5e5df7"
+    },
+    {
+      "bytes": 4494,
+      "original_path": "lineage/forecast_rev1_1/contracts/PredictionMarketObservation.schema.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/PredictionMarketObservation.schema.json",
+      "sha256": "acce5ad1b148e50c14ed6a2d4bb70e81090fcf7088ed66d50e701f68aa4b0c2e"
+    },
+    {
+      "bytes": 2920,
+      "original_path": "lineage/forecast_rev1_1/contracts/PredictionMarketSourceProfile.schema.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/PredictionMarketSourceProfile.schema.json",
+      "sha256": "15802e4ac07b234f6e597cfbe293033845909c154816f820c7825d54b9bf199f"
+    },
+    {
+      "bytes": 3253,
+      "original_path": "lineage/forecast_rev1_1/contracts/PredictionMarketStudySpec.schema.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/PredictionMarketStudySpec.schema.json",
+      "sha256": "0a2a3912e3ec09a29a47c64e2e301473355c65202ad6a025fa406ac180441632"
+    },
+    {
+      "bytes": 5213,
+      "original_path": "lineage/forecast_rev1_1/contracts/QualificationRecord.schema.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/QualificationRecord.schema.json",
+      "sha256": "78d6f9950156cc57dbc88bb9bedd444e891cc00665f9b0830985a21a68fcb609"
+    },
+    {
+      "bytes": 4629,
+      "original_path": "lineage/forecast_rev1_1/contracts/TargetSpec.schema.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/TargetSpec.schema.json",
+      "sha256": "0ab99d697f30db8c97a6c706c7fd742b2694fb15790131bffb9aed08db3e36b0"
+    },
+    {
+      "bytes": 3895,
+      "original_path": "lineage/forecast_rev1_1/contracts/TrainingJobSpec.schema.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/TrainingJobSpec.schema.json",
+      "sha256": "375c6dada95299a5238f9092d5696107b09d3b63a9f137e98aaf215192ceff39"
+    },
+    {
+      "bytes": 1577,
+      "original_path": "lineage/forecast_rev1_1/contracts/examples/ForecastPacket.fixture.abstained.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/examples/ForecastPacket.fixture.abstained.json",
+      "sha256": "2c6d7807536cce1662e5f1b6573117ab38b56dea9e89286924369ad9c2bbd1c9"
+    },
+    {
+      "bytes": 2026,
+      "original_path": "lineage/forecast_rev1_1/contracts/examples/ForecastPacket.fixture.ready.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/examples/ForecastPacket.fixture.ready.json",
+      "sha256": "abf938447bce26f346c1a8270751ca0a870287a53de6ea4b4b978d29dcdd8423"
+    },
+    {
+      "bytes": 1050,
+      "original_path": "lineage/forecast_rev1_1/contracts/prediction_market_examples/ArbitrageCandidate.fixture.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/prediction_market_examples/ArbitrageCandidate.fixture.json",
+      "sha256": "5ffc9c497ec0628700aff4baef52fd79372e6bf85a66864960899d5b8c90cebe"
+    },
+    {
+      "bytes": 1114,
+      "original_path": "lineage/forecast_rev1_1/contracts/prediction_market_examples/EventAssetResponse.fixture.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/prediction_market_examples/EventAssetResponse.fixture.json",
+      "sha256": "cfbe713cf25a603ae1d94862c817b6b95aee5671282586baa6c9f925cbbcd0dd"
+    },
+    {
+      "bytes": 1093,
+      "original_path": "lineage/forecast_rev1_1/contracts/prediction_market_examples/EventExecutionScenario.fixture.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/prediction_market_examples/EventExecutionScenario.fixture.json",
+      "sha256": "0c0c8c70e79642abe60cde4191189d7aa02625ae71d909277f7419573ec3c1b4"
+    },
+    {
+      "bytes": 1086,
+      "original_path": "lineage/forecast_rev1_1/contracts/prediction_market_examples/EventPositionProposal.fixture.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/prediction_market_examples/EventPositionProposal.fixture.json",
+      "sha256": "e66ac417ae5cb2e58a52f1ebfd94ada66bf32d0de908f50cf850a51c29688716"
+    },
+    {
+      "bytes": 1694,
+      "original_path": "lineage/forecast_rev1_1/contracts/prediction_market_examples/EventProbabilitySnapshot.fixture.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/prediction_market_examples/EventProbabilitySnapshot.fixture.json",
+      "sha256": "c07a82ac9c66dd6ea218886b710e4a52cf9e038eaaf76d003b4d26c61c647bcc"
+    },
+    {
+      "bytes": 968,
+      "original_path": "lineage/forecast_rev1_1/contracts/prediction_market_examples/MarketMakingPolicy.fixture.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/prediction_market_examples/MarketMakingPolicy.fixture.json",
+      "sha256": "44da805f34976bb9e690a51b357f2aebaade94763ea0f1889fbc55b34648f872"
+    },
+    {
+      "bytes": 1343,
+      "original_path": "lineage/forecast_rev1_1/contracts/prediction_market_examples/PredictionMarketContract.fixture.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/prediction_market_examples/PredictionMarketContract.fixture.json",
+      "sha256": "ea62dcfc13cd350f3468dfb98156c32d2a8b30da24846924272f707663aec628"
+    },
+    {
+      "bytes": 1247,
+      "original_path": "lineage/forecast_rev1_1/contracts/prediction_market_examples/PredictionMarketObservation.fixture.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/prediction_market_examples/PredictionMarketObservation.fixture.json",
+      "sha256": "2d2c82a196de4075cbbd4a8e7b6153737d7f8babdde38801cfdb320d98928afe"
+    },
+    {
+      "bytes": 867,
+      "original_path": "lineage/forecast_rev1_1/contracts/prediction_market_examples/PredictionMarketSourceProfile.fixture.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/prediction_market_examples/PredictionMarketSourceProfile.fixture.json",
+      "sha256": "04c02bbbb467a97b77a25a09c8a80061ed377fff4aee489930030f4ba1002bcb"
+    },
+    {
+      "bytes": 1284,
+      "original_path": "lineage/forecast_rev1_1/contracts/prediction_market_examples/PredictionMarketStudySpec.fixture.json",
+      "preserved_at": "lineage/forecast_rev1_1/contracts/prediction_market_examples/PredictionMarketStudySpec.fixture.json",
+      "sha256": "7f016416cb25b19cf6323c2fa67b1ad50951e434a2e2ac2ccffff61d75a8fa0d"
+    },
+    {
+      "bytes": 134678,
+      "original_path": "lineage/forecast_rev1_1/plan/ACCEPTANCE_TEST_CONTRACTS.json",
+      "preserved_at": "lineage/forecast_rev1_1/plan/ACCEPTANCE_TEST_CONTRACTS.json",
+      "sha256": "81e3e61278581acad79a76aca5f88cf092d35b0c0becb1f80e5674bc559a72b3"
+    },
+    {
+      "bytes": 88069,
+      "original_path": "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json",
+      "preserved_at": "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json",
+      "sha256": "2b031ac752c3180f40bf6fd2fb449b2147ba6b51e5871a307f3b9751e676ad2a"
+    },
+    {
+      "bytes": 66412,
+      "original_path": "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.md",
+      "preserved_at": "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.md",
+      "sha256": "b175094c6c7fec5cd84c6d181cc6d7fa396a96efc7e311a61e8dde85a3598312"
+    },
+    {
+      "bytes": 5986,
+      "original_path": "lineage/forecast_rev1_1/plan/PARENT_INTEGRATION_DELTA.json",
+      "preserved_at": "lineage/forecast_rev1_1/plan/PARENT_INTEGRATION_DELTA.json",
+      "sha256": "dce30767e92b003eaf5d0b33c6ea77d361ccc39d10a061bf025f1fe631d2c6f2"
+    },
+    {
+      "bytes": 55213,
+      "original_path": "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+      "preserved_at": "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+      "sha256": "a3c58a144deb2dc5dc12667f9db8d2fb83ae1baf13f2153d5597079f4760cd46"
+    },
+    {
+      "bytes": 92011,
+      "original_path": "lineage/forecast_rev1_1/plan/REQUIREMENTS_AND_TESTS.md",
+      "preserved_at": "lineage/forecast_rev1_1/plan/REQUIREMENTS_AND_TESTS.md",
+      "sha256": "56b534fc9774ea1a2f29d0c7033322eb5c434c41ca37f1086844ee2741e7a201"
+    },
+    {
+      "bytes": 26555,
+      "original_path": "lineage/forecast_rev1_1/references/PARENT_PLAN_SNAPSHOT.json",
+      "preserved_at": "lineage/forecast_rev1_1/references/PARENT_PLAN_SNAPSHOT.json",
+      "sha256": "c1c106c0da65d2b6034093f70ba62da026a2beb642d70f45d186a3eb369e1252"
+    },
+    {
+      "bytes": 26663,
+      "original_path": "lineage/forecast_rev1_1/references/SOURCE_REGISTER.json",
+      "preserved_at": "lineage/forecast_rev1_1/references/SOURCE_REGISTER.json",
+      "sha256": "33d54b8b979c6a2b915097a90dd134942654e9783e040601af93a757d442c456"
+    },
+    {
+      "bytes": 14928,
+      "original_path": "lineage/forecast_rev1_1/references/SOURCE_REGISTER.md",
+      "preserved_at": "lineage/forecast_rev1_1/references/SOURCE_REGISTER.md",
+      "sha256": "6dbbb6b10a5ea44743d1a3a3cb94897bccb8ddf35a2e7418dff3f7e65a87561c"
+    },
+    {
+      "bytes": 12120,
+      "original_path": "lineage/forecast_rev1_1/research/PREDICTION_MARKET_STUDIES.json",
+      "preserved_at": "lineage/forecast_rev1_1/research/PREDICTION_MARKET_STUDIES.json",
+      "sha256": "c6d5761e8338406059e06ad20992758892b8206eebef240bfe566d01813335eb"
+    },
+    {
+      "bytes": 4565,
+      "original_path": "lineage/forecast_rev1_1/research/PREDICTION_MARKET_STUDIES.md",
+      "preserved_at": "lineage/forecast_rev1_1/research/PREDICTION_MARKET_STUDIES.md",
+      "sha256": "bb828d7db9c8af26cb143c175a1b73ba679f0c403d9301b82563f6d290509a57"
+    },
+    {
+      "bytes": 1574,
+      "original_path": "lineage/forecast_rev1_1/scope/OWNER_DIRECTION.md",
+      "preserved_at": "lineage/forecast_rev1_1/scope/OWNER_DIRECTION.md",
+      "sha256": "61daeff6bee98dfe31f8f0a3f77b80058c8b8903d4ffcae4b7aca4c32f64caf5"
+    },
+    {
+      "bytes": 11221,
+      "original_path": "lineage/forecast_rev1_1/tools/render_documents.py",
+      "preserved_at": "lineage/forecast_rev1_1/tools/render_documents.py",
+      "sha256": "c2d7e686b76ce49852b65f20d665f7fb13b1ece21bd3a278b85616838ecd978d"
+    },
+    {
+      "bytes": 16231,
+      "original_path": "lineage/forecast_rev1_1/verification/DOCUMENT_CHECK_REPORT.json",
+      "preserved_at": "lineage/forecast_rev1_1/verification/DOCUMENT_CHECK_REPORT.json",
+      "sha256": "81c06724d0426fc5f140036fe0371983dfb5e71e02080c53e10c899644475006"
+    },
+    {
+      "bytes": 7299,
+      "original_path": "lineage/forecast_rev1_1/verification/DOCUMENT_CHECK_REPORT.md",
+      "preserved_at": "lineage/forecast_rev1_1/verification/DOCUMENT_CHECK_REPORT.md",
+      "sha256": "a893e50d044829e6b36d9596952079686f06e7796645e9ba87d9b4498eec003d"
+    },
+    {
+      "bytes": 937,
+      "original_path": "lineage/forecast_rev1_1/verification/HTML_READING_COPY_CHECK.json",
+      "preserved_at": "lineage/forecast_rev1_1/verification/HTML_READING_COPY_CHECK.json",
+      "sha256": "d7d6c0a080771d7fa94a5d6bc3563c4fb435bca15aebbc6026c15969ca3502da"
+    },
+    {
+      "bytes": 16955,
+      "original_path": "lineage/forecast_rev1_1/verification/prediction_market_contract_checks.py",
+      "preserved_at": "lineage/forecast_rev1_1/verification/prediction_market_contract_checks.py",
+      "sha256": "1fcff2aa418311742615989d9856a3dfd96f0d224d7e7deb7bcd48152d617b40"
+    },
+    {
+      "bytes": 24416,
+      "original_path": "lineage/forecast_rev1_1/verification/validate_blueprint.py",
+      "preserved_at": "lineage/forecast_rev1_1/verification/validate_blueprint.py",
+      "sha256": "34b2a7e958fb1a6f3711a9da242eacf80044cc7178ccb77df04224ed82b750c3"
+    },
+    {
+      "bytes": 285201,
+      "original_path": "lineage/rev1_10/MASTER_SOURCE.md",
+      "preserved_at": "lineage/rev1_10/MASTER_SOURCE.md",
+      "sha256": "dba347b9f02831d1a3a2d9570b4434f6a8b4b98f6f47862c830ff6784cb56f51"
+    },
+    {
+      "bytes": 75332,
+      "original_path": "lineage/rev1_10/PLAN_SOURCE.md",
+      "preserved_at": "lineage/rev1_10/PLAN_SOURCE.md",
+      "sha256": "1b367e7507f2d371230891458ca1efc05c6fbb343b712d97ca170cecebbbc6e2"
+    },
+    {
+      "bytes": 64371,
+      "original_path": "lineage/rev1_10/plan/DEVELOPMENT_PLAN.json",
+      "preserved_at": "lineage/rev1_10/plan/DEVELOPMENT_PLAN.json",
+      "sha256": "391bde124e1015302ebbe6b7db2211303f8e888683782d2db08203fced7ba6bd"
+    },
+    {
+      "bytes": 2422,
+      "original_path": "lineage/rev1_10/plan/PROPOSED_SCOPE_LOCK.json",
+      "preserved_at": "lineage/rev1_10/plan/PROPOSED_SCOPE_LOCK.json",
+      "sha256": "f5e2c8d89b4a55b8c28e5331339ca3abc0625cd014f978e5f9c909f99be20608"
+    },
+    {
+      "bytes": 9256,
+      "original_path": "lineage/rev1_10/verification/DIAL_DOCUMENT_VERIFICATION_RECEIPT.json",
+      "preserved_at": "lineage/rev1_10/verification/DIAL_DOCUMENT_VERIFICATION_RECEIPT.json",
+      "sha256": "dd0710b4f3dda9c8d15f0bd5957ab09fbb16b81c645af93d1602e23fdf7e8546"
+    },
+    {
+      "bytes": 238641,
+      "original_path": "lineage/rev1_10/verification/TEST_CONTRACTS.json",
+      "preserved_at": "lineage/rev1_10/verification/TEST_CONTRACTS.json",
+      "sha256": "9985c4808dd52fd1333136a6372e5f25677a4c91e3cd647247d816c2a0c45908"
+    },
+    {
+      "bytes": 170874,
+      "original_path": "plan/DEVELOPMENT_PLAN.json",
+      "preserved_at": "lineage/rev1_11/plan/DEVELOPMENT_PLAN.json",
+      "sha256": "a732f7a28c0aa7cae3cbce055e6e861a31fb4e6ee293cc6efded7a62df51b94e"
+    },
+    {
+      "bytes": 1424,
+      "original_path": "plan/PLAN_INPUT_PROVENANCE.json",
+      "preserved_at": "lineage/rev1_11/plan/PLAN_INPUT_PROVENANCE.json",
+      "sha256": "b7f7b79e8905cfc632553a2d629f351a9295505fdd5f9bd4fbe8b926264a6f5f"
+    },
+    {
+      "bytes": 223853,
+      "original_path": "plan/PROPOSED_SCOPE_LOCK.json",
+      "preserved_at": "lineage/rev1_11/plan/PROPOSED_SCOPE_LOCK.json",
+      "sha256": "22d4d51ba522fc29e0ee8b67fa84712e109125a2d20200d0cc1c17e7c967afc9"
+    },
+    {
+      "bytes": 350417,
+      "original_path": "plan/VAN_NEXT_DETERMINISTIC_PLAN_REV1_11.md",
+      "preserved_at": "lineage/rev1_11/plan/VAN_NEXT_DETERMINISTIC_PLAN_REV1_11.md",
+      "sha256": "9e1f2b380bc0681ca58162f19069eba009bbf390489ddccea3b69c573bee4e8d"
+    },
+    {
+      "bytes": 9120,
+      "original_path": "plan/render_plan.py",
+      "preserved_at": "lineage/rev1_11/plan/render_plan.py",
+      "sha256": "79c0c189836ed70d8b40164accacf97a7be7022ea82b0bcfc09a8a7d58bfda68"
+    },
+    {
+      "bytes": 7393,
+      "original_path": "reference/ACCOUNTS_FUNDS_TECHNICAL_CONTRACT.md",
+      "preserved_at": "reference/ACCOUNTS_FUNDS_TECHNICAL_CONTRACT.md",
+      "sha256": "e173fe2a197a6b9408b13190f1f7e8f7c39bdfde058995aa5b2804dd47577866"
+    },
+    {
+      "bytes": 286151,
+      "original_path": "reference/LEGACY_78_SOURCE.json",
+      "preserved_at": "reference/LEGACY_78_SOURCE.json",
+      "sha256": "34b97daaf8d92951833bc0270998e9ae5159fdeffa078844a8d2d4241cf52d1d"
+    },
+    {
+      "bytes": 6374,
+      "original_path": "reference/OPUS_NEW_REQUIREMENTS_072_077.json",
+      "preserved_at": "reference/OPUS_NEW_REQUIREMENTS_072_077.json",
+      "sha256": "08966c2a4bc45f78c3134a557e4b94cc88be23ad4f9d1263951b90d548d16a0f"
+    },
+    {
+      "bytes": 241968,
+      "original_path": "reference/REV1_9B_SOURCE_MASTER.md",
+      "preserved_at": "reference/REV1_9B_SOURCE_MASTER.md",
+      "sha256": "f708229674eb95c47f99375faf242388a6b3741ebe9a118fc1c15beebe71e0f7"
+    },
+    {
+      "bytes": 88958,
+      "original_path": "reference/REV2_ACTION_REGISTRY.json",
+      "preserved_at": "reference/REV2_ACTION_REGISTRY.json",
+      "sha256": "aeec8ce72bca964b729d6beaf2a0678add6d5b549e57a4249fa27d99a684ab96"
+    },
+    {
+      "bytes": 82888,
+      "original_path": "reference/REV2_FEATURE_REGISTRY.json",
+      "preserved_at": "reference/REV2_FEATURE_REGISTRY.json",
+      "sha256": "9748ff23550847816fb2a909921002f9d13248f2bfb45e482586b814c91aedb5"
+    },
+    {
+      "bytes": 8568,
+      "original_path": "reference/REV2_PRODUCT_TRUTH.json",
+      "preserved_at": "reference/REV2_PRODUCT_TRUTH.json",
+      "sha256": "f453251d531845dbd614dafbe49a95f5b3e694fe20008d15944da824bb1fd208"
+    },
+    {
+      "bytes": 130974,
+      "original_path": "reference/REV2_REQUIREMENTS.json",
+      "preserved_at": "reference/REV2_REQUIREMENTS.json",
+      "sha256": "fc460e016dbed4854d40e1bb7a5e74fc0b8bb52da7062efb2c2ff984990be62b"
+    },
+    {
+      "bytes": 57312,
+      "original_path": "reference/REV2_SCREEN_OR_SURFACE_REGISTRY.json",
+      "preserved_at": "reference/REV2_SCREEN_OR_SURFACE_REGISTRY.json",
+      "sha256": "d5e5f1cd8f641733edb03a6576787716f35e64f527c653d2af69ae561244a765"
+    },
+    {
+      "bytes": 1465,
+      "original_path": "reference/SOURCE_PINS.json",
+      "preserved_at": "reference/SOURCE_PINS.json",
+      "sha256": "05c06310b147f44c0014cf59ef7a5add1916b22c88c096d6306769c30d846656"
+    },
+    {
+      "bytes": 20806,
+      "original_path": "reference/VAN_STATE_MACHINES_REV1_9.json",
+      "preserved_at": "reference/VAN_STATE_MACHINES_REV1_9.json",
+      "sha256": "7c45ed6cf3eadfdf045e7a08aa446a2227b920b4a0bf75fd8a8e6794fa0fc4c0"
+    },
+    {
+      "bytes": 520,
+      "original_path": "research/FORECAST_READING_RULE.md",
+      "preserved_at": "lineage/rev1_11/research/FORECAST_READING_RULE.md",
+      "sha256": "c40197f4d43006f7019d176582c47d6e33b24163a7b3061bd59ea8799b752be0"
+    },
+    {
+      "bytes": 136237,
+      "original_path": "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md",
+      "preserved_at": "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md",
+      "sha256": "544e77a2bc46317ff319c86da646b1c7c937b9c88ee7328b9cafef2f72cff750"
+    },
+    {
+      "bytes": 10458698,
+      "original_path": "research/REFERENCE_REA_PORTABLE_EVIDENCE_20261015.zip",
+      "preserved_at": "research/REFERENCE_REA_PORTABLE_EVIDENCE_20261015.zip",
+      "sha256": "14cc7da88b0d5245bf4c8bb96021e9b8c59721ff17f4daa4fa4dfb670fe84917"
+    },
+    {
+      "bytes": 3357,
+      "original_path": "research/SOURCE_AND_REA_ADMISSION.md",
+      "preserved_at": "research/SOURCE_AND_REA_ADMISSION.md",
+      "sha256": "d573c41340baf1d1f387b8fd653b132f3beeb637f108bf1628e1021831430f7f"
+    },
+    {
+      "bytes": 52140,
+      "original_path": "research/VAN_REA_MT5_TRADINGVIEW_FULL_RESEARCH_20261015.md",
+      "preserved_at": "research/VAN_REA_MT5_TRADINGVIEW_FULL_RESEARCH_20261015.md",
+      "sha256": "b8ce4abe113dfda6dd547777684cff30a5c9ad1a8f2ed98345f6d07f3ca3be08"
+    },
+    {
+      "bytes": 3045,
+      "original_path": "tools/collect_source_evidence.py",
+      "preserved_at": "tools/collect_source_evidence.py",
+      "sha256": "fc406c0fa0a4e7147d476f3468e4d51552201985ab637a360d4df78bdd533453"
+    },
+    {
+      "bytes": 2981,
+      "original_path": "tools/probe_opus_limit_semantics.py",
+      "preserved_at": "tools/probe_opus_limit_semantics.py",
+      "sha256": "8de23313dbbc55509c9ed6e7fac754f6ea9c2f2bcbde24852016e7b4d6d6e7f9"
+    },
+    {
+      "bytes": 58080,
+      "original_path": "traceability/FORECAST_PACKET_CROSSWALK.json",
+      "preserved_at": "traceability/FORECAST_PACKET_CROSSWALK.json",
+      "sha256": "135e1690f920427a9e79c1554064ed3a30b29a3af50825b388adccb4f66858b5"
+    },
+    {
+      "bytes": 201715,
+      "original_path": "traceability/LEGACY_349_ACTIONS.json",
+      "preserved_at": "traceability/LEGACY_349_ACTIONS.json",
+      "sha256": "4fe9dd0b7050203e0cac8a479c0a21993b890082aed15b28ab85250410c7830d"
+    },
+    {
+      "bytes": 8194,
+      "original_path": "traceability/OLD_DU_TO_BACKEND_FRONTEND.json",
+      "preserved_at": "traceability/OLD_DU_TO_BACKEND_FRONTEND.json",
+      "sha256": "8d841ed34ff06a23e9cb082a3c2c3f771464a2d7491322ed673155e9cdb487e9"
+    },
+    {
+      "bytes": 11461,
+      "original_path": "traceability/PRODUCT_TRUTH.json",
+      "preserved_at": "traceability/PRODUCT_TRUTH.json",
+      "sha256": "8dc95e6a73ffd9ad7fc8cc6661923af19e7e98e622242df9e31c7d33f99e64a0"
+    },
+    {
+      "bytes": 164953,
+      "original_path": "traceability/REQUIREMENTS_AND_DU_MAPPING.json",
+      "preserved_at": "lineage/rev1_11/traceability/REQUIREMENTS_AND_DU_MAPPING.json",
+      "sha256": "e999f3ca85b3bf4ca6a700d09d8225cf85d983472a436f5c9053f583e976fa7a"
+    },
+    {
+      "bytes": 17969,
+      "original_path": "traceability/REV110_PACKET_CROSSWALK.json",
+      "preserved_at": "lineage/rev1_11/traceability/REV110_PACKET_CROSSWALK.json",
+      "sha256": "387b1a5a93c40ebbc26cf8359c4136a5cd477961a14191979fd0fb16270bd011"
+    },
+    {
+      "bytes": 252461,
+      "original_path": "traceability/REV2_171_ATOM_CROSSWALK.json",
+      "preserved_at": "traceability/REV2_171_ATOM_CROSSWALK.json",
+      "sha256": "050a2862effca169b4cab95440894e26edc01225715a23f2ff11624a4e1966ac"
+    },
+    {
+      "bytes": 129683,
+      "original_path": "traceability/REV2_93_FEATURE_CROSSWALK.json",
+      "preserved_at": "traceability/REV2_93_FEATURE_CROSSWALK.json",
+      "sha256": "7627c163c573a7b1a6debdf2a4c973bfbc5e2a373805b053653dbd1cc903d5a2"
+    },
+    {
+      "bytes": 463,
+      "original_path": "verification/BACKEND_COMPLETE_CERTIFICATE.json",
+      "preserved_at": "lineage/rev1_11/verification/BACKEND_COMPLETE_CERTIFICATE.json",
+      "sha256": "b8b1cf29576164452b73cdee97b4a86cbda10cca0568da05eb2b7c90ad6410f2"
+    },
+    {
+      "bytes": 464,
+      "original_path": "verification/F15_CERTIFICATE.json",
+      "preserved_at": "lineage/rev1_11/verification/F15_CERTIFICATE.json",
+      "sha256": "ad7d0469b8efa20cb4d24b16a675927ffebaaf633f7f8e32dd8eb619a5aec530"
+    },
+    {
+      "bytes": 16308,
+      "original_path": "verification/GAP_CLOSURE_REGISTER.json",
+      "preserved_at": "lineage/rev1_11/verification/GAP_CLOSURE_REGISTER.json",
+      "sha256": "16983e67ce28ace28f19f2eead419646b9564c2b4bad4b190c3b21d865785e38"
+    },
+    {
+      "bytes": 1545,
+      "original_path": "verification/OPUS_BASELINE_TEST_RECEIPT.json",
+      "preserved_at": "verification/OPUS_BASELINE_TEST_RECEIPT.json",
+      "sha256": "db07ab54d1bc954346dc05795bb63dd5ae8f0a58a53b60825086c6bd2dc45e89"
+    },
+    {
+      "bytes": 77161,
+      "original_path": "verification/RUNTIME_EXTERNAL_QUALIFICATION_MATRIX.json",
+      "preserved_at": "lineage/rev1_11/verification/RUNTIME_EXTERNAL_QUALIFICATION_MATRIX.json",
+      "sha256": "9e7cc74ad39cdc80bc7b5bdbbbec4de8e1c61a42786031742721d8b8578468e5"
+    },
+    {
+      "bytes": 467219,
+      "original_path": "verification/TEST_CONTRACTS.json",
+      "preserved_at": "lineage/rev1_11/verification/TEST_CONTRACTS.json",
+      "sha256": "064a1198b47353a76e7acfd0e7767b27c26ce09abd4c4b28395ae0891d4fa10a"
+    },
+    {
+      "bytes": 1105,
+      "original_path": "verification/assert_readiness.py",
+      "preserved_at": "verification/assert_readiness.py",
+      "sha256": "f7ee0dbb612b6fc540492a814591553241ebc61316aa4c7adb4393ab51769b43"
+    },
+    {
+      "bytes": 2510,
+      "original_path": "verification/verify_forecast_contracts.py",
+      "preserved_at": "verification/verify_forecast_contracts.py",
+      "sha256": "36427599f7f7d72b109955f17aaef9c0aa8f950a1d862f34eebe69ff8e35255d"
+    },
+    {
+      "bytes": 4136,
+      "original_path": "verification/verify_graph_export.py",
+      "preserved_at": "verification/verify_graph_export.py",
+      "sha256": "f7a5cd1d29ce03a3b1333949f464f311ae7ff0558efcc44f9b35dfdc1a3395a3"
+    },
+    {
+      "bytes": 4651,
+      "original_path": "verification/verify_news_readiness.py",
+      "preserved_at": "verification/verify_news_readiness.py",
+      "sha256": "d5480179401dd91679ca93c243b7648c95250ab41c0a6fc14508c5fcb1a83594"
+    },
+    {
+      "bytes": 1365,
+      "original_path": "verification/verify_package.py",
+      "preserved_at": "verification/verify_package.py",
+      "sha256": "7396dd5f9cd2c088df16568c3c363165614cb26c7f88c88c802e45fa881ad3b0"
+    },
+    {
+      "bytes": 20277,
+      "original_path": "verification/verify_unified.py",
+      "preserved_at": "lineage/rev1_11/verification/verify_unified.py",
+      "sha256": "69f416f2c88b85dbe43c03ce067a92588470768ab7086bef0c2bd62072bf99c6"
+    }
+  ],
+  "parent_zip_bytes": 12323067,
+  "parent_zip_sha256": "702411c37aced8013cc2e40afa5fea8d9c3f30608dd94dfd3db8d919fac7fab5",
+  "schema": "van.original-byte-preservation/1.0",
+  "scope": "Original parent files reconstructable by these exact bytes; not a new signed acceptance."
+}

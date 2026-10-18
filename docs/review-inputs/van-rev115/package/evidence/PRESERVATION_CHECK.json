@@ -1,0 +1,107 @@
+{
+  "check_groups": [
+    "173 original parent files reconstructable from byte-preserving locations",
+    "requirements inherited objects exact",
+    "tests inherited objects exact",
+    "surfaces inherited objects exact",
+    "121 stable units, original dependencies, exit contracts and deliverables retained",
+    "eight new backend units and two verifiers only",
+    "32 requirements bound to 96 actual positive/adversarial/recovery contracts",
+    "all 12 review findings mapped to real requirements and test IDs",
+    "all eight source adoptions integrated without new authority",
+    "service and executable-plan dependencies agree",
+    "revision-qualified packet-number crosswalk complete",
+    "domain integration feeds catalogue, scientific evaluation and independent review",
+    "generic Qlib/neural research not blocked by crypto providers"
+  ],
+  "findings": [],
+  "negative_cases": [
+    {
+      "case": "old requirement weakened",
+      "caught": true,
+      "expected": "INHERITED_OBJECT_CHANGED"
+    },
+    {
+      "case": "old test removed",
+      "caught": true,
+      "expected": "INHERITED_OBJECT_CHANGED"
+    },
+    {
+      "case": "old theme context removed",
+      "caught": true,
+      "expected": "INHERITED_OBJECT_CHANGED"
+    },
+    {
+      "case": "stable unit removed",
+      "caught": true,
+      "expected": "OLD_UNIT_REMOVED"
+    },
+    {
+      "case": "old exit weakened",
+      "caught": true,
+      "expected": "OLD_UNIT_OBLIGATION_CHANGED"
+    },
+    {
+      "case": "new unit removed",
+      "caught": true,
+      "expected": "NEW_UNIT_SCOPE"
+    },
+    {
+      "case": "new requirement removed",
+      "caught": true,
+      "expected": "HVA_REQUIREMENT_SCOPE"
+    },
+    {
+      "case": "test no longer tests requirement",
+      "caught": true,
+      "expected": "HVA_TEST_BINDING"
+    },
+    {
+      "case": "application claimed passed",
+      "caught": true,
+      "expected": "FALSE_APPLICATION_PASS"
+    },
+    {
+      "case": "review row omitted",
+      "caught": true,
+      "expected": "REVIEW_SCOPE"
+    },
+    {
+      "case": "review row unmapped",
+      "caught": true,
+      "expected": "UNRESOLVED_REVIEW_MAPPING"
+    },
+    {
+      "case": "review fake test",
+      "caught": true,
+      "expected": "UNKNOWN_REVIEW_BINDING"
+    },
+    {
+      "case": "adoption omitted",
+      "caught": true,
+      "expected": "ADOPTION_SCOPE"
+    },
+    {
+      "case": "adoption empty",
+      "caught": true,
+      "expected": "ADOPTION_EMPTY"
+    },
+    {
+      "case": "service dependency stale",
+      "caught": true,
+      "expected": "SERVICE_DEPENDENCY_DRIFT"
+    },
+    {
+      "case": "packet old/new confused",
+      "caught": true,
+      "expected": "PACKET_ALIAS_MISMATCH"
+    },
+    {
+      "case": "domain omitted from final catalogue",
+      "caught": true,
+      "expected": "HVA_PRODUCER_ORDER"
+    }
+  ],
+  "negative_cases_caught": 17,
+  "scope": "Specification byte/object preservation and integration mappings only; not independent F15 or application qualification"
+}
