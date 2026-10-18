@@ -44,3 +44,8 @@ Deliver: (a) independent prioritized audit with exact evidence and nonclaims; (b
 Explicitly challenge missing producer-to-consumer links, urgent fallback widening, median-cost relabeling, observed fills discarded after revocation, simulated evidence laundered as live, mode/crypto leakage, unbounded replacements, restarted lockouts, revoked fallback revival, forged promotion and missing provider proof. Test real positive and recovery paths as well as rejection.
 
 Do not claim “fully built”, “profitable”, “F15”, “Backend Complete” or “live qualified” from documents or test counts. Preserve the existing owner decisions and require a new recorded amendment for genuine scope/financial policy changes. Finish with one implementable recommended architecture and one dependency-correct plan, not competing options or an ever-growing list of tools.
+
+
+## Active Rev1.16 owner integration
+
+Follow CANONICAL_AUTHORITY.json for the active master/focused specification and single rendered plan. Normative §8.6 incorporates VAN-OWNER-EL-001 via VAN-EL-001…007 and 42 NOT_RUN contracts (EL-AT-001…014 × POS/NEG/REC). Audit both actual strategy and execution consumer paths, causal claim typing, null/power and protected confirmation controls, proposed endpoint bindings and owner-context failures. The active totals are 316 requirements / 1,586 tests. Earlier counts and source-audit results above retain their historical scopes; no new all-branch audit is claimed.

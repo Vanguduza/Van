@@ -15,7 +15,8 @@
         "Extend existing boundaries; justify any new process/store with measured isolation/correctness benefit.",
         "Each candidate lists operational cost, maintenance/state burden, alternatives and incremental evidence; safety complexity is mandatory.",
         "All inherited requirement/action/context objects remain, with explicit semantic additions not automatic deletion.",
-        "Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit."
+        "Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit.",
+        "Review Rev1.16 experience-learning document/schema/traceability scope before code; backend application and frontend physical acceptance remain at their later gates."
       ],
       "tests": [
         "T-VAN-SO-043-POS",
@@ -73,7 +74,8 @@
         "VAN-SO-039",
         "VAN-CRYPTO-004",
         "VAN-CRYPTO-013",
-        "VAN-RV-002"
+        "VAN-RV-002",
+        "VAN-EL-006"
       ],
       "operations": [
         "Operational choices are automatic under qualified grants; novel policies require independent qualification and authorized promotion.",
@@ -85,7 +87,8 @@
         "Spot support does not imply margin/perps/options/DEX/withdraw authority; any extension needs product-specific qualification.",
         "Dispatch resolves current qualified policy, mandate, reservation, epoch and objective; positive decimal venue increments and complete mature costs validate.",
         "Remove only POLICY_QUALIFIED at dispatch and reseal unsigned locks; named semantic check still fails. Reject zero tick and mature unknown costs.",
-        "Expiry/revocation at any preactivation or drain stage blocks new risk, reconciles in-flight effects and cannot reactivate revoked fallback."
+        "Expiry/revocation at any preactivation or drain stage blocks new risk, reconciles in-flight effects and cannot reactivate revoked fallback.",
+        "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery."
       ],
       "tests": [
         "T-VAN-SO-002-POS",
@@ -111,7 +114,10 @@
         "T-VAN-CRYPTO-013-REC",
         "T-VAN-RV-002-POS",
         "T-VAN-RV-002-NEG",
-        "T-VAN-RV-002-REC"
+        "T-VAN-RV-002-REC",
+        "EL-AT-011-POS",
+        "EL-AT-011-NEG",
+        "EL-AT-011-REC"
       ],
       "unit_id": "BE-002"
     },
@@ -125,7 +131,8 @@
         "VAN-SO-022",
         "VAN-SO-023",
         "VAN-RV-003",
-        "VAN-RV-006"
+        "VAN-RV-006",
+        "VAN-EL-001"
       ],
       "operations": [
         "Live/demo/paper/shadow/backtest/counterfactual provenance stays separate and source-authorized.",
@@ -139,7 +146,8 @@
         "Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
         "Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds.",
         "Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance.",
-        "Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection."
+        "Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
+        "Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills."
       ],
       "tests": [
         "T-VAN-SO-011-POS",
@@ -165,7 +173,13 @@
         "T-VAN-RV-003-REC",
         "T-VAN-RV-006-POS",
         "T-VAN-RV-006-NEG",
-        "T-VAN-RV-006-REC"
+        "T-VAN-RV-006-REC",
+        "EL-AT-009-POS",
+        "EL-AT-009-NEG",
+        "EL-AT-009-REC",
+        "EL-AT-014-POS",
+        "EL-AT-014-NEG",
+        "EL-AT-014-REC"
       ],
       "unit_id": "BE-003"
     },
@@ -397,7 +411,8 @@
         "VAN-RV-004",
         "VAN-RV-005",
         "VAN-RV-006",
-        "VAN-RV-008"
+        "VAN-RV-008",
+        "VAN-EL-005"
       ],
       "operations": [
         "Operational choices are automatic under qualified grants; novel policies require independent qualification and authorized promotion.",
@@ -442,7 +457,8 @@
         "Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
         "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts.",
         "Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration.",
-        "Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate."
+        "Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate.",
+        "Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops."
       ],
       "tests": [
         "T-VAN-SO-002-POS",
@@ -537,7 +553,16 @@
         "T-VAN-RV-006-REC",
         "T-VAN-RV-008-POS",
         "T-VAN-RV-008-NEG",
-        "T-VAN-RV-008-REC"
+        "T-VAN-RV-008-REC",
+        "EL-AT-003-POS",
+        "EL-AT-003-NEG",
+        "EL-AT-003-REC",
+        "EL-AT-004-POS",
+        "EL-AT-004-NEG",
+        "EL-AT-004-REC",
+        "EL-AT-012-POS",
+        "EL-AT-012-NEG",
+        "EL-AT-012-REC"
       ],
       "unit_id": "BE-010"
     },
@@ -575,7 +600,8 @@
         "VAN-CRYPTO-009",
         "VAN-RV-001",
         "VAN-RV-003",
-        "VAN-RV-004"
+        "VAN-RV-004",
+        "VAN-EL-001"
       ],
       "operations": [
         "Do not call a mixture of medians an expectation or missing cost zero; record units, estimator and uncertainty.",
@@ -600,7 +626,8 @@
         "Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
         "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation.",
         "Fees, exits or netting cannot reopen entry allowance; TCA decomposition must equal direct signed fill-versus-reference cost plus nonembedded charges.",
-        "Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry."
+        "Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
+        "Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills."
       ],
       "tests": [
         "T-VAN-SO-008-POS",
@@ -653,22 +680,36 @@
         "T-VAN-RV-003-REC",
         "T-VAN-RV-004-POS",
         "T-VAN-RV-004-NEG",
-        "T-VAN-RV-004-REC"
+        "T-VAN-RV-004-REC",
+        "EL-AT-009-POS",
+        "EL-AT-009-NEG",
+        "EL-AT-009-REC",
+        "EL-AT-014-POS",
+        "EL-AT-014-NEG",
+        "EL-AT-014-REC"
       ],
       "unit_id": "BE-012"
     },
     {
       "completion_claim": "SPEC_ADDED_ONLY",
       "new_requirements": [
-        "VAN-SO-026"
+        "VAN-SO-026",
+        "VAN-EL-002"
       ],
       "operations": [
-        "Remote interpretation/training stays off decision/protection path; bounded queues and credentials."
+        "Remote interpretation/training stays off decision/protection path; bounded queues and credentials.",
+        "Separate cash accounting, strategy quality, execution contribution, statistical association, simulated alternatives and causal claims; report uncertainty and rival explanations instead of outcome-based stories."
       ],
       "tests": [
         "T-VAN-SO-026-POS",
         "T-VAN-SO-026-NEG",
-        "T-VAN-SO-026-REC"
+        "T-VAN-SO-026-REC",
+        "EL-AT-001-POS",
+        "EL-AT-001-NEG",
+        "EL-AT-001-REC",
+        "EL-AT-010-POS",
+        "EL-AT-010-NEG",
+        "EL-AT-010-REC"
       ],
       "unit_id": "BE-021"
     },
@@ -691,11 +732,13 @@
       "completion_claim": "SPEC_ADDED_ONLY",
       "new_requirements": [
         "VAN-SO-026",
-        "VAN-SO-027"
+        "VAN-SO-027",
+        "VAN-EL-006"
       ],
       "operations": [
         "Remote interpretation/training stays off decision/protection path; bounded queues and credentials.",
-        "Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate."
+        "Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate.",
+        "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery."
       ],
       "tests": [
         "T-VAN-SO-026-POS",
@@ -703,7 +746,10 @@
         "T-VAN-SO-026-REC",
         "T-VAN-SO-027-POS",
         "T-VAN-SO-027-NEG",
-        "T-VAN-SO-027-REC"
+        "T-VAN-SO-027-REC",
+        "EL-AT-011-POS",
+        "EL-AT-011-NEG",
+        "EL-AT-011-REC"
       ],
       "unit_id": "BE-028"
     },
@@ -739,7 +785,9 @@
         "VAN-LEAN-005",
         "VAN-RV-004",
         "VAN-RV-005",
-        "VAN-RV-007"
+        "VAN-RV-007",
+        "VAN-EL-003",
+        "VAN-EL-004"
       ],
       "operations": [
         "Do not call a mixture of medians an expectation or missing cost zero; record units, estimator and uncertainty.",
@@ -762,7 +810,9 @@
         "Replanning uses newly observed depth/time under same grant; restart retains lifetime counters and does not repeat unconfirmed slices.",
         "Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty.",
         "Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L.",
-        "Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies."
+        "Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies.",
+        "Preregister independent comparison, costs, dependence, selection adjustment, null controls, trial census, protected chronological confirmation and stopping rules; inconclusive evidence cannot promote.",
+        "Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback."
       ],
       "tests": [
         "T-VAN-SO-008-POS",
@@ -809,37 +859,76 @@
         "T-VAN-RV-005-REC",
         "T-VAN-RV-007-POS",
         "T-VAN-RV-007-NEG",
-        "T-VAN-RV-007-REC"
+        "T-VAN-RV-007-REC",
+        "EL-AT-002-POS",
+        "EL-AT-002-NEG",
+        "EL-AT-002-REC",
+        "EL-AT-005-POS",
+        "EL-AT-005-NEG",
+        "EL-AT-005-REC",
+        "EL-AT-006-POS",
+        "EL-AT-006-NEG",
+        "EL-AT-006-REC",
+        "EL-AT-008-POS",
+        "EL-AT-008-NEG",
+        "EL-AT-008-REC",
+        "EL-AT-007-POS",
+        "EL-AT-007-NEG",
+        "EL-AT-007-REC"
       ],
       "unit_id": "BE-035"
     },
     {
       "completion_claim": "SPEC_ADDED_ONLY",
       "new_requirements": [
-        "VAN-SO-042"
+        "VAN-SO-042",
+        "VAN-EL-004",
+        "VAN-EL-005"
       ],
       "operations": [
-        "Required forecasting plugins are complete integrations, while active selection uses qualified minimal stack."
+        "Required forecasting plugins are complete integrations, while active selection uses qualified minimal stack.",
+        "Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback.",
+        "Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops."
       ],
       "tests": [
         "T-VAN-SO-042-POS",
         "T-VAN-SO-042-NEG",
-        "T-VAN-SO-042-REC"
+        "T-VAN-SO-042-REC",
+        "EL-AT-007-POS",
+        "EL-AT-007-NEG",
+        "EL-AT-007-REC",
+        "EL-AT-003-POS",
+        "EL-AT-003-NEG",
+        "EL-AT-003-REC",
+        "EL-AT-004-POS",
+        "EL-AT-004-NEG",
+        "EL-AT-004-REC",
+        "EL-AT-012-POS",
+        "EL-AT-012-NEG",
+        "EL-AT-012-REC"
       ],
       "unit_id": "BE-013"
     },
     {
       "completion_claim": "SPEC_ADDED_ONLY",
       "new_requirements": [
-        "VAN-SO-027"
+        "VAN-SO-027",
+        "VAN-EL-002"
       ],
       "operations": [
-        "Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate."
+        "Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate.",
+        "Separate cash accounting, strategy quality, execution contribution, statistical association, simulated alternatives and causal claims; report uncertainty and rival explanations instead of outcome-based stories."
       ],
       "tests": [
         "T-VAN-SO-027-POS",
         "T-VAN-SO-027-NEG",
-        "T-VAN-SO-027-REC"
+        "T-VAN-SO-027-REC",
+        "EL-AT-001-POS",
+        "EL-AT-001-NEG",
+        "EL-AT-001-REC",
+        "EL-AT-010-POS",
+        "EL-AT-010-NEG",
+        "EL-AT-010-REC"
       ],
       "unit_id": "BE-022"
     },
@@ -975,7 +1064,10 @@
         "VAN-LEAN-005",
         "VAN-RV-003",
         "VAN-RV-006",
-        "VAN-RV-007"
+        "VAN-RV-007",
+        "VAN-EL-004",
+        "VAN-EL-005",
+        "VAN-EL-006"
       ],
       "operations": [
         "Actual outcome producer, durable evidence, selector and evolution consumers form one integrated VATI loop.",
@@ -1013,7 +1105,10 @@
         "Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
         "Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty.",
         "Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L.",
-        "Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies."
+        "Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies.",
+        "Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback.",
+        "Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops.",
+        "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery."
       ],
       "tests": [
         "T-VAN-SO-001-POS",
@@ -1105,7 +1200,22 @@
         "T-VAN-RV-006-REC",
         "T-VAN-RV-007-POS",
         "T-VAN-RV-007-NEG",
-        "T-VAN-RV-007-REC"
+        "T-VAN-RV-007-REC",
+        "EL-AT-007-POS",
+        "EL-AT-007-NEG",
+        "EL-AT-007-REC",
+        "EL-AT-003-POS",
+        "EL-AT-003-NEG",
+        "EL-AT-003-REC",
+        "EL-AT-004-POS",
+        "EL-AT-004-NEG",
+        "EL-AT-004-REC",
+        "EL-AT-012-POS",
+        "EL-AT-012-NEG",
+        "EL-AT-012-REC",
+        "EL-AT-011-POS",
+        "EL-AT-011-NEG",
+        "EL-AT-011-REC"
       ],
       "unit_id": "BE-036"
     },
@@ -1131,7 +1241,8 @@
         "VAN-SO-044",
         "VAN-CRYPTO-014",
         "VAN-LEAN-004",
-        "VAN-RV-008"
+        "VAN-RV-008",
+        "VAN-EL-007"
       ],
       "operations": [
         "Expose active binding, changed decision, evidence/maturity, authority and fallback without ungrounded profit claims.",
@@ -1140,7 +1251,8 @@
         "Internal optimizer states become contextual typed views; no new default global tab or dense Home.",
         "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts.",
         "Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration.",
-        "Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate."
+        "Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate.",
+        "Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
       ],
       "tests": [
         "T-VAN-SO-038-POS",
@@ -1157,7 +1269,10 @@
         "T-VAN-LEAN-004-REC",
         "T-VAN-RV-008-POS",
         "T-VAN-RV-008-NEG",
-        "T-VAN-RV-008-REC"
+        "T-VAN-RV-008-REC",
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
       ],
       "unit_id": "BE-032"
     },
@@ -1293,7 +1408,9 @@
         "VAN-SO-033",
         "VAN-SO-037",
         "VAN-RV-003",
-        "VAN-RV-006"
+        "VAN-RV-006",
+        "VAN-EL-005",
+        "VAN-EL-006"
       ],
       "operations": [
         "Actual outcome producer, durable evidence, selector and evolution consumers form one integrated VATI loop.",
@@ -1309,7 +1426,9 @@
         "Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
         "Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds.",
         "Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance.",
-        "Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection."
+        "Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
+        "Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops.",
+        "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery."
       ],
       "tests": [
         "T-VAN-SO-001-POS",
@@ -1341,7 +1460,19 @@
         "T-VAN-RV-003-REC",
         "T-VAN-RV-006-POS",
         "T-VAN-RV-006-NEG",
-        "T-VAN-RV-006-REC"
+        "T-VAN-RV-006-REC",
+        "EL-AT-003-POS",
+        "EL-AT-003-NEG",
+        "EL-AT-003-REC",
+        "EL-AT-004-POS",
+        "EL-AT-004-NEG",
+        "EL-AT-004-REC",
+        "EL-AT-012-POS",
+        "EL-AT-012-NEG",
+        "EL-AT-012-REC",
+        "EL-AT-011-POS",
+        "EL-AT-011-NEG",
+        "EL-AT-011-REC"
       ],
       "unit_id": "BQ-007"
     },
@@ -1352,7 +1483,10 @@
         "VAN-SO-033",
         "VAN-LEAN-002",
         "VAN-RV-004",
-        "VAN-RV-007"
+        "VAN-RV-007",
+        "VAN-EL-002",
+        "VAN-EL-003",
+        "VAN-EL-004"
       ],
       "operations": [
         "No live randomized exploration by default; off-policy claims require propensity/overlap assumptions.",
@@ -1363,7 +1497,10 @@
         "Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
         "Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty.",
         "Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L.",
-        "Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies."
+        "Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies.",
+        "Separate cash accounting, strategy quality, execution contribution, statistical association, simulated alternatives and causal claims; report uncertainty and rival explanations instead of outcome-based stories.",
+        "Preregister independent comparison, costs, dependence, selection adjustment, null controls, trial census, protected chronological confirmation and stopping rules; inconclusive evidence cannot promote.",
+        "Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback."
       ],
       "tests": [
         "T-VAN-SO-032-POS",
@@ -1380,7 +1517,28 @@
         "T-VAN-RV-004-REC",
         "T-VAN-RV-007-POS",
         "T-VAN-RV-007-NEG",
-        "T-VAN-RV-007-REC"
+        "T-VAN-RV-007-REC",
+        "EL-AT-001-POS",
+        "EL-AT-001-NEG",
+        "EL-AT-001-REC",
+        "EL-AT-010-POS",
+        "EL-AT-010-NEG",
+        "EL-AT-010-REC",
+        "EL-AT-002-POS",
+        "EL-AT-002-NEG",
+        "EL-AT-002-REC",
+        "EL-AT-005-POS",
+        "EL-AT-005-NEG",
+        "EL-AT-005-REC",
+        "EL-AT-006-POS",
+        "EL-AT-006-NEG",
+        "EL-AT-006-REC",
+        "EL-AT-008-POS",
+        "EL-AT-008-NEG",
+        "EL-AT-008-REC",
+        "EL-AT-007-POS",
+        "EL-AT-007-NEG",
+        "EL-AT-007-REC"
       ],
       "unit_id": "BQ-009"
     },
@@ -1422,7 +1580,14 @@
         "VAN-RV-005",
         "VAN-RV-006",
         "VAN-RV-007",
-        "VAN-RV-008"
+        "VAN-RV-008",
+        "VAN-EL-001",
+        "VAN-EL-002",
+        "VAN-EL-003",
+        "VAN-EL-004",
+        "VAN-EL-005",
+        "VAN-EL-006",
+        "VAN-EL-007"
       ],
       "operations": [
         "Actual outcome producer, durable evidence, selector and evolution consumers form one integrated VATI loop.",
@@ -1451,7 +1616,14 @@
         "Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies.",
         "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts.",
         "Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration.",
-        "Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate."
+        "Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate.",
+        "Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills.",
+        "Separate cash accounting, strategy quality, execution contribution, statistical association, simulated alternatives and causal claims; report uncertainty and rival explanations instead of outcome-based stories.",
+        "Preregister independent comparison, costs, dependence, selection adjustment, null controls, trial census, protected chronological confirmation and stopping rules; inconclusive evidence cannot promote.",
+        "Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback.",
+        "Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops.",
+        "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery.",
+        "Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
       ],
       "tests": [
         "T-VAN-SO-001-POS",
@@ -1486,22 +1658,69 @@
         "T-VAN-RV-007-REC",
         "T-VAN-RV-008-POS",
         "T-VAN-RV-008-NEG",
-        "T-VAN-RV-008-REC"
+        "T-VAN-RV-008-REC",
+        "EL-AT-009-POS",
+        "EL-AT-009-NEG",
+        "EL-AT-009-REC",
+        "EL-AT-014-POS",
+        "EL-AT-014-NEG",
+        "EL-AT-014-REC",
+        "EL-AT-001-POS",
+        "EL-AT-001-NEG",
+        "EL-AT-001-REC",
+        "EL-AT-010-POS",
+        "EL-AT-010-NEG",
+        "EL-AT-010-REC",
+        "EL-AT-002-POS",
+        "EL-AT-002-NEG",
+        "EL-AT-002-REC",
+        "EL-AT-005-POS",
+        "EL-AT-005-NEG",
+        "EL-AT-005-REC",
+        "EL-AT-006-POS",
+        "EL-AT-006-NEG",
+        "EL-AT-006-REC",
+        "EL-AT-008-POS",
+        "EL-AT-008-NEG",
+        "EL-AT-008-REC",
+        "EL-AT-007-POS",
+        "EL-AT-007-NEG",
+        "EL-AT-007-REC",
+        "EL-AT-003-POS",
+        "EL-AT-003-NEG",
+        "EL-AT-003-REC",
+        "EL-AT-004-POS",
+        "EL-AT-004-NEG",
+        "EL-AT-004-REC",
+        "EL-AT-012-POS",
+        "EL-AT-012-NEG",
+        "EL-AT-012-REC",
+        "EL-AT-011-POS",
+        "EL-AT-011-NEG",
+        "EL-AT-011-REC",
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
       ],
       "unit_id": "BG-001"
     },
     {
       "completion_claim": "SPEC_ADDED_ONLY",
       "new_requirements": [
-        "VAN-LEAN-004"
+        "VAN-LEAN-004",
+        "VAN-EL-007"
       ],
       "operations": [
-        "Internal optimizer states become contextual typed views; no new default global tab or dense Home."
+        "Internal optimizer states become contextual typed views; no new default global tab or dense Home.",
+        "Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
       ],
       "tests": [
         "T-VAN-LEAN-004-POS",
         "T-VAN-LEAN-004-NEG",
-        "T-VAN-LEAN-004-REC"
+        "T-VAN-LEAN-004-REC",
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
       ],
       "unit_id": "UX-001"
     },
@@ -1618,15 +1837,20 @@
     {
       "completion_claim": "SPEC_ADDED_ONLY",
       "new_requirements": [
-        "VAN-CRYPTO-014"
+        "VAN-CRYPTO-014",
+        "VAN-EL-007"
       ],
       "operations": [
-        "Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states."
+        "Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states.",
+        "Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
       ],
       "tests": [
         "T-VAN-CRYPTO-014-POS",
         "T-VAN-CRYPTO-014-NEG",
-        "T-VAN-CRYPTO-014-REC"
+        "T-VAN-CRYPTO-014-REC",
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
       ],
       "unit_id": "FE-011"
     },
@@ -1644,6 +1868,101 @@
         "T-VAN-SO-038-REC"
       ],
       "unit_id": "FE-013"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-EL-001"
+      ],
+      "operations": [
+        "Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills."
+      ],
+      "tests": [
+        "EL-AT-009-POS",
+        "EL-AT-009-NEG",
+        "EL-AT-009-REC",
+        "EL-AT-014-POS",
+        "EL-AT-014-NEG",
+        "EL-AT-014-REC"
+      ],
+      "unit_id": "VAN-ML-PKT-027"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-EL-001",
+        "VAN-EL-007"
+      ],
+      "operations": [
+        "Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills.",
+        "Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
+      ],
+      "tests": [
+        "EL-AT-009-POS",
+        "EL-AT-009-NEG",
+        "EL-AT-009-REC",
+        "EL-AT-014-POS",
+        "EL-AT-014-NEG",
+        "EL-AT-014-REC",
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "unit_id": "BQ-005"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [],
+      "operations": [
+        "Review Rev1.16 experience-learning document/schema/traceability scope before code; backend application and frontend physical acceptance remain at their later gates."
+      ],
+      "tests": [],
+      "unit_id": "PRE-003"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-EL-007"
+      ],
+      "operations": [
+        "Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
+      ],
+      "tests": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "unit_id": "FE-012"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-EL-007"
+      ],
+      "operations": [
+        "Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
+      ],
+      "tests": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "unit_id": "FE-014"
+    },
+    {
+      "completion_claim": "SPEC_ADDED_ONLY",
+      "new_requirements": [
+        "VAN-EL-007"
+      ],
+      "operations": [
+        "Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
+      ],
+      "tests": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "unit_id": "FE-023"
     }
   ],
   "no_new_required_deployable_services": true,

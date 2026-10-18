@@ -212,7 +212,10 @@
       ]
     }
   ],
-  "preservation_invariant": "309 requirements; 1544 planned test contracts; all 234 contexts and 349 inherited actions; all new loops before BG; no claim of new all-branch semantic certification",
+  "owner_requirement_refs": [
+    "VAN-OWNER-EL-001"
+  ],
+  "preservation_invariant": "316 requirements; 1586 planned test contracts; all 234 contexts and 349 inherited actions; all new loops before BG; no claim of new all-branch semantic certification",
   "project_id": "16f2f43a-8d8b-4f18-a6ac-5bd8df620414",
   "required_backend_ids": [
     "BE-001",
@@ -341,7 +344,8 @@
       "VAN-SO-039",
       "VAN-CRYPTO-004",
       "VAN-CRYPTO-013",
-      "VAN-RV-002"
+      "VAN-RV-002",
+      "VAN-EL-006"
     ],
     "BE-003": [
       "VAN-NX-021",
@@ -360,7 +364,8 @@
       "VAN-SO-022",
       "VAN-SO-023",
       "VAN-RV-003",
-      "VAN-RV-006"
+      "VAN-RV-006",
+      "VAN-EL-001"
     ],
     "BE-004": [
       "VAN-NX-048",
@@ -486,7 +491,8 @@
       "VAN-RV-004",
       "VAN-RV-005",
       "VAN-RV-006",
-      "VAN-RV-008"
+      "VAN-RV-008",
+      "VAN-EL-005"
     ],
     "BE-011": [
       "VAN-NX-010",
@@ -524,7 +530,8 @@
       "VAN-CRYPTO-009",
       "VAN-RV-001",
       "VAN-RV-003",
-      "VAN-RV-004"
+      "VAN-RV-004",
+      "VAN-EL-001"
     ],
     "BE-013": [
       "VAN-NX-008",
@@ -535,7 +542,9 @@
       "VAN-CX-014",
       "VAN-CX-018",
       "VAN-HVA-029",
-      "VAN-SO-042"
+      "VAN-SO-042",
+      "VAN-EL-004",
+      "VAN-EL-005"
     ],
     "BE-014": [
       "VAN-NX-013",
@@ -584,14 +593,16 @@
       "VAN-CX-018",
       "VAN-HVA-027",
       "VAN-HVA-028",
-      "VAN-SO-026"
+      "VAN-SO-026",
+      "VAN-EL-002"
     ],
     "BE-022": [
       "VAN-NX-034",
       "VAN-NX-035",
       "VAN-NX-072",
       "VAN-CX-014",
-      "VAN-SO-027"
+      "VAN-SO-027",
+      "VAN-EL-002"
     ],
     "BE-023": [
       "VAN-NX-014",
@@ -626,7 +637,8 @@
       "VAN-NX-072",
       "VAN-CX-014",
       "VAN-SO-026",
-      "VAN-SO-027"
+      "VAN-SO-027",
+      "VAN-EL-006"
     ],
     "BE-029": [
       "VAN-NX-006",
@@ -660,7 +672,8 @@
       "VAN-SO-044",
       "VAN-CRYPTO-014",
       "VAN-LEAN-004",
-      "VAN-RV-008"
+      "VAN-RV-008",
+      "VAN-EL-007"
     ],
     "BE-033": [
       "VAN-NX-021",
@@ -705,7 +718,9 @@
       "VAN-LEAN-005",
       "VAN-RV-004",
       "VAN-RV-005",
-      "VAN-RV-007"
+      "VAN-RV-007",
+      "VAN-EL-003",
+      "VAN-EL-004"
     ],
     "BE-036": [
       "VAN-NX-072",
@@ -742,7 +757,10 @@
       "VAN-LEAN-005",
       "VAN-RV-003",
       "VAN-RV-006",
-      "VAN-RV-007"
+      "VAN-RV-007",
+      "VAN-EL-004",
+      "VAN-EL-005",
+      "VAN-EL-006"
     ],
     "BE-037": [
       "VAN-HVA-004",
@@ -812,7 +830,14 @@
       "VAN-RV-005",
       "VAN-RV-006",
       "VAN-RV-007",
-      "VAN-RV-008"
+      "VAN-RV-008",
+      "VAN-EL-001",
+      "VAN-EL-002",
+      "VAN-EL-003",
+      "VAN-EL-004",
+      "VAN-EL-005",
+      "VAN-EL-006",
+      "VAN-EL-007"
     ],
     "BQ-001": [
       "VAN-SO-016",
@@ -835,7 +860,9 @@
     "BQ-005": [
       "VAN-NX-021",
       "VAN-NX-022",
-      "VAN-NX-060"
+      "VAN-NX-060",
+      "VAN-EL-001",
+      "VAN-EL-007"
     ],
     "BQ-006": [
       "VAN-NX-024",
@@ -864,7 +891,9 @@
       "VAN-SO-033",
       "VAN-SO-037",
       "VAN-RV-003",
-      "VAN-RV-006"
+      "VAN-RV-006",
+      "VAN-EL-005",
+      "VAN-EL-006"
     ],
     "BQ-008": [
       "VAN-HVA-008",
@@ -907,7 +936,10 @@
       "VAN-SO-033",
       "VAN-LEAN-002",
       "VAN-RV-004",
-      "VAN-RV-007"
+      "VAN-RV-007",
+      "VAN-EL-002",
+      "VAN-EL-003",
+      "VAN-EL-004"
     ],
     "FE-001": [
       "VAN-NX-003",
@@ -990,12 +1022,14 @@
       "VAN-NX-074",
       "VAN-NX-076",
       "VAN-NX-077",
-      "VAN-CRYPTO-014"
+      "VAN-CRYPTO-014",
+      "VAN-EL-007"
     ],
     "FE-012": [
       "VAN-NX-058",
       "VAN-NX-072",
-      "VAN-NX-077"
+      "VAN-NX-077",
+      "VAN-EL-007"
     ],
     "FE-013": [
       "VAN-NX-013",
@@ -1010,7 +1044,8 @@
       "VAN-NX-034",
       "VAN-NX-035",
       "VAN-NX-065",
-      "VAN-NX-072"
+      "VAN-NX-072",
+      "VAN-EL-007"
     ],
     "FE-015": [
       "VAN-NX-014",
@@ -1055,7 +1090,8 @@
       "VAN-ML-REQ-058",
       "VAN-HVA-006",
       "VAN-HVA-031",
-      "VAN-HVA-032"
+      "VAN-HVA-032",
+      "VAN-EL-007"
     ],
     "PRE-001": [
       "VAN-NX-071",
@@ -1132,7 +1168,8 @@
       "VAN-NX-001",
       "VAN-NX-030",
       "VAN-CX-017",
-      "VAN-LEAN-004"
+      "VAN-LEAN-004",
+      "VAN-EL-007"
     ],
     "UX-002": [
       "VAN-NX-001",
@@ -1268,7 +1305,8 @@
       "VAN-ML-REQ-048",
       "VAN-ML-REQ-049",
       "VAN-HVA-024",
-      "VAN-HVA-025"
+      "VAN-HVA-025",
+      "VAN-EL-001"
     ],
     "VAN-ML-PKT-028": [
       "VAN-ML-REQ-050",
@@ -1347,7 +1385,7 @@
       "VAN-HVA-001"
     ]
   },
-  "revision": "1.15",
+  "revision": "1.16",
   "schema": "van.canonical.rebuild.plan/1.1",
   "self_optimization_objective": "REQUIRED_CORE_ARCHITECTURAL_OUTCOME",
   "source_alias_semantics": "Prior packet IDs retained in crosswalks; one active generated VAN-PKT sequence; child F15/BG/release IDs are aliases, not extra authorization paths.",
@@ -1459,7 +1497,8 @@
         "VAN-LEAN-001: Extend existing boundaries; justify any new process/store with measured isolation/correctness benefit.",
         "VAN-LEAN-002: Each candidate lists operational cost, maintenance/state burden, alternatives and incremental evidence; safety complexity is mandatory.",
         "VAN-LEAN-003: All inherited requirement/action/context objects remain, with explicit semantic additions not automatic deletion.",
-        "VAN-LEAN-005: Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit."
+        "VAN-LEAN-005: Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit.",
+        "Rev1.16 documentary admission: verify experience-learning contracts, preservation, both consumer paths and statistical obligations before implementation. Do not require application execution at PRE; application proof belongs to backend/BQ exits and native UI remains after BG."
       ],
       "id": "PRE-002",
       "implementation_evidence": [],
@@ -1534,6 +1573,9 @@
         "PRE-002"
       ],
       "exit_contract": "Independent verifier issues current project-scoped F15; all preparation blockers closed; owner signature valid. No Android or production readiness claim.",
+      "full_deliverables": [
+        "Rev1.16 documentary admission: verify experience-learning contracts, preservation, both consumer paths and statistical obligations before implementation. Do not require application execution at PRE; application proof belongs to backend/BQ exits and native UI remains after BG."
+      ],
       "id": "PRE-003",
       "implementation_evidence": [],
       "kind": "PREDEVELOPMENT_GATE",
@@ -1660,7 +1702,10 @@
         "T-VAN-CRYPTO-013-REC",
         "T-VAN-RV-002-POS",
         "T-VAN-RV-002-NEG",
-        "T-VAN-RV-002-REC"
+        "T-VAN-RV-002-REC",
+        "EL-AT-011-POS",
+        "EL-AT-011-NEG",
+        "EL-AT-011-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -1676,7 +1721,8 @@
         "VAN-SO-039: Learned state can evolve under qualified rule; rule/action/reward/scope changes use policy evolution; risk changes keep own authority.",
         "VAN-CRYPTO-004: Trading workers lack withdrawal scope; secret references and account grants remain per environment.",
         "VAN-CRYPTO-013: Spot support does not imply margin/perps/options/DEX/withdraw authority; any extension needs product-specific qualification.",
-        "VAN-RV-002: Dispatch resolves current qualified policy, mandate, reservation, epoch and objective; positive decimal venue increments and complete mature costs validate. Remove only POLICY_QUALIFIED at dispatch and reseal unsigned locks; named semantic check still fails. Reject zero tick and mature unknown costs. Expiry/revocation at any preactivation or drain stage blocks new risk, reconciles in-flight effects and cannot reactivate revoked fallback."
+        "VAN-RV-002: Dispatch resolves current qualified policy, mandate, reservation, epoch and objective; positive decimal venue increments and complete mature costs validate. Remove only POLICY_QUALIFIED at dispatch and reseal unsigned locks; named semantic check still fails. Reject zero tick and mature unknown costs. Expiry/revocation at any preactivation or drain stage blocks new risk, reconciles in-flight effects and cannot reactivate revoked fallback.",
+        "VAN-EL-006: Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery."
       ],
       "id": "BE-002",
       "implementation_evidence": [],
@@ -1763,7 +1809,13 @@
         "T-VAN-RV-003-REC",
         "T-VAN-RV-006-POS",
         "T-VAN-RV-006-NEG",
-        "T-VAN-RV-006-REC"
+        "T-VAN-RV-006-REC",
+        "EL-AT-009-POS",
+        "EL-AT-009-NEG",
+        "EL-AT-009-REC",
+        "EL-AT-014-POS",
+        "EL-AT-014-NEG",
+        "EL-AT-014-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -1779,7 +1831,8 @@
         "VAN-SO-022: Observation contribution, consumed revision and cursor/snapshot publish atomically.",
         "VAN-SO-023: No retroactive editing of issued decision; affected future statistics/models are invalidated or restated.",
         "VAN-RV-003: Real registered consumer applies newer observation revision once, persists cursor/contribution/snapshot atomically, and later eligible selector consumes its fingerprint. Deliver older revision after correction and conflicting equal revision; older evidence cannot overwrite current contribution and conflict is quarantined. Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
-        "VAN-RV-006: Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds. Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance. Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection."
+        "VAN-RV-006: Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds. Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance. Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
+        "VAN-EL-001: Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills."
       ],
       "id": "BE-003",
       "implementation_evidence": [],
@@ -2360,7 +2413,16 @@
         "T-VAN-RV-006-REC",
         "T-VAN-RV-008-POS",
         "T-VAN-RV-008-NEG",
-        "T-VAN-RV-008-REC"
+        "T-VAN-RV-008-REC",
+        "EL-AT-003-POS",
+        "EL-AT-003-NEG",
+        "EL-AT-003-REC",
+        "EL-AT-004-POS",
+        "EL-AT-004-NEG",
+        "EL-AT-004-REC",
+        "EL-AT-012-POS",
+        "EL-AT-012-NEG",
+        "EL-AT-012-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -2403,7 +2465,8 @@
         "VAN-RV-004: One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation. Fees, exits or netting cannot reopen entry allowance; TCA decomposition must equal direct signed fill-versus-reference cost plus nonembedded charges. Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
         "VAN-RV-005: Quantized slices jointly satisfy parent quantity, fresh depth participation, minimum lot/notional, maximum slices, deadline and command budget. Quantity 200, depth 10, participation 0.25 and max 8 slices is infeasible for a one-snapshot plan; never issue eight slices of 25 claiming a cap of 2.5. Replanning uses newly observed depth/time under same grant; restart retains lifetime counters and does not repeat unconfirmed slices.",
         "VAN-RV-006: Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds. Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance. Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
-        "VAN-RV-008: Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts. Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration. Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate."
+        "VAN-RV-008: Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts. Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration. Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate.",
+        "VAN-EL-005: Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops."
       ],
       "id": "BE-010",
       "implementation_evidence": [],
@@ -2631,7 +2694,13 @@
         "T-VAN-RV-003-REC",
         "T-VAN-RV-004-POS",
         "T-VAN-RV-004-NEG",
-        "T-VAN-RV-004-REC"
+        "T-VAN-RV-004-REC",
+        "EL-AT-009-POS",
+        "EL-AT-009-NEG",
+        "EL-AT-009-REC",
+        "EL-AT-014-POS",
+        "EL-AT-014-NEG",
+        "EL-AT-014-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -2659,7 +2728,8 @@
         "VAN-CRYPTO-009: Account-wide cancellation must be assessed against protective/manual orders; no automatic blanket enabling.",
         "VAN-RV-001: Lose cancel reply; authenticated lookup proves cancelled with partial fills; record fills once, retain protection and release only proven unused reservation. A timeout, absent REST result or expired local timer never proves cancellation or flat exposure. Restart at cancel-send and query boundaries, then accept late fill/correction without resubmission.",
         "VAN-RV-003: Real registered consumer applies newer observation revision once, persists cursor/contribution/snapshot atomically, and later eligible selector consumes its fingerprint. Deliver older revision after correction and conflicting equal revision; older evidence cannot overwrite current contribution and conflict is quarantined. Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
-        "VAN-RV-004: One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation. Fees, exits or netting cannot reopen entry allowance; TCA decomposition must equal direct signed fill-versus-reference cost plus nonembedded charges. Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry."
+        "VAN-RV-004: One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation. Fees, exits or netting cannot reopen entry allowance; TCA decomposition must equal direct signed fill-versus-reference cost plus nonembedded charges. Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
+        "VAN-EL-001: Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills."
       ],
       "id": "BE-012",
       "implementation_evidence": [],
@@ -2908,7 +2978,13 @@
         "T-HVA-028-REC",
         "T-VAN-SO-026-POS",
         "T-VAN-SO-026-NEG",
-        "T-VAN-SO-026-REC"
+        "T-VAN-SO-026-REC",
+        "EL-AT-001-POS",
+        "EL-AT-001-NEG",
+        "EL-AT-001-REC",
+        "EL-AT-010-POS",
+        "EL-AT-010-NEG",
+        "EL-AT-010-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -2922,7 +2998,8 @@
       "full_deliverables": [
         "Extend registered trading evidence questions through the existing shared dial-jev consumer; answer quality is not a profitable-trade probability.",
         "Evidence claims distinguish model probability, analyst confidence, source corroboration and risk authority",
-        "VAN-SO-026: Remote interpretation/training stays off decision/protection path; bounded queues and credentials."
+        "VAN-SO-026: Remote interpretation/training stays off decision/protection path; bounded queues and credentials.",
+        "VAN-EL-002: Separate cash accounting, strategy quality, execution contribution, statistical association, simulated alternatives and causal claims; report uncertainty and rival explanations instead of outcome-based stories."
       ],
       "id": "BE-021",
       "implementation_evidence": [],
@@ -3119,7 +3196,10 @@
         "T-VAN-SO-026-REC",
         "T-VAN-SO-027-POS",
         "T-VAN-SO-027-NEG",
-        "T-VAN-SO-027-REC"
+        "T-VAN-SO-027-REC",
+        "EL-AT-011-POS",
+        "EL-AT-011-NEG",
+        "EL-AT-011-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -3132,7 +3212,8 @@
       "exit_contract": "candidate/admit/version workflows; bind standing authority; schedule; report next/last run; execute through domain adapters; retry safely. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Failed run never silently success; timezone/DST/misfire specified; schedules never mint grants; unknown effect reconciled before retry Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.",
       "full_deliverables": [
         "VAN-SO-026: Remote interpretation/training stays off decision/protection path; bounded queues and credentials.",
-        "VAN-SO-027: Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate."
+        "VAN-SO-027: Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate.",
+        "VAN-EL-006: Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery."
       ],
       "id": "BE-028",
       "implementation_evidence": [],
@@ -3371,7 +3452,22 @@
         "T-VAN-RV-005-REC",
         "T-VAN-RV-007-POS",
         "T-VAN-RV-007-NEG",
-        "T-VAN-RV-007-REC"
+        "T-VAN-RV-007-REC",
+        "EL-AT-002-POS",
+        "EL-AT-002-NEG",
+        "EL-AT-002-REC",
+        "EL-AT-005-POS",
+        "EL-AT-005-NEG",
+        "EL-AT-005-REC",
+        "EL-AT-006-POS",
+        "EL-AT-006-NEG",
+        "EL-AT-006-REC",
+        "EL-AT-008-POS",
+        "EL-AT-008-NEG",
+        "EL-AT-008-REC",
+        "EL-AT-007-POS",
+        "EL-AT-007-NEG",
+        "EL-AT-007-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -3401,7 +3497,9 @@
         "VAN-LEAN-005: Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit.",
         "VAN-RV-004: One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation. Fees, exits or netting cannot reopen entry allowance; TCA decomposition must equal direct signed fill-versus-reference cost plus nonembedded charges. Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
         "VAN-RV-005: Quantized slices jointly satisfy parent quantity, fresh depth participation, minimum lot/notional, maximum slices, deadline and command budget. Quantity 200, depth 10, participation 0.25 and max 8 slices is infeasible for a one-snapshot plan; never issue eight slices of 25 claiming a cap of 2.5. Replanning uses newly observed depth/time under same grant; restart retains lifetime counters and does not repeat unconfirmed slices.",
-        "VAN-RV-007: Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty. Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L. Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies."
+        "VAN-RV-007: Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty. Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L. Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies.",
+        "VAN-EL-003: Preregister independent comparison, costs, dependence, selection adjustment, null controls, trial census, protected chronological confirmation and stopping rules; inconclusive evidence cannot promote.",
+        "VAN-EL-004: Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback."
       ],
       "id": "BE-035",
       "implementation_evidence": [],
@@ -3490,7 +3588,19 @@
         "T-REV113-013",
         "T-VAN-SO-042-POS",
         "T-VAN-SO-042-NEG",
-        "T-VAN-SO-042-REC"
+        "T-VAN-SO-042-REC",
+        "EL-AT-007-POS",
+        "EL-AT-007-NEG",
+        "EL-AT-007-REC",
+        "EL-AT-003-POS",
+        "EL-AT-003-NEG",
+        "EL-AT-003-REC",
+        "EL-AT-004-POS",
+        "EL-AT-004-NEG",
+        "EL-AT-004-REC",
+        "EL-AT-012-POS",
+        "EL-AT-012-NEG",
+        "EL-AT-012-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -3503,7 +3613,9 @@
       "full_deliverables": [
         "Do not equate existing AllocatorV1 with calibrated model-weighted ranking. Specify a separately reviewed policy version without adding sizing/reservation authority.",
         "Tempered modes with signed risk budgets; default code cannot bypass mandate; AGGRESSIVE requires independent edge",
-        "VAN-SO-042: Required forecasting plugins are complete integrations, while active selection uses qualified minimal stack."
+        "VAN-SO-042: Required forecasting plugins are complete integrations, while active selection uses qualified minimal stack.",
+        "VAN-EL-004: Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback.",
+        "VAN-EL-005: Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops."
       ],
       "id": "BE-013",
       "implementation_evidence": [],
@@ -3603,7 +3715,13 @@
         "T-VAN-CX-014-REC",
         "T-VAN-SO-027-POS",
         "T-VAN-SO-027-NEG",
-        "T-VAN-SO-027-REC"
+        "T-VAN-SO-027-REC",
+        "EL-AT-001-POS",
+        "EL-AT-001-NEG",
+        "EL-AT-001-REC",
+        "EL-AT-010-POS",
+        "EL-AT-010-NEG",
+        "EL-AT-010-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -3615,7 +3733,8 @@
       ],
       "exit_contract": "analyse all manual trades; display soft behaviour findings; extract entry-time features; validate new candidates; track counterfactuals. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Post-entry holding duration is outcome metadata, not an entry feature; losing trades retained; insufficient sample no assertion; candidate never automatically promoted Loss diagnostics use all-trade and opportunity denominators. Predictive deterioration and input drift are different states. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.",
       "full_deliverables": [
-        "VAN-SO-027: Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate."
+        "VAN-SO-027: Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate.",
+        "VAN-EL-002: Separate cash accounting, strategy quality, execution contribution, statistical association, simulated alternatives and causal claims; report uncertainty and rival explanations instead of outcome-based stories."
       ],
       "id": "BE-022",
       "implementation_evidence": [],
@@ -5101,7 +5220,13 @@
         "T-HVA-024-REC",
         "T-HVA-025-POS",
         "T-HVA-025-NEG",
-        "T-HVA-025-REC"
+        "T-HVA-025-REC",
+        "EL-AT-009-POS",
+        "EL-AT-009-NEG",
+        "EL-AT-009-REC",
+        "EL-AT-014-POS",
+        "EL-AT-014-NEG",
+        "EL-AT-014-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -5118,7 +5243,8 @@
         "Persist input-to-forecast-to-decision-to-outcome attribution and counterfactual separation",
         "Connect existing drift/health/replay and observed broker costs to candidate retraining requests",
         "Implement privacy/retention/correction invalidation, consented manual-trade datasets and no-survivor bias",
-        "Retain full discovery cohorts, delayed/censored outcomes and transitive invalidation lineage; no synthetic receipt may enter realized performance."
+        "Retain full discovery cohorts, delayed/censored outcomes and transitive invalidation lineage; no synthetic receipt may enter realized performance.",
+        "VAN-EL-001: Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills."
       ],
       "id": "VAN-ML-PKT-027",
       "implementation_evidence": [],
@@ -6007,7 +6133,22 @@
         "T-VAN-RV-006-REC",
         "T-VAN-RV-007-POS",
         "T-VAN-RV-007-NEG",
-        "T-VAN-RV-007-REC"
+        "T-VAN-RV-007-REC",
+        "EL-AT-007-POS",
+        "EL-AT-007-NEG",
+        "EL-AT-007-REC",
+        "EL-AT-003-POS",
+        "EL-AT-003-NEG",
+        "EL-AT-003-REC",
+        "EL-AT-004-POS",
+        "EL-AT-004-NEG",
+        "EL-AT-004-REC",
+        "EL-AT-012-POS",
+        "EL-AT-012-NEG",
+        "EL-AT-012-REC",
+        "EL-AT-011-POS",
+        "EL-AT-011-NEG",
+        "EL-AT-011-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -6059,7 +6200,10 @@
         "VAN-LEAN-005: Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit.",
         "VAN-RV-003: Real registered consumer applies newer observation revision once, persists cursor/contribution/snapshot atomically, and later eligible selector consumes its fingerprint. Deliver older revision after correction and conflicting equal revision; older evidence cannot overwrite current contribution and conflict is quarantined. Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
         "VAN-RV-006: Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds. Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance. Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
-        "VAN-RV-007: Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty. Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L. Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies."
+        "VAN-RV-007: Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty. Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L. Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies.",
+        "VAN-EL-004: Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback.",
+        "VAN-EL-005: Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops.",
+        "VAN-EL-006: Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery."
       ],
       "id": "BE-036",
       "implementation_evidence": [],
@@ -6360,7 +6504,10 @@
         "T-VAN-LEAN-004-REC",
         "T-VAN-RV-008-POS",
         "T-VAN-RV-008-NEG",
-        "T-VAN-RV-008-REC"
+        "T-VAN-RV-008-REC",
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -6398,7 +6545,8 @@
         "VAN-SO-044: Every new lifecycle/crypto operation has producer, caller, tests and scoped evidence before frontend.",
         "VAN-CRYPTO-014: Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states.",
         "VAN-LEAN-004: Internal optimizer states become contextual typed views; no new default global tab or dense Home.",
-        "VAN-RV-008: Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts. Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration. Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate."
+        "VAN-RV-008: Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts. Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration. Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate.",
+        "VAN-EL-007: Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
       ],
       "id": "BE-032",
       "implementation_evidence": [],
@@ -6972,7 +7120,16 @@
       "acceptance_test_ids": [
         "T-NX-021",
         "T-NX-022",
-        "T-NX-060"
+        "T-NX-060",
+        "EL-AT-009-POS",
+        "EL-AT-009-NEG",
+        "EL-AT-009-REC",
+        "EL-AT-014-POS",
+        "EL-AT-014-NEG",
+        "EL-AT-014-REC",
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -7053,6 +7210,10 @@
         "VAN-ML-PKT-048"
       ],
       "exit_contract": "No required backend feature partial; verified provider or service outcomes, ledger state and fault-injection receipts; exact source/artifact/config identity. Headless harness is not new UI. No synthetic success.",
+      "full_deliverables": [
+        "VAN-EL-001: Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills.",
+        "VAN-EL-007: Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
+      ],
       "id": "BQ-005",
       "implementation_evidence": [],
       "kind": "BACKEND_VERIFICATION",
@@ -7281,7 +7442,19 @@
         "T-VAN-RV-003-REC",
         "T-VAN-RV-006-POS",
         "T-VAN-RV-006-NEG",
-        "T-VAN-RV-006-REC"
+        "T-VAN-RV-006-REC",
+        "EL-AT-003-POS",
+        "EL-AT-003-NEG",
+        "EL-AT-003-REC",
+        "EL-AT-004-POS",
+        "EL-AT-004-NEG",
+        "EL-AT-004-REC",
+        "EL-AT-012-POS",
+        "EL-AT-012-NEG",
+        "EL-AT-012-REC",
+        "EL-AT-011-POS",
+        "EL-AT-011-NEG",
+        "EL-AT-011-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -7301,7 +7474,9 @@
         "VAN-SO-033: Qualification binds exact cohort/evaluator/artifact, uncertainty and operational limits; author cannot self-certify.",
         "VAN-SO-037: Full positive loop is mandatory; real candidate may correctly fail economic tests.",
         "VAN-RV-003: Real registered consumer applies newer observation revision once, persists cursor/contribution/snapshot atomically, and later eligible selector consumes its fingerprint. Deliver older revision after correction and conflicting equal revision; older evidence cannot overwrite current contribution and conflict is quarantined. Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
-        "VAN-RV-006: Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds. Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance. Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection."
+        "VAN-RV-006: Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds. Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance. Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
+        "VAN-EL-005: Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops.",
+        "VAN-EL-006: Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery."
       ],
       "id": "BQ-007",
       "implementation_evidence": [],
@@ -7418,7 +7593,28 @@
         "T-VAN-RV-004-REC",
         "T-VAN-RV-007-POS",
         "T-VAN-RV-007-NEG",
-        "T-VAN-RV-007-REC"
+        "T-VAN-RV-007-REC",
+        "EL-AT-001-POS",
+        "EL-AT-001-NEG",
+        "EL-AT-001-REC",
+        "EL-AT-010-POS",
+        "EL-AT-010-NEG",
+        "EL-AT-010-REC",
+        "EL-AT-002-POS",
+        "EL-AT-002-NEG",
+        "EL-AT-002-REC",
+        "EL-AT-005-POS",
+        "EL-AT-005-NEG",
+        "EL-AT-005-REC",
+        "EL-AT-006-POS",
+        "EL-AT-006-NEG",
+        "EL-AT-006-REC",
+        "EL-AT-008-POS",
+        "EL-AT-008-NEG",
+        "EL-AT-008-REC",
+        "EL-AT-007-POS",
+        "EL-AT-007-NEG",
+        "EL-AT-007-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -7438,7 +7634,10 @@
         "VAN-SO-033: Qualification binds exact cohort/evaluator/artifact, uncertainty and operational limits; author cannot self-certify.",
         "VAN-LEAN-002: Each candidate lists operational cost, maintenance/state burden, alternatives and incremental evidence; safety complexity is mandatory.",
         "VAN-RV-004: One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation. Fees, exits or netting cannot reopen entry allowance; TCA decomposition must equal direct signed fill-versus-reference cost plus nonembedded charges. Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
-        "VAN-RV-007: Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty. Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L. Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies."
+        "VAN-RV-007: Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty. Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L. Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies.",
+        "VAN-EL-002: Separate cash accounting, strategy quality, execution contribution, statistical association, simulated alternatives and causal claims; report uncertainty and rival explanations instead of outcome-based stories.",
+        "VAN-EL-003: Preregister independent comparison, costs, dependence, selection adjustment, null controls, trial census, protected chronological confirmation and stopping rules; inconclusive evidence cannot promote.",
+        "VAN-EL-004: Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback."
       ],
       "id": "BQ-009",
       "implementation_evidence": [],
@@ -7675,7 +7874,49 @@
         "T-VAN-RV-007-REC",
         "T-VAN-RV-008-POS",
         "T-VAN-RV-008-NEG",
-        "T-VAN-RV-008-REC"
+        "T-VAN-RV-008-REC",
+        "EL-AT-009-POS",
+        "EL-AT-009-NEG",
+        "EL-AT-009-REC",
+        "EL-AT-014-POS",
+        "EL-AT-014-NEG",
+        "EL-AT-014-REC",
+        "EL-AT-001-POS",
+        "EL-AT-001-NEG",
+        "EL-AT-001-REC",
+        "EL-AT-010-POS",
+        "EL-AT-010-NEG",
+        "EL-AT-010-REC",
+        "EL-AT-002-POS",
+        "EL-AT-002-NEG",
+        "EL-AT-002-REC",
+        "EL-AT-005-POS",
+        "EL-AT-005-NEG",
+        "EL-AT-005-REC",
+        "EL-AT-006-POS",
+        "EL-AT-006-NEG",
+        "EL-AT-006-REC",
+        "EL-AT-008-POS",
+        "EL-AT-008-NEG",
+        "EL-AT-008-REC",
+        "EL-AT-007-POS",
+        "EL-AT-007-NEG",
+        "EL-AT-007-REC",
+        "EL-AT-003-POS",
+        "EL-AT-003-NEG",
+        "EL-AT-003-REC",
+        "EL-AT-004-POS",
+        "EL-AT-004-NEG",
+        "EL-AT-004-REC",
+        "EL-AT-012-POS",
+        "EL-AT-012-NEG",
+        "EL-AT-012-REC",
+        "EL-AT-011-POS",
+        "EL-AT-011-NEG",
+        "EL-AT-011-REC",
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -7787,7 +8028,14 @@
         "VAN-RV-005: Quantized slices jointly satisfy parent quantity, fresh depth participation, minimum lot/notional, maximum slices, deadline and command budget. Quantity 200, depth 10, participation 0.25 and max 8 slices is infeasible for a one-snapshot plan; never issue eight slices of 25 claiming a cap of 2.5. Replanning uses newly observed depth/time under same grant; restart retains lifetime counters and does not repeat unconfirmed slices.",
         "VAN-RV-006: Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds. Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance. Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
         "VAN-RV-007: Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty. Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L. Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies.",
-        "VAN-RV-008: Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts. Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration. Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate."
+        "VAN-RV-008: Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts. Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration. Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate.",
+        "VAN-EL-001: Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills.",
+        "VAN-EL-002: Separate cash accounting, strategy quality, execution contribution, statistical association, simulated alternatives and causal claims; report uncertainty and rival explanations instead of outcome-based stories.",
+        "VAN-EL-003: Preregister independent comparison, costs, dependence, selection adjustment, null controls, trial census, protected chronological confirmation and stopping rules; inconclusive evidence cannot promote.",
+        "VAN-EL-004: Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback.",
+        "VAN-EL-005: Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops.",
+        "VAN-EL-006: Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery.",
+        "VAN-EL-007: Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
       ],
       "id": "BG-001",
       "implementation_evidence": [],
@@ -7843,7 +8091,10 @@
         "T-REV113-029",
         "T-VAN-LEAN-004-POS",
         "T-VAN-LEAN-004-NEG",
-        "T-VAN-LEAN-004-REC"
+        "T-VAN-LEAN-004-REC",
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -7852,7 +8103,8 @@
       "exit_contract": "Consume complete capability catalog and every context/action; review whole-app route and progressive disclosure, no five-flow scope ceiling. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.",
       "full_deliverables": [
         "Derive the complete owner journey and navigational hierarchy only from BG-001 capability/action contracts; preserve 78 source UX flows",
-        "VAN-LEAN-004: Internal optimizer states become contextual typed views; no new default global tab or dense Home."
+        "VAN-LEAN-004: Internal optimizer states become contextual typed views; no new default global tab or dense Home.",
+        "VAN-EL-007: Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
       ],
       "id": "UX-001",
       "implementation_evidence": [],
@@ -8560,7 +8812,10 @@
         "T-SURFACE-CX-004",
         "T-VAN-CRYPTO-014-POS",
         "T-VAN-CRYPTO-014-NEG",
-        "T-VAN-CRYPTO-014-REC"
+        "T-VAN-CRYPTO-014-REC",
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -8572,7 +8827,8 @@
       ],
       "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.",
       "full_deliverables": [
-        "VAN-CRYPTO-014: Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states."
+        "VAN-CRYPTO-014: Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states.",
+        "VAN-EL-007: Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
       ],
       "id": "FE-011",
       "implementation_evidence": [],
@@ -8605,7 +8861,10 @@
         "T-LAC-144",
         "T-LAC-145",
         "T-SURFACE-CX-001",
-        "T-SURFACE-CX-012"
+        "T-SURFACE-CX-012",
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -8616,6 +8875,9 @@
         "FE-003"
       ],
       "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "full_deliverables": [
+        "VAN-EL-007: Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
+      ],
       "id": "FE-012",
       "implementation_evidence": [],
       "kind": "FRONTEND",
@@ -8721,7 +8983,10 @@
         "T-SURFACE-208",
         "T-SURFACE-209",
         "T-LAC-131",
-        "T-LAC-136"
+        "T-LAC-136",
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -8732,6 +8997,9 @@
         "FE-003"
       ],
       "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "full_deliverables": [
+        "VAN-EL-007: Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
+      ],
       "id": "FE-014",
       "implementation_evidence": [],
       "kind": "FRONTEND",
@@ -9369,7 +9637,10 @@
         "T-CTX-HVA-SELLABILITY",
         "T-CTX-HVA-COHORT",
         "T-CTX-HVA-JUDGMENT",
-        "T-REV113-039"
+        "T-REV113-039",
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
       ],
       "completion": "FULL",
       "dependencies": [
@@ -9385,7 +9656,8 @@
       "exit_contract": "All model/research contexts, candidate registry, trial reports, source health and calibrated expectation views consume the complete backend catalogue; no research view can grant execution.",
       "full_deliverables": [
         "After BG-001 only, implement the six new context/detail projections within existing navigation, in both locked themes. No new global tab, wallet or trade button.",
-        "Research chain/model surfaces read-only, clear candidate/abstention/evidence and opportunity cost"
+        "Research chain/model surfaces read-only, clear candidate/abstention/evidence and opportunity cost",
+        "VAN-EL-007: Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
       ],
       "id": "FE-023",
       "implementation_evidence": [],

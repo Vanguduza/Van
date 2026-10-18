@@ -1,18 +1,18 @@
-# Validation performed
+# Rev1.16 validation performed
 
-All checks below are documentary; application and economic experiment counts are zero.
+All current checks are documentary. Application tests, economic experiments, provider operations and handset tests executed by this delivery: **zero**.
 
-| Check | Observed result |
+| Current check | Observed result |
 |---|---|
-| Exact parent manifest | 377 entries match |
-| Supplied documentary commands | Seven commands exit 0 |
-| Independent parent probes | Eleven inputs/results reproduce exactly, including one rejected suspicion |
-| Current core schema/graph/reference check | Zero findings |
-| Current independent preservation/semantic/binding checks | 79 / 79 |
-| Current adversarial checks | 47 / 47 |
-| Inherited news readiness mutations | 12 / 12 |
-| Inherited forecast mutations | 38 / 38 |
-| Inherited high-value mutations | 67 / 67 |
-| Deterministic rendered plan | Matches current inputs |
+| Core schema/graph/reference and learning integration | Zero findings |
+| Independent preservation/semantic/binding checks | 79 / 79 |
+| Adversarial document/reference checks | 47 / 47 |
+| Experience-learning integration/schema/mutation checks | 36 / 36 |
+| Generated plan and input provenance | Match current inputs |
+| Previous published requirement/test objects | All 309 / 1,544 unchanged |
+| Previous unit graph and screen objects | All 131 unit dependencies / 234 contexts preserved |
+| Original locked visual assets and Rev1.14 parent | Preserved; independent checks pass |
 
-Corrective delivery 1.15.1 reran the render, core, adversarial and independent checks: exact commands, exit codes, captured output and hashes are in evidence/rev115/correction_checks. The original delivery results, including unchanged news/forecast/high-value checks and parent probes, remain in evidence/rev115/final_checks. These inherited results were not rerun or relabeled as new execution. Archive member identity and fresh-extraction validation are delivered in the separate final package receipt. Numeric counts do not substitute for native independent acceptance.
+Current exact commands, exit codes, entrypoint/output hashes and captured output: `evidence/rev116/final_checks/receipts.json`. The object preservation baseline independently matches published commit `321af1601e4d21fe74630593997748cdeaf3c008`. Archive member identity, exact unpacked-package comparison and fresh-extraction checks are recorded in the outer `REV1_16_FINAL_PACKAGE_RECEIPT.json`.
+
+Prior news/forecast/high-value mutation results and original source probes remain historical under `evidence/rev115/`; they were not rerun or relabeled as new execution. Native issuer authenticity, implementation behaviour, financial authority, economic edge and physical Android acceptance remain separate. All 1,586 application test contracts remain NOT_RUN; F15 and BG remain NOT_ISSUED.

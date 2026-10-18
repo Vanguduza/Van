@@ -1,5 +1,8 @@
 {
   "consolidation_additive_count": 12,
+  "extension_registries": [
+    "design/EXPERIENCE_LEARNING_CONTEXT_BINDINGS.json"
+  ],
   "high_value_context_additive_count": 6,
   "legacy_count": 78,
   "post_rev2_additive_count": 23,
@@ -107,7 +110,7 @@
       ],
       "style_authority_effect": "NONE",
       "style_family_id": "ORB_AND_COMPACT_SUMMARY",
-      "style_first_fold_rule": "single focal orb, 2–3 priority previews, compact action hub",
+      "style_first_fold_rule": "single focal orb, 2\u20133 priority previews, compact action hub",
       "style_goldens": "FUTURE_NATIVE_OWNER_SIGNOFF_AFTER_BG_001",
       "style_modes": [
         "DARK_GRAPHITE",
@@ -203,7 +206,7 @@
       ],
       "style_authority_effect": "NONE",
       "style_family_id": "ORB_AND_COMPACT_SUMMARY",
-      "style_first_fold_rule": "single focal orb, 2–3 priority previews, compact action hub",
+      "style_first_fold_rule": "single focal orb, 2\u20133 priority previews, compact action hub",
       "style_goldens": "FUTURE_NATIVE_OWNER_SIGNOFF_AFTER_BG_001",
       "style_modes": [
         "DARK_GRAPHITE",
@@ -292,7 +295,7 @@
       ],
       "style_authority_effect": "NONE",
       "style_family_id": "ORB_AND_COMPACT_SUMMARY",
-      "style_first_fold_rule": "single focal orb, 2–3 priority previews, compact action hub",
+      "style_first_fold_rule": "single focal orb, 2\u20133 priority previews, compact action hub",
       "style_goldens": "FUTURE_NATIVE_OWNER_SIGNOFF_AFTER_BG_001",
       "style_modes": [
         "DARK_GRAPHITE",
@@ -374,7 +377,7 @@
       ],
       "style_authority_effect": "NONE",
       "style_family_id": "ORB_AND_COMPACT_SUMMARY",
-      "style_first_fold_rule": "single focal orb, 2–3 priority previews, compact action hub",
+      "style_first_fold_rule": "single focal orb, 2\u20133 priority previews, compact action hub",
       "style_goldens": "FUTURE_NATIVE_OWNER_SIGNOFF_AFTER_BG_001",
       "style_modes": [
         "DARK_GRAPHITE",
@@ -463,7 +466,7 @@
       ],
       "style_authority_effect": "NONE",
       "style_family_id": "ORB_AND_COMPACT_SUMMARY",
-      "style_first_fold_rule": "single focal orb, 2–3 priority previews, compact action hub",
+      "style_first_fold_rule": "single focal orb, 2\u20133 priority previews, compact action hub",
       "style_goldens": "FUTURE_NATIVE_OWNER_SIGNOFF_AFTER_BG_001",
       "style_modes": [
         "DARK_GRAPHITE",
@@ -552,7 +555,7 @@
       ],
       "style_authority_effect": "NONE",
       "style_family_id": "ORB_AND_COMPACT_SUMMARY",
-      "style_first_fold_rule": "single focal orb, 2–3 priority previews, compact action hub",
+      "style_first_fold_rule": "single focal orb, 2\u20133 priority previews, compact action hub",
       "style_goldens": "FUTURE_NATIVE_OWNER_SIGNOFF_AFTER_BG_001",
       "style_modes": [
         "DARK_GRAPHITE",
@@ -641,7 +644,7 @@
       ],
       "style_authority_effect": "NONE",
       "style_family_id": "ORB_AND_COMPACT_SUMMARY",
-      "style_first_fold_rule": "single focal orb, 2–3 priority previews, compact action hub",
+      "style_first_fold_rule": "single focal orb, 2\u20133 priority previews, compact action hub",
       "style_goldens": "FUTURE_NATIVE_OWNER_SIGNOFF_AFTER_BG_001",
       "style_modes": [
         "DARK_GRAPHITE",
@@ -10567,7 +10570,7 @@
       ],
       "style_authority_effect": "NONE",
       "style_family_id": "ORB_AND_COMPACT_SUMMARY",
-      "style_first_fold_rule": "single focal orb, 2–3 priority previews, compact action hub",
+      "style_first_fold_rule": "single focal orb, 2\u20133 priority previews, compact action hub",
       "style_goldens": "FUTURE_NATIVE_OWNER_SIGNOFF_AFTER_BG_001",
       "style_modes": [
         "DARK_GRAPHITE",
@@ -10716,7 +10719,7 @@
       ],
       "style_authority_effect": "NONE",
       "style_family_id": "ORB_AND_COMPACT_SUMMARY",
-      "style_first_fold_rule": "single focal orb, 2–3 priority previews, compact action hub",
+      "style_first_fold_rule": "single focal orb, 2\u20133 priority previews, compact action hub",
       "style_goldens": "FUTURE_NATIVE_OWNER_SIGNOFF_AFTER_BG_001",
       "style_modes": [
         "DARK_GRAPHITE",
@@ -16523,7 +16526,7 @@
       ],
       "style_authority_effect": "NONE",
       "style_family_id": "ORB_AND_COMPACT_SUMMARY",
-      "style_first_fold_rule": "single focal orb, 2–3 priority previews, compact action hub",
+      "style_first_fold_rule": "single focal orb, 2\u20133 priority previews, compact action hub",
       "style_goldens": "FUTURE_NATIVE_OWNER_SIGNOFF_AFTER_BG_001",
       "style_modes": [
         "DARK_GRAPHITE",
@@ -19309,7 +19312,7 @@
       ],
       "style_authority_effect": "NONE",
       "style_family_id": "ORB_AND_COMPACT_SUMMARY",
-      "style_first_fold_rule": "single focal orb, 2–3 priority previews, compact action hub",
+      "style_first_fold_rule": "single focal orb, 2\u20133 priority previews, compact action hub",
       "style_goldens": "FUTURE_NATIVE_OWNER_SIGNOFF_AFTER_BG_001",
       "style_modes": [
         "DARK_GRAPHITE",
@@ -20229,7 +20232,7 @@
       ],
       "style_authority_effect": "NONE",
       "style_family_id": "ORB_AND_COMPACT_SUMMARY",
-      "style_first_fold_rule": "single focal orb, 2–3 priority previews, compact action hub",
+      "style_first_fold_rule": "single focal orb, 2\u20133 priority previews, compact action hub",
       "style_goldens": "FUTURE_NATIVE_OWNER_SIGNOFF_AFTER_BG_001",
       "style_modes": [
         "DARK_GRAPHITE",
@@ -22107,7 +22110,7 @@
         }
       ],
       "dark_light": "Both original locked tactile themes, measured native goldens only after BG-001; semantic labels and accessible detail.",
-      "domain": "Trading / Intelligence / Research — existing contextual navigation",
+      "domain": "Trading / Intelligence / Research \u2014 existing contextual navigation",
       "evidence_grade": "CONTRACT_ONLY_NOT_RENDERED",
       "first_fold": "Show observed/rejected/unknown/research-eligible counts with source age; unfold candidate evidence, no trading CTA.",
       "frontend_units": [
@@ -22167,7 +22170,7 @@
         }
       ],
       "dark_light": "Both original locked tactile themes, measured native goldens only after BG-001; semantic labels and accessible detail.",
-      "domain": "Trading / Intelligence / Research — existing contextual navigation",
+      "domain": "Trading / Intelligence / Research \u2014 existing contextual navigation",
       "evidence_grade": "CONTRACT_ONLY_NOT_RENDERED",
       "first_fold": "Show REJECT/INVESTIGATE/NO_HARD_BLOCK, affected state and concrete reasons. No safe-to-buy badge.",
       "frontend_units": [
@@ -22225,7 +22228,7 @@
         }
       ],
       "dark_light": "Both original locked tactile themes, measured native goldens only after BG-001; semantic labels and accessible detail.",
-      "domain": "Trading / Intelligence / Research — existing contextual navigation",
+      "domain": "Trading / Intelligence / Research \u2014 existing contextual navigation",
       "evidence_grade": "CONTRACT_ONLY_NOT_RENDERED",
       "first_fold": "Show raw versus adjusted holdings, time interval, source roles and uncertainty; no ownership certainty from heuristics.",
       "frontend_units": [
@@ -22284,7 +22287,7 @@
         }
       ],
       "dark_light": "Both original locked tactile themes, measured native goldens only after BG-001; semantic labels and accessible detail.",
-      "domain": "Trading / Intelligence / Research — existing contextual navigation",
+      "domain": "Trading / Intelligence / Research \u2014 existing contextual navigation",
       "evidence_grade": "CONTRACT_ONLY_NOT_RENDERED",
       "first_fold": "Show buy/sell simulation distinction, quote size/state/expiry and observed versus modeled costs.",
       "frontend_units": [
@@ -22343,7 +22346,7 @@
         }
       ],
       "dark_light": "Both original locked tactile themes, measured native goldens only after BG-001; semantic labels and accessible detail.",
-      "domain": "Trading / Intelligence / Research — existing contextual navigation",
+      "domain": "Trading / Intelligence / Research \u2014 existing contextual navigation",
       "evidence_grade": "CONTRACT_ONLY_NOT_RENDERED",
       "first_fold": "Show same-universe arms, distinct cash paths, uncertainty, rejected/censored cases and cost assumptions; never simulated as realized.",
       "frontend_units": [
@@ -22402,7 +22405,7 @@
         }
       ],
       "dark_light": "Both original locked tactile themes, measured native goldens only after BG-001; semantic labels and accessible detail.",
-      "domain": "Trading / Intelligence / Research — existing contextual navigation",
+      "domain": "Trading / Intelligence / Research \u2014 existing contextual navigation",
       "evidence_grade": "CONTRACT_ONLY_NOT_RENDERED",
       "first_fold": "Show registered question, supplied evidence, abstention and answer-quality semantics, with no hard-filter or exit override.",
       "frontend_units": [

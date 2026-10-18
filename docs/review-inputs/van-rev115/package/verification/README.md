@@ -1,7 +1,5 @@
-# Active documentary verification — Rev1.15
+# Active documentary verification — Rev1.16
 
-Use `verify_rev115.py` for schema/graph/preservation and synthetic reference checks, `verify_review_contracts.py` for independent semantic regressions and exact Rev1.14 object preservation, and `reproduce_parent_probes.py` to reproduce all eleven original counterexamples/controls against the exact parent archive. `plan/render_plan.py --check` verifies the sole current schedule.
+`verify_rev116.py` checks schema/graph/preservation/reference invariants and invokes the experience-learning integration checker. `verify_review_contracts.py` retains independent semantic/preservation regressions. `verify_experience_learning.py` checks all seven additions, all 42 acceptance links, both consumer paths, strict record examples and mutations, inherited object fingerprints, API/service/context references and active blueprint embedding. `plan/render_plan.py --check` verifies generated plan references and provenance.
 
-Historical checkers and receipts retain their revision-specific scope in lineage/evidence. News, forecast and high-value checkers validate their unchanged inherited schemas. None verifies real issuer authenticity, runtime registration, application execution, trading performance or provider settlement. No F15 or BG is issued.
-
-Corrective delivery 1.15.1 adds independent acceptance-binding and stale-count regressions. Current render/core/mutation/review receipts: `evidence/rev115/correction_checks/receipts.json`; original delivery receipts remain historical. All 1,544 application tests still have `execution_state: NOT_RUN`.
+Current receipts are under `evidence/rev116/final_checks/`. Rev1.15 checkers/receipts are historical. None proves an application endpoint, financial effect, independent issuer, statistical edge, live profitability or device acceptance. All 1,586 application tests are NOT_RUN; F15/BG remain NOT_ISSUED.

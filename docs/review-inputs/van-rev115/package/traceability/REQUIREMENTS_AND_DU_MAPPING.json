@@ -1,5 +1,7 @@
 {
+  "count": 316,
   "crypto_trading_requirements": 14,
+  "experience_learning_requirements": 7,
   "forecast_requirements": 90,
   "high_value_addition_requirements": 32,
   "lean_architecture_requirements": 6,
@@ -7171,6 +7173,224 @@
         "T-VAN-RV-008-REC"
       ],
       "text": "Eligible CEX spot target and backend consumer acceptance"
+    },
+    {
+      "acceptance": "Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills.",
+      "backend_units": [
+        "BE-003",
+        "BE-012",
+        "VAN-ML-PKT-027"
+      ],
+      "frontend_units": [],
+      "id": "VAN-EL-001",
+      "mapping_grade": "OWNER_REQUESTED_INTEGRATED_PENDING_INDEPENDENT_ADMISSION",
+      "other_units": [
+        "BQ-005",
+        "BG-001"
+      ],
+      "source_refs": [
+        "VAN-OWNER-EL-001"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV4_20261018.md \u00a78.6",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "EL-AT-009-POS",
+      "test_ids": [
+        "EL-AT-009-POS",
+        "EL-AT-009-NEG",
+        "EL-AT-009-REC",
+        "EL-AT-014-POS",
+        "EL-AT-014-NEG",
+        "EL-AT-014-REC"
+      ],
+      "text": "Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills.",
+      "title": "Point-in-time trading experience and revision lineage"
+    },
+    {
+      "acceptance": "Separate cash accounting, strategy quality, execution contribution, statistical association, simulated alternatives and causal claims; report uncertainty and rival explanations instead of outcome-based stories.",
+      "backend_units": [
+        "BE-021",
+        "BE-022"
+      ],
+      "frontend_units": [],
+      "id": "VAN-EL-002",
+      "mapping_grade": "OWNER_REQUESTED_INTEGRATED_PENDING_INDEPENDENT_ADMISSION",
+      "other_units": [
+        "BQ-009",
+        "BG-001"
+      ],
+      "source_refs": [
+        "VAN-OWNER-EL-001"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV4_20261018.md \u00a78.6",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "EL-AT-001-POS",
+      "test_ids": [
+        "EL-AT-001-POS",
+        "EL-AT-001-NEG",
+        "EL-AT-001-REC",
+        "EL-AT-010-POS",
+        "EL-AT-010-NEG",
+        "EL-AT-010-REC"
+      ],
+      "text": "Separate cash accounting, strategy quality, execution contribution, statistical association, simulated alternatives and causal claims; report uncertainty and rival explanations instead of outcome-based stories.",
+      "title": "Evidence-grounded outcome diagnosis"
+    },
+    {
+      "acceptance": "Preregister independent comparison, costs, dependence, selection adjustment, null controls, trial census, protected chronological confirmation and stopping rules; inconclusive evidence cannot promote.",
+      "backend_units": [
+        "BE-035"
+      ],
+      "frontend_units": [],
+      "id": "VAN-EL-003",
+      "mapping_grade": "OWNER_REQUESTED_INTEGRATED_PENDING_INDEPENDENT_ADMISSION",
+      "other_units": [
+        "BQ-009",
+        "BG-001"
+      ],
+      "source_refs": [
+        "VAN-OWNER-EL-001"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV4_20261018.md \u00a78.6",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "EL-AT-002-POS",
+      "test_ids": [
+        "EL-AT-002-POS",
+        "EL-AT-002-NEG",
+        "EL-AT-002-REC",
+        "EL-AT-005-POS",
+        "EL-AT-005-NEG",
+        "EL-AT-005-REC",
+        "EL-AT-006-POS",
+        "EL-AT-006-NEG",
+        "EL-AT-006-REC",
+        "EL-AT-008-POS",
+        "EL-AT-008-NEG",
+        "EL-AT-008-REC"
+      ],
+      "text": "Preregister independent comparison, costs, dependence, selection adjustment, null controls, trial census, protected chronological confirmation and stopping rules; inconclusive evidence cannot promote.",
+      "title": "Repeatable edge versus chance qualification"
+    },
+    {
+      "acceptance": "Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback.",
+      "backend_units": [
+        "BE-013",
+        "BE-035",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-EL-004",
+      "mapping_grade": "OWNER_REQUESTED_INTEGRATED_PENDING_INDEPENDENT_ADMISSION",
+      "other_units": [
+        "BQ-009",
+        "BG-001"
+      ],
+      "source_refs": [
+        "VAN-OWNER-EL-001"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV4_20261018.md \u00a78.6",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "EL-AT-007-POS",
+      "test_ids": [
+        "EL-AT-007-POS",
+        "EL-AT-007-NEG",
+        "EL-AT-007-REC"
+      ],
+      "text": "Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback.",
+      "title": "Point-in-time setup similarity and regime support"
+    },
+    {
+      "acceptance": "Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops.",
+      "backend_units": [
+        "BE-010",
+        "BE-013",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-EL-005",
+      "mapping_grade": "OWNER_REQUESTED_INTEGRATED_PENDING_INDEPENDENT_ADMISSION",
+      "other_units": [
+        "BQ-007",
+        "BG-001"
+      ],
+      "source_refs": [
+        "VAN-OWNER-EL-001"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV4_20261018.md \u00a78.6",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "EL-AT-003-POS",
+      "test_ids": [
+        "EL-AT-003-POS",
+        "EL-AT-003-NEG",
+        "EL-AT-003-REC",
+        "EL-AT-004-POS",
+        "EL-AT-004-NEG",
+        "EL-AT-004-REC",
+        "EL-AT-012-POS",
+        "EL-AT-012-NEG",
+        "EL-AT-012-REC"
+      ],
+      "text": "Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops.",
+      "title": "Complete strategy and execution experience loops"
+    },
+    {
+      "acceptance": "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery.",
+      "backend_units": [
+        "BE-002",
+        "BE-028",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-EL-006",
+      "mapping_grade": "OWNER_REQUESTED_INTEGRATED_PENDING_INDEPENDENT_ADMISSION",
+      "other_units": [
+        "BQ-007",
+        "BG-001"
+      ],
+      "source_refs": [
+        "VAN-OWNER-EL-001"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV4_20261018.md \u00a78.6",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "EL-AT-011-POS",
+      "test_ids": [
+        "EL-AT-011-POS",
+        "EL-AT-011-NEG",
+        "EL-AT-011-REC"
+      ],
+      "text": "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery.",
+      "title": "Bounded adaptation, promotion and recovery"
+    },
+    {
+      "acceptance": "Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts.",
+      "backend_units": [
+        "BE-032"
+      ],
+      "frontend_units": [
+        "UX-001",
+        "FE-011",
+        "FE-012",
+        "FE-014",
+        "FE-023"
+      ],
+      "id": "VAN-EL-007",
+      "mapping_grade": "OWNER_REQUESTED_INTEGRATED_PENDING_INDEPENDENT_ADMISSION",
+      "other_units": [
+        "BQ-005",
+        "BG-001"
+      ],
+      "source_refs": [
+        "VAN-OWNER-EL-001"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV4_20261018.md \u00a78.6",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "EL-AT-013-POS",
+      "test_ids": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "text": "Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts.",
+      "title": "Owner learning read models and contextual controls"
     }
   ],
   "review_refinements": [
@@ -7183,10 +7403,10 @@
     "VAN-RV-007",
     "VAN-RV-008"
   ],
-  "revision": "1.15",
+  "revision": "1.16",
   "schema": "van.canonical.requirements/1.1",
   "self_optimization_requirements": 44,
   "source_nx_requirements": 77,
   "status": "SEMANTIC_CONSOLIDATION_CANDIDATE_REQUIRES_INDEPENDENT_ADMISSION",
-  "total": 309
+  "total": 316
 }

@@ -1,6 +1,7 @@
 {
+  "experience_learning_contract": "contracts/self_optimization/EXPERIENCE_LEARNING_CONTRACT.json",
   "logical_services_not_mandated_microservices": true,
-  "revision": "1.14",
+  "revision": "1.16",
   "schema": "van.canonical.backend.catalog/1.1",
   "services": [
     {
@@ -57,6 +58,10 @@
         "BE-001",
         "PRE-003"
       ],
+      "experience_learning_operation_ids": [
+        "EL-OP-006",
+        "EL-OP-007"
+      ],
       "id": "BE-002",
       "implementation_status": "REQUIRED_EXTENSION_NOT_IMPLEMENTED_BY_THIS_PACK",
       "logical_boundary": "Capability/service obligation; reuse or extend qualified existing implementation; not a mandated microservice",
@@ -73,7 +78,8 @@
         "New bindings require qualified and authenticated promotion; open parents retain policy unless explicit compatible migration.",
         "Learned state can evolve under qualified rule; rule/action/reward/scope changes use policy evolution; risk changes keep own authority.",
         "Trading workers lack withdrawal scope; secret references and account grants remain per environment.",
-        "Spot support does not imply margin/perps/options/DEX/withdraw authority; any extension needs product-specific qualification."
+        "Spot support does not imply margin/perps/options/DEX/withdraw authority; any extension needs product-specific qualification.",
+        "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery."
       ],
       "rev114_tests": [
         "T-VAN-SO-002-POS",
@@ -97,6 +103,14 @@
         "T-VAN-CRYPTO-013-POS",
         "T-VAN-CRYPTO-013-NEG",
         "T-VAN-CRYPTO-013-REC"
+      ],
+      "rev116_requirements": [
+        "VAN-EL-006"
+      ],
+      "rev116_tests": [
+        "EL-AT-011-POS",
+        "EL-AT-011-NEG",
+        "EL-AT-011-REC"
       ],
       "status": "NOT_BUILT_BY_THIS_BLUEPRINT",
       "target_source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
@@ -130,7 +144,8 @@
         "Authoritative fill identity, correction/bust and fee currency feed one cash/position state.",
         "Verified anchor plus tail reduces repeated work without accepting tampered history.",
         "Observation contribution, consumed revision and cursor/snapshot publish atomically.",
-        "No retroactive editing of issued decision; affected future statistics/models are invalidated or restated."
+        "No retroactive editing of issued decision; affected future statistics/models are invalidated or restated.",
+        "Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills."
       ],
       "rev114_tests": [
         "T-VAN-SO-011-POS",
@@ -151,6 +166,17 @@
         "T-VAN-SO-023-POS",
         "T-VAN-SO-023-NEG",
         "T-VAN-SO-023-REC"
+      ],
+      "rev116_requirements": [
+        "VAN-EL-001"
+      ],
+      "rev116_tests": [
+        "EL-AT-009-POS",
+        "EL-AT-009-NEG",
+        "EL-AT-009-REC",
+        "EL-AT-014-POS",
+        "EL-AT-014-NEG",
+        "EL-AT-014-REC"
       ],
       "status": "NOT_BUILT_BY_THIS_BLUEPRINT",
       "target_source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
@@ -479,7 +505,8 @@
         "Account-wide cancellation must be assessed against protective/manual orders; no automatic blanket enabling.",
         "Provider chosen by eligible current access; mocked Coinbase Advanced output cannot qualify matching or latency.",
         "Chain discovery remains read-only; only independently admitted exchange products may enter actual order universe.",
-        "Spot support does not imply margin/perps/options/DEX/withdraw authority; any extension needs product-specific qualification."
+        "Spot support does not imply margin/perps/options/DEX/withdraw authority; any extension needs product-specific qualification.",
+        "Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops."
       ],
       "rev113_additional_exit_tests": [
         "Strict order types, immediate/resting same submission vocabulary; buy/sell LIMIT not worse than declared price; policy expiry, blackouts and race outcomes observable"
@@ -561,6 +588,20 @@
         "T-VAN-CRYPTO-013-NEG",
         "T-VAN-CRYPTO-013-REC"
       ],
+      "rev116_requirements": [
+        "VAN-EL-005"
+      ],
+      "rev116_tests": [
+        "EL-AT-003-POS",
+        "EL-AT-003-NEG",
+        "EL-AT-003-REC",
+        "EL-AT-004-POS",
+        "EL-AT-004-NEG",
+        "EL-AT-004-REC",
+        "EL-AT-012-POS",
+        "EL-AT-012-NEG",
+        "EL-AT-012-REC"
+      ],
       "reviewed_extensions": [
         "HVA-REV1.12"
       ],
@@ -617,6 +658,9 @@
         "BE-011",
         "PRE-003"
       ],
+      "experience_learning_operation_ids": [
+        "EL-OP-001"
+      ],
       "id": "BE-012",
       "implementation_status": "REQUIRED_EXTENSION_NOT_IMPLEMENTED_BY_THIS_PACK",
       "logical_boundary": "Capability/service obligation; reuse or extend qualified existing implementation; not a mandated microservice",
@@ -640,7 +684,8 @@
         "Target delta accounts for actual holdings/working orders, netting mode and manual/strategy ownership.",
         "Buy reserves quote, sell owned base; fees/base/quote/third assets and cash conversion explicit; no leverage.",
         "No silent coercion, native/synthetic stop distinction, amend priority and trigger sources explicit.",
-        "Account-wide cancellation must be assessed against protective/manual orders; no automatic blanket enabling."
+        "Account-wide cancellation must be assessed against protective/manual orders; no automatic blanket enabling.",
+        "Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills."
       ],
       "rev113_additional_exit_tests": [
         "Common stop readback/reconciliation for immediate and late fills; all partial/rejected/expired/cancel-pending states source-bound"
@@ -689,6 +734,17 @@
         "T-VAN-CRYPTO-009-NEG",
         "T-VAN-CRYPTO-009-REC"
       ],
+      "rev116_requirements": [
+        "VAN-EL-001"
+      ],
+      "rev116_tests": [
+        "EL-AT-009-POS",
+        "EL-AT-009-NEG",
+        "EL-AT-009-REC",
+        "EL-AT-014-POS",
+        "EL-AT-014-NEG",
+        "EL-AT-014-REC"
+      ],
       "status": "NOT_BUILT_BY_THIS_BLUEPRINT",
       "target_source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
       "title": "Positions, protection, portfolio, history and TCA"
@@ -719,7 +775,9 @@
         "reconcile restart",
         "attribution",
         "Do not equate existing AllocatorV1 with calibrated model-weighted ranking. Specify a separately reviewed policy version without adding sizing/reservation authority.",
-        "Required forecasting plugins are complete integrations, while active selection uses qualified minimal stack."
+        "Required forecasting plugins are complete integrations, while active selection uses qualified minimal stack.",
+        "Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback.",
+        "Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops."
       ],
       "rev113_additional_exit_tests": [
         "Tempered modes with signed risk budgets; default code cannot bypass mandate; AGGRESSIVE requires independent edge"
@@ -728,6 +786,24 @@
         "T-VAN-SO-042-POS",
         "T-VAN-SO-042-NEG",
         "T-VAN-SO-042-REC"
+      ],
+      "rev116_requirements": [
+        "VAN-EL-004",
+        "VAN-EL-005"
+      ],
+      "rev116_tests": [
+        "EL-AT-007-POS",
+        "EL-AT-007-NEG",
+        "EL-AT-007-REC",
+        "EL-AT-003-POS",
+        "EL-AT-003-NEG",
+        "EL-AT-003-REC",
+        "EL-AT-004-POS",
+        "EL-AT-004-NEG",
+        "EL-AT-004-REC",
+        "EL-AT-012-POS",
+        "EL-AT-012-NEG",
+        "EL-AT-012-REC"
       ],
       "reviewed_extensions": [
         "HVA-REV1.12"
@@ -791,7 +867,7 @@
       "additional_correction_ids": [
         "VAN-CX-005"
       ],
-      "adversarial_acceptance": "D1–D6 cannot increase risk; owner-managed trades get proposals not silent exits; D7 requires strategy evidence; news corrections retract pending eligibility",
+      "adversarial_acceptance": "D1\u2013D6 cannot increase risk; owner-managed trades get proposals not silent exits; D7 requires strategy evidence; news corrections retract pending eligibility",
       "authority": "VATI event/risk/lifecycle authority, not LLM",
       "completion": "FULL_REQUIRED_BEFORE_BG001",
       "dependencies": [
@@ -814,7 +890,7 @@
       ],
       "status": "NOT_BUILT_BY_THIS_BLUEPRINT",
       "target_source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
-      "title": "Governed news effects D1–D7 and news strategy lifecycle"
+      "title": "Governed news effects D1\u2013D7 and news strategy lifecycle"
     },
     {
       "additional_correction_ids": [
@@ -950,7 +1026,8 @@
         "track contradiction",
         "provide evidence artifacts",
         "Extend registered trading evidence questions through the existing shared dial-jev consumer; answer quality is not a profitable-trade probability.",
-        "Remote interpretation/training stays off decision/protection path; bounded queues and credentials."
+        "Remote interpretation/training stays off decision/protection path; bounded queues and credentials.",
+        "Separate cash accounting, strategy quality, execution contribution, statistical association, simulated alternatives and causal claims; report uncertainty and rival explanations instead of outcome-based stories."
       ],
       "rev113_additional_exit_tests": [
         "Evidence claims distinguish model probability, analyst confidence, source corroboration and risk authority"
@@ -959,6 +1036,17 @@
         "T-VAN-SO-026-POS",
         "T-VAN-SO-026-NEG",
         "T-VAN-SO-026-REC"
+      ],
+      "rev116_requirements": [
+        "VAN-EL-002"
+      ],
+      "rev116_tests": [
+        "EL-AT-001-POS",
+        "EL-AT-001-NEG",
+        "EL-AT-001-REC",
+        "EL-AT-010-POS",
+        "EL-AT-010-NEG",
+        "EL-AT-010-REC"
       ],
       "reviewed_extensions": [
         "HVA-REV1.12"
@@ -981,6 +1069,9 @@
         "BE-021",
         "PRE-003"
       ],
+      "experience_learning_operation_ids": [
+        "EL-OP-002"
+      ],
       "id": "BE-022",
       "implementation_status": "REQUIRED_EXTENSION_NOT_IMPLEMENTED_BY_THIS_PACK",
       "logical_boundary": "Capability/service obligation; reuse or extend qualified existing implementation; not a mandated microservice",
@@ -991,12 +1082,24 @@
         "extract entry-time features",
         "validate new candidates",
         "track counterfactuals",
-        "Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate."
+        "Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate.",
+        "Separate cash accounting, strategy quality, execution contribution, statistical association, simulated alternatives and causal claims; report uncertainty and rival explanations instead of outcome-based stories."
       ],
       "rev114_tests": [
         "T-VAN-SO-027-POS",
         "T-VAN-SO-027-NEG",
         "T-VAN-SO-027-REC"
+      ],
+      "rev116_requirements": [
+        "VAN-EL-002"
+      ],
+      "rev116_tests": [
+        "EL-AT-001-POS",
+        "EL-AT-001-NEG",
+        "EL-AT-001-REC",
+        "EL-AT-010-POS",
+        "EL-AT-010-NEG",
+        "EL-AT-010-REC"
       ],
       "status": "NOT_BUILT_BY_THIS_BLUEPRINT",
       "target_source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
@@ -1165,7 +1268,8 @@
         "execute through domain adapters",
         "retry safely",
         "Remote interpretation/training stays off decision/protection path; bounded queues and credentials.",
-        "Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate."
+        "Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate.",
+        "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery."
       ],
       "rev114_tests": [
         "T-VAN-SO-026-POS",
@@ -1174,6 +1278,14 @@
         "T-VAN-SO-027-POS",
         "T-VAN-SO-027-NEG",
         "T-VAN-SO-027-REC"
+      ],
+      "rev116_requirements": [
+        "VAN-EL-006"
+      ],
+      "rev116_tests": [
+        "EL-AT-011-POS",
+        "EL-AT-011-NEG",
+        "EL-AT-011-REC"
       ],
       "status": "NOT_BUILT_BY_THIS_BLUEPRINT",
       "target_source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
@@ -1307,6 +1419,16 @@
         "VAN-ML-PKT-028",
         "VAN-ML-PKT-048"
       ],
+      "experience_learning_operation_ids": [
+        "EL-OP-001",
+        "EL-OP-002",
+        "EL-OP-003",
+        "EL-OP-004",
+        "EL-OP-005",
+        "EL-OP-006",
+        "EL-OP-007",
+        "EL-OP-008"
+      ],
       "id": "BE-032",
       "implementation_status": "REQUIRED_EXTENSION_NOT_IMPLEMENTED_BY_THIS_PACK",
       "logical_boundary": "Capability/service obligation; reuse or extend qualified existing implementation; not a mandated microservice",
@@ -1319,7 +1441,8 @@
         "Expose active binding, changed decision, evidence/maturity, authority and fallback without ungrounded profit claims.",
         "Every new lifecycle/crypto operation has producer, caller, tests and scoped evidence before frontend.",
         "Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states.",
-        "Internal optimizer states become contextual typed views; no new default global tab or dense Home."
+        "Internal optimizer states become contextual typed views; no new default global tab or dense Home.",
+        "Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
       ],
       "rev113_additional_exit_tests": [
         "Publish *full* consumer catalogue of 234 contexts with per-action authority/receipt/stale/unknown states before BG; no fixture-only readiness"
@@ -1337,6 +1460,14 @@
         "T-VAN-LEAN-004-POS",
         "T-VAN-LEAN-004-NEG",
         "T-VAN-LEAN-004-REC"
+      ],
+      "rev116_requirements": [
+        "VAN-EL-007"
+      ],
+      "rev116_tests": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
       ],
       "reviewed_extensions": [
         "HVA-REV1.12"
@@ -1435,7 +1566,7 @@
         "VAN-CX-013",
         "VAN-CX-014"
       ],
-      "adversarial_acceptance": "All VAN-CX-003–013 evaluator obligations; executable matching/chronology fixtures; actual folds and data manifests; deployment-faithful and isolation experiments separated; independent adversarial oracle.",
+      "adversarial_acceptance": "All VAN-CX-003\u2013013 evaluator obligations; executable matching/chronology fixtures; actual folds and data manifests; deployment-faithful and isolation experiments separated; independent adversarial oracle.",
       "authority": "VATI research coordinator; risk and order ownership unchanged; independent qualification and exact owner promotion",
       "completion": "FULL_REQUIRED_BEFORE_BG001",
       "dependencies": [
@@ -1446,6 +1577,9 @@
         "BE-012",
         "BE-019",
         "PRE-003"
+      ],
+      "experience_learning_operation_ids": [
+        "EL-OP-003"
       ],
       "id": "BE-035",
       "implementation_status": "REQUIRED_EXTENSION_NOT_IMPLEMENTED_BY_THIS_PACK",
@@ -1472,7 +1606,9 @@
         "DesignChangeProposal binds source/data/evaluator/alternatives/uncertainty, complexity effects and affected contracts.",
         "No silent coercion, native/synthetic stop distinction, amend priority and trigger sources explicit.",
         "Crypto full-account arms include correct data conventions, fees, liquidity drought, maintenance, delisting and stablecoin stress.",
-        "Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit."
+        "Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit.",
+        "Preregister independent comparison, costs, dependence, selection adjustment, null controls, trial census, protected chronological confirmation and stopping rules; inconclusive evidence cannot promote.",
+        "Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback."
       ],
       "rev113_additional_exit_tests": [
         "Calendar-year reporting cannot impersonate walk-forward; bid/ask, point-in-time/timezones, no future leakage, intrabar oracle"
@@ -1515,6 +1651,27 @@
         "T-VAN-LEAN-005-NEG",
         "T-VAN-LEAN-005-REC"
       ],
+      "rev116_requirements": [
+        "VAN-EL-003",
+        "VAN-EL-004"
+      ],
+      "rev116_tests": [
+        "EL-AT-002-POS",
+        "EL-AT-002-NEG",
+        "EL-AT-002-REC",
+        "EL-AT-005-POS",
+        "EL-AT-005-NEG",
+        "EL-AT-005-REC",
+        "EL-AT-006-POS",
+        "EL-AT-006-NEG",
+        "EL-AT-006-REC",
+        "EL-AT-008-POS",
+        "EL-AT-008-NEG",
+        "EL-AT-008-REC",
+        "EL-AT-007-POS",
+        "EL-AT-007-NEG",
+        "EL-AT-007-REC"
+      ],
       "reviewed_extensions": [
         "HVA-REV1.12"
       ],
@@ -1547,6 +1704,10 @@
         "VAN-ML-PKT-025",
         "VAN-ML-PKT-027",
         "VAN-ML-PKT-047"
+      ],
+      "experience_learning_operation_ids": [
+        "EL-OP-004",
+        "EL-OP-005"
       ],
       "id": "BE-036",
       "implementation_status": "REQUIRED_EXTENSION_NOT_IMPLEMENTED_BY_THIS_PACK",
@@ -1583,7 +1744,10 @@
         "Required forecasting plugins are complete integrations, while active selection uses qualified minimal stack.",
         "DesignChangeProposal binds source/data/evaluator/alternatives/uncertainty, complexity effects and affected contracts.",
         "Each candidate lists operational cost, maintenance/state burden, alternatives and incremental evidence; safety complexity is mandatory.",
-        "Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit."
+        "Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit.",
+        "Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback.",
+        "Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops.",
+        "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery."
       ],
       "rev113_additional_exit_tests": [
         "Candidate proposals from both winners and losers, complete experiments; no autonomous live promotion"
@@ -1670,6 +1834,28 @@
         "T-VAN-LEAN-005-POS",
         "T-VAN-LEAN-005-NEG",
         "T-VAN-LEAN-005-REC"
+      ],
+      "rev116_requirements": [
+        "VAN-EL-004",
+        "VAN-EL-005",
+        "VAN-EL-006"
+      ],
+      "rev116_tests": [
+        "EL-AT-007-POS",
+        "EL-AT-007-NEG",
+        "EL-AT-007-REC",
+        "EL-AT-003-POS",
+        "EL-AT-003-NEG",
+        "EL-AT-003-REC",
+        "EL-AT-004-POS",
+        "EL-AT-004-NEG",
+        "EL-AT-004-REC",
+        "EL-AT-012-POS",
+        "EL-AT-012-NEG",
+        "EL-AT-012-REC",
+        "EL-AT-011-POS",
+        "EL-AT-011-NEG",
+        "EL-AT-011-REC"
       ],
       "status": "SPECIFIED_NOT_IMPLEMENTED",
       "title": "Continuous governed strategy and execution-policy development; operational learning integration"
@@ -2278,7 +2464,19 @@
         "Persist input-to-forecast-to-decision-to-outcome attribution and counterfactual separation",
         "Connect existing drift/health/replay and observed broker costs to candidate retraining requests",
         "Implement privacy/retention/correction invalidation, consented manual-trade datasets and no-survivor bias",
-        "Retain full discovery cohorts, delayed/censored outcomes and transitive invalidation lineage; no synthetic receipt may enter realized performance."
+        "Retain full discovery cohorts, delayed/censored outcomes and transitive invalidation lineage; no synthetic receipt may enter realized performance.",
+        "Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills."
+      ],
+      "rev116_requirements": [
+        "VAN-EL-001"
+      ],
+      "rev116_tests": [
+        "EL-AT-009-POS",
+        "EL-AT-009-NEG",
+        "EL-AT-009-REC",
+        "EL-AT-014-POS",
+        "EL-AT-014-NEG",
+        "EL-AT-014-REC"
       ],
       "reviewed_extensions": [
         "HVA-REV1.12"
@@ -2497,7 +2695,7 @@
       "logical_boundary": "Integrated additive within VAN, not an independent trading runtime",
       "models": "Source forecast schema set in contracts/forecast; exact producer/consumer bindings in plan and source crosswalk",
       "operations": [
-        "Implement external-asset evidence integration through inherited D1–D7 policies and preserve manual-position ownership, no stop widening, calendar blackouts and two-source armed expectations.",
+        "Implement external-asset evidence integration through inherited D1\u2013D7 policies and preserve manual-position ownership, no stop widening, calendar blackouts and two-source armed expectations.",
         "Implement sandbox binary-contract value calculations for held-to-settlement and exit-before-settlement strategies with explicit depth/fees/currency/capital lockup; probabilities must be independently calibrated.",
         "Implement maximum-loss/event-family portfolio stress and constrained Kelly-style research comparisons; output only bounded proposals, never final authority, actual order instructions or self-promotion."
       ],
@@ -2654,7 +2852,7 @@
         "Persist source availability, state anchors, cursors, quotas, retention and disabled-provider readbacks.",
         "Chain discovery remains read-only; only independently admitted exchange products may enter actual order universe."
       ],
-      "producer_store_consumer": "Documented provider record → existing acquisition/data store → cohort and security analyzers",
+      "producer_store_consumer": "Documented provider record \u2192 existing acquisition/data store \u2192 cohort and security analyzers",
       "rev113_additional_exit_tests": [
         "No chain source adoption without capability/terms/access and authority isolation"
       ],
@@ -2684,7 +2882,7 @@
         "Implement cheap-to-expensive screening with one-survivor invariants, typed unknown normalization and empirical rule versions.",
         "Use existing scheduling with durable bounded queues, cause-specific rechecks and negative-cache invalidation."
       ],
-      "producer_store_consumer": "Discovery adapters → immutable cohort/stage events → screening, datasets and read models",
+      "producer_store_consumer": "Discovery adapters \u2192 immutable cohort/stage events \u2192 screening, datasets and read models",
       "status": "NOT_BUILT_BY_THIS_BLUEPRINT",
       "target_source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
       "title": "Complete discovery cohorts and staged deterministic screening"
@@ -2706,7 +2904,7 @@
         "Inspect authority, transfer-fee/hook/delegate/extension evidence and technical account roles without transactions.",
         "Emit factual REJECT/INVESTIGATE/NO_HARD_BLOCK findings, unsupported/unknown states and anchored provenance."
       ],
-      "producer_store_consumer": "Read-only Solana observations → security finding store → screening, route analysis and feature research",
+      "producer_store_consumer": "Read-only Solana observations \u2192 security finding store \u2192 screening, route analysis and feature research",
       "status": "NOT_BUILT_BY_THIS_BLUEPRINT",
       "target_source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
       "title": "Solana token capability and uncertainty analyzer"
@@ -2728,7 +2926,7 @@
         "Evaluate transfer/mint/blacklist/tax/max-transaction and liquidity-removal capabilities through supported read-only evidence.",
         "Retain code-verification uncertainty and state-dependent restrictions; no signing or broadcast operations."
       ],
-      "producer_store_consumer": "Read-only EVM observations → security finding store → screening and sell simulation",
+      "producer_store_consumer": "Read-only EVM observations \u2192 security finding store \u2192 screening and sell simulation",
       "status": "NOT_BUILT_BY_THIS_BLUEPRINT",
       "target_source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
       "title": "EVM contract/proxy capability and uncertainty analyzer"
@@ -2754,7 +2952,7 @@
         "Join to existing net-edge and TCA/label contracts with no double counting; invalid/unknown exitability remains research-only.",
         "Chain discovery remains read-only; only independently admitted exchange products may enter actual order universe."
       ],
-      "producer_store_consumer": "Anchored route facts and simulations → existing economics evidence store → candidate research and evaluation",
+      "producer_store_consumer": "Anchored route facts and simulations \u2192 existing economics evidence store \u2192 candidate research and evaluation",
       "rev114_tests": [
         "T-VAN-CRYPTO-012-POS",
         "T-VAN-CRYPTO-012-NEG",
@@ -2782,7 +2980,7 @@
         "Retain raw and adjusted concentration plus uncertain funding/ownership clusters; deduplicate transaction-level routes.",
         "Produce growth/flow/manipulation research features with coverage and missingness, never narratives from a single snapshot."
       ],
-      "producer_store_consumer": "Anchored chain observations → historical wallet/role snapshots → feature pipelines and screening research",
+      "producer_store_consumer": "Anchored chain observations \u2192 historical wallet/role snapshots \u2192 feature pipelines and screening research",
       "status": "NOT_BUILT_BY_THIS_BLUEPRINT",
       "target_source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
       "title": "Temporal wallet attribution and holder-flow intelligence"
@@ -2803,12 +3001,12 @@
       "logical_boundary": "Extend existing service owners; not a mandatory separate microservice.",
       "models": "StateAnchor, invalidation batch/checkpoint, dependency DAG, revalidation receipts",
       "operations": [
-        "Maintain transitive source→fact→feature→forecast→experiment dependency references and explicit finality policies.",
+        "Maintain transitive source\u2192fact\u2192feature\u2192forecast\u2192experiment dependency references and explicit finality policies.",
         "Process source correction, chain reorg, pool migration and contract changes as versioned invalidation events.",
         "Block stale descendant consumption, replay revalidation safely and preserve all prior evidence without hindsight edits.",
         "Chain discovery remains read-only; only independently admitted exchange products may enter actual order universe."
       ],
-      "producer_store_consumer": "Changed source/state → durable invalidation/revalidation ledger → caches, datasets, models and experiment consumers",
+      "producer_store_consumer": "Changed source/state \u2192 durable invalidation/revalidation ledger \u2192 caches, datasets, models and experiment consumers",
       "rev114_tests": [
         "T-VAN-CRYPTO-012-POS",
         "T-VAN-CRYPTO-012-NEG",
@@ -2845,7 +3043,7 @@
         "Exercise valid success, negative, interruption, revoke and rollback paths on the DIAL topology with source-bound real integration receipts where required.",
         "Chain discovery remains read-only; only independently admitted exchange products may enter actual order universe."
       ],
-      "producer_store_consumer": "All domain/evaluation services → existing gateway/catalogue and model registry → research and later FE-023 contexts",
+      "producer_store_consumer": "All domain/evaluation services \u2192 existing gateway/catalogue and model registry \u2192 research and later FE-023 contexts",
       "rev113_additional_exit_tests": [
         "All read-only chain research matched to qualified backend and eventual frontend consumer; no signing or trading route"
       ],

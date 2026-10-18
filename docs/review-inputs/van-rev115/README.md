@@ -1,22 +1,22 @@
-# VAN Next Rev1.15 — corrective delivery 1.15.1
+# VAN Next — integrated blueprint Rev1.16
 
-**Latest owner requirement:** [Learning from trading experience](OWNER_REQUIREMENT_EXPERIENCE_LEARNING.md) specifies evidence-grounded trade diagnosis, distinguishing repeatable edge from chance, and complete strategy/execution improvement loops. Read it alongside this package. It is an additional implementation requirement outside the sealed ZIP, with 14 unexecuted acceptance scenarios; PRE-002 must integrate it into the next consolidated registries before affected scope admission. The ZIP and its receipt below retain their verified 1.15.1 identity.
+The owner’s experience-learning requirement is fully incorporated in the master and focused blueprints, machine requirements/test registries, single development plan, typed evidence/API contracts and existing screen bindings.
 
-Published at the owner's explicit request: “Commit and push the zip and rev 1.15”. This is a specification-review candidate, not application implementation, a merge of the source candidates, or an issued F15/BG certificate.
-
-- [Download the exact ZIP](VAN_NEXT_REVIEWED_BLUEPRINT_PACK_REV1_15_1_20261018.zip)
-- [Correction details](package/review/REV115_CORRECTIONS.md)
+- [Master blueprint](package/VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_16_20261018.md)
+- [Focused blueprint, including normative §8.6](package/VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV4_20261018.md)
+- [Download the complete Rev1.16 ZIP](VAN_NEXT_INTEGRATED_BLUEPRINT_PACK_REV1_16_20261018.zip)
 - [Start here](package/README_START_HERE.md)
-- [Prioritized independent audit](package/review/INDEPENDENT_AUDIT.md)
-- [Unified master specification](package/VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_15_20261018.md)
-- [Focused execution and crypto specification](package/VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV3_20261018.md)
-- [Single development plan](package/plan/VAN_NEXT_DETERMINISTIC_PLAN_REV1_15.md)
-- [Frontend context registry](package/design/ALL_SURFACE_CONTRACTS.json)
-- [Design-change proposals](package/review/DESIGN_CHANGE_PROPOSALS.json)
-- [Final archive verification receipt](REV1_15_FINAL_PACKAGE_RECEIPT.json)
+- [Single generated implementation plan](package/plan/VAN_NEXT_DETERMINISTIC_PLAN_REV1_16.md)
+- [Seven integrated learning requirements](package/traceability/REV116_REQUIREMENTS.json)
+- [42 positive/adverse/recovery acceptance contracts](package/verification/REV116_ACCEPTANCE_CONTRACTS.json)
+- [Typed evidence records and API/consumer contracts](package/contracts/self_optimization/EXPERIENCE_LEARNING_CONTRACT.json)
+- [Learning bindings for eight existing contexts](package/design/EXPERIENCE_LEARNING_CONTEXT_BINDINGS.json)
+- [Full screen registry](package/design/ALL_SURFACE_CONTRACTS.json)
+- [Validation summary](package/review/VALIDATION_SUMMARY.md)
+- [Final archive receipt](REV1_16_FINAL_PACKAGE_RECEIPT.json)
 
-ZIP SHA-256: `f6094a15e4c90f735903fa4b66ae7532dbbdd4a6e3fef071f29dcaeb17a01cd0`. The unpacked package preserves the delivered bytes and includes its MANIFEST. The exact Rev1.14 parent archive is retained inside it.
+Active totals: **316 requirements, 1,586 planned application tests, 131 units and 234 contexts**. All 309 previous requirement objects and 1,544 previous test objects are preserved. All application tests remain NOT_RUN; this publication implements specifications and documentary checks, not application behaviour or deployed endpoints.
 
-The package contains 309 requirements, 1,544 planned application acceptance contracts, 131 units and 234 contexts. All application acceptance remains NOT_RUN. Documentary checks passed; native DIAL runtime verification, provider qualification, application implementation and S24/Artemis acceptance are not claimed by publication.
+ZIP SHA-256: `ed7bd4bddf8f4bc7bf2a36ea12c4570994281f1de653a28af67f6f7e1123f843`. The archive matches `package/` byte for byte and passed fresh-extraction document checks. The exact supplied Rev1.14 parent archive remains included.
 
-Delivery 1.15.1 corrects current versus historical counts and generates explicit acceptance references on all 131 plan units. The previous delivery remains available at commit `b5f56ebbc056bbd8eb3e9f7a562a8cd5d5b74bdf`. No product scope or application test state changed.
+This directory retains its original publication path for link continuity. CANONICAL_AUTHORITY.json selects Rev1.16; older blueprint files are historical. The earlier Rev1.15.1 archive and receipt remain available at commit `270d077b978d785b186b46b208a97ba188fad1a2`; the original companion request is retained in package lineage. No F15/BG, production qualification, economic profit or S24 acceptance is claimed.

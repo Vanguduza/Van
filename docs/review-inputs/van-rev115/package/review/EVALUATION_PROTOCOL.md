@@ -29,3 +29,11 @@ Run prefix invariance and poisoned-future tests against both feature constructio
 - Raw receipt: actual admitted host/job, exact command, timestamps, exit, stdout/stderr and artifact hashes. Independent verifier and promotion owner remain separate.
 
 A successful controlled causal loop proves its mechanism. It does not demonstrate live profitability, authorize exploration, or permit silently replacing a policy.
+
+## Rev1.16 experience-learning qualification
+
+Focused blueprint §8.6 and VAN-EL-001…007 are mandatory extensions. Register the setup/similarity/regime rule using information available at decision time; keep accounting, association, simulation and supported causation separate. Hypothesis-discovery observations cannot also be protected confirmation. Preserve all human/LLM trials, treat overlap/dependence, qualify null controls and power on controlled alternatives, and preregister sequential or fixed-window inference. Null-control tolerances apply to ensembles, not a demand that every random realization be rejected. No p-value or single profitable outcome is proof of skill.
+
+Run both EL-AT-003 execution and EL-AT-004 strategy positive loops through actual registered producers and consumers. EL-AT-012 removes each real consumer independently. The evaluator must detect economically known improvements in controlled fixtures as well as reject induced leakage, false attribution, omitted costs and invalid authority. Indefinite refusal or a narrative report alone cannot pass. Controlled mechanism tests and prospective economic qualification remain separate.
+
+Required run artifacts additionally include immutable experience and diagnosis revisions, registered hypotheses, trial/split manifests, dependence and selection adjustment, null/power controls, exact policy diffs, consumer receipts, before/after snapshots and stale/corrected evidence propagation. Source/cost corrections invalidate affected claims; earlier AS_DECIDED evidence remains unchanged.
