@@ -1,5 +1,7 @@
 # VAN Next Rev1.15 — corrective delivery 1.15.1
 
+**Latest owner requirement:** [Learning from trading experience](OWNER_REQUIREMENT_EXPERIENCE_LEARNING.md) specifies evidence-grounded trade diagnosis, distinguishing repeatable edge from chance, and complete strategy/execution improvement loops. Read it alongside this package. It is an additional implementation requirement outside the sealed ZIP, with 14 unexecuted acceptance scenarios; PRE-002 must integrate it into the next consolidated registries before affected scope admission. The ZIP and its receipt below retain their verified 1.15.1 identity.
+
 Published at the owner's explicit request: “Commit and push the zip and rev 1.15”. This is a specification-review candidate, not application implementation, a merge of the source candidates, or an issued F15/BG certificate.
 
 - [Download the exact ZIP](VAN_NEXT_REVIEWED_BLUEPRINT_PACK_REV1_15_1_20261018.zip)
