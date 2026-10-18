@@ -1,0 +1,234 @@
+{
+  "experiments": [
+    {
+      "acceptance_refs": [
+        "T-VAN-JM-007-POS",
+        "T-VAN-JM-007-NEG",
+        "T-VAN-JM-007-REC"
+      ],
+      "arms": "Required qualified execution policies; same risk constraints",
+      "authority": "Research and any provider usage require actual existing scoped grants; no live randomization or production promotion implied.",
+      "estimand": "Net cost, fills/misses, deadlines, adverse selection and protection",
+      "id": "JM-EXP-001",
+      "independent_owner": "BQ-009",
+      "integration_owner": "BE-036",
+      "negative_control": "A lower fill-only cost that hides misses, doubled spread or reused depth must fail.",
+      "outcomes": [
+        "SUPPORTED_WITHIN_SCOPE",
+        "BASELINE_RETAINED",
+        "INCONCLUSIVE",
+        "REJECTED"
+      ],
+      "population": "Matched approved objectives and independent account arms",
+      "primary_owner": "BE-035",
+      "priority": 1,
+      "required_pre_run_bindings": [
+        "source_and_model_epochs",
+        "data_rights_and_availability",
+        "sample_dependence_definition",
+        "complete_trial_budget",
+        "protected_confirmation_windows",
+        "cost_schedule_and_reservation",
+        "risk_limits",
+        "materiality_and_uncertainty_method",
+        "sequential_or_fixed_review_rule",
+        "positive_power_and_null_ensemble_oracles",
+        "native_research_grant"
+      ],
+      "state": "NOT_RUN",
+      "title": "Execution drag"
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-JM-007-POS",
+        "T-VAN-JM-007-NEG",
+        "T-VAN-JM-007-REC"
+      ],
+      "arms": "Baseline versus validated event/regime selection inputs",
+      "authority": "Research and any provider usage require actual existing scoped grants; no live randomization or production promotion implied.",
+      "estimand": "Net utility, false abstentions, coverage and tail risk",
+      "id": "JM-EXP-002",
+      "independent_owner": "BQ-009",
+      "integration_owner": "BE-036",
+      "negative_control": "Higher hit rate with lower net utility or lost opportunity coverage cannot pass.",
+      "outcomes": [
+        "SUPPORTED_WITHIN_SCOPE",
+        "BASELINE_RETAINED",
+        "INCONCLUSIVE",
+        "REJECTED"
+      ],
+      "population": "Complete ex-ante opportunity stream",
+      "primary_owner": "BE-035",
+      "priority": 2,
+      "required_pre_run_bindings": [
+        "source_and_model_epochs",
+        "data_rights_and_availability",
+        "sample_dependence_definition",
+        "complete_trial_budget",
+        "protected_confirmation_windows",
+        "cost_schedule_and_reservation",
+        "risk_limits",
+        "materiality_and_uncertainty_method",
+        "sequential_or_fixed_review_rule",
+        "positive_power_and_null_ensemble_oracles",
+        "native_research_grant"
+      ],
+      "state": "NOT_RUN",
+      "title": "Selection and abstention"
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-JM-007-POS",
+        "T-VAN-JM-007-NEG",
+        "T-VAN-JM-007-REC"
+      ],
+      "arms": "A baseline; B baseline+Jev; C B+Argon; D B+DeepSeek Pro",
+      "authority": "Research and any provider usage require actual existing scoped grants; no live randomization or production promotion implied.",
+      "estimand": "Incremental whole-account utility and cost per confirmed improvement",
+      "id": "JM-EXP-003",
+      "independent_owner": "BQ-009",
+      "integration_owner": "BE-036",
+      "negative_control": "Model-weight hindsight, reused holdout, hidden prompt trials and correlated reviewer agreement invalidate confirmation.",
+      "outcomes": [
+        "SUPPORTED_WITHIN_SCOPE",
+        "BASELINE_RETAINED",
+        "INCONCLUSIVE",
+        "REJECTED"
+      ],
+      "population": "Frozen research tasks and sealed prospective decisions",
+      "primary_owner": "BE-035",
+      "priority": 3,
+      "required_pre_run_bindings": [
+        "source_and_model_epochs",
+        "data_rights_and_availability",
+        "sample_dependence_definition",
+        "complete_trial_budget",
+        "protected_confirmation_windows",
+        "cost_schedule_and_reservation",
+        "risk_limits",
+        "materiality_and_uncertainty_method",
+        "sequential_or_fixed_review_rule",
+        "positive_power_and_null_ensemble_oracles",
+        "native_research_grant"
+      ],
+      "state": "NOT_RUN",
+      "title": "Reasoning-assisted strategy research"
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-JM-007-POS",
+        "T-VAN-JM-007-NEG",
+        "T-VAN-JM-007-REC"
+      ],
+      "arms": "Simple extractor versus admitted model-assisted extraction",
+      "authority": "Research and any provider usage require actual existing scoped grants; no live randomization or production promotion implied.",
+      "estimand": "Fact accuracy/corrections then prospective net signal utility",
+      "id": "JM-EXP-004",
+      "independent_owner": "BQ-009",
+      "integration_owner": "BE-036",
+      "negative_control": "Already-priced information, fabricated citations and future revisions cannot create an edge.",
+      "outcomes": [
+        "SUPPORTED_WITHIN_SCOPE",
+        "BASELINE_RETAINED",
+        "INCONCLUSIVE",
+        "REJECTED"
+      ],
+      "population": "Archived original-release and availability timestamps",
+      "primary_owner": "BE-035",
+      "priority": 4,
+      "required_pre_run_bindings": [
+        "source_and_model_epochs",
+        "data_rights_and_availability",
+        "sample_dependence_definition",
+        "complete_trial_budget",
+        "protected_confirmation_windows",
+        "cost_schedule_and_reservation",
+        "risk_limits",
+        "materiality_and_uncertainty_method",
+        "sequential_or_fixed_review_rule",
+        "positive_power_and_null_ensemble_oracles",
+        "native_research_grant"
+      ],
+      "state": "NOT_RUN",
+      "title": "Event and filing extraction"
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-JM-007-POS",
+        "T-VAN-JM-007-NEG",
+        "T-VAN-JM-007-REC"
+      ],
+      "arms": "Approved baseline versus candidate exits/risk inputs",
+      "authority": "Research and any provider usage require actual existing scoped grants; no live randomization or production promotion implied.",
+      "estimand": "Net return distribution, drawdown, correlated exposure and turnover",
+      "id": "JM-EXP-005",
+      "independent_owner": "BQ-009",
+      "integration_owner": "BE-036",
+      "negative_control": "Higher leverage, widened stops and changed accounting cannot count as improvement.",
+      "outcomes": [
+        "SUPPORTED_WITHIN_SCOPE",
+        "BASELINE_RETAINED",
+        "INCONCLUSIVE",
+        "REJECTED"
+      ],
+      "population": "Independent account paths with equal initial capital and risk limits",
+      "primary_owner": "BE-035",
+      "priority": 5,
+      "required_pre_run_bindings": [
+        "source_and_model_epochs",
+        "data_rights_and_availability",
+        "sample_dependence_definition",
+        "complete_trial_budget",
+        "protected_confirmation_windows",
+        "cost_schedule_and_reservation",
+        "risk_limits",
+        "materiality_and_uncertainty_method",
+        "sequential_or_fixed_review_rule",
+        "positive_power_and_null_ensemble_oracles",
+        "native_research_grant"
+      ],
+      "state": "NOT_RUN",
+      "title": "Capital efficiency and exits"
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-JM-007-POS",
+        "T-VAN-JM-007-NEG",
+        "T-VAN-JM-007-REC"
+      ],
+      "arms": "Simple routing versus optional Flash triage and selective Pro/Argon escalation",
+      "authority": "Research and any provider usage require actual existing scoped grants; no live randomization or production promotion implied.",
+      "estimand": "Net value of information, valid hypotheses per cost, latency and reliability",
+      "id": "JM-EXP-006",
+      "independent_owner": "BQ-009",
+      "integration_owner": "BE-036",
+      "negative_control": "Free retries, hidden reasoning/search tokens or hindsight routing invalidate savings.",
+      "outcomes": [
+        "SUPPORTED_WITHIN_SCOPE",
+        "BASELINE_RETAINED",
+        "INCONCLUSIVE",
+        "REJECTED"
+      ],
+      "population": "Declared task queue with exact provider/tool/token accounting",
+      "primary_owner": "BE-035",
+      "priority": 6,
+      "required_pre_run_bindings": [
+        "source_and_model_epochs",
+        "data_rights_and_availability",
+        "sample_dependence_definition",
+        "complete_trial_budget",
+        "protected_confirmation_windows",
+        "cost_schedule_and_reservation",
+        "risk_limits",
+        "materiality_and_uncertainty_method",
+        "sequential_or_fixed_review_rule",
+        "positive_power_and_null_ensemble_oracles",
+        "native_research_grant"
+      ],
+      "state": "NOT_RUN",
+      "title": "Research economics and routing"
+    }
+  ],
+  "revision": "1.17",
+  "scope": "REGISTERED_EXPERIMENT_TEMPLATES_NOT_EXECUTED"
+}

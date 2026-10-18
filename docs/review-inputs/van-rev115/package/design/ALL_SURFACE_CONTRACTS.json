@@ -1,7 +1,8 @@
 {
   "consolidation_additive_count": 12,
   "extension_registries": [
-    "design/EXPERIENCE_LEARNING_CONTEXT_BINDINGS.json"
+    "design/EXPERIENCE_LEARNING_CONTEXT_BINDINGS.json",
+    "design/MODEL_HARDENING_CONTEXT_BINDINGS.json"
   ],
   "high_value_context_additive_count": 6,
   "legacy_count": 78,

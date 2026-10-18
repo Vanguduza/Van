@@ -3,7 +3,7 @@ import copy,hashlib,importlib.util,json,tempfile,zipfile
 from pathlib import Path
 from jsonschema import Draft202012Validator
 P=Path(__file__).resolve().parents[1]
-spec=importlib.util.spec_from_file_location('revision',P/'verification/verify_rev116.py')
+spec=importlib.util.spec_from_file_location('revision',P/'verification/verify_rev117.py')
 v=importlib.util.module_from_spec(spec);spec.loader.exec_module(v)
 d={k:v.read(p) for k,p in v.FILES.items()}
 parents={k:v.read('lineage/rev1_13/'+p)[field] for k,(p,field) in v.PARENTS.items()}
@@ -73,7 +73,7 @@ require('EQUAL_REVISION_CONFLICT',error=='CONFLICTING_REVISION',error)
 by={r['id']:r for r in d['requirements']['requirements']};ts={r['id'] for r in d['tests']['tests']}
 for r in v.read('traceability/REV115_REQUIREMENTS.json')['requirements']:
  require('NEW_REQUIREMENT_'+r['id'],by.get(r['id'])==r and set(r['test_ids']).issubset(ts))
-require('COUNTS',len(by)==316 and len(ts)==1586 and len(d['plan']['units'])==131)
+require('COUNTS',len(by)==324 and len(ts)==1610 and len(d['plan']['units'])==131)
 components={c['requirement_id'] for c in v.read('contracts/self_optimization/COMPONENT_LEDGER.json')['components']}
 for r in v.read('traceability/REV115_REQUIREMENTS.json')['requirements']:require('COMPONENT_'+r['id'],r['id'] in components)
 require('NO_CERTIFICATES_OR_APP_RESULTS',d['f15']['status']==d['bg']['status']=='NOT_ISSUED' and all(t['execution_state']=='NOT_RUN' for t in d['tests']['tests']))
@@ -115,6 +115,6 @@ for mutation in ('duplicate_test','unknown_unit'):
  try:r.acceptance_index(plan,changed);actual=None
  except ValueError as exc:actual=str(exc)
  require('REJECT_REGISTRY_'+mutation,actual==error,actual)
-require('ACTIVE_BLUEPRINT_COUNTS','The active totals are 316 requirements and 1,586 planned application tests' in focus and 'Historical Rev1.13 baseline: 237 requirements' in master)
+require('ACTIVE_BLUEPRINT_COUNTS','The active totals are 324 requirements and 1,610 planned application tests' in focus and 'Historical Rev1.13 baseline: 237 requirements' in master)
 out={'scope':'DOCUMENT_ONLY_NOT_APPLICATION_OR_ECONOMIC_VALIDATION','passed':sum(r['passed'] for r in rows),'total':len(rows),'application_tests_executed':0,'cases':rows}
 print(json.dumps(out,indent=2));raise SystemExit(0 if all(r['passed'] for r in rows) else 1)

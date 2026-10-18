@@ -1,7 +1,8 @@
 {
   "experience_learning_contract": "contracts/self_optimization/EXPERIENCE_LEARNING_CONTRACT.json",
   "logical_services_not_mandated_microservices": true,
-  "revision": "1.16",
+  "model_use_contract": "contracts/self_optimization/MODEL_USE_CONTRACT.json",
+  "revision": "1.17",
   "schema": "van.canonical.backend.catalog/1.1",
   "services": [
     {
@@ -79,7 +80,9 @@
         "Learned state can evolve under qualified rule; rule/action/reward/scope changes use policy evolution; risk changes keep own authority.",
         "Trading workers lack withdrawal scope; secret references and account grants remain per environment.",
         "Spot support does not imply margin/perps/options/DEX/withdraw authority; any extension needs product-specific qualification.",
-        "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery."
+        "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery.",
+        "Point-in-time information, privacy and contamination controls: Build a scoped evidence packet from archived sources available at the cutoff; confirm findings prospectively with sealed outputs and explicit model-weight contamination limitations.",
+        "Separate health dimensions, bounded adaptation and owner readback: Expose policy/procedural, economic, data, calibration and provider health separately; registered drift/hysteresis rules change a later qualified choice with evidence and exact consumer readback."
       ],
       "rev114_tests": [
         "T-VAN-SO-002-POS",
@@ -111,6 +114,18 @@
         "EL-AT-011-POS",
         "EL-AT-011-NEG",
         "EL-AT-011-REC"
+      ],
+      "rev117_requirements": [
+        "VAN-JM-003",
+        "VAN-JM-008"
+      ],
+      "rev117_tests": [
+        "T-VAN-JM-003-POS",
+        "T-VAN-JM-003-NEG",
+        "T-VAN-JM-003-REC",
+        "T-VAN-JM-008-POS",
+        "T-VAN-JM-008-NEG",
+        "T-VAN-JM-008-REC"
       ],
       "status": "NOT_BUILT_BY_THIS_BLUEPRINT",
       "target_source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
@@ -145,7 +160,11 @@
         "Verified anchor plus tail reduces repeated work without accepting tampered history.",
         "Observation contribution, consumed revision and cursor/snapshot publish atomically.",
         "No retroactive editing of issued decision; affected future statistics/models are invalidated or restated.",
-        "Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills."
+        "Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills.",
+        "Shared Jev consumer scope and asynchronous isolation: Run admitted typed Jev judgments and model research through the actual durable asynchronous path; qualified snapshots improve a later eligible decision while urgent execution/protection continues.",
+        "Exact model epoch, output provenance and replay: Bind requested and resolved model, prompt/data/tool/config versions and response receipts to one qualification epoch; replay the recorded response and reproduce downstream decisions without invoking a provider.",
+        "Point-in-time information, privacy and contamination controls: Build a scoped evidence packet from archived sources available at the cutoff; confirm findings prospectively with sealed outputs and explicit model-weight contamination limitations.",
+        "Durable global model and research budgets: Atomically reserve bounded per-attempt monetary/token/tool allowance across workers, settle actual costs and reconcile provider quotas with the global ledger."
       ],
       "rev114_tests": [
         "T-VAN-SO-011-POS",
@@ -177,6 +196,26 @@
         "EL-AT-014-POS",
         "EL-AT-014-NEG",
         "EL-AT-014-REC"
+      ],
+      "rev117_requirements": [
+        "VAN-JM-001",
+        "VAN-JM-002",
+        "VAN-JM-003",
+        "VAN-JM-005"
+      ],
+      "rev117_tests": [
+        "T-VAN-JM-001-POS",
+        "T-VAN-JM-001-NEG",
+        "T-VAN-JM-001-REC",
+        "T-VAN-JM-002-POS",
+        "T-VAN-JM-002-NEG",
+        "T-VAN-JM-002-REC",
+        "T-VAN-JM-003-POS",
+        "T-VAN-JM-003-NEG",
+        "T-VAN-JM-003-REC",
+        "T-VAN-JM-005-POS",
+        "T-VAN-JM-005-NEG",
+        "T-VAN-JM-005-REC"
       ],
       "status": "NOT_BUILT_BY_THIS_BLUEPRINT",
       "target_source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
@@ -506,7 +545,8 @@
         "Provider chosen by eligible current access; mocked Coinbase Advanced output cannot qualify matching or latency.",
         "Chain discovery remains read-only; only independently admitted exchange products may enter actual order universe.",
         "Spot support does not imply margin/perps/options/DEX/withdraw authority; any extension needs product-specific qualification.",
-        "Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops."
+        "Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops.",
+        "Prioritized net-profitability experiments and value-of-information routing: Execute the registered execution-drag, selection, reasoning, event, capital-efficiency and research-economics experiments with controlled positive/null oracles and cost/risk-matched account paths."
       ],
       "rev113_additional_exit_tests": [
         "Strict order types, immediate/resting same submission vocabulary; buy/sell LIMIT not worse than declared price; policy expiry, blackouts and race outcomes observable"
@@ -601,6 +641,14 @@
         "EL-AT-012-POS",
         "EL-AT-012-NEG",
         "EL-AT-012-REC"
+      ],
+      "rev117_requirements": [
+        "VAN-JM-007"
+      ],
+      "rev117_tests": [
+        "T-VAN-JM-007-POS",
+        "T-VAN-JM-007-NEG",
+        "T-VAN-JM-007-REC"
       ],
       "reviewed_extensions": [
         "HVA-REV1.12"
@@ -777,7 +825,10 @@
         "Do not equate existing AllocatorV1 with calibrated model-weighted ranking. Specify a separately reviewed policy version without adding sizing/reservation authority.",
         "Required forecasting plugins are complete integrations, while active selection uses qualified minimal stack.",
         "Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback.",
-        "Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops."
+        "Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops.",
+        "Exact model epoch, output provenance and replay: Bind requested and resolved model, prompt/data/tool/config versions and response receipts to one qualification epoch; replay the recorded response and reproduce downstream decisions without invoking a provider.",
+        "Target-correct calibration and complete economic qualification: Measure a declared target across the eligible opportunity population, against its base-rate comparator; qualify a controlled positive net contribution using registered dependence, selection, uncertainty and cost procedures.",
+        "Prioritized net-profitability experiments and value-of-information routing: Execute the registered execution-drag, selection, reasoning, event, capital-efficiency and research-economics experiments with controlled positive/null oracles and cost/risk-matched account paths."
       ],
       "rev113_additional_exit_tests": [
         "Tempered modes with signed risk budgets; default code cannot bypass mandate; AGGRESSIVE requires independent edge"
@@ -804,6 +855,22 @@
         "EL-AT-012-POS",
         "EL-AT-012-NEG",
         "EL-AT-012-REC"
+      ],
+      "rev117_requirements": [
+        "VAN-JM-002",
+        "VAN-JM-004",
+        "VAN-JM-007"
+      ],
+      "rev117_tests": [
+        "T-VAN-JM-002-POS",
+        "T-VAN-JM-002-NEG",
+        "T-VAN-JM-002-REC",
+        "T-VAN-JM-004-POS",
+        "T-VAN-JM-004-NEG",
+        "T-VAN-JM-004-REC",
+        "T-VAN-JM-007-POS",
+        "T-VAN-JM-007-NEG",
+        "T-VAN-JM-007-REC"
       ],
       "reviewed_extensions": [
         "HVA-REV1.12"
@@ -1027,7 +1094,10 @@
         "provide evidence artifacts",
         "Extend registered trading evidence questions through the existing shared dial-jev consumer; answer quality is not a profitable-trade probability.",
         "Remote interpretation/training stays off decision/protection path; bounded queues and credentials.",
-        "Separate cash accounting, strategy quality, execution contribution, statistical association, simulated alternatives and causal claims; report uncertainty and rival explanations instead of outcome-based stories."
+        "Separate cash accounting, strategy quality, execution contribution, statistical association, simulated alternatives and causal claims; report uncertainty and rival explanations instead of outcome-based stories.",
+        "Shared Jev consumer scope and asynchronous isolation: Run admitted typed Jev judgments and model research through the actual durable asynchronous path; qualified snapshots improve a later eligible decision while urgent execution/protection continues.",
+        "Point-in-time information, privacy and contamination controls: Build a scoped evidence packet from archived sources available at the cutoff; confirm findings prospectively with sealed outputs and explicit model-weight contamination limitations.",
+        "Independent review and measured Jev/model contribution: Compare numerical baseline, baseline plus Jev, and separate Argon/DeepSeek challenger arms on preregistered tasks with equal information and independent outcomes; preserve full trial and reviewer provenance."
       ],
       "rev113_additional_exit_tests": [
         "Evidence claims distinguish model probability, analyst confidence, source corroboration and risk authority"
@@ -1047,6 +1117,22 @@
         "EL-AT-010-POS",
         "EL-AT-010-NEG",
         "EL-AT-010-REC"
+      ],
+      "rev117_requirements": [
+        "VAN-JM-001",
+        "VAN-JM-003",
+        "VAN-JM-006"
+      ],
+      "rev117_tests": [
+        "T-VAN-JM-001-POS",
+        "T-VAN-JM-001-NEG",
+        "T-VAN-JM-001-REC",
+        "T-VAN-JM-003-POS",
+        "T-VAN-JM-003-NEG",
+        "T-VAN-JM-003-REC",
+        "T-VAN-JM-006-POS",
+        "T-VAN-JM-006-NEG",
+        "T-VAN-JM-006-REC"
       ],
       "reviewed_extensions": [
         "HVA-REV1.12"
@@ -1083,7 +1169,11 @@
         "validate new candidates",
         "track counterfactuals",
         "Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate.",
-        "Separate cash accounting, strategy quality, execution contribution, statistical association, simulated alternatives and causal claims; report uncertainty and rival explanations instead of outcome-based stories."
+        "Separate cash accounting, strategy quality, execution contribution, statistical association, simulated alternatives and causal claims; report uncertainty and rival explanations instead of outcome-based stories.",
+        "Shared Jev consumer scope and asynchronous isolation: Run admitted typed Jev judgments and model research through the actual durable asynchronous path; qualified snapshots improve a later eligible decision while urgent execution/protection continues.",
+        "Target-correct calibration and complete economic qualification: Measure a declared target across the eligible opportunity population, against its base-rate comparator; qualify a controlled positive net contribution using registered dependence, selection, uncertainty and cost procedures.",
+        "Independent review and measured Jev/model contribution: Compare numerical baseline, baseline plus Jev, and separate Argon/DeepSeek challenger arms on preregistered tasks with equal information and independent outcomes; preserve full trial and reviewer provenance.",
+        "Separate health dimensions, bounded adaptation and owner readback: Expose policy/procedural, economic, data, calibration and provider health separately; registered drift/hysteresis rules change a later qualified choice with evidence and exact consumer readback."
       ],
       "rev114_tests": [
         "T-VAN-SO-027-POS",
@@ -1100,6 +1190,26 @@
         "EL-AT-010-POS",
         "EL-AT-010-NEG",
         "EL-AT-010-REC"
+      ],
+      "rev117_requirements": [
+        "VAN-JM-001",
+        "VAN-JM-004",
+        "VAN-JM-006",
+        "VAN-JM-008"
+      ],
+      "rev117_tests": [
+        "T-VAN-JM-001-POS",
+        "T-VAN-JM-001-NEG",
+        "T-VAN-JM-001-REC",
+        "T-VAN-JM-004-POS",
+        "T-VAN-JM-004-NEG",
+        "T-VAN-JM-004-REC",
+        "T-VAN-JM-006-POS",
+        "T-VAN-JM-006-NEG",
+        "T-VAN-JM-006-REC",
+        "T-VAN-JM-008-POS",
+        "T-VAN-JM-008-NEG",
+        "T-VAN-JM-008-REC"
       ],
       "status": "NOT_BUILT_BY_THIS_BLUEPRINT",
       "target_source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
@@ -1269,7 +1379,9 @@
         "retry safely",
         "Remote interpretation/training stays off decision/protection path; bounded queues and credentials.",
         "Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate.",
-        "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery."
+        "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery.",
+        "Durable global model and research budgets: Atomically reserve bounded per-attempt monetary/token/tool allowance across workers, settle actual costs and reconcile provider quotas with the global ledger.",
+        "Prioritized net-profitability experiments and value-of-information routing: Execute the registered execution-drag, selection, reasoning, event, capital-efficiency and research-economics experiments with controlled positive/null oracles and cost/risk-matched account paths."
       ],
       "rev114_tests": [
         "T-VAN-SO-026-POS",
@@ -1286,6 +1398,18 @@
         "EL-AT-011-POS",
         "EL-AT-011-NEG",
         "EL-AT-011-REC"
+      ],
+      "rev117_requirements": [
+        "VAN-JM-005",
+        "VAN-JM-007"
+      ],
+      "rev117_tests": [
+        "T-VAN-JM-005-POS",
+        "T-VAN-JM-005-NEG",
+        "T-VAN-JM-005-REC",
+        "T-VAN-JM-007-POS",
+        "T-VAN-JM-007-NEG",
+        "T-VAN-JM-007-REC"
       ],
       "status": "NOT_BUILT_BY_THIS_BLUEPRINT",
       "target_source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
@@ -1442,7 +1566,8 @@
         "Every new lifecycle/crypto operation has producer, caller, tests and scoped evidence before frontend.",
         "Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states.",
         "Internal optimizer states become contextual typed views; no new default global tab or dense Home.",
-        "Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
+        "Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts.",
+        "Separate health dimensions, bounded adaptation and owner readback: Expose policy/procedural, economic, data, calibration and provider health separately; registered drift/hysteresis rules change a later qualified choice with evidence and exact consumer readback."
       ],
       "rev113_additional_exit_tests": [
         "Publish *full* consumer catalogue of 234 contexts with per-action authority/receipt/stale/unknown states before BG; no fixture-only readiness"
@@ -1468,6 +1593,14 @@
         "EL-AT-013-POS",
         "EL-AT-013-NEG",
         "EL-AT-013-REC"
+      ],
+      "rev117_requirements": [
+        "VAN-JM-008"
+      ],
+      "rev117_tests": [
+        "T-VAN-JM-008-POS",
+        "T-VAN-JM-008-NEG",
+        "T-VAN-JM-008-REC"
       ],
       "reviewed_extensions": [
         "HVA-REV1.12"
@@ -1608,7 +1741,11 @@
         "Crypto full-account arms include correct data conventions, fees, liquidity drought, maintenance, delisting and stablecoin stress.",
         "Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit.",
         "Preregister independent comparison, costs, dependence, selection adjustment, null controls, trial census, protected chronological confirmation and stopping rules; inconclusive evidence cannot promote.",
-        "Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback."
+        "Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback.",
+        "Point-in-time information, privacy and contamination controls: Build a scoped evidence packet from archived sources available at the cutoff; confirm findings prospectively with sealed outputs and explicit model-weight contamination limitations.",
+        "Target-correct calibration and complete economic qualification: Measure a declared target across the eligible opportunity population, against its base-rate comparator; qualify a controlled positive net contribution using registered dependence, selection, uncertainty and cost procedures.",
+        "Independent review and measured Jev/model contribution: Compare numerical baseline, baseline plus Jev, and separate Argon/DeepSeek challenger arms on preregistered tasks with equal information and independent outcomes; preserve full trial and reviewer provenance.",
+        "Prioritized net-profitability experiments and value-of-information routing: Execute the registered execution-drag, selection, reasoning, event, capital-efficiency and research-economics experiments with controlled positive/null oracles and cost/risk-matched account paths."
       ],
       "rev113_additional_exit_tests": [
         "Calendar-year reporting cannot impersonate walk-forward; bid/ask, point-in-time/timezones, no future leakage, intrabar oracle"
@@ -1671,6 +1808,26 @@
         "EL-AT-007-POS",
         "EL-AT-007-NEG",
         "EL-AT-007-REC"
+      ],
+      "rev117_requirements": [
+        "VAN-JM-003",
+        "VAN-JM-004",
+        "VAN-JM-006",
+        "VAN-JM-007"
+      ],
+      "rev117_tests": [
+        "T-VAN-JM-003-POS",
+        "T-VAN-JM-003-NEG",
+        "T-VAN-JM-003-REC",
+        "T-VAN-JM-004-POS",
+        "T-VAN-JM-004-NEG",
+        "T-VAN-JM-004-REC",
+        "T-VAN-JM-006-POS",
+        "T-VAN-JM-006-NEG",
+        "T-VAN-JM-006-REC",
+        "T-VAN-JM-007-POS",
+        "T-VAN-JM-007-NEG",
+        "T-VAN-JM-007-REC"
       ],
       "reviewed_extensions": [
         "HVA-REV1.12"
@@ -1747,7 +1904,14 @@
         "Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit.",
         "Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback.",
         "Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops.",
-        "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery."
+        "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery.",
+        "Shared Jev consumer scope and asynchronous isolation: Run admitted typed Jev judgments and model research through the actual durable asynchronous path; qualified snapshots improve a later eligible decision while urgent execution/protection continues.",
+        "Exact model epoch, output provenance and replay: Bind requested and resolved model, prompt/data/tool/config versions and response receipts to one qualification epoch; replay the recorded response and reproduce downstream decisions without invoking a provider.",
+        "Target-correct calibration and complete economic qualification: Measure a declared target across the eligible opportunity population, against its base-rate comparator; qualify a controlled positive net contribution using registered dependence, selection, uncertainty and cost procedures.",
+        "Durable global model and research budgets: Atomically reserve bounded per-attempt monetary/token/tool allowance across workers, settle actual costs and reconcile provider quotas with the global ledger.",
+        "Independent review and measured Jev/model contribution: Compare numerical baseline, baseline plus Jev, and separate Argon/DeepSeek challenger arms on preregistered tasks with equal information and independent outcomes; preserve full trial and reviewer provenance.",
+        "Prioritized net-profitability experiments and value-of-information routing: Execute the registered execution-drag, selection, reasoning, event, capital-efficiency and research-economics experiments with controlled positive/null oracles and cost/risk-matched account paths.",
+        "Separate health dimensions, bounded adaptation and owner readback: Expose policy/procedural, economic, data, calibration and provider health separately; registered drift/hysteresis rules change a later qualified choice with evidence and exact consumer readback."
       ],
       "rev113_additional_exit_tests": [
         "Candidate proposals from both winners and losers, complete experiments; no autonomous live promotion"
@@ -1856,6 +2020,38 @@
         "EL-AT-011-POS",
         "EL-AT-011-NEG",
         "EL-AT-011-REC"
+      ],
+      "rev117_requirements": [
+        "VAN-JM-001",
+        "VAN-JM-002",
+        "VAN-JM-004",
+        "VAN-JM-005",
+        "VAN-JM-006",
+        "VAN-JM-007",
+        "VAN-JM-008"
+      ],
+      "rev117_tests": [
+        "T-VAN-JM-001-POS",
+        "T-VAN-JM-001-NEG",
+        "T-VAN-JM-001-REC",
+        "T-VAN-JM-002-POS",
+        "T-VAN-JM-002-NEG",
+        "T-VAN-JM-002-REC",
+        "T-VAN-JM-004-POS",
+        "T-VAN-JM-004-NEG",
+        "T-VAN-JM-004-REC",
+        "T-VAN-JM-005-POS",
+        "T-VAN-JM-005-NEG",
+        "T-VAN-JM-005-REC",
+        "T-VAN-JM-006-POS",
+        "T-VAN-JM-006-NEG",
+        "T-VAN-JM-006-REC",
+        "T-VAN-JM-007-POS",
+        "T-VAN-JM-007-NEG",
+        "T-VAN-JM-007-REC",
+        "T-VAN-JM-008-POS",
+        "T-VAN-JM-008-NEG",
+        "T-VAN-JM-008-REC"
       ],
       "status": "SPECIFIED_NOT_IMPLEMENTED",
       "title": "Continuous governed strategy and execution-policy development; operational learning integration"

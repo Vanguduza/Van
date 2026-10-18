@@ -1,0 +1,63 @@
+{
+  "examples": [
+    {
+      "account_scope": "fixture:account_scope",
+      "actual_cost_usd": null,
+      "availability_cutoff_ref": "fixture:availability_cutoff_ref",
+      "calibration_ref": "fixture:calibration",
+      "consumer_state": "QUALIFIED",
+      "cost_state": "UNKNOWN",
+      "evidence_epoch": "fixture:epoch",
+      "financial_authority": false,
+      "latency_ms": 1,
+      "prediction_target": "fixture:event",
+      "probability_use": true,
+      "prompt_data_tool_manifest_ref": "fixture:prompt_data_tool_manifest_ref",
+      "provider_route_ref": "fixture:provider_route_ref",
+      "qualification_ref": "fixture:qualification",
+      "record_id": "fixture:record_id",
+      "record_type": "ModelUseRecord",
+      "requested_model": "fixture:requested_model",
+      "reservation_ref": "fixture:reservation_ref",
+      "resolved_model": "fixture:resolved",
+      "response_artifact_ref": "fixture:response_artifact_ref",
+      "response_hash": "fixture:response_hash",
+      "revision": 1,
+      "task": "EXTRACTION"
+    },
+    {
+      "account_scope": "fixture:account_scope",
+      "actual_cost_usd": null,
+      "attempt_id": "fixture:attempt_id",
+      "budget_scope_ref": "fixture:budget_scope_ref",
+      "liability_retained": true,
+      "operation_id": "fixture:operation_id",
+      "provider_epoch_ref": "fixture:provider_epoch_ref",
+      "record_id": "fixture:record_id",
+      "record_type": "ResearchBudgetReservation",
+      "reserved_cost_usd": "0.08",
+      "revision": 1,
+      "settlement_ref": null,
+      "status": "UNKNOWN_COST"
+    },
+    {
+      "account_scope": "fixture:account_scope",
+      "all_opportunity_census_ref": "fixture:all_opportunity_census_ref",
+      "contamination_assessment_ref": "fixture:contamination_assessment_ref",
+      "cost_and_risk_comparison_ref": "fixture:cost_and_risk_comparison_ref",
+      "dependence_selection_uncertainty_ref": "fixture:dependence_selection_uncertainty_ref",
+      "evidence_state": "SUPPORTED",
+      "financial_authority": false,
+      "independent_review_ref": "fixture:independent_review_ref",
+      "model_epoch_ref": "fixture:model_epoch_ref",
+      "prediction_target": null,
+      "protected_confirmation_ref": "fixture:protected_confirmation_ref",
+      "record_id": "fixture:record_id",
+      "record_type": "ModelQualificationEvidence",
+      "revision": 1,
+      "task_scope_ref": "fixture:task_scope_ref",
+      "trial_census_ref": "fixture:trial_census_ref"
+    }
+  ],
+  "scope": "SYNTHETIC_SCHEMA_FIXTURES_NOT_REAL_MODEL_CALLS_OR_QUALIFICATION"
+}

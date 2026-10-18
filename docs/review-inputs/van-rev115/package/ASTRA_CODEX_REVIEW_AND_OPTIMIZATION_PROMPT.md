@@ -49,3 +49,8 @@ Do not claim “fully built”, “profitable”, “F15”, “Backend Complete
 ## Active Rev1.16 owner integration
 
 Follow CANONICAL_AUTHORITY.json for the active master/focused specification and single rendered plan. Normative §8.6 incorporates VAN-OWNER-EL-001 via VAN-EL-001…007 and 42 NOT_RUN contracts (EL-AT-001…014 × POS/NEG/REC). Audit both actual strategy and execution consumer paths, causal claim typing, null/power and protected confirmation controls, proposed endpoint bindings and owner-context failures. The active totals are 316 requirements / 1,586 tests. Earlier counts and source-audit results above retain their historical scopes; no new all-branch audit is claimed.
+
+
+## Active Rev1.17 model/Jev integration
+
+CANONICAL_AUTHORITY selects the Rev1.17 master, focused Rev5 §§8.6–8.7 and single plan. Active totals are 324 requirements / 1,610 NOT_RUN contracts. Review VAN-JM-001…008, exact source counterexamples, primary-source model identities, all-attempt cost reservation, weight-leakage limits, calibrated target/population and separate economic/procedural health. No model is promoted and no source shortcoming is represented as repaired by this document. Earlier active-version paragraphs above are historical. Native admission, actual model access, experiment execution and application fixes require their own evidence.

@@ -1,5 +1,5 @@
-# Active documentary verification — Rev1.16
+# Active document verification — Rev1.17
 
-`verify_rev116.py` checks schema/graph/preservation/reference invariants and invokes the experience-learning integration checker. `verify_review_contracts.py` retains independent semantic/preservation regressions. `verify_experience_learning.py` checks all seven additions, all 42 acceptance links, both consumer paths, strict record examples and mutations, inherited object fingerprints, API/service/context references and active blueprint embedding. `plan/render_plan.py --check` verifies generated plan references and provenance.
+`verify_rev117.py` includes the experience-learning and model-hardening integration checks; it also validates the retained schema/graph/reference invariants. `verify_review_contracts.py`, `verify_experience_learning.py` and `verify_model_hardening.py` run their independent mutations and schema/cost checks. The generated plan is checked by `plan/render_plan.py --check`.
 
-Current receipts are under `evidence/rev116/final_checks/`. Rev1.15 checkers/receipts are historical. None proves an application endpoint, financial effect, independent issuer, statistical edge, live profitability or device acceptance. All 1,586 application tests are NOT_RUN; F15/BG remain NOT_ISSUED.
+Current receipts: `evidence/rev117/final_checks/`. Historical checkers/results retain their revision-specific scope. The source probes are separately recorded and are not application acceptance. All 1,610 application contracts remain NOT_RUN, six economic experiment templates remain NOT_RUN and no model/provider inference was performed. Schema success never proves real authority, costs, model identity or profit.

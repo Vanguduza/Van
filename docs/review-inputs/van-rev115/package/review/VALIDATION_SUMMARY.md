@@ -1,18 +1,18 @@
-# Rev1.16 validation performed
+# Rev1.17 validation performed
 
-All current checks are documentary. Application tests, economic experiments, provider operations and handset tests executed by this delivery: **zero**.
-
-| Current check | Observed result |
+| Current documentary check | Result |
 |---|---|
-| Core schema/graph/reference and learning integration | Zero findings |
-| Independent preservation/semantic/binding checks | 79 / 79 |
+| Core graph/schema/reference and integrated learning/model contracts | Zero findings |
+| Independent preservation/semantic/binding regressions | 79 / 79 |
 | Adversarial document/reference checks | 47 / 47 |
-| Experience-learning integration/schema/mutation checks | 36 / 36 |
-| Generated plan and input provenance | Match current inputs |
-| Previous published requirement/test objects | All 309 / 1,544 unchanged |
-| Previous unit graph and screen objects | All 131 unit dependencies / 234 contexts preserved |
-| Original locked visual assets and Rev1.14 parent | Preserved; independent checks pass |
+| Experience-learning integration/schema/mutations | 36 / 36 |
+| Model/Jev integration/schema/mutations and cost arithmetic | 35 / 35 |
+| Generated plan/provenance | Match current inputs |
+| Rev1.16 inheritance | All 316 requirement and 1,586 test objects preserved |
+| Stable plan/context inventories | All 131 unit identities/dependencies and 234 context objects preserved |
 
-Current exact commands, exit codes, entrypoint/output hashes and captured output: `evidence/rev116/final_checks/receipts.json`. The object preservation baseline independently matches published commit `321af1601e4d21fe74630593997748cdeaf3c008`. Archive member identity, exact unpacked-package comparison and fresh-extraction checks are recorded in the outer `REV1_16_FINAL_PACKAGE_RECEIPT.json`.
+Exact commands, entrypoint/output hashes and captured results are in `evidence/rev117/final_checks/receipts.json`. Object fingerprints independently match published commit `874774d4ece98718f4d3e80002ec136320a84e13`. The external final package receipt records archive identity, byte-for-byte unpacked comparison and fresh-extraction checks.
 
-Prior news/forecast/high-value mutation results and original source probes remain historical under `evidence/rev115/`; they were not rerun or relabeled as new execution. Native issuer authenticity, implementation behaviour, financial authority, economic edge and physical Android acceptance remain separate. All 1,586 application test contracts remain NOT_RUN; F15 and BG remain NOT_ISSUED.
+Separately, two pure-function/property counterexamples and one static call-order source probe executed; their exact observed outputs/file fingerprints are in `evidence/rev117/source_probes.json`. These are bounded source findings, not application e2e or proof of a deployed defect. Source code was not repaired by this specification revision.
+
+No model inference, economic experiment, application acceptance test, live provider operation or handset acceptance ran. All 1,610 application contracts and all six economic experiment templates remain NOT_RUN; F15/BG remain NOT_ISSUED. Earlier source/review and inherited verifier outputs retain their dated scopes. Public provider pages are cited with retrieval metadata and bounded excerpts, not treated as independent profit evidence.

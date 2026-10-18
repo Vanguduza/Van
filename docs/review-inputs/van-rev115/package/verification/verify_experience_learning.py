@@ -12,9 +12,9 @@ def check(d):
  def need(ok,code):
   if not ok:e.append(code)
  rr={r['id']:r for r in d['requirements']['requirements']};tt={t['id']:t for t in d['tests']['tests']};uu={u['id']:u for u in d['plan']['units']};ss={s['id']:s for s in d['surfaces']['surfaces']}
- need(len(rr)==len(d['requirements']['requirements'])==d['requirements']['total']==d['requirements']['count']==316,'REQUIREMENT_COUNT_OR_DUPLICATE')
- need(len(tt)==len(d['tests']['tests'])==1586,'TEST_COUNT_OR_DUPLICATE')
- need(d['authority']['active_requirement_count']==316 and d['authority']['active_application_test_count']==1586,'STALE_AUTHORITY_COUNTS')
+ need(len(rr)==len(d['requirements']['requirements'])==d['requirements']['total']==d['requirements']['count']==324,'REQUIREMENT_COUNT_OR_DUPLICATE')
+ need(len(tt)==len(d['tests']['tests'])==1610,'TEST_COUNT_OR_DUPLICATE')
+ need(d['authority']['active_requirement_count']==324 and d['authority']['active_application_test_count']==1610,'STALE_AUTHORITY_COUNTS')
  need({r['id'] for r in d['new_requirements']['requirements']}=={f'VAN-EL-{i:03d}' for i in range(1,8)},'REQUIRED_LEARNING_SCOPE')
  expected={f'EL-AT-{i:03d}-{k}' for i in range(1,15) for k in ['POS','NEG','REC']}
  need({t['id'] for t in d['new_tests']['tests']}==expected,'SCENARIO_COVERAGE')
@@ -64,7 +64,7 @@ def main():
  d=load();rows=[]
  def test(name,ok):rows.append({'id':name,'passed':bool(ok)})
  errors=check(d);test('INTEGRATION',not errors)
- mutations=[('DROP_REQUIREMENT',lambda x:x['requirements']['requirements'].pop(),'REQUIREMENT_NOT_IN_MAIN:'),('DROP_TEST',lambda x:x['tests']['tests'].pop(),'TEST_NOT_IN_MAIN:'),('STALE_COUNT',lambda x:x['authority'].update(active_application_test_count=1544),'STALE_AUTHORITY_COUNTS'),('DROP_STRATEGY_LOOP',lambda x:x['contract']['consumer_paths'].pop(0),'BOTH_LOOPS_REQUIRED'),('DROP_OBSERVER_TEST',lambda x:x['contract']['consumer_paths'][0]['end_to_end_tests'].remove('EL-AT-012-NEG'),'MISSING_OBSERVER_REMOVAL_TEST'),('FALSE_EDGE_FROM_ONE_TRADE',lambda x:x['contract']['invariants'].update(single_outcome_proves_edge=True),'LEARNING_INVARIANT_LOSS'),('ORPHAN_CONTEXT',lambda x:x['surfaces']['extension_registries'].clear(),'ORPHAN_CONTEXT_EXTENSION'),('DELETE_INCONCLUSIVE',lambda x:x['contexts']['bindings'][0]['states'].remove('INCONCLUSIVE'),'MISSING_CONTEXT_ERROR_STATE'),('FORGED_TEST_RESULT',lambda x:x['new_tests']['tests'][0].update(execution_state='PASS'),'FABRICATED_APPLICATION_RESULT:'),('CHANGE_PARENT_TEST',lambda x:x['tests']['tests'][0].update(execution_state='PASS'),'PRESERVATION:tests')]
+ mutations=[('DROP_REQUIREMENT',lambda x:x['requirements']['requirements'].remove(next(r for r in x['requirements']['requirements'] if r['id']=='VAN-EL-007')),'REQUIREMENT_NOT_IN_MAIN:'),('DROP_TEST',lambda x:x['tests']['tests'].remove(next(t for t in x['tests']['tests'] if t['id']=='EL-AT-013-REC')),'TEST_NOT_IN_MAIN:'),('STALE_COUNT',lambda x:x['authority'].update(active_application_test_count=1544),'STALE_AUTHORITY_COUNTS'),('DROP_STRATEGY_LOOP',lambda x:x['contract']['consumer_paths'].pop(0),'BOTH_LOOPS_REQUIRED'),('DROP_OBSERVER_TEST',lambda x:x['contract']['consumer_paths'][0]['end_to_end_tests'].remove('EL-AT-012-NEG'),'MISSING_OBSERVER_REMOVAL_TEST'),('FALSE_EDGE_FROM_ONE_TRADE',lambda x:x['contract']['invariants'].update(single_outcome_proves_edge=True),'LEARNING_INVARIANT_LOSS'),('ORPHAN_CONTEXT',lambda x:x['surfaces']['extension_registries'].clear(),'ORPHAN_CONTEXT_EXTENSION'),('DELETE_INCONCLUSIVE',lambda x:x['contexts']['bindings'][0]['states'].remove('INCONCLUSIVE'),'MISSING_CONTEXT_ERROR_STATE'),('FORGED_TEST_RESULT',lambda x:x['new_tests']['tests'][0].update(execution_state='PASS'),'FABRICATED_APPLICATION_RESULT:'),('CHANGE_PARENT_TEST',lambda x:x['tests']['tests'][0].update(execution_state='PASS'),'PRESERVATION:tests')]
  mutations += [('UNPROTECTED_CONFIRMATION',lambda x:x['contract']['invariants'].update(protected_confirmation_required=False),'LEARNING_INVARIANT_LOSS'),('APPLICATION_AT_PRE',lambda x:x['new_tests']['tests'][0]['additional_units'].append('PRE-002'),'APPLICATION_TEST_AT_PRE_GATE:'),('DROP_SERVICE_BINDING',lambda x:next(a for a in x['catalog']['services'] if a['id']=='BE-012')['experience_learning_operation_ids'].clear(),'MISSING_SERVICE_OPERATION:')]
  for name,mutate,code in mutations:
   x=copy.deepcopy(d);mutate(x);test(name,any(e.startswith(code) for e in check(x)))
@@ -80,7 +80,7 @@ def main():
  obj=copy.deepcopy(by['EvidenceAssessment']);obj.update(assessment_state='INCONCLUSIVE',null_control_results_ref=None,power_control_results_ref=None,qualification_ref=None,independent_review_ref=None)
  test('PRESERVE_INCONCLUSIVE_WITH_MISSING_EVIDENCE',validator.is_valid(obj))
  focus=(P/d['authority']['focused_blueprint']).read_text().rstrip();master=(P/d['authority']['master']).read_text();test('NORMATIVE_SECTION_EMBEDDED','### 8.6 Learning from trading experience' in focus and focus in master)
- test('ACTIVE_COUNTS_IN_BLUEPRINT','The active totals are 316 requirements and 1,586 planned application tests' in focus and 'Active Rev1.15:' not in master)
+ test('ACTIVE_COUNTS_IN_BLUEPRINT','The active totals are 324 requirements and 1,610 planned application tests' in focus and 'Active Rev1.15:' not in master)
  test('ALL_SCENARIOS_OUTLINED',all(f'`EL-AT-{i:03d}`' in focus for i in range(1,15)))
  test('INTEGRATED_PLAN_TEXT',all(t['id'] in (P/d['authority']['rendered_plan']).read_text() for t in d['new_tests']['tests']))
  out={'scope':'DOCUMENT_LINK_SCHEMA_AND_MUTATION_CHECKS_ONLY','passed':sum(r['passed'] for r in rows),'total':len(rows),'findings':errors,'application_tests_executed':0,'cases':rows};print(json.dumps(out,indent=2));return 0 if not errors and all(r['passed'] for r in rows) else 1

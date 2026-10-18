@@ -1,9 +1,10 @@
 {
-  "count": 316,
+  "count": 324,
   "crypto_trading_requirements": 14,
   "experience_learning_requirements": 7,
   "forecast_requirements": 90,
   "high_value_addition_requirements": 32,
+  "jev_model_hardening_requirements": 8,
   "lean_architecture_requirements": 6,
   "new_correction_requirements": 20,
   "preserved_backend_first_requirements": 18,
@@ -7391,6 +7392,276 @@
       ],
       "text": "Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts.",
       "title": "Owner learning read models and contextual controls"
+    },
+    {
+      "acceptance": {
+        "adversarial": "Stall the model, saturate its queue, inject an attention-module result into a trading consumer and set apply_effect=true on wrong-scope evidence; no risk/stop/reconcile wait or unauthorized effect is permitted.",
+        "positive": "Run admitted typed Jev judgments and model research through the actual durable asynchronous path; qualified snapshots improve a later eligible decision while urgent execution/protection continues.",
+        "recovery": "Restart the isolated worker, replay the original work IDs within bounded backlog and expire obsolete responses; preserve open-parent protection and the baseline."
+      },
+      "backend_units": [
+        "BE-003",
+        "BE-021",
+        "BE-022",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-JM-001",
+      "mapping_grade": "OWNER_DIRECTED_HARDENING_PENDING_INDEPENDENT_ADMISSION",
+      "other_units": [
+        "BQ-005",
+        "BQ-007",
+        "BG-001"
+      ],
+      "source_refs": [
+        "OWNER_JEV_ARGON_DEEPSEEK_20261018"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md \u00a78.7",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-JM-001-POS",
+      "test_ids": [
+        "T-VAN-JM-001-POS",
+        "T-VAN-JM-001-NEG",
+        "T-VAN-JM-001-REC"
+      ],
+      "text": "Shared Jev consumer scope and asynchronous isolation: Run admitted typed Jev judgments and model research through the actual durable asynchronous path; qualified snapshots improve a later eligible decision while urgent execution/protection continues.",
+      "title": "Shared Jev consumer scope and asynchronous isolation"
+    },
+    {
+      "acceptance": {
+        "adversarial": "Silently redirect an alias, change prompt/retrieval/calibration or supply a wrong-context response; prior qualification cannot authorize the changed identity.",
+        "positive": "Bind requested and resolved model, prompt/data/tool/config versions and response receipts to one qualification epoch; replay the recorded response and reproduce downstream decisions without invoking a provider.",
+        "recovery": "Quarantine unknown identity, retain old decisions, requalify the new epoch and atomically activate a compatible binding with authoritative readback."
+      },
+      "backend_units": [
+        "BE-003",
+        "BE-013",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-JM-002",
+      "mapping_grade": "OWNER_DIRECTED_HARDENING_PENDING_INDEPENDENT_ADMISSION",
+      "other_units": [
+        "BQ-007",
+        "BG-001"
+      ],
+      "source_refs": [
+        "OWNER_JEV_ARGON_DEEPSEEK_20261018"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md \u00a78.7",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-JM-002-POS",
+      "test_ids": [
+        "T-VAN-JM-002-POS",
+        "T-VAN-JM-002-NEG",
+        "T-VAN-JM-002-REC"
+      ],
+      "text": "Exact model epoch, output provenance and replay: Bind requested and resolved model, prompt/data/tool/config versions and response receipts to one qualification epoch; replay the recorded response and reproduce downstream decisions without invoking a provider.",
+      "title": "Exact model epoch, output provenance and replay"
+    },
+    {
+      "acceptance": {
+        "adversarial": "Inject future/model-memorized outcomes, copied-source corroboration, prompt instructions in filings, cross-account memory and secret-bearing fields; block leakage or mark historical results nonconfirmatory, never execute embedded instructions.",
+        "positive": "Build a scoped evidence packet from archived sources available at the cutoff; confirm findings prospectively with sealed outputs and explicit model-weight contamination limitations.",
+        "recovery": "Revoke tainted artifacts, invalidate affected studies, restore admissible source/index versions and confirm on fresh protected prospective observations."
+      },
+      "backend_units": [
+        "BE-002",
+        "BE-003",
+        "BE-021",
+        "BE-035"
+      ],
+      "frontend_units": [],
+      "id": "VAN-JM-003",
+      "mapping_grade": "OWNER_DIRECTED_HARDENING_PENDING_INDEPENDENT_ADMISSION",
+      "other_units": [
+        "BQ-005",
+        "BQ-009",
+        "BG-001"
+      ],
+      "source_refs": [
+        "OWNER_JEV_ARGON_DEEPSEEK_20261018"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md \u00a78.7",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-JM-003-POS",
+      "test_ids": [
+        "T-VAN-JM-003-POS",
+        "T-VAN-JM-003-NEG",
+        "T-VAN-JM-003-REC"
+      ],
+      "text": "Point-in-time information, privacy and contamination controls: Build a scoped evidence packet from archived sources available at the cutoff; confirm findings prospectively with sealed outputs and explicit model-weight contamination limitations.",
+      "title": "Point-in-time information, privacy and contamination controls"
+    },
+    {
+      "acceptance": {
+        "adversarial": "Submit only 50 correlated disagreements, missing calibration, positive gross means with negative net costs, or a change-helped score labeled trade-win probability; probability-dependent/economic admission fails.",
+        "positive": "Measure a declared target across the eligible opportunity population, against its base-rate comparator; qualify a controlled positive net contribution using registered dependence, selection, uncertainty and cost procedures.",
+        "recovery": "Restore full trials and missingness accounting, recompute target-specific calibration and confidence on new protected data; retain explanation-only use only where independently qualified."
+      },
+      "backend_units": [
+        "BE-013",
+        "BE-022",
+        "BE-035",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-JM-004",
+      "mapping_grade": "OWNER_DIRECTED_HARDENING_PENDING_INDEPENDENT_ADMISSION",
+      "other_units": [
+        "BQ-009",
+        "BG-001"
+      ],
+      "source_refs": [
+        "OWNER_JEV_ARGON_DEEPSEEK_20261018"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md \u00a78.7",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-JM-004-POS",
+      "test_ids": [
+        "T-VAN-JM-004-POS",
+        "T-VAN-JM-004-NEG",
+        "T-VAN-JM-004-REC"
+      ],
+      "text": "Target-correct calibration and complete economic qualification: Measure a declared target across the eligible opportunity population, against its base-rate comparator; qualify a controlled positive net contribution using registered dependence, selection, uncertainty and cost procedures.",
+      "title": "Target-correct calibration and complete economic qualification"
+    },
+    {
+      "acceptance": {
+        "adversarial": "Race workers, exhaust budget with malformed/failed outputs, trigger fallback retries or cancel after provider acceptance; no unreserved call or reset of costs is allowed and unknown bills retain liability.",
+        "positive": "Atomically reserve bounded per-attempt monetary/token/tool allowance across workers, settle actual costs and reconcile provider quotas with the global ledger.",
+        "recovery": "Crash before/after reservation and settlement, recover the same attempt IDs and reconcile unknown charges without double billing or duplicate provider work; use qualified no-model fallback."
+      },
+      "backend_units": [
+        "BE-003",
+        "BE-028",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-JM-005",
+      "mapping_grade": "OWNER_DIRECTED_HARDENING_PENDING_INDEPENDENT_ADMISSION",
+      "other_units": [
+        "BQ-005",
+        "BG-001"
+      ],
+      "source_refs": [
+        "OWNER_JEV_ARGON_DEEPSEEK_20261018"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md \u00a78.7",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-JM-005-POS",
+      "test_ids": [
+        "T-VAN-JM-005-POS",
+        "T-VAN-JM-005-NEG",
+        "T-VAN-JM-005-REC"
+      ],
+      "text": "Durable global model and research budgets: Atomically reserve bounded per-attempt monetary/token/tool allowance across workers, settle actual costs and reconcile provider quotas with the global ledger.",
+      "title": "Durable global model and research budgets"
+    },
+    {
+      "acceptance": {
+        "adversarial": "Leak author/model identity through nested fields or free text, reuse the holdout, let the proposer accept its own result or count correlated model agreement as independent proof; fail review/qualification.",
+        "positive": "Compare numerical baseline, baseline plus Jev, and separate Argon/DeepSeek challenger arms on preregistered tasks with equal information and independent outcomes; preserve full trial and reviewer provenance.",
+        "recovery": "Replace tainted review packets, retain rejected trials and failed canaries, re-establish separate review/holdout access and repeat evaluation with a fresh protected window."
+      },
+      "backend_units": [
+        "BE-021",
+        "BE-022",
+        "BE-035",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-JM-006",
+      "mapping_grade": "OWNER_DIRECTED_HARDENING_PENDING_INDEPENDENT_ADMISSION",
+      "other_units": [
+        "BQ-009",
+        "BG-001"
+      ],
+      "source_refs": [
+        "OWNER_JEV_ARGON_DEEPSEEK_20261018"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md \u00a78.7",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-JM-006-POS",
+      "test_ids": [
+        "T-VAN-JM-006-POS",
+        "T-VAN-JM-006-NEG",
+        "T-VAN-JM-006-REC"
+      ],
+      "text": "Independent review and measured Jev/model contribution: Compare numerical baseline, baseline plus Jev, and separate Argon/DeepSeek challenger arms on preregistered tasks with equal information and independent outcomes; preserve full trial and reviewer provenance.",
+      "title": "Independent review and measured Jev/model contribution"
+    },
+    {
+      "acceptance": {
+        "adversarial": "Promote a leaderboard score, increased leverage, fill-only gains or an expensive model with negative incremental net utility; reject unsupported benefit and prevent expanding tools or risk to manufacture a win.",
+        "positive": "Execute the registered execution-drag, selection, reasoning, event, capital-efficiency and research-economics experiments with controlled positive/null oracles and cost/risk-matched account paths.",
+        "recovery": "Retain the simpler qualified baseline, revise only within the registered research budget and evaluate a frozen new hypothesis on fresh evidence; inconclusive remains a valid result."
+      },
+      "backend_units": [
+        "BE-010",
+        "BE-013",
+        "BE-028",
+        "BE-035",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-JM-007",
+      "mapping_grade": "OWNER_DIRECTED_HARDENING_PENDING_INDEPENDENT_ADMISSION",
+      "other_units": [
+        "BQ-009",
+        "BG-001"
+      ],
+      "source_refs": [
+        "OWNER_JEV_ARGON_DEEPSEEK_20261018"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md \u00a78.7",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-JM-007-POS",
+      "test_ids": [
+        "T-VAN-JM-007-POS",
+        "T-VAN-JM-007-NEG",
+        "T-VAN-JM-007-REC"
+      ],
+      "text": "Prioritized net-profitability experiments and value-of-information routing: Execute the registered execution-drag, selection, reasoning, event, capital-efficiency and research-economics experiments with controlled positive/null oracles and cost/risk-matched account paths.",
+      "title": "Prioritized net-profitability experiments and value-of-information routing"
+    },
+    {
+      "acceptance": {
+        "adversarial": "Mark a consistently losing policy healthy solely because it obeys rules, rewrite policy after one ordinary loss, hide stale model identity/costs or reactivate a revoked fallback; appropriate gates fail.",
+        "positive": "Expose policy/procedural, economic, data, calibration and provider health separately; registered drift/hysteresis rules change a later qualified choice with evidence and exact consumer readback.",
+        "recovery": "Keep urgent protection during suspension, reconcile open parents and corrected labels, and resume only a currently qualified compatible binding with durable owner-visible status."
+      },
+      "backend_units": [
+        "BE-002",
+        "BE-022",
+        "BE-032",
+        "BE-036"
+      ],
+      "frontend_units": [
+        "FE-012",
+        "FE-014",
+        "FE-023"
+      ],
+      "id": "VAN-JM-008",
+      "mapping_grade": "OWNER_DIRECTED_HARDENING_PENDING_INDEPENDENT_ADMISSION",
+      "other_units": [
+        "BQ-007",
+        "BQ-009",
+        "BG-001"
+      ],
+      "source_refs": [
+        "OWNER_JEV_ARGON_DEEPSEEK_20261018"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md \u00a78.7",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-JM-008-POS",
+      "test_ids": [
+        "T-VAN-JM-008-POS",
+        "T-VAN-JM-008-NEG",
+        "T-VAN-JM-008-REC"
+      ],
+      "text": "Separate health dimensions, bounded adaptation and owner readback: Expose policy/procedural, economic, data, calibration and provider health separately; registered drift/hysteresis rules change a later qualified choice with evidence and exact consumer readback.",
+      "title": "Separate health dimensions, bounded adaptation and owner readback"
     }
   ],
   "review_refinements": [
@@ -7403,10 +7674,10 @@
     "VAN-RV-007",
     "VAN-RV-008"
   ],
-  "revision": "1.16",
+  "revision": "1.17",
   "schema": "van.canonical.requirements/1.1",
   "self_optimization_requirements": 44,
   "source_nx_requirements": 77,
   "status": "SEMANTIC_CONSOLIDATION_CANDIDATE_REQUIRES_INDEPENDENT_ADMISSION",
-  "total": 316
+  "total": 324
 }
