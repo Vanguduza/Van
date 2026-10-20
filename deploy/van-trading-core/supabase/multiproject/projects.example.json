@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "target_installation": "/opt/van-trading/supabase",
+  "allowed_postgres_service": "db",
+  "projects": [
+    {
+      "slug": "nissan-gtr",
+      "database": "gtr_prod",
+      "project_uuid": "53d39b5d-bf19-4cf1-9a5b-0904192d90d1",
+      "hostname": "nissan-gtr-api.example.invalid",
+      "loopback_port": 18081,
+      "status": "PLANNED"
+    }
+  ]
+}
