@@ -84,12 +84,24 @@ def main(pkg: Path) -> int:
         f.write_text(f.read_text().replace(f"=={OLD}", f"=={NEW}").replace("1,610", "1,624"))
     f = pkg / "plan/compile_rev118.py"
     f.write_text(f.read_text().replace(f"Compiled {OLD}", f"Compiled {NEW}"))
-    for md in pkg.glob("*.md"):
-        t = md.read_text()
-        t2 = t.replace("The active totals are 324 requirements and 1,610 planned application tests",
-                       "The active totals are 324 requirements and 1,624 planned application tests")
-        if t2 != t:
-            md.write_text(t2)
+    # The verifiers read the active totals from the master and focused blueprint named by
+    # CANONICAL_AUTHORITY. Those documents state the totals inside the Rev1.17 revision paragraph,
+    # which is history and stays byte-identical; the amendment appends its own statement instead.
+    # Lineage documents (the Rev1.17 master and anything not named by authority) are untouched.
+    authority = json.loads((pkg / "CANONICAL_AUTHORITY.json").read_text())
+    note = (f"\n\n**Rev1.18.1 amendment AP-001 (proposed, not admitted).** Adds {NEW - OLD} acceptance identities for "
+            f"the five gate units that had none (BQ-003, BQ-004, QA-002, QA-003, REL-002) and binds 39 existing identities "
+            f"to them. The active totals are 324 requirements and {NEW:,} planned application tests; the Rev1.17 "
+            f"paragraph above records that revision's totals and is preserved unchanged.\n")
+    # The master embeds the focused blueprint verbatim (verifiers check `focus in master`), so the
+    # note is appended to the focused blueprint and the master's embedded copy is replaced with it.
+    focus_md, master_md = pkg / authority["focused_blueprint"], pkg / authority["master"]
+    old_focus = focus_md.read_text().rstrip()
+    new_focus = old_focus + note.rstrip("\n")
+    master_text = master_md.read_text()
+    assert master_text.count(old_focus) == 1, "master no longer embeds the focused blueprint exactly once"
+    focus_md.write_text(new_focus + "\n")
+    master_md.write_text(master_text.replace(old_focus, new_focus, 1))
 
     # Unit acceptance lists are derived (render_plan.acceptance_index, registry order), so the
     # amendment regenerates them with the package's own function instead of appending.

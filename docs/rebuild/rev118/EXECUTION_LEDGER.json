@@ -134,15 +134,15 @@
   },
   {
    "id": "BLK-006",
-   "what": "AP-001 admission (five gate units without acceptance)",
+   "what": "PR #104 CI: backend fixed on this branch (DDS sibling 0c7fa8cf, services env 17a7cb81) pending the deploy-key secret; instrumentation has two causes, ICU regex (patch prepared) and Rive action-2 margin (both outcomes at one SHA; remedies prepared); ledger needs PR #94",
    "blocks": "PRE-001 exit and F15 (preparation blocker)",
-   "needed_from": "independent reviewer + owner via package amendment procedure"
+   "needed_from": "owner: deploy key; android/ authorization for the ICU patch; visual-authority or android decision for Rive"
   },
   {
    "id": "BLK-006",
-   "what": "PR #104 CI red on b02075f3: backend (missing DDS sibling checkout, reproduced), android-instrumentation/character-forge-gate (RiveContractTest.coreInputsDriveTheRig, not reproduced), ledger (expected until PR #94)",
+   "what": "PR #104 CI: backend fixed on this branch (DDS sibling 0c7fa8cf, services env 17a7cb81) pending the deploy-key secret; instrumentation has two causes, ICU regex (patch prepared) and Rive action-2 margin (both outcomes at one SHA; remedies prepared); ledger needs PR #94",
    "blocks": "PR #104 merge",
-   "needed_from": "owner authorization for .github/workflows change; CI artifact read or one rerun"
+   "needed_from": "owner: deploy key; android/ authorization for the ICU patch; visual-authority or android decision for Rive"
   }
  ],
  "amendment_proposals": [
@@ -164,28 +164,27 @@
   "updated_utc": "2026-10-21",
   "branch": "ccr-9e07e1af-8mgz1p",
   "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-  "background_jobs": "none (Gradle retry loop stopped; JVM run completed via Google Maven Central mirror)",
+  "background_jobs": "none",
   "last_validation": [
-   "pre001.py check: no drift, 0 disposition problems, 5 trace findings (AP-001); selftest 20/20",
-   "symbol dispositions 116/116 verified (SYMBOL_VERIFICATION.json)",
-   "ap001.py check clean (generic checks, 230 pre-existing non-ancestor listings reported); selftest 13/13",
-   "ap001_dryrun.py on a package copy: 10/10 package checks exit 0, 19 files changed",
-   "pytest tests/rebuild 7 passed; consolidation verify.py zero findings",
-   "cited baseline tests 292+47+1+9 passed; Artemis contracts 38/38 with DDS sibling, 38 errors without",
-   "Android JVM harness 157 classes / 1,273 tests, 0 failures (JVM only)",
-   "package unchanged vs 3c3379bd (git diff --quiet)",
-   "pre002_dossiers.py: 324 dossiers, no drift, selftest 11/11",
-   "OBL-004 audit-hook probe: tests/contracts 1,525 passed/4 skipped, only data/ and data/documents mkdirs, zero tracked-DB opens"
+   "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
+   "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
+   "AP-001 candidate: 10/10 package checks on an amended copy; ap001_candidate.py 30/30, digest 8eb76af5…; four induced defects caught",
+   "pytest tests/rebuild: 11 passed; consolidation verify.py zero findings; package unchanged vs 3c3379bd",
+   "CI: Artemis 136/136 with pinned sibling (2 passed/134 errors without); test_ci_dds_contract_pin 7 tests, induced failures caught; services 198/198 in stream venv",
+   "Local backend job: all steps run; non-passes classified in ci/BACKEND_JOB_LOCAL.json",
+   "ICU regex patch: JVM harness 1,273/1,273 on patched tree; ICU test fails before, passes after"
   ],
   "environment_notes": [
    "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
    "pytest from backend/requirements.txt in a venv",
    "rsync needed for tests/hermes installer test",
    "DDS sibling at /home/user/dial-development-system fetched origin/master 204f2f3b for F15 source reading",
-   "Gradle: repo.maven.apache.org returned 429 repeatedly; an init script adding https://maven-central.storage-download.googleapis.com/maven2/ resolved the same coordinates"
+   "Gradle: repo.maven.apache.org returned 429 repeatedly; an init script adding https://maven-central.storage-download.googleapis.com/maven2/ resolved the same coordinates",
+   "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
+   "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
   ],
-  "next_action": "Owner: PR #94 adoption, PR #104 CI fixes (ADMISSION_STEPS.md), OQ-05 mechanism, native registry readback for identity, independent reviewer with a DDS root-signed identity, AP-001 admission decision. Reviewer: answer pre002/challenge dossiers. Lead: no dependency-ready PRE work remains; BE units blocked on PRE-003.",
-  "previous_head": "33c6e818d9611fd3b1b68a3341a51e61a92ead90"
+  "next_action": "Owner: provision DDS_CONTRACT_READ_DEPLOY_KEY; adopt PR #94; decide AP-001/AP-002, OQ-05 and the 18 owner decisions; authorize or reject the Android ICU patch and choose the Rive remedy; obtain native registry readback; name an eligible independent reviewer. Lead: no further PRE work is dependency-ready until those return; BE units remain blocked on PRE-003.",
+  "previous_head": "1cab6b2f5bd1e4e98c0a61538be34268f6280159"
  },
  "observations": [
   "OBS-001 BE-002 debug cleartext",
@@ -194,5 +193,14 @@
   "OBS-004 BE-003 committed SQLite snapshot"
  ],
  "obligations": "obligations/OBLIGATIONS.json: OBL-001..005 (OBS-003 owner corrected to BE-025)",
- "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)"
+ "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
+ "pre002_reviews": "pre002/challenge/review/: NEG_REC_REVIEW (37 adequate / 6 gaps), PRODUCT_TRUTH_TRACE_REVIEW (189 classified), DECISION_REGISTER (49 real dependencies, 18 owner decisions)",
+ "amendments": {
+  "AP-001": "candidate verified, digest 8eb76af5…, not admitted",
+  "AP-002": "additive follow-on, prepared, not dry-run"
+ },
+ "ci_prerequisite_commits": [
+  "0c7fa8cf DDS sibling checkout",
+  "17a7cb81 services stream-host environment"
+ ]
 }

@@ -37,8 +37,16 @@
   {
    "purpose": "Artemis contract tests and their DDS sibling dependency (PR #104 backend failure)",
    "cwd": ".",
-   "command": "python -m pytest -q tests/contracts/test_artemis_*  with ../dial-development-system at 64d6b7158c72 present, then from a worktree without the sibling",
-   "result": "38 passed with sibling; 38 errors without it (reproduces the CI backend job's errors, which all sit in test_artemis_*)"
+   "command": "python -m pytest -q tests/contracts/test_artemis_*.py in a CI-equivalent layout (Van/ plus sibling dial-development-system/)",
+   "result": "sibling absent: 2 passed, 134 errors (identical to CI); DDS at pin 64d6b715: 136 passed; DDS at master 204f2f3b: 136 passed; only the three pinned contract files: 136 passed",
+   "correction_20261021": "An earlier entry said 38 passed / 38 errors; that came from a narrower selection. The full test_artemis_* set is 136."
+  },
+  {
+   "purpose": "Android JVM harness on the ICU-regex-patched tree (ci/patches/0001)",
+   "cwd": "android/verification",
+   "command": "same Gradle invocation as the baseline JVM run, on a worktree with the patch applied",
+   "result": "1273 tests, 0 failures, 0 errors, 0 skipped (identical to baseline)",
+   "label": "JVM_HOST_TEST_ONLY"
   }
  ],
  "not_run": [

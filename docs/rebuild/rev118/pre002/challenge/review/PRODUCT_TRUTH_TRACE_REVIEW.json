@@ -1,0 +1,1794 @@
+{
+ "schema": "van.rebuild.pre002.truth-trace-review/1",
+ "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE",
+ "product_truth_scope": "PRODUCT_TRUTH.json holds 22 owner-intent atoms (18 owner-conversation candidates PENDING_OWNER_FREEZE, 4 recorded owner instructions of 2026-10-18). The master's F0_OWNER_INTENT_PRODUCT_TRUTH gate requires 'exact latest owner backend-first direction, original design hashes, signed final scope/decisions and full feature coverage', and VAN-PT-18 defines the chain requirements → Product Truth → DUs. So an owner-facing product requirement needs a Product Truth trace; an engineering correction or directive-governed contract may instead trace to its own authoritative registry.",
+ "families": {
+  "VAN-CX": {
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "reasoning": "Consolidation corrective contracts (graded CONSOLIDATION_CORRECTION_PENDING_INDEPENDENT_REVIEW). They specify how existing intent is met correctly (protection parity, limit-price invariants, expiry propagation, authority) rather than adding owner product intent; every one appears in all three governing registries."
+  },
+  "VAN-HVA": {
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "reasoning": "Owner-directed high-value trading adoptions with source_adoption_ids, all 32 present in the adoption crosswalk and findings disposition. Owner intent is carried by the directive registry; when Product Truth is frozen it should reference that directive (candidate VAN-PT-07, VAN-PT-SO-01) rather than restate each adoption."
+  },
+  "VAN-EL": {
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/REV116_REQUIREMENTS.json",
+    "contracts/self_optimization/EXPERIENCE_LEARNING_CONTRACT.json",
+    "verification/REV116_ACCEPTANCE_CONTRACTS.json"
+   ],
+   "reasoning": "Owner-directed experience-learning requirements (source_refs to the 2026-10-18 owner direction) carried by the Rev1.16 registry and contract. Closest atom VAN-PT-SO-02; link is an admission act, not made here."
+  },
+  "VAN-JM": {
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/REV117_REQUIREMENTS.json",
+    "contracts/self_optimization/MODEL_USE_CONTRACT.json",
+    "verification/REV117_ACCEPTANCE_CONTRACTS.json"
+   ],
+   "reasoning": "Owner-directed Jev/model hardening (OWNER_JEV_ARGON_DEEPSEEK_20261018) carried by the Rev1.17 registry and contract. Closest atoms VAN-PT-SO-01/SO-02."
+  },
+  "VAN-ML-REQ": {
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "reasoning": "Forecast requirements (REQUIRED_SOFTWARE_SEPARATE_ECONOMIC_ADMISSION). All 90 source_packet ids are present in the forecast packet crosswalk, but no source_obligation_sha256 re-derives from any string, line or paragraph in the package (checked against the crosswalk and FORECAST_TECHNICAL_SOURCE_REV1_1.md), so obligation-level provenance cannot be verified from the package. Finding for the reviewer, not a Product Truth gap."
+  },
+  "VAN-NX-BF": {
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "reasoning": "Backend-first clauses. F0 names the owner's backend-first direction as part of Product Truth, but none of the 22 atoms states it (VAN-PT-18 describes the engineering chain, not backend-first ordering). Their source_row_sha256 equals sha256 of each clause's own text (18/18), so it is self-referential, not evidence of an external source. Owner action: add or confirm a backend-first atom; nothing is linked here."
+  }
+ },
+ "counts": {
+  "MISSING_REQUIRED_TRACE": 14,
+  "MISSING_REQUIRED_TRACE_ATOM_ABSENT": 18,
+  "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY": 67,
+  "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED": 90
+ },
+ "reviews": [
+  {
+   "id": "VAN-NX-018",
+   "classification": "MISSING_REQUIRED_TRACE",
+   "candidate_atoms_not_linked": [
+    "VAN-PT-14",
+    "VAN-PT-12"
+   ],
+   "reasoning": "Continuity of memory, decisions, research and automation is preservation of original capability (PT-14); no atom names memory explicitly.",
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-034",
+   "classification": "MISSING_REQUIRED_TRACE",
+   "candidate_atoms_not_linked": [
+    "VAN-PT-07"
+   ],
+   "reasoning": "Owner trading-behaviour diagnostics sit in the full trading scope; no atom names diagnostics.",
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-035",
+   "classification": "MISSING_REQUIRED_TRACE",
+   "candidate_atoms_not_linked": [
+    "VAN-PT-07",
+    "VAN-PT-SO-01"
+   ],
+   "reasoning": "Owner pattern extraction into candidate strategies is strategy development under the trading scope and self-optimization.",
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-039",
+   "classification": "MISSING_REQUIRED_TRACE",
+   "candidate_atoms_not_linked": [
+    "VAN-PT-15",
+    "VAN-PT-18"
+   ],
+   "reasoning": "Look-ahead sentinel and network kill-switch in research tests protect against false results; an engineering-integrity requirement.",
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-059",
+   "classification": "MISSING_REQUIRED_TRACE",
+   "candidate_atoms_not_linked": [
+    "VAN-PT-10",
+    "VAN-PT-07"
+   ],
+   "reasoning": "History separating funding cash flow from trading P&L belongs to account/funds and trading history.",
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-066",
+   "classification": "MISSING_REQUIRED_TRACE",
+   "candidate_atoms_not_linked": [
+    "VAN-PT-13"
+   ],
+   "reasoning": "Memory privacy, consent and erasure; PT-13 covers authority boundaries but no atom names privacy or erasure. Likely a genuine missing atom.",
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-067",
+   "classification": "MISSING_REQUIRED_TRACE",
+   "candidate_atoms_not_linked": [],
+   "reasoning": "Owner-editable memory learning goals: no atom covers memory or learning goals. Genuine missing intent trace.",
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-068",
+   "classification": "MISSING_REQUIRED_TRACE",
+   "candidate_atoms_not_linked": [
+    "VAN-PT-14"
+   ],
+   "reasoning": "Automation scheduling readback continues an original capability.",
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-BF-001",
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-BF-002",
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-BF-003",
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-BF-004",
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-BF-005",
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-BF-006",
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-BF-007",
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-BF-008",
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-BF-009",
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-BF-010",
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-BF-011",
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-BF-012",
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-BF-013",
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-BF-014",
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-BF-015",
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-BF-016",
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-BF-017",
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-BF-018",
+   "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
+   "governing_registries": [],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-072",
+   "classification": "MISSING_REQUIRED_TRACE",
+   "candidate_atoms_not_linked": [
+    "VAN-PT-SO-01",
+    "VAN-PT-07"
+   ],
+   "reasoning": "Continuous governed strategy development is self-optimization of the trading scope.",
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-073",
+   "classification": "MISSING_REQUIRED_TRACE",
+   "candidate_atoms_not_linked": [
+    "VAN-PT-LEAN-01",
+    "VAN-PT-15"
+   ],
+   "reasoning": "Ledger verification cost bounded by a verified anchor: lean runtime without weakening integrity.",
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-074",
+   "classification": "MISSING_REQUIRED_TRACE",
+   "candidate_atoms_not_linked": [
+    "VAN-PT-07",
+    "VAN-PT-15"
+   ],
+   "reasoning": "Per-instrument slippage bounds: execution correctness in the trading scope.",
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-075",
+   "classification": "MISSING_REQUIRED_TRACE",
+   "candidate_atoms_not_linked": [
+    "VAN-PT-15",
+    "VAN-PT-13"
+   ],
+   "reasoning": "Tick quantisation never widens the approved stop: protection integrity.",
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-076",
+   "classification": "MISSING_REQUIRED_TRACE",
+   "candidate_atoms_not_linked": [
+    "VAN-PT-07",
+    "VAN-PT-15"
+   ],
+   "reasoning": "Entry type executed as requested or refused, never coerced: execution truthfulness.",
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-077",
+   "classification": "MISSING_REQUIRED_TRACE",
+   "candidate_atoms_not_linked": [
+    "VAN-PT-17",
+    "VAN-PT-13"
+   ],
+   "reasoning": "Recoverable lockouts and owner-signed reset: mode/risk governance and owner authority.",
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-001",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-002",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-003",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-004",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-005",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-006",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-007",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-008",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-009",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-010",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-011",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-012",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-013",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-014",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-015",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-016",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-017",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-018",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-019",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-CX-020",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "contracts/CORRECTIVE_IMPLEMENTATION_CONTRACTS.json",
+    "verification/GAP_CLOSURE_REGISTER.json",
+    "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-001",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-002",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-003",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-004",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-005",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-006",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-007",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-008",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-009",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-010",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-011",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-012",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-013",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-014",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-015",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-016",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-017",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-018",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-019",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-020",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-021",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-022",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-023",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-024",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-025",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-026",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-027",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-028",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-029",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-030",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-031",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-032",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-033",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-034",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-035",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-036",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-037",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-038",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-039",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-040",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-041",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-042",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-043",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-044",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-045",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-046",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-047",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-048",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-049",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-050",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-051",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-052",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-053",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-054",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-055",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-056",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-057",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-058",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-059",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-060",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-061",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-062",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-063",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-064",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-065",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-066",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-067",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-068",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-069",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-070",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-071",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-072",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-073",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-074",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-075",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-076",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-077",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-078",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-079",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-080",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-081",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-082",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-083",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-084",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-085",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-086",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-087",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-088",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-089",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-ML-REQ-090",
+   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "governing_registries": [
+    "traceability/FORECAST_PACKET_CROSSWALK.json",
+    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-001",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-002",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-003",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-004",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-005",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-006",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-007",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-008",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-009",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-010",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-011",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-012",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-013",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-014",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-015",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-016",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-017",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-018",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-019",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-020",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-021",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-022",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-023",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-024",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-025",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-026",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-027",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-028",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-029",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-030",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-031",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-HVA-032",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/HIGH_VALUE_ADOPTION_CROSSWALK.json",
+    "traceability/REVIEW_FINDINGS_DISPOSITION.json",
+    "verification/GAP_CLOSURE_REGISTER.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-EL-001",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/REV116_REQUIREMENTS.json",
+    "contracts/self_optimization/EXPERIENCE_LEARNING_CONTRACT.json",
+    "verification/REV116_ACCEPTANCE_CONTRACTS.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-EL-002",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/REV116_REQUIREMENTS.json",
+    "contracts/self_optimization/EXPERIENCE_LEARNING_CONTRACT.json",
+    "verification/REV116_ACCEPTANCE_CONTRACTS.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-EL-003",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/REV116_REQUIREMENTS.json",
+    "contracts/self_optimization/EXPERIENCE_LEARNING_CONTRACT.json",
+    "verification/REV116_ACCEPTANCE_CONTRACTS.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-EL-004",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/REV116_REQUIREMENTS.json",
+    "contracts/self_optimization/EXPERIENCE_LEARNING_CONTRACT.json",
+    "verification/REV116_ACCEPTANCE_CONTRACTS.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-EL-005",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/REV116_REQUIREMENTS.json",
+    "contracts/self_optimization/EXPERIENCE_LEARNING_CONTRACT.json",
+    "verification/REV116_ACCEPTANCE_CONTRACTS.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-EL-006",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/REV116_REQUIREMENTS.json",
+    "contracts/self_optimization/EXPERIENCE_LEARNING_CONTRACT.json",
+    "verification/REV116_ACCEPTANCE_CONTRACTS.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-EL-007",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/REV116_REQUIREMENTS.json",
+    "contracts/self_optimization/EXPERIENCE_LEARNING_CONTRACT.json",
+    "verification/REV116_ACCEPTANCE_CONTRACTS.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-JM-001",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/REV117_REQUIREMENTS.json",
+    "contracts/self_optimization/MODEL_USE_CONTRACT.json",
+    "verification/REV117_ACCEPTANCE_CONTRACTS.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-JM-002",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/REV117_REQUIREMENTS.json",
+    "contracts/self_optimization/MODEL_USE_CONTRACT.json",
+    "verification/REV117_ACCEPTANCE_CONTRACTS.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-JM-003",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/REV117_REQUIREMENTS.json",
+    "contracts/self_optimization/MODEL_USE_CONTRACT.json",
+    "verification/REV117_ACCEPTANCE_CONTRACTS.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-JM-004",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/REV117_REQUIREMENTS.json",
+    "contracts/self_optimization/MODEL_USE_CONTRACT.json",
+    "verification/REV117_ACCEPTANCE_CONTRACTS.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-JM-005",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/REV117_REQUIREMENTS.json",
+    "contracts/self_optimization/MODEL_USE_CONTRACT.json",
+    "verification/REV117_ACCEPTANCE_CONTRACTS.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-JM-006",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/REV117_REQUIREMENTS.json",
+    "contracts/self_optimization/MODEL_USE_CONTRACT.json",
+    "verification/REV117_ACCEPTANCE_CONTRACTS.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-JM-007",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/REV117_REQUIREMENTS.json",
+    "contracts/self_optimization/MODEL_USE_CONTRACT.json",
+    "verification/REV117_ACCEPTANCE_CONTRACTS.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-JM-008",
+   "classification": "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
+   "governing_registries": [
+    "traceability/REV117_REQUIREMENTS.json",
+    "contracts/self_optimization/MODEL_USE_CONTRACT.json",
+    "verification/REV117_ACCEPTANCE_CONTRACTS.json"
+   ],
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  }
+ ],
+ "owner_actions": [
+  "Add or confirm a Product Truth atom for the backend-first direction (18 VAN-NX-BF clauses).",
+  "Decide atoms for memory privacy/learning goals (VAN-NX-066, VAN-NX-067), which no atom covers.",
+  "Admit or correct candidate atoms for the other 12 owner-facing NX rows."
+ ],
+ "reviewer_actions": [
+  "Obtain the forecast source that VAN-ML-REQ source_obligation_sha256 values hash, or record them as unverifiable."
+ ]
+}

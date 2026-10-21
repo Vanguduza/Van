@@ -5,7 +5,7 @@
  ],
  "generator_output": [
   "Compiled 1624 acceptance identities with 349 action-oracle refinements, explicit ownership additions and 72 domain scenarios; all NOT_RUN.",
-  "Rendered VAN_NEXT_DETERMINISTIC_PLAN_REV1_18.md, 5430 lines; digest 6b63af22cd37c4b4b48c699d460417140432495536d2336b9c47f22791b44153"
+  "Rendered VAN_NEXT_DETERMINISTIC_PLAN_REV1_18.md, 5430 lines; digest 6eba84a1f2d3bbba9e717773afac85a5912e81c48ad5137f213afeb0facd8226"
  ],
  "verifiers": [
   {
@@ -72,7 +72,6 @@
  "changed_files": [
   "CANONICAL_AUTHORITY.json",
   "MANIFEST.json",
-  "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_17_20261018.md",
   "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_18_20261021.md",
   "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md",
   "amendments/AP-001.json",

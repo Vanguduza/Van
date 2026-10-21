@@ -1,0 +1,503 @@
+{
+ "schema": "van.rebuild.pre002.decision-register/1",
+ "state": "AUTHOR_PREPARED_PENDING_OWNER_DECISION_AND_INDEPENDENT_CHALLENGE",
+ "method": "Pairs from dossier open_owner_questions; topical screen then explicit author overrides after reading every DIRECT pair and every UNIT_SHARED pair for the narrowly scoped questions. Options and recommendations follow the master's framing.",
+ "counts": {
+  "questions": 21,
+  "pairs": 402,
+  "direct_pairs": 56,
+  "requirements_with_a_real_dependency": 49,
+  "requirements_flagged_by_screen": 149,
+  "by_class": {
+   "OWNER_FINANCIAL_POLICY": 7,
+   "OWNER_SIGNATURE_MECHANISM": 1,
+   "OWNER_PROCUREMENT": 2,
+   "OWNER_LIVE_PROMOTION": 1,
+   "TECHNICAL_WITH_OWNER_COPY_APPROVAL": 1,
+   "TECHNICAL_DECISION_WITHIN_AUTHORITY": 1,
+   "OWNER_RETENTION_POLICY": 1,
+   "OWNER_PREFERENCE": 1,
+   "OWNER_PRODUCT_SCOPE": 1,
+   "RESOLVED_BY_EXISTING_OWNER_INSTRUCTION": 1,
+   "OWNER_PROCUREMENT_AND_MONEY": 1,
+   "OWNER_RUNTIME_SIGNATURE": 1,
+   "OWNER_FINANCIAL_ACTIVATION": 1,
+   "OWNER_OR_PROVIDER_DECISION": 1
+  }
+ },
+ "remaining_owner_decisions": [
+  "OQ-01",
+  "OQ-02",
+  "OQ-03",
+  "OQ-05",
+  "OQ-06",
+  "OQ-07",
+  "OQ-08",
+  "OQ-09",
+  "OQ-11",
+  "OQ-12",
+  "OQ-15",
+  "OQ-16",
+  "OQ-17",
+  "OQ-19",
+  "OQ-20",
+  "OQ-21",
+  "OQ-SO-01",
+  "OQ-CRYPTO-01"
+ ],
+ "decisions": [
+  {
+   "id": "OQ-01",
+   "question": "Manual per-strategy budget",
+   "gate": "LIVE",
+   "units": [
+    "BE-011"
+   ],
+   "class": "OWNER_FINANCIAL_POLICY",
+   "cited_in_master": true,
+   "verified_dependent_requirements": [
+    "VAN-NX-027",
+    "VAN-NX-031"
+   ],
+   "unit_shared_only_count": 6,
+   "options": [
+    "Set owner.manual risk budget in the next signed mandate (a value at or below max_risk_per_trade)"
+   ],
+   "author_recommendation": "Owner sets the value; master §7.4.2 already bounds it (never above max_risk_per_trade; shares 25/50/75/100%; counts toward account limits).",
+   "can_proceed_before_decision": "BE-011 builds ManualStopPolicy/ManualIntentFactory with the budget read from the signed mandate; manual entry stays refused until a mandate includes owner.manual."
+  },
+  {
+   "id": "OQ-02",
+   "question": "ATR stop policy per instrument class",
+   "gate": "START",
+   "units": [
+    "BE-009",
+    "BE-011"
+   ],
+   "class": "OWNER_FINANCIAL_POLICY",
+   "cited_in_master": true,
+   "verified_dependent_requirements": [
+    "VAN-NX-010",
+    "VAN-NX-027"
+   ],
+   "unit_shared_only_count": 24,
+   "options": [
+    "Owner-signed ATR multiple per instrument class"
+   ],
+   "author_recommendation": "Owner sets multiples; engineering supplies measured stop-out statistics per class from backtests to inform the choice.",
+   "can_proceed_before_decision": "Policy table, validation (venue stop/freeze level, never widened by quantisation) and tests with fixture multiples; no live value."
+  },
+  {
+   "id": "OQ-03",
+   "question": "Manual demo acceptance period",
+   "gate": "LIVE",
+   "units": [
+    "BE-011"
+   ],
+   "class": "OWNER_FINANCIAL_POLICY",
+   "cited_in_master": true,
+   "verified_dependent_requirements": [
+    "VAN-NX-027"
+   ],
+   "unit_shared_only_count": 7,
+   "options": [
+    "Demo duration and/or trade-count criteria before LIMITED_LIVE manual trading"
+   ],
+   "author_recommendation": "Owner sets the criterion; master recommends demo first, then LIMITED_LIVE after owner signature.",
+   "can_proceed_before_decision": "All manual-trading code and DEMO_TRADER operation; only the LIMITED_LIVE promotion waits."
+  },
+  {
+   "id": "OQ-05",
+   "question": "Exact product/lock signature for formal predevelopment",
+   "gate": "F15",
+   "units": [
+    "PRE-003"
+   ],
+   "class": "OWNER_SIGNATURE_MECHANISM",
+   "cited_in_master": true,
+   "verified_dependent_requirements": [
+    "VAN-CX-019",
+    "VAN-NX-070"
+   ],
+   "unit_shared_only_count": 5,
+   "options": [
+    "Use an existing trusted signed mechanism to approve the scope lock (see pre003/F15_AND_IDENTITY_REQUIREMENTS.md and the OQ-05 recommendation)"
+   ],
+   "author_recommendation": "See the OQ-05 mechanism recommendation in pre003; no new signature format.",
+   "can_proceed_before_decision": "Nothing implementation-bearing: PRE-003 cannot exit without it."
+  },
+  {
+   "id": "OQ-06",
+   "question": "Licensed news/calendar provider selection",
+   "gate": "START",
+   "units": [
+    "BE-014"
+   ],
+   "class": "OWNER_PROCUREMENT",
+   "cited_in_master": true,
+   "verified_dependent_requirements": [
+    "VAN-NX-013"
+   ],
+   "unit_shared_only_count": 2,
+   "options": [
+    "Select licensed news/calendar providers after current API, licence and latency evidence"
+   ],
+   "author_recommendation": "Owner selects after BE-014 produces current measured evidence; vendor research figures are historical, not quotes.",
+   "can_proceed_before_decision": "Provider-neutral ingest adapters, source health and cross-checking against public/official sources; no purchase."
+  },
+  {
+   "id": "OQ-07",
+   "question": "Automated missing-stop reattach versus immediate flatten policy",
+   "gate": "START",
+   "units": [
+    "BE-010",
+    "BE-011"
+   ],
+   "class": "OWNER_FINANCIAL_POLICY",
+   "cited_in_master": true,
+   "verified_dependent_requirements": [
+    "VAN-CRYPTO-007",
+    "VAN-CRYPTO-008",
+    "VAN-CRYPTO-009",
+    "VAN-CX-003",
+    "VAN-NX-010",
+    "VAN-RV-001",
+    "VAN-SO-016"
+   ],
+   "unit_shared_only_count": 42,
+   "options": [
+    "A: keep immediate flatten + kill switch for automated trades (current router, F-031)",
+    "B: apply the Rev1.2 re-read → re-attach (≤2 attempts, seconds) → flatten sequence to automated trades too"
+   ],
+   "author_recommendation": "Master states the trade-off: a few seconds' exposure versus a guaranteed spread cost and a halted account. Author recommends B for parity with manual trades, with PROTECTION_UNCONFIRMED shown as full exposure at risk; the choice is the owner's.",
+   "can_proceed_before_decision": "Both paths are implemented behind the policy and tested; manual trades already use the sequence by canon."
+  },
+  {
+   "id": "OQ-08",
+   "question": "Promote each news path from shadow",
+   "gate": "LIVE",
+   "units": [
+    "BE-016"
+   ],
+   "class": "OWNER_LIVE_PROMOTION",
+   "cited_in_master": true,
+   "verified_dependent_requirements": [
+    "VAN-NX-032"
+   ],
+   "unit_shared_only_count": 2,
+   "options": [
+    "Sign promotion of each news path D4/D5 from shadow after per-path evidence"
+   ],
+   "author_recommendation": "Per-path owner signature by design; not a blocker.",
+   "can_proceed_before_decision": "Shadow operation and evidence collection for every path."
+  },
+  {
+   "id": "OQ-09",
+   "question": "No direct news risk increase; resolve signed final policy",
+   "gate": "START",
+   "units": [
+    "BE-016"
+   ],
+   "class": "OWNER_FINANCIAL_POLICY",
+   "cited_in_master": true,
+   "verified_dependent_requirements": [
+    "VAN-NX-032"
+   ],
+   "unit_shared_only_count": 2,
+   "options": [
+    "Keep: news never directly increases risk (D1–D6 reduce/defer; D7 creates trades only via validated strategies)",
+    "Change: allow direct size increase"
+   ],
+   "author_recommendation": "Master recommends keeping the rule; author concurs (a direct increase bypasses strategy evidence).",
+   "can_proceed_before_decision": "D1–D7 implementation under the keep rule, which is the safe default the canon already describes."
+  },
+  {
+   "id": "OQ-11",
+   "question": "Feed bundle and authorized budget",
+   "gate": "START",
+   "units": [
+    "BE-014"
+   ],
+   "class": "OWNER_PROCUREMENT",
+   "cited_in_master": true,
+   "verified_dependent_requirements": [
+    "VAN-NX-013",
+    "VAN-NX-038"
+   ],
+   "unit_shared_only_count": 1,
+   "options": [
+    "Choose the feed bundle and authorize its monthly budget"
+   ],
+   "author_recommendation": "Owner decides after measured latency/terms evidence; the master's $230–650/month is a historical estimate.",
+   "can_proceed_before_decision": "Ingest with free/official sources; paid feeds admitted later without code change."
+  },
+  {
+   "id": "OQ-12",
+   "question": "Event strategies, budget, daily cap and first classes",
+   "gate": "START",
+   "units": [
+    "BE-017"
+   ],
+   "class": "OWNER_FINANCIAL_POLICY",
+   "cited_in_master": false,
+   "verified_dependent_requirements": [
+    "VAN-CX-015",
+    "VAN-NX-033",
+    "VAN-NX-BF-016"
+   ],
+   "unit_shared_only_count": 0,
+   "options": [
+    "Event strategies, budget, daily cap and first classes for news trading"
+   ],
+   "author_recommendation": "Owner signs per class after paper and shadow evidence (§8.10.9).",
+   "can_proceed_before_decision": "Bundle mechanics, arming proofs, paper and shadow."
+  },
+  {
+   "id": "OQ-13",
+   "question": "Behaviour notice wording and calibration",
+   "gate": "START",
+   "units": [
+    "BE-022"
+   ],
+   "class": "TECHNICAL_WITH_OWNER_COPY_APPROVAL",
+   "cited_in_master": false,
+   "verified_dependent_requirements": [
+    "VAN-NX-034"
+   ],
+   "unit_shared_only_count": 9,
+   "options": [
+    "Engineering defines the calibration method; owner approves owner-facing wording"
+   ],
+   "author_recommendation": "Not a START blocker for BE-022: calibration is an engineering method; wording is presentation, after BG-001.",
+   "can_proceed_before_decision": "BE-022 diagnostics payload, calibration evaluation; copy drafted in UX later."
+  },
+  {
+   "id": "OQ-14",
+   "question": "Native versus qualified web chart renderer, measured after BG-001; existing spike unqualified and not evidence of completed native UI.",
+   "gate": "START",
+   "units": [
+    "UX-002",
+    "FE-007"
+   ],
+   "class": "TECHNICAL_DECISION_WITHIN_AUTHORITY",
+   "cited_in_master": true,
+   "verified_dependent_requirements": [
+    "VAN-NX-009",
+    "VAN-NX-041",
+    "VAN-NX-042"
+   ],
+   "unit_shared_only_count": 6,
+   "options": [
+    "Native canvas",
+    "New native engine",
+    "Qualified web engine"
+   ],
+   "author_recommendation": "Resolved as an engineering decision by measurement after BG-001 against §15.1 budgets (60 fps chart gestures on S24, lifecycle soak); the renderer-independent capability contract makes any choice swappable. Not an owner question.",
+   "can_proceed_before_decision": "All backend chart contracts (BE-018) and the capability contract; renderer selection happens in FE-007 after BG-001."
+  },
+  {
+   "id": "OQ-15",
+   "question": "Owner-approved deletion/archive/retention grace: source record recommends 30 days while older text said 7; no implicit value chosen.",
+   "gate": "START",
+   "units": [
+    "BE-004"
+   ],
+   "class": "OWNER_RETENTION_POLICY",
+   "cited_in_master": true,
+   "verified_dependent_requirements": [
+    "VAN-CX-016",
+    "VAN-NX-050"
+   ],
+   "unit_shared_only_count": 9,
+   "options": [
+    "7 days (older text)",
+    "30 days (source record recommendation)",
+    "Other owner-selected duration"
+   ],
+   "author_recommendation": "Owner selects; author notes 30 days gives more recovery time for an accidental delete while credentials are destroyed immediately either way.",
+   "can_proceed_before_decision": "Grace period implemented as a signed parameter; delete blocked by open exposure regardless."
+  },
+  {
+   "id": "OQ-16",
+   "question": "Portfolio reporting currency",
+   "gate": "START",
+   "units": [
+    "BE-006",
+    "BE-012"
+   ],
+   "class": "OWNER_PREFERENCE",
+   "cited_in_master": true,
+   "verified_dependent_requirements": [
+    "VAN-NX-040",
+    "VAN-NX-052",
+    "VAN-NX-062"
+   ],
+   "unit_shared_only_count": 29,
+   "options": [
+    "USD",
+    "Another base currency"
+   ],
+   "author_recommendation": "Display preference only (limits stay per account). Author suggests USD, the denomination of most broker accounts, but the owner chooses.",
+   "can_proceed_before_decision": "Combined view with an explicit base-currency parameter and FX source/time; no money effect."
+  },
+  {
+   "id": "OQ-17",
+   "question": "Simulated replay practice actions scope",
+   "gate": "START",
+   "units": [
+    "BE-019"
+   ],
+   "class": "OWNER_PRODUCT_SCOPE",
+   "cited_in_master": false,
+   "verified_dependent_requirements": [
+    "VAN-NX-044"
+   ],
+   "unit_shared_only_count": 5,
+   "options": [
+    "Practice actions in replay are simulation-only (no broker route)",
+    "Broader scope"
+   ],
+   "author_recommendation": "Recommend simulation-only; any broker route from replay would contradict §18.2 'never execute from a chart' spirit.",
+   "can_proceed_before_decision": "Replay sandbox with simulation-only actions."
+  },
+  {
+   "id": "OQ-18",
+   "question": "Premature accounts branch disposition",
+   "gate": "START",
+   "units": [
+    "BE-001",
+    "BE-004"
+   ],
+   "class": "RESOLVED_BY_EXISTING_OWNER_INSTRUCTION",
+   "cited_in_master": false,
+   "verified_dependent_requirements": [
+    "VAN-HVA-002",
+    "VAN-NX-048",
+    "VAN-NX-049",
+    "VAN-NX-057",
+    "VAN-NX-064"
+   ],
+   "unit_shared_only_count": 16,
+   "options": [
+    "Retain as migration baseline (consolidation)",
+    "Reject"
+   ],
+   "author_recommendation": "Already settled: feature/rea-trading-accounts-tactile-20261015 is a selected source input (CONSOLIDATION_STATE.json source_inputs, 3b2c9e04) and existing Android code remains the migration baseline per the owner's standing instruction; its presentation is not frontend authority before BG-001.",
+   "can_proceed_before_decision": "Everything; this is not an open question."
+  },
+  {
+   "id": "OQ-19",
+   "question": "First admitted funding provider rail and sandbox authority",
+   "gate": "START",
+   "units": [
+    "BE-007"
+   ],
+   "class": "OWNER_PROCUREMENT_AND_MONEY",
+   "cited_in_master": true,
+   "verified_dependent_requirements": [
+    "VAN-CX-016",
+    "VAN-NX-055"
+   ],
+   "unit_shared_only_count": 1,
+   "options": [
+    "Select the first funding provider rail and its sandbox authority"
+   ],
+   "author_recommendation": "Owner selects; master rollout: one rail in sandbox/demo first, then reversal reconciliation; no production credentials during preparation.",
+   "can_proceed_before_decision": "Funding ledger, hosted-flow state machine and sandbox adapters."
+  },
+  {
+   "id": "OQ-20",
+   "question": "Temperament percentages and evidence thresholds for live",
+   "gate": "LIVE",
+   "units": [
+    "BE-013"
+   ],
+   "class": "OWNER_FINANCIAL_POLICY",
+   "cited_in_master": true,
+   "verified_dependent_requirements": [
+    "VAN-NX-058"
+   ],
+   "unit_shared_only_count": 13,
+   "options": [
+    "Sign temperament percentage values and live evidence thresholds"
+   ],
+   "author_recommendation": "Owner signs after backtest/walk-forward per mode (DU-30); AGGRESSIVE stays unbound until an edge-evidence producer qualifies.",
+   "can_proceed_before_decision": "Mode mechanics, passive monitoring and refusal logic."
+  },
+  {
+   "id": "OQ-21",
+   "question": "24h cooldown; 0.5 probation; >2 cooldowns/7d escalation; retain stated scopes under OD-38/39",
+   "gate": "DECIDED_VALUES_RUNTIME_SIGNATURE_STILL_REQUIRED",
+   "units": [
+    "BE-009",
+    "BE-013"
+   ],
+   "class": "OWNER_RUNTIME_SIGNATURE",
+   "cited_in_master": true,
+   "verified_dependent_requirements": [
+    "VAN-CX-009",
+    "VAN-NX-077"
+   ],
+   "unit_shared_only_count": 31,
+   "options": [
+    "Sign runtime activation of the already-accepted OD-39 values"
+   ],
+   "author_recommendation": "Values are decided (24 h cooldown, ×0.5 probation, >2 cooldowns/7 d escalation); only the runtime signing act remains.",
+   "can_proceed_before_decision": "All lockout code (defaults already equal OD-39 values)."
+  },
+  {
+   "id": "OQ-SO-01",
+   "question": "Approve exact operational policy domain, estimator/update rules, bounds and qualification requirements before consequential use.",
+   "gate": "FINANCIAL_ACTIVATION",
+   "units": [
+    "BE-002",
+    "BE-010",
+    "BE-036"
+   ],
+   "class": "OWNER_FINANCIAL_ACTIVATION",
+   "cited_in_master": false,
+   "verified_dependent_requirements": [
+    "VAN-EL-006",
+    "VAN-SO-001",
+    "VAN-SO-003",
+    "VAN-SO-006",
+    "VAN-SO-008",
+    "VAN-SO-024",
+    "VAN-SO-039"
+   ],
+   "unit_shared_only_count": 88,
+   "options": [
+    "Approve the operational policy domain, estimator/update rules, bounds and qualification before consequential use"
+   ],
+   "author_recommendation": "Owner approval before consequential use, by design; not a build blocker.",
+   "can_proceed_before_decision": "Full self-optimization machinery in shadow/qualification without financial effect."
+  },
+  {
+   "id": "OQ-CRYPTO-01",
+   "question": "Select initial eligible spot exchange/account/product scope from current permitted access; validate authentic qualification environment.",
+   "gate": "BE-004/BE-005/BE-010 target admission",
+   "units": [
+    "BE-004",
+    "BE-005",
+    "BE-010"
+   ],
+   "class": "OWNER_OR_PROVIDER_DECISION",
+   "cited_in_master": false,
+   "verified_dependent_requirements": [
+    "VAN-CRYPTO-001",
+    "VAN-CRYPTO-002",
+    "VAN-CRYPTO-003",
+    "VAN-CRYPTO-007",
+    "VAN-CRYPTO-013",
+    "VAN-NX-045",
+    "VAN-RV-008"
+   ],
+   "unit_shared_only_count": 48,
+   "options": [
+    "Select the initial eligible spot exchange/account/product from currently permitted access"
+   ],
+   "author_recommendation": "Owner selects from accounts already held/permitted; no procurement inferred.",
+   "can_proceed_before_decision": "Exchange-neutral capability matrix, filters, precision and adapters against public/sandbox endpoints."
+  }
+ ]
+}

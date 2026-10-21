@@ -1,0 +1,212 @@
+{
+ "schema": "van.rebuild.amendment-patch/1",
+ "amendment": "AP-002",
+ "status": "PROPOSED_NOT_DRY_RUN_NOT_ADMITTED",
+ "depends_on": "AP-001 decision (count chain 1,624 → 1,632 if AP-001 is admitted; 1,610 → 1,618 otherwise)",
+ "base_package_tree": "ac0226a22a95f51642cfeb37b3709b40f7cacf10",
+ "source": "docs/rebuild/rev118/pre002/challenge/review/NEG_REC_REVIEW.json (six GAP_REFINEMENT_PROPOSED dispositions)",
+ "rule": "Additive only. No existing identity text, owner or digest changes; existing identities gain owners only through owner_additions.",
+ "new_acceptance_contracts": [
+  {
+   "id": "T-NX-001-NEG",
+   "unit": "UX-001",
+   "kind": "NEG",
+   "requirement_refs": [
+    "VAN-NX-001"
+   ],
+   "expectation": "The visual-lock check fails naming the authority and token; nothing ships.",
+   "proves": "The two locked visual authorities cannot drift without a new owner lock.",
+   "preconditions": "Locked dark and light authority hashes recorded; visual-lock check wired into CI.",
+   "stimulus": "Change one byte of either authority image, or one derived token, with no new owner lock record.",
+   "observable": "The visual-lock check fails naming the authority and token; nothing ships.",
+   "negative_case": "A candidate that only changes non-authority surfaces passes.",
+   "recovery_case": "Reverting the change restores a green check.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY; no live authorization inferred",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-002-PROPOSED",
+   "pass_evidence": "Receipt bound to exact source commit, artifact/APK digest, configuration version and the induced input; reviewer readback of the refusal or restored state."
+  },
+  {
+   "id": "T-NX-001-REC",
+   "unit": "UX-001",
+   "kind": "REC",
+   "requirement_refs": [
+    "VAN-NX-001"
+   ],
+   "expectation": "Both themes render their locked tokens after each transition; no mixed-theme frame persists after settle.",
+   "proves": "Both authorities survive runtime transitions.",
+   "preconditions": "Signed build with both themes.",
+   "stimulus": "Theme switch, process death and dynamic-type change on device.",
+   "observable": "Both themes render their locked tokens after each transition; no mixed-theme frame persists after settle.",
+   "negative_case": "A token mismatch after recreation fails.",
+   "recovery_case": "Recreation from saved state restores the selected authority.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY; no live authorization inferred",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-002-PROPOSED",
+   "pass_evidence": "Receipt bound to exact source commit, artifact/APK digest, configuration version and the induced input; reviewer readback of the refusal or restored state."
+  },
+  {
+   "id": "T-NX-025-NEG",
+   "unit": "QA-004",
+   "kind": "NEG",
+   "requirement_refs": [
+    "VAN-NX-025"
+   ],
+   "expectation": "Acceptance is refused with the digest mismatch named.",
+   "proves": "The owner's on-device decision binds the exact installed APK.",
+   "preconditions": "Owner acceptance record schema; Artemis capture of installed package digest.",
+   "stimulus": "Present an owner decision recorded against a different APK digest, or evidence from another build or device.",
+   "observable": "Acceptance is refused with the digest mismatch named.",
+   "negative_case": "Decision against the installed digest is accepted.",
+   "recovery_case": "Re-recording against the installed digest succeeds; the stale record stays as history.",
+   "environment": "S24 Ultra via authorized Artemis workflow",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-002-PROPOSED",
+   "pass_evidence": "Receipt bound to exact source commit, artifact/APK digest, configuration version and the induced input; reviewer readback of the refusal or restored state."
+  },
+  {
+   "id": "T-NX-026-NEG",
+   "unit": "PRE-002",
+   "kind": "NEG",
+   "requirement_refs": [
+    "VAN-NX-026"
+   ],
+   "expectation": "The REA gate refuses each, naming the record and reason.",
+   "proves": "Only admitted, hash-matching research inputs can justify architectural change.",
+   "preconditions": "RESEARCH_INPUT_ACCEPTANCE.json with 39 REA ids and hashes.",
+   "stimulus": "Cite a record outside the 39, a record whose bytes no longer hash to the admitted value, or a static-only record as runtime/device evidence.",
+   "observable": "The REA gate refuses each, naming the record and reason.",
+   "negative_case": "An admitted, matching record used within its declared limits passes.",
+   "recovery_case": "Re-admission with a new hash restores eligibility; dependants are re-checked.",
+   "environment": "Documentary/static gate",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-002-PROPOSED",
+   "pass_evidence": "Receipt bound to exact source commit, artifact/APK digest, configuration version and the induced input; reviewer readback of the refusal or restored state."
+  },
+  {
+   "id": "T-NX-026-REC",
+   "unit": "PRE-002",
+   "kind": "REC",
+   "requirement_refs": [
+    "VAN-NX-026"
+   ],
+   "expectation": "Dependent changes are marked for re-admission and cannot be cited until re-checked.",
+   "proves": "Superseding a research record invalidates what depended on it.",
+   "preconditions": "A change admitted on REA record R.",
+   "stimulus": "Supersede R with a new version.",
+   "observable": "Dependent changes are marked for re-admission and cannot be cited until re-checked.",
+   "negative_case": "A dependant still citing old R passes: fails.",
+   "recovery_case": "Re-admission of dependants clears the mark.",
+   "environment": "Documentary/static gate",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-002-PROPOSED",
+   "pass_evidence": "Receipt bound to exact source commit, artifact/APK digest, configuration version and the induced input; reviewer readback of the refusal or restored state."
+  },
+  {
+   "id": "T-NX-049-NEG",
+   "unit": "FE-010",
+   "kind": "NEG",
+   "requirement_refs": [
+    "VAN-NX-049"
+   ],
+   "expectation": "Old credential stays valid and in use after a failed verify or crash; the attempt is recorded; a server/login change forces re-verification before any trading.",
+   "proves": "Credential rotation never leaves an account without valid credentials (master inherited §7.9.10).",
+   "preconditions": "Linked account with a working credential; fault injection on verify and swap.",
+   "stimulus": "Fail verification of the new secret; crash between verify and swap; change server/login.",
+   "observable": "Old credential stays valid and in use after a failed verify or crash; the attempt is recorded; a server/login change forces re-verification before any trading.",
+   "negative_case": "A successful rotation destroys the old secret with a receipt.",
+   "recovery_case": "Restart after a crash resumes from the recorded attempt without a credential gap.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY; no live authorization inferred",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-002-PROPOSED",
+   "pass_evidence": "Receipt bound to exact source commit, artifact/APK digest, configuration version and the induced input; reviewer readback of the refusal or restored state."
+  },
+  {
+   "id": "T-NX-067-NEG",
+   "unit": "FE-019",
+   "kind": "NEG",
+   "requirement_refs": [
+    "VAN-NX-067"
+   ],
+   "expectation": "Each is refused and audited; the stored goal is unchanged.",
+   "proves": "Only the owner can change learning goals, within recorded consent.",
+   "preconditions": "Memory learning goals with revision ids; consent record.",
+   "stimulus": "Edit from a non-owner principal; edit against a stale revision; goal widening data use beyond consent.",
+   "observable": "Each is refused and audited; the stored goal is unchanged.",
+   "negative_case": "An owner edit on the current revision within consent is applied and audited.",
+   "recovery_case": "None required beyond audit; see REC.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY; no live authorization inferred",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-002-PROPOSED",
+   "pass_evidence": "Receipt bound to exact source commit, artifact/APK digest, configuration version and the induced input; reviewer readback of the refusal or restored state."
+  },
+  {
+   "id": "T-NX-067-REC",
+   "unit": "FE-019",
+   "kind": "REC",
+   "requirement_refs": [
+    "VAN-NX-067"
+   ],
+   "expectation": "Exactly one audited revision wins; restart shows the last committed goal.",
+   "proves": "Goal edits are durable and single-valued.",
+   "preconditions": "Two concurrent owner edits; process restart.",
+   "stimulus": "Submit two edits concurrently, then restart.",
+   "observable": "Exactly one audited revision wins; restart shows the last committed goal.",
+   "negative_case": "Both edits applied or a lost edit with no audit: fails.",
+   "recovery_case": "Restart restores the committed goal.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY; no live authorization inferred",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-002-PROPOSED",
+   "pass_evidence": "Receipt bound to exact source commit, artifact/APK digest, configuration version and the induced input; reviewer readback of the refusal or restored state."
+  }
+ ],
+ "owner_additions": {
+  "T-VAN-CX-019-NEG": [
+   "BQ-006",
+   "QA-005"
+  ],
+  "T-VAN-CX-019-REC": [
+   "BQ-006",
+   "QA-005"
+  ],
+  "T-BE-026-NEG": [
+   "QA-004"
+  ],
+  "T-BE-026-REC": [
+   "QA-004"
+  ]
+ },
+ "owner_addition_rationale": {
+  "T-VAN-CX-019-NEG": "VAN-NX-024: release-stage verification must re-run stale/self-issued/swapped-receipt negatives at the release head, not inherit the PRE-003 pass.",
+  "T-VAN-CX-019-REC": "VAN-NX-024: revoked or stale evidence handling at the release head.",
+  "T-BE-026-NEG": "VAN-NX-025: on-device acceptance must refuse disconnect, wrong APK and stale results itself.",
+  "T-BE-026-REC": "VAN-NX-025: attempt restart keeps original identities at the acceptance unit."
+ },
+ "citation_errata": {
+  "note": "Erratum records only; the identities' text is unchanged. The Rev1.18 master repeats 67 section numbers (whole-product contract then verbatim inherited spec).",
+  "T-NX-027": {
+   "cites": "§7.4",
+   "means": "inherited §7.4 Owner manual trading (master L1470)"
+  },
+  "T-NX-032": {
+   "cites": "§8.4–§8.5",
+   "means": "inherited §8.4 History comparison (L1992) and §8.5 How news changes trading decisions (L2012)"
+  },
+  "T-NX-036": {
+   "cites": "§8.2, §8.4",
+   "means": "inherited §8.2 Live sources (L1958) and §8.4 History comparison (L1992)"
+  },
+  "T-NX-037": {
+   "cites": "§8.3",
+   "means": "inherited §8.3 Analysis of each story (L1977)"
+  }
+ }
+}

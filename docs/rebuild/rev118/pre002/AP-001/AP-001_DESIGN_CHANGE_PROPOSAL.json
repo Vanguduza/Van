@@ -118,11 +118,10 @@
   "tool": "tools/rebuild/ap001_dryrun.py",
   "result": "DRYRUN_RESULT.json",
   "verifier_diff": "DRYRUN_VERIFIER_CHANGES.diff",
-  "outcome": "All ten package checks exit 0 on an amended COPY (compile, render, verify_whole_product, verify_rev117 json/selftest/check-package, review contracts, experience learning, model hardening, theme readability); admitted package unchanged.",
+  "outcome": "All ten package checks exit 0 on an amended COPY; 18 files change. Rev1.17 history is preserved: the Rev1.17 master is untouched and the Rev1.17 totals sentence stays byte-identical; the amendment appends its own Rev1.18.1 statement to the focused blueprint and the master's embedded copy (verifiers require `focus in master`).",
   "files_changed": [
    "CANONICAL_AUTHORITY.json",
    "MANIFEST.json",
-   "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_17_20261018.md",
    "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_18_20261021.md",
    "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md",
    "amendments/AP-001.json",
@@ -147,12 +146,26 @@
    "Re-prepared (unsigned) PROPOSED_SCOPE_LOCK object and file hashes: a new owner signature covers the amended scope"
   ],
   "narrative_to_update_on_admission": [
-   "Rev1.18 master line 5 'Active scope: 324 requirements, 1,610 acceptance identities' and the \u00a7-table row 'Planned application acceptance contracts | 1,610'",
+   "Rev1.18 master line 5 'Active scope: 324 requirements, 1,610 acceptance identities' and the §-table row 'Planned application acceptance contracts | 1,610'",
    "README_START_HERE.md active scope line",
    "review/VALIDATION_SUMMARY.md counts",
    "Only the verifier-checked sentence was changed in the dry run; a real admission should update all active-total statements and keep historical ones"
   ],
   "recommended_form": "Deliver as a new revision (e.g. Rev1.18.1) with the exact Rev1.18 archive retained under lineage/, as the Rev1.15.1 corrective delivery did, rather than editing Rev1.18 in place.",
-  "observation": "The admitted plan already lists 230 identities owned by non-ancestor units (e.g. PRE-001 lists T-HVA-002-* owned by BE-001), apparently document admission at PRE with execution at the owner; ap001.py forbids only NEW such listings."
- }
+  "observation": "The admitted plan already lists 230 identities owned by non-ancestor units (e.g. PRE-001 lists T-HVA-002-* owned by BE-001), apparently document admission at PRE with execution at the owner; ap001.py forbids only NEW such listings.",
+  "correction_20261021": "The earlier dry run (19 files) rewrote 'The active totals are 324 requirements and 1,610…' to 1,624 inside the Rev1.17 paragraph of three documents, including the Rev1.17 master. That falsified a historical statement. Corrected in tools/rebuild/ap001_dryrun.py; the old note below about updating active-total statements is superseded.",
+  "candidate_verification": {
+   "file": "CANDIDATE_VERIFICATION.json",
+   "checks": 30,
+   "passed": true,
+   "file_tree_sha256": "8eb76af51c41260c0e86ab4201a75339126367126ab3ada806ee0d2d89e10e49",
+   "manifest_sha256": "d20a858398e1a5746be4e7e901829a428be4c4824bab4b589e0b95d565eb795e"
+  }
+ },
+ "admission_action": [
+  "Independent reviewer reviews AP-001 (AP-001_REVIEW.md, AP-001_PATCH.json) and this verification, and approves or rejects.",
+  "Owner admits it through the package protocol (CONSOLIDATION_APPLY_PROTOCOL.md step 4): select the amended package as the one active candidate, update the authority selector and prepared scope fingerprints, keep old schedules historical.",
+  "Deliver the amended package as Rev1.18.1 in a new path with its own archive digest; the admitted Rev1.18 package (manifest above) stays byte-identical as lineage. Re-sign the scope lock over the Rev1.18.1 hashes (OQ-05).",
+  "Re-run PRE-001 trace (1,624 identities), ap001.py check, the ten package checks and manifest.py check at the frozen F15 baseline."
+ ]
 }
