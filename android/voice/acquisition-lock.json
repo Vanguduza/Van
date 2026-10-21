@@ -17,9 +17,9 @@
     {
       "archive": {
         "archive": "archives/sherpa-onnx-zipformer-gigaspeech-2023-12-12.tar.bz2",
-        "published_sha256": "ec7f27abbbdba3b261deab9a853803b5ec72cb3295c01a77f34e6de5b62bf5c4",
-        "sha256": "ec7f27abbbdba3b261deab9a853803b5ec72cb3295c01a77f34e6de5b62bf5c4",
-        "size": 310562559
+        "published_sha256": "4e8097ebda27dad47353bd4a7edea77c985e2dd5330d5f1cdc07354bb12ab00d",
+        "sha256": "4e8097ebda27dad47353bd4a7edea77c985e2dd5330d5f1cdc07354bb12ab00d",
+        "size": 310453030
       },
       "capability": "asr",
       "license": {
