@@ -3,6 +3,7 @@
 Experience learning remains fully integrated; this revision adds Jev/model failure isolation, qualification and profitability-research contracts.
 
 - [21 October readability amendment](package/design/DARK_THEME_READABILITY_AMENDMENT_20261021.md) and [234 context bindings](package/design/THEME_READABILITY_CONTEXT_BINDINGS.json)
+- [Whole-product completeness audit — 21 October](completeness-audit-20261021/REPORT.md): 16 open contract/traceability/qualification findings; all feature, action, context and service inventories covered. Audit is separate from the sealed package.
 - [Active master blueprint](package/VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_17_20261018.md)
 - [Focused specification §§8.6–8.7](package/VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md)
 - [Model assessment, source findings and recommendation](package/research/REV117_MODEL_AND_PROFITABILITY_REVIEW.md)

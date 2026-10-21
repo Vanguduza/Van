@@ -1,0 +1,375 @@
+{
+  "audited_commit": "172d2143d3e6d2ec4b401376f5ef5a4cf94c7429",
+  "priority_meaning": {
+    "P0": "Blocks the relevant integration/global gate or a core promised outcome; not a CVSS/source vulnerability severity.",
+    "P1": "Must close before affected unit/final acceptance; does not prohibit unrelated implementation."
+  },
+  "findings": [
+    {
+      "id": "WPC-001",
+      "priority": "P0",
+      "category": "CONTRACT_MATERIALIZATION",
+      "title": "The complete executable consumer catalogue is still a deliverable",
+      "evidence": [
+        "contracts/BACKEND_SERVICE_CATALOG.json: services[*].operations",
+        "contracts/BACKEND_TO_FRONTEND_CONSUMPTION_CONTRACT.md: Required per-capability contract",
+        "design/ALL_SURFACE_CONTRACTS.json: endpoints and required_backend_catalog_fields"
+      ],
+      "observed": "All 82 service rows express operations as prose strings. Only 73/234 contexts carry inline historical endpoint references (185 distinct method/path pairs). The remaining 161 are not evidence of missing routes: contracts can be inherited through shared services. However, an exact current action-to-operation/schema/error/readback/consumer binding cannot be inferred from the aggregate catalogue.",
+      "owners": [
+        "BE-032",
+        "BE-003",
+        "BQ-006"
+      ],
+      "required_closure": "Publish one versioned native capability/action bundle with stable operation IDs; protocol/handler identity appropriate to each operation; input/output/error schemas; permissions; state transitions; idempotency; recovery lookup; exact source/consumer registration and evidence. Join every feature/context/action without inventing endpoints.",
+      "closure_evidence": "Each required action resolves to a real registered producer and client; success, refusal, unknown and recovery have independently observed postconditions. A missing binding blocks BG-001.",
+      "status": "OPEN_AT_AUDITED_BLUEPRINT",
+      "source_bug_claim": false
+    },
+    {
+      "id": "WPC-002",
+      "priority": "P0",
+      "category": "ACCEPTANCE_ORACLE_DEPTH",
+      "title": "Inventory preservation does not yet provide executable per-action acceptance",
+      "evidence": [
+        "verification/TEST_CONTRACTS.json: T-LAC-001\u2026349, T-SURFACE-*, T-BE-*",
+        "traceability/LEGACY_349_ACTIONS.json"
+      ],
+      "observed": "All 349 legacy-action tests have expectation equal to the action title. There are also 34 repetitions each of generic backend positive, restart, authority and producer/consumer expectations. Detailed domain requirements may supply semantics, but these entries do not independently state the full stimulus and observable result.",
+      "owners": [
+        "BQ-006",
+        "UX-003",
+        "QA-001"
+      ],
+      "required_closure": "Expand existing test identities with exact preconditions, input, operation/context binding, oracle, failure reason and restart/retry postcondition. Retain every legacy action and existing test identity; reusable harnesses must enumerate every bound case.",
+      "closure_evidence": "Traceable results cover every required action and state family; altering the postcondition or pointing a test at a sibling action causes the relevant acceptance to fail.",
+      "status": "OPEN_AT_AUDITED_BLUEPRINT",
+      "source_bug_claim": false
+    },
+    {
+      "id": "WPC-003",
+      "priority": "P1",
+      "category": "CONFIRMED_TRACEABILITY_GAP",
+      "title": "22 feature tests omit their declared primary frontend owner",
+      "evidence": [
+        "traceability/REV2_93_FEATURE_CROSSWALK.json: primary_frontend_unit/test_ids",
+        "verification/TEST_CONTRACTS.json: unit/additional_units",
+        "STRUCTURAL_FINDINGS.json: feature_primary_test_owner_mismatches"
+      ],
+      "observed": "Example: VNX-F-PRESENCE-03 declares FE-021 but its direct test belongs only to FE-017. ARTEMIS declares FE-018/test FE-017; Automation declares FE-020/test FE-019. Some of the 22 may be intentional shared delivery; this is an unclosed ownership/delegation relationship, not proof of missing implementation.",
+      "owners": [
+        "UX-003",
+        "BQ-006",
+        "QA-001"
+      ],
+      "required_closure": "For each listed mismatch record accountable primary and supporting owners, add the primary to the applicable test binding or document and test explicit delegation. Align VNX-S-PRESENCE-05 (FE-005) with its voice feature owner and shared floating-shell responsibilities.",
+      "closure_evidence": "Every feature primary has a reviewed acceptance obligation in the generated plan or an explicit delegation with shared exit evidence; no feature is certified solely by an unrelated unit.",
+      "status": "OPEN_AT_AUDITED_BLUEPRINT",
+      "source_bug_claim": false
+    },
+    {
+      "id": "WPC-004",
+      "priority": "P0",
+      "category": "LIFECYCLE_CONTRACT_DEPTH",
+      "title": "Zero-configuration bootstrap needs an executable identity and recovery protocol",
+      "evidence": [
+        "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_17_20261018.md: Part B \u00a7\u00a711.4,12.1,14.4,19.3",
+        "contracts/BACKEND_SERVICE_CATALOG.json: BE-002/031",
+        "design/ALL_SURFACE_CONTRACTS.json: van.onboarding/van.provisioning/van.devices.provision"
+      ],
+      "observed": "Signed provisioning, pairing/revocation and absence of manual host/token fields are specified. The whole-product acceptance set still needs a bound bootstrap/update/re-enrollment path with exact freshness, trust and failure semantics for the deployed Android identity and service route.",
+      "owners": [
+        "BE-002",
+        "BE-031",
+        "FE-001",
+        "FE-022",
+        "QA-002"
+      ],
+      "required_closure": "Bind first-install delivery, trust root, envelope lifetime, owner/device enrollment, endpoint/certificate rotation, device replacement/revocation, clock error, offline start and reinstall/restore to typed outcomes and actual signed-build scenarios. Preserve one owner enrollment flow without manual backend settings.",
+      "closure_evidence": "A fresh S24 installation reaches the intended authorized services without host/port/token entry; expired/replayed provisioning refuses; rotation and recovery work without reviving a revoked device.",
+      "status": "OPEN_AT_AUDITED_BLUEPRINT",
+      "source_bug_claim": false
+    },
+    {
+      "id": "WPC-005",
+      "priority": "P0",
+      "category": "INTERACTION_CONTRACT_DEPTH",
+      "title": "Conversation and spoken responses need a complete turn/audio contract",
+      "evidence": [
+        "contracts/BACKEND_SERVICE_CATALOG.json: BE-029",
+        "verification/TEST_CONTRACTS.json: T-BE-029-POS/NEG/REC, T-FEATURE-PRESENCE-03",
+        "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_17_20261018.md: Part B \u00a7\u00a710\u201311"
+      ],
+      "observed": "Voice is already included: streaming transcript/audio, interruption, history and speaker consent are explicit. The active entries do not supply a complete typed sequence for partial/final recognition, turn revision, command acceptance, audio playback, interruption and verified action completion, or a measurable conversation latency/quality budget.",
+      "owners": [
+        "BE-029",
+        "BE-002",
+        "BE-003",
+        "FE-021",
+        "BQ-004"
+      ],
+      "required_closure": "Define session/turn/audio sequence identity, partial/final transcript and correction rules, intent ambiguity handling, TTS completion/cancellation, barge-in, text fallback, language/number pronunciation, provider failure, scoped context, redacted retention and measurable acceptance budgets. Decide supported activation modes explicitly; do not assume always-on wake word. Voice identity alone cannot replace effect authorization.",
+      "closure_evidence": "Positive conversations and action readback run through real speech providers; ambiguous amounts/accounts require resolution; late audio/recognition cannot restart a cancelled turn or duplicate a command; spoken done follows verified effect, not transcript receipt.",
+      "status": "OPEN_AT_AUDITED_BLUEPRINT",
+      "source_bug_claim": false
+    },
+    {
+      "id": "WPC-006",
+      "priority": "P1",
+      "category": "PLATFORM_CONTRACT_DEPTH",
+      "title": "Floating and voice lifecycle need a declared Android support matrix",
+      "evidence": [
+        "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_17_20261018.md: Part B \u00a710.4",
+        "contracts/BACKEND_TO_FRONTEND_CONSUMPTION_CONTRACT.md: Voice/device ownership",
+        "plan/DEVELOPMENT_PLAN.json: FE-005/021, QA-004"
+      ],
+      "observed": "OS permission/lifecycle preservation is required, but the release needs exact supported Android/One UI behaviour and evidence for background/locked screen, overlay, microphone, notification and audio-route restrictions. A generic persistent-assistant promise does not settle those platform cases.",
+      "owners": [
+        "FE-005",
+        "FE-021",
+        "FE-022",
+        "QA-004"
+      ],
+      "required_closure": "Publish supported activation/foreground/background modes and fallbacks; test Bluetooth/headset changes, audio-focus loss/call, denied/revoked permission, foreground-service limits, reboot, battery saver, process death and owner dismissal on the supported S24 OS.",
+      "closure_evidence": "Each supported mode has actual OS readback; unsupported background behaviour is clearly surfaced with an accessible supported alternative and no silent recording.",
+      "status": "OPEN_AT_AUDITED_BLUEPRINT",
+      "source_bug_claim": false
+    },
+    {
+      "id": "WPC-007",
+      "priority": "P0",
+      "category": "ECONOMIC_QUALIFICATION_PENDING",
+      "title": "Strong trading specifications still need source repairs and economic proof",
+      "evidence": [
+        "research/REV117_MODEL_AND_PROFITABILITY_REVIEW.md",
+        "evidence/rev117/source_probes.json",
+        "research/PROFITABILITY_EXPERIMENTS.json",
+        "review/INDEPENDENT_AUDIT.md"
+      ],
+      "observed": "Prior pinned-source reviews/probes identify execution/TCA/slicing and model-qualification/blind-review/budget isolation work. This audit does not reassert those defects against newly deployed code. All six economic experiment templates remain NOT_RUN; a detailed learning specification is not demonstrated positive net contribution.",
+      "owners": [
+        "BE-010",
+        "BE-012",
+        "BE-035",
+        "BE-036",
+        "BQ-007",
+        "BQ-009"
+      ],
+      "required_closure": "Reconcile each source finding at the implementation head, qualify the evaluator first, run registered full-cohort/cost/risk experiments with protected confirmation, and retain inconclusive/negative results. Demonstrate both actual outcome-to-later-decision loops and rollback.",
+      "closure_evidence": "Exact source tests establish repairs, and independent evidence supports each promoted policy/model at its declared scope. No profitability label follows solely from model capability or winning trades.",
+      "status": "OPEN_AT_AUDITED_BLUEPRINT",
+      "source_bug_claim": false
+    },
+    {
+      "id": "WPC-008",
+      "priority": "P0",
+      "category": "EXTERNAL_QUALIFICATION_PENDING",
+      "title": "Provider capability and entitlement remain external dependencies",
+      "evidence": [
+        "verification/RUNTIME_EXTERNAL_QUALIFICATION_MATRIX.json: status/capabilities",
+        "contracts/BACKEND_SERVICE_CATALOG.json: BE-004\u2013008,014,024\u2013029,034 and forecast providers"
+      ],
+      "observed": "The matrix contains all 82 backend units but explicitly says PREDEVELOPMENT_MATRIX_NOT_RUNTIME_PROOF. Current provider support, permitted accounts, feeds, speech access, execution/funding rails and research licences are not established by these rows.",
+      "owners": [
+        "BE-004",
+        "BE-005",
+        "BE-031",
+        "BE-032",
+        "BQ-002",
+        "BQ-004",
+        "BQ-006"
+      ],
+      "required_closure": "For each required provider-operation pair bind actual account scope, entitlement, environment, source/API version, support/degradation states, rate/fee limits and qualified receipt. Select first execution/voice/data targets within existing authority; preserve all broader feature obligations or declare a separate approved scope amendment.",
+      "closure_evidence": "Required integrations have current permitted positive and refusal paths. Unsupported is a truthful state, not a way to count a required feature as complete; hosted fallback is tested where allowed.",
+      "status": "OPEN_AT_AUDITED_BLUEPRINT",
+      "source_bug_claim": false
+    },
+    {
+      "id": "WPC-009",
+      "priority": "P1",
+      "category": "DELIVERY_POLICY_DEPTH",
+      "title": "Notification and cross-surface state policy needs a complete delivery matrix",
+      "evidence": [
+        "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_17_20261018.md: Part B \u00a7\u00a75,11.7,13",
+        "contracts/BACKEND_SERVICE_CATALOG.json: BE-030/031"
+      ],
+      "observed": "Canonical event identity, dedupe, quiet hours and critical-risk precedence exist. Their combinations across orb, Attention, Android notification, Floating VAN and spoken output still need explicit policy/acceptance rows, especially privacy while locked and denied OS delivery.",
+      "owners": [
+        "BE-030",
+        "BE-031",
+        "FE-004",
+        "FE-005",
+        "FE-021",
+        "FE-022"
+      ],
+      "required_closure": "Specify per-channel eligibility, criticality, lock-screen masking, quiet hours, acknowledgement/snooze distinction, expiry and delivery failure. Reconcile Android permission/DND constraints with reliable in-app critical state rather than promising to bypass the OS.",
+      "closure_evidence": "One event remains one incident across channels; revoked/expired actions cannot execute from old notifications; critical state remains visible even when OS delivery is blocked.",
+      "status": "OPEN_AT_AUDITED_BLUEPRINT",
+      "source_bug_claim": false
+    },
+    {
+      "id": "WPC-010",
+      "priority": "P1",
+      "category": "WORKFLOW_PROTOCOL_DEPTH",
+      "title": "Work, agents, browser, automation and studio require operation-level lifecycle tables",
+      "evidence": [
+        "contracts/BACKEND_SERVICE_CATALOG.json: BE-023\u2013026,028,034",
+        "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_17_20261018.md: Part B \u00a7\u00a79,11.5\u201311.6"
+      ],
+      "observed": "Native identities, leases, cancellation, truthful progress, provider approvals and artifact evidence are present as rules. Per-operation conflicts, timeout/unknown reconciliation, asynchronous callbacks and partial workflow compensation must still be bound to specific native APIs and tests.",
+      "owners": [
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-028",
+        "BE-034",
+        "BQ-004"
+      ],
+      "required_closure": "Provide transition tables for create/update/steer/pause/resume/cancel/retry and approvals, with expected revision, native operation/attempt identity, callback correlation, lease/fence, timeout and reconciliation. Explicitly define DST/misfire/overlap policy and safe file transfer retries.",
+      "closure_evidence": "Concurrent edits and late callbacks cannot overwrite newer state; unknown effects reconcile original operations; cancellation of a UI request never falsely reports native work cancelled.",
+      "status": "OPEN_AT_AUDITED_BLUEPRINT",
+      "source_bug_claim": false
+    },
+    {
+      "id": "WPC-011",
+      "priority": "P1",
+      "category": "DATA_LIFECYCLE_DEPTH",
+      "title": "Privacy and erasure need a verifiable store-by-store lifecycle",
+      "evidence": [
+        "contracts/BACKEND_SERVICE_CATALOG.json: BE-027/029",
+        "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_17_20261018.md: Part B \u00a711.3",
+        "contracts/self_optimization/MODEL_USE_CONTRACT.json"
+      ],
+      "observed": "Erasure, derivative caches, exceptions and distinction from model unlearning are explicit. The physical store/processor retention graph and deletion/restore evidence are not provided by the service catalogue.",
+      "owners": [
+        "BE-027",
+        "BE-029",
+        "BE-033",
+        "BQ-005"
+      ],
+      "required_closure": "Map source, transcript/audio, embeddings/index, cached summaries, provider retention, artifacts, telemetry and backups to policy, owner and deletion/expiry receipts. Preserve necessary audit exceptions explicitly; prevent restored backups from reviving withdrawn context.",
+      "closure_evidence": "A scoped erasure is traceable through each applicable store/processor and re-index/restore path; inaccessible or retained exceptions remain disclosed rather than reported as deleted.",
+      "status": "OPEN_AT_AUDITED_BLUEPRINT",
+      "source_bug_claim": false
+    },
+    {
+      "id": "WPC-012",
+      "priority": "P1",
+      "category": "OPERABILITY_BUDGET_DEPTH",
+      "title": "Recovery and capacity obligations need measurable operational budgets",
+      "evidence": [
+        "contracts/BACKEND_SERVICE_CATALOG.json: BE-033",
+        "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_17_20261018.md: Part B \u00a715.1",
+        "verification/RUNTIME_EXTERNAL_QUALIFICATION_MATRIX.json"
+      ],
+      "observed": "There are candidate navigation/chart targets and qualitative recovery/capacity requirements. End-to-end availability, voice latency, event freshness, restore RPO/RTO, queue/disk limits and research-versus-protection saturation require deployed-topology budgets and failure thresholds.",
+      "owners": [
+        "BE-003",
+        "BE-029",
+        "BE-033",
+        "BQ-005",
+        "QA-004"
+      ],
+      "required_closure": "Set workload-specific budgets and measurement protocols before qualification; define overload/backpressure, alert ownership, retention, restore procedure, maintenance behaviour and acceptable data loss per domain. Preserve urgent financial reconciliation independently of research load.",
+      "closure_evidence": "Representative load, dependency outage and restore drills meet the declared budgets or visibly degrade within policy; success is not inferred from an open port or healthy process.",
+      "status": "OPEN_AT_AUDITED_BLUEPRINT",
+      "source_bug_claim": false
+    },
+    {
+      "id": "WPC-013",
+      "priority": "P0",
+      "category": "RELEASE_ACCEPTANCE_PENDING",
+      "title": "Signed app identity, upgrade and rollback need exact-build evidence",
+      "evidence": [
+        "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_17_20261018.md: Part B \u00a7\u00a712.1,19.3",
+        "plan/DEVELOPMENT_PLAN.json: QA-002/005 and release/retirement units"
+      ],
+      "observed": "The blueprint preserves com.dial.van, signing/pairing continuity and compatible rollback. These requirements remain unverified for the eventual rebuilt app and current backend/store versions.",
+      "owners": [
+        "BE-002",
+        "BE-033",
+        "FE-001",
+        "QA-002",
+        "QA-005"
+      ],
+      "required_closure": "Bind signing identity, APK digest, provisioning schema, backend version compatibility, migrations, OS permissions, encrypted stores and app links to install/upgrade/rollback tests. Test rollback against newer financial data and revocations; retirement follows full parity acceptance.",
+      "closure_evidence": "The actual signed release installs/upgrades without orphaning owner/device state; incompatible versions refuse safely; rollback never restores obsolete authority or loses financial truth.",
+      "status": "OPEN_AT_AUDITED_BLUEPRINT",
+      "source_bug_claim": false
+    },
+    {
+      "id": "WPC-014",
+      "priority": "P1",
+      "category": "SECURITY_ACCEPTANCE_DEPTH",
+      "title": "Cross-domain security needs an explicit adversarial surface matrix",
+      "evidence": [
+        "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_17_20261018.md: Part B \u00a7\u00a714,18",
+        "contracts/BACKEND_SERVICE_CATALOG.json: BE-002/025/027/029",
+        "plan/DEVELOPMENT_PLAN.json: BQ-005,QA-003"
+      ],
+      "observed": "Scope, signed intents, untrusted chart/browser content, privacy and model prompt-injection boundaries are specified. Each ingress/egress and consequential command still needs exact attack fixtures and source-bound enforcement evidence.",
+      "owners": [
+        "BE-002",
+        "BE-025",
+        "BE-027",
+        "BE-029",
+        "BQ-005",
+        "QA-003"
+      ],
+      "required_closure": "Cover forged/replayed intents, changed confirmation arguments, cross-account/project queries, malicious shares/documents/web content, transcript ambiguity, token leakage in logs/captures, expired sessions and restored revocations. Bind denial to the actual domain owner.",
+      "closure_evidence": "Negative tests fail at authoritative boundaries and leave correct receipts/state; display checks or sanitized screenshots alone cannot certify authorization.",
+      "status": "OPEN_AT_AUDITED_BLUEPRINT",
+      "source_bug_claim": false
+    },
+    {
+      "id": "WPC-015",
+      "priority": "P1",
+      "category": "NATIVE_ACCEPTANCE_PENDING",
+      "title": "Readability, navigation and performance remain rendered-device obligations",
+      "evidence": [
+        "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
+        "evidence/rev117/theme_readability_20261021.json",
+        "design/ALL_SURFACE_CONTRACTS.json",
+        "plan/DEVELOPMENT_PLAN.json: QA-004"
+      ],
+      "observed": "All 234 contexts inherit readability requirements, and 80 opaque colour pairs passed static arithmetic. There is no resulting proof of gradients/compositing, actual glyphs, TalkBack, large text, sunlight, battery/thermal or process-death behaviour.",
+      "owners": [
+        "UX-002",
+        "UX-003",
+        "FE-002",
+        "QA-004"
+      ],
+      "required_closure": "Create exact-build component/state goldens and complete context/action acceptance, including both themes, 200% font scaling, focus, reduced motion, landscape/split screen, low brightness/sunlight and pending-action recovery.",
+      "closure_evidence": "Actual S24 receipts and accessibility/performance evidence certify the declared context/state matrix; visual degradation preserves essential controls and financial values.",
+      "status": "OPEN_AT_AUDITED_BLUEPRINT",
+      "source_bug_claim": false
+    },
+    {
+      "id": "WPC-016",
+      "priority": "P0",
+      "category": "WHOLE_PRODUCT_ACCEPTANCE_PENDING",
+      "title": "No document result currently establishes full implementation or release acceptance",
+      "evidence": [
+        "verification/TEST_CONTRACTS.json: all execution_state values",
+        "verification/F15_CERTIFICATE.json",
+        "verification/BACKEND_COMPLETE_CERTIFICATE.json",
+        "plan/DEVELOPMENT_PLAN.json: global gates"
+      ],
+      "observed": "All 1,610 application contracts are NOT_RUN. Native source admission/F15, BG and final owner/device acceptance are separate from successful document verification. Source implementation may exist elsewhere; this audit has not requalified it.",
+      "owners": [
+        "BQ-006",
+        "BG-001",
+        "QA-001",
+        "QA-002",
+        "QA-003",
+        "QA-004",
+        "QA-005"
+      ],
+      "required_closure": "Keep an exact-source acceptance ledger across every feature/action/requirement/provider; reconcile source fixes first, qualify all backend capabilities before frontend gate, then run complete signed-app and S24 acceptance. Representative journeys discover risks but cannot certify untested siblings.",
+      "closure_evidence": "Current source/config/provider/build receipts support every applicable obligation and required independent/native gate. No counter, schema checker, simulator or emulator is relabelled as complete product/device evidence.",
+      "status": "OPEN_AT_AUDITED_BLUEPRINT",
+      "source_bug_claim": false
+    }
+  ]
+}
