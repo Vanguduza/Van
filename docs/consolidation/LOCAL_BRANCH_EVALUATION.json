@@ -1,0 +1,110 @@
+{
+  "scope": "AVAILABLE_WORKSPACE_LOCAL_BRANCH_INVENTORY",
+  "van_checkouts": 7,
+  "original_local_branch_refs": 8,
+  "checkouts": [
+    {
+      "checkout": ".onboarding/canon/dfc1557ab99ad8d41cf84714e1bb671e89b045e6/Van",
+      "branches": [
+        {
+          "branch": "main",
+          "sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+          "remote_tip_match": true,
+          "retained_in_consolidated_ancestry": true,
+          "disposition": "INTEGRATED_ANCESTOR"
+        }
+      ]
+    },
+    {
+      "checkout": "van-review-2026-10-18/publish",
+      "branches": [
+        {
+          "branch": "main",
+          "sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+          "remote_tip_match": true,
+          "retained_in_consolidated_ancestry": true,
+          "disposition": "INTEGRATED_ANCESTOR"
+        },
+        {
+          "branch": "review/van-rev115-20261018",
+          "sha": "3c3379bd791f7bda7ab66c21bba550d6077ba853",
+          "remote_tip_match": true,
+          "retained_in_consolidated_ancestry": true,
+          "disposition": "INTEGRATED_ANCESTOR"
+        }
+      ]
+    },
+    {
+      "checkout": "van-audit/canon-source-publication-dfc1557a-2026-10-09-remote-readback",
+      "branches": [
+        {
+          "branch": "codex/van-canon-runtime-closure-2026-10-09",
+          "sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+          "remote_tip_match": true,
+          "retained_in_consolidated_ancestry": true,
+          "disposition": "INTEGRATED_ANCESTOR"
+        }
+      ]
+    },
+    {
+      "checkout": "van-audit/canon-evidence-publication-dfc1557a-r3-2026-10-09-remote-readback",
+      "branches": [
+        {
+          "branch": "codex/van-canon-runtime-evidence-2026-10-09",
+          "sha": "c502cf7ab5c29b262719c4ed7eebf55ac3fe4647",
+          "remote_tip_match": true,
+          "retained_in_consolidated_ancestry": false,
+          "disposition": "PRESERVED_AT_REMOTE_SNAPSHOT"
+        }
+      ]
+    },
+    {
+      "checkout": "van-audit/van-owner-wiring-remote-check-2026-10-08",
+      "branches": [
+        {
+          "branch": "codex/van-owner-wiring-2026-10-08",
+          "sha": "652ef3f38717c808f57fcbc97f92d1030f9ab4a8",
+          "remote_tip_match": true,
+          "retained_in_consolidated_ancestry": true,
+          "disposition": "INTEGRATED_ANCESTOR"
+        }
+      ]
+    },
+    {
+      "checkout": "van-audit/canon-pr93-4ad31883-2026-10-09",
+      "branches": [
+        {
+          "branch": "main",
+          "sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+          "remote_tip_match": true,
+          "retained_in_consolidated_ancestry": true,
+          "disposition": "INTEGRATED_ANCESTOR"
+        }
+      ]
+    },
+    {
+      "checkout": "Van",
+      "branches": [
+        {
+          "branch": "work",
+          "sha": "12feb9033dfc1dd68d7b4d41ac477f0d9dbbc4af",
+          "remote_tip_match": false,
+          "retained_in_consolidated_ancestry": true,
+          "disposition": "INTEGRATED_ANCESTOR"
+        }
+      ]
+    }
+  ],
+  "original_dirty_checkout": {
+    "path": "/workspace/Van",
+    "head": "12feb9033dfc1dd68d7b4d41ac477f0d9dbbc4af",
+    "tracked_diff_sha256": "9856575a913d32738b9649d5946a61818bd02769b8da7698a4e0dc6614585a98",
+    "status_sha256": "d07afcc2c1cd0e9ba8b50ea40e2103696e16321d7d4803c47ff1fc7e6714a6f9",
+    "status_entries": 576,
+    "policy": "Original dirty selected checkout remains untouched; no raw dirty diff included."
+  },
+  "limitations": [
+    "Includes ordinary Van Git checkouts present in this workspace; no claim of scanning private computers or other hosts.",
+    "Uncommitted owner work was preserved in place, not promoted into the consolidated source."
+  ]
+}

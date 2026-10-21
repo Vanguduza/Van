@@ -28,6 +28,6 @@ Run `python3 tools/consolidation/verify.py`. Fetch archive tags if a shallow/bra
 
 ## Admission and continuation
 
-The default branch remains `main`; the consolidated branch is a source candidate. Existing Project Truth trusted-base intake and independent/code-owner review remain required for canonical main admission. No owner signature, gate certificate, deployed service change or new financial authority is created by this consolidation.
+The default branch remains `main`; the consolidated branch is a source candidate. Existing Project Truth trusted-base intake and independent/code-owner review remain required for canonical main admission. `MAIN_ADMISSION.md` and `MAIN_AUTHORIZATION_INTAKE.json` describe the concrete prerequisite. No owner signature, gate certificate, deployed service change or new financial authority is created by this consolidation.
 
 Resume by checking Git status, this branch's current head, root authority, the branch ledger and actual running jobs. Begin the next dependency-ready PRE packet. Keep candidate adoption decisions traceable; never merge all archive branches or restore a historical whole tree over this source.

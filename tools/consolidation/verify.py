@@ -30,6 +30,10 @@ def main():
             findings.append('Missing branch disposition/evidence: ' + row['branch'])
         if git('rev-parse', 'refs/tags/' + row['archive_tag']) != row['sha']:
             findings.append('Snapshot ref mismatch: ' + row['branch'])
+    hooks = subprocess.run(['git', '-C', str(ROOT), 'config', '--get', 'core.hooksPath'],
+                           text=True, capture_output=True)
+    if hooks.returncode or hooks.stdout.strip() != '.githooks':
+        findings.append('Install the repository Project Truth hooks before source work')
     spec = state['blueprint']
     actual_hash = hashlib.sha256((ROOT / spec['archive']).read_bytes()).hexdigest()
     if actual_hash != spec['archive_sha256']:
