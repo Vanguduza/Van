@@ -89,3 +89,17 @@ def test_recorded_blobs_are_the_pinned_dds_blobs_when_dds_is_present():
             assert subprocess.run(["git", "hash-object", str(DDS / path)], capture_output=True, text=True).stdout.strip() == blob
         else:
             assert real.stdout.strip() == blob
+
+
+def test_services_run_in_the_stream_hosts_own_hash_locked_environment():
+    """The stream-host tests need aiortc/av/aiohttp from deploy/van-browser-stream/requirements.lock,
+    whose cryptography/pyee pins differ from the backend lock. The services step must build that
+    environment exactly as bootstrap.sh does and run the whole services tree in it."""
+    step = next(s for s in backend_steps() if s.get("name") == "Browser Control Agent and stream-host logic")
+    run = step["run"]
+    assert "--require-hashes -r deploy/van-browser-stream/requirements.lock" in run
+    assert 'PYTHONPATH="$PWD:$PWD/backend"' in run
+    assert re.search(r"-m pytest -q services\s*$", run.strip())
+    assert "--ignore" not in run and "-k " not in run and "continue-on-error" not in step
+    lock = (ROOT / "deploy/van-browser-stream/requirements.lock").read_text()
+    assert "aiortc==" in lock and lock.count("--hash=sha256:") >= lock.count("==")

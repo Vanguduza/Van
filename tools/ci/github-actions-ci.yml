@@ -215,8 +215,16 @@ jobs:
       # runs on the Browser Stream Host rather than on the Gateway, so neither of the two
       # suites above reaches it. Its authority checks are pure and executed here; the CDP
       # transport behind them needs a Chromium and is RB-010/RB-117, a host gate.
+      # The stream host runs from a venv holding only deploy/van-browser-stream/requirements.lock
+      # (hash-pinned) with van_gateway on PYTHONPATH (bootstrap.sh). Its tests need aiortc/av/aiohttp,
+      # which the backend lock lacks, and that lock pins cryptography and pyee differently, so the
+      # services suite runs in the same isolated environment rather than altering the backend one.
       - name: Browser Control Agent and stream-host logic
-        run: pytest -q services
+        run: |
+          python -m venv "$RUNNER_TEMP/stream-venv"
+          "$RUNNER_TEMP/stream-venv/bin/pip" install --require-hashes -r deploy/van-browser-stream/requirements.lock
+          "$RUNNER_TEMP/stream-venv/bin/pip" install pytest==9.1.1 pytest-asyncio==1.4.0
+          PYTHONPATH="$PWD:$PWD/backend" "$RUNNER_TEMP/stream-venv/bin/python" -m pytest -q services
 
       # Protocol rule 31, Android half. A compiler finds code that does not build; this
       # finds code that builds, is tested, and nothing reaches — the class P0-AND-012 lived
