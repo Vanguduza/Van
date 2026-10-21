@@ -46,6 +46,7 @@
   "docs/rebuild/rev118/pre003/NATIVE_READBACK_REQUEST.md": "f3e0131efeb773783dcb6e687f244dc1c97ed1bd61f00bc793028f051d0e6d36",
   "docs/rebuild/rev118/pre003/REVIEW_SUBMISSION.md": "0f6d38ab100aebb34092b648ab34a88719b266be3991972cad9d9118502baa66",
   "docs/rebuild/rev118/receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json": "372781542e32895e8e8cd549cc7df715a80c7bdb04b24fc655e8fbd0991a3462",
+  "docs/rebuild/rev118/receipts/PROJECT_TRUTH_VERIFY_4fd466de.json": "771ae3852a41b8849f253d5d77a7fee48ac52cc5b8327ac0ec0ebe24c3fd29c6",
   "tests/rebuild/test_ap001.py": "549b90cb35b9e855f0ce3b5af70bf5972c8ff9310d17a234f9ff25b4a2da2dfb",
   "tests/rebuild/test_pre001.py": "05afd0ff69a55f4c94faa17ca1d05d20b9e6efd5e6abd699ab12a1d33eae4c82",
   "tests/rebuild/test_pre002_dossiers.py": "89ffec64edda33be71d676d1f5d7078454bcf5f4fbba5fabb0591f42bdb8b141",
