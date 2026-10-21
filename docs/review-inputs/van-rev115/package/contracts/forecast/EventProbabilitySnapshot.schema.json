@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:van:forecast:prediction-market:EventProbabilitySnapshot:1.0",
+  "title": "EventProbabilitySnapshot",
+  "description": "Proposed VAN contract. JSON shape/local arithmetic is not evidence admission, source permission or financial authority.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment": {
+      "enum": [
+        "FIXTURE",
+        "RESEARCH",
+        "SHADOW"
+      ]
+    },
+    "authority_effect": {
+      "const": "NONE"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "source_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "canonical_event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "proposition_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "max_input_available_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scheduled_release_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "estimate_kind": {
+      "enum": [
+        "MARKET_IMPLIED",
+        "CALIBRATED_EVENT_PROBABILITY"
+      ]
+    },
+    "distribution_representation": {
+      "enum": [
+        "BINARY",
+        "EXCLUSIVE_EXHAUSTIVE_BINS",
+        "THRESHOLD_SURVIVAL"
+      ]
+    },
+    "raw_probabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "minLength": 1
+          },
+          "probability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": [
+          "outcome",
+          "probability"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "calibrated_probabilities": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "minLength": 1
+              },
+              "probability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "required": [
+              "outcome",
+              "probability"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "thresholds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "threshold": {
+            "type": "number"
+          },
+          "survival_probability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": [
+          "threshold",
+          "survival_probability"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "tail_policy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "estimator_policy_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adjustment_policy_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "calibrator_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "event_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "source_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "source_names": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "source_event_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "agreement_state": {
+      "enum": [
+        "MATCHED_TWO_SOURCES",
+        "SINGLE_SOURCE",
+        "DISPUTED",
+        "NOT_COMPARABLE"
+      ]
+    },
+    "agreement_proves_independence": {
+      "const": false
+    },
+    "status": {
+      "enum": [
+        "READY_FOR_RESEARCH",
+        "UNAVAILABLE",
+        "DISPUTED",
+        "PARTIAL"
+      ]
+    },
+    "armed_eligible": {
+      "type": "boolean",
+      "description": "Eligibility metadata, not permission. True requires verified source/rule/horizon/freshness/liquidity evidence and the existing parent consumer checks; never grants armed execution."
+    },
+    "origin_event_id_for_change": {
+      "type": "string",
+      "minLength": 1
+    },
+    "armed_eligibility_evidence_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_id",
+    "environment",
+    "authority_effect",
+    "evidence_refs",
+    "source_digest",
+    "canonical_event_id",
+    "proposition_digest",
+    "as_of",
+    "max_input_available_at",
+    "scheduled_release_at",
+    "estimate_kind",
+    "distribution_representation",
+    "raw_probabilities",
+    "calibrated_probabilities",
+    "thresholds",
+    "tail_policy",
+    "estimator_policy_ref",
+    "adjustment_policy_ref",
+    "calibrator_ref",
+    "event_count",
+    "source_count",
+    "source_names",
+    "source_event_ids",
+    "agreement_state",
+    "agreement_proves_independence",
+    "status",
+    "armed_eligible",
+    "origin_event_id_for_change",
+    "armed_eligibility_evidence_ref"
+  ],
+  "additionalProperties": false
+}

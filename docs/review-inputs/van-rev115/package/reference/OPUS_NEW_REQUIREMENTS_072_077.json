@@ -1,0 +1,172 @@
+{
+  "rows": [
+    {
+      "acceptance": "§7.4.14; induced: a failing candidate never reaches the owner; a passing candidate cannot change live trading without a signed promotion; a protected-path candidate is held; the weekly run is scheduled and replays identically from the ledger",
+      "backend_units": [
+        "BE-013",
+        "BE-022",
+        "BE-028",
+        "BE-035",
+        "BE-036"
+      ],
+      "canonical_clarifications": [
+        "VAN-CX-010",
+        "VAN-CX-011",
+        "VAN-CX-013",
+        "VAN-CX-014"
+      ],
+      "frontend_units": [
+        "FE-012",
+        "FE-014",
+        "FE-023"
+      ],
+      "id": "VAN-NX-072",
+      "legacy_du": "DU-28d",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-007"
+      ],
+      "source_row_sha256": "72b6479b6f92f20ca03398b26bebdb76d6e120466a0834199aa95c32a60137c8",
+      "source_sha": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-NX-072",
+      "text": "Continuous governed strategy development: weekly loss clustering and drift review, automatic candidate generation, automatic backtest and validation, only passing candidates sent to the owner, owner-signed one-step promotion, automatic demotion"
+    },
+    {
+      "acceptance": "§7.4.15 #1; induced: a tampered new row, a re-chained old row and a deleted row are caught at once; an in-place old-row edit is caught by the next full verification",
+      "backend_units": [
+        "BE-003",
+        "BE-033"
+      ],
+      "canonical_clarifications": [
+        "VAN-CX-008"
+      ],
+      "frontend_units": [
+        "FE-022"
+      ],
+      "id": "VAN-NX-073",
+      "legacy_du": "DU-28",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-007"
+      ],
+      "source_row_sha256": "993c07d10d419c84935b02364c83181140cda2f94684d688453142a1d43bccd1",
+      "source_sha": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-NX-073",
+      "text": "Per-decision ledger verification costs the rows added since a verified anchor, not the whole ledger; full verification at least hourly and after any failure"
+    },
+    {
+      "acceptance": "§7.4.15 #2; JPY and metals orders fill under normal slippage; slippage beyond the bound is still refused",
+      "backend_units": [
+        "BE-008",
+        "BE-009",
+        "BE-010"
+      ],
+      "canonical_clarifications": [
+        "VAN-CX-007"
+      ],
+      "frontend_units": [
+        "FE-009",
+        "FE-011"
+      ],
+      "id": "VAN-NX-074",
+      "legacy_du": "DU-28e",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-007"
+      ],
+      "source_row_sha256": "4eff60dda497f2d8beb4fef7f39ec5788c4713b68b8f0c0757d3ad41da671b2a",
+      "source_sha": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-NX-074",
+      "text": "Slippage bounds are relative to price and converted per instrument (price units for the router, points for MT5)"
+    },
+    {
+      "acceptance": "§7.4.15 #3; randomised both-direction test; induced widening fails",
+      "backend_units": [
+        "BE-008",
+        "BE-009",
+        "BE-010"
+      ],
+      "canonical_clarifications": [
+        "VAN-CX-007"
+      ],
+      "frontend_units": [
+        "FE-009"
+      ],
+      "id": "VAN-NX-075",
+      "legacy_du": "DU-28e",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-007"
+      ],
+      "source_row_sha256": "0ce5d3e5445c57b4d9252a21ad18245f6b76006765e727227089da3ac892f708",
+      "source_sha": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-NX-075",
+      "text": "Tick quantisation never widens the approved stop distance"
+    },
+    {
+      "acceptance": "§7.4.15 #4; induced: STOP→LIMIT refused, unsupported type refused, paper limit not filled away from the market; live STOP only after per-venue demo qualification",
+      "backend_units": [
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "BE-019",
+        "BE-035"
+      ],
+      "canonical_clarifications": [
+        "VAN-CX-003",
+        "VAN-CX-004",
+        "VAN-CX-005",
+        "VAN-CX-006"
+      ],
+      "frontend_units": [
+        "FE-009",
+        "FE-011"
+      ],
+      "id": "VAN-NX-076",
+      "legacy_du": "DU-28e",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-007"
+      ],
+      "source_row_sha256": "108fec7b6efca6690e38c237e15e2d283e70006d97b6ec0369d1aaa1649b0d84",
+      "source_sha": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-NX-076",
+      "text": "The strategy's entry type is executed as requested or refused, never coerced; resting orders reserve risk, fill only when price reaches them, expire, and on fill seal the thesis and record TCA; a venue refusal ends only that candidate"
+    },
+    {
+      "acceptance": "§7.4.15 lockout design; induced: no expiry, legacy top floor, no rebuild, manual counted in the account scope, no probation and unconditional baseline restore each fail a test",
+      "backend_units": [
+        "BE-002",
+        "BE-006",
+        "BE-009",
+        "BE-011",
+        "BE-013"
+      ],
+      "canonical_clarifications": [
+        "VAN-CX-009"
+      ],
+      "frontend_units": [
+        "FE-009",
+        "FE-011",
+        "FE-012"
+      ],
+      "id": "VAN-NX-077",
+      "legacy_du": "DU-28",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-007"
+      ],
+      "source_row_sha256": "1554d4b1f7752ac60d9232e502f2c62c628c9972e3979df30cbb7831b3c8ff4a",
+      "source_sha": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-NX-077",
+      "text": "Recoverable lockouts: per-strategy and account cooldown, probation, weekly escalation to an owner-signed reset; relative drawdown top tier; owner-signed drawdown resume; state rebuilt from the ledger on restart; manual trades in their own scope"
+    }
+  ],
+  "source_sha": "a39f241b0135cf92cc5a6b9a28af226aa294603d"
+}

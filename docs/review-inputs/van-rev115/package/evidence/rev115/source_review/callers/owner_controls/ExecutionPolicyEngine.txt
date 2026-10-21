@@ -1,0 +1,9 @@
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:trading/vati/app/account_service.py:39:from vati.execution.policy import ExecutionBucket, ExecutionPolicyEngine
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:trading/vati/app/account_service.py:115:        self.policy = ExecutionPolicyEngine()
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:trading/vati/app/cycle.py:21:from vati.execution.policy import ExecutionBucket, ExecutionPolicyEngine
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:trading/vati/app/cycle.py:106:        self.execution_policy = ExecutionPolicyEngine()
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:trading/vati/cognition/translator.py:12:ExecutionPolicyEngine → ExecutionRouter exactly as before, and the authority
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:trading/vati/execution/policy.py:1:"""ExecutionPolicyEngine (§22, TRD-ENH-051..053).
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:trading/vati/execution/policy.py:172:class ExecutionPolicyEngine:
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:trading/vati/execution/policy.py:257:    "ExecutionPolicyEngine",
+68394af3c6e53ed764062b19cb4f2c0ab3b3b608:trading/vati/execution/style_selector.py:3:The ExecutionPolicyEngine already answers "which template", from measured

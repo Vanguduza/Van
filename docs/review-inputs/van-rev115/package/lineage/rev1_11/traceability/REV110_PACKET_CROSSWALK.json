@@ -1,0 +1,536 @@
+{
+  "mappings": [
+    {
+      "canonical_packet_id": "VAN-PKT-001",
+      "canonical_unit": "PRE-001",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-001",
+      "source_unit": "PRE-001"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-002",
+      "canonical_unit": "PRE-002",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-002",
+      "source_unit": "PRE-002"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-003",
+      "canonical_unit": "PRE-003",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-003",
+      "source_unit": "PRE-003"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-004",
+      "canonical_unit": "BE-001",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-004",
+      "source_unit": "BE-001"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-005",
+      "canonical_unit": "BE-002",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-005",
+      "source_unit": "BE-002"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-006",
+      "canonical_unit": "BE-003",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-006",
+      "source_unit": "BE-003"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-007",
+      "canonical_unit": "BE-004",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-007",
+      "source_unit": "BE-004"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-008",
+      "canonical_unit": "BE-005",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-008",
+      "source_unit": "BE-005"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-009",
+      "canonical_unit": "BE-006",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-009",
+      "source_unit": "BE-006"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-010",
+      "canonical_unit": "BE-007",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-010",
+      "source_unit": "BE-007"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-011",
+      "canonical_unit": "BE-008",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-011",
+      "source_unit": "BE-008"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-012",
+      "canonical_unit": "BE-009",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-012",
+      "source_unit": "BE-009"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-013",
+      "canonical_unit": "BE-010",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-013",
+      "source_unit": "BE-010"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-014",
+      "canonical_unit": "BE-011",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-014",
+      "source_unit": "BE-011"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-015",
+      "canonical_unit": "BE-012",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-015",
+      "source_unit": "BE-012"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-033",
+      "canonical_unit": "BE-013",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-016",
+      "source_unit": "BE-013"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-016",
+      "canonical_unit": "BE-014",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-017",
+      "source_unit": "BE-014"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-017",
+      "canonical_unit": "BE-015",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-018",
+      "source_unit": "BE-015"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-034",
+      "canonical_unit": "BE-016",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-019",
+      "source_unit": "BE-016"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-035",
+      "canonical_unit": "BE-017",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-020",
+      "source_unit": "BE-017"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-018",
+      "canonical_unit": "BE-018",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-021",
+      "source_unit": "BE-018"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-019",
+      "canonical_unit": "BE-019",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-022",
+      "source_unit": "BE-019"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-020",
+      "canonical_unit": "BE-020",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-023",
+      "source_unit": "BE-020"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-021",
+      "canonical_unit": "BE-021",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-024",
+      "source_unit": "BE-021"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-036",
+      "canonical_unit": "BE-022",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-025",
+      "source_unit": "BE-022"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-022",
+      "canonical_unit": "BE-023",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-026",
+      "source_unit": "BE-023"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-023",
+      "canonical_unit": "BE-024",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-027",
+      "source_unit": "BE-024"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-024",
+      "canonical_unit": "BE-025",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-028",
+      "source_unit": "BE-025"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-025",
+      "canonical_unit": "BE-026",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-029",
+      "source_unit": "BE-026"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-026",
+      "canonical_unit": "BE-027",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-030",
+      "source_unit": "BE-027"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-027",
+      "canonical_unit": "BE-028",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-031",
+      "source_unit": "BE-028"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-028",
+      "canonical_unit": "BE-029",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-032",
+      "source_unit": "BE-029"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-029",
+      "canonical_unit": "BE-030",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-033",
+      "source_unit": "BE-030"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-030",
+      "canonical_unit": "BE-031",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-034",
+      "source_unit": "BE-031"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-031",
+      "canonical_unit": "BE-034",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-035",
+      "source_unit": "BE-034"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-076",
+      "canonical_unit": "BE-032",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-036",
+      "source_unit": "BE-032"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-077",
+      "canonical_unit": "BE-033",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-037",
+      "source_unit": "BE-033"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-078",
+      "canonical_unit": "BQ-001",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-038",
+      "source_unit": "BQ-001"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-079",
+      "canonical_unit": "BQ-002",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-039",
+      "source_unit": "BQ-002"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-080",
+      "canonical_unit": "BQ-003",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-040",
+      "source_unit": "BQ-003"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-081",
+      "canonical_unit": "BQ-004",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-041",
+      "source_unit": "BQ-004"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-082",
+      "canonical_unit": "BQ-005",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-042",
+      "source_unit": "BQ-005"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-087",
+      "canonical_unit": "BQ-006",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-043",
+      "source_unit": "BQ-006"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-088",
+      "canonical_unit": "BG-001",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-044",
+      "source_unit": "BG-001"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-089",
+      "canonical_unit": "UX-001",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-045",
+      "source_unit": "UX-001"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-090",
+      "canonical_unit": "UX-002",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-046",
+      "source_unit": "UX-002"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-091",
+      "canonical_unit": "UX-003",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-047",
+      "source_unit": "UX-003"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-092",
+      "canonical_unit": "FE-001",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-048",
+      "source_unit": "FE-001"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-093",
+      "canonical_unit": "FE-002",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-049",
+      "source_unit": "FE-002"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-094",
+      "canonical_unit": "FE-003",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-050",
+      "source_unit": "FE-003"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-095",
+      "canonical_unit": "FE-004",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-051",
+      "source_unit": "FE-004"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-096",
+      "canonical_unit": "FE-005",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-052",
+      "source_unit": "FE-005"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-097",
+      "canonical_unit": "FE-006",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-053",
+      "source_unit": "FE-006"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-098",
+      "canonical_unit": "FE-007",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-054",
+      "source_unit": "FE-007"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-099",
+      "canonical_unit": "FE-008",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-055",
+      "source_unit": "FE-008"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-100",
+      "canonical_unit": "FE-009",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-056",
+      "source_unit": "FE-009"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-101",
+      "canonical_unit": "FE-010",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-057",
+      "source_unit": "FE-010"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-102",
+      "canonical_unit": "FE-011",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-058",
+      "source_unit": "FE-011"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-103",
+      "canonical_unit": "FE-012",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-059",
+      "source_unit": "FE-012"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-104",
+      "canonical_unit": "FE-013",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-060",
+      "source_unit": "FE-013"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-105",
+      "canonical_unit": "FE-014",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-061",
+      "source_unit": "FE-014"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-106",
+      "canonical_unit": "FE-015",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-062",
+      "source_unit": "FE-015"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-107",
+      "canonical_unit": "FE-016",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-063",
+      "source_unit": "FE-016"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-108",
+      "canonical_unit": "FE-017",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-064",
+      "source_unit": "FE-017"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-109",
+      "canonical_unit": "FE-018",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-065",
+      "source_unit": "FE-018"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-110",
+      "canonical_unit": "FE-019",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-066",
+      "source_unit": "FE-019"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-111",
+      "canonical_unit": "FE-020",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-067",
+      "source_unit": "FE-020"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-112",
+      "canonical_unit": "FE-021",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-068",
+      "source_unit": "FE-021"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-113",
+      "canonical_unit": "FE-022",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-069",
+      "source_unit": "FE-022"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-115",
+      "canonical_unit": "QA-001",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-070",
+      "source_unit": "QA-001"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-116",
+      "canonical_unit": "QA-002",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-071",
+      "source_unit": "QA-002"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-117",
+      "canonical_unit": "QA-003",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-072",
+      "source_unit": "QA-003"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-118",
+      "canonical_unit": "QA-004",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-073",
+      "source_unit": "QA-004"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-119",
+      "canonical_unit": "QA-005",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-074",
+      "source_unit": "QA-005"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-120",
+      "canonical_unit": "REL-001",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-075",
+      "source_unit": "REL-001"
+    },
+    {
+      "canonical_packet_id": "VAN-PKT-121",
+      "canonical_unit": "REL-002",
+      "disposition": "PRESERVED_WITH_UPDATED_DEPENDENCIES_AND_FULL_SCOPE",
+      "source_packet_id": "BF-PKT-076",
+      "source_unit": "REL-002"
+    }
+  ]
+}

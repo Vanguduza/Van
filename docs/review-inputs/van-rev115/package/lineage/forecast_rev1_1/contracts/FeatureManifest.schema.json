@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:van:ml:1.0:FeatureManifest",
+  "title": "FeatureManifest",
+  "description": "Proposed VAN interchange contract. Shape validity is not permission, factual evidence or runtime qualification. Cross-record semantic validation and independent trusted receipts are required.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "van-ml/1.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "authority_effect": {
+      "const": "NONE"
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "cohort_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "instrument_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "venue_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "RESEARCH",
+            "SHADOW",
+            "LIVE_ADVISORY"
+          ]
+        }
+      },
+      "required": [
+        "project_id",
+        "cohort_id",
+        "instrument_id",
+        "venue_id",
+        "environment"
+      ],
+      "additionalProperties": false
+    },
+    "feature_definition_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "transform_artifact_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "fit_start_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "fit_end_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "max_fit_label_available_at": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "fold_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "ordered_features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "dtype": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "source_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "minItems": 1
+          },
+          "availability_rule": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "role": {
+            "enum": [
+              "HISTORICAL",
+              "KNOWN_FUTURE",
+              "STATIC"
+            ]
+          },
+          "lookback_steps": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "missing_policy": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "required": [
+          "name",
+          "dtype",
+          "unit",
+          "source_refs",
+          "availability_rule",
+          "role",
+          "lookback_steps",
+          "missing_policy"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "row_identity_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "row_mask_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "category_vocab_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "parity_report_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_id",
+    "authority_effect",
+    "scope",
+    "feature_definition_digest",
+    "transform_artifact_digest",
+    "fit_start_at",
+    "fit_end_at",
+    "max_fit_label_available_at",
+    "fold_id",
+    "ordered_features",
+    "row_identity_digest",
+    "row_mask_digest",
+    "category_vocab_digest",
+    "parity_report_ref"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,19 @@
+{
+  "basis": "Comparative review R01–R12 and explicit current user message",
+  "formal_admission": "PENDING_INDEPENDENT_SEMANTIC_AND_EXISTING_OWNER_SIGNATURE_PROCESS",
+  "not_granted": [
+    "application implementation certification",
+    "F15",
+    "BG-001",
+    "live trading mandate",
+    "wallet custody/signing",
+    "procurement",
+    "blanket branch merge"
+  ],
+  "owner_message": "Proceed according to your recommendations",
+  "project_id": "16f2f43a-8d8b-4f18-a6ac-5bd8df620414",
+  "record_kind": "SOURCE_OF_SPECIFICATION_DIRECTION_NOT_CRYPTOGRAPHIC_APPROVAL",
+  "schema": "van.owner-requested.specification-direction/1.0",
+  "scope": "Integrate reviewed additions into the complete single unified blueprint and its plan; read-only crypto domain engineering scope included.",
+  "signature": null
+}

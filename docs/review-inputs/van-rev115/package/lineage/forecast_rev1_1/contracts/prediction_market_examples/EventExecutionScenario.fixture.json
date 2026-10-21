@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "record_id": "fixture:EventExecutionScenario",
+  "environment": "FIXTURE",
+  "authority_effect": "NONE",
+  "evidence_refs": [
+    "fixture:synthetic-only-not-real-evidence"
+  ],
+  "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "scenario_id": "fixture:100-contracts-success",
+  "contract_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "book_stream_ref": "fixture:synthetic-depth",
+  "input_granularity": "FIXTURE",
+  "fee_policy_ref": "fixture:illustrative-not-current-fee-schedule",
+  "queue_policy_ref": "fixture:queue-uncertainty-no-guaranteed-fill",
+  "touch_guarantees_fill": false,
+  "cancel_request_is_final": false,
+  "cash_before": "1000.00",
+  "entry_cost": "60.00",
+  "fees": "1.68",
+  "other_cash_costs": "0.00",
+  "final_payout": "100.00",
+  "cash_after": "1038.32",
+  "trade_close_at": "2026-10-17T14:30:00Z",
+  "settled_at": "2026-10-17T15:30:00Z",
+  "cash_available_at": "2026-10-17T15:30:00Z",
+  "source_evidence_claim": "FIXTURE_ONLY",
+  "actual_broker_execution": false
+}

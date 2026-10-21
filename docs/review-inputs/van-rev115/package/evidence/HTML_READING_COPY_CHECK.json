@@ -1,0 +1,25 @@
+{
+  "scope": "Local HTML structure and source linkage; not native VAN visual certification",
+  "checks": [
+    {
+      "file": "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_12_20261017.html",
+      "headings": 329,
+      "tables": 34,
+      "duplicate_ids": 0,
+      "broken_internal_links": [],
+      "external_scripts": 0,
+      "title": "VAN Next Unified Blueprint \u2014 Revision 1.12",
+      "source_sha256": "2cd2ccaa821cf8d2f561d50d272e62934140fc7dc33273deda97984cd95f4387"
+    },
+    {
+      "file": "VAN_HIGH_VALUE_TRADING_ADOPTIONS_BLUEPRINT_REV1_1_20261017.html",
+      "headings": 47,
+      "tables": 13,
+      "duplicate_ids": 0,
+      "broken_internal_links": [],
+      "external_scripts": 0,
+      "title": "VAN High-Value Adoptions \u2014 Corrected Integrated Companion",
+      "source_sha256": "a084c4e744852a82bcadf6ecfbcc065105d647f8393dbf141eafb91d22c5d613"
+    }
+  ]
+}

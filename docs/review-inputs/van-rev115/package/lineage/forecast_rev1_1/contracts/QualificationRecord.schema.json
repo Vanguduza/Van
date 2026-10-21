@@ -1,0 +1,244 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:van:ml:1.0:QualificationRecord",
+  "title": "QualificationRecord",
+  "description": "Proposed VAN interchange contract. Shape validity is not permission, factual evidence or runtime qualification. Cross-record semantic validation and independent trusted receipts are required.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "van-ml/1.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "authority_effect": {
+      "const": "NONE"
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "cohort_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "instrument_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "venue_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "RESEARCH",
+            "SHADOW",
+            "LIVE_ADVISORY"
+          ]
+        }
+      },
+      "required": [
+        "project_id",
+        "cohort_id",
+        "instrument_id",
+        "venue_id",
+        "environment"
+      ],
+      "additionalProperties": false
+    },
+    "model_artifact_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "feature_manifest_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "target_spec_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "study_protocol_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "evidence_index_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "kind": {
+      "enum": [
+        "ENGINEERING",
+        "FORECAST_QUALITY",
+        "ECONOMIC",
+        "PRODUCT"
+      ]
+    },
+    "result": {
+      "enum": [
+        "NOT_EVALUATED",
+        "QUALIFIED",
+        "REJECTED",
+        "INCONCLUSIVE"
+      ]
+    },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "value": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "sample_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "interval_lower": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "interval_upper": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "method_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "required": [
+          "name",
+          "value",
+          "unit",
+          "sample_count",
+          "interval_lower",
+          "interval_upper",
+          "method_ref"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "valid_until": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256
+      },
+      "minItems": 0
+    },
+    "independent_verifier_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "trusted_receipt_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "open_blockers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256
+      },
+      "minItems": 0
+    },
+    "signature_is_external": {
+      "const": true
+    },
+    "may_execute_orders": {
+      "const": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_id",
+    "authority_effect",
+    "scope",
+    "model_artifact_digest",
+    "feature_manifest_digest",
+    "target_spec_digest",
+    "study_protocol_digest",
+    "evidence_index_digest",
+    "kind",
+    "result",
+    "metrics",
+    "created_at",
+    "valid_until",
+    "evidence_refs",
+    "independent_verifier_ref",
+    "trusted_receipt_ref",
+    "open_blockers",
+    "signature_is_external",
+    "may_execute_orders"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,11 @@
+{
+  "arguments_sha256": "99ff1fdcc2160be1f1750624aff1045c171d392aaedb9dc8cd8e90e9bc4029f8",
+  "changed_refs": {},
+  "comparison": "prior sealed 66-head review",
+  "effective_uid": 1001,
+  "observed_ref_count": 66,
+  "request_id": "van-hva-integrate-discover-run-20261017-01",
+  "scope": "Read-only ref refresh only. Prior full content review not rerun.",
+  "source": "https://github.com/Vanguduza/Van.git refs/heads",
+  "target": "van-trading-core"
+}

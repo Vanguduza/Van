@@ -1,0 +1,11 @@
+{
+  "repository": "Vanguduza/Van",
+  "head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+  "base": "8eb1889822fc8a83f219977c15340172e16acd91",
+  "changed_paths": 105,
+  "canonical_compact_export_sha256": "c564eba117c0e7bbebfeaf0da6fcbd94dca3b3ccd42531dc2d88565ea8391576",
+  "vm_full_inventory": "/home/ubuntu/work/van-canonical-reconciliation-20261017/SOURCE_ADOPTION_INVENTORY.json",
+  "rehydration_script": "tools/collect_source_evidence.py",
+  "complete_repository_embedded": false,
+  "scope": "Exact VM source delta enumerated and hashed. The source repository and detailed ledger are retrievable from these pins; a full semantic audit is not inferred."
+}

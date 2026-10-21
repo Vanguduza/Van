@@ -1,0 +1,671 @@
+{
+  "scope": "24 overlapping capability families cover all 82 backend units; counts are not additive product features",
+  "families": [
+    {
+      "id": "HOME",
+      "title": "Home, orb, Quick Hub, Attention and notifications",
+      "backend_units": [
+        "BE-030"
+      ],
+      "frontend_units": [
+        "FE-004"
+      ],
+      "evidence_location": "Part B \u00a7\u00a75\u20136, 11.1, 11.7",
+      "present_specification": "State reducer, severity precedence, compact hub, deep links and notification deduplication are detailed.",
+      "positive_journey": "A genuine protection or task event creates one scoped Attention item, updates the orb, opens the right subject and records acknowledgement.",
+      "error_and_recovery_journey": "Stale task stream with healthy market stream stays distinguishable; denied notification permission, quiet hours and dismissed previews retain critical in-app incident state; replay does not notify twice.",
+      "open_findings": [
+        "WPC-001",
+        "WPC-002",
+        "WPC-009",
+        "WPC-015"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "BOOTSTRAP",
+      "title": "Installation, zero-configuration connection and navigation",
+      "backend_units": [
+        "BE-002",
+        "BE-003",
+        "BE-031"
+      ],
+      "frontend_units": [
+        "FE-001",
+        "FE-003",
+        "FE-022"
+      ],
+      "evidence_location": "Part B \u00a7\u00a711.4, 12.1, 14.4, 19.3",
+      "present_specification": "Signed provisioning and no raw host/token forms are explicit; identity/app-signing continuity is required.",
+      "positive_journey": "Fresh signed install receives/verifies provisioning, enrolls owner/device, connects to the admitted gateway, reads service capabilities and restores an authorized deep link without typing backend configuration.",
+      "error_and_recovery_journey": "Expired provisioning, rotated service certificate/endpoint, lost/replaced/revoked handset, clock skew, unavailable backend and app restore have distinct repair paths; an old device cannot regain authority.",
+      "open_findings": [
+        "WPC-004",
+        "WPC-001",
+        "WPC-013"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "MARKETS",
+      "title": "Markets, portfolio summaries, watchlists, screening and alerts",
+      "backend_units": [
+        "BE-008",
+        "BE-020"
+      ],
+      "frontend_units": [
+        "FE-006",
+        "FE-011"
+      ],
+      "evidence_location": "Part B \u00a7\u00a77.1\u20137.3, BE-008/020",
+      "present_specification": "Instrument identity, freshness, watchlists and server-side alerts are included.",
+      "positive_journey": "Find an instrument, persist a watchlist/screen rule, receive a server-evaluated alert and open the exact venue/instrument with source time.",
+      "error_and_recovery_journey": "Feed gap, delisting, alias collision, market closure, entitlement denial, process death and duplicate alert delivery preserve accurate data and one alert identity.",
+      "open_findings": [
+        "WPC-001",
+        "WPC-002",
+        "WPC-008",
+        "WPC-009"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "CHART",
+      "title": "Charts, indicators, drawings, replay, depth and workspaces",
+      "backend_units": [
+        "BE-018",
+        "BE-019"
+      ],
+      "frontend_units": [
+        "FE-007",
+        "FE-008"
+      ],
+      "evidence_location": "Part B \u00a77 and chart bridge contracts",
+      "present_specification": "Professional chart scope and untrusted bridge boundaries are substantial; replay isolation is explicit.",
+      "positive_journey": "Save drawings and indicator settings, restore a multi-chart workspace, inspect real order overlays, run isolated replay and submit a typed observation to research.",
+      "error_and_recovery_journey": "Unsupported depth/order types are explicit; reconnect gaps, WebView/native renderer failure, malformed bridge inputs and workspace conflicts preserve instrument precision and never execute from a chart.",
+      "open_findings": [
+        "WPC-001",
+        "WPC-002",
+        "WPC-008",
+        "WPC-015"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "ORDERS",
+      "title": "Manual orders, positions, protection, risk, handover, history and TCA",
+      "backend_units": [
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012"
+      ],
+      "frontend_units": [
+        "FE-009",
+        "FE-011"
+      ],
+      "evidence_location": "Part A \u00a7\u00a75\u20137, Part B \u00a77.4 and \u00a732",
+      "present_specification": "Financial invariants, unknown outcomes, child reservations and ownership transitions are deeply specified.",
+      "positive_journey": "Preview a scoped order, confirm within mandate, receive partial/final fills with protection, hand control between owner and VAN, then reconcile cash and TCA.",
+      "error_and_recovery_journey": "Concurrent spend, partial fill, cancel race, exchange outage, unknown submission, late correction and restart preserve exposure, protection, unique intents and readback.",
+      "open_findings": [
+        "WPC-002",
+        "WPC-007",
+        "WPC-008",
+        "WPC-012",
+        "WPC-016"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "ACCOUNTS",
+      "title": "Accounts, authentication, KYC, funds, payments and statements",
+      "backend_units": [
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007"
+      ],
+      "frontend_units": [
+        "FE-010",
+        "FE-011"
+      ],
+      "evidence_location": "Part B Accounts/Funds requirements; BE-004\u2013007",
+      "present_specification": "Local unlink/remote closure, settled funding and provider-hosted flows are explicitly separated.",
+      "positive_journey": "Link or create an admitted account, validate access, rotate credentials, deposit/withdraw/transfer through the supported flow and reconcile settlement/statement.",
+      "error_and_recovery_journey": "Observe-only access, KYC restriction, expired hosted callback, duplicate transfer, disputed/returned payment and open exposure prevent false success or unsafe closure.",
+      "open_findings": [
+        "WPC-008",
+        "WPC-001",
+        "WPC-002",
+        "WPC-012"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "STRATEGIES",
+      "title": "Strategies, trading modes and policy promotion",
+      "backend_units": [
+        "BE-013",
+        "BE-036"
+      ],
+      "frontend_units": [
+        "FE-012"
+      ],
+      "evidence_location": "Part A \u00a7\u00a72, 6, 9; Part B trading mode contracts",
+      "present_specification": "Operational adaptation and separately authorized policy evolution are well distinguished.",
+      "positive_journey": "Inspect strategy evidence, select an admitted mode, authorize an exact policy change and verify active consumer/version and current risk bounds.",
+      "error_and_recovery_journey": "Inconclusive edge, revoked mandate, changed candidate, active old-version parent, drift and rollback preserve existing protections and qualified fallback.",
+      "open_findings": [
+        "WPC-007",
+        "WPC-001",
+        "WPC-002",
+        "WPC-016"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "LEARNING",
+      "title": "Forecasting, models, self-improvement and economic experiments",
+      "backend_units": [
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029"
+      ],
+      "frontend_units": [
+        "FE-012",
+        "FE-014",
+        "FE-023"
+      ],
+      "evidence_location": "Part A \u00a7\u00a78\u201310; forecast contracts and research experiment register",
+      "present_specification": "Targets, temporal validation, calibration, chance controls, Jev/model budgets, independent evaluation and positive feedback proof are detailed.",
+      "positive_journey": "Seal a full opportunity cohort, diagnose outcomes with uncertainty, evaluate a candidate after full costs, qualify it, observe a changed later decision and reproduce that decision from retained evidence.",
+      "error_and_recovery_journey": "Contamination, future-data leakage, sparse cohorts, model alias change, interrupted budget settlement, corrected labels and drift yield explicit ineligible/inconclusive states and qualified fallback.",
+      "open_findings": [
+        "WPC-007",
+        "WPC-008",
+        "WPC-012",
+        "WPC-016"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "NEWS",
+      "title": "News, calendar, analyst, event impact and armed tickets",
+      "backend_units": [
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-021",
+        "BE-022"
+      ],
+      "frontend_units": [
+        "FE-013",
+        "FE-014"
+      ],
+      "evidence_location": "Part B \u00a78; news readiness amendment",
+      "present_specification": "Citations, source contradictions, event timing and bounded D1\u2013D7 influence are explicit.",
+      "positive_journey": "Read a sourced event analysis, inspect affected holdings, obtain a grounded analyst answer, and arm an eligible exact news ticket whose actual outcome is reconciled.",
+      "error_and_recovery_journey": "Duplicate/revised stories, bad timestamps, unavailable source, contradictory facts, late release and expired single-use ticket cannot create fabricated certainty or repeated trading.",
+      "open_findings": [
+        "WPC-008",
+        "WPC-001",
+        "WPC-002",
+        "WPC-007"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "PREDICTION",
+      "title": "Prediction-market information, probability and research laboratories",
+      "backend_units": [
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048"
+      ],
+      "frontend_units": [
+        "FE-023"
+      ],
+      "evidence_location": "Part B forecast/prediction integration; forecast contract files",
+      "present_specification": "Event identity, calibration, non-atomic arbitrage and market-making laboratories are retained as research scope.",
+      "positive_journey": "Capture a time-qualified event distribution and evaluate its incremental asset/research value, preserving settlement and fee assumptions in the report.",
+      "error_and_recovery_journey": "Void/disputed resolution, source disagreement, absent liquidity, stale quotes and non-atomic fills fail the appropriate research claim; no lab creates live order authority.",
+      "open_findings": [
+        "WPC-008",
+        "WPC-007",
+        "WPC-001",
+        "WPC-016"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "CRYPTO_TRADE",
+      "title": "Centralized-exchange spot crypto execution",
+      "backend_units": [
+        "BE-004",
+        "BE-005",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-012"
+      ],
+      "frontend_units": [
+        "FE-009",
+        "FE-010",
+        "FE-011"
+      ],
+      "evidence_location": "Part A \u00a711; VAN-CRYPTO-001\u2013014",
+      "present_specification": "Actual spot execution is distinct from read-only chain research and derivatives.",
+      "positive_journey": "Use the admitted venue/account/instrument, satisfy size/precision filters, trade spot and reconcile asset inventory, protection and fees in their true currencies.",
+      "error_and_recovery_journey": "Book gap, rate limit, nonce/clock issue, stop support mismatch, fee asset shortage and dead-man cancellation preserve truthful exposure and recovery priority.",
+      "open_findings": [
+        "WPC-008",
+        "WPC-007",
+        "WPC-012",
+        "WPC-016"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "CHAIN",
+      "title": "Chain discovery, security, wallets and executable-economics research",
+      "backend_units": [
+        "BE-037",
+        "BE-038",
+        "BE-039",
+        "BE-040",
+        "BE-041",
+        "BE-042",
+        "BE-043",
+        "BE-044"
+      ],
+      "frontend_units": [
+        "FE-014",
+        "FE-023"
+      ],
+      "evidence_location": "Part B \u00a730; high_value schemas and contracts",
+      "present_specification": "Full cohorts, chain-specific identity, sellability uncertainty, finality and read-only boundaries are detailed.",
+      "positive_journey": "Inspect a discovered asset, state-bound security analysis, independent buy/sell quotes, wallet attribution and matched-cohort economics with citations.",
+      "error_and_recovery_journey": "Reorganization, unsupported extension/proxy, unavailable sell path, incomplete holdings and censored exit remain explicit unknowns and invalidate dependent evidence.",
+      "open_findings": [
+        "WPC-008",
+        "WPC-007",
+        "WPC-001",
+        "WPC-016"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "WORK",
+      "title": "Projects, tasks, missions, graphs, progress and approvals",
+      "backend_units": [
+        "BE-023"
+      ],
+      "frontend_units": [
+        "FE-015"
+      ],
+      "evidence_location": "Part B \u00a79; BE-023",
+      "present_specification": "Stable node/edge IDs, meaningful progress, accessible list and lease-aware actions are well described.",
+      "positive_journey": "Create or update a permitted task, inspect its dependency graph, resolve a blocker, review evidence and observe authoritative verified completion.",
+      "error_and_recovery_journey": "Cycle, stale revision, concurrent edit, failed review, missing handoff and lost cancellation response never fabricate progress or dispatch twice; reconcile original task/job.",
+      "open_findings": [
+        "WPC-001",
+        "WPC-002",
+        "WPC-010",
+        "WPC-003"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "AGENTS",
+      "title": "Agents, Hermes, Muse, Jev and provider-bound interventions",
+      "backend_units": [
+        "BE-024"
+      ],
+      "frontend_units": [
+        "FE-016"
+      ],
+      "evidence_location": "Part B \u00a79.6; BE-024; shared Jev clauses",
+      "present_specification": "Native ownership, provider approvals and independent work/task/artifact outcomes are explicit.",
+      "positive_journey": "Observe a real assignment, steer the exact permitted job, answer its bound approval and inspect its native outcome/artifact.",
+      "error_and_recovery_journey": "Expired lease, late callback, worker replacement, provider outage and revoked capability retain native identities and enforce current scopes.",
+      "open_findings": [
+        "WPC-001",
+        "WPC-010",
+        "WPC-008",
+        "WPC-002"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "STUDIO",
+      "title": "Development studio, design/research workspaces, CI and security",
+      "backend_units": [
+        "BE-034"
+      ],
+      "frontend_units": [
+        "FE-018"
+      ],
+      "evidence_location": "BE-034; Part B \u00a711.5 and studio contexts",
+      "present_specification": "Evidence/workspace adapters and source-candidate admission are preserved, but largely specified at capability level.",
+      "positive_journey": "Open a real source/workspace artifact, inspect CI/security/design evidence, request an authorized native action and verify its exact build/source outcome.",
+      "error_and_recovery_journey": "Wrong branch/artifact, stale review, unavailable plugin and failed build remain distinct; a workspace control cannot imply deployment or mint authority.",
+      "open_findings": [
+        "WPC-001",
+        "WPC-010",
+        "WPC-008",
+        "WPC-002"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "VOICE",
+      "title": "Conversation, speech input/output and speaker consent",
+      "backend_units": [
+        "BE-029"
+      ],
+      "frontend_units": [
+        "FE-021"
+      ],
+      "evidence_location": "Part B \u00a7\u00a710\u201311; BE-029; VNX-F-PRESENCE-03",
+      "present_specification": "Turns, transcript/audio streaming, interruption, history and consent exist as obligations; detailed turn/audio protocol remains to be materialized.",
+      "positive_journey": "Speak a scoped request, inspect corrected interpretation, receive an intelligible spoken answer, follow up, interrupt playback and obtain a verified spoken effect result when applicable.",
+      "error_and_recovery_journey": "Ambiguous account/amount, ASR correction, TTS failure, Bluetooth/audio-focus change, phone call, interruption, timeout, reconnection and revoked mic consent preserve one turn/command and a usable text path.",
+      "open_findings": [
+        "WPC-005",
+        "WPC-003",
+        "WPC-001",
+        "WPC-014"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "FLOATING",
+      "title": "Floating assistant, workboards, gestures and Android lifecycle",
+      "backend_units": [
+        "BE-029",
+        "BE-030",
+        "BE-031"
+      ],
+      "frontend_units": [
+        "FE-005"
+      ],
+      "evidence_location": "Part B \u00a710",
+      "present_specification": "Tap/double-tap/long-press, drag/dock/minimize/restore, workboard and lifecycle preservation are explicit.",
+      "positive_journey": "Open and move the assistant without obstructing another app, switch to conversation/work/trades and restore the correct state after process recreation.",
+      "error_and_recovery_journey": "Overlay denial, locked screen, service restart restriction, keyboard collision, occlusion, battery saver and dismissed state use documented OS-compatible recovery without hidden mic capture.",
+      "open_findings": [
+        "WPC-006",
+        "WPC-005",
+        "WPC-015",
+        "WPC-002"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "MEMORY",
+      "title": "Memory, knowledge, research, privacy, goals and adaptations",
+      "backend_units": [
+        "BE-027"
+      ],
+      "frontend_units": [
+        "FE-019"
+      ],
+      "evidence_location": "Part B \u00a711.3; BE-027",
+      "present_specification": "Fact provenance, corrections, retraction, erasure exceptions and adaptation review are represented.",
+      "positive_journey": "Retrieve a cited fact, correct it, change a goal, review or roll back an adaptation and erase the specified retained scope with verified readback.",
+      "error_and_recovery_journey": "Conflicting facts, stale index, cross-project query, revoked source, derived cache and retained backup cannot silently revive erased material or equate deletion with model unlearning.",
+      "open_findings": [
+        "WPC-011",
+        "WPC-001",
+        "WPC-002",
+        "WPC-014"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "AUTOMATION",
+      "title": "Automation, reminders, schedules and standing consent",
+      "backend_units": [
+        "BE-028"
+      ],
+      "frontend_units": [
+        "FE-020"
+      ],
+      "evidence_location": "Part B \u00a711.6; BE-028; VAN-CX-014",
+      "present_specification": "Candidate/admitted versions, DST/misfire and unknown-effect reconciliation are required.",
+      "positive_journey": "Admit a scoped workflow, set a schedule/reminder, observe next/last run, pause or revoke it and inspect per-step durable outcomes.",
+      "error_and_recovery_journey": "DST transition, clock jump, overlapping run, missed schedule, consent expiry and timeout after effect use explicit policies and reconcile before retry.",
+      "open_findings": [
+        "WPC-003",
+        "WPC-010",
+        "WPC-001",
+        "WPC-002"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "REMOTE",
+      "title": "Browser, remote devices, files, artifacts and share intake",
+      "backend_units": [
+        "BE-025"
+      ],
+      "frontend_units": [
+        "FE-017"
+      ],
+      "evidence_location": "Part B \u00a711.5; BE-025",
+      "present_specification": "Session leases, observed targets, file destinations and untrusted source content are explicit.",
+      "positive_journey": "Open an admitted session, observe the target, execute an exact permitted interaction, import/export an allowed artifact and verify destination/outcome.",
+      "error_and_recovery_journey": "Navigation changes target, stale viewport, interrupted upload, malicious content, oversized file, revoked lease and unknown click outcome require bounded recovery and original-operation lookup.",
+      "open_findings": [
+        "WPC-010",
+        "WPC-014",
+        "WPC-001",
+        "WPC-002"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "ARTEMIS",
+      "title": "ARTEMIS tests, devices, captures and evidence",
+      "backend_units": [
+        "BE-026"
+      ],
+      "frontend_units": [
+        "FE-018"
+      ],
+      "evidence_location": "BE-026; VNX-F-WORK-08; QA-004/005",
+      "present_specification": "Real device/build identity and pass/fail/unknown are clearly required.",
+      "positive_journey": "Choose an admitted device and exact APK, run/cancel a plan, inspect captures and independently resolve the test attempt outcome.",
+      "error_and_recovery_journey": "Device disconnect, missing capture, wrong APK, attempt restart and stale result remain unknown/failed rather than physical-device acceptance.",
+      "open_findings": [
+        "WPC-003",
+        "WPC-010",
+        "WPC-016"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "SETTINGS",
+      "title": "Connected services, permissions, devices, diagnostics and preferences",
+      "backend_units": [
+        "BE-002",
+        "BE-031"
+      ],
+      "frontend_units": [
+        "FE-022"
+      ],
+      "evidence_location": "Part B \u00a711.4; BE-031",
+      "present_specification": "Provider health versus authority, signed provisioning, notification/voice preferences and redaction are specified.",
+      "positive_journey": "Inspect per-service readiness/scopes, change permitted preferences, revoke a device/consent and export scoped redacted diagnostics.",
+      "error_and_recovery_journey": "Healthy transport with unavailable action, pending Android permission, stale setting revision and expired enrollment remain distinct; recovery preserves privacy choices.",
+      "open_findings": [
+        "WPC-004",
+        "WPC-008",
+        "WPC-009",
+        "WPC-014"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "MOBILE",
+      "title": "Whole-app navigation, accessibility, themes and device performance",
+      "backend_units": [
+        "BE-030",
+        "BE-032"
+      ],
+      "frontend_units": [
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "evidence_location": "Part B \u00a7\u00a712, 15, 34.1; 21 October readability amendment",
+      "present_specification": "Both themes, 234 contexts, reduced motion, scale, process death and S24 checks are explicit.",
+      "positive_journey": "Navigate every accepted context/action in both themes with large text/TalkBack, recover back-stack and pending references after process death, and keep critical controls readable.",
+      "error_and_recovery_journey": "Malformed/expired deep link, low memory, no network, slow render, theme switch and visual effect degradation preserve state and access to required controls.",
+      "open_findings": [
+        "WPC-002",
+        "WPC-009",
+        "WPC-015",
+        "WPC-016"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    },
+    {
+      "id": "OPERATIONS",
+      "title": "Security, data durability, deployment, migration, release and recovery",
+      "backend_units": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-032",
+        "BE-033"
+      ],
+      "frontend_units": [
+        "FE-001",
+        "FE-022"
+      ],
+      "evidence_location": "Part B \u00a7\u00a713\u201314, 19, 22\u201323; BE-033",
+      "present_specification": "Exact source admission, signed intents, outbox/reconciliation, recovery and global backend gate are mandatory.",
+      "positive_journey": "Deploy a pinned release, migrate and restore state, connect the signed app, observe domain health, rotate credentials and verify a compatible rollback.",
+      "error_and_recovery_journey": "Crash after dispatch, backup/ledger inconsistency, revoked signing authority, schema incompatibility, resource exhaustion and restore of old consent must preserve financial truth and current revocations.",
+      "open_findings": [
+        "WPC-001",
+        "WPC-004",
+        "WPC-012",
+        "WPC-013",
+        "WPC-014",
+        "WPC-016"
+      ],
+      "blueprint_assessment": "SCOPE_PRESENT_WITH_CONTRACT_OR_QUALIFICATION_WORK",
+      "source_implementation": "NOT_REASSESSED_IN_THIS_PASS",
+      "live_services": "NOT_CHECKED",
+      "handset_acceptance": "NOT_RUN_IN_THIS_PASS"
+    }
+  ]
+}

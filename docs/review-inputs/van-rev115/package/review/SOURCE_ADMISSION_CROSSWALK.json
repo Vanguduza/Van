@@ -1,0 +1,1432 @@
+{
+  "all_parent_admission_rows_preserved_in": "consolidation/IMPLEMENTATION_ADMISSION_REGISTER.json",
+  "entries": [
+    {
+      "application_qualification": "NOT_ESTABLISHED_THIS_REVIEW",
+      "caller": "DecisionCycle._risk_store_ok; AccountCoordinatorService._risk_store_ok",
+      "disposition": "ADAPT_PRESERVE",
+      "reason": "Keep incremental verification; require immutable checkpoint/rollback and prefix-tamper detection before considering economic runs valid.",
+      "source": {
+        "commit": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+        "label": "opus",
+        "path": "trading/vati/core/ledger.py",
+        "ref": "refs/review-pr/101",
+        "sha256": "c61e8a02f2148f7a72e820688ca6b13c993e8acc93210274266fb2edd20f6bb5",
+        "symbols": [
+          {
+            "end_line": 33,
+            "kind": "ClassDef",
+            "line": 32,
+            "name": "LedgerError"
+          },
+          {
+            "end_line": 44,
+            "kind": "ClassDef",
+            "line": 37,
+            "name": "ReplayReport"
+          },
+          {
+            "end_line": 52,
+            "kind": "FunctionDef",
+            "line": 47,
+            "name": "_check_row"
+          },
+          {
+            "end_line": 100,
+            "kind": "ClassDef",
+            "line": 55,
+            "name": "IncrementalChainVerifier"
+          },
+          {
+            "end_line": 218,
+            "kind": "ClassDef",
+            "line": 103,
+            "name": "Ledger"
+          },
+          {
+            "end_line": 44,
+            "kind": "FunctionDef",
+            "line": 43,
+            "name": "ok"
+          },
+          {
+            "end_line": 78,
+            "kind": "FunctionDef",
+            "line": 73,
+            "name": "__init__"
+          },
+          {
+            "end_line": 100,
+            "kind": "FunctionDef",
+            "line": 80,
+            "name": "verify"
+          },
+          {
+            "end_line": 117,
+            "kind": "FunctionDef",
+            "line": 104,
+            "name": "__init__"
+          },
+          {
+            "end_line": 132,
+            "kind": "FunctionDef",
+            "line": 120,
+            "name": "append"
+          },
+          {
+            "end_line": 136,
+            "kind": "FunctionDef",
+            "line": 135,
+            "name": "_row_to_event"
+          },
+          {
+            "end_line": 149,
+            "kind": "FunctionDef",
+            "line": 138,
+            "name": "iter"
+          },
+          {
+            "end_line": 154,
+            "kind": "FunctionDef",
+            "line": 151,
+            "name": "count"
+          },
+          {
+            "end_line": 158,
+            "kind": "FunctionDef",
+            "line": 156,
+            "name": "head"
+          },
+          {
+            "end_line": 164,
+            "kind": "FunctionDef",
+            "line": 161,
+            "name": "verify_chain"
+          },
+          {
+            "end_line": 171,
+            "kind": "FunctionDef",
+            "line": 166,
+            "name": "verify_incremental"
+          },
+          {
+            "end_line": 182,
+            "kind": "FunctionDef",
+            "line": 173,
+            "name": "_verify_from"
+          },
+          {
+            "end_line": 186,
+            "kind": "FunctionDef",
+            "line": 184,
+            "name": "_chain_at"
+          },
+          {
+            "end_line": 189,
+            "kind": "FunctionDef",
+            "line": 188,
+            "name": "_count_upto"
+          },
+          {
+            "end_line": 207,
+            "kind": "FunctionDef",
+            "line": 191,
+            "name": "replay_decisions"
+          },
+          {
+            "end_line": 215,
+            "kind": "FunctionDef",
+            "line": 209,
+            "name": "export_jsonl"
+          },
+          {
+            "end_line": 218,
+            "kind": "FunctionDef",
+            "line": 217,
+            "name": "close"
+          }
+        ]
+      },
+      "symbol": "IncrementalChainVerifier.verify; Ledger.verify_incremental",
+      "unit": "BE-003"
+    },
+    {
+      "application_qualification": "NOT_ESTABLISHED_THIS_REVIEW",
+      "caller": "DecisionCycle construction, reset_loss_streak; account service restore",
+      "disposition": "ADAPT_PRESERVE",
+      "reason": "Retain OD-38/39 recovery and owner reset semantics; never replace with a branch that resets lockouts on restart.",
+      "source": {
+        "commit": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+        "label": "opus",
+        "path": "trading/vati/risk/lockouts.py",
+        "ref": "refs/review-pr/101",
+        "sha256": "a2d839353210989e9e5a73d38a098a145add16720dec18acfa3354f68f2791b7",
+        "symbols": [
+          {
+            "end_line": 73,
+            "kind": "ClassDef",
+            "line": 69,
+            "name": "LockoutPolicy"
+          },
+          {
+            "end_line": 82,
+            "kind": "ClassDef",
+            "line": 77,
+            "name": "_Scope"
+          },
+          {
+            "end_line": 89,
+            "kind": "ClassDef",
+            "line": 86,
+            "name": "StreakVerdict"
+          },
+          {
+            "end_line": 93,
+            "kind": "FunctionDef",
+            "line": 92,
+            "name": "is_manual"
+          },
+          {
+            "end_line": 98,
+            "kind": "FunctionDef",
+            "line": 96,
+            "name": "_scopes"
+          },
+          {
+            "end_line": 165,
+            "kind": "ClassDef",
+            "line": 101,
+            "name": "LossStreakGovernor"
+          },
+          {
+            "end_line": 184,
+            "kind": "FunctionDef",
+            "line": 168,
+            "name": "restore_peak_equity"
+          },
+          {
+            "end_line": 208,
+            "kind": "FunctionDef",
+            "line": 187,
+            "name": "restore_equity_baselines"
+          },
+          {
+            "end_line": 214,
+            "kind": "FunctionDef",
+            "line": 211,
+            "name": "relative_top_state"
+          },
+          {
+            "end_line": 218,
+            "kind": "FunctionDef",
+            "line": 217,
+            "name": "at_or_above"
+          },
+          {
+            "end_line": 104,
+            "kind": "FunctionDef",
+            "line": 102,
+            "name": "__init__"
+          },
+          {
+            "end_line": 107,
+            "kind": "FunctionDef",
+            "line": 106,
+            "name": "_scope"
+          },
+          {
+            "end_line": 129,
+            "kind": "FunctionDef",
+            "line": 110,
+            "name": "on_close"
+          },
+          {
+            "end_line": 134,
+            "kind": "FunctionDef",
+            "line": 131,
+            "name": "reset"
+          },
+          {
+            "end_line": 150,
+            "kind": "FunctionDef",
+            "line": 137,
+            "name": "verdict"
+          },
+          {
+            "end_line": 165,
+            "kind": "FunctionDef",
+            "line": 154,
+            "name": "rebuild"
+          }
+        ]
+      },
+      "symbol": "LossStreakGovernor.on_close/verdict/rebuild; restore_equity_baselines",
+      "unit": "BE-009"
+    },
+    {
+      "application_qualification": "NOT_ESTABLISHED_THIS_REVIEW",
+      "caller": "DecisionCycle.mark; BacktestEngine.run; research harness.run",
+      "disposition": "ADAPT_REQUALIFY",
+      "reason": "Preserve pending-order improvement; qualify actual limit, stop, bid/ask, intrabar and fee semantics before economic comparison.",
+      "source": {
+        "commit": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+        "label": "opus",
+        "path": "trading/vati/execution/paper.py",
+        "ref": "refs/review-pr/101",
+        "sha256": "23cc0734e4ccd64ba3c6a685d976dedc3cc4953faca172f82c4d5ae0ffc51f99",
+        "symbols": [
+          {
+            "end_line": 184,
+            "kind": "ClassDef",
+            "line": 26,
+            "name": "PaperAdapter"
+          },
+          {
+            "end_line": 47,
+            "kind": "FunctionDef",
+            "line": 45,
+            "name": "sync_account"
+          },
+          {
+            "end_line": 52,
+            "kind": "FunctionDef",
+            "line": 49,
+            "name": "_unrealised"
+          },
+          {
+            "end_line": 55,
+            "kind": "FunctionDef",
+            "line": 54,
+            "name": "positions"
+          },
+          {
+            "end_line": 58,
+            "kind": "FunctionDef",
+            "line": 57,
+            "name": "heartbeat"
+          },
+          {
+            "end_line": 85,
+            "kind": "FunctionDef",
+            "line": 60,
+            "name": "submit"
+          },
+          {
+            "end_line": 93,
+            "kind": "FunctionDef",
+            "line": 87,
+            "name": "_rest"
+          },
+          {
+            "end_line": 110,
+            "kind": "FunctionDef",
+            "line": 95,
+            "name": "_open"
+          },
+          {
+            "end_line": 144,
+            "kind": "FunctionDef",
+            "line": 112,
+            "name": "_work_pending"
+          },
+          {
+            "end_line": 149,
+            "kind": "FunctionDef",
+            "line": 146,
+            "name": "modify_stop"
+          },
+          {
+            "end_line": 164,
+            "kind": "FunctionDef",
+            "line": 151,
+            "name": "close"
+          },
+          {
+            "end_line": 184,
+            "kind": "FunctionDef",
+            "line": 166,
+            "name": "mark"
+          }
+        ]
+      },
+      "symbol": "PaperAdapter",
+      "unit": "BE-035"
+    },
+    {
+      "application_qualification": "NOT_ESTABLISHED_THIS_REVIEW",
+      "caller": "DecisionCycle.step; AccountCoordinatorService proposal/execute paths",
+      "disposition": "ADAPT_REQUIRED",
+      "reason": "Keep selection interface; remove urgent widening/insertion-order fallback, bind exact policy epoch, replace heuristic expected-cost claim and wire durable producer.",
+      "source": {
+        "commit": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+        "label": "opus",
+        "path": "trading/vati/execution/policy.py",
+        "ref": "refs/review-pr/101",
+        "sha256": "a2471b09db8c8494eabead80bbd6bcc1569cc4171398b6ac19ee48d40eca83eb",
+        "symbols": [
+          {
+            "end_line": 69,
+            "kind": "ClassDef",
+            "line": 56,
+            "name": "ExecutionBucket"
+          },
+          {
+            "end_line": 138,
+            "kind": "ClassDef",
+            "line": 73,
+            "name": "ExecutionEvidence"
+          },
+          {
+            "end_line": 170,
+            "kind": "ClassDef",
+            "line": 142,
+            "name": "ExecutionPolicyDecision"
+          },
+          {
+            "end_line": 262,
+            "kind": "ClassDef",
+            "line": 173,
+            "name": "ExecutionPolicyEngine"
+          },
+          {
+            "end_line": 69,
+            "kind": "FunctionDef",
+            "line": 67,
+            "name": "key"
+          },
+          {
+            "end_line": 104,
+            "kind": "FunctionDef",
+            "line": 87,
+            "name": "observe"
+          },
+          {
+            "end_line": 110,
+            "kind": "FunctionDef",
+            "line": 107,
+            "name": "fill_probability"
+          },
+          {
+            "end_line": 113,
+            "kind": "FunctionDef",
+            "line": 112,
+            "name": "_median"
+          },
+          {
+            "end_line": 117,
+            "kind": "FunctionDef",
+            "line": 116,
+            "name": "median_slippage"
+          },
+          {
+            "end_line": 121,
+            "kind": "FunctionDef",
+            "line": 120,
+            "name": "median_adverse"
+          },
+          {
+            "end_line": 125,
+            "kind": "FunctionDef",
+            "line": 124,
+            "name": "median_non_fill_cost"
+          },
+          {
+            "end_line": 138,
+            "kind": "FunctionDef",
+            "line": 127,
+            "name": "expected_shortfall_estimate"
+          },
+          {
+            "end_line": 161,
+            "kind": "FunctionDef",
+            "line": 158,
+            "name": "as_dict"
+          },
+          {
+            "end_line": 164,
+            "kind": "FunctionDef",
+            "line": 163,
+            "name": "sealed"
+          },
+          {
+            "end_line": 170,
+            "kind": "FunctionDef",
+            "line": 167,
+            "name": "entry_type"
+          },
+          {
+            "end_line": 184,
+            "kind": "FunctionDef",
+            "line": 174,
+            "name": "__init__"
+          },
+          {
+            "end_line": 189,
+            "kind": "FunctionDef",
+            "line": 188,
+            "name": "evidence"
+          },
+          {
+            "end_line": 192,
+            "kind": "FunctionDef",
+            "line": 191,
+            "name": "observe"
+          },
+          {
+            "end_line": 250,
+            "kind": "FunctionDef",
+            "line": 196,
+            "name": "select"
+          },
+          {
+            "end_line": 262,
+            "kind": "FunctionDef",
+            "line": 252,
+            "name": "_decision"
+          }
+        ]
+      },
+      "symbol": "ExecutionPolicyEngine.select/observe; ExecutionEvidence.expected_shortfall_estimate",
+      "unit": "BE-036"
+    },
+    {
+      "application_qualification": "NOT_ESTABLISHED_THIS_REVIEW",
+      "caller": "ExecutionRouter via style_selector constructed by cycle/account service",
+      "disposition": "ADAPT_REQUIRED",
+      "reason": "Treat slice/participation/deadline constraints jointly; MAX_SLICES cannot relax participation.",
+      "source": {
+        "commit": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+        "label": "opus",
+        "path": "trading/vati/execution/style_selector.py",
+        "ref": "refs/review-pr/101",
+        "sha256": "ab1015ba81a875306a91b026587425088ac9635f0d0ab06d75d5eee2a2af600e",
+        "symbols": [
+          {
+            "end_line": 64,
+            "kind": "ClassDef",
+            "line": 59,
+            "name": "Urgency"
+          },
+          {
+            "end_line": 68,
+            "kind": "ClassDef",
+            "line": 67,
+            "name": "StyleRefused"
+          },
+          {
+            "end_line": 87,
+            "kind": "ClassDef",
+            "line": 72,
+            "name": "LiquidityView"
+          },
+          {
+            "end_line": 142,
+            "kind": "ClassDef",
+            "line": 91,
+            "name": "ExecutionStyle"
+          },
+          {
+            "end_line": 147,
+            "kind": "FunctionDef",
+            "line": 145,
+            "name": "_bounded"
+          },
+          {
+            "end_line": 274,
+            "kind": "ClassDef",
+            "line": 150,
+            "name": "ExecutionStyleSelector"
+          },
+          {
+            "end_line": 280,
+            "kind": "FunctionDef",
+            "line": 277,
+            "name": "_floor"
+          },
+          {
+            "end_line": 81,
+            "kind": "FunctionDef",
+            "line": 80,
+            "name": "known"
+          },
+          {
+            "end_line": 87,
+            "kind": "FunctionDef",
+            "line": 84,
+            "name": "spread_multiple"
+          },
+          {
+            "end_line": 111,
+            "kind": "FunctionDef",
+            "line": 110,
+            "name": "total_quantity"
+          },
+          {
+            "end_line": 129,
+            "kind": "FunctionDef",
+            "line": 113,
+            "name": "body"
+          },
+          {
+            "end_line": 132,
+            "kind": "FunctionDef",
+            "line": 131,
+            "name": "sealed"
+          },
+          {
+            "end_line": 135,
+            "kind": "FunctionDef",
+            "line": 134,
+            "name": "seal_ok"
+          },
+          {
+            "end_line": 142,
+            "kind": "FunctionDef",
+            "line": 137,
+            "name": "within"
+          },
+          {
+            "end_line": 159,
+            "kind": "FunctionDef",
+            "line": 153,
+            "name": "__init__"
+          },
+          {
+            "end_line": 201,
+            "kind": "FunctionDef",
+            "line": 161,
+            "name": "select"
+          },
+          {
+            "end_line": 216,
+            "kind": "FunctionDef",
+            "line": 205,
+            "name": "_entry_type"
+          },
+          {
+            "end_line": 224,
+            "kind": "FunctionDef",
+            "line": 219,
+            "name": "_wait"
+          },
+          {
+            "end_line": 238,
+            "kind": "FunctionDef",
+            "line": 227,
+            "name": "_slippage"
+          },
+          {
+            "end_line": 274,
+            "kind": "FunctionDef",
+            "line": 240,
+            "name": "_slice"
+          }
+        ]
+      },
+      "symbol": "ExecutionStyleSelector._slice/select",
+      "unit": "BE-010"
+    },
+    {
+      "application_qualification": "NOT_ESTABLISHED_THIS_REVIEW",
+      "caller": "DecisionCycle._record_entry path; AccountTradeLifecycle TCA callers (raw caller receipts)",
+      "disposition": "ADAPT_REQUIRED",
+      "reason": "Reconcile decomposition to direct economic oracle; retain filled quantity and true quote/account/fee units.",
+      "source": {
+        "commit": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+        "label": "opus",
+        "path": "trading/vati/execution/tca.py",
+        "ref": "refs/review-pr/101",
+        "sha256": "98f548bd7628240b678b0911d80fba57975ca365acd722f6bb6788911fd26870",
+        "symbols": [
+          {
+            "end_line": 31,
+            "kind": "ClassDef",
+            "line": 15,
+            "name": "TcaRecord"
+          },
+          {
+            "end_line": 45,
+            "kind": "FunctionDef",
+            "line": 34,
+            "name": "compute_tca"
+          },
+          {
+            "end_line": 31,
+            "kind": "FunctionDef",
+            "line": 30,
+            "name": "as_dict"
+          }
+        ]
+      },
+      "symbol": "compute_tca",
+      "unit": "BE-012"
+    },
+    {
+      "application_qualification": "NOT_ESTABLISHED_THIS_REVIEW",
+      "caller": "Account service start/build and tick/opportunity path",
+      "disposition": "RECONCILE_WITH_OPUS",
+      "reason": "Preserve temperament, typed evidence/replay, invoker state and account ownership; compose with Opus fixes; remove synchronous optional model wait from risk/protection path.",
+      "source": {
+        "commit": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+        "label": "canon",
+        "path": "trading/vati/app/account_service.py",
+        "ref": "refs/review-pr/93",
+        "sha256": "8795a89226b5955ed69814eb46445d27f1276e2cb948c65bfd32c7e5f1a58bef",
+        "symbols": [
+          {
+            "end_line": 97,
+            "kind": "ClassDef",
+            "line": 76,
+            "name": "LiveInstrumentSpec"
+          },
+          {
+            "end_line": 1351,
+            "kind": "ClassDef",
+            "line": 100,
+            "name": "AccountCoordinatorService"
+          },
+          {
+            "end_line": 97,
+            "kind": "FunctionDef",
+            "line": 87,
+            "name": "from_mapping"
+          },
+          {
+            "end_line": 150,
+            "kind": "FunctionDef",
+            "line": 103,
+            "name": "__init__"
+          },
+          {
+            "end_line": 162,
+            "kind": "FunctionDef",
+            "line": 152,
+            "name": "_load_specs"
+          },
+          {
+            "end_line": 431,
+            "kind": "FunctionDef",
+            "line": 164,
+            "name": "build"
+          },
+          {
+            "end_line": 462,
+            "kind": "FunctionDef",
+            "line": 434,
+            "name": "_build_news"
+          },
+          {
+            "end_line": 480,
+            "kind": "FunctionDef",
+            "line": 464,
+            "name": "refresh_news"
+          },
+          {
+            "end_line": 514,
+            "kind": "FunctionDef",
+            "line": 482,
+            "name": "_apply_news_event_risk"
+          },
+          {
+            "end_line": 525,
+            "kind": "FunctionDef",
+            "line": 516,
+            "name": "_correlation_for"
+          },
+          {
+            "end_line": 538,
+            "kind": "FunctionDef",
+            "line": 527,
+            "name": "_snapshot_for_symbol"
+          },
+          {
+            "end_line": 587,
+            "kind": "FunctionDef",
+            "line": 540,
+            "name": "_execute_delta"
+          },
+          {
+            "end_line": 614,
+            "kind": "FunctionDef",
+            "line": 589,
+            "name": "_open_positions"
+          },
+          {
+            "end_line": 622,
+            "kind": "FunctionDef",
+            "line": 616,
+            "name": "_ledger_positions"
+          },
+          {
+            "end_line": 628,
+            "kind": "FunctionDef",
+            "line": 624,
+            "name": "_risk_store_ok"
+          },
+          {
+            "end_line": 669,
+            "kind": "FunctionDef",
+            "line": 630,
+            "name": "_snapshot_for"
+          },
+          {
+            "end_line": 688,
+            "kind": "FunctionDef",
+            "line": 671,
+            "name": "_risk"
+          },
+          {
+            "end_line": 701,
+            "kind": "FunctionDef",
+            "line": 691,
+            "name": "_dependency_positions"
+          },
+          {
+            "end_line": 726,
+            "kind": "FunctionDef",
+            "line": 703,
+            "name": "_dependency_for"
+          },
+          {
+            "end_line": 786,
+            "kind": "FunctionDef",
+            "line": 728,
+            "name": "_execute"
+          },
+          {
+            "end_line": 795,
+            "kind": "FunctionDef",
+            "line": 788,
+            "name": "_observe_owner_halt"
+          },
+          {
+            "end_line": 876,
+            "kind": "FunctionDef",
+            "line": 797,
+            "name": "_owner_ticket_projection"
+          },
+          {
+            "end_line": 922,
+            "kind": "FunctionDef",
+            "line": 878,
+            "name": "_sync_owner_ticket_buys"
+          },
+          {
+            "end_line": 970,
+            "kind": "FunctionDef",
+            "line": 924,
+            "name": "_sync_owner_ticket_sells"
+          },
+          {
+            "end_line": 1005,
+            "kind": "FunctionDef",
+            "line": 972,
+            "name": "_account_snapshot"
+          },
+          {
+            "end_line": 1039,
+            "kind": "FunctionDef",
+            "line": 1007,
+            "name": "_log_allocation_pass"
+          },
+          {
+            "end_line": 1056,
+            "kind": "FunctionDef",
+            "line": 1040,
+            "name": "_heartbeat"
+          },
+          {
+            "end_line": 1121,
+            "kind": "FunctionDef",
+            "line": 1058,
+            "name": "start"
+          },
+          {
+            "end_line": 1269,
+            "kind": "FunctionDef",
+            "line": 1122,
+            "name": "step_once"
+          },
+          {
+            "end_line": 1310,
+            "kind": "FunctionDef",
+            "line": 1270,
+            "name": "_start_packet_worker"
+          },
+          {
+            "end_line": 1351,
+            "kind": "FunctionDef",
+            "line": 1312,
+            "name": "run_forever"
+          },
+          {
+            "end_line": 534,
+            "kind": "ClassDef",
+            "line": 533,
+            "name": "_Probe"
+          },
+          {
+            "end_line": 1307,
+            "kind": "FunctionDef",
+            "line": 1281,
+            "name": "produce"
+          },
+          {
+            "end_line": 1314,
+            "kind": "FunctionDef",
+            "line": 1313,
+            "name": "stop"
+          },
+          {
+            "end_line": 287,
+            "kind": "FunctionDef",
+            "line": 278,
+            "name": "state_fn"
+          },
+          {
+            "end_line": 308,
+            "kind": "FunctionDef",
+            "line": 289,
+            "name": "mtf_state_fn"
+          },
+          {
+            "end_line": 326,
+            "kind": "FunctionDef",
+            "line": 324,
+            "name": "source"
+          },
+          {
+            "end_line": 534,
+            "kind": "FunctionDef",
+            "line": 534,
+            "name": "__init__"
+          },
+          {
+            "end_line": 292,
+            "kind": "FunctionDef",
+            "line": 290,
+            "name": "bars_for"
+          },
+          {
+            "end_line": 301,
+            "kind": "FunctionDef",
+            "line": 294,
+            "name": "state_builder"
+          }
+        ]
+      },
+      "symbol": "AccountCoordinatorService construction/_risk and temperament paths",
+      "unit": "BE-001"
+    },
+    {
+      "application_qualification": "NOT_ESTABLISHED_THIS_REVIEW",
+      "caller": "backend/van_gateway/app.py; attention/reasoning/browser/understanding consumers in expanded caller receipt",
+      "disposition": "ADAPT_PRESERVE_SHARED_SERVICE",
+      "reason": "Keep consumer-scoped shared dial-jev integration, SHADOW/apply_effect handling and fallback; no second service or authority. 1.2 seconds is a timeout setting, not measured latency.",
+      "source": {
+        "commit": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+        "label": "canon",
+        "path": "backend/van_gateway/jev/advisor.py",
+        "ref": "refs/review-pr/93",
+        "sha256": "e2a61071e0a9aed5e50ac48941a2a747cdff74c261d6084212f18395925da2b9",
+        "symbols": [
+          {
+            "end_line": 11,
+            "kind": "ClassDef",
+            "line": 10,
+            "name": "JevJudgmentError"
+          },
+          {
+            "end_line": 25,
+            "kind": "ClassDef",
+            "line": 15,
+            "name": "JevAnnotation"
+          },
+          {
+            "end_line": 146,
+            "kind": "ClassDef",
+            "line": 28,
+            "name": "JevVanAdvisor"
+          },
+          {
+            "end_line": 156,
+            "kind": "FunctionDef",
+            "line": 149,
+            "name": "score01"
+          },
+          {
+            "end_line": 165,
+            "kind": "FunctionDef",
+            "line": 159,
+            "name": "noul_probability"
+          },
+          {
+            "end_line": 25,
+            "kind": "FunctionDef",
+            "line": 24,
+            "name": "available"
+          },
+          {
+            "end_line": 59,
+            "kind": "FunctionDef",
+            "line": 48,
+            "name": "__init__"
+          },
+          {
+            "end_line": 63,
+            "kind": "FunctionDef",
+            "line": 62,
+            "name": "configured"
+          },
+          {
+            "end_line": 71,
+            "kind": "FunctionDef",
+            "line": 65,
+            "name": "_token"
+          },
+          {
+            "end_line": 111,
+            "kind": "AsyncFunctionDef",
+            "line": 73,
+            "name": "_batch"
+          },
+          {
+            "end_line": 114,
+            "kind": "AsyncFunctionDef",
+            "line": 113,
+            "name": "attention_fields"
+          },
+          {
+            "end_line": 117,
+            "kind": "AsyncFunctionDef",
+            "line": 116,
+            "name": "critic"
+          },
+          {
+            "end_line": 121,
+            "kind": "AsyncFunctionDef",
+            "line": 119,
+            "name": "browser_state"
+          },
+          {
+            "end_line": 146,
+            "kind": "AsyncFunctionDef",
+            "line": 123,
+            "name": "propose_action"
+          }
+        ]
+      },
+      "symbol": "JevVanAdvisor._batch; JevAnnotation",
+      "unit": "BE-021"
+    },
+    {
+      "application_qualification": "NOT_ESTABLISHED_THIS_REVIEW",
+      "caller": "AccountDecisionCoordinator and AccountCoordinatorService on candidate source",
+      "disposition": "RECONCILE_WITH_CANON",
+      "reason": "Preserve opportunity mode and signed temperament semantics; no duplicate allocator or risk owner.",
+      "source": {
+        "commit": "923ecf9bbb81a2b3b485a3730071279851596b06",
+        "label": "modes",
+        "path": "trading/vati/arbiter/temperament.py",
+        "ref": "refs/review-pr/92",
+        "sha256": "3c470b4872fcd1ad8aeed8b52294b374a895a15efb138f485e087deb84bbfcd8",
+        "symbols": [
+          {
+            "end_line": 30,
+            "kind": "FunctionDef",
+            "line": 25,
+            "name": "_bounded"
+          },
+          {
+            "end_line": 88,
+            "kind": "ClassDef",
+            "line": 34,
+            "name": "AdmittedEdge"
+          },
+          {
+            "end_line": 110,
+            "kind": "ClassDef",
+            "line": 92,
+            "name": "TemperamentVerdict"
+          },
+          {
+            "end_line": 190,
+            "kind": "ClassDef",
+            "line": 113,
+            "name": "TemperamentPolicy"
+          },
+          {
+            "end_line": 229,
+            "kind": "ClassDef",
+            "line": 193,
+            "name": "TemperedOpportunityAllocator"
+          },
+          {
+            "end_line": 65,
+            "kind": "FunctionDef",
+            "line": 54,
+            "name": "body"
+          },
+          {
+            "end_line": 68,
+            "kind": "FunctionDef",
+            "line": 67,
+            "name": "sealed"
+          },
+          {
+            "end_line": 88,
+            "kind": "FunctionDef",
+            "line": 70,
+            "name": "valid_for"
+          },
+          {
+            "end_line": 110,
+            "kind": "FunctionDef",
+            "line": 104,
+            "name": "sealed"
+          },
+          {
+            "end_line": 120,
+            "kind": "FunctionDef",
+            "line": 116,
+            "name": "__init__"
+          },
+          {
+            "end_line": 190,
+            "kind": "FunctionDef",
+            "line": 122,
+            "name": "verdict"
+          },
+          {
+            "end_line": 197,
+            "kind": "FunctionDef",
+            "line": 196,
+            "name": "__init__"
+          },
+          {
+            "end_line": 229,
+            "kind": "FunctionDef",
+            "line": 199,
+            "name": "rank"
+          },
+          {
+            "end_line": 130,
+            "kind": "FunctionDef",
+            "line": 126,
+            "name": "result"
+          }
+        ]
+      },
+      "symbol": "TemperamentPolicy; TemperedOpportunityAllocator",
+      "unit": "BE-009"
+    },
+    {
+      "application_qualification": "NOT_ESTABLISHED_THIS_REVIEW",
+      "caller": "VAN gateway router registration and Android MuseRoute",
+      "disposition": "ADAPT_PRESERVE",
+      "reason": "Native task/command receipt and owner gate contracts remain separate from VATI trading authority.",
+      "source": {
+        "commit": "0e825b44f559f44815cc9925f5dcbcaec5d7eb53",
+        "label": "muse",
+        "path": "backend/van_gateway/muse/api.py",
+        "ref": "refs/review-pr/95",
+        "sha256": "05094cea36675232b06f1a0618be7de590b17a043c7a8f68aec0f9bfebbe40c9",
+        "symbols": [
+          {
+            "end_line": 36,
+            "kind": "AsyncFunctionDef",
+            "line": 24,
+            "name": "bounded_json"
+          },
+          {
+            "end_line": 42,
+            "kind": "FunctionDef",
+            "line": 39,
+            "name": "failure"
+          },
+          {
+            "end_line": 204,
+            "kind": "FunctionDef",
+            "line": 45,
+            "name": "build_muse_router"
+          },
+          {
+            "end_line": 51,
+            "kind": "FunctionDef",
+            "line": 49,
+            "name": "enabled"
+          },
+          {
+            "end_line": 55,
+            "kind": "FunctionDef",
+            "line": 53,
+            "name": "actuation_admitted"
+          },
+          {
+            "end_line": 64,
+            "kind": "FunctionDef",
+            "line": 57,
+            "name": "owner"
+          },
+          {
+            "end_line": 74,
+            "kind": "AsyncFunctionDef",
+            "line": 67,
+            "name": "overview"
+          },
+          {
+            "end_line": 84,
+            "kind": "AsyncFunctionDef",
+            "line": 77,
+            "name": "action"
+          },
+          {
+            "end_line": 93,
+            "kind": "AsyncFunctionDef",
+            "line": 87,
+            "name": "challenge"
+          },
+          {
+            "end_line": 101,
+            "kind": "AsyncFunctionDef",
+            "line": 96,
+            "name": "task_overview"
+          },
+          {
+            "end_line": 112,
+            "kind": "AsyncFunctionDef",
+            "line": 104,
+            "name": "task_call"
+          },
+          {
+            "end_line": 120,
+            "kind": "AsyncFunctionDef",
+            "line": 115,
+            "name": "receipt_by_key"
+          },
+          {
+            "end_line": 128,
+            "kind": "AsyncFunctionDef",
+            "line": 123,
+            "name": "receipt"
+          },
+          {
+            "end_line": 155,
+            "kind": "AsyncFunctionDef",
+            "line": 131,
+            "name": "events"
+          },
+          {
+            "end_line": 178,
+            "kind": "AsyncFunctionDef",
+            "line": 158,
+            "name": "relay"
+          },
+          {
+            "end_line": 203,
+            "kind": "AsyncFunctionDef",
+            "line": 181,
+            "name": "site"
+          },
+          {
+            "end_line": 154,
+            "kind": "AsyncFunctionDef",
+            "line": 139,
+            "name": "stream"
+          }
+        ]
+      },
+      "symbol": "build_muse_router",
+      "unit": "BE-001"
+    },
+    {
+      "application_qualification": "NOT_ESTABLISHED_THIS_REVIEW",
+      "caller": "MuseRoute and backend Muse API",
+      "disposition": "PRESERVE_CONTRACT_REBUILD_PRESENTATION_AFTER_BG",
+      "reason": "Preserve interaction/result identity and recovery; native presentation is later UX work.",
+      "source": {
+        "commit": "081a547117ea7d585e2cb6089e2c88c76acc2355",
+        "label": "muse_interaction",
+        "path": "android/app/src/main/java/com/dial/van/muse/MuseInteractionProtocol.kt",
+        "ref": "refs/review-pr/97",
+        "sha256": "942c31644f78c54ce3b76aacfda23235d550afabd13bbb11ec7e77bbadbc93e1",
+        "symbols": []
+      },
+      "symbol": "Muse interaction protocol",
+      "unit": "BE-001"
+    },
+    {
+      "application_qualification": "NOT_ESTABLISHED_THIS_REVIEW",
+      "caller": "MuseRoute / owner-control API",
+      "disposition": "PRESERVE_CONTRACT_REBUILD_PRESENTATION_AFTER_BG",
+      "reason": "Preserve exact review/readback and task controls; do not lose PR-only owner flows on main-only rebuild.",
+      "source": {
+        "commit": "68394af3c6e53ed764062b19cb4f2c0ab3b3b608",
+        "label": "owner_controls",
+        "path": "android/app/src/main/java/com/dial/van/muse/MuseOwnerControls.kt",
+        "ref": "refs/review-pr/98",
+        "sha256": "bdfa143edc4417c595d0213421ae76cda09a2fe7a743027b5931857c9cd421ba",
+        "symbols": []
+      },
+      "symbol": "Native owner controls",
+      "unit": "BE-001"
+    },
+    {
+      "application_qualification": "NOT_ESTABLISHED_THIS_REVIEW",
+      "caller": "web/muse-interaction BFF; native Muse contexts",
+      "disposition": "RECONCILE_FEATURE_CONTRACT",
+      "reason": "Preserve Studio capability in full catalogue; verify source-specific caller and security tests before reuse, no new early frontend exception.",
+      "source": {
+        "commit": "4ad12183d9f65a23a2b4de51ed8ba6d1b6ca48c2",
+        "label": "studio",
+        "path": "web/muse-interaction/cinematic-studio.mjs",
+        "ref": "refs/review-pr/99",
+        "sha256": "cc00e52869fa05c705b2078b1eca02a2a74d416e001a41a3658910f81fcc25e2",
+        "symbols": []
+      },
+      "symbol": "Studio routes and task control",
+      "unit": "BE-001"
+    },
+    {
+      "application_qualification": "NOT_ESTABLISHED_THIS_REVIEW",
+      "caller": "Review-input branch inherited runtime source",
+      "disposition": "DO_NOT_USE_AS_COMPLETE_RUNTIME_BASELINE",
+      "reason": "Fetched cbd059cf source omits multiple Opus changes; newer review documentation is not a replacement implementation.",
+      "source": {
+        "commit": "cbd059cfb1ddfb80766bdebc2c74d3b25302a992",
+        "label": "review_inputs",
+        "path": "trading/vati/execution/policy.py",
+        "ref": "refs/heads/review/muse-vati-rev114-inputs-20261018",
+        "sha256": "e2676f15743051ab2bd52133ebbe9b92aea24ef5284e6ce0c1efab5699ddc43e",
+        "symbols": [
+          {
+            "end_line": 68,
+            "kind": "ClassDef",
+            "line": 55,
+            "name": "ExecutionBucket"
+          },
+          {
+            "end_line": 137,
+            "kind": "ClassDef",
+            "line": 72,
+            "name": "ExecutionEvidence"
+          },
+          {
+            "end_line": 169,
+            "kind": "ClassDef",
+            "line": 141,
+            "name": "ExecutionPolicyDecision"
+          },
+          {
+            "end_line": 251,
+            "kind": "ClassDef",
+            "line": 172,
+            "name": "ExecutionPolicyEngine"
+          },
+          {
+            "end_line": 68,
+            "kind": "FunctionDef",
+            "line": 66,
+            "name": "key"
+          },
+          {
+            "end_line": 103,
+            "kind": "FunctionDef",
+            "line": 86,
+            "name": "observe"
+          },
+          {
+            "end_line": 109,
+            "kind": "FunctionDef",
+            "line": 106,
+            "name": "fill_probability"
+          },
+          {
+            "end_line": 112,
+            "kind": "FunctionDef",
+            "line": 111,
+            "name": "_median"
+          },
+          {
+            "end_line": 116,
+            "kind": "FunctionDef",
+            "line": 115,
+            "name": "median_slippage"
+          },
+          {
+            "end_line": 120,
+            "kind": "FunctionDef",
+            "line": 119,
+            "name": "median_adverse"
+          },
+          {
+            "end_line": 124,
+            "kind": "FunctionDef",
+            "line": 123,
+            "name": "median_non_fill_cost"
+          },
+          {
+            "end_line": 137,
+            "kind": "FunctionDef",
+            "line": 126,
+            "name": "expected_shortfall_estimate"
+          },
+          {
+            "end_line": 160,
+            "kind": "FunctionDef",
+            "line": 157,
+            "name": "as_dict"
+          },
+          {
+            "end_line": 163,
+            "kind": "FunctionDef",
+            "line": 162,
+            "name": "sealed"
+          },
+          {
+            "end_line": 169,
+            "kind": "FunctionDef",
+            "line": 166,
+            "name": "entry_type"
+          },
+          {
+            "end_line": 183,
+            "kind": "FunctionDef",
+            "line": 173,
+            "name": "__init__"
+          },
+          {
+            "end_line": 188,
+            "kind": "FunctionDef",
+            "line": 187,
+            "name": "evidence"
+          },
+          {
+            "end_line": 191,
+            "kind": "FunctionDef",
+            "line": 190,
+            "name": "observe"
+          },
+          {
+            "end_line": 239,
+            "kind": "FunctionDef",
+            "line": 195,
+            "name": "select"
+          },
+          {
+            "end_line": 251,
+            "kind": "FunctionDef",
+            "line": 241,
+            "name": "_decision"
+          }
+        ]
+      },
+      "symbol": "ExecutionPolicyEngine.select",
+      "unit": "PRE-001"
+    }
+  ],
+  "merge_performed": false,
+  "native_project_identity": "UNVERIFIED_THIS_SESSION",
+  "pr_open_merged_state": "NOT_ESTABLISHED_BY_GIT_REFS",
+  "scope": "Selected semantic source reconciliation; full head trees and file/symbol identities retained separately. Remaining PRE-001 feature-by-feature admission stays explicit."
+}

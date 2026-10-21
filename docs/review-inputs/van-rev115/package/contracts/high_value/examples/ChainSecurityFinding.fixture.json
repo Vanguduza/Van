@@ -1,0 +1,36 @@
+{
+  "analyzer_version": "fixture-evm/1",
+  "asset_id": "eip155:8453:0x1111111111111111111111111111111111111111",
+  "available_at": "2026-10-17T10:00:00Z",
+  "chain_family": "EVM",
+  "decision_cutoff": "2026-10-17T10:01:00Z",
+  "expires_at": "2026-10-17T10:05:00Z",
+  "factual_restrictions": [],
+  "freeze_authority": "UNKNOWN",
+  "implementation_evidence_level": "SPEC_ONLY",
+  "mint_authority": "UNKNOWN",
+  "permission_to_buy": false,
+  "reality": "SYNTHETIC",
+  "reason_codes": [
+    "UNKNOWN_CAPABILITIES"
+  ],
+  "record_id": "fixture:ChainSecurityFinding:1",
+  "research_source_class": "SYNTHETIC",
+  "schema_version": "1.0",
+  "source_refs": [
+    "fixture:controlled-input-only"
+  ],
+  "state_anchor": {
+    "chain_id": "eip155:8453",
+    "finality": "FINALIZED",
+    "hash": "synthetic-block-100",
+    "height": 100,
+    "state_epoch": 1
+  },
+  "trade_authorized": false,
+  "unsupported_capabilities": [
+    "INSUFFICIENT_STATE"
+  ],
+  "upgrade_authority": "UNKNOWN",
+  "verdict": "INVESTIGATE"
+}

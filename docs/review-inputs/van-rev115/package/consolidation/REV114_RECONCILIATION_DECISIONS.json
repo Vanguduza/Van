@@ -1,0 +1,48 @@
+{
+  "decisions": [
+    {
+      "boundary": "No feature deleted; identity mismatch resolved by actual parent bytes.",
+      "conflict": "Compilation D4 scope count",
+      "id": "SCOPE-01",
+      "resolution": "Use exact delivered parent JSON 237/1328, retain different prior quoted 267/1377 as unverified candidate identity."
+    },
+    {
+      "boundary": "No live funding, derivative, withdrawal or DEX signing permission inferred.",
+      "conflict": "Whole-app crypto read-only vs latest trade-crypto request",
+      "id": "SCOPE-02",
+      "resolution": "Retain chain/wallet/event labs read-only; add mandatory actual CEX spot software via current financial owners."
+    },
+    {
+      "boundary": "Independent semantic/financial admission pending.",
+      "conflict": "Existing LearningBoundary forbids policy writes",
+      "id": "AUTH-01",
+      "resolution": "Retain forbidden targets; qualify narrow evidence/state/selection contract separately from policy mutation."
+    },
+    {
+      "boundary": "No per-trade owner click required solely for qualified operational choice.",
+      "conflict": "Automatic optimization vs every-change approval",
+      "id": "AUTH-02",
+      "resolution": "Already-qualified method/state choices use standing scoped grant; novel policy code/domain requires governed promotion."
+    },
+    {
+      "boundary": "Thresholds/materiality bound by admitted policy, not invented live constants.",
+      "conflict": "Sample counts and mixed medians described as sufficient expected cost",
+      "id": "SEM-01",
+      "resolution": "Use effective cohort evidence and a correctly named/qualified target estimator; missing costs remain unknown."
+    },
+    {
+      "boundary": "Full new requirement acceptance remains mandatory.",
+      "conflict": "More features implies more engines and services",
+      "id": "PLAN-01",
+      "resolution": "Extend the existing 131-unit graph and 82 backend/12 verifier catalogue; no new required deployable processes."
+    },
+    {
+      "boundary": "Prepared hashes are identity, not owner signature.",
+      "conflict": "Specification checks vs lifecycle execution proof",
+      "id": "STATUS-01",
+      "resolution": "All application acceptance remains NOT_RUN; independent F15/BG/financial promotion remain NOT_ISSUED."
+    }
+  ],
+  "revision": "1.14",
+  "status": "PROPOSED_NOT_OWNER_SIGNED"
+}

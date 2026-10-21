@@ -1,0 +1,222 @@
+{
+  "bindings": [
+    {
+      "acceptance_refs": [
+        "T-VAN-JM-008-POS",
+        "T-VAN-JM-008-NEG",
+        "T-VAN-JM-008-REC"
+      ],
+      "authority_rule": "Existing native gates and reconciled commands; model evidence cannot self-promote.",
+      "backend_units": [
+        "BE-021",
+        "BE-022",
+        "BE-032",
+        "BE-035",
+        "BE-036"
+      ],
+      "context_id": "VAN-S-CX-MODEL-REGISTRY",
+      "frontend_units": [
+        "FE-012",
+        "FE-014",
+        "FE-023"
+      ],
+      "operation_ids": [
+        "EL-OP-002",
+        "EL-OP-003",
+        "EL-OP-004",
+        "EL-OP-005",
+        "EL-OP-008"
+      ],
+      "presentation": "Requested/served identity, task scope, prompt/calibration epoch, access/qualification and current fallback.",
+      "required_states": [
+        "MODEL_UNAVAILABLE",
+        "IDENTITY_UNVERIFIED",
+        "SHADOW",
+        "INCONCLUSIVE",
+        "CALIBRATION_MISSING",
+        "BUDGET_EXHAUSTED",
+        "COST_UNKNOWN",
+        "DRIFT_SUSPENDED",
+        "CURRENT"
+      ],
+      "requirement_ids": [
+        "VAN-JM-008"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-JM-008-POS",
+        "T-VAN-JM-008-NEG",
+        "T-VAN-JM-008-REC"
+      ],
+      "authority_rule": "Existing native gates and reconciled commands; model evidence cannot self-promote.",
+      "backend_units": [
+        "BE-021",
+        "BE-022",
+        "BE-032",
+        "BE-035",
+        "BE-036"
+      ],
+      "context_id": "VAN-S-CX-CALIBRATION",
+      "frontend_units": [
+        "FE-012",
+        "FE-014",
+        "FE-023"
+      ],
+      "operation_ids": [
+        "EL-OP-002",
+        "EL-OP-003",
+        "EL-OP-004",
+        "EL-OP-005",
+        "EL-OP-008"
+      ],
+      "presentation": "Prediction target, eligible population, base-rate comparator, uncertainty, missing labels and economic qualification.",
+      "required_states": [
+        "MODEL_UNAVAILABLE",
+        "IDENTITY_UNVERIFIED",
+        "SHADOW",
+        "INCONCLUSIVE",
+        "CALIBRATION_MISSING",
+        "BUDGET_EXHAUSTED",
+        "COST_UNKNOWN",
+        "DRIFT_SUSPENDED",
+        "CURRENT"
+      ],
+      "requirement_ids": [
+        "VAN-JM-008"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-JM-008-POS",
+        "T-VAN-JM-008-NEG",
+        "T-VAN-JM-008-REC"
+      ],
+      "authority_rule": "Existing native gates and reconciled commands; model evidence cannot self-promote.",
+      "backend_units": [
+        "BE-021",
+        "BE-022",
+        "BE-032",
+        "BE-035",
+        "BE-036"
+      ],
+      "context_id": "VAN-S-CX-CANDIDATE-COMPARISON",
+      "frontend_units": [
+        "FE-012",
+        "FE-014",
+        "FE-023"
+      ],
+      "operation_ids": [
+        "EL-OP-002",
+        "EL-OP-003",
+        "EL-OP-004",
+        "EL-OP-005",
+        "EL-OP-008"
+      ],
+      "presentation": "Jev/Argon/DeepSeek ablations, net after-cost outcomes and risk/uncertainty parity.",
+      "required_states": [
+        "MODEL_UNAVAILABLE",
+        "IDENTITY_UNVERIFIED",
+        "SHADOW",
+        "INCONCLUSIVE",
+        "CALIBRATION_MISSING",
+        "BUDGET_EXHAUSTED",
+        "COST_UNKNOWN",
+        "DRIFT_SUSPENDED",
+        "CURRENT"
+      ],
+      "requirement_ids": [
+        "VAN-JM-008"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-JM-008-POS",
+        "T-VAN-JM-008-NEG",
+        "T-VAN-JM-008-REC"
+      ],
+      "authority_rule": "Existing native gates and reconciled commands; model evidence cannot self-promote.",
+      "backend_units": [
+        "BE-021",
+        "BE-022",
+        "BE-032",
+        "BE-035",
+        "BE-036"
+      ],
+      "context_id": "VAN-S-CX-EXPERIMENT-LEDGER",
+      "frontend_units": [
+        "FE-012",
+        "FE-014",
+        "FE-023"
+      ],
+      "operation_ids": [
+        "EL-OP-002",
+        "EL-OP-003",
+        "EL-OP-004",
+        "EL-OP-005",
+        "EL-OP-008"
+      ],
+      "presentation": "All prompt/model/human trials, budget reservations and failed/unknown-cost attempts; prospective windows and reasons.",
+      "required_states": [
+        "MODEL_UNAVAILABLE",
+        "IDENTITY_UNVERIFIED",
+        "SHADOW",
+        "INCONCLUSIVE",
+        "CALIBRATION_MISSING",
+        "BUDGET_EXHAUSTED",
+        "COST_UNKNOWN",
+        "DRIFT_SUSPENDED",
+        "CURRENT"
+      ],
+      "requirement_ids": [
+        "VAN-JM-008"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-JM-008-POS",
+        "T-VAN-JM-008-NEG",
+        "T-VAN-JM-008-REC"
+      ],
+      "authority_rule": "Existing native gates and reconciled commands; model evidence cannot self-promote.",
+      "backend_units": [
+        "BE-021",
+        "BE-022",
+        "BE-032",
+        "BE-035",
+        "BE-036"
+      ],
+      "context_id": "CTX-HVA-JUDGMENT",
+      "frontend_units": [
+        "FE-012",
+        "FE-014",
+        "FE-023"
+      ],
+      "operation_ids": [
+        "EL-OP-002",
+        "EL-OP-003",
+        "EL-OP-004",
+        "EL-OP-005",
+        "EL-OP-008"
+      ],
+      "presentation": "Jev module, typed judgment target, source citations, effect scope, reviewer independence and limitations.",
+      "required_states": [
+        "MODEL_UNAVAILABLE",
+        "IDENTITY_UNVERIFIED",
+        "SHADOW",
+        "INCONCLUSIVE",
+        "CALIBRATION_MISSING",
+        "BUDGET_EXHAUSTED",
+        "COST_UNKNOWN",
+        "DRIFT_SUSPENDED",
+        "CURRENT"
+      ],
+      "requirement_ids": [
+        "VAN-JM-008"
+      ]
+    }
+  ],
+  "existing_contexts_only": true,
+  "schema": "van.model-hardening.context-binding/1.0",
+  "visual_assets_changed": false
+}
