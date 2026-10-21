@@ -1,0 +1,413 @@
+{
+ "schema": "van.rebuild.amendment-patch/1",
+ "amendment": "AP-001",
+ "base_package_tree": "ac0226a22a95f51642cfeb37b3709b40f7cacf10",
+ "base_plan_revision": "1.18",
+ "new_acceptance_contracts": [
+  {
+   "id": "T-BQ-003-HEADLESS-POS",
+   "unit": "BQ-003",
+   "kind": "POS",
+   "expectation": "One headless run over the complete news, event history, armed grants and chart-observation backend (BE-014, BE-015, BE-016, BE-017, BE-018, BE-019, BE-021) exercises every owned declared operation through actual registered producers and consumers, with real providers where the target requires them; each outcome is independently read back and bound to exact source commit, artifact hashes and configuration version.",
+   "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; actual provider when required; no live authorization inferred",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ]
+  },
+  {
+   "id": "T-BQ-003-HEADLESS-NEG",
+   "unit": "BQ-003",
+   "kind": "NEG",
+   "expectation": "The gate rejects: any owned operation unreached or answered by a stub/fixture, an empty or acknowledgement-only response counted as success, a provider-required outcome without a real provider receipt, or a receipt bound to a different source/artifact/config than the one admitted.",
+   "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; actual provider when required; no live authorization inferred",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ]
+  },
+  {
+   "id": "T-BQ-003-HEADLESS-REC",
+   "unit": "BQ-003",
+   "kind": "REC",
+   "expectation": "Inject faults across the domain (process kill at commit/outbox boundaries, provider timeout and lost reply, duplicate and out-of-order events, disconnect/restart); every original operation identity reconciles to an authoritative postcondition with no duplicate effect, and the fault-injection log is part of the receipt.",
+   "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; actual provider when required; no live authorization inferred",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ]
+  },
+  {
+   "id": "T-BQ-004-HEADLESS-POS",
+   "unit": "BQ-004",
+   "kind": "POS",
+   "expectation": "One headless run over the complete work, agents/Muse, browser, Artemis, memory, automation and voice backend (BE-023, BE-024, BE-025, BE-026, BE-027, BE-028, BE-029) exercises every owned declared operation through actual registered producers and consumers, with real providers where the target requires them; each outcome is independently read back and bound to exact source commit, artifact hashes and configuration version.",
+   "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; actual provider when required; no live authorization inferred",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ]
+  },
+  {
+   "id": "T-BQ-004-HEADLESS-NEG",
+   "unit": "BQ-004",
+   "kind": "NEG",
+   "expectation": "The gate rejects: any owned operation unreached or answered by a stub/fixture, an empty or acknowledgement-only response counted as success, a provider-required outcome without a real provider receipt, or a receipt bound to a different source/artifact/config than the one admitted.",
+   "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; actual provider when required; no live authorization inferred",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ]
+  },
+  {
+   "id": "T-BQ-004-HEADLESS-REC",
+   "unit": "BQ-004",
+   "kind": "REC",
+   "expectation": "Inject faults across the domain (process kill at commit/outbox boundaries, provider timeout and lost reply, duplicate and out-of-order events, disconnect/restart); every original operation identity reconciles to an authoritative postcondition with no duplicate effect, and the fault-injection log is part of the receipt.",
+   "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; actual provider when required; no live authorization inferred",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ]
+  },
+  {
+   "id": "T-QA-002-POS",
+   "unit": "QA-002",
+   "kind": "POS",
+   "expectation": "The exact signed release-candidate APK, enrolled through admitted signed provisioning (zero in-app backend configuration, certificate verification on), reaches every admitted backend operation of every context through the real gateway and bound providers; each result is independently read back on the backend.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY_WITH_REAL_BOUND_PROVIDER_WHERE_REQUIRED; exact signed APK on admitted S24 Ultra via Artemis where required",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ]
+  },
+  {
+   "id": "T-QA-002-NEG",
+   "unit": "QA-002",
+   "kind": "NEG",
+   "expectation": "Reject as a pass: a debug or unsigned build, a mocked gateway/provider, cleartext or disabled certificate verification, a user-typed endpoint, an operation shown complete in the app without backend readback, or a feature hidden to avoid a failing integration.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY_WITH_REAL_BOUND_PROVIDER_WHERE_REQUIRED; exact signed APK on admitted S24 Ultra via Artemis where required",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ]
+  },
+  {
+   "id": "T-QA-002-REC",
+   "unit": "QA-002",
+   "kind": "REC",
+   "expectation": "With the signed app: endpoint/trust rotation, revocation and re-enrollment, network loss and process death mid-operation; the app shows accepted/running/applied/outcome-unknown/cancelled truthfully and reconciles before any retry, preserving the original operation identity.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY_WITH_REAL_BOUND_PROVIDER_WHERE_REQUIRED; exact signed APK on admitted S24 Ultra via Artemis where required",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ]
+  },
+  {
+   "id": "T-QA-003-POS",
+   "unit": "QA-003",
+   "kind": "POS",
+   "expectation": "Cross-domain adversarial suite through the signed app and backend: wrong owner/account/device/grant, replayed or forged commands, speaker similarity presented as authorization, model output attempting to widen limits, and partial speech recognition all refuse with redacted logs; authorized paths still succeed.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY_WITH_REAL_BOUND_PROVIDER_WHERE_REQUIRED; exact signed APK on admitted S24 Ultra via Artemis where required",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ]
+  },
+  {
+   "id": "T-QA-003-NEG",
+   "unit": "QA-003",
+   "kind": "NEG",
+   "expectation": "Any cross-domain path where a refusal in one domain is bypassed through another (e.g. automation, browser, agent or voice routing into a trading/fund/approval effect without that owner's native authority) fails the gate.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY_WITH_REAL_BOUND_PROVIDER_WHERE_REQUIRED; exact signed APK on admitted S24 Ultra via Artemis where required",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ]
+  },
+  {
+   "id": "T-QA-003-REC",
+   "unit": "QA-003",
+   "kind": "REC",
+   "expectation": "Recovery under attack: revocation mid-operation, compromised-device revocation, restore from backup with erasure tombstones, and restart during an outcome-unknown financial command recover to authoritative state without resurrecting revoked authority or erased data.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY_WITH_REAL_BOUND_PROVIDER_WHERE_REQUIRED; exact signed APK on admitted S24 Ultra via Artemis where required",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ]
+  },
+  {
+   "id": "T-REL-002-NEG",
+   "unit": "REL-002",
+   "kind": "NEG",
+   "expectation": "Retirement is refused while any retained behaviour lacks current parity evidence in the new app, without a separate owner-approved retirement review, or if it would remove a functional service, evidence record or owner data instead of presentation only.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY_WITH_REAL_BOUND_PROVIDER_WHERE_REQUIRED; exact signed APK on admitted S24 Ultra via Artemis where required",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ]
+  },
+  {
+   "id": "T-REL-002-REC",
+   "unit": "REL-002",
+   "kind": "REC",
+   "expectation": "After retirement, a detected parity regression or failed signed release restores a working path (rollback to the prior signed release) without data loss, preserving com.dial.van identity and signing continuity.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY_WITH_REAL_BOUND_PROVIDER_WHERE_REQUIRED; exact signed APK on admitted S24 Ultra via Artemis where required",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ]
+  }
+ ],
+ "unit_acceptance_additions": {
+  "BQ-003": [
+   "T-BE-014-INT",
+   "T-BE-014-REC",
+   "T-BE-015-INT",
+   "T-BE-015-REC",
+   "T-BE-016-INT",
+   "T-BE-016-REC",
+   "T-BE-017-INT",
+   "T-BE-017-REC",
+   "T-BE-018-INT",
+   "T-BE-018-REC",
+   "T-BE-019-INT",
+   "T-BE-019-REC",
+   "T-BE-021-INT",
+   "T-BE-021-REC",
+   "T-BE-014-POS",
+   "T-BE-014-NEG",
+   "T-BE-018-POS",
+   "T-BE-018-NEG",
+   "T-BQ-003-HEADLESS-POS",
+   "T-BQ-003-HEADLESS-NEG",
+   "T-BQ-003-HEADLESS-REC"
+  ],
+  "BQ-004": [
+   "T-BE-023-INT",
+   "T-BE-023-REC",
+   "T-BE-024-INT",
+   "T-BE-024-REC",
+   "T-BE-025-INT",
+   "T-BE-025-REC",
+   "T-BE-026-INT",
+   "T-BE-026-REC",
+   "T-BE-027-INT",
+   "T-BE-027-REC",
+   "T-BE-028-INT",
+   "T-BE-028-REC",
+   "T-BE-029-INT",
+   "T-BE-029-REC",
+   "T-BE-023-POS",
+   "T-BE-024-POS",
+   "T-BE-025-POS",
+   "T-BE-027-POS",
+   "T-BE-028-POS",
+   "T-BE-029-POS",
+   "T-BQ-004-HEADLESS-POS",
+   "T-BQ-004-HEADLESS-NEG",
+   "T-BQ-004-HEADLESS-REC"
+  ],
+  "QA-002": [
+   "T-QA-002-POS",
+   "T-QA-002-NEG",
+   "T-QA-002-REC"
+  ],
+  "QA-003": [
+   "T-QA-003-POS",
+   "T-QA-003-NEG",
+   "T-QA-003-REC"
+  ],
+  "REL-002": [
+   "T-NX-054",
+   "T-REL-002-NEG",
+   "T-REL-002-REC"
+  ]
+ },
+ "co_listed_kind_overrides": {
+  "T-NX-054": "POS"
+ },
+ "proposed_verification_requirement_ownership": {
+  "BQ-003": [
+   "VAN-CX-004",
+   "VAN-CX-005",
+   "VAN-CX-010",
+   "VAN-CX-012",
+   "VAN-CX-015",
+   "VAN-CX-018",
+   "VAN-EL-002",
+   "VAN-HVA-027",
+   "VAN-HVA-028",
+   "VAN-JM-001",
+   "VAN-JM-003",
+   "VAN-JM-006",
+   "VAN-NX-009",
+   "VAN-NX-012",
+   "VAN-NX-013",
+   "VAN-NX-032",
+   "VAN-NX-033",
+   "VAN-NX-036",
+   "VAN-NX-037",
+   "VAN-NX-038",
+   "VAN-NX-041",
+   "VAN-NX-042",
+   "VAN-NX-043",
+   "VAN-NX-044",
+   "VAN-NX-046",
+   "VAN-NX-065",
+   "VAN-NX-076",
+   "VAN-NX-BF-016",
+   "VAN-SO-026"
+  ],
+  "BQ-004": [
+   "VAN-CX-014",
+   "VAN-EL-006",
+   "VAN-HVA-027",
+   "VAN-JM-005",
+   "VAN-JM-007",
+   "VAN-NX-006",
+   "VAN-NX-014",
+   "VAN-NX-015",
+   "VAN-NX-016",
+   "VAN-NX-017",
+   "VAN-NX-018",
+   "VAN-NX-020",
+   "VAN-NX-066",
+   "VAN-NX-067",
+   "VAN-NX-068",
+   "VAN-NX-069",
+   "VAN-NX-072",
+   "VAN-NX-BF-013",
+   "VAN-SO-026",
+   "VAN-SO-027"
+  ],
+  "_rule": "Verification ownership only: the domain units keep implementation ownership; BQ units verify the union of requirements their domain units own. Optional part of AP-001; reviewer may admit coverage without it."
+ },
+ "preservation": "Additive only: no identity, predicate, owner, dependency or requirement is removed or rewritten; effective registry grows from 1,610 to 1,624 identities."
+}

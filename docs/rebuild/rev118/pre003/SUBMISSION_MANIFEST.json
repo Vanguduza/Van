@@ -1,0 +1,32 @@
+{
+ "archive_sha256": "6c7c7c1cb4fbd4748c0d63ceb2add9bd460778b66fb3b2302e16de09ac3a57a8",
+ "consolidation_head": "b02075f327ea8180ab6d269eba358cf8c5479878",
+ "files": {
+  "docs/rebuild/rev118/ADMISSION_STEPS.md": "2a619486d4bb6294be57329444145b93019fbdcb535b6b22c894f4a76cbd5061",
+  "docs/rebuild/rev118/EXECUTION_LEDGER.json": "eacf249a12b16eccfd8ffe7ddf8e10a193e2c58efd4fc179846b94df35a17f85",
+  "docs/rebuild/rev118/READINESS_ASSESSMENT.md": "1a7f5dc84ce1922067ebb58fc0240eb1a341c3cdc528821e2718980cf7ba8e46",
+  "docs/rebuild/rev118/pre001/CLASSIFICATION_RULES.json": "defcface9ea4aa68502c51c91e0bf8ac283c8194f9852180a9128981ec4c1137",
+  "docs/rebuild/rev118/pre001/DISPOSITIONS.json": "8d498e4e604ebdb5f7da50aebbacc803f551c299a3140f10046d2becf19d80de",
+  "docs/rebuild/rev118/pre001/OVERLAP_PRESERVATION.json": "886dab92548f0b0fdb310f7c84134e760e848d0ce58ab634d415efde7626548a",
+  "docs/rebuild/rev118/pre001/PR_STATE_20261021.json": "f1772e0a510c3b9571949f7716d96dc43c9c5e20a239739d599d3adb652822f5",
+  "docs/rebuild/rev118/pre001/REF_INVENTORY.json": "5ee6c41cc3ce125a5e598bdd7c5a27d7b558fde9832828629f169bd6279a9a2a",
+  "docs/rebuild/rev118/pre001/REMOTE_REFS_20261021.txt": "5a3523c37d08d67225d109a3cf3e8eb5cbac7a684328a67b2231e40bacb986d1",
+  "docs/rebuild/rev118/pre001/SOURCE_CLASSIFICATION.json": "73e3f828ffc8aade7dba285d49b35cada6e472dea99c0a523ea101ef1f49da73",
+  "docs/rebuild/rev118/pre001/SOURCE_LEDGER.json": "0a708b4125ea076da24ae03e096a9ebef444cb620dde7abe68c0fed400788e9f",
+  "docs/rebuild/rev118/pre001/STATUS.json": "e85190ded6ebb4c704e395a6093b1f8dbea01dcbc65e350ea06b062a7e33347d",
+  "docs/rebuild/rev118/pre001/TEST_EVIDENCE.json": "4421636bd81ffcfdec9615129b366c2f1ba2818c277e75fb8ec42525e8e9dad1",
+  "docs/rebuild/rev118/pre001/TRACE_CHECK.json": "28db35bb6f2a86088d19cac4c2f96fc6f1b3988deb0d5200f57e974ec6759983",
+  "docs/rebuild/rev118/pre002/AP-001/AP-001_DESIGN_CHANGE_PROPOSAL.json": "c9708c17e830585410e1dd5dfa624bc026c852c1fb89d0d52d66cd1d296cac79",
+  "docs/rebuild/rev118/pre002/AP-001/AP-001_PATCH.json": "feb4a93b1c5c992845ffbf945c2aa218253230367a66fa4906b76b85726b016a",
+  "docs/rebuild/rev118/pre002/OWNER_DECISION_REGISTER.json": "933d7b70fdd4f7db1b70ee48807356bafb26e241e4c536f1031037b284b920d3",
+  "docs/rebuild/rev118/pre002/PRE002_STATUS.md": "53f7d90cc65e9ad74240ed4068f2e5061e3e2cc45e58154cb68dd7d207c61ae0",
+  "docs/rebuild/rev118/pre003/REVIEW_SUBMISSION.md": "8e8ed786a9e6626422ba4cf3d9f92d9047cfcc0e8361a3cf77d59f5aee6a0077",
+  "tests/rebuild/test_ap001.py": "328cee48af7b402bee7511776cb9450524d77b9befc11481ad8a5a631d6c404d",
+  "tests/rebuild/test_pre001.py": "7d408d48925cbfc7864d4e81697396686a6e8d6c3775e006acea23466ad0fe9f",
+  "tools/rebuild/ap001.py": "f82ca696df1820fd74bec46b8aed39c7f17bf082d3f4ecffb74c968fb567d389",
+  "tools/rebuild/manifest.py": "1068c54e5a5c12398665bab083e17e66789ff7543b6ab2232deedda481c55877",
+  "tools/rebuild/pre001.py": "b50ac9dac9efed2c5a2281a9f5adbff787e8aa1f50c15861c6364f73960f4f04"
+ },
+ "package_tree": "ac0226a22a95f51642cfeb37b3709b40f7cacf10",
+ "schema": "van.rebuild.pre003.submission-manifest/1"
+}

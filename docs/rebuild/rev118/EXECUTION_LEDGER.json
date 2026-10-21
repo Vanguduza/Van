@@ -54,28 +54,37 @@
     "plan_revision": "1.18",
     "unit_id": "PRE-001",
     "scope_digest": "package tree ac0226a2",
-    "source_commit": "f3cf8301df6f73f9f88dd418f23ae63ce64649bf"
+    "source_commit": "b02075f327ea8180ab6d269eba358cf8c5479878"
    },
-   "status": "IN_PROGRESS",
-   "evidence": "docs/rebuild/rev118/pre001/STATUS.json",
+   "status": "EVIDENCE_COMPLETE_EXCEPT_AP001_PENDING_INDEPENDENT_REVIEW",
+   "evidence": [
+    "docs/rebuild/rev118/pre001/STATUS.json",
+    "docs/rebuild/rev118/pre001/DISPOSITIONS.json",
+    "docs/rebuild/rev118/pre001/TEST_EVIDENCE.json"
+   ],
    "open": {
-    "refs": 19,
-    "overlap": 27,
-    "source_files_unclassified": "1575/1575",
+    "refs": 0,
+    "overlap": 0,
+    "source_files_unclassified": "0/2131",
     "trace_findings": 5
    },
    "acceptance": {
-    "T-NX-071": "NOT_RUN_AS_ACCEPTANCE: oracle exists (pre001.py check), rows unclassified",
-    "T-BF-015": "oracle self-tested 10/10; independent verification pending",
-    "T-VAN-CX-002-NEG": "induced cases rejected (selftest)",
-    "T-HVA-002-POS/NEG": "overlap oracle built; 27 rows pending review"
+    "T-NX-071": "oracle green except AP-001 trace findings; independent verification pending",
+    "T-BF-015": "selftest 15/15; independent verification pending",
+    "T-VAN-CX-002-POS/NEG/REC": "dispositions + induced rejection evidence; independent review pending",
+    "T-HVA-002-POS/NEG/REC": "34 overlap rows resolved with executed tests; independent review pending"
    },
    "exit_requires": "all rows dispositioned with evidence, then INDEPENDENT review of the no-loss mapping (not self-issued)"
   },
   "PRE-002": {
-   "status": "NOT_STARTED",
+   "status": "AUTHOR_WORK_COMPLETE_PENDING_INDEPENDENT_CHALLENGE",
    "depends": [
     "PRE-001"
+   ],
+   "evidence": [
+    "docs/rebuild/rev118/pre002/PRE002_STATUS.md",
+    "docs/rebuild/rev118/pre002/OWNER_DECISION_REGISTER.json",
+    "docs/rebuild/rev118/pre002/AP-001/"
    ]
   },
   "PRE-003": {
@@ -83,7 +92,8 @@
    "depends": [
     "PRE-002"
    ],
-   "blocker": "BLK-001"
+   "blocker": "BLK-001",
+   "submission": "docs/rebuild/rev118/pre003/REVIEW_SUBMISSION.md"
   },
   "ALL_BE_BQ_UX_FE_QA_REL": {
    "status": "NOT_STARTED",
@@ -93,7 +103,7 @@
  "blockers": [
   {
    "id": "BLK-001",
-   "what": "PRE-003 independent F15 issuer and valid owner signature (OQ-05)",
+   "what": "PRE-003 F15: DDS predevelopment-forensic-gate.mjs on the DIAL control host over the registered 'van' project pack (fingerprinted certificate, not a signature) plus owner scope-lock signature (OQ-05) and independent reviewer populating pack evidence",
    "blocks": "all 94 backend/backend-verification units and everything after",
    "needed_from": "owner + trusted independent verifier via native DIAL",
    "not_substitutable": "pack checker, generated PASS or this agent"
@@ -115,15 +125,28 @@
    "what": "21 owner questions unresolved in plan.owner_questions (START gates on BE-004/006/007/009/010/011/014/016/017/019/022, UX-002)",
    "blocks": "those units' START even after F15",
    "needed_from": "owner decisions"
+  },
+  {
+   "id": "BLK-005",
+   "what": "Project identity: package project_id 16f2f43a-... vs DDS registry id 'van'; certifier fails on mismatch; native readback unavailable here",
+   "blocks": "F15",
+   "needed_from": "native DIAL readback / owner"
+  },
+  {
+   "id": "BLK-006",
+   "what": "AP-001 admission (five gate units without acceptance)",
+   "blocks": "PRE-001 exit and F15 (preparation blocker)",
+   "needed_from": "independent reviewer + owner via package amendment procedure"
   }
  ],
  "amendment_proposals": [
   {
    "id": "AP-001",
    "finding": "Units BQ-003, BQ-004, QA-002, QA-003, REL-002 own zero acceptance identities (plan acceptance_test_ids empty; effective registry has no test with these units). The package's verify_review_contracts.py 79/79 does not detect it.",
-   "evidence": "docs/rebuild/rev118/pre001/TRACE_CHECK.json",
+   "evidence": "docs/rebuild/rev118/pre002/AP-001/",
    "proposal": "Bind explicit POS/NEG/REC acceptance identities to each unit (or record that each aggregates named existing IDs) through an admitted amendment; package left unchanged",
-   "status": "PROPOSED_NOT_ADMITTED"
+   "status": "PROPOSED_NOT_ADMITTED",
+   "verifier": "tools/rebuild/ap001.py (9/9 selftest)"
   }
  ],
  "delegation": {
@@ -137,16 +160,24 @@
   "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
   "background_jobs": "none",
   "last_validation": [
-   "package documentary verifiers 10/10 exit 0",
-   "tools/consolidation/verify.py zero findings",
-   "pre001.py check: no drift",
-   "pre001.py selftest 10/10",
-   "pytest tests/rebuild 3 passed"
+   "pre001.py check: no drift; selftest 15/15",
+   "ap001.py check clean; selftest 9/9",
+   "pytest tests/rebuild 5 passed",
+   "cited baseline tests 292+47+1+9 passed",
+   "package unchanged (git diff --quiet)"
   ],
   "environment_notes": [
    "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
-   "pytest from backend/requirements.txt in a venv"
+   "pytest from backend/requirements.txt in a venv",
+   "rsync needed for tests/hermes installer test",
+   "DDS sibling at /home/user/dial-development-system fetched origin/master 204f2f3b for F15 source reading"
   ],
-  "next_action": "PRE-001: disposition the 19 unpreserved PR-only heads (start with PR-11..13 backend/tests/test_google_mesh.py and PR-22/46/47 Android content), review the 27 overlap rows (main symbols absent at HEAD) caller-by-caller, then classify source files by owning unit with evidence."
- }
+  "next_action": "Owner/independent reviewer: act on pre003/REVIEW_SUBMISSION.md (AP-001, project identity, independent challenge, OQ-05 signature) and ADMISSION_STEPS.md (PR #94 adoption). Lead: no further dependency-ready PRE work until those return; BE units remain blocked on PRE-003."
+ },
+ "observations": [
+  "OBS-001 BE-002 debug cleartext",
+  "OBS-002 BE-003 stale-claim retake reliance",
+  "OBS-003 BE-028 positive approval-resume test",
+  "OBS-004 BE-003 committed SQLite snapshot"
+ ]
 }

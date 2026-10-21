@@ -1,0 +1,236 @@
+{
+ "schema": "van.rebuild.pre002.owner-decisions/1",
+ "source": "plan/DEVELOPMENT_PLAN.json owner_questions (package tree ac0226a2)",
+ "scan_head": "b02075f327ea8180ab6d269eba358cf8c5479878",
+ "method": "git grep at the consolidation head for values that would silently pre-decide an open question; a scan finding nothing is not proof of absence in dynamic configuration",
+ "questions": [
+  {
+   "gate": "LIVE",
+   "id": "OQ-01",
+   "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+   "text": "Manual per-strategy budget",
+   "units": [
+    "BE-011"
+   ],
+   "source_default_scan": "NOT_SCANNED_IN_PRE002"
+  },
+  {
+   "gate": "START",
+   "id": "OQ-02",
+   "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+   "text": "ATR stop policy per instrument class",
+   "units": [
+    "BE-009",
+    "BE-011"
+   ],
+   "source_default_scan": "No hard-coded ATR stop multiple found in trading/vati."
+  },
+  {
+   "gate": "LIVE",
+   "id": "OQ-03",
+   "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+   "text": "Manual demo acceptance period",
+   "units": [
+    "BE-011"
+   ],
+   "source_default_scan": "NOT_SCANNED_IN_PRE002"
+  },
+  {
+   "gate": "F15",
+   "id": "OQ-05",
+   "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+   "text": "Exact product/lock signature for formal predevelopment",
+   "units": [
+    "PRE-003"
+   ],
+   "source_default_scan": "NOT_SCANNED_IN_PRE002"
+  },
+  {
+   "gate": "START",
+   "id": "OQ-06",
+   "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+   "text": "Licensed news/calendar provider selection",
+   "units": [
+    "BE-014"
+   ],
+   "source_default_scan": "NOT_SCANNED_IN_PRE002"
+  },
+  {
+   "gate": "START",
+   "id": "OQ-07",
+   "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+   "text": "Automated missing-stop reattach versus immediate flatten policy",
+   "units": [
+    "BE-010",
+    "BE-011"
+   ],
+   "source_default_scan": "No source path pre-selects missing-stop reattach versus immediate flatten (no matching symbols in trading/vati)."
+  },
+  {
+   "gate": "LIVE",
+   "id": "OQ-08",
+   "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+   "text": "Promote each news path from shadow",
+   "units": [
+    "BE-016"
+   ],
+   "source_default_scan": "NOT_SCANNED_IN_PRE002"
+  },
+  {
+   "gate": "START",
+   "id": "OQ-09",
+   "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+   "text": "No direct news risk increase; resolve signed final policy",
+   "units": [
+    "BE-016"
+   ],
+   "source_default_scan": "NOT_SCANNED_IN_PRE002"
+  },
+  {
+   "gate": "START",
+   "id": "OQ-11",
+   "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+   "text": "Feed bundle and authorized budget",
+   "units": [
+    "BE-014"
+   ],
+   "source_default_scan": "NOT_SCANNED_IN_PRE002"
+  },
+  {
+   "gate": "START",
+   "id": "OQ-12",
+   "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+   "text": "Event strategies, budget, daily cap and first classes",
+   "units": [
+    "BE-017"
+   ],
+   "source_default_scan": "NOT_SCANNED_IN_PRE002"
+  },
+  {
+   "gate": "START",
+   "id": "OQ-13",
+   "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+   "text": "Behaviour notice wording and calibration",
+   "units": [
+    "BE-022"
+   ],
+   "source_default_scan": "NOT_SCANNED_IN_PRE002"
+  },
+  {
+   "gate": "START",
+   "id": "OQ-14",
+   "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+   "text": "Native versus qualified web chart renderer, measured after BG-001; existing spike unqualified and not evidence of completed native UI.",
+   "units": [
+    "UX-002",
+    "FE-007"
+   ],
+   "source_default_scan": "NOT_SCANNED_IN_PRE002"
+  },
+  {
+   "gate": "START",
+   "id": "OQ-15",
+   "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+   "text": "Owner-approved deletion/archive/retention grace: source record recommends 30 days while older text said 7; no implicit value chosen.",
+   "units": [
+    "BE-004"
+   ],
+   "source_default_scan": "No source value pre-selects the 7 vs 30-day owner deletion/archive grace. Hits (command nonce 7-day retention, browser 30 s expiry grace) are unrelated mechanisms."
+  },
+  {
+   "gate": "START",
+   "id": "OQ-16",
+   "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+   "text": "Portfolio reporting currency",
+   "units": [
+    "BE-006",
+    "BE-012"
+   ],
+   "source_default_scan": "No production reporting-currency default found; USD appears only as instrument account_currency in test fixtures."
+  },
+  {
+   "gate": "START",
+   "id": "OQ-17",
+   "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+   "text": "Simulated replay practice actions scope",
+   "units": [
+    "BE-019"
+   ],
+   "source_default_scan": "NOT_SCANNED_IN_PRE002"
+  },
+  {
+   "gate": "START",
+   "id": "OQ-18",
+   "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+   "text": "Premature accounts branch disposition",
+   "units": [
+    "BE-001",
+    "BE-004"
+   ],
+   "source_default_scan": "NOT_SCANNED_IN_PRE002"
+  },
+  {
+   "gate": "START",
+   "id": "OQ-19",
+   "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+   "text": "First admitted funding provider rail and sandbox authority",
+   "units": [
+    "BE-007"
+   ],
+   "source_default_scan": "NOT_SCANNED_IN_PRE002"
+  },
+  {
+   "gate": "LIVE",
+   "id": "OQ-20",
+   "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+   "text": "Temperament percentages and evidence thresholds for live",
+   "units": [
+    "BE-013"
+   ],
+   "source_default_scan": "NOT_SCANNED_IN_PRE002"
+  },
+  {
+   "gate": "DECIDED_VALUES_RUNTIME_SIGNATURE_STILL_REQUIRED",
+   "id": "OQ-21",
+   "status": "VALUES_ACCEPTED_OD39_NOT_RUNTIME_ACTIVATION",
+   "text": "24h cooldown; 0.5 probation; >2 cooldowns/7d escalation; retain stated scopes under OD-38/39",
+   "units": [
+    "BE-009",
+    "BE-013"
+   ],
+   "source_default_scan": "trading/vati/risk/lockouts.py defaults (24 h cooldown, x0.5 probation) equal the owner-accepted OD-39 values; runtime activation must still bind the signed policy (verify in BE-009)."
+  },
+  {
+   "gate": "BE-004/BE-005/BE-010 target admission",
+   "id": "OQ-CRYPTO-01",
+   "status": "OWNER_OR_PROVIDER_DECISION_REQUIRED_NO_PROCUREMENT_INFERRED",
+   "text": "Select initial eligible spot exchange/account/product scope from current permitted access; validate authentic qualification environment.",
+   "units": [
+    "BE-004",
+    "BE-005",
+    "BE-010"
+   ],
+   "source_default_scan": "NOT_SCANNED_IN_PRE002"
+  },
+  {
+   "gate": "FINANCIAL_ACTIVATION",
+   "id": "OQ-SO-01",
+   "status": "PREPARED_SPEC_NOT_SIGNED",
+   "text": "Approve exact operational policy domain, estimator/update rules, bounds and qualification requirements before consequential use.",
+   "units": [
+    "BE-002",
+    "BE-010",
+    "BE-036"
+   ],
+   "source_default_scan": "NOT_SCANNED_IN_PRE002"
+  }
+ ],
+ "counts": {
+  "LIVE": 4,
+  "START": 13,
+  "F15": 1,
+  "DECIDED_VALUES_RUNTIME_SIGNATURE_STILL_REQUIRED": 1,
+  "BE-004/BE-005/BE-010 target admission": 1,
+  "FINANCIAL_ACTIVATION": 1
+ }
+}

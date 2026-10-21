@@ -19,7 +19,7 @@
   "OBS-004": {
    "owner_unit": "BE-003",
    "status": "OPEN_FOR_UNIT_REVIEW",
-   "what": "data/van_gateway.sqlite3 (1,064,960 bytes) is committed: 87 tables, seed rows only (20 migrations, 9 action definitions, 11 capability rows, FTS config); no owner/device rows. Confirm it is an intentional schema fixture and that runtime never writes to the tracked path."
+   "what": "data/van_gateway.sqlite3 (1,064,960 bytes) is committed: 87 tables, seed rows only (20 migrations, 9 action definitions, 11 capability rows, FTS config); no owner/device rows. Confirm it is an intentional schema fixture and that runtime never writes to the tracked path. During this session's test runs (2026-10-21 ~16:30 UTC) an empty WAL and a shm file appeared beside the tracked database, so some test or helper opens data/van_gateway.sqlite3 itself; the tracked file stayed byte-identical (git diff clean) and the side files were removed."
   }
  },
  "overlap": {
