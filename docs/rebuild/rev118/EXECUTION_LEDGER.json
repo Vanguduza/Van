@@ -170,10 +170,12 @@
    "symbol dispositions 116/116 verified (SYMBOL_VERIFICATION.json)",
    "ap001.py check clean (generic checks, 230 pre-existing non-ancestor listings reported); selftest 13/13",
    "ap001_dryrun.py on a package copy: 10/10 package checks exit 0, 19 files changed",
-   "pytest tests/rebuild 5 passed; consolidation verify.py zero findings",
+   "pytest tests/rebuild 7 passed; consolidation verify.py zero findings",
    "cited baseline tests 292+47+1+9 passed; Artemis contracts 38/38 with DDS sibling, 38 errors without",
    "Android JVM harness 157 classes / 1,273 tests, 0 failures (JVM only)",
-   "package unchanged vs 3c3379bd (git diff --quiet)"
+   "package unchanged vs 3c3379bd (git diff --quiet)",
+   "pre002_dossiers.py: 324 dossiers, no drift, selftest 11/11",
+   "OBL-004 audit-hook probe: tests/contracts 1,525 passed/4 skipped, only data/ and data/documents mkdirs, zero tracked-DB opens"
   ],
   "environment_notes": [
    "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -182,7 +184,7 @@
    "DDS sibling at /home/user/dial-development-system fetched origin/master 204f2f3b for F15 source reading",
    "Gradle: repo.maven.apache.org returned 429 repeatedly; an init script adding https://maven-central.storage-download.googleapis.com/maven2/ resolved the same coordinates"
   ],
-  "next_action": "Lead: Objective 1E challenge dossiers (author-prepared). Owner: PR #94 adoption, PR #104 CI fixes (ADMISSION_STEPS.md), OQ-05 mechanism, native registry readback for identity, independent reviewer with a DDS root-signed identity, AP-001 admission decision.",
+  "next_action": "Owner: PR #94 adoption, PR #104 CI fixes (ADMISSION_STEPS.md), OQ-05 mechanism, native registry readback for identity, independent reviewer with a DDS root-signed identity, AP-001 admission decision. Reviewer: answer pre002/challenge dossiers. Lead: no dependency-ready PRE work remains; BE units blocked on PRE-003.",
   "previous_head": "33c6e818d9611fd3b1b68a3341a51e61a92ead90"
  },
  "observations": [
@@ -191,5 +193,6 @@
   "OBS-003 BE-025 positive approval-resume test (corrected from BE-028)",
   "OBS-004 BE-003 committed SQLite snapshot"
  ],
- "obligations": "obligations/OBLIGATIONS.json: OBL-001..005 (OBS-003 owner corrected to BE-025)"
+ "obligations": "obligations/OBLIGATIONS.json: OBL-001..005 (OBS-003 owner corrected to BE-025)",
+ "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)"
 }

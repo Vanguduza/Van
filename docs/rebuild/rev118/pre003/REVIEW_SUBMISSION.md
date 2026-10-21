@@ -47,15 +47,16 @@ Prepared by the lead (Opus 5.5) on 2026-10-21 for the **independent** F15 review
 | AP-001 omission and patch | `python3 tools/rebuild/ap001.py check` / `selftest` (generic: gate-coverage regression against the admitted plan, new non-ancestor listings, co-listings without owner addition, unspecified fields) | 5 omissions detected; patched view clean (1,610→1,624); 13/13 |
 | AP-001 admission dry run | `python3 tools/rebuild/ap001_dryrun.py <copy>` | all 10 package checks exit 0 on the amended copy; 19 files change (`pre002/AP-001/DRYRUN_RESULT.json`) |
 | Cited baseline behaviour | `pre001/TEST_EVIDENCE.json` | 292 + 47 (+1 after installing rsync) + 9 passed; Artemis contracts 38/38 with the DDS sibling; Android JVM harness 1,273/1,273 (JVM only, not instrumentation or handset) |
-| Rebuild oracle regression | `pytest tests/rebuild` | 5 passed |
+| Rebuild oracle regression | `pytest tests/rebuild` | 7 passed |
 | F15, reviewer, signature and identity requirements | `pre003/F15_AND_IDENTITY_REQUIREMENTS.md` | read from DDS source; native state not readable here |
 | Observation obligations | `obligations/OBLIGATIONS.json` | OBL-001…005, author-prepared |
+| Requirement challenge dossiers | `python3 tools/rebuild/pre002_dossiers.py check` / `selftest` | 324 dossiers, no drift; 11/11 |
 
 ## 4. Unresolved findings the reviewer must decide
 
 1. **AP-001**: five gate units (BQ-003, BQ-004, QA-002, QA-003, REL-002) have no acceptance in the admitted package. PRE-001 stays OPEN until AP-001 is admitted or otherwise resolved. **Preparation blocker.**
 2. **Project identity**: the package label is `16f2f43a-8d8b-4f18-a6ac-5bd8df620414`; the DDS registry assigns `project_id = previous?.project_id || slug` (expected `van`). Mapping defined (pack uses the registry id, UUID kept as an alias), pending native readback of `operations/project-registry.json`. See `F15_AND_IDENTITY_REQUIREMENTS.md` §2. **Preparation blocker.**
-3. **Independent challenge** of all 324 requirements, 93 features, 171 atoms and 349 actions (all graded pending independent review or admission). PRE-002 cannot exit without it.
+3. **Independent challenge** of all 324 requirements, 93 features, 171 atoms and 349 actions (all graded pending independent review or admission). PRE-002 cannot exit without it. Author-prepared dossiers for the 324 requirements are in `../pre002/challenge/` (`SUMMARY.md` first); they are inputs to the challenge, not the challenge.
 4. **Owner signature** on the scope lock (OQ-05) and the remaining owner questions by gate (`pre002/OWNER_DECISION_REGISTER.json`).
 5. **Observation obligations** (not F15 blockers unless the reviewer rules otherwise), now testable contracts in `obligations/OBLIGATIONS.json`: OBL-001 debug cleartext to every host (BE-002/REL-001); OBL-002 stale-claim retake with an unhandled unique-index race (BE-003); OBL-003 positive approval-resume path untested (**BE-025**, corrected from BE-028); OBL-004 importing `van_gateway.app` writes `data/` beside the tracked snapshot (root cause reproduced; BE-003); OBL-005 Android instrumentation and handset evidence.
 6. **Dispositions**: no `INFERRED` basis remains. PR-22 is compared line by line with PR-23 (185/186 lines, the difference being the ColumnScope fix); PR-40/41/43/44 and ConnectedRoute are read from their diffs.

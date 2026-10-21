@@ -1,0 +1,42 @@
+{
+ "schema": "van.rebuild.pre002.challenge-summary/1",
+ "challenge_state": "AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW",
+ "not": "Not independent admission, not regrading, not owner approval. The independent reviewer answers each dossier.",
+ "requirements": 324,
+ "expected_requirements": 324,
+ "flag_definitions": {
+  "TEST_MISSING": "A referenced acceptance identity is absent from the effective registry.",
+  "TEST_NOT_BOUND_TO_OWNER": "A referenced identity belongs to no unit that owns this requirement.",
+  "OWNERSHIP_MISMATCH": "Units on the requirement record differ from plan.requirement_ownership.",
+  "NO_OWNER": "No unit owns the requirement in plan.requirement_ownership.",
+  "NO_NEGATIVE_OR_RECOVERY": "No referenced identity or acceptance clause names a negative/adversarial or recovery case.",
+  "SUBJECTIVE_ACCEPTANCE": "Acceptance rests on owner/screenshot judgement with no stated observable.",
+  "UNDERSPECIFIED_ACCEPTANCE": "Requirement acceptance and every linked expectation are under 6 words, too short to state stimulus and observable.",
+  "TEMPLATE_ACCEPTANCE": "Acceptance is a shared template sentence, so the requirement-specific oracle lives only in the referenced tests.",
+  "DUPLICATE_TEXT": "Another requirement has the same normalised text.",
+  "OWNER_QUESTION_OPEN": "An owning unit has an unresolved owner question gating it.",
+  "GATE_UNIT_WITHOUT_ACCEPTANCE": "An owning unit has no acceptance identities in the admitted plan (AP-001).",
+  "NO_PRODUCT_TRUTH_TRACE": "No product-truth atom maps to this requirement."
+ },
+ "flag_counts": {
+  "TEST_MISSING": 0,
+  "TEST_NOT_BOUND_TO_OWNER": 0,
+  "OWNERSHIP_MISMATCH": 0,
+  "NO_OWNER": 0,
+  "NO_NEGATIVE_OR_RECOVERY": 43,
+  "SUBJECTIVE_ACCEPTANCE": 1,
+  "UNDERSPECIFIED_ACCEPTANCE": 29,
+  "TEMPLATE_ACCEPTANCE": 18,
+  "DUPLICATE_TEXT": 0,
+  "OWNER_QUESTION_OPEN": 149,
+  "GATE_UNIT_WITHOUT_ACCEPTANCE": 3,
+  "NO_PRODUCT_TRUTH_TRACE": 189
+ },
+ "requirements_without_flags": 13,
+ "inputs_sha256": {
+  "traceability/REQUIREMENTS_AND_DU_MAPPING.json": "ce212f40d89030947edcd67d0a9b1cbf9dae59c54ff095110ef618a86f73fe27",
+  "verification/EFFECTIVE_TEST_CONTRACTS_REV118.json": "d8691ed3dfdc721154e758c454fe7f7c8502bae23d2d0b0a8e3991c25106d251",
+  "plan/DEVELOPMENT_PLAN.json": "3e708a5ad3b92fd45767c22093d411d766b4fe86fb50f3d28741b4cbeb4c0f04",
+  "traceability/PRODUCT_TRUTH.json": "4d0bd6be109a8bcc563912f2c40739c68d7fedca8f2d09ca0f4a3a31741f03a3"
+ }
+}
