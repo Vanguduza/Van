@@ -64,6 +64,13 @@ jobs:
       - name: Actual Android pure-source JVM harness
         working-directory: android/verification
         run: gradle test --no-daemon --console=plain
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepare and verify source-locked generic voice assets
+        run: |
+          python3 android/tools/package_voice_assets.py --acquire
+          python3 android/tools/package_voice_assets.py --verify
       - name: Android package, unit-test and lint gate
         working-directory: android
         run: bash gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug --no-daemon --console=plain
