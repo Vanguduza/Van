@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20261021-owner-consolidation-release-workflow",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "d508284fb40d041695230949a04dcc0ba03f30c942519cbf1cc4d24ef9c57d84",
+  "owner_instruction_excerpt": "Perform repository consolidation with all branches evaluated so opus 5.5 will start on a a clean unpolluted repository",
+  "derivation": "Fix a GitHub-confirmed inherited workflow parse error by moving runner-specific directory initialization from job env into a runner step.",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "codex",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "issued_at_utc": "2026-10-21T11:09:19.852710+00:00",
+  "branch_scope": "consolidation/opus-clean-rev118-20261021",
+  "authorized_paths": [
+    ".github/workflows/van-owner-release.yml"
+  ],
+  "reusable": true,
+  "revoked": false,
+  "limitations": [
+    "Only fix runner context evaluation for the existing manual release workflow.",
+    "Preserve workflow_dispatch, environment approval, secret compartmentalization, signer/profile verification, cleanup, and artifact requirements.",
+    "No workflow dispatch, signing, production deployment, host modification or financial action authorized."
+  ]
+}
