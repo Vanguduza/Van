@@ -30,7 +30,7 @@
  ],
  "acceptance": {
   "positive": "ap001.py check: patched_findings == [] and patch_problems == [] and preservation_findings == [].",
-  "negative": "ap001.py selftest: emptied unit, missing NEG, unknown identity, deleted/reordered identity, result-claiming or colliding new identity are each detected (9/9).",
+  "negative": "ap001.py selftest 13/13: emptied unit, missing NEG, unknown identity, deleted or reordered identity, unrelated gate losing coverage, downstream-owned co-listing, missing owner addition, unspecified observable, result-claiming or colliding identity are each detected.",
   "recovery": "If admission adds or changes any unit, re-run ap001.py and pre001.py trace check; package verifiers' hard-coded 1,610 counts must be regenerated through compile_rev118.py, not edited by hand."
  },
  "acceptance_test_refs": [
@@ -91,15 +91,15 @@
  "evaluator": {
   "kind": "DOCUMENT_CHECKER",
   "script": "tools/rebuild/ap001.py",
-  "sha256": "f82ca696df1820fd74bec46b8aed39c7f17bf082d3f4ecffb74c968fb567d389",
+  "sha256": "ccd903e9e5b474c2a7fac48ec14204c32c02427f1d9b95c8e7527ce44a7037c2",
   "economic_evaluator_qualified": false
  },
  "evidence_manifest": "docs/rebuild/rev118/pre002/AP-001/AP-001_PATCH.json",
- "patch_sha256": "feb4a93b1c5c992845ffbf945c2aa218253230367a66fa4906b76b85726b016a",
+ "patch_sha256": "69ef383bc6d402625c927167f064247ee055e57225a01bdb2fd272d32186a8db",
  "expected_benefit": "Five gate units become falsifiable; no unit can pass with zero oracles.",
  "observed_benefit": "Document-level only; no application test exists or ran.",
  "uncertainty": "Reviewer may prefer different reuse sets or a single aggregate identity per unit; the optional verification requirement-ownership binding for BQ-003/BQ-004 may be admitted or declined independently.",
- "complexity_ref": "No new service, store or process; 14 contracts, 41 co-listings.",
+ "complexity_ref": "No new service, store or process; 14 new contracts and 39 co-listings (18 BQ-003 + 20 BQ-004 + 1 REL-002). An earlier figure of 41 co-listings was a counting error, corrected here.",
  "resource_measurements": "N/A (documentary).",
  "failure_and_recovery": "Rejected or modified admission leaves the package unchanged; the five omissions stay open in TRACE_CHECK and keep PRE-001 OPEN.",
  "rollback": "Not applied to the package; nothing to roll back until admitted.",
@@ -113,5 +113,46 @@
   "Apply via the package generator: add contracts to verification sources, regenerate EFFECTIVE_TEST_CONTRACTS_REV118.json with plan/compile_rev118.py, re-render the plan with plan/render_plan.py",
   "Update count assertions through regeneration, rerun all ten package verifiers plus ap001.py and pre001.py, repackage with manifest and receipt",
   "Invalidate any dependent receipts; record the amendment in the authority selector"
- ]
+ ],
+ "dry_run": {
+  "tool": "tools/rebuild/ap001_dryrun.py",
+  "result": "DRYRUN_RESULT.json",
+  "verifier_diff": "DRYRUN_VERIFIER_CHANGES.diff",
+  "outcome": "All ten package checks exit 0 on an amended COPY (compile, render, verify_whole_product, verify_rev117 json/selftest/check-package, review contracts, experience learning, model hardening, theme readability); admitted package unchanged.",
+  "files_changed": [
+   "CANONICAL_AUTHORITY.json",
+   "MANIFEST.json",
+   "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_17_20261018.md",
+   "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_18_20261021.md",
+   "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md",
+   "amendments/AP-001.json",
+   "consolidation/GENERATED_SCOPE_COUNTS.json",
+   "contracts/whole_product/ACCEPTANCE_REFINEMENTS.json",
+   "plan/DEVELOPMENT_PLAN.json",
+   "plan/PLAN_INPUT_PROVENANCE.json",
+   "plan/PROPOSED_SCOPE_LOCK.json",
+   "plan/VAN_NEXT_DETERMINISTIC_PLAN_REV1_18.md",
+   "plan/compile_rev118.py",
+   "verification/EFFECTIVE_TEST_CONTRACTS_REV118.json",
+   "verification/TEST_CONTRACTS.json",
+   "verification/verify_experience_learning.py",
+   "verification/verify_model_hardening.py",
+   "verification/verify_review_contracts.py",
+   "verification/verify_whole_product.py"
+  ],
+  "reviewer_must_approve": [
+   "verify_whole_product.py PRESERVE_* changes from exact equality with Rev1.17 fingerprints to: every parent object digest unchanged AND additions exactly equal to those declared in amendments/*.json",
+   "verify_model_hardening.py REMOVE_TEST mutation targets a named model-hardening test instead of the last list element (positional assumption broke once identities were appended; without the fix the mutation silently tests an AP-001 identity)",
+   "Count pins 1,610 -> 1,624 in four verifiers, CANONICAL_AUTHORITY and GENERATED_SCOPE_COUNTS",
+   "Re-prepared (unsigned) PROPOSED_SCOPE_LOCK object and file hashes: a new owner signature covers the amended scope"
+  ],
+  "narrative_to_update_on_admission": [
+   "Rev1.18 master line 5 'Active scope: 324 requirements, 1,610 acceptance identities' and the \u00a7-table row 'Planned application acceptance contracts | 1,610'",
+   "README_START_HERE.md active scope line",
+   "review/VALIDATION_SUMMARY.md counts",
+   "Only the verifier-checked sentence was changed in the dry run; a real admission should update all active-total statements and keep historical ones"
+  ],
+  "recommended_form": "Deliver as a new revision (e.g. Rev1.18.1) with the exact Rev1.18 archive retained under lineage/, as the Rev1.15.1 corrective delivery did, rather than editing Rev1.18 in place.",
+  "observation": "The admitted plan already lists 230 identities owned by non-ancestor units (e.g. PRE-001 lists T-HVA-002-* owned by BE-001), apparently document admission at PRE with execution at the owner; ap001.py forbids only NEW such listings."
+ }
 }

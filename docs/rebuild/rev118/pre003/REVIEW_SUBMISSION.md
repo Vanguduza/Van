@@ -42,20 +42,25 @@ Prepared by the lead (Opus 5.5) on 2026-10-21 for the **independent** F15 review
 | Documentary package checks | the ten commands in the owner prompt | all exit 0 (26/26, 79/79, 47/47, 36/36, 35/35, 900 members) |
 | Consolidation inputs and branch preservation | `python3 tools/consolidation/verify.py` | zero findings |
 | PRE-001 inventory, dispositions and classification | `python3 tools/rebuild/pre001.py check` (needs an unshallowed clone and fetched `refs/pull/*`) | no drift; refs 0 open, overlap 0 open, 0/2,131 unclassified, 5 trace findings (AP-001) |
-| PRE-001 oracle strength | `python3 tools/rebuild/pre001.py selftest` | 15/15 induced failures rejected |
-| AP-001 omission and patch | `python3 tools/rebuild/ap001.py check` / `selftest` | 5 omissions detected; patched view clean (1,610→1,624); 9/9 |
-| Cited baseline behaviour | `pre001/TEST_EVIDENCE.json` | 292 + 47 (+1 after installing rsync) + 9 passed; Android JVM tests not rerun here |
+| PRE-001 oracle strength | `python3 tools/rebuild/pre001.py selftest` | 20/20 induced failures rejected (incl. 5 symbol-verification cases) |
+| Symbol-level preservation | `pre001/SYMBOL_DISPOSITIONS.json` checked into `pre001/SYMBOL_VERIFICATION.json` by `pre001.py generate` (AST-qualified Python names, kind-aware Kotlin) | 116/116 verified; cross-repo moves cite DDS `2964c6ec` |
+| AP-001 omission and patch | `python3 tools/rebuild/ap001.py check` / `selftest` (generic: gate-coverage regression against the admitted plan, new non-ancestor listings, co-listings without owner addition, unspecified fields) | 5 omissions detected; patched view clean (1,610→1,624); 13/13 |
+| AP-001 admission dry run | `python3 tools/rebuild/ap001_dryrun.py <copy>` | all 10 package checks exit 0 on the amended copy; 19 files change (`pre002/AP-001/DRYRUN_RESULT.json`) |
+| Cited baseline behaviour | `pre001/TEST_EVIDENCE.json` | 292 + 47 (+1 after installing rsync) + 9 passed; Artemis contracts 38/38 with the DDS sibling; Android JVM harness 1,273/1,273 (JVM only, not instrumentation or handset) |
 | Rebuild oracle regression | `pytest tests/rebuild` | 5 passed |
+| F15, reviewer, signature and identity requirements | `pre003/F15_AND_IDENTITY_REQUIREMENTS.md` | read from DDS source; native state not readable here |
+| Observation obligations | `obligations/OBLIGATIONS.json` | OBL-001…005, author-prepared |
 
 ## 4. Unresolved findings the reviewer must decide
 
 1. **AP-001**: five gate units (BQ-003, BQ-004, QA-002, QA-003, REL-002) have no acceptance in the admitted package. PRE-001 stays OPEN until AP-001 is admitted or otherwise resolved. **Preparation blocker.**
-2. **Project identity**: the package's `project_id` is `16f2f43a-8d8b-4f18-a6ac-5bd8df620414`, while the DDS registry id is `van`. The certifier fails on mismatch. Native readback was impossible from this session (no Global DIAL/Oracle tool). **Preparation blocker.**
+2. **Project identity**: the package label is `16f2f43a-8d8b-4f18-a6ac-5bd8df620414`; the DDS registry assigns `project_id = previous?.project_id || slug` (expected `van`). Mapping defined (pack uses the registry id, UUID kept as an alias), pending native readback of `operations/project-registry.json`. See `F15_AND_IDENTITY_REQUIREMENTS.md` §2. **Preparation blocker.**
 3. **Independent challenge** of all 324 requirements, 93 features, 171 atoms and 349 actions (all graded pending independent review or admission). PRE-002 cannot exit without it.
 4. **Owner signature** on the scope lock (OQ-05) and the remaining owner questions by gate (`pre002/OWNER_DECISION_REGISTER.json`).
-5. **Observations for owning units** (not F15 blockers unless the reviewer rules otherwise): OBS-001 debug-build app-wide cleartext (BE-002); OBS-002 idempotency stale-claim retake relies on mission dedup (BE-003); OBS-003 no positive "approval resumes the same browser task" test (BE-028); OBS-004 committed SQLite schema snapshot (BE-003).
-6. **Inferred dispositions**: PR-22, PR-40/41/43/44 and the ConnectedRoute row rest on PR titles and sequence rather than line-level proof (`basis: INFERRED`). The reviewer may require deeper evidence.
-7. **Main admission** (Project Truth trusted base, PR #94, then PR #104) is separate from F15 but blocks merging any of this. See `../ADMISSION_STEPS.md`.
+5. **Observation obligations** (not F15 blockers unless the reviewer rules otherwise), now testable contracts in `obligations/OBLIGATIONS.json`: OBL-001 debug cleartext to every host (BE-002/REL-001); OBL-002 stale-claim retake with an unhandled unique-index race (BE-003); OBL-003 positive approval-resume path untested (**BE-025**, corrected from BE-028); OBL-004 importing `van_gateway.app` writes `data/` beside the tracked snapshot (root cause reproduced; BE-003); OBL-005 Android instrumentation and handset evidence.
+6. **Dispositions**: no `INFERRED` basis remains. PR-22 is compared line by line with PR-23 (185/186 lines, the difference being the ColumnScope fix); PR-40/41/43/44 and ConnectedRoute are read from their diffs.
+7. **Main admission** (Project Truth trusted base, PR #94, then PR #104) is separate from F15 but blocks merging any of this. PR #104's CI on `b02075f3` is red in four jobs; diagnosis and proposed fixes are in `../ADMISSION_STEPS.md`.
+8. **OQ-05 mechanism**: the owner must choose which existing signed record carries scope-lock approval (`F15_AND_IDENTITY_REQUIREMENTS.md` §5).
 
 ## 5. Explicit non-claims
 

@@ -66,6 +66,32 @@ def omissions(plan: dict, tests: list, overrides: dict, scope: set[str] | None =
     return sorted(out)
 
 
+def gate_coverage(plan: dict, tests: list, overrides: dict) -> dict[str, set]:
+    by_id = {t["id"]: t for t in tests}
+    return {u["id"]: {kind_of(t, by_id.get(t), overrides) for t in (u.get("acceptance_test_ids") or [])} & set(KINDS)
+            for u in plan["units"] if u["id"].startswith(GATE_PREFIXES)}
+
+
+def ancestors(plan: dict) -> dict[str, set]:
+    units = {u["id"]: u for u in plan["units"]}
+    memo: dict[str, set] = {}
+
+    def walk(uid):
+        if uid not in memo:
+            memo[uid] = set()
+            for d in units[uid].get("dependencies", []):
+                memo[uid] |= {d} | walk(d)
+        return memo[uid]
+    return {u: walk(u) for u in units}
+
+
+def non_ancestor_listings(plan: dict, tests: list) -> set[tuple]:
+    owner = {t["id"]: t["unit"] for t in tests}
+    anc = ancestors(plan)
+    return {(u["id"], t) for u in plan["units"] for t in (u.get("acceptance_test_ids") or [])
+            if t in owner and owner[t] != u["id"] and owner[t] not in anc[u["id"]]}
+
+
 def apply(plan: dict, tests: list, patch: dict) -> tuple[dict, list, list[str]]:
     p, t = copy.deepcopy(plan), copy.deepcopy(tests)
     problems = []
@@ -125,8 +151,28 @@ def evaluate(plan, tests, patch) -> dict:
     p2, t2, problems = apply(plan, tests, patch)
     after = omissions(p2, t2, overrides, scope)
     pres = preservation(plan, tests, p2, t2)
-    return {"current_package_findings": before, "patched_findings": after, "patch_problems": problems,
+    # Generic: no gate unit anywhere may lose POS/NEG/REC coverage relative to the admitted plan.
+    cov0, cov1 = gate_coverage(plan, tests, overrides), gate_coverage(p2, t2, overrides)
+    for u, kinds in cov0.items():
+        for k in sorted(kinds - cov1.get(u, set())):
+            after.append(f"GATE_COVERAGE_REGRESSED_{k}:{u}")
+    # Generic: the patch introduces no listing of an identity owned by a non-ancestor unit.
+    for u, t in sorted(non_ancestor_listings(p2, t2) - non_ancestor_listings(plan, tests)):
+        problems.append(f"NEW_NON_ANCESTOR_LISTING:{u}:{t}")
+    # Convention: every co-listing is recorded as an owner addition (compiled to additional_units).
+    owner = {t["id"]: t["unit"] for t in t2}
+    adds = patch.get("owner_additions", {})
+    for u, ids in patch["unit_acceptance_additions"].items():
+        for i in ids:
+            if owner.get(i) not in (None, u) and u not in adds.get(i, []):
+                problems.append(f"CO_LISTING_WITHOUT_OWNER_ADDITION:{u}:{i}")
+    for c in patch["new_acceptance_contracts"]:
+        for f in ("proves", "preconditions", "stimulus", "observable", "pass_evidence"):
+            if not c.get(f):
+                problems.append(f"NEW_ID_UNSPECIFIED_{f.upper()}:{c['id']}")
+    return {"current_package_findings": before, "patched_findings": sorted(set(after)), "patch_problems": problems,
             "preservation_findings": pres, "counts": {"before": len(tests), "after": len(t2)},
+            "pre_existing_non_ancestor_listings": len(non_ancestor_listings(plan, tests)),
             "patched_clean": not (after or problems or pres)}
 
 
@@ -172,6 +218,22 @@ def cmd_selftest() -> int:
     next(u for u in p3["units"] if u["id"] == "BQ-001")["acceptance_test_ids"].pop(0)
     results.append({"id": "PATCH_THAT_REORDERS_OR_DROPS_EXISTING_UNIT_ACCEPTANCE",
                     "passed": "UNIT_ACCEPTANCE_NOT_PREFIX_PRESERVED:BQ-001" in preservation(plan, tests, p3, t3)})
+    # Generic coverage: an unrelated gate (not one of AP-001's five) losing its NEG must be caught.
+    p4, t4, _ = apply(plan, tests, patch)
+    bq1 = next(u for u in p4["units"] if u["id"] == "BQ-001")
+    bq1["acceptance_test_ids"] = [i for i in bq1["acceptance_test_ids"] if not i.endswith("-NEG")]
+    cov0 = gate_coverage(plan, tests, patch.get("co_listed_kind_overrides", {}))
+    cov1 = gate_coverage(p4, t4, patch.get("co_listed_kind_overrides", {}))
+    results.append({"id": "UNRELATED_GATE_LOSES_NEGATIVE_COVERAGE", "passed": "NEG" in cov0["BQ-001"] - cov1["BQ-001"]})
+    case("CO_LISTING_OF_DOWNSTREAM_OWNED_IDENTITY",
+         lambda p, t, pa: pa["unit_acceptance_additions"]["BQ-003"].append("T-FEATURE-CHART-03"),
+         lambda r: any(x.startswith("NEW_NON_ANCESTOR_LISTING:BQ-003") for x in r["patch_problems"]))
+    case("CO_LISTING_WITHOUT_OWNER_ADDITION",
+         lambda p, t, pa: pa["owner_additions"].pop("T-NX-054"),
+         lambda r: "CO_LISTING_WITHOUT_OWNER_ADDITION:REL-002:T-NX-054" in r["patch_problems"])
+    case("NEW_IDENTITY_WITHOUT_OBSERVABLE_RESULT",
+         lambda p, t, pa: pa["new_acceptance_contracts"][0].pop("observable"),
+         lambda r: any(x.startswith("NEW_ID_UNSPECIFIED_OBSERVABLE") for x in r["patch_problems"]))
     case("NEW_IDENTITY_CLAIMING_A_RESULT",
          lambda p, t, pa: pa["new_acceptance_contracts"][0].__setitem__("execution_state", "PASSED"),
          lambda r: any(x.startswith("NEW_ID_CLAIMS_RESULT") for x in r["patch_problems"]))

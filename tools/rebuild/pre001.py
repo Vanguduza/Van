@@ -40,7 +40,7 @@ ACTIVE_ROOTS = ("android", "backend", "trading", "services", "hermes")
 # frozen consolidation head is inventoried (deploy, tools, root tests, CI, registries, config,
 # locked visual authority, root files).
 HISTORICAL_ROOTS = ("docs", "evidence", "artifacts")
-REFS_SNAPSHOT = OUT / "REMOTE_REFS_20261021.txt"
+REFS_SNAPSHOT = OUT / "REMOTE_REFS_20261021T171448Z.txt"
 PR_STATE = OUT / "PR_STATE_20261021.json"
 DISPOSITIONS = OUT / "DISPOSITIONS.json"
 
@@ -278,6 +278,72 @@ def overlap_preservation(trees: dict) -> dict:
             "rows": rows}
 
 
+# ---------------------------------------------------------------- symbol evidence
+
+SYMBOLS = OUT / "SYMBOL_DISPOSITIONS.json"
+DDS_DIR = ROOT.parent / "dial-development-system"
+
+
+def defines(path: str, text: str, symbol: str) -> bool:
+    """Python: exact AST qualified name (or a leaf matching a qualified name's last part when
+    the symbol is unqualified). Kotlin: the same declaration kinds the ledger extracts
+    (fun/class/object/interface); properties do not count."""
+    if path.endswith(".py"):
+        names = {q for q, *_ in py_symbols(text.encode())}
+        return symbol in names if "." in symbol else any(q == symbol or q.endswith("." + symbol) for q in names)
+    leaf = symbol.split(".")[-1]
+    pat = (rf"\b(fun|class|object|interface)\s+(<[^>]*>\s*)?([A-Za-z0-9_]+\.)?{re.escape(leaf)}\b")
+    return re.search(pat, text, re.M) is not None
+
+
+def blob_text(repo: Path, rev: str, path: str) -> str | None:
+    r = subprocess.run(["git", "-C", str(repo), "show", f"{rev}:{path}"], capture_output=True)
+    return r.stdout.decode("utf-8", "replace") if r.returncode == 0 else None
+
+
+def verify_symbols(overlap: dict, doc: dict) -> dict:
+    """Mechanically check each typed symbol disposition against Git objects."""
+    rows, problems = [], []
+    for row in overlap["rows"]:
+        mapping = doc["rows"].get(row["id"], {})
+        targets = row["missing_symbols"] or (["__file__"] if not row["head_present"] else [])
+        for sym in targets:
+            d = mapping.get(sym)
+            leaf = sym.split(".")[-1]
+            ok, why = False, "NO_DISPOSITION"
+            if d:
+                st = d.get("status")
+                if st in ("MOVED", "REPLACED_BY"):
+                    want = d.get("symbol") or leaf
+                    txt = blob_text(ROOT, CONSOLIDATION_HEAD, d.get("at", ""))
+                    ok = txt is not None and defines(d["at"], txt, want)
+                    why = "TARGET_DEFINED_AT_HEAD" if ok else "TARGET_NOT_DEFINED_AT_HEAD"
+                elif st in ("REMOVED_WITH_CALLER", "RETIRED"):
+                    c = d.get("commit", "")
+                    before, after = blob_text(ROOT, f"{c}^", row["path"]), blob_text(ROOT, c, row["path"])
+                    ok = (bool(re.fullmatch(r"[0-9a-f]{40}", c)) and before is not None and defines(row["path"], before, sym)
+                          and (after is None or not defines(row["path"], after, sym)) and bool(d.get("why")))
+                    why = "REMOVAL_COMMIT_VERIFIED" if ok else "REMOVAL_COMMIT_NOT_VERIFIED"
+                elif st == "MOVED_CROSS_REPO":
+                    if not DDS_DIR.exists():
+                        why = "CROSS_REPO_CHECKOUT_ABSENT"
+                    else:
+                        txt = blob_text(DDS_DIR, d.get("commit", ""), d.get("at", ""))
+                        ok = txt is not None and (sym == "__file__" or defines(d["at"], txt, sym))
+                        why = "DESTINATION_VERIFIED" if ok else "DESTINATION_NOT_VERIFIED"
+                elif st == "INSTRUMENT_ARTEFACT":
+                    txt = blob_text(ROOT, CONSOLIDATION_HEAD, row["path"]) or ""
+                    ok = row["path"].endswith(".kt") and "fun `" in txt
+                    why = "BACKTICK_NAME_FRAGMENT" if ok else "ARTEFACT_CLAIM_NOT_SUPPORTED"
+                else:
+                    why = f"UNKNOWN_STATUS:{st}"
+            rows.append({"row": row["id"], "symbol": sym, "status": d and d.get("status"), "verified": ok, "check": why})
+            if not ok:
+                problems.append(f"SYMBOL_UNVERIFIED:{row['id']}:{sym}:{why}")
+    return {"schema": "van.rebuild.pre001.symbol-verification/1", "symbols": len(rows),
+            "verified": sum(r["verified"] for r in rows), "problems": problems, "rows": rows}
+
+
 # ---------------------------------------------------------------- traceability
 
 def trace_check(pkg: Path) -> dict:
@@ -400,7 +466,9 @@ def trace_check(pkg: Path) -> dict:
               "owner_actions": len(actions), "contexts": len(ctx), "surfaces": len(surfaces),
               "features": len(features), "source_atoms": len(atoms), "truth_atoms": len(truth),
               "domain_scenarios": len(scenarios)}
-    expected = {"requirements": 324, "acceptance_identities": 1610, "units": 131, "owner_actions": 349,
+    authority = load(pkg / "CANONICAL_AUTHORITY.json")
+    expected = {"requirements": authority["active_requirement_count"],
+                "acceptance_identities": authority["active_application_test_count"], "units": 131, "owner_actions": 349,
                 "contexts": 234, "features": 93, "source_atoms": 171, "truth_atoms": 22, "domain_scenarios": 72}
     for k, v in expected.items():
         if counts[k] != v:
@@ -455,7 +523,8 @@ def classify(ledger: dict, rules_doc: dict, unit_ids: set[str]) -> dict:
 
 # ---------------------------------------------------------------- judgement
 
-def judge(refs: dict, ledger: dict, overlap: dict, trace: dict, disp: dict, classification: dict) -> dict:
+def judge(refs: dict, ledger: dict, overlap: dict, trace: dict, disp: dict, classification: dict,
+          symbols: dict | None = None) -> dict:
     d_refs = disp.get("refs", {})
     d_ovl = disp.get("overlap", {})
     problems = []
@@ -482,6 +551,8 @@ def judge(refs: dict, ledger: dict, overlap: dict, trace: dict, disp: dict, clas
                 if not (r["id"] in d_ovl and valid(d_ovl[r["id"]], r["id"]))]
     unclassified = list(classification["unmatched"])
     problems.extend(classification["rule_problems"])
+    if symbols is not None:
+        problems.extend(symbols["problems"])
     for k in d_refs:
         if k not in {r["id"] for r in refs["rows"]}:
             problems.append(f"DISPOSITION_FOR_UNKNOWN_REF:{k}")
@@ -504,9 +575,10 @@ def generate(head: str):
     trace = trace_check(PKG)
     units = {u["id"] for u in load(PKG / "plan/DEVELOPMENT_PLAN.json")["units"]}
     classification = classify(ledger, load(RULES), units)
+    symbols = verify_symbols(overlap, load(SYMBOLS))
     return {"REF_INVENTORY.json": refs, "SOURCE_LEDGER.json": ledger,
             "OVERLAP_PRESERVATION.json": overlap, "TRACE_CHECK.json": trace,
-            "SOURCE_CLASSIFICATION.json": classification}
+            "SOURCE_CLASSIFICATION.json": classification, "SYMBOL_VERIFICATION.json": symbols}
 
 
 def source_head() -> str:
@@ -516,7 +588,7 @@ def source_head() -> str:
 
 def summary(arts: dict, disp: dict) -> dict:
     s = judge(arts["REF_INVENTORY.json"], arts["SOURCE_LEDGER.json"], arts["OVERLAP_PRESERVATION.json"],
-              arts["TRACE_CHECK.json"], disp, arts["SOURCE_CLASSIFICATION.json"])
+              arts["TRACE_CHECK.json"], disp, arts["SOURCE_CLASSIFICATION.json"], arts["SYMBOL_VERIFICATION.json"])
     s["artefact_sha256"] = {k: sha256(dump(v).encode()) for k, v in sorted(arts.items())}
     s["source_head"] = arts["SOURCE_LEDGER.json"]["head"]
     s["unit"] = "PRE-001"
@@ -553,7 +625,7 @@ def cmd_selftest() -> int:
     """Each case breaks one invariant and requires the judge or trace check to reject it."""
     arts = {n: load(OUT / n) for n in ("REF_INVENTORY.json", "SOURCE_LEDGER.json",
                                        "OVERLAP_PRESERVATION.json", "TRACE_CHECK.json",
-                                       "SOURCE_CLASSIFICATION.json")}
+                                       "SOURCE_CLASSIFICATION.json", "SYMBOL_VERIFICATION.json")}
     disp = load(DISPOSITIONS) if DISPOSITIONS.exists() else {}
     full = {"refs": {r["id"]: {"decision": "X", "evidence": "x",
                                "paths": {m: "X" for m in r.get("missing_blob_paths") or []}}
@@ -614,6 +686,26 @@ def cmd_selftest() -> int:
     run("DROPPED_SYMBOL_IN_OVERLAP",
         lambda a, d: a["OVERLAP_PRESERVATION.json"]["rows"].append(
             {"id": "OVL:x.py:opus", "missing_symbols": ["AccountService.lockout"]}), True)
+
+    # Symbol-evidence mutations run the real verifier against the real overlap rows.
+    sym_doc = load(SYMBOLS)
+    overlap = arts["OVERLAP_PRESERVATION.json"]
+
+    def sym_mut(name, edit):
+        doc = copy.deepcopy(sym_doc)
+        edit(doc["rows"])
+        v = verify_symbols(overlap, doc)
+        results.append({"id": name, "passed": bool(v["problems"]), "problems": v["problems"][:2]})
+
+    tca = "OVL:android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:main"
+    spk = "OVL:android/app/src/main/java/com/dial/van/voice/SherpaSpeakerSimilarity.kt:main"
+    art = "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04"
+    sym_mut("SYMBOL_WITHOUT_DISPOSITION", lambda r: r[tca].pop("MoreSheet"))
+    sym_mut("MOVED_TO_FILE_THAT_LACKS_IT", lambda r: r[tca]["MoreSheet"].update(at="android/app/src/main/java/com/dial/van/VanApplication.kt"))
+    sym_mut("NAME_MATCH_ON_A_PROPERTY_NOT_A_FUNCTION", lambda r: r[spk].__setitem__(
+        "cosine", {"status": "MOVED", "at": "android/app/src/main/java/com/dial/van/voice/SpeakerEnrollmentPolicy.kt", "symbol": None}))
+    sym_mut("WRONG_REMOVAL_COMMIT", lambda r: r[spk]["readEmbedding"].update(commit=CONSOLIDATION_HEAD))
+    sym_mut("CROSS_REPO_WRONG_COMMIT", lambda r: [v.update(commit="64d6b7158c723b7700e5b53175ea8048d4e92d00") for v in r[art].values()])
 
     # Trace-level mutations run against the real package registries in memory. A case passes
     # only if it produces a finding absent from the unmutated baseline.

@@ -1,0 +1,98 @@
+--- a/verification/verify_whole_product.py
++++ b/verification/verify_whole_product.py
+@@ -20,7 +20,7 @@
+   need(x.get('classification') in d['actions']['profiles'],'ACTION_PROFILE:'+i)
+   need(all(len(x.get(k,''))>40 for k in ['positive_oracle','negative_oracle','recovery_oracle']),'ACTION_ORACLES:'+i)
+  features=rd('traceability/REV2_93_FEATURE_CROSSWALK.json')['features'];surfaces=rd('design/ALL_SURFACE_CONTRACTS.json')['surfaces'];services=rd('contracts/BACKEND_SERVICE_CATALOG.json')['services'];tests={t['id']:t for t in d['effective']['tests']};units={u['id']:u for u in d['plan']['units']}
+- need(len(tests)==len(d['effective']['tests'])==1610,'EFFECTIVE_TEST_COUNT')
++ need(len(tests)==len(d['effective']['tests'])==1624,'EFFECTIVE_TEST_COUNT')
+  need(d['plan'].get('acceptance_owner_extensions')==d['ref']['owner_additions'],'CANONICAL_OWNER_EXTENSIONS')
+  need(d['bindings']['features']==features,'FEATURE_COVERAGE')
+  cc=d['bindings']['contexts'];need(len(cc)==234 and {c['context_id'] for c in cc}=={s['id'] for s in surfaces},'CONTEXT_COVERAGE')
+@@ -55,7 +55,7 @@
+  errs=structural(d);test('INTEGRATION',not errs,errs)
+  baseline=rd('lineage/REV117_WHOLE_PRODUCT_FINGERPRINTS.json')
+  for name,file,key in [('requirements','traceability/REQUIREMENTS_AND_DU_MAPPING.json','requirements'),('tests','verification/TEST_CONTRACTS.json','tests'),('actions','traceability/LEGACY_349_ACTIONS.json','actions'),('surfaces','design/ALL_SURFACE_CONTRACTS.json','surfaces')]:
+-  current={x['id']:digest(x) for x in rd(file)[key]};test('PRESERVE_'+name,current==baseline['objects'][name])
++  current={x['id']:digest(x) for x in rd(file)[key]};base=baseline['objects'][name];allowed=set().union(*[set(json.loads(a.read_text())['added'].get(name,[])) for a in sorted((P/'amendments').glob('*.json'))]) if (P/'amendments').is_dir() else set();test('PRESERVE_'+name,all(current.get(k)==v for k,v in base.items()) and set(current)-set(base)==allowed&set(current))
+  test('UNIT_GRAPH_PRESERVED',[{k:u[k] for k in ['id','packet_id','sequence','dependencies']} for u in d['plan']['units']]==baseline['units'])
+  a=rd('CANONICAL_AUTHORITY.json');master=(P/a['master']).read_text();norm=(P/D/'ARCHITECTURE_REV118.md').read_text();test('NORMATIVE_MASTER_INTEGRATION',norm in master and a['revision']=='1.18' and a['effective_test_registry']=='verification/EFFECTIVE_TEST_CONTRACTS_REV118.json')
+  test('DISCOVERABLE_CONTEXT_EXTENSION',D+'FEATURE_CONTEXT_BINDINGS.json' in rd('design/ALL_SURFACE_CONTRACTS.json')['extension_registries'])
+--- a/verification/verify_model_hardening.py
++++ b/verification/verify_model_hardening.py
+@@ -13,7 +13,7 @@
+   if not ok:e.append(code)
+  rr={r['id']:r for r in d['requirements']['requirements']};tt={t['id']:t for t in d['tests']['tests']};uu={u['id']:u for u in d['plan']['units']};ss={s['id']:s for s in d['surfaces']['surfaces']};services={s['id']:s for s in d['catalog']['services']}
+  need(len(rr)==d['requirements']['count']==d['requirements']['total']==d['authority']['active_requirement_count']==324,'REQUIREMENT_COUNT')
+- need(len(tt)==d['tests']['count']==d['authority']['active_application_test_count']==1610,'TEST_COUNT')
++ need(len(tt)==d['tests']['count']==d['authority']['active_application_test_count']==1624,'TEST_COUNT')
+  expected={f'VAN-JM-{i:03d}' for i in range(1,9)};test_ids={f'T-VAN-JM-{i:03d}-{k}' for i in range(1,9) for k in ['POS','NEG','REC']}
+  need({r['id'] for r in d['new_requirements']['requirements']}==expected,'HARDENING_SCOPE_LOSS');need(set(d['contract']['requirements'])==expected,'CONTRACT_SCOPE_LOSS')
+  need({t['id'] for t in d['new_tests']['tests']}==test_ids,'ACCEPTANCE_COVERAGE')
+@@ -57,7 +57,7 @@
+  errors=check(d);test('INTEGRATION',not errors)
+  for flag in ['no_model_rpc_on_financial_path','all_attempts_reserved_before_transport','unknown_cost_retains_liability','model_weight_leakage_assessed','probability_target_requires_calibration','reviewer_and_holdout_separated','economic_health_separate_from_procedural_health']:
+   x=copy.deepcopy(d);x['contract']['invariants'][flag]=False;test('DROP_'+flag,'MISSING_INVARIANT:'+flag in check(x))
+- for name,mutate,code in [('REMOVE_REQUIREMENT',lambda x:x['requirements']['requirements'].pop(),'REQUIREMENT_NOT_IN_MAIN:'),('REMOVE_TEST',lambda x:x['tests']['tests'].pop(),'TEST_NOT_IN_MAIN:'),('FORGE_MODEL_WIN',lambda x:x['contract']['models'][0].update(economic_qualification='PASS'),'FALSE_MODEL_QUALIFICATION'),('RELABEL_ARGON',lambda x:x['contract']['models'][0].update(requested_model='grok-4'),'WRONG_MODEL_IDENTITY'),('NO_CONFIRMATION',lambda x:x['experiments']['experiments'][0]['required_pre_run_bindings'].remove('protected_confirmation_windows'),'INCOMPLETE_STUDY_BINDINGS'),('HIDE_UNKNOWN_COST',lambda x:x['contexts']['bindings'][0]['required_states'].remove('COST_UNKNOWN'),'HIDDEN_ERROR_OR_UNKNOWN_STATE')]:
++ for name,mutate,code in [('REMOVE_REQUIREMENT',lambda x:x['requirements']['requirements'].pop(),'REQUIREMENT_NOT_IN_MAIN:'),('REMOVE_TEST',lambda x:x['tests']['tests'].remove(next(t for t in x['tests']['tests'] if t['id']==x['new_tests']['tests'][0]['id'])),'TEST_NOT_IN_MAIN:'),('FORGE_MODEL_WIN',lambda x:x['contract']['models'][0].update(economic_qualification='PASS'),'FALSE_MODEL_QUALIFICATION'),('RELABEL_ARGON',lambda x:x['contract']['models'][0].update(requested_model='grok-4'),'WRONG_MODEL_IDENTITY'),('NO_CONFIRMATION',lambda x:x['experiments']['experiments'][0]['required_pre_run_bindings'].remove('protected_confirmation_windows'),'INCOMPLETE_STUDY_BINDINGS'),('HIDE_UNKNOWN_COST',lambda x:x['contexts']['bindings'][0]['required_states'].remove('COST_UNKNOWN'),'HIDDEN_ERROR_OR_UNKNOWN_STATE')]:
+   x=copy.deepcopy(d);mutate(x);test(name,any(v.startswith(code) for v in check(x)))
+  Draft202012Validator.check_schema(d['schema']);v=Draft202012Validator(d['schema']);examples={r['record_type']:r for r in d['examples']['examples']}
+  for name,obj in examples.items():test('VALID_'+name,v.is_valid(obj))
+@@ -66,7 +66,7 @@
+  obj=copy.deepcopy(examples['ModelQualificationEvidence']);obj.update(evidence_state='INCONCLUSIVE',protected_confirmation_ref=None);test('PRESERVE_INCONCLUSIVE',v.is_valid(obj))
+  focus=(P/d['authority']['focused_blueprint']).read_text().rstrip();master=(P/d['authority']['master']).read_text();test('FULL_NORMATIVE_SECTION','### 8.7 Hardened self-improvement' in focus and focus in master)
+  test('NEW_TESTS_RENDERED',all(t in (P/d['authority']['rendered_plan']).read_text() for t in (f'T-VAN-JM-{i:03d}-{k}' for i in range(1,9) for k in ['POS','NEG','REC'])))
+- test('ACTIVE_COUNTS','The active totals are 324 requirements and 1,610 planned application tests' in focus and 'Active Rev1.16:' not in master)
++ test('ACTIVE_COUNTS','The active totals are 324 requirements and 1,624 planned application tests' in focus and 'Active Rev1.16:' not in master)
+  for name,inp,out,expected in [('ARGON','2','10','0.08'),('ARGON_DEC','4','20','0.16'),('DS_PRO_PEAK','1.32','3.96','0.04224'),('DS_PRO_OFFPEAK','.66','1.98','.02112'),('DS_FLASH_PEAK','.3','1.2','.0108'),('DS_FLASH_OFFPEAK','.15','.6','.0054')]:test('TOKEN_COST_ARITHMETIC_'+name,(Decimal(20000)*Decimal(inp)+Decimal(4000)*Decimal(out))/Decimal(1000000)==Decimal(expected))
+  print(json.dumps({'scope':'DOCUMENT_INTEGRATION_SCHEMA_MUTATIONS_AND_COST_ARITHMETIC_ONLY','passed':sum(r['passed'] for r in rows),'total':len(rows),'findings':errors,'model_invocations':0,'application_tests_executed':0,'economic_experiments_executed':0,'cases':rows},indent=2));return 0 if not errors and all(r['passed'] for r in rows) else 1
+ if __name__=='__main__':raise SystemExit(main())
+--- a/verification/verify_review_contracts.py
++++ b/verification/verify_review_contracts.py
+@@ -73,7 +73,7 @@
+ by={r['id']:r for r in d['requirements']['requirements']};ts={r['id'] for r in d['tests']['tests']}
+ for r in v.read('traceability/REV115_REQUIREMENTS.json')['requirements']:
+  require('NEW_REQUIREMENT_'+r['id'],by.get(r['id'])==r and set(r['test_ids']).issubset(ts))
+-require('COUNTS',len(by)==324 and len(ts)==1610 and len(d['plan']['units'])==131)
++require('COUNTS',len(by)==324 and len(ts)==1624 and len(d['plan']['units'])==131)
+ components={c['requirement_id'] for c in v.read('contracts/self_optimization/COMPONENT_LEDGER.json')['components']}
+ for r in v.read('traceability/REV115_REQUIREMENTS.json')['requirements']:require('COMPONENT_'+r['id'],r['id'] in components)
+ require('NO_CERTIFICATES_OR_APP_RESULTS',d['f15']['status']==d['bg']['status']=='NOT_ISSUED' and all(t['execution_state']=='NOT_RUN' for t in d['tests']['tests']))
+@@ -116,6 +116,6 @@
+  try:r.acceptance_index(plan,changed);actual=None
+  except ValueError as exc:actual=str(exc)
+  require('REJECT_REGISTRY_'+mutation,actual==error,actual)
+-require('ACTIVE_BLUEPRINT_COUNTS','The active totals are 324 requirements and 1,610 planned application tests' in focus and 'Historical Rev1.13 baseline: 237 requirements' in master)
++require('ACTIVE_BLUEPRINT_COUNTS','The active totals are 324 requirements and 1,624 planned application tests' in focus and 'Historical Rev1.13 baseline: 237 requirements' in master)
+ out={'scope':'DOCUMENT_ONLY_NOT_APPLICATION_OR_ECONOMIC_VALIDATION','passed':sum(r['passed'] for r in rows),'total':len(rows),'application_tests_executed':0,'cases':rows}
+ print(json.dumps(out,indent=2));raise SystemExit(0 if all(r['passed'] for r in rows) else 1)
+--- a/verification/verify_experience_learning.py
++++ b/verification/verify_experience_learning.py
+@@ -13,8 +13,8 @@
+   if not ok:e.append(code)
+  rr={r['id']:r for r in d['requirements']['requirements']};tt={t['id']:t for t in d['tests']['tests']};uu={u['id']:u for u in d['plan']['units']};ss={s['id']:s for s in d['surfaces']['surfaces']}
+  need(len(rr)==len(d['requirements']['requirements'])==d['requirements']['total']==d['requirements']['count']==324,'REQUIREMENT_COUNT_OR_DUPLICATE')
+- need(len(tt)==len(d['tests']['tests'])==1610,'TEST_COUNT_OR_DUPLICATE')
+- need(d['authority']['active_requirement_count']==324 and d['authority']['active_application_test_count']==1610,'STALE_AUTHORITY_COUNTS')
++ need(len(tt)==len(d['tests']['tests'])==1624,'TEST_COUNT_OR_DUPLICATE')
++ need(d['authority']['active_requirement_count']==324 and d['authority']['active_application_test_count']==1624,'STALE_AUTHORITY_COUNTS')
+  need({r['id'] for r in d['new_requirements']['requirements']}=={f'VAN-EL-{i:03d}' for i in range(1,8)},'REQUIRED_LEARNING_SCOPE')
+  expected={f'EL-AT-{i:03d}-{k}' for i in range(1,15) for k in ['POS','NEG','REC']}
+  need({t['id'] for t in d['new_tests']['tests']}==expected,'SCENARIO_COVERAGE')
+@@ -80,7 +80,7 @@
+  obj=copy.deepcopy(by['EvidenceAssessment']);obj.update(assessment_state='INCONCLUSIVE',null_control_results_ref=None,power_control_results_ref=None,qualification_ref=None,independent_review_ref=None)
+  test('PRESERVE_INCONCLUSIVE_WITH_MISSING_EVIDENCE',validator.is_valid(obj))
+  focus=(P/d['authority']['focused_blueprint']).read_text().rstrip();master=(P/d['authority']['master']).read_text();test('NORMATIVE_SECTION_EMBEDDED','### 8.6 Learning from trading experience' in focus and focus in master)
+- test('ACTIVE_COUNTS_IN_BLUEPRINT','The active totals are 324 requirements and 1,610 planned application tests' in focus and 'Active Rev1.15:' not in master)
++ test('ACTIVE_COUNTS_IN_BLUEPRINT','The active totals are 324 requirements and 1,624 planned application tests' in focus and 'Active Rev1.15:' not in master)
+  test('ALL_SCENARIOS_OUTLINED',all(f'`EL-AT-{i:03d}`' in focus for i in range(1,15)))
+  test('INTEGRATED_PLAN_TEXT',all(t['id'] in (P/d['authority']['rendered_plan']).read_text() for t in d['new_tests']['tests']))
+  out={'scope':'DOCUMENT_LINK_SCHEMA_AND_MUTATION_CHECKS_ONLY','passed':sum(r['passed'] for r in rows),'total':len(rows),'findings':errors,'application_tests_executed':0,'cases':rows};print(json.dumps(out,indent=2));return 0 if not errors and all(r['passed'] for r in rows) else 1
+--- a/plan/compile_rev118.py
++++ b/plan/compile_rev118.py
+@@ -17,4 +17,4 @@
+  ap=argparse.ArgumentParser();ap.add_argument('--check',action='store_true');a=ap.parse_args();text=json.dumps(compiled(),indent=2,sort_keys=True)+'\n';p=P/'verification/EFFECTIVE_TEST_CONTRACTS_REV118.json'
+  if a.check:
+   ok=p.is_file() and p.read_text()==text;print('Effective acceptance registry matches' if ok else 'STALE_EFFECTIVE_ACCEPTANCE');raise SystemExit(0 if ok else 1)
+- p.write_text(text);print('Compiled 1610 acceptance identities with 349 action-oracle refinements, explicit ownership additions and 72 domain scenarios; all NOT_RUN.')
++ p.write_text(text);print('Compiled 1624 acceptance identities with 349 action-oracle refinements, explicit ownership additions and 72 domain scenarios; all NOT_RUN.')

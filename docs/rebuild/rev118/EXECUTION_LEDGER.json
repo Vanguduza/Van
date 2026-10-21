@@ -137,6 +137,12 @@
    "what": "AP-001 admission (five gate units without acceptance)",
    "blocks": "PRE-001 exit and F15 (preparation blocker)",
    "needed_from": "independent reviewer + owner via package amendment procedure"
+  },
+  {
+   "id": "BLK-006",
+   "what": "PR #104 CI red on b02075f3: backend (missing DDS sibling checkout, reproduced), android-instrumentation/character-forge-gate (RiveContractTest.coreInputsDriveTheRig, not reproduced), ledger (expected until PR #94)",
+   "blocks": "PR #104 merge",
+   "needed_from": "owner authorization for .github/workflows change; CI artifact read or one rerun"
   }
  ],
  "amendment_proposals": [
@@ -158,26 +164,32 @@
   "updated_utc": "2026-10-21",
   "branch": "ccr-9e07e1af-8mgz1p",
   "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-  "background_jobs": "none",
+  "background_jobs": "none (Gradle retry loop stopped; JVM run completed via Google Maven Central mirror)",
   "last_validation": [
-   "pre001.py check: no drift; selftest 15/15",
-   "ap001.py check clean; selftest 9/9",
-   "pytest tests/rebuild 5 passed",
-   "cited baseline tests 292+47+1+9 passed",
-   "package unchanged (git diff --quiet)"
+   "pre001.py check: no drift, 0 disposition problems, 5 trace findings (AP-001); selftest 20/20",
+   "symbol dispositions 116/116 verified (SYMBOL_VERIFICATION.json)",
+   "ap001.py check clean (generic checks, 230 pre-existing non-ancestor listings reported); selftest 13/13",
+   "ap001_dryrun.py on a package copy: 10/10 package checks exit 0, 19 files changed",
+   "pytest tests/rebuild 5 passed; consolidation verify.py zero findings",
+   "cited baseline tests 292+47+1+9 passed; Artemis contracts 38/38 with DDS sibling, 38 errors without",
+   "Android JVM harness 157 classes / 1,273 tests, 0 failures (JVM only)",
+   "package unchanged vs 3c3379bd (git diff --quiet)"
   ],
   "environment_notes": [
    "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
    "pytest from backend/requirements.txt in a venv",
    "rsync needed for tests/hermes installer test",
-   "DDS sibling at /home/user/dial-development-system fetched origin/master 204f2f3b for F15 source reading"
+   "DDS sibling at /home/user/dial-development-system fetched origin/master 204f2f3b for F15 source reading",
+   "Gradle: repo.maven.apache.org returned 429 repeatedly; an init script adding https://maven-central.storage-download.googleapis.com/maven2/ resolved the same coordinates"
   ],
-  "next_action": "Owner/independent reviewer: act on pre003/REVIEW_SUBMISSION.md (AP-001, project identity, independent challenge, OQ-05 signature) and ADMISSION_STEPS.md (PR #94 adoption). Lead: no further dependency-ready PRE work until those return; BE units remain blocked on PRE-003."
+  "next_action": "Lead: Objective 1E challenge dossiers (author-prepared). Owner: PR #94 adoption, PR #104 CI fixes (ADMISSION_STEPS.md), OQ-05 mechanism, native registry readback for identity, independent reviewer with a DDS root-signed identity, AP-001 admission decision.",
+  "previous_head": "33c6e818d9611fd3b1b68a3341a51e61a92ead90"
  },
  "observations": [
   "OBS-001 BE-002 debug cleartext",
   "OBS-002 BE-003 stale-claim retake reliance",
-  "OBS-003 BE-028 positive approval-resume test",
+  "OBS-003 BE-025 positive approval-resume test (corrected from BE-028)",
   "OBS-004 BE-003 committed SQLite snapshot"
- ]
+ ],
+ "obligations": "obligations/OBLIGATIONS.json: OBL-001..005 (OBS-003 owner corrected to BE-025)"
 }

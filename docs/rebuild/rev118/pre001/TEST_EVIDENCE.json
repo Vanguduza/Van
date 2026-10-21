@@ -26,10 +26,24 @@
    "cwd": ".",
    "command": "apt-get install rsync; python -m pytest -q tests/hermes/test_profile_layout.py::test_install_profile_preserves_runtime_state_and_secrets",
    "result": "1 passed"
+  },
+  {
+   "purpose": "Android JVM verification harness (cited ProvisioningPayloadTest, BrowserControlMutationTest, SpeakerEnrollmentPolicyTest)",
+   "cwd": "android/verification",
+   "command": "gradle --no-daemon -q --init-script <scratch>/mirror.init.gradle test  (init script adds https://maven-central.storage-download.googleapis.com/maven2/ because repo.maven.apache.org returned HTTP 429 on 4 attempts; dependency coordinates unchanged)",
+   "result": "157 classes, 1273 tests, 0 failures, 0 errors, 0 skipped (summed from build/test-results/test/*.xml); the three cited classes are present and green",
+   "label": "JVM_HOST_TEST_ONLY: plain JVM harness compiled from android sources. Not an AGP unit-test run of the app module, not instrumentation, not an APK, not handset or S24 acceptance"
+  },
+  {
+   "purpose": "Artemis contract tests and their DDS sibling dependency (PR #104 backend failure)",
+   "cwd": ".",
+   "command": "python -m pytest -q tests/contracts/test_artemis_*  with ../dial-development-system at 64d6b7158c72 present, then from a worktree without the sibling",
+   "result": "38 passed with sibling; 38 errors without it (reproduces the CI backend job's errors, which all sit in test_artemis_*)"
   }
  ],
  "not_run": [
-  "Android JVM tests cited (ProvisioningPayloadTest, BrowserControlMutationTest, SpeakerEnrollmentPolicyTest): no Android SDK/Gradle run in this session; consolidation VALIDATION.md reports 1,273 JVM tests passing at its own head, which is historical evidence, not a rerun"
+  "Android instrumentation (connectedAndroidTest) and handset acceptance: no emulator or device in this session; the S24 Ultra via Artemis is the only valid handset acceptance",
+  "PR #104 RiveContractTest.coreInputsDriveTheRig instrumentation failure: test-report artifact not downloadable here; not reproduced"
  ],
  "scope": "Source tests of the inherited baseline. Not Rev1.18 acceptance identities."
 }

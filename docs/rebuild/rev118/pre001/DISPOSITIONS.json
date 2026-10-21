@@ -4,22 +4,28 @@
    "owner_unit": "BE-002",
    "severity": "debug-build only; release manifest unaffected per comment \u2014 verify at release qualification",
    "status": "OPEN_FOR_UNIT_REVIEW",
-   "what": "android/app/src/debug/AndroidManifest.xml sets usesCleartextTraffic=true app-wide for debug builds while its comment scopes intent to 127.0.0.1/localhost; also exports debug RiveCandidateHostActivity."
+   "what": "android/app/src/debug/AndroidManifest.xml sets usesCleartextTraffic=true app-wide for debug builds while its comment scopes intent to 127.0.0.1/localhost; also exports debug RiveCandidateHostActivity.",
+   "obligation": "OBL-001"
   },
   "OBS-002": {
    "owner_unit": "BE-003",
    "status": "OPEN_FOR_UNIT_REVIEW",
-   "what": "Idempotency stale-claim retake after a conflicting attempt relies on CommandMissionLink.existing_for_command to prevent duplicate missions; not verified in PRE-001."
+   "what": "Idempotency stale-claim retake after a conflicting attempt relies on CommandMissionLink.existing_for_command to prevent duplicate missions; not verified in PRE-001.",
+   "obligation": "OBL-002"
   },
   "OBS-003": {
-   "owner_unit": "BE-028",
+   "owner_unit": "BE-025",
    "status": "OPEN_FOR_UNIT_REVIEW",
-   "what": "No positive test found at HEAD that a genuine owner approval resumes the same browser task (only refusal/advisory tests)."
+   "what": "No positive test found at HEAD that a genuine owner approval resumes the same browser task (only refusal/advisory tests).",
+   "owner_unit_correction": "Was BE-028 (automation); browser approval belongs to BE-025. See obligations/OBLIGATIONS.json OBL-003.",
+   "obligation": "OBL-003"
   },
   "OBS-004": {
    "owner_unit": "BE-003",
    "status": "OPEN_FOR_UNIT_REVIEW",
-   "what": "data/van_gateway.sqlite3 (1,064,960 bytes) is committed: 87 tables, seed rows only (20 migrations, 9 action definitions, 11 capability rows, FTS config); no owner/device rows. Confirm it is an intentional schema fixture and that runtime never writes to the tracked path. During this session's test runs (2026-10-21 ~16:30 UTC) an empty WAL and a shm file appeared beside the tracked database, so some test or helper opens data/van_gateway.sqlite3 itself; the tracked file stayed byte-identical (git diff clean) and the side files were removed."
+   "what": "data/van_gateway.sqlite3 (1,064,960 bytes) is committed: 87 tables, seed rows only (20 migrations, 9 action definitions, 11 capability rows, FTS config); no owner/device rows. Confirm it is an intentional schema fixture and that runtime never writes to the tracked path. During this session's test runs (2026-10-21 ~16:30 UTC) an empty WAL and a shm file appeared beside the tracked database, so some test or helper opens data/van_gateway.sqlite3 itself; the tracked file stayed byte-identical (git diff clean) and the side files were removed.",
+   "root_cause": "Reproduced: app.py:3856 module-level create_app() with relative default database_path creates data/ and data/documents when imported from repo-root cwd (trigger: tests/contracts/test_artemis_console_boundary.py). See OBL-004.",
+   "obligation": "OBL-004"
   }
  },
  "overlap": {
@@ -42,10 +48,10 @@
    "evidence_grade": "OBSERVED"
   },
   "OVL:android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:main": {
-   "basis": "INFERRED",
+   "basis": "OBSERVED",
    "decision": "SUPERSEDED",
-   "evidence": "Removed by 652ef3f3 'Complete VAN owner contracts and Android backend wiring'; route rewritten against the owner-contract read models. No HEAD reference to ConnectedData; the connected-services context remains a Rev1.18 obligation (BE-033/FE-022) and is not satisfied by either version.",
-   "evidence_grade": "INFERRED"
+   "evidence": "Removed by 652ef3f3. ConnectedData/load replaced by per-plane state in ConnectedRoute (health, planes, workspace, per-source failures, observedAt, revoke uncertainty) and ConnectedReadback.source (command/connected/ConnectedReadback.kt); verified per symbol in SYMBOL_VERIFICATION.json. The connected-services context remains a Rev1.18 obligation (BE-031/FE-022).",
+   "evidence_grade": "OBSERVED"
   },
   "OVL:android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:main": {
    "basis": "OBSERVED",
@@ -134,7 +140,7 @@
   "OVL:backend/tests/test_browser_api.py:main": {
    "basis": "OBSERVED",
    "decision": "SEMANTICS_CHANGED_REVIEW",
-   "evidence": "652ef3f3 'Complete VAN owner contracts and Android backend wiring': test_owner_approval_resumes_same_browser_task replaced by test_advisory_owner_answer_cannot_resume_or_widen_browser_task; HEAD retains test_owner_approval_cannot_widen_to_unapproved_domain and test_action_class_approval_cannot_be_exceeded. A positive 'genuine approval resumes the same task' test was not found at HEAD; the positive resume path is a BE-028/BQ-004 acceptance obligation (recorded OBS-003).",
+   "evidence": "652ef3f3 'Complete VAN owner contracts and Android backend wiring': test_owner_approval_resumes_same_browser_task replaced by test_advisory_owner_answer_cannot_resume_or_widen_browser_task; HEAD retains test_owner_approval_cannot_widen_to_unapproved_domain and test_action_class_approval_cannot_be_exceeded. A positive 'genuine approval resumes the same task' test was not found at HEAD; the positive resume path is a BE-025 (browser) acceptance obligation, integrated by BQ-004 (corrected from BE-028; see OBL-003) (recorded OBS-003).",
    "evidence_grade": "OBSERVED"
   },
   "OVL:backend/tests/test_browser_escalation_boundary.py:main": {
@@ -413,10 +419,10 @@
    }
   },
   "PR-22": {
-   "basis": "INFERRED",
+   "basis": "OBSERVED",
    "decision": "SUPERSEDED_BY_MERGED_PR_23",
-   "evidence": "Closed unmerged 'gpt/trading-main-reconcile'; same-purpose 'gpt/trading-main-reconcile-v2' (PR-23) merged and its head is contained in evaluated history. PR-22 and PR-23 blobs for FloatingOverlayService.kt/TradingCommandCentreActivity.kt differ, so equivalence is inferred from the v2 replacement, not proven line by line; HEAD versions have since evolved (486/661 and 119/144 PR-22 lines absent). Blueprint docs are historical planning text superseded by Rev1.18.",
-   "evidence_grade": "INFERRED",
+   "evidence": "Closed unmerged 'gpt/trading-main-reconcile'; same-purpose 'gpt/trading-main-reconcile-v2' (PR-23) merged and its head is contained in evaluated history. PR-22 and PR-23 blobs for FloatingOverlayService.kt/TradingCommandCentreActivity.kt differ, so equivalence is inferred from the v2 replacement, not proven line by line; HEAD versions have since evolved (486/661 and 119/144 PR-22 lines absent). Blueprint docs are historical planning text superseded by Rev1.18. Line-level check: of the 186 distinct non-blank lines PR-22 added to FloatingOverlayService.kt and TradingCommandCentreActivity.kt, 185 are present in merged PR-23 (48e47fe9); the one difference is PR-23's own fix giving TradesWorkboardPanel a ColumnScope receiver ('Fix VATI trade panel column scope').",
+   "evidence_grade": "OBSERVED",
    "paths": {
     "android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt": "SUPERSEDED",
     "android/app/src/main/java/com/dial/van/trading/TradingCommandCentreActivity.kt": "SUPERSEDED",
@@ -454,38 +460,38 @@
    }
   },
   "PR-40": {
-   "basis": "INFERRED",
+   "basis": "OBSERVED",
    "decision": "RETIRED_BUILD_EXPERIMENT",
-   "evidence": "Closed unmerged 'ci: retain debug APK for owner testing'. One-off artifact-retention/diagnostic CI edits; HEAD van-ci.yml and owner release workflow govern builds. Release/handset evidence must come from the admitted release path and S24/Artemis, not retained debug APKs.",
-   "evidence_grade": "INFERRED",
+   "evidence": "Closed unmerged 'ci: retain debug APK for owner testing'. Diff adds only an actions/upload-artifact step for app-debug.apk.",
+   "evidence_grade": "OBSERVED",
    "paths": {
     ".github/workflows/van-ci.yml": "RETIRED"
    }
   },
   "PR-41": {
-   "basis": "INFERRED",
+   "basis": "OBSERVED",
    "decision": "RETIRED_BUILD_EXPERIMENT",
-   "evidence": "Closed unmerged 'ci: retain corrected S24 owner-test APK (icon); superseded by merged PR-42 fix/current-van-launcher-icon'. One-off artifact-retention/diagnostic CI edits; HEAD van-ci.yml and owner release workflow govern builds. Release/handset evidence must come from the admitted release path and S24/Artemis, not retained debug APKs.",
-   "evidence_grade": "INFERRED",
+   "evidence": "Closed unmerged 'ci: retain corrected S24 owner-test APK (icon); superseded by merged PR-42 fix/current-van-launcher-icon'. Diff adds a debug-APK upload plus applicationIdSuffix '.test'/versionNameSuffix '-owner-test' and an icon change; the suffix would break com.dial.van identity continuity, and the icon is superseded by merged PR-42.",
+   "evidence_grade": "OBSERVED",
    "paths": {
     ".github/workflows/van-ci.yml": "RETIRED",
     "android/app/build.gradle.kts": "SUPERSEDED"
    }
   },
   "PR-43": {
-   "basis": "INFERRED",
+   "basis": "OBSERVED",
    "decision": "RETIRED_BUILD_EXPERIMENT",
-   "evidence": "Closed unmerged 'ci: retain canonical com.dial.van owner-debug APK'. One-off artifact-retention/diagnostic CI edits; HEAD van-ci.yml and owner release workflow govern builds. Release/handset evidence must come from the admitted release path and S24/Artemis, not retained debug APKs.",
-   "evidence_grade": "INFERRED",
+   "evidence": "Closed unmerged 'ci: retain canonical com.dial.van owner-debug APK'. Diff adds only an actions/upload-artifact step for app-debug.apk.",
+   "evidence_grade": "OBSERVED",
    "paths": {
     ".github/workflows/van-ci.yml": "RETIRED"
    }
   },
   "PR-44": {
-   "basis": "INFERRED",
+   "basis": "OBSERVED",
    "decision": "RETIRED_BUILD_EXPERIMENT",
-   "evidence": "Closed unmerged 'ci: certify Android APK installability (diagnostic)'. One-off artifact-retention/diagnostic CI edits; HEAD van-ci.yml and owner release workflow govern builds. Release/handset evidence must come from the admitted release path and S24/Artemis, not retained debug APKs.",
-   "evidence_grade": "INFERRED",
+   "evidence": "Closed unmerged 'ci: certify Android APK installability (diagnostic)'. Diff removes the Automation/Browser Fabric certification steps from CI and adds APK sha256/aapt badging/signing/alignment diagnostics; merging would have weakened CI. The APK-identity idea is carried as an input to REL-001 exact-APK evidence, not as a lost obligation.",
+   "evidence_grade": "OBSERVED",
    "paths": {
     ".github/workflows/van-ci.yml": "RETIRED"
    }
@@ -522,6 +528,13 @@
     "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt": "RETIRED",
     "android/app/src/main/java/com/dial/van/onboarding/OnboardingPlan.kt": "RETIRED"
    }
+  },
+  "ccr-9e07e1af-8mgz1p": {
+   "basis": "OBSERVED",
+   "decision": "REBUILD_WORK_BRANCH",
+   "evidence": "Created by this rebuild after the 70-branch evaluation; descends from consolidation tip b02075f3 (git merge-base --is-ancestor) and adds only docs/rebuild/**, tools/rebuild/**, tests/rebuild/**, one authorization record and ledger rows (git diff --stat b02075f3..33c6e818).",
+   "evidence_grade": "OBSERVED",
+   "paths": {}
   },
   "consolidation/opus-clean-rev118-20261021": {
    "basis": "OBSERVED",

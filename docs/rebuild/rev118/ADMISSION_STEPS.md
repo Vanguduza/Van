@@ -19,3 +19,26 @@ Facts observed 2026-10-21:
 | 7 | — | Open a PR for `ccr-9e07e1af-8mgz1p` (PRE-001/PRE-002 evidence only) against the updated `main`; same ledger verification | Ledger job green on that head |
 
 Not done, and not to be done to unblock the build: merging either PR, disabling or bypassing checks, minting records for past commits, rewriting history, or treating local GREEN as admission. F15 is independent of this sequence, but the F15 baseline SHA must be the commit actually reviewed. If merging changes the head, the certificate must be computed for the new baseline.
+
+## PR #104 CI on head `b02075f3` (van-ci run 39590832158), observed 2026-10-21
+
+| Job | Result | Diagnosis | Status |
+|---|---|---|---|
+| project-truth-ledger | FAIL | Expected on base `main`: `trusted/tools/ci/project_truth_ledger.py` is absent until PR #94 is adopted (step 1) | Resolved by steps 1–4 |
+| backend | FAIL | **Reproduced locally.** All 134 errors are in `tests/contracts/test_artemis_*`. `tools/certification/artemis_acceptance.py:210` resolves `dds_root or root.parent / "dial-development-system"`, and the job checks out only `Van`. In a worktree with no sibling the Artemis suite errors (38/38). With the sibling DDS at the pin (`CONSOLIDATION_STATE.json` line 29, `64d6b7158c72…`) it passes 38/38 | Fix proposed below; needs owner authorization |
+| android-instrumentation, character-forge-gate | FAIL | `connectedAndroidTest` failed in `RiveContractTest.coreInputsDriveTheRig`; character-forge-gate fails on that binding. PR #101 (`a39f241b`) and PR #94's Oct-9 run passed this job. The base lineage since then includes `077bc517` (visual renderer removal) and `8c192be7`. The assertion text is in the run's test-report artifact, which this session cannot download, so **regression versus emulator flake is not established** | Owner or CI: read the artifact, then rerun at most once per the flake rule. A second failure is real and goes to the owning Android unit |
+| mutation, android-and-visual-evidence, cognitive-fabric, canonical-tree, python | PASS | — | — |
+
+**Proposed backend fix (not applied).** It touches `.github/workflows/van-ci.yml`, which is outside this branch's authorization (`tools/rebuild/**`, `tests/rebuild/**`, `docs/rebuild/**`). Add this to the `backend` job before the test step:
+
+```yaml
+      - uses: actions/checkout@v4
+        with:
+          repository: Vanguduza/dial-development-system
+          ref: 64d6b7158c723b7700e5b53175ea8048d4e92d00
+          path: dds
+          token: ${{ secrets.DDS_READ_TOKEN }}   # read-only; only needed if DDS is private
+      - run: mv dds ../dial-development-system
+```
+
+The alternative is to pass `dds_root` from an environment variable. That is an application change to `tools/certification/`, which needs owner authorization and a ledger record. Either way the pin must stay `64d6b715` until PRE-001's MOVED_CROSS_REPO dispositions (DDS `2964c6ec`) are re-pinned deliberately.

@@ -21,4 +21,4 @@ def test_current_package_omission_and_patched_view():
 def test_every_induced_failure_is_detected(capsys):
     assert ap001.cmd_selftest() == 0
     report = json.loads(capsys.readouterr().out)
-    assert report["passed"] == report["total"] == 9
+    assert report["passed"] == report["total"] == 13

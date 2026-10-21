@@ -1,0 +1,820 @@
+{
+ "problems": [],
+ "rows": [
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:android/app/src/main/java/com/dial/van/browser/BrowserActivity.kt:main",
+   "status": "REMOVED_WITH_CALLER",
+   "symbol": "describe",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/browser/BrowserActivity.kt:main",
+   "status": "REPLACED_BY",
+   "symbol": "onDocumentChosen",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:main",
+   "status": "MOVED",
+   "symbol": "acknowledgeViewport",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:main",
+   "status": "REPLACED_BY",
+   "symbol": "beginUpload",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:main",
+   "status": "MOVED",
+   "symbol": "CommandBottomBar",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:main",
+   "status": "MOVED",
+   "symbol": "CommandSideRail",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:main",
+   "status": "MOVED",
+   "symbol": "MoreSheet",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:main",
+   "status": "MOVED",
+   "symbol": "NavDestination",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:main",
+   "status": "REPLACED_BY",
+   "symbol": "ConnectedData",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:main",
+   "status": "REPLACED_BY",
+   "symbol": "load",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:main",
+   "status": "MOVED",
+   "symbol": "ConversationBubble",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:main",
+   "status": "MOVED",
+   "symbol": "MissionRow",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:main",
+   "status": "MOVED",
+   "symbol": "ReconfirmationPanel",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:main",
+   "status": "MOVED",
+   "symbol": "WorkActivityRoute",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:main",
+   "status": "MOVED",
+   "symbol": "formatTime",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:main",
+   "status": "REMOVED_WITH_CALLER",
+   "symbol": "refresh",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:main",
+   "status": "MOVED",
+   "symbol": "severityRole",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:main",
+   "status": "MOVED",
+   "symbol": "statusRole",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/connectivity/ProvisioningPayload.kt:main",
+   "status": "REPLACED_BY",
+   "symbol": "isAcceptableUrl",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/notification/NotificationPolicy.kt:main",
+   "status": "MOVED",
+   "symbol": "AppNotificationPolicy",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt:main",
+   "status": "REPLACED_BY",
+   "symbol": "ProvisioningStatus",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt:main",
+   "status": "REMOVED_WITH_CALLER",
+   "symbol": "isOnboardingComplete",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:main",
+   "status": "MOVED",
+   "symbol": "Loaded",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:main",
+   "status": "MOVED",
+   "symbol": "Loading",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:main",
+   "status": "MOVED",
+   "symbol": "Ready",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:main",
+   "status": "MOVED",
+   "symbol": "Unavailable",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt:main",
+   "status": "RETIRED",
+   "symbol": "VanOwnerArtAvatar",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:android/app/src/main/java/com/dial/van/voice/SherpaSpeakerSimilarity.kt:main",
+   "status": "REMOVED_WITH_CALLER",
+   "symbol": "admitted",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:android/app/src/main/java/com/dial/van/voice/SherpaSpeakerSimilarity.kt:main",
+   "status": "REMOVED_WITH_CALLER",
+   "symbol": "cosine",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:android/app/src/main/java/com/dial/van/voice/SherpaSpeakerSimilarity.kt:main",
+   "status": "REMOVED_WITH_CALLER",
+   "symbol": "normalized",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/voice/SherpaSpeakerSimilarity.kt:main",
+   "status": "MOVED",
+   "symbol": "pcm16ToFloat",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:android/app/src/main/java/com/dial/van/voice/SherpaSpeakerSimilarity.kt:main",
+   "status": "RETIRED",
+   "symbol": "readEmbedding",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:android/app/src/main/java/com/dial/van/voice/SherpaSpeakerSimilarity.kt:main",
+   "status": "REMOVED_WITH_CALLER",
+   "symbol": "sha256",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:android/app/src/main/java/com/dial/van/voice/VoiceEdge.kt:main",
+   "status": "REMOVED_WITH_CALLER",
+   "symbol": "sha256",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/voice/WakeAcknowledgement.kt:main",
+   "status": "REPLACED_BY",
+   "symbol": "onDone",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/voice/WakeAcknowledgement.kt:main",
+   "status": "REPLACED_BY",
+   "symbol": "onError",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/voice/WakeAcknowledgement.kt:main",
+   "status": "REPLACED_BY",
+   "symbol": "onInit",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:android/app/src/main/java/com/dial/van/voice/WakeAcknowledgement.kt:main",
+   "status": "REPLACED_BY",
+   "symbol": "onStart",
+   "verified": true
+  },
+  {
+   "check": "BACKTICK_NAME_FRAGMENT",
+   "row": "OVL:android/verification/src/test/kotlin/com/dial/van/onboarding/OnboardingPlanTest.kt:main",
+   "status": "INSTRUMENT_ARTEFACT",
+   "symbol": "an",
+   "verified": true
+  },
+  {
+   "check": "BACKTICK_NAME_FRAGMENT",
+   "row": "OVL:android/verification/src/test/kotlin/com/dial/van/onboarding/OnboardingPlanTest.kt:main",
+   "status": "INSTRUMENT_ARTEFACT",
+   "symbol": "pairing",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:backend/tests/test_automation_api.py:main",
+   "status": "REMOVED_WITH_CALLER",
+   "symbol": "_n8n_transport",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:backend/tests/test_automation_api.py:main",
+   "status": "REMOVED_WITH_CALLER",
+   "symbol": "_n8n_transport.handler",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:backend/tests/test_automation_compiler.py:main",
+   "status": "REPLACED_BY",
+   "symbol": "test_credentials_compile_to_identifier_never_value",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:backend/tests/test_automation_compiler.py:main",
+   "status": "REPLACED_BY",
+   "symbol": "test_webhook_trigger_compiles_with_authentication",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:backend/tests/test_automation_dispatch.py:main",
+   "status": "REMOVED_WITH_CALLER",
+   "symbol": "_transport",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:backend/tests/test_automation_dispatch.py:main",
+   "status": "REMOVED_WITH_CALLER",
+   "symbol": "_transport.handler",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:backend/tests/test_automation_health_api.py:main",
+   "status": "REPLACED_BY",
+   "symbol": "test_automation_health_reports_governance_approved",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:backend/tests/test_browser_api.py:main",
+   "status": "REPLACED_BY",
+   "symbol": "test_owner_approval_resumes_same_browser_task",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:backend/tests/test_browser_escalation_boundary.py:main",
+   "status": "REPLACED_BY",
+   "symbol": "test_two_different_overruns_are_two_separate_questions",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:backend/tests/test_interactive_browser_api.py:main",
+   "status": "REPLACED_BY",
+   "symbol": "TestUnconfiguredDeployment.test_without_a_signing_key_the_routes_do_not_exist",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:backend/tests/test_knowledge_runtime.py:main",
+   "status": "REPLACED_BY",
+   "symbol": "test_consumer_preexisting_same_title_is_not_claimed_as_van_created",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:backend/tests/test_knowledge_runtime.py:main",
+   "status": "REMOVED_WITH_CALLER",
+   "symbol": "test_consumer_preexisting_same_title_is_not_claimed_as_van_created.Harness",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:backend/tests/test_knowledge_runtime.py:main",
+   "status": "REMOVED_WITH_CALLER",
+   "symbol": "test_consumer_preexisting_same_title_is_not_claimed_as_van_created.Harness.navigate",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:backend/tests/test_knowledge_runtime.py:main",
+   "status": "REMOVED_WITH_CALLER",
+   "symbol": "test_consumer_preexisting_same_title_is_not_claimed_as_van_created.Harness.page_info",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:backend/tests/test_knowledge_runtime.py:main",
+   "status": "REMOVED_WITH_CALLER",
+   "symbol": "test_consumer_preexisting_same_title_is_not_claimed_as_van_created.Stagehand",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:backend/tests/test_knowledge_runtime.py:main",
+   "status": "REMOVED_WITH_CALLER",
+   "symbol": "test_consumer_preexisting_same_title_is_not_claimed_as_van_created.Stagehand.act",
+   "verified": true
+  },
+  {
+   "check": "REMOVAL_COMMIT_VERIFIED",
+   "row": "OVL:backend/tests/test_knowledge_runtime.py:main",
+   "status": "REMOVED_WITH_CALLER",
+   "symbol": "test_consumer_preexisting_same_title_is_not_claimed_as_van_created.Stagehand.extract",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:backend/tests/test_recovery_matrix.py:main",
+   "status": "REPLACED_BY",
+   "symbol": "TestCellGatewayRestartMidCommand.test_a_conflict_is_never_retaken",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:backend/tests/test_visual_acceptance.py:main",
+   "status": "REPLACED_BY",
+   "symbol": "test_visual_acceptance_is_declared_device_proofed",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:backend/van_gateway/automation/compiler.py:main",
+   "status": "REPLACED_BY",
+   "symbol": "AutomationCompiler._compile_parameters",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:backend/van_gateway/automation/compiler.py:main",
+   "status": "REPLACED_BY",
+   "symbol": "AutomationCompiler._position",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:backend/van_gateway/browser/api.py:main",
+   "status": "REPLACED_BY",
+   "symbol": "BrowserApi._install_routes.run_assignment.assert_lease_active",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:backend/van_gateway/decisions/service.py:main",
+   "status": "MOVED",
+   "symbol": "DecisionCreate",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:backend/van_gateway/decisions/service.py:main",
+   "status": "MOVED",
+   "symbol": "DecisionRecord",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:backend/van_gateway/decisions/service.py:main",
+   "status": "MOVED",
+   "symbol": "DecisionStatus",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:tests/contracts/test_stored_command_is_deliverable.py:main",
+   "status": "REPLACED_BY",
+   "symbol": "test_the_builder_is_the_one_the_offline_path_uses",
+   "verified": true
+  },
+  {
+   "check": "TARGET_DEFINED_AT_HEAD",
+   "row": "OVL:tests/contracts/test_van_direct_mtls_deploy.py:main",
+   "status": "REPLACED_BY",
+   "symbol": "test_the_app_ships_configured_for_the_direct_link",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts.test_api_key_login_refused",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts.test_binding_is_idempotent_and_refuses_unbound_provider",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts.test_bound_tool_call_returned_to_artemis",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts.test_codex_environment_excludes_native_loader_settings",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts.test_command_disables_execution_and_delegation",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts.test_different_account_refused",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts.test_different_requested_model_refused_before_transport",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts.test_every_profile_node_and_fallback_is_exact_model",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts.test_fresh_native_task_child_inherits_binding",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts.test_inline_image_preserved",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts.test_local_file_url_refused",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts.test_matching_chatgpt_account",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts.test_missing_login_refused",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts.test_non_image_payload_refused",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts.test_non_object_tool_arguments_refused",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts.test_process_environment_excludes_api_billing",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts.test_role_and_tool_result_preserved",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionContracts.test_unbound_tool_refused",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/__init__.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "__file__",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/mcp_launcher.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "__file__",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "ChatGPTSubscriptionChatModel",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "ChatGPTSubscriptionChatModel._agenerate",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "ChatGPTSubscriptionChatModel._astream",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "ChatGPTSubscriptionChatModel._generate",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "ChatGPTSubscriptionChatModel._identifying_params",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "ChatGPTSubscriptionChatModel._llm_type",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "ChatGPTSubscriptionChatModel.bind_tools",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "ChatGPTSubscriptionChatModel.with_structured_output",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "ChatGPTSubscriptionChatModel.with_structured_output.parse",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionSession",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionSession.__aenter__",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionSession.__aexit__",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionSession.__init__",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionSession.complete",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionSession.receive",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionSession.rpc",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "SubscriptionSession.send",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "bind_native_artemis",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "bind_native_artemis.create_model",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "bind_native_artemis.probe",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "codex_command",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "messages_to_input",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "read_subscription_account",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "response_message",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "subscription_environment",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "tool_response_schema",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "validate_account",
+   "verified": true
+  },
+  {
+   "check": "DESTINATION_VERIFIED",
+   "row": "OVL:tools/artemis_subscription/sitecustomize.py:accounts_3b2c9e04",
+   "status": "MOVED_CROSS_REPO",
+   "symbol": "__file__",
+   "verified": true
+  }
+ ],
+ "schema": "van.rebuild.pre001.symbol-verification/1",
+ "symbols": 116,
+ "verified": 116
+}

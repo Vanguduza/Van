@@ -1,9 +1,9 @@
 {
- "branch_count": 71,
+ "branch_count": 72,
  "pr_state": "PR_STATE_20261021.json",
  "pull_count": 104,
- "refs_snapshot": "REMOTE_REFS_20261021.txt",
- "refs_snapshot_sha256": "5a3523c37d08d67225d109a3cf3e8eb5cbac7a684328a67b2231e40bacb986d1",
+ "refs_snapshot": "REMOTE_REFS_20261021T171448Z.txt",
+ "refs_snapshot_sha256": "fbc379e4965d1d434934ee7e77153aee41de539e2ca23984c336dc4dda294ae8",
  "rows": [
   {
    "archive_tag": "archive/van-20261021/ccr-71397b02-lm6fid",
@@ -24,6 +24,16 @@
    "live_sha": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
    "needs_disposition": false,
    "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": null,
+   "evaluated_sha": null,
+   "evaluation_disposition": null,
+   "id": "ccr-9e07e1af-8mgz1p",
+   "kind": "branch",
+   "live_sha": "33c6e818d9611fd3b1b68a3341a51e61a92ead90",
+   "needs_disposition": true,
+   "state": "NEW_SINCE_EVALUATION"
   },
   {
    "archive_tag": "archive/van-20261021/chatgpt/allow-sandboxed-playwright-userns-20261008",
