@@ -18,13 +18,17 @@ jobs:
     environment: van-owner-release
     timeout-minutes: 45
     env:
-      VAN_OWNER_RELEASE_INPUT_DIR: ${{ runner.temp }}/van-owner-release-inputs
-      VAN_DEPLOYMENT_PROFILE_FILE: ${{ runner.temp }}/van-owner-release-inputs/android-owner-core.properties
       VAN_CONNECTIVITY_TRUSTED_KEYS: ${{ vars.VAN_CONNECTIVITY_TRUSTED_KEYS }}
       VAN_OWNER_CORE_PROFILE_BASE64: ${{ vars.VAN_OWNER_CORE_PROFILE_BASE64 }}
       VAN_OWNER_SIGNER_SHA256: ${{ vars.VAN_OWNER_SIGNER_SHA256 }}
     steps:
       - uses: actions/checkout@v4
+      - name: Bind private owner release paths on the runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "VAN_OWNER_RELEASE_INPUT_DIR=$RUNNER_TEMP/van-owner-release-inputs" >> "$GITHUB_ENV"
+          echo "VAN_DEPLOYMENT_PROFILE_FILE=$RUNNER_TEMP/van-owner-release-inputs/android-owner-core.properties" >> "$GITHUB_ENV"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
