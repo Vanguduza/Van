@@ -84,11 +84,28 @@ def test_trade_book_current_state_from_open_position(eurusd, tmp_path):
     cyc = DecisionCycle(cfg=cfg, adapter=paper, ledger=led, engine=fx_engine(cfg), cost_fn=lambda st: D("0.0003"), calendar=FX_CALENDAR, events=EventMatrix())
     bars = synthetic_bars()
     opened = None
+    states = []
     for i in range(60, len(bars)):
+        # P1-TRADE-EXEC-004: walk each bar's price path so a resting entry (the London
+        # breakout's STOP) can trigger; it used to "fill" at once above the market.
+        for px in (bars[i].open, bars[i].low, bars[i].high, bars[i].close):
+            cyc.mark(px - D("0.00005"), px + D("0.00005"), now_ms=bars[i].end_ms)
+        if opened is not None:
+            book = build_trade_book(led, view="current")
+            if book["current"]:
+                states.append(book["current"][0]["state"])
+                if states[-1] == "OPEN":
+                    break
+            continue
         r = cyc.step(bars[: i + 1], now_ms=bars[i].end_ms, last_quote_ms=bars[i].end_ms)
         if r.decision in ("APPROVED", "REDUCED"):
-            opened = r; break
+            opened = r
+            book = build_trade_book(led, view="current")
+            states.append(book["current"][0]["state"])
+            if states[-1] == "OPEN":
+                break
     assert opened is not None
+    assert states and states[-1] == "OPEN", states
     book = build_trade_book(led, view="current")
     assert book["counts"]["current"] == 1
     cur = book["current"][0]

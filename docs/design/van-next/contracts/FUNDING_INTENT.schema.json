@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "status": "PROPOSED_APPLICATION_CONTRACT_NOT_RUNTIME_SCHEMA",
+  "title": "VAN Next proposed provider funding intent draft",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "intent_id",
+    "owner_id",
+    "account_id",
+    "broker_account_ref",
+    "provider_id",
+    "operation",
+    "currency",
+    "amount_decimal",
+    "idempotency_key",
+    "status",
+    "quote_epoch"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "intent_id": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string"
+    },
+    "broker_account_ref": {
+      "type": "string"
+    },
+    "provider_id": {
+      "type": "string"
+    },
+    "operation": {
+      "enum": [
+        "DEPOSIT",
+        "WITHDRAW",
+        "TRANSFER"
+      ]
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3,8}$"
+    },
+    "amount_decimal": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+    },
+    "beneficiary_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 10
+    },
+    "status": {
+      "enum": [
+        "DRAFT",
+        "QUOTED",
+        "AWAITING_OWNER",
+        "AUTHORIZED",
+        "SUBMITTED",
+        "PENDING_SETTLEMENT",
+        "SETTLED",
+        "OUTCOME_UNKNOWN",
+        "FAILED",
+        "REJECTED",
+        "REVERSED",
+        "EXPIRED"
+      ]
+    },
+    "quote_epoch": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "source_receipt": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

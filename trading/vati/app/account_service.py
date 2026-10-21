@@ -61,6 +61,7 @@ from vati.observability.enhancement_metrics import (
     CORRELATION_MULTIPLIER, EXECUTION_FILL_PROBABILITY, EXECUTION_POLICY_SELECTED,
     PORTFOLIO_INCREMENTAL_ES,
 )
+from vati.risk.lockouts import LockoutPolicy, LossStreakGovernor, relative_top_state, restore_equity_baselines
 from vati.risk import KillSwitch, MarketIntegrityState, OpenPosition, RiskAuthority, RiskSnapshot, TradingMandate
 from vati.risk.contracts import Direction, KillSwitchTrigger, LossModel
 from vati.risk.dependency import PortfolioDependencyEngine
@@ -375,6 +376,7 @@ class AccountCoordinatorService:
             },
             learning=self.learning,
             cognition=self.cognition,
+            streaks=LossStreakGovernor.rebuild(LockoutPolicy(mandate.max_consecutive_losses), self._ledger.iter()),
             # GAP-F-003. The adaptive-management path is given the same gate
             # the opening path uses: the account's RiskAuthority, its mandate,
             # and the same snapshot builder. A size-changing adjustment is a
@@ -623,9 +625,22 @@ class AccountCoordinatorService:
 
     def _risk_store_ok(self) -> bool:
         try:
-            return bool(self._ledger.verify_chain()[0])
+            return bool(self._ledger.verify_incremental()[0])
         except Exception:
             return False
+
+    def _drawdown_top_state(self):
+        if self.mandate is None:
+            return None
+        states = []
+        for ev in self.evaluators.values():
+            reg = getattr(getattr(ev, "engine", None), "registry", None)
+            for sid in self.mandate.allowed_strategies:
+                try:
+                    states.append(reg.get(sid).state)
+                except Exception:  # noqa: BLE001
+                    continue
+        return relative_top_state(states)
 
     def _snapshot_for(self, candidate: CandidateOpportunity) -> RiskSnapshot:
         assert self.adapter is not None and self.account is not None
@@ -643,15 +658,22 @@ class AccountCoordinatorService:
             state is not None and
             state.event_window in (EventWindowState.PRE_BLACKOUT, EventWindowState.POST_BLACKOUT))
         integrity = state.integrity if state is not None else MarketIntegrityState.HALTED
+        streaks = getattr(self.lifecycle, "streaks", None) if self.lifecycle is not None else None
+        sid = getattr(candidate, "strategy_id", "")
+        streak = streaks.verdict(sid, now_ms) if (streaks is not None and sid) else None
         return RiskSnapshot(
             now_unix=now_ms // 1000, account_alias=acct.account_alias,
             account_verified=acct.verified, equity=acct.equity, balance=acct.balance,
             peak_equity=self.peak_equity, day_start_equity=self.day_start_equity,
             week_start_equity=self.week_start_equity,
             consecutive_losses=(
-                self.lifecycle.consecutive_losses
-                if self.lifecycle is not None else self.consecutive_losses
+                streak.losses if streak is not None
+                else self.lifecycle.consecutive_losses if self.lifecycle is not None
+                else self.consecutive_losses
             ),
+            loss_streak_lock=streak.lock if streak is not None else "",
+            loss_streak_multiplier=streak.risk_multiplier if streak is not None else Decimal("1"),
+            drawdown_top_state=self._drawdown_top_state(),
             open_positions=self._open_positions(), symbol_contract=contract,
             quote_age_ms=quote_age, max_quote_age_ms=self.cfg.max_quote_age_ms,
             broker_connected=hb.connected, reconciliation_ok=report.permit_new_orders,
@@ -737,7 +759,7 @@ class AccountCoordinatorService:
             event_proximity=state.event_window.value, direction=candidate.direction.value)
         policy_decision = self.policy.select(
             candidate_id=candidate.candidate_id, bucket=bucket,
-            event_state=state.event_window.value)
+            event_state=state.event_window.value, entry_type=candidate.entry_type)
         metrics.inc(
             EXECUTION_POLICY_SELECTED,
             account_alias=self.account.alias, symbol=candidate.symbol,
@@ -760,6 +782,7 @@ class AccountCoordinatorService:
             intent, decision, self.mandate, now_ms=self.clock(),
             stop_mode=StopMode.SOFTWARE if software else StopMode.VENUE,
             targets=targets, time_in_force=self.specs[candidate.symbol.upper()].time_in_force,
+            entry_type=candidate.entry_type,
             lease_epoch=lease_epoch, execution_policy_decision=policy_decision,
             market_reference=MarketReference(
                 last_price=state.features.close,
@@ -1084,7 +1107,12 @@ class AccountCoordinatorService:
         )
         if unresolved or not report.permit_new_orders:
             self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, now)
-        self.peak_equity = self.day_start_equity = self.week_start_equity = acct.equity
+        # P1-TRADE-RISK-005: a restart resumes the recorded high-water mark and, within the
+        # same day/week, the recorded loss baselines; it no longer re-baselines them.
+        peak, day, week = restore_equity_baselines(self._ledger.iter(), now)
+        self.peak_equity = max(peak, acct.equity) if peak is not None else acct.equity
+        self.day_start_equity = day if day is not None else acct.equity
+        self.week_start_equity = week if week is not None else acct.equity
         self._observe_owner_halt(now)
 
         self._ledger.append(make_event(

@@ -27,7 +27,7 @@ import time
 from dataclasses import dataclass, field
 from decimal import Decimal
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, ClassVar
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import PlainTextResponse
@@ -138,14 +138,43 @@ def format_commands(cmds: list[dict]) -> str:
 
 
 # ------------------------------------------------------------------ adapter (session side)
+#: MT5 `deviation` is in points (the symbol's last quoted digit). P1-TRADE-EXEC-002: this
+#: was `max_slippage * 10000`, which on a 5-digit EURUSD quote allowed 0.2 pip and on a
+#: 3-digit USDJPY quote 0.002 yen. Brokers that quote differently pass `point_sizes`.
+DEFAULT_POINT = Decimal("0.00001")
+THREE_DIGIT_POINT = Decimal("0.001")
+THREE_DIGIT_PREFIXES = ("XAU", "XAG")
+DEFAULT_DEVIATION_POINTS = 20
+
+
+def point_size(symbol: str, overrides: Optional[dict] = None) -> Decimal:
+    sym = symbol.upper()
+    if overrides and sym in overrides:
+        return Decimal(str(overrides[sym]))
+    if sym.endswith("JPY") or sym.startswith(THREE_DIGIT_PREFIXES):
+        return THREE_DIGIT_POINT
+    return DEFAULT_POINT
+
+
+def deviation_points(symbol: str, max_slippage: Optional[Decimal], overrides: Optional[dict] = None) -> int:
+    """Price-unit slippage bound → whole MT5 points, rounded down so it never widens."""
+    if max_slippage is None:
+        return DEFAULT_DEVIATION_POINTS
+    return max(0, int(max_slippage / point_size(symbol, overrides)))
+
+
 @dataclass
 class Mt5PullAdapter:
+    #: P1-TRADE-EXEC-004: the entry types this venue really executes (the EA picks LIMIT only if the comment contains "LIMIT", and the comment is "vati:<intent>", so every order is sent at market today).
+    #: The router refuses anything else instead of sending it as a different order.
+    supported_entry_types: ClassVar[tuple] = ("MARKET",)
     queue: BridgeQueue
     account_alias: str = "mt5_ea"
     venue: str = "mt5"
     timeout_s: float = 15.0
     clock: Callable[[], int] = field(default=lambda: int(time.time() * 1000))
     poll_s: float = 0.2
+    point_sizes: dict = field(default_factory=dict)
 
     def _state(self) -> dict:
         st = self.queue.state(self.account_alias)
@@ -189,7 +218,7 @@ class Mt5PullAdapter:
         except VenueUnavailable as exc:
             return rej(str(exc))
         body = {"symbol": cmd.symbol, "type": "BUY" if cmd.direction is Direction.LONG else "SELL", "volume": str(cmd.quantity), "price": str(cmd.entry_price), "sl": str(cmd.protective_stop), "tp": str(cmd.targets[0]) if cmd.targets else "",
-                "comment": f"vati:{cmd.trade_intent_id}"[:31], "magic": int(cmd.decision_hash[:8], 16) % 2_147_483_647, "deviation": str(int((cmd.max_slippage or Decimal("0.0002")) * 10000)), "order_type": cmd.entry_type}
+                "comment": f"vati:{cmd.trade_intent_id}"[:31], "magic": int(cmd.decision_hash[:8], 16) % 2_147_483_647, "deviation": str(deviation_points(cmd.symbol, cmd.max_slippage, self.point_sizes)), "order_type": cmd.entry_type}
         cid = self.queue.enqueue(self.account_alias, "ORDER_SEND", body, now_ms=now_ms)
         r = self._await(cid)
         if r is None:

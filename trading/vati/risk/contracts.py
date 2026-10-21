@@ -190,6 +190,13 @@ class RiskSnapshot:
     #: by the deterministic lifecycle supervisor and consumed only by RiskAuthority.
     preservation_blocks_new_risk: bool = False
     preservation_reason: str = ""
+    #: P1-TRADE-RISK-005 — recoverable lockouts (vati.risk.lockouts). A non-empty lock
+    #: refuses new risk for this strategy or the account; the multiplier (≤ 1) is the
+    #: probation size after a cooldown; the top state is the highest promotion state
+    #: among the mandate's strategies (None keeps the legacy CERTIFIED_LIVE floor).
+    loss_streak_lock: str = ""
+    loss_streak_multiplier: Decimal = Decimal("1")
+    drawdown_top_state: Optional["StrategyState"] = None
 
     @property
     def data_fresh(self) -> bool:

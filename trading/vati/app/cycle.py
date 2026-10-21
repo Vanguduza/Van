@@ -41,6 +41,7 @@ from vati.cognition.attribution import DecisionQualityInputs, DecisionQualityLed
 from vati.market_data.bars import Bar
 from vati.market_data.calendars import MarketCalendar
 from vati.observability import metrics
+from vati.risk.lockouts import DRAWDOWN_RESUME_EVENT, LockoutPolicy, LossStreakGovernor, relative_top_state, restore_peak_equity
 from vati.risk import Decision, KillSwitch, MarketIntegrityState, OpenPosition, RiskAuthority, RiskSnapshot, SymbolContract, TradingMandate
 from vati.risk.contracts import Direction, LossModel, StrategyState
 from vati.risk.serde import intent_to_dict, snapshot_to_dict
@@ -117,6 +118,12 @@ class DecisionCycle:
         self.day_start_equity = ZERO
         self.week_start_equity = ZERO
         self.consecutive_losses = 0
+        # P1-TRADE-RISK-005: lockouts and the high-water mark are rebuilt from the ledger,
+        # so a restart can neither reset a losing-streak lock nor re-baseline the peak.
+        self.streaks = LossStreakGovernor.rebuild(LockoutPolicy(self.mandate.max_consecutive_losses), ledger.iter())
+        restored_peak = restore_peak_equity(ledger.iter())
+        if restored_peak is not None and restored_peak > ZERO:
+            self.peak_equity = restored_peak
         self.integrity = MarketIntegrityState.NORMAL
         self.reviews: list = []
         self._closed_seen = 0
@@ -146,6 +153,11 @@ class DecisionCycle:
     def _open_positions(self) -> tuple[OpenPosition, ...]:
         out = []
         c = self.cfg.contract
+        # Resting entries reserve their worst-case risk until they fill or expire.
+        for row in self._entries.values():
+            if row.get("pending") and row.get("stop") is not None:
+                out.append(OpenPosition(row["symbol"], row["direction"], row["pending_quantity"], abs(row["entry"] - row["stop"]),
+                                        c.value_per_price_unit_per_lot, c.base_currency, c.quote_currency, "", True))
         for p in self.adapter.positions():
             stop = p.stop_price if p.stop_price is not None else self.protection.rules.get(p.position_id, None)
             stop_price = stop.stop if hasattr(stop, "stop") else stop
@@ -188,9 +200,14 @@ class DecisionCycle:
         The risk store is the ledger: without it the authority cannot know what is open,
         what has been lost today, or whether this decision has already been made. A ledger
         that will not answer is a risk store that is unavailable.
+
+        Incremental (P1-TRADE-LEDGER-001): a full verify from genesis on every decision
+        made decision latency grow with the ledger. `verify_incremental` checks only the
+        rows written since the last check, against an anchor that cannot move unnoticed,
+        and re-verifies from genesis at least hourly.
         """
         try:
-            return bool(self.ledger.verify_chain()[0])
+            return bool(self.ledger.verify_incremental()[0])
         except Exception:  # noqa: BLE001 — an unreadable ledger is not a healthy one
             return False
 
@@ -206,14 +223,33 @@ class DecisionCycle:
             return True
         return window in (EventWindowState.PRE_BLACKOUT, EventWindowState.POST_BLACKOUT)
 
-    def snapshot(self, *, now_ms: int, quote_age_ms: int) -> RiskSnapshot:
+    def _drawdown_top_state(self):
+        """Highest promotion state among the strategies this mandate allows."""
+        states = []
+        for sid in self.mandate.allowed_strategies:
+            try:
+                states.append(self.engine.registry.get(sid).state)
+            except Exception:  # noqa: BLE001 — a strategy not in the registry has no state
+                continue
+        return relative_top_state(states)
+
+    def snapshot(self, *, now_ms: int, quote_age_ms: int, strategy_id: str = "") -> RiskSnapshot:
         acct = self.adapter.sync_account()
         if self.peak_equity == ZERO:
-            self.peak_equity = self.day_start_equity = self.week_start_equity = acct.equity
+            self.peak_equity = acct.equity
+        if self.day_start_equity == ZERO:
+            self.day_start_equity = acct.equity
+        if self.week_start_equity == ZERO:
+            self.week_start_equity = acct.equity
         self.peak_equity = max(self.peak_equity, acct.equity)
+        streak = self.streaks.verdict(strategy_id, now_ms) if strategy_id else None
         hb = self.adapter.heartbeat(now_ms=now_ms)
         return RiskSnapshot(now_unix=now_ms // 1000, account_alias=acct.account_alias, account_verified=acct.verified, equity=acct.equity, balance=acct.balance,
-                            peak_equity=self.peak_equity, day_start_equity=self.day_start_equity, week_start_equity=self.week_start_equity, consecutive_losses=self.consecutive_losses,
+                            peak_equity=self.peak_equity, day_start_equity=self.day_start_equity, week_start_equity=self.week_start_equity,
+                            consecutive_losses=streak.losses if streak else 0,
+                            loss_streak_lock=streak.lock if streak else "",
+                            loss_streak_multiplier=streak.risk_multiplier if streak else Decimal("1"),
+                            drawdown_top_state=self._drawdown_top_state(),
                             open_positions=self._open_positions(), symbol_contract=self.cfg.contract, quote_age_ms=quote_age_ms, max_quote_age_ms=self.cfg.max_quote_age_ms,
                             broker_connected=hb.connected,
                             reconciliation_ok=self._reconciliation_ok(account_verified=acct.verified),
@@ -257,7 +293,7 @@ class DecisionCycle:
         if oa.intent is None:
             return CycleResult(state.as_of_ms, state.state_hash, oa.decision, oa.abstain_reason)
         intent = oa.intent
-        snap = self.snapshot(now_ms=now_ms, quote_age_ms=state.quote_age_ms)
+        snap = self.snapshot(now_ms=now_ms, quote_age_ms=state.quote_age_ms, strategy_id=intent.strategy_id)
         decision = self.authority.evaluate_safe(intent, snap)
         self._log(EventKind.RISK_DECISION, {"inputs": {"intent": intent_to_dict(intent), "snapshot": snapshot_to_dict(snap), "mandate": cfg.mandate_dict}, "decision": decision.to_dict()}, now_ms=now_ms, corr=intent.trade_intent_id)
         metrics.inc("vati_decisions_total", outcome=decision.decision.value)
@@ -295,11 +331,12 @@ class DecisionCycle:
                 candidate_id=intent.trade_intent_id,
                 bucket=execution_bucket,
                 event_state=state.event_window.value,
+                entry_type=oa.entry_type,
             )
             rec = self.router.execute(
                 intent, decision, self.mandate, now_ms=now_ms,
                 stop_mode=StopMode.SOFTWARE if cfg.software_stops else StopMode.VENUE,
-                targets=targets, time_in_force=cfg.time_in_force, entry_type="LIMIT",
+                targets=targets, time_in_force=cfg.time_in_force, entry_type=oa.entry_type,
                 execution_policy_decision=policy_decision,
                 market_reference=MarketReference(
                     last_price=state.features.close,
@@ -311,6 +348,28 @@ class DecisionCycle:
         except RouterError as exc:
             self._log(EventKind.SESSION, {"router_refused": str(exc)}, now_ms=now_ms, corr=intent.trade_intent_id)
             return CycleResult(state.as_of_ms, state.state_hash, "ROUTER_REFUSED", str(exc), decision.approved_size)
+        if rec.status == "ACCEPTED" and rec.reject_reason == "PENDING" and rec.filled_qty == ZERO:
+            # P1-TRADE-EXEC-004: a resting entry (an untriggered STOP, a LIMIT away from the
+            # market) is not a position. It reserves its worst-case risk until it fills or
+            # expires (_open_positions), and is excluded from venue reconciliation.
+            self._entries[intent.trade_intent_id] = {
+                "pending": True, "open": False, "entry": intent.entry, "stop": intent.stop,
+                "direction": intent.direction, "strategy_id": intent.strategy_id, "cost_pct": cost,
+                "decision_price": intent.entry, "quantity": ZERO, "pending_quantity": decision.approved_size,
+                "broker_order_id": rec.broker_order_id, "broker_position_id": "", "opened_ms": now_ms,
+                "targets": tuple(targets), "original_approved_risk_pct": decision.approved_risk_pct,
+                "protective_stop_confirmed": False, "event_certified": bool(intent.is_event_certified),
+                "execution_policy_applied": True, "regime": state.regime.trend.value,
+                "session": state.session.value, "symbol": cfg.symbol,
+                "opened_in_blackout": state.event_window.value in ("PRE_BLACKOUT", "POST_BLACKOUT"),
+                "best_price": intent.entry, "worst_price": intent.entry,
+                "event_window": state.event_window.value,
+                # In memory only: the fill seals the thesis from the approval that admitted it.
+                "_approval": (intent, decision, state, tuple(targets)),
+            }
+            self._log(EventKind.SESSION, {"event": "ENTRY_RESTING", "entry_type": oa.entry_type, "order": rec.broker_order_id},
+                      now_ms=now_ms, corr=intent.trade_intent_id)
+            return CycleResult(state.as_of_ms, state.state_hash, decision.decision.value, "pending", decision.approved_size)
         if rec.status in ("FILLED", "PARTIAL", "ACCEPTED", "OWNER_EXECUTED"):
             entry_price = rec.average_fill or intent.entry
             self._entries[intent.trade_intent_id] = {
@@ -333,24 +392,23 @@ class DecisionCycle:
                 "symbol": cfg.symbol,
             }
             self._seal_thesis(intent, decision, state, targets, entry_price, now_ms)
-            if rec.average_fill is not None and rec.filled_qty > ZERO:
-                tca = compute_tca(rec, direction=intent.direction, qty=rec.filled_qty, value_per_unit=cfg.contract.value_per_price_unit_per_lot if cfg.contract.loss_model is LossModel.STOP_DISTANCE else Decimal(1), modelled_cost_pct=cost)
-                tca_payload = tca.as_dict()
-                if self.learning is not None:
-                    tca_payload |= {
-                        "learning_environment": self.learning.environment.value,
-                        "broker": self.learning.broker,
-                        "symbol": cfg.symbol,
-                        "session": state.session.value,
-                        "event_window": state.event_window.value,
-                        "rejected": False,
-                    }
-                self._log(EventKind.TCA_RECORD, tca_payload, now_ms=now_ms, corr=intent.trade_intent_id)
-                self._entries[intent.trade_intent_id]["cost_ratio"] = tca.cost_ratio
-                if self.learning is not None:
-                    self.learning.on_tca(self.ledger, trade_intent_id=intent.trade_intent_id, symbol=cfg.symbol, session=state.session.value, event_window=state.event_window.value, cost_ratio=tca.cost_ratio, slippage=tca.slippage)
-                    self.engine.m.broker_liquidity[cfg.symbol] = self.learning.broker_liquidity(cfg.symbol)
+            self._record_tca(rec, intent.direction, cost, state.session.value, state.event_window.value, now_ms=now_ms)
         return CycleResult(state.as_of_ms, state.state_hash, decision.decision.value, "", decision.approved_size)
+
+    # ------------------------------------------------- owner-signed recovery (A4)
+    def reset_loss_streak(self, scope: str, *, owner_signature_ref: str, authority, now_ms: int) -> None:
+        """Clear a losing-streak suspension. `scope` is a strategy id or ACCOUNT_SCOPE."""
+        authority.verify(owner_signature_ref, act="loss-streak-reset", subject=f"{self.cfg.account_alias}:{scope}", now_unix=now_ms // 1000)
+        self._log(EventKind.SESSION, {**self.streaks.reset(scope), "owner_signature_ref": owner_signature_ref}, now_ms=now_ms)
+
+    def resume_after_drawdown(self, *, owner_signature_ref: str, authority, now_ms: int) -> None:
+        """Owner decision to resume after the suspending drawdown tier: re-baseline the peak."""
+        authority.verify(owner_signature_ref, act="drawdown-resume", subject=self.cfg.account_alias, now_unix=now_ms // 1000)
+        equity = self.adapter.sync_account().equity
+        old = self.peak_equity
+        self.peak_equity = equity
+        self._log(EventKind.SESSION, {"event": DRAWDOWN_RESUME_EVENT, "old_peak_equity": str(old), "new_peak_equity": str(equity),
+                                      "owner_signature_ref": owner_signature_ref}, now_ms=now_ms)
 
     # ------------------------------------------------------- marks and exits
     def mark(self, bid: Decimal, ask: Decimal, *, now_ms: int) -> None:
@@ -363,9 +421,59 @@ class DecisionCycle:
         if hasattr(self.adapter, "mark"):
             receipts += self.adapter.mark(cfg.symbol, bid, ask, now_ms=now_ms)  # type: ignore[attr-defined]
         for r in receipts:
+            row = self._entries.get(r.trade_intent_id)
+            if row is not None and row.get("pending"):
+                self._settle_pending(r, row, now_ms=now_ms)
+                continue
             if r.status == "FILLED" and r.trade_intent_id in self._entries and r.reject_reason not in ("TRAIL", "BREAK_EVEN"):
                 self._on_close(r.trade_intent_id, r.average_fill, r.reject_reason, now_ms)
                 self.protection.forget(r.broker_position_id)
+
+    def _record_tca(self, rec, direction, cost: Decimal, session: str, event_window: str, *, now_ms: int) -> None:
+        cfg = self.cfg
+        if rec.average_fill is None or rec.filled_qty <= ZERO:
+            return
+        tca = compute_tca(rec, direction=direction, qty=rec.filled_qty, value_per_unit=cfg.contract.value_per_price_unit_per_lot if cfg.contract.loss_model is LossModel.STOP_DISTANCE else Decimal(1), modelled_cost_pct=cost)
+        tca_payload = tca.as_dict()
+        if self.learning is not None:
+            tca_payload |= {
+                "learning_environment": self.learning.environment.value,
+                "broker": self.learning.broker,
+                "symbol": cfg.symbol,
+                "session": session,
+                "event_window": event_window,
+                "rejected": False,
+            }
+        self._log(EventKind.TCA_RECORD, tca_payload, now_ms=now_ms, corr=rec.trade_intent_id)
+        self._entries[rec.trade_intent_id]["cost_ratio"] = tca.cost_ratio
+        if self.learning is not None:
+            self.learning.on_tca(self.ledger, trade_intent_id=rec.trade_intent_id, symbol=cfg.symbol, session=session, event_window=event_window, cost_ratio=tca.cost_ratio, slippage=tca.slippage)
+            self.engine.m.broker_liquidity[cfg.symbol] = self.learning.broker_liquidity(cfg.symbol)
+
+    def _settle_pending(self, r, row: dict, *, now_ms: int) -> None:
+        """A resting entry filled (becomes a position) or expired (reserves nothing)."""
+        self._log(EventKind.EXECUTION_RECEIPT, {k: (v.value if hasattr(v, "value") else v) for k, v in asdict(r).items()},
+                  now_ms=now_ms, corr=r.trade_intent_id)
+        if r.status == "FILLED" and r.reject_reason == "PENDING_FILLED":
+            row.update({"pending": False, "open": True, "entry": r.average_fill, "quantity": r.filled_qty,
+                        "broker_position_id": r.broker_position_id,
+                        "protective_stop_confirmed": bool(r.protective_stop_confirmed or self.cfg.software_stops),
+                        "best_price": r.average_fill, "worst_price": r.average_fill})
+            if row.get("stop") is not None:
+                self.router.protection.register(r.broker_position_id, symbol=self.cfg.symbol, direction=row["direction"], entry=r.average_fill,
+                                                stop=row["stop"], target=row["targets"][0] if row.get("targets") else None, opened_ms=now_ms,
+                                                software_stop=bool(self.cfg.software_stops))
+            self._log(EventKind.SESSION, {"event": "ENTRY_FILLED_FROM_REST", "fill": str(r.average_fill), "position": r.broker_position_id},
+                      now_ms=now_ms, corr=r.trade_intent_id)
+            approval = row.pop("_approval", None)
+            if approval is not None:
+                intent, decision, state, targets = approval
+                self._seal_thesis(intent, decision, state, targets, r.average_fill, now_ms)
+            self._record_tca(r, row["direction"], row["cost_pct"], row["session"], row.get("event_window", ""), now_ms=now_ms)
+        elif r.status in ("EXPIRED", "CANCELLED", "REJECTED"):
+            self._entries.pop(r.trade_intent_id, None)
+            self._log(EventKind.SESSION, {"event": "ENTRY_REST_ENDED", "status": r.status, "reason": r.reject_reason},
+                      now_ms=now_ms, corr=r.trade_intent_id)
 
     # ------------------------------------------ active-trade intelligence
     def _seal_thesis(self, intent, decision, state, targets, entry_price: Decimal,
@@ -415,6 +523,8 @@ class DecisionCycle:
     def _review_open_theses(self, bid: Decimal, ask: Decimal, *, now_ms: int) -> None:
         """Assess every open position's claim and act on what the policy allows."""
         for intent_id, row in list(self._entries.items()):
+            if row.get("pending"):
+                continue   # a resting entry is not a position yet
             thesis = self.thesis.thesis_for(intent_id)
             if thesis is None:
                 continue
@@ -566,7 +676,9 @@ class DecisionCycle:
             for c in reversed(closed):
                 if c["intent"] == intent_id:
                     pnl = c["pnl"]; break
-        self.consecutive_losses = self.consecutive_losses + 1 if pnl < ZERO else 0
+        for lock_event in self.streaks.on_close(e["strategy_id"], pnl, now_ms):
+            self._log(EventKind.SESSION, lock_event, now_ms=now_ms, corr=intent_id)
+        self.consecutive_losses = self.streaks.verdict(e["strategy_id"], now_ms).losses
         rv = review_trade(trade_intent_id=intent_id, strategy_id=e["strategy_id"], entry=e["entry"], exit_price=exit_price, stop=e["stop"] or e["entry"], direction_long=e["direction"] is Direction.LONG,
                           pnl=pnl, thesis_correct=pnl > ZERO, process_ok=True, exit_reason=reason)
         self.reviews.append(rv)
