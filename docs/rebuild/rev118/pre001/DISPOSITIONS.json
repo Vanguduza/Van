@@ -1,0 +1,20 @@
+{
+ "schema": "van.rebuild.pre001.dispositions/1",
+ "rule": "Hand-authored judgements only. Each entry needs a decision and evidence; INFERRED judgements may not claim OBSERVED grade. Rows absent here remain OPEN and block PRE-001.",
+ "refs": {
+  "consolidation/opus-clean-rev118-20261021": {
+   "decision": "SOURCE_BASELINE_OF_REV118_IMPLEMENTATION",
+   "basis": "OBSERVED",
+   "evidence_grade": "OBSERVED",
+   "evidence": "Created after the 70-branch evaluation as its integration result (CONSOLIDATION_STATE.json, docs/consolidation/VALIDATION.md). Working branch ccr-9e07e1af-8mgz1p descends from its tip b02075f327ea8180ab6d269eba358cf8c5479878 (git merge-base --is-ancestor)."
+  },
+  "PR-104": {
+   "decision": "SAME_HEAD_AS_CONSOLIDATION_BRANCH",
+   "basis": "OBSERVED",
+   "evidence_grade": "OBSERVED",
+   "evidence": "refs/pull/104/head = b02075f327ea8180ab6d269eba358cf8c5479878 = consolidation/opus-clean-rev118-20261021 tip (REMOTE_REFS_20261021.txt). Its 'not preserved' blobs are the consolidation's own new content, preserved by that branch which postdates the evaluation."
+  }
+ },
+ "overlap": {},
+ "source": {}
+}

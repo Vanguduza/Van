@@ -1,0 +1,152 @@
+{
+ "schema": "van.rebuild.execution-ledger/1",
+ "purpose": "Compact continuation index for the Rev1.18 programme. Subordinate to the package plan; never a second roadmap.",
+ "canonical_inputs": {
+  "package": "docs/review-inputs/van-rev115/package",
+  "package_tree": "ac0226a22a95f51642cfeb37b3709b40f7cacf10",
+  "archive_sha256": "6c7c7c1cb4fbd4748c0d63ceb2add9bd460778b66fb3b2302e16de09ac3a57a8",
+  "blueprint_delivery_commit": "3c3379bd791f7bda7ab66c21bba550d6077ba853",
+  "plan_revision": "1.18",
+  "plan": "plan/DEVELOPMENT_PLAN.json",
+  "effective_tests": "verification/EFFECTIVE_TEST_CONTRACTS_REV118.json",
+  "instructions": [
+   "CLAUDE.md",
+   "CONSOLIDATION_STATE.json",
+   "docs/consolidation/START_HERE.md",
+   "docs/consolidation/OPUS_BUILD_PROMPT.md"
+  ]
+ },
+ "source_baseline": {
+  "branch": "consolidation/opus-clean-rev118-20261021",
+  "commit": "b02075f327ea8180ab6d269eba358cf8c5479878",
+  "working_branch": "ccr-9e07e1af-8mgz1p"
+ },
+ "scope_counts": {
+  "requirements": 324,
+  "acceptance_identities": 1610,
+  "units": 131,
+  "backend_units": 82,
+  "backend_verification_units": 12,
+  "frontend_units": 23,
+  "contexts": 234,
+  "owner_actions": 349,
+  "features": 93,
+  "source_atoms": 171,
+  "truth_atoms": 22,
+  "domain_scenarios": 72
+ },
+ "status_vocabulary": [
+  "NOT_STARTED",
+  "IN_PROGRESS",
+  "SOURCE_IMPLEMENTED",
+  "SOURCE_TESTED",
+  "INTEGRATED",
+  "DEPLOYED",
+  "LIVE_VERIFIED",
+  "QUALIFIED",
+  "OWNER_ACCEPTED",
+  "BLOCKED"
+ ],
+ "units": {
+  "PRE-001": {
+   "packet": "VAN-PKT-001",
+   "binding": {
+    "plan_revision": "1.18",
+    "unit_id": "PRE-001",
+    "scope_digest": "package tree ac0226a2",
+    "source_commit": "f3cf8301df6f73f9f88dd418f23ae63ce64649bf"
+   },
+   "status": "IN_PROGRESS",
+   "evidence": "docs/rebuild/rev118/pre001/STATUS.json",
+   "open": {
+    "refs": 19,
+    "overlap": 27,
+    "source_files_unclassified": "1575/1575",
+    "trace_findings": 5
+   },
+   "acceptance": {
+    "T-NX-071": "NOT_RUN_AS_ACCEPTANCE: oracle exists (pre001.py check), rows unclassified",
+    "T-BF-015": "oracle self-tested 10/10; independent verification pending",
+    "T-VAN-CX-002-NEG": "induced cases rejected (selftest)",
+    "T-HVA-002-POS/NEG": "overlap oracle built; 27 rows pending review"
+   },
+   "exit_requires": "all rows dispositioned with evidence, then INDEPENDENT review of the no-loss mapping (not self-issued)"
+  },
+  "PRE-002": {
+   "status": "NOT_STARTED",
+   "depends": [
+    "PRE-001"
+   ]
+  },
+  "PRE-003": {
+   "status": "BLOCKED",
+   "depends": [
+    "PRE-002"
+   ],
+   "blocker": "BLK-001"
+  },
+  "ALL_BE_BQ_UX_FE_QA_REL": {
+   "status": "NOT_STARTED",
+   "reason": "every backend unit depends on PRE-003"
+  }
+ },
+ "blockers": [
+  {
+   "id": "BLK-001",
+   "what": "PRE-003 independent F15 issuer and valid owner signature (OQ-05)",
+   "blocks": "all 94 backend/backend-verification units and everything after",
+   "needed_from": "owner + trusted independent verifier via native DIAL",
+   "not_substitutable": "pack checker, generated PASS or this agent"
+  },
+  {
+   "id": "BLK-002",
+   "what": "Trusted-base Project Truth bootstrap absent on main (PR #94); PR #104 ledger job fails before judging",
+   "blocks": "main admission of any branch",
+   "needed_from": "owner/code-owner adoption through PR #94 policy"
+  },
+  {
+   "id": "BLK-003",
+   "what": "Native DIAL Oracle/Commander/Artemis tools not exposed in this session; adb MCP failed (ENOENT)",
+   "blocks": "native identity readback, device evidence, S24 acceptance",
+   "needed_from": "enrolled dial-oracle-control / Artemis connection"
+  },
+  {
+   "id": "BLK-004",
+   "what": "21 owner questions unresolved in plan.owner_questions (START gates on BE-004/006/007/009/010/011/014/016/017/019/022, UX-002)",
+   "blocks": "those units' START even after F15",
+   "needed_from": "owner decisions"
+  }
+ ],
+ "amendment_proposals": [
+  {
+   "id": "AP-001",
+   "finding": "Units BQ-003, BQ-004, QA-002, QA-003, REL-002 own zero acceptance identities (plan acceptance_test_ids empty; effective registry has no test with these units). The package's verify_review_contracts.py 79/79 does not detect it.",
+   "evidence": "docs/rebuild/rev118/pre001/TRACE_CHECK.json",
+   "proposal": "Bind explicit POS/NEG/REC acceptance identities to each unit (or record that each aggregates named existing IDs) through an admitted amendment; package left unchanged",
+   "status": "PROPOSED_NOT_ADMITTED"
+  }
+ ],
+ "delegation": {
+  "model_routing_available": "Agent tool with subagent types; no smaller-model capability trial performed",
+  "delegated_packets": [],
+  "note": "All work in this packet performed directly by the lead."
+ },
+ "checkpoint": {
+  "updated_utc": "2026-10-21",
+  "branch": "ccr-9e07e1af-8mgz1p",
+  "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
+  "background_jobs": "none",
+  "last_validation": [
+   "package documentary verifiers 10/10 exit 0",
+   "tools/consolidation/verify.py zero findings",
+   "pre001.py check: no drift",
+   "pre001.py selftest 10/10",
+   "pytest tests/rebuild 3 passed"
+  ],
+  "environment_notes": [
+   "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
+   "pytest from backend/requirements.txt in a venv"
+  ],
+  "next_action": "PRE-001: disposition the 19 unpreserved PR-only heads (start with PR-11..13 backend/tests/test_google_mesh.py and PR-22/46/47 Android content), review the 27 overlap rows (main symbols absent at HEAD) caller-by-caller, then classify source files by owning unit with evidence."
+ }
+}

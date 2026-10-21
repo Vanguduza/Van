@@ -1,0 +1,77 @@
+{
+ "artefact_sha256": {
+  "OVERLAP_PRESERVATION.json": "60ba3000ebba29503c078dc90ab9612dfef9550947f6249363117b060c0236f7",
+  "REF_INVENTORY.json": "5ee6c41cc3ce125a5e598bdd7c5a27d7b558fde9832828629f169bd6279a9a2a",
+  "SOURCE_LEDGER.json": "77b3cd76d1ec155e14bbb5d82bf984901fcaaff9a629588895d5b95887dc0a6a",
+  "TRACE_CHECK.json": "28db35bb6f2a86088d19cac4c2f96fc6f1b3988deb0d5200f57e974ec6759983"
+ },
+ "disposition_problems": [],
+ "note": "EVIDENCE_COMPLETE is not PRE-001 acceptance: the exit requires independent review of the no-loss mapping.",
+ "overlap_open": {
+  "count": 27,
+  "ids": [
+   "OVL:android/app/src/main/java/com/dial/van/browser/BrowserActivity.kt:main",
+   "OVL:android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:main",
+   "OVL:android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:main",
+   "OVL:android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:main",
+   "OVL:android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:main",
+   "OVL:android/app/src/main/java/com/dial/van/connectivity/ProvisioningPayload.kt:main",
+   "OVL:android/app/src/main/java/com/dial/van/notification/NotificationPolicy.kt:main",
+   "OVL:android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt:main",
+   "OVL:android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:main",
+   "OVL:android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt:main",
+   "OVL:android/app/src/main/java/com/dial/van/voice/SherpaSpeakerSimilarity.kt:main",
+   "OVL:android/app/src/main/java/com/dial/van/voice/VoiceEdge.kt:main",
+   "OVL:android/app/src/main/java/com/dial/van/voice/WakeAcknowledgement.kt:main",
+   "OVL:android/verification/src/test/kotlin/com/dial/van/onboarding/OnboardingPlanTest.kt:main",
+   "OVL:backend/tests/test_automation_api.py:main",
+   "OVL:backend/tests/test_automation_compiler.py:main",
+   "OVL:backend/tests/test_automation_dispatch.py:main",
+   "OVL:backend/tests/test_automation_health_api.py:main",
+   "OVL:backend/tests/test_browser_api.py:main",
+   "OVL:backend/tests/test_browser_escalation_boundary.py:main",
+   "OVL:backend/tests/test_interactive_browser_api.py:main",
+   "OVL:backend/tests/test_knowledge_runtime.py:main",
+   "OVL:backend/tests/test_recovery_matrix.py:main",
+   "OVL:backend/tests/test_visual_acceptance.py:main",
+   "OVL:backend/van_gateway/automation/compiler.py:main",
+   "OVL:backend/van_gateway/browser/api.py:main",
+   "OVL:backend/van_gateway/decisions/service.py:main"
+  ],
+  "of": 27
+ },
+ "packet": "VAN-PKT-001",
+ "refs_open": {
+  "count": 19,
+  "ids": [
+   "PR-4",
+   "PR-11",
+   "PR-12",
+   "PR-13",
+   "PR-14",
+   "PR-15",
+   "PR-16",
+   "PR-17",
+   "PR-18",
+   "PR-22",
+   "PR-35",
+   "PR-38",
+   "PR-40",
+   "PR-41",
+   "PR-43",
+   "PR-44",
+   "PR-45",
+   "PR-46",
+   "PR-47"
+  ],
+  "of": 175
+ },
+ "source_head": "f3cf8301df6f73f9f88dd418f23ae63ce64649bf",
+ "source_unclassified": {
+  "count": 1575,
+  "of": 1575
+ },
+ "status": "OPEN",
+ "trace_findings": 5,
+ "unit": "PRE-001"
+}
