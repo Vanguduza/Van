@@ -24,6 +24,8 @@
 
 | Input | SHA-256 |
 |---|---|
+| `design/DARK_THEME_READABILITY_AMENDMENT_20261021.md` | `76fdb8794c01512c13adaa75da53527f71cf204767f9a97207105641e86dc21c` |
+| `design/THEME_READABILITY_CONTEXT_BINDINGS.json` | `5441026e97f2826f1e655ca7772019d401580a24d6be59bbe22852f3e367689c` |
 | `traceability/REV117_REQUIREMENTS.json` | `258bf0cda757466a6abad6f6a4117302e3cf7d89a2ce872546e64e88f7161197` |
 | `verification/REV117_ACCEPTANCE_CONTRACTS.json` | `16c1f2caf7f4278fcfbfaf5d47e0a350a377af6cf0b094d3959347dc84c75b50` |
 | `contracts/self_optimization/MODEL_USE_CONTRACT.json` | `cfc3997aa11d30f4818bfbb6f1aa02514137c7807028b9c20ce612f97786c628` |
@@ -35,16 +37,16 @@
 | `contracts/self_optimization/EXPERIENCE_LEARNING_CONTRACT.json` | `eb48b6b55c516d7978da61f2b5dff30290f54ca9564814015a1281b4776d01fc` |
 | `contracts/self_optimization/EXPERIENCE_LEARNING_RECORDS.schema.json` | `322e61e10dc06ea693344e47b07e1d278f4eb5f3d00a7de387ffb82c4895d1ea` |
 | `design/EXPERIENCE_LEARNING_CONTEXT_BINDINGS.json` | `b5b5d6005251814e29feae88632d4b68c80c35016c4889135d256f5a3cde611b` |
-| `CANONICAL_AUTHORITY.json` | `6d7973bc8085411e40fdbfe1e385d11e21dd848a6203dafbc8b46471e812353e` |
-| `plan/DEVELOPMENT_PLAN.json` | `e1569b7b503bc1dec0338b3ea200dfa983584261b0e4b9be85e8e7d77a37a83b` |
+| `CANONICAL_AUTHORITY.json` | `853812a98571cc4bc3fddc501081b9c99ff4354215b824052373bb833dcb354e` |
+| `plan/DEVELOPMENT_PLAN.json` | `9062ab65e0dd06d9a381cdf86a08a28723c74829daa95301461b597f2237bc0a` |
 | `traceability/REQUIREMENTS_AND_DU_MAPPING.json` | `ce212f40d89030947edcd67d0a9b1cbf9dae59c54ff095110ef618a86f73fe27` |
 | `contracts/BACKEND_SERVICE_CATALOG.json` | `9035c8969077578a2ee96fe7c87c1d8677c0c28b21d7aa342a7065c037b82892` |
 | `verification/TEST_CONTRACTS.json` | `8516439e5f58193efcd1df9f8c09f5f189126be978e29961261dea96808aaf62` |
-| `design/ALL_SURFACE_CONTRACTS.json` | `e592902fffee51c8001a09b3d83e53fea80ee112b94cda2acc6491893221571f` |
+| `design/ALL_SURFACE_CONTRACTS.json` | `f971bbb2dc4e3efccb7b8590f149a25a5deb04165d8fb6fd0337572565f4347a` |
 | `traceability/LEGACY_349_ACTIONS.json` | `4fe9dd0b7050203e0cac8a479c0a21993b890082aed15b28ab85250410c7830d` |
 | `traceability/FORECAST_PACKET_CROSSWALK.json` | `135e1690f920427a9e79c1554064ed3a30b29a3af50825b388adccb4f66858b5` |
-| `plan/PROPOSED_SCOPE_LOCK.json` | `3984afad22521e56123fb4706f7c7aa9c89e0084d1cecb965e50c4430b541d9e` |
-| `plan/render_plan.py` | `13a5af38fc58d5d5526a8c145e140d931fb2fa80bf0426d6dee16a66eccf0cd4` |
+| `plan/PROPOSED_SCOPE_LOCK.json` | `274ed0315e097e6d153ba25bb88375902744bb28ea13ef89de46172f681d90d3` |
+| `plan/render_plan.py` | `e0bf2d3e19cd0e88d2e0df19060ea14c61420fe80fd67e592bd39f949ff7e933` |
 | `VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md` | `0d99a68ead6909821a18a0887a328a6eadc4ab53e544df6ec816d4df45747557` |
 | `contracts/self_optimization/STATE_MACHINES.json` | `5fec962405fe8a82febfb5d2b3febec31c729fd2002982ecb3a65033f4080303` |
 | `contracts/self_optimization/PROOF_PREDICATES.json` | `bfeff228238e354995892dd614126cb57bf9b75cfa4638b606c894689ec092f3` |
@@ -57,7 +59,7 @@
 | `review/DESIGN_CHANGE_PROPOSALS.json` | `565dd16483329788978bf91259b3e3e34b29eeff9cf2d446511bb7eac968d454` |
 | `review/SOURCE_ADMISSION_CROSSWALK.json` | `ba2313efc061a98cc6c9821e843b819bbd91b495f773dcaeb324e88ebd6ee073` |
 
-**Aggregate input digest:** `1724bd78d2f1f36678e07c8b26d93d4652e40f1ee6cf0fb67c08591fbc2584b8`. Deterministic canonical JSON of the filename→SHA-256 map, UTF-8; no timestamps in generated output.
+**Aggregate input digest:** `7cc1d48828f9189d989a37a1d6e6d8f16f8b42503e974200fc9ec04d2506322c`. Deterministic canonical JSON of the filename→SHA-256 map, UTF-8; no timestamps in generated output.
 
 ## 3. Entire packet sequence
 
@@ -3890,7 +3892,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001.
 **Requirement owners:** VAN-NX-001, VAN-NX-030, VAN-CX-017, VAN-LEAN-004, VAN-EL-007.
 
-**Exit contract:** Consume complete capability catalog and every context/action; review whole-app route and progressive disclosure, no five-flow scope ceiling. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.
+**Exit contract:** Consume complete capability catalog and every context/action; review whole-app route and progressive disclosure, no five-flow scope ceiling. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - Derive the complete owner journey and navigational hierarchy only from BG-001 capability/action contracts; preserve 78 source UX flows
@@ -3918,7 +3920,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-001.
 **Requirement owners:** VAN-NX-001, VAN-NX-002, VAN-NX-030, VAN-CX-020, VAN-LEAN-006.
 
-**Exit contract:** Owner reviews native prototypes in both themes; approved tokens/geometry/material/motion/accessibility; no old UI import or regenerated replacement of locked images. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.
+**Exit contract:** Owner reviews native prototypes in both themes; approved tokens/geometry/material/motion/accessibility; no old UI import or regenerated replacement of locked images. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - Locked graphite dark and silver porcelain light style accepted through native Compose component/state goldens; match material, not only palette
@@ -3941,7 +3943,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-001, UX-002.
 **Requirement owners:** VAN-NX-003, VAN-NX-BF-007, VAN-CX-017, VAN-CX-020, VAN-LEAN-004.
 
-**Exit contract:** Each retained/additive surface has complete backend fields/actions/states, matching design family, dark/light acceptance and physical test plan; no action omitted for visual simplicity. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.
+**Exit contract:** Each retained/additive surface has complete backend fields/actions/states, matching design family, dark/light acceptance and physical test plan; no action omitted for visual simplicity. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - All 234 contexts receive source-bound states, role-specific material/geometry and progressive disclosure; no second dashboard in Quick Hub
@@ -3968,7 +3970,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003.
 **Requirement owners:** VAN-NX-003, VAN-NX-023, VAN-NX-040, VAN-NX-039, VAN-NX-029.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - Reactive typed store from actual admitted backend, source age and unknown, no visual-origin execution
@@ -3988,7 +3990,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001.
 **Requirement owners:** VAN-NX-001, VAN-NX-002, VAN-NX-023, VAN-NX-039, VAN-NX-029, VAN-NX-030, VAN-LEAN-006.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - Dual-theme typed tokens, native material recipes, source asset pins, anti-legacy import and contrast checker
@@ -4007,7 +4009,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002.
 **Requirement owners:** VAN-NX-003.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **Planned test obligations (all NOT_RUN):**
 - `T-FEATURE-HOME-07` — Home state fallbacks: every permitted state/action reaches its backend outcome, denial and recovery; both-theme visual proof.
@@ -4019,7 +4021,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003.
 **Requirement owners:** VAN-NX-004, VAN-NX-005, VAN-NX-007, VAN-NX-063.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - Home orb and compact sheet have independent accessible status and no state legend, no unverified financial numbers
@@ -4076,7 +4078,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003.
 **Requirement owners:** VAN-NX-006.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - Floating VAN retains all signed, dock, drag, restore, voice and work modes in separate tactile presentation
@@ -4106,7 +4108,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003.
 **Requirement owners:** VAN-NX-008, VAN-NX-011, VAN-NX-040, VAN-NX-047, VAN-CRYPTO-014.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - Trading Home includes five owner-approved destinations while Account/Risk/Positions remain reachable
@@ -4146,7 +4148,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003.
 **Requirement owners:** VAN-NX-009, VAN-NX-041, VAN-NX-042, VAN-CRYPTO-014.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - Precision chart inset and tactile controls are segregated; renderer is untrusted display, no broker credentials
@@ -4180,7 +4182,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003, FE-007.
 **Requirement owners:** VAN-NX-043, VAN-NX-044, VAN-CRYPTO-014.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - Drawings, indicators, replay share versioned owner data; historical replay cannot reach order endpoints
@@ -4220,7 +4222,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003.
 **Requirement owners:** VAN-NX-010, VAN-NX-027, VAN-NX-031, VAN-NX-045, VAN-NX-061, VAN-NX-062, VAN-NX-074, VAN-NX-075, VAN-NX-076, VAN-NX-077, VAN-SO-038, VAN-CRYPTO-014.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - Full order lifecycle and protective SL/TP readback with exact owner action sheets
@@ -4306,7 +4308,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003.
 **Requirement owners:** VAN-NX-048, VAN-NX-049, VAN-NX-050, VAN-NX-051, VAN-NX-055, VAN-NX-056, VAN-NX-057, VAN-NX-059, VAN-NX-064.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - Accounts/Funds provider capability and scope explicit, authenticated hosted flows not fake app-side fund transfers
@@ -4374,7 +4376,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003.
 **Requirement owners:** VAN-NX-010, VAN-NX-051, VAN-NX-052, VAN-NX-059, VAN-NX-061, VAN-NX-062, VAN-NX-074, VAN-NX-076, VAN-NX-077, VAN-CRYPTO-014, VAN-EL-007.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - VAN-CRYPTO-014: Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states.
@@ -4403,7 +4405,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003.
 **Requirement owners:** VAN-NX-058, VAN-NX-072, VAN-NX-077, VAN-EL-007, VAN-JM-008.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - VAN-EL-007: Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts.
@@ -4434,7 +4436,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003.
 **Requirement owners:** VAN-NX-013, VAN-NX-033, VAN-NX-032, VAN-SO-038.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - News/futures source-grade analysis, history and event impact in compact-first layered surfaces
@@ -4482,7 +4484,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003.
 **Requirement owners:** VAN-NX-012, VAN-NX-013, VAN-NX-046, VAN-NX-034, VAN-NX-035, VAN-NX-065, VAN-NX-072, VAN-EL-007, VAN-JM-008.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - VAN-EL-007: Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts.
@@ -4525,7 +4527,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003.
 **Requirement owners:** VAN-NX-014, VAN-NX-015.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - Project DAG/agents factual source mappings, stage/agent flow and accessible list fallback
@@ -4619,7 +4621,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003.
 **Requirement owners:** VAN-NX-016, VAN-NX-017.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - Muse/native approval source owner, provider lease, readback; no VNC as primary mobile interface
@@ -4646,7 +4648,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003.
 **Requirement owners:** VAN-NX-020, VAN-NX-069.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **Planned test obligations (all NOT_RUN):**
 - `T-NX-020` — Real native scenario execution
@@ -4731,7 +4733,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003.
 **Requirement owners:** VAN-NX-020, VAN-NX-069.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **Planned test obligations (all NOT_RUN):**
 - `T-SURFACE-098` — VNX-S-WORK-13: complete screen/context semantics, all source actions, both themes, large text, privacy, stale/error, process death and deep-link restoration.
@@ -4764,7 +4766,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003.
 **Requirement owners:** VAN-NX-018, VAN-NX-066, VAN-NX-067, VAN-NX-068.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **Planned test obligations (all NOT_RUN):**
 - `T-NX-018` — Every original feature reachable
@@ -4866,7 +4868,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003.
 **Requirement owners:** VAN-NX-018, VAN-NX-066, VAN-NX-067, VAN-NX-068.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **Planned test obligations (all NOT_RUN):**
 - `T-SURFACE-169` — van.automation.plan: complete screen/context semantics, all source actions, both themes, large text, privacy, stale/error, process death and deep-link restoration.
@@ -4908,7 +4910,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003.
 **Requirement owners:** VAN-NX-006, VAN-NX-020, VAN-NX-069.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **Planned test obligations (all NOT_RUN):**
 - `T-SURFACE-170` — van.settings.speaker-profile: complete screen/context semantics, all source actions, both themes, large text, privacy, stale/error, process death and deep-link restoration.
@@ -4942,7 +4944,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003.
 **Requirement owners:** VAN-NX-019, VAN-NX-073.
 
-**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.
+**Exit contract:** Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **Planned test obligations (all NOT_RUN):**
 - `T-NX-019` — Physical owner-device/OS tests
@@ -5025,7 +5027,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** BG-001, UX-003, FE-001, FE-002, FE-003, FE-012, FE-013, FE-014.
 **Requirement owners:** VAN-NX-072, VAN-CX-020, VAN-ML-REQ-058, VAN-HVA-006, VAN-HVA-031, VAN-HVA-032, VAN-EL-007, VAN-JM-008.
 
-**Exit contract:** All model/research contexts, candidate registry, trial reports, source health and calibrated expectation views consume the complete backend catalogue; no research view can grant execution.
+**Exit contract:** All model/research contexts, candidate registry, trial reports, source health and calibrated expectation views consume the complete backend catalogue; no research view can grant execution. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **All deliverables:**
 - After BG-001 only, implement the six new context/detail projections within existing navigation, in both locked themes. No new global tab, wallet or trade button.
@@ -5074,7 +5076,7 @@ The 76 parent Rev1.10 units and all 48 forecast packet obligations are preserved
 **Entry prerequisites:** FE-001, FE-002, FE-003, FE-004, FE-005, FE-006, FE-007, FE-008, FE-009, FE-010, FE-011, FE-012, FE-013, FE-014, FE-015, FE-016, FE-017, FE-018, FE-019, FE-020, FE-021, FE-022, FE-023.
 **Requirement owners:** VAN-NX-023, VAN-NX-024, VAN-NX-039, VAN-NX-029, VAN-NX-BF-014, VAN-CX-020.
 
-**Exit contract:** Every applicable acceptance receipt current and exact-source; independently reviewed; actual S24 where required. No feature removed or shortened to make tests pass.
+**Exit contract:** Every applicable acceptance receipt current and exact-source; independently reviewed; actual S24 where required. No feature removed or shortened to make tests pass. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.
 
 **Planned test obligations (all NOT_RUN):**
 - `T-NX-023` — Static lint + route/feature bijection

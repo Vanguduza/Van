@@ -4817,3 +4817,8 @@ Both original locked tactile themes, measured native goldens only after BG-001; 
 
 States: SYNTHETIC, OBSERVED, DELAYED, UNKNOWN, STALE, REVOKED, UNAVAILABLE. Backend owners: BE-021, BE-044. Frontend: FE-023 only after BG-001. Acceptance: T-CTX-HVA-JUDGMENT, NOT_RUN. Read-only navigation and evidence inspection. No wallet, new order sender, signing or new financial permission.
 
+
+
+## Owner-adopted readability refinement — 21 October 2026
+
+Mandatory across the existing contexts: [dark-theme readability amendment](DARK_THEME_READABILITY_AMENDMENT_20261021.md), mechanically enumerated in [theme readability bindings](THEME_READABILITY_CONTEXT_BINDINGS.json). This refines existing material/accessibility acceptance while preserving the paired token definitions and locked visuals. All native/device scenarios remain NOT_RUN.

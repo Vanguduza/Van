@@ -75,3 +75,8 @@ Approval checks: two themes with every applicable READY/LOADING/STALE/OFFLINE/ER
 8. Creates a fail-closed style token/type/route binding test in `verification/verify_rev113.py`, with negative cases; does not falsely claim full device acceptance.
 
 **Not qualified by this specification:** finished 3D orb source asset, third-party font distribution, actual native compiled output, live chart latency, device interaction, owner visual signature or application performance.
+
+
+## Owner-adopted readability refinement — 21 October 2026
+
+Mandatory across the existing contexts: [dark-theme readability amendment](DARK_THEME_READABILITY_AMENDMENT_20261021.md), mechanically enumerated in [theme readability bindings](THEME_READABILITY_CONTEXT_BINDINGS.json). This refines existing material/accessibility acceptance while preserving the paired token definitions and locked visuals. All native/device scenarios remain NOT_RUN.

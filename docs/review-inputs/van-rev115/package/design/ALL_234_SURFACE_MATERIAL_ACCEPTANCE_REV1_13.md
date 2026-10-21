@@ -242,3 +242,8 @@ Each row inherits its existing exact backend consumer, source freshness, action,
 | `CTX-HVA-JUDGMENT` | RESEARCH_CHAIN | ResearchResultPanel | NewsSourceStatus | discovery funnel, security, wallet and net-edge evidence | FE-023 |
 
 **Global test:** Each context must expose its required states in both themes, provide a non-colour status cue and have source-bound financial/work values; the physical card recipe never authorises an effect. Every contextual effect opens the appropriate signed/approved owner action.
+
+
+## Owner-adopted readability refinement — 21 October 2026
+
+Mandatory across the existing contexts: [dark-theme readability amendment](DARK_THEME_READABILITY_AMENDMENT_20261021.md), mechanically enumerated in [theme readability bindings](THEME_READABILITY_CONTEXT_BINDINGS.json). This refines existing material/accessibility acceptance while preserving the paired token definitions and locked visuals. All native/device scenarios remain NOT_RUN.

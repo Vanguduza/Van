@@ -1446,6 +1446,18 @@
   "source_refresh_utc": "2026-10-18 (PR101 metadata and targeted immutable files only; prior all-branch inventory retained as dated evidence)",
   "source_review_ref": "evidence/rev115/source_review/SOURCE_RECONCILIATION_EVIDENCE.json",
   "status": "OWNER_DIRECTED_REVISED_BLUEPRINT_CANDIDATE_INDEPENDENT_ADMISSION_PENDING",
+  "theme_readability_refinement": {
+    "acceptance_refs": [
+      "T-VAN-CX-020-POS",
+      "T-VAN-CX-020-NEG",
+      "T-VAN-CX-020-REC"
+    ],
+    "application_status": "NOT_RUN",
+    "context_bindings": "design/THEME_READABILITY_CONTEXT_BINDINGS.json",
+    "contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
+    "new_test_ids": 0,
+    "ownership": "UX-001/002/003, FE-001 and every context-bound FE unit, QA-001; no dependency changes."
+  },
   "units": [
     {
       "acceptance_test_ids": [
@@ -8353,7 +8365,7 @@
       "dependencies": [
         "BG-001"
       ],
-      "exit_contract": "Consume complete capability catalog and every context/action; review whole-app route and progressive disclosure, no five-flow scope ceiling. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.",
+      "exit_contract": "Consume complete capability catalog and every context/action; review whole-app route and progressive disclosure, no five-flow scope ceiling. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "Derive the complete owner journey and navigational hierarchy only from BG-001 capability/action contracts; preserve 78 source UX flows",
         "VAN-LEAN-004: Internal optimizer states become contextual typed views; no new default global tab or dense Home.",
@@ -8378,6 +8390,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 4,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Full-product information architecture from the complete backend"
     },
     {
@@ -8396,7 +8409,7 @@
         "BG-001",
         "UX-001"
       ],
-      "exit_contract": "Owner reviews native prototypes in both themes; approved tokens/geometry/material/motion/accessibility; no old UI import or regenerated replacement of locked images. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.",
+      "exit_contract": "Owner reviews native prototypes in both themes; approved tokens/geometry/material/motion/accessibility; no old UI import or regenerated replacement of locked images. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "Locked graphite dark and silver porcelain light style accepted through native Compose component/state goldens; match material, not only palette",
         "VAN-LEAN-006: All new capabilities feed sole BG and existing context/material contracts; no early native renderer."
@@ -8420,6 +8433,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 4,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Locked dark/light native material and component goldens"
     },
     {
@@ -8443,7 +8457,7 @@
         "UX-001",
         "UX-002"
       ],
-      "exit_contract": "Each retained/additive surface has complete backend fields/actions/states, matching design family, dark/light acceptance and physical test plan; no action omitted for visual simplicity. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.",
+      "exit_contract": "Each retained/additive surface has complete backend fields/actions/states, matching design family, dark/light acceptance and physical test plan; no action omitted for visual simplicity. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "All 234 contexts receive source-bound states, role-specific material/geometry and progressive disclosure; no second dashboard in Quick Hub",
         "VAN-LEAN-004: Internal optimizer states become contextual typed views; no new default global tab or dense Home."
@@ -8467,6 +8481,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 4,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Every-screen and action design contract acceptance"
     },
     {
@@ -8483,7 +8498,7 @@
         "BG-001",
         "UX-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "Reactive typed store from actual admitted backend, source age and unknown, no visual-origin execution"
       ],
@@ -8498,6 +8513,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Native typed ports, reactive client store, offline cache and device plumbing"
     },
     {
@@ -8513,7 +8529,7 @@
         "UX-003",
         "FE-001"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "Dual-theme typed tokens, native material recipes, source asset pins, anti-legacy import and contrast checker",
         "VAN-LEAN-006: All new capabilities feed sole BG and existing context/material contracts; no early native renderer."
@@ -8537,6 +8553,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Tactile Spatial components, tokens, isolation and accessibility semantics"
     },
     {
@@ -8550,7 +8567,7 @@
         "FE-001",
         "FE-002"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "id": "FE-003",
       "implementation_evidence": [],
       "kind": "FRONTEND",
@@ -8561,6 +8578,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Adaptive shell, deep links, shared intakes and full navigation"
     },
     {
@@ -8617,7 +8635,7 @@
         "FE-002",
         "FE-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "Home orb and compact sheet have independent accessible status and no state legend, no unverified financial numbers"
       ],
@@ -8632,6 +8650,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Home, metallic orb, compact Quick Hub and Attention"
     },
     {
@@ -8661,7 +8680,7 @@
         "FE-002",
         "FE-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "Floating VAN retains all signed, dock, drag, restore, voice and work modes in separate tactile presentation"
       ],
@@ -8676,6 +8695,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Floating VAN, gestures, dock/workboards and lifecycle"
     },
     {
@@ -8714,7 +8734,7 @@
         "FE-002",
         "FE-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "Trading Home includes five owner-approved destinations while Account/Risk/Positions remain reachable",
         "VAN-CRYPTO-014: Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states."
@@ -8738,6 +8758,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Trading Home, Markets, Watchlists, screener and Alerts"
     },
     {
@@ -8770,7 +8791,7 @@
         "FE-002",
         "FE-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "Precision chart inset and tactile controls are segregated; renderer is untrusted display, no broker credentials",
         "VAN-CRYPTO-014: Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states."
@@ -8794,6 +8815,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Native previews and professional chart renderer/bridge"
     },
     {
@@ -8833,7 +8855,7 @@
         "FE-003",
         "FE-007"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "Drawings, indicators, replay share versioned owner data; historical replay cannot reach order endpoints",
         "VAN-CRYPTO-014: Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states."
@@ -8857,6 +8879,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Indicators, drawings, workspaces, depth and replay controls"
     },
     {
@@ -8940,7 +8963,7 @@
         "FE-002",
         "FE-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "Full order lifecycle and protective SL/TP readback with exact owner action sheets",
         "VAN-SO-038: Expose active binding, changed decision, evidence/maturity, authority and fallback without ungrounded profit claims.",
@@ -8969,6 +8992,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Orders, manual review, positions, protection and handover"
     },
     {
@@ -9036,7 +9060,7 @@
         "FE-002",
         "FE-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "Accounts/Funds provider capability and scope explicit, authenticated hosted flows not fake app-side fund transfers"
       ],
@@ -9051,6 +9075,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Accounts and Funds, provider-hosted flows and receipts"
     },
     {
@@ -9078,7 +9103,7 @@
         "FE-002",
         "FE-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "VAN-CRYPTO-014: Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states.",
         "VAN-EL-007: Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts."
@@ -9101,6 +9126,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Portfolio, history, statements, TCA and Risk Command Centre"
     },
     {
@@ -9130,7 +9156,7 @@
         "FE-002",
         "FE-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "VAN-EL-007: Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts.",
         "Separate health dimensions, bounded adaptation and owner readback: Expose policy/procedural, economic, data, calibration and provider health separately; registered drift/hysteresis rules change a later qualified choice with evidence and exact consumer readback."
@@ -9145,6 +9171,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Strategies, trading modes and evidence/promotion views"
     },
     {
@@ -9191,7 +9218,7 @@
         "FE-002",
         "FE-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "News/futures source-grade analysis, history and event impact in compact-first layered surfaces",
         "VAN-SO-038: Expose active binding, changed decision, evidence/maturity, authority and fallback without ungrounded profit claims."
@@ -9215,6 +9242,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "News, calendar, history profiles and armed news ticket views"
     },
     {
@@ -9256,7 +9284,7 @@
         "FE-002",
         "FE-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "VAN-EL-007: Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts.",
         "Separate health dimensions, bounded adaptation and owner readback: Expose policy/procedural, economic, data, calibration and provider health separately; registered drift/hysteresis rules change a later qualified choice with evidence and exact consumer readback."
@@ -9271,6 +9299,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Analyst, chart observations, behaviour diagnostics and research"
     },
     {
@@ -9364,7 +9393,7 @@
         "FE-002",
         "FE-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "Project DAG/agents factual source mappings, stage/agent flow and accessible list fallback"
       ],
@@ -9379,6 +9408,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Work, Projects, tasks and live dependency diagrams"
     },
     {
@@ -9405,7 +9435,7 @@
         "FE-002",
         "FE-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "Muse/native approval source owner, provider lease, readback; no VNC as primary mobile interface"
       ],
@@ -9420,6 +9450,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Agents, Muse/Hermes interactions and handoff maps"
     },
     {
@@ -9507,7 +9538,7 @@
         "FE-002",
         "FE-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "id": "FE-017",
       "implementation_evidence": [],
       "kind": "FRONTEND",
@@ -9518,6 +9549,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Browser/remote sessions, files, share and provider outcome views"
     },
     {
@@ -9553,7 +9585,7 @@
         "FE-002",
         "FE-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "id": "FE-018",
       "implementation_evidence": [],
       "kind": "FRONTEND",
@@ -9564,6 +9596,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "ARTEMIS, development/studio, CI/security and evidence workspaces"
     },
     {
@@ -9668,7 +9701,7 @@
         "FE-002",
         "FE-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "id": "FE-019",
       "implementation_evidence": [],
       "kind": "FRONTEND",
@@ -9679,6 +9712,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Memory, citations, privacy/erasure, learning goals and adaptations"
     },
     {
@@ -9723,7 +9757,7 @@
         "FE-002",
         "FE-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "id": "FE-020",
       "implementation_evidence": [],
       "kind": "FRONTEND",
@@ -9734,6 +9768,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Automation, reminders, standing permissions and schedules"
     },
     {
@@ -9770,7 +9805,7 @@
         "FE-002",
         "FE-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "id": "FE-021",
       "implementation_evidence": [],
       "kind": "FRONTEND",
@@ -9781,6 +9816,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Conversation, voice and speaker consent workflows"
     },
     {
@@ -9866,7 +9902,7 @@
         "FE-002",
         "FE-003"
       ],
-      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "id": "FE-022",
       "implementation_evidence": [],
       "kind": "FRONTEND",
@@ -9877,6 +9913,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Connected, settings, device provisioning, notifications and diagnostics"
     },
     {
@@ -9917,7 +9954,7 @@
         "FE-013",
         "FE-014"
       ],
-      "exit_contract": "All model/research contexts, candidate registry, trial reports, source health and calibrated expectation views consume the complete backend catalogue; no research view can grant execution.",
+      "exit_contract": "All model/research contexts, candidate registry, trial reports, source health and calibrated expectation views consume the complete backend catalogue; no research view can grant execution. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "full_deliverables": [
         "After BG-001 only, implement the six new context/detail projections within existing navigation, in both locked themes. No new global tab, wallet or trade button.",
         "Research chain/model surfaces read-only, clear candidate/abstention/evidence and opportunity cost",
@@ -9949,6 +9986,7 @@
       "source_origin": "FORECAST_CHILD_034_AND_OD37",
       "stage": 5,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "Native model, strategy-development and prediction-research views"
     },
     {
@@ -9987,7 +10025,7 @@
         "FE-022",
         "FE-023"
       ],
-      "exit_contract": "Every applicable acceptance receipt current and exact-source; independently reviewed; actual S24 where required. No feature removed or shortened to make tests pass.",
+      "exit_contract": "Every applicable acceptance receipt current and exact-source; independently reviewed; actual S24 where required. No feature removed or shortened to make tests pass. Theme readability amendment 2026-10-21: satisfy all applicable layered-surface, composited-contrast, non-colour state, scaling and recovery scenarios for assigned contexts; actual S24 evidence at QA-001.",
       "id": "QA-001",
       "implementation_evidence": [],
       "kind": "FINAL_QUALIFICATION",
@@ -9998,6 +10036,7 @@
       "source_origin": "REV1.10_PARENT",
       "stage": 6,
       "status": "NOT_STARTED",
+      "theme_readability_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
       "title": "All-feature/surface/action parity and no-loss reverse coverage"
     },
     {

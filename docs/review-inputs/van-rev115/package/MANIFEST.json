@@ -1,14 +1,14 @@
 {
   "authority": "UNSIGNED_SPECIFICATION_PROPOSAL_ONLY",
-  "file_count_excluding_manifest": 859,
+  "file_count_excluding_manifest": 863,
   "files": {
     "ASTRA_CODEX_REVIEW_AND_OPTIMIZATION_PROMPT.md": {
       "bytes": 11370,
       "sha256": "7bb8085a33e3be828e59d4d2459ea9160fa3960b0e311db1429c43c219eb7a08"
     },
     "CANONICAL_AUTHORITY.json": {
-      "bytes": 3544,
-      "sha256": "6d7973bc8085411e40fdbfe1e385d11e21dd848a6203dafbc8b46471e812353e"
+      "bytes": 3774,
+      "sha256": "853812a98571cc4bc3fddc501081b9c99ff4354215b824052373bb833dcb354e"
     },
     "CHANGELOG_REV1_12.md": {
       "bytes": 1072,
@@ -59,8 +59,8 @@
       "sha256": "ff0d27171d7766abb5d898bc1436e1320fb7e0c1e949814670d6ca7754f5261d"
     },
     "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_17_20261018.md": {
-      "bytes": 541183,
-      "sha256": "0b7dce33fa5470e63b76e3198998806996a156db7f8b2b8d9da7fb6530fe9a4a"
+      "bytes": 542143,
+      "sha256": "a106588da1c58b1eeb648441c8814656621ad73206a17f030dabfb335b76f4c2"
     },
     "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV3_20261018.md": {
       "bytes": 72517,
@@ -503,20 +503,24 @@
       "sha256": "dbf56159910a012cb91e7dbc9ed8386fa6d9babee83483da68ff7c8463b74166"
     },
     "design/ALL_234_SURFACE_MATERIAL_ACCEPTANCE_REV1_13.md": {
-      "bytes": 37271,
-      "sha256": "eb1bb6abe4928f0a38aa1247a5c19743521c34cbca8a42fabcc04a5e7c0a7903"
+      "bytes": 37720,
+      "sha256": "a9d48f0ba7b338e750a79584796c999648562f86278594e79549da0e874d7c6b"
     },
     "design/ALL_SCREEN_TACTILE_SPECIFICATIONS.md": {
-      "bytes": 368071,
-      "sha256": "a7b0e81be73b4d974bb206500578d95c0f16bea9c9751819d98d7393ee59537b"
+      "bytes": 368520,
+      "sha256": "d990f0da07831eeccd97e2e33b5ace5c999bfdb3a8fcc09c596bdba9c367ec2e"
     },
     "design/ALL_SURFACE_CONTRACTS.json": {
-      "bytes": 844317,
-      "sha256": "e592902fffee51c8001a09b3d83e53fea80ee112b94cda2acc6491893221571f"
+      "bytes": 844371,
+      "sha256": "f971bbb2dc4e3efccb7b8590f149a25a5deb04165d8fb6fd0337572565f4347a"
     },
     "design/COMPONENT_RECIPES_REV2.json": {
       "bytes": 8396,
       "sha256": "71b8f10149c2727e04bb4fabcb853b7c446a1b2905eac88363bdf25b47414296"
+    },
+    "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md": {
+      "bytes": 7611,
+      "sha256": "76fdb8794c01512c13adaa75da53527f71cf204767f9a97207105641e86dc21c"
     },
     "design/EXPERIENCE_LEARNING_CONTEXT_BINDINGS.json": {
       "bytes": 7923,
@@ -534,6 +538,10 @@
       "bytes": 2994,
       "sha256": "1a5b30ed2dc594b6d45a808b948a78d990a863cbe0ea93afb39a4ec0130c94f9"
     },
+    "design/THEME_READABILITY_CONTEXT_BINDINGS.json": {
+      "bytes": 104308,
+      "sha256": "5441026e97f2826f1e655ca7772019d401580a24d6be59bbe22852f3e367689c"
+    },
     "design/VAN_LOCKED_DARK.png": {
       "bytes": 300849,
       "sha256": "e3bca85b2c523bbb171048ec7947b40227f38766eec100e216c1d0643b456a17"
@@ -547,8 +555,8 @@
       "sha256": "d1e844bf9df322e471543774885b6ea05c250312a6ad8df99dcf1e1676d99fb2"
     },
     "design/VAN_TACTILE_SPATIAL_STYLE_REV2.md": {
-      "bytes": 10300,
-      "sha256": "4703c254ecb324580cbcadea57587d9fe6b2bc84ec427cc7af9c6e326acf39c8"
+      "bytes": 10749,
+      "sha256": "aefa60f17b18e490ab685ff27b06c22bbe4c76f5a644df7b8ea7cb61c1429eb4"
     },
     "evidence/BG_REFUSAL.json": {
       "bytes": 389,
@@ -568,7 +576,7 @@
     },
     "evidence/GRAPH_EXPORT.json": {
       "bytes": 38952,
-      "sha256": "a0928506d3bce568c589309a50370b1754e7541df97378f39fae845ba3428f31"
+      "sha256": "bac7b65cccd6101e0e7f0f115027dfeba3868f77cc0bc452b51434f410884b0f"
     },
     "evidence/GRAPH_REPLAY_CHECK.json": {
       "bytes": 1658,
@@ -2314,6 +2322,10 @@
       "bytes": 1946,
       "sha256": "7715e95b07d25d05a4a79182a2df11acd709347a161207bb69a47d7db5056ea0"
     },
+    "evidence/rev117/theme_readability_20261021.json": {
+      "bytes": 14310,
+      "sha256": "d75bf939d42d649428cc21ca1cf37808a77dfb7bb9aafa15347a545f7c8fab4f"
+    },
     "lineage/OWNER_REQUIREMENT_EXPERIENCE_LEARNING_ORIGINAL.md": {
       "bytes": 18580,
       "sha256": "393310a59bedf3120195f7e198dcee862a8ff3e315adcae83b562af418b8fa45"
@@ -2947,16 +2959,16 @@
       "sha256": "d27e027ea062d005d422e312da0e94aaeceeebfd79f853e9c3e710f82cbd1c4c"
     },
     "plan/DEVELOPMENT_PLAN.json": {
-      "bytes": 382500,
-      "sha256": "e1569b7b503bc1dec0338b3ea200dfa983584261b0e4b9be85e8e7d77a37a83b"
+      "bytes": 390926,
+      "sha256": "9062ab65e0dd06d9a381cdf86a08a28723c74829daa95301461b597f2237bc0a"
     },
     "plan/PLAN_INPUT_PROVENANCE.json": {
-      "bytes": 4157,
-      "sha256": "05874af24242cb36bd2b3078443d32581599f5f5d25f88e841385c9cde66fab9"
+      "bytes": 4406,
+      "sha256": "a803ab7eea3010c97ac0af4bfa984dd33d8cc06e8aadf41f0eae9258a4a1c443"
     },
     "plan/PROPOSED_SCOPE_LOCK.json": {
-      "bytes": 248430,
-      "sha256": "3984afad22521e56123fb4706f7c7aa9c89e0084d1cecb965e50c4430b541d9e"
+      "bytes": 248795,
+      "sha256": "274ed0315e097e6d153ba25bb88375902744bb28ea13ef89de46172f681d90d3"
     },
     "plan/REV113_TO_REV114_UNIT_CROSSWALK.json": {
       "bytes": 33938,
@@ -2971,12 +2983,12 @@
       "sha256": "80e840a0f11c8e7be77844d6fac9388ae2e73cca2755502a61c7a191541df72b"
     },
     "plan/VAN_NEXT_DETERMINISTIC_PLAN_REV1_17.md": {
-      "bytes": 658707,
-      "sha256": "f02a6cfde3bad8aaa64983f891c09ff46fce35a445d86a7845bc7b10a2115abd"
+      "bytes": 664464,
+      "sha256": "84bca6978fe9e3f9fc5bb8388de56f1205563e375e160aab6a0b93f5878d01a5"
     },
     "plan/render_plan.py": {
-      "bytes": 13322,
-      "sha256": "13a5af38fc58d5d5526a8c145e140d931fb2fa80bf0426d6dee16a66eccf0cd4"
+      "bytes": 13425,
+      "sha256": "e0bf2d3e19cd0e88d2e0df19060ea14c61420fe80fd67e592bd39f949ff7e933"
     },
     "reference/ACCOUNTS_FUNDS_TECHNICAL_CONTRACT.md": {
       "bytes": 7393,
@@ -3139,8 +3151,8 @@
       "sha256": "ba2313efc061a98cc6c9821e843b819bbd91b495f773dcaeb324e88ebd6ee073"
     },
     "review/VALIDATION_SUMMARY.md": {
-      "bytes": 1791,
-      "sha256": "e3a1672bc08a637ce38690cad5200f70a37a49bb5ab3e9c26596995d2ef7719a"
+      "bytes": 2798,
+      "sha256": "45d92f3225a4ce00606cc287cc4e4b7f3eed002a1531972779745c6b68919abe"
     },
     "tools/build_rev114_archive.py": {
       "bytes": 2300,
@@ -3437,6 +3449,10 @@
     "verification/verify_review_contracts.py": {
       "bytes": 10127,
       "sha256": "2876dad7082d88ad1a65d8ef8628a6a275660fc637bd3298d0b6aaf3a76eb131"
+    },
+    "verification/verify_theme_readability.py": {
+      "bytes": 3852,
+      "sha256": "4e5e970eba833dc51d12b7335cd1fb7b93995332ea083d7b1601ff4a5105e911"
     }
   },
   "revision": "1.17",

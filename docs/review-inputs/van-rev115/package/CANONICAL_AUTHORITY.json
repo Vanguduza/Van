@@ -52,6 +52,9 @@
     "Rev1.16 replaced by Rev1.17 on the same unit identities/dependencies; adds model/Jev hardening without issuing runtime or economic qualification."
   ],
   "targeted_source_refresh": "research/REV114_SOURCE_REGISTER.json",
+  "theme_readability_amendment": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
+  "theme_readability_amendment_date": "2026-10-21",
+  "theme_readability_context_bindings": "design/THEME_READABILITY_CONTEXT_BINDINGS.json",
   "two_autonomy_levels": [
     "AUTOMATIC_OPERATIONAL_OPTIMIZATION",
     "GOVERNED_POLICY_EVOLUTION"

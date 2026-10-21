@@ -4497,6 +4497,10 @@ Home Orb and Floating VAN share one typed reducer but remain independent UI surf
 
 Every one of the 234 contexts has assigned material-family, focal recipe, detail recipe and both-theme/state acceptance. The style's **canonical use is after BG-001**, with owner-approved native goldens on an actual Android build. Tokens are provisional during specification and must not be marked owner-approved until dark/light device goldens are accepted.
 
+### 34.1 Owner-adopted readability refinement — 21 October 2026
+
+The normative [dark-theme readability amendment](design/DARK_THEME_READABILITY_AMENDMENT_20261021.md) applies through [all 234 context bindings](design/THEME_READABILITY_CONTEXT_BINDINGS.json). Adopt semantic surface layering, readable off-white/grey roles, and restrained shadows with visible controls. Require measured composited contrast (ordinary text 4.5:1; qualifying large text and essential controls/indicators 3:1), explicit non-colour operational states, scale/reduced-motion recovery and S24 Ultra readability evidence. Pure black/white are permitted where appropriate; the supplied example hex values do not replace the established paired tokens. Existing material/accessibility acceptance contracts are refined; native checks remain NOT_RUN. UX-001/002/003, FE-001 and every bound FE unit, then QA-001, own delivery after BG-001. The locked images and token bytes are preserved.
+
 ## 35. Integrated all-branch preservation and full-surface design
 
 The source baseline remains unmerged `PR101 and main`; no automatic cherry-pick is allowed. PRE-001 must reconcile the refreshed 67 branch heads and 101 PR heads (including PR98 native owner controls and PR99 cinematic Studio) at file/function/caller level; PRE-002 maps them into Product Truth and owner action ledger; independent F15 tests source completeness; BE-001 admits compatible source code. No earlier branch with a richer service is overridden merely because its date is older, and no late branch with a different owner authority supersedes the verified canon by default.
