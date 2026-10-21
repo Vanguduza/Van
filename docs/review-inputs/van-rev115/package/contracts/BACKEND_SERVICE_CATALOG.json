@@ -1,4 +1,5 @@
 {
+  "effective_registration_contract": "contracts/whole_product/PROTOCOLS.json",
   "experience_learning_contract": "contracts/self_optimization/EXPERIENCE_LEARNING_CONTRACT.json",
   "logical_services_not_mandated_microservices": true,
   "model_use_contract": "contracts/self_optimization/MODEL_USE_CONTRACT.json",
@@ -3252,5 +3253,6 @@
       "target_source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
       "title": "Read-only crypto end-to-end research, operations and native consumption contract"
     }
-  ]
+  ],
+  "whole_product_contract": "contracts/whole_product/CAPABILITY_BOUNDARIES.json"
 }

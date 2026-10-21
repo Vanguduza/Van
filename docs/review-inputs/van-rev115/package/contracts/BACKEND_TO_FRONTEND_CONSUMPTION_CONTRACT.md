@@ -1,3 +1,5 @@
+> Rev1.18 mandatory refinement: `contracts/whole_product/ARCHITECTURE_REV118.md`, typed protocol records, complete action/context bindings and `verification/EFFECTIVE_TEST_CONTRACTS_REV118.json` govern execution. All exact runtime registrations and independent receipts must be materialized before BG-001.
+
 > Rev1.12: complete inherited contracts retained; new mandatory domain obligations below. The machine catalogue and plan are active.
 
 # Backend-to-Experience Contract Bundle — Rev 1.11

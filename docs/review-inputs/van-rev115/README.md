@@ -1,26 +1,22 @@
-# VAN Next — hardened self-improvement blueprint Rev1.17
+# VAN Next — whole-product blueprint Rev1.18
 
-Experience learning remains fully integrated; this revision adds Jev/model failure isolation, qualification and profitability-research contracts.
+Rev1.18 addresses the 16 whole-product completeness findings at normative architecture, lifecycle, ownership and acceptance-contract level. It covers the entire VAN product and preserves all inherited trading, research, assistant, Work, device and visual obligations.
 
-- [21 October readability amendment](package/design/DARK_THEME_READABILITY_AMENDMENT_20261021.md) and [234 context bindings](package/design/THEME_READABILITY_CONTEXT_BINDINGS.json)
-- [Whole-product completeness audit — 21 October](completeness-audit-20261021/REPORT.md): 16 open contract/traceability/qualification findings; all feature, action, context and service inventories covered. Audit is separate from the sealed package.
-- [Active master blueprint](package/VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_17_20261018.md)
-- [Focused specification §§8.6–8.7](package/VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md)
-- [Model assessment, source findings and recommendation](package/research/REV117_MODEL_AND_PROFITABILITY_REVIEW.md)
-- [Six profitability experiment templates](package/research/PROFITABILITY_EXPERIMENTS.json)
-- [Model/Jev contracts and invariants](package/contracts/self_optimization/MODEL_USE_CONTRACT.json)
-- [Single generated development plan](package/plan/VAN_NEXT_DETERMINISTIC_PLAN_REV1_17.md)
-- [Eight new requirements](package/traceability/REV117_REQUIREMENTS.json) and [24 acceptance contracts](package/verification/REV117_ACCEPTANCE_CONTRACTS.json)
-- [Five existing-context extensions](package/design/MODEL_HARDENING_CONTEXT_BINDINGS.json)
-- [Download complete Rev1.17 ZIP](VAN_NEXT_HARDENED_BLUEPRINT_PACK_REV1_17_20261018.zip)
-- [Verification summary](package/review/VALIDATION_SUMMARY.md) and [final archive receipt](REV1_17_FINAL_PACKAGE_RECEIPT.json)
+- [Active complete master blueprint](package/VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_18_20261021.md)
+- [Whole-product architecture contract](package/contracts/whole_product/ARCHITECTURE_REV118.md)
+- [Architecture improvements and delivery notes](package/review/REV118_DELIVERY.md)
+- [All 16 finding dispositions and remaining implementation exits](package/contracts/whole_product/ISSUE_DISPOSITION.json)
+- [All 349 action contracts](package/contracts/whole_product/ACTION_CONTRACTS.json)
+- [All feature/context bindings](package/contracts/whole_product/FEATURE_CONTEXT_BINDINGS.json)
+- [Effective acceptance registry](package/verification/EFFECTIVE_TEST_CONTRACTS_REV118.json)
+- [Generated implementation plan](package/plan/VAN_NEXT_DETERMINISTIC_PLAN_REV1_18.md)
+- [Download complete Rev1.18 ZIP](VAN_NEXT_WHOLE_PRODUCT_BLUEPRINT_PACK_REV1_18_20261021.zip)
+- [Verification summary](package/review/VALIDATION_SUMMARY.md) and [final archive receipt](REV1_18_FINAL_PACKAGE_RECEIPT.json)
 
-Active totals: **324 requirements / 1,610 planned application tests**, on the same 131 units and 234 context objects. Prior Rev1.16 requirements/test objects are preserved. All application contracts and economic experiments remain NOT_RUN. The revision hardens the specification and documentary checks; it does not repair application source, deploy a model or establish profitability.
+Scope remains **324 requirements / 1,610 acceptance identities / 234 contexts / 349 inherited actions / 131 units**. All 22 feature-primary test ownership gaps are resolved by explicit mandatory additive ownership; the floating voice context also includes FE-021. The effective registry compiles inherited records with 349 action-oracle refinements and 72 domain scenario refinements. Runners must use the effective registry; source test objects remain preserved for provenance. All application tests are NOT_RUN and all new qualification entries are NOT_QUALIFIED.
 
-Google's current documentation verifies Gemini 4 Argon (`gemini-4-argon`); DeepSeek Pro and Flash are separately scoped research candidates. No new model has been promoted. Provider capabilities/prices are documented observations, not VAN performance results or account-access proof.
+The architecture separates critical execution, interactive control and research; standardizes typed command/outcome and event contracts; specifies zero-configuration enrollment/rotation/recovery; retains local speech/VAD and defines spoken responses/interruption; strengthens workflow, memory/privacy, automation, provider, Android and release lifecycles. It requires no additional deployable services by default. Real source repairs, exact provider-specific runtime bindings and schema registration, service/device qualification and economic evidence remain implementation obligations.
 
-The 21 October readability amendment refines existing accessibility/material contracts: layered surfaces, measured contrast, visible controls, non-colour state cues, and S24 readability. All 80 checked opaque token pairs pass; rendered/device checks remain NOT_RUN. Existing palette, locked images, requirements and test objects are preserved.
+All documentary checks pass, including **26/26** new whole-product checks, preserved graph/schema and inherited regression checks. The ZIP's **901 members** match the unpacked package and pass fresh-extraction checks. SHA-256: `6c7c7c1cb4fbd4748c0d63ceb2add9bd460778b66fb3b2302e16de09ac3a57a8`.
 
-ZIP SHA-256: `6c1757a72c64ab09084064c38abfb3c46d26a77bc77ad8841c65e13e9f0b3116`. All members match the unpacked package and pass fresh-extraction document checks. The exact original Rev1.14 archive is retained; previous complete deliveries remain in Git history, including Rev1.16 at `874774d4ece98718f4d3e80002ec136320a84e13`.
-
-The publication directory retains its original path for link continuity. CANONICAL_AUTHORITY selects the active Rev1.17 files; older named files/receipts retain their historical scope. No native certificate, financial activation or S24 acceptance is issued.
+The [historical whole-product audit](completeness-audit-20261021/REPORT.md) is pinned to Rev1.17 at `673a1cc`; reproduce its old input hashes at that commit, not against this revised package. Previous complete ZIPs remain available in Git history. This directory retains its original name for link continuity; CANONICAL_AUTHORITY identifies the active revision. No runtime, financial, profitability, F15/BG or S24 acceptance is issued by a document revision.

@@ -1,3 +1,13 @@
+# Rev1.18 whole-product validation
+
+The new whole-product integration, strict-schema and adversarial omission checks pass **26/26**. Core graph/schema checks report zero findings; independent preservation/binding checks pass **79/79**, adversarial legacy checks **47/47**, experience-learning checks **36/36**, model/Jev checks **35/35**, and all **80** checked opaque colour pairs pass. The effective registry and generated plan match their current inputs. Exact commands/output hashes are in `evidence/rev118/final_checks/receipts.json`; the external Rev1.18 archive receipt records fresh-extraction checks and exact ZIP/unpacked equality.
+
+All 324 inherited requirements, 1,610 source test objects, 349 actions and 234 context objects are preserved. The compiled execution view adds mandatory acceptance owners, 349 action-oracle refinements and 72 scenario refinements without manufacturing extra test identities or results. All application tests remain NOT_RUN; all runtime qualification entries remain NOT_QUALIFIED. F15/BG and economic/device acceptance are not issued by these document checks. The 16 audit issues are addressed at normative design/contract level; actual source repairs, registrations, provider access and native outcomes remain required work.
+
+The independent binding checker now compares the plan with inherited owners plus the separate explicit Rev1.18 owner-additions registry. Its missing/duplicate/invented/misassigned binding mutations remain active. No preservation or runtime-result check was disabled.
+
+## Historical Rev1.17 verification record
+
 # Rev1.17 validation performed
 
 | Current documentary check | Result |

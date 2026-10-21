@@ -1,3 +1,5 @@
+> Active delivery is Rev1.18 (21 October 2026). Start at `VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_18_20261021.md` and `contracts/whole_product/ARCHITECTURE_REV118.md`; execute acceptance from `verification/EFFECTIVE_TEST_CONTRACTS_REV118.json`. This header supersedes older entrypoint/revision references below; historical findings and financial gates remain applicable.
+
 # VAN Next hardened self-improvement blueprint — Rev1.17
 
 Start with `CANONICAL_AUTHORITY.json`. The active master is `VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_17_20261018.md`; the focused specification is `VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md`. Normative §8.6 defines experience learning; §8.7 hardens Jev/model use and profitability research. The single schedule is `plan/DEVELOPMENT_PLAN.json`, rendered as `plan/VAN_NEXT_DETERMINISTIC_PLAN_REV1_17.md`.

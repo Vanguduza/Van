@@ -88,7 +88,8 @@ rspec=importlib.util.spec_from_file_location('renderer',P/'plan/render_plan.py')
 r=importlib.util.module_from_spec(rspec);rspec.loader.exec_module(r)
 plan=d['plan'];tests=d['tests']['tests']
 summary=r.current_scope(plan,d['requirements']['requirements'],tests)
-expected={u['id']:[t['id'] for t in tests if u['id']==t['unit'] or u['id'] in t.get('additional_units',[])] for u in plan['units']}
+extensions=v.read('contracts/whole_product/ACCEPTANCE_REFINEMENTS.json')['owner_additions']
+expected={u['id']:[t['id'] for t in tests if u['id']==t['unit'] or u['id'] in t.get('additional_units',[]) or u['id'] in extensions.get(t['id'],[])] for u in plan['units']}
 require('EXACT_REGISTRY_BINDINGS',all(u.get('acceptance_test_ids')==expected[u['id']] for u in plan['units']))
 require('ALL_TESTS_EXPLICIT_IN_PLAN',set().union(*(set(u['acceptance_test_ids']) for u in plan['units']))==ts)
 require('POSITIVE_BINDING_GUARD',r.binding_errors(plan,tests,summary)==[])

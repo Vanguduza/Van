@@ -12,13 +12,17 @@
     "tests": 1610,
     "truth": 22
   },
+  "domain_scenario_refinements": 72,
+  "effective_acceptance_identities": 1610,
   "first_UX_packet": "VAN-PKT-099",
   "historical_counts": "Earlier blueprints and receipts retain their historical scope; CANONICAL_AUTHORITY selects the active revision.",
-  "new_application_contracts": 24,
-  "new_requirements": 8,
-  "original_requirement_objects_preserved": 316,
-  "original_test_objects_preserved": 1586,
+  "legacy_action_oracle_refinements": 349,
+  "new_application_contracts": 0,
+  "new_requirements": 0,
+  "original_requirement_objects_preserved": 324,
+  "original_test_objects_preserved": 1610,
   "original_unit_ids_preserved": 131,
-  "revision": "1.17",
-  "theme_variants": 2
+  "revision": "1.18",
+  "theme_variants": 2,
+  "whole_product_issues_addressed_at_design_level": 16
 }

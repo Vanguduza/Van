@@ -1,3 +1,5 @@
+> Rev1.18 mandatory refinement: `contracts/whole_product/ARCHITECTURE_REV118.md`, typed protocol records, complete action/context bindings and `verification/EFFECTIVE_TEST_CONTRACTS_REV118.json` govern execution. All exact runtime registrations and independent receipts must be materialized before BG-001.
+
 # Whole-Backend Complete contract — BG-001, Rev 1.11
 
 ## One global frontend entry gate
