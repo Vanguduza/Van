@@ -110,6 +110,48 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # The Artemis contract tests read three DDS source contracts from the sibling
+      # ../dial-development-system (tools/certification/artemis_acceptance.py, test_artemis_*).
+      # Without it 134 of them error before asserting anything. DDS is private and this
+      # repository is public, so the files are not copied here: they are checked out at the
+      # pin in CONSOLIDATION_STATE.json native_dependency (a qualification baseline for source
+      # contract tests, not a deployment attestation) with a read-only deploy key scoped to DDS
+      # alone, and each blob is verified. A missing key fails this step; it never skips tests.
+      - name: Require the DDS contract read key
+        env:
+          DDS_KEY: ${{ secrets.DDS_CONTRACT_READ_DEPLOY_KEY }}
+        run: |
+          test -n "$DDS_KEY" || {
+            echo "::error::secret DDS_CONTRACT_READ_DEPLOY_KEY is not provisioned: add a read-only deploy key on Vanguduza/dial-development-system and store its private half in this repository's Actions secrets"
+            exit 1
+          }
+      - name: Check out pinned DDS source contracts (sibling)
+        uses: actions/checkout@v4
+        with:
+          repository: Vanguduza/dial-development-system
+          ref: 64d6b7158c723b7700e5b53175ea8048d4e92d00
+          ssh-key: ${{ secrets.DDS_CONTRACT_READ_DEPLOY_KEY }}
+          persist-credentials: false
+          path: .dds-contract-pin
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            agent-system/orchestration/android-testing-mcp.mjs
+            agent-system/orchestration/android-testing-plane.mjs
+            deploy/netcup/hermes-control/artemis/dial_artemis_mcp_bridge.py
+      - name: Verify pinned DDS contract blobs and place the sibling
+        run: |
+          set -euo pipefail
+          cd .dds-contract-pin
+          test "$(git rev-parse HEAD)" = 64d6b7158c723b7700e5b53175ea8048d4e92d00
+          while read -r blob path; do
+            test "$(git hash-object "$path")" = "$blob" || { echo "::error file=$path::DDS contract blob mismatch"; exit 1; }
+          done <<'EOF'
+          4aca852dea44cb07401ca92bf970eb3a78c1db2d agent-system/orchestration/android-testing-mcp.mjs
+          c99f02f3df35f6b9aa880923dd6b01ca3118d644 agent-system/orchestration/android-testing-plane.mjs
+          9134ddc864ab174c000b6e434d2675ba01352006 deploy/netcup/hermes-control/artemis/dial_artemis_mcp_bridge.py
+          EOF
+          cd ..
+          mv .dds-contract-pin ../dial-development-system
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
