@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20261021-owner-rev118-ci-workflow-template",
+  "project": "van",
+  "authority": "OWNER_EXPLICIT",
+  "owner_instruction_sha256": "35dea959a01ab5b327ca3a016eaa5b5c4653fae9294c6e33f674f1c57d39b313",
+  "owner_instruction_excerpt": "I authorize you to prepare, test, commit and push narrowly scoped CI prerequisite fixes needed to validate this consolidation, including the relevant .github/workflows files and supporting regression tests. Create an accurate authorization intake record for this instruction if required by the hooks.\n\nThis authorization does not permit disabling checks, broadening credentials, weakening protection, deploying services or releasing an APK.",
+  "derivation": "Supplement to auth-20261021-owner-rev118-ci-prerequisites under the same owner instruction (identical excerpt and SHA-256). tests/contracts/test_ci_workflow_is_what_it_claims.py requires tools/ci/github-actions-ci.yml to stay byte-identical to .github/workflows/van-ci.yml (it was identical at 1cab6b2f), and tools/ci/install_github_workflow.py copies the template over the live workflow. A CI prerequisite fix to the live workflow therefore has to land in the template too, or the installer would revert it and an existing gate would fail. This record covers that one mirror file only.",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "claude-code",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "issued_at_utc": "2026-10-21T19:54:31.441346+00:00",
+  "branch_scope": "ccr-9e07e1af-8mgz1p",
+  "authorized_paths": [
+    "tools/ci/github-actions-ci.yml"
+  ],
+  "reusable": true,
+  "revoked": false,
+  "limitations": [
+    "Byte-identical mirror of .github/workflows/van-ci.yml only; no other file under tools/ci/.",
+    "Does not permit disabling, skipping or weakening any check or test, broadening credentials or token scopes, weakening branch or environment protection, deploying services or releasing an APK.",
+    "Does not cover application roots (android/, backend/, trading/, services/, hermes/), the admitted blueprint package, existing Project Truth records or hooks.",
+    "No cryptographic signature, independent certification or approval of unreviewed findings is claimed."
+  ]
+}
