@@ -1,0 +1,35 @@
+{
+ "schema": "van.rebuild.pre001.test-evidence/1",
+ "source_commit": "b02075f327ea8180ab6d269eba358cf8c5479878 (application roots unchanged on ccr-9e07e1af-8mgz1p)",
+ "environment": {
+  "python": "Python 3.13.16",
+  "pytest": "pytest 9.1.1",
+  "deps": "backend/requirements.txt in an isolated venv",
+  "container": "Claude Code cloud session, Linux",
+  "date_utc": "2026-10-21"
+ },
+ "runs": [
+  {
+   "purpose": "Behaviour cited by overlap and PR dispositions",
+   "cwd": "backend",
+   "command": "python -m pytest -q tests/test_google_mesh.py tests/test_automation_compiler.py tests/test_interactive_browser_api.py tests/test_recovery_matrix.py tests/test_browser_api.py tests/test_browser_escalation_boundary.py tests/test_visual_acceptance.py tests/test_knowledge_runtime.py tests/test_automation_health_api.py tests/test_automation_dispatch.py tests/test_automation_api.py tests/test_interactive_browser_session.py",
+   "result": "292 passed"
+  },
+  {
+   "purpose": "PR-16/PR-35 cited behaviour",
+   "cwd": ".",
+   "command": "python -m pytest -q trading/tests/test_oci_trading_topology_bootstrap.py tests/hermes/test_profile_layout.py",
+   "result": "47 passed, 1 skipped (rsync absent: installer state preservation NOT VERIFIED)"
+  },
+  {
+   "purpose": "Close the skip above",
+   "cwd": ".",
+   "command": "apt-get install rsync; python -m pytest -q tests/hermes/test_profile_layout.py::test_install_profile_preserves_runtime_state_and_secrets",
+   "result": "1 passed"
+  }
+ ],
+ "not_run": [
+  "Android JVM tests cited (ProvisioningPayloadTest, BrowserControlMutationTest, SpeakerEnrollmentPolicyTest): no Android SDK/Gradle run in this session; consolidation VALIDATION.md reports 1,273 JVM tests passing at its own head, which is historical evidence, not a rerun"
+ ],
+ "scope": "Source tests of the inherited baseline. Not Rev1.18 acceptance identities."
+}

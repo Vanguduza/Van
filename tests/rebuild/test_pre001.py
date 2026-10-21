@@ -17,7 +17,7 @@ spec.loader.exec_module(pre001)
 def test_every_induced_failure_is_rejected(capsys):
     assert pre001.cmd_selftest() == 0
     report = json.loads(capsys.readouterr().out)
-    assert report["passed"] == report["total"] == 10
+    assert report["passed"] == report["total"] == 15
 
 
 def test_committed_trace_check_matches_current_registries():

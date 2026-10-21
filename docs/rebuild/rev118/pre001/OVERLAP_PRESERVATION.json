@@ -387,6 +387,130 @@
     "DecisionStatus"
    ],
    "path": "backend/van_gateway/decisions/service.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:tests/contracts/test_stored_command_is_deliverable.py:main",
+   "input": "main",
+   "missing_symbols": [
+    "test_the_builder_is_the_one_the_offline_path_uses"
+   ],
+   "path": "tests/contracts/test_stored_command_is_deliverable.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:tests/contracts/test_van_direct_mtls_deploy.py:main",
+   "input": "main",
+   "missing_symbols": [
+    "test_the_app_ships_configured_for_the_direct_link"
+   ],
+   "path": "tests/contracts/test_van_direct_mtls_deploy.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04"
+   ],
+   "head_present": false,
+   "id": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "input": "accounts_3b2c9e04",
+   "missing_symbols": [
+    "SubscriptionContracts",
+    "SubscriptionContracts.test_api_key_login_refused",
+    "SubscriptionContracts.test_binding_is_idempotent_and_refuses_unbound_provider",
+    "SubscriptionContracts.test_bound_tool_call_returned_to_artemis",
+    "SubscriptionContracts.test_codex_environment_excludes_native_loader_settings",
+    "SubscriptionContracts.test_command_disables_execution_and_delegation",
+    "SubscriptionContracts.test_different_account_refused",
+    "SubscriptionContracts.test_different_requested_model_refused_before_transport",
+    "SubscriptionContracts.test_every_profile_node_and_fallback_is_exact_model",
+    "SubscriptionContracts.test_fresh_native_task_child_inherits_binding",
+    "SubscriptionContracts.test_inline_image_preserved",
+    "SubscriptionContracts.test_local_file_url_refused",
+    "SubscriptionContracts.test_matching_chatgpt_account",
+    "SubscriptionContracts.test_missing_login_refused",
+    "SubscriptionContracts.test_non_image_payload_refused",
+    "SubscriptionContracts.test_non_object_tool_arguments_refused",
+    "SubscriptionContracts.test_process_environment_excludes_api_billing",
+    "SubscriptionContracts.test_role_and_tool_result_preserved",
+    "SubscriptionContracts.test_unbound_tool_refused"
+   ],
+   "path": "tests/test_artemis_subscription.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04"
+   ],
+   "head_present": false,
+   "id": "OVL:tools/artemis_subscription/__init__.py:accounts_3b2c9e04",
+   "input": "accounts_3b2c9e04",
+   "missing_symbols": [],
+   "path": "tools/artemis_subscription/__init__.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04"
+   ],
+   "head_present": false,
+   "id": "OVL:tools/artemis_subscription/mcp_launcher.py:accounts_3b2c9e04",
+   "input": "accounts_3b2c9e04",
+   "missing_symbols": [],
+   "path": "tools/artemis_subscription/mcp_launcher.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04"
+   ],
+   "head_present": false,
+   "id": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "input": "accounts_3b2c9e04",
+   "missing_symbols": [
+    "ChatGPTSubscriptionChatModel",
+    "ChatGPTSubscriptionChatModel._agenerate",
+    "ChatGPTSubscriptionChatModel._astream",
+    "ChatGPTSubscriptionChatModel._generate",
+    "ChatGPTSubscriptionChatModel._identifying_params",
+    "ChatGPTSubscriptionChatModel._llm_type",
+    "ChatGPTSubscriptionChatModel.bind_tools",
+    "ChatGPTSubscriptionChatModel.with_structured_output",
+    "ChatGPTSubscriptionChatModel.with_structured_output.parse",
+    "SubscriptionSession",
+    "SubscriptionSession.__aenter__",
+    "SubscriptionSession.__aexit__",
+    "SubscriptionSession.__init__",
+    "SubscriptionSession.complete",
+    "SubscriptionSession.receive",
+    "SubscriptionSession.rpc",
+    "SubscriptionSession.send",
+    "bind_native_artemis",
+    "bind_native_artemis.create_model",
+    "bind_native_artemis.probe",
+    "codex_command",
+    "messages_to_input",
+    "read_subscription_account",
+    "response_message",
+    "subscription_environment",
+    "tool_response_schema",
+    "validate_account"
+   ],
+   "path": "tools/artemis_subscription/provider.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04"
+   ],
+   "head_present": false,
+   "id": "OVL:tools/artemis_subscription/sitecustomize.py:accounts_3b2c9e04",
+   "input": "accounts_3b2c9e04",
+   "missing_symbols": [],
+   "path": "tools/artemis_subscription/sitecustomize.py"
   }
  ],
  "rule": "A symbol defined by an input version and absent at HEAD is a preservation finding until dispositioned (T-HVA-002).",

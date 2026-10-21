@@ -36,6 +36,10 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "docs/rebuild/rev118/pre001"
 PKG = ROOT / "docs/review-inputs/van-rev115/package"
 ACTIVE_ROOTS = ("android", "backend", "trading", "services", "hermes")
+# Historical/document roots excluded by CLAUDE.md source boundaries; everything else at the
+# frozen consolidation head is inventoried (deploy, tools, root tests, CI, registries, config,
+# locked visual authority, root files).
+HISTORICAL_ROOTS = ("docs", "evidence", "artifacts")
 REFS_SNAPSHOT = OUT / "REMOTE_REFS_20261021.txt"
 PR_STATE = OUT / "PR_STATE_20261021.json"
 DISPOSITIONS = OUT / "DISPOSITIONS.json"
@@ -196,9 +200,13 @@ def symbols_for(path: str, blob: bytes) -> tuple[list, str]:
     return [], "NOT_PARSED"
 
 
+def inventory_roots() -> list[str]:
+    return [n for n in git("ls-tree", "--name-only", CONSOLIDATION_HEAD).splitlines() if n not in HISTORICAL_ROOTS]
+
+
 def tree(commit: str) -> dict[str, str]:
     out = {}
-    for line in git("ls-tree", "-r", commit, "--", *ACTIVE_ROOTS).splitlines():
+    for line in git("ls-tree", "-r", commit, "--", *inventory_roots()).splitlines():
         meta, path = line.split("\t", 1)
         _, typ, blob = meta.split()
         if typ == "blob":
@@ -231,7 +239,8 @@ def source_ledger(head: str) -> tuple[dict, dict]:
     summary = {}
     for r in rows:
         summary[r["provenance"]] = summary.get(r["provenance"], 0) + 1
-    ledger = {"schema": "van.rebuild.pre001.source/1", "head": head, "roots": list(ACTIVE_ROOTS),
+    ledger = {"schema": "van.rebuild.pre001.source/1", "head": head, "roots": inventory_roots(),
+              "excluded_historical_roots": list(HISTORICAL_ROOTS),
               "inputs": INPUTS, "file_count": len(rows),
               "symbol_count": sum(len(r["symbols"]) for r in rows),
               "provenance_counts": summary, "rows": rows}
@@ -400,12 +409,55 @@ def trace_check(pkg: Path) -> dict:
             "scope": "Registry linkage only. A linked row is not an implementation; implementation presence is judged per unit at its own exit."}
 
 
+# ---------------------------------------------------------------- classification
+
+RULES = OUT / "CLASSIFICATION_RULES.json"
+
+
+def classify(ledger: dict, rules_doc: dict, unit_ids: set[str]) -> dict:
+    """Apply the hand-authored ordered rules to every ledger file (first match wins)."""
+    rules = [(r, re.compile(r["re"])) for r in rules_doc["rules"]]
+    kinds, classes = set(rules_doc["kinds"]), set(rules_doc["classes"])
+    rows, hits, problems = [], {r["id"]: 0 for r, _ in rules}, []
+    for r, _ in rules:
+        if r["kind"] not in kinds:
+            problems.append(f"RULE_UNKNOWN_KIND:{r['id']}:{r['kind']}")
+        if r["class"] not in classes:
+            problems.append(f"RULE_UNKNOWN_CLASS:{r['id']}:{r['class']}")
+        for u in r["units"]:
+            if u not in unit_ids:
+                problems.append(f"RULE_UNKNOWN_UNIT:{r['id']}:{u}")
+        if not r["units"] or not r.get("why"):
+            problems.append(f"RULE_WITHOUT_OWNER_OR_REASON:{r['id']}")
+    for f in ledger["rows"]:
+        rule = next((r for r, rx in rules if rx.search(f["path"])), None)
+        if rule:
+            hits[rule["id"]] += 1
+        rows.append({"path": f["path"], "rule": rule and rule["id"], "kind": rule and rule["kind"],
+                     "units": rule and rule["units"], "class": rule and rule["class"]})
+    for rid, n in hits.items():
+        if n == 0:
+            problems.append(f"RULE_MATCHES_NOTHING:{rid}")
+    counts: dict = {}
+    for r in rows:
+        for key in ("kind", "class"):
+            counts.setdefault(key, {}).setdefault(str(r[key]), 0)
+            counts[key][str(r[key])] += 1
+    unit_files: dict = {}
+    for r in rows:
+        for u in r["units"] or []:
+            unit_files[u] = unit_files.get(u, 0) + 1
+    return {"schema": "van.rebuild.pre001.classification/1", "rules_sha256": sha256(dump(rules_doc).encode()),
+            "file_count": len(rows), "unmatched": sorted(r["path"] for r in rows if not r["rule"]),
+            "rule_problems": sorted(problems), "rule_hits": hits, "counts": counts,
+            "files_per_unit": dict(sorted(unit_files.items())), "rows": rows}
+
+
 # ---------------------------------------------------------------- judgement
 
-def judge(refs: dict, ledger: dict, overlap: dict, trace: dict, disp: dict) -> dict:
+def judge(refs: dict, ledger: dict, overlap: dict, trace: dict, disp: dict, classification: dict) -> dict:
     d_refs = disp.get("refs", {})
     d_ovl = disp.get("overlap", {})
-    d_files = disp.get("source", {})
     problems = []
 
     def valid(entry, where):
@@ -417,20 +469,19 @@ def judge(refs: dict, ledger: dict, overlap: dict, trace: dict, disp: dict) -> d
             return False
         return True
 
+    def covers_paths(r):
+        missing = set(r.get("missing_blob_paths") or [])
+        uncovered = missing - set((d_refs[r["id"]].get("paths") or {}))
+        if uncovered:
+            problems.append(f"DISPOSITION_MISSING_PATHS:{r['id']}:{len(uncovered)}")
+        return not uncovered
+
     open_refs = [r["id"] for r in refs["rows"] if r["needs_disposition"]
-                 and not (r["id"] in d_refs and valid(d_refs[r["id"]], r["id"]))]
+                 and not (r["id"] in d_refs and valid(d_refs[r["id"]], r["id"]) and covers_paths(r))]
     open_ovl = [r["id"] for r in overlap["rows"]
                 if not (r["id"] in d_ovl and valid(d_ovl[r["id"]], r["id"]))]
-    classes = {"RETAIN", "ADAPT", "REPLACE", "EXTEND", "RETIRE_AFTER_PARITY"}
-    unclassified = []
-    for r in ledger["rows"]:
-        e = d_files.get(r["path"])
-        if e is None:
-            prefix = next((p for p in sorted(d_files, key=len, reverse=True)
-                           if p.endswith("/") and r["path"].startswith(p)), None)
-            e = d_files.get(prefix) if prefix else None
-        if not e or e.get("class") not in classes or not valid(e, r["path"]):
-            unclassified.append(r["path"])
+    unclassified = list(classification["unmatched"])
+    problems.extend(classification["rule_problems"])
     for k in d_refs:
         if k not in {r["id"] for r in refs["rows"]}:
             problems.append(f"DISPOSITION_FOR_UNKNOWN_REF:{k}")
@@ -451,18 +502,21 @@ def generate(head: str):
     ledger, trees = source_ledger(head)
     overlap = overlap_preservation(trees)
     trace = trace_check(PKG)
+    units = {u["id"] for u in load(PKG / "plan/DEVELOPMENT_PLAN.json")["units"]}
+    classification = classify(ledger, load(RULES), units)
     return {"REF_INVENTORY.json": refs, "SOURCE_LEDGER.json": ledger,
-            "OVERLAP_PRESERVATION.json": overlap, "TRACE_CHECK.json": trace}
+            "OVERLAP_PRESERVATION.json": overlap, "TRACE_CHECK.json": trace,
+            "SOURCE_CLASSIFICATION.json": classification}
 
 
 def source_head() -> str:
-    """Last commit that touched an active root: generated facts must not churn on doc commits."""
-    return git("log", "-1", "--format=%H", "HEAD", "--", *ACTIVE_ROOTS).strip()
+    """PRE-001 freezes the admitted source candidate; later rebuild commits are not inventoried."""
+    return CONSOLIDATION_HEAD
 
 
 def summary(arts: dict, disp: dict) -> dict:
     s = judge(arts["REF_INVENTORY.json"], arts["SOURCE_LEDGER.json"], arts["OVERLAP_PRESERVATION.json"],
-              arts["TRACE_CHECK.json"], disp)
+              arts["TRACE_CHECK.json"], disp, arts["SOURCE_CLASSIFICATION.json"])
     s["artefact_sha256"] = {k: sha256(dump(v).encode()) for k, v in sorted(arts.items())}
     s["source_head"] = arts["SOURCE_LEDGER.json"]["head"]
     s["unit"] = "PRE-001"
@@ -498,21 +552,24 @@ def cmd_check() -> int:
 def cmd_selftest() -> int:
     """Each case breaks one invariant and requires the judge or trace check to reject it."""
     arts = {n: load(OUT / n) for n in ("REF_INVENTORY.json", "SOURCE_LEDGER.json",
-                                       "OVERLAP_PRESERVATION.json", "TRACE_CHECK.json")}
+                                       "OVERLAP_PRESERVATION.json", "TRACE_CHECK.json",
+                                       "SOURCE_CLASSIFICATION.json")}
     disp = load(DISPOSITIONS) if DISPOSITIONS.exists() else {}
-    full = {"refs": {r["id"]: {"decision": "X", "evidence": "x"} for r in arts["REF_INVENTORY.json"]["rows"]
-                     if r["needs_disposition"]},
-            "overlap": {r["id"]: {"decision": "X", "evidence": "x"} for r in arts["OVERLAP_PRESERVATION.json"]["rows"]},
-            "source": {f"{root}/": {"class": "RETAIN", "decision": "X", "evidence": "x"} for root in ACTIVE_ROOTS}}
+    full = {"refs": {r["id"]: {"decision": "X", "evidence": "x",
+                               "paths": {m: "X" for m in r.get("missing_blob_paths") or []}}
+                     for r in arts["REF_INVENTORY.json"]["rows"] if r["needs_disposition"]},
+            "overlap": {r["id"]: {"decision": "X", "evidence": "x"} for r in arts["OVERLAP_PRESERVATION.json"]["rows"]}}
     clean_trace = dict(arts["TRACE_CHECK.json"], findings=[])
+    clean_class = dict(arts["SOURCE_CLASSIFICATION.json"], unmatched=[], rule_problems=[])
     results = []
 
     def run(name, mutate, expect_open):
         a, d = copy.deepcopy(arts), copy.deepcopy(full)
         a["TRACE_CHECK.json"] = copy.deepcopy(clean_trace)
+        a["SOURCE_CLASSIFICATION.json"] = copy.deepcopy(clean_class)
         mutate(a, d)
         s = judge(a["REF_INVENTORY.json"], a["SOURCE_LEDGER.json"], a["OVERLAP_PRESERVATION.json"],
-                  a["TRACE_CHECK.json"], d)
+                  a["TRACE_CHECK.json"], d, a["SOURCE_CLASSIFICATION.json"])
         ok = (s["status"] == "OPEN") == expect_open
         results.append({"id": name, "passed": ok, "status": s["status"]})
 
@@ -524,9 +581,36 @@ def cmd_selftest() -> int:
         lambda a, d: a["REF_INVENTORY.json"]["rows"].append(
             {"kind": "pull", "id": "PR-999", "state": "PR_ONLY_HEAD", "needs_disposition": True}), True)
     run("INFERRED_EFFECT_REPORTED_AS_OBSERVED",
-        lambda a, d: d["source"]["backend/"].update(evidence_grade="OBSERVED", basis="INFERRED"), True)
-    run("CLASSIFICATION_WITHOUT_EVIDENCE",
-        lambda a, d: d["source"]["trading/"].pop("evidence"), True)
+        lambda a, d: next(iter(d["refs"].values())).update(evidence_grade="OBSERVED", basis="INFERRED"), True)
+    run("DISPOSITION_WITHOUT_EVIDENCE",
+        lambda a, d: next(iter(d["overlap"].values())).pop("evidence"), True)
+    run("UNCLASSIFIED_SOURCE_FILE",
+        lambda a, d: a["SOURCE_CLASSIFICATION.json"]["unmatched"].append("backend/van_gateway/new.py"), True)
+
+    # Classification-level mutations run the real rules against the real ledger.
+    rules_doc = load(RULES)
+    unit_ids = {u["id"] for u in load(PKG / "plan/DEVELOPMENT_PLAN.json")["units"]}
+
+    def class_mut(name, edit, expect):
+        doc = copy.deepcopy(rules_doc)
+        edit(doc)
+        c = classify(arts["SOURCE_LEDGER.json"], doc, unit_ids)
+        results.append({"id": name, "passed": expect(c), "problems": c["rule_problems"][:2],
+                        "unmatched": len(c["unmatched"])})
+
+    class_mut("RULE_NAMES_UNKNOWN_UNIT", lambda d: d["rules"][0]["units"].append("BE-999"),
+              lambda c: any(p.startswith("RULE_UNKNOWN_UNIT") for p in c["rule_problems"]))
+    class_mut("REMOVED_RULE_LEAVES_FILES_UNOWNED",
+              lambda d: d["rules"].__setitem__(slice(None), [r for r in d["rules"] if r["id"] != "R-SERVICES"]),
+              lambda c: any(u.startswith("services/") for u in c["unmatched"]))
+    class_mut("SHADOWED_RULE_DETECTED",
+              lambda d: d["rules"].insert(0, {"id": "R-SHADOW", "re": "^backend/", "kind": "TOOLING",
+                                              "units": ["BE-033"], "class": "RETAIN", "why": "x"}),
+              lambda c: any(p.startswith("RULE_MATCHES_NOTHING") for p in c["rule_problems"]))
+    run("REF_DISPOSITION_OMITS_A_PATH",
+        lambda a, d: (a["REF_INVENTORY.json"]["rows"].append(
+            {"kind": "pull", "id": "PR-998", "needs_disposition": True, "missing_blob_paths": ["a.py", "b.kt"]}),
+            d["refs"].__setitem__("PR-998", {"decision": "X", "evidence": "x", "paths": {"a.py": "PRESERVED"}})), True)
     run("DROPPED_SYMBOL_IN_OVERLAP",
         lambda a, d: a["OVERLAP_PRESERVATION.json"]["rows"].append(
             {"id": "OVL:x.py:opus", "missing_symbols": ["AccountService.lockout"]}), True)
