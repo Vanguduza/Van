@@ -1,5 +1,12 @@
 # VAN
 
+## Current rebuild starting point
+
+The owner-requested source consolidation for **Rev1.18** starts at [CLAUDE.md](CLAUDE.md) and [START_HERE](docs/consolidation/START_HERE.md). [CONSOLIDATION_STATE.json](CONSOLIDATION_STATE.json) pins source inputs, the exact blueprint package and the full 70-branch evaluation. This is a development baseline, not a completed Rev1.18 implementation or release qualification.
+
+Use the active package's canonical authority and effective acceptance registry for new work. The architecture and quick-start text below describe the inherited application. Historical plans and dated evidence remain available for provenance and do not create a second active programme.
+
+
 DIAL's owner-facing AI personal assistant and operator.
 
 Hermes profile `van` owns agent execution. VAN provides Android embodiment, owner authority, deterministic attention/reminders, Google capability mediation, and a fail-closed secure gateway.

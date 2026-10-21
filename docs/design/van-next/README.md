@@ -1,3 +1,5 @@
+> **Historical design lineage.** The active rebuild is Rev1.18 under `docs/review-inputs/van-rev115/package/`. Read its `CANONICAL_AUTHORITY.json` and the repository `CLAUDE.md`. The plans, freezes and evidence in this directory are retained provenance, not a competing execution programme. Source-bound historical evidence remains unchanged.
+
 # VAN Next — Tactile Spatial rebuild design pack
 
 Design and programme documents for rebuilding VAN's Android frontend in the owner-approved Tactile Spatial style without losing existing functions. Nothing here is implemented, deployed or device-qualified.
