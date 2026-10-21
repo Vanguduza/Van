@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20260930-owner-derived-programme-a-ci-readme-rulesets",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "1fb51f92482bc51e4c6d7fc1ef508b3070a56c0d024dd773927367162ce72dfb",
+  "owner_instruction_digest_input": "UTF-8 bytes of the verbatim owner message \"Yes to owner derived treatment and  enforce van's ledger\", no quotes, no trailing newline",
+  "owner_instruction_record": "docs/decisions/OWNER-DECISION-20260930-OWNER-DERIVED-AND-LEDGER-ENFORCEMENT.md",
+  "owner_instruction_excerpt": "Yes to owner derived treatment and  enforce van's ledger",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "claude_code",
+    "request_id": "claude-code-session_01ELKqm4GCPmPvF3ggKkgB1J-20260930",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "signature_note": "Derived authority; no signature claimed. Review I8 found the CI README omitted that the owner must restrict creation of and direct pushes to gpt/** for the ledger check to be enforceable; documenting that follows 'enforce van's ledger'. Byte-identical to Programme B's README change. The owner did not review this diff.",
+  "purpose": "Authorize unit G15-a's CI README mirror (gpt/** ruleset: restrict creations, require a pull request).",
+  "authorized_paths": [
+    "tools/ci/README.md"
+  ],
+  "commit_scope": {
+    "commits": [
+      "741b8b8801370d037469d2da12f754a89f355d9d"
+    ]
+  },
+  "limits": [
+    "Covers only the listed paths in the listed commits.",
+    "May not redefine product, money, security or owner-control intent.",
+    "Opens no production gate; not reusable."
+  ],
+  "issued_at_utc": "2026-09-30T00:00:00Z",
+  "recorded_by": "integrator (session_01ELKqm4GCPmPvF3ggKkgB1J)",
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false,
+  "reusable": false,
+  "revoked": false
+}

@@ -152,6 +152,13 @@ object SpeechFusionEngine {
 class VoiceSecondPassCoordinator(
     private val engine: LocalSecondPassAsr,
 ) {
+    fun isReady(): Boolean = engine.isReady()
+
+    fun transcribePrimary(pcm16: ByteArray, biasingStrings: List<String>): LocalAsrResult {
+        check(engine.isReady()) { "local_asr_unavailable" }
+        return engine.transcribe(pcm16, biasingStrings)
+    }
+
     fun shouldRun(android: VoiceRecognitionResult, knownPersonalConfusion: Boolean = false): SecondPassDecision =
         if (!engine.isReady()) SecondPassDecision(false, emptySet())
         else VoiceSecondPassPolicy.decide(android, knownPersonalConfusion)

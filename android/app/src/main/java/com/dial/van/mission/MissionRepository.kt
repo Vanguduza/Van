@@ -122,8 +122,12 @@ class MissionRepository(private val client: VanGatewayClient) {
     suspend fun revertAdaptation(changeId: String) = client.revertAdaptation(changeId)
     suspend fun confirmAdaptation(changeId: String) = client.confirmAdaptation(changeId)
 
-    suspend fun cancel(missionId: String) = client.cancelMission(missionId)
-    suspend fun message(missionId: String, text: String) = client.messageMission(missionId, text)
+    suspend fun cancel(missionId: String): JSONObject = client.cancelMission(missionId).also {
+        MissionIntervention.requireCancelled(missionId, it.optString("mission_id"), it.optString("state"))
+    }
+    suspend fun message(missionId: String, text: String): JSONObject = client.messageMission(missionId, text).also {
+        MissionIntervention.requireMessageRecorded(it.optBoolean("recorded"), it.optString("event_id"))
+    }
     suspend fun resolveDecision(decisionId: String, approved: Boolean) =
         client.resolveDecision(decisionId, approved)
 

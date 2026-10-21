@@ -45,10 +45,12 @@
       "latency_tier": "T3",
       "licence": "MIT",
       "licence_class": "PERMISSIVE",
-      "observed_version": "4.1.0 pinned by deploy/van-trading-core/browser/package.json",
+      "observed_version": "4.1.0 (upstream release commit cd7b230778cf92269e4cb90e80d97f5113781c51, npm integrity sha512-PJikMBVoaCRh6TFD7GcmeISmsMq4IwUu1BD5FOsGUVDUxrVqZomWa6W6dF+a/zu4xRZu2Z2xX1nXVMDaCuZWsw==) pinned by deploy/van-browser-core/browser/package.json",
       "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
       "constraints": [
         "local/CDP mode is the default VAN production mode",
+        "production placement is the van-browser-core trust zone only (owner decision 2026-09-29 §1); never van-trading-core, dial-control or van-private-core; if van-browser-core is unavailable Stagehand is PRODUCTION_DISABLED",
+        "model is anthropic/claude-sonnet-5 (owner decision 2026-09-29 §4); no silent downgrade or substitution",
         "cloud Browserbase use is a separate optional external gate",
         "semantic output is UNTRUSTED_EXTERNAL evidence, never owner authority",
         "Stagehand cannot send, modify or cancel broker orders",

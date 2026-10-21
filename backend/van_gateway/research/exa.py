@@ -19,6 +19,10 @@ class ResearchPolicyError(ValueError):
     pass
 
 
+class ResearchProviderError(RuntimeError):
+    """Safe provider fault codes; never return transport URLs or credential details."""
+
+
 _SECRET_PATTERNS = (
     re.compile(r"(?i)\b(?:api[_-]?key|access[_-]?token|refresh[_-]?token|client[_-]?secret|password|passwd)\b\s*[:=]\s*\S+"),
     re.compile(r"\bsk-[A-Za-z0-9_-]{16,}\b"),
@@ -93,10 +97,27 @@ class ExaResearchService:
         if request.category:
             body["category"] = request.category
 
-        async with httpx.AsyncClient(base_url=self.base_url, timeout=self.timeout_seconds, transport=self.transport) as client:
-            response = await client.post("/search", headers={"x-api-key": self._api_key, "Content-Type": "application/json"}, json=body)
-        response.raise_for_status()
-        payload = response.json()
+        try:
+            async with httpx.AsyncClient(base_url=self.base_url, timeout=self.timeout_seconds, transport=self.transport) as client:
+                response = await client.post("/search", headers={"x-api-key": self._api_key, "Content-Type": "application/json"}, json=body, follow_redirects=False)
+            if response.status_code >= 300:
+                raise ResearchProviderError(f"exa_http_{response.status_code}")
+            if len(response.content) > 4 * 1024 * 1024:
+                raise ResearchProviderError("exa_response_malformed")
+            try:
+                payload = response.json()
+            except ValueError as exc:
+                raise ResearchProviderError("exa_response_malformed") from exc
+            self._validate_response(payload, request.max_results)
+        except httpx.TimeoutException as exc:
+            await self._invalidate_readiness()
+            raise ResearchProviderError("exa_timeout") from exc
+        except httpx.HTTPError as exc:
+            await self._invalidate_readiness()
+            raise ResearchProviderError("exa_unreachable") from exc
+        except ResearchProviderError:
+            await self._invalidate_readiness()
+            raise
         sources: list[ResearchSource] = []
         retrieved_at = int(time.time() * 1000)
         for raw in payload.get("results", []):
@@ -161,9 +182,45 @@ class ExaResearchService:
             evidence_pointer=f"gateway://research/{research_id}",
         )
 
+    async def _invalidate_readiness(self) -> None:
+        # A historical canary must not keep claiming READY after an observed
+        # provider outage or a malformed response.
+        await self.store.execute("DELETE FROM runtime_meta WHERE key='exa_ready_evidence_pointer'")
+
+    @staticmethod
+    def _validate_response(payload: object, max_results: int) -> None:
+        if not isinstance(payload, dict) or not isinstance(payload.get("results"), list):
+            raise ResearchProviderError("exa_response_malformed")
+        if len(payload["results"]) > max_results:
+            raise ResearchProviderError("exa_response_malformed")
+        for field in ("requestId", "resolvedSearchType"):
+            if payload.get(field) is not None and not isinstance(payload[field], str):
+                raise ResearchProviderError("exa_response_malformed")
+        if payload.get("costDollars") is not None and not isinstance(payload["costDollars"], dict):
+            raise ResearchProviderError("exa_response_malformed")
+        # Validate the entire batch before persisting a single evidence row.
+        # A valid first result cannot hide a malformed later source.
+        for raw in payload["results"]:
+            if not isinstance(raw, dict) or not isinstance(raw.get("url"), str):
+                raise ResearchProviderError("exa_response_malformed")
+            try:
+                url = urlparse(raw["url"].strip())
+                if url.scheme not in {"http", "https"} or not url.hostname or url.username or url.password:
+                    raise ValueError("invalid source URL")
+                url.port
+            except ValueError as exc:
+                raise ResearchProviderError("exa_response_malformed") from exc
+            for field in ("title", "publishedDate", "author", "id"):
+                if raw.get(field) is not None and not isinstance(raw[field], str):
+                    raise ResearchProviderError("exa_response_malformed")
+            highlights = raw.get("highlights", [])
+            if not isinstance(highlights, list) or len(highlights) > 64 or any(not isinstance(item, str) for item in highlights):
+                raise ResearchProviderError("exa_response_malformed")
+
     async def certify_canary(self, request: ResearchSearchRequest) -> dict[str, object]:
         result = await self.search(request)
         if not result.sources:
+            await self._invalidate_readiness()
             raise ResearchPolicyError("exa_canary_returned_no_sources")
         pointer = result.evidence_pointer
         await self.store.execute(

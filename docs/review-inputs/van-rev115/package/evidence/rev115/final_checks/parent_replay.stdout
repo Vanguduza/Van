@@ -1,0 +1,6 @@
+{
+  "scope": "EXACT_PARENT_DOCUMENT_PROBE_REPLAY_ONLY",
+  "equal": true,
+  "probes": 11,
+  "application_tests_executed": 0
+}

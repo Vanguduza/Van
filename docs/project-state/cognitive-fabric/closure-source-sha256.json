@@ -1,0 +1,28 @@
+{
+  "algorithm": "sha256",
+  "files": [
+    {
+      "path": "trading/vati/cognition/fabric.py",
+      "sha256": "4c00d8c0c8d8b9eb6cdb7e21f96419ab3c7005f5f158a75b041c66768a0a93e6"
+    },
+    {
+      "path": "trading/vati/cognition/packet_producer.py",
+      "sha256": "c8b938ed3574cb53d3365551aa06fc1c0144629a1df242a3ca2afecf60156746"
+    },
+    {
+      "path": "trading/vati/app/account_service.py",
+      "sha256": "000d5abc25c346c589c59460ee8976de4899f7ce88404598cd602fc3f24d2ac0"
+    },
+    {
+      "path": "trading/tests/test_vati_cognitive_fabric.py",
+      "sha256": "17f5ad5de86e8dcaa9ec54466b046107039c734c56aecb2dcba2bd582eacb896"
+    },
+    {
+      "path": "trading/tests/test_cognitive_packet_producer.py",
+      "sha256": "002bd2c5d80c1ab34d837adf2cf091c15644ff9da0404ecca0561e4fb3a2ec53"
+    }
+  ],
+  "new_source_author": "Codex",
+  "muse_original_source_recovered": false,
+  "qualification": "SOURCE_AND_LOCAL_TESTS_ONLY"
+}

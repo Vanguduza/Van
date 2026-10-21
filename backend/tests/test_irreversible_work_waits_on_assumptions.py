@@ -132,8 +132,34 @@ async def test_falsifying_without_evidence_is_refused(kernel, mission):
     await kernel.resolve_assumption(
         a.assumption_id, status=AssumptionStatus.FALSIFIED,
         evidence_refs=["provider-readback://notebook/n1#absent"],
+        independent_observer=True,
     )
     await kernel.assert_safe_for_irreversible_work(mission.mission_id)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('status', [AssumptionStatus.VERIFIED, AssumptionStatus.FALSIFIED])
+async def test_planner_evidence_strings_do_not_resolve_a_blocker(kernel, mission, status):
+    assumption = await _blocker(kernel, mission)
+    with pytest.raises(ReasoningError) as refused:
+        await kernel.resolve_assumption(assumption.assumption_id, status=status,
+                                        evidence_refs=['provider-readback://invented'])
+    assert refused.value.code == 'ASSUMPTION_RESOLUTION_REQUIRES_INDEPENDENT_OBSERVATION'
+    with pytest.raises(ReasoningError):
+        await kernel.assert_safe_for_irreversible_work(mission.mission_id)
+
+
+@pytest.mark.asyncio
+async def test_superseding_with_low_importance_cannot_discharge_high_impact_obligation(kernel, mission):
+    original = await _blocker(kernel, mission)
+    replacement = await kernel.record_assumption(mission_id=mission.mission_id, claim='trivial replacement',
+                                                  source='planner', importance=Importance.LOW)
+    with pytest.raises(ReasoningError) as refused:
+        await kernel.resolve_assumption(original.assumption_id, status=AssumptionStatus.SUPERSEDED,
+                                        superseded_by=replacement.assumption_id)
+    assert refused.value.code == 'ASSUMPTION_REPLACEMENT_WEAKENS_BLOCKER'
+    with pytest.raises(ReasoningError):
+        await kernel.assert_safe_for_irreversible_work(mission.mission_id)
 
 
 @pytest.mark.asyncio
@@ -389,9 +415,19 @@ async def test_the_gate_is_passable_and_stops_being_the_reason_for_refusal(runti
 
     resolved = await ac.post(
         f"/v1/runtime/reasoning/assumptions/{assumption.assumption_id}/resolve",
-        json={"status": "VERIFIED", "evidence_refs": ["provider-readback://notebook/nb-1"]},
+        json={"status": "VERIFIED", "evidence_refs": ["provider-readback://notebook/nb-1"], "independent_observer": True},
     )
-    assert resolved.status_code == 200
+    assert resolved.status_code == 409
+    assert resolved.json()["detail"] == "ASSUMPTION_RESOLUTION_REQUIRES_INDEPENDENT_OBSERVATION"
+    # Supplying an evidence string does not clear the planner's own blocker.
+    still_blocked = await ac.post("/v1/runtime/actions/begin", json=_begin(command_id))
+    assert still_blocked.json()["detail"] == "MISSION_HAS_UNVERIFIED_HIGH_IMPACT_ASSUMPTIONS"
+    # An explicitly trusted test observer isolates the kernel's legitimate resolution
+    # path. Production still needs a deterministic assumption-specific observer.
+    await kernel.resolve_assumption(
+        assumption.assumption_id, status=AssumptionStatus.VERIFIED,
+        evidence_refs=["provider-readback://notebook/nb-1"], independent_observer=True,
+    )
 
     response = await ac.post("/v1/runtime/actions/begin", json=_begin(command_id))
     assert response.json().get("detail") != "MISSION_HAS_UNVERIFIED_HIGH_IMPACT_ASSUMPTIONS"

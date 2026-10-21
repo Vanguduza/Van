@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import re
+import json
+from decimal import Decimal
 from enum import Enum
 from typing import Any
 
@@ -10,7 +12,10 @@ from van_gateway.action.models import VerifierType
 from van_gateway.action.registry import BUILTIN_ACTIONS
 from van_gateway.command.context_requirements import OWNER_SUBJECT
 from van_gateway.models import ActionClass
+from van_gateway.context.forget import FORGETTABLE
 from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
+from van_gateway.proactive.owner_control import ceiling_parameters
+from van_gateway.capability.owner_permissions import permission_parameters
 
 
 class ResolutionMode(str, Enum):
@@ -41,6 +46,26 @@ _MUTATION_WORDS = {
 
 def _normalize(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip()).casefold()
+
+
+def canonical_positive_decimal(value: Any) -> str:
+    """Bounded plain-decimal owner amounts; never round through float/context."""
+    if not isinstance(value, str) or len(value) > 128 or not re.fullmatch(r"[0-9]+(?:\.[0-9]+)?", value):
+        raise ValueError("amount must be a bounded positive plain decimal string")
+    amount = Decimal(value)
+    if not amount.is_finite() or amount <= 0:
+        raise ValueError("amount must be finite and positive")
+    rendered = format(amount, "f")
+    return rendered.rstrip("0").rstrip(".") if "." in rendered else rendered
+
+
+def _unique_json_object(pairs):
+    result = {}
+    for name, value in pairs:
+        if name in result:
+            raise ValueError("duplicate confirmation property")
+        result[name] = value
+    return result
 
 
 def _slugify_predicate(text: str) -> str:
@@ -94,6 +119,20 @@ class TypedCommandResolver:
         """
         self.default_notebook_id = (default_notebook_id or "").strip()
 
+    JEV_MODULE_TRANSITION_PATTERN = re.compile(
+        r"^(?:set|move) jev module (?P<module_id>[A-Za-z0-9._-]+) to "
+        r"(?P<target>DISABLED|SHADOW|ADVISORY|ACTIVE_GATED|ACTIVE|QUARANTINED|BYPASSED)$",
+        re.IGNORECASE,
+    )
+    JEV_GLOBAL_CONTROL_PATTERN = re.compile(
+        r"^(?P<operation>enable|disable|bypass|restore) jev(?: globally)?$",
+        re.IGNORECASE,
+    )
+    JEV_PROJECT_CONTROL_PATTERN = re.compile(
+        r"^(?P<operation>enable|disable) jev for project (?P<project_id>[A-Za-z0-9._-]+)$",
+        re.IGNORECASE,
+    )
+
     HALT_TRADING = {
         "halt trading",
         "stop trading",
@@ -127,6 +166,10 @@ class TypedCommandResolver:
     NOTEBOOK_ENTERPRISE_DELETE_PATTERN = re.compile(
         r"^(?:delete|remove)\s+(?:the\s+)?(?:gemini\s+)?notebook enterprise notebook id\s+"
         r"(?P<notebook_id>[A-Za-z0-9._:/-]+)$",
+        re.IGNORECASE,
+    )
+    GMAIL_SEND_DRAFT_PATTERN = re.compile(
+        r"^send\s+(?:gmail\s+)?draft\s+id\s+(?P<draft_id>[A-Za-z0-9_-]{1,256})$",
         re.IGNORECASE,
     )
     NOTEBOOK_ENTERPRISE_DELETE_SOURCES_PATTERN = re.compile(
@@ -198,9 +241,169 @@ class TypedCommandResolver:
         re.IGNORECASE,
     )
 
+    DISABLE_STANDING_INTENT_PATTERN = re.compile(
+        r"^disable standing intent (?P<intent_id>[A-Za-z0-9._-]{1,256})$", re.IGNORECASE,
+    )
+    ERASE_MEMORY_STORE_PATTERN = re.compile(r"^forget owner-derived memory store (?P<store>[a-z_]+)$", re.IGNORECASE)
+
     def resolve(self, text: str) -> CommandResolution:
         raw_compact = re.sub(r"\s+", " ", text.strip())
         normalized = raw_compact.casefold()
+
+        record = re.fullmatch(r"forget owner-derived memory record ([a-z_]+) (mr_[0-9a-f]{64}) ([0-9a-f]{64})",raw_compact)
+        if record:
+            from van_gateway.understanding.records import record_parameters
+            try:
+                parameters=record_parameters(*record.groups())
+                return _from_action("memory.erase",text=normalized,intent_id="OWNER_DERIVED_MEMORY_RECORD_ERASURE",
+                    parameters=parameters,rule_id="memory.erase.record.exact.v1")
+            except ValueError:
+                pass
+
+        match = re.fullmatch(r"grant owner permission\s+(\{.*\})", text.strip(), re.IGNORECASE | re.DOTALL)
+        if match and len(match.group(1).encode()) <= 8192:
+            try:
+                parameters = permission_parameters(json.loads(match.group(1), object_pairs_hook=_unique_json_object))
+                return _from_action("owner.permission.grant", text=normalized, intent_id="OWNER_PERMISSION_GRANT",
+                    parameters=parameters, rule_id="owner.permission.grant.exact.v1")
+            except (ValueError, TypeError, RecursionError):
+                pass
+
+        match = re.fullmatch(r"prepare browser task\s+(\{.*\})", text.strip(), re.IGNORECASE | re.DOTALL)
+        if match and len(match.group(1).encode()) <= 8192:
+            try:
+                values = json.loads(match.group(1), object_pairs_hook=_unique_json_object)
+                if (set(values) != {"session_id","target_domain","goal"}
+                    or not isinstance(values["session_id"], str) or not re.fullmatch(r"[A-Za-z0-9._:-]{1,256}",values["session_id"])
+                    or not isinstance(values["goal"], str) or not 1 <= len(values["goal"].strip()) <= 1000
+                    or any(ord(c)<32 for c in values["goal"])
+                    or not isinstance(values["target_domain"],str)
+                    or not re.fullmatch(r"[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?",values["target_domain"])
+                    or ".." in values["target_domain"]):
+                    raise ValueError("browser_preparation_exact_parameters_required")
+                return _from_action("browser.task.prepare", text=normalized, intent_id="OWNER_BROWSER_PREPARATION",
+                    parameters=values, rule_id="browser.task.prepare.exact.v1")
+            except (ValueError, TypeError, RecursionError):
+                pass
+
+        match = re.fullmatch(r"submit browser file\s+(\{.*\})", text.strip(), re.IGNORECASE | re.DOTALL)
+        if match and len(match.group(1).encode()) <= 1024:
+            try:
+                values = json.loads(match.group(1), object_pairs_hook=_unique_json_object)
+                if (not isinstance(values, dict) or set(values) != {"session_id", "request_id", "request_sha256"}
+                    or not all(isinstance(values[k], str) and re.fullmatch(r"[A-Za-z0-9._:-]{1,256}", values[k])
+                               for k in ("session_id", "request_id"))
+                    or not isinstance(values["request_sha256"], str)
+                    or not re.fullmatch(r"[0-9a-f]{64}", values["request_sha256"])):
+                    raise ValueError("browser_file_provider_exact_parameters_required")
+                return _from_action("browser.file.provider.submit", text=normalized, intent_id="OWNER_BROWSER_FILE_SUBMISSION",
+                    parameters=values, rule_id="browser.file.provider.submit.exact.v1")
+            except (ValueError, TypeError, RecursionError):
+                pass
+
+        match = re.fullmatch(r"execute browser plan\s+(\{.*\})", text.strip(), re.IGNORECASE | re.DOTALL)
+        if match and len(match.group(1)) <= 1024:
+            try:
+                values = json.loads(match.group(1), object_pairs_hook=_unique_json_object)
+                if (set(values) != {"session_id", "plan_id", "plan_sha256"}
+                    or not all(isinstance(values[k],str) and re.fullmatch(r"[A-Za-z0-9._:-]{1,256}",values[k]) for k in ["session_id","plan_id"])
+                    or not isinstance(values["plan_sha256"],str) or not re.fullmatch(r"[0-9a-f]{64}",values["plan_sha256"])):
+                    raise ValueError("browser_plan_exact_parameters_required")
+                return _from_action("browser.plan.execute", text=normalized, intent_id="OWNER_BROWSER_PLAN",
+                    parameters=values,rule_id="browser.plan.execute.exact.v1")
+            except (ValueError, TypeError, RecursionError):
+                pass
+
+        match = re.fullmatch(r"set domain autonomy ceiling\s+(\{.*\})", text.strip(), re.IGNORECASE | re.DOTALL)
+        if match and len(match.group(1)) <= 512:
+            try:
+                parameters = ceiling_parameters(json.loads(match.group(1), object_pairs_hook=_unique_json_object))
+                return _from_action("owner.autonomy.ceiling.set", text=normalized,
+                    intent_id="OWNER_DOMAIN_AUTONOMY_CEILING", parameters=parameters,
+                    rule_id="owner.autonomy.ceiling.set.exact.v1")
+            except (ValueError, TypeError, RecursionError):
+                pass
+
+        match = re.fullmatch(r"confirm trading ticket\s+(\{.*\})", text.strip(), re.IGNORECASE | re.DOTALL)
+        if match and len(match.group(1)) <= 2048:
+            try:
+                values = json.loads(match.group(1), object_pairs_hook=_unique_json_object)
+                if set(values) != {"ticket_id", "fill_price", "filled_qty", "contract_note_ref"}:
+                    raise ValueError("exact confirmation fields are required")
+                if not isinstance(values["ticket_id"], str) or not re.fullmatch(r"[A-Za-z0-9._:-]{1,256}", values["ticket_id"]):
+                    raise ValueError("ticket identifier invalid")
+                note = values["contract_note_ref"]
+                if not isinstance(note, str) or not 1 <= len(note.strip()) <= 512 or any(ord(c) < 32 for c in note):
+                    raise ValueError("contract note reference invalid")
+                parameters = {"ticket_id": values["ticket_id"],
+                    "fill_price": canonical_positive_decimal(values["fill_price"]),
+                    "filled_qty": canonical_positive_decimal(values["filled_qty"]),
+                    "contract_note_ref": note.strip()}
+                return _from_action("trading.ticket.confirm", text=normalized, intent_id="TRADING_TICKET_CONFIRM",
+                    parameters=parameters, rule_id="trading.ticket.confirm.exact.v1")
+            except (ValueError, TypeError, RecursionError):
+                pass
+
+        erase_store = None
+        if normalized == "forget all owner-derived memory":
+            erase_store = "all"
+        else:
+            match = self.ERASE_MEMORY_STORE_PATTERN.fullmatch(raw_compact)
+            if match and match.group("store").casefold() in {entry.table for entry in FORGETTABLE}:
+                erase_store = match.group("store").casefold()
+        if erase_store is not None:
+            from van_gateway.context.memory_erasure import selected_stores
+
+            return _from_action(
+                "memory.erase", text=normalized, intent_id="OWNER_MEMORY_ERASURE",
+                parameters={"store": erase_store, "stores": [entry.table for entry in selected_stores(erase_store)]},
+                rule_id="memory.erase.exact.v1",
+            )
+
+        match = self.DISABLE_STANDING_INTENT_PATTERN.fullmatch(raw_compact)
+        if match:
+            return _from_action(
+                "automation.standing_intent.disable", text=normalized,
+                intent_id="AUTOMATION_STANDING_INTENT_DISABLE",
+                parameters={"intent_id": match.group("intent_id")},
+                rule_id="automation.standing_intent.disable.exact.v1",
+            )
+
+        module_transition = self.JEV_MODULE_TRANSITION_PATTERN.fullmatch(raw_compact)
+        if module_transition:
+            return _from_action(
+                "jev.module.transition",
+                text=normalized,
+                intent_id="JEV_MODULE_TRANSITION",
+                parameters={
+                    "module_id": module_transition.group("module_id"),
+                    "target_state": module_transition.group("target").upper(),
+                },
+                rule_id="jev.module.transition.exact.v1",
+            )
+
+        global_control = self.JEV_GLOBAL_CONTROL_PATTERN.fullmatch(raw_compact)
+        if global_control:
+            return _from_action(
+                "jev.global.control",
+                text=normalized,
+                intent_id="JEV_GLOBAL_CONTROL",
+                parameters={"operation": global_control.group("operation").lower()},
+                rule_id="jev.global.control.exact.v1",
+            )
+
+        project_control = self.JEV_PROJECT_CONTROL_PATTERN.fullmatch(raw_compact)
+        if project_control:
+            return _from_action(
+                "jev.global.control",
+                text=normalized,
+                intent_id="JEV_PROJECT_CONTROL",
+                parameters={
+                    "operation": project_control.group("operation").lower(),
+                    "project_id": project_control.group("project_id"),
+                },
+                rule_id="jev.project.control.exact.v1",
+            )
 
         if normalized in self.HALT_TRADING:
             return _from_action(
@@ -209,6 +412,13 @@ class TypedCommandResolver:
                 intent_id="TRADING_HALT",
                 parameters={},
                 rule_id="trading.halt.exact.v1",
+            )
+
+        match = self.GMAIL_SEND_DRAFT_PATTERN.fullmatch(raw_compact)
+        if match:
+            return _from_action(
+                "google.gmail.send", text=normalized, intent_id="GMAIL_SEND_DRAFT",
+                parameters={"draft_id": match.group("draft_id")}, rule_id="gmail.send.exact.v1",
             )
 
         for pattern in self.NOTE_WITH_NOTEBOOK_PATTERNS:

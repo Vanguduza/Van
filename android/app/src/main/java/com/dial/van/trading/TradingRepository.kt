@@ -2,19 +2,14 @@ package com.dial.van.trading
 
 import com.dial.van.gateway.VanGatewayClient
 
-/** One place that turns gateway text into models and gateway failure into a named state. Never caches as truth. */
-sealed class Loaded<out T> {
-    data object Loading : Loaded<Nothing>()
-    data class Ready<T>(val value: T) : Loaded<T>()
-    data class Unavailable(val reason: String) : Loaded<Nothing>()
-}
-
+/** The owner screens share one gateway; a failed section never fabricates an empty ledger. */
 class TradingRepository(private val client: VanGatewayClient) {
     private suspend fun <T> load(parse: (String) -> T?, call: suspend () -> String): Loaded<T> =
-        runCatching { call() }.fold(
-            onSuccess = { body -> parse(body)?.let { Loaded.Ready(it) } ?: Loaded.Unavailable("Gateway response unreadable") },
-            onFailure = { Loaded.Unavailable("Gateway unreachable: ${it.message?.take(80) ?: "no detail"}") },
-        )
+        loadTradingData(parse, call)
+
+    suspend fun status(): Loaded<TradingRuntimeReadModel> = load(TradingRuntimeReadModel::parse) { client.tradingStatus() }
+
+    suspend fun tickets(): Loaded<TradingTicketList> = load(TradingTicketList::parse) { client.tradingTickets() }
 
     suspend fun portfolio(): Loaded<PortfolioSummary> = load(PortfolioSummary::parse) { client.tradingPortfolio() }
     suspend fun marketStates(symbol: String? = null): Loaded<List<MarketStateCard>> = load({ MarketStateCard.parseAll(it) }) { client.tradingMarketState(symbol) }

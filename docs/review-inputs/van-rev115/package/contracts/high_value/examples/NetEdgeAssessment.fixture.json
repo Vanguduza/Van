@@ -1,0 +1,29 @@
+{
+  "asset_id": "eip155:8453:0x1111111111111111111111111111111111111111",
+  "available_at": "2026-10-17T10:00:00Z",
+  "cash_currency": "USD",
+  "decision_cutoff": "2026-10-17T10:01:00Z",
+  "economic_materiality_floor": "2",
+  "economic_state": "RESEARCH_ONLY",
+  "entry_cash_cost": "100",
+  "existing_risk_authority_ref": null,
+  "expected_exit_proceeds": "112",
+  "expires_at": "2026-10-17T10:05:00Z",
+  "failure_cost": "1",
+  "forecast_ref": "fixture:ExecutionEconomicsForecast:1",
+  "implementation_evidence_level": "SPEC_ONLY",
+  "incremental_exit_costs": "2",
+  "net_ev": "9",
+  "own_sizing_permission": false,
+  "quantity": "10",
+  "quantity_unit": "TOKEN_BASE_UNITS",
+  "quote_ref": "fixture:quote:1",
+  "reality": "SYNTHETIC",
+  "record_id": "fixture:NetEdgeAssessment:1",
+  "research_source_class": "SYNTHETIC",
+  "schema_version": "1.0",
+  "source_refs": [
+    "fixture:controlled-input-only"
+  ],
+  "trade_authorized": false
+}

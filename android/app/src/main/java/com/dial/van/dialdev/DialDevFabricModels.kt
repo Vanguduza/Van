@@ -474,6 +474,22 @@ object DialDevConsequence {
 /** `GET /v1/dial-dev/events` (SSE): `{projection_revision, changed: [...]}` per event. */
 data class DialDevChange(val projectionRevision: String?, val changed: Set<String>)
 
+/** A terminal read-stream refusal. Its reason is the gateway's safe fixed vocabulary. */
+class DialDevStreamUnavailable(rawReason: String?) : RuntimeException(
+    "dial_dev_unavailable: ${safeReason(rawReason)}",
+) {
+    val reason: String = safeReason(rawReason)
+
+    private companion object {
+        val REASONS = setOf(
+            "unconfigured", "credential_invalid", "unreachable", "timeout", "upstream_error",
+            "upstream_auth_refused", "upstream_redirect", "upstream_malformed", "upstream_echoed_credential",
+        )
+
+        fun safeReason(reason: String?): String = reason?.takeIf { it in REASONS } ?: "upstream_error"
+    }
+}
+
 object DialDevSse {
     /**
      * Folds SSE lines into events. `data:` lines accumulate until a blank line dispatches them
@@ -504,6 +520,13 @@ object DialDevSse {
             JSONObject(payload)
         } catch (_: org.json.JSONException) {
             return null
+        }
+        // Once headers have been sent the gateway reports a transport failure as
+        // a terminal SSE payload. Throw so callbackFlow closes with a cause and
+        // the existing read-stream retry policy reconnects; this is not a change
+        // notification and never requests a retry of an owner effect.
+        if (json.opt("error") == "dial_dev_unavailable") {
+            throw DialDevStreamUnavailable(json.opt("reason") as? String)
         }
         return DialDevChange(json.str("projection_revision"), json.optJSONArray("changed").strings().map { it.lowercase() }.toSet())
     }

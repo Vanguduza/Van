@@ -1,0 +1,33 @@
+[Unit]
+Description=VAN profile %i exact-IP public-web egress proxy
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=van-egress-%i
+Group=van-egress-%i
+EnvironmentFile=/etc/van-browser-stream/profiles/%i/egress.env
+WorkingDirectory=/opt/van-browser-stream/src
+ExecStart=/opt/van-browser-stream/venv/bin/python -m services.browser_control_agent.egress_proxy --host 127.0.0.1 --port ${VAN_BROWSER_EGRESS_PORT}
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+ProtectProc=invisible
+ProcSubset=pid
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+ReadOnlyPaths=/opt/van-browser-stream
+InaccessiblePaths=-/var/lib/van-browser-profiles -/var/lib/van-browser-transfers -/etc/van-browser-stream/profiles -/run/docker.sock
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

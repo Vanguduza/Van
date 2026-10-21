@@ -1,0 +1,40 @@
+{
+  "applicability": "IN_DOMAIN",
+  "asset_id": "eip155:8453:0x1111111111111111111111111111111111111111",
+  "available_at": "2026-10-17T10:00:00Z",
+  "calibration_id": "fixture:calibration:1",
+  "calibration_state": "VALID",
+  "cash_currency": "USD",
+  "decision_cutoff": "2026-10-17T10:01:00Z",
+  "expected_exit_proceeds": "112",
+  "expires_at": "2026-10-17T10:05:00Z",
+  "failure_cost": "1",
+  "feature_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "horizon_seconds": 3600,
+  "implementation_evidence_level": "SPEC_ONLY",
+  "included_in_exit_proceeds": [
+    "exit_spread",
+    "exit_impact"
+  ],
+  "incremental_costs": [
+    {
+      "cash_amount": "2",
+      "component": "exit_gas"
+    }
+  ],
+  "model_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "p_fill": 0.7,
+  "quantity": "10",
+  "quantity_unit": "TOKEN_BASE_UNITS",
+  "quote_ref": "fixture:quote:1",
+  "reality": "SYNTHETIC",
+  "record_id": "fixture:ExecutionEconomicsForecast:1",
+  "research_source_class": "SYNTHETIC",
+  "schema_version": "1.0",
+  "side": "BUY",
+  "source_refs": [
+    "fixture:controlled-input-only"
+  ],
+  "target_id": "fixture:executable-exit/1",
+  "trade_authorized": false
+}

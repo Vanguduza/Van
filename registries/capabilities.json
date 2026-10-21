@@ -2,13 +2,140 @@
   "version": "1.0.0",
   "principle": "Rev 1 \u00a77 \u2014 a capability not declared here is not routable for production mutation. This file declares WHAT a capability is and what contract it must meet; it never declares whether one is ready right now. Readiness stays with the subsystem that already owns it (readiness_source), so this registry subsumes the automation and Google registries without becoming a third copy of their state.",
   "readiness_sources": {
-    "STATIC": "Declared-ready. Native gateway reads with no external dependency.",
+    "STATIC": "Declared-ready. Native gateway reads and owner-gated controls with no external dependency.",
     "AUTOMATION_REGISTRY": "automation_capabilities lifecycle \u2014 ready iff an ADMITTED artifact exists.",
     "GOOGLE_MESH": "GoogleIdentityBroker.capability_status \u2014 ready iff state is READY.",
     "EXTERNAL_RUNTIME": "ExternalRuntimeRegistry readiness evidence for a private worker.",
-    "NEVER_ROUTABLE": "Declared so the boundary is auditable, and structurally unroutable by the generic fabric. Not an omission \u2014 a decision."
+    "NEVER_ROUTABLE": "Declared so the boundary is auditable, and structurally unroutable by the generic fabric. Not an omission \u2014 a decision.",
+    "OWNER_ARTIFACT_PROVIDER": "Current exact provider capability receipt plus dedicated admission signer/source TLS bindings; static configuration alone is unavailable."
   },
   "capabilities": [
+    {
+      "capability_id": "browser.file.provider.submit",
+      "provider": "owner_artifact_provider",
+      "executor": "GATEWAY_LOCAL",
+      "capability_class": "BROWSER_INTERACTION",
+      "authority_class": "A4",
+      "requires_network": true,
+      "requires_owner_presence": true,
+      "data_domains": [
+        "owner_browser_file"
+      ],
+      "side_effects": [
+        "WRITE_EXACT_OWNER_FILE_EVIDENCE"
+      ],
+      "idempotency": "NEVER_RETRY",
+      "supports_checkpoint": true,
+      "supports_resume": false,
+      "verification_strategy": "API_READBACK",
+      "latency_class": "SECONDS",
+      "cost_class": "FREE",
+      "privacy_class": "OWNER_PRIVATE",
+      "readiness_source": "OWNER_ARTIFACT_PROVIDER",
+      "fallback_capabilities": [],
+      "no_fallback_reason": "Only the exact signed fresh owner A4 request can admit this file to its qualified provider namespace. An uncertain write is reconciled through readback only; contents remain untrusted evidence."
+    },
+    {
+      "capability_id": "owner.autonomy.ceiling.set",
+      "provider": "van",
+      "executor": "GATEWAY_LOCAL",
+      "capability_class": "NATIVE_CONTROL",
+      "authority_class": "A4",
+      "requires_network": false,
+      "requires_owner_presence": true,
+      "data_domains": [
+        "domain_trust"
+      ],
+      "side_effects": [
+        "WRITE_OWNER_AUTONOMY_CEILING"
+      ],
+      "idempotency": "IDEMPOTENT_WITH_KEY",
+      "supports_checkpoint": true,
+      "supports_resume": false,
+      "verification_strategy": "API_READBACK",
+      "latency_class": "INTERACTIVE",
+      "cost_class": "FREE",
+      "privacy_class": "OWNER_PRIVATE",
+      "readiness_source": "STATIC",
+      "fallback_capabilities": [],
+      "no_fallback_reason": "Only the exact signed owner A4 command with fresh biometric approval may alter this ceiling. Other executors and permission metadata cannot grant it."
+    },
+    {
+      "capability_id": "owner.permission.grant",
+      "provider": "van",
+      "executor": "GATEWAY_LOCAL",
+      "capability_class": "NATIVE_CONTROL",
+      "authority_class": "A4",
+      "requires_network": false,
+      "requires_owner_presence": true,
+      "data_domains": [
+        "owner_permissions"
+      ],
+      "side_effects": [
+        "WRITE_EXACT_OWNER_CONSENT"
+      ],
+      "idempotency": "IDEMPOTENT_WITH_KEY",
+      "supports_checkpoint": true,
+      "supports_resume": false,
+      "verification_strategy": "API_READBACK",
+      "latency_class": "INTERACTIVE",
+      "cost_class": "FREE",
+      "privacy_class": "OWNER_PRIVATE",
+      "readiness_source": "STATIC",
+      "fallback_capabilities": [],
+      "no_fallback_reason": "Exact signed owner A4 consent constrains native use. Provider identity and fresh canonical action authority remain independent requirements."
+    },
+    {
+      "capability_id": "browser.plan.execute",
+      "provider": "browser_control_agent",
+      "executor": "BROWSER_NATIVE_PLAN",
+      "capability_class": "BROWSER_INTERACTION",
+      "authority_class": "A4",
+      "requires_network": true,
+      "requires_owner_presence": true,
+      "data_domains": [
+        "browser_session"
+      ],
+      "side_effects": [
+        "BOUNDED_BROWSER_PLAN_EFFECT"
+      ],
+      "idempotency": "IDEMPOTENT_WITH_KEY",
+      "supports_checkpoint": true,
+      "supports_resume": false,
+      "verification_strategy": "API_READBACK",
+      "latency_class": "INTERACTIVE",
+      "cost_class": "FREE",
+      "privacy_class": "OWNER_PRIVATE",
+      "readiness_source": "EXTERNAL_RUNTIME",
+      "fallback_capabilities": [],
+      "no_fallback_reason": "Only the current broker-owned session, immutable plan, native A4 and independent DOM readback may execute browser effects.",
+      "health_probe": "browser_control_agent"
+    },
+    {
+      "capability_id": "browser.task.prepare",
+      "provider": "van",
+      "executor": "GATEWAY_LOCAL",
+      "capability_class": "NATIVE_CONTROL",
+      "authority_class": "A3",
+      "requires_network": false,
+      "requires_owner_presence": false,
+      "data_domains": [
+        "browser_session"
+      ],
+      "side_effects": [
+        "BIND_OWNER_TASK_TO_COMMAND_MISSION"
+      ],
+      "idempotency": "IDEMPOTENT_WITH_KEY",
+      "supports_checkpoint": true,
+      "supports_resume": false,
+      "verification_strategy": "API_READBACK",
+      "latency_class": "INTERACTIVE",
+      "cost_class": "FREE",
+      "privacy_class": "OWNER_PRIVATE",
+      "readiness_source": "STATIC",
+      "fallback_capabilities": [],
+      "no_fallback_reason": "A signed exact owner command prepares read-only task bindings without starting a worker or delegating browser control."
+    },
     {
       "capability_id": "native.owner_context.read",
       "provider": "van_gateway",

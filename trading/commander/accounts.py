@@ -97,8 +97,6 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
 
     def upsert_record(alias: str, broker: str, *, mode: str = "DEMO_TRADER", currency: str = "USD", label: str = "", server: str = "", login: str = "", bridge_url: str = "", demo: bool = True, mandate_ref: str = "") -> dict:
         r = reg()
-        if alias in r.accounts:
-            r.remove(alias)
         sec = _secrets_path(st, alias)
         if broker in ("DERIV", "CTRADER", "MT5_EA", "MT5"):
             if not sec.is_file():
@@ -107,7 +105,9 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         else:
             cref = CredentialRef()
         try:
-            acc = r.add(Account(alias=alias, broker=broker, mode=mode, currency=currency, label=label or alias, server=server, login=login, bridge_url=bridge_url, credential_ref=cref, demo=demo, mandate_ref=mandate_ref))
+            candidate = Account(alias=alias, broker=broker, mode=mode, currency=currency, label=label or alias, server=server, login=login, bridge_url=bridge_url, credential_ref=cref, demo=demo, mandate_ref=mandate_ref)
+            candidate.validate()
+            acc = r.replace(candidate) if alias in r.accounts else r.add(candidate)
         except AccountRegistryError as exc:
             raise HTTPException(422, str(exc))
         return acc.public()

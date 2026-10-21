@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "status": "CURRENT_SOURCE_REGISTRY_AND_CONTRACTS_PASS_BACKEND_INTEGRATION_PENDING",
+  "production_freeze": {
+    "path": "docs/audit/validation/van-production-source-freeze-2026-10-07.json",
+    "sha256": "40f0838f25e46b414a6db9add55021619cf5a177930aded3823db51517a94beb"
+  },
+  "android_receipt": {
+    "path": "docs/audit/validation/android-owner-controls-final-receipt-2026-10-07.json",
+    "sha256": "443c57f152df18656c228c0cca5cd38737ab1aa6588d56ae49a7ebcc37175d28"
+  },
+  "source_bound_registry_counts": {
+    "features": 42,
+    "screens_and_hosted_surfaces": 70,
+    "endpoints": 307,
+    "schema_components": 165
+  },
+  "functional_feature_status_counts": {
+    "SOURCE_WIRED_REQUIRES_ACCEPTANCE": 30,
+    "EXTERNAL_CONTRACT_OR_ASSET_REQUIRED": 4,
+    "SOURCE_WIRING_INCOMPLETE": 8
+  },
+  "local_contract_checks": {
+    "tests": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 16,
+    "xml": "docs/audit/validation/owner-registry-final-contracts-2026-10-07.xml",
+    "xml_sha256": "8298690eaabfa04fda9a0cbebdaaf31c2afbcb973df8361f753eb41367da8862"
+  },
+  "artifact_hashes": {
+    "registries/owner_features.json": "65f14baa9b3d9589ea494b70dae4b0e7d78ccfb75c7e2fb903503aff0fa1fb34",
+    "registries/owner_screens.json": "193f4ba801995cdee41d9cdff0e2774839b1fa5918f59b674ab7f3f6c911f18c",
+    "registries/owner_endpoints.json": "3c3c81ef082fa7dc606349740c0fe604bf75334f773b7b81656d55626b32061a",
+    "registries/owner_endpoint_schemas.json": "efe5c8bbaf061598f7528041f0335b049ba8e5c78dbeef8baf3a4147785a426d",
+    "docs/audit/OWNER_FRONTEND_CONTRACT.html": "8c9f22e036334f54b86d624a1a08e45b58af63c86eff8403f7ce913e9d5dd7f5",
+    "tests/contracts/test_owner_redesign_registry.py": "bb24753469962450515bfae16121871fe0ee785350ddb34045169be5512611f5",
+    "tests/contracts/test_owner_endpoint_registry.py": "38bed91c7f3df85519bf3aa2cf321b09ea0af276cd19e9f67b93c6246c4ebce1",
+    "tests/contracts/test_stored_command_is_deliverable.py": "bf7174339a0316557d73008684b515cd6c344289509e54a3cf187f8f1d207f3d"
+  },
+  "historical_registry_snapshots": {
+    "owner_features.json": "2ecc45df95683c23366710b2ac4d80d3842b616720604b2eeb6c98a36d642d70",
+    "owner_screens.json": "6d96433451a08ad8ff6d322e5f957a7c805fe1b4d3e0a1edca459852ff421941"
+  },
+  "baseline_fields_unchanged": true,
+  "unresolved_current_citations": 0,
+  "physical_cases_executed": 0,
+  "deployment_accepted": false,
+  "owner_release": false,
+  "scope": "Current supported source contracts and local checks only. Explicit source limitations, upstream gaps, external assets, visual redesign and live qualification remain separately recorded."
+}

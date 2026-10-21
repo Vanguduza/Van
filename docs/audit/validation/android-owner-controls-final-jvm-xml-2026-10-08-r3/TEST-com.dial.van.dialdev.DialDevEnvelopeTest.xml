@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.dialdev.DialDevEnvelopeTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:28" hostname="052fefa249ff" time="0.01">
+  <properties/>
+  <testcase name="a missing freshness is unknown, and unknown reads as stale()" classname="com.dial.van.dialdev.DialDevEnvelopeTest" time="0.003"/>
+  <testcase name="a body without a projection revision is not a projection()" classname="com.dial.van.dialdev.DialDevEnvelopeTest" time="0.0"/>
+  <testcase name="an empty task list is EMPTY, unless DIAL says it is degraded()" classname="com.dial.van.dialdev.DialDevEnvelopeTest" time="0.001"/>
+  <testcase name="fresh data with no degraded subsystems is CONTENT()" classname="com.dial.van.dialdev.DialDevEnvelopeTest" time="0.0"/>
+  <testcase name="DegradedCatalog names every DIAL development subsystem()" classname="com.dial.van.dialdev.DialDevEnvelopeTest" time="0.001"/>
+  <testcase name="an unauthorised phone is an ERROR it cannot retry its way out of()" classname="com.dial.van.dialdev.DialDevEnvelopeTest" time="0.0"/>
+  <testcase name="freshness over the 30 s default is STALE, and stale outranks degraded()" classname="com.dial.van.dialdev.DialDevEnvelopeTest" time="0.001"/>
+  <testcase name="the envelope parses revision, sources, freshness and degraded rows()" classname="com.dial.van.dialdev.DialDevEnvelopeTest" time="0.001"/>
+  <testcase name="workspaces go stale at 10 s()" classname="com.dial.van.dialdev.DialDevEnvelopeTest" time="0.0"/>
+  <testcase name="a non-empty degraded list is DEGRADED with the surviving data()" classname="com.dial.van.dialdev.DialDevEnvelopeTest" time="0.0"/>
+  <testcase name="offline or failed with a last-known projection keeps it on screen as STALE()" classname="com.dial.van.dialdev.DialDevEnvelopeTest" time="0.001"/>
+  <testcase name="a bare degraded key still becomes a row with the catalogue's sentence()" classname="com.dial.van.dialdev.DialDevEnvelopeTest" time="0.0"/>
+  <testcase name="503 dial_dev_unavailable with nothing on screen is a retryable ERROR()" classname="com.dial.van.dialdev.DialDevEnvelopeTest" time="0.0"/>
+  <testcase name="offline with nothing on screen is OFFLINE with no owner work queued()" classname="com.dial.van.dialdev.DialDevEnvelopeTest" time="0.001"/>
+  <testcase name="age keeps growing on the phone after the projection was served()" classname="com.dial.van.dialdev.DialDevEnvelopeTest" time="0.0"/>
+  <testcase name="a refetch in flight keeps the last projection judged by its own age()" classname="com.dial.van.dialdev.DialDevEnvelopeTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

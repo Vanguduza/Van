@@ -447,6 +447,30 @@ print("__VAN_JSON__" + json.dumps({"uploaded": True}))
     return page_info_result(alias, domain)
 
 
+def network_candidates(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]:
+    """Read-only endpoint candidates from the live page's Resource Timing buffer.
+
+    Query strings, fragments, headers, cookies and bodies never leave the worker.
+    This is discovery metadata, not authority to call the discovered endpoint.
+    """
+    script = r"""
+import json
+expr = "(()=>{const out=[];for(const e of performance.getEntriesByType('resource').slice(-512)){try{const u=new URL(e.name,location.href);if(u.protocol!=='http:'&&u.protocol!=='https:')continue;out.push({url:u.origin+u.pathname,initiator_type:String(e.initiatorType||'other')});}catch(_){}}return out;})()"
+items = js(expr) or []
+print("__VAN_JSON__" + json.dumps({"candidates": items[:512]}))
+"""
+    result = run_harness(alias, script)
+    candidates = []
+    for item in result.get("candidates", []):
+        if not isinstance(item, dict):
+            continue
+        url = str(item.get("url") or "")[:4096]
+        initiator = str(item.get("initiator_type") or "other")[:64]
+        if url.startswith(("http://", "https://")):
+            candidates.append({"url": url, "initiator_type": initiator})
+    return {"candidates": candidates[:512], "harness_version": HARNESS_VERSION}
+
+
 def tabs(alias: str, domain: str) -> dict[str, Any]:
     script = r"""
 import json
@@ -474,6 +498,7 @@ OPERATIONS = {
     "/scroll": scroll_page,
     "/wait": wait,
     "/upload": upload,
+    "/network_candidates": network_candidates,
 }
 
 

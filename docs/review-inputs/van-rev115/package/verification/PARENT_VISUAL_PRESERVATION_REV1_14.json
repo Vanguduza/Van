@@ -1,0 +1,58 @@
+{
+  "all_match": true,
+  "files": [
+    {
+      "file": "design/VAN_MATERIAL_TOKENS_REV2.json",
+      "sha256": "d1e844bf9df322e471543774885b6ea05c250312a6ad8df99dcf1e1676d99fb2"
+    },
+    {
+      "file": "design/VAN_TACTILE_SPATIAL_STYLE_REV2.md",
+      "sha256": "4703c254ecb324580cbcadea57587d9fe6b2bc84ec427cc7af9c6e326acf39c8"
+    },
+    {
+      "file": "reference/ACCOUNTS_FUNDS_TECHNICAL_CONTRACT.md",
+      "sha256": "e173fe2a197a6b9408b13190f1f7e8f7c39bdfde058995aa5b2804dd47577866"
+    },
+    {
+      "file": "reference/LEGACY_78_SOURCE.json",
+      "sha256": "34b97daaf8d92951833bc0270998e9ae5159fdeffa078844a8d2d4241cf52d1d"
+    },
+    {
+      "file": "reference/OPUS_NEW_REQUIREMENTS_072_077.json",
+      "sha256": "08966c2a4bc45f78c3134a557e4b94cc88be23ad4f9d1263951b90d548d16a0f"
+    },
+    {
+      "file": "reference/REV1_9B_SOURCE_MASTER.md",
+      "sha256": "f708229674eb95c47f99375faf242388a6b3741ebe9a118fc1c15beebe71e0f7"
+    },
+    {
+      "file": "reference/REV2_ACTION_REGISTRY.json",
+      "sha256": "aeec8ce72bca964b729d6beaf2a0678add6d5b549e57a4249fa27d99a684ab96"
+    },
+    {
+      "file": "reference/REV2_FEATURE_REGISTRY.json",
+      "sha256": "9748ff23550847816fb2a909921002f9d13248f2bfb45e482586b814c91aedb5"
+    },
+    {
+      "file": "reference/REV2_PRODUCT_TRUTH.json",
+      "sha256": "f453251d531845dbd614dafbe49a95f5b3e694fe20008d15944da824bb1fd208"
+    },
+    {
+      "file": "reference/REV2_REQUIREMENTS.json",
+      "sha256": "fc460e016dbed4854d40e1bb7a5e74fc0b8bb52da7062efb2c2ff984990be62b"
+    },
+    {
+      "file": "reference/REV2_SCREEN_OR_SURFACE_REGISTRY.json",
+      "sha256": "d5e5f1cd8f641733edb03a6576787716f35e64f527c653d2af69ae561244a765"
+    },
+    {
+      "file": "reference/SOURCE_PINS.json",
+      "sha256": "05c06310b147f44c0014cf59ef7a5add1916b22c88c096d6306769c30d846656"
+    },
+    {
+      "file": "reference/VAN_STATE_MACHINES_REV1_9.json",
+      "sha256": "7c45ed6cf3eadfdf045e7a08aa446a2227b920b4a0bf75fd8a8e6794fa0fc4c0"
+    }
+  ],
+  "scope": "exact parent reference bytes preserved; not new owner or native qualification"
+}

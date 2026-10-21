@@ -10,7 +10,8 @@ WRAPPER="$VAN_REPO/deploy/van-trading-core/hermes/van-trading-full-commander-std
 fail(){ echo "QUALIFICATION RED: $*" >&2; exit 1; }
 pass(){ echo "✓ $*"; }
 
-[[ "$(hostname)" == "${DIAL_HERMES_HOST_ID:-dial-hermes-control}" ]] || fail "wrong host"
+# Hermes runs on the Netcup host dial-control; dial-hermes-control is its fabric alias.
+case "$(hostname)" in "${DIAL_HERMES_HOST_ID:-dial-control}"|dial-control|dial-hermes-control) ;; *) false ;; esac || fail "wrong host: expected the Hermes host dial-control"
 [[ -f "$HERMES_CONFIG" ]] || fail "Hermes config missing"
 [[ -x "$WRAPPER" ]] || fail "Trading Commander SSH stdio wrapper missing"
 

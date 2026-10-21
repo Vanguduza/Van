@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.telemetry.BrowserStreamTelemetryTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:48" hostname="052fefa249ff" time="0.02">
+  <properties/>
+  <testcase name="counters are deltas and drain to nothing()" classname="com.dial.van.telemetry.BrowserStreamTelemetryTest" time="0.013"/>
+  <testcase name="fps is emitted once a window has closed and not before()" classname="com.dial.van.telemetry.BrowserStreamTelemetryTest" time="0.001"/>
+  <testcase name="a stream that has shown nothing has no frame age()" classname="com.dial.van.telemetry.BrowserStreamTelemetryTest" time="0.0"/>
+  <testcase name="a decoder restart does not subtract, and the readings after it are right()" classname="com.dial.van.telemetry.BrowserStreamTelemetryTest" time="0.0"/>
+  <testcase name="the decoder's first total is not credited to the first flush()" classname="com.dial.van.telemetry.BrowserStreamTelemetryTest" time="0.002"/>
+  <testcase name="a clock that went backwards restarts the window rather than stalling it()" classname="com.dial.van.telemetry.BrowserStreamTelemetryTest" time="0.0"/>
+  <testcase name="a drain before any frame reports nothing at all()" classname="com.dial.van.telemetry.BrowserStreamTelemetryTest" time="0.0"/>
+  <testcase name="a new stream does not inherit the old decoder's baseline()" classname="com.dial.van.telemetry.BrowserStreamTelemetryTest" time="0.001"/>
+  <testcase name="later totals are reported as the delta between them()" classname="com.dial.van.telemetry.BrowserStreamTelemetryTest" time="0.0"/>
+  <testcase name="a counter that went backwards does not erase drops that really happened()" classname="com.dial.van.telemetry.BrowserStreamTelemetryTest" time="0.0"/>
+  <testcase name="a closed stream stops claiming an age()" classname="com.dial.van.telemetry.BrowserStreamTelemetryTest" time="0.0"/>
+  <testcase name="a frozen stream reports a large age rather than going quiet()" classname="com.dial.van.telemetry.BrowserStreamTelemetryTest" time="0.0"/>
+  <testcase name="frame age is how long ago the last frame arrived()" classname="com.dial.van.telemetry.BrowserStreamTelemetryTest" time="0.0"/>
+  <testcase name="dropping zero frames is not an event()" classname="com.dial.van.telemetry.BrowserStreamTelemetryTest" time="0.0"/>
+  <testcase name="a negative or non-finite fps never becomes a sample()" classname="com.dial.van.telemetry.BrowserStreamTelemetryTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

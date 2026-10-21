@@ -8,7 +8,7 @@
 #   repo checkout, venv with requirements-vm.txt [+ nautilus_trader at --with-nautilus]
 #   local Supabase (PostgreSQL authority store) + post-bootstrap VATI ledger reconciliation
 #   systemd: vati-supabase, vati-vekl, vati-commander, vati-session@<alias> (enabled per account)
-#   ufw: deny incoming; 22 and 9133 only from oracle-admin + dial-hermes-control /32s
+#   ufw: deny incoming; 22 and 9133 only from oracle-admin and the dial-control overlay (the old dial-hermes-control A1 was terminated 2026-09-25)
 #
 # MetaTrader 5 CANNOT run on this host: MT5 is a Windows x86-64 program and this VM is ARM64
 # Linux. The MT5 bridge worker runs on a Windows host (windows/mt5_worker) and this VM holds only
@@ -271,12 +271,17 @@ if [[ -n "$PUBLIC_HOST" ]]; then
 else
   (( DRY_RUN )) || die "--public-host is required for the complete production bootstrap"
 fi
+# Owner decision 2026-09-29 §1: Stagehand and the Harness-owned Chromium do not run on
+# van-trading-core in production. Their placement is the van-browser-core trust zone
+# (deploy/van-browser-core/bootstrap.sh on its own host). The historical browser package
+# below is development-only and runs only when explicitly requested for a dev host.
 VEKL_WORKER_HOST="${VAN_VEKL_WORKER_HOST:-}"
-if [[ -n "$VEKL_WORKER_HOST" ]]; then
-  if (( DRY_RUN )); then plan "bootstrap Stagehand/Playwright/Temporal runtime for VEKL worker $VEKL_WORKER_HOST"; else VAN_VEKL_WORKER_HOST="$VEKL_WORKER_HOST" bash "$HERE/browser/bootstrap-browser-runtime.sh"; fi
-  ok "browser development runtime foundation"
+if [[ "${VAN_BROWSER_HISTORICAL_DEV_ONLY:-}" == 1 ]]; then
+  [[ -n "$VEKL_WORKER_HOST" ]] || die "VAN_VEKL_WORKER_HOST is required for the dev-only browser runtime"
+  if (( DRY_RUN )); then plan "bootstrap DEV-ONLY historical browser runtime for VEKL worker $VEKL_WORKER_HOST"; else VAN_BROWSER_HISTORICAL_DEV_ONLY=1 VAN_VEKL_WORKER_HOST="$VEKL_WORKER_HOST" bash "$HERE/browser/bootstrap-browser-runtime.sh"; fi
+  ok "browser development runtime foundation (DEV-ONLY, not production)"
 else
-  (( DRY_RUN )) || die "VAN_VEKL_WORKER_HOST is required for complete production bootstrap"
+  ok "browser runtime not installed on van-trading-core (production placement: van-browser-core)"
 fi
 
 # ---------------------------------------------------------------- public TLS front for the MT5 pull bridge (optional)
@@ -327,7 +332,7 @@ echo "[bootstrap] next: 1) copy $SECRETS/pki/mt5-worker.{crt,key} + ca.crt to th
 echo "[bootstrap]       2) sudo -u vati $VENV/bin/python -m vati accounts add --registry $CONFIG/accounts.json --alias <alias> --broker MT5|DERIV|PAPER ..."
 echo "[bootstrap]       3) write $CONFIG/sessions/<alias>.json and: systemctl enable --now vati-session@<alias>"
 echo "[bootstrap]       4) as ubuntu on van-trading-core, if reported PAIRING_REQUIRED: ~/.local/share/van/spmrf/codex/node_modules/.bin/codex login"
-echo "[bootstrap]       5) on dial-hermes-control: bash deploy/van-trading-core/hermes/install-full-commander-transport.sh"
-echo "[bootstrap]       6) on dial-hermes-control: bash deploy/van-trading-core/hermes/register-commander-mcp.sh && bash deploy/van-trading-core/hermes/register-full-desktop-commander-mcp.sh"
-echo "[bootstrap]       7) on dial-hermes-control: bash deploy/van-trading-core/hermes/qualify-full-desktop-commander-mcp.sh"
+echo "[bootstrap]       5) on dial-control (Hermes): bash deploy/van-trading-core/hermes/install-full-commander-transport.sh"
+echo "[bootstrap]       6) on dial-control (Hermes): bash deploy/van-trading-core/hermes/register-commander-mcp.sh && bash deploy/van-trading-core/hermes/register-full-desktop-commander-mcp.sh"
+echo "[bootstrap]       7) on dial-control (Hermes): bash deploy/van-trading-core/hermes/qualify-full-desktop-commander-mcp.sh"
 echo "[bootstrap]       8) bash deploy/van-trading-core/qualify.sh"

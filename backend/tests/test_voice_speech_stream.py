@@ -285,5 +285,9 @@ class TestTheResumeRouteCarriesIt:
 
         from van_gateway import app as app_module
 
-        source = inspect.getsource(app_module.create_app)
+        import ast
+        module_source = inspect.getsource(app_module)
+        factory = next(node for node in ast.parse(module_source).body
+                       if isinstance(node, ast.FunctionDef) and node.name == "create_app")
+        source = ast.get_source_segment(module_source, factory)
         assert '"response_state": speech_streams.response_state(device_id)' in source

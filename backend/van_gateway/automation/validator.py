@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass, field
+import re
 from typing import Any
 
 from van_gateway.automation.canonical import digest
@@ -32,6 +33,9 @@ from van_gateway.automation.payments import (
     assert_not_automated_payment,
 )
 from van_gateway.automation.policy import AutomationPolicy, PolicyError, load_automation_policy
+from van_gateway.automation.primitive_policy import (
+    PrimitiveSemanticError, assert_primitive_semantics, primitive_semantics, validate_branch_graph,
+)
 from van_gateway.models import ActionClass
 
 
@@ -76,6 +80,10 @@ class WorkflowValidator:
         errors.extend(self._check_steps(ir))
         order, graph_errors = self._check_graph(ir)
         errors.extend(graph_errors)
+        try:
+            validate_branch_graph(ir)
+        except (PrimitiveSemanticError, ValueError) as exc:
+            errors.append(str(exc))
         errors.extend(self._check_effects(ir))
         errors.extend(self._check_payment_boundary(ir))
         errors.extend(self._check_domains(ir))
@@ -83,6 +91,10 @@ class WorkflowValidator:
         errors.extend(self._check_limits(ir))
 
         derived = strongest_class(ir.steps)
+        for step in ir.steps:
+            semantics = primitive_semantics(step)
+            if semantics is not None and RANK[semantics.minimum_action_class.value] > RANK[derived.value]:
+                derived = semantics.minimum_action_class
         errors.extend(self._check_action_class(ir, derived))
 
         if not ir.verifier and any(step.mutates for step in ir.steps):
@@ -122,6 +134,11 @@ class WorkflowValidator:
                 errors.append(f"MISSING_TIMEOUT:{step.step_id}")
             if step.retry_class not in set(RetryClass):
                 errors.append(f"INVALID_RETRY_CLASS:{step.step_id}")
+            if primitive_semantics(step) is not None:
+                try:
+                    assert_primitive_semantics(step)
+                except PrimitiveSemanticError as exc:
+                    errors.append(str(exc))
 
             # §79 — a non-idempotent mutation must never be retried blindly.
             if step.mutates and step.retry_class is RetryClass.IDEMPOTENT:
@@ -226,18 +243,73 @@ class WorkflowValidator:
         return order, errors
 
     def _check_variable_bindings(self, ir: WorkflowIR) -> list[str]:
-        """Reject unbound variables and undefined output references (§145)."""
+        """Validate the same closed dotted references used by compile and callback."""
         errors: list[str] = []
-        defined: set[str] = set(ir.variables) | set(ir.inputs_schema.get("properties", {}))
+        steps = {step.step_id: step for step in ir.steps}
+        outputs: dict[str, str] = {}
         for step in ir.steps:
-            for binding in step.input_bindings.values():
-                if not isinstance(binding, str) or not binding.startswith("$"):
-                    continue
-                name = binding[1:].split(".", 1)[0]
-                if name not in defined:
-                    errors.append(f"UNBOUND_VARIABLE:{step.step_id}:{name}")
             if step.output_name:
-                defined.add(step.output_name)
+                if step.output_name in outputs:
+                    errors.append(f"DUPLICATE_OUTPUT_NAME:{step.output_name}")
+                outputs[step.output_name] = step.step_id
+        parents: dict[str, set[str]] = defaultdict(set)
+        for edge in ir.edges:
+            if edge.from_step in steps and edge.to_step in steps:
+                parents[edge.to_step].add(edge.from_step)
+        input_fields = ir.inputs_schema.get("properties", {})
+        if not isinstance(input_fields, dict):
+            input_fields = {}
+
+        def references(value: Any):
+            if isinstance(value, dict):
+                if value.get("kind") == "LITERAL" and set(value) == {"kind", "value"}:
+                    return
+                if value.get("kind") == "STEP_RESULT":
+                    if (set(value) != {"kind", "step_id", "path", "optional"} or type(value.get("optional")) is not bool
+                            or not isinstance(value.get("step_id"), str) or not isinstance(value.get("path"), str)):
+                        yield "$INVALID.."
+                    else:
+                        yield "$steps." + value["step_id"] + ("." + value["path"] if value["path"] else "")
+                    return
+                for nested in value.values():
+                    yield from references(nested)
+            elif isinstance(value, list):
+                for nested in value:
+                    yield from references(nested)
+            elif isinstance(value, str) and (value.startswith("$") or value.startswith("{{")):
+                yield value
+
+        for step in ir.steps:
+            ancestors: set[str] = set()
+            pending = list(parents[step.step_id])
+            while pending:
+                source = pending.pop()
+                if source not in ancestors:
+                    ancestors.add(source)
+                    pending.extend(parents[source])
+            for binding in references(step.input_bindings):
+                reference = (binding[1:] if binding.startswith("$") else
+                             binding[2:-2].strip() if binding.endswith("}}") else "")
+                path = reference.split(".")
+                if any(re.fullmatch(r"[A-Za-z0-9_-]+", part) is None for part in path):
+                    errors.append(f"UNSUPPORTED_BINDING_EXPRESSION:{step.step_id}")
+                    continue
+                if path[0] == "input":
+                    if len(path) > 1 and path[1] not in input_fields:
+                        errors.append(f"UNBOUND_INPUT_FIELD:{step.step_id}:{path[1]}")
+                    continue
+                if path[0] == "steps":
+                    source = path[1] if len(path) > 1 else ""
+                    if source not in steps:
+                        errors.append(f"UNBOUND_STEP_REFERENCE:{step.step_id}:{source}")
+                        continue
+                else:
+                    source = outputs.get(path[0])
+                    if source is None:
+                        errors.append(f"UNBOUND_VARIABLE:{step.step_id}:{path[0]}")
+                        continue
+                if source not in ancestors:
+                    errors.append(f"BINDING_SOURCE_NOT_ANCESTOR:{step.step_id}:{source}")
         return errors
 
     def _check_effects(self, ir: WorkflowIR) -> list[str]:

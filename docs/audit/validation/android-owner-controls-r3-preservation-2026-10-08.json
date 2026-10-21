@@ -1,0 +1,13 @@
+{
+  "archived_apk": {
+    "bytes": 317069609,
+    "path": "/workspace/van-audit/android-owner-controls-r3-debug-2026-10-08.apk",
+    "sha256": "10d26d0c381714fb7752f176786c16677ef2b939d4cea5f09971e8d1b71ca2bd"
+  },
+  "historical_receipt": {
+    "path": "docs/audit/validation/android-owner-controls-final-receipt-2026-10-08-r3.json",
+    "sha256": "241c214273f5811268bd236773606f75f97af5ccb389a6db5ce7b202be32378b"
+  },
+  "reason": "Preserve exact r3 debug artifact before r4 rebuild for final consent storage-effect freshness guard. Existing copied r3 logs/XML/manifests/receipts unchanged. r3 qualifies its earlier source only.",
+  "schema_version": 1
+}

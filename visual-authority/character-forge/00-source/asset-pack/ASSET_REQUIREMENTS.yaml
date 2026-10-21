@@ -2,9 +2,11 @@ schema_version: 3
 purpose: deterministic source inventory for VAN M1-M5
 requirements:
   canonical_character_board:
-    status: PRESENT
-    path: visual-authority/assets/pack/owner_board_visual_authority.png
-    role: sole image identity authority
+    status: PRESENT_OWNER_SELECTED_HASH_LOCKED
+    path: visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
+    sha256: cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c
+    role: sole primary visual identity authority
+    decision: CF-D-05-REV2_1
   identity_lock:
     status: PRESENT
     path: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml

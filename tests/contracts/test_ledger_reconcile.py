@@ -259,10 +259,13 @@ def test_the_ci_tools_depend_on_no_binary_the_runner_may_not_have():
 
     `git` is exempt: `install_github_workflow.py` is a developer command that commits and
     pushes, and a git-less environment is not one where it has anything to do.
+    `project_truth_ledger.py` is exempt for the same binary: it verifies commits, so it walks
+    git history, and the CI job that runs it checks out with git at fetch-depth 0 first. It
+    runs nothing but git.
     """
     import ast
 
-    exempt = {"install_github_workflow.py"}
+    exempt = {"install_github_workflow.py", "project_truth_ledger.py"}
     offenders = []
     for tool in sorted((ROOT / "tools" / "ci").glob("*.py")):
         if tool.name in exempt:

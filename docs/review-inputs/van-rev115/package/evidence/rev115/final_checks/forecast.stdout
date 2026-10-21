@@ -1,0 +1,238 @@
+{
+  "scope": "DOCUMENT_AND_SYNTHETIC_FIXTURE_ONLY_NOT_ECONOMIC_OR_RUNTIME_QUALIFICATION",
+  "schemas": 18,
+  "fixtures": 12,
+  "findings": [],
+  "mutation_count": 38,
+  "mutations_detected": 38,
+  "mutations": [
+    {
+      "name": "PM procurement introduced as requirement",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM purchase authorized",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM host inferred as operator eligibility",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM fixture relabelled authorized capture",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM threshold absent",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM reviewless exact equivalence",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM missing opposite bid replaced with ask",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM wrong complementary ask",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM sequence gap marked healthy",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM observation available after decision",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM negative book quantity",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM threshold survival increases",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM exclusive bins do not sum to one",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM calibrated probability has no calibration",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM outcome known before expectation frozen",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM probability change hides contract roll",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM two-source claim hides duplicate",
+      "result": "DETECTED",
+      "finding_count": 2,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM two-source claim mismatches event",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM agreement treated as independence",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM fixture turns on armed eligibility",
+      "result": "DETECTED",
+      "finding_count": 2,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM event probability copied as trade-win probability",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM response trained in the future",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM asset probability lacks calibrator",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM news proposal expands risk",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM binary EV omits costs",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM binary maximum loss understated",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM proposal enables live",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM study splits individual quotes",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM study drops exposure-matched control",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM study claims unrun economic success",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM cash ignores fee debit",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM settlement cash released early",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM price touch guarantees fill",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM arbitrage has hidden losing state",
+      "result": "DETECTED",
+      "finding_count": 2,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM cross-venue legs assumed atomic",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM quote cancel releases exposure before confirmation",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM maker assumes privileges",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    },
+    {
+      "name": "PM maker allows live order submission",
+      "result": "DETECTED",
+      "finding_count": 1,
+      "boundary": "DOCUMENT_FIXTURE_ONLY"
+    }
+  ]
+}

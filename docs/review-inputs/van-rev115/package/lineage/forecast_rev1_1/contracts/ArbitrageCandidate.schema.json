@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:van:forecast:prediction-market:ArbitrageCandidate:1.0",
+  "title": "ArbitrageCandidate",
+  "description": "Proposed VAN contract. JSON shape/local arithmetic is not evidence admission, source permission or financial authority.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment": {
+      "enum": [
+        "FIXTURE",
+        "RESEARCH",
+        "SHADOW"
+      ]
+    },
+    "authority_effect": {
+      "const": "NONE"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "source_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "candidate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_relation_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "relation_state": {
+      "enum": [
+        "EXACT_REVIEWED",
+        "COMPLEMENT_REVIEWED"
+      ]
+    },
+    "payoff_states": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "minLength": 1
+          },
+          "portfolio_payout": {
+            "type": "string",
+            "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+          }
+        },
+        "required": [
+          "state",
+          "portfolio_payout"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 2
+    },
+    "purchase_cost": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+    },
+    "fees_and_costs": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+    },
+    "min_conditional_net_payoff": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+    },
+    "exceptional_resolution_policy_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "venue_cash_separate": {
+      "const": true
+    },
+    "atomic_execution_assumed": {
+      "const": false
+    },
+    "same_currency_assumed": {
+      "const": false
+    },
+    "hedge_failure_scenario_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "claim": {
+      "const": "CONDITIONAL_PAYOFF_HEDGE_NOT_EXECUTION_GUARANTEE"
+    },
+    "live_enabled": {
+      "const": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_id",
+    "environment",
+    "authority_effect",
+    "evidence_refs",
+    "source_digest",
+    "candidate_id",
+    "contract_relation_ref",
+    "relation_state",
+    "payoff_states",
+    "purchase_cost",
+    "fees_and_costs",
+    "min_conditional_net_payoff",
+    "exceptional_resolution_policy_ref",
+    "venue_cash_separate",
+    "atomic_execution_assumed",
+    "same_currency_assumed",
+    "hedge_failure_scenario_ref",
+    "claim",
+    "live_enabled"
+  ],
+  "additionalProperties": false
+}

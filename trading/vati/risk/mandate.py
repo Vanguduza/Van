@@ -14,6 +14,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
 from enum import Enum
 from typing import Any, Iterable, Mapping
+from vati.core.canonical import canonical_hash
 from vati.authority import (
     MAX_STANDING_LIFETIME_SECONDS,
     OwnerAuthorityError,
@@ -33,6 +34,12 @@ class AuthorizationMode(str, Enum):
     LIMITED_LIVE = "LIMITED_LIVE"
     AUTONOMOUS_LIVE = "AUTONOMOUS_LIVE"
     HALTED = "HALTED"
+
+
+class TradingTemperament(str, Enum):
+    NORMAL = "NORMAL"
+    RISKY = "RISKY"
+    AGGRESSIVE = "AGGRESSIVE"
 
 
 ORDER_SENDING_MODES = frozenset(
@@ -140,6 +147,19 @@ class TradingMandate:
     #: Only an owner-signed new mandate version can change a value here: this
     #: is the single place in the system where a ceiling can rise.
     strategy_risk_budgets: Mapping[str, Decimal] = field(default_factory=dict)
+    #: Optional owner-selected behaviour. None preserves legacy execution.
+    #: These fields arrive only through an admitted owner mandate; no runtime
+    #: model or trading agent can switch profiles on an open account.
+    trading_temperament: TradingTemperament | None = None
+    strategy_temperaments: Mapping[str, TradingTemperament] = field(default_factory=dict)
+    temperament_owner_signature_ref: str = ""
+
+    @property
+    def temperament_enabled(self) -> bool:
+        return self.trading_temperament is not None or bool(self.strategy_temperaments)
+
+    def temperament_for(self, strategy_id: str) -> TradingTemperament | None:
+        return self.strategy_temperaments.get(strategy_id, self.trading_temperament)
 
     def risk_budget_for(self, strategy_id: str) -> Decimal:
         """The live base risk for one strategy.
@@ -198,6 +218,31 @@ class TradingMandate:
         except OwnerAuthorityError as exc:
             raise MandateError(f"mandate is not owner-signed: {exc}") from exc
 
+        # The legacy signed mandate token covers mandate identity/version.
+        # A profile changes live allocation, so it requires a SECOND signed
+        # grant over the complete mandate content (including limits), not
+        # merely a mutable enum alongside the old identity token.
+        requested_profile = (data.get("trading_temperament") is not None or
+                             bool(data.get("strategy_temperaments")))
+        profile_ref = str(data.get("temperament_owner_signature_ref") or "")
+        if requested_profile and not profile_ref:
+            raise MandateError("owner-signed temperament grant required")
+        if not requested_profile and profile_ref:
+            raise MandateError("temperament signature without selected temperament")
+        verified_profile_ref = ""
+        if requested_profile:
+            try:
+                verified_profile = verifier.verify(
+                    profile_ref, act="trading-temperament-admit",
+                    subject=trading_temperament_subject(data),
+                    now_unix=int(data.get("signed_at_unix") or time.time()),
+                    single_use=False,
+                    max_lifetime_seconds=MAX_STANDING_LIFETIME_SECONDS,
+                )
+            except OwnerAuthorityError as exc:
+                raise MandateError(f"temperament profile is not owner-signed: {exc}") from exc
+            verified_profile_ref = verified_profile.ref
+
         forbidden = frozenset(str(x) for x in _as_iterable(data["forbidden"]))
         absent = HARD_FORBIDDEN_BEHAVIOURS - forbidden
         if absent:
@@ -230,6 +275,9 @@ class TradingMandate:
             expires_at_unix=int(data["expires_at_unix"]),
             drawdown_tiers=tiers,
             strategy_risk_budgets=_parse_budgets(data.get("strategy_risk_budgets")),
+            trading_temperament=_parse_temperament(data.get("trading_temperament")),
+            strategy_temperaments=_parse_temperaments(data.get("strategy_temperaments")),
+            temperament_owner_signature_ref=verified_profile_ref,
         )
         m.validate(ceilings)
         return m
@@ -250,6 +298,17 @@ class TradingMandate:
                 raise MandateError(f"strategy_risk_budget for {sid}, which is not in allowed_strategies")
 
     def validate(self, ceilings: PlatformCeilings) -> None:
+        if self.temperament_enabled and not self.temperament_owner_signature_ref.startswith("owner-authority:"):
+            raise MandateError("owner-verified temperament grant reference required")
+        if not self.temperament_enabled and self.temperament_owner_signature_ref:
+            raise MandateError("unexpected temperament owner grant without a profile")
+        if self.trading_temperament is not None and not isinstance(self.trading_temperament, TradingTemperament):
+            raise MandateError("invalid trading_temperament")
+        for sid, profile in self.strategy_temperaments.items():
+            if sid not in self.allowed_strategies:
+                raise MandateError(f"trading temperament for unapproved strategy {sid}")
+            if not isinstance(profile, TradingTemperament):
+                raise MandateError(f"invalid strategy temperament for {sid}")
         if self.tier1_event_policy not in ("flat", "strategy_specific"):
             raise MandateError(f"tier1_event_policy must be flat|strategy_specific, got {self.tier1_event_policy!r}")
         if self.max_consecutive_losses < 1 or self.max_positions_per_instrument < 1 or self.max_total_positions < 1:
@@ -293,6 +352,36 @@ def _as_iterable(value: Any) -> Iterable[Any]:
     if isinstance(value, (str, bytes)):
         raise MandateError("expected a list, got a string")
     return list(value)
+
+
+def trading_temperament_subject(data: Mapping[str, Any]) -> str:
+    """Content-bound subject for a second owner signature, not just an ID.
+
+    Covers the original owner grant, risk ceilings, scope, expiry, and all
+    new profile fields. Changing ANY of them invalidates the profile grant.
+    This helper is for the offline owner signing workflow and verifier.
+    """
+    return "temperament-v1:" + canonical_hash({
+        key: value for key, value in data.items()
+        if key != "temperament_owner_signature_ref"
+    })
+
+
+def _parse_temperament(raw: Any) -> TradingTemperament | None:
+    if raw is None:
+        return None
+    try:
+        return TradingTemperament(str(raw).upper())
+    except ValueError as exc:
+        raise MandateError(f"unknown trading temperament: {raw!r}") from exc
+
+
+def _parse_temperaments(raw: Any) -> dict[str, TradingTemperament]:
+    if raw is None:
+        return {}
+    if not isinstance(raw, Mapping):
+        raise MandateError("strategy_temperaments must be a mapping")
+    return {str(sid): _parse_temperament(profile) for sid, profile in raw.items()}
 
 
 def _parse_budgets(raw: Any) -> dict[str, Decimal]:

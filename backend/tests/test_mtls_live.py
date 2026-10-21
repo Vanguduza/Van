@@ -203,6 +203,20 @@ async def test_revocation_takes_effect_on_the_next_connection(gateway, tmp_path)
         assert (r.status_code, r.json()["detail"]) == (403, "client_certificate_not_admitted")
 
 
+async def test_operator_cli_revocation_is_visible_to_the_running_listener(gateway, tmp_path):
+    app, port, pki_dir = gateway
+    phone = await pair(app, "owner-phone")
+    cert, key = await enrol(port, pki_dir, phone, tmp_path)
+    ctx = client_ctx(pki_dir, cert, key)
+    async with httpx.AsyncClient(verify=ctx, base_url=f"https://127.0.0.1:{port}") as c:
+        assert (await c.get("/health", headers={"X-Van-Ingress-Token": INGRESS})).status_code == 200
+    # A separate instance is exactly how `python -m van_gateway.mtls.pki revoke` writes it.
+    assert await asyncio.to_thread(DeviceCA(pki_dir).revoke_device, phone.device.device_id) == 1
+    async with httpx.AsyncClient(verify=ctx, base_url=f"https://127.0.0.1:{port}") as c:
+        r = await c.get("/health", headers={"X-Van-Ingress-Token": INGRESS})
+        assert (r.status_code, r.json()["detail"]) == (403, "client_certificate_not_admitted")
+
+
 async def test_revoking_the_device_revokes_its_certificate(gateway, tmp_path):
     app, port, pki_dir = gateway
     phone = await pair(app, "owner-phone")

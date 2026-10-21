@@ -48,6 +48,7 @@ FORGETTABLE: tuple[ForgettableStore, ...] = (
     ForgettableStore("strategic_memory", None, "long-running context about the owner's direction"),
     ForgettableStore("decision_fingerprints", None, "patterns VAN has noticed in the owner's decisions"),
     ForgettableStore("shared_vocabulary", None, "words VAN has learned the owner's meaning for"),
+    ForgettableStore("cognitive_complement_map", None, "task collaboration patterns and explicit owner preferences"),
     ForgettableStore("intent_edges", None, "how VAN links the owner's intents over time"),
     ForgettableStore("intent_nodes", None, "the owner's intents as VAN recorded them"),
     ForgettableStore("intent_missions", None, "which missions VAN attached to which intent"),
@@ -115,6 +116,7 @@ class OwnerMemory:
                     else:
                         cursor = await db.execute(f"DELETE FROM {entry.table}", ())  # noqa: S608
                     removed[entry.table] = int(cursor.rowcount or 0)
+                await db.execute("DELETE FROM runtime_meta WHERE key GLOB 'owner_memory_declaration:*'")
             except BaseException:
                 await db.rollback()
                 raise
@@ -134,6 +136,7 @@ class OwnerMemory:
                 f"known stores are {sorted(e.table for e in FORGETTABLE)}"
             )
         async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
             if entry.owner_column:
                 cursor = await db.execute(
                     f"DELETE FROM {entry.table} WHERE {entry.owner_column} = ?",  # noqa: S608
@@ -141,6 +144,9 @@ class OwnerMemory:
                 )
             else:
                 cursor = await db.execute(f"DELETE FROM {entry.table}", ())  # noqa: S608
+            if table in {"shared_vocabulary", "cognitive_complement_map"}:
+                kind = "vocabulary" if table == "shared_vocabulary" else "complement"
+                await db.execute("DELETE FROM runtime_meta WHERE key GLOB ?", (f"owner_memory_declaration:{kind}:*",))
             await db.commit()
             return int(cursor.rowcount or 0)
 

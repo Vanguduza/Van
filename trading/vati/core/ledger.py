@@ -11,6 +11,8 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
+import time
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Iterable, Iterator, Optional
@@ -19,6 +21,13 @@ from vati.core.canonical import canonical_hash, canonical_json
 from vati.core.events import Event, EventKind
 
 GENESIS = "0" * 64
+
+#: A full re-verification from genesis runs at least this often, even when every
+#: incremental check passes. The incremental check proves the new rows chain onto an
+#: anchor that has not moved and that nothing at or below the anchor was deleted; an
+#: in-place edit of an old row that leaves its stored chain_hash alone is only caught
+#: by recomputing from genesis, so this bounds how long such an edit can go unseen.
+FULL_REVERIFY_EVERY_S = 3600.0
 
 
 class LedgerError(RuntimeError):
@@ -34,6 +43,62 @@ class ReplayReport:
     @property
     def ok(self) -> bool:
         return not self.divergent
+
+
+def _check_row(prev: str, r) -> bool:
+    """r = (event_hash, prev_hash, chain_hash, payload_json, kind, producer, correlation_id,
+    event_time_ms, received_time_ms, decision_time_ms, schema_version, ...)."""
+    ev = Event(EventKind(r[4]), r[5], r[7], r[8], json.loads(r[3]), r[10], r[9], r[6], r[0])
+    return (canonical_hash(ev.body()) == r[0] and r[1] == prev
+            and hashlib.sha256((prev + r[0]).encode()).hexdigest() == r[2])
+
+
+class IncrementalChainVerifier:
+    """Per-decision ledger check whose cost does not grow with the ledger.
+
+    Before, every risk snapshot called `verify_chain()`, which re-hashes the whole
+    ledger from genesis: decision latency grew with every event ever written (a
+    2,000-bar backtest spent 149 of 164 s there, and a live session would slow the
+    same way). This keeps an anchor (seq, chain_hash, row count) from the last
+    successful verification and, on each call:
+
+    1. re-reads the anchor row: a chain recomputed from any earlier row changes it;
+    2. counts the rows up to the anchor: a deleted row changes the count;
+    3. verifies only the rows appended since, chaining from the anchor.
+
+    A full verification from genesis runs on first use and again whenever
+    `full_every_s` has passed, which also catches an in-place edit of an old row.
+    Any failure drops the anchor, so the next call is a full verification again.
+    """
+
+    def __init__(self, ledger, *, full_every_s: float = FULL_REVERIFY_EVERY_S, clock: Callable[[], float] = time.monotonic) -> None:
+        self.ledger, self.full_every_s, self.clock = ledger, full_every_s, clock
+        self._anchor: Optional[tuple[int, str, int]] = None   # (seq, chain_hash, rows up to seq)
+        self._last_full = 0.0
+        self.last_rows_checked = 0
+        self.full_verifications = 0
+
+    def verify(self) -> tuple[bool, int]:
+        now = self.clock()
+        if self._anchor is None or now - self._last_full >= self.full_every_s:
+            ok, n, seq, head = self.ledger._verify_from(0, GENESIS)
+            self.full_verifications += 1
+            self.last_rows_checked = n
+            self._anchor = (seq, head, n) if ok else None
+            self._last_full = now
+            return ok, n
+        seq, chain, n = self._anchor
+        if seq and (self.ledger._chain_at(seq) != chain or self.ledger._count_upto(seq) != n):
+            self._anchor = None
+            self.last_rows_checked = 0
+            return False, n
+        ok, added, new_seq, head = self.ledger._verify_from(seq, chain)
+        self.last_rows_checked = added
+        if not ok:
+            self._anchor = None
+            return False, n + added
+        self._anchor = (new_seq, head, n + added)
+        return True, n + added
 
 
 class Ledger:
@@ -53,10 +118,24 @@ class Ledger:
         self._conn.execute("CREATE INDEX IF NOT EXISTS ix_events_kind ON events(kind)")
 
     # ------------------------------------------------------------------ write
+    @contextmanager
+    def atomic(self):
+        """Serialize a read/validate/append operation with every ledger writer."""
+        if self._conn.in_transaction:
+            yield self
+            return
+        self._conn.execute("BEGIN IMMEDIATE")
+        try:
+            yield self
+            self._conn.commit()
+        except BaseException:
+            self._conn.rollback()
+            raise
+
     def append(self, event: Event) -> str:
         if not event.hash or event.hash != canonical_hash(event.body()):
             raise LedgerError("event hash missing or does not match body")
-        with self._conn:
+        with self.atomic():
             row = self._conn.execute("SELECT chain_hash FROM events ORDER BY seq DESC LIMIT 1").fetchone()
             prev = row[0] if row else GENESIS
             chain = hashlib.sha256((prev + event.hash).encode()).hexdigest()
@@ -95,17 +174,34 @@ class Ledger:
 
     # ----------------------------------------------------------------- verify
     def verify_chain(self) -> tuple[bool, int]:
-        prev = GENESIS
-        n = 0
-        for r in self._conn.execute("SELECT event_hash, prev_hash, chain_hash, payload_json, kind, producer, correlation_id, event_time_ms, received_time_ms, decision_time_ms, schema_version FROM events ORDER BY seq"):
-            ev = Event(EventKind(r[4]), r[5], r[7], r[8], json.loads(r[3]), r[10], r[9], r[6], r[0])
-            if canonical_hash(ev.body()) != r[0]:
-                return False, n
-            if r[1] != prev or hashlib.sha256((prev + r[0]).encode()).hexdigest() != r[2]:
-                return False, n
-            prev = r[2]
+        """Full verification from genesis. For audits, startup and evidence."""
+        ok, n, _seq, _head = self._verify_from(0, GENESIS)
+        return ok, n
+
+    def verify_incremental(self) -> tuple[bool, int]:
+        """Per-decision check: cost proportional to rows added since the last check
+        (see IncrementalChainVerifier), with a periodic full verification."""
+        if getattr(self, "_incremental", None) is None:
+            self._incremental = IncrementalChainVerifier(self)
+        return self._incremental.verify()
+
+    def _verify_from(self, after_seq: int, prev: str) -> tuple[bool, int, int, str]:
+        """Verify rows with seq > after_seq chaining from `prev`. Returns
+        (ok, rows verified, last good seq, last good chain hash)."""
+        n, seq = 0, after_seq
+        for r in self._conn.execute("SELECT event_hash, prev_hash, chain_hash, payload_json, kind, producer, correlation_id, event_time_ms, received_time_ms, decision_time_ms, schema_version, seq FROM events WHERE seq > ? ORDER BY seq", (after_seq,)):
+            if not _check_row(prev, r):
+                return False, n, seq, prev
+            prev, seq = r[2], r[11]
             n += 1
-        return True, n
+        return True, n, seq, prev
+
+    def _chain_at(self, seq: int) -> Optional[str]:
+        row = self._conn.execute("SELECT chain_hash FROM events WHERE seq = ?", (seq,)).fetchone()
+        return row[0] if row else None
+
+    def _count_upto(self, seq: int) -> int:
+        return self._conn.execute("SELECT COUNT(*) FROM events WHERE seq <= ?", (seq,)).fetchone()[0]
 
     def replay_decisions(self, recompute: Callable[[dict], dict]) -> ReplayReport:
         """Feed each RISK_DECISION's stored inputs (payload['inputs']) to `recompute`

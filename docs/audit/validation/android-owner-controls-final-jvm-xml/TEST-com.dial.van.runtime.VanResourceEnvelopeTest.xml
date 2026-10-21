@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.runtime.VanResourceEnvelopeTest" tests="20" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:32" hostname="052fefa249ff" time="0.009">
+  <properties/>
+  <testcase name="pressure is the worst input and not the last one()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.0"/>
+  <testcase name="the wake word and the owner's own commands are among them()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.001"/>
+  <testcase name="the ceiling tightens as pressure rises and never loosens()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.0"/>
+  <testcase name="critical state indicators survive the floor()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.001"/>
+  <testcase name="power save asks for restraint and does not declare an emergency()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.0"/>
+  <testcase name="a still budget is never clamped into a moving one()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.003"/>
+  <testcase name="every input that reached the winning level is named()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.0"/>
+  <testcase name="everything discretionary yields before anything the owner asked for()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.001"/>
+  <testcase name="battery bands escalate()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.0"/>
+  <testcase name="hearing the owner survives every pressure()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.0"/>
+  <testcase name="saying VAN is unwell is not a luxury()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.001"/>
+  <testcase name="a stopped subsystem has no cadence()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.0"/>
+  <testcase name="a healthy device is nominal and says nothing()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.0"/>
+  <testcase name="an unreadable battery is not a flat battery()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.0"/>
+  <testcase name="cadence only ever stretches as pressure rises()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.001"/>
+  <testcase name="the envelope may lower the embodiment's budget and never raise it()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.0"/>
+  <testcase name="charging clears battery pressure and nothing else()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.0"/>
+  <testcase name="a nearly flat battery no longer renders the full field()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.0"/>
+  <testcase name="telemetry is traded before the owner's own screen stops updating()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.0"/>
+  <testcase name="memory and storage contribute independently()" classname="com.dial.van.runtime.VanResourceEnvelopeTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

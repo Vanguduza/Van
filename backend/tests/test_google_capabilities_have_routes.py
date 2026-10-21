@@ -31,6 +31,9 @@ INTERNAL = "google-routes-internal"
 NEW_ROUTES = {
     "/v1/google/actions/execute": "POST",
     "/v1/google/gmail/draft": "POST",
+    "/v1/google/calendar/review": "GET",
+    "/v1/google/gmail/attachment/import-pdf": "POST",
+    "/v1/google/gmail/thread": "GET",
     "/v1/google/calendar/agenda": "GET",
     "/v1/google/calendar/reschedule": "POST",
     "/v1/google/drive/search": "GET",
@@ -92,7 +95,9 @@ def test_the_service_methods_these_routes_call_still_exist():
     """A route naming a method that has been renamed is a 500 nobody notices until it is
     called, and these are called rarely."""
     for method in (
-        "gmail_draft", "calendar_agenda", "calendar_reschedule",
+        "gmail_draft", "gmail_thread_get", "gmail_attachment_get",
+        "calendar_agenda", "calendar_event_review", "calendar_reschedule",
+        "calendar_create", "calendar_update", "calendar_delete",
         "drive_search", "contacts_resolve", "tasks_list",
     ):
         assert callable(getattr(GoogleService, method, None)), method
@@ -112,8 +117,11 @@ async def test_none_of_them_is_reachable_without_the_internal_credential(client)
     ac, _ = client
     for path, method in NEW_ROUTES.items():
         call = ac.get if method == "GET" else ac.post
-        response = await call(path, params={"q": "x", "thread_id": "t", "body": "b",
-                                            "event_id": "e", "new_start_unix": 0})
+        response = await call(path, params={
+            "q": "x", "thread_id": "t", "body": "b", "event_id": "e",
+            "new_start_unix": 0, "message_id": "m", "attachment_id": "a",
+            "filename": "form.pdf",
+        })
         assert response.status_code in (401, 403), f"{path} answered {response.status_code}"
         assert response.json()["detail"] != "ok"
 

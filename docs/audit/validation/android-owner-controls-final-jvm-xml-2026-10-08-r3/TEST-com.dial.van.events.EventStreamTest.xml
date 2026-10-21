@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.events.EventStreamTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:28" hostname="052fefa249ff" time="0.008">
+  <properties/>
+  <testcase name="newest events are kept and the list is bounded()" classname="com.dial.van.events.EventStreamTest" time="0.002"/>
+  <testcase name="catching up is not slowed down()" classname="com.dial.van.events.EventStreamTest" time="0.002"/>
+  <testcase name="a feed that failed is not a feed with nothing in it()" classname="com.dial.van.events.EventStreamTest" time="0.0"/>
+  <testcase name="the cursor advances instead of staying at zero()" classname="com.dial.van.events.EventStreamTest" time="0.0"/>
+  <testcase name="a truncated page catches up immediately()" classname="com.dial.van.events.EventStreamTest" time="0.0"/>
+  <testcase name="a restored cursor resumes instead of replaying everything()" classname="com.dial.van.events.EventStreamTest" time="0.0"/>
+  <testcase name="the envelope never makes a stretched backoff exceed the ceiling()" classname="com.dial.van.events.EventStreamTest" time="0.0"/>
+  <testcase name="a device with minutes left stops polling rather than polling slowly()" classname="com.dial.van.events.EventStreamTest" time="0.001"/>
+  <testcase name="a cursor is saved so a restart does not replay()" classname="com.dial.van.events.EventStreamTest" time="0.0"/>
+  <testcase name="the cursor never rewinds()" classname="com.dial.van.events.EventStreamTest" time="0.0"/>
+  <testcase name="a success clears the backoff()" classname="com.dial.van.events.EventStreamTest" time="0.0"/>
+  <testcase name="failures back off exponentially and stop at a ceiling()" classname="com.dial.van.events.EventStreamTest" time="0.0"/>
+  <testcase name="a constrained device polls the event stream less often()" classname="com.dial.van.events.EventStreamTest" time="0.0"/>
+  <testcase name="an overlapping page does not produce duplicate rows()" classname="com.dial.van.events.EventStreamTest" time="0.0"/>
+  <testcase name="catch-up is immediate because the constant is zero, and that is load-bearing()" classname="com.dial.van.events.EventStreamTest" time="0.0"/>
+  <testcase name="the default pressure changes nothing for a caller that has no reading()" classname="com.dial.van.events.EventStreamTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

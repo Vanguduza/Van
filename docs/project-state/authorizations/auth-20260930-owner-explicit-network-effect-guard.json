@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20260930-owner-explicit-network-effect-guard",
+  "project": "van",
+  "authority": "OWNER_EXPLICIT",
+  "owner_instruction_sha256": "1fc63b2f9355a9c8534003a65e0bd8550288092795b4d07d2dcb2dec371107b0",
+  "owner_instruction_digest_input": "UTF-8 bytes of the verbatim selected option label \"Network-effect guard (Recommended)\" with no quotes and no trailing newline",
+  "owner_option_text_sha256": "b9b94542a3742f52de3bd01361b3e492624febc951b8ad937b48176e74d89352",
+  "owner_option_text_digest_input": "UTF-8 bytes of the option text recorded in docs/decisions/OWNER-DECISION-20260930-NETWORK-EFFECT-GUARD.md section 2, as one line, no quotes, no trailing newline",
+  "owner_instruction_record": "docs/decisions/OWNER-DECISION-20260930-NETWORK-EFFECT-GUARD.md",
+  "owner_instruction_excerpt": "Network-effect guard (Recommended) — While the Harness acts, it intercepts the page's network requests and blocks write requests (POST/PUT/DELETE and similar) unless the task is admitted as mutating. A blocked request goes to you. This catches handler-driven payments whatever the label, but tasks that legitimately submit forms must be admitted as mutating.",
+  "authority_basis": "After independent review I6 (finding M4), the owner was asked how Programme B should handle pages that move money inside a JavaScript click handler behind a benign label, and directly selected the 'Network-effect guard' option, whose text specifies the mechanism (intercept the page's network requests while the Harness acts, block writes unless the task is admitted as mutating, send a blocked request to the owner). That is a bounded owner-ordered change, so the guard and the records carrying it out are OWNER_EXPLICIT. The engineering detail (settle window, write classification, Chromium flags, the effect MAC binding the mutating flag and scope digest, the migration) is unit G9c's and was not separately approved by the owner.",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "claude_code",
+    "request_id": "claude-code-session_01ELKqm4GCPmPvF3ggKkgB1J-20260930-i6",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "signature_note": "The owner answered in a Claude Code session. No device, biometric or cryptographic signature is claimed. This record is not signed-ingress evidence.",
+  "limits": [
+    "No signature of any kind is claimed.",
+    "Covers only the listed files, as changed by the listed commits (72e72120..7f87e25f) plus this record.",
+    "It does not admit any task or domain as mutating and does not change config/browser/profiles.yaml or domains.yaml: which tasks may be mutating stays with BrowserPolicyEngine.check_task and the existing admission records.",
+    "It does not open any production activation gate and does not name any gate's decision record.",
+    "Not reusable: exact paths, no globs."
+  ],
+  "issued_at_utc": "2026-09-30T00:00:00Z",
+  "base_sha": "72e721205118ce5339fd6104daa27079fee613c1",
+  "branch_scope": "gpt/jev-openmuse-convergence-r1-van-20260929 (unit-g9c)",
+  "commit_range": "72e72120..7f87e25f28448e1bbce4a3430b8897f0fe8d156f",
+  "commits": [
+    "f4c2f341a041e7f16880b3a239da90b8a04662ae",
+    "86c933bdf89fe04078d226771b053823c6a3bf5e",
+    "7f87e25f28448e1bbce4a3430b8897f0fe8d156f"
+  ],
+  "authorized_paths": [
+    "backend/tests/cdp_harness_kit.py",
+    "backend/tests/test_browser_network_effect_guard.py",
+    "backend/tests/test_browser_review_i5_task_scope.py",
+    "backend/tests/test_browser_task_tombstones.py",
+    "backend/tests/test_harness_elements.py",
+    "backend/van_gateway/browser/adapters.py",
+    "backend/van_gateway/browser/api.py",
+    "backend/van_gateway/browser/interaction_router.py",
+    "backend/van_gateway/browser/models.py",
+    "backend/van_gateway/browser/service.py",
+    "backend/van_gateway/browser/worker.py",
+    "backend/van_gateway/storage/db.py",
+    "deploy/van-browser-core/browser/harness_service.py",
+    "docs/decisions/OWNER-DECISION-20260930-NETWORK-EFFECT-GUARD.md",
+    "docs/project-state/authorizations/auth-20260930-owner-explicit-network-effect-guard.json",
+    "tests/contracts/test_van_browser_core_zone.py"
+  ],
+  "decision_sections_in_scope": [
+    "2026-09-30 answers after review I6, question 1"
+  ],
+  "change_classes": [
+    "browser_safety_control",
+    "verification",
+    "project_truth_reconciliation"
+  ],
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false,
+  "reusable": false,
+  "revoked": false
+}

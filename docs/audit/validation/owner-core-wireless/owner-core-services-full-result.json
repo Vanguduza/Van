@@ -1,0 +1,21 @@
+{
+  "suite": "services",
+  "command": [
+    "/workspace/.onboarding/van-venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "services",
+    "tests/hermes",
+    "hermes/policy/tests",
+    "tests/scenarios"
+  ],
+  "cwd": "/workspace/Van",
+  "started_at_utc": "2026-10-07T11:05:58.110741+00:00",
+  "finished_at_utc": "2026-10-07T11:06:04.058723+00:00",
+  "exit_code": 0,
+  "input_files": 27,
+  "source_unchanged": true,
+  "changed_inputs": [],
+  "live_device_executed": false
+}

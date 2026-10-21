@@ -17,12 +17,14 @@ succeeded. There is no argument a caller can make to get past that.
 from __future__ import annotations
 
 import json
+import hashlib
 import logging
 import time
 import uuid
 from typing import Any
 
 from van_gateway.mission.verifiers import VerifierRegistry
+from van_gateway.mission.hermes_results import HermesResultInbox
 from van_gateway.observability import instruments
 from van_gateway.observability.correlation import for_command
 from van_gateway.observability.logging import log_event
@@ -98,6 +100,8 @@ class MissionService:
         # P1-LEARN-001 — the learning stores had no caller that recorded a real outcome.
         # A mission reaching a terminal state is the outcome; this is where it is written.
         self.learning = learning
+        self.hermes_results = HermesResultInbox(self)
+        self.terminal_projector = None
 
     # ------------------------------------------------------------- creation
 
@@ -248,32 +252,40 @@ class MissionService:
             )
             verification_state = verification.status
 
-        await self.store.execute(
-            "UPDATE missions SET state = ?, verification_state = ?, "
-            "verification_record_json = COALESCE(?, verification_record_json), "
-            "final_outcome = COALESCE(?, final_outcome), updated_at_ms = ? "
-            "WHERE mission_id = ? AND state = ?",
-            (
-                target.value, verification_state.value,
-                Store.dumps(verification.model_dump(mode="json")) if verification else None,
-                final_outcome, now, mission_id, current.value,
-            ),
-        )
         event_type = EVENT_FOR_STATE.get(target)
-        if event_type is not None:
-            await self.record_event(
-                mission_id=mission_id, event_type=event_type, actor=actor,
-                summary=summary or final_outcome or target.value,
-                severity="WARN" if target in (MissionState.FAILED, MissionState.BLOCKED_POLICY,
-                                              MissionState.BLOCKED_UNSAFE) else "INFO",
-                # A verification receipt outranks a caller-supplied pointer: the receipt is
-                # what a success claim rests on, and the caller does not get to substitute
-                # its own reference for it.
-                evidence_ref=(verification.evidence_refs[0]
-                              if verification and verification.evidence_refs
-                              else evidence_ref),
-                now_ms=now,
+        event = MissionEvent(
+            event_id=f"mev_{uuid.uuid4().hex}", mission_id=mission_id, event_type=event_type,
+            actor=actor, occurred_at_ms=now,
+            summary=summary or final_outcome or target.value,
+            severity="WARN" if target in (MissionState.FAILED, MissionState.BLOCKED_POLICY,
+                                          MissionState.BLOCKED_UNSAFE) else "INFO",
+            evidence_ref=(verification.evidence_refs[0] if verification and verification.evidence_refs else evidence_ref),
+        ) if event_type is not None else None
+        async with self.store.connection() as db:
+            changed = await db.execute(
+                "UPDATE missions SET state = ?, verification_state = ?, "
+                "verification_record_json = COALESCE(?, verification_record_json), "
+                "final_outcome = COALESCE(?, final_outcome), updated_at_ms = ? "
+                "WHERE mission_id = ? AND state = ?",
+                (
+                    target.value, verification_state.value,
+                    Store.dumps(verification.model_dump(mode="json")) if verification else None,
+                    final_outcome, now, mission_id, current.value,
+                ),
             )
+            if changed.rowcount != 1:
+                await db.rollback()
+                raise MissionError("MISSION_STATE_PRECONDITION_FAILED", current.value)
+            if event is not None:
+                await self._persist_event(db, event)
+            if target in TERMINAL_STATES:
+                await db.execute(
+                    "INSERT OR IGNORE INTO mission_projection_outbox(mission_id, created_at_ms) VALUES(?,?)",
+                    (mission_id, now),
+                )
+            await db.commit()
+        if event is not None:
+            await self._publish_event(event)
         refreshed = await self.get(mission_id)
         assert refreshed is not None
         if refreshed.is_terminal:
@@ -311,7 +323,36 @@ class MissionService:
             # §12 — how the owner's decision actually turned out, which is the only thing
             # that can falsify what VAN inferred from it.
             await self.learning.record_decision_outcome(refreshed, state=refreshed.state)
+        if refreshed.is_terminal:
+            await self.reconcile_terminal_projections(mission_id=mission_id)
         return refreshed
+
+    async def reconcile_terminal_projections(self, *, mission_id: str | None = None, limit: int = 32) -> int:
+        """Retry local idempotent publication; never rerun an external effect."""
+        if self.terminal_projector is None:
+            return 0
+        rows = await self.store.fetchall(
+            "SELECT mission_id FROM mission_projection_outbox" +
+            (" WHERE mission_id=?" if mission_id else "") +
+            " ORDER BY created_at_ms LIMIT ?",
+            (mission_id, min(max(limit, 1), 100)) if mission_id else (min(max(limit, 1), 100),),
+        )
+        completed = 0
+        for row in rows:
+            mission = await self.get(row["mission_id"])
+            if mission is None or not mission.is_terminal:
+                continue
+            try:
+                await self.terminal_projector(mission)
+            except Exception as exc:
+                await self.store.execute(
+                    "UPDATE mission_projection_outbox SET attempts=attempts+1, last_failure=? WHERE mission_id=?",
+                    (type(exc).__name__, mission.mission_id),
+                )
+                continue
+            await self.store.execute("DELETE FROM mission_projection_outbox WHERE mission_id=?", (mission.mission_id,))
+            completed += 1
+        return completed
 
     async def for_hermes_run(self, hermes_run_id: str) -> Mission | None:
         """Resolve a Hermes run through the durable mission-event ledger.
@@ -324,9 +365,14 @@ class MissionService:
         run_id = hermes_run_id.strip()
         if not run_id:
             raise MissionError("HERMES_RUN_ID_REQUIRED")
+        binding = await self.store.fetchone(
+            "SELECT mission_id FROM hermes_run_bindings WHERE hermes_run_id = ?", (run_id,),
+        )
+        if binding is not None:
+            return await self.get(str(binding["mission_id"]))
         rows = await self.store.fetchall(
             "SELECT DISTINCT mission_id FROM mission_events "
-            "WHERE evidence_ref = ? ORDER BY mission_id LIMIT 2",
+            "WHERE evidence_ref = ? AND event_type = 'mission.started' ORDER BY mission_id LIMIT 2",
             (f"hermes-run:{run_id}",),
         )
         if not rows:
@@ -334,6 +380,17 @@ class MissionService:
         if len(rows) != 1:
             raise MissionError("HERMES_RUN_BINDING_AMBIGUOUS", run_id)
         return await self.get(str(rows[0]["mission_id"]))
+
+    async def ingest_hermes_result(self, **kwargs: Any) -> dict[str, Any]:
+        return await self.hermes_results.ingest(**kwargs)
+
+    async def bind_hermes_run(self, **kwargs: Any) -> Mission:
+        mission = await self.hermes_results.bind(**kwargs)
+        assert mission is not None
+        return mission
+
+    async def reconcile_hermes_results(self) -> int:
+        return await self.hermes_results.reconcile()
 
     async def apply_hermes_result(
         self,
@@ -412,15 +469,16 @@ class MissionService:
                 final_outcome=summary or "execution failed",
             )
 
-        if mission.state is not MissionState.RUNNING:
+        if mission.state not in {MissionState.RUNNING, MissionState.VERIFYING}:
             raise MissionError("HERMES_RESULT_STATE_INVALID", f"{mission.state.value}->COMPLETED")
-        mission = await self.transition(
-            mission.mission_id,
-            target=MissionState.VERIFYING,
-            expected=MissionState.RUNNING,
-            actor=PrincipalType.HERMES_AGENT,
-            summary=summary or "Hermes reported execution complete; verifying independently",
-        )
+        if mission.state is MissionState.RUNNING:
+            mission = await self.transition(
+                mission.mission_id,
+                target=MissionState.VERIFYING,
+                expected=MissionState.RUNNING,
+                actor=PrincipalType.HERMES_AGENT,
+                summary=summary or "Hermes reported execution complete; verifying independently",
+            )
 
         if not mission.success_contract.is_checkable:
             return await self.transition(
@@ -478,6 +536,9 @@ class MissionService:
         claiming to have done something.
         """
         now = int(time.time() * 1000) if now_ms is None else now_ms
+        # A restart or temporary verifier failure must not discard an already delivered
+        # callback or expire its mission before the durable inbox has been reconciled.
+        await self.reconcile_hermes_results()
         terminal = ",".join("?" for _ in TERMINAL_STATES)
         rows = await self.store.fetchall(
             f"SELECT mission_id, state FROM missions WHERE deadline_ms IS NOT NULL "
@@ -679,43 +740,67 @@ class MissionService:
         owner_visibility: bool = True,
         evidence_ref: str | None = None,
         now_ms: int | None = None,
+        idempotency_key: str | None = None,
     ) -> MissionEvent:
         now = int(time.time() * 1000) if now_ms is None else now_ms
         event = MissionEvent(
-            event_id=f"mev_{uuid.uuid4().hex}", mission_id=mission_id, activity_id=activity_id,
+            event_id=(f"mev_{hashlib.sha256(Store.dumps([mission_id, idempotency_key]).encode()).hexdigest()}"
+                      if idempotency_key is not None else f"mev_{uuid.uuid4().hex}"),
+            mission_id=mission_id, activity_id=activity_id,
             event_type=event_type, actor=actor, occurred_at_ms=now, severity=severity,
             owner_visibility=owner_visibility, summary=summary, evidence_ref=evidence_ref,
         )
-        await self.store.execute(
+        async with self.store.connection() as db:
+            created = await self._persist_event(db, event)
+            await db.commit()
+        if not created:
+            row = await self.store.fetchone("SELECT * FROM mission_events WHERE event_id=?", (event.event_id,))
+            assert row is not None
+            if (row["mission_id"] != mission_id or row["activity_id"] != activity_id
+                or row["event_type"] != event_type.value or row["actor"] != actor.value
+                or row["severity"] != severity or bool(row["owner_visibility"]) != owner_visibility
+                or row["summary"] != summary or row["evidence_ref"] != evidence_ref):
+                raise MissionError("MISSION_EVENT_IDEMPOTENCY_CONFLICT")
+            return event.model_copy(update={"occurred_at_ms": int(row["occurred_at_ms"])})
+        await self._publish_event(event)
+        return event
+
+    @staticmethod
+    async def _persist_event(db: Any, event: MissionEvent) -> bool:
+        inserted = await db.execute(
             """
             INSERT INTO mission_events(
               event_id, mission_id, activity_id, event_type, actor, occurred_at_ms,
               severity, owner_visibility, summary, evidence_ref
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(event_id) DO NOTHING
             """,
             (
-                event.event_id, mission_id, activity_id, event_type.value, actor.value, now,
-                severity, 1 if owner_visibility else 0, summary, evidence_ref,
+                event.event_id, event.mission_id, event.activity_id, event.event_type.value,
+                event.actor.value, event.occurred_at_ms, event.severity,
+                1 if event.owner_visibility else 0, event.summary, event.evidence_ref,
             ),
         )
-        if self.bus is not None and owner_visibility:
+        return inserted.rowcount == 1
+
+    async def _publish_event(self, event: MissionEvent) -> None:
+        if self.bus is not None and event.owner_visibility:
             # Only owner-visible events reach the device stream: the bus is the owner's
             # feed, not an internal trace, and the distinction is already recorded per
             # event rather than decided here.
             await self.bus.publish(
-                event_type.value,
+                event.event_type.value,
                 {
                     "event_id": event.event_id,
-                    "mission_id": mission_id,
-                    "activity_id": activity_id,
-                    "actor": actor.value,
-                    "severity": severity,
-                    "summary": summary,
-                    "evidence_ref": evidence_ref,
-                    "occurred_at_ms": now,
+                    "mission_id": event.mission_id,
+                    "activity_id": event.activity_id,
+                    "actor": event.actor.value,
+                    "severity": event.severity,
+                    "summary": event.summary,
+                    "evidence_ref": event.evidence_ref,
+                    "occurred_at_ms": event.occurred_at_ms,
                 },
             )
-        return event
 
     # --------------------------------------------------------------- reading
 

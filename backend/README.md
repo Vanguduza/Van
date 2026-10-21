@@ -2,6 +2,12 @@
 
 Secure owner-authority layer in front of Hermes profile `van`.
 
+Selected estate placement: this backend runs on private `van-trading-core`; Hermes profile
+`van` and ARTEMIS run on `dial-control`. The phone uses a separately admitted VAN-only
+end-to-end TLS passthrough on `oracle-admin`. The exact public URI and CA are deployment
+inputs. See [the owner-core recipe](../deploy/van-owner-core/README.md); the historical
+Netcup APK address and the limited DDS development proxy do not qualify this connection.
+
 Hermes remains the sole agent runtime. The gateway authenticates owner intent, brokers capability grants, isolates credentials, records evidence, and exposes deterministic Google capability planning.
 
 ## Run
@@ -63,14 +69,27 @@ Google OAuth tokens, API keys, service credentials, browser cookies and session 
 
 ## Android owner pairing
 
-`POST /v1/devices/pairing-ticket` is internal-control-only and creates a short-lived single-use ticket. `POST /v1/devices/pair` consumes that ticket atomically with encrypted HMAC enrollment, owner-grant creation, and issuance of a per-device access token. The gateway persists only hashes of pairing/device-access tokens. Direct enroll/revoke routes remain internal-control-only.
+The authorized installer supplies a short-lived signed connection envelope; the app enters
+no connection settings. Bootstrap challenge/attestation validates a pinned Google Android
+attestation chain, release signer, package and fresh hardware-key proof. Pairing consumes
+the exact operator-issued ticket and binding atomically, with encrypted HMAC enrollment,
+owner grant and revocable per-device token. Only hashes of bootstrap/pairing/access tokens
+persist. Lost bootstrap/pairing replies recover the same attempt through exact token hashes
+and fresh proofs; they do not mint replacement authority. Direct enrollment/revocation and
+provisioning-status observation remain under the separate operator enrollment scope.
 
-Normal Android calls carry both `X-Van-Ingress-Token` and `X-Van-Device-Token`; command requests additionally carry the existing signed HMAC payload. `/health` intentionally requires only the ingress bearer so service/tunnel probes do not need a device identity.
+Normal Android calls carry both `X-Van-Ingress-Token` and `X-Van-Device-Token`. Every owner
+POST/PUT/PATCH/DELETE requires fresh hardware-key proof over method, exact path/query, time
+and serialized body; nonces are durable. Command requests additionally carry their sealed
+command authority. `/health` requires the ingress bearer and only establishes process
+readiness; Hermes execution and a phone connection require their own evidence.
 
 ## Direct phone link (mutual TLS)
 
-The phone connects straight to this gateway on the Hermes host: no tunnel or relay in between.
-One TLS 1.3 connection carries the app's HTTPS calls and its two-way session WebSocket
+The phone's TLS terminates at this gateway on private `van-trading-core`. A dedicated,
+governed VAN-only oracle-admin TCP passthrough preserves the original TLS connection and
+client certificate; it cannot use a TLS-terminating HTTP proxy or forwarded certificate
+headers. TLS 1.3 carries the app's HTTPS calls and its two-way session WebSocket
 (`/v1/session/ws`, 20 s keepalive, resume by sequence number).
 
 - **Both ends authenticate.** The server certificate and every phone's client certificate come
@@ -84,25 +103,38 @@ One TLS 1.3 connection carries the app's HTTPS calls and its two-way session Web
   certificates. `issued.json` is the authority, checked on every request, and fails closed.
 - **Without a certificate**, only pairing, bootstrap, certificate enrolment and the two
   browser surfaces that carry their own credential answer. The WebSocket always needs one.
-- **The loopback listener** (`127.0.0.1:8787`, used by Hermes and local tools) is unchanged.
+- **The loopback listener** (`127.0.0.1:8787`) remains local. A source-restricted WireGuard
+  relay admits `dial-control` only on core `10.77.0.4:8787`, while per-purpose control tokens
+  authenticate Hermes callbacks/MCP. Gateway-to-Hermes uses the separately measured profile
+  API on the private control peer. The DDS typed development proxy is a different lane.
 
 Enable it on the host (idempotent; it keeps an existing CA):
 
 ```bash
-tools/runtime/install_van_gateway_service.sh
-tools/runtime/enable_van_mtls.sh --san IP:<public address>   # listens on 8443
+tools/runtime/install_van_gateway_service.sh   # production needs exact clean source SHA
+tools/runtime/enable_van_mtls.sh --bind 10.77.0.4 --san DNS:<approved-phone-ingress-name>
 ```
 
 The last line it prints is the CA certificate, base64-encoded. It is public. The app pins
-it together with the base URL `https://<public address>:8443`; both are committed in
-`android/van-gateway.properties`, which every app build reads, so update that file whenever
-the CA or the address changes. An installed phone moves to the committed address on upgrade,
-keeping its device id and tokens. The CA key stays
+it together with the exact approved HTTPS ingress URL through the generated external
+Android deployment profile. Release builds reject the historical committed fallback; no
+credentials enter the APK. The helper changes no firewall rules: the governed deployment
+recipe supplies exact private source/port rules and the separately admitted ingress.
+An upgrade preserves device identity and encrypted state. The CA key stays
 in `~/.local/share/van/mtls` (mode 0700) and is never printed. Revoke by device with
 `python -m van_gateway.mtls.pki revoke --dir ~/.local/share/van/mtls --device-id <id>`.
 
-The browser surfaces (the ARTEMIS console and the broker OAuth callback) will not trust the
-private CA. Keep them on their current route until they have a publicly trusted name.
+Browser/account surfaces need their own qualified browser trust route. The phone's private
+CA does not establish a publicly trusted browser session or authorize moving those routes.
+
+## DIAL development projection
+
+`VAN_DIAL_DEV_ENABLED=false` is the owner-core default. Enabling the independently qualified
+DEC-056 limited product proxy requires `VAN_DIAL_DEV_BASE_URL=https://10.77.0.2:8443`,
+`VAN_DIAL_DEV_TOKEN_FILE`, `VAN_DIAL_DEV_TLS_CA_FILE`, `VAN_DIAL_DEV_TLS_CLIENT_CERT_FILE`
+and `VAN_DIAL_DEV_TLS_CLIENT_KEY_FILE` (private key mode 0600). Production requires TLS 1.3,
+hostname verification and client identity for GET and SSE, refuses direct control HTTP or
+incomplete TLS, and has no fallback. This does not provide the phone/Hermes WebSocket lane.
 
 ## Observability and operations (Gate 11)
 
@@ -143,6 +175,7 @@ file that opens cleanly and is missing the most recent committed transactions.
 Every table carries a retention class, and `backend/tests/test_ops_retention.py` reads the
 live schema and fails if a table has none — so the policy cannot fall behind the schema.
 `OWNER_STATE` never prunes: the owner's record of their own life is not the system's to
-expire, and deletion there goes through `/v1/context/memory`. The audit log is pruned only
+expire. Owner-memory erasure goes through the signed A4 command pipeline with explicit
+scope and fresh biometric approval; direct `DELETE /v1/context/memory` refuses it. The audit log is pruned only
 as an anchored prefix, so `verify_chain` still reconciles over what remains and the anchor
 records how much was removed.

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.VoiceSecondPassTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:16:26" hostname="052fefa249ff" time="0.006">
+  <properties/>
+  <testcase name="strongLocalResultCanReplaceWeakAndroidResult" classname="com.dial.van.voice.VoiceSecondPassTest" time="0.003"/>
+  <testcase name="lowAndroidConfidenceTriggersSecondPass" classname="com.dial.van.voice.VoiceSecondPassTest" time="0.001"/>
+  <testcase name="alternativesTriggerSecondPassEvenWithGoodTopConfidence" classname="com.dial.van.voice.VoiceSecondPassTest" time="0.0"/>
+  <testcase name="differingWeakLocalTranscriptCannotOverrideStrongAndroidResult" classname="com.dial.van.voice.VoiceSecondPassTest" time="0.0"/>
+  <testcase name="corroboratedLocalAlternativeMayReplaceAndroidText" classname="com.dial.van.voice.VoiceSecondPassTest" time="0.001"/>
+  <testcase name="confidentCleanResultDoesNotTriggerSecondPass" classname="com.dial.van.voice.VoiceSecondPassTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

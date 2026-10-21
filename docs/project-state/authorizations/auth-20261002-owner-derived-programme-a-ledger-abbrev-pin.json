@@ -1,0 +1,58 @@
+{
+ "schema_version": 1,
+ "authorization_id": "auth-20261002-owner-derived-programme-a-ledger-abbrev-pin",
+ "project": "van",
+ "authority": "OWNER_DERIVED",
+ "owner_instruction_sha256": "1fb51f92482bc51e4c6d7fc1ef508b3070a56c0d024dd773927367162ce72dfb",
+ "owner_instruction_digest_input": "UTF-8 bytes of the verbatim owner message \"Yes to owner derived treatment and  enforce van's ledger\", no quotes, no trailing newline",
+ "owner_instruction_record": "docs/decisions/OWNER-DECISION-20260930-OWNER-DERIVED-AND-LEDGER-ENFORCEMENT.md",
+ "owner_instruction_excerpt": "Yes to owner derived treatment and  enforce van's ledger",
+ "source": {
+  "kind": "owner_session_instruction",
+  "channel": "claude_code",
+  "request_id": "claude-code-session_01Bpoym1tGVUgaW8MWgRZfxt-20261002",
+  "owner_attested": true,
+  "device_signature_claimed": false,
+  "cryptographic_signature_claimed": false,
+  "signed_ingress_claimed": false
+ },
+ "signature_note": "Derived authority; no signature claimed. The ledger checker's digest depended on git's clone-dependent hash abbreviation: in a shallow clone Programme A's own ledger failed (39 DIGEST_MISMATCH) and passed with core.abbrev=8. Pinning it keeps every existing row valid and follows 'enforce van's ledger' and the owner's 2026-10-01 instruction to close the identified gaps; on 2026-10-02 the owner answered 'commit' to accepting the same pin in Programme B's unit G16 (record in that programme: docs/decisions/OWNER-DECISION-20261001-REVIEW-I9-CLOSURE.md). Byte-identical to Programme B 34a519ac. The owner did not review this diff.",
+ "purpose": "Authorize unit G16-a: the ledger checker's core.abbrev=8 pin, its README note and test (mirror of Programme B 34a519ac).",
+ "authorized_paths": [
+  "tests/contracts/test_project_truth_ledger.py",
+  "tools/ci/README.md",
+  "tools/ci/project_truth_ledger.py"
+ ],
+ "commit_scope": {
+  "commits": [
+   "4112b01233ee54c260563f3b071614d00a86b8dd"
+  ]
+ },
+ "limits": [
+  "Covers only the listed paths in the listed commits.",
+  "May not redefine product, money, security or owner-control intent.",
+  "Opens no production gate; not reusable."
+ ],
+ "issued_at_utc": "2026-10-02T00:00:00Z",
+ "recorded_by": "integrator (session_01Bpoym1tGVUgaW8MWgRZfxt)",
+ "material_scope_expansion": false,
+ "feature_removal": false,
+ "business_model_change": false,
+ "security_authority_change": false,
+ "owner_control_boundary_change": false,
+ "legal_position_change": false,
+ "money_or_custody_model_change": false,
+ "locked_provider_change": false,
+ "reusable": false,
+ "revoked": false,
+ "additional_owner_answers": {
+  "closure": {
+   "label": "Write the record and push to where you think is most suitable. Close all identified gaps and issues still open",
+   "sha256": "2d618286c8a5d5b0f813a52e48b55afd9789bfa2f020a929f79a3dcb8c3696be"
+  },
+  "commit": {
+   "label": "commit",
+   "sha256": "9505cacb7c710ed17125fcc6cb3669e8ddca6c8cd8af6a31f6b3cd64604c3098"
+  }
+ }
+}

@@ -1,0 +1,14 @@
+{
+  "arguments_sha256": "675faae0529ff61fc2948156e6c6b6cebf551132a279592aa7223fe19653b808",
+  "effective_uid": 1001,
+  "exit_code": 0,
+  "exported_report_sha256": "3417b5244177543c84ab0fa38d63b0b816158a734db86f5c1bbc58931d6e1aad",
+  "report_bytes_match_actual_vm_report": true,
+  "request_id": "van-rev112-graph-run-20261017-02b",
+  "scope": "Exact Rev1.12 exported document DAG only; no full-document semantic admission, application tests, provider calls, model training, repository merge or deployment.",
+  "separate_prepared_operation": "An earlier truncated draft was prepared only, never authorized or run. It supplies no execution evidence.",
+  "stdout_truncated": false,
+  "target": "van-trading-core",
+  "timed_out": false,
+  "transport": "WIREGUARD_SSH_SUDO"
+}

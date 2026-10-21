@@ -1,0 +1,345 @@
+{
+  "schema_version": 1,
+  "status": "CURRENT_SOURCE_LOCAL_VALIDATION_PASS_WITH_EXTERNAL_PREREQUISITES",
+  "repository": "Vanguduza/Van",
+  "base_commit": "12feb9033dfc1dd68d7b4d41ac477f0d9dbbc4af",
+  "source_manifest": {
+    "path": "docs/audit/validation/van-production-source-freeze-provider-speaker-2026-10-08-r8.json",
+    "sha256": "c55031c4be0cc6da94b86d103066b4b683d71be3c6d779a56bc3520fffb7b61e"
+  },
+  "production_source_files": 1413,
+  "checks": [
+    {
+      "scope": "backend",
+      "selection": "backend/tests",
+      "status": "PASS",
+      "counts": {
+        "tests": 3231,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 3231
+      },
+      "skips": [],
+      "junit": {
+        "path": "docs/audit/validation/backend-expansion-frozen-final-2026-10-08-provider-speaker-r6.xml",
+        "sha256": "dbbee3bf9bf398f5f02dc8f17c28b9394051447bf4ebeb8d804e28a81efb6612"
+      },
+      "log": {
+        "path": "docs/audit/validation/backend-expansion-frozen-final-2026-10-08-provider-speaker-r6.log",
+        "sha256": "15f1aa9ff3b0855d7fb4591a5a47e19ba318efd6864293da93aec51fc227a94c"
+      },
+      "source_receipts": [
+        {
+          "path": "docs/audit/validation/backend-expansion-frozen-final-2026-10-08-provider-speaker-r6-result.json",
+          "sha256": "bd924a469058bb9522904807788d0fa95ab8bdbda56db61abb4c97540479c930"
+        },
+        {
+          "path": "docs/audit/validation/backend-expansion-frozen-final-2026-10-08-provider-speaker-r6-inputs.json",
+          "sha256": "8358153937cca85c495646484811ff6fcf808988394e2bbd05051a32937adbf1"
+        }
+      ],
+      "component_requalification": {
+        "path": "docs/audit/validation/backend-component-requalification-provider-speaker-2026-10-08-r8.json",
+        "sha256": "83034ff53a25aedb7a7cc73a218b04d5d419d3fd826b0c9bbaa1958271151f7a"
+      }
+    },
+    {
+      "scope": "contracts",
+      "selection": "tests/contracts",
+      "status": "PASS",
+      "counts": {
+        "tests": 996,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 2,
+        "passed": 994
+      },
+      "skips": [
+        {
+          "case": "tests.contracts.test_android_instrumentation_abi::test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile",
+          "reason": "opt-in actual AGP release guard check"
+        },
+        {
+          "case": "tests.contracts.test_android_production_target::test_actual_agp_valid_target_still_refuses_missing_production_signing",
+          "reason": "opt-in actual AGP signing guard check"
+        }
+      ],
+      "junit": {
+        "path": "docs/audit/validation/contracts-provider-speaker-frozen-final-2026-10-08-r8.xml",
+        "sha256": "3feec7a1fbf8b0ea944294868a3bb4032af878e4f50c6dfc48f72da28c970c7c"
+      },
+      "log": {
+        "path": "docs/audit/validation/contracts-provider-speaker-frozen-final-2026-10-08-r8.log",
+        "sha256": "6f965193d0dcff11352d07a1d5390781c72eb0ee28be1cf28f84904cd829599b"
+      },
+      "source_receipts": [
+        {
+          "path": "docs/audit/validation/contracts-provider-speaker-frozen-final-2026-10-08-r8-before.json",
+          "sha256": "3a5ec9e2dd54752d3fc1b909438e8f236554a0959590eddf0372fd98d86cbf92"
+        },
+        {
+          "path": "docs/audit/validation/contracts-provider-speaker-frozen-final-2026-10-08-r8-after.json",
+          "sha256": "a1d330bfc40719fe760389e79ef8b0da10b125a8d8ac77872f4cf66ea7f62366"
+        },
+        {
+          "path": "docs/audit/validation/contracts-provider-speaker-frozen-final-2026-10-08-r8-result.json",
+          "sha256": "942015f68119194c978b0c78e727ff935d6ea471098d006dffc2f1044fed0c04"
+        }
+      ]
+    },
+    {
+      "scope": "trading",
+      "selection": "trading/tests",
+      "status": "PASS",
+      "counts": {
+        "tests": 1295,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 2,
+        "passed": 1293
+      },
+      "skips": [
+        {
+          "case": "trading.tests.test_infra_live::test_postgres_ledger_matches_sqlite_chain_and_detects_tampering",
+          "reason": "local PostgreSQL not reachable"
+        },
+        {
+          "case": "trading.tests.test_vtil_borrow::test_dial_resolver_selects_trading_knowledge_from_van_registry",
+          "reason": "dial-new checkout not available (set DIAL_REPO)"
+        }
+      ],
+      "junit": {
+        "path": "docs/audit/validation/trading-expansion-frozen-final-2026-10-08-provider-speaker-r8.xml",
+        "sha256": "7cf1f2c5456debd9d212dc969c14823a3496a68155f6e043cc611a25ec0e9d2c"
+      },
+      "log": {
+        "path": "docs/audit/validation/trading-expansion-frozen-final-2026-10-08-provider-speaker-r8.log",
+        "sha256": "eb4fe719b2d8babbebfb1d7335e55a7159ec3768ab928e2b6d6af16609430009"
+      },
+      "source_receipts": [
+        {
+          "path": "docs/audit/validation/trading-expansion-frozen-final-2026-10-08-provider-speaker-r8-inputs.json",
+          "sha256": "93812777252c468d43919dc5cec1e1872734744f7f5e84301e8e1db27b44f8dc"
+        },
+        {
+          "path": "docs/audit/validation/trading-expansion-frozen-final-2026-10-08-provider-speaker-r8-result.json",
+          "sha256": "52f6055e614008c849ae9c95d519a66250c05c5bbd1e414d546a4cbbed942d54"
+        }
+      ]
+    },
+    {
+      "scope": "hermes_and_scenarios",
+      "selection": "tests/hermes hermes/policy/tests tests/scenarios",
+      "status": "PASS",
+      "counts": {
+        "tests": 89,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 89
+      },
+      "skips": [],
+      "junit": {
+        "path": "docs/audit/validation/hermes-scenarios-expansion-frozen-final-2026-10-08-provider-speaker-r9.xml",
+        "sha256": "f08f0c9af09327c6ea0054b130e1207a2b4bfa9f83454910158713edef95209f"
+      },
+      "log": {
+        "path": "docs/audit/validation/hermes-scenarios-expansion-frozen-final-2026-10-08-provider-speaker-r9.log",
+        "sha256": "dee3ba5112a71d36bb74c5e3757770f5b95595e553f782bcb7842f52b31f26a7"
+      },
+      "source_receipts": [
+        {
+          "path": "docs/audit/validation/hermes-scenarios-expansion-frozen-final-2026-10-08-provider-speaker-r9-result.json",
+          "sha256": "ded8d4139fe90c3c1fb3951add4f6feb15acfa8968f8ee4f4d3da0897fa76241"
+        },
+        {
+          "path": "docs/audit/validation/hermes-scenarios-expansion-frozen-final-2026-10-08-provider-speaker-r9-inputs.json",
+          "sha256": "56928c4ac09cb1f6214325ca5a094c967adb944ab5d00c583d83ecde9d428317"
+        }
+      ]
+    },
+    {
+      "scope": "native_browser_services",
+      "selection": "services",
+      "status": "PASS",
+      "counts": {
+        "tests": 160,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 160
+      },
+      "skips": [],
+      "junit": {
+        "path": "docs/audit/validation/browser-services-provider-speaker-final-2026-10-08.xml",
+        "sha256": "0b4dd387df6b8da402874ac72dbee2a7355597b5d7dde01f8ab5dd5d251bcc47"
+      },
+      "log": {
+        "path": "docs/audit/validation/browser-services-provider-speaker-final-2026-10-08.log",
+        "sha256": "277dc414e2f03bb43c4fff830fe2d2dac31173f119788e7b8e5179c7449d9bf9"
+      },
+      "source_receipts": [
+        {
+          "path": "docs/audit/validation/browser-services-provider-speaker-final-2026-10-08.source-inputs.json",
+          "sha256": "43490b44be8b2d018f71be0a9ce521e040d310d0a4b58f0f7806e39395c52bc7"
+        }
+      ]
+    }
+  ],
+  "android": {
+    "receipt": {
+      "path": "docs/audit/validation/android-owner-controls-final-receipt-2026-10-08-r4.json",
+      "sha256": "144402dd7b1776b8bcd6e155c2d1cf11069ced29eb0266b04eda4e40a1392887"
+    },
+    "jvm": {
+      "errors": 0,
+      "failures": 0,
+      "passed": 1262,
+      "skipped": 0,
+      "suites": 153,
+      "tests": 1262
+    },
+    "app_unit": {
+      "errors": 0,
+      "failures": 0,
+      "passed": 203,
+      "skipped": 0,
+      "suites": 36,
+      "tests": 203
+    },
+    "debug_apk": {
+      "bytes": 317069609,
+      "default_native_abis": [
+        "arm64-v8a"
+      ],
+      "owner_release": false,
+      "path": "android/app/build/outputs/apk/debug/app-debug.apk",
+      "sha256": "1562d995bfe6d12f54c7c583e9e5569a79a4129f0e828bb30952df22a5393078"
+    },
+    "lint": {
+      "Error": 0,
+      "Fatal": 0,
+      "Hint": 19,
+      "Warning": 87
+    },
+    "native_libraries": 7,
+    "embedded_asset_files": 45,
+    "embedded_asset_bytes": 224852871,
+    "embedded_asset_manifest": {
+      "path": "android/voice/voice_asset_manifest.json",
+      "sha256": "7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30"
+    },
+    "native_corresponding_source_status": "INVENTORIED_NOT_COMPLETE",
+    "generic_acoustic_observations": [
+      {
+        "path": "docs/audit/validation/generic-acoustic-model-qualification-2026-10-08.json",
+        "sha256": "0eb1bb222688c5e48bfbb8637c050e0333edc1220534286e4ad974a6d76758f8"
+      },
+      {
+        "path": "docs/audit/validation/generic-acoustic-selected-files-2026-10-08.json",
+        "sha256": "55eea4ff0258f3be72f72611ef1cb82aaf942ceb9d313d3905a9cb58a2c946d3"
+      }
+    ],
+    "native_16k_alignment": "PASS",
+    "zipalign_16k": "PASS"
+  },
+  "disjoint_runner_executions": {
+    "passed": 7232,
+    "skipped": 4,
+    "failed": 0,
+    "errors": 0
+  },
+  "supplemental_skip_qualification": [
+    {
+      "scope": "actual_release_refusal",
+      "qualification": "FRESH_CURRENT_SOURCE_EXECUTION",
+      "passed": 2,
+      "receipt": {
+        "path": "docs/audit/validation/android-release-guards-supplement-2026-10-08-r4.json",
+        "sha256": "e6c025bac4daeedd74dcbfac586889afd9862f316d87deb60cff1c484af0a7c1"
+      }
+    },
+    {
+      "scope": "isolated_real_postgres_ledger",
+      "qualification": "RETAINED_EXECUTION_WITH_UNCHANGED_INPUTS",
+      "qualified_cases": 1,
+      "receipt": {
+        "path": "docs/audit/validation/trading-postgres-retained-input-check-2026-10-08.json",
+        "sha256": "ff270b2f4f81a2b0695f6de9e1759077f2874bae3ff35a79f4f2cf9207dc80b4"
+      }
+    },
+    {
+      "scope": "readonly_DDS_resolver",
+      "qualification": "RETAINED_EXECUTION_WITH_UNCHANGED_INPUTS",
+      "qualified_cases": 1,
+      "receipt": {
+        "path": "docs/audit/validation/trading-dial-resolver-retained-input-check-2026-10-08.json",
+        "sha256": "3f8436ff41c600374d3b760e3fad79c53b749dba45aa911323dc4854369915b7"
+      }
+    }
+  ],
+  "fresh_passing_disjoint_executions_including_release_guards": 7234,
+  "retained_passing_cases_with_unchanged_inputs": 2,
+  "qualified_current_source_cases": 7236,
+  "registry": {
+    "counts": {
+      "features": 42,
+      "functions": 105,
+      "screens": 78,
+      "endpoints": 345,
+      "schemas": 200,
+      "prepared_acceptance_cases": 826
+    },
+    "wiring_status_counts": {
+      "SOURCE_WIRED_REQUIRES_ACCEPTANCE": 39,
+      "EXTERNAL_CONTRACT_OR_ASSET_REQUIRED": 3
+    },
+    "features": {
+      "path": "registries/owner_features.json",
+      "sha256": "e6361e2916ae148c2cffa96fd15a1a1e8f13ed28d8513b8c27d4408bfa2f3768"
+    },
+    "screens": {
+      "path": "registries/owner_screens.json",
+      "sha256": "7efca98f23da0c822b451a4f5457bb47eac67576bf2f602ada4883f448325794"
+    },
+    "endpoints": {
+      "path": "registries/owner_endpoints.json",
+      "sha256": "030765d69790e30e64659b6c94977b8d843b1a9ccf3aa8c813654c78cc395973"
+    },
+    "schemas": {
+      "path": "registries/owner_endpoint_schemas.json",
+      "sha256": "4e41fc728924a8bf083dfda6bdd8a272853b2720f26d0b02373fcbc1033718e8"
+    },
+    "acceptance_plan": {
+      "path": "docs/audit/VAN_ARTEMIS_ACCEPTANCE_PLAN_2026-10-08.json",
+      "sha256": "ec0fc0396d051468273186903d001b2bbe2bc801bf3a8eae306462241d6821cc"
+    }
+  },
+  "deployment_choice": {
+    "gateway": "van-trading-core",
+    "hermes": "dial-control profile van",
+    "device_actuator": "NATIVE_ARTEMIS_VIA_DIAL_COMMANDER"
+  },
+  "owner_profile_fabricated": false,
+  "generic_models_grant_owner_identity": false,
+  "physical_tests_executed": 0,
+  "owner_release_built": false,
+  "production_deployed": false,
+  "live_provider_canaries_run": false,
+  "only_s24_testing_remains": false,
+  "external_prerequisites": [
+    "Callable authorized DIAL/Commander production route",
+    "Actual van-trading-core deployment, private Hermes connectivity, valid gateway trust and live firewall evidence",
+    "Existing owner production signer, attestation/provisioning bindings and verified release packet",
+    "Governed Oracle/VEKL owner-artifact target contract and canonical admission/introspection integration",
+    "Actual S24 wake/transcription/speaker acoustic qualification and real owner enrollment; generic pinned assets and local source tests are not acoustic accuracy evidence. Rive redesign remains separately deferred",
+    "Publish the saved managed environment configuration draft"
+  ],
+  "scope": "Disjoint complete local suites and independent Android build evidence, with exact byte bindings. Focused overlapping tests excluded from totals. Native browser tests use controlled TLS/CDP/WebRTC fixtures. No actual production service, provider, signed owner release, or S24 qualification.",
+  "source_control": {
+    "committed": false,
+    "pushed": false,
+    "dds_modified": false
+  }
+}

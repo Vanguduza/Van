@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.session.OfflineSubmissionTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:47" hostname="052fefa249ff" time="0.005">
+  <properties/>
+  <testcase name="an ordinary command that never arrived is saved and sent later()" classname="com.dial.van.session.OfflineSubmissionTest" time="0.001"/>
+  <testcase name="something that needs the owner present is saved and asked about again()" classname="com.dial.van.session.OfflineSubmissionTest" time="0.0"/>
+  <testcase name="a held command is not promised a question that nothing asks()" classname="com.dial.van.session.OfflineSubmissionTest" time="0.0"/>
+  <testcase name="an irreversible command is not told it will be retried()" classname="com.dial.van.session.OfflineSubmissionTest" time="0.0"/>
+  <testcase name="an irreversible command is never stored, whatever the network did()" classname="com.dial.van.session.OfflineSubmissionTest" time="0.0"/>
+  <testcase name="the three outcomes do not share a sentence()" classname="com.dial.van.session.OfflineSubmissionTest" time="0.001"/>
+  <testcase name="the classification comes from OutboxPolicy rather than a second copy()" classname="com.dial.van.session.OfflineSubmissionTest" time="0.0"/>
+  <testcase name="ambiguous dispatch preserves the original signed command and client context()" classname="com.dial.van.session.OfflineSubmissionTest" time="0.0"/>
+  <testcase name="a command the Gateway refused is not saved and replayed later()" classname="com.dial.van.session.OfflineSubmissionTest" time="0.0"/>
+  <testcase name="a moment-only command is refused before the storage question is asked()" classname="com.dial.van.session.OfflineSubmissionTest" time="0.0"/>
+  <testcase name="an elevated but reversible command is stored rather than dropped()" classname="com.dial.van.session.OfflineSubmissionTest" time="0.0"/>
+  <testcase name="a command that is only good for a moment is not stored for four hours()" classname="com.dial.van.session.OfflineSubmissionTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

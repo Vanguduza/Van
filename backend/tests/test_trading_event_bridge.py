@@ -44,3 +44,33 @@ async def test_unavailable_ledger_publishes_nothing(tmp_path):
     bridge = TradingEventBridge(store, _Trading([_row("t1")], available=False), EventBus(store, 50))
     assert await bridge.run() == {"published": 0, "ledger_available": False}
     assert await store.fetchall("SELECT 1 FROM events WHERE event_type = ?", (EVENT_TYPE,)) == []
+
+
+@pytest.mark.asyncio
+async def test_gateway_registered_scheduler_publishes_closed_trade_once(tmp_path, monkeypatch):
+    """Exercise the actual app callback, which the HTTP handler once shadowed."""
+    from van_gateway.app import create_app
+    from van_gateway.config import get_settings
+
+    monkeypatch.setenv("VAN_DATABASE_PATH", str(tmp_path / "scheduled.sqlite3"))
+    monkeypatch.setenv("VAN_SCHEDULER_ENABLED", "false")
+    get_settings.cache_clear()
+    try:
+        app = create_app()
+        await app.state.store.migrate()
+        monkeypatch.setattr(app.state.trading, "history", lambda limit=50: {
+            "ledger_available": True, "history": [_row("scheduled-trade")],
+        })
+        scheduler = app.state.scheduler
+        job = scheduler.jobs["trading.publish_closed"]
+        first = await scheduler.run_job(job)
+        second = await scheduler.run_job(job)
+        assert first["outcome"] == "OK"
+        assert first["detail"]["published"] == 1
+        assert second["detail"]["published"] == 0
+        rows = await app.state.store.fetchall(
+            "SELECT payload_json FROM events WHERE event_type = ?", (EVENT_TYPE,),
+        )
+        assert len(rows) == 1 and "scheduled-trade" in rows[0]["payload_json"]
+    finally:
+        get_settings.cache_clear()

@@ -17,8 +17,8 @@ that the owner had no way to reach.
   voice turn to prime the recogniser and rewrite the transcript, and nothing could put a
   word into it.
 
-These tests are static because the Android Gradle Plugin cannot be fetched here, so Compose
-cannot be compiled locally. CI compiles it. What is checkable before a push is that each
+These tests check production source bindings independently from the actual Android build.
+What they verify is that each
 screen exists, is reachable from the NavHost, and calls the function that was dead — which
 is the half a refactor silently removes.
 """
@@ -31,6 +31,7 @@ ROOT = Path(__file__).resolve().parents[2]
 APP = ROOT / "android" / "app" / "src" / "main" / "java" / "com" / "dial" / "van"
 MODULES = APP / "command" / "modules"
 WORK = APP / "command" / "work" / "WorkRoute.kt"
+WORK_DETAILS = APP / "command" / "work" / "WorkDetails.kt"
 ROUTES = APP / "command" / "nav" / "VanRoute.kt"
 ACTIVITY = APP / "command" / "CommandCentreActivity.kt"
 
@@ -43,15 +44,26 @@ def test_mission_repository_is_constructed_and_read_from_work():
     """The surface P2-AND-015 found dead: constructed by nothing, called by nothing."""
     work = _text(WORK)
     assert "MissionRepository(app.gatewayClient)" in work
-    assert "runCatching { repository.home() }" in work
-    assert ".onSuccess { active = it.activeMissions; waiting = it.waitingMissions" in work
+    # The owner now also needs completed/failed/cancelled records. Reading the home
+    # summary loses those; Work reads the mission collection and groups actual states.
+    assert "runCatching { repository.missions() }" in work
+    assert "active = it.filter { mission -> mission.isActive }" in work
+    assert 'waiting = it.filter { mission -> !mission.isTerminal && mission.state == "WAITING_FOR_OWNER" }' in work
+    assert "completed = it.filter { mission -> mission.isTerminal }" in work
+    assert "requestedMission = it.firstOrNull { mission -> mission.missionId == requestedMissionId }" in work
+    repository = _text(APP / "mission/MissionRepository.kt")
+    assert "suspend fun missions(activeOnly: Boolean = false)" in repository
+    assert "MissionParsing.missionSummaries(client.missions(activeOnly))" in repository
 
 
 def test_work_survives_rotation():
     """A mission's expanded/collapsed state is exactly what turning the phone used to lose."""
     work = _text(WORK)
-    assert "import androidx.compose.runtime.saveable.rememberSaveable" in work
-    assert "rememberSaveable(mission.missionId)" in work
+    details = _text(WORK_DETAILS)
+    assert "MissionRow(app, mission," in work
+    assert "internal fun MissionRow(app: VanApplication, mission: MissionSummary" in details
+    assert "import androidx.compose.runtime.saveable.rememberSaveable" in details
+    assert "rememberSaveable(mission.missionId)" in details
 
 
 #: screen file -> (the route id `VanRoute`/`CommandCentreActivity` must carry it under, the

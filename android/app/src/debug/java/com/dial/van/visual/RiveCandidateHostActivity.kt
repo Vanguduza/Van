@@ -83,7 +83,7 @@ class RiveCandidateHostActivity : ComponentActivity() {
                         )
                     }
                 } else {
-                    RiveCandidateHost(bytes = bytes, modifier = Modifier.fillMaxSize())
+                    CharacterRigLab(bytes = bytes)
                 }
             }
         }

@@ -5,8 +5,9 @@
     <application android:usesCleartextTraffic="true">
         <activity
             android:name=".visual.RiveCandidateHostActivity"
-            android:exported="false"
-            android:label="VAN Rive candidate"
-            android:theme="@style/Theme.Van" />
+            android:exported="true"
+            android:label="VAN Character Rig Lab"
+            android:theme="@style/Theme.Van">
+        </activity>
     </application>
 </manifest>

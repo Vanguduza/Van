@@ -1,0 +1,84 @@
+{
+ "schema_version": 1,
+ "authorization_id": "auth-20261001-owner-derived-programme-b-review-i9-remediation",
+ "project": "van",
+ "authority": "OWNER_DERIVED",
+ "owner_instruction_sha256": "2d618286c8a5d5b0f813a52e48b55afd9789bfa2f020a929f79a3dcb8c3696be",
+ "owner_instruction_digest_input": "UTF-8 bytes of the verbatim owner message \"Write the record and push to where you think is most suitable. Close all identified gaps and issues still open\", no quotes, no trailing newline",
+ "owner_instruction_record": "docs/decisions/OWNER-DECISION-20261001-REVIEW-I9-CLOSURE.md",
+ "owner_instruction_excerpt": "Write the record and push to where you think is most suitable. Close all identified gaps and issues still open",
+ "additional_owner_answers": {
+  "egress": {
+   "label": "Egress proxy (Recommended)",
+   "sha256": "bb585837793f4ad187205e1c663848d4a53315fa6ee319db3d02536035026c49"
+  },
+  "guard": {
+   "label": "Network-effect guard (Recommended)",
+   "sha256": "1fc63b2f9355a9c8534003a65e0bd8550288092795b4d07d2dcb2dec371107b0"
+  },
+  "canary": {
+   "label": "In-zone canary origin (Recommended)",
+   "sha256": "76df8fb31e23f8ae44e8d05d2ca94ece66ee8c8868e5d5f5ba9258c01c15ff37"
+  },
+  "ledger": {
+   "label": "Yes to owner derived treatment and  enforce van's ledger",
+   "sha256": "1fb51f92482bc51e4c6d7fc1ef508b3070a56c0d024dd773927367162ce72dfb"
+  }
+ },
+ "source": {
+  "kind": "owner_session_instruction",
+  "channel": "claude_code",
+  "request_id": "claude-code-session_01Bpoym1tGVUgaW8MWgRZfxt-20261001",
+  "owner_attested": true,
+  "device_signature_claimed": false,
+  "cryptographic_signature_claimed": false,
+  "signed_ingress_claimed": false
+ },
+ "signature_note": "Derived authority; no signature claimed. The owner ordered this record written and the gaps review I9 and re-review I9b left open closed. Review I9 reproduced that the egress proxy relayed client bytes after an Upgrade request before the upstream switched protocols (a pipelined request reached the upstream unjudged) and admitted Upgrade lists; that a failed Harness /release read as clean, so a write the network-effect guard blocked was never handed to the owner; that the egress qualify report was bound neither to time nor to code; and three nits. I9b observed that the report's digests measure installed files, not running processes. Fixing these is a necessary consequence of the owner's 'Egress proxy', 'Network-effect guard' and 'In-zone canary origin' answers; the gate changes only tighten a production gate. The owner did not review these diffs. The ledger checker pin (core.abbrev=8) closes a gap found while recording G16: digests depended on the clone; it keeps every existing row valid and adds no authority.",
+ "purpose": "Authorize unit G16: review-I9 remediation (MAJOR-1, MINOR-1, MINOR-2, NIT-1, NIT-2, NIT-3), the I9b running-code check, the ledger checker's hash-abbreviation pin (a shallow clone failed 178 existing digests), their tests, the migration-record section and the owner decision record.",
+ "authorized_paths": [
+  "backend/tests/test_browser_egress_proxy_i9.py",
+  "backend/tests/test_browser_late_block_callers.py",
+  "backend/tests/test_production_activation_gates.py",
+  "backend/van_gateway/automation/production_gates.py",
+  "backend/van_gateway/browser/service.py",
+  "backend/van_gateway/knowledge/notebook.py",
+  "deploy/van-browser-core/browser/egress_proxy.py",
+  "deploy/van-browser-core/qualify.sh",
+  "docs/decisions/OWNER-DECISION-20261001-REVIEW-I9-CLOSURE.md",
+  "docs/project-state/VAN_BROWSER_CORE_MIGRATION_20260929.md",
+  "registries/production_activation_gates.json",
+  "tests/contracts/test_project_truth_ledger.py",
+  "tools/ci/README.md",
+  "tools/ci/project_truth_ledger.py"
+ ],
+ "commit_scope": {
+  "commits": [
+   "ec618b3518deec81d27d0e890dcdca0aa1176628",
+   "51dfdf3c4c43df6d789746bb6cf2085407576e3f",
+   "2cf1983386ac0419f6da18444eaf382fbfffd19f",
+   "46813fcdaa716ef5534f45696b782f8bcd3bcaa3",
+   "9132523123461ced0fca6e3a86693b8f2c8cf102",
+   "7e7103012b9a25c8f79fcfb9e47f763c126a106c",
+   "33c0a93f68aaacbcb97aee74498652841b018000",
+   "34a519ac3c3a0961b5bcc4614a2e7fe10b997edf"
+  ]
+ },
+ "limits": [
+  "Covers only the listed paths in the listed commits.",
+  "May not redefine product, money, security or owner-control intent.",
+  "Opens no production gate; not reusable."
+ ],
+ "issued_at_utc": "2026-10-01T00:00:00Z",
+ "recorded_by": "integrator (session_01Bpoym1tGVUgaW8MWgRZfxt)",
+ "material_scope_expansion": false,
+ "feature_removal": false,
+ "business_model_change": false,
+ "security_authority_change": false,
+ "owner_control_boundary_change": false,
+ "legal_position_change": false,
+ "money_or_custody_model_change": false,
+ "locked_provider_change": false,
+ "reusable": false,
+ "revoked": false
+}

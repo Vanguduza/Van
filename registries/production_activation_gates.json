@@ -1,0 +1,201 @@
+{
+  "$schema_note": "Owner decision 2026-09-29 s6 (docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md). The explicit production activation gate model read by backend/van_gateway/automation/production_gates.py and surfaced by the automation/browser health API. Each required decision names the gates that must be GREEN, where each gate's status is read from (a dotted path into the decision record), and the closed vocabulary that maps a raw value to GREEN / PENDING / BLOCKED. Any value outside the declared vocabulary, a missing path, a missing or unparseable file, or an empty model is UNKNOWN and fails closed. production_activation_permitted is true only when every gate of every required decision is GREEN. This file declares where truth lives; it never holds a status itself. Decision records stay append-only: when a later append supersedes an earlier gate, the path here moves to the newer block.",
+  "schema_version": 1,
+  "model_id": "VAN-PRODUCTION-ACTIVATION-GATES",
+  "authorization_id": "auth-20260929-owner-stagehand-private-plane-gates",
+  "decisions_dir": "docs/decisions",
+  "required_decisions": [
+    {
+      "decision": "VAN-ADOPT-N8N-001.yaml",
+      "format": "yaml",
+      "gates": [
+        {
+          "id": "owner_decision",
+          "kind": "owner_decision",
+          "path": "owner_signature_status",
+          "green": ["SIGNED"],
+          "pending": ["PENDING"]
+        },
+        {
+          "id": "live_qualification",
+          "kind": "production",
+          "path": "observed_runtime.pin_status",
+          "green": ["PINNED_DIGEST_VERIFIED"],
+          "pending": ["UNPINNED_VERIFY_AT_ADOPTION"],
+          "note": "registries/automation_browser_dependencies.json: versions stay UNPINNED_VERIFY_AT_ADOPTION until an adoption gate records a digest; docs/EXTERNAL_GATES.md n8n rows are PENDING_LIVE."
+        }
+      ]
+    },
+    {
+      "decision": "VAN-ADOPT-STAGEHAND-001.yaml",
+      "format": "yaml",
+      "gates": [
+        {
+          "id": "owner_decision",
+          "kind": "owner_decision",
+          "path": "owner_signature_status",
+          "green": ["SIGNED"],
+          "pending": ["PENDING"]
+        },
+        {
+          "id": "owner_intent",
+          "kind": "owner_decision",
+          "path": "owner_decisions_20260929.owner_intent",
+          "green": ["OWNER_INTENT_APPROVED"],
+          "pending": ["PENDING"]
+        },
+        {
+          "id": "production_gate",
+          "kind": "production",
+          "path": "owner_decisions_20260929.production_gate.status",
+          "green": ["GREEN"],
+          "pending": ["PENDING"],
+          "blocked": ["BLOCKED"]
+        },
+        {
+          "id": "signed_ingress",
+          "kind": "production",
+          "path": "owner_decisions_20260929.signed_ingress.status",
+          "green": ["SIGNED_INGRESS_VERIFIED"],
+          "pending": ["SIGNED_INGRESS_PENDING"],
+          "note": "Owner decision s2: not waived; no waiver value is accepted as GREEN."
+        },
+        {
+          "id": "production_host",
+          "kind": "production",
+          "path": "owner_decisions_20260929.hosting.zone_status",
+          "green": ["AVAILABLE"],
+          "pending": ["UNPROVISIONED"],
+          "blocked": ["UNAVAILABLE"],
+          "note": "Owner decision s1: van-browser-core unavailable => Stagehand PRODUCTION_DISABLED."
+        },
+        {
+          "id": "model_pin",
+          "kind": "production",
+          "path": "owner_decisions_20260929.model.pin_status",
+          "green": ["PINNED_IMMUTABLE_REVISION"],
+          "pending": ["UNVERIFIED", "FLOATING_ALIAS_ONLY"],
+          "note": "Owner decision s4: FLOATING_ALIAS_ONLY keeps the gate pending where deterministic pinning is mandatory."
+        },
+        {
+          "id": "live_qualification",
+          "kind": "production",
+          "path": "owner_decisions_20260929.version.live_qualification.status",
+          "green": ["GREEN"],
+          "pending": ["PENDING"],
+          "blocked": ["FAILED"],
+          "note": "Owner decision s5: live runtime reports the 4.1.0 artifact and passes the runtime canary."
+        },
+        {
+          "id": "blocker_verifier_gap",
+          "kind": "production",
+          "path": "blocker_closure_20260929.blockers.STAGEHAND-VERIFIER-GAP-20260929.status",
+          "green": ["CLOSED"],
+          "blocked": ["OPEN"],
+          "note": "Moved to the blocker_closure_20260929 append (OWNER_DERIVED; review I3 at VAN f55d360d). The earlier owner_decisions_20260929 block still records OPEN as the state at the time."
+        },
+        {
+          "id": "blocker_direct_actuation",
+          "kind": "production",
+          "path": "blocker_closure_20260929.blockers.STAGEHAND-DIRECT-ACTUATION-20260929.status",
+          "green": ["CLOSED"],
+          "blocked": ["OPEN"],
+          "note": "Moved to the blocker_closure_20260929 append (OWNER_DERIVED; review I3 at VAN f55d360d). The earlier owner_decisions_20260929 block still records OPEN as the state at the time."
+        }
+      ]
+    },
+    {
+      "decision": "VAN-ADOPT-BROWSER-HARNESS-001.yaml",
+      "format": "yaml",
+      "gates": [
+        {
+          "id": "owner_decision",
+          "kind": "owner_decision",
+          "path": "owner_signature_status",
+          "green": ["SIGNED"],
+          "pending": ["PENDING"]
+        },
+        {
+          "id": "live_qualification",
+          "kind": "production",
+          "path": "observed_runtime.pin_status",
+          "green": ["PINNED_DIGEST_VERIFIED"],
+          "pending": ["UNPINNED_VERIFY_AT_ADOPTION"],
+          "note": "docs/EXTERNAL_GATES.md Browser Harness row is REPO_COMPLETE / PENDING_LIVE."
+        }
+      ]
+    },
+    {
+      "decision": "VAN-AMEND-SECURITY-POLICY-001.md",
+      "format": "markdown",
+      "gates": [
+        {
+          "id": "owner_decision",
+          "kind": "owner_decision",
+          "path": "Status",
+          "green": ["OWNER_APPROVED"],
+          "pending": ["PENDING", "PROPOSED"]
+        }
+      ]
+    }
+  ],
+  "capability_decisions": [
+    {
+      "decision": "VAN-JEV-BROWSER-EFFECT-001.yaml",
+      "format": "yaml",
+      "note": "Review I2 N-7. Gates one capability only (jev_browser_effect in backend/van_gateway/automation/production_gates.py CAPABILITY_DECISIONS) and is not part of the global production_activation_permitted summary: SHADOW_ONLY is a legitimate production posture for Jev. Blueprint s11: PROPOSE_ACTION capped at SHADOW until a separate owner decision. dial-jev's own apply_effect/lifecycle report is necessary, never sufficient.",
+      "gates": [
+        {
+          "id": "owner_decision",
+          "kind": "owner_decision",
+          "path": "owner_signature_status",
+          "green": ["SIGNED"],
+          "pending": ["PENDING", "NOT_APPLICABLE_RECORDS_EXISTING_CAP"],
+          "note": "Review I3 MINOR-4. Effect needs the separate owner decision, so the record must carry an owner signature status of SIGNED; the record as written (NOT_APPLICABLE_RECORDS_EXISTING_CAP) is pending."
+        },
+        {
+          "id": "owner_decision_reference",
+          "kind": "owner_reference",
+          "path": "jev_browser_effect.owner_decision_reference",
+          "green_pattern": "docs/decisions/OWNER-DECISIONS-[0-9]{8}-[A-Z0-9-]+\\.md",
+          "reference_dir": "docs/decisions",
+          "sha256_path": "jev_browser_effect.owner_decision_sha256",
+          "authorization_path": "jev_browser_effect.owner_decision_authorization_id",
+          "authorizations_dir": "docs/project-state/authorizations",
+          "authorization_authority": ["OWNER_EXPLICIT"],
+          "note": "Review I3 MINOR-4, tightened by review I4 MINOR-B. GREEN only when the reference resolves to an existing docs/decisions/OWNER-DECISIONS-*.md file, the record pins that file's sha256 at owner_decision_sha256 and the pin matches, and owner_decision_authorization_id names an existing, unrevoked OWNER_EXPLICIT authorization record in docs/project-state/authorizations/ whose owner_instruction_record is that file and whose authorized_paths names this record (docs/decisions/VAN-JEV-BROWSER-EFFECT-001.yaml) exactly. A shape-only reference, a missing file, a missing or mismatched pin, or a missing, revoked or unrelated authorization is UNKNOWN."
+        },
+        {
+          "id": "jev_browser_effect",
+          "kind": "production",
+          "path": "jev_browser_effect.status",
+          "green": ["OWNER_APPROVED_EFFECT"],
+          "pending": ["SHADOW_ONLY"],
+          "blocked": ["REVOKED"]
+        }
+      ]
+    },
+    {
+      "decision": "VAN-BROWSER-CORE-EGRESS-001.yaml",
+      "format": "yaml",
+      "note": "Unit G12 (owner answers 2026-09-30 after review I7: 'Egress proxy (Recommended)', 'Firewall UDP in zone (Recommended)'). Gates the browser_harness, stagehand and jev_browser_effect capabilities (CAPABILITY_DECISIONS); not part of the global summary. GREEN only with a host qualify.sh report (qualify_report gate): the record's status QUALIFIED, the report file inside evidence/van-browser-core/qualify with its sha256 pinned, zone van-browser-core, every required check present, required and GREEN. PENDING until then.",
+      "gates": [
+        {
+          "id": "egress_qualification",
+          "kind": "qualify_report",
+          "path": "egress_qualification.status",
+          "green": ["QUALIFIED"],
+          "pending": ["PENDING"],
+          "blocked": ["FAILED"],
+          "report_path": "egress_qualification.qualify_report",
+          "sha256_path": "egress_qualification.qualify_report_sha256",
+          "report_dir": "evidence/van-browser-core/qualify",
+          "zone": "van-browser-core",
+          "max_age_hours": 168,
+          "artifacts": {"harness_service.py": "deploy/van-browser-core/browser/harness_service.py", "egress_proxy.py": "deploy/van-browser-core/browser/egress_proxy.py", "van-browser-core.nft": "deploy/van-browser-core/firewall/van-browser-core.nft"},
+          "required_checks": ["firewall_loaded", "browser_udp_blocked", "browser_tcp_bypass_blocked", "egress_proxy_active", "egress_refuses_without_policy", "egress_policy_mac_enforced", "egress_refuses_websocket_and_write", "harness_uses_egress_proxy", "network_guard_canary", "egress_refuses_smuggling", "egress_refuses_other_users", "stagehand_isolated", "services_run_installed_code"]
+        }
+      ]
+    }
+  ]
+}

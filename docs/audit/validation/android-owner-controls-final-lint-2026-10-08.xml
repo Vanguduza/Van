@@ -1,0 +1,1644 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.10.1">
+
+    <issue
+        id="ApplySharedPref"
+        severity="Warning"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        category="Correctness"
+        priority="6"
+        summary="Use `apply()` on `SharedPreferences`"
+        explanation="Consider using `apply()` instead of `commit` on shared preferences. Whereas `commit` blocks and writes its data to persistent storage immediately, `apply` will handle it in the background."
+        errorLine1="                        .commit().also { check(it) { &quot;connectivity_manifest_store_failed&quot; } }"
+        errorLine2="                         ~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/connectivity/ConnectivityRegistry.kt"
+            line="105"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        severity="Warning"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        category="Correctness"
+        priority="6"
+        summary="Use `apply()` on `SharedPreferences`"
+        explanation="Consider using `apply()` instead of `commit` on shared preferences. Whereas `commit` blocks and writes its data to persistent storage immediately, `apply` will handle it in the background."
+        errorLine1="            .commit()"
+        errorLine2="             ~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt"
+            line="158"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        severity="Warning"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        category="Correctness"
+        priority="6"
+        summary="Use `apply()` on `SharedPreferences`"
+        explanation="Consider using `apply()` instead of `commit` on shared preferences. Whereas `commit` blocks and writes its data to persistent storage immediately, `apply` will handle it in the background."
+        errorLine1="        editor.putString(KEY_INDEX, &quot;&quot;).commit()"
+        errorLine2="                                        ~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt"
+            line="206"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        severity="Warning"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        category="Correctness"
+        priority="6"
+        summary="Use `apply()` on `SharedPreferences`"
+        explanation="Consider using `apply()` instead of `commit` on shared preferences. Whereas `commit` blocks and writes its data to persistent storage immediately, `apply` will handle it in the background."
+        errorLine1="            .commit()"
+        errorLine2="             ~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt"
+            line="229"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        severity="Warning"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        category="Correctness"
+        priority="6"
+        summary="Use `apply()` on `SharedPreferences`"
+        explanation="Consider using `apply()` instead of `commit` on shared preferences. Whereas `commit` blocks and writes its data to persistent storage immediately, `apply` will handle it in the background."
+        errorLine1="        prefs.edit().putLong(KEY_CURSOR, cursor).commit()"
+        errorLine2="                                                 ~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/events/PreferencesEventCursorStore.kt"
+            line="21"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        severity="Warning"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        category="Correctness"
+        priority="6"
+        summary="Use `apply()` on `SharedPreferences`"
+        explanation="Consider using `apply()` instead of `commit` on shared preferences. Whereas `commit` blocks and writes its data to persistent storage immediately, `apply` will handle it in the background."
+        errorLine1="            .commit().also { require(it) { &quot;provisioning_credentials_store_failed&quot; } }"
+        errorLine2="             ~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+            line="500"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="ImplicitSamInstance"
+        severity="Warning"
+        message="This argument is a new instance so `stopService` will not remove anything"
+        category="Correctness"
+        priority="6"
+        summary="Implicit SAM Instances"
+        explanation="Kotlin&apos;s support for SAM (single abstract method) interfaces lets you pass a lambda to the interface. This will create a new instance on the fly even though there is no explicit constructor call. If you pass one of these lambdas or method references into a method which (for example) stores or compares the object identity, unexpected results may happen.&#xA;&#xA;In particular, passing a lambda variable in as a listener, and then later attempting to remove the listener will not work because a different instance is passed in."
+        url="https://kotlinlang.org/docs/fun-interfaces.html#sam-conversions"
+        urls="https://kotlinlang.org/docs/fun-interfaces.html#sam-conversions"
+        errorLine1="            context.stopService(Intent(context, FloatingOverlayService::class.java))"
+        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt"
+            line="446"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="ImplicitSamInstance"
+        severity="Warning"
+        message="This argument is a new instance so `stopService` will not remove anything"
+        category="Correctness"
+        priority="6"
+        summary="Implicit SAM Instances"
+        explanation="Kotlin&apos;s support for SAM (single abstract method) interfaces lets you pass a lambda to the interface. This will create a new instance on the fly even though there is no explicit constructor call. If you pass one of these lambdas or method references into a method which (for example) stores or compares the object identity, unexpected results may happen.&#xA;&#xA;In particular, passing a lambda variable in as a listener, and then later attempting to remove the listener will not work because a different instance is passed in."
+        url="https://kotlinlang.org/docs/fun-interfaces.html#sam-conversions"
+        urls="https://kotlinlang.org/docs/fun-interfaces.html#sam-conversions"
+        errorLine1="            context.stopService(Intent(context, WakeListenerService::class.java))"
+        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/voice/WakeListenerService.kt"
+            line="122"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="AndroidGradlePluginVersion"
+        severity="Warning"
+        message="A newer version of Gradle than 8.11.1 is available: 8.14.5"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Android Gradle Plugin Version"
+        explanation="This detector looks for usage of the Android Gradle Plugin where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="distributionUrl=https\://services.gradle.org/distributions/gradle-8.11.1-bin.zip"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/gradle/wrapper/gradle-wrapper.properties"
+            line="3"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.core:core-ktx than 1.13.1 is available: 1.19.1"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    implementation(&quot;androidx.core:core-ktx:1.13.1&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/build.gradle.kts"
+            line="294"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.8.4 is available: 2.11.0"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    implementation(&quot;androidx.lifecycle:lifecycle-runtime-ktx:2.8.4&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/build.gradle.kts"
+            line="295"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.lifecycle:lifecycle-viewmodel-compose than 2.8.4 is available: 2.11.0"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    implementation(&quot;androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/build.gradle.kts"
+            line="296"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.lifecycle:lifecycle-viewmodel-savedstate than 2.8.4 is available: 2.11.0"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    implementation(&quot;androidx.lifecycle:lifecycle-viewmodel-savedstate:2.8.4&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/build.gradle.kts"
+            line="299"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.lifecycle:lifecycle-service than 2.8.4 is available: 2.11.0"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    implementation(&quot;androidx.lifecycle:lifecycle-service:2.8.4&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/build.gradle.kts"
+            line="300"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.activity:activity-compose than 1.9.1 is available: 1.13.0"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    implementation(&quot;androidx.activity:activity-compose:1.9.1&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/build.gradle.kts"
+            line="301"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.navigation:navigation-compose than 2.7.7 is available: 2.10.2"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    implementation(&quot;androidx.navigation:navigation-compose:2.7.7&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/build.gradle.kts"
+            line="307"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.security:security-crypto than 1.1.0-alpha06 is available: 1.1.0"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    implementation(&quot;androidx.security:security-crypto:1.1.0-alpha06&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/build.gradle.kts"
+            line="309"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.fragment:fragment-ktx than 1.7.1 is available: 1.9.1"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    implementation(&quot;androidx.fragment:fragment-ktx:1.7.1&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/build.gradle.kts"
+            line="313"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of org.jetbrains.kotlinx:kotlinx-serialization-json than 1.6.3 is available: 1.7.3"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    implementation(&quot;org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/build.gradle.kts"
+            line="315"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.test.ext:junit than 1.2.1 is available: 1.3.0"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    androidTestImplementation(&quot;androidx.test.ext:junit:1.2.1&quot;)"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/build.gradle.kts"
+            line="354"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.test:runner than 1.6.1 is available: 1.7.0"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    androidTestImplementation(&quot;androidx.test:runner:1.6.1&quot;)"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/build.gradle.kts"
+            line="355"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.test:core-ktx than 1.6.1 is available: 1.7.0"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    androidTestImplementation(&quot;androidx.test:core-ktx:1.6.1&quot;)"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/build.gradle.kts"
+            line="356"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of org.jetbrains.kotlinx:kotlinx-serialization-json than 1.6.3 is available: 1.7.3"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    testImplementation(&quot;org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3&quot;)"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/build.gradle.kts"
+            line="358"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="ComposableNaming"
+        severity="Warning"
+        message="Composable functions that return Unit should start with an uppercase letter"
+        category="Correctness"
+        priority="3"
+        summary="Incorrect naming for @Composable functions"
+        explanation="@Composable functions without a return type should use similar naming to classes, starting with an uppercase letter and ending with a noun. @Composable functions with a return type should be treated as normal Kotlin functions, starting with a lowercase letter."
+        errorLine1="private fun truthBadge(truth: ProjectTruthSnapshot) {"
+        errorLine2="            ~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/projects/ProjectDetailRoute.kt"
+            line="287"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ModifierParameter"
+        severity="Warning"
+        message="Optional Modifier parameter should have a default value of `Modifier`"
+        category="Correctness"
+        priority="3"
+        summary="Guidelines for Modifier parameters in a Composable function"
+        explanation="The first (or only) Modifier parameter in a Composable function should follow the following rules:&#xA;- Be named `modifier`&#xA;- Have a type of `Modifier`&#xA;- Either have no default value, or have a default value of `Modifier`&#xA;- If optional, be the first optional parameter in the parameter list"
+        errorLine1="    modifier: Modifier = Modifier.size(64.dp),"
+        errorLine2="    ~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/overlay/VanMinimizedAvatar.kt"
+            line="34"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ChromeOsAbiSupport"
+        severity="Warning"
+        message="Missing x86_64 ABI support for ChromeOS"
+        category="Correctness:Chrome OS"
+        priority="4"
+        summary="Missing ABI Support for ChromeOS"
+        explanation="To properly support ChromeOS, your Android application should have an x86 and/or x86_64 binary as part of the build configuration. To fix the issue, ensure your files are properly optimized for ARM; the binary translator will then ensure compatibility with x86. Alternatively, add an `abiSplit` for x86 within your `build.gradle` file and create the required x86 dependencies."
+        url="https://developer.android.com/ndk/guides/abis"
+        urls="https://developer.android.com/ndk/guides/abis"
+        errorLine1="            abiFilters += &quot;arm64-v8a&quot;"
+        errorLine2="                          ~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/build.gradle.kts"
+            line="121"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="SetJavaScriptEnabled"
+        severity="Warning"
+        message="Using `setJavaScriptEnabled` can introduce XSS vulnerabilities into your application, review carefully"
+        category="Security"
+        priority="6"
+        summary="Using `setJavaScriptEnabled`"
+        explanation="Your code should not invoke `setJavaScriptEnabled` if you are not sure that your app really requires JavaScript support."
+        url="https://goo.gle/SetJavaScriptEnabled"
+        urls="https://goo.gle/SetJavaScriptEnabled,https://developer.android.com/training/articles/security-tips"
+        errorLine1="                            view.settings.javaScriptEnabled = true"
+        errorLine2="                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/command/artemis/ArtemisConsoleRoute.kt"
+            line="102"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="CustomX509TrustManager"
+        severity="Warning"
+        message="Implementing a custom `X509TrustManager` is error-prone and likely to be insecure. It is likely to disable certificate validation altogether, and is non-trivial to implement correctly without calling Android&apos;s default implementation."
+        category="Security"
+        priority="5"
+        summary="Implements custom TLS trust manager"
+        explanation="This check looks for custom `X509TrustManager` implementations."
+        url="https://goo.gle/CustomX509TrustManager"
+        urls="https://goo.gle/CustomX509TrustManager"
+        errorLine1="class SignedPinTrustManager("
+        errorLine2="      ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/connectivity/SignedPinTrustManager.kt"
+            line="10"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="DataExtractionRules"
+        severity="Warning"
+        message="The attribute `android:allowBackup` is deprecated from Android 12 and may be removed in future versions. Consider adding the attribute `android:dataExtractionRules` specifying an `@xml` resource which configures backups and device transfers on Android 12 and higher."
+        category="Security"
+        priority="3"
+        summary="Missing data extraction rules"
+        explanation="Before Android 12, the attributes `android:allowBackup` and `android:fullBackupContent` were used to configure all forms of backup, including cloud backups, device-to-device transfers and adb backup.&#xA;&#xA;In Android 12 and higher, these attributes have been deprecated and will only apply to cloud backups. You should instead use the attribute `android:dataExtractionRules`, specifying an `@xml` resource that configures which files to back up, for cloud backups and for device-to-device transfers, separately. If your `minSdkVersion` supports older versions, you&apos;ll still want to specify an `android:fullBackupContent` resource if the default behavior is not right for your app."
+        url="https://developer.android.com/about/versions/12/backup-restore#xml-changes"
+        urls="https://developer.android.com/about/versions/12/backup-restore#xml-changes,https://goo.gle/DataExtractionRules"
+        errorLine1="        android:allowBackup=&quot;false&quot;"
+        errorLine2="                             ~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/AndroidManifest.xml"
+            line="36"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 31"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="                            if (android.os.Build.VERSION.SDK_INT >= 26) {"
+        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/command/artemis/ArtemisConsoleRoute.kt"
+            line="109"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 31"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="            displayRotation = if (android.os.Build.VERSION.SDK_INT >= 30) {"
+        errorLine2="                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/browser/BrowserActivity.kt"
+            line="210"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 31"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="        android.os.Build.VERSION.SDK_INT >= 24 &amp;&amp; isInMultiWindowMode -> WindowMode.SPLIT"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/browser/BrowserActivity.kt"
+            line="230"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 31"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="        val thermal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {"
+        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/runtime/DeviceRuntimeReadings.kt"
+            line="35"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 31"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &amp;&amp;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/overlay/OverlayWindowFlags.kt"
+            line="35"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 31"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="        val blurFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &amp;&amp; blur) {"
+        errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/overlay/OverlayWindowFlags.kt"
+            line="39"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 31"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/overlay/OverlayWindowFlags.kt"
+            line="45"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 31"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/security/OwnerApprovalKeyManager.kt"
+            line="39"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 31"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="                if (strongBox &amp;&amp; Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {"
+        errorLine2="                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/security/OwnerDeviceIdentity.kt"
+            line="114"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 31"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="        val thermal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {"
+        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt"
+            line="394"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 31"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="        val blurEnabled = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt"
+            line="399"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 31"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &amp;&amp; SpeechRecognizer.isOnDeviceRecognitionAvailable(appContext)"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt"
+            line="85"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 31"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &amp;&amp; onDeviceAvailable) {"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt"
+            line="92"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="This folder configuration (`v26`) is unnecessary; `minSdkVersion` is 31. Merge all the resources in this folder into `mipmap-anydpi`."
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder.">
+        <location
+            file="/workspace/Van/android/app/src/main/res/mipmap-anydpi-v26"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    var page by remember(preview) { mutableStateOf(0) }"
+        errorLine2="                                    ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/browser/BrowserInertFileDialog.kt"
+            line="40"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    var pages by remember(preview) { mutableStateOf(0) }"
+        errorLine2="                                     ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/browser/BrowserInertFileDialog.kt"
+            line="41"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableLongStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    var observedAt by remember(snapshot.sessionId) { mutableStateOf(0L) }"
+        errorLine2="                                                     ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/browser/BrowserSessionPanel.kt"
+            line="40"
+            column="54"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableLongStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    var observedAt by remember { mutableStateOf(0L) }"
+        errorLine2="                                 ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt"
+            line="47"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    var cursor by remember(selectedStore) { mutableStateOf(0) }"
+        errorLine2="                                            ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/memory/DerivedMemoryRecordsSection.kt"
+            line="39"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableLongStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    var now by remember(key) { mutableStateOf(System.currentTimeMillis()) }"
+        errorLine2="                               ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/command/dev/DevProjection.kt"
+            line="71"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    private var tradeRefreshTick by mutableStateOf(0)"
+        errorLine2="                                    ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt"
+            line="58"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableLongStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    var lastRead by remember { mutableStateOf(0L) }"
+        errorLine2="                               ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/memory/MemoryRoute.kt"
+            line="83"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableLongStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    var observedAt by remember { mutableStateOf(0L) }"
+        errorLine2="                                 ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/trading/ui/OverviewScreen.kt"
+            line="67"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableLongStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    var lastRead by remember(title) { mutableStateOf(0L) }"
+        errorLine2="                                      ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/command/owner/OwnerDataSection.kt"
+            line="46"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableLongStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    var now by remember { mutableStateOf(System.currentTimeMillis() / 1000L) }"
+        errorLine2="                          ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/command/attention/OwnerDecisionCard.kt"
+            line="43"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    var offsetFromEnd by rememberSaveable(bars.size) { mutableStateOf(0) }"
+        errorLine2="                                                       ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/trading/ui/TradeChartCanvas.kt"
+            line="74"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    var visibleBars by rememberSaveable { mutableStateOf(maxVisible) }"
+        errorLine2="                                          ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/trading/ui/TradeChartCanvas.kt"
+            line="75"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    var seen by remember { mutableStateOf(generation) }"
+        errorLine2="                           ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt"
+            line="330"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableFloatStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    var phase by remember { mutableStateOf(clock.phase) }"
+        errorLine2="                            ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt"
+            line="513"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    var retry by remember(mission.missionId) { mutableStateOf(0) }"
+        errorLine2="                                               ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/command/work/WorkDetails.kt"
+            line="185"
+            column="48"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    var gmailPreviewAttempt by remember(approval?.challengeId) { mutableStateOf(0) }"
+        errorLine2="                                                                 ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt"
+            line="77"
+            column="66"/>
+    </issue>
+
+    <issue
+        id="UsableSpace"
+        severity="Warning"
+        message="Consider also using `StorageManager#getAllocatableBytes` and `allocateBytes` which will consider clearable cached data"
+        category="Performance"
+        priority="3"
+        summary="Using getUsableSpace()"
+        explanation="When you need to allocate disk space for large files, consider using the new `allocateBytes(FileDescriptor, long)` API, which will automatically clear cached files belonging to other apps (as needed) to meet your request.&#xA;&#xA;When deciding if the device has enough disk space to hold your new data, call `getAllocatableBytes(UUID)` instead of using `getUsableSpace()`, since the former will consider any cached data that the system is willing to clear on your behalf.&#xA;&#xA;Note that these methods require API level 26. If your app is running on older devices, you will probably need to use both APIs, conditionally switching on `Build.VERSION.SDK_INT`. Lint only looks in the same compilation unit to see if you are already using both APIs, so if it warns even though you are already using the new API, consider moving the calls to the same file or suppressing the warning."
+        errorLine1="            freeStorageBytes = runCatching { context.filesDir.usableSpace }"
+        errorLine2="                                                              ~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/runtime/DeviceRuntimeReadings.kt"
+            line="54"
+            column="63"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="private fun openBrowser(ctx: Context, url: String) = ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))"
+        errorLine2="                                                                                                  ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt"
+            line="198"
+            column="99"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                val allowed = remember(url) { Uri.parse(url) }"
+        errorLine2="                                              ~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/command/artemis/ArtemisConsoleRoute.kt"
+            line="93"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX function `createBitmap` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                                val bitmap = Bitmap.createBitmap(maxOf(1, (sheet.width * scale).toInt()), maxOf(1, (sheet.height * scale).toInt()), Bitmap.Config.ARGB_8888)"
+        errorLine2="                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/browser/BrowserInertFileDialog.kt"
+            line="74"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                check(recovery.edit().putString(&quot;import&quot;, JSONObject().put(&quot;session_id&quot;, context.sessionId)"
+        errorLine2="                      ~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/browser/BrowserPhoneActions.kt"
+            line="169"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        check(recovery.edit().remove(&quot;import&quot;).commit())"
+        errorLine2="              ~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/browser/BrowserPhoneActions.kt"
+            line="188"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                    check(recovery.edit().remove(&quot;analyse&quot;).commit())"
+        errorLine2="                          ~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/browser/BrowserPhoneActions.kt"
+            line="207"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                check(recovery.edit().remove(&quot;analyse&quot;).commit())"
+        errorLine2="                      ~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/browser/BrowserPhoneActions.kt"
+            line="231"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                .setData(Uri.parse(VanRoute.toDeepLink(route)))"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt"
+            line="147"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                    prefs.edit()"
+        errorLine2="                    ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/connectivity/ConnectivityRegistry.kt"
+            line="100"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="            Uri.parse(&quot;package:${context.packageName}&quot;),"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/degraded/DeviceSignals.kt"
+            line="106"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        Uri.parse(&quot;package:${context.packageName}&quot;),"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/degraded/DeviceSignals.kt"
+            line="115"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        indexPrefs.edit()"
+        errorLine2="        ~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt"
+            line="155"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        val editor = indexPrefs.edit()"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt"
+            line="204"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        indexPrefs.edit()"
+        errorLine2="        ~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt"
+            line="226"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        prefs.edit().putString(keyPolicy(packageName), policy.name).apply()"
+        errorLine2="        ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/notification/NotificationPolicy.kt"
+            line="40"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        prefs.edit().putBoolean(&quot;$OBSERVED_PREFIX$packageName&quot;, true).apply()"
+        errorLine2="        ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/notification/NotificationPolicy.kt"
+            line="47"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        prefs.edit()"
+        errorLine2="        ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/notification/NotificationPolicy.kt"
+            line="58"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                            Uri.parse(&quot;package:${context.packageName}&quot;),"
+        errorLine2="                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt"
+            line="231"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        prefs.edit().putString(KEY_GRAPH, array.toString()).apply()"
+        errorLine2="        ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/voice/PersonalSpeechModel.kt"
+            line="175"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        prefs.edit().putLong(KEY_CURSOR, cursor).commit()"
+        errorLine2="        ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/events/PreferencesEventCursorStore.kt"
+            line="21"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="            check(prefs.edit().putString(KEY_PENDING, envelope.toString()).commit()) { &quot;provisioning_pending_store_failed&quot; }"
+        errorLine2="                  ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/connectivity/ProvisioningIntake.kt"
+            line="52"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        check(prefs.edit().remove(KEY_PENDING).commit()) { &quot;provisioning_pending_clear_failed&quot; }"
+        errorLine2="              ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/connectivity/ProvisioningIntake.kt"
+            line="63"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        check(prefs.edit().putStringSet(KEY_ACCEPTED, accepted() + provisioningId)"
+        errorLine2="              ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/connectivity/ProvisioningIntake.kt"
+            line="93"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        browserSessionStore.edit()"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/VanApplication.kt"
+            line="146"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        browserSessionStore.edit().clear().apply()"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/VanApplication.kt"
+            line="174"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="            prefs.edit().putString(KEY_LAST_SESSION_DAY, today).apply()"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/VanApplication.kt"
+            line="673"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `Bitmap.scale` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    val small = android.graphics.Bitmap.createScaledBitmap(source, n, n, true)"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt"
+            line="184"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                prefs.edit().putString(KEY_BASE, configured).apply()"
+        errorLine2="                ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+            line="280"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        private set(value) = prefs.edit().putString(KEY_BASE, normalizeGatewayBaseUrl(value)).apply()"
+        errorLine2="                             ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+            line="292"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        set(value) = prefs.edit().putString(KEY_DEVICE, value).apply()"
+        errorLine2="                     ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+            line="314"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        set(value) = prefs.edit().putString(KEY_SECRET, value).apply()"
+        errorLine2="                     ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+            line="318"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        set(value) = prefs.edit().putString(KEY_INGRESS_TOKEN, value).apply()"
+        errorLine2="                     ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+            line="322"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        set(value) = prefs.edit().putString(KEY_DEVICE_ACCESS_TOKEN, value).apply()"
+        errorLine2="                     ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+            line="326"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="            check(prefs.edit().putString(KEY_PENDING_PAIR, body.toString()).putString(KEY_BASE, payload.gatewayUrl.trimEnd(&apos;/&apos;))"
+        errorLine2="                  ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+            line="419"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        check(prefs.edit().putString(KEY_INGRESS_TOKEN, response.getString(&quot;ingress_token&quot;))"
+        errorLine2="              ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+            line="455"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        prefs.edit()"
+        errorLine2="        ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+            line="492"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                check(prefs.edit().putString(KEY_PENDING_SESSION_OPEN, prepared).commit()) { &quot;session_open_store_failed&quot; }"
+        errorLine2="                      ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+            line="1006"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        val edit = prefs.edit().putString(KEY_SESSION_IDENTITY, identity.toString())"
+        errorLine2="                   ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+            line="1036"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                check(prefs.edit().remove(KEY_SESSION_IDENTITY).commit()) { &quot;session_identity_clear_failed&quot; }"
+        errorLine2="                      ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+            line="1079"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX function `createBitmap` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    private val bitmap: Bitmap = Bitmap.createBitmap(GRID, GRID, Bitmap.Config.ARGB_8888)"
+        errorLine2="                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/visual/VanRiveAvatar.kt"
+            line="107"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="ClickableViewAccessibility"
+        severity="Warning"
+        message="Custom view `BrowserSurfaceView` overrides `onTouchEvent` but not `performClick`"
+        category="Accessibility"
+        priority="6"
+        summary="Accessibility in Custom Views"
+        explanation="If a `View` that overrides `onTouchEvent` or uses an `OnTouchListener` does not also implement `performClick` and call it when clicks are detected, the `View` may not handle accessibility actions properly. Logic handling the click actions should ideally be placed in `View#performClick` as some accessibility services invoke `performClick` when a click action should occur."
+        errorLine1="    override fun onTouchEvent(event: MotionEvent): Boolean {"
+        errorLine2="                 ~~~~~~~~~~~~">
+        <location
+            file="/workspace/Van/android/app/src/main/java/com/dial/van/browser/BrowserSurfaceView.kt"
+            line="65"
+            column="18"/>
+    </issue>
+
+</issues>

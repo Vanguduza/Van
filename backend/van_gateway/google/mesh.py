@@ -251,6 +251,20 @@ class GoogleIdentityBroker:
             return GoogleCapabilityStatus(capability_id=descriptor.capability_id, family=descriptor.family, display_name=descriptor.display_name, credential_plane=descriptor.credential_plane, identity_alias=selected_identity, state=GoogleCapabilityState.POLICY_BLOCKED, reason="google_identity_binding_mismatch", public_api=descriptor.public_api)
         principal = await self.principal_status(selected_identity)
         evidence = await self._evidence(capability_id)
+        if (
+            descriptor.credential_plane == GoogleCredentialPlane.WORKSPACE_OAUTH
+            and workspace is not None
+            and not workspace.connected
+        ):
+            return GoogleCapabilityStatus(
+                capability_id=descriptor.capability_id, family=descriptor.family,
+                display_name=descriptor.display_name,
+                credential_plane=descriptor.credential_plane,
+                identity_alias=selected_identity, state=GoogleCapabilityState.AUTH_REQUIRED,
+                reason="workspace_oauth_not_connected", public_api=descriptor.public_api,
+                configured_by_account=principal.registered,
+                evidence_pointer=evidence["evidence_pointer"] if evidence is not None else None,
+            )
         if evidence is not None:
             state = GoogleCapabilityState(evidence["state"])
             reason = "certification_evidence"

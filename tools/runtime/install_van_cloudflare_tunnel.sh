@@ -3,10 +3,12 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 CONFIG_ROOT="${VAN_CONFIG_ROOT:-$HOME/.config/van}"
+CONFIG_ROOT="$(realpath -m -- "$CONFIG_ROOT")"
 TOKEN_FILE="$CONFIG_ROOT/cloudflare-tunnel.token"
 PUBLIC_ENV="$CONFIG_ROOT/public-gateway.env"
 GATEWAY_ENV="$CONFIG_ROOT/gateway.env"
 CLOUDFLARED="${VAN_CLOUDFLARED_BIN:-$HOME/bin/cloudflared}"
+CLOUDFLARED="$(realpath -m -- "$CLOUDFLARED")"
 UNIT_SRC="$ROOT/deploy/systemd/van-cloudflare-tunnel.service"
 UNIT_DST="$HOME/.config/systemd/user/van-cloudflare-tunnel.service"
 
@@ -29,7 +31,9 @@ if [[ "$PUBLIC_URL" != https://* ]] || [[ "$PUBLIC_URL" == *trycloudflare.com* ]
   exit 3
 fi
 mkdir -p "$HOME/.config/systemd/user"
-install -m 0644 "$UNIT_SRC" "$UNIT_DST"
+python3 "$ROOT/tools/runtime/render_systemd_unit.py" --service tunnel --home "$HOME" \
+  --state-root "${VAN_STATE_ROOT:-$HOME/.local/share/van}" --config-root "$CONFIG_ROOT" \
+  --cloudflared "$CLOUDFLARED" --output "$UNIT_DST"
 systemctl --user daemon-reload
 systemctl --user enable van-cloudflare-tunnel.service >/dev/null
 systemctl --user restart van-cloudflare-tunnel.service

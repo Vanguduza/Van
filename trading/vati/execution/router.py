@@ -18,7 +18,7 @@ from vati.core.events import EventKind, make_event
 from vati.core.ledger import Ledger
 from vati.execution.base import ExecutionReceipt, OrderCommand, StopMode, VenueAdapter
 from vati.execution.protection import ProtectionManager
-from vati.execution.policy_templates import DO_NOT_EXECUTE, template as execution_template
+from vati.execution.policy_templates import DO_NOT_EXECUTE, LIMIT_AT_TOUCH, entry_compatible, slippage_bound_in_price, template as execution_template
 from vati.execution.pretrade import MarketReference, PreTradeControls
 from vati.execution.route_registry import RouteRegistry
 from vati.execution.style_selector import (
@@ -57,6 +57,11 @@ def resolve_execution_policy(decision, *, entry_type: str, max_slippage: Optiona
     if chosen_entry not in t.allowed_entry_types:
         raise RouterError(
             f"execution policy entry type {chosen_entry!r} is outside template {t.template_id}")
+    if entry_type and not entry_compatible(entry_type, chosen_entry):
+        # P1-TRADE-EXEC-004: the strategy's entry type is binding; a STOP entry is never
+        # quietly turned into a LIMIT (or anything else).
+        raise RouterError(
+            f"ENTRY_TYPE_NOT_PERMITTED: strategy requested {entry_type}, template {t.template_id} executes {chosen_entry}")
     bounded_slippage = t.max_slippage
     if max_slippage is not None:
         bounded_slippage = min(max_slippage, t.max_slippage)
@@ -143,6 +148,7 @@ class ExecutionRouter:
             command_stop = quantised.stop_price if intent.stop is not None else None
             route = self.route_registry.resolve(
                 intent.account_alias, intent.symbol, now_ms=now_ms, direction=intent.direction)
+            requested_entry = entry_type
             entry_type, max_slippage = resolve_execution_policy(
                 execution_policy_decision, entry_type=entry_type, max_slippage=max_slippage)
             style = self.style_selector.select(
@@ -162,6 +168,9 @@ class ExecutionRouter:
                 # until a child-command protocol is explicitly admitted.
                 raise RouterError(
                     f"execution style requires {style.slices} slices; single-command router refuses")
+            if not entry_compatible(requested_entry, style.entry_type):
+                raise RouterError(
+                    f"ENTRY_TYPE_NOT_PERMITTED: strategy requested {requested_entry}, style chose {style.entry_type}")
             entry_type = style.entry_type
             max_slippage = (
                 style.max_slippage if max_slippage is None
@@ -170,6 +179,27 @@ class ExecutionRouter:
         else:
             entry_type, max_slippage = resolve_execution_policy(
                 execution_policy_decision, entry_type=entry_type, max_slippage=max_slippage)
+
+        # Venue capability (P1-TRADE-EXEC-004). A venue that declares what it can execute
+        # is held to it: an unsupported type is refused, not sent as something else. The
+        # one explicit, logged exception is an at-touch LIMIT on a venue that can only
+        # send market orders — that is what such a venue already did silently, and the
+        # slippage cap still bounds it.
+        requested_entry_type = entry_type
+        substituted = False
+        supported = getattr(adapter, "supported_entry_types", None)
+        if supported is not None and entry_type not in supported:
+            template_id = getattr(execution_policy_decision, "template_id", LIMIT_AT_TOUCH) if execution_policy_decision is not None else LIMIT_AT_TOUCH
+            if entry_type == "LIMIT" and "MARKET" in supported and template_id == LIMIT_AT_TOUCH:
+                entry_type, substituted = "MARKET", True
+            else:
+                raise RouterError(
+                    f"ENTRY_TYPE_NOT_SUPPORTED: venue {intent.venue} cannot execute {entry_type} (supports {sorted(supported)})")
+
+        # Template, style and caller bounds are fractions of price (policy_templates 1.1.0);
+        # the order command and every adapter work in price units of this instrument.
+        if max_slippage is not None:
+            max_slippage = slippage_bound_in_price(max_slippage, command_entry)
 
         if execution_policy_decision is not None:
             self._log(
@@ -221,7 +251,9 @@ class ExecutionRouter:
                     quantity=cmd.quantity,
                     now_ms=now_ms,
                 )
-            self._log(EventKind.ORDER_COMMAND, {**asdict(cmd), "direction": cmd.direction.value, "stop_mode": cmd.stop_mode.value, "loss_model": cmd.loss_model.value}, now_ms=now_ms, corr=corr, decision_time=now_ms)
+            self._log(EventKind.ORDER_COMMAND, {**asdict(cmd), "direction": cmd.direction.value, "stop_mode": cmd.stop_mode.value, "loss_model": cmd.loss_model.value,
+                                                **({"requested_entry_type": requested_entry_type, "entry_type_substituted": True} if substituted else {})},
+                      now_ms=now_ms, corr=corr, decision_time=now_ms)
             metrics.inc("vati_orders_sent_total", venue=intent.venue)
             receipt = adapter.submit(cmd, now_ms=now_ms)
             self._log(EventKind.EXECUTION_RECEIPT, {k: (v.value if hasattr(v, "value") else v) for k, v in asdict(receipt).items()}, now_ms=now_ms, corr=corr)

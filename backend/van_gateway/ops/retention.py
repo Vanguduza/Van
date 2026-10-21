@@ -104,12 +104,22 @@ POLICIES: tuple[TablePolicy, ...] = (
     # ---- the owner's own state ---------------------------------------------
     _p("devices", _OWNER, note="Revoking a device is the owner's act, not a timer's."),
     _p("missions", _OWNER, note="The durable record of what the owner asked for."),
+    _p("hermes_result_inbox", _OWNER,
+       note="Durable lifecycle reports and duplicate receipts. An age sweep must not "
+            "erase a still-unbound report or permit a conflicting terminal replay."),
     _p("reminders", _OWNER),
     _p("attention", _OWNER, note="A dismissed item is dismissed by the owner, not aged out."),
     _p("decisions", _OWNER),
+    _p("decision_details", _CHILD, parent=("decision_id", "decisions")),
     _p("owner_facts", _OWNER, note="Superseded revisions are the fact's history, not litter."),
     _p("owner_context_edges", _OWNER),
     _p("owner_cognitive_model", _OWNER),
+    # Memory Fabric C1/C2: per-episode origin rows die with their assertion; the revision
+    # counter must never be pruned or reset (a reset would let an old capsule verify again).
+    _p("owner_model_episodes", _CHILD, parent=("assertion_id", "owner_cognitive_model")),
+    _p("owner_model_revisions", _OWNER, note="Monotonic fence for personal capsules; never reset."),
+    _p("owner_model_outbox", _EV, "created_at_ms",
+       note="Correction/invalidation delivery record, with per-target receipts."),
     _p("shared_vocabulary", _OWNER),
     _p("strategic_memory", _OWNER),
     _p("symbiotic_growth", _OWNER),
@@ -125,6 +135,18 @@ POLICIES: tuple[TablePolicy, ...] = (
     _p("browser_scope_authorizations", _OWNER, note="What the owner let the browser touch."),
     _p("standing_automation_authorities", _OWNER),
     _p("automation_standing_intents", _OWNER),
+    _p("automation_owner_plans", _OWNER,
+       note="Owner proposals and durable idempotency claims survive until explicit owner retirement; expiry cannot permit a repeat proposal."),
+    _p("automation_artifacts", _OWNER,
+       note="Admitted immutable executable manifests remain authoritative until explicit retirement."),
+    _p("automation_capabilities", _OWNER,
+       note="Capability admission and withdrawal are operator/owner acts, not telemetry expiry."),
+    _p("automation_runs", _OWNER,
+       note="Canonical run and uncertain-effect history must not disappear or permit a repeated effect."),
+    _p("automation_n8n_resources", _OWNER,
+       note="Concrete resource declarations and credentials are retired explicitly."),
+    _p("automation_credential_bindings", _OWNER,
+       note="Admitted credential aliases are declarations, never aged into a different binding."),
     _p("intent_nodes", _OWNER),
     _p("intent_edges", _OWNER),
     _p("intent_missions", _OWNER),
@@ -132,6 +154,16 @@ POLICIES: tuple[TablePolicy, ...] = (
     _p("runtime_meta", _OWNER),
     _p("project_truth_cache", _OWNER, note="Small, keyed by project; a stale row is replaced, not accumulated."),
     _p("action_definitions", _OWNER, note="The declared action catalogue, not a log."),
+    # ---- OpenMuse→VAN convergence owner state (migrations 31/32) ---------
+    _p("owner_artifacts", _OWNER, note="Owner-visible generated results; deletion is an owner lifecycle decision."),
+    _p("documents", _OWNER, note="Source/output document provenance owned by the owner; files are not aged out silently."),
+    _p("owner_goals", _OWNER),
+    _p("watches", _OWNER, note="The owner decides when a standing watch stops."),
+    _p("suggestions", _OWNER, note="Acceptance/dismissal is an owner decision and remains auditable."),
+    _p("conversation_threads", _OWNER),
+    _p("conversation_messages", _OWNER, note="Conversation history is owner state, not execution truth."),
+    _p("conversation_drafts", _OWNER, note="Unsent owner-authored text must not expire by system policy."),
+    _p("conversation_followups", _OWNER, note="Queued owner-facing continuation state is retained until owner lifecycle action."),
     _p("capability_registry", _OWNER, note="Declarations. Withdrawal is recorded, not deleted."),
     _p("sqlite_sequence", _OWNER, note="SQLite's own AUTOINCREMENT bookkeeping."),
 
@@ -146,8 +178,10 @@ POLICIES: tuple[TablePolicy, ...] = (
     _p("learning_outcomes", _EV, "recorded_at_ms"),
     _p("external_reality", _EV, "observed_at_ms"),
     _p("computer_operations", _EV, "started_at_ms"),
+    _p("computer_worker_receipts", _EV, "created_at_ms", note="Digest-bound proof of what the subordinate worker returned."),
     _p("google_artifacts", _EV, "created_at_unix", TimeUnit.SECONDS),
-    _p("automation_artifacts", _EV, "created_at_ms"),
+    _p("automation_worker_evidence", _EV, "created_at_ms",
+       note="Sealed external-source payload evidence; source trust remains untrusted."),
     _p("automation_repairs", _EV, "created_at_ms"),
     _p("automation_dead_letter", _EV, "created_at_ms"),
     _p("browser_escalations", _EV, "created_at_ms"),
@@ -158,8 +192,38 @@ POLICIES: tuple[TablePolicy, ...] = (
     _p("automation_run_telemetry", _TEL, "recorded_at_ms"),
     _p("automation_generation_telemetry", _TEL, "recorded_at_ms"),
     _p("automation_workflow_health", _TEL, "updated_at_ms"),
-    _p("automation_runs", _TEL, "updated_at_ms"),
     _p("browser_tasks", _TEL, "updated_at_ms"),
+    _p("browser_task_tombstones", _OWNER,
+       note="Review I5 D1. Not owner content, but never pruned by a timer: a tombstone is what "
+            "stops a terminal task_id being inserted again after retention deletes its "
+            "browser_tasks row, so it must outlive that row. Triggers refuse its deletion."),
+    _p("watch_runs", _TEL, "created_at_ms", note="Individual watch observations are operational history; triggered owner state lives in Attention."),
+
+    # ---- VAN web acquisition fabric (migrations 31-32) ---------------------
+    _p(
+        "web_acquisition_items",
+        _OWNER,
+        note="Durable frontier state can remain actionable for longer than a generic "
+             "retention horizon. Prune only with a future state-aware terminal-item "
+             "sweeper, never by age alone.",
+    ),
+    _p(
+        "web_domain_skills",
+        _OWNER,
+        note="Qualified learned skills remain active until superseded/quarantined/retired; "
+             "generic age pruning could remove the current executable skill.",
+    ),
+    _p("web_domain_controls", _DER, "updated_at_ms",
+       note="Rate/concurrency state is rebuildable from future observations."),
+    _p("web_acquisition_sessions", _TEL, "updated_at_ms",
+       note="Acquisition session-pool metadata is operational telemetry; no secrets live here."),
+    _p("web_acquisition_events", _EV, "occurred_at_ms"),
+    _p("web_acquisition_evidence", _EV, "created_at_ms",
+       note="Content-addressed custody/provenance records outlive the crawl that produced them."),
+    _p("web_domain_skill_canaries", _EV, "created_at_ms",
+       note="Qualification/drift evidence for learned domain skills."),
+    _p("web_acquisition_telemetry", _TEL, "recorded_at_ms"),
+
 
     # ---- Remote Browser Rev 1.5 (migration 27) ------------------------------
     #
@@ -176,9 +240,9 @@ POLICIES: tuple[TablePolicy, ...] = (
     _p("browser_session_events", _EV, "occurred_at_ms",
        note="ADR-RB-008's durable state changes — what VAN would cite if asked why a page "
             "was open or who took control. Evidence outlives the session it describes."),
-    _p("browser_stream_grants", _EPH, "issued_at_ms",
-       note="Single-use, two-minute credentials. The row exists to make the nonce "
-            "un-replayable, and a week after expiry nothing can replay it."),
+    _p("browser_stream_grants", _CHILD, parent=("session_id", "browser_interactive_sessions"),
+       note="The mint row remains canonical producer admission after its redemption window expires; "
+            "retain it until the session retires."),
     _p("browser_downloads", _EV, "created_at_ms",
        note="What the owner actually got out of a session."),
 
@@ -214,7 +278,6 @@ POLICIES: tuple[TablePolicy, ...] = (
     _p("eval_runs", _TEL, "created_at_ms"),
     _p("execution_strategies", _TEL, "updated_at_ms"),
     _p("technology_capabilities", _TEL, "updated_at_ms"),
-    _p("automation_capabilities", _TEL, "updated_at_ms"),
     _p("google_jobs", _TEL, "updated_at_unix", TimeUnit.SECONDS),
     _p("attention_candidates", _TEL, "created_at_ms"),
     _p("automation_external_events", _TEL, "received_at_ms"),
@@ -224,6 +287,7 @@ POLICIES: tuple[TablePolicy, ...] = (
        "Seven days is far longer than any command's replay window, so pruning "
        "can never make a replayed command look fresh."),
     _p("automation_run_nonces", _EPH, "issued_at_ms"),
+    _p("computer_worker_leases", _EPH, "updated_at_ms", note="Short-lived generation fences; receipts preserve durable evidence."),
     _p("pairing_tickets", _EPH, "created_at_unix", TimeUnit.SECONDS),
     _p("idempotency", _EPH, "updated_at_unix", TimeUnit.SECONDS,
        "Retained well past any client's retry horizon; an idempotency record that "
@@ -250,9 +314,36 @@ POLICIES: tuple[TablePolicy, ...] = (
     ),
 
     # ---- children -----------------------------------------------------------
+    _p("mission_projection_outbox", _CHILD, parent=("mission_id", "missions"),
+       note="Undelivered terminal publication must survive retries and age sweeps."),
     _p("mission_events", _CHILD, parent=("mission_id", "missions")),
     _p("mission_activities", _CHILD, parent=("mission_id", "missions")),
+    _p("mission_execution_controls", _CHILD, parent=("mission_id", "missions")),
+    _p("mission_control_requests", _CHILD, parent=("mission_id", "missions")),
+    _p("hermes_run_bindings", _CHILD, parent=("mission_id", "missions"),
+       note="Immutable observed run correlation lasts as long as the owner mission."),
+    _p("pairing_attempts", _CHILD, parent=("device_id", "devices"),
+       note="Hash-only exact-retry authority lasts as long as the enrolled device; "
+            "pruning it must never make an earned credential unrecoverable."),
     _p("action_receipts", _CHILD, parent=("execution_id", "action_executions")),
+    _p("automation_runtime_bindings", _CHILD, parent=("artifact_id", "automation_artifacts"),
+       note="Exact executable/helper bindings belong to their immutable artifact."),
+    _p("automation_worker_dedupe", _CHILD, parent=("artifact_id", "automation_artifacts"),
+       note="Delivered checkpoints prevent lost notifications and survive ordinary age sweeps."),
+    _p("automation_worker_steps", _CHILD, parent=("run_id", "automation_runs"),
+       note="Completed and uncertain callback receipts remain bound to the canonical run."),
+    _p("automation_worker_files", _CHILD, parent=("run_id", "automation_runs"),
+       note="Retain receipt metadata; the worker separately erases expired transient bytes."),
+    _p("automation_standing_firings", _CHILD, parent=("authority_id", "standing_automation_authorities"),
+       note="A claimed trigger cannot become fresh again while its authority exists."),
+    _p("browser_stream_producers", _CHILD, parent=("grant_id", "browser_stream_grants"),
+       note="Producer admission is meaningful only while its original short-lived grant record remains."),
+    _p("browser_owner_transfer_grants", _CHILD, parent=("producer_session_id", "browser_stream_producers"),
+       note="One-use transfer receipts track their canonical producer and its admission grant."),
+    _p("browser_control_producer_grants", _CHILD, parent=("task_id", "browser_tasks"),
+       note="Budgeted producer call authority belongs to the bounded task and session."),
+    _p("goal_milestones", _CHILD, parent=("goal_id", "owner_goals")),
+    _p("goal_mission_links", _CHILD, parent=("goal_id", "owner_goals")),
 )
 
 BY_TABLE: dict[str, TablePolicy] = {policy.table: policy for policy in POLICIES}
@@ -316,15 +407,56 @@ class RetentionService:
         async with self.store.connection() as db:
             await db.execute("BEGIN IMMEDIATE")
             try:
+                child_policies = [p for p in POLICIES if p.retention is RetentionClass.CHILD]
+                dependencies: dict[str, set[tuple[str, str, str]]] = {}
+                protected_dependencies: dict[str, set[tuple[str, str, str]]] = {}
+                child_counts: dict[str, int] = {}
+                for policy in POLICIES:
+                    if policy.retention is RetentionClass.CHILD:
+                        continue
+                    cursor = await db.execute(f"PRAGMA foreign_key_list({policy.table})")
+                    for fk in await cursor.fetchall():
+                        protected_dependencies.setdefault(fk["table"], set()).add((policy.table, fk["from"], fk["to"]))
+                for child in child_policies:
+                    column, parent = child.parent
+                    dependencies.setdefault(parent, set()).add((child.table, column, _PRIMARY_KEY[parent]))
+                    # A producer can refer to both a session and an admission
+                    # grant. CHILD lifetime follows either authoritative parent;
+                    # foreign-key restrictions must not break routine retention.
+                    cursor = await db.execute(f"PRAGMA foreign_key_list({child.table})")
+                    for fk in await cursor.fetchall():
+                        if fk["seq"] != 0:
+                            raise RetentionPolicyError("composite_child_foreign_key_unsupported")
+                        dependencies.setdefault(fk["table"], set()).add((child.table, fk["from"], fk["to"]))
+
+                async def remove_children(parent, predicate, parameters, visiting=()):
+                    if parent in visiting:
+                        raise RetentionPolicyError("cyclic_child_retention_dependency")
+                    for child_table, column, parent_column in sorted(dependencies.get(parent, set())):
+                        child_predicate = f"{column} IN (SELECT {parent_column} FROM {parent} WHERE {predicate})"
+                        await remove_children(child_table, child_predicate, parameters, (*visiting, parent))
+                        cursor = await db.execute(f"DELETE FROM {child_table} WHERE {child_predicate}", parameters)
+                        child_counts[child_table] = child_counts.get(child_table, 0) + int(cursor.rowcount or 0)
+
                 for policy in selected:
                     cutoff = self.cutoff_for(policy, now_ms)
                     if cutoff is None:
                         continue
-                    cursor = await db.execute(
-                        f"DELETE FROM {policy.table} WHERE {policy.column} IS NOT NULL "
-                        f"AND {policy.column} < ?",
-                        (cutoff,),
-                    )
+                    predicate = f"{policy.column} IS NOT NULL AND {policy.column} < ?"
+                    parameters = (cutoff,)
+                    if policy.table == "browser_interactive_sessions":
+                        # A renewed session can outlive its creation timestamp.
+                        # Retention is not a revocation or producer disconnect.
+                        predicate += " AND (state IN ('TERMINATED','FAILED') OR expires_at_ms<=?)"
+                        parameters += (now_ms,)
+                    # An evidence/owner record has its own lifetime. Neither
+                    # cascade deletion nor a foreign-key failure may shorten it.
+                    # Retire the parent only after those records have retired.
+                    for dependent, column, parent_column in sorted(protected_dependencies.get(policy.table, set())):
+                        predicate += (f" AND NOT EXISTS(SELECT 1 FROM {dependent} "
+                                      f"WHERE {dependent}.{column}={policy.table}.{parent_column})")
+                    await remove_children(policy.table, predicate, parameters)
+                    cursor = await db.execute(f"DELETE FROM {policy.table} WHERE {predicate}", parameters)
                     results.append(PruneResult(
                         table=policy.table, deleted=int(cursor.rowcount or 0),
                         cutoff=cutoff, retention=policy.retention,
@@ -334,16 +466,15 @@ class RetentionService:
                 for policy in POLICIES:
                     if policy.retention is not RetentionClass.CHILD or policy.parent is None:
                         continue
-                    if tables is not None and policy.table not in tables:
+                    if tables is not None and policy.table not in tables and policy.table not in child_counts:
                         continue
                     column, parent = policy.parent
                     parent_key = BY_TABLE[parent]
-                    cursor = await db.execute(
-                        f"DELETE FROM {policy.table} WHERE {column} NOT IN "
-                        f"(SELECT {_PRIMARY_KEY[parent]} FROM {parent})",
-                    )
+                    orphan_predicate = f"{column} NOT IN (SELECT {_PRIMARY_KEY[parent]} FROM {parent})"
+                    await remove_children(policy.table, orphan_predicate, ())
+                    cursor = await db.execute(f"DELETE FROM {policy.table} WHERE {orphan_predicate}")
                     results.append(PruneResult(
-                        table=policy.table, deleted=int(cursor.rowcount or 0),
+                        table=policy.table, deleted=int(cursor.rowcount or 0) + child_counts.get(policy.table, 0),
                         cutoff=0, retention=parent_key.retention,
                     ))
             except BaseException:
@@ -406,10 +537,20 @@ class RetentionService:
 #: is how the first version of the Remote Browser policies was caught: the classes were
 #: assigned, the map was not extended, and the orphan sweep failed on the first run.
 _PRIMARY_KEY = {
+    "decisions": "id",
+    "devices": "device_id",
     "missions": "mission_id",
     "action_executions": "execution_id",
     "browser_interactive_sessions": "session_id",
     "van_sessions": "van_session_id",
+    "automation_artifacts": "artifact_id",
+    "automation_runs": "run_id",
+    "standing_automation_authorities": "authority_id",
+    "browser_stream_grants": "grant_id",
+    "browser_stream_producers": "producer_session_id",
+    "browser_tasks": "task_id",
+    "owner_goals": "goal_id",
+    "owner_cognitive_model": "assertion_id",
 }
 
 

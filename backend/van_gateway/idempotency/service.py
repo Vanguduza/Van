@@ -111,16 +111,26 @@ class IdempotencyService:
                     # claim is not a promise that nothing happened; it is a statement that
                     # whoever held it is not coming back.
                     return None
+                if (
+                    row["status"] == IdempotencyStatus.FAILED.value
+                    and row["request_hash"] == req_hash
+                ):
+                    await db.execute(
+                        "UPDATE idempotency SET status = ?, response_json = NULL, "
+                        "updated_at_unix = ?, claim_count = claim_count + 1 "
+                        "WHERE idempotency_key = ?",
+                        (IdempotencyStatus.IN_FLIGHT.value, now, key),
+                    )
+                    await db.commit()
+                    return None
             except BaseException:
                 await db.rollback()
                 raise
             await db.commit()
 
         if row["request_hash"] != req_hash:
-            await self.store.execute(
-                "UPDATE idempotency SET status = ?, updated_at_unix = ? WHERE idempotency_key = ?",
-                (IdempotencyStatus.CONFLICT.value, now, key),
-            )
+            # A conflicting attempt must not overwrite the original command's receipt
+            # or release its in-flight claim.
             raise IdempotencyConflict("Same idempotency key with different request")
         if row["status"] == IdempotencyStatus.COMPLETED.value:
             return json.loads(row["response_json"]) if row["response_json"] else {}
@@ -128,12 +138,7 @@ class IdempotencyService:
             raise IdempotencyInFlight("Idempotency key still in flight")
         if row["status"] == IdempotencyStatus.CONFLICT.value:
             raise IdempotencyConflict("Idempotency key previously conflicted")
-        # FAILED with same hash: allow retry by moving back to IN_FLIGHT
-        await self.store.execute(
-            "UPDATE idempotency SET status = ?, response_json = NULL, updated_at_unix = ? WHERE idempotency_key = ?",
-            (IdempotencyStatus.IN_FLIGHT.value, now, key),
-        )
-        return None
+        raise IdempotencyConflict("Unknown idempotency claim state")
 
     async def complete(self, key: str, response: dict[str, Any]) -> None:
         now = int(time.time())

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,9 +53,8 @@ import org.json.JSONObject
  * DNA §4 destination 8: "Devices & Settings — pairing, permissions, voice, notifications
  * policy, quiet hours, character/renderer status, diagnostics."
  *
- * Voice settings and notification policy are the existing, unowned-by-this-worker-to-rewrite
- * `SpeechModule`/`NotificationPolicyModule` bodies, reached here rather than duplicated —
- * both already do everything DNA §4 asks of them (P2-AND-017/018).
+ * Voice enrollment/corrections and notification policy use their shared modules,
+ * reached through native settings destinations rather than duplicated controls.
  *
  * @DataSource("GET /v1/degraded") — the diagnostics section (GAP-F-010).
  */
@@ -63,6 +63,9 @@ fun SettingsRoute(
     app: VanApplication,
     onOpenVoice: () -> Unit,
     onOpenNotifications: () -> Unit,
+    onOpenPermissions: () -> Unit = {},
+    onOpenDiagnostics: () -> Unit = {},
+    onOpenJev: () -> Unit,
 ) {
     val tokens = LocalVanTokens.current
     val context = LocalContext.current
@@ -95,16 +98,26 @@ fun SettingsRoute(
         verticalArrangement = Arrangement.spacedBy(tokens.space.space3),
         contentPadding = PaddingValues(vertical = tokens.space.space3),
     ) {
-        item { SectionHeader("Settings & Devices", detail = "Pairing, permissions, voice, notifications, diagnostics") }
+        item { SectionHeader("Settings & Devices", detail = "Connection, permissions, voice, notifications, diagnostics") }
+        item {
+            Text("VAN ${BuildConfig.VERSION_NAME} · ${BuildConfig.VAN_SOURCE_SHA.take(12)}",
+                style = tokens.type.label, color = tokens.color.textSecondary)
+            OutlinedButton(onClick = {
+                context.startActivity(Intent(context, com.dial.van.onboarding.OnboardingActivity::class.java)
+                    .putExtra(com.dial.van.onboarding.OnboardingActivity.EXTRA_REVIEW_PERMISSIONS, true))
+            }) { Text("Review Android permissions") }
+        }
+        item { Button(onClick = onOpenPermissions) { Text("Standing permissions & automatic readiness") } }
+        item { OutlinedButton(onClick = onOpenDiagnostics) { Text("Service readiness & recovery") } }
 
         item {
             VanPanel {
                 Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
                     val paired = app.gatewayClient.isPaired()
-                    Text("This phone's pairing", style = tokens.type.headline, color = tokens.color.textPrimary)
+                    Text("Automatic phone connection", style = tokens.type.headline, color = tokens.color.textPrimary)
                     Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
                         StatusChip(
-                            label = if (paired) "PAIRED" else "NOT PAIRED",
+                            label = if (paired) "ENROLLED" else "INSTALLER SETUP PENDING",
                             role = if (paired) StatusSemantics.ROLE_FAVOURABLE else StatusSemantics.ROLE_EVENT_RISK,
                         )
                         StatusChip(
@@ -114,9 +127,9 @@ fun SettingsRoute(
                     }
                     Text(
                         when {
-                            paired -> "Ingress, revocable device access and the command signing credential are active."
-                            app.provisioning.configured -> "Waiting for the installer. VAN will not ask you for an address or a code — no screen in this app can change where it connects."
-                            else -> "This build was not given the key it needs to be set up, so it cannot be provisioned at all. A rebuild is what it needs."
+                            paired -> "This phone has enrolled credentials. VAN checks connectivity and capability readiness automatically."
+                            app.provisioning.configured -> "Waiting for supported installer enrollment. VAN will continue when it arrives."
+                            else -> "This build cannot complete enrollment. Restore VAN through its supported installer."
                         },
                         style = tokens.type.body,
                         color = tokens.color.textSecondary,
@@ -247,6 +260,13 @@ fun SettingsRoute(
                 onClick = onOpenNotifications,
             )
         }
+        item {
+            SettingsLink(
+                title = "Jev Intelligence",
+                detail = "System-1 modules, provider qualification, activity, contribution and owner controls",
+                onClick = onOpenJev,
+            )
+        }
 
         item {
             Text(
@@ -284,16 +304,15 @@ private fun SettingsLink(title: String, detail: String, onClick: () -> Unit) {
 }
 
 /**
- * Settings' "Voice" child (DNA §4: "voice settings"). `SpeechModule` is unowned by this
- * worker to rewrite (P2-AND-018) and is itself a `LazyColumn { fillMaxSize() }`, so it gets
- * its own destination rather than being nested inside Settings' own list.
+ * Settings' "Voice" child: dedicated owner speaker enrollment and personal speech
+ * corrections share this full-screen list, with a native activity for exact biometric consent.
  */
 @Composable
 fun SettingsVoiceRoute(app: VanApplication, onBack: () -> Unit) {
     val degraded by app.degradedModeStore.state.collectAsState()
     Column(modifier = Modifier.fillMaxSize()) {
         SettingsChildHeader("Voice", onBack)
-        SpeechModule(app, legacyGlassFor(degraded))
+        SpeechModule(app, legacyGlassFor(degraded), ownerActivity = LocalContext.current as? FragmentActivity)
     }
 }
 

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.VoiceRecognitionPolicyTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:49" hostname="052fefa249ff" time="0.023">
+  <properties/>
+  <testcase name="supporting an API level is not a claim that voice works on the device()" classname="com.dial.van.voice.VoiceRecognitionPolicyTest" time="0.0"/>
+  <testcase name="word-level evidence is only claimed from the version that emits it()" classname="com.dial.van.voice.VoiceRecognitionPolicyTest" time="0.0"/>
+  <testcase name="the retained low-API branch is kept deliberately and still resolves()" classname="com.dial.van.voice.VoiceRecognitionPolicyTest" time="0.0"/>
+  <testcase name="caller audio is only claimed where the platform actually supports it()" classname="com.dial.van.voice.VoiceRecognitionPolicyTest" time="0.0"/>
+  <testcase name="a device with no on-device recognizer still fails closed rather than going to the cloud()" classname="com.dial.van.voice.VoiceRecognitionPolicyTest" time="0.0"/>
+  <testcase name="every supported device can reach a recognition backend that exists()" classname="com.dial.van.voice.VoiceRecognitionPolicyTest" time="0.001"/>
+  <testcase name="a working backend never carries an unavailable reason()" classname="com.dial.van.voice.VoiceRecognitionPolicyTest" time="0.001"/>
+  <testcase name="the build guard is installed and depends on the assemble tasks()" classname="com.dial.van.voice.VoiceRecognitionPolicyTest" time="0.003"/>
+  <testcase name="the unavailable reason reaches a production consumer()" classname="com.dial.van.voice.VoiceRecognitionPolicyTest" time="0.013"/>
+  <testcase name="the supported floor is at or above the on-device recognizer floor()" classname="com.dial.van.voice.VoiceRecognitionPolicyTest" time="0.001"/>
+  <testcase name="a supported device missing its recognizer is not told to install Sherpa()" classname="com.dial.van.voice.VoiceRecognitionPolicyTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

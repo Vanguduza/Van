@@ -17,6 +17,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from van_gateway.browser.task_scope import TaskScope
 from van_gateway.models import ActionClass
 
 
@@ -146,6 +147,16 @@ class BrowserTask(BaseModel):
     goal: str
 
     inputs: dict[str, Any] = Field(default_factory=dict)
+    #: Owner decision 2026-09-30 — the pages this task may act on (``task_scope``). Recorded
+    #: at creation (Hermes-declared, else the target domain's origin) and widened only by an
+    #: owner approval. None means no scope in the task truth: every action is refused.
+    scope: TaskScope | None = None
+    #: Owner decision 2026-09-30 (network-effect guard) — the task was admitted as mutating at
+    #: creation (``mutating=True`` passed ``BrowserPolicyEngine.check_task``: a profile whose
+    #: mutation posture is ``gateway_authorized_only`` and a domain admitted for mutation).
+    #: Only then may the Harness let the page write to the network, and only inside the
+    #: task scope. Default False: every write during an automated action is blocked.
+    mutating: bool = False
     status: BrowserTaskStatus = BrowserTaskStatus.PENDING
     evidence_pointer: str | None = None
     error_code: str | None = None

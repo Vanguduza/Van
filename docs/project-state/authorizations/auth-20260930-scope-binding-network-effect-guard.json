@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20260930-scope-binding-network-effect-guard",
+  "project": "van",
+  "record_kind": "commit_scope_binding",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "83ae8c23b05c21ba58975498c2d1ee3c06a870677acae0e6fe45b547640e18cb",
+  "owner_instruction_digest_input": "UTF-8 bytes of the verbatim selected answer label \"Widen by binding (Recommended)\" with no quotes and no trailing newline",
+  "owner_instruction_record": "docs/decisions/OWNER-DECISION-20260930-BROWSER-TASK-SCOPE.md",
+  "owner_instruction_excerpt": "Widen by binding (Recommended)",
+  "question_verbatim": "G9c's network-guard record covers commits 72e72120..7f87e25f. Two later G9c commits fall outside that range: its merge of G9b, and a contract-test fix. Covering them needs a scope binding that widens the record's commit range. The paths and authority stay the same. How should those two commits be covered?",
+  "option_text_verbatim": "Append an OWNER_DERIVED binding that extends the guard record to G9c's 9 first-parent commits (72e72120..2833fa4c), citing your 'Network-effect guard' choice. Paths are unchanged.",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "claude_code",
+    "request_id": "claude-code-session_01ELKqm4GCPmPvF3ggKkgB1J-20260930",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "signature_note": "The owner selected this answer in the Claude Code session that asked; recorded first-hand by the integrator. No signature of any kind is claimed.",
+  "purpose": "Bind unit G9c's network-effect guard record (written with a prose commit_range and no machine-readable commit_scope) to G9c's 9 first-parent commits, as the owner chose. This widens the record's commit coverage beyond its own text (72e72120..7f87e25f) by exactly two commits, fb3887f2 (merge of G9b) and 01f5b4fc (zone contract test fix), plus G9c's ledger-only commits; its paths and authority are unchanged.",
+  "binds": {
+    "auth-20260930-owner-explicit-network-effect-guard": {
+      "commits": [
+        "f4c2f341a041e7f16880b3a239da90b8a04662ae",
+        "86c933bdf89fe04078d226771b053823c6a3bf5e",
+        "7f87e25f28448e1bbce4a3430b8897f0fe8d156f",
+        "c0697e0807692f2e01b0ded8992e079bba0e0733",
+        "99b89e7175b82dd8cfa6eb0e63e060b09ea17205",
+        "fb3887f28499c146a96fd2c46bed7a8fdedfe91c",
+        "f1604d2a2380e878989bed25a322844f0e7d60ec",
+        "01f5b4fc0e23cbe5925cbd02ee016d99eaa9776f",
+        "2833fa4c83b359cdc55657b1aa39c704dea7d843"
+      ],
+      "derivation": "git rev-list --first-parent 72e721205118ce5339fd6104daa27079fee613c1..2833fa4c83b359cdc55657b1aa39c704dea7d843",
+      "note": "Owner-approved extension (answer above) beyond the record's own commit_range."
+    }
+  },
+  "limits": [
+    "No signature of any kind is claimed.",
+    "Authorizes no file by itself; the bound record keeps its own paths, authority and limits.",
+    "It may not bind a record that declares its own commit_scope or is reusable; a second binding of the same record makes that record cover nothing."
+  ],
+  "issued_at_utc": "2026-09-30T00:00:00Z",
+  "recorded_by": "integrator (session_01ELKqm4GCPmPvF3ggKkgB1J), first-hand",
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false,
+  "reusable": false,
+  "revoked": false
+}

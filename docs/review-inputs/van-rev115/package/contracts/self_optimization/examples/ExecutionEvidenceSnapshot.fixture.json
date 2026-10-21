@@ -1,0 +1,26 @@
+{
+  "created_ms": 1000,
+  "eligible_observation_refs": [],
+  "environment": "FIXTURE",
+  "excluded_observation_reasons": [],
+  "expires_at_ms": 2000,
+  "independent_parent_count": 0,
+  "method_statistics": [],
+  "observation_set_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "record_id": "FIXTURE_ExecutionEvidenceSnapshot",
+  "record_type": "ExecutionEvidenceSnapshot",
+  "schema_version": 2,
+  "scope": {
+    "account_id": "FIXTURE_ACCOUNT",
+    "market_type": "CRYPTO_SPOT",
+    "ownership": "OWNER_MANUAL",
+    "product_id": "FIXTURE_PRODUCT_ID",
+    "scope_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "strategy_id": "FIXTURE_STRATEGY_ID",
+    "venue_id": "FIXTURE_VENUE"
+  },
+  "snapshot_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "source_available_cutoff_ms": 1000,
+  "source_cutoff_cursor": 0,
+  "update_rule_sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+}

@@ -1,0 +1,96 @@
+{
+  "document_type": "Compiled review evidence summary; not the raw broker receipt",
+  "date": "2026-10-17",
+  "repository": "Vanguduza/Van",
+  "main_sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+  "vm": "van-trading-core",
+  "execution_lane": "Global DIAL owner-direct typed; inspected code runs under ubuntu uid1001 in isolated scratch",
+  "snapshot_observed_at": "2026-10-17T17:07:39.306838+00:00",
+  "content_scan_observed_at": "2026-10-17T17:10:34.486143+00:00",
+  "probe_observed_at": "2026-10-17T17:17:49.426405+00:00",
+  "branch_count": 66,
+  "distinct_head_commits": 63,
+  "union_file_paths": 4634,
+  "branch_drift_in_inventory_scan": {},
+  "recognized_text_path_blob_pairs": 3798,
+  "requested_unique_blobs": 3706,
+  "scanned_utf8_unique_blobs": 3680,
+  "skipped_blobs_within_text_candidates": 26,
+  "scope_limitations": [
+    "Complete head-tree inventory and mechanical text/import scans; selective semantic review, not line-by-line semantic certification of every branch",
+    "Only currently advertised refs/heads in this repository; no claim to deleted branches, unfetched forks, uncommitted work or separately deployed untracked services",
+    "Text scan limited to configured text extensions, UTF-8 and <=1MiB; binary/other formats are not covered by the content scan",
+    "No full application suite, model fitting, provider admission, deployed broker qualification or profitability study this pass"
+  ],
+  "forecast_library_direct_python_imports_found": [],
+  "core_files_identical_on_all_66": [
+    "trading/vati/arbiter/portfolio_allocator.py",
+    "trading/vati/arbiter/meta_labeler.py",
+    "trading/vati/cognition/shadow_book.py",
+    "trading/vati/cognition/performance_ledger.py",
+    "trading/vati/cognition/providers.py",
+    "trading/vati/backtest/engine.py",
+    "trading/vati/backtest/metrics.py",
+    "trading/vati/market_data/costs.py"
+  ],
+  "paper_probe_source_sha": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+  "paper_probe_cases": [
+    {
+      "case": "buy-limit",
+      "requested_limit": "1.10000",
+      "fill": "1.10007",
+      "status": "FILLED",
+      "limit_respected": false
+    },
+    {
+      "case": "sell-limit",
+      "requested_limit": "1.10000",
+      "fill": "1.09993",
+      "status": "FILLED",
+      "limit_respected": false
+    },
+    {
+      "case": "distant-limit-positive-control",
+      "status": "ACCEPTED",
+      "pending_count": 1,
+      "correctly_rests": true
+    },
+    {
+      "case": "stop-default-lifetime",
+      "status": "ACCEPTED",
+      "lifetime_ms": 86400000,
+      "meaning": "24-hour adapter fallback observed; policy-to-router expiry propagation not exercised by this direct adapter probe"
+    }
+  ],
+  "vm_workspace": "/home/ubuntu/work/van-high-value-review-20261017-005_3oh7",
+  "raw_vm_artifacts": {
+    "BRANCH_REVIEW_INVENTORY.json": "3dc2d3bbe93eab38f510573b696e150e2b5e2a0ec8df2e8a76606fa2da86cc5c",
+    "ALL_BRANCH_CONTENT_SCAN.json": "051d75ca3bda4ab2d8330dc877048e00aa4808eebe3807afe8848457e72f527c",
+    "REVIEW_EVIDENCE_EXPORT.json": "37c521ef3b5f60f313286cba37208d125899ba273ea8c74219c2801fd06bce0f"
+  },
+  "typed_execution_request_ids": [
+    "van-hva-allbranches-run-20261017-01",
+    "van-hva-content-run-20261017-02",
+    "van-hva-probes-run-20261017-03",
+    "van-hva-export-run-20261017-04"
+  ],
+  "inputs": {
+    "VAN_HIGH_VALUE_TRADING_ADOPTIONS_BLUEPRINT_REV1_2026-10-17.md": {
+      "bytes": 49430,
+      "sha256": "50514e34a7fee24c329aa27fffe0e199f2d7d76ec3b6f9ac496f5fbc91c8d12d"
+    },
+    "VAN_FORECAST_ADOPTION_BLUEPRINT_REV1_1_20261017.md": {
+      "bytes": 136237,
+      "sha256": "544e77a2bc46317ff319c86da646b1c7c937b9c88ee7328b9cafef2f72cff750"
+    },
+    "VAN_FORECAST_ADOPTION_BLUEPRINT_PACK_REV1_1_20261017.zip": {
+      "bytes": 449989,
+      "sha256": "dbacf6b24f0e2df572a5e1208748921a59bab60780694570bf84aaadb0a8c849"
+    }
+  },
+  "application_source_changed": false,
+  "blueprints_rewritten": false,
+  "branch_merged": false,
+  "live_financial_operation": false,
+  "new_source_adopted": false
+}

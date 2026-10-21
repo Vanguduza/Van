@@ -1,0 +1,65 @@
+{
+ "schema_version": 1,
+ "authorization_id": "auth-20261010-owner-close-leftovers",
+ "project": "van",
+ "authority": "OWNER_EXPLICIT",
+ "owner_instruction_sha256": "51e8888b45df51a871da76c716749076aa6e4b18e4b000dd6b91db7100540f17",
+ "owner_instruction_excerpt": "Close the leftovers",
+ "owner_instruction_context": [
+  "Leftovers reported after the dead-Kotlin removal: the now-unused VanBodyExclusionProfile, the reference-pack guide naming the removed engine, and the 219 historical ledger findings."
+ ],
+ "source": {
+  "kind": "owner_session_instruction",
+  "channel": "claude_code",
+  "request_id": "claude-code-20261010-van-close-leftovers",
+  "owner_attested": true,
+  "device_signature_claimed": false,
+  "cryptographic_signature_claimed": false,
+  "signed_ingress_claimed": false
+ },
+ "issued_at_utc": "2026-10-10T05:00:00Z",
+ "base_sha": "a33038d30ea62cebde077ed0806ef907c8e0c20b",
+ "branch_scope": "ccr-71397b02-lm6fid",
+ "commit_scope": {
+  "commits": [
+   "119e3acc81e797bc93f736d178b4892f96915b0c",
+   "d1e7ef6b58f78087c124990e4039cd0218e2ca26",
+   "d03a9fcf7166406549acf14b818ccb698c8a3fc0"
+  ]
+ },
+ "authorized_paths": [
+  "android/app/src/main/java/com/dial/van/visual/VanBodyExclusionProfile.kt",
+  "android/app/src/main/java/com/dial/van/visual/VanExclusionPrimitive.kt",
+  "android/app/src/main/java/com/dial/van/visual/VanFieldPoint.kt",
+  "android/verification/build.gradle.kts",
+  "android/verification/src/test/kotlin/com/dial/van/visual/VanAuraGeometryTest.kt",
+  "android/visual-preview/build.gradle.kts",
+  "docs/project-state/HISTORICAL_LEDGER_RECONCILIATION_PROPOSAL_20261010.json",
+  "docs/project-state/REMOTE_BROWSER_CLOSURE_RECORD.md",
+  "evidence/van-system-audit/findings.json",
+  "tools/character_forge/build_reference_pack.py",
+  "visual-authority/character-forge/00-source/reference-pack/PACK_MANIFEST.json",
+  "visual-authority/character-forge/00-source/reference-pack/guides/artboard_overlay_template.svg"
+ ],
+ "change_classes": [
+  "dead_code_removal",
+  "audit_register_reconciliation",
+  "reference_pack_comment_regeneration",
+  "historical_reconciliation_proposal"
+ ],
+ "material_scope_expansion": false,
+ "feature_removal": false,
+ "business_model_change": false,
+ "security_authority_change": false,
+ "owner_control_boundary_change": false,
+ "legal_position_change": false,
+ "money_or_custody_model_change": false,
+ "locked_provider_change": false,
+ "reusable": false,
+ "revoked": false,
+ "limitations": [
+  "The historical list is PENDING_OWNER_EXACT_LIST_CONFIRMATION and approves none of the listed commits",
+  "P2-AURA-001 moves to DELIBERATELY_REMOVED_CANON_CORRECTED because its requirement is already superseded canon (CF-D-06/REV1/CF-D-08)",
+  "No deployment, live host change or handset action"
+ ]
+}

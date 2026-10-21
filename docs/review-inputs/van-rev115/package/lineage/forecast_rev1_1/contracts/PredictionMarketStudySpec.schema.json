@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:van:forecast:prediction-market:PredictionMarketStudySpec:1.0",
+  "title": "PredictionMarketStudySpec",
+  "description": "Proposed VAN contract. JSON shape/local arithmetic is not evidence admission, source permission or financial authority.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment": {
+      "enum": [
+        "FIXTURE",
+        "RESEARCH",
+        "SHADOW"
+      ]
+    },
+    "authority_effect": {
+      "const": "NONE"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "source_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "study_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "experiment": {
+      "enum": [
+        "RISK_FILTER",
+        "SURPRISE",
+        "VOLATILITY",
+        "RANKING"
+      ]
+    },
+    "frozen_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_snapshot_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "protocol_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "group_split_key": {
+      "const": "UNDERLYING_EVENT_AND_TIME_BLOCK"
+    },
+    "baseline_policies": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 2
+    },
+    "exposure_matched_control": {
+      "const": true
+    },
+    "full_account_replay": {
+      "const": true
+    },
+    "realistic_information_lag": {
+      "const": true
+    },
+    "negative_controls": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 2
+    },
+    "effective_sample_unit": {
+      "const": "INDEPENDENT_EVENT_OR_JUSTIFIED_TIME_BLOCK"
+    },
+    "utility_definition_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "minimum_material_effect": {
+      "type": "string",
+      "minLength": 1
+    },
+    "final_holdout_locked": {
+      "const": true
+    },
+    "all_trials_retained": {
+      "const": true
+    },
+    "source_eligibility_scope_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "result": {
+      "enum": [
+        "NOT_RUN",
+        "QUALIFIED",
+        "REJECTED",
+        "INCONCLUSIVE",
+        "UNAVAILABLE"
+      ]
+    },
+    "live_promotion_authority": {
+      "const": "NONE"
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_id",
+    "environment",
+    "authority_effect",
+    "evidence_refs",
+    "source_digest",
+    "study_id",
+    "experiment",
+    "frozen_at",
+    "data_snapshot_ref",
+    "protocol_digest",
+    "group_split_key",
+    "baseline_policies",
+    "exposure_matched_control",
+    "full_account_replay",
+    "realistic_information_lag",
+    "negative_controls",
+    "effective_sample_unit",
+    "utility_definition_ref",
+    "minimum_material_effect",
+    "final_holdout_locked",
+    "all_trials_retained",
+    "source_eligibility_scope_ref",
+    "result",
+    "live_promotion_authority"
+  ],
+  "additionalProperties": false
+}

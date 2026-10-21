@@ -1,0 +1,246 @@
+{
+  "recipes": [
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "MachinedSurface",
+      "role": "FRAME",
+      "rule": "one upper seam + contact shadow; no nested gloss",
+      "surface": "OPAQUE"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "RaisedActionRow",
+      "role": "NAVIGATION",
+      "rule": "icon engraved in separate shallow pocket; arrow aligned",
+      "surface": "RAISED"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "FinancialMetric",
+      "role": "METRIC",
+      "rule": "large tabular amount, freshness and source, bounded sparkline",
+      "surface": "RAISED"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "RiskHeatMeter",
+      "role": "RISK",
+      "rule": "read-only source-bound bar and risk ceiling, no fake green",
+      "surface": "INSET"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "HeroCommandOrb",
+      "role": "HOME_IDENTITY",
+      "rule": "large physical orb, subtle rim based on verified reducer",
+      "surface": "PBR_SCULPTED"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "OrbQuickHub",
+      "role": "COMPACT_SHEET",
+      "rule": "3 groups max + quick row, no chart or legend",
+      "surface": "RAISED"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "FloatingVanShell",
+      "role": "FLOATING_ASSISTANT",
+      "rule": "independent gesture surface and OS policies",
+      "surface": "PBR_MINI"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "ProfessionalChartShell",
+      "role": "CHART",
+      "rule": "plot flat and precision-first, controls tactile and outside plot",
+      "surface": "INSET"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "CandlestickViewport",
+      "role": "CHART_PLOT",
+      "rule": "native or qualified renderer, no decorative card gradients on plot",
+      "surface": "INSET"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "ChartToolRail",
+      "role": "CHART_TOOLS",
+      "rule": "bounded context tools, expandable by mode",
+      "surface": "RAISED"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "OrderReviewSheet",
+      "role": "FINANCIAL_REVIEW",
+      "rule": "exact scoped action digest + risk + confirmation + outcome",
+      "surface": "RAISED"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "OrderLifecycleTile",
+      "role": "ORDER",
+      "rule": "separate placed/partial/cancel-pending/unknown states",
+      "surface": "RAISED"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "PositionProtectionTile",
+      "role": "POSITION",
+      "rule": "signed result, verified stop/target, exposure readback",
+      "surface": "RAISED"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "AccountIdentityCard",
+      "role": "ACCOUNT",
+      "rule": "demo/live/investor/owner scopes visible, balances maskable",
+      "surface": "RAISED"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "FundsQuoteSheet",
+      "role": "PAYMENT",
+      "rule": "minor units, fee, beneficiary digest, expiry, broker capability",
+      "surface": "RAISED"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "FundingReceiptRow",
+      "role": "PAYMENT_RECEIPT",
+      "rule": "provider outcome, reversal, fx rate and status evidence",
+      "surface": "INSET"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "NewsEvidenceBrief",
+      "role": "INTELLIGENCE",
+      "rule": "what happened / history / disagreement / relevance / sources",
+      "surface": "RAISED"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "NewsSourceStatus",
+      "role": "SOURCE_FRESHNESS",
+      "rule": "age, venue, source reliability, corrections",
+      "surface": "INSET"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "TradingCandidateCard",
+      "role": "POTENTIAL",
+      "rule": "explicit uncalibrated confidence, never win odds",
+      "surface": "RAISED"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "AgentEvidenceCard",
+      "role": "AGENT",
+      "rule": "lease, activity, source age, never synthetic completion",
+      "surface": "RAISED"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "ProjectPhaseRail",
+      "role": "WORK",
+      "rule": "phase and verified completion, no fictitious progress",
+      "surface": "TRACK"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "LiveDependencyNode",
+      "role": "GRAPH",
+      "rule": "focus stable nodes/edges, visible blocked states",
+      "surface": "RAISED"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "LiveHandoffEdge",
+      "role": "GRAPH_EDGE",
+      "rule": "direction + source evidence, not decorative arrows",
+      "surface": "PRECISION"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "TaskProgressDetail",
+      "role": "TASK",
+      "rule": "outcome checklist/evidence/source, controls separate",
+      "surface": "RAISED"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "ResearchResultPanel",
+      "role": "RESEARCH",
+      "rule": "point-in-time source, winning/losing trials and evidence grade",
+      "surface": "INSET"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "ModelCalibrationPanel",
+      "role": "MODEL",
+      "rule": "calibration/samples/uncertainty, no success colour on unqualified",
+      "surface": "INSET"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "AutomationRunRow",
+      "role": "AUTOMATION",
+      "rule": "last run, next run, verified result, failure explanation",
+      "surface": "RAISED"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "SecureSettingsRow",
+      "role": "SECURITY",
+      "rule": "accessibility and owner grant separate from provider health",
+      "surface": "RAISED"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "EvidenceCitationStrip",
+      "role": "PROVENANCE",
+      "rule": "source id, timestamp and readback reference",
+      "surface": "INSET"
+    },
+    {
+      "dark_light_required": true,
+      "disabled_error_stale_loading_focus_large_text_required": true,
+      "id": "TactileModalSheet",
+      "role": "SHEET",
+      "rule": "focus trap, adaptive height, explicit Cancel, semantic confirm",
+      "surface": "RAISED"
+    }
+  ],
+  "schema": "van.material.components/2.0",
+  "status": "PROPOSED_UNTIL_NATIVE_GOLDEN"
+}

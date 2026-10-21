@@ -1,0 +1,2945 @@
+{
+  "status": "NOT_RUN",
+  "tests": [
+    {
+      "id": "VAN-ML-AT-001-P",
+      "requirement_id": "VAN-ML-REQ-001",
+      "packet_id": "VAN-ML-PKT-001",
+      "kind": "POSITIVE",
+      "contract": "Reconcile parent/source/candidate hashes and all touched functions.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-001-N",
+      "requirement_id": "VAN-ML-REQ-001",
+      "packet_id": "VAN-ML-PKT-001",
+      "kind": "ADVERSARIAL",
+      "contract": "Remove one inherited action or ignore a selected branch: scope admission fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-002-P",
+      "requirement_id": "VAN-ML-REQ-002",
+      "packet_id": "VAN-ML-PKT-002",
+      "kind": "POSITIVE",
+      "contract": "Admit an internally coherent research profile and signed scope references.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-002-N",
+      "requirement_id": "VAN-ML-REQ-002",
+      "packet_id": "VAN-ML-PKT-002",
+      "kind": "ADVERSARIAL",
+      "contract": "An unspecified live budget or data entitlement cannot be filled with a guessed value.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-003-P",
+      "requirement_id": "VAN-ML-REQ-003",
+      "packet_id": "VAN-ML-PKT-003",
+      "kind": "POSITIVE",
+      "contract": "Validate actual external gate receipt with trusted issuer at execution.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-003-N",
+      "requirement_id": "VAN-ML-REQ-003",
+      "packet_id": "VAN-ML-PKT-003",
+      "kind": "ADVERSARIAL",
+      "contract": "A local PASS JSON or document hash alone fails entry.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-004-P",
+      "requirement_id": "VAN-ML-REQ-004",
+      "packet_id": "VAN-ML-PKT-004",
+      "kind": "POSITIVE",
+      "contract": "Train/export/load a small actual locked model on authorized infrastructure.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-004-N",
+      "requirement_id": "VAN-ML-REQ-004",
+      "packet_id": "VAN-ML-PKT-004",
+      "kind": "ADVERSARIAL",
+      "contract": "Unsupported wheel/architecture or missing quota blocks job admission.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-005-P",
+      "requirement_id": "VAN-ML-REQ-005",
+      "packet_id": "VAN-ML-PKT-005",
+      "kind": "POSITIVE",
+      "contract": "Late-arriving release stays absent until its observed availability cutoff.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-005-N",
+      "requirement_id": "VAN-ML-REQ-005",
+      "packet_id": "VAN-ML-PKT-005",
+      "kind": "ADVERSARIAL",
+      "contract": "Replace vintage data with revised future values: dataset validation fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-006-P",
+      "requirement_id": "VAN-ML-REQ-006",
+      "packet_id": "VAN-ML-PKT-005",
+      "kind": "POSITIVE",
+      "contract": "Reproduce an historical cohort including subsequently delisted instruments.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-006-N",
+      "requirement_id": "VAN-ML-REQ-006",
+      "packet_id": "VAN-ML-PKT-005",
+      "kind": "ADVERSARIAL",
+      "contract": "Present-day universe or cross-venue ticker collision is detected.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-007-P",
+      "requirement_id": "VAN-ML-REQ-007",
+      "packet_id": "VAN-ML-PKT-005",
+      "kind": "POSITIVE",
+      "contract": "DST, holiday and missing-bar fixtures preserve correct cutoff/horizon semantics.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-007-N",
+      "requirement_id": "VAN-ML-REQ-007",
+      "packet_id": "VAN-ML-PKT-005",
+      "kind": "ADVERSARIAL",
+      "contract": "Partial current candle or fabricated forward-filled tradability cannot enter fit.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-008-P",
+      "requirement_id": "VAN-ML-REQ-008",
+      "packet_id": "VAN-ML-PKT-006",
+      "kind": "POSITIVE",
+      "contract": "Replay identical snapshot through training and serving transforms.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-008-N",
+      "requirement_id": "VAN-ML-REQ-008",
+      "packet_id": "VAN-ML-PKT-006",
+      "kind": "ADVERSARIAL",
+      "contract": "Permute a feature column or change unit while keeping old manifest: reject.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-009-P",
+      "requirement_id": "VAN-ML-REQ-009",
+      "packet_id": "VAN-ML-PKT-006",
+      "kind": "POSITIVE",
+      "contract": "Apply a declared row filter and verify row IDs across features, targets and weights.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-009-N",
+      "requirement_id": "VAN-ML-REQ-009",
+      "packet_id": "VAN-ML-PKT-006",
+      "kind": "ADVERSARIAL",
+      "contract": "Validation-fitted scaler or independent target-row filtering fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-010-P",
+      "requirement_id": "VAN-ML-REQ-010",
+      "packet_id": "VAN-ML-PKT-006",
+      "kind": "POSITIVE",
+      "contract": "Version added peer/lag features and compare their incremental contribution.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-010-N",
+      "requirement_id": "VAN-ML-REQ-010",
+      "packet_id": "VAN-ML-PKT-006",
+      "kind": "ADVERSARIAL",
+      "contract": "A negative feature shift or asynchronous future peer close fails prefix tests.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-011-P",
+      "requirement_id": "VAN-ML-REQ-011",
+      "packet_id": "VAN-ML-PKT-007",
+      "kind": "POSITIVE",
+      "contract": "Build an executable horizon label only after all required observations mature.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-011-N",
+      "requirement_id": "VAN-ML-REQ-011",
+      "packet_id": "VAN-ML-PKT-007",
+      "kind": "ADVERSARIAL",
+      "contract": "Post-entry holding duration presented as a known entry feature is rejected.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-012-P",
+      "requirement_id": "VAN-ML-REQ-012",
+      "packet_id": "VAN-ML-PKT-007",
+      "kind": "POSITIVE",
+      "contract": "Build explicitly separated actual and counterfactual cohort reports.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-012-N",
+      "requirement_id": "VAN-ML-REQ-012",
+      "packet_id": "VAN-ML-PKT-007",
+      "kind": "ADVERSARIAL",
+      "contract": "A practice record promoted to live outcome provenance fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-013-P",
+      "requirement_id": "VAN-ML-REQ-013",
+      "packet_id": "VAN-ML-PKT-007",
+      "kind": "POSITIVE",
+      "contract": "Compare labels against independent hand calculations for admitted instrument classes.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-013-N",
+      "requirement_id": "VAN-ML-REQ-013",
+      "packet_id": "VAN-ML-PKT-007",
+      "kind": "ADVERSARIAL",
+      "contract": "Double cost deduction or invalid distribution support is detected.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-014-P",
+      "requirement_id": "VAN-ML-REQ-014",
+      "packet_id": "VAN-ML-PKT-008",
+      "kind": "POSITIVE",
+      "contract": "Demonstrate disjoint information intervals while retaining lawful historical context.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-014-N",
+      "requirement_id": "VAN-ML-REQ-014",
+      "packet_id": "VAN-ML-PKT-008",
+      "kind": "ADVERSARIAL",
+      "contract": "Random time splits or labels extending through validation boundary fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-015-P",
+      "requirement_id": "VAN-ML-REQ-015",
+      "packet_id": "VAN-ML-PKT-008",
+      "kind": "POSITIVE",
+      "contract": "A causal strategy is stable at identical cutoff after sufficient warmup.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-015-N",
+      "requirement_id": "VAN-ML-REQ-015",
+      "packet_id": "VAN-ML-PKT-008",
+      "kind": "ADVERSARIAL",
+      "contract": "Leaked future field, centered rolling window or full-data statistic changes prefix result.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-016-P",
+      "requirement_id": "VAN-ML-REQ-016",
+      "packet_id": "VAN-ML-PKT-008",
+      "kind": "POSITIVE",
+      "contract": "A single final evaluation references the frozen study census.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-016-N",
+      "requirement_id": "VAN-ML-REQ-016",
+      "packet_id": "VAN-ML-PKT-008",
+      "kind": "ADVERSARIAL",
+      "contract": "Second tuning pass on observed holdout without a new untouched period is blocked.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-017-P",
+      "requirement_id": "VAN-ML-REQ-017",
+      "packet_id": "VAN-ML-PKT-009",
+      "kind": "POSITIVE",
+      "contract": "Both stop and target touched: long and short and mixed portfolio ambiguity are explicit.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-017-N",
+      "requirement_id": "VAN-ML-REQ-017",
+      "packet_id": "VAN-ML-PKT-009",
+      "kind": "ADVERSARIAL",
+      "contract": "Independent contradictory paths presented as one portfolio market history fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-018-P",
+      "requirement_id": "VAN-ML-REQ-018",
+      "packet_id": "VAN-ML-PKT-009",
+      "kind": "POSITIVE",
+      "contract": "Commission, funding, gap and final close reconcile to ledger cash and MTM.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-018-N",
+      "requirement_id": "VAN-ML-REQ-018",
+      "packet_id": "VAN-ML-PKT-009",
+      "kind": "ADVERSARIAL",
+      "contract": "Risk cost estimate substituted for P&L deductions or pre-flatten final equity fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-019-P",
+      "requirement_id": "VAN-ML-REQ-019",
+      "packet_id": "VAN-ML-PKT-009",
+      "kind": "POSITIVE",
+      "contract": "Deposit changes collateral but not historical trading return; open loss appears in MTM drawdown.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-019-N",
+      "requirement_id": "VAN-ML-REQ-019",
+      "packet_id": "VAN-ML-PKT-009",
+      "kind": "ADVERSARIAL",
+      "contract": "Deposit erases loss, withdrawal is labelled trading loss or closed-only DD certifies exposure: fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-020-P",
+      "requirement_id": "VAN-ML-REQ-020",
+      "packet_id": "VAN-ML-PKT-010",
+      "kind": "POSITIVE",
+      "contract": "Concurrent candidates contend for the same simulated risk/capital budget.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-020-N",
+      "requirement_id": "VAN-ML-REQ-020",
+      "packet_id": "VAN-ML-PKT-010",
+      "kind": "ADVERSARIAL",
+      "contract": "Independent symbol backtests summed as a feasible portfolio result fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-021-P",
+      "requirement_id": "VAN-ML-REQ-021",
+      "packet_id": "VAN-ML-PKT-010",
+      "kind": "POSITIVE",
+      "contract": "Approval, reduction, rejection, expiry and protection paths are all replayed.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-021-N",
+      "requirement_id": "VAN-ML-REQ-021",
+      "packet_id": "VAN-ML-PKT-010",
+      "kind": "ADVERSARIAL",
+      "contract": "Zero checked decisions reported as full successful decision coverage fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-022-P",
+      "requirement_id": "VAN-ML-REQ-022",
+      "packet_id": "VAN-ML-PKT-011",
+      "kind": "POSITIVE",
+      "contract": "Compare indexed predictions and train-only preprocessing against the source dataset.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-022-N",
+      "requirement_id": "VAN-ML-REQ-022",
+      "packet_id": "VAN-ML-PKT-011",
+      "kind": "ADVERSARIAL",
+      "contract": "Qlib regional exchange defaults or dynamic unapproved YAML classes fail startup.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-023-P",
+      "requirement_id": "VAN-ML-REQ-023",
+      "packet_id": "VAN-ML-PKT-012",
+      "kind": "POSITIVE",
+      "contract": "Fit/infer/reload under fixed environment and compare predictions.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-023-N",
+      "requirement_id": "VAN-ML-REQ-023",
+      "packet_id": "VAN-ML-PKT-012",
+      "kind": "ADVERSARIAL",
+      "contract": "Feature-order, objective, target or cost-basis mismatch rejects the artifact.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-024-P",
+      "requirement_id": "VAN-ML-REQ-024",
+      "packet_id": "VAN-ML-PKT-013",
+      "kind": "POSITIVE",
+      "contract": "Evaluate raw output against base rates on the same candidate population.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-024-N",
+      "requirement_id": "VAN-ML-REQ-024",
+      "packet_id": "VAN-ML-PKT-013",
+      "kind": "ADVERSARIAL",
+      "contract": "Class weighting/resampling output advertised as calibrated probability fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-025-P",
+      "requirement_id": "VAN-ML-REQ-025",
+      "packet_id": "VAN-ML-PKT-014",
+      "kind": "POSITIVE",
+      "contract": "Fit requested alpha models and validate ordered quantiles on evaluation data.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-025-N",
+      "requirement_id": "VAN-ML-REQ-025",
+      "packet_id": "VAN-ML-PKT-014",
+      "kind": "ADVERSARIAL",
+      "contract": "Pass quantile into stock Qlib LGBModel loss, or accept crossed quantiles without handling: fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-026-P",
+      "requirement_id": "VAN-ML-REQ-026",
+      "packet_id": "VAN-ML-PKT-014",
+      "kind": "POSITIVE",
+      "contract": "Verify group sizes/ordering sum to rows and rank metrics use the same cohort.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-026-N",
+      "requirement_id": "VAN-ML-REQ-026",
+      "packet_id": "VAN-ML-PKT-014",
+      "kind": "ADVERSARIAL",
+      "contract": "Continuous negative return labels or cross-time query group leak are rejected.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-027-P",
+      "requirement_id": "VAN-ML-REQ-027",
+      "packet_id": "VAN-ML-PKT-015",
+      "kind": "POSITIVE",
+      "contract": "Report matched loss, cost and coverage comparisons with sample counts.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-027-N",
+      "requirement_id": "VAN-ML-REQ-027",
+      "packet_id": "VAN-ML-PKT-015",
+      "kind": "ADVERSARIAL",
+      "contract": "Compare different horizons or omit a stronger simple baseline to claim victory: fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-028-P",
+      "requirement_id": "VAN-ML-REQ-028",
+      "packet_id": "VAN-ML-PKT-016",
+      "kind": "POSITIVE",
+      "contract": "Round-trip aligned panel data and verify output identity and dimensions.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-028-N",
+      "requirement_id": "VAN-ML-REQ-028",
+      "packet_id": "VAN-ML-PKT-016",
+      "kind": "ADVERSARIAL",
+      "contract": "Duplicate timestamps, unseen cohort semantics or predictor-time scaler refit fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-029-P",
+      "requirement_id": "VAN-ML-REQ-029",
+      "packet_id": "VAN-ML-PKT-016",
+      "kind": "POSITIVE",
+      "contract": "Execute train/export/reload/infer/evaluate on admitted real historical data.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-029-N",
+      "requirement_id": "VAN-ML-REQ-029",
+      "packet_id": "VAN-ML-PKT-016",
+      "kind": "ADVERSARIAL",
+      "contract": "An import-only plugin or canned forecast cannot close this requirement.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-030-P",
+      "requirement_id": "VAN-ML-REQ-030",
+      "packet_id": "VAN-ML-PKT-017",
+      "kind": "POSITIVE",
+      "contract": "Ablate contextual covariates and compare forecast/decomposition before and after reload.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-030-N",
+      "requirement_id": "VAN-ML-REQ-030",
+      "packet_id": "VAN-ML-PKT-017",
+      "kind": "ADVERSARIAL",
+      "contract": "Future actual releases, unavailable decomposition or fabricated causal labels fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-031-P",
+      "requirement_id": "VAN-ML-REQ-031",
+      "packet_id": "VAN-ML-PKT-018",
+      "kind": "POSITIVE",
+      "contract": "Compare raw sample tensor, aggregation and original-domain output calculations.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-031-N",
+      "requirement_id": "VAN-ML-REQ-031",
+      "packet_id": "VAN-ML-PKT-018",
+      "kind": "ADVERSARIAL",
+      "contract": "A mean path or independently sampled marginal quantiles labelled joint scenarios fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-032-P",
+      "requirement_id": "VAN-ML-REQ-032",
+      "packet_id": "VAN-ML-PKT-019",
+      "kind": "POSITIVE",
+      "contract": "Each plugin completes actual train/export/load/infer and reports unsupported inputs before fit.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-032-N",
+      "requirement_id": "VAN-ML-REQ-032",
+      "packet_id": "VAN-ML-PKT-019",
+      "kind": "ADVERSARIAL",
+      "contract": "Constructor field presence alone used as proof of exogenous support fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-033-P",
+      "requirement_id": "VAN-ML-REQ-033",
+      "packet_id": "VAN-ML-PKT-020",
+      "kind": "POSITIVE",
+      "contract": "Old deterministic conformal consumers retain semantics and new buckets enforce identity.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-033-N",
+      "requirement_id": "VAN-ML-REQ-033",
+      "packet_id": "VAN-ML-PKT-020",
+      "kind": "ADVERSARIAL",
+      "contract": "New library calibration silently replaces existing risk policy or raises size: fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-034-P",
+      "requirement_id": "VAN-ML-REQ-034",
+      "packet_id": "VAN-ML-PKT-020",
+      "kind": "POSITIVE",
+      "contract": "Evaluate reliability, Brier/log loss or quantile coverage by horizon/cohort with uncertainty.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-034-N",
+      "requirement_id": "VAN-ML-REQ-034",
+      "packet_id": "VAN-ML-PKT-020",
+      "kind": "ADVERSARIAL",
+      "contract": "Nominal coverage or mathematical minimum residual count used as economic qualification fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-035-P",
+      "requirement_id": "VAN-ML-REQ-035",
+      "packet_id": "VAN-ML-PKT-020",
+      "kind": "POSITIVE",
+      "contract": "Refit invalidates the old calibrator; inverse-transform uncertainty is checked.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-035-N",
+      "requirement_id": "VAN-ML-REQ-035",
+      "packet_id": "VAN-ML-PKT-020",
+      "kind": "ADVERSARIAL",
+      "contract": "Sum marginal quantiles or exponentiate log-mean as arithmetic expectation without correction: fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-036-P",
+      "requirement_id": "VAN-ML-REQ-036",
+      "packet_id": "VAN-ML-PKT-021",
+      "kind": "POSITIVE",
+      "contract": "Pause/resume a study and retain failed/pruned trial history and immutable inputs.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-036-N",
+      "requirement_id": "VAN-ML-REQ-036",
+      "packet_id": "VAN-ML-PKT-021",
+      "kind": "ADVERSARIAL",
+      "contract": "Parallel untracked studies or direct writes to live model binding fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-037-P",
+      "requirement_id": "VAN-ML-REQ-037",
+      "packet_id": "VAN-ML-PKT-022",
+      "kind": "POSITIVE",
+      "contract": "Corrupted/tampered model is rejected before deserialization and fallback is recorded.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-037-N",
+      "requirement_id": "VAN-ML-REQ-037",
+      "packet_id": "VAN-ML-PKT-022",
+      "kind": "ADVERSARIAL",
+      "contract": "Untrusted pickle, arbitrary import or unchecked remote URI fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-038-P",
+      "requirement_id": "VAN-ML-REQ-038",
+      "packet_id": "VAN-ML-PKT-022",
+      "kind": "POSITIVE",
+      "contract": "Admit an exact version through independently verified binding and CAS epoch.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-038-N",
+      "requirement_id": "VAN-ML-REQ-038",
+      "packet_id": "VAN-ML-PKT-022",
+      "kind": "ADVERSARIAL",
+      "contract": "Alias swap or attacker-authored certificate leaves active model unchanged.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-039-P",
+      "requirement_id": "VAN-ML-REQ-039",
+      "packet_id": "VAN-ML-PKT-023",
+      "kind": "POSITIVE",
+      "contract": "Restart at each job state and recover without duplicate model publication.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-039-N",
+      "requirement_id": "VAN-ML-REQ-039",
+      "packet_id": "VAN-ML-PKT-023",
+      "kind": "ADVERSARIAL",
+      "contract": "Training finished marks model live or expired model used while waiting: fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-040-P",
+      "requirement_id": "VAN-ML-REQ-040",
+      "packet_id": "VAN-ML-PKT-023",
+      "kind": "POSITIVE",
+      "contract": "Burst retraining requests produce bounded pending work and measured noninterference.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-040-N",
+      "requirement_id": "VAN-ML-REQ-040",
+      "packet_id": "VAN-ML-PKT-023",
+      "kind": "ADVERSARIAL",
+      "contract": "Heavy study admitted using stale capacity or no budget is refused.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-041-P",
+      "requirement_id": "VAN-ML-REQ-041",
+      "packet_id": "VAN-ML-PKT-024",
+      "kind": "POSITIVE",
+      "contract": "Authenticated caller receives correct horizon/scalar/quantile identities.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-041-N",
+      "requirement_id": "VAN-ML-REQ-041",
+      "packet_id": "VAN-ML-PKT-024",
+      "kind": "ADVERSARIAL",
+      "contract": "NaN, Infinity, wrong account/venue, order quantity or executable instruction fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-042-P",
+      "requirement_id": "VAN-ML-REQ-042",
+      "packet_id": "VAN-ML-PKT-024",
+      "kind": "POSITIVE",
+      "contract": "Old-but-freshly-served model and new prediction over stale data both fail as appropriate.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-042-N",
+      "requirement_id": "VAN-ML-REQ-042",
+      "packet_id": "VAN-ML-PKT-024",
+      "kind": "ADVERSARIAL",
+      "contract": "Novelty score labelled probability or tail observations silently deleted to improve metrics: fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-043-P",
+      "requirement_id": "VAN-ML-REQ-043",
+      "packet_id": "VAN-ML-PKT-024",
+      "kind": "POSITIVE",
+      "contract": "Service timeout returns bounded abstention and protection continues.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-043-N",
+      "requirement_id": "VAN-ML-REQ-043",
+      "packet_id": "VAN-ML-PKT-024",
+      "kind": "ADVERSARIAL",
+      "contract": "Cache reused after target/model/feature/adjustment revision is rejected.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-044-P",
+      "requirement_id": "VAN-ML-REQ-044",
+      "packet_id": "VAN-ML-PKT-025",
+      "kind": "POSITIVE",
+      "contract": "Ablate each model and compare against strongest single incumbent on matched outcomes.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-044-N",
+      "requirement_id": "VAN-ML-REQ-044",
+      "packet_id": "VAN-ML-PKT-025",
+      "kind": "ADVERSARIAL",
+      "contract": "Duplicated correlated signals counted as independent confirmation fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-045-P",
+      "requirement_id": "VAN-ML-REQ-045",
+      "packet_id": "VAN-ML-PKT-025",
+      "kind": "POSITIVE",
+      "contract": "Every consequential decision retains exact mandate/risk/intent/route receipt.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-045-N",
+      "requirement_id": "VAN-ML-REQ-045",
+      "packet_id": "VAN-ML-PKT-025",
+      "kind": "ADVERSARIAL",
+      "contract": "Forecast tries to widen stop, raise ceilings, submit order or alter funds: reject.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-046-P",
+      "requirement_id": "VAN-ML-REQ-046",
+      "packet_id": "VAN-ML-PKT-025",
+      "kind": "POSITIVE",
+      "contract": "Sandbox admission and refusal both execute through genuine consumer paths.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-046-N",
+      "requirement_id": "VAN-ML-REQ-046",
+      "packet_id": "VAN-ML-PKT-025",
+      "kind": "ADVERSARIAL",
+      "contract": "Aggressive solely on model confidence, unbound evidence or wrong environment fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-047-P",
+      "requirement_id": "VAN-ML-REQ-047",
+      "packet_id": "VAN-ML-PKT-026",
+      "kind": "POSITIVE",
+      "contract": "Deduplicated losses, persistent locks and defined session expiry reproduce after restart.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-047-N",
+      "requirement_id": "VAN-ML-REQ-047",
+      "packet_id": "VAN-ML-PKT-026",
+      "kind": "ADVERSARIAL",
+      "contract": "Protection suppresses authorized exits, counts fills as separate trades or resets on restart: fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-048-P",
+      "requirement_id": "VAN-ML-REQ-048",
+      "packet_id": "VAN-ML-PKT-027",
+      "kind": "POSITIVE",
+      "contract": "A rejected candidate remains in analysis with counterfactual status and missing actual fills.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-048-N",
+      "requirement_id": "VAN-ML-REQ-048",
+      "packet_id": "VAN-ML-PKT-027",
+      "kind": "ADVERSARIAL",
+      "contract": "Only profitable executed candidates retained or paper outcomes relabelled real fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-049-P",
+      "requirement_id": "VAN-ML-REQ-049",
+      "packet_id": "VAN-ML-PKT-027",
+      "kind": "POSITIVE",
+      "contract": "Trace a revoked manual-data source to features, models, caches and public projections.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-049-N",
+      "requirement_id": "VAN-ML-REQ-049",
+      "packet_id": "VAN-ML-PKT-027",
+      "kind": "ADVERSARIAL",
+      "contract": "Delete a row and claim model unlearning or keep revoked model active: fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-050-P",
+      "requirement_id": "VAN-ML-REQ-050",
+      "packet_id": "VAN-ML-PKT-028",
+      "kind": "POSITIVE",
+      "contract": "Headless owner-scoped caller executes each operation and reads durable outcome.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-050-N",
+      "requirement_id": "VAN-ML-REQ-050",
+      "packet_id": "VAN-ML-PKT-028",
+      "kind": "ADVERSARIAL",
+      "contract": "Only a unit function, fake API or missing cancel/readback cannot close backend capability.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-051-P",
+      "requirement_id": "VAN-ML-REQ-051",
+      "packet_id": "VAN-ML-PKT-028",
+      "kind": "POSITIVE",
+      "contract": "Projection identifies calibration population, sample, horizon, expiry and limitations.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-051-N",
+      "requirement_id": "VAN-ML-REQ-051",
+      "packet_id": "VAN-ML-PKT-028",
+      "kind": "ADVERSARIAL",
+      "contract": "Uncalibrated certainty, neural explanation as causality or stale band as current fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-052-P",
+      "requirement_id": "VAN-ML-REQ-052",
+      "packet_id": "VAN-ML-PKT-029",
+      "kind": "POSITIVE",
+      "contract": "Actual staged services survive restart, backup/restore and compatible rollback.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-052-N",
+      "requirement_id": "VAN-ML-REQ-052",
+      "packet_id": "VAN-ML-PKT-029",
+      "kind": "ADVERSARIAL",
+      "contract": "Forbidden desktop/local substitution, broker keys in trainer or stale-source receipt fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-053-P",
+      "requirement_id": "VAN-ML-REQ-053",
+      "packet_id": "VAN-ML-PKT-029",
+      "kind": "POSITIVE",
+      "contract": "Overload, disk full and unavailable registry produce recorded safe backpressure.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-053-N",
+      "requirement_id": "VAN-ML-REQ-053",
+      "packet_id": "VAN-ML-PKT-029",
+      "kind": "ADVERSARIAL",
+      "contract": "Unbounded threads/logs/cache, exposed secrets or unmeasured T0 starvation fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-054-P",
+      "requirement_id": "VAN-ML-REQ-054",
+      "packet_id": "VAN-ML-PKT-030",
+      "kind": "POSITIVE",
+      "contract": "Recompute metrics from immutable prediction/outcome files independently.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-054-N",
+      "requirement_id": "VAN-ML-REQ-054",
+      "packet_id": "VAN-ML-PKT-030",
+      "kind": "ADVERSARIAL",
+      "contract": "Literature returns, arbitrary accuracy threshold or in-sample results used as VAN proof fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-055-P",
+      "requirement_id": "VAN-ML-REQ-055",
+      "packet_id": "VAN-ML-PKT-031",
+      "kind": "POSITIVE",
+      "contract": "Fit, serve, evaluate, sandbox-admit, revoke and reject through genuine services.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-055-N",
+      "requirement_id": "VAN-ML-REQ-055",
+      "packet_id": "VAN-ML-PKT-031",
+      "kind": "ADVERSARIAL",
+      "contract": "Only refusal stubs or a synthetic approval promoted to live cannot pass.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-056-P",
+      "requirement_id": "VAN-ML-REQ-056",
+      "packet_id": "VAN-ML-PKT-032",
+      "kind": "POSITIVE",
+      "contract": "Independent audit enumerates every backend requirement and verifies authoritative receipts.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-056-N",
+      "requirement_id": "VAN-ML-REQ-056",
+      "packet_id": "VAN-ML-PKT-032",
+      "kind": "ADVERSARIAL",
+      "contract": "Machine-readable nonempty evidence arrays or this checker substituted for semantic qualification fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-057-P",
+      "requirement_id": "VAN-ML-REQ-057",
+      "packet_id": "VAN-ML-PKT-033",
+      "kind": "POSITIVE",
+      "contract": "Parent verifies additive and original whole-product scope in one contract baseline.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-057-N",
+      "requirement_id": "VAN-ML-REQ-057",
+      "packet_id": "VAN-ML-PKT-033",
+      "kind": "ADVERSARIAL",
+      "contract": "Additive-only pass used to bypass incomplete original backend fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-058-P",
+      "requirement_id": "VAN-ML-REQ-058",
+      "packet_id": "VAN-ML-PKT-034",
+      "kind": "POSITIVE",
+      "contract": "Both themes, offline/restoration, cancellation and accessibility retain all mapped actions.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-058-N",
+      "requirement_id": "VAN-ML-REQ-058",
+      "packet_id": "VAN-ML-PKT-034",
+      "kind": "ADVERSARIAL",
+      "contract": "Crowded Home, hidden required capability or UI-coded domain rule fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-059-P",
+      "requirement_id": "VAN-ML-REQ-059",
+      "packet_id": "VAN-ML-PKT-035",
+      "kind": "POSITIVE",
+      "contract": "Physical lifecycle/performance/privacy and independent whole-product acceptance are recorded.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-059-N",
+      "requirement_id": "VAN-ML-REQ-059",
+      "packet_id": "VAN-ML-PKT-035",
+      "kind": "ADVERSARIAL",
+      "contract": "Emulator screenshot or backend contract proof offered as S24 acceptance fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-060-P",
+      "requirement_id": "VAN-ML-REQ-060",
+      "packet_id": "VAN-ML-PKT-036",
+      "kind": "POSITIVE",
+      "contract": "A released app can honestly show a rejected model with zero live influence.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-060-N",
+      "requirement_id": "VAN-ML-REQ-060",
+      "packet_id": "VAN-ML-PKT-036",
+      "kind": "ADVERSARIAL",
+      "contract": "Install success enables trading, retrospective gate weakens, or rollback deletes ledger history: fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and environment identity",
+        "Input/fixture/data snapshot identity",
+        "Invoked actual component or service and assertion output",
+        "Independent review where required by the parent gate"
+      ],
+      "note": "A test contract, not a test result. Synthetic cases prove behavior only, never market profitability."
+    },
+    {
+      "id": "VAN-ML-AT-061-P",
+      "requirement_id": "VAN-ML-REQ-061",
+      "packet_id": "VAN-ML-PKT-037",
+      "kind": "POSITIVE",
+      "contract": "Build and select both VM deployment profiles with explicit source/capability states and no payment workflow.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-061-N",
+      "requirement_id": "VAN-ML-REQ-061",
+      "packet_id": "VAN-ML-PKT-037",
+      "kind": "ADVERSARIAL",
+      "contract": "Changing execution_host to a permitted region must not set operator eligibility, purchase approval or source-use permission.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-062-P",
+      "requirement_id": "VAN-ML-REQ-062",
+      "packet_id": "VAN-ML-PKT-037",
+      "kind": "POSITIVE",
+      "contract": "Exercise full positive synthetic ingest-to-evidence flow with purchases disabled and explicit NOT_LIVE data labels.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-062-N",
+      "requirement_id": "VAN-ML-REQ-062",
+      "packet_id": "VAN-ML-PKT-037",
+      "kind": "ADVERSARIAL",
+      "contract": "Do not require a purchased licence to run synthetic tests; do not relabel unknown source-use rights as an admitted real-data capture.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-063-P",
+      "requirement_id": "VAN-ML-REQ-063",
+      "packet_id": "VAN-ML-PKT-038",
+      "kind": "POSITIVE",
+      "contract": "Read complete paged synthetic and authorized-provider datasets with method/endpoint and schema version receipts.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-063-N",
+      "requirement_id": "VAN-ML-REQ-063",
+      "packet_id": "VAN-ML-PKT-038",
+      "kind": "ADVERSARIAL",
+      "contract": "Injected order endpoint, redirect to credential host, unbounded paging or HTTP429 hot retry must be refused.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-064-P",
+      "requirement_id": "VAN-ML-REQ-064",
+      "packet_id": "VAN-ML-PKT-038",
+      "kind": "POSITIVE",
+      "contract": "Union live/historical responses under overlap and moving boundaries with stable IDs and complete provenance.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-064-N",
+      "requirement_id": "VAN-ML-REQ-064",
+      "packet_id": "VAN-ML-PKT-038",
+      "kind": "ADVERSARIAL",
+      "contract": "Dropped page or single shared archive cutoff cannot be silently accepted; reconstructed time cannot masquerade as actual availability.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-065-P",
+      "requirement_id": "VAN-ML-REQ-065",
+      "packet_id": "VAN-ML-PKT-038",
+      "kind": "POSITIVE",
+      "contract": "For YES bid0.42 and NO bid0.56 obtain YES ask0.44 and NO ask0.58 with correct quantities.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-065-N",
+      "requirement_id": "VAN-ML-REQ-065",
+      "packet_id": "VAN-ML-PKT-038",
+      "kind": "ADVERSARIAL",
+      "contract": "Treating YES last trade as executable ask or performing currency calculations through rounded binary floats fails the contract.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-066-P",
+      "requirement_id": "VAN-ML-REQ-066",
+      "packet_id": "VAN-ML-PKT-038",
+      "kind": "POSITIVE",
+      "contract": "Replay snapshot/deltas, duplicate and restart; regain READY only after a consistent new snapshot.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-066-N",
+      "requirement_id": "VAN-ML-REQ-066",
+      "packet_id": "VAN-ML-PKT-038",
+      "kind": "ADVERSARIAL",
+      "contract": "Out-of-order delta, missing sequence or stale cached depth must not continue providing usable liquidity.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-067-P",
+      "requirement_id": "VAN-ML-REQ-067",
+      "packet_id": "VAN-ML-PKT-039",
+      "kind": "POSITIVE",
+      "contract": "Resolve two reviewed identical propositions and explicit complement relation into a shared event mapping.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-067-N",
+      "requirement_id": "VAN-ML-REQ-067",
+      "packet_id": "VAN-ML-PKT-039",
+      "kind": "ADVERSARIAL",
+      "contract": "Same headline with different rounding, observation date or revised-value rules cannot be treated as identical.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-068-P",
+      "requirement_id": "VAN-ML-REQ-068",
+      "packet_id": "VAN-ML-PKT-039",
+      "kind": "POSITIVE",
+      "contract": "Process an official release, later correction and delayed settlement without rewriting issued forecasts or prematurely crediting cash.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-068-N",
+      "requirement_id": "VAN-ML-REQ-068",
+      "packet_id": "VAN-ML-PKT-039",
+      "kind": "ADVERSARIAL",
+      "contract": "Event happened or market closed cannot be used as proof that a payout is final or funds are available.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-069-P",
+      "requirement_id": "VAN-ML-REQ-069",
+      "packet_id": "VAN-ML-PKT-040",
+      "kind": "POSITIVE",
+      "contract": "Forecast features remain stable when a next-meeting display rolls to a different underlying event.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-069-N",
+      "requirement_id": "VAN-ML-REQ-069",
+      "packet_id": "VAN-ML-PKT-040",
+      "kind": "ADVERSARIAL",
+      "contract": "Subtracting different event contracts and reporting the difference as same-event repricing fails validation.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-070-P",
+      "requirement_id": "VAN-ML-REQ-070",
+      "packet_id": "VAN-ML-PKT-040",
+      "kind": "POSITIVE",
+      "contract": "Convert decreasing threshold probabilities into disjoint masses; retain raw and adjusted distributions and tail assumptions.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-070-N",
+      "requirement_id": "VAN-ML-REQ-070",
+      "packet_id": "VAN-ML-PKT-040",
+      "kind": "ADVERSARIAL",
+      "contract": "Summing overlapping threshold probabilities, silently normalizing missing bins or inventing a tail midpoint is rejected.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-071-P",
+      "requirement_id": "VAN-ML-REQ-071",
+      "packet_id": "VAN-ML-PKT-040",
+      "kind": "POSITIVE",
+      "contract": "Produce mid/interval estimates only from valid two-sided books and admit eligible liquidity cohorts.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-071-N",
+      "requirement_id": "VAN-ML-REQ-071",
+      "packet_id": "VAN-ML-PKT-040",
+      "kind": "ADVERSARIAL",
+      "contract": "Volume-only confidence, stale last trades, crossed books or empty levels cannot become high-confidence event probabilities.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-072-P",
+      "requirement_id": "VAN-ML-REQ-072",
+      "packet_id": "VAN-ML-PKT-041",
+      "kind": "POSITIVE",
+      "contract": "Issue immutable expectation snapshot then calculate a versioned surprise when official information arrives.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-072-N",
+      "requirement_id": "VAN-ML-REQ-072",
+      "packet_id": "VAN-ML-PKT-041",
+      "kind": "ADVERSARIAL",
+      "contract": "Replacing the pre-release distribution with a post-release price or corrected value fails the lookahead sentinel.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-073-P",
+      "requirement_id": "VAN-ML-REQ-073",
+      "packet_id": "VAN-ML-PKT-040",
+      "kind": "POSITIVE",
+      "contract": "Two fresh comparable sources pass consistency; single-source research remains explicitly SINGLE_SOURCE and cannot arm the inherited dual-source path.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-073-N",
+      "requirement_id": "VAN-ML-REQ-073",
+      "packet_id": "VAN-ML-PKT-040",
+      "kind": "ADVERSARIAL",
+      "contract": "Duplicate syndication, mismatched contract horizons or two models reading one feed cannot count as independent confirmations.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-074-P",
+      "requirement_id": "VAN-ML-REQ-074",
+      "packet_id": "VAN-ML-PKT-041",
+      "kind": "POSITIVE",
+      "contract": "Evaluate raw and calibrated proper scores on later whole-event holdouts with recorded sample adequacy.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-074-N",
+      "requirement_id": "VAN-ML-REQ-074",
+      "packet_id": "VAN-ML-PKT-041",
+      "kind": "ADVERSARIAL",
+      "contract": "Randomly splitting snapshots of the same event or pooling unrelated categories to conceal macro miscalibration fails admission.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-075-P",
+      "requirement_id": "VAN-ML-REQ-075",
+      "packet_id": "VAN-ML-PKT-041",
+      "kind": "POSITIVE",
+      "contract": "Expose raw and calibrated event probabilities with compatible calibrator lineage and explicit event definition.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-075-N",
+      "requirement_id": "VAN-ML-REQ-075",
+      "packet_id": "VAN-ML-PKT-041",
+      "kind": "ADVERSARIAL",
+      "contract": "Copy event probability to trade win probability or label an uncalibrated market price CALIBRATED without evidence is refused.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-076-P",
+      "requirement_id": "VAN-ML-REQ-076",
+      "packet_id": "VAN-ML-PKT-042",
+      "kind": "POSITIVE",
+      "contract": "Fit/export/reload each selected provider on an adequate causal synthetic/allowed cohort and reproduce held-out predictions.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-076-N",
+      "requirement_id": "VAN-ML-REQ-076",
+      "packet_id": "VAN-ML-PKT-042",
+      "kind": "ADVERSARIAL",
+      "contract": "Future event prices, unsupported exogenous flags or cross-fold scaler/calibrator fits fail before model publication.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-077-P",
+      "requirement_id": "VAN-ML-REQ-077",
+      "packet_id": "VAN-ML-PKT-042",
+      "kind": "POSITIVE",
+      "contract": "Demonstrate a conditional response bundle with matched labels/units and a complete with/without-event ablation report.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-077-N",
+      "requirement_id": "VAN-ML-REQ-077",
+      "packet_id": "VAN-ML-PKT-042",
+      "kind": "ADVERSARIAL",
+      "contract": "Treat a rate-cut probability as gold-up probability or use in-sample learner predictions to qualify fusion is rejected.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-078-P",
+      "requirement_id": "VAN-ML-REQ-078",
+      "packet_id": "VAN-ML-PKT-043",
+      "kind": "POSITIVE",
+      "contract": "Exercise permitted reduce/defer/template/rank actions plus separately admitted sandbox D7 with correct source and owner bindings.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-078-N",
+      "requirement_id": "VAN-ML-REQ-078",
+      "packet_id": "VAN-ML-PKT-043",
+      "kind": "ADVERSARIAL",
+      "contract": "Raise news multiplier above1, shorten blackout, widen stop, touch owner-managed position or bypass two-source arming: refuse.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-079-P",
+      "requirement_id": "VAN-ML-REQ-079",
+      "packet_id": "VAN-ML-PKT-043",
+      "kind": "POSITIVE",
+      "contract": "Reference fixtures reconcile depth-aware entry cost and final/early-exit value in exact currency units.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-079-N",
+      "requirement_id": "VAN-ML-REQ-079",
+      "packet_id": "VAN-ML-PKT-043",
+      "kind": "ADVERSARIAL",
+      "contract": "Use midpoint instead of ask, omit fees, double-charge embedded spread or reuse purchase price as independent success probability: fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-080-P",
+      "requirement_id": "VAN-ML-REQ-080",
+      "packet_id": "VAN-ML-PKT-043",
+      "kind": "POSITIVE",
+      "contract": "Compare risk-constrained proposals against existing account/event limits and explicit worst-case payoff scenarios.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-080-N",
+      "requirement_id": "VAN-ML-REQ-080",
+      "packet_id": "VAN-ML-PKT-043",
+      "kind": "ADVERSARIAL",
+      "contract": "Assume a protective stop caps binary loss, net incompatible contracts, infer joint independence or emit a live order quantity from the forecaster: refuse.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-081-P",
+      "requirement_id": "VAN-ML-REQ-081",
+      "packet_id": "VAN-ML-PKT-044",
+      "kind": "POSITIVE",
+      "contract": "Fragmented fill and single-fill fixtures reconcile cash, fees, inventory and final settlement under the configured policy.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-081-N",
+      "requirement_id": "VAN-ML-REQ-081",
+      "packet_id": "VAN-ML-PKT-044",
+      "kind": "ADVERSARIAL",
+      "contract": "Applying one timeless fee constant, cancelling debit on unknown state or crediting unsettled cash fails accounting.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-082-P",
+      "requirement_id": "VAN-ML-REQ-082",
+      "packet_id": "VAN-ML-PKT-044",
+      "kind": "POSITIVE",
+      "contract": "Replay a partial fill followed by cancellation and delayed acknowledgement on one consistent book path.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-082-N",
+      "requirement_id": "VAN-ML-REQ-082",
+      "packet_id": "VAN-ML-PKT-044",
+      "kind": "ADVERSARIAL",
+      "contract": "Touch-equals-fill, cancel-request-equals-cancelled, candles-prove-queue or zero-latency post-announcement entry cannot qualify.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-083-P",
+      "requirement_id": "VAN-ML-REQ-083",
+      "packet_id": "VAN-ML-PKT-045",
+      "kind": "POSITIVE",
+      "contract": "Produce a positive synthetic complementary payout matrix and a separately named executable-margin estimate.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-083-N",
+      "requirement_id": "VAN-ML-REQ-083",
+      "packet_id": "VAN-ML-PKT-045",
+      "kind": "ADVERSARIAL",
+      "contract": "Different source/vintage, omitted void state, unequal hedge quantity or negative state payout must defeat an arbitrage assertion.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-084-P",
+      "requirement_id": "VAN-ML-REQ-084",
+      "packet_id": "VAN-ML-PKT-045",
+      "kind": "POSITIVE",
+      "contract": "Simulate both-filled and first-leg-only outcomes with bounded loss and explicit cash reservation/readback.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-084-N",
+      "requirement_id": "VAN-ML-REQ-084",
+      "packet_id": "VAN-ML-PKT-045",
+      "kind": "ADVERSARIAL",
+      "contract": "Unfilled hedge assumed complete, stablecoin treated as guaranteed USD or delayed settlement capital instantly reused fails.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-085-P",
+      "requirement_id": "VAN-ML-REQ-085",
+      "packet_id": "VAN-ML-PKT-046",
+      "kind": "POSITIVE",
+      "contract": "Exercise fixed and inventory-skew policies on the same synthetic stream with exact inventory and fill-conditional markout.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-085-N",
+      "requirement_id": "VAN-ML-REQ-085",
+      "packet_id": "VAN-ML-PKT-046",
+      "kind": "ADVERSARIAL",
+      "contract": "A profitable unconditional midpoint forecast or assumed privileged queue/rate treatment cannot prove maker profitability.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-086-P",
+      "requirement_id": "VAN-ML-REQ-086",
+      "packet_id": "VAN-ML-PKT-046",
+      "kind": "POSITIVE",
+      "contract": "Bad book/official-release state prevents new quotes; pending cancels remain reserved until confirmed and restart restores exposure.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-086-N",
+      "requirement_id": "VAN-ML-REQ-086",
+      "packet_id": "VAN-ML-PKT-046",
+      "kind": "ADVERSARIAL",
+      "contract": "Spoofing/wash-trade policy, removed reservation before cancellation, unbounded quote loops or continued healthy status after a gap: refuse.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-087-P",
+      "requirement_id": "VAN-ML-REQ-087",
+      "packet_id": "VAN-ML-PKT-047",
+      "kind": "POSITIVE",
+      "contract": "Produce all four complete study contracts, reports and explicit no-edge/inconclusive paths with full-account outcomes.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-087-N",
+      "requirement_id": "VAN-ML-REQ-087",
+      "packet_id": "VAN-ML-PKT-047",
+      "kind": "ADVERSARIAL",
+      "contract": "Claim improvement solely from fewer trades, dropped missed winners, favourable period selection or ignored source/compute cost: fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-088-P",
+      "requirement_id": "VAN-ML-REQ-088",
+      "packet_id": "VAN-ML-PKT-047",
+      "kind": "POSITIVE",
+      "contract": "Mature future outcomes against sealed forecasts and report effective events, uncertainty, concentration and cost-adjusted utility.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-088-N",
+      "requirement_id": "VAN-ML-REQ-088",
+      "packet_id": "VAN-ML-PKT-047",
+      "kind": "ADVERSARIAL",
+      "contract": "Repeated quotes as independent trials, post-release resealing, future correction leakage or fixed-days-as-sufficient rule fails qualification.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-089-P",
+      "requirement_id": "VAN-ML-REQ-089",
+      "packet_id": "VAN-ML-PKT-048",
+      "kind": "POSITIVE",
+      "contract": "Headless actual gateway and worker readback handles ready, absent, stale, disputed, rejected, inconclusive and unknown without fake controls.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-089-N",
+      "requirement_id": "VAN-ML-REQ-089",
+      "packet_id": "VAN-ML-PKT-048",
+      "kind": "ADVERSARIAL",
+      "contract": "Dense new Home dashboard, backend-only schema with no real caller, or active trade control on research-only evidence cannot pass closure.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-090-P",
+      "requirement_id": "VAN-ML-REQ-090",
+      "packet_id": "VAN-ML-PKT-048",
+      "kind": "POSITIVE",
+      "contract": "Kill/restart adapter, lose registry/source, fill disk, change schema and revoke inputs; valid unrelated strategies/protection continue within their policy.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-AT-090-N",
+      "requirement_id": "VAN-ML-REQ-090",
+      "packet_id": "VAN-ML-PKT-048",
+      "kind": "ADVERSARIAL",
+      "contract": "Fixture success relabelled provider-ready, additive-only gate unlocking frontend, source failure disabling exits or unexpected external payment: fail.",
+      "status": "NOT_RUN",
+      "receipt_refs": [],
+      "expected_evidence": [
+        "Exact source and VM/runtime identity",
+        "Input, event/rule/data/fee revision and availability cutoffs",
+        "Invoked real component/service, assertion outputs and durable readbacks",
+        "Scope-correct independent review and honest fixture/provider/economic distinctions"
+      ],
+      "note": "Application test contract, not an executed test. Portable document fixtures do not qualify application, source access or trading performance.",
+      "introduced_in": "1.1"
+    }
+  ]
+}

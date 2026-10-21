@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.VoiceTurnLifecycleTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:40" hostname="052fefa249ff" time="0.001">
+  <properties/>
+  <testcase name="cancelled turn cannot admit late final or processed transcript()" classname="com.dial.van.voice.VoiceTurnLifecycleTest" time="0.0"/>
+  <testcase name="replacement rejects old callbacks even with same owner turn id()" classname="com.dial.van.voice.VoiceTurnLifecycleTest" time="0.001"/>
+  <testcase name="finishing audio permits one final transcript while duplicate finals are rejected()" classname="com.dial.van.voice.VoiceTurnLifecycleTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

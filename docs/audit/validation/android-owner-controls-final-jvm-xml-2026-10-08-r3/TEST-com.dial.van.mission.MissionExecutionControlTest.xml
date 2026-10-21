@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.mission.MissionExecutionControlTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:28" hostname="052fefa249ff" time="0.001">
+  <properties/>
+  <testcase name="pause receipt binds original request generation reason and desired fence()" classname="com.dial.van.mission.MissionExecutionControlTest" time="0.001"/>
+  <testcase name="direction recovery requires exact owner text rather than mere recorded status()" classname="com.dial.van.mission.MissionExecutionControlTest" time="0.0"/>
+  <testcase name="worker acknowledgement must match exact run control original generation and no process claim()" classname="com.dial.van.mission.MissionExecutionControlTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -26,6 +26,8 @@ from __future__ import annotations
 
 import time
 import uuid
+import hashlib
+import re
 from typing import Any
 
 from van_gateway.session.models import (
@@ -74,33 +76,57 @@ class VanHermesSessionService:
     async def open(
         self, *, device_id: str, path: TransportPathDescriptor | None = None,
         now_ms: int | None = None,
+        open_request_id: str | None = None,
     ) -> tuple[VanHermesSession, int]:
-        """Start a logical session and grant its first path epoch."""
+        """Start once, or recover the same device's exact lost opening response."""
         now = int(time.time() * 1000) if now_ms is None else now_ms
+        if open_request_id is not None and not re.fullmatch(r"[A-Za-z0-9_-]{16,128}", open_request_id):
+            raise SessionError("session_open_request_invalid")
+        opening_identity = Store.dumps({"device_id": device_id, "open_request_id": open_request_id})
+        session_id = (f"vhs_{hashlib.sha256(opening_identity.encode()).hexdigest()}" if open_request_id
+                      else f"vhs_{uuid.uuid4().hex}")
+        request_hash = hashlib.sha256(Store.dumps({
+            "device_id": device_id, "open_request_id": open_request_id,
+            "path": path.model_dump(mode="json") if path else None,
+        }).encode()).hexdigest()
         session = VanHermesSession(
-            van_session_id=f"vhs_{uuid.uuid4().hex}",
+            van_session_id=session_id,
             session_epoch=1,
             device_id=device_id,
             created_at_ms=now,
             authoritative_path_epoch=1,
         )
-        await self.store.execute(
-            """
-            INSERT INTO van_sessions(
-              van_session_id, session_epoch, device_id, principal_type, state,
-              created_at_ms, last_client_event_seq, last_server_ack_seq,
-              authoritative_path_epoch
-            ) VALUES (?, ?, ?, ?, ?, ?, 0, 0, ?)
-            """,
-            (
-                session.van_session_id, session.session_epoch, device_id,
-                session.principal_type, session.state.value, now,
-                session.authoritative_path_epoch,
-            ),
-        )
-        if path is not None:
-            await self._record_path(session.van_session_id, 1, path, now)
-        return session, session.authoritative_path_epoch
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            cur = await db.execute("SELECT device_id,state FROM van_sessions WHERE van_session_id = ?", (session_id,))
+            prior = await cur.fetchone()
+            if prior is not None:
+                cur = await db.execute("SELECT value FROM runtime_meta WHERE key = ?", (f"session_open:{session_id}",))
+                receipt = await cur.fetchone()
+                if prior["device_id"] != device_id or receipt is None or receipt["value"] != request_hash:
+                    await db.rollback()
+                    raise SessionError("session_open_request_conflict")
+                if prior["state"] == SessionState.CLOSED.value:
+                    await db.rollback()
+                    raise SessionError(REJECT_CLOSED)
+            else:
+                await db.execute(
+                    "INSERT INTO van_sessions(van_session_id,session_epoch,device_id,principal_type,state,"
+                    "created_at_ms,last_client_event_seq,last_server_ack_seq,authoritative_path_epoch) "
+                    "VALUES (?,?,?,?,?,?,0,0,?)",
+                    (session_id, session.session_epoch, device_id, session.principal_type, session.state.value, now, 1),
+                )
+                if path is not None:
+                    await self._record_path(session_id, 1, path, now, db=db)
+                if open_request_id is not None:
+                    await db.execute(
+                        "INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES (?,?,?)",
+                        (f"session_open:{session_id}", request_hash, now),
+                    )
+            await db.commit()
+        stored = await self.get(session_id)
+        assert stored is not None
+        return stored, stored.authoritative_path_epoch
 
     async def get(self, van_session_id: str) -> VanHermesSession | None:
         row = await self.store.fetchone(
@@ -151,44 +177,35 @@ class VanHermesSessionService:
         is least trustworthy.
         """
         now = int(time.time() * 1000) if now_ms is None else now_ms
-        session = await self.get(request.van_session_id)
-        if session is None:
-            return self._refuse(REJECT_UNKNOWN_SESSION)
-        if session.device_id != request.device_id:
-            return self._refuse(REJECT_WRONG_DEVICE)
-        if session.state is SessionState.CLOSED:
-            return self._refuse(REJECT_CLOSED)
-        if request.session_epoch != session.session_epoch:
-            # A client resuming an older epoch has missed a deliberate invalidation — a
-            # re-pairing, or an owner ending the session elsewhere. Accepting it would
-            # resurrect authority the Gateway has already withdrawn.
-            return self._refuse(REJECT_STALE_SESSION_EPOCH)
-
-        new_path_epoch = session.authoritative_path_epoch + 1
-        cursor = (
-            authoritative_event_cursor
-            if authoritative_event_cursor is not None
-            else max(request.last_event_seq, session.last_client_event_seq)
-        )
-        await self.store.execute(
-            """
-            UPDATE van_sessions
-               SET state = ?, last_resumed_at_ms = ?, authoritative_path_epoch = ?,
-                   last_client_event_seq = ?
-             WHERE van_session_id = ?
-            """,
-            (
-                SessionState.ACTIVE.value, now, new_path_epoch,
-                max(request.last_event_seq, session.last_client_event_seq),
-                session.van_session_id,
-            ),
-        )
-        if path is not None:
-            await self._record_path(session.van_session_id, new_path_epoch, path, now)
+        # The fence and its path descriptor are one grant. Concurrent resumes must
+        # not both read the same epoch, and a failed path write must not retire a
+        # still-working client's authority without supplying its replacement.
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            cur = await db.execute("SELECT * FROM van_sessions WHERE van_session_id = ?", (request.van_session_id,))
+            row = await cur.fetchone()
+            refusal = (REJECT_UNKNOWN_SESSION if row is None else
+                       REJECT_WRONG_DEVICE if row["device_id"] != request.device_id else
+                       REJECT_CLOSED if row["state"] == SessionState.CLOSED.value else
+                       REJECT_STALE_SESSION_EPOCH if int(row["session_epoch"]) != request.session_epoch else None)
+            if refusal is not None:
+                await db.rollback()
+                return self._refuse(refusal)
+            new_path_epoch = int(row["authoritative_path_epoch"]) + 1
+            client_cursor = max(request.last_event_seq, int(row["last_client_event_seq"]))
+            cursor = authoritative_event_cursor if authoritative_event_cursor is not None else client_cursor
+            await db.execute(
+                "UPDATE van_sessions SET state = ?, last_resumed_at_ms = ?, authoritative_path_epoch = ?, "
+                "last_client_event_seq = ? WHERE van_session_id = ?",
+                (SessionState.ACTIVE.value, now, new_path_epoch, client_cursor, request.van_session_id),
+            )
+            if path is not None:
+                await self._record_path(request.van_session_id, new_path_epoch, path, now, db=db)
+            await db.commit()
 
         return ResumeResult(
             accepted=True,
-            session_epoch=session.session_epoch,
+            session_epoch=request.session_epoch,
             new_path_epoch=new_path_epoch,
             authoritative_event_cursor=cursor,
             # The client replays from the next event after what it holds, not from the
@@ -258,30 +275,44 @@ class VanHermesSessionService:
         if envelope.payload_digest is not None and envelope.payload_digest != digest:
             raise SessionError(REJECT_PAYLOAD_DIGEST_MISMATCH)
 
-        if not envelope.idempotency_key:
-            # Without a key there is nothing to be idempotent about. The message is still
-            # recorded, so a duplicate message_id cannot be replayed.
-            await self._record_message(envelope, digest, CommandAdmission.ADMITTED, None, now)
+        # Checking and recording on separate connections let two requests win the
+        # same key. ON CONFLICT(message_id) also hid a reused message ID and still
+        # told the router to execute it. Check both identities under one write lock.
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            cur = await db.execute(
+                "SELECT * FROM van_sessions WHERE van_session_id = ?", (envelope.van_session_id,),
+            )
+            session = await cur.fetchone()
+            refusal = (REJECT_UNKNOWN_SESSION if session is None else
+                       REJECT_WRONG_DEVICE if session["device_id"] != envelope.device_id else
+                       REJECT_CLOSED if session["state"] == SessionState.CLOSED.value else
+                       REJECT_STALE_SESSION_EPOCH if int(session["session_epoch"]) != envelope.session_epoch else
+                       REJECT_STALE_PATH_EPOCH if int(session["authoritative_path_epoch"]) != envelope.path_epoch else None)
+            if refusal is not None:
+                await db.rollback()
+                raise SessionError(refusal)
+            cur = await db.execute(
+                "SELECT * FROM van_session_messages WHERE message_id = ? OR "
+                "(van_session_id = ? AND idempotency_key = ?)",
+                (envelope.message_id, envelope.van_session_id, envelope.idempotency_key),
+            )
+            prior = await cur.fetchall()
+            if prior:
+                for existing in prior:
+                    if (existing["van_session_id"] != envelope.van_session_id
+                        or existing["idempotency_key"] != envelope.idempotency_key
+                        or existing["kind"] != envelope.kind
+                        or existing["command_id"] != envelope.command_id
+                        or existing["payload_digest"] != digest):
+                        await db.rollback()
+                        return CommandAdmission.CONFLICT, None
+                result = prior[0]["result_json"]
+                await db.commit()
+                return CommandAdmission.ALREADY_KNOWN, json.loads(result) if result is not None else None
+            await self._record_message(envelope, digest, CommandAdmission.ADMITTED, None, now, db=db)
+            await db.commit()
             return CommandAdmission.ADMITTED, None
-
-        existing = await self.store.fetchone(
-            """
-            SELECT payload_digest, admitted_state, result_json
-              FROM van_session_messages
-             WHERE van_session_id = ? AND idempotency_key = ?
-            """,
-            (envelope.van_session_id, envelope.idempotency_key),
-        )
-        if existing is None:
-            await self._record_message(envelope, digest, CommandAdmission.ADMITTED, None, now)
-            return CommandAdmission.ADMITTED, None
-        if existing["payload_digest"] != digest:
-            # Refused rather than executed, and deliberately not recorded as a new message:
-            # the conflicting payload must leave no trace that could later be mistaken for
-            # an accepted command.
-            return CommandAdmission.CONFLICT, None
-        result = existing["result_json"]
-        return CommandAdmission.ALREADY_KNOWN, (json.loads(result) if result else None)
 
     async def forget_message(self, envelope: SessionEnvelope) -> None:
         """Un-record a message that was admitted and then not carried out.
@@ -292,17 +323,22 @@ class VanHermesSessionService:
         that never happened.
         """
         await self.store.execute(
-            "DELETE FROM van_session_messages WHERE message_id = ?",
-            (envelope.message_id,),
+            "DELETE FROM van_session_messages WHERE message_id = ? AND van_session_id = ? "
+            "AND kind = ? AND payload_digest = ? AND result_json IS NULL",
+            (envelope.message_id, envelope.van_session_id, envelope.kind, envelope.digest()),
         )
 
     async def record_result(
-        self, envelope: SessionEnvelope, result: dict, *, now_ms: int | None = None
+        self, envelope: SessionEnvelope, result: dict, *, now_ms: int | None = None,
+        replace_retryable: bool = False,
     ) -> None:
         """Store what the first execution produced, so the resubmission can be answered."""
         await self.store.execute(
-            "UPDATE van_session_messages SET result_json = ? WHERE message_id = ?",
-            (Store.dumps(result), envelope.message_id),
+            "UPDATE van_session_messages SET result_json = ? WHERE van_session_id = ? "
+            "AND (message_id = ? OR idempotency_key = ?) AND kind = ? AND payload_digest = ? "
+            "AND (result_json IS NULL OR (? AND json_extract(result_json, '$.status') IN ('degraded', 'in_flight')))",
+            (Store.dumps(result), envelope.van_session_id, envelope.message_id, envelope.idempotency_key,
+             envelope.kind, envelope.digest(), replace_retryable),
         )
 
     async def _record_message(
@@ -312,14 +348,15 @@ class VanHermesSessionService:
         admission: CommandAdmission,
         result: dict | None,
         now: int,
+        *, db: Any | None = None,
     ) -> None:
-        await self.store.execute(
+        execute = db.execute if db is not None else self.store.execute
+        await execute(
             """
             INSERT INTO van_session_messages(
               message_id, van_session_id, idempotency_key, command_id, kind,
               payload_digest, path_epoch, admitted_state, result_json, created_at_ms
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(message_id) DO NOTHING
             """,
             (
                 envelope.message_id, envelope.van_session_id, envelope.idempotency_key,
@@ -331,9 +368,11 @@ class VanHermesSessionService:
     # ------------------------------------------------------------------ paths
 
     async def _record_path(
-        self, van_session_id: str, path_epoch: int, path: TransportPathDescriptor, now: int
+        self, van_session_id: str, path_epoch: int, path: TransportPathDescriptor, now: int,
+        *, db: Any | None = None,
     ) -> None:
-        await self.store.execute(
+        execute = db.execute if db is not None else self.store.execute
+        await execute(
             """
             INSERT INTO van_session_paths(
               van_session_id, path_epoch, path_id, path_class, route_id, health,

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.VoiceRecognitionPolicyTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:57:31" hostname="052fefa249ff" time="0.03">
+  <properties/>
+  <testcase name="api34AddsWordEvidence" classname="com.dial.van.voice.VoiceRecognitionPolicyTest" time="0.028"/>
+  <testcase name="api31OnDeviceSerializesMicrophoneOwnership" classname="com.dial.van.voice.VoiceRecognitionPolicyTest" time="0.0"/>
+  <testcase name="api33UsesCallerFedAudio" classname="com.dial.van.voice.VoiceRecognitionPolicyTest" time="0.0"/>
+  <testcase name="api30IsDesignedSherpaPrimaryNotAndroidDegraded" classname="com.dial.van.voice.VoiceRecognitionPolicyTest" time="0.0"/>
+  <testcase name="supportingAnApiLevelIsNotAClaimThatVoiceWorks" classname="com.dial.van.voice.VoiceRecognitionPolicyTest" time="0.0"/>
+  <testcase name="rollingBufferReturnsNewestBytesInChronologicalOrder" classname="com.dial.van.voice.VoiceRecognitionPolicyTest" time="0.002"/>
+  <testcase name="modernDeviceWithoutOnDeviceRecognizerIsUnavailableNotSherpaRequired" classname="com.dial.van.voice.VoiceRecognitionPolicyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

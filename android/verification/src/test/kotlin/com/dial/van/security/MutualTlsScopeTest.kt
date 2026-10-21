@@ -9,6 +9,17 @@ import kotlin.test.assertTrue
 class MutualTlsScopeTest {
     private val direct = "https://62.83.35.103:8443"
 
+    @Test fun `a signed migration renews certificates on the admitted gateway and session only`() {
+        val gateway = "https://van-core.example:9443"
+        val session = "wss://van-session.example:9444/v1/session/ws"
+        assertTrue(MutualTlsScope.appliesToManagedGateway(direct, "$gateway/v1/devices/tls-certificate", gateway, session))
+        assertTrue(MutualTlsScope.appliesToManagedGateway(direct, session, gateway, session))
+        assertTrue(MutualTlsScope.appliesToManagedGateway(direct, "$direct/health", gateway, session))
+        assertFalse(MutualTlsScope.appliesToManagedGateway(direct, "https://browser.example/signal", gateway, session))
+        assertFalse(MutualTlsScope.appliesToManagedGateway(direct, "https://van-core.example/health", gateway, session))
+        assertFalse(MutualTlsScope.appliesToManagedGateway(direct, "http://van-core.example:9443/health", gateway, session))
+    }
+
     @Test
     fun `the direct endpoint and its session socket are on the pinned link`() {
         assertTrue(MutualTlsScope.applies(direct, "https://62.83.35.103:8443/v1/devices/pair"))

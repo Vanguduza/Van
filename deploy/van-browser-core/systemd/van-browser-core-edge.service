@@ -1,0 +1,38 @@
+[Unit]
+Description=VAN browser-core mTLS edge (the only cross-zone listener)
+After=network-online.target van-browser-harness.service van-stagehand.service
+Wants=network-online.target
+ConditionPathExists=/etc/van-browser-core/zone
+
+[Service]
+Type=notify
+User=van-browser-edge
+Group=van-browser-edge
+EnvironmentFile=/etc/van-browser-core/runtime.env
+ExecStartPre=/usr/bin/grep -qx van-browser-core /etc/van-browser-core/zone
+ExecStartPre=/usr/bin/caddy validate --config /etc/van-browser-core/Caddyfile --adapter caddyfile
+ExecStart=/usr/bin/caddy run --environ --config /etc/van-browser-core/Caddyfile --adapter caddyfile
+ExecReload=/usr/bin/caddy reload --config /etc/van-browser-core/Caddyfile --adapter caddyfile
+Restart=on-failure
+RestartSec=5
+# Binds an unprivileged port (9443) on the private overlay address only.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=false
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077
+ReadWritePaths=/var/lib/van-browser-edge
+ReadOnlyPaths=/etc/van-browser-core
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

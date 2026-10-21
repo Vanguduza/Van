@@ -1,0 +1,28 @@
+[Unit]
+Description=VAN Muse loopback-only bridge to isolated SOCKS proxy
+Requires=van-muse-socks.service
+After=van-muse-socks.service
+
+[Service]
+Type=simple
+User=vanmuseproxy
+Group=vanmuseproxy
+ExecStart=/usr/bin/socat TCP4-LISTEN:17890,bind=127.0.0.1,reuseaddr,fork TCP4:169.254.77.2:1080
+Restart=always
+RestartSec=2
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+RestrictAddressFamilies=AF_INET AF_UNIX
+
+[Install]
+WantedBy=multi-user.target

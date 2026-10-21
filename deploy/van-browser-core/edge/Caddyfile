@@ -1,0 +1,55 @@
+# van-browser-core mTLS edge — the ONLY listener in this zone reachable from another zone.
+#
+# Owner decision 2026-09-29 §1: cross-zone access to van-browser-core uses bounded
+# authenticated interfaces only. This edge:
+#   * binds the private overlay address (VAN_BROWSER_CORE_EDGE_BIND), never 0.0.0.0;
+#   * requires a client certificate chaining to the zone-private CA issued by
+#     pki/make-browser-core-pki.sh, which issues exactly one caller identity
+#     (van-gateway). No other CA, no bearer token, no anonymous access;
+#   * forwards only the fixed worker operations below to the loopback workers. Anything
+#     else answers 404 here, including Stagehand's refused /agent loop AND Stagehand /act:
+#     owner decision §8 forbids Stagehand an independent actuation authority, so across
+#     zones Stagehand is observe/extract (proposal) only and every actuation goes through
+#     the Harness-owned path (/harness/*) behind the Browser Router's policy.
+#
+# NOT verified in the repository sandbox: `caddy validate` was not available there. The
+# unit runs `caddy validate` as ExecStartPre and qualify.sh probes the refusal cases live.
+{
+    admin off
+    auto_https off
+    persist_config off
+}
+
+{$VAN_BROWSER_CORE_EDGE_BIND}:{$VAN_BROWSER_CORE_EDGE_PORT} {
+    bind {$VAN_BROWSER_CORE_EDGE_BIND}
+
+    tls /etc/van-browser-core/pki/edge.crt /etc/van-browser-core/pki/edge.key {
+        protocols tls1.3
+        client_auth {
+            mode require_and_verify
+            trust_pool file /etc/van-browser-core/pki/ca.crt
+        }
+    }
+
+    @stagehand_ops {
+        method GET POST
+        path /stagehand/health /stagehand/observe /stagehand/extract
+    }
+    handle @stagehand_ops {
+        uri strip_prefix /stagehand
+        reverse_proxy 127.0.0.1:9140
+    }
+
+    @harness_ops {
+        method GET POST
+        path /harness/health /harness/navigate /harness/page_info /harness/click /harness/fill /harness/press /harness/scroll /harness/screenshot /harness/wait /harness/upload /harness/tabs
+    }
+    handle @harness_ops {
+        uri strip_prefix /harness
+        reverse_proxy 127.0.0.1:9141
+    }
+
+    handle {
+        respond "not found" 404
+    }
+}

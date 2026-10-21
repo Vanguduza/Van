@@ -1,0 +1,13 @@
+{
+  "host_id": "d583846fc2da",
+  "architecture": "x86_64",
+  "cpu_count": 5,
+  "ram_total_bytes": 18882699264,
+  "ram_available_bytes": 17118502912,
+  "gpu_state": "NOT_QUALIFIED",
+  "probe_source": "/proc/meminfo+platform",
+  "observed_at_ms": 1791283838340,
+  "execution_environment": "Codex shared workspace",
+  "estate_qualification_claimed": false,
+  "model_artifact_available": false
+}

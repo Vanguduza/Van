@@ -119,14 +119,13 @@ class TestCellGatewayRestartMidCommand:
         await _age_claim(store, "k", STALE_CLAIM_SECONDS * 10)
         assert await service.begin("k", PAYLOAD) == {"status": "accepted"}
 
-    async def test_a_conflict_is_never_retaken(self, store):
+    async def test_a_conflicting_attempt_does_not_poison_the_original_claim(self, store):
         service = IdempotencyService(store)
         await service.begin("k", PAYLOAD)
         with pytest.raises(IdempotencyConflict):
             await service.begin("k", {"command_id": "cmd-1", "text": "something else"})
         await _age_claim(store, "k", STALE_CLAIM_SECONDS * 10)
-        with pytest.raises(IdempotencyConflict):
-            await service.begin("k", PAYLOAD)
+        assert await service.begin("k", PAYLOAD) is None
 
     async def test_a_stale_claim_under_a_different_request_is_a_conflict(self, store):
         """Age does not make a different request the same request."""

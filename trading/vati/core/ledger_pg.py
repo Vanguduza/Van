@@ -8,11 +8,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+from contextlib import contextmanager
 from typing import Callable, Iterator, Optional
 
 from vati.core.canonical import canonical_hash, canonical_json
 from vati.core.events import Event, EventKind
-from vati.core.ledger import GENESIS, LedgerError, ReplayReport
+from vati.core.ledger import GENESIS, IncrementalChainVerifier, LedgerError, ReplayReport, _check_row
 
 # The vati schema is provisioned by the privileged deployment reconciler.
 # Runtime deliberately has no CREATE privilege on the database.
@@ -50,6 +51,7 @@ class PostgresLedger:
         import psycopg  # local import: the SQLite ledger must not need psycopg
         self.path = dsn
         self.name = ledger_name
+        self._atomic_depth = 0
         self._conn = (connect or psycopg.connect)(dsn)
         self._conn.autocommit = False
         with self._conn.cursor() as cur:
@@ -58,6 +60,30 @@ class PostgresLedger:
         self._conn.commit()
 
     # ------------------------------------------------------------------ write
+    @contextmanager
+    def atomic(self):
+        """Keep a read/validate/append operation under the chain-head writer lock."""
+        outer = self._atomic_depth == 0
+        if outer:
+            with self._conn.cursor() as cur:
+                cur.execute("SELECT chain_hash FROM vati.chain_head WHERE ledger = %s FOR UPDATE", (self.name,))
+                cur.fetchone()
+        self._atomic_depth += 1
+        try:
+            yield self
+            if outer:
+                self._conn.commit()
+        except BaseException:
+            if outer:
+                self._conn.rollback()
+            raise
+        finally:
+            self._atomic_depth -= 1
+
+    def _finish_read(self):
+        if self._atomic_depth == 0:
+            self._conn.rollback()
+
     def append(self, event: Event) -> str:
         if not event.hash or event.hash != canonical_hash(event.body()):
             raise LedgerError("event hash missing or does not match body")
@@ -74,9 +100,11 @@ class PostgresLedger:
                 )
                 seq = cur.fetchone()[0]
                 cur.execute("UPDATE vati.chain_head SET chain_hash = %s, seq = %s WHERE ledger = %s", (chain, seq, self.name))
-            self._conn.commit()
+            if self._atomic_depth == 0:
+                self._conn.commit()
         except Exception:
-            self._conn.rollback()
+            if self._atomic_depth == 0:
+                self._conn.rollback()
             raise
         return chain
 
@@ -99,7 +127,7 @@ class PostgresLedger:
             cur.execute(q, args)
             for r in cur:
                 yield self._row_to_event(r)
-        self._conn.rollback()
+        self._finish_read()
 
     def count(self, kind: Optional[EventKind] = None) -> int:
         with self._conn.cursor() as cur:
@@ -108,33 +136,63 @@ class PostgresLedger:
             else:
                 cur.execute("SELECT COUNT(*) FROM vati.events WHERE kind = %s", (kind.value,))
             n = cur.fetchone()[0]
-        self._conn.rollback()
+        self._finish_read()
         return n
 
     def head(self) -> str:
         with self._conn.cursor() as cur:
             cur.execute("SELECT chain_hash FROM vati.chain_head WHERE ledger = %s", (self.name,))
             row = cur.fetchone()
-        self._conn.rollback()
+        self._finish_read()
         return row[0] if row else GENESIS
 
     # ----------------------------------------------------------------- verify
     def verify_chain(self) -> tuple[bool, int]:
-        prev = GENESIS
-        n = 0
-        with self._conn.cursor() as cur:
-            cur.execute("SELECT event_hash, prev_hash, chain_hash, payload_json, kind, producer, correlation_id, event_time_ms, received_time_ms, decision_time_ms, schema_version FROM vati.events ORDER BY seq")
-            for r in cur:
-                ev = Event(EventKind(r[4]), r[5], r[7], r[8], json.loads(r[3]), r[10], r[9], r[6], r[0])
-                if canonical_hash(ev.body()) != r[0] or r[1] != prev or hashlib.sha256((prev + r[0]).encode()).hexdigest() != r[2]:
-                    self._conn.rollback()
-                    return False, n
-                prev = r[2]
-                n += 1
-        self._conn.rollback()
+        """Full verification from genesis. For audits, startup and evidence."""
+        ok, n, _seq, prev = self._verify_from(0, GENESIS)
+        if not ok:
+            return False, n
         if n and prev != self.head():
             return False, n
         return True, n
+
+    def verify_incremental(self) -> tuple[bool, int]:
+        """Per-decision check whose cost does not grow with the ledger
+        (see vati.core.ledger.IncrementalChainVerifier)."""
+        if getattr(self, "_incremental", None) is None:
+            self._incremental = IncrementalChainVerifier(self)
+        ok, n = self._incremental.verify()
+        if ok and n and self._incremental._anchor and self._incremental._anchor[1] != self.head():
+            self._incremental._anchor = None
+            return False, n
+        return ok, n
+
+    def _verify_from(self, after_seq: int, prev: str) -> tuple[bool, int, int, str]:
+        n, seq = 0, after_seq
+        with self._conn.cursor() as cur:
+            cur.execute("SELECT event_hash, prev_hash, chain_hash, payload_json, kind, producer, correlation_id, event_time_ms, received_time_ms, decision_time_ms, schema_version, seq FROM vati.events WHERE seq > %s ORDER BY seq", (after_seq,))
+            for r in cur:
+                if not _check_row(prev, r):
+                    self._finish_read()
+                    return False, n, seq, prev
+                prev, seq = r[2], r[11]
+                n += 1
+        self._finish_read()
+        return True, n, seq, prev
+
+    def _chain_at(self, seq: int) -> Optional[str]:
+        with self._conn.cursor() as cur:
+            cur.execute("SELECT chain_hash FROM vati.events WHERE seq = %s", (seq,))
+            row = cur.fetchone()
+        self._finish_read()
+        return row[0] if row else None
+
+    def _count_upto(self, seq: int) -> int:
+        with self._conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*) FROM vati.events WHERE seq <= %s", (seq,))
+            n = cur.fetchone()[0]
+        self._finish_read()
+        return n
 
     def replay_decisions(self, recompute: Callable[[dict], dict]) -> ReplayReport:
         checked = identical = 0

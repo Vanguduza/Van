@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 import base64
 import binascii
 import hmac
+import hashlib
 import json
 import re
 import shutil
@@ -15,11 +16,13 @@ from pathlib import Path
 
 from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse, PlainTextResponse, RedirectResponse
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field, StrictBool, ValidationError
 
 from van_gateway.action.service import ActionPolicyError
 from van_gateway.artemis.console import ArtemisConsoleProxy
 from van_gateway.attention.engine import AttentionEngine
+from van_gateway.artifacts.api import build_artifact_router
+from van_gateway.artifacts.service import ArtifactService
 from van_gateway.audit.service import AuditService
 from van_gateway.auth.service import AuthError, AuthService
 from van_gateway.approval.service import OwnerApprovalError, OwnerApprovalService
@@ -37,7 +40,16 @@ from van_gateway.auth.throttle import GLOBAL_SUBJECT, AuthThrottle, Throttled
 from van_gateway.command.mission_link import CommandMissionLink
 from van_gateway.briefing.service import BriefingService
 from van_gateway.config import get_settings
-from van_gateway.decisions.service import DecisionCreate, DecisionService
+from van_gateway.decisions.service import DecisionCreate, DecisionError, DecisionService
+from van_gateway.documents.api import build_document_router
+from van_gateway.documents.service import DocumentService
+from van_gateway.goals.api import build_goal_router
+from van_gateway.goals.service import GoalService
+from van_gateway.goals.watch_runner import WatchRunner
+from van_gateway.suggestions.api import build_suggestion_router
+from van_gateway.suggestions.service import SuggestionService
+from van_gateway.conversations.api import build_conversation_router
+from van_gateway.conversations.service import ConversationService
 from van_gateway.degraded.registry import DegradedRegistry
 from van_gateway.dial_dev.api import build_dial_dev_router
 from van_gateway.dial_dev.attention import DialDevAttentionIngest
@@ -53,6 +65,9 @@ from van_gateway.hermes.bridge import HermesBridge
 from van_gateway.mtls.pki import DeviceCA, PkiError
 from van_gateway.mtls.transport import mtls_device_id
 from van_gateway.idempotency.service import IdempotencyService
+from van_gateway.jev.client import JevProjectionClient, JevProposeActionClient
+from van_gateway.jev.api import JevProjectionApi
+from van_gateway.jev.advisor import JevVanAdvisor
 from van_gateway.models import (
     ActionClass,
     AttentionSeverity,
@@ -74,6 +89,7 @@ from van_gateway.coherence import wire_status
 from van_gateway.ops import health as ops_health
 from van_gateway.ops.backup import create_backup, drill as backup_drill
 from van_gateway.ops.pki import scan as pki_scan
+from van_gateway.ops.pki import scan_device as device_pki_scan
 from van_gateway.ops.retention import RetentionService
 from van_gateway.ops.scheduler import OpsScheduler, ScheduledJob
 from van_gateway.ops.suppression import SuppressionChannel, SuppressionStore
@@ -86,6 +102,7 @@ from van_gateway.reminders.service import ReminderService
 from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
 from van_gateway.automation.api import AutomationApi
 from van_gateway.automation.dispatch import AutomationDispatcher
+from van_gateway.automation.worker_runtime import AutomationWorkerRuntime, WorkerWorkflowObserver
 from van_gateway.automation.grants import RunGrantService
 from van_gateway.automation.health import AutomationHealthApi
 from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex
@@ -100,10 +117,20 @@ from van_gateway.browser.interactive_api import (
     is_interactive_browser_owner_route,
 )
 from van_gateway.browser.interactive_service import InteractiveSessionService
+from van_gateway.browser.producer_api import (
+    build_browser_producer_router,
+    is_browser_producer_consumer_route,
+)
+from van_gateway.browser.producer_service import BrowserProducerService
 from van_gateway.browser.quality_api import QualityControllers, build_quality_router
+from van_gateway.computer_use.api import build_computer_use_router
+from van_gateway.computer_use.fabric import ComputerInteractionFabric, Surface
+from van_gateway.computer_use.worker import DockerComputerConfig, DockerComputerWorker
 from van_gateway.connectivity.provisioning import (
     build_provisioning_payload,
     sign_provisioning_payload,
+    PROVISIONING_TTL_MS,
+    validate_gateway_url,
 )
 from van_gateway.browser.stream_grants import (
     SigningKey,
@@ -111,22 +138,29 @@ from van_gateway.browser.stream_grants import (
     StreamGrantSigner,
 )
 from van_gateway.browser.worker import HybridBrowserWorker
+from van_gateway.browser.interaction_router import (
+    IndependentPostconditionVerifier,
+    build_interaction_router,
+    build_interaction_routes,
+)
 from van_gateway.session.api import build_session_router, is_session_owner_route
 from van_gateway.voice.speech_stream import SpeechStreamService
 from van_gateway.session.router import (
+    CURRENT_OPERATION,
     SessionDelegateError,
     SessionDelegates,
     SessionRouter,
 )
 from van_gateway.session.service import VanHermesSessionService
 from van_gateway.auth.device_binding import DeviceBindingError, OwnerDeviceBindingService
-from van_gateway.auth.device_proof import AttestationPolicy
+from van_gateway.auth.device_proof import AttestationPolicy, DeviceProofError, verify_attestation_chain, verify_request_proof
 from van_gateway.connectivity.config import ConnectivityConfigService, ConnectivityError
 from van_gateway.capability.models import ReadinessSource
 from van_gateway.capability.readiness import (
     AutomationReadiness,
     ExternalRuntimeReadiness,
     GoogleMeshReadiness,
+    OwnerArtifactProviderReadiness,
 )
 from van_gateway.capability.registry import CapabilityRegistry
 from van_gateway.capability.router import CapabilityRouter
@@ -188,8 +222,8 @@ class EnrollBody(BaseModel):
 class PairDeviceBody(EnrollBody):
     """Enrolment plus the ticket that authorises it.
 
-    Pairing is enrolment performed by the owner's own device rather than by an operator, so
-    the only additional field is proof that an operator issued a ticket for it.
+    Pairing is enrolment performed by the owner's own device with an operator-issued
+    ticket. An optional client-known access token permits a hardware-proved exact retry.
     """
 
     pairing_token: str = Field(
@@ -197,6 +231,15 @@ class PairDeviceBody(EnrollBody):
         description=(
             "Single-use ticket from POST /v1/devices/pairing-ticket. Consumed atomically "
             "with the enrolment, so a replayed pairing cannot mint a second device."
+        ),
+    )
+    device_access_token: str | None = Field(
+        default=None,
+        min_length=32,
+        max_length=512,
+        description=(
+            "Client-generated token persisted before pairing. With a fresh bound-hardware "
+            "proof, an exact request retry can recover the original enrollment response."
         ),
     )
 
@@ -253,7 +296,7 @@ class ProjectTruthBody(BaseModel):
 
 
 class DecisionResolveBody(BaseModel):
-    approved: bool
+    approved: StrictBool
 
 
 class AccountActionRequest(BaseModel):
@@ -346,6 +389,9 @@ class TicketConfirmRequest(BaseModel):
 #: route at all.
 GOOGLE_CONTROL_ROUTES: frozenset[str] = frozenset({
     "/v1/google/gmail/search",
+    "/v1/google/calendar/review",
+    "/v1/google/gmail/attachment/import-pdf",
+    "/v1/google/gmail/thread",
     "/v1/google/actions/execute",
     "/v1/google/gmail/send",
     "/v1/google/gmail/draft",
@@ -385,9 +431,20 @@ class BootstrapAttestBody(BaseModel):
     public_key_pem: str
     #: Base64 of the raw attestation extension octets from the device key's certificate.
     attestation_extension_b64: str
+    attestation_chain_b64: list[str] = Field(min_length=2, max_length=8)
     attestation_root_fingerprint: str | None = None
     os_version: str | None = None
     os_patch_level: str | None = None
+
+class BootstrapRecoverBody(BaseModel):
+    token: str = Field(min_length=32, max_length=256)
+    device_id: str = Field(min_length=1, max_length=128)
+
+class CertifyBindingBody(BaseModel):
+    attestation_chain_b64: list[str] = Field(min_length=2, max_length=8)
+
+class ProvisioningStatusBody(BaseModel):
+    bootstrap_token: str = Field(min_length=32, max_length=256)
 
 class RebindBody(BaseModel):
     reason: str
@@ -443,7 +500,28 @@ def create_app() -> FastAPI:
     projects = ProjectRouter(store, project_registry_path)
     audit = AuditService(store)
     degraded = DegradedRegistry()
-    attention = AttentionEngine(store, settings.attention_budget_per_hour)
+    jev_advisor = JevVanAdvisor(
+        base_url=settings.jev_base_url,
+        token_file=settings.jev_consumer_token_file,
+        enabled=settings.jev_enabled,
+        timeout_seconds=min(settings.jev_timeout_seconds, 1.2),
+    )
+    jev_projection = JevProjectionApi(
+        JevProjectionClient(
+            base_url=settings.jev_base_url,
+            read_token_file=settings.jev_projection_token_file,
+            control_token_file=settings.jev_control_token_file,
+            enabled=settings.jev_enabled,
+            timeout_seconds=settings.jev_timeout_seconds,
+        ),
+        degraded,
+    )
+    attention = AttentionEngine(store, settings.attention_budget_per_hour, jev_advisor=jev_advisor)
+    artifacts = ArtifactService(store)
+    documents = DocumentService(store, artifacts)
+    goals = GoalService(store, attention)
+    suggestions = SuggestionService(store, attention)
+    conversations = ConversationService(store)
     briefing = BriefingService(store, attention)
     reminders = ReminderService(store)
     decisions = DecisionService(store, attention)
@@ -452,15 +530,33 @@ def create_app() -> FastAPI:
     domain_trust = DomainTrustService(store)
     owner_runtime = OwnerRuntimeApi(
         store, settings, reminders=reminders, attention=attention, briefing=briefing,
+        artifacts=artifacts, suggestions=suggestions, conversations=conversations,
         # GAP-F-008: agent-initiated mutations consult the earned/granted domain trust.
         autonomy=ActionAutonomyGate(domain_trust),
+        jev_advisor=jev_advisor,
     )
+    owner_runtime.bind_decisions(decisions)
     automation_registry = AutomationRegistry(store)
     automation_hot_index = HotWorkflowIndex()
+    computer_worker = DockerComputerWorker(DockerComputerConfig(
+        enabled=settings.computer_worker_enabled,
+        image=settings.computer_worker_image,
+        deployment_id=settings.computer_worker_deployment_id,
+        timeout_seconds=settings.computer_worker_timeout_seconds,
+        qualification_file=settings.computer_worker_qualification_file,
+    ))
+    computer_use = ComputerInteractionFabric(
+        store,
+        worker_impls=(
+            {Surface.TERMINAL: computer_worker}
+            if settings.computer_worker_enabled else {}
+        ),
+    )
     # One index, so `/v1/automation/health` reports the index work is routed
     # through rather than an empty copy of it.
     automation_health = AutomationHealthApi(
-        store, settings, degraded=degraded, hot_index=automation_hot_index
+        store, settings, degraded=degraded, hot_index=automation_hot_index,
+        computer_use=computer_use,
     )
     # The dispatcher shares the owner runtime's ActionRuntime and command
     # authority: an automation run must meet the same single final authority
@@ -482,6 +578,12 @@ def create_app() -> FastAPI:
         standing=StandingAutomationAuthorityService(store, owner_runtime.authority),
         dispatcher=automation_dispatcher,
     )
+    automation_worker = AutomationWorkerRuntime(
+        store, grants=automation_dispatcher.grants, actions=owner_runtime.actions,
+        authority=owner_runtime.authority, registry=automation_registry,
+        enabled=settings.automation_enabled, settings=settings,
+    )
+    automation.worker = automation_worker
     # Critical durable coordination is a separate Temporal runtime, not an n8n workflow.
     # It is repository-complete even when this host has not yet supplied the deployment
     # bridge URL/token; in that state its routes fail closed and health says UNCONFIGURED.
@@ -496,6 +598,36 @@ def create_app() -> FastAPI:
             automation_health.harness,
             automation_health.stagehand,
         ),
+        # Owner decision 2026-09-29 §7 — a worker's "done" is a claim; this independent
+        # read-back verifier is the only thing that turns it into COMPLETED.
+        verifier=IndependentPostconditionVerifier(automation_health.harness),
+    )
+    # Programme B / B5 — the interaction router rides on the same harness and Stagehand
+    # adapters; it has no browser of its own. The eligibility classifier (B2) is imported
+    # lazily and a missing classifier or verifier disables the Jev lane with a recorded
+    # reason. `browser_interaction_router_enabled` defaults False.
+    browser_interaction = build_interaction_router(
+        settings=settings,
+        harness=automation_health.harness,
+        stagehand=automation_health.stagehand,
+        store=store,
+        jev_client=JevProposeActionClient(
+            base_url=settings.jev_base_url,
+            token_file=settings.jev_consumer_token_file,
+            enabled=settings.jev_enabled,
+            timeout_seconds=min(settings.jev_timeout_seconds, 1.2),
+        ),
+    )
+    browser.interaction_router = browser_interaction
+    # Unit G11 (review I7 MAJOR-1) — every page lease the browser fabric gives back ends the
+    # Harness's network guard for it: the page is frozen, then interception is removed.
+    browser.broker.page_release_hook = getattr(automation_health.harness, "release_page", None)
+
+    watch_runner = WatchRunner(
+        goals,
+        tasks=browser.tasks,
+        broker=browser.broker,
+        harness=automation_health.harness,
     )
 
 
@@ -525,7 +657,13 @@ def create_app() -> FastAPI:
     if settings.google_oauth_client_id and settings.google_oauth_client_secret:
         google_transport = GoogleHttpTransport()
         google_oauth = GoogleOAuthTokenClient(settings.google_oauth_client_id, settings.google_oauth_client_secret)
-    google = GoogleService(store, settings.google_token_fernet_key, transport=google_transport, oauth=google_oauth)
+    google = GoogleService(
+        store,
+        settings.google_token_fernet_key,
+        transport=google_transport,
+        oauth=google_oauth,
+        documents=documents,
+    )
     google_registry = GoogleCapabilityRegistry(google_registry_path)
     google_broker = GoogleIdentityBroker(
         store,
@@ -549,6 +687,7 @@ def create_app() -> FastAPI:
             ReadinessSource.EXTERNAL_RUNTIME: ExternalRuntimeReadiness(
                 automation_health.runtime, enabled=settings.browser_enabled
             ),
+            ReadinessSource.OWNER_ARTIFACT_PROVIDER: OwnerArtifactProviderReadiness(lambda: browser_artifacts),
         },
     )
     capability_router = CapabilityRouter(store, capability_registry)
@@ -557,7 +696,7 @@ def create_app() -> FastAPI:
     events = EventBus(store, settings.event_page_size)
     # Closed trades become owner-visible events (Activity feed, embodiment CELEBRATE
     # on GOOD_DECISION_GOOD_OUTCOME only). A projection of the ledger, never an authority.
-    trading_events = TradingEventBridge(store, trading, events)
+    trading_event_bridge = TradingEventBridge(store, trading, events)
     # Rev 1.5 §§5, 6 — the interactive browser session.
     #
     # It shares the Browser Fabric's broker and policy engine rather than constructing its
@@ -583,11 +722,84 @@ def create_app() -> FastAPI:
         else None
     )
 
+    browser_producers = (
+        BrowserProducerService(
+            store=store,
+            sessions=interactive_sessions,
+            grants=browser_stream_grants,
+            control_proxy_bindings=settings.browser_control_proxy_bindings,
+        )
+        if browser_stream_grants is not None else None
+    )
+    profile_clients = {}
+    if browser_producers is not None and (settings.browser_control_client_address or
+            settings.browser_control_profile_clients.strip() != "{}"):
+        from services.browser_control_agent.client import BrowserControlClient, ControlClientConfig
+        from van_gateway.browser.interactive_worker import InteractiveAssignmentFactory, build_profile_control_clients
+        profile_clients = build_profile_control_clients(settings.browser_control_profile_clients,
+            caller_common_name=settings.browser_control_client_common_name)
+        browser.interactive_worker_factory = InteractiveAssignmentFactory(
+            producers=browser_producers, store=store,
+            client=None if profile_clients else BrowserControlClient(ControlClientConfig(
+                address=settings.browser_control_client_address,
+                port=settings.browser_control_client_port,
+                server_name=settings.browser_control_client_server_name,
+                ca_file=settings.browser_control_client_ca_file,
+                cert_file=settings.browser_control_client_cert_file,
+                key_file=settings.browser_control_client_key_file,
+            )),
+            caller_common_name=settings.browser_control_client_common_name,
+            proxy_principal_sha256=settings.browser_control_proxy_principal_sha256,
+            profile_clients=profile_clients,
+        )
+
     # P0-VERIFY-001 — the registry that performs verification, rather than a receipt
     # the claimant writes. Built before the service because the service fails closed
     # without it.
+    from van_gateway.browser.action_plans import BrowserActionPlanService, build_action_plan_router
+    browser_action_plans = (BrowserActionPlanService(
+        store=store, sessions=interactive_sessions, producers=browser_producers,
+        command_authority=owner_runtime.authority, profile_clients=profile_clients,
+    ) if browser_producers is not None else None)
+
+    from cryptography.hazmat.primitives import serialization
+    from van_gateway.browser.artifact_admission import (OwnerArtifactAdmissionService,
+        load_artifact_provider_config, build_artifact_admission_router, build_artifact_provider_claim_router)
+    from van_gateway.auth.provider_transport import (ProviderTransportAuthenticator,
+        is_artifact_provider_route, load_artifact_transport_bindings)
+
+    # The admission signer is dedicated to file effects. Connectivity and stream
+    # keys cannot be reused to mint authority for a remote evidence namespace.
+    excluded_artifact_signers = []
+    for key_file in (settings.browser_stream_signing_key_file, settings.connectivity_signing_key_file):
+        if key_file:
+            key = serialization.load_pem_private_key(_read_stream_signing_key(key_file).encode(), password=None)
+            excluded_artifact_signers.append(hashlib.sha256(key.public_key().public_bytes(
+                serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo)).hexdigest())
+    artifact_config = load_artifact_provider_config(settings.browser_artifact_providers_file,
+        disallowed_signer_public_sha256=tuple(excluded_artifact_signers))
+
+    def current_artifact_configuration() -> bool:
+        if not settings.browser_artifact_providers_file or not artifact_config["configuration_sha256"]:
+            return False
+        try:
+            with Path(settings.browser_artifact_providers_file).open("rb") as configured:
+                encoded = configured.read(65537)
+            return (len(encoded) <= 65536 and
+                    hashlib.sha256(encoded).hexdigest() == artifact_config["configuration_sha256"])
+        except OSError:
+            return False
+
+    artifact_provider_auth = ProviderTransportAuthenticator(
+        lambda: load_artifact_transport_bindings(settings.browser_artifact_providers_file))
+    browser_artifacts = OwnerArtifactAdmissionService(store=store, sessions=interactive_sessions,
+        producers=browser_producers, command_authority=owner_runtime.authority,
+        providers=artifact_config["providers"], source_clients=artifact_config["source_clients"],
+        signer=artifact_config["signer"], current_configuration=current_artifact_configuration)
+
     verifiers = build_mission_registry(
-        store=store, trading=trading, knowledge=owner_runtime.knowledge,
+        store=store, trading=trading, knowledge=owner_runtime.knowledge, google=google, browser_plans=browser_action_plans, automation=automation,
+        browser_artifacts=browser_artifacts, jev=jev_projection.client,
     )
     # P1-AUTO-001 — the dispatcher was constructed with an empty observer map, so every
     # production run came back UNVERIFIABLE and owner_success could never be true; the
@@ -595,6 +807,7 @@ def create_app() -> FastAPI:
     # than at construction because the Google service the READ_BACK observer reads is
     # built after the dispatcher, and reordering that is a larger change than this is.
     automation_dispatcher.verifier = build_automation_verifier(store=store, google=google)
+    automation_dispatcher.verifier.observers["AUTOMATION_WORKER_READ_BACK"] = WorkerWorkflowObserver(automation_worker)
     learning = LearningFeed(store)
     missions = MissionService(
         store, capabilities=capability_registry, bus=events, verifiers=verifiers,
@@ -614,13 +827,18 @@ def create_app() -> FastAPI:
     owner_memory = OwnerMemory(store)
     context_lifecycle = ContextLifecycle(store, owner_runtime.context)
     mission_binder = MissionBinder(store, missions)
+    from van_gateway.browser.task_preparation import BrowserTaskPreparationService
+    browser_preparation = (BrowserTaskPreparationService(store=store,sessions=interactive_sessions,
+        producers=browser_producers,tasks=browser.tasks,binder=mission_binder,command_authority=owner_runtime.authority)
+        if browser_producers is not None else None)
+
     # P0-EXEC-001 — the join that makes an accepted command a durable mission.
     command_missions = CommandMissionLink(
         missions, execution_deadline_seconds=settings.execution_deadline_seconds,
     )
     browser.binder = mission_binder
     automation.binder = mission_binder
-    understanding_api = UnderstandingApi(store, settings)
+    understanding_api = UnderstandingApi(store, settings, jev_advisor=jev_advisor)
     # GAP-F-028: VAN's only self-initiated behaviour — bounded FOLLOW_UP attention items
     # for work the owner left waiting. Never opens a mission or executes an action.
     proactive_followups = ProactiveFollowUpJob(
@@ -658,10 +876,14 @@ def create_app() -> FastAPI:
         # GAP-F-001/002/005: gateway-executed typed actions (memory, reminders,
         # trading halt) run here with the same authority/action/mission ledgers.
         actions=owner_runtime.actions,
+        browser_plans=browser_action_plans, browser_preparation=browser_preparation, automation=automation,
+        browser_artifacts=browser_artifacts,
         owner_fact_author=owner_fact_author,
         reminders=reminders,
         trading=trading,
+        jev=jev_projection.client,
         learning=learning,
+        google=google,
     )
 
     # ---------------------------------------------------------- Gate 11: ops jobs
@@ -713,16 +935,21 @@ def create_app() -> FastAPI:
     async def _run_retention() -> dict:
         results = await retention.prune()
         audit_prune = await retention.prune_audit_prefix()
+        transient_retired = await automation_worker.cleanup_transient_bytes()
         return {
             "deleted": sum(result.deleted for result in results),
             "tables": len(results),
             "audit_pruned": audit_prune["pruned"],
+            "automation_transient_retired": transient_retired,
         }
 
     async def _scan_pki() -> dict:
-        report = pki_scan(settings.pki_dir)
+        report = pki_scan(settings.pki_dir) if settings.pki_dir else {"present": False, "days_remaining": None}
         app.state.ops_pki = report
-        return {"present": report["present"], "days_remaining": report["days_remaining"]}
+        device_report = device_pki_scan(settings.mtls_dir if settings.mtls_enabled else None)
+        app.state.ops_device_pki = device_report
+        return {"present": report["present"], "days_remaining": report["days_remaining"],
+                "device_pki": device_report}
 
     async def _take_backup() -> dict:
         destination = Path(settings.backup_dir) / time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
@@ -730,6 +957,7 @@ def create_app() -> FastAPI:
             database_path=settings.database_path,
             destination=destination,
             project_state_dir=str(Path(__file__).resolve().parents[2] / "docs" / "project-state"),
+            document_dir=str(Path(settings.database_path).resolve().parent / "documents"),
         )
         return {"destination": str(destination), "entries": len(manifest.entries)}
 
@@ -777,6 +1005,7 @@ def create_app() -> FastAPI:
             database_path=settings.database_path,
             workspace=workspace,
             project_state_dir=str(Path(__file__).resolve().parents[2] / "docs" / "project-state"),
+            document_dir=str(Path(settings.database_path).resolve().parent / "documents"),
         )
         app.state.ops_backup_drill = report
         if not report["ok"]:
@@ -801,10 +1030,18 @@ def create_app() -> FastAPI:
         }
 
     async def _run_trading_events() -> dict:
-        return await trading_events.run(int(time.time() * 1000))
+        return await trading_event_bridge.run(int(time.time() * 1000))
 
     async def _run_proactive_followups() -> dict:
         return await proactive_followups.run(int(time.time() * 1000))
+
+    async def _run_owner_watches() -> dict:
+        # Individual watches carry their own next_run_at_ms. The scheduler tick merely
+        # wakes the bounded runner; a restart therefore does not re-check every watch.
+        return await watch_runner.run(now_ms=int(time.time() * 1000))
+
+    async def _reconcile_mission_publications() -> dict:
+        return {"published": await missions.reconcile_terminal_projections()}
 
     def _scheduler_jobs() -> tuple[ScheduledJob, ...]:
         jobs = [
@@ -813,11 +1050,18 @@ def create_app() -> FastAPI:
                 "missions.expire_overdue", settings.reminder_sweep_seconds,
                 _expire_overdue_missions,
             ),
+            ScheduledJob("missions.publish_terminal", settings.reminder_sweep_seconds,
+                         _reconcile_mission_publications),
             ScheduledJob("ops.retention", settings.retention_interval_seconds, _run_retention),
             ScheduledJob("proactive.follow_ups", settings.reminder_sweep_seconds, _run_proactive_followups),
+            ScheduledJob("owner.watches", settings.reminder_sweep_seconds, _run_owner_watches),
             ScheduledJob("trading.publish_closed", settings.reminder_sweep_seconds, _run_trading_events),
         ]
-        if settings.pki_dir:
+        if settings.automation_enabled:
+            jobs.append(ScheduledJob(
+                "automation.standing_sweep", 15, automation.standing_runner.sweep_due,
+            ))
+        if settings.pki_dir or (settings.mtls_enabled and settings.mtls_dir):
             jobs.append(ScheduledJob("ops.pki_scan", settings.pki_scan_interval_seconds, _scan_pki))
         if settings.backup_enabled and settings.backup_dir:
             jobs.append(ScheduledJob("ops.backup", settings.backup_interval_seconds, _take_backup))
@@ -851,6 +1095,7 @@ def create_app() -> FastAPI:
         await auth.load_persisted_secrets()
         await oauth_pending.migrate()
         await owner_runtime.startup()
+        await missions.reconcile_terminal_projections()
         # §273 — the HOT index is a cache of durable state, so it is rebuilt on
         # every boot rather than trusted to survive a restart.
         await automation_hot_index.rebuild(store)
@@ -890,6 +1135,14 @@ def create_app() -> FastAPI:
     app.state.owner_memory = owner_memory
     app.state.learning = learning
     app.state.degraded = degraded
+    app.state.artifacts = artifacts
+    app.state.documents = documents
+    app.state.goals = goals
+    app.state.watch_runner = watch_runner
+    app.state.suggestions = suggestions
+    app.state.conversations = conversations
+    app.state.jev_projection = jev_projection
+    app.state.jev_advisor = jev_advisor
     app.state.visual_acceptance = visual_acceptance
     # Exposed like `degraded`: which jobs a build actually installs is a property of
     # the running app, and a job list that exists only inside a closure is how
@@ -901,12 +1154,16 @@ def create_app() -> FastAPI:
     app.state.orchestrator = orchestrator
     app.state.owner_runtime = owner_runtime
     app.state.automation_health = automation_health
+    app.state.computer_use = computer_use
+    app.state.computer_worker = computer_worker
     app.state.automation = automation
+    app.state.automation_worker = automation_worker
     app.state.temporal_automation = temporal_automation
     app.state.automation_registry = automation_registry
     app.state.automation_hot_index = automation_hot_index
     app.state.automation_dispatcher = automation_dispatcher
     app.state.browser = browser
+    app.state.browser_interaction = browser_interaction
     app.state.capability_registry = capability_registry
     app.state.capability_router = capability_router
     app.state.missions = missions
@@ -924,6 +1181,34 @@ def create_app() -> FastAPI:
     app.state.dial_dev_client = dial_dev_client
     app.state.dial_dev_attention = dial_dev_attention
     app.include_router(owner_runtime.router)
+    if browser_action_plans is not None:
+        app.include_router(build_action_plan_router(browser_action_plans))
+    from van_gateway.browser.artifact_provider import build_artifact_provider_router
+    app.include_router(build_artifact_provider_router(sessions=interactive_sessions,
+        providers=artifact_config["providers"], admissions=browser_artifacts))
+    app.include_router(build_artifact_admission_router(browser_artifacts))
+    app.include_router(build_artifact_provider_claim_router(browser_artifacts, artifact_provider_auth.authenticate))
+    app.state.browser_artifacts = browser_artifacts
+    app.state.artifact_provider_auth = artifact_provider_auth
+
+    from van_gateway.automation.owner_api import OwnerAutomationApi
+    app.include_router(OwnerAutomationApi(automation).router)
+
+    app.include_router(build_artifact_router(artifacts))
+    app.include_router(build_document_router(documents))
+    app.include_router(build_goal_router(goals))
+    app.include_router(build_suggestion_router(suggestions))
+    app.include_router(build_conversation_router(conversations))
+    app.include_router(build_computer_use_router(computer_use))
+    from van_gateway.cognitive.api import build_cognitive_router
+    from van_gateway.cognitive.twin import CognitiveTwinClient
+    twin_client = CognitiveTwinClient(DialDevClient(DialDevConfig(
+        enabled=settings.cognitive_twin_enabled, base_url=settings.cognitive_twin_base_url,
+        token_file=settings.cognitive_twin_token_file)),
+        projects=tuple(p.strip() for p in settings.cognitive_twin_projects.split(',') if p.strip()))
+    app.include_router(build_cognitive_router(store=store, context=owner_runtime.context,
+        trading=trading, require_internal=lambda token: require_internal_control(token, ControlScope.COGNITIVE),
+        twin_client=twin_client))
     app.include_router(build_dial_dev_router(
         client=dial_dev_client,
         config=dial_dev_config,
@@ -931,10 +1216,33 @@ def create_app() -> FastAPI:
         degraded=degraded,
         audit=audit,
     ))
+    app.include_router(jev_projection.router)
+
+    @app.get("/v1/browser/interaction-router")
+    async def interaction_router_status() -> dict:
+        """Configured lanes and their actual gate verdicts; read-only capability projection."""
+        stagehand_reason = await browser_interaction._stagehand_disabled_reason()
+        jev_reasons = browser_interaction.jev_lane_disabled_reasons()
+        jev_gate_reason = await browser_interaction._jev_effect_gate_closed_reason()
+        return {
+            "jev_service": "dial-jev" if browser_interaction.jev_client is not None else None,
+            "jev_lane_reachable": bool(browser_interaction.enabled and not jev_reasons
+                                       and jev_gate_reason is None),
+            "jev_lane_disabled_reasons": jev_reasons,
+            "jev_effect_gate_reason": jev_gate_reason,
+            "jev_eligibility_classifier": type(browser_interaction.eligibility_classifier).__name__,
+            "deterministic_executor": browser_interaction.executor is not None,
+            "stagehand_fallback": bool(browser_interaction.enabled and stagehand_reason is None),
+            "stagehand_disabled_reason": stagehand_reason,
+            "independent_verifier": browser_interaction.verifier is not None,
+        }
+
     app.include_router(automation_health.router)
     app.include_router(automation.router)
+    app.include_router(automation_worker.router)
     app.include_router(temporal_automation.router)
     app.include_router(browser.router)
+    app.include_router(build_interaction_routes(browser, browser_interaction))
     if browser_stream_grants is not None:
         # Rev 1.5 §§22.2, 22.3 — what Hermes is handed when it drives the owner's
         # browser, and what is destroyed when the owner takes it back.
@@ -959,10 +1267,19 @@ def create_app() -> FastAPI:
             agent_grants=agent_grants,
             downloads_broker=downloads_broker,
             signal_url=settings.browser_stream_signal_url,
+            profile_signal_urls=settings.browser_stream_profile_signal_urls,
             ice_servers=_parse_ice_servers(settings.browser_stream_ice_servers),
             mission_binder=mission_binder,
             audit=audit,
             on_session_ended=quality_controllers.forget,
+            producers=browser_producers,
+            delegate_issued_for=(settings.browser_control_client_common_name
+                if getattr(browser, "interactive_worker_factory", None) is not None else None),
+        ))
+        app.include_router(build_browser_producer_router(
+            service=browser_producers,
+            settings=settings,
+            audit=audit,
         ))
         # §18 — the Hermes-scoped side of the same records. Separate router because
         # it is a different authority, not a different concern: the owner's phone
@@ -1002,12 +1319,16 @@ def create_app() -> FastAPI:
             # Not defaulted. An absent answer is not a "no", and guessing either way
             # decides something on the owner's behalf that they did not say.
             raise SessionDelegateError("approved_required")
+        if type(payload["approved"]) is not bool:
+            raise SessionDelegateError("approved_invalid")
         try:
             record = await decisions.resolve(
-                decision_id, approved=bool(payload["approved"])
+                decision_id, approved=payload["approved"], owner_device_id=device_id
             )
         except KeyError as exc:
             raise SessionDelegateError("decision_not_found") from exc
+        except DecisionError as exc:
+            raise SessionDelegateError(exc.reason) from exc
         return record.model_dump(mode="json")
 
     async def _cancel_mission_through_session(payload: dict, device_id: str) -> dict:
@@ -1015,6 +1336,9 @@ def create_app() -> FastAPI:
         mission_id = str(payload.get("mission_id") or "")
         if not mission_id:
             raise SessionDelegateError("mission_id_required")
+        existing = await missions.get(mission_id)
+        if existing is not None and existing.state is MissionState.CANCELLED:
+            return {"mission_id": existing.mission_id, "state": existing.state.value}
         try:
             mission = await missions.transition(
                 mission_id,
@@ -1023,6 +1347,11 @@ def create_app() -> FastAPI:
                 final_outcome="cancelled by owner",
             )
         except MissionError as exc:
+            # Two carriers may recover the same cancellation simultaneously. Only
+            # a genuinely observed CANCELLED state can recover the second receipt.
+            existing = await missions.get(mission_id)
+            if existing is not None and existing.state is MissionState.CANCELLED:
+                return {"mission_id": existing.mission_id, "state": existing.state.value}
             raise SessionDelegateError(str(exc)) from exc
         return {"mission_id": mission.mission_id, "state": mission.state.value}
 
@@ -1034,14 +1363,33 @@ def create_app() -> FastAPI:
             raise SessionDelegateError("mission_id_and_text_required")
         if await missions.get(mission_id) is None:
             raise SessionDelegateError("mission_unknown")
+        operation = CURRENT_OPERATION.get()
+        operation_key = (Store.dumps([operation.van_session_id, operation.idempotency_key or operation.message_id])
+                         if operation is not None else None)
         event = await missions.record_event(
             mission_id=mission_id,
-            event_type=MissionEventType.MISSION_CREATED,
+            event_type=MissionEventType.MISSION_MESSAGE,
             actor=PrincipalType.OWNER_DEVICE,
             summary=text[:500],
             severity="INFO",
+            idempotency_key=operation_key,
         )
         return {"event_id": event.event_id, "recorded": True}
+
+    async def _recover_session_result(envelope, device_id: str) -> dict | None:
+        """Recover through the existing idempotent authority, never a new one.
+
+        Command handoffs retain the orchestrator's unknown/expired/cancelled
+        boundaries. Local controls now have exact duplicate-safe effects.
+        """
+        delegate = {"command.submit": _submit_command_through_session,
+                    "decision.answer": _answer_decision_through_session,
+                    "mission.cancel": _cancel_mission_through_session,
+                    "mission.message": _message_mission_through_session}.get(envelope.kind)
+        if delegate is None:
+            return None
+        result = await delegate(envelope.payload, device_id)
+        return None if envelope.kind == "command.submit" and result.get("status") == "in_flight" else result
 
     # Rev 1.5 §20.2 — all four kinds the router knows, delegated to the authorities that
     # already exist.
@@ -1058,6 +1406,7 @@ def create_app() -> FastAPI:
             answer_decision=_answer_decision_through_session,
             cancel_mission=_cancel_mission_through_session,
             message_mission=_message_mission_through_session,
+            recover_result=_recover_session_result,
         ),
     )
 
@@ -1074,9 +1423,9 @@ def create_app() -> FastAPI:
 
         Answered from two places, because the Gateway knows a thing in two ways and the
         client cannot tell which applies. A mission is the richer answer and is preferred.
-        Failing that, `van_session_messages` is the §20.12 admission table — the record
-        that makes a resubmission safe — and a row in it means the Gateway holds this
-        message whether or not anything downstream opened a mission for it.
+        Failing that, `van_session_messages` is the §20.12 admission table. A
+        completed result settles its message; an admitted row without a result
+        remains RESULT_PENDING and must not silently leave the device outbox.
 
         Consulting only the mission table made every answer for an admitted-but-missionless
         message `UNKNOWN`, which the client correctly reads as *resend*. The command was
@@ -1099,13 +1448,14 @@ def create_app() -> FastAPI:
             # identity a given command happens to have.
             row = await store.fetchone(
                 """
-                SELECT admitted_state FROM van_session_messages
+                SELECT admitted_state, result_json FROM van_session_messages
                  WHERE van_session_id = ? AND (command_id = ? OR message_id = ?)
                  LIMIT 1
                 """,
                 (van_session_id, identity, identity),
             )
-            states[identity] = row["admitted_state"] if row is not None else "UNKNOWN"
+            states[identity] = ("RESULT_PENDING" if row is not None and row["result_json"] is None else
+                                row["admitted_state"] if row is not None else "UNKNOWN")
         cursor_row = await store.fetchone(
             "SELECT last_seq FROM event_cursors WHERE device_id = ?", (device_id,)
         )
@@ -1120,6 +1470,8 @@ def create_app() -> FastAPI:
     app.include_router(build_session_router(
         sessions=van_sessions, router=session_router, events=events,
         resume_snapshot=_resume_snapshot,
+        require_device_binding=settings.require_device_binding,
+        audit=audit,
     ))
     # Rev 1.5 §§0D.3, 5.7 — the owner-device binding.
     #
@@ -1154,11 +1506,19 @@ def create_app() -> FastAPI:
     app.state.connectivity_config = connectivity_config
     app.state.van_sessions = van_sessions
     app.state.session_router = session_router
+    app.state.browser_preparation = browser_preparation
+    app.state.browser_action_plans = browser_action_plans
     app.state.interactive_sessions = interactive_sessions
     app.state.browser_control_leases = browser_control_leases
+    app.state.interaction_router = browser_interaction
     app.state.browser_stream_grants = browser_stream_grants
+    app.state.browser_producers = browser_producers
     app.include_router(mission_api.router)
     app.include_router(understanding_api.router)
+    from van_gateway.decisions.api import build_decision_router
+    app.include_router(build_decision_router(decisions))
+    from van_gateway.capability.owner_permissions import build_owner_permission_router
+    app.include_router(build_owner_permission_router(store))
 
     def control_scope_for(
         method: str, path: str, *, internal_present: bool = False
@@ -1169,6 +1529,8 @@ def create_app() -> FastAPI:
         makes "the Hermes runtime may drive automation but may not enrol a device"
         expressible at all.
         """
+        if path.startswith("/v1/runtime/cognitive/"):
+            return ControlScope.COGNITIVE
         if path.startswith("/v1/runtime/"):
             return ControlScope.RUNTIME
         # P2-CU-001 adds the computer-use fabric's health on the same terms as the other
@@ -1183,13 +1545,15 @@ def create_app() -> FastAPI:
         # report a frame time.
         if path.startswith("/v1/observability/") and path != "/v1/observability/device-telemetry":
             return ControlScope.OBSERVABILITY
+        if path.startswith("/v1/automation/worker/"):
+            return ControlScope.AUTOMATION_WORKER
         if path.startswith("/v1/automation/"):
             return ControlScope.AUTOMATION
         if path.startswith("/v1/missions") or path in ("/v1/needs-you", "/v1/activity",
                                                         "/v1/capabilities/status"):
             if method == "GET":
                 return None
-            return None if (path.endswith("/cancel") or path.endswith("/message")) else ControlScope.MISSIONS
+            return None if (method == "POST" and re.fullmatch(r"/v1/missions/[^/]+/(?:cancel|message|pause|resume|direction)", path)) else ControlScope.MISSIONS
         if path.startswith("/v1/understanding") or path.startswith("/v1/permissions") or (
             path in ("/v1/technology-radar", "/v1/eval", "/v1/autonomy")
         ):
@@ -1199,6 +1563,8 @@ def create_app() -> FastAPI:
             # authenticates as the owner's device. Same predicate-with-one-reader shape as
             # the interactive browser routes below.
             return None
+        if is_browser_producer_consumer_route(path):
+            return ControlScope.BROWSER_STREAM_PRODUCER
         if is_interactive_browser_owner_route(path):
             # Rev 1.5 §6.1 — the owner's phone creates, heartbeats and closes its own
             # browser session, so these are device-authenticated rather than Hermes-only.
@@ -1223,6 +1589,7 @@ def create_app() -> FastAPI:
         if method == "POST" and path in {
             "/v1/devices/bootstrap/create", "/v1/devices/rebind",
             "/v1/devices/provisioning-payload",
+            "/v1/devices/provisioning-status",
         }:
             # ADR-RB-026 — minting an enrolment credential, and replacing the owner's
             # device, are the same authority as enrolment itself.
@@ -1241,6 +1608,8 @@ def create_app() -> FastAPI:
             return ControlScope.GOOGLE
         if path.startswith("/v1/google/jobs/"):
             return ControlScope.GOOGLE
+        if path.startswith("/v1/google/gmail/drafts/") and path.endswith("/preview"):
+            return ControlScope.GOOGLE
         return None
 
     def requires_device_proof(method: str, path: str) -> bool:
@@ -1258,23 +1627,13 @@ def create_app() -> FastAPI:
         """
         if method not in {"POST", "PUT", "PATCH", "DELETE"}:
             return False
-        if path in {"/v1/devices/bootstrap/challenge", "/v1/devices/bootstrap/attest"}:
+        if path in {"/v1/devices/bootstrap/challenge", "/v1/devices/bootstrap/attest", "/v1/devices/bootstrap/recover"}:
             # The enrolment itself. There is no bound key yet to prove possession of.
             return False
-        return (
-            is_interactive_browser_owner_route(path)
-            or is_session_owner_route(path)
-            or path == "/v1/commands"
-            or path == "/v1/context/ingest"
-            or path == "/v1/google/owner-revoke"
-            or path == "/v1/visual/acceptance"
-            or path == "/v1/artemis/console/session"
-            # The phone's TLS client certificate is minted here: proof of the bound key.
-            or path == "/v1/devices/tls-certificate"
-            # VAN-DEV-001 — the one DIAL development mutation. Reads under /v1/dial-dev
-            # stay on owner-device authentication without a proof, like every poll.
-            or path == DIAL_DEV_ACTIONS_PATH
-        )
+        # Internal-control routes are handled before this owner gate. Every remaining
+        # owner mutation proves possession; an allowlist silently omitted understanding,
+        # permissions, reminders and privacy controls as those routers grew.
+        return True
 
     async def enforce_device_proof(request: Request, device_id: str) -> JSONResponse | None:
         """Refuse a privileged request from a bound device that did not sign it.
@@ -1309,6 +1668,9 @@ def create_app() -> FastAPI:
             return JSONResponse(
                 status_code=403, content={"detail": "device_not_owner_device"}
             )
+        if (settings.require_device_binding and not binding.attestation_chain_verified
+                and request.url.path != "/v1/device-binding/certify"):
+            return JSONResponse(status_code=403, content={"detail": "device_attestation_recertification_required"})
 
         signature_b64 = request.headers.get("X-Van-Device-Proof", "")
         issued_at_raw = request.headers.get("X-Van-Device-Proof-Issued-At", "")
@@ -1337,18 +1699,34 @@ def create_app() -> FastAPI:
         # The dependency is real, so it is tested rather than assumed: a proved POST must
         # come back with the field it sent, which fails if this ever stops being true.
         body = await request.body()
+        signed_target = request.url.path
+        raw_query = request.scope.get("query_string", b"")
+        if raw_query:
+            signed_target += "?" + raw_query.decode("ascii")
 
         try:
             await owner_device_bindings.require_proof(
                 device_id=device_id,
                 signature=signature,
                 method=request.method,
-                path=request.url.path,
+                path=signed_target,
                 issued_at_ms=issued_at_ms,
                 body=body,
             )
         except DeviceBindingError as exc:
             return JSONResponse(status_code=401, content={"detail": exc.reason})
+        from van_gateway.command.nonce import CommandNonceService, NonceReplay
+        proof_identity = hashlib.sha256(Store.dumps({
+            "device_id": device_id, "method": request.method, "target": signed_target,
+            "issued_at_ms": issued_at_ms, "body_sha256": hashlib.sha256(body).hexdigest(),
+        }).encode()).hexdigest()
+        try:
+            await CommandNonceService(store).consume(
+                device_id=device_id, nonce=f"device-http-proof:{proof_identity}",
+                command_id=f"device-http-request:{proof_identity}",
+            )
+        except NonceReplay:
+            return JSONResponse(status_code=401, content={"detail": "device_proof_replayed"})
         request.state.van_device_proved = True
         return None
 
@@ -1374,6 +1752,14 @@ def create_app() -> FastAPI:
 
     @app.middleware("http")
     async def require_ingress_auth(request: Request, call_next):
+        if is_artifact_provider_route(request.scope):
+            # Dedicated attested machine authority has no owner/device or legacy
+            # internal-token fallback. The handler rechecks the current binding.
+            try:
+                request.state.van_artifact_provider_principal = await artifact_provider_auth.authenticate(request)
+            except HTTPException as exc:
+                return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+            return await call_next(request)
         # The embedded ARTEMIS browser surface uses a short-lived HttpOnly session
         # minted only after a normal owner-device proof. The one-use launch URL and
         # subsequent cookie-authenticated GETs do not carry Android bearer headers.
@@ -1387,7 +1773,7 @@ def create_app() -> FastAPI:
         # two are protected by the single-use bootstrap token instead, which is the whole
         # credential: short-lived, hashed at rest, and spent by the enrolment it authorises.
         if request.method == "POST" and request.url.path in {
-            "/v1/devices/bootstrap/challenge", "/v1/devices/bootstrap/attest",
+            "/v1/devices/bootstrap/challenge", "/v1/devices/bootstrap/attest", "/v1/devices/bootstrap/recover",
         }:
             return await call_next(request)
         if request.method == "GET" and request.url.path.startswith("/v1/trading/oauth/") and request.url.path.endswith("/callback"):
@@ -1567,27 +1953,33 @@ def create_app() -> FastAPI:
         response.headers["Cache-Control"] = "no-store"
         return response
 
-    @app.api_route("/v1/artemis/console", methods=["GET", "HEAD", "OPTIONS", "POST"])
-    @app.api_route("/v1/artemis/console/", methods=["GET", "HEAD", "OPTIONS", "POST"])
-    @app.api_route("/v1/artemis/console/{resource_path:path}", methods=["GET", "HEAD", "OPTIONS", "POST"])
     async def proxy_artemis_console(request: Request, resource_path: str = ""):
         return await artemis_console.proxy(request)
 
-    @app.api_route("/api/{resource_path:path}", methods=["GET", "HEAD", "OPTIONS", "POST"])
     async def proxy_artemis_console_api(request: Request, resource_path: str):
         return await artemis_console.proxy(request)
 
-    @app.api_route("/images/{resource_path:path}", methods=["GET", "HEAD", "OPTIONS"])
     async def proxy_artemis_console_images(request: Request, resource_path: str):
         return await artemis_console.proxy(request)
 
-    @app.api_route("/videos/{resource_path:path}", methods=["GET", "HEAD", "OPTIONS"])
     async def proxy_artemis_console_videos(request: Request, resource_path: str):
         return await artemis_console.proxy(request)
 
-    @app.api_route("/local_file/{resource_path:path}", methods=["GET", "HEAD", "OPTIONS"])
     async def proxy_artemis_console_local_file(request: Request, resource_path: str):
         return await artemis_console.proxy(request)
+
+    def register_artemis_proxy(path, handler, *, methods):
+        # One APIRoute per method gives OpenAPI clients distinct operation identities.
+        # The same governed handler and ingress classifiers still protect every alias.
+        for method in methods:
+            app.add_api_route(path, handler, methods=[method])
+
+    for console_path in ("/v1/artemis/console", "/v1/artemis/console/", "/v1/artemis/console/{resource_path:path}"):
+        register_artemis_proxy(console_path, proxy_artemis_console, methods=["GET", "HEAD", "OPTIONS", "POST"])
+    register_artemis_proxy("/api/{resource_path:path}", proxy_artemis_console_api, methods=["GET", "HEAD", "OPTIONS", "POST"])
+    register_artemis_proxy("/images/{resource_path:path}", proxy_artemis_console_images, methods=["GET", "HEAD", "OPTIONS"])
+    register_artemis_proxy("/videos/{resource_path:path}", proxy_artemis_console_videos, methods=["GET", "HEAD", "OPTIONS"])
+    register_artemis_proxy("/local_file/{resource_path:path}", proxy_artemis_console_local_file, methods=["GET", "HEAD", "OPTIONS"])
 
     @app.post("/v1/devices/pairing-ticket")
     async def create_pairing_ticket(
@@ -1605,7 +1997,10 @@ def create_app() -> FastAPI:
         )
 
     @app.post("/v1/devices/pair")
-    async def pair_device(body: PairDeviceBody):
+    async def pair_device(body: PairDeviceBody, request: Request):
+        import hashlib
+        from van_gateway.command.nonce import CommandNonceService, NonceReplay
+
         ingress_token = settings.ingress_token.strip()
         if not ingress_token:
             raise HTTPException(status_code=503, detail="ingress_auth_unconfigured")
@@ -1622,19 +2017,63 @@ def create_app() -> FastAPI:
                 headers={"Retry-After": str(locked.retry_after_seconds)},
             ) from locked
         try:
+            hardware_proved = False
+            proved_binding_id = None
+            request_hash = None
+            if body.device_access_token is not None or settings.require_device_binding:
+                binding_service = getattr(app.state, "owner_device_bindings", None)
+                if binding_service is None:
+                    raise HTTPException(status_code=503, detail="owner_device_binding_unconfigured")
+                signature_b64 = request.headers.get("X-Van-Device-Proof", "")
+                issued_at = request.headers.get("X-Van-Device-Proof-Issued-At", "")
+                if not signature_b64 or not issued_at:
+                    raise DeviceBindingError("device_proof_required")
+                try:
+                    signature = base64.b64decode(signature_b64, validate=True)
+                    issued_at_ms = int(issued_at)
+                except (ValueError, binascii.Error) as exc:
+                    raise DeviceBindingError("device_proof_malformed") from exc
+                raw_body = await request.body()
+                binding = await binding_service.require_proof(
+                    device_id=body.device_id, signature=signature, method="POST",
+                    path="/v1/devices/pair", issued_at_ms=issued_at_ms, body=raw_body,
+                )
+                active = await binding_service.active()
+                if active is None or active.binding_id != binding.binding_id:
+                    raise DeviceBindingError("device_not_owner_device")
+                if not getattr(binding, "attestation_chain_verified", False):
+                    raise DeviceBindingError("device_attestation_chain_unverified")
+                request_hash = hashlib.sha256(raw_body).hexdigest()
+                try:
+                    await CommandNonceService(store).consume(
+                        device_id=body.device_id, nonce=f"pairing-proof:{issued_at_ms}",
+                        command_id=f"pairing:{request_hash}",
+                    )
+                except NonceReplay as exc:
+                    raise DeviceBindingError("device_proof_replayed") from exc
+                hardware_proved = True
+                proved_binding_id = binding.binding_id
             result = await auth.pair_device(
                 body.pairing_token,
                 body.device_id,
                 body.device_secret,
                 body.public_key_pem,
                 body.label,
+                device_access_token=body.device_access_token,
+                request_hash=request_hash,
+                hardware_proved=hardware_proved,
+                proved_binding_id=proved_binding_id,
             )
+        except DeviceBindingError as exc:
+            throttle.record_failure("pairing", GLOBAL_SUBJECT)
+            status = 401 if exc.reason.startswith("device_proof_") else 403
+            raise HTTPException(status_code=status, detail=exc.reason) from exc
         except AuthError as exc:
             # `already_enrolled` and `device_revoked` mean the ticket was genuine, so they
             # are a client mistake, not a guess, and must not count toward the lockout.
             if exc.code not in {"already_enrolled", "device_revoked"}:
                 throttle.record_failure("pairing", GLOBAL_SUBJECT)
-            code = 409 if exc.code in {"already_enrolled", "device_revoked"} else 400
+            code = 409 if exc.code in {"already_enrolled", "device_revoked", "pairing_recovery_conflict", "pairing_recovery_unavailable"} else 400
             raise HTTPException(status_code=code, detail=exc.message) from exc
         throttle.record_success("pairing", GLOBAL_SUBJECT)
         return JSONResponse(
@@ -1718,7 +2157,27 @@ def create_app() -> FastAPI:
     async def commands(req: CommandRequest, request: Request):
         if getattr(request.state, "van_device_id", None) != req.device_id:
             raise HTTPException(status_code=403, detail="device_identity_mismatch")
-        return await orchestrator.handle(req)
+        result = await orchestrator.handle(req)
+        # OMV-006 — only a command that reached the point of becoming owner intent has a
+        # Mission. Invalid signatures/refusals before that point must never be projected as
+        # owner speech. Projection is presentation state and cannot change command outcome.
+        if result.mission_id:
+            try:
+                main_thread = await conversations.ensure_main()
+                await conversations.append_projection(
+                    main_thread.thread_id,
+                    projection_key=f"command:{req.command_id}:owner",
+                    role="OWNER",
+                    body=req.text,
+                    command_id=req.command_id,
+                    mission_id=result.mission_id,
+                    terminal=False,
+                )
+            except Exception:
+                logging.getLogger("van_gateway.conversations").exception(
+                    "failed to project owner command %s into main thread", req.command_id
+                )
+        return result
 
     def _require_binding_service() -> OwnerDeviceBindingService:
         if owner_device_bindings is None:
@@ -1754,8 +2213,14 @@ def create_app() -> FastAPI:
             # device cannot verify is a payload it must refuse, and handing the installer
             # one would make the failure look like the phone's.
             raise HTTPException(status_code=503, detail="connectivity_signing_unconfigured")
+        if not _require_binding_service().policy.allowed_root_fingerprints:
+            raise HTTPException(status_code=503, detail="attestation_roots_unconfigured")
+        try:
+            validated_gateway_url = validate_gateway_url(body.gateway_url)
+        except ConnectivityError as exc:
+            raise HTTPException(status_code=400, detail=exc.reason) from exc
         token, challenge = await _require_binding_service().create_bootstrap_token(
-            note=body.note
+            note=body.note, ttl_ms=PROVISIONING_TTL_MS,
         )
         # Both credentials, minted together, because provisioning is one act. A device
         # that paired but did not bind would hold working tokens and no hardware identity,
@@ -1764,7 +2229,7 @@ def create_app() -> FastAPI:
         active = await connectivity_config.active()
         try:
             payload = build_provisioning_payload(
-                gateway_url=body.gateway_url,
+                gateway_url=validated_gateway_url,
                 pairing_token=ticket.token,
                 bootstrap_token=token,
                 attestation_challenge=challenge,
@@ -1796,27 +2261,65 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=403, detail=exc.reason) from exc
         return {"attestation_challenge": challenge}
 
+    @app.post("/v1/devices/provisioning-status")
+    async def owner_device_provisioning_status(
+        body: ProvisioningStatusBody,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        """Installer readback for one exact attempt; never grants or renews authority."""
+        from van_gateway.auth.provisioning_status import provisioning_status
+        require_internal_control(x_van_internal_token, ControlScope.DEVICE_ENROLMENT)
+        try:
+            status = await provisioning_status(store, body.bootstrap_token, app.state.device_ca)
+        except DeviceBindingError as exc:
+            raise HTTPException(status_code=404, detail=exc.reason) from exc
+        return JSONResponse(status, headers={"Cache-Control": "no-store"})
+
     @app.post("/v1/devices/bootstrap/attest")
-    async def bootstrap_attest(body: BootstrapAttestBody):
+    async def bootstrap_attest(body: BootstrapAttestBody, request: Request):
         """Bind the owner's device, or refuse and record why."""
         try:
             extension = base64.b64decode(body.attestation_extension_b64, validate=True)
+            chain = [base64.b64decode(item, validate=True) for item in body.attestation_chain_b64]
         except Exception as exc:
             raise HTTPException(status_code=400, detail="attestation_not_base64") from exc
         try:
+            extension, verified_root = verify_attestation_chain(
+                certificates_der=chain, public_key_pem=body.public_key_pem,
+                policy=_require_binding_service().policy, extension=extension,
+            )
+            try:
+                signature = base64.b64decode(request.headers.get("X-Van-Device-Proof", ""), validate=True)
+                issued_at = int(request.headers.get("X-Van-Device-Proof-Issued-At", ""))
+            except (ValueError, binascii.Error) as exc:
+                raise DeviceBindingError("device_proof_malformed") from exc
+            verify_request_proof(
+                public_key_pem=body.public_key_pem, signature=signature, method="POST",
+                path="/v1/devices/bootstrap/attest", device_id=body.device_id,
+                issued_at_ms=issued_at, body=await request.body(),
+            )
+            from van_gateway.command.nonce import CommandNonceService, NonceReplay
+            try:
+                await CommandNonceService(store).consume(
+                    device_id=body.device_id, nonce=f"bootstrap-attest:{issued_at}",
+                    command_id=hashlib.sha256(body.token.encode()).hexdigest(),
+                )
+            except NonceReplay as exc:
+                raise DeviceBindingError("device_proof_replayed") from exc
             binding = await _require_binding_service().bind(
                 token=body.token,
                 device_id=body.device_id,
                 public_key_pem=body.public_key_pem,
                 attestation_extension=extension,
-                attestation_root_fingerprint=body.attestation_root_fingerprint,
+                attestation_root_fingerprint=verified_root,
+                attestation_chain_verified=True,
                 os_version=body.os_version,
                 os_patch_level=body.os_patch_level,
             )
-        except DeviceBindingError as exc:
+        except (DeviceBindingError, DeviceProofError) as exc:
             await audit.record(
                 result="refused", device_id=body.device_id,
-                capability="device.bootstrap.attest", error_class=exc.reason,
+                capability="device.bootstrap.attest", failure_reason=exc.reason,
             )
             raise HTTPException(status_code=403, detail=exc.reason) from exc
         await audit.record(
@@ -1829,7 +2332,45 @@ def create_app() -> FastAPI:
             "device_key_fingerprint": binding.device_key_fingerprint,
             "key_security_level": binding.key_security_level,
             "verified_boot_state": binding.verified_boot_state,
+            "attestation_chain_verified": binding.attestation_chain_verified,
         }
+
+    @app.post("/v1/devices/bootstrap/recover")
+    async def bootstrap_recover(body: BootstrapRecoverBody, request: Request):
+        """Recover a lost bind response; this cannot enroll or replace a phone."""
+        try:
+            signature = base64.b64decode(request.headers.get("X-Van-Device-Proof", ""), validate=True)
+            issued_at = int(request.headers.get("X-Van-Device-Proof-Issued-At", ""))
+        except (ValueError, binascii.Error) as exc:
+            raise HTTPException(status_code=400, detail="device_proof_malformed") from exc
+        try:
+            binding = await _require_binding_service().recover_bootstrap(
+                token=body.token, device_id=body.device_id, signature=signature,
+                issued_at_ms=issued_at, body=await request.body(),
+            )
+        except DeviceBindingError as exc:
+            code = 404 if exc.reason == "bootstrap_not_consumed" else 403
+            raise HTTPException(status_code=code, detail=exc.reason) from exc
+        return JSONResponse({
+            "bound": True, "binding_id": binding.binding_id, "device_id": binding.device_id,
+            "device_key_fingerprint": binding.device_key_fingerprint,
+            "attestation_chain_verified": binding.attestation_chain_verified,
+        }, headers={"Cache-Control": "no-store"})
+
+    @app.post("/v1/device-binding/certify")
+    async def certify_binding(body: CertifyBindingBody, request: Request):
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id or not getattr(request.state, "van_device_proved", False):
+            raise HTTPException(status_code=403, detail="device_proof_required")
+        try:
+            chain = [base64.b64decode(item, validate=True) for item in body.attestation_chain_b64]
+            binding = await _require_binding_service().certify_existing(device_id=device_id, certificates_der=chain)
+        except (ValueError, binascii.Error) as exc:
+            raise HTTPException(status_code=400, detail="attestation_not_base64") from exc
+        except DeviceBindingError as exc:
+            raise HTTPException(status_code=403, detail=exc.reason) from exc
+        return {"bound": True, "device_key_fingerprint": binding.device_key_fingerprint,
+                "attestation_chain_verified": binding.attestation_chain_verified}
 
     @app.get("/v1/device-binding/status")
     async def device_binding_status(request: Request):
@@ -1842,14 +2383,31 @@ def create_app() -> FastAPI:
         binding = await owner_device_bindings.for_device(device_id)
         if binding is None:
             return {"configured": True, "bound": False}
+        approval_fingerprint = None
+        try:
+            paired = await auth.require_device(device_id)
+        except AuthError as exc:
+            raise HTTPException(403, exc.code) from None
+        if paired is not None:
+            try:
+                approval_public = serialization.load_pem_public_key(paired.public_key_pem.encode())
+                approval_fingerprint = hashlib.sha256(approval_public.public_bytes(
+                    serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo)).hexdigest()
+            except (ValueError, TypeError):
+                pass
         return {
             "configured": True,
             "bound": binding.status.value == "ACTIVE",
+            "device_id": device_id,
+            "binding_id": binding.binding_id,
+            "owner_principal_id": binding.owner_principal_id,
+            "owner_approval_key_fingerprint": approval_fingerprint,
             "status": binding.status.value,
             "device_key_fingerprint": binding.device_key_fingerprint,
             "key_security_level": binding.key_security_level,
             "verified_boot_state": binding.verified_boot_state,
             "bound_at_ms": binding.bound_at_ms,
+            "attestation_chain_verified": binding.attestation_chain_verified,
             "last_proof_at_ms": binding.last_proof_at_ms,
         }
 
@@ -2000,11 +2558,13 @@ def create_app() -> FastAPI:
         return await decisions.list_open()
 
     @app.post("/v1/decisions/{decision_id}/resolve")
-    async def resolve_decision(decision_id: str, body: DecisionResolveBody):
+    async def resolve_decision(decision_id: str, body: DecisionResolveBody, request: Request):
         try:
-            return await decisions.resolve(decision_id, approved=body.approved)
+            return await decisions.resolve(decision_id, approved=body.approved, owner_device_id=request.state.van_device_id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail="decision_not_found") from exc
+        except DecisionError as exc:
+            raise HTTPException(status_code=409, detail=exc.reason) from exc
 
     @app.put("/v1/projects/{project_id}/truth")
     async def put_project_truth(
@@ -2067,31 +2627,15 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=403, detail="device_identity_required")
         return await owner_memory.inventory()
 
-    @app.delete("/v1/context/memory")
+    @app.delete("/v1/context/memory", status_code=409)
     async def owner_memory_forget(request: Request, store: str | None = None):
-        """Delete what VAN has concluded about the owner.
-
-        P2-MEM-002 — only owner_facts and owner_context_edges could be erased. The
-        cognitive model, the reasoning ledger, the growth ledger, strategic memory,
-        decision fingerprints, the shared vocabulary and the intent graph all accumulated
-        owner-derived material with no way out.
-        """
-        device_id = getattr(request.state, "van_device_id", None)
-        if not device_id:
-            raise HTTPException(status_code=403, detail="device_identity_required")
-        if store:
-            try:
-                removed = await owner_memory.forget_store(store)
-            except ValueError as exc:
-                raise HTTPException(status_code=404, detail=str(exc)) from exc
-            result = {"removed": {store: removed}}
-        else:
-            result = await owner_memory.forget_all()
-        await audit.record(
-            result="ok", device_id=device_id, capability="context.memory.forget",
-            after={"removed": result["removed"]},
-        )
-        return result
+        """Compatibility refusal: irreversible erasure uses the A4 command boundary."""
+        raise HTTPException(status_code=409, detail={
+            "code": "memory_erasure_requires_approved_command",
+            "command": "forget all owner-derived memory" if store is None
+                else f"forget owner-derived memory store {store}",
+            "endpoint": "/v1/commands",
+        })
 
     @app.get("/v1/context/export")
     async def owner_context_export(request: Request):
@@ -2205,6 +2749,57 @@ def create_app() -> FastAPI:
         except GoogleAuthError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 
+    @app.get("/v1/google/gmail/thread")
+    async def gmail_thread(
+        thread_id: str,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
+        try:
+            return {"thread": _scrubbed(await google.gmail_thread_get(thread_id))}
+        except GoogleAuthError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.post("/v1/google/gmail/attachment/import-pdf")
+    async def gmail_attachment_import_pdf(
+        message_id: str,
+        attachment_id: str,
+        filename: str = "attachment.pdf",
+        project_id: str | None = None,
+        command_id: str | None = None,
+        mission_id: str | None = None,
+        execution_id: str | None = None,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        """Import a Gmail attachment through Document Fabric, never into model context."""
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
+        try:
+            data = await google.gmail_attachment_get(message_id, attachment_id)
+            record = await documents.import_pdf(
+                filename=filename, data=data, project_id=project_id, command_id=command_id,
+                mission_id=mission_id, execution_id=execution_id,
+            )
+            return record.model_dump(mode="json")
+        except GoogleAuthError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except Exception as exc:
+            code = getattr(exc, "code", "gmail_attachment_import_failed")
+            raise HTTPException(status_code=422, detail=str(code)) from exc
+
+    @app.get("/v1/google/calendar/review")
+    async def calendar_review(
+        event_id: str,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
+        try:
+            return _scrubbed(await google.calendar_event_review(event_id))
+        except GoogleAuthError as exc:
+            raise HTTPException(
+                status_code=409 if str(exc) == "google_outcome_unknown" else 503,
+                detail=str(exc),
+            ) from exc
+
     @app.post("/v1/google/actions/execute")
     async def execute_google_action(
         body: GoogleAuthorizedActionBody,
@@ -2223,13 +2818,36 @@ def create_app() -> FastAPI:
     async def gmail_send(
         execution_id: str,
         draft_id: str,
+        draft_content_sha256: str,
         x_van_internal_token: str | None = Header(default=None),
     ):
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         return await _execute_google_action(
             execution_id,
-            {"draft_id": draft_id},
+            {"draft_id": draft_id, "draft_content_sha256": draft_content_sha256},
         )
+
+    @app.get("/v1/google/gmail/drafts/{draft_id}/preview")
+    async def gmail_internal_draft_preview(
+        draft_id: str, x_van_internal_token: str | None = Header(default=None),
+    ):
+        """Read the approval binding without exposing private message text to a worker."""
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
+        try:
+            preview = await google.gmail_draft_preview(draft_id)
+            return {key: value for key, value in preview.items() if key != "preview"}
+        except GoogleAuthError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.get("/v1/owner/google/gmail/drafts/{draft_id}/preview")
+    async def gmail_owner_draft_preview(draft_id: str, request: Request):
+        """Private decoded content for the paired owner's approval display."""
+        if not getattr(request.state, "van_device_id", None):
+            raise HTTPException(status_code=403, detail="device_identity_required")
+        try:
+            return await google.gmail_draft_preview(draft_id)
+        except GoogleAuthError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     # P2-GOOG-004 — six capabilities with a transport, a service method and no way in.
     #
@@ -2330,7 +2948,8 @@ def create_app() -> FastAPI:
                 notebook_enterprise=knowledge.notebook_enterprise,
                 notebook_consumer=knowledge.notebook_consumer,
                 broker=google_broker,
-            )
+            ),
+            mesh=await google_broker.mesh_status(workspace=await google.status()),
         )
 
     @app.post("/v1/google/connect")
@@ -2626,8 +3245,17 @@ def create_app() -> FastAPI:
         return await ops_health.collect(
             scheduler=scheduler,
             pki_dir=settings.pki_dir or None,
+            device_pki_dir=settings.mtls_dir if settings.mtls_enabled else None,
             backup_root=settings.backup_dir or None,
         )
+
+    from van_gateway.owner_api import OwnerServiceApi
+    owner_services = OwnerServiceApi(
+        store, knowledge=owner_runtime.knowledge, research=owner_runtime.research,
+        automation_health=automation_health, ops_health=_ops_health,
+    )
+    app.state.owner_services = owner_services
+    app.include_router(owner_services.router)
 
     @app.get("/v1/observability/alerts")
     async def observability_alert_state(x_van_internal_token: str | None = Header(default=None)):
@@ -2763,6 +3391,17 @@ def create_app() -> FastAPI:
     @app.get("/v1/trading/risk")
     async def trading_risk():
         return trading.risk()
+
+    @app.get("/v1/trading/cognitive-fabric/{account_alias}")
+    async def trading_cognitive_fabric(account_alias: str):
+        return trading.cognitive_fabric(account_alias)
+
+    @app.post("/v1/trading/cognitive-fabric/{account_alias}/{operation}")
+    async def trading_cognitive_candidate(account_alias: str, operation: str, body: dict):
+        try:
+            return trading.cognitive_import(account_alias, operation, body)
+        except (ValueError, TypeError, KeyError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.get("/v1/trading/cognition")
     async def trading_cognition():
@@ -3136,7 +3775,7 @@ def create_app() -> FastAPI:
 
     @app.get("/v1/trading/tickets")
     async def trading_tickets(status: str | None = None):
-        return {"tickets": trading.tickets(status=status)}
+        return {"ledger_available": trading.available(), "tickets": trading.tickets(status=status)}
 
     @app.post("/v1/trading/halt")
     async def trading_halt(

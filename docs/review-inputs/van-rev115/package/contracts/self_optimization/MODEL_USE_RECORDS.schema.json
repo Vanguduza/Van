@@ -1,0 +1,550 @@
+{
+  "$defs": {
+    "ModelQualificationEvidence": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "evidence_state": {
+                "const": "SUPPORTED"
+              }
+            },
+            "required": [
+              "evidence_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "all_opportunity_census_ref": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "contamination_assessment_ref": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "cost_and_risk_comparison_ref": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "dependence_selection_uncertainty_ref": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "independent_review_ref": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "protected_confirmation_ref": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "trial_census_ref": {
+                "minLength": 1,
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "account_scope": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "all_opportunity_census_ref": {
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contamination_assessment_ref": {
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cost_and_risk_comparison_ref": {
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dependence_selection_uncertainty_ref": {
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence_state": {
+          "enum": [
+            "PENDING",
+            "SUPPORTED",
+            "INCONCLUSIVE",
+            "REJECTED",
+            "INVALIDATED"
+          ]
+        },
+        "financial_authority": {
+          "const": false
+        },
+        "independent_review_ref": {
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "model_epoch_ref": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "prediction_target": {
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "protected_confirmation_ref": {
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "record_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "record_type": {
+          "const": "ModelQualificationEvidence"
+        },
+        "revision": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "task_scope_ref": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "trial_census_ref": {
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "account_scope",
+        "revision",
+        "task_scope_ref",
+        "model_epoch_ref",
+        "prediction_target",
+        "evidence_state",
+        "all_opportunity_census_ref",
+        "trial_census_ref",
+        "protected_confirmation_ref",
+        "contamination_assessment_ref",
+        "cost_and_risk_comparison_ref",
+        "dependence_selection_uncertainty_ref",
+        "independent_review_ref",
+        "financial_authority"
+      ],
+      "type": "object"
+    },
+    "ModelUseRecord": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "consumer_state": {
+                "const": "QUALIFIED"
+              }
+            },
+            "required": [
+              "consumer_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evidence_epoch": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "qualification_ref": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "resolved_model": {
+                "minLength": 1,
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "probability_use": {
+                "const": true
+              }
+            },
+            "required": [
+              "probability_use"
+            ]
+          },
+          "then": {
+            "properties": {
+              "calibration_ref": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "prediction_target": {
+                "minLength": 1,
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "cost_state": {
+                "const": "SETTLED"
+              }
+            },
+            "required": [
+              "cost_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "actual_cost_usd": {
+                "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "account_scope": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "actual_cost_usd": {
+          "anyOf": [
+            {
+              "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "availability_cutoff_ref": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "calibration_ref": {
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "consumer_state": {
+          "enum": [
+            "UNAVAILABLE",
+            "SHADOW",
+            "RESEARCH",
+            "QUALIFIED"
+          ]
+        },
+        "cost_state": {
+          "enum": [
+            "UNKNOWN",
+            "SETTLED"
+          ]
+        },
+        "evidence_epoch": {
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "financial_authority": {
+          "const": false
+        },
+        "latency_ms": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "prediction_target": {
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "probability_use": {
+          "type": "boolean"
+        },
+        "prompt_data_tool_manifest_ref": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "provider_route_ref": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "qualification_ref": {
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "record_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "record_type": {
+          "const": "ModelUseRecord"
+        },
+        "requested_model": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "reservation_ref": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "resolved_model": {
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "response_artifact_ref": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "response_hash": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "task": {
+          "enum": [
+            "EXTRACTION",
+            "HYPOTHESIS",
+            "CRITIQUE",
+            "QUALIFIED_SIGNAL"
+          ]
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "account_scope",
+        "revision",
+        "requested_model",
+        "resolved_model",
+        "evidence_epoch",
+        "provider_route_ref",
+        "prompt_data_tool_manifest_ref",
+        "availability_cutoff_ref",
+        "response_artifact_ref",
+        "response_hash",
+        "task",
+        "consumer_state",
+        "qualification_ref",
+        "probability_use",
+        "prediction_target",
+        "calibration_ref",
+        "reservation_ref",
+        "cost_state",
+        "actual_cost_usd",
+        "latency_ms",
+        "financial_authority"
+      ],
+      "type": "object"
+    },
+    "ResearchBudgetReservation": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "UNKNOWN_COST"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "liability_retained": {
+                "const": true
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "SETTLED"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "settlement_ref": {
+                "minLength": 1,
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "SETTLED"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "actual_cost_usd": {
+                "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "account_scope": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "actual_cost_usd": {
+          "anyOf": [
+            {
+              "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "attempt_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "budget_scope_ref": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "liability_retained": {
+          "type": "boolean"
+        },
+        "operation_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "provider_epoch_ref": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "record_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "record_type": {
+          "const": "ResearchBudgetReservation"
+        },
+        "reserved_cost_usd": {
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "settlement_ref": {
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "enum": [
+            "RESERVED",
+            "UNKNOWN_COST",
+            "SETTLED",
+            "RELEASED"
+          ]
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "account_scope",
+        "revision",
+        "operation_id",
+        "attempt_id",
+        "budget_scope_ref",
+        "provider_epoch_ref",
+        "reserved_cost_usd",
+        "status",
+        "actual_cost_usd",
+        "liability_retained",
+        "settlement_ref"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "urn:van:model-use:1.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/ModelUseRecord"
+    },
+    {
+      "$ref": "#/$defs/ResearchBudgetReservation"
+    },
+    {
+      "$ref": "#/$defs/ModelQualificationEvidence"
+    }
+  ]
+}

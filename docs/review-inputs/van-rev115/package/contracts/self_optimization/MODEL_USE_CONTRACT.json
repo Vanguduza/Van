@@ -1,0 +1,114 @@
+{
+  "context_bindings": "design/MODEL_HARDENING_CONTEXT_BINDINGS.json",
+  "deployment_claim": false,
+  "existing_api_operations": [
+    "EL-OP-002",
+    "EL-OP-003",
+    "EL-OP-004",
+    "EL-OP-005",
+    "EL-OP-008"
+  ],
+  "experiments": "research/PROFITABILITY_EXPERIMENTS.json",
+  "invariants": {
+    "all_attempts_reserved_before_transport": true,
+    "all_opportunities_and_trials_retained": true,
+    "all_prior_model_capabilities_preserved": true,
+    "automatic_live_exploration": false,
+    "benchmark_is_profit_evidence": false,
+    "bounded_update_rate_and_hysteresis": true,
+    "durable_global_budget": true,
+    "economic_health_separate_from_procedural_health": true,
+    "generated_code_isolated": true,
+    "jev_score_not_trade_probability": true,
+    "model_can_widen_risk": false,
+    "model_weight_leakage_assessed": true,
+    "native_authority_required_for_activation": true,
+    "native_scope_and_effect_validation": true,
+    "net_cost_and_risk_matched_qualification": true,
+    "no_model_rpc_on_financial_path": true,
+    "no_new_deployable_services": true,
+    "probability_target_requires_calibration": true,
+    "replay_recorded_response_without_model_call": true,
+    "resolved_identity_epoch_required": true,
+    "reviewer_and_holdout_separated": true,
+    "shared_jev_owner_preserved": true,
+    "unknown_cost_retains_liability": true
+  },
+  "jev_rule": "Reuse existing dial-jev consumer-scoped route. Proposed trading modules require native module admission; attention/browser modules, apply_effect flags and Score/NouL values cannot confer trading or promotion authority.",
+  "models": [
+    {
+      "access_tested": false,
+      "candidate_role": "deep research/hypothesis challenger",
+      "documented_served_revision": "stable model identifier; immutable weights not attested by these docs",
+      "economic_qualification": "NOT_RUN",
+      "id": "ARGON",
+      "provider": "Google",
+      "requested_model": "gemini-4-argon",
+      "source_refs": [
+        "google_models",
+        "google_argon",
+        "google_pricing"
+      ]
+    },
+    {
+      "access_tested": false,
+      "candidate_role": "alternative reasoning/research challenger",
+      "documented_served_revision": "DeepSeek-V4-Pro-0813",
+      "economic_qualification": "NOT_RUN",
+      "id": "DEEPSEEK_PRO",
+      "provider": "DeepSeek",
+      "requested_model": "deepseek-v4-pro",
+      "source_refs": [
+        "deepseek_docs",
+        "deepseek_prices",
+        "deepseek_thinking"
+      ]
+    },
+    {
+      "access_tested": false,
+      "candidate_role": "optional bounded extraction/triage experiment",
+      "documented_served_revision": "DeepSeek-V4.1-Flash-1017",
+      "economic_qualification": "NOT_RUN",
+      "id": "DEEPSEEK_FLASH",
+      "provider": "DeepSeek",
+      "requested_model": "deepseek-flash",
+      "source_refs": [
+        "deepseek_docs",
+        "deepseek_prices",
+        "deepseek_thinking"
+      ]
+    }
+  ],
+  "owner_units": [
+    "BE-002",
+    "BE-003",
+    "BE-013",
+    "BE-021",
+    "BE-022",
+    "BE-028",
+    "BE-032",
+    "BE-035",
+    "BE-036",
+    "BQ-005",
+    "BQ-007",
+    "BQ-009"
+  ],
+  "phase_rule": "PRE reviews documents; these 24 headless application contracts execute at backend/BQ exits before BG; physical frontend acceptance follows BG.",
+  "promotion_default": "NO_NEW_MODEL_PROMOTED_BY_THIS_PACKAGE",
+  "records_schema": "contracts/self_optimization/MODEL_USE_RECORDS.schema.json",
+  "requirements": [
+    "VAN-JM-001",
+    "VAN-JM-002",
+    "VAN-JM-003",
+    "VAN-JM-004",
+    "VAN-JM-005",
+    "VAN-JM-006",
+    "VAN-JM-007",
+    "VAN-JM-008"
+  ],
+  "revision": "1.17",
+  "runtime_rule": "Resolve each reference against native scoped evidence; schemas and booleans do not prove budgets, immutable weights, statistical claims or authority. Qualified records require current identity, data, calibration where probability is used, financial boundaries and trusted consumer readback.",
+  "schema": "van.model-use.contract/1.0",
+  "source_register": "research/REV117_SOURCE_REGISTER.json",
+  "status": "SPECIFIED_NOT_IMPLEMENTED"
+}

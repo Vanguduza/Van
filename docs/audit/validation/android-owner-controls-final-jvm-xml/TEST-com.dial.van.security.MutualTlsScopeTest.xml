@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.security.MutualTlsScopeTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:32" hostname="052fefa249ff" time="0.003">
+  <properties/>
+  <testcase name="every other route keeps platform trust()" classname="com.dial.van.security.MutualTlsScopeTest" time="0.001"/>
+  <testcase name="the direct endpoint and its session socket are on the pinned link()" classname="com.dial.van.security.MutualTlsScopeTest" time="0.001"/>
+  <testcase name="a signed migration renews certificates on the admitted gateway and session only()" classname="com.dial.van.security.MutualTlsScopeTest" time="0.0"/>
+  <testcase name="only the routes a phone needs before it holds a certificate skip it()" classname="com.dial.van.security.MutualTlsScopeTest" time="0.0"/>
+  <testcase name="a build without a direct endpoint pins nothing()" classname="com.dial.van.security.MutualTlsScopeTest" time="0.001"/>
+  <testcase name="a build that pins the direct link moves a phone saved on an older route()" classname="com.dial.van.security.MutualTlsScopeTest" time="0.0"/>
+  <testcase name="without a pinned direct link the saved address stands()" classname="com.dial.van.security.MutualTlsScopeTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

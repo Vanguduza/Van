@@ -1,0 +1,58 @@
+# Web Acquisition Fabric Rev 2 Hardened §2 — Scrapling adoption record. Owner-approved 2026-10-10.
+# Raised by the 2026-10-09 canon audit: Scrapling is pinned in
+# deploy/van-trading-core/web-acquisition/requirements.txt without an adoption record.
+decision_id: VAN-ADOPT-SCRAPLING-001
+schema_version: 1
+subject: D4Vinci/Scrapling public HTTP and public dynamic extraction worker
+blueprint_sections: ["Web Acquisition Fabric Rev 2 Hardened §2", "§66"]
+
+upstream_repository: D4Vinci/Scrapling
+package: scrapling[rag]
+licence: BSD-3-Clause            # PyPI scrapling 0.4.15 metadata, checked 2026-10-09
+licence_class: PERMISSIVE
+
+intended_use:
+  - public, read-only HTTP and dynamic extraction inside the loopback-only van-web-acquisition-worker
+  - Markdown/structured extraction of public pages for the VAN-owned acquisition frontier
+
+technical_boundary:
+  owner_authority: false
+  account_visible_or_authenticated_profiles: forbidden   # Rev 2 §36: routes to Harness/Stagehand instead
+  frontier_authority: false                               # VAN owns the frontier
+  network_exposure: loopback_only
+  private_or_metadata_targets: forbidden
+
+update_policy:
+  latest_tag_install: forbidden
+  production_install: exact_pinned_version_with_locked_dependencies
+
+observed_runtime:
+  pinned_version: "0.4.15"
+  pin_source: deploy/van-trading-core/web-acquisition/requirements.txt
+
+owner_signature_status: SIGNED
+owner_signed_at: 2026-10-10
+owner_signature_semantics:
+  basis: PROJECT_TRUTH_OWNER_INSTRUCTION
+  authority_tier: Project Truth recorded intent, not device-signed ingress
+  device_signed: false
+  evidence_scope: OWNER_SESSION_INSTRUCTION_2026-10-10
+  authorization_id: auth-20261010-owner-adoption-artemis-transfer-dead-kotlin
+signed_ingress:
+  status: ABSENT
+  evidence_ref: null
+  scope: REPOSITORY_RECORD
+  note: >-
+    No device-signed ingress evidence exists for this decision. SIGNED records the owner's
+    2026-10-10 Claude Code session instruction "Conclude scrapling and crawlee adoption".
+owner_signature_evidence_ref: owner session instruction, Claude Code session_01PA46CKBgNLwnekdwQUNNBD, 2026-10-10
+
+owner_decision_record:
+  decided_on: 2026-10-10
+  decision: APPROVED
+  owner_words: >-
+    "Conclude scrapling and crawlee adoption"
+  provenance: >-
+    Owner instruction given directly in a Claude Code session. No device, biometric or
+    cryptographic signature is claimed. Approval covers the pinned version and the technical
+    boundary above; any version change follows the update policy.

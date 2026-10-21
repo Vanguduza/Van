@@ -1,0 +1,5 @@
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/cognition/invokers.py:399:Optional Jev System-1 support:
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/cognition/invokers.py:403:- Jev is subordinate evidence only (ANNOTATE, lifecycle ceiling SHADOW):
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/cognition/invokers.py:407:- If Jev is unavailable, disabled, unqualified, abstains, or conflicts with your
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/cognition/invokers.py:409:  Jev answer. Never call Jev as an independent/background trading loop.
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/cognition/invokers.py:410:- A Jev conflict may only increase your stated uncertainty; it is never a
