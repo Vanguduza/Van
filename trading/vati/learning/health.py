@@ -153,6 +153,11 @@ class StrategyHealthTracker:
         for old in refs[:-self.window]:
             self.evidence.discard(old)
         del refs[:-self.window]
+        # Hysteresis measures distinct admitted observations, not diagnostic
+        # polls, duplicate deliveries or calls to live_adjustment(). The same
+        # evidence stream must produce the same state during cold replay.
+        below = self.verdict(o.strategy_id).health < self.degrade_below
+        self._below_count[o.strategy_id] = self._below_count.get(o.strategy_id, 0) + 1 if below else 0
         return self.verdict(o.strategy_id)
 
     def observe_evidence(self, strategy_id: str, evidence_ref: str, *, resolver: LedgerEvidenceResolver,
@@ -164,6 +169,7 @@ class StrategyHealthTracker:
                             resolver=resolver, correlation_hint=correlation_hint)
 
     def verdict(self, strategy_id: str) -> HealthVerdict:
+        """Read the current projection without advancing its observation clock."""
         buf = self._obs.get(strategy_id, [])
         if not buf:
             return HealthVerdict(strategy_id, ONE, ZERO, None, ("no observations",))
@@ -182,10 +188,10 @@ class StrategyHealthTracker:
         if c_fit < Decimal("0.7"): reasons.append("trading outside eligible regimes")
         rec = None
         below = health < self.degrade_below
-        self._below_count[strategy_id] = self._below_count.get(strategy_id, 0) + 1 if below else 0
-        if health < self.shadow_below and self._below_count[strategy_id] >= self.sustain:
+        breaches = self._below_count.get(strategy_id, 0)
+        if health < self.shadow_below and breaches >= self.sustain:
             rec = "SHADOW"
-        elif below and self._below_count[strategy_id] >= self.sustain:
+        elif below and breaches >= self.sustain:
             rec = "DEGRADED"
         return HealthVerdict(strategy_id, health.quantize(Decimal("0.001")), W, rec, tuple(reasons))
 

@@ -17,6 +17,7 @@ from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind, make_event
 from vati.core.ledger import Ledger
 from vati.execution.base import ExecutionReceipt, OrderCommand, StopMode, VenueAdapter
+from vati.execution.exit_journal import ExitJournal, ExitPending
 from vati.execution.protection import ProtectionManager
 from vati.execution.policy_templates import DO_NOT_EXECUTE, LIMIT_AT_TOUCH, entry_compatible, slippage_bound_in_price, template as execution_template
 from vati.execution.pretrade import MarketReference, PreTradeControls
@@ -34,6 +35,10 @@ ZERO = Decimal("0")
 
 
 class RouterError(RuntimeError):
+    pass
+
+
+class ExitInFlight(RouterError):
     pass
 
 
@@ -91,9 +96,118 @@ class ExecutionRouter:
         if pretrade_controls is not None and route_registry is not None and pretrade_controls.routes is not route_registry:
             raise RouterError("pre-trade controls and router must share the same RouteRegistry")
         self._seen: set[str] = {e.payload["idempotency_key"] for e in ledger.iter(EventKind.ORDER_COMMAND)}
+        self.exit_journal = ExitJournal(ledger, producer)
+        for pending in self.exit_journal.unresolved():
+            if pending.payload.get("state", "UNKNOWN") != "ACCEPTED":
+                self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, pending.received_time_ms)
 
-    def _log(self, kind: EventKind, payload: dict, *, now_ms: int, corr: str, decision_time: Optional[int] = None) -> None:
-        self.ledger.append(make_event(kind, self.producer, payload, event_time_ms=now_ms, received_time_ms=now_ms, decision_time_ms=decision_time, correlation_id=corr))
+    def _log(self, kind: EventKind, payload: dict, *, now_ms: int, corr: str, decision_time: Optional[int] = None) -> str:
+        event = make_event(kind, self.producer, payload, event_time_ms=now_ms, received_time_ms=now_ms, decision_time_ms=decision_time, correlation_id=corr)
+        self.ledger.append(event)
+        return event.hash
+
+    def _uncertain_exit(self, position_id: str, *, now_ms: int, request_ref: str) -> None:
+        if position_id in self.protection.rules:
+            self.protection.mark_close_pending(position_id)
+        if KillSwitchTrigger.RECONCILIATION_FAILURE not in self.kill.active:
+            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, now_ms)
+            self._log(EventKind.KILL_SWITCH, {"trigger": KillSwitchTrigger.RECONCILIATION_FAILURE.value,
+                "reason": "protective exit outcome unresolved", "exit_request_ref": request_ref},
+                now_ms=now_ms, corr=position_id)
+
+    def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int) -> ExecutionReceipt:
+        try:
+            request = self.exit_journal.begin(venue=venue, position_id=position_id,
+                trade_intent_id=trade_intent_id, action=action, quantity=quantity, reason=reason, now_ms=now_ms)
+        except ExitPending as exc:
+            raise ExitInFlight(str(exc)) from exc
+        if position_id in self.protection.rules:
+            self.protection.mark_close_pending(position_id)
+        try:
+            receipt = self.adapters[venue].close(position_id, quantity, now_ms=now_ms, reason=reason)
+            state = self.exit_journal.receipt_state(receipt, venue=venue,
+                position_id=position_id, trade_intent_id=trade_intent_id)
+            ticket = None
+            if state == "ACCEPTED" and receipt.execution_channel == "OWNER_TICKET":
+                ticket = getattr(self.adapters[venue], "tickets", {}).get(receipt.broker_order_id)
+                if ticket is None or ticket.side != "SELL" or ticket.source_position_id != position_id:
+                    state = "UNKNOWN"
+            with self.ledger.atomic():
+                receipt_ref = self._log(EventKind.EXECUTION_RECEIPT,
+                    {**{k:(v.value if hasattr(v, "value") else v) for k,v in asdict(receipt).items()},
+                     "exit_action": "CLOSE", "exit_reason": reason,
+                     "preservation_action": action, "exit_request_ref": request.hash},
+                    now_ms=now_ms, corr=receipt.trade_intent_id or trade_intent_id or position_id)
+                self.exit_journal.finish(request, state=state, receipt_event_ref=receipt_ref, now_ms=now_ms)
+                if state == "ACCEPTED" and ticket is not None:
+                    self._log(EventKind.OWNER_TICKET, {"ticket": receipt.broker_order_id,
+                        "symbol": ticket.symbol, "side": "SELL", "position_id": position_id,
+                        "trade_intent_id": receipt.trade_intent_id, "exit_reason": reason,
+                        "qty": str(ticket.quantity_shares), "limit_price": str(ticket.limit_price),
+                        "exit_request_ref": request.hash}, now_ms=now_ms,
+                        corr=receipt.trade_intent_id or trade_intent_id or position_id)
+        except BaseException:
+            # The request is already durable. Even a missing response or a
+            # receipt-persistence failure cannot authorize another send.
+            self._uncertain_exit(position_id, now_ms=now_ms, request_ref=request.hash)
+            raise
+        if state == "UNKNOWN":
+            self._uncertain_exit(position_id, now_ms=now_ms, request_ref=request.hash)
+            if receipt.status not in {"UNKNOWN", "PARTIAL"}:
+                raise RouterError("protective exit evidence incomplete or inconsistent; reconcile before retry")
+        elif state == "CONFIRMED":
+            if action == "FULL_CLOSE":
+                self.protection.close_confirmed(position_id)
+            else:
+                self.protection.close_failed(position_id)
+        elif state == "NOT_EXECUTED":
+            self.protection.close_failed(position_id)
+        return receipt
+
+    def confirm_owner_exit(self, receipt: ExecutionReceipt, *, now_ms: int) -> bool:
+        """Fold a durable native owner-ticket confirmation of this exact attempt.
+
+        AccountService verifies/adopts the original owner confirmation and
+        persists its receipt before this call. A different ticket, free-form
+        assertion or derived producer cannot settle the pending request.
+        """
+        pending = self.exit_journal.pending(receipt.venue, receipt.broker_position_id)
+        if pending is None:
+            return False  # legacy/non-journal owner recovery retains its existing path
+        request_ref = pending.payload.get("request_ref", pending.hash)
+        request = next((e for e in self.exit_journal._events(receipt.venue, receipt.broker_position_id)
+                        if e.hash == request_ref), None)
+        issued = None
+        confirmed = None
+        fields = asdict(receipt)
+        for event in self.ledger.iter(EventKind.EXECUTION_RECEIPT):
+            if event.hash != canonical_hash(event.body()):
+                continue
+            if event.hash == pending.payload.get("receipt_event_ref"):
+                issued = event
+            if (event.producer == "vati-account-service" and event.payload.get("receipt_hash") == receipt.receipt_hash
+                and canonical_hash({k:event.payload.get(k) for k in fields}) == canonical_hash(fields)):
+                confirmed = event
+        if (request is None or issued is None or confirmed is None
+            or issued.producer != self.producer or issued.payload.get("execution_channel") != "OWNER_TICKET"
+            or issued.payload.get("status") != "ACCEPTED" or not receipt.broker_order_id
+            or issued.payload.get("broker_order_id") != receipt.broker_order_id
+            or receipt.execution_channel != "OWNER_TICKET"
+            or self.exit_journal.receipt_state(receipt, venue=receipt.venue, position_id=receipt.broker_position_id,
+                trade_intent_id=request.payload["trade_intent_id"]) != "CONFIRMED"):
+            raise RouterError("owner exit confirmation lacks its native request/ticket/receipt binding; reconcile")
+        # The owner-ticket adapter's position projection has just applied this
+        # exact confirmation. A final partial ticket leaves residual protection.
+        remaining = [p for p in self.adapters[receipt.venue].positions() if p.position_id == receipt.broker_position_id]
+        with self.ledger.atomic():
+            self.exit_journal.finish(request, state="PARTIAL_CONFIRMED" if remaining else "CONFIRMED",
+                receipt_event_ref=confirmed.hash, now_ms=now_ms)
+        if remaining:
+            self.protection.close_failed(receipt.broker_position_id)
+        else:
+            self.protection.close_confirmed(receipt.broker_position_id)
+        return True
 
     def execute(self, intent: TradeIntent, decision: RiskDecision, mandate: TradingMandate, *, now_ms: int, stop_mode: StopMode = StopMode.VENUE,
                 targets: tuple[Decimal, ...] = (), time_in_force: str = "DAY", entry_type: str = "LIMIT", max_slippage: Optional[Decimal] = None,
@@ -102,6 +216,10 @@ class ExecutionRouter:
                 liquidity: Optional[LiquidityView] = None,
                 urgency: Urgency = Urgency.NORMAL) -> ExecutionReceipt:
         corr = intent.trade_intent_id
+        for pending in self.exit_journal.unresolved():
+            if pending.payload.get("state", "UNKNOWN") != "ACCEPTED":
+                self._uncertain_exit(pending.payload.get("position_id", pending.payload.get("broker_position_id")), now_ms=now_ms,
+                    request_ref=pending.payload.get("request_ref", pending.hash))
         if not isinstance(urgency, Urgency):
             raise RouterError("execution urgency must be a registered deterministic state")
         if urgency is Urgency.IMMEDIATE:
@@ -341,73 +459,54 @@ class ExecutionRouter:
         if action not in ("PARTIAL_CLOSE", "FULL_CLOSE"):
             raise RouterError(f"unsupported preservation action {action}")
         if action == "FULL_CLOSE":
-            self.protection.mark_close_pending(position_id)
             quantity = None
-        receipt = adapter.close(position_id, quantity, now_ms=now_ms, reason=reason)
-        self._log(
-            EventKind.EXECUTION_RECEIPT,
-            {**{k: (v.value if hasattr(v, "value") else v)
-                for k, v in asdict(receipt).items()},
-             "exit_action": "CLOSE", "exit_reason": reason,
-             "preservation_action": action},
-            now_ms=now_ms, corr=receipt.trade_intent_id or trade_intent_id,
-        )
-        if action == "FULL_CLOSE":
-            if receipt.status in ("FILLED", "OWNER_EXECUTED", "BROKER_CONFIRMED"):
-                self.protection.close_confirmed(position_id)
-            elif receipt.status in ("REJECTED", "CANCELLED", "EXPIRED", "UNKNOWN"):
-                self.protection.close_failed(position_id)
-        return receipt
+        return self._send_close(venue, position_id=position_id, trade_intent_id=trade_intent_id,
+            action=action, quantity=quantity, now_ms=now_ms, reason=reason)
 
     def apply_exits(self, venue: str, symbol: str, bid: Decimal, ask: Decimal, *, now_ms: int) -> list[ExecutionReceipt]:
         adapter = self.adapters[venue]
         out = []
+        # A fresh protection projection cannot erase an earlier transport
+        # attempt. Restore its fence before on_mark can emit another close.
+        for position_id, rule in list(self.protection.rules.items()):
+            if rule.symbol == symbol:
+                pending = self.exit_journal.pending(venue, position_id)
+                if pending is not None:
+                    self.protection.mark_close_pending(position_id)
+                    if pending.payload.get("state", "UNKNOWN") != "ACCEPTED":
+                        self._uncertain_exit(position_id, now_ms=now_ms, request_ref=pending.payload.get("request_ref", pending.hash))
         for ins in self.protection.on_mark(symbol, bid, ask, now_ms=now_ms):
             if ins.action == "CLOSE":
-                r = adapter.close(ins.position_id, None, now_ms=now_ms, reason=ins.reason)
+                try:
+                    r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+                        action="FULL_CLOSE", quantity=None, now_ms=now_ms, reason=ins.reason)
+                except ExitInFlight:
+                    # Another ledger writer committed the same position's
+                    # attempt after this mark was calculated.
+                    latest = self.exit_journal.latest(venue, ins.position_id)
+                    if latest is not None and latest.payload["state"] != "ACCEPTED":
+                        self._uncertain_exit(ins.position_id, now_ms=now_ms,
+                            request_ref=latest.payload.get("request_ref", latest.hash))
+                    continue
             else:
                 r = adapter.modify_stop(ins.position_id, ins.price, now_ms=now_ms)  # type: ignore[arg-type]
 
-            self._log(
-                EventKind.EXECUTION_RECEIPT,
-                {
-                    **{k: (v.value if hasattr(v, "value") else v) for k, v in asdict(r).items()},
-                    "exit_action": ins.action,
-                    "exit_reason": ins.reason,
-                },
-                now_ms=now_ms,
-                corr=r.trade_intent_id or ins.position_id,
-            )
+            if ins.action != "CLOSE":
+                self._log(
+                    EventKind.EXECUTION_RECEIPT,
+                    {
+                        **{k: (v.value if hasattr(v, "value") else v) for k, v in asdict(r).items()},
+                        "exit_action": ins.action,
+                        "exit_reason": ins.reason,
+                    },
+                    now_ms=now_ms,
+                    corr=r.trade_intent_id or ins.position_id,
+                )
 
             if ins.action == "CLOSE":
                 if r.status in ("FILLED", "OWNER_EXECUTED", "BROKER_CONFIRMED"):
                     self.protection.close_confirmed(ins.position_id)
-                elif r.status == "ACCEPTED" and r.execution_channel == "OWNER_TICKET":
-                    # The position is still open. Keep the rule in pending-close
-                    # state and expose the SELL ticket to the gateway/owner.
-                    ticket = getattr(adapter, "tickets", {}).get(r.broker_order_id)
-                    self._log(
-                        EventKind.OWNER_TICKET,
-                        {
-                            "ticket": r.broker_order_id,
-                            "symbol": symbol,
-                            "side": "SELL",
-                            "position_id": ins.position_id,
-                            "trade_intent_id": r.trade_intent_id,
-                            "exit_reason": ins.reason,
-                            "qty": (
-                                str(ticket.quantity_shares)
-                                if ticket is not None else None
-                            ),
-                            "limit_price": (
-                                str(ticket.limit_price)
-                                if ticket is not None else None
-                            ),
-                        },
-                        now_ms=now_ms,
-                        corr=r.trade_intent_id or ins.position_id,
-                    )
-                elif r.status in ("REJECTED", "CANCELLED", "EXPIRED", "UNKNOWN"):
+                elif r.status in ("REJECTED", "CANCELLED", "EXPIRED"):
                     self.protection.close_failed(ins.position_id)
             else:
                 # on_mark has already tentatively moved the in-memory stop. A

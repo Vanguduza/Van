@@ -1,0 +1,65 @@
+{
+  "schema": "van.rebuild.candidate-source-receipt/1",
+  "scope": "PARTIAL_BE003_BE010_BE012_BE036_NOT_UNIT_ACCEPTANCE",
+  "source_parent": "4da20510b1f2",
+  "source_sha256": {
+    "trading/vati/core/events.py": "dfed3d3e808285c09f506bfb128fc4e5771a51f30de90ae8ce98eb1555b654b1",
+    "trading/vati/execution/exit_journal.py": "c62660c55847b04d46d3b8f91d2179da9659307548fa6e0d7d50917a06863d38",
+    "trading/vati/execution/router.py": "982d2478ea289d58aeadbee2f5519488e6bdb13776a2cb6a5ef542eea12cbb2c",
+    "trading/vati/app/trade_lifecycle.py": "910e10f7b93ee46f891c056f6f1914283d5f3b8d9364a5ee6512dcc23070e2b3",
+    "trading/vati/app/cycle.py": "5a6b67ac05feccd3d0197af7fe54d1fd72932c5a16563417c609dce914a76931",
+    "trading/vati/learning/health.py": "00957a34ce24ef7c9487f032b1404d77d69781194fa91907a7d2875013c04066",
+    "trading/tests/test_exit_uncertainty.py": "c2a1f426a08718ec66cc720c0512198e60c5cab80906b066af0edd6dd2c46916",
+    "trading/tests/test_health_observation_clock.py": "3e561aeb6bab5cb63758ba0b2e7a555f865f225ab88ed79377094e0985309515"
+  },
+  "before": {
+    "uncertain_close": {
+      "failed": 7,
+      "passed": 1
+    },
+    "health_clock": {
+      "failed": 3,
+      "passed": 1
+    }
+  },
+  "validation": {
+    "trading": {
+      "passed": 1629,
+      "skipped": 2,
+      "warnings": 3,
+      "seconds": 47.22
+    },
+    "rebuild": {
+      "passed": 52,
+      "seconds": 33.1
+    },
+    "new_exit_and_clock_tests": 30,
+    "mutation_anchor_preflight": {
+      "identities": 374,
+      "edits": 382,
+      "findings": 0,
+      "corpus_execution_at_this_source": "NOT_RUN"
+    }
+  },
+  "logs_sha256": {
+    "/tmp/van-exit-uncertainty-before.txt": "9aa66a39e54a4ff032a023398214193fa3c2f6aceb30abb0737bee3a7d552493",
+    "/tmp/van-health-clock-before.txt": "058eab822c20c0bd7dd7fb5a73ec6a8fc3a85d2b26b794e10eb4054cabe1d31b",
+    "/tmp/van-health-clock-validation.txt": "3212f64f4555884530dd7813c404650548eaecab62d6e1ba5fec535d17f2dfef",
+    "/tmp/van-exit-upgrade-validation.txt": "9b9ac3928956d1940a134305e81d21f726874b44506e95b8afc32e210c3322dc",
+    "/tmp/van-exit-and-health-final.txt": "4849c3f5b4401d02450d333d4a7e2369991dd4886f91c8aaaf1598905cb5e3fb",
+    "/tmp/van-rebuild-after-exits.txt": "42b2115722754b5ecb4381cf3f631f49e774afa8f61d1d384694c5c8395547b6",
+    "/tmp/van-exit-mutation-preflight.json": "b1e8359648f88d5623789a3a98a4bb5e863bf64a12b7634789e76ca64f359f11"
+  },
+  "crash_windows": [
+    "after durable request before transport",
+    "after controlled provider effect before response",
+    "after receipt insert before atomic disposition commit",
+    "after receipt/disposition commit before projection update"
+  ],
+  "limits": [
+    "Local SQLite and controlled adapter/owner facts; no live broker, profit, S24 or independent unit acceptance",
+    "Legacy UNKNOWN closes fail closed pending authoritative native reconciliation",
+    "General broker-specific reconciliation of pending exit requests remains BE010 work; journal exposes uncertainty, never invents a resolution",
+    "PostgreSQL uses the existing ledger atomic contract but no new actual PostgreSQL service result is claimed here"
+  ]
+}

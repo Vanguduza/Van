@@ -507,6 +507,8 @@ class AccountTradeLifecycle:
         now_ms: int,
     ) -> None:
         """Apply an owner SELL fill without treating a partial fill as closed."""
+        if callable(getattr(self.router, "confirm_owner_exit", None)):
+            self.router.confirm_owner_exit(receipt, now_ms=now_ms)
         remaining = [
             p for p in self.adapter.positions()
             if p.trade_intent_id == receipt.trade_intent_id
@@ -1260,7 +1262,8 @@ class AccountTradeLifecycle:
                     receipt.reject_reason,
                     now_ms,
                 )
-                self.protection.forget(receipt.broker_position_id)
+                if receipt.trade_intent_id not in self.entries:
+                    self.protection.forget(receipt.broker_position_id)
 
     def _realised_pnl(self, entry: dict, exit_price: Decimal) -> tuple[Decimal, bool]:
         measured = closed_trade_pnl(entry, exit_price,
@@ -1274,9 +1277,14 @@ class AccountTradeLifecycle:
         reason: str,
         now_ms: int,
     ) -> None:
-        entry = self.entries.pop(intent_id, None)
-        if entry is None or exit_price is None:
+        entry = self.entries.get(intent_id)
+        if entry is None:
             return
+        if not isinstance(exit_price, Decimal) or not exit_price.is_finite():
+            self._log(EventKind.SESSION, {"event": "CLOSE_PRICE_UNRESOLVED",
+                "reason": reason, "position_id": entry.get("broker_position_id")}, now_ms=now_ms, corr=intent_id)
+            return
+        self.entries.pop(intent_id)
         family = self.families.for_intent(intent_id)
         if family is not None and family.net_quantity > ZERO:
             self.families.apply(

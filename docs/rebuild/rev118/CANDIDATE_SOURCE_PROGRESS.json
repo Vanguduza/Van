@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T07:25:08.387414+00:00",
+  "updated_at_utc": "2026-10-22T07:38:56.946564+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -67,6 +67,11 @@
           "change": "Native sealed quality/lesson cold-start parity, duplicate checks and durable-before-cache ordering",
           "evidence": "backend/BE-003_012_036_LEARNING_REPLAY.md; receipts/LEARNING_REPLAY_SOURCE_20261022.json",
           "result": "1599 full trading tests passed / 2 skipped; candidate milestone only"
+        },
+        {
+          "change": "Existing ledger atomic protective request/receipt journal and four real process-death boundaries",
+          "evidence": "backend/BE-003_010_012_036_EXIT_AND_HEALTH.md; receipts/EXIT_UNCERTAINTY_AND_HEALTH_SOURCE_20261022.json",
+          "result": "1629 full trading tests pass/2 skip; partial candidate milestone"
         }
       ]
     },
@@ -151,6 +156,11 @@
           "change": "Joint lot/participation/count feasibility, single-command refusal, protected exit/entry distinction and normal router refusal",
           "result": "Full trading source suite: 1576 pass, 2 skip. These are partial unit milestones; no policy qualification or profit claim.",
           "evidence": "backend/BE-010_012_036_EXECUTION_ECONOMICS.md; receipts/EXECUTION_ECONOMICS_SOURCE_20261022.json"
+        },
+        {
+          "change": "No blind retry after unknown close; same producer handles market/preservation and native owner confirmation",
+          "evidence": "backend/BE-003_010_012_036_EXIT_AND_HEALTH.md; receipts/EXIT_UNCERTAINTY_AND_HEALTH_SOURCE_20261022.json",
+          "result": "1629 full trading tests pass/2 skip; partial candidate milestone"
         }
       ]
     },
@@ -185,6 +195,11 @@
           "change": "Contract-scaled reconciled PnL attribution and net return over immutable approved money risk",
           "evidence": "backend/BE-003_012_036_LEARNING_REPLAY.md; receipts/LEARNING_REPLAY_SOURCE_20261022.json",
           "result": "1599 full trading tests passed / 2 skipped; candidate milestone only"
+        },
+        {
+          "change": "Missing/nonfinite close-price state retained for later reconciliation; pending fills retain fees",
+          "evidence": "backend/BE-003_010_012_036_EXIT_AND_HEALTH.md; receipts/EXIT_UNCERTAINTY_AND_HEALTH_SOURCE_20261022.json",
+          "result": "1629 full trading tests pass/2 skip; partial candidate milestone"
         }
       ]
     },
@@ -1074,6 +1089,11 @@
           "change": "Unknown outcome exclusion; source-version/environment-preserving lesson replay; no single-trade randomness inference",
           "evidence": "backend/BE-003_012_036_LEARNING_REPLAY.md; receipts/LEARNING_REPLAY_SOURCE_20261022.json",
           "result": "1599 full trading tests passed / 2 skipped; candidate milestone only"
+        },
+        {
+          "change": "Distinct-observation hysteresis clock; duplicate evidence and diagnostic reads do not advance it",
+          "evidence": "backend/BE-003_010_012_036_EXIT_AND_HEALTH.md; receipts/EXIT_UNCERTAINTY_AND_HEALTH_SOURCE_20261022.json",
+          "result": "1629 full trading tests pass/2 skip; partial candidate milestone"
         }
       ]
     },

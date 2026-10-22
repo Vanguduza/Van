@@ -428,7 +428,8 @@ class DecisionCycle:
                 continue
             if r.status == "FILLED" and r.trade_intent_id in self._entries and r.reject_reason not in ("TRAIL", "BREAK_EVEN"):
                 self._on_close(r.trade_intent_id, r.average_fill, r.reject_reason, now_ms)
-                self.protection.forget(r.broker_position_id)
+                if r.trade_intent_id not in self._entries:
+                    self.protection.forget(r.broker_position_id)
 
     def _record_tca(self, rec, direction, cost: Decimal, session: str, event_window: str, *, now_ms: int) -> None:
         cfg = self.cfg
@@ -457,6 +458,7 @@ class DecisionCycle:
                   now_ms=now_ms, corr=r.trade_intent_id)
         if r.status == "FILLED" and r.reject_reason == "PENDING_FILLED":
             row.update({"pending": False, "open": True, "entry": r.average_fill, "quantity": r.filled_qty,
+                        "fees": r.fees,
                         "broker_position_id": r.broker_position_id,
                         "protective_stop_confirmed": bool(r.protective_stop_confirmed or self.cfg.software_stops),
                         "best_price": r.average_fill, "worst_price": r.average_fill})
@@ -636,7 +638,8 @@ class DecisionCycle:
                     "FILLED", "OWNER_EXECUTED", "BROKER_CONFIRMED"
                 ):
                     self._on_close(intent_id, receipt.average_fill, "EXIT", now_ms)
-                    self.protection.forget(position_id)
+                    if intent_id not in self._entries:
+                        self.protection.forget(position_id)
 
     def _classify_decision(self, intent_id: str, entry: dict, rv, now_ms: int, *, outcome_known: bool = True):
         """Decision quality x outcome, and the lesson it teaches (GAP-F-003)."""
@@ -669,9 +672,14 @@ class DecisionCycle:
         return verdict
 
     def _on_close(self, intent_id: str, exit_price: Optional[Decimal], reason: str, now_ms: int) -> None:
-        e = self._entries.pop(intent_id, None)
-        if e is None or exit_price is None:
+        e = self._entries.get(intent_id)
+        if e is None:
             return
+        if not isinstance(exit_price, Decimal) or not exit_price.is_finite():
+            self._log(EventKind.SESSION, {"event": "CLOSE_PRICE_UNRESOLVED",
+                "reason": reason, "position_id": e.get("broker_position_id")}, now_ms=now_ms, corr=intent_id)
+            return
+        self._entries.pop(intent_id)
         e["trade_intent_id"] = intent_id
         measured = closed_trade_pnl(e, exit_price, self.cfg.contract, getattr(self.adapter, "closed", None))
         pnl = measured.amount if measured.amount is not None else ZERO
