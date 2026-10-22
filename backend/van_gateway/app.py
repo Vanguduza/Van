@@ -3535,7 +3535,7 @@ def create_app() -> FastAPI:
                 )
                 raise HTTPException(status_code=403, detail=str(exc)) from exc
         try:
-            result = await onboarding.run(req.action, req.args)
+            result = await onboarding.run(req.action, req.args, owner_device_id=req.device_id)
         except HTTPException as exc:
             await audit.record(
                 result="refused",
@@ -3751,16 +3751,18 @@ def create_app() -> FastAPI:
 
         from fastapi.responses import HTMLResponse
 
+        headers = {"Cache-Control": "no-store", "Referrer-Policy": "no-referrer"}
         try:
             result = await onboarding.oauth_callback(broker, dict(request.query_params))
         except HTTPException as exc:
             return HTMLResponse(
                 f"<h2>Van: linking failed</h2><p>{html.escape(str(exc.detail))}</p>",
-                status_code=exc.status_code,
+                status_code=exc.status_code, headers=headers,
             )
         return HTMLResponse(
-            f"<h2>Van: {html.escape(str(result['broker']))} linked</h2>"
-            "<p>Return to the Van app to choose the account. You can close this page.</p>"
+            f"<h2>Van: {html.escape(str(result['broker']))} authorization received</h2>"
+            "<p>Return to the Van app to choose the account. You can close this page.</p>",
+            headers=headers,
         )
 
     @app.post("/v1/visual/acceptance")

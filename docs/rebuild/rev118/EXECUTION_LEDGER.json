@@ -170,7 +170,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-22T12:41:51.078693+00:00",
+    "updated_utc": "2026-10-22T12:55:58.750286+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
@@ -178,14 +178,8 @@
         "source": "b1ab08bd",
         "kind": "frozen full backend/contracts storage audit",
         "session": 70771,
-        "log": "/tmp/van-b1ab-full-backend.txt"
-      },
-      {
-        "source": "b1ab08bd",
-        "kind": "hosted van-ci",
-        "run_id": 39778638488,
-        "native_job": 119823924980,
-        "status": "IN_PROGRESS; query actual state before next push to avoid concurrency cancellation"
+        "log": "/tmp/van-b1ab-full-backend.txt",
+        "status": "RUNNING; collect actual result"
       }
     ],
     "last_validation": [
@@ -231,7 +225,8 @@
       "Learning/native packet:1754 full trading+one separate new PostgreSQL scope case all pass without skips;129 focused/66 owner-gateway/78 rebuild pass. Account/cohort bypass mutant caught/restored. VITS native diagnostic invalid_voice proved count-zero single-speaker metadata22050/0 from exact pinned weights and SDK11afbd00;1306 JVM/195 app/APKs/lint0Error/Fatal89warnings pass,next native run pending. Prior9599 hosted374mutants/publicPG/trading/117voice pass;16 native pass/4core skips/2real native-preparation failures. Frozen9573 fullbackend/contracts6557pass/166skip,no forbidden storage events.",
       "Frozen9599 fullbackend/contracts:6571pass/166skip/one literal-shell ABI oracle failure,no forbidden storage events. Corrected oracle:20pass/zero skips including real AGP release-profile refusal;workflow unchanged.",
       "Restated-learning source:1797 full trading tests pass/zero skips with real private PostgreSQL;27 gateway tests/78 rebuild pass;three new accounting/restatement/transaction mutants caught after seven valid controls,source restored. Existing account/portfolio endpoints expose scoped recorded views. Registry437endpoints/254schemas and original374mutations/383edits retained;fixture stopped/removed. Native2fb3actual18pass/4core skips and6580backend pass retained separately.",
-      "Account persistence:1825 full trading pass/zero skip with real private PostgreSQL;36 focused/46 gateway pass;8 original failures reproduced,4 custom mutants caught/restored after7validcontrols. Original374identities/383edits and437endpoints/254schemas retained;fixture stopped/removed. Safe exposure unlink and native provider identity/OAuth remain required."
+      "Account persistence:1825 full trading pass/zero skip with real private PostgreSQL;36 focused/46 gateway pass;8 original failures reproduced,4 custom mutants caught/restored after7validcontrols. Original374identities/383edits and437endpoints/254schemas retained;fixture stopped/removed. Safe exposure unlink and native provider identity/OAuth remain required.",
+      "OAuth exact state/broker/device:39gateway/192owner-registry+Artemis-plan/78rebuild pass;3 real pre-fix failures and3 bypass mutants verified,source restored. b1ab hosted39778638488 completes374legacy mutants,26PG/117voice,1796tradingpass+oneprivateDDSskip,18nativepass+4core skips. Separate cognitive-fabric workflow39778638515passes Python andAndroid."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -242,8 +237,8 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Continue canonical BE-004/005 exact OAuth state/broker/device binding, callback collision/recovery, native live/demo/read-only identity and exposure-safe unlink. Observe b1ab native/full audit before next push. Remaining original funds/qualified-adaptation and whole-product units retained.",
-    "previous_head": "b1ab08bddd1ca9a101e51eb07f74d28d3eb70767"
+    "next_action": "Continue canonical BE-005 durable OAuth callback/link claims, concurrency and truthful uncertain-effect recovery; then native account environment/read-only identity and exposure-safe unlink. Collect frozen b1ab full audit. Keep original funds, governed adaptation and whole-product units/gates intact.",
+    "previous_head": "fce3212e"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -301,6 +296,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Continue canonical BE-004/005 exact OAuth state/broker/device binding, callback collision/recovery, native live/demo/read-only identity and exposure-safe unlink. Observe b1ab native/full audit before next push. Remaining original funds/qualified-adaptation and whole-product units retained.",
-  "updated_at_utc": "2026-10-22T12:41:51.078693+00:00"
+  "current_action": "Continue canonical BE-005 durable OAuth callback/link claims, concurrency and truthful uncertain-effect recovery; then native account environment/read-only identity and exposure-safe unlink. Collect frozen b1ab full audit. Keep original funds, governed adaptation and whole-product units/gates intact.",
+  "updated_at_utc": "2026-10-22T12:55:58.750286+00:00"
 }

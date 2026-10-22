@@ -127,7 +127,14 @@ class OAuthPending:
         row = await self.store.fetchone("SELECT broker, payload_enc, created_at_unix FROM trading_oauth_pending WHERE state = ?", (state,))
         if row is None or int(row["created_at_unix"]) < int(time.time()) - PENDING_TTL_S:
             return None
-        return {"broker": row["broker"], **json.loads(self._f.decrypt(row["payload_enc"].encode()))}
+        from cryptography.fernet import InvalidToken
+        try:
+            payload = json.loads(self._f.decrypt(row["payload_enc"].encode()))
+            if not isinstance(payload, dict):
+                raise ValueError("invalid pending payload")
+        except (InvalidToken, ValueError, TypeError):
+            raise HTTPException(409, "OAuth state cannot be read; restart linking without adopting old credentials") from None
+        return {**payload, "broker": row["broker"]}
 
     async def latest(self, broker: str) -> Optional[str]:
         row = await self.store.fetchone("SELECT state FROM trading_oauth_pending WHERE broker = ? ORDER BY created_at_unix DESC LIMIT 1", (broker,))
@@ -155,17 +162,24 @@ class AccountOnboarding:
     def _cb(self, broker: str) -> str:
         return f"{self.public_base_url.rstrip('/')}/v1/trading/oauth/{broker}/callback"
 
-    async def oauth_start(self, args: dict) -> dict:
+    @staticmethod
+    def _owner(pending: dict, owner_device_id: str | None) -> None:
+        if not isinstance(owner_device_id, str) or not owner_device_id or pending.get("_owner_device_id") != owner_device_id:
+            raise HTTPException(403, "OAuth state belongs to another device or has no verified owner; restart linking")
+
+    async def oauth_start(self, args: dict, *, owner_device_id: str | None = None) -> dict:
+        if not isinstance(owner_device_id, str) or not owner_device_id:
+            raise HTTPException(403, "authenticated owner device is required to start OAuth")
         broker = str(args.get("broker", "")).lower()
         if broker == "deriv":
-            state = await self.pending.create("deriv", {"app_id": str(args.get("app_id") or self.deriv_app_id)})
+            state = await self.pending.create("deriv", {"app_id": str(args.get("app_id") or self.deriv_app_id), "_owner_device_id": owner_device_id})
             return {"state": state, "url": f"{DERIV_OAUTH}?{urlencode({'app_id': args.get('app_id') or self.deriv_app_id, 'l': 'EN', 'brand': 'deriv', 'state': state})}", "callback": self._cb("deriv"),
                     "note": "register this callback as the redirect URL of the Deriv app (api.deriv.com → register application)"}
         if broker == "ctrader":
             cid, csec = str(args.get("client_id", "")).strip(), str(args.get("client_secret", "")).strip()
             if not cid or not csec:
                 raise HTTPException(422, "cTrader application client_id and client_secret are required (openapi.ctrader.com → Applications)")
-            state = await self.pending.create("ctrader", {"client_id": cid, "client_secret": csec})
+            state = await self.pending.create("ctrader", {"client_id": cid, "client_secret": csec, "_owner_device_id": owner_device_id})
             _trading_path()
             from vati.execution.ctrader import authorize_url
             return {"state": state, "url": authorize_url(cid, self._cb("ctrader"), state=state), "callback": self._cb("ctrader"), "note": "the application's redirect URI must equal the callback"}
@@ -175,16 +189,16 @@ class AccountOnboarding:
         if broker == "ctrader":
             state, code = str(query.get("state", "")), str(query.get("code", ""))
             p = await self.pending.get(state)
-            if p is None or not code:
-                raise HTTPException(400, "missing code or unknown state")
+            if p is None or p.get("broker") != "ctrader" or not p.get("_owner_device_id") or not code:
+                raise HTTPException(400, "missing code or unknown, unbound or wrong-broker state")
             tok = self.control.run("ctrader_oauth_exchange", {"client_id": p["client_id"], "client_secret": p["client_secret"], "code": code, "redirect_uri": self._cb("ctrader")})
             await self.pending.update(state, {"access_token": tok["access_token"], "refresh_token": tok.get("refresh_token"), "ready": True})
             return {"broker": "ctrader", "state": state, "ready": True}
         if broker == "deriv":
-            state = str(query.get("state", "")) or await self.pending.latest("deriv") or ""
+            state = str(query.get("state", ""))
             p = await self.pending.get(state)
-            if p is None:
-                raise HTTPException(400, "unknown or expired state")
+            if p is None or p.get("broker") != "deriv" or not p.get("_owner_device_id"):
+                raise HTTPException(400, "unknown, expired, unbound or wrong-broker state")
             accounts = []
             i = 1
             while f"acct{i}" in query and f"token{i}" in query:
@@ -196,10 +210,11 @@ class AccountOnboarding:
             return {"broker": "deriv", "state": state, "ready": True, "accounts": len(accounts)}
         raise HTTPException(404, "unknown broker")
 
-    async def oauth_pending(self, args: dict) -> dict:
+    async def oauth_pending(self, args: dict, *, owner_device_id: str | None = None) -> dict:
         p = await self.pending.get(str(args.get("state", "")))
         if p is None:
             return {"ready": False, "expired": True}
+        self._owner(p, owner_device_id)
         if not p.get("ready"):
             return {"ready": False}
         if p["broker"] == "deriv":
@@ -207,15 +222,16 @@ class AccountOnboarding:
         accts = self.control.run("ctrader_discover", {"client_id": p["client_id"], "client_secret": p["client_secret"], "access_token": p["access_token"]})
         return {"ready": True, "broker": "ctrader", "accounts": accts.get("accounts", []), "errors": accts.get("errors", [])}
 
-    async def run(self, action: str, args: dict) -> dict:
+    async def run(self, action: str, args: dict, *, owner_device_id: str | None = None) -> dict:
         if action == "oauth_start":
-            return await self.oauth_start(args)
+            return await self.oauth_start(args, owner_device_id=owner_device_id)
         if action == "oauth_pending":
-            return await self.oauth_pending(args)
+            return await self.oauth_pending(args, owner_device_id=owner_device_id)
         if action == "deriv_oauth_link" and args.get("state"):
             p = await self.pending.get(str(args["state"]))
-            if p is None:
-                raise HTTPException(404, "unknown or expired OAuth state")
+            if p is None or p.get("broker") != "deriv" or not p.get("ready"):
+                raise HTTPException(404, "unknown, expired, incomplete or wrong-broker OAuth state")
+            self._owner(p, owner_device_id)
             acct = next((a for a in p.get("accounts", []) if a["loginid"].upper() == str(args.get("loginid", "")).upper()), None)
             if acct is None:
                 raise HTTPException(422, "loginid not in the OAuth result")
@@ -224,8 +240,9 @@ class AccountOnboarding:
             return out
         if action == "ctrader_link" and args.get("state"):
             p = await self.pending.get(str(args["state"]))
-            if p is None or not p.get("ready"):
-                raise HTTPException(404, "unknown, expired or incomplete OAuth state")
+            if p is None or p.get("broker") != "ctrader" or not p.get("ready"):
+                raise HTTPException(404, "unknown, expired, incomplete or wrong-broker OAuth state")
+            self._owner(p, owner_device_id)
             out = self.control.run("ctrader_link", {"alias": args.get("alias"), "client_id": p["client_id"], "client_secret": p["client_secret"], "access_token": p["access_token"], "refresh_token": p.get("refresh_token"),
                                                      "ctid_trader_account_id": args.get("ctid_trader_account_id"), "is_live": args.get("is_live", False), "label": args.get("label", ""), "currency": args.get("currency", "USD")})
             await self.pending.consume(str(args["state"]))

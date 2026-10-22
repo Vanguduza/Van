@@ -9524,7 +9524,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3790",
+      "source": "backend/van_gateway/app.py:3792",
       "summary": "Trading Tickets",
       "tags": [],
       "parameters": [
@@ -10095,7 +10095,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3781",
+      "source": "backend/van_gateway/app.py:3783",
       "summary": "Latest Visual Acceptance",
       "tags": [],
       "parameters": [],
@@ -17650,7 +17650,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3854",
+      "source": "backend/van_gateway/app.py:3856",
       "summary": "Reset Events",
       "tags": [],
       "parameters": [
@@ -22084,7 +22084,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3794",
+      "source": "backend/van_gateway/app.py:3796",
       "summary": "Trading Halt",
       "tags": [],
       "parameters": [
@@ -22236,7 +22236,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3818",
+      "source": "backend/van_gateway/app.py:3820",
       "summary": "Trading Confirm Ticket",
       "tags": [],
       "parameters": [
@@ -22620,7 +22620,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3766",
+      "source": "backend/van_gateway/app.py:3768",
       "summary": "Record Visual Acceptance",
       "tags": [],
       "parameters": [],

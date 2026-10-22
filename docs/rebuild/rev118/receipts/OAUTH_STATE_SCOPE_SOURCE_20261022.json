@@ -1,0 +1,86 @@
+{
+  "schema": "van.rebuild.oauth-state-scope-source/1",
+  "source_parent": "fce3212e4a08edc92f27626511d454684d37cbfc",
+  "source_sha256": {
+    "backend/van_gateway/app.py": "3c841b6b5b0da042f57ff2792f8c5ef259a12424b9f0f963636a0d9c6b8c6e0c",
+    "backend/van_gateway/trading/accounts.py": "65edc94b876429223cdb299cf8416f9c6038e1ee0465b3808600506f9c5be0ce",
+    "backend/tests/test_trading_oauth_scope.py": "7bd882028f2d7cadaecc9739534a949b3f4a3606c6973f246e447563045af1b5",
+    "backend/tests/test_trading_api.py": "1ea1aa20e2315040b1e634b21a75f7ecd25138c19e5c86ed33aade14d498d480"
+  },
+  "pre_fix_semantic_counterexamples": 3,
+  "gateway": {
+    "tests": 39,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "3c6773e606b7d74dd74cce86735a4ccd2375103843b9a25591fe17f903c081f6"
+  },
+  "owner_registry_and_artemis_plan_contracts": {
+    "tests": 192,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "9d58cc5c9e532d00666651f34c051744e446f9095b23ab1d10b7532664f3d813"
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "90cd5ecc94d2bab3a88dbaa1b1a1cb461d3636b54e1adf8ce9ad90ad6c0d4f01"
+  },
+  "new_regression_cases": 7,
+  "custom_mutants": {
+    "detected": 3,
+    "survived": 0,
+    "source_restored": true,
+    "rows": [
+      {
+        "kind": "baseline",
+        "mutation": null,
+        "exit_code": 0,
+        "log": "/tmp/van-oauth-scope-mutant-0.txt",
+        "sha256": "2df005e9e728c13fdcde056428931b80c84d51c9008bd031fd1d51b611c2f22e"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "allow another paired device to adopt pending OAuth state",
+        "exit_code": 1,
+        "log": "/tmp/van-oauth-scope-mutant-1.txt",
+        "sha256": "9b470f900747ca218255fd6ef9dfee9c10508fc9302e595b15e3f14fee59444a"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "allow a wrong-broker callback to populate pending state",
+        "exit_code": 1,
+        "log": "/tmp/van-oauth-scope-mutant-2.txt",
+        "sha256": "82715dfb87efa488a6489f238c17a9c8ddb1e7d3ef32fad48fcb3907790917e2"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "substitute latest global OAuth state when callback nonce is absent",
+        "exit_code": 1,
+        "log": "/tmp/van-oauth-scope-mutant-3.txt",
+        "sha256": "52b985c9c63f1f1eb3a90e1ef6a9e2639357feb1c9e502a12ee9d1ff50a42604"
+      }
+    ]
+  },
+  "owner_registry_refresh": {
+    "changed": [
+      "registries/owner_endpoints.json",
+      "registries/owner_features.json",
+      "registries/owner_screens.json",
+      "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json"
+    ],
+    "applied": true,
+    "scope": "SOURCE_CONTRACTS_ONLY"
+  },
+  "live_provider_contacted": false,
+  "whole_unit_acceptance": "NOT_ISSUED",
+  "remaining": [
+    "Durable callback/link collision, unknown effect and process recovery",
+    "Native identity/environment/read-only admission",
+    "Exposure/funds/lease-safe unlink",
+    "Qualified provider/credential and independent/production/handset acceptance"
+  ]
+}

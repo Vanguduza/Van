@@ -472,7 +472,8 @@ async def test_account_onboarding_is_device_signed_and_forwards_without_storing_
     assert st["url"].startswith("https://oauth.deriv.com/oauth2/authorize?app_id=1089") and st["callback"].endswith("/v1/trading/oauth/deriv/callback")
     assert (await act("oauth_pending", {"state": st["state"]})).json() == {"ready": False}
     cb = await ac.get(f"/v1/trading/oauth/deriv/callback?state={st['state']}&acct1=VRTC900&token1=a1-linked&cur1=USD&acct2=CR777&token2=a1-real&cur2=USD")
-    assert cb.status_code == 200 and "linked" in cb.text
+    assert cb.status_code == 200 and "authorization received" in cb.text
+    assert cb.headers["cache-control"] == "no-store" and cb.headers["referrer-policy"] == "no-referrer"
     pend = (await act("oauth_pending", {"state": st["state"]})).json()
     assert pend["ready"] and pend["accounts"] == [{"loginid": "VRTC900", "currency": "USD", "demo": True}, {"loginid": "CR777", "currency": "USD", "demo": False}] and "a1-" not in json.dumps(pend)
     row = await app.state.store.fetchone("SELECT payload_enc FROM trading_oauth_pending WHERE state = ?", (st["state"],))
