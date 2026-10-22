@@ -586,6 +586,32 @@ jobs:
   mutation:
     runs-on: ubuntu-latest
     continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: python
+            family: python
+            shard: 0/1
+          - label: browser-agent
+            family: browser-agent
+            shard: 0/1
+          - label: kotlin-0
+            family: kotlin
+            shard: 0/4
+          - label: kotlin-1
+            family: kotlin
+            shard: 1/4
+          - label: kotlin-2
+            family: kotlin
+            shard: 2/4
+          - label: kotlin-3
+            family: kotlin
+            shard: 3/4
+    env:
+      MUTATION_FAMILY: ${{ matrix.family }}
+      MUTATION_SHARD: ${{ matrix.shard }}
+      PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/backend:${{ github.workspace }}/trading
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -596,8 +622,23 @@ jobs:
           distribution: temurin
           java-version: "17"
       - name: Install backend dependencies
+        if: matrix.family == 'python'
         working-directory: backend
         run: pip install -r requirements.lock
+      - name: Install browser mutation dependencies
+        if: matrix.family == 'browser-agent'
+        run: |
+          pip install --require-hashes -r deploy/van-browser-stream/requirements.lock
+          pip install pytest==9.1.1 pytest-asyncio==1.4.0
+      - name: Install mutation Gradle
+        if: matrix.family == 'kotlin'
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - name: Resolve and prove the Kotlin control before offline mutations
+        if: matrix.family == 'kotlin'
+        working-directory: android/verification
+        run: gradle test --console=plain --rerun-tasks
       - name: Mutation testing (non-blocking)
         working-directory: backend
         timeout-minutes: 45
@@ -605,11 +646,11 @@ jobs:
           set -euo pipefail
           mkdir -p ../artifacts/mutation
           python ../tools/rebuild/mutation_registry.py --check | tee ../artifacts/mutation/mutation-registry.json
-          python ../tools/audit/mutation_suite.py 2>&1 | tee ../artifacts/mutation/mutation-report.txt
+          python ../tools/audit/mutation_suite.py --family "$MUTATION_FAMILY" --shard "$MUTATION_SHARD" 2>&1 | tee ../artifacts/mutation/mutation-report.txt
       - name: Upload mutation report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: van-mutation-report
+          name: van-mutation-report-${{ matrix.label }}
           path: artifacts/mutation/
           if-no-files-found: warn

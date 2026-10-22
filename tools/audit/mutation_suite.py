@@ -1,4 +1,5 @@
 import pathlib
+import argparse
 import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from mutation import run
@@ -39,33 +40,42 @@ ALL = [
    ("../android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
     '            .put("command_id", commandId)\n', "",
     "C38 the stored command has no id for the Gateway to admit it by"),
-   ("../android/app/src/main/java/com/dial/van/control/VanCommandController.kt",
-    "            gateway.buildCommandBody(", "            gateway.buildCommandBodyX(",
-    "C38 the offline path assembles its own payload again"),
+   ('../android/app/src/main/java/com/dial/van/control/VanCommandController.kt',
+ 'OfflineSubmission.preparedReplay(preparedBody, command.idempotencyKey)',
+ 'org.json.JSONObject().put("idempotency_key", command.idempotencyKey)',
+ 'C38 the offline path assembles its own payload again'),
  ]),
  (["tests/test_session_transport_api.py", "tests/test_van_hermes_session.py"], [
    ("van_gateway/app.py",
     "            cancel_mission=_cancel_mission_through_session,\n", "",
     "C36 the owner cancels a mission over the session and nothing happens"),
-   ("van_gateway/session/service.py",
-    '            "DELETE FROM van_session_messages WHERE message_id = ?",',
-    '            "SELECT 1 WHERE ? IS NULL",',
-    "C36 a refused message keeps its idempotency key and the corrected resend is refused"),
-   ("van_gateway/session/router.py",
-    "        delegate = self._delegate_for(envelope.kind)\n"
-    "        if delegate is None:\n"
-    "            return RoutedResult(False, envelope.kind, refusal=REJECT_UNKNOWN_KIND)\n"
-    "\n"
-    "        admission, existing = await self.sessions.admit(envelope, now_ms=now)",
-    "        admission, existing = await self.sessions.admit(envelope, now_ms=now)\n"
-    "        delegate = self._delegate_for(envelope.kind)\n"
-    "        if delegate is None:\n"
-    "            return RoutedResult(False, envelope.kind, refusal=REJECT_UNKNOWN_KIND)",
-    "C36 an envelope nobody can carry out is written into the admission table first"),
-   ("van_gateway/app.py",
-    '            states[identity] = row["admitted_state"] if row is not None else "UNKNOWN"',
-    '            states[identity] = "UNKNOWN"',
-    "C36 the Gateway holds the message and tells the phone to send it again"),
+   ('van_gateway/session/service.py',
+ '"AND kind = ? AND payload_digest = ? AND result_json IS NULL",',
+ '"AND kind = ? AND payload_digest = ? AND result_json IS NOT NULL",',
+ 'C36 a refused message keeps its idempotency key and the corrected resend is refused'),
+   ('van_gateway/session/router.py',
+ '        delegate = self._delegate_for(envelope.kind)\n'
+ '        if delegate is None:\n'
+ '            return RoutedResult(False, envelope.kind, refusal=REJECT_UNKNOWN_KIND)\n'
+ '\n'
+ '        try:\n'
+ '            admission, existing = await self.sessions.admit(envelope, now_ms=now)\n'
+ '        except SessionError as exc:\n'
+ '            return RoutedResult(False, envelope.kind, refusal=exc.reason)',
+ '        try:\n'
+ '            admission, existing = await self.sessions.admit(envelope, now_ms=now)\n'
+ '        except SessionError as exc:\n'
+ '            return RoutedResult(False, envelope.kind, refusal=exc.reason)\n'
+ '        delegate = self._delegate_for(envelope.kind)\n'
+ '        if delegate is None:\n'
+ '            return RoutedResult(False, envelope.kind, refusal=REJECT_UNKNOWN_KIND)',
+ 'C36 an envelope nobody can carry out is written into the admission table first'),
+   ('van_gateway/app.py',
+ '            states[identity] = ("RESULT_PENDING" if row is not None and row["result_json"] is None '
+ 'else\n'
+ '                                row["admitted_state"] if row is not None else "UNKNOWN")',
+ '            states[identity] = "UNKNOWN"',
+ 'C36 the Gateway holds the message and tells the phone to send it again'),
    ("van_gateway/app.py",
     "                 WHERE van_session_id = ? AND (command_id = ? OR message_id = ?)",
     "                 WHERE ? IS NOT NULL AND (command_id = ? OR message_id = ?)",
@@ -429,10 +439,10 @@ ALL = [
     '    return path == INTERACTIVE_SESSION_PREFIX or path.startswith(INTERACTIVE_SESSION_PREFIX + "/")',
     "    return path.startswith(INTERACTIVE_SESSION_PREFIX)",
     "C24 a look-alike path is treated as the owner's session surface"),
-   ("van_gateway/app.py",
-    "    if browser_stream_grants is not None:\n        app.include_router(build_interactive_router(",
-    "    if True:\n        app.include_router(build_interactive_router(",
-    "C24 the routes mount with no signing key configured"),
+   ('van_gateway/app.py',
+ '    if browser_stream_grants is not None:\n        # Rev 1.5 §§22.2, 22.3',
+ '    if True:\n        # Rev 1.5 §§22.2, 22.3',
+ 'C24 the routes mount with no signing key configured'),
    ("van_gateway/browser/interactive_api.py",
     '            raise HTTPException(status_code=404, detail="interactive_session_unknown")\n        return session',
     "            pass\n        return session",
@@ -509,10 +519,10 @@ ALL = [
     "        digest = envelope.digest()\n        if envelope.payload_digest is not None and envelope.payload_digest != digest:",
     "        digest = envelope.payload_digest or envelope.digest()\n        if False:",
     "C26 the envelope vouches for its own payload"),
-   ("van_gateway/session/service.py",
-    '        if existing["payload_digest"] != digest:',
-    "        if False:",
-    "C26 a different payload under a known key is executed"),
+   ('van_gateway/session/service.py',
+ '                        or existing["payload_digest"] != digest):',
+ '                        or False):',
+ 'C26 a different payload under a known key is executed'),
    ("van_gateway/session/service.py",
     "        if len(routes) >= 2:",
     "        if len(usable) >= 2:",
@@ -852,18 +862,18 @@ CONTROL_AGENT = [
   "        task.steps_used += 1",
   "        pass",
   "C29 the budget is never spent, which is the same as not having one"),
- (f"{SERVICES}/agent.py",
-  "    if not (url.startswith(\"https://\") or url.startswith(\"http://\")):",
-  "    if False:",
-  "C29 file:/// reads the host's disk into a page the owner is watching"),
+ ('services/browser_control_agent/agent.py',
+ '        validate_public_url_syntax(url)',
+ '        pass',
+ "C29 file:/// reads the host's disk into a page the owner is watching"),
  (f"{SERVICES}/cdp.py",
   "        if not address.is_loopback:",
   "        if False:",
   "C29 the CDP client may be pointed at another host's browser"),
- (f"{SERVICES}/cdp.py",
-  "            raise CdpUnavailable(\"cdp_endpoint_must_be_a_loopback_literal\") from exc",
-  "            return",
-  "C29 a hostname is accepted, and resolves on a machine we do not control"),
+ ('services/browser_control_agent/cdp.py',
+ "            raise CdpUnavailable('cdp_endpoint_must_be_a_loopback_literal') from exc",
+ '            return',
+ 'C29 a hostname is accepted, and resolves on a machine we do not control'),
  # --- checkpoint 31: the wire format the host and its caller share ------------
  (f"{SERVICES}/wire.py",
   '    if "caller" in payload or "caller_common_name" in payload:',
@@ -946,22 +956,36 @@ EVT_KT = f"{APP_KT}/events/EventStream.kt"
 ROOT_LEVEL = [
  # --- checkpoint 20/21: owner surfaces and the removal assertion ----------------
  (["tests/contracts/test_owner_surfaces_are_reachable.py"], [
-   ("android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
-    "            CommandModule.MISSIONS -> MissionsModule(app, glass)\n", "",
-    "C20 the work screen has no render branch"),
-   ("android/app/src/main/java/com/dial/van/command/CommandModule.kt",
-    '    MISSIONS("missions", "Work"),\n', "", "C20 the work screen is not navigable"),
-   ("android/app/src/main/java/com/dial/van/command/modules/MissionsModule.kt",
-    "                .onSuccess { snapshot = it; error = null }",
-    "                .onSuccess { error = null }",
-    "C20 the work screen never binds the repository result"),
+   ('android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt',
+ '                        WorkRoute(\n'
+ '                            app = app,\n'
+ '                            onOpenBrowser = { nav.navigate(VanRoute.WORK_BROWSER) },\n'
+ '                            onOpenArtemis = { nav.navigate(VanRoute.WORK_ARTEMIS) },\n'
+ '                            onOpenActivity = { nav.navigate(VanRoute.WORK_ACTIVITY) },\n'
+ '                            onOpenConvergence = { nav.navigate(VanRoute.WORK_ASSETS) },\n'
+ '                            onOpenDevelopment = { nav.navigate(VanRoute.devHomeRoute()) },\n'
+ '                            onOpenKnowledge = { nav.navigate(VanRoute.OWNER_KNOWLEDGE) },\n'
+ '                            onOpenResearch = { nav.navigate(VanRoute.OWNER_RESEARCH) },\n'
+ '                            onOpenAutomation = { nav.navigate(VanRoute.OWNER_AUTOMATION) },\n'
+ '                            onOpenCognitiveTwin = { nav.navigate(VanRoute.WORK_COGNITIVE_TWIN) },\n'
+ '                        )',
+ '                        Unit',
+ 'C20 the work screen has no render branch'),
+   ('android/app/src/main/java/com/dial/van/command/nav/VanRoute.kt',
+ '    val PRIMARY: List<String> = listOf(HOME, ATTENTION, WORK, TRADING, MEMORY)',
+ '    val PRIMARY: List<String> = listOf(HOME, ATTENTION, TRADING, MEMORY)',
+ 'C20 the work screen is not navigable'),
+   ('android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt',
+ '                    active = it.filter { mission -> mission.isActive }',
+ '                    active = emptyList()',
+ 'C20 the work screen never binds the repository result'),
    ("android/app/src/main/java/com/dial/van/command/modules/NotificationPolicyModule.kt",
     "                                    store.setPolicy(entry.key, option)",
     "                                    reload()", "C20 setting an app policy does nothing"),
-   ("android/app/src/main/java/com/dial/van/command/modules/MissionsModule.kt",
-    "    var expanded by rememberSaveable { mutableStateOf<String?>(null) }",
-    "    var expanded by remember { mutableStateOf<String?>(null) }",
-    "C20 the open mission is lost on rotation"),
+   ('android/app/src/main/java/com/dial/van/command/work/WorkDetails.kt',
+ '    var expanded by rememberSaveable(mission.missionId) { mutableStateOf(initiallyExpanded) }',
+ '    var expanded by remember(mission.missionId) { mutableStateOf(initiallyExpanded) }',
+ 'C20 the open mission is lost on rotation'),
  ]),
  # --- checkpoint 22: what signed the APK the owner installs --------------------
  (["tests/contracts/test_debug_signing_identity.py"], [
@@ -1004,30 +1028,40 @@ ROOT_LEVEL = [
     "C21 the gate stops recognising a deleted Python function"),
  ]),
  # --- checkpoint 19: Google routes and the premise ingress ---------------------
- (["tests/test_google_capabilities_have_routes.py", "tests/test_control_scopes.py"], [
-   ("van_gateway/app.py", '    "/v1/google/drive/search",\n    "/v1/google/contacts/resolve",\n', "",
-    "C19 two new routes fall outside the scope set"),
-   ("van_gateway/google/service.py",
-    "        if execution.status is not ExecutionStatus.AUTHORIZED:",
-    "        if False:",
-    "C19 Google provider executes an A4 record that never received owner approval"),
-   ([("van_gateway/app.py", '    "/v1/google/tasks",\n', ""),
-     ("van_gateway/app.py",
-      "        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)\n        try:\n            return {\"tasks\": await google.tasks_list()}",
-      "        try:\n            return {\"tasks\": await google.tasks_list()}")],
-    "C19 the owner's tasks reachable with a device token (both guards removed)"),
+ (["backend/tests/test_google_capabilities_have_routes.py", "backend/tests/test_control_scopes.py"], [
+   ('backend/van_gateway/app.py',
+ '    "/v1/google/drive/search",\n    "/v1/google/contacts/resolve",\n',
+ '',
+ 'C19 two new routes fall outside the scope set'),
+   ('backend/van_gateway/google/service.py',
+ '        if execution.status is not ExecutionStatus.AUTHORIZED:',
+ '        if False:',
+ 'C19 Google provider executes an A4 record that never received owner approval'),
+   ([('backend/van_gateway/app.py', '    "/v1/google/tasks",\n', ''),
+  ('backend/van_gateway/app.py',
+   '        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)\n'
+   '        try:\n'
+   '            return {"tasks": _scrubbed(await google.tasks_list())}',
+   '        try:\n            return {"tasks": _scrubbed(await google.tasks_list())}')],
+ "C19 the owner's tasks reachable with a device token (both guards removed)"),
  ]),
- (["tests/test_irreversible_work_waits_on_assumptions.py"], [
-   ("van_gateway/runtime_api.py", '        @router.post("/reasoning/premises")\n',
-    '        @router.post("/reasoning/premises-disabled")\n',
-    "C19 the premise ingress moves and nothing records"),
-   ("van_gateway/reasoning/kernel.py",
-    "            and semantic_class in (SemanticClass.FACT_VERIFIED, SemanticClass.FACT_UNVERIFIED)",
-    "            and True", "C19 agreeing with a preference counts as unsupported agreement"),
-   ("van_gateway/reasoning/kernel.py", "            not corrected\n", "            True\n",
-    "C19 a correction is counted as agreement"),
-   ("van_gateway/reasoning/kernel.py", "            and not refs\n", "            and True\n",
-    "C19 citing evidence no longer makes agreement well-founded"),
+ (["backend/tests/test_irreversible_work_waits_on_assumptions.py"], [
+   ('backend/van_gateway/runtime_api.py',
+ '        @router.post("/reasoning/premises")\n',
+ '        @router.post("/reasoning/premises-disabled")\n',
+ 'C19 the premise ingress moves and nothing records'),
+   ('backend/van_gateway/reasoning/kernel.py',
+ '            and semantic_class in (SemanticClass.FACT_VERIFIED, SemanticClass.FACT_UNVERIFIED)',
+ '            and True',
+ 'C19 agreeing with a preference counts as unsupported agreement'),
+   ('backend/van_gateway/reasoning/kernel.py',
+ '            not corrected\n',
+ '            True\n',
+ 'C19 a correction is counted as agreement'),
+   ('backend/van_gateway/reasoning/kernel.py',
+ '            and not refs\n',
+ '            and True\n',
+ 'C19 citing evidence no longer makes agreement well-founded'),
  ]),
  # --- checkpoint 18: the ledger reconciler -------------------------------------
  # Six mutations, and getting three of them to fail took three attempts each. The tool's
@@ -1060,17 +1094,22 @@ ROOT_LEVEL = [
     'r"<(?:activity|activity-alias|service|receiver|provider|application)\\b[^>]*?"\n    r\'android:name="\\.?([A-Za-z0-9_.]+)"\'',
     'r\'android:name="\\.?([A-Za-z0-9_.]+)"\'',
     "C15 the manifest sweep treats permissions as components again"),
-   ("tools/audit/kotlin_reachability.py", '    text = re.sub(r"//[^\\n]*", " ", text)', "    pass",
-    "C15 a symbol named in a line comment counts as a call site"),
-   ("tools/audit/kotlin_reachability.py",
-    '    text = re.sub(r"/\\*.*?\\*/", " ", text, flags=re.DOTALL)', "    pass",
-    "C15 a symbol named in a KDoc counts as a call site"),
-   ("tools/audit/kotlin_reachability.py",
-    """    text = re.sub(r'"(?:[^"\\\\\\n]|\\\\.)*"', ' "" ', text)""", "    pass",
-    "C15 a symbol named in a string counts as a call site"),
-   ("tools/audit/kotlin_reachability.py",
-    '    text = re.sub(r"//[^\\n]*", " ", text)', '    text = re.sub(r".*", " ", text)',
-    "C15 strip everything, so all code looks dead"),
+   ('tools/audit/kotlin_reachability.py',
+ '_strip_noise = strip_noise',
+ '_strip_noise = lambda text: strip_noise(text.replace("//", "/ /"))',
+ 'C15 a symbol named in a line comment counts as a call site'),
+   ('tools/audit/kotlin_reachability.py',
+ '_strip_noise = strip_noise',
+ '_strip_noise = lambda text: strip_noise(text.replace("/*", "/ *"))',
+ 'C15 a symbol named in a KDoc counts as a call site'),
+   ('tools/audit/kotlin_reachability.py',
+ '_strip_noise = strip_noise',
+ '_strip_noise = lambda text: strip_noise(text.replace(chr(34), chr(39)))',
+ 'C15 a symbol named in a string counts as a call site'),
+   ('tools/audit/kotlin_reachability.py',
+ '_strip_noise = strip_noise',
+ '_strip_noise = lambda text: ""',
+ 'C15 strip everything, so all code looks dead'),
    ("tools/audit/kotlin_reachability.py",
     'r"(?:(?:enum|annotation|companion)\\s+)?"', '""',
     "C15 miss enum and annotation declarations"),
@@ -1107,24 +1146,48 @@ ROOT_LEVEL = [
  # --- checkpoint 12: the APK leaves CI ----------------------------------------
  (["tests/contracts/test_the_apk_leaves_ci.py",
    "tests/contracts/test_ci_workflow_is_what_it_claims.py"], [
-   (".github/workflows/van-ci.yml",
-    """      - name: Upload debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: van-debug-apk
-          path: android/app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
-""", "", "C12 drop the APK upload entirely"),
-   (".github/workflows/van-ci.yml", "if-no-files-found: error\n      - name: Shared visual",
-    "if-no-files-found: warn\n      - name: Shared visual",
-    "C12 publish an empty artefact instead of failing"),
-   (".github/workflows/van-ci.yml", "path: android/app/build/outputs/apk/debug/*.apk",
-    "path: android/app/build/outputs/apk/release/*.apk",
-    "C12 point the upload at a variant the build never assembles"),
-   (".github/workflows/van-ci.yml",
-    "./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug",
-    "./gradlew :app:testDebugUnitTest :app:lintDebug",
-    "C12 stop assembling the APK but keep uploading it"),
+   ([('.github/workflows/van-ci.yml',
+   '      - name: Upload debug APK\n'
+   '        uses: actions/upload-artifact@v4\n'
+   '        with:\n'
+   '          name: van-debug-apk\n'
+   '          path: |\n'
+   '            android/app/build/outputs/apk/debug/*.apk\n'
+   '            android/app/build/outputs/apk/debug/signing-identity.txt\n'
+   '          if-no-files-found: error\n',
+   ''),
+  ('tools/ci/github-actions-ci.yml',
+   '      - name: Upload debug APK\n'
+   '        uses: actions/upload-artifact@v4\n'
+   '        with:\n'
+   '          name: van-debug-apk\n'
+   '          path: |\n'
+   '            android/app/build/outputs/apk/debug/*.apk\n'
+   '            android/app/build/outputs/apk/debug/signing-identity.txt\n'
+   '          if-no-files-found: error\n',
+   '')],
+ 'C12 drop the APK upload entirely'),
+   ([('.github/workflows/van-ci.yml',
+   'if-no-files-found: error\n      - name: Shared visual',
+   'if-no-files-found: warn\n      - name: Shared visual'),
+  ('tools/ci/github-actions-ci.yml',
+   'if-no-files-found: error\n      - name: Shared visual',
+   'if-no-files-found: warn\n      - name: Shared visual')],
+ 'C12 publish an empty artefact instead of failing'),
+   ([('.github/workflows/van-ci.yml',
+   '            android/app/build/outputs/apk/debug/*.apk',
+   '            android/app/build/outputs/apk/release/*.apk'),
+  ('tools/ci/github-actions-ci.yml',
+   '            android/app/build/outputs/apk/debug/*.apk',
+   '            android/app/build/outputs/apk/release/*.apk')],
+ 'C12 point the upload at a variant the build never assembles'),
+   ([('.github/workflows/van-ci.yml',
+   './gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug',
+   './gradlew :app:testDebugUnitTest :app:lintDebug'),
+  ('tools/ci/github-actions-ci.yml',
+   './gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug',
+   './gradlew :app:testDebugUnitTest :app:lintDebug')],
+ 'C12 stop assembling the APK but keep uploading it'),
    ("android/settings.gradle.kts", 'include(":app")', 'include(":application")',
     "C12 rename the module out from under the artifact path"),
    ("android/app/build.gradle.kts", 'id("com.android.application")',
@@ -1144,10 +1207,10 @@ KOTLIN = [
   "            if (seq < 0) return Frame.Unrecognised",
   "            if (false) return Frame.Unrecognised",
   "C40 an event with no sequence rewinds the stream to the beginning"),
- (f"{APP_KT}/session/SessionDownstream.kt",
-  '        if (messageId.isNotEmpty() && frame.has("accepted")) {',
-  '        if (false) {',
-  "C40 nothing is ever taken out of flight, so a resume resends everything"),
+ ('android/app/src/main/java/com/dial/van/session/SessionDownstream.kt',
+ '        if (messageId.isNotEmpty() && frame.opt("accepted") is Boolean) {',
+ '        if (false) {',
+ 'C40 nothing is ever taken out of flight, so a resume resends everything'),
  (f"{APP_KT}/session/SessionDownstream.kt",
   "EventPage(events = listOf(record), nextCursor = seq, truncated = false)",
   "EventPage(events = listOf(record), nextCursor = 0L, truncated = false)",
@@ -1156,10 +1219,10 @@ KOTLIN = [
   "        cursors.save(next.cursor)",
   "        cursors.save(page.nextCursor)",
   "C40 the saved cursor goes backwards and the owner reads a morning twice"),
- (f"{APP_KT}/events/VanEventStreamStore.kt",
-  "        val next = EventStream.applyPage(_state.value, page)",
-  "        val next = _state.value.copy(events = page.events, cursor = page.nextCursor, loaded = true)",
-  "C40 a socket page replaces the history instead of merging with it"),
+ ('android/app/src/main/java/com/dial/van/events/VanEventStreamStore.kt',
+ '        val next = EventStream.applyPage(before, page)',
+ '        val next = before.copy(events = page.events, cursor = page.nextCursor, loaded = true)',
+ 'C40 a socket page replaces the history instead of merging with it'),
  # --- checkpoint 39: the durable write, and where it runs ---------------------------
  # --- checkpoint 38: the stored command has to be one the Gateway can accept ---------
  (f"{APP_KT}/session/OfflineSubmission.kt",
@@ -1182,10 +1245,11 @@ KOTLIN = [
   "                \"Saved, and held. This one won't be sent without you.\",",
   "                \"Saved. You're offline, so I'll check with you before I send it.\",",
   "C37 the owner waits for a question nothing asks"),
- (f"{APP_KT}/session/OfflineSubmission.kt",
-  "                \"Not sent \u2014 this one needs you online. Nothing was changed.\",",
-  "                \"Saved \u2014 I'll send this when you're back online.\",",
-  "C37 an A4 that will never be sent is described as queued"),
+ ('android/app/src/main/java/com/dial/van/session/OfflineSubmission.kt',
+ '                "The response was lost. This action may already have happened; check its state '
+ 'before issuing it again. Nothing was queued.",',
+ '                "Saved — I\'ll send this when you\'re back online.",',
+ 'C37 an A4 that will never be sent is described as queued'),
  (f"{APP_KT}/session/SessionEnvelope.kt",
   "        JSONObject(envelope.toString())\n"
   "            .put(\"van_session_id\", vanSessionId)\n"
@@ -1212,14 +1276,16 @@ KOTLIN = [
   "        records.recordsOfKind(OutboxPersistence.SESSION_KIND)",
   "        records.recordsOfKind(\"COMMAND\")",
   "C36 a restart finds an empty outbox and the owner's queued work is gone"),
- (f"{APP_KT}/session/SessionReconciliation.kt",
-  "        if (state == null || state == UNKNOWN) Verdict.RESEND else Verdict.SETTLE",
-  "        if (state == null) Verdict.RESEND else Verdict.SETTLE",
-  "C36 a command the Gateway has never heard of is treated as delivered"),
- (f"{APP_KT}/session/SessionReconciliation.kt",
-  "        if (state == null || state == UNKNOWN) Verdict.RESEND else Verdict.SETTLE",
-  "        Verdict.RESEND",
-  "C36 a command the Gateway is already running is sent a second time"),
+ ('android/app/src/main/java/com/dial/van/session/SessionReconciliation.kt',
+ '        if (state == null || state == UNKNOWN || state == RESULT_PENDING) Verdict.RESEND else '
+ 'Verdict.SETTLE',
+ '        if (state == null || state == RESULT_PENDING) Verdict.RESEND else Verdict.SETTLE',
+ 'C36 a command the Gateway has never heard of is treated as delivered'),
+ ('android/app/src/main/java/com/dial/van/session/SessionReconciliation.kt',
+ '        if (state == null || state == UNKNOWN || state == RESULT_PENDING) Verdict.RESEND else '
+ 'Verdict.SETTLE',
+ '        Verdict.RESEND',
+ 'C36 a command the Gateway is already running is sent a second time'),
  (f"{APP_KT}/session/SessionReconciliation.kt",
   "        commandId?.takeIf { it.isNotBlank() && it != messageId } ?: messageId",
   "        messageId",
@@ -1276,16 +1342,14 @@ KOTLIN = [
   "        if (provisioningId in alreadyAccepted) {",
   "        if (false) {",
   "C34 a payload replayed from a device log provisions the phone again"),
- (f"{APP_KT}/connectivity/ProvisioningPayload.kt",
-  "        if (!isAcceptableUrl(gatewayUrl, allowInsecureLoopback)) {",
-  "        if (false) {",
-  "C34 a release build is pointed at a plain-http gateway"),
- (f"{APP_KT}/connectivity/ProvisioningPayload.kt",
-  "        if (url.startsWith(\"https://\", ignoreCase = true)) return true\n"
-  "        if (!allowInsecureLoopback) return false",
-  "        if (url.startsWith(\"https://\", ignoreCase = true)) return true\n"
-  "        if (false) return false",
-  "C34 every build treats loopback http as acceptable, not only a debug one"),
+ ('android/app/src/main/java/com/dial/van/connectivity/ProvisioningPayload.kt',
+ '        if (!GatewayBaseUrl.accepts(gatewayUrl, allowInsecureLoopback)) {',
+ '        if (false) {',
+ 'C34 a release build is pointed at a plain-http gateway'),
+ ('android/app/src/main/java/com/dial/van/connectivity/ProvisioningPayload.kt',
+ '"http" -> allowInsecureLoopback && host in setOf("localhost", "127.0.0.1", "::1")',
+ '"http" -> host in setOf("localhost", "127.0.0.1", "::1")',
+ 'C34 every build treats loopback http as acceptable, not only a debug one'),
  (f"{APP_KT}/connectivity/ProvisioningPayload.kt",
   "        if (leaked != null) {",
   "        if (false) {",
@@ -1640,7 +1704,15 @@ KOTLIN = [
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
-def groups(selector: str | None = None):
+def select(cases, selector=None, shard=(0, 1)):
+    index, count = shard
+    if not 0 <= index < count:
+        raise ValueError("shard must satisfy 0 <= index < count")
+    return [case for i, case in enumerate(cases)
+            if i % count == index and (not selector or selector in case[-1])]
+
+
+def groups(selector: str | None = None, family="all", shard=(0, 1)):
     """The groups to run. `selector` matches the checkpoint tag on a group's mutations.
 
     Selecting matters more than it looks: the full suite is several hundred subprocess
@@ -1648,23 +1720,24 @@ def groups(selector: str | None = None):
     "just the checkpoint I am working on" is the difference between a two-minute check and
     a thirty-minute one that gets killed.
     """
-    for tests, mutations in ALL:
-        if selector and not any(selector in mutation[-1] for mutation in mutations):
-            continue
-        yield tests, mutations, {}
-    for tests, mutations in ROOT_LEVEL:
-        if selector and not any(selector in mutation[-1] for mutation in mutations):
-            continue
-        yield tests, mutations, {"root": ROOT, "cwd": ROOT}
-    for tests, mutations in ((AGENT_TESTS, CONTROL_AGENT),):
-        if selector and not any(selector in mutation[-1] for mutation in mutations):
-            continue
-        yield tests, mutations, {"root": ROOT, "cwd": ROOT}
+    if family not in {"all", "python", "browser-agent", "kotlin"}:
+        raise ValueError("unknown mutation family")
+    candidates = []
+    if family in {"all", "python"}:
+        candidates += [(tests, mutations, {}) for tests, mutations in ALL]
+        candidates += [(tests, mutations, {"root": ROOT, "cwd": ROOT}) for tests, mutations in ROOT_LEVEL]
+    if family in {"all", "browser-agent"}:
+        candidates.append((AGENT_TESTS, CONTROL_AGENT, {"root": ROOT, "cwd": ROOT}))
+    selected = {id(case) for case in select([m for _, ms, _ in candidates for m in ms], selector, shard)}
+    for tests, mutations, options in candidates:
+        mutations = [m for m in mutations if id(m) in selected]
+        if mutations:
+            yield tests, mutations, options
 
 
-def main(selector: str | None = None) -> int:
+def main(selector: str | None = None, family="all", shard=(0, 1)) -> int:
     survivors = []
-    for tests, mutations, options in groups(selector):
+    for tests, mutations, options in groups(selector, family, shard):
         print(f"\n### {tests}", flush=True)
         survivors += run(mutations, tests, **options)
 
@@ -1672,7 +1745,7 @@ def main(selector: str | None = None) -> int:
     # matched the selector and then ran the whole list, so asking for one checkpoint ran
     # every Kotlin mutation in the suite — minutes of Gradle for a check that should take
     # seconds, and a working tree mutated far outside what was being examined.
-    kotlin = [m for m in KOTLIN if not selector or selector in m[-1]]
+    kotlin = select(KOTLIN, selector, shard) if family in {"all", "kotlin"} else []
     if kotlin:
         print("\n### android/verification (Gradle)", flush=True)
         survivors += run(
@@ -1689,4 +1762,15 @@ if __name__ == "__main__":
     # It was not: `import mutation_suite` executed the entire suite as a side effect, which
     # is how a run meant to check seven mutations spent twenty minutes on the other three
     # hundred and was then killed, leaving a source file mutated in the tree.
-    raise SystemExit(main(sys.argv[1] if len(sys.argv) > 1 else None))
+    parser = argparse.ArgumentParser(description="Run retained mutation cases in a qualified component environment")
+    parser.add_argument("selector", nargs="?", help="Optional substring of the original mutation description")
+    parser.add_argument("--family", choices=["all", "python", "browser-agent", "kotlin"], default="all")
+    parser.add_argument("--shard", default="0/1", help="Zero-based index/count; every case belongs to exactly one shard")
+    args = parser.parse_args()
+    try:
+        shard = tuple(map(int, args.shard.split("/")))
+        if len(shard) != 2 or not 0 <= shard[0] < shard[1]:
+            raise ValueError()
+    except ValueError:
+        parser.error("--shard must be index/count with 0 <= index < count")
+    raise SystemExit(main(args.selector, args.family, shard))

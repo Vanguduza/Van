@@ -26,6 +26,7 @@ is the half a refactor silently removes.
 from __future__ import annotations
 
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[2]
 APP = ROOT / "android" / "app" / "src" / "main" / "java" / "com" / "dial" / "van"
@@ -54,6 +55,17 @@ def test_mission_repository_is_constructed_and_read_from_work():
     repository = _text(APP / "mission/MissionRepository.kt")
     assert "suspend fun missions(activeOnly: Boolean = false)" in repository
     assert "MissionParsing.missionSummaries(client.missions(activeOnly))" in repository
+
+
+def test_work_has_a_rendered_destination_and_a_primary_navigation_entry():
+    """A working repository cannot compensate for an empty or unreachable destination."""
+    activity = _text(ACTIVITY)
+    start = activity.index("composable(VanRoute.WORK) {")
+    end = activity.index("\n                    }", start)
+    assert "WorkRoute(" in activity[start:end]
+    primary = re.search(r"val PRIMARY: List<String> = listOf\(([^)]*)\)", _text(ROUTES))
+    assert primary is not None
+    assert "WORK" in {entry.strip() for entry in primary.group(1).split(",")}
 
 
 def test_work_survives_rotation():

@@ -61,7 +61,7 @@ def recover() -> list[str]:
     return restored
 
 
-def run(mutations, tests, root=".", cwd=None, command=None):
+def run(mutations, tests, root=".", cwd=None, command=None, observe=None):
     """`root` is what the mutation paths are relative to; `cwd` is where the suite runs.
 
     They differ for mutations outside backend/ — a workflow file, a Gradle script, Kotlin
@@ -87,6 +87,8 @@ def run(mutations, tests, root=".", cwd=None, command=None):
         command or [sys.executable, "-m", "pytest", *tests, "-q"],
         capture_output=True, text=True, cwd=cwd,
     )
+    if observe is not None:
+        observe("baseline", None, baseline)
     if baseline.returncode != 0:
         raise RuntimeError(
             f"BASELINE_TESTS_FAILED (exit {baseline.returncode}); no mutations executed\n"
@@ -136,6 +138,8 @@ def run(mutations, tests, root=".", cwd=None, command=None):
             for number, handler in previous.items():
                 signal.signal(number, handler)
             _purge_bytecode(root)
+        if observe is not None:
+            observe("mutation", why, result)
         caught = result.returncode != 0
         verdicts.append((caught, why))
         print(f"{'CAUGHT' if caught else '*** SURVIVED ***':18} {why}")

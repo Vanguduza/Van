@@ -182,3 +182,40 @@ async def test_drafting_is_a_typed_a3_mutation_not_a_raw_internal_write(client):
     )
     assert response.status_code == 422
     assert not app.state.google.transport.calls
+
+
+@pytest.mark.asyncio
+async def test_google_rejects_a_real_unapproved_execution_before_provider_or_transition(tmp_path, monkeypatch):
+    """A valid execution ID and matching parameters cannot stand in for owner approval."""
+    from conftest_automation import enroll_device, make_action_runtime, make_store
+    from van_gateway.action.models import ExecutionStatus
+    from van_gateway.action.service import ActionPolicyError
+    from van_gateway.google.transport import FakeGoogleTransport
+    from van_gateway.models import PrincipalType
+
+    store = await make_store(tmp_path)
+    await enroll_device(store)
+    actions = await make_action_runtime(store)
+    parameters = {"event_id": "event-1", "new_start_unix": 1791453600}
+    execution = await actions.begin(
+        execution_id="unapproved-google", command_id="unapproved-command", turn_id="unapproved-turn",
+        action_id="google.calendar.reschedule", principal_type=PrincipalType.OWNER_DEVICE,
+        requested_by="dev-owner-1", idempotency_key="unapproved-key", parameters=parameters,
+        snapshot_id=None, owner_approved=False,
+    )
+    assert execution.status is not ExecutionStatus.AUTHORIZED
+    transition_attempts = []
+    mark_executing = actions.mark_executing
+
+    async def observed_transition(execution_id):
+        transition_attempts.append(execution_id)
+        return await mark_executing(execution_id)
+
+    monkeypatch.setattr(actions, "mark_executing", observed_transition)
+    transport = FakeGoogleTransport()
+    google = GoogleService(store, Fernet.generate_key().decode(), transport)
+    with pytest.raises(ActionPolicyError, match="^execution_not_authorized$"):
+        await google.execute_authorized_action(actions, execution_id=execution.execution_id, parameters=parameters)
+    assert (await actions.get_execution(execution.execution_id)).status is execution.status
+    assert not transition_attempts, "Google must refuse before requesting an execution transition"
+    assert not transport.calls
