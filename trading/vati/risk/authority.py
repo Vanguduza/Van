@@ -197,6 +197,9 @@ class RiskAuthority:
         if invalid_fact:
             return rej('INVALID_BOOLEAN_FACT',invalid_fact)
 
+        if not m.authority_matches_policy():
+            return rej('MANDATE_AUTHORITY_MISMATCH','current effective policy lacks its original owner grant; re-admission required')
+
         # 1b. Post-entry preservation has precedence over new risk. The
         # lifecycle may describe why, but only RiskAuthority turns that fact
         # into a refusal (INV-AUTH-001).

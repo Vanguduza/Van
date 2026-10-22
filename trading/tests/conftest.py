@@ -84,13 +84,19 @@ def mandate_dict(**overrides):
         "expires_at_unix": NOW + 30 * 86400,
     }
     base.update(overrides)
-    # Signed last, over the identity the caller ended up with: a mandate signed for
-    # version 1.0.0 must not admit an override that bumped the version.
+    # Sign the actual effective policy after the caller selects its scope and bounds.
+    from vati.risk.mandate import mandate_subject
+    try:
+        subject=mandate_subject(base)
+    except (ValueError,TypeError,KeyError):
+        # Negative parser fixtures must reach the real loader. This token
+        # cannot admit any effective policy if parsing is accidentally bypassed.
+        subject='invalid-test-policy'
     base.setdefault(
         "owner_signature_ref",
         owner_authority().token(
             act="mandate-admit",
-            subject=f"{base['mandate_id']}:{base['version']}",
+            subject=subject,
             issued_at_unix=int(base["signed_at_unix"]),
             lifetime_seconds=int(base["expires_at_unix"]) - int(base["signed_at_unix"]),
         ),

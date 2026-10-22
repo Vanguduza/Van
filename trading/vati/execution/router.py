@@ -246,6 +246,8 @@ class ExecutionRouter:
             raise RouterError(f"mode {mandate.mode.value} does not send orders")
         if getattr(decision, "mandate_hash", None) != mandate_binding_hash(mandate):
             raise RouterError("risk approval does not match the current mandate; re-evaluation required")
+        if not mandate.authority_matches_policy():
+            raise RouterError("current mandate lacks its original policy-bound owner grant; re-admission required")
         if intent.idempotency_key in self._seen:
             raise RouterError("duplicate idempotency key")
         adapter = self.adapters.get(intent.venue)

@@ -67,10 +67,11 @@ def test_mandate_fractions_are_decimal_strings_not_floats():
         TradingMandate.from_mapping(example)
 
     from conftest import owner_authority
+    from vati.risk.mandate import mandate_subject
 
     example["owner_signature_ref"] = owner_authority().token(
         act="mandate-admit",
-        subject=f"{example['mandate_id']}:{example['version']}",
+        subject=mandate_subject(example),
         issued_at_unix=int(example["signed_at_unix"]),
         lifetime_seconds=int(example["expires_at_unix"]) - int(example["signed_at_unix"]),
     )

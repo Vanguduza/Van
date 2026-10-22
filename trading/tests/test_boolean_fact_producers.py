@@ -31,9 +31,9 @@ def test_owner_policy_loader_does_not_coerce_false_text_to_a_true_permission(fie
 
 
 def test_explicit_false_policy_remains_false_and_direct_objects_do_not_bypass_validation():
-    raw=mandate_dict(weekend_hold_allowed=False)
-    raw['drawdown_tiers']=[{'threshold':'0.05','multiplier':'0.5','top_tier_only':False},
-        {'threshold':'0.10','multiplier':'0','top_tier_only':False}]
+    raw=mandate_dict(weekend_hold_allowed=False,
+        drawdown_tiers=[{'threshold':'0.05','multiplier':'0.5','top_tier_only':False},
+            {'threshold':'0.10','multiplier':'0','top_tier_only':False}])
     admitted=TradingMandate.from_mapping(raw)
     assert admitted.weekend_hold_allowed is False and admitted.drawdown_tiers[0].top_tier_only is False
     with pytest.raises(MandateError):replace(admitted,weekend_hold_allowed='false').validate(PlatformCeilings())
