@@ -41,7 +41,7 @@ from decimal import Decimal
 from enum import Enum
 from typing import Any, Iterable, Mapping, Optional
 
-from vati.core.canonical import canonical_json
+from vati.core.canonical import canonical_hash, canonical_json
 from vati.core.events import EventKind
 from vati.learning.episodes import ENVIRONMENT_WEIGHT, EXECUTION_FACT_WEIGHT, Environment
 
@@ -384,21 +384,44 @@ class LedgerEvidenceResolver(TrustedEvidenceResolver):
                 return ev
         return None
 
-    def trade_fact(self, evidence_class: EvidenceClass, trade_id: str) -> Optional[EvidenceRecord]:
-        """The latest allowlisted `evidence_class` event of one trade, resolved
-        (e.g. the TCA_RECORD that holds a reviewed trade's cost ratio)."""
+    def _available_history(self, trade_id: str, available_through: str):
+        """Original journal availability, never a source timestamp/revision rank.
+
+        Consume the read fully so a transactional reader is closed, then cut
+        at the first publication of this exact immutable anchor in this trade.
+        An absent/wrong-scope anchor cannot fall back to current/future facts.
+        """
+        from vati.core.ledger import history_through, LedgerError
+        try:
+            return history_through(self.ledger, trade_id, available_through)
+        except LedgerError as exc:
+            raise EvidenceError(str(exc)) from exc
+
+    def trade_fact(self, evidence_class: EvidenceClass, trade_id: str, *, available_through: str | None = None) -> Optional[EvidenceRecord]:
+        """Latest allowlisted fact available through the supplied journal anchor.
+
+        Without an anchor this retains the current-analysis lookup. Historical
+        consumers must supply their original source-event anchor explicitly.
+        """
         kind, producers = EVIDENCE_SOURCE_ALLOWLIST[evidence_class]
         hit = None
-        for ev in self.ledger.iter(kind, correlation_id=trade_id):
-            if ev.producer in producers:
+        rows = (self._available_history(trade_id, available_through) if available_through is not None
+                else self.ledger.iter(kind, correlation_id=trade_id))
+        for ev in rows:
+            if ev.kind is kind and ev.producer in producers:
                 hit = ev
         return None if hit is None else self.resolve(EvidenceRef(evidence_class, hit.hash), correlation_hint=trade_id)
 
-    def decision_quality(self, trade_id: str) -> Optional[Mapping[str, Any]]:
-        """The latest decision-quality verdict payload of one trade, if any."""
+    def decision_quality(self, trade_id: str, *, available_through: str | None = None) -> Optional[Mapping[str, Any]]:
+        """Native process evidence at a historical anchor, or current analysis."""
         hit = None
-        for ev in self.ledger.iter(EventKind.DECISION_QUADRANT, correlation_id=trade_id):
-            if ev.producer in DECISION_QUALITY_PRODUCERS and str(ev.payload.get("trade_intent_id", trade_id)) == trade_id:
+        rows = (self._available_history(trade_id, available_through) if available_through is not None
+                else self.ledger.iter(EventKind.DECISION_QUADRANT, correlation_id=trade_id))
+        for ev in rows:
+            if (ev.kind is EventKind.DECISION_QUADRANT and ev.producer in DECISION_QUALITY_PRODUCERS
+                and str(ev.payload.get("trade_intent_id", trade_id)) == trade_id):
+                if ev.hash != canonical_hash(ev.body()):
+                    raise EvidenceError("decision-quality event seal mismatch")
                 hit = ev
         return None if hit is None else json.loads(canonical_json(hit.payload))
 

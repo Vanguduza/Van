@@ -39,7 +39,7 @@ def cap_cost_ratio(c: Decimal) -> Decimal:
     return COST_RATIO_CAP if c.is_infinite() else min(c, COST_RATIO_CAP)
 
 
-def health_facts(rec: EvidenceRecord, resolver: LedgerEvidenceResolver) -> tuple[Decimal, bool, Decimal]:
+def health_facts(rec: EvidenceRecord, resolver: LedgerEvidenceResolver, *, availability_anchor: str | None = None) -> tuple[Decimal, bool, Decimal]:
     """(r_multiple, process_ok, cost_ratio) of one trade, read from the ledger.
 
     * r_multiple — the cited TRADE_REVIEW payload, or the experience artifact's outcome;
@@ -49,9 +49,21 @@ def health_facts(rec: EvidenceRecord, resolver: LedgerEvidenceResolver) -> tuple
       (same trade, same environment).
     A value the evidence does not record is refused, never defaulted."""
     p = rec.content["payload"]
+    if rec.evidence_class is EvidenceClass.VTIL_ARTIFACT:
+        recorded_anchor = p.get("learning_cutoff_ref")
+        if recorded_anchor is not None:
+            available = resolver._available_history(rec.trade_id, rec.identity)
+            if not any(e.hash == recorded_anchor for e in available):
+                raise EvidenceError("learning anchor lies outside original artifact availability")
+        availability_anchor = recorded_anchor or rec.identity
+    if availability_anchor is not None:
+        # A learning cutoff cannot predate the review/source being consumed.
+        available = resolver._available_history(rec.trade_id, availability_anchor)
+        if rec.evidence_class is not EvidenceClass.VTIL_ARTIFACT and not any(e.hash == rec.identity for e in available):
+            raise EvidenceError("learning anchor predates its source review")
     if rec.evidence_class is EvidenceClass.TRADE_REVIEW:
         r_raw, proc = p.get("r_multiple"), p.get("process_ok")
-        tca = resolver.trade_fact(EvidenceClass.TCA_RECORD, rec.trade_id)
+        tca = resolver.trade_fact(EvidenceClass.TCA_RECORD, rec.trade_id, available_through=availability_anchor)
         if tca is None:
             raise EvidenceError(f"evidence {rec.ref} has no TCA_RECORD for trade {rec.trade_id!r}: its cost ratio is not recorded")
         if tca.environment is not rec.environment:
@@ -69,7 +81,12 @@ def health_facts(rec: EvidenceRecord, resolver: LedgerEvidenceResolver) -> tuple
     if r.is_infinite():
         raise EvidenceError(f"evidence {rec.ref} records a malformed r_multiple {r_raw!r}")
     cost = cap_cost_ratio(_decimal(cost_raw, "cost_ratio", rec))
-    dq = resolver.decision_quality(rec.trade_id)
+    # An experience artifact is the durable snapshot used by cold replay. Late
+    # quality corrections belong to a separate restated projection; they cannot
+    # become what was available when this original artifact was published. The
+    # live review hook runs after its native quality assessment and still uses
+    # the current assessment at that observation boundary.
+    dq = resolver.decision_quality(rec.trade_id, available_through=availability_anchor)
     if dq is not None:
         faults = dq.get("faults")
         if not isinstance(faults, list):
@@ -89,6 +106,7 @@ class HealthObservation:
     cost_ratio: Decimal            # realised / modelled cost (1 = as modelled)
     regime_fit: bool               # traded inside an eligible regime
     evidence_ref: str              # vati-evidence:<TRADE_REVIEW|VTIL_ARTIFACT|...>:<ledger Event.hash>
+    availability_anchor: str | None = None
 
 
 @dataclass(frozen=True)
@@ -124,6 +142,8 @@ class StrategyHealthTracker:
     _consumed: dict[str, set[str]] = field(default_factory=dict)
 
     def observe(self, o: HealthObservation, *, resolver: LedgerEvidenceResolver, correlation_hint: str | None = None) -> HealthVerdict:
+        if type(o.process_ok) is not bool or type(o.regime_fit) is not bool:
+            raise EvidenceError("health process and regime facts must be booleans")
         ref = parse_evidence_ref(o.evidence_ref)
         if ref.evidence_class not in HEALTH_SOURCE_CLASSES:
             raise EvidenceError(f"{ref.evidence_class.value} is not a source event for strategy health")
@@ -133,12 +153,18 @@ class StrategyHealthTracker:
             raise EvidenceError(f"evidence {ref} is not about {o.strategy_id!r}")
         if Environment(o.environment) is not rec.environment:
             raise EvidenceError(f"observation environment {o.environment.value} != evidence environment {rec.environment.value}")
+        if rec.evidence_class is EvidenceClass.VTIL_ARTIFACT:
+            stored = rec.content["payload"].get("review", {})
+            if not isinstance(stored, Mapping):
+                raise EvidenceError("original episode has no typed review")
+            if "regime_fit" in stored and (type(stored["regime_fit"]) is not bool or stored["regime_fit"] is not o.regime_fit):
+                raise EvidenceError("regime_fit disagrees with the original episode")
         # A-VATI M3: the observed values are the evidence's, not the caller's.
-        r, proc, cost = health_facts(rec, resolver)
+        r, proc, cost = health_facts(rec, resolver, availability_anchor=o.availability_anchor)
         if o.r_multiple != r or bool(o.process_ok) is not proc or cap_cost_ratio(Decimal(o.cost_ratio)) != cost:
             raise EvidenceError(f"observation (r={o.r_multiple}, process_ok={o.process_ok}, cost_ratio={o.cost_ratio}) disagrees with "
                                 f"its evidence {ref} (r={r}, process_ok={proc}, cost_ratio={cost})")
-        o = HealthObservation(o.strategy_id, rec.environment, r, proc, cost, bool(o.regime_fit), o.evidence_ref)
+        o = HealthObservation(o.strategy_id, rec.environment, r, proc, cost, bool(o.regime_fit), o.evidence_ref, o.availability_anchor)
         refs = self._refs.setdefault(o.strategy_id, [])
         consumed = self._consumed.setdefault(o.strategy_id, set())
         canonical = str(ref)
@@ -165,6 +191,12 @@ class StrategyHealthTracker:
         """Observe a trade whose every value is read from its ledger evidence."""
         rec = ResolvedEvidenceCache.resolve_from_ledger(evidence_ref, resolver, correlation_hint=correlation_hint)
         r, proc, cost = health_facts(rec, resolver)
+        if rec.evidence_class is EvidenceClass.VTIL_ARTIFACT:
+            stored = rec.content["payload"].get("review", {})
+            if not isinstance(stored, Mapping):
+                raise EvidenceError("original episode has no typed review")
+            if "regime_fit" in stored:
+                regime_fit = stored["regime_fit"]
         return self.observe(HealthObservation(strategy_id, rec.environment, r, proc, cost, regime_fit, evidence_ref),
                             resolver=resolver, correlation_hint=correlation_hint)
 

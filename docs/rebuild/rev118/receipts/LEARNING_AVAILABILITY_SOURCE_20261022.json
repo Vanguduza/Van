@@ -1,0 +1,83 @@
+{
+  "schema": "van.rebuild.candidate-source-receipt/1",
+  "source_parent": "9e345e680a1dade94a8747f5e32ac0b0069fd8b7",
+  "scope": "PARTIAL_BE003_BE036_AS_DECIDED_AVAILABILITY_NOT_UNIT_ACCEPTANCE",
+  "source_sha256": {
+    "trading/vati/core/ledger.py": "d5f0d32b03be5f1bacf833042fbe0c5a2097cc5f197a4f6cd6e1155ee6df33ef",
+    "trading/vati/learning/episodes.py": "71ec4430ce91850ed1b1e85a3fd98b3bc824210f09404140245b2aaa86a3321f",
+    "trading/vati/learning/evidence.py": "da035cec3f6b243b795bdb59eb62a43f392002af3ca744d8429bc92d5977b3c0",
+    "trading/vati/learning/health.py": "caa00fe802bb18bfd91dd6dfe8a2d1c6b7a92b9f20970fa93acea71f67a31883",
+    "trading/vati/learning/hooks.py": "f3057b337d7e63014061a4f83276f9f34a40d251f1daf0e7c999596ba7962c4f",
+    "trading/tests/test_learning_as_decided.py": "c2e313f3c48363d32345ad361ee56bdbec7b419a0e16eff95b601de3654540c5",
+    ".github/workflows/van-ci.yml": "6d47061ecbfa1fcfca55d704b59690fbd1c9f0a60035d5407d82a0873d22a15b",
+    "tools/ci/github-actions-ci.yml": "6d47061ecbfa1fcfca55d704b59690fbd1c9f0a60035d5407d82a0873d22a15b",
+    "tools/rebuild/ci_ubuntu_libraries.py": "898aa9b959357316d6203aa64e04ca878af6d93c81994a5abff782c7916d464e",
+    "tests/rebuild/test_ci_ubuntu_libraries.py": "abad027742b55782e12e20249b8c9cb406d5fa0c852fa3a6551fb3ad6b6a831a"
+  },
+  "full_trading": {
+    "tests": 1691,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 1691,
+    "warnings": 3,
+    "seconds": 46.67
+  },
+  "focused": {
+    "learning_and_recovery": 102,
+    "cutoff_plus_CI_contracts": 19,
+    "Ubuntu_prerequisite_controls": 7,
+    "DDS_sparse_import_closure": 2
+  },
+  "logs_sha256": {
+    "/tmp/van-as-decided-before.txt": "d16b6113f03a403370eb659b9abd0f0465805504c13f6659b36a24b036a859f1",
+    "/tmp/van-as-decided-regime-before.txt": "f905252b90c546c8581813890865271805a8be48a21e86204f3e32a463452954",
+    "/tmp/van-as-decided-final.txt": "4104187482292fe24088ab009d8e53d723ca09d5f8e9d3c824baf80475a593c9",
+    "/tmp/van-availability-full-trading.txt": "46c4b5c03df0d0a8c7d747582b14d40b8a7757630fd51de01523a61888873152",
+    "/tmp/van-availability-full-trading.xml": "47f3475e88ca3ccd15f93859378b441486aa7e08ba99c99d21840131e8309e2f",
+    "/tmp/van-vtil-borrow-explicit-checkout.txt": "ed4e09caf2c123cc998a4a054db510aefa9991486486560067423d72e1530bca",
+    "/tmp/van-vtil-sparse-closure.txt": "3c82e1d3305214e6527e81a3191d87bd710aba47bc834df9a486aeefacb40faf",
+    "/tmp/van-as-decided-latest-focused.txt": "8de325c387c85685181d40f9e05885edcf52a0765935f5edd6b12740c6f5d8a9",
+    "/tmp/van-ci-ubuntu-source-tests.txt": "ee09f6debd9f81709cd5af75a47e8b1c6ed9a94b8e82a9b34c00f597199e9c17"
+  },
+  "fixture": {
+    "fixture_stopped": true,
+    "fixture_data_removed": true,
+    "production_database_used": false,
+    "private_unix_socket_only": true,
+    "actual_pinned_DDS_checkout_used": true,
+    "test_exit": 0
+  },
+  "DDS_source_dependency": {
+    "commit": "64d6b7158c723b7700e5b53175ea8048d4e92d00",
+    "import_closure": [
+      {
+        "path": "agent-system/orchestration/engineering-resource-registry.mjs",
+        "blob": "ae3d794c69acedcc2aadcfe3c280d0456dc353ff"
+      },
+      {
+        "path": "agent-system/orchestration/engineering-resource-resolver.mjs",
+        "blob": "2d7a6fe97753a080fc32763155dfb8959794ba84"
+      },
+      {
+        "path": "agent-system/orchestration/skill-registry.mjs",
+        "blob": "e51df40224a674f6a08d203bf89fffc88bc8a33b"
+      },
+      {
+        "path": "agent-system/orchestration/skill-resolver.mjs",
+        "blob": "da029793d95407cdee21c4957f6483d8d3eb64a4"
+      },
+      {
+        "path": "agent-system/orchestration/state-store.mjs",
+        "blob": "a9af6f44d4d9dd9624f99d2677ec6ca1dbce200c"
+      }
+    ],
+    "private_source_committed_to_public_repository": false
+  },
+  "initial_counterexamples": "Cold replay used late quality edits; raw quality source seals were not checked; later regime-fit check reproduced cold recovery from0.750to1.000. Initial cutoff API tests also failed because the API did not yet exist; not every initial failure denotes a preexisting implemented-contract defect.",
+  "limits": [
+    "Captured learning availability preserves original observations; complete higher-revision RESTATED_ANALYSIS reduction, atomic contribution/cursor snapshots and qualified positive adaptation remain implementation work",
+    "Legacy artifacts without the new captured anchor are bounded by their original publication; omitted historical context is not reconstructed as newly observed proof",
+    "Actual source fixtures and pinned DDS resolver, not native host, independent certificate, financial execution or profitability evidence"
+  ]
+}

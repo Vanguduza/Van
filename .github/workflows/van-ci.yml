@@ -142,6 +142,9 @@ jobs:
       VATI_TEST_PG_ISOLATED_FIXTURE: '1'
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.19.0"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -173,17 +176,33 @@ jobs:
           assert counts["tests"] >= 26 and all(counts[k] == 0 for k in ("failures", "errors", "skipped")), counts
           print(counts)
           PY
+      - name: Public trading source regressions
+        run: python -m pytest -q trading/tests/ --junitxml=trading-source-report.xml
+      - name: Record the only private-source test unavailable to this public job
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          root = ET.parse("trading-source-report.xml").getroot()
+          cases = list(root.iter("testcase"))
+          skipped = [f"{c.get('classname')}::{c.get('name')}" for c in cases if c.find("skipped") is not None]
+          allowed = {"trading.tests.test_vtil_borrow::test_dial_resolver_selects_trading_knowledge_from_van_registry"}
+          assert len(cases) >= 1691 and len(skipped) <= 1 and set(skipped) <= allowed, skipped
+          assert all("dial-new checkout not available (set DIAL_REPO)" in c.find("skipped").get("message", "") for c in cases if c.find("skipped") is not None), skipped
+          print({"source_cases": len(cases), "private_source_not_executed_here": skipped})
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: van-postgres-ledger-report
-          path: postgres-ledger-report.xml
+          path: |
+            postgres-ledger-report.xml
+            trading-source-report.xml
 
   backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # The Artemis contract tests read three DDS source contracts from the sibling
+      # Artemis and VTIL tests read the bounded pinned DDS source contracts from the sibling
       # ../dial-development-system (tools/certification/artemis_acceptance.py, test_artemis_*).
       # Without it 134 of them error before asserting anything. DDS is private and this
       # repository is public, so the files are not copied here: they are checked out at the
@@ -211,6 +230,11 @@ jobs:
             agent-system/orchestration/android-testing-mcp.mjs
             agent-system/orchestration/android-testing-plane.mjs
             deploy/netcup/hermes-control/artemis/dial_artemis_mcp_bridge.py
+            agent-system/orchestration/engineering-resource-registry.mjs
+            agent-system/orchestration/engineering-resource-resolver.mjs
+            agent-system/orchestration/skill-registry.mjs
+            agent-system/orchestration/skill-resolver.mjs
+            agent-system/orchestration/state-store.mjs
       - name: Verify pinned DDS contract blobs and place the sibling
         run: |
           set -euo pipefail
@@ -222,12 +246,20 @@ jobs:
           4aca852dea44cb07401ca92bf970eb3a78c1db2d agent-system/orchestration/android-testing-mcp.mjs
           c99f02f3df35f6b9aa880923dd6b01ca3118d644 agent-system/orchestration/android-testing-plane.mjs
           9134ddc864ab174c000b6e434d2675ba01352006 deploy/netcup/hermes-control/artemis/dial_artemis_mcp_bridge.py
+          ae3d794c69acedcc2aadcfe3c280d0456dc353ff agent-system/orchestration/engineering-resource-registry.mjs
+          2d7a6fe97753a080fc32763155dfb8959794ba84 agent-system/orchestration/engineering-resource-resolver.mjs
+          e51df40224a674f6a08d203bf89fffc88bc8a33b agent-system/orchestration/skill-registry.mjs
+          da029793d95407cdee21c4957f6483d8d3eb64a4 agent-system/orchestration/skill-resolver.mjs
+          a9af6f44d4d9dd9624f99d2677ec6ca1dbce200c agent-system/orchestration/state-store.mjs
           EOF
           cd ..
           mv .dds-contract-pin ../dial-development-system
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.19.0"
       - name: Install backend dependencies
         working-directory: backend
         # GAP-F-017 — installed from the exact-pinned lock, not the floating spec, so this
@@ -248,9 +280,7 @@ jobs:
 
       - name: Character Forge pinned Rive CLI authoring smoke
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            libgl1 libegl1 libgles2 libx11-6 libxkbcommon0 libfontconfig1 libfreetype6 libxcb1
+          python tools/rebuild/ci_ubuntu_libraries.py
           tmp="$(mktemp -d)"
           curl -fsSL https://releases.rive.app/cli/v1.1.1/rive-linux-x64.tar.gz -o "$tmp/rive.tar.gz"
           echo "41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5  $tmp/rive.tar.gz" | sha256sum -c -
@@ -360,6 +390,8 @@ jobs:
         run: python trading/tools/migrate_capsule_timeframes.py --check
 
       - name: Trading enhancement tests
+        env:
+          DIAL_REPO: ${{ github.workspace }}/../dial-development-system
         run: pytest -q trading/tests/
 
       # Rev 5.1 G15 / TRD-REV51-133. This certifies repository implementation
@@ -446,9 +478,7 @@ jobs:
       - name: Build Candidate B mechanics prototype
         run: |
           python -m pip install --disable-pip-version-check "Pillow==12.3.0" "vtracer==0.6.15" "PyYAML==6.0.2"
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            libgl1 libegl1 libgles2 libx11-6 libxkbcommon0 libfontconfig1 libfreetype6 libxcb1
+          python tools/rebuild/ci_ubuntu_libraries.py
           tmp="$(mktemp -d)"
           curl -fsSL https://releases.rive.app/cli/v1.1.1/rive-linux-x64.tar.gz -o "$tmp/rive.tar.gz"
           echo "41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5  $tmp/rive.tar.gz" | sha256sum -c -
@@ -532,9 +562,7 @@ jobs:
       - name: Build Candidate B mechanics prototype
         run: |
           python -m pip install --disable-pip-version-check "Pillow==12.3.0" "vtracer==0.6.15" "PyYAML==6.0.2"
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            libgl1 libegl1 libgles2 libx11-6 libxkbcommon0 libfontconfig1 libfreetype6 libxcb1
+          python tools/rebuild/ci_ubuntu_libraries.py
           tmp="$(mktemp -d)"
           curl -fsSL https://releases.rive.app/cli/v1.1.1/rive-linux-x64.tar.gz -o "$tmp/rive.tar.gz"
           echo "41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5  $tmp/rive.tar.gz" | sha256sum -c -

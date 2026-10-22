@@ -170,10 +170,10 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-22T08:07:47.329917+00:00",
+    "updated_utc": "2026-10-22T08:29:16.169461+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": "No local database/server/test left running. Hosted9c1e8515 source CI39743488511 was in progress at checkpoint; refresh exact job state after new push.",
+    "background_jobs": "No local database/test remains running. Source9e345e68 run39745717242 pending two mutation shards at last read; refresh before attributing a full score. New source CI not yet launched.",
     "last_validation": [
       "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
       "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -207,7 +207,8 @@
       "Current candidate feedback source:1599 trading tests passed/2 skipped; contract scale, original approved money risk, unknown settlement and native cold-start replay covered.",
       "Protective exit/health candidate:1629 trading pass/2skip;52 rebuild pass;30 new regression cases; four actual process-death windows and two ledger writers. All374 mutation anchors retained; full current hosted corpus pending.",
       "Candidate validation integrity:1663 full trading pass/2skip before two additional passing test-only controls;36 latest integrity tests and88 gateway trading/activation tests pass. Numerical/version checks and CSCV coverage fixed; no market/native qualification issued.",
-      "Real PostgreSQL named-ledger/migration candidate:5 original failures reproduced;1680 full trading pass/1skip before final two test-only controls; latest zero-skip CI selection26/26;18 CI/deployer contract tests pass. Private fixture stopped/removed."
+      "Real PostgreSQL named-ledger/migration candidate:5 original failures reproduced;1680 full trading pass/1skip before final two test-only controls; latest zero-skip CI selection26/26;18 CI/deployer contract tests pass. Private fixture stopped/removed.",
+      "Current captured-availability source:1691 full trading pass, zero skips, with actual private PostgreSQL and pinned DDS source fixtures;102 learning/recovery,19 cutoff/CI,7 Ubuntu prerequisite controls pass. Hosted9e345 database job26/26 passes; Android acquisition blocked before tests by MicrosoftAPT403, helper fix pending new hosted source run."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -218,8 +219,8 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Continue candidate implementation: immutable as-decided evidence joins and actual account/runtime/readmodel scope binding; reconcile mature corrected outcomes and monitor the new hosted PostgreSQL job.",
-    "previous_head": "eb94d0f8"
+    "next_action": "Push and verify the captured-learning/CI prerequisite checkpoint; continue actual account/runtime/readmodel scope binding and durable corrected-outcome contributions under the canonical units. Native/owner gates remain unissued.",
+    "previous_head": "9e345e680a1dade94a8747f5e32ac0b0069fd8b7"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",

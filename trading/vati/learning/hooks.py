@@ -14,13 +14,13 @@ No event, no learning: there is no fallback to an intent id or free text."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Optional
 
 from vati.core.events import Event, EventKind
-from vati.core.ledger import Ledger
+from vati.core.ledger import Ledger, history_through
 from vati.learning.boundary import LearningBoundary, LiveAdjustment, LiveTarget
 from vati.learning.broker import EVENT_WINDOWS, BrokerLearner
 from vati.learning.episodes import Environment, ExperienceEpisode, episode_from_ledger
@@ -68,10 +68,12 @@ class LearningHooks:
         return r
 
     @staticmethod
-    def _latest(ledger: Ledger, kind: EventKind, trade_intent_id: str, match: dict[str, str]) -> Optional[Event]:
+    def _latest(ledger: Ledger, kind: EventKind, trade_intent_id: str, match: dict[str, str], *, available_through: str | None = None) -> Optional[Event]:
         hit = None
-        for ev in ledger.iter(kind, correlation_id=trade_intent_id):
-            if all(str(ev.payload.get(k)) == v for k, v in match.items()):
+        rows = (history_through(ledger,trade_intent_id,available_through) if available_through is not None
+                else ledger.iter(kind,correlation_id=trade_intent_id))
+        for ev in rows:
+            if ev.kind is kind and all(str(ev.payload.get(k)) == v for k, v in match.items()):
                 hit = ev
         return hit
 
@@ -96,15 +98,21 @@ class LearningHooks:
         return adj
 
     def on_review(self, ledger: Ledger, *, trade_intent_id: str, strategy_id: str, r_multiple: Decimal, process_ok: bool, cost_ratio: Decimal, regime_fit: bool = True) -> tuple[Optional[ExperienceEpisode], Optional[LiveAdjustment]]:
-        ep = episode_from_ledger(ledger, trade_intent_id, environment=self.environment)
+        if type(regime_fit) is not bool:
+            self.refusals.append(f"review {trade_intent_id}: regime_fit must be a recorded boolean")
+            return None, None
+        history = list(ledger.iter(correlation_id=trade_intent_id))
+        cutoff = history[-1].hash if history else None
+        ep = episode_from_ledger(ledger, trade_intent_id, environment=self.environment, available_through=cutoff)
         if ep is not None:
+            ep = replace(ep, review={**ep.review, "regime_fit":regime_fit}, artifact_hash="").sealed()
             self.episodes.append(ep)
-        review = self._latest(ledger, EventKind.TRADE_REVIEW, trade_intent_id, {"strategy_id": strategy_id})
+        review = self._latest(ledger, EventKind.TRADE_REVIEW, trade_intent_id, {"strategy_id": strategy_id}, available_through=cutoff)
         if review is None:
             return ep, None   # no TRADE_REVIEW on the ledger: no health evidence (never the intent id)
         try:
             self.health.observe(HealthObservation(strategy_id, self.environment, r_multiple, process_ok, min(cost_ratio, Decimal("10")), regime_fit,
-                                                  make_evidence_ref(EvidenceClass.TRADE_REVIEW, review.hash)),
+                                                  make_evidence_ref(EvidenceClass.TRADE_REVIEW, review.hash), cutoff),
                                 resolver=self.resolver(ledger), correlation_hint=trade_intent_id)
         except EvidenceError as e:
             self.refusals.append(f"review {trade_intent_id}: {e}")

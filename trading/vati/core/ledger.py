@@ -34,6 +34,21 @@ class LedgerError(RuntimeError):
     pass
 
 
+def history_through(ledger, correlation_id: str, anchor: str):
+    """Fully read a subject's journal, then retain its original availability.
+
+    A hash addresses the first publication of an immutable record; replaying
+    identical bytes later cannot move that record's original availability.
+    """
+    rows = list(ledger.iter(correlation_id=correlation_id))
+    for index, event in enumerate(rows):
+        if event.hash == anchor:
+            if event.hash != canonical_hash(event.body()):
+                raise LedgerError("evidence availability anchor seal mismatch")
+            return rows[:index+1]
+    raise LedgerError("evidence availability anchor missing from requested trade scope")
+
+
 @dataclass(frozen=True)
 class ReplayReport:
     checked: int

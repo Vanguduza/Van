@@ -10,7 +10,7 @@ from typing import Optional
 
 from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind, make_event
-from vati.core.ledger import Ledger
+from vati.core.ledger import Ledger, history_through
 
 ZERO = Decimal("0")
 
@@ -61,6 +61,7 @@ class ExperienceEpisode:
     evidence_refs: tuple[str, ...]
     admission_state: str = "PROPOSED"
     artifact_hash: str = ""
+    learning_cutoff_ref: Optional[str] = None
 
     def weight(self) -> Decimal:
         return ENVIRONMENT_WEIGHT[self.environment]
@@ -136,11 +137,14 @@ class MacroEventEpisode:
         return MacroEventEpisode(**{**self.__dict__, "artifact_hash": _seal(self)})
 
 
-def episode_from_ledger(ledger: Ledger, trade_intent_id: str, *, environment: Environment) -> Optional[ExperienceEpisode]:
+def episode_from_ledger(ledger: Ledger, trade_intent_id: str, *, environment: Environment,
+                        available_through: str | None = None) -> Optional[ExperienceEpisode]:
     """Assemble an ExperienceEpisode from the chained events of one intent."""
     dec = rec = tca = rev = None
     receipts = []
-    for ev in ledger.iter(correlation_id=trade_intent_id):
+    rows = (history_through(ledger, trade_intent_id, available_through) if available_through is not None
+            else ledger.iter(correlation_id=trade_intent_id))
+    for ev in rows:
         if ev.kind is EventKind.RISK_DECISION:
             dec = ev
         elif ev.kind is EventKind.EXECUTION_RECEIPT:
@@ -167,6 +171,7 @@ def episode_from_ledger(ledger: Ledger, trade_intent_id: str, *, environment: En
         review={"outcome": rev.payload.get("outcome"), "polarity": rev.payload.get("polarity"), "thesis_correct": rev.payload.get("thesis_correct"), "process_ok": rev.payload.get("process_ok"), "lessons": rev.payload.get("lessons")} if rev else {},
         opened_ms=dec.event_time_ms, closed_ms=rev.event_time_ms if rev else None,
         evidence_refs=tuple(x for x in (dec.hash, entry_rec.hash if entry_rec else None, tca.hash if tca else None, rev.hash if rev else None) if x),
+        learning_cutoff_ref=available_through,
     )
     return ep.sealed()
 
