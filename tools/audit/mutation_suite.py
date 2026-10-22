@@ -1700,7 +1700,7 @@ KOTLIN = [
   "            if (false) {",
   "C30 a substituted model decides what VAN hears"),
  (f"{APP_KT}/voice/SpeechQueue.kt",
-  "        if (ownerStillInVoiceContext && elapsed <= SAME_CONTEXT_WINDOW_MS) {",
+  "        if (ownerStillInVoiceContext && elapsed in 0..SAME_CONTEXT_WINDOW_MS) {",
   "        if (ownerStillInVoiceContext) {",
   "C30 an answer from hours ago speaks the moment the owner opens VAN"),
  (f"{APP_KT}/voice/SpeechQueue.kt",

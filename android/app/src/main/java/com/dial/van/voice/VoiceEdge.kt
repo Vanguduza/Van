@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.Job
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Rev 1.5 §21 — the local voice edge, assembled.
@@ -68,10 +71,15 @@ class VoiceEdge(
     private val audio = context.applicationContext
         .getSystemService(Context.AUDIO_SERVICE) as? AudioManager
 
+    private val assetLoadGeneration = AtomicLong()
     private val _readiness = MutableStateFlow(Readiness())
     val readiness: StateFlow<Readiness> = _readiness.asStateFlow()
 
     private var speech = SpeechQueue()
+    var onSpeechFailure: () -> Unit = {}
+    var mayContinueSpeech: (String?) -> Boolean = { true }
+    private var yieldRetry: Job? = null
+    var onSpeechProgress: (SpeechCursors, Boolean) -> Unit = { _, _ -> }
     private var browserAudioForSpeech = false
     private var utteranceGeneration = 0L
     private var activeUtterance: Pair<String, String>? = null
@@ -85,6 +93,7 @@ class VoiceEdge(
      * than refuse to start.
      */
     fun loadAssets(runtimeReadiness: () -> Map<VoiceCapability, Boolean> = { emptyMap() }) {
+        val generation = assetLoadGeneration.incrementAndGet()
         scope.launch(Dispatchers.IO) {
             val installed = VoiceAssetInstaller.installedOrNull()
             val bundle = installed?.bundle
@@ -112,6 +121,7 @@ class VoiceEdge(
                 } else {
                     false
                 }
+            if (generation != assetLoadGeneration.get()) return@launch
             _readiness.value = Readiness(
                 capabilities = capabilities,
                 bundleVersion = bundle?.bundleVersion,
@@ -120,6 +130,7 @@ class VoiceEdge(
                     if (localTtsRuntimeReady) null else tts.sherpaPreparationError(),
                 installing = installed == null && VoiceAssetInstaller.failure == null,
             )
+            android.util.Log.i("VanVoiceRuntime", "voice readiness: ${_readiness.value}; install=${VoiceAssetInstaller.failure}")
         }
     }
 
@@ -179,15 +190,19 @@ class VoiceEdge(
             speech = SpeechQueue()
         }
         if (!speech.offer(segment)) return null
+        onSpeechProgress(speech.cursors(), false)
         browserAudioForSpeech = browserAudioPlaying
         return playNext()
     }
 
     private fun playNext(): String? {
+        if (!mayContinueSpeech(speech.cursors().speechStreamId)) { bargeIn(); return null }
         val segment = speech.nextForSynthesis() ?: return null
         val selection = LocalTtsRouter.select(SpeechKind.ASSISTANT_ANSWER, engines(segment.text))
         if (selection is TtsSelection.Silent) {
             speech.mark(segment.segmentId, SpeechSegmentState.FAILED)
+            onSpeechProgress(speech.cursors(), true)
+            onSpeechFailure()
             return selection.ownerSentence
         }
         selection as TtsSelection.Engine
@@ -201,6 +216,11 @@ class VoiceEdge(
         if (currentDucking == DuckingAction.YIELD) {
             // Something with more right to the audio is using it. Not an error, and not a
             // failure to answer: the segment stays queued.
+            if (yieldRetry?.isActive != true) yieldRetry = scope.launch {
+                delay(500)
+                yieldRetry = null
+                playNext()
+            }
             return null
         }
         speech.mark(segment.segmentId, SpeechSegmentState.SYNTHESIZING)
@@ -215,7 +235,9 @@ class VoiceEdge(
         if (!started) {
             if (activeUtterance?.first == utteranceId) activeUtterance = null
             speech.mark(segment.segmentId, SpeechSegmentState.FAILED)
+            onSpeechProgress(speech.cursors(), true)
             releaseAudio()
+            onSpeechFailure()
             return "I can't answer aloud right now — it's on the screen instead."
         }
         return null
@@ -230,6 +252,7 @@ class VoiceEdge(
         val segmentId = activeUtterance?.takeIf { it.first == utteranceId }?.second ?: return
         activeUtterance = null
         speech.mark(segmentId, SpeechSegmentState.SPOKEN)
+        onSpeechProgress(speech.cursors(), false)
         releaseAudio()
         playNext()
     }
@@ -238,6 +261,8 @@ class VoiceEdge(
         val segmentId = activeUtterance?.takeIf { it.first == utteranceId }?.second ?: return
         activeUtterance = null
         speech.mark(segmentId, SpeechSegmentState.FAILED)
+        onSpeechProgress(speech.cursors(), true)
+        onSpeechFailure()
         releaseAudio()
     }
 
@@ -245,17 +270,21 @@ class VoiceEdge(
         if (activeUtterance?.first != utteranceId) return
         activeUtterance = null
         speech.bargeIn()
+        onSpeechProgress(speech.cursors(), true)
         releaseAudio()
     }
 
     /** §21.21 — the owner spoke. Local first, always. */
     fun bargeIn(): Int {
+        yieldRetry?.cancel()
+        yieldRetry = null
         val interrupted = speech.snapshot().count { it.state in setOf(SpeechSegmentState.RECEIVED,
             SpeechSegmentState.SYNTHESIZING, SpeechSegmentState.READY, SpeechSegmentState.SPEAKING) }
         for (step in BargeInPolicy.sequence()) {
             when (step) {
                 BargeInStep.STOP_PLAYBACK -> tts.onBargeInRequested()
-                BargeInStep.MARK_SEGMENTS_INTERRUPTED -> { speech.bargeIn(); return interrupted }
+                BargeInStep.MARK_SEGMENTS_INTERRUPTED -> { speech.bargeIn(); activeUtterance = null;
+                    onSpeechProgress(speech.cursors(), true); releaseAudio(); return interrupted }
                 else -> Unit
             }
         }
@@ -280,6 +309,17 @@ class VoiceEdge(
         val routing = OfflineCommandClassifier.classify(transcript, actionClass)
         if (hermesReachable || routing == CommandRouting.LOCAL_EXECUTABLE) return routing to null
         return routing to OfflineCommandClassifier.offlineSentence(routing)
+    }
+
+    fun acceptResponse(response: BoundSpeechResponse) {
+        if (response.interrupted) return
+        if (speech.cursors().speechStreamId != response.streamId) {
+            bargeIn()
+            speech = SpeechQueue()
+            speech.restoreHeardPrefix(response.responseId, response.streamId, response.heard)
+        }
+        response.segments.forEach { speak(it, browserAudioPlaying = false) }
+        playNext()
     }
 
     fun queue(): SpeechQueue = speech

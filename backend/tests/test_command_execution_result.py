@@ -172,7 +172,7 @@ async def test_hermes_result_is_bound_to_run_and_cannot_self_verify(client, monk
     ]
     assert len(owner_messages) == 1
     assert len(van_messages) == 1
-    assert van_messages[0]["body"] == "Hermes finished producing the briefing"
+    assert van_messages[0]["body"] == "Finished, but VAN could not confirm it worked. Reported result: Hermes finished producing the briefing"
     assert van_messages[0]["artifact_refs"] == [payload["artifact_id"]]
 
     forged = await ac.post(

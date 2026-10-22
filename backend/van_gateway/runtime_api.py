@@ -282,6 +282,8 @@ class OwnerRuntimeApi:
         artifact_id = None
         if not mission.is_terminal or not mission.final_outcome:
             return
+        from van_gateway.coherence.owner_status import MISSION, qualified_outcome
+        outcome = qualified_outcome(MISSION[mission.state], mission.final_outcome, finished=True)
         if self.artifacts is not None:
             source = {"mission_id": mission.mission_id, "state": mission.state.value,
                 "verification_state": mission.verification_state.value, "final_outcome": mission.final_outcome}
@@ -289,7 +291,7 @@ class OwnerRuntimeApi:
             verification = await self.missions.verification_record(mission.mission_id)
             projection = await self.artifacts.ensure_projection(
                 kind=ArtifactKind.REPORT, title=f"Mission result · {mission.title}",
-                summary=mission.final_outcome, project_id=mission.project_id,
+                summary=outcome, project_id=mission.project_id,
                 command_id=mission.authority_envelope.source_command_id, mission_id=mission.mission_id,
                 canonical_source_type="mission.outcome", canonical_source_id=mission.mission_id,
                 canonical_source_digest=source_digest,
@@ -299,7 +301,7 @@ class OwnerRuntimeApi:
             thread = await self.conversations.ensure_main()
             await self.conversations.append_projection(thread.thread_id,
                 projection_key=f"mission:{mission.mission_id}:terminal", role="VAN",
-                body=mission.final_outcome, command_id=mission.authority_envelope.source_command_id,
+                body=outcome, command_id=mission.authority_envelope.source_command_id,
                 mission_id=mission.mission_id, artifact_refs=[artifact_id] if artifact_id else [], terminal=True)
 
     def bind_decisions(self, decisions: DecisionService) -> None:

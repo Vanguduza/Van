@@ -25,12 +25,12 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class VanCommandControllerTest {
-    private class Fixture {
+    private class Fixture(nowMs: () -> Long = System::currentTimeMillis) {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         val gateway = VanGatewayClient()
         val spoken = CopyOnWriteArrayList<String>()
         val saved = CopyOnWriteArrayList<String>()
-        val controller = VanCommandController(gateway, scope, speak = { spoken += it }).apply {
+        val controller = VanCommandController(gateway, scope, speak = { spoken += it }, nowMs = nowMs).apply {
             storeForLater = { body, _ -> saved += body.toString(); true }
         }
         suspend fun submitted() = await { !controller.state.value.submitting && gateway.commandCalls.get() > 0 }
@@ -98,6 +98,41 @@ class VanCommandControllerTest {
             assertEquals(1, f.controller.state.value.messages.count { it.text == "Checked" })
             assertTrue(f.spoken.isEmpty())
         } finally { f.close() }
+    }
+
+    @Test fun `late voice result stays visible without speaking hours after its question`() = runBlocking {
+        var now = 1000L
+        val f = Fixture { now }
+        try {
+            f.controller.submit(VanOwnerCommand("read status", VanCommandSource.VOICE,
+                turnId = "voice-turn", askedAtEpochMs = now))
+            f.submitted()
+            now += 3_600_000
+            f.gateway.onStatus = { JSONObject().put("owner_status", "DONE").put("finished", true)
+                .put("final_outcome", "Late result") }
+            f.controller.pollUnfinishedCommands()
+            await { f.controller.state.value.messages.any { it.text == "Late result" } }
+            assertTrue(f.spoken.isEmpty())
+        } finally { f.close() }
+    }
+
+    @Test fun `new capture or typed command revokes an older voice answer context`() = runBlocking {
+        for (typed in listOf(false, true)) {
+            val f = Fixture()
+            try {
+                f.controller.submitText("read status", VanCommandSource.VOICE, turnId = "voice-turn")
+                f.submitted()
+                if (typed) {
+                    f.controller.submitText("another request", VanCommandSource.CHAT)
+                    await { f.gateway.commandCalls.get() == 2 && !f.controller.state.value.submitting }
+                } else f.controller.invalidateVoiceContext()
+                f.gateway.onStatus = { JSONObject().put("owner_status", "DONE").put("finished", true)
+                    .put("final_outcome", "Old result") }
+                f.controller.pollUnfinishedCommands()
+                await { f.controller.state.value.messages.any { it.text == "Old result" } }
+                assertTrue(f.spoken.isEmpty())
+            } finally { f.close() }
+        }
     }
 
     @Test fun `gateway upgraded A4 approval cannot be stored after its receipt is lost`() = runBlocking {

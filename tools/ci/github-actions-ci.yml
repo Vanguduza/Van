@@ -195,6 +195,7 @@ jobs:
           python -m pytest -q
           backend/tests/test_voice_stream_continuity.py
           backend/tests/test_voice_stream_binding.py
+          backend/tests/test_voice_response_api.py
           backend/tests/test_voice_speech_stream.py
           backend/tests/test_speech_sync.py
           backend/tests/test_voice_speech_cues.py
@@ -208,7 +209,7 @@ jobs:
           import xml.etree.ElementTree as ET
           suites = list(ET.parse("voice-source-report.xml").getroot().iter("testsuite"))
           counts = {key: sum(int(s.get(key, 0)) for s in suites) for key in ("tests", "failures", "errors", "skipped")}
-          assert counts["tests"] >= 102 and all(counts[k] == 0 for k in ("failures", "errors", "skipped")), counts
+          assert counts["tests"] >= 117 and all(counts[k] == 0 for k in ("failures", "errors", "skipped")), counts
           print(counts)
           PY
       - uses: actions/upload-artifact@v4
@@ -639,7 +640,7 @@ jobs:
           working-directory: android
           script: |
             chmod +x gradlew
-            ./gradlew :app:connectedDebugAndroidTest -PVAN_TEST_ABI=x86_64 --console=plain
+            bash -c 'set +e; ./gradlew :app:connectedDebugAndroidTest -PVAN_TEST_ABI=x86_64 --console=plain; result=$?; mkdir -p app/build/reports/voice-runtime; adb logcat -d -v threadtime VanVoiceRuntime:I AndroidRuntime:E "*:S" > app/build/reports/voice-runtime/logcat.txt; exit "$result"'
             find app/build/outputs/connected_android_test_additional_output -type f -print || echo "no screenshots captured"
       # The SHA files above say which bytes were checked out; this says what RiveContractTest
       # concluded about them. `cli rive record-validation` refuses a PASS this file does not state.
@@ -657,6 +658,13 @@ jobs:
         with:
           name: van-instrumentation-report
           path: android/app/build/reports/androidTests/connected
+          if-no-files-found: warn
+      - name: Upload native voice readiness diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-voice-runtime
+          path: android/app/build/reports/voice-runtime
           if-no-files-found: warn
       - name: Upload Character Forge validation binding
         if: always()

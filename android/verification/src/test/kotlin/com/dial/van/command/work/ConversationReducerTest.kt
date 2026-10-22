@@ -88,6 +88,19 @@ class ConversationReducerTest {
     }
 
     @Test
+    fun `unverified partial and failed outcomes retain their warning even with a success claim`() {
+        for (status in listOf("COULD_NOT_VERIFY", "DONE_WITH_GAPS", "FAILED", "NEVER_HEARD_BACK")) {
+            val outcome = ConversationReducer.outcomeFor(ConversationReducer.PollResult(
+                status, null, "The trade succeeded", true,
+            ))
+            assertTrue(outcome.text.contains("Reported result: The trade succeeded"))
+            assertTrue(outcome.text.startsWith(com.dial.van.status.OwnerStatusProjection.sentenceFor(
+                com.dial.van.status.OwnerWorkStatus.valueOf(status))))
+            assertFalse(outcome.status == VanCommandStatus.SUCCEEDED)
+        }
+    }
+
+    @Test
     fun `contextGapsSentence names what VAN did not know`() {
         assertEquals(
             "VAN did not know: your timezone; who Thandi is",

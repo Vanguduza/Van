@@ -170,10 +170,10 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-22T10:33:42.530848+00:00",
+    "updated_utc": "2026-10-22T11:07:28.433115+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": "No local database/test remains running. Source9e345e68 run39745717242 pending two mutation shards at last read; refresh before attributing a full score. New source CI not yet launched.",
+    "background_jobs": "Frozen9573 backend/contracts qualification running separately in owned van-autonomous-qualification-20261022/Van; see /tmp/van-9573-full-backend.txt and /tmp/van-9573-backend.xml. No private database fixture running. Next hosted native job pending this source push.",
     "last_validation": [
       "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
       "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -212,7 +212,8 @@
       "Exact approval binding:1713 full trading pass/zero skips on private PostgreSQL plus pinned DDS;82 focused,22 new source cases;12 real JSON Schema controls pass. Fixture stopped/removed. Hosted e68dd210:374/374 mutation identities,16 instrumentation pass/4 explicit skips,26 PG and1690 public trading pass/one private-source skip; only DDS key and trusted-main jobs fail.",
       "Account risk recovery:1741 full trading pass/zero skips on private PostgreSQL and pinned DDS,28 new cases;74 focused/one PG case covered in full,41 gateway,154 owner/Artemis-plan contracts pass. All foreign financial-state counterexamples fixed; unknown scope retains protection and owner-visible refusal. Private fixture stopped/removed.",
       "Speech candidate:1290 JVM/195 app units/48 backend pass;debug and instrumentation APKs assemble;lint0Error/Fatal89warnings. Three affected Kotlin mutants assertion-detected after control, source restored;374 identities retained/383 edits. Two actual offline TTS/owner-turn instrumentation cases compile, awaiting hosted execution; no local emulator/native acceptance claim.",
-      "Bound result/voice foundations:102 backend zero skip,154owner contracts,7generation-preimage controls pass. Hosted7626:374/374mutations/383edits;public PG/trading/48voice pass. Native voice class did not run due non-void JUnit method; explicitUnit and localjavap fix verified, native retry remains required."
+      "Bound result/voice foundations:102 backend zero skip,154owner contracts,7generation-preimage controls pass. Hosted7626:374/374mutations/383edits;public PG/trading/48voice pass. Native voice class did not run due non-void JUnit method; explicitUnit and localjavap fix verified, native retry remains required.",
+      "Authenticated speech delivery:155 backend,1302 JVM,195 app,44 owner/CI and78 rebuild pass;APKs/lint0Error/Fatal89warnings.437endpoints/254schemas;all feature/screen/function identities preserved. Delayed-context mutant detected/restored,374 identities retained. Hosted9573:374mutations pass,16 native pass/4core skips/2 voice readiness failures;new independent TTS startup/diagnostics await hosted run."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -223,8 +224,8 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Execute corrected native tests in next hosted run and connect real speech producer/cursor/interrupt endpoints with current owner context, source revision and bounded capacity; preserve every canonical feature/unit.",
-    "previous_head": "7626a20f1063f71dd7cb7e590450911cba7e3ed5"
+    "next_action": "Observe new native voice diagnostics and fix actual failure without relaxing acceptance; complete scoped learning/capsule/readmodels and explicit corrected-outcome folds, then remaining canonical feature units. Do not stop at F15; do not claim gates/handset/profit qualification.",
+    "previous_head": "9573b3204ad2a5087e935269d3e5522c85b6ab2d"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -282,6 +283,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Push bound result/voice foundation and corrected native test fixture; continue real authenticated gateway speech producer/cursor/interrupt and Android/context consumer.",
-  "updated_at_utc": "2026-10-22T10:33:42.530848+00:00"
+  "current_action": "Push authenticated speech delivery and native startup diagnostics; observe actual native rerun and continue account/learning scope and corrected-outcome source work.",
+  "updated_at_utc": "2026-10-22T11:07:28.433115+00:00"
 }

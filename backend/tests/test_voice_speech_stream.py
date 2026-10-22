@@ -290,4 +290,4 @@ class TestTheResumeRouteCarriesIt:
         factory = next(node for node in ast.parse(module_source).body
                        if isinstance(node, ast.FunctionDef) and node.name == "create_app")
         source = ast.get_source_segment(module_source, factory)
-        assert '"response_state": speech_streams.response_state(device_id)' in source
+        assert '"response_state": await bound_speech.resume_state(device_id)' in source

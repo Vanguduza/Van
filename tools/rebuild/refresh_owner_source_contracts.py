@@ -114,6 +114,26 @@ def build():
         "scope": "One continuation of the same waiting task; advisory decisions grant no authority",
         "specification": "docs/rebuild/rev118/backend/BE-025_BROWSER_CONTINUATION.md",
         "new_ui_implemented": False, "live_qualified": False})
+    voice = next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-VOICE-001")
+    voice_clients = {
+        ("POST", "/v1/voice/responses"): "openSpokenResult",
+        ("GET", "/v1/voice/streams/{stream_id}"): "speechStream",
+        ("POST", "/v1/voice/streams/{stream_id}/cursors"): "reportSpeechCursors",
+        ("POST", "/v1/voice/streams/{stream_id}/interrupt"): "interruptSpeech",
+    }
+    for key, client in voice_clients.items():
+        endpoint = next(r for r in endpoint_doc["endpoints"] if (r["method"], r["path"]) == key)
+        voice.setdefault("backend_contract_extensions", []).append({
+            "method": key[0], "path": key[1], "endpoint_id": endpoint["endpoint_id"],
+            "source_status": "CANDIDATE_SOURCE_TESTED_NATIVE_ACCEPTANCE_PENDING",
+            "client_namespace": "VanGatewayClient", "client_function": client,
+            "source_ref": endpoint["source"], "authentication": endpoint["authentication"],
+            "device_proof_required_when_bound": endpoint["device_proof_required_when_bound"],
+            "authority": "READ_EXISTING_OWNED_RESULT_ONLY_NO_WORK_DISPATCH",
+            "scope": "Exact result reference and playback request; actual heard cursor; local-first interruption; current owner voice context",
+            "specification": "docs/rebuild/rev118/backend/BE-029_AUTHENTICATED_SPEECH_DELIVERY.md",
+            "new_ui_implemented": False, "live_qualified": False,
+        })
     receipt = {"scope": "BOUNDED_SOURCE_REFERENCE_REFRESH_NOT_FULL_PRODUCT_REVIEW",
         "input_registry_commit": INPUT, "citation_source_commit": CITATION_BASE,
         "preserved_identity_sets": preserved, "citation_changes": changes,

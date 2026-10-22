@@ -2910,6 +2910,27 @@
         "title": "CredentialResolveBody",
         "description": "P2-DEAD-001 \u2014 the alias a workflow asks for, and the class it claims."
       },
+      "CursorReport": {
+        "properties": {
+          "last_received_segment": {
+            "type": "integer",
+            "minimum": -1.0,
+            "title": "Last Received Segment"
+          },
+          "last_spoken_segment": {
+            "type": "integer",
+            "minimum": -1.0,
+            "title": "Last Spoken Segment"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "last_received_segment",
+          "last_spoken_segment"
+        ],
+        "title": "CursorReport"
+      },
       "DecisionAnswer": {
         "properties": {
           "choice_id": {
@@ -7278,6 +7299,36 @@
         ],
         "title": "PlannedStep",
         "description": "One step of a deterministic assignment. Mirrors `ProposedAction`'s shape, because\nthe runner grades the proposal and the plan has to be gradeable in the same terms."
+      },
+      "PlaybackRequest": {
+        "properties": {
+          "command_id": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Command Id"
+          },
+          "result_ref": {
+            "type": "string",
+            "pattern": "^result_[a-f0-9]{64}$",
+            "title": "Result Ref"
+          },
+          "playback_request_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 16,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Playback Request Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "command_id",
+          "result_ref",
+          "playback_request_id"
+        ],
+        "title": "PlaybackRequest"
       },
       "PostconditionSpec": {
         "properties": {

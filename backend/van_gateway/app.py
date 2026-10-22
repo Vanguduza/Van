@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import asyncio
 
 from contextlib import asynccontextmanager
 import base64
@@ -145,6 +146,7 @@ from van_gateway.browser.interaction_router import (
 )
 from van_gateway.session.api import build_session_router, is_session_owner_route
 from van_gateway.voice.speech_stream import SpeechStreamService
+from van_gateway.voice.responses import BoundSpeechResponses, build_voice_router, with_spoken_result
 from van_gateway.session.router import (
     CURRENT_OPERATION,
     SessionDelegateError,
@@ -1112,9 +1114,17 @@ def create_app() -> FastAPI:
             await scheduler.start()
         if dial_dev_config.enabled and dial_dev_config.attention_enabled:
             dial_dev_attention.start()
+        async def expire_speech_text():
+            while True:
+                await asyncio.sleep(60)
+                speech_streams.sweep()
+        speech_cleanup = asyncio.create_task(expire_speech_text())
         try:
             yield
         finally:
+            speech_cleanup.cancel()
+            await asyncio.gather(speech_cleanup, return_exceptions=True)
+            speech_streams.clear()
             await dial_dev_attention.stop()
             await scheduler.stop()
 
@@ -1416,11 +1426,64 @@ def create_app() -> FastAPI:
         ),
     )
 
+    async def _read_command_result(command_id: str, device_id: str) -> dict:
+        if not device_id:
+            raise HTTPException(status_code=404, detail="command_unknown")
+        mission = await command_missions.existing_for_command(command_id)
+        rows = await store.fetchall(
+            "SELECT device_id, result, failure_reason, created_at_unix FROM audit "
+            "WHERE command_id = ? AND device_id = ? ORDER BY COALESCE(chain_seq, 0) DESC LIMIT 1",
+            (command_id, device_id),
+        )
+        if mission is None and not rows:
+            raise HTTPException(status_code=404, detail="command_unknown")
+        if mission is not None and mission.owner_principal_id != f"device:{device_id}":
+            # Audit retention or a later unscoped observation cannot transfer
+            # ownership of a durable command result to another paired device.
+            raise HTTPException(status_code=404, detail="command_unknown")
+        if mission is not None:
+            status = wire_status.from_mission_state(mission.state.value)
+            result = {
+                "command_id": command_id,
+                "correlation_id": correlation_for_command(command_id),
+                "mission_id": mission.mission_id,
+                "mission_state": mission.state.value,
+                "owner_status": status.value,
+                "sentence": owner_status.SENTENCE[status],
+                "needs_you": status in owner_status.NEEDS_OWNER,
+                "finished": status in owner_status.FINISHED,
+                "final_outcome": mission.final_outcome,
+                "verification_state": mission.verification_state.value,
+                "deadline_ms": mission.deadline_ms,
+                "updated_at_ms": mission.updated_at_ms,
+            }
+            return with_spoken_result(result)
+
+        # Refused before a mission was opened: the audit row is the whole story.
+        status = wire_status.from_command_result(str(rows[0]["result"]))
+        result = {
+            "command_id": command_id,
+            "correlation_id": correlation_for_command(command_id),
+            "mission_id": None,
+            "mission_state": None,
+            "owner_status": status.value,
+            "sentence": owner_status.SENTENCE[status],
+            "needs_you": status in owner_status.NEEDS_OWNER,
+            "finished": status in owner_status.FINISHED,
+            "final_outcome": rows[0]["failure_reason"],
+            "verification_state": None,
+            "deadline_ms": None,
+            "updated_at_ms": int(rows[0]["created_at_unix"]) * 1000,
+        }
+        return with_spoken_result(result)
+
     # Rev 1.5 §21.16 — the spoken half of an answer, so a reconnect does not start it
     # again from the beginning. Held in memory deliberately: a restart loses the text of an
     # answer in flight, while the command that produced it and its result are both durable.
     speech_streams = SpeechStreamService()
     app.state.speech_streams = speech_streams
+    bound_speech = BoundSpeechResponses(speech_streams, _read_command_result, owner_runtime.authority)
+    app.include_router(build_voice_router(bound_speech))
 
     async def _resume_snapshot(
         *, device_id: str, van_session_id: str, pending_command_ids: list[str]
@@ -1445,7 +1508,7 @@ def create_app() -> FastAPI:
         states: dict[str, str] = {}
         for identity in pending_command_ids[:50]:
             mission = await command_missions.existing_for_command(identity)
-            if mission is not None:
+            if mission is not None and mission.owner_principal_id == f"device:{device_id}":
                 states[identity] = mission.state.value
                 continue
             # The client asks by command id when it has one and by message id otherwise,
@@ -1470,7 +1533,7 @@ def create_app() -> FastAPI:
             "authoritative_event_cursor": int(cursor_row["last_seq"]) if cursor_row else 0,
             # §21.16 — where the owner actually got to in the spoken answer. Absent when
             # there is nothing in flight, which is the ordinary case.
-            "response_state": speech_streams.response_state(device_id),
+            "response_state": await bound_speech.resume_state(device_id),
         }
 
     app.include_router(build_session_router(
@@ -2444,62 +2507,7 @@ def create_app() -> FastAPI:
 
     @app.get("/v1/commands/{command_id}")
     async def command_status(command_id: str, request: Request):
-        """What happened to a command the owner sent.
-
-        P0-EXEC-002 — this returned 404 for every command. The audit's probe drove ten
-        intents through POST /v1/commands, got `accepted` for all ten, and then had nowhere
-        to ask what became of them; the terminal owner-visible status was "accepted"
-        forever. The device could not show a completion because there was nothing to read.
-
-        Device-authenticated and scoped to the calling device: a command's status names
-        what the owner asked for, and one paired device has no business reading another's.
-        """
-        device_id = getattr(request.state, "van_device_id", None)
-        mission = await command_missions.existing_for_command(command_id)
-        rows = await store.fetchall(
-            "SELECT device_id, result, failure_reason, created_at_unix FROM audit "
-            "WHERE command_id = ? AND device_id = ? ORDER BY COALESCE(chain_seq, 0) DESC LIMIT 1",
-            (command_id, device_id),
-        )
-        if mission is None and not rows:
-            raise HTTPException(status_code=404, detail="command_unknown")
-        if mission is not None and mission.owner_principal_id != f"device:{device_id}":
-            # Audit retention or a later unscoped observation cannot transfer
-            # ownership of a durable command result to another paired device.
-            raise HTTPException(status_code=404, detail="command_unknown")
-        if mission is not None:
-            status = wire_status.from_mission_state(mission.state.value)
-            return {
-                "command_id": command_id,
-                "correlation_id": correlation_for_command(command_id),
-                "mission_id": mission.mission_id,
-                "mission_state": mission.state.value,
-                "owner_status": status.value,
-                "sentence": owner_status.SENTENCE[status],
-                "needs_you": status in owner_status.NEEDS_OWNER,
-                "finished": status in owner_status.FINISHED,
-                "final_outcome": mission.final_outcome,
-                "verification_state": mission.verification_state.value,
-                "deadline_ms": mission.deadline_ms,
-                "updated_at_ms": mission.updated_at_ms,
-            }
-
-        # Refused before a mission was opened: the audit row is the whole story.
-        status = wire_status.from_command_result(str(rows[0]["result"]))
-        return {
-            "command_id": command_id,
-            "correlation_id": correlation_for_command(command_id),
-            "mission_id": None,
-            "mission_state": None,
-            "owner_status": status.value,
-            "sentence": owner_status.SENTENCE[status],
-            "needs_you": status in owner_status.NEEDS_OWNER,
-            "finished": status in owner_status.FINISHED,
-            "final_outcome": rows[0]["failure_reason"],
-            "verification_state": None,
-            "deadline_ms": None,
-            "updated_at_ms": int(rows[0]["created_at_unix"]) * 1000,
-        }
+        return await _read_command_result(command_id, getattr(request.state, "van_device_id", ""))
 
     @app.get("/v1/briefing")
     async def get_briefing():

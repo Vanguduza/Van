@@ -187,6 +187,8 @@ sourceSets {
             "com/dial/van/voice/VitsLexiconCoverage.kt",
             "com/dial/van/voice/VoiceTurn.kt",
             "com/dial/van/voice/SpeechQueue.kt",
+            "com/dial/van/voice/GatewaySpeechDelivery.kt",
+            "com/dial/van/control/SpokenCommandResult.kt",
             // GAP-F-013 — the device-side cue timing model and the pure lookup
             // TtsOutputManager drives it with.
             "com/dial/van/voice/SpeechCueTiming.kt",

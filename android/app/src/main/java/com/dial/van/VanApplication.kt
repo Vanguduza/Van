@@ -77,6 +77,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
      * this device paired and unbound — §0D.3's failure state exactly.
      */
     internal val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val voiceScope = CoroutineScope(appScope.coroutineContext + Dispatchers.Main.immediate)
 
     lateinit var commandQueue: EncryptedCommandQueue
         private set
@@ -243,6 +244,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
      * screen, and because the asset classification is read once at start rather than each
      * time something asks.
      */
+    private lateinit var speechDelivery: com.dial.van.voice.GatewaySpeechDelivery
     lateinit var voiceEdge: VoiceEdge
         private set
 
@@ -312,7 +314,29 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
             // already uses, so the owner has one history rather than two that disagree.
             onDownstreamPage = { eventStream.apply(it) },
         )
-        voiceEdge = VoiceEdge(this, ttsOutput, appScope)
+        voiceEdge = VoiceEdge(this, ttsOutput, voiceScope)
+        speechDelivery = com.dial.van.voice.GatewaySpeechDelivery(
+            scope = voiceScope, current = commandController::isSpeechContextCurrent,
+            open = gatewayClient::openSpokenResult, read = gatewayClient::speechStream,
+            report = gatewayClient::reportSpeechCursors, interrupt = gatewayClient::interruptSpeech,
+            play = voiceEdge::acceptResponse, stop = { voiceEdge.bargeIn() },
+            cursors = { voiceEdge.queue().cursors() },
+        )
+        commandController.speakResult = { request -> appScope.launch(Dispatchers.Main.immediate) {
+            speechDelivery.deliver(request)
+        } }
+        commandController.onOwnerInput = { appScope.launch(Dispatchers.Main.immediate) { speechDelivery.cancel() } }
+        voiceEdge.onSpeechFailure = speechDelivery::playbackFailed
+        voiceEdge.onSpeechProgress = speechDelivery::progress
+        voiceEdge.mayContinueSpeech = speechDelivery::mayContinue
+        appScope.launch {
+            speechDelivery.failure.collect { failure ->
+                if (failure != null) degradedModeStore.markBroken("voice", failure,
+                    com.dial.van.degraded.RestoreAction.RETRY_CONNECTION)
+            }
+        }
+        vanSession.onSpeechResume = { appScope.launch(Dispatchers.Main.immediate) { speechDelivery.reconnect() } }
+
         refreshVoiceAssetReadiness()
         wakeModel = WakeModelLoader(this)
         wakeCoordinator = WakeCoordinator(
@@ -430,6 +454,9 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
                 refreshVoiceAssetReadiness()
                 return@launch
             }
+            // Speaking does not depend on microphone permission, an ASR turn ending,
+            // or wake-model construction. Prepare its native engine independently.
+            refreshVoiceAssetReadiness()
             val recognizer = SherpaLocalSecondPassAsr.fromFiles(this@VanApplication)
             val secondPass = recognizer?.let(::VoiceSecondPassCoordinator)
             val loadedWake = WakeModelLoader(this@VanApplication)
@@ -918,7 +945,10 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
 
     override fun onListeningChanged(listening: Boolean) {
         voiceUi.listening(listening)
-        if (listening) VanLiveVisualState.listeningStarted() else VanLiveVisualState.listeningEnded()
+        if (listening) {
+            commandController.invalidateVoiceContext()
+            VanLiveVisualState.listeningStarted()
+        } else VanLiveVisualState.listeningEnded()
     }
 
     override fun onSpeakingChanged(speaking: Boolean) {

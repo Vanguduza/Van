@@ -50,6 +50,8 @@ class SpeechStream:
     last_spoken_segment: int = -1
     interrupted: bool = False
     request_digest: str = ""
+    source_command_id: str | None = None
+    source_result_ref: str | None = None
 
     @property
     def final_index(self) -> int:
@@ -83,6 +85,8 @@ class SpeechStreamService:
         text: str,
         interruptible: bool = True,
         now_ms: int | None = None,
+        source_command_id: str | None = None,
+        source_result_ref: str | None = None,
     ) -> SpeechStream:
         """Segment an answer and register it. Re-opening the same response returns it.
 
@@ -97,9 +101,15 @@ class SpeechStreamService:
             raise ValueError("speech_text_empty")
         if type(interruptible) is not bool:
             raise ValueError("speech_interruptible_invalid")
+        if bool(source_command_id) != bool(source_result_ref):
+            raise ValueError("speech_source_binding_required")
+        if len(text) > 100_000:
+            raise ValueError("speech_text_too_large")
         self.sweep(now_ms=now)
         key = (device_id, response_id)
         digest = hashlib.sha256(json.dumps([turn_id, text, interruptible], separators=(",", ":")).encode()).hexdigest()
+        if source_command_id is not None:
+            digest = hashlib.sha256(json.dumps([digest, source_command_id, source_result_ref]).encode()).hexdigest()
         existing = self._by_response.get(key)
         if existing is not None:
             stream = self._streams[existing]
@@ -107,6 +117,10 @@ class SpeechStreamService:
                 raise ValueError("speech_response_binding_conflict")
             return stream
 
+        if sum(len(s.text.encode()) for value in self._streams.values() for s in value.segments) + len(text.encode()) > 8 * 1024 * 1024:
+            raise ValueError("speech_capacity_reached")
+        if len(self._streams) >= 1024 or sum(s.device_id == device_id for s in self._streams.values()) >= 64:
+            raise ValueError("speech_capacity_reached")
         identity = json.dumps([device_id, response_id, digest], separators=(",", ":"))
         stream_id = "sp_" + hashlib.sha256(identity.encode()).hexdigest()
         stream = SpeechStream(
@@ -122,6 +136,8 @@ class SpeechStreamService:
             ),
             created_at_ms=now,
             request_digest=digest,
+            source_command_id=source_command_id,
+            source_result_ref=source_result_ref,
         )
         self._streams[stream_id] = stream
         self._by_response[key] = stream_id
@@ -138,6 +154,8 @@ class SpeechStreamService:
         stream = self._streams.get(speech_stream_id)
         if stream is None or stream.interrupted:
             return []
+        if stream.source_command_id is not None:
+            raise ValueError("speech_bound_result_immutable")
         fresh = build_segments(
             response_id=stream.response_id,
             speech_stream_id=stream.speech_stream_id,
@@ -242,3 +260,12 @@ class SpeechStreamService:
     def get(self, speech_stream_id: str) -> SpeechStream | None:
         self.sweep()
         return self._streams.get(speech_stream_id)
+
+    def discard(self, speech_stream_id: str) -> None:
+        stream = self._streams.pop(speech_stream_id, None)
+        if stream is not None:
+            self._by_response.pop((stream.device_id, stream.response_id), None)
+
+    def clear(self) -> None:
+        self._streams.clear()
+        self._by_response.clear()

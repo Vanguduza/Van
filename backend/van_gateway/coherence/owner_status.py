@@ -271,6 +271,14 @@ def project(vocabulary: str, status: object) -> OwnerWorkStatus:
     return table.get(status, OwnerWorkStatus.UNKNOWN)
 
 
+def qualified_outcome(status: OwnerWorkStatus, summary: str | None, *, finished: bool) -> str:
+    """A subsystem's result claim cannot replace its actual verification verdict."""
+    sentence = SENTENCE[status]
+    if finished and isinstance(summary, str) and summary.strip():
+        return summary if status == OwnerWorkStatus.DONE else f"{sentence}. Reported result: {summary}"
+    return sentence
+
+
 def describe(vocabulary: str, status: object) -> dict[str, object]:
     """The projection plus everything a surface needs to render it without deciding."""
     owner_status = project(vocabulary, status)

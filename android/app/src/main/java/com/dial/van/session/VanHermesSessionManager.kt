@@ -100,6 +100,8 @@ class VanHermesSessionManager(
     },
 ) {
 
+    var onSpeechResume: () -> Unit = {}
+
     data class State(
         val vanSessionId: String? = null,
         val sessionEpoch: Int = 0,
@@ -830,6 +832,9 @@ class VanHermesSessionManager(
                     )
                 }
             }
+        }
+        if (refusal == null && synchronized(this) { generation == connectionGeneration && socket === webSocket }) {
+            onSpeechResume()
         }
         if (ResumePolicy.classify(local.sessionEpoch, serverEpoch, refusal) != ResumeOutcome.SESSION_REPLACED) return
         val fresh = try {

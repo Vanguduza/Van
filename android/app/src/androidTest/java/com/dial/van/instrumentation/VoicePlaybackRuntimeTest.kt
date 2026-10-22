@@ -21,10 +21,18 @@ class VoicePlaybackRuntimeTest {
     private val app get() = ApplicationProvider.getApplicationContext<VanApplication>()
 
     private suspend fun ready() {
-        withTimeout(60_000) {
-            app.voiceEdge.readiness.first { !it.installing && it.localTtsRuntimeReady }
+        try {
+            withTimeout(60_000) {
+                app.voiceEdge.readiness.first { !it.installing &&
+                    (it.localTtsRuntimeReady || it.localTtsRuntimeError != null) }
+            }
+        } catch (timeout: kotlinx.coroutines.TimeoutCancellationException) {
+            throw AssertionError("Voice startup did not finish: ${app.voiceEdge.readiness.value}; " +
+                "installation=${com.dial.van.voice.VoiceAssetInstaller.failure}; " +
+                "native=${app.ttsOutput.sherpaPreparationError()}", timeout)
         }
-        assertTrue(app.ttsOutput.sherpaReady())
+        assertTrue("Actual voice runtime: ${app.voiceEdge.readiness.value}; " +
+            "installation=${com.dial.van.voice.VoiceAssetInstaller.failure}", app.ttsOutput.sherpaReady())
     }
 
     private suspend fun awaitSpoken(): String = withTimeout(45_000) {

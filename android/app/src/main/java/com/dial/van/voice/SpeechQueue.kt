@@ -140,6 +140,16 @@ class SpeechQueue {
 
     fun shouldSynthesiseMore(): Boolean = readyCount() < SYNTHESIS_LOOKAHEAD
 
+    /** Restore only a prefix the owner reported heard, before any segment is accepted. */
+    fun restoreHeardPrefix(response: String, stream: String, heard: Int): Boolean {
+        if (segments.isNotEmpty() || response.isBlank() || stream.isBlank() || heard < -1) return false
+        responseId = response
+        speechStreamId = stream
+        lastSpokenIndex = heard
+        lastReceivedIndex = heard
+        return true
+    }
+
     fun cursors(): SpeechCursors = SpeechCursors(
         responseId = responseId,
         speechStreamId = speechStreamId,
@@ -219,7 +229,7 @@ object DelayedAnswerPolicy {
         policyPermitsUnpromptedSpeech: Boolean = false,
     ): DelayedAnswerAction {
         val elapsed = completedAtMs - askedAtMs
-        if (ownerStillInVoiceContext && elapsed <= SAME_CONTEXT_WINDOW_MS) {
+        if (ownerStillInVoiceContext && elapsed in 0..SAME_CONTEXT_WINDOW_MS) {
             return DelayedAnswerAction.SPEAK_NOW
         }
         if (policyPermitsUnpromptedSpeech && screenInteractive) {

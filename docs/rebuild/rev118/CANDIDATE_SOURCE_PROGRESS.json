@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T10:33:42.530848+00:00",
+  "updated_at_utc": "2026-10-22T11:07:28.433115+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -51,6 +51,10 @@
         {
           "description": "Durable mission owner scopes command readback; device/content-bound speech streams refuse impossible/expired/conflicting facts.102 backend/154owner/7refresh controls pass. Native JUnit fixture corrected; actual new voice runtime pending.",
           "evidence": "backend/BE-002_029_BOUND_RESULT_SOURCE.md; receipts/BOUND_SPEECH_RESULT_SOURCE_20261022.json"
+        },
+        {
+          "description": "Authenticated existing-result speech production, actual Android consumer/cursors/interrupt, current owner context and truthful uncertain outcomes;155 backend/1302 JVM/195 app/44 owner+CI/78 rebuild pass. Native voice readiness failure retained; independent TTS startup and diagnostics await hosted rerun. No entire-unit acceptance.",
+          "evidence": "backend/BE-029_AUTHENTICATED_SPEECH_DELIVERY.md; receipts/AUTHENTICATED_SPEECH_DELIVERY_SOURCE_20261022.json"
         }
       ]
     },
@@ -414,6 +418,10 @@
         {
           "description": "Durable mission owner scopes command readback; device/content-bound speech streams refuse impossible/expired/conflicting facts.102 backend/154owner/7refresh controls pass. Native JUnit fixture corrected; actual new voice runtime pending.",
           "evidence": "backend/BE-002_029_BOUND_RESULT_SOURCE.md; receipts/BOUND_SPEECH_RESULT_SOURCE_20261022.json"
+        },
+        {
+          "description": "Authenticated existing-result speech production, actual Android consumer/cursors/interrupt, current owner context and truthful uncertain outcomes;155 backend/1302 JVM/195 app/44 owner+CI/78 rebuild pass. Native voice readiness failure retained; independent TTS startup and diagnostics await hosted rerun. No entire-unit acceptance.",
+          "evidence": "backend/BE-029_AUTHENTICATED_SPEECH_DELIVERY.md; receipts/AUTHENTICATED_SPEECH_DELIVERY_SOURCE_20261022.json"
         }
       ]
     },

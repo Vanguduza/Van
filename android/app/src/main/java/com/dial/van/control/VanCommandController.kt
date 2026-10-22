@@ -47,6 +47,8 @@ data class VanConversationMessage(
      *  decides whether the eventual answer is worth speaking, same rule [shouldSpeak] uses
      *  for the synchronous one. Null on an OWNER message (its own source is [VanOwnerCommand.source]). */
     val source: VanCommandSource? = null,
+    val voiceContextId: String? = null,
+    val askedAtEpochMs: Long = createdAtEpochMs,
     /** GAP-F-019 — `context_gaps` from the dispatch response, already turned into the
      *  "VAN did not know: …" sentence a Work screen renders under the reply. Null when the
      *  gateway reported no gaps. */
@@ -75,6 +77,7 @@ data class VanOwnerCommand(
      * on its own: the gateway verifies each value against its own keys and policies.
      */
     val clientContext: Map<String, String> = emptyMap(),
+    val askedAtEpochMs: Long = System.currentTimeMillis(),
 )
 
 data class PendingA4Approval(
@@ -109,10 +112,31 @@ class VanCommandController(
      * for — reading every status change aloud is how an assistant gets muted.
      */
     private val speak: (String) -> Unit = {},
+    private val nowMs: () -> Long = System::currentTimeMillis,
 ) {
     private val _state = MutableStateFlow(VanConversationState())
     val state: StateFlow<VanConversationState> = _state.asStateFlow()
     private val pollingCommands = ConcurrentHashMap.newKeySet<String>()
+    @Volatile private var voiceContextId: String? = null
+    var speakResult: ((SpokenCommandResult) -> Unit)? = null
+    var onOwnerInput: () -> Unit = {}
+
+    fun invalidateVoiceContext() {
+        voiceContextId = null
+        onOwnerInput()
+    }
+
+    fun isSpeechContextCurrent(result: SpokenCommandResult): Boolean =
+        voiceContextId == result.contextId &&
+            com.dial.van.voice.DelayedAnswerPolicy.decide(
+                result.askedAtEpochMs, nowMs(), true, true,
+            ) == com.dial.van.voice.DelayedAnswerAction.SPEAK_NOW
+
+    private fun deliverSpeech(result: SpokenCommandResult) {
+        if (!isSpeechContextCurrent(result)) return
+        speakResult?.invoke(result) ?: speak(result.text)
+    }
+
 
     /**
      * §20.14 — where a command goes when it could not be sent.
@@ -224,6 +248,8 @@ class VanCommandController(
         val normalized = command.text.trim()
         if (normalized.isEmpty()) return
 
+        invalidateVoiceContext()
+        if (command.source == VanCommandSource.VOICE) voiceContextId = command.turnId ?: command.idempotencyKey
         val ownerMessage = VanConversationMessage(
             role = VanMessageRole.OWNER,
             text = normalized,
@@ -454,6 +480,8 @@ class VanCommandController(
                     commandId = response.optString("command_id").ifBlank { null },
                     status = status,
                     source = command.source,
+                    voiceContextId = command.turnId ?: command.idempotencyKey,
+                    askedAtEpochMs = command.askedAtEpochMs,
                     contextGapsSentence = gapsSentence,
                     memoryEffectReceipt = memoryReceipt,
                 ),
@@ -462,7 +490,12 @@ class VanCommandController(
                 lastError = if (status == VanCommandStatus.FAILED) responseText else null,
             )
         }
-        if (shouldSpeak(command, ownerStatus)) speak(responseText)
+        if (shouldSpeak(command, ownerStatus)) deliverSpeech(SpokenCommandResult(
+            commandId = response.optString("command_id").ifBlank { null },
+            resultRef = response.optString("result_ref").ifBlank { null },
+            text = responseText, contextId = command.turnId ?: command.idempotencyKey,
+            askedAtEpochMs = command.askedAtEpochMs,
+        ))
     }
 
     /**
@@ -515,11 +548,18 @@ class VanCommandController(
                             commandId = commandId,
                             status = outcome.status,
                             source = message.source,
+                            voiceContextId = message.voiceContextId,
+                            askedAtEpochMs = message.askedAtEpochMs,
                         ),
                     )
                     if (_state.compareAndSet(current, next)) { applied = true; break }
                 }
-                if (applied && !outcome.keepPolling && shouldSpeakPolledOutcome(message.source)) speak(outcome.text)
+                if (applied && !outcome.keepPolling && shouldSpeakPolledOutcome(message.source)) {
+                    message.voiceContextId?.let { contextId -> deliverSpeech(SpokenCommandResult(
+                        commandId = commandId, resultRef = response.optString("result_ref").ifBlank { null },
+                        text = outcome.text, contextId = contextId, askedAtEpochMs = message.askedAtEpochMs,
+                    )) }
+                }
                 } finally { pollingCommands.remove(commandId) }
             }
         }

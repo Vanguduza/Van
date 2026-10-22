@@ -1827,6 +1827,39 @@ class VanGatewayClient(context: Context) {
         getJson("/v1/commands/${encodeSegment(commandId)}")
     }
 
+    /** Speech projects existing work and never submits that work again. */
+    suspend fun openSpokenResult(request: com.dial.van.control.SpokenCommandResult): JSONObject =
+        withContext(Dispatchers.IO) {
+            val command = requireNotNull(request.commandId) { "speech_command_required" }
+            val ref = request.resultRef ?: commandStatus(command).getString("result_ref")
+            postProved("/v1/voice/responses", JSONObject().put("command_id", command)
+                .put("result_ref", ref).put("playback_request_id", request.playbackRequestId))
+        }
+
+    suspend fun speechStream(streamId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/voice/streams/${encodeSegment(streamId)}")
+    }
+
+    suspend fun reportSpeechCursors(cursors: com.dial.van.voice.SpeechCursors) = withContext(Dispatchers.IO) {
+        val id = requireNotNull(cursors.speechStreamId)
+        try {
+            postProved("/v1/voice/streams/${encodeSegment(id)}/cursors", JSONObject()
+                .put("last_received_segment", cursors.lastReceivedSegment)
+                .put("last_spoken_segment", cursors.lastSpokenSegment))
+        } catch (refused: GatewayHttpException) {
+            if (refused.code in setOf(401, 403, 404, 409, 410, 422)) {
+                throw com.dial.van.voice.SpeechSourceRefused(refused.code)
+            }
+            throw refused
+        }
+        Unit
+    }
+
+    suspend fun interruptSpeech(streamId: String) = withContext(Dispatchers.IO) {
+        postProved("/v1/voice/streams/${encodeSegment(streamId)}/interrupt", JSONObject())
+        Unit
+    }
+
     // ------------------------------------------------------------------------------ Google
 
     /** GET /v1/google/planes — the four Google credentials, reported one by one. */
