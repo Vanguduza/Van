@@ -1,7 +1,7 @@
 {
   "schema": "van.rebuild.authorization-intake-candidate/1",
   "status": "PREPARED_NOT_ADMITTED",
-  "source_head": "5d6372fdea20b31b300c32b66bb164904211bb0f",
+  "source_head": "c2a278488f00bacaf912853ed6e711a5b1de986a",
   "base_head": "8eb1889822fc8a83f219977c15340172e16acd91",
   "records": [
     {

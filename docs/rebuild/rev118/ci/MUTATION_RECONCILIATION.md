@@ -98,3 +98,15 @@ The current registry has 374 cases / 382 edits. Python groups now stay intact on
 balanced runners (59/58/58/57 cases, eight controls each), avoiding four repeated
 controls per group. Partition tests prove each case and Python control runs once.
 Fresh-source full execution and independent semantic review remain separate.
+
+
+## Final source verification
+
+Run `39725953372` at source `c2a27848` / merge `9ae436ab` (identical source tree
+`42e4a6b0`) passes **all 374 original mutation cases / 382 edits**, with zero
+survivors. `MUTATION_CORPUS_c2a27848.json` compares every terminal log identity
+against the registry and proves exact, once-only coverage. All nine shards pass;
+no invalid control/collection/compiler failure became a detection. The earlier
+371/374 result and failed attempts remain preserved. This closes the legacy
+source-verification finding; independent review and Rev1.18 unit admission remain
+separate. No original planned acceptance identity or native certificate is issued.

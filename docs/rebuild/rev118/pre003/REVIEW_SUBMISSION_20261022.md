@@ -36,3 +36,15 @@ The original planned acceptance registry remains NOT_RUN, as do additions in the
 The complete trusted-base intake candidate is `MAIN_AUTHORIZATION_INTAKE_CURRENT.json` (45 records, original 39 unchanged plus six continuation records). Recompute it against the actual protected base after bootstrap.
 
 Mutation continuation at `5d6372fd`: all 36 original input findings are resolved, all 374 case identities remain (380 edits), and all 32 retargeted cases are assertion-detected after valid controls. Initial survivors, missing dependencies and an invalid Kotlin replacement remain recorded as failed attempts. The shared runner rejects pytest collection and Gradle compilation/setup failures. See `ci/MUTATION_RECONCILIATION.md`, its exact mapping and per-component receipts. Thirty-five focused controls and 52 rebuild regressions pass. Full corpus run `39721114929` is in progress; its browser shard passed 26/26, with no complete corpus score claimed. Native admission, owner decisions and release/handset requirements remain unchanged.
+
+
+Latest source evidence: c2a27848 / run39725953372, exact merge 9ae436ab / tree42e4a6b0.
+All 374 legacy mutations now pass with valid controls and once-only identity
+coverage; Android emulator 16 passed / 0 failed / 4 explicit core skips; Android
+build/lint, Character Forge core and rebuild regressions pass. The source corpus
+gap is closed. New mission-creation race/error guards pass 100 related local
+backend tests; 55 connection/policy/signing-refusal checks passed. No formal
+Rev1.18 unit or native/handset acceptance is inferred. See the current checkpoint
+and exact receipts. Original failed scores/attempts and the immutable blueprint
+remain preserved. Trusted-main and DDS credential jobs still fail their genuine
+prerequisites; nothing was bypassed.

@@ -126,21 +126,21 @@
    "environment": "GitHub-hosted Android emulator core evidence at 637eaf96: 14 passed, 0 failed, 4 explicit core-mode skips. S24 Ultra via Artemis and full/production rig qualification remain pending.",
    "pass_evidence": "Instrumentation report and Artemis receipts for the exact APK.",
    "status": "OPEN_HANDSET_AND_FULL_RIG_QUALIFICATION (core emulator source evidence complete)",
-   "current_runtime": "fca473cc report: 20 tests, 15 passed / 1 deep-link timing failure / 4 core skips. Both new network tests and all Rive core checks pass. Bounded route-selection wait compiled; fresh emulator run required."
+   "current_runtime": "c2a27848 / run39725953372: 20 collected, 16 passed / 0 failed / 4 explicit core-mode skips. Both new network tests, resident singleTop Intent checks and all applicable Rive tests pass. Full/production rig and S24 Artemis acceptance remain pending."
   },
   {
    "id": "OBL-006",
    "from": "OBS-005",
    "owner_unit": "BQ-006 / QA-003",
-   "status": "COMPLETE_CORPUS_EXECUTED_THREE_ORACLES_CORRECTED_REQUALIFICATION_PENDING",
+   "status": "SOURCE_CORPUS_VERIFIED_PENDING_ADMITTED_UNIT_REVIEW",
    "finding": "The 374-case legacy mutation corpus has 36 preflight findings. Its former CI success was an aborted run masked by tee and step continuation.",
    "proves": "Every retained mutation is bound to the current equivalent implementation and valid test target; each unmutated control passes before a mutation can count as caught.",
    "stimulus": "Reconcile each recorded stale/missing target preserving the invariant, run preflight, then execute controls and mutants in an isolated source checkout with the actual component dependencies.",
    "observable": "No invalid registry input, no collection/setup error counted as caught, no silent case omission; complete per-case outcomes and restoration proof.",
    "evidence": "ci/MUTATION_VERIFICATION_FINDING.md; ci/MUTATION_REGISTRY_CURRENT.json; ci/MUTATION_RECONCILIATION.md; ci/MUTATION_RECONCILIATION_MAPPING.json and per-component execution receipts",
    "completed_correction": "All original 36 preflight findings resolved; all 374 case identities preserved (380 edits). All 32 retargeted cases pass controls and fail their intended assertions; invalid initial controls/compiler failures retained. Shared harness and CI reject misleading successes. 35 focused regressions and 52 isolated rebuild tests pass. Follow-up C35 replacement now qualifies the queue constant; C11 now jointly removes the optimistic lookup and unique fence, reflecting the actual combined invariant. Both induced failures detected. Current corpus: 374 identities, 381 edits, nine disjoint CI shards.",
-   "remaining": "Fresh-source full run after the C26/C18/C15 repairs; independent semantic review stays separate.",
-   "full_corpus_evidence": "ci/MUTATION_CORPUS_fca473cc.json: every original identity exactly once, 371 detections/3 survivors. Repairs in MUTATION_FOLLOWUP_C26/C18/C15.json pass. Current corpus 374 identities / 382 edits. No case dropped."
+   "remaining": "Eligible independent semantic/admission review through the canonical unit programme; no source-corpus execution gap remains.",
+   "full_corpus_evidence": "ci/MUTATION_CORPUS_c2a27848.json: all 374 original identities exactly once, 374 detected/0 survived, 382 edits, valid controls. Earlier failed corpus/invalid executions remain preserved."
   }
  ]
 }

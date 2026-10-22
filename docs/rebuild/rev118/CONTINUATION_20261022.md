@@ -50,3 +50,14 @@ and locally detected, without dropping cases (current 374 identities/382 edits).
 The resident deep-link test now awaits the exact destination after asynchronous
 Intent delivery; all identity/Intent assertions remain. A fresh source CI run is
 required. See the current ledger and exact retained receipts, including failures.
+
+
+Final source verification is complete at c2a27848, run39725953372: all 374 legacy
+mutations detected, zero survivors, 382 edits, every original identity exactly
+once. Android instrumentation: 16 passed / 0 failed / 4 explicit core-mode skips;
+build/lint, Character Forge core and 52 rebuild regressions pass. The only failing
+workflow jobs are missing external DDS read credentials and the absent trusted
+checker on main. Read CHECKPOINT_c2a27848_20261022.md and the current ledger. The
+canonical Rev1.18 programme remains blocked before PRE-003, not completed by this
+maintenance. Scope-lock/independent admission, production profile/signing, real
+service/provider/firewall evidence and S24 acceptance remain outstanding.
