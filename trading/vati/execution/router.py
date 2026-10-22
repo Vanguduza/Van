@@ -102,6 +102,10 @@ class ExecutionRouter:
                 liquidity: Optional[LiquidityView] = None,
                 urgency: Urgency = Urgency.NORMAL) -> ExecutionReceipt:
         corr = intent.trade_intent_id
+        if not isinstance(urgency, Urgency):
+            raise RouterError("execution urgency must be a registered deterministic state")
+        if urgency is Urgency.IMMEDIATE:
+            raise RouterError("protective-exit urgency cannot authorize a new entry; use the protective reduction path")
         # --- gate chain (fail closed, first failure names the reason) ---
         if self.lease_fence is not None and not self.lease_fence(lease_epoch):
             raise RouterError(f"account runtime lease fence refused epoch {lease_epoch!r}")
@@ -151,17 +155,22 @@ class ExecutionRouter:
             requested_entry = entry_type
             entry_type, max_slippage = resolve_execution_policy(
                 execution_policy_decision, entry_type=entry_type, max_slippage=max_slippage)
-            style = self.style_selector.select(
-                trade_intent_id=intent.trade_intent_id,
-                policy_decision=execution_policy_decision,
-                route=route,
-                quantity=quantity,
-                liquidity=liquidity or LiquidityView(),
-                urgency=urgency,
-                now_ms=now_ms,
-            )
+            try:
+                style = self.style_selector.select(
+                    trade_intent_id=intent.trade_intent_id,
+                    policy_decision=execution_policy_decision,
+                    route=route,
+                    quantity=quantity,
+                    liquidity=liquidity or LiquidityView(),
+                    urgency=urgency,
+                    now_ms=now_ms,
+                )
+            except StyleRefused as exc:
+                raise RouterError(f"execution style refused: {exc}") from exc
             if not style.seal_ok():
                 raise RouterError("execution style seal is invalid")
+            if style.total_quantity != quantity:
+                raise RouterError("execution style quantity differs from the approved quantised quantity")
             if style.slices != 1:
                 # The current router has one broker submission per intent. Silently
                 # ignoring a multi-slice plan would violate the selected style; refuse

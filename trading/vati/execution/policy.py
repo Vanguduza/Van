@@ -49,7 +49,7 @@ EVIDENCE_SUFFICIENT = "SUFFICIENT"
 EVIDENCE_THIN = "THIN"
 EVIDENCE_ABSENT = "ABSENT"
 
-POLICY_VERSION = "execution-policy/1.0.0"
+POLICY_VERSION = "execution-policy/1.1.0"
 
 
 @dataclass(frozen=True)
@@ -83,21 +83,33 @@ class ExecutionEvidence:
     time_to_fill_ms: list[int] = field(default_factory=list)
     non_fill_cost: list[Decimal] = field(default_factory=list)
     shortfall: list[Decimal] = field(default_factory=list)
+    objective_costs: list[Decimal | None] = field(default_factory=list)
 
     def observe(self, *, filled: bool, partial: bool = False, cancelled: bool = False,
                 slippage: Decimal = ZERO, spread_captured: Decimal = ZERO,
                 post_fill_adverse: Decimal = ZERO, time_to_fill_ms: int = 0,
-                non_fill_cost: Decimal = ZERO, shortfall: Decimal = ZERO) -> None:
+                non_fill_cost: Decimal | None = None, shortfall: Decimal | None = None,
+                objective_cost: Decimal | None = None) -> None:
+        for value in (shortfall, non_fill_cost, objective_cost):
+            if value is not None and (not isinstance(value, Decimal) or not value.is_finite()):
+                raise ValueError("execution objective cost must be a finite Decimal or explicitly missing")
+        # Partial fills need a measured whole-objective cost, including the
+        # residual benchmark. A filled-leg cost alone cannot value that objective.
+        complete = objective_cost if objective_cost is not None else (
+            None if partial else shortfall if filled else non_fill_cost)
         self.samples += 1
+        self.objective_costs.append(complete)
         if filled:
             self.fills += 1
             self.slippage.append(slippage)
             self.spread_captured.append(spread_captured)
             self.post_fill_adverse.append(post_fill_adverse)
             self.time_to_fill_ms.append(time_to_fill_ms)
-            self.shortfall.append(shortfall)
+            if shortfall is not None:
+                self.shortfall.append(shortfall)
         else:
-            self.non_fill_cost.append(non_fill_cost)
+            if non_fill_cost is not None:
+                self.non_fill_cost.append(non_fill_cost)
         if partial:
             self.partial_fills += 1
         if cancelled:
@@ -125,17 +137,16 @@ class ExecutionEvidence:
         return self._median(self.non_fill_cost)
 
     def expected_shortfall_estimate(self) -> Optional[Decimal]:
-        """Fill cost weighted by fill probability, plus the cost of not filling.
+        """Empirical mean of the declared complete objective stream.
 
-        The term the half-a-spread approximation omits: a passive order that
-        never fills is not free.
+        This is a mean execution-cost estimate, not a tail expected-shortfall
+        risk statistic or causal proof. Conditional medians do not form a mean;
+        missing outcomes cannot be silently replaced with zero or dropped.
         """
-        p = self.fill_probability
-        if p is None:
+        if (self.samples == 0 or len(self.objective_costs) != self.samples
+            or any(value is None for value in self.objective_costs)):
             return None
-        fill_cost = self._median(self.shortfall) or ZERO
-        miss_cost = self._median(self.non_fill_cost) or ZERO
-        return (p * fill_cost + (ONE - p) * miss_cost).quantize(Decimal("0.00000001"))
+        return (sum(self.objective_costs, ZERO) / Decimal(self.samples)).quantize(Decimal("0.00000001"))
 
 
 @dataclass(frozen=True)
@@ -154,6 +165,7 @@ class ExecutionPolicyDecision:
     reason: str = ""
     policy_version: str = POLICY_VERSION
     decision_hash: str = ""
+    cost_estimator: str = "MEAN_COMPLETE_OBJECTIVE_COST/1"
 
     def as_dict(self) -> dict:
         d = {k: (str(v) if isinstance(v, Decimal) else v)

@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T06:39:00.579570+00:00",
+  "updated_at_utc": "2026-10-22T06:44:23.769824+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -139,9 +139,15 @@
         "BE-009",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "change": "Joint lot/participation/count feasibility, single-command refusal, protected exit/entry distinction and normal router refusal",
+          "result": "Full trading source suite: 1576 pass, 2 skip. These are partial unit milestones; no policy qualification or profit claim.",
+          "evidence": "backend/BE-010_012_036_EXECUTION_ECONOMICS.md; receipts/EXECUTION_ECONOMICS_SOURCE_20261022.json"
+        }
+      ]
     },
     "BE-011": {
       "title": "Manual trading, adds and management handover",
@@ -162,9 +168,15 @@
         "BE-011",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "change": "Versioned signed-fill TCA with complete decomposition and actual filled-quantity/notional provenance",
+          "result": "Full trading source suite: 1576 pass, 2 skip. These are partial unit milestones; no policy qualification or profit claim.",
+          "evidence": "backend/BE-010_012_036_EXECUTION_ECONOMICS.md; receipts/EXECUTION_ECONOMICS_SOURCE_20261022.json"
+        }
+      ]
     },
     "BE-014": {
       "title": "News, calendar and source-health ingestion",
@@ -1040,9 +1052,15 @@
         "VAN-ML-PKT-027",
         "VAN-ML-PKT-047"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "change": "Complete-objective mean cost estimate; missing/partial objective costs cannot select an apparently free template",
+          "result": "Full trading source suite: 1576 pass, 2 skip. These are partial unit milestones; no policy qualification or profit claim.",
+          "evidence": "backend/BE-010_012_036_EXECUTION_ECONOMICS.md; receipts/EXECUTION_ECONOMICS_SOURCE_20261022.json"
+        }
+      ]
     },
     "BE-044": {
       "title": "Read-only crypto end-to-end research, operations and native consumption contract",
