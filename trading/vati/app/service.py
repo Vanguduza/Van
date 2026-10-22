@@ -101,15 +101,7 @@ class ServiceConfig:
 #: P1-TRADE-008 — which learning environment a session's experience belongs to. Taken from
 #: the mandate's authorization mode rather than assumed, so a demo session's episodes are
 #: never pooled with a live one's; the two are not comparable evidence.
-ENVIRONMENT_FOR_MODE: dict[AuthorizationMode, Environment] = {
-    AuthorizationMode.OBSERVE: Environment.SHADOW,
-    AuthorizationMode.ADVISOR: Environment.SHADOW,
-    AuthorizationMode.DEMO_TRADER: Environment.DEMO,
-    AuthorizationMode.SHADOW_TRADER: Environment.SHADOW,
-    AuthorizationMode.LIMITED_LIVE: Environment.LIMITED_LIVE,
-    AuthorizationMode.AUTONOMOUS_LIVE: Environment.LIVE,
-    AuthorizationMode.HALTED: Environment.SHADOW,
-}
+from vati.learning.scope import ENVIRONMENT_FOR_MODE
 
 
 def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: Decimal = Decimal("10000")) -> VenueAdapter:
@@ -202,6 +194,7 @@ class SessionService:
         # made this a wiring job rather than a design one.
         learning = LearningHooks(
             environment=ENVIRONMENT_FOR_MODE[mandate.mode],
+            account_alias=account.alias,
             broker=str(getattr(account.broker, "value", account.broker)).lower(),
         )
         self.learning_replay = restore_learning_runtime(
@@ -274,6 +267,7 @@ class SessionService:
         hb = {"account_alias": self.cfg.account_alias, "symbol": self.cfg.symbol, "status": status, "cycles": self.cycles, "last_bar_end_ms": self.last_bar_end_ms,
               "permit_new_orders": bool(self.runner and self.runner.permit_new_orders), "kill_switch": sorted(t.value for t in self.runner.cycle.kill.active) if self.runner else [],
               "risk_history_issue": self.runner.cycle.streaks.recovery_issue if self.runner else "",
+              "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
               "updated_ms": self.clock(), "pid": os.getpid(), **(extra or {})}
         Path(self.cfg.heartbeat_path).write_text(json.dumps(hb))
 
@@ -288,6 +282,7 @@ class SessionService:
             "connected": hb.connected, "server_offset_ms": hb.server_offset_ms, "open_positions": len(positions), "peak_equity": str(r.cycle.peak_equity), "day_start_equity": str(r.cycle.day_start_equity),
             "week_start_equity": str(r.cycle.week_start_equity), "kill_switch": sorted(t.value for t in r.cycle.kill.active), "mode": r.cycle.mandate.mode.value,
             "risk_history_issue": r.cycle.streaks.recovery_issue,
+            "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
         }, event_time_ms=now_ms, received_time_ms=now_ms, correlation_id=r.cycle.cfg.session_id))
 
     def start(self) -> None:

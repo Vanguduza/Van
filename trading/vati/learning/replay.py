@@ -35,6 +35,8 @@ class LearningReplayReport:
     broker_multipliers: int
     demotions_restored: int
     owner_promotions_restored: int = 0
+    unresolved_scope_refs: tuple[str, ...] = ()
+    excluded_scope_refs: tuple[str, ...] = ()
 
 
 def _engines_for_strategy(engines_by_symbol: Mapping[str, object], strategy_id: str):
@@ -47,7 +49,7 @@ def _engines_for_strategy(engines_by_symbol: Mapping[str, object], strategy_id: 
 
 
 def _restore_capsule_state_events(
-    ledger, engines_by_symbol: Mapping[str, object]
+    ledger, engines_by_symbol: Mapping[str, object], *, scope=None
 ) -> tuple[int, int]:
     """Replay durable capsule-state events only along the current hash lineage.
 
@@ -64,6 +66,8 @@ def _restore_capsule_state_events(
         by = str(p.get("by") or "")
         if authority == "AUTOMATIC_DEMOTION_ONLY":
             if by != "vati-learning":
+                continue
+            if scope is not None and not scope.admit(event):
                 continue
             kind = "demotion"
         elif authority == "OWNER_SIGNED_PROMOTION":
@@ -170,11 +174,14 @@ def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, o
     # session-environment fallback on replay — the event must record its own —
     # but the restarted runtime's environment bounds what it may record
     # (A-VATI M1): no replayed fact is weighted above the runtime reading it.
-    resolver = LedgerEvidenceResolver(ledger, environment_ceiling=learning.environment)
+    resolver = learning.resolver(ledger, replay=True)
+    scope = resolver.scope
 
     # Broker execution learning is only replayed where the original context was
     # persisted. Absence is not filled from current session state.
     for event in ledger.iter(EventKind.TCA_RECORD):
+        if scope is not None and not scope.admit(event):
+            continue
         p = event.payload
         required = (
             "learning_environment", "broker", "symbol", "session", "event_window",
@@ -212,6 +219,8 @@ def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, o
     # Experience artifacts are the durable source of the environment weighting
     # used by strategy health. Do not infer it from the current mandate.
     for event in ledger.iter(EventKind.TRADE_EXPERIENCE_ARTIFACT):
+        if scope is not None and not scope.admit(event):
+            continue
         # A-VATI M3: every value (R, process verdict, cost) is read from the
         # artifact and the trade's ledger facts, never re-derived here.
         strategy_id = event.payload.get("strategy_id")
@@ -268,7 +277,7 @@ def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, o
             broker_multipliers += 1
 
     exact_demotions, owner_promotions = _restore_capsule_state_events(
-        ledger, engines_by_symbol
+        ledger, engines_by_symbol, scope=scope
     )
     return LearningReplayReport(
         tca_observations=tca_n,
@@ -277,6 +286,8 @@ def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, o
         broker_multipliers=broker_multipliers,
         demotions_restored=exact_demotions,
         owner_promotions_restored=owner_promotions,
+        unresolved_scope_refs=tuple(sorted(scope.unresolved_refs)) if scope is not None else (),
+        excluded_scope_refs=tuple(sorted(scope.excluded_refs)) if scope is not None else (),
     )
 
 

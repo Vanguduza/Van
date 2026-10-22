@@ -127,7 +127,7 @@ class DecisionCycle:
             restored_peak = restore_peak_equity(ledger.iter(), account_alias=cfg.account_alias)
         except RiskHistoryScopeError:
             restored_peak = None
-        if self.streaks.recovery_issue:
+        if self.streaks.recovery_issue or (self.learning is not None and self.learning.recovery_issue):
             self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, 0)
         if restored_peak is not None and restored_peak > ZERO:
             self.peak_equity = restored_peak
@@ -144,11 +144,14 @@ class DecisionCycle:
         self.adjustments = PositionAdjustmentEngine(
             ledger=ledger, policies=self.adjustment_policies)
         self.scale_policies = ScalePolicyRegistry()
-        self.decision_quality = DecisionQualityLedger(ledger=ledger)
+        learning_scope = self.learning.resolver(ledger).scope if self.learning is not None else None
+        self.decision_quality = DecisionQualityLedger(ledger=ledger, scope=learning_scope)
         self.decision_quality.restore_from_ledger(ledger)
-        self.lessons = LessonStore(ledger=ledger)
+        self.lessons = LessonStore(ledger=ledger, scope=learning_scope)
         self.lessons.restore_from_ledger(ledger)
         self.engine.lessons = self.lessons
+        if self.learning is not None and self.learning.recovery_issue:
+            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, 0)
         #: Headline ingress (events/news_ingress.py) when the runtime has one.
         #: Reduce-only; the calendar keeps the blackout authority.
         self.news = None
@@ -158,6 +161,9 @@ class DecisionCycle:
     def _log(self, kind: EventKind, payload: dict, *, now_ms: int, corr: str = "") -> None:
         if kind in {EventKind.SESSION, EventKind.RISK_DECISION}:
             payload = {**payload, "account_alias": self.cfg.account_alias}
+        if kind is EventKind.CAPSULE_STATE and self.learning is not None:
+            payload = {**payload, "account_alias": self.cfg.account_alias,
+                       "learning_environment": self.learning.environment.value}
         self.ledger.append(make_event(kind, "vati-cycle", payload, event_time_ms=now_ms, received_time_ms=now_ms, correlation_id=corr or self.cfg.session_id))
 
     def _open_positions(self) -> tuple[OpenPosition, ...]:
@@ -275,7 +281,7 @@ class DecisionCycle:
         return RiskSnapshot(now_unix=now_ms // 1000, account_alias=acct.account_alias, account_verified=acct.verified, equity=acct.equity, balance=acct.balance,
                             peak_equity=self.peak_equity, day_start_equity=self.day_start_equity, week_start_equity=self.week_start_equity,
                             consecutive_losses=streak.losses if streak else 0,
-                            loss_streak_lock=streak.lock if streak else "",
+                            loss_streak_lock=(self.learning.recovery_issue if self.learning is not None else "") or (streak.lock if streak else ""),
                             loss_streak_multiplier=streak.risk_multiplier if streak else Decimal("1"),
                             drawdown_top_state=self._drawdown_top_state(),
                             open_positions=self._open_positions(), symbol_contract=self.cfg.contract, quote_age_ms=quote_age_ms, max_quote_age_ms=self.cfg.max_quote_age_ms,

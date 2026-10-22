@@ -47,3 +47,10 @@ class VitsLexiconCoverage private constructor(private val vocabulary: Set<String
         }
     }
 }
+
+/** Sherpa 1.13.8 VITS reports zero speakers for its single-speaker model (ID zero). */
+object VitsSpeakerIdentity {
+    fun accepts(sampleRate: Int, speakers: Int, speakerId: Int): Boolean =
+        sampleRate > 0 && speakerId >= 0 &&
+            ((speakers == 0 && speakerId == 0) || (speakers > 0 && speakerId < speakers))
+}

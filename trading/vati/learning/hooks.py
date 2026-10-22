@@ -49,6 +49,7 @@ def to_payload(obj: Any) -> Any:
 class LearningHooks:
     environment: Environment
     broker: str = "paper"
+    account_alias: str | None = field(default=None, kw_only=True)
     health: StrategyHealthTracker = field(default_factory=StrategyHealthTracker)
     brokers: BrokerLearner = field(default_factory=BrokerLearner)
     episodes: list[ExperienceEpisode] = field(default_factory=list)
@@ -59,13 +60,22 @@ class LearningHooks:
     # from that trade; the close/fill path itself is never interrupted.
     refusals: list[str] = field(default_factory=list)
 
-    _resolvers: dict[int, LedgerEvidenceResolver] = field(default_factory=dict, repr=False)
+    _resolvers: dict[tuple[int, bool], LedgerEvidenceResolver] = field(default_factory=dict, repr=False)
 
-    def resolver(self, ledger: Ledger) -> LedgerEvidenceResolver:
-        r = self._resolvers.get(id(ledger))
+    def resolver(self, ledger: Ledger, *, replay: bool = False) -> LedgerEvidenceResolver:
+        key = (id(ledger), replay)
+        r = self._resolvers.get(key)
         if r is None or r.ledger is not ledger:
-            r = self._resolvers[id(ledger)] = LedgerEvidenceResolver(ledger, session_environment=self.environment)
+            r = self._resolvers[key] = LedgerEvidenceResolver(ledger,
+                session_environment=None if replay else self.environment,
+                environment_ceiling=self.environment if replay else None,
+                account_alias=self.account_alias)
         return r
+
+    @property
+    def recovery_issue(self) -> str:
+        issues = sorted({r.scope.issue for r in self._resolvers.values() if r.scope is not None and r.scope.issue})
+        return "; ".join(issues)
 
     @staticmethod
     def _latest(ledger: Ledger, kind: EventKind, trade_intent_id: str, match: dict[str, str], *, available_through: str | None = None) -> Optional[Event]:
@@ -103,6 +113,10 @@ class LearningHooks:
             return None, None
         history = list(ledger.iter(correlation_id=trade_intent_id))
         cutoff = history[-1].hash if history else None
+        resolver = self.resolver(ledger)
+        if resolver.scope is not None and (not history or not resolver.scope.admit(history[-1])):
+            self.refusals.append(f"review {trade_intent_id}: native account/cohort unresolved or excluded")
+            return None, None
         ep = episode_from_ledger(ledger, trade_intent_id, environment=self.environment, available_through=cutoff)
         if ep is not None:
             ep = replace(ep, review={**ep.review, "regime_fit":regime_fit}, artifact_hash="").sealed()

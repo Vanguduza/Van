@@ -528,7 +528,8 @@ class DecisionQualityLedger:
     """
 
     def __init__(self, *, ledger=None, producer: str = "vati-decision-quality",
-                 window: int = 60) -> None:
+                 window: int = 60, scope=None) -> None:
+        self.scope = scope
         self._ledger = ledger
         self._producer = producer
         self.window = window
@@ -541,6 +542,10 @@ class DecisionQualityLedger:
                evidence_refs: tuple[str, ...] = (), outcome_known: bool = True) -> QuadrantVerdict:
         if type(outcome_known) is not bool or not isinstance(r_multiple, Decimal) or not r_multiple.is_finite():
             raise ValueError("decision-quality return must be a finite Decimal")
+        if self.scope is not None:
+            history = list(self._ledger.iter(correlation_id=inputs.trade_intent_id))
+            if not history or not self.scope.admit(history[-1]):
+                raise ValueError("decision-quality input has no admitted native account/cohort")
         verdict = QuadrantVerdict(
             trade_intent_id=inputs.trade_intent_id,
             strategy_id=inputs.strategy_id,
@@ -582,6 +587,8 @@ class DecisionQualityLedger:
         """Restore actual native, sealed process observations without appending rows."""
         restored = 0
         for event in ledger.iter(EventKind.DECISION_QUADRANT):
+            if self.scope is not None and not self.scope.admit(event):
+                continue
             try:
                 p = event.payload
                 if event.producer != self._producer or event.hash != canonical_hash(event.body()):

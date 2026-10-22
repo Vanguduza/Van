@@ -115,9 +115,10 @@ class AccountTradeLifecycle:
         self.adjustment_policies = AdjustmentPolicyRegistry()
         self.adjustments = PositionAdjustmentEngine(
             ledger=self.ledger, policies=self.adjustment_policies)
-        self.decision_quality = DecisionQualityLedger(ledger=self.ledger)
+        learning_scope = self.learning.resolver(self.ledger).scope if self.learning is not None else None
+        self.decision_quality = DecisionQualityLedger(ledger=self.ledger, scope=learning_scope)
         self.decision_quality.restore_from_ledger(self.ledger)
-        self.lessons = LessonStore(ledger=self.ledger)
+        self.lessons = LessonStore(ledger=self.ledger, scope=learning_scope)
 
     @property
     def preservation_blocks_new_risk(self) -> bool:
@@ -131,6 +132,9 @@ class AccountTradeLifecycle:
         )
 
     def _log(self, kind: EventKind, payload: dict, *, now_ms: int, corr: str) -> None:
+        if kind is EventKind.CAPSULE_STATE and self.learning is not None and self.learning.account_alias is not None:
+            payload = {**payload, "account_alias": self.learning.account_alias,
+                       "learning_environment": self.learning.environment.value}
         self.ledger.append(make_event(
             kind, "vati-account-lifecycle", payload,
             event_time_ms=now_ms, received_time_ms=now_ms,

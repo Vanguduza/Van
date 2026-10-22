@@ -1,0 +1,98 @@
+{
+  "schema": "van.rebuild.learning-cohort-source/1",
+  "source_parent": "9599d695956adbe929ba4496065aa3baaa96b147",
+  "source_sha256": {
+    "trading/tests/test_learning_account_scope.py": "a0eae00dd087152a61c621af783bd7d9e2bb6e2268be6f0443c41222a208c054",
+    "trading/vati/app/account_service.py": "48a31139af8e5093eb671fe96e1a9b27b07082526c0fe34b4760bc556322c021",
+    "trading/vati/app/cycle.py": "b78a6dec9125817f5ac144ea1db1288c3e251529c08ca6c7aed3d7f12b58c67d",
+    "trading/vati/app/service.py": "9e2be851be39f1a1c2e2716ea0fd7d94fca44d56fa5e78e2566ea3d9708fcd07",
+    "trading/vati/app/trade_lifecycle.py": "85452d0d01916899c3fd4e78e94a118c38791ecc10ccb6ad255b8b0177e51319",
+    "trading/vati/cognition/attribution.py": "0ad25718f68b8f692ed146fdfcaf991bb65ba42b55cf56635be692aa870119db",
+    "trading/vati/learning/episodes.py": "0d54ae7cf102d37ebaf8fb10422ff6525a09318fac0e61517591181d03895ab0",
+    "trading/vati/learning/evidence.py": "f64ea7ed07c51794e6d902301ecea95b2bb1c4acf7bf01f5b44fad7c60ee14d2",
+    "trading/vati/learning/hooks.py": "fffaafc743d3b06f684ee7442b0eed34840917fa9204f04a0c2c27a60e22b7df",
+    "trading/vati/learning/replay.py": "c07745e10815d30e0476823a4601fbbda72122dc940e0a59dc55cf785f420091",
+    "trading/vati/learning/scope.py": "e714252d10cc76258306caa6224c1c831b110557559a1e1fc73f6b6e2ce65c26"
+  },
+  "full_trading": {
+    "tests": 1754,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "1a280a0af7ad81a3a768bc6134c94df45311740228c54e7aa38c669798be3b32"
+  },
+  "new_real_postgres_case": {
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "9c0094a4693d119c6fd19c8a4138deb9da74cead43f5cd09e95a0d01f310f8ad"
+  },
+  "distinct_cases_executed": 1755,
+  "focused_learning_recovery": {
+    "tests": 129,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "1c69a78619fe5c2d6817b318e8533de9c6916591241678818091f06798e9f3b2"
+  },
+  "owner_gateway_contracts": {
+    "tests": 66,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "ce7979d936e01010aa086e6c9c576b00b71bc03dcc998db2cde1a4c37ca0e28d"
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "68f32194eb71b63cede262aae6e35ce2f00b0985d98aa3e1b7c7ee0712954ef5"
+  },
+  "private_fixture_cleanup": {
+    "/tmp/van-learning-scope-pg-cleanup.json": {
+      "stopped": true,
+      "removed": true
+    },
+    "/tmp/van-learning-scope-specific-pg-cleanup.json": {
+      "stopped": true,
+      "removed": true
+    }
+  },
+  "account_scope_mutant": {
+    "detected": 1,
+    "survived": 0,
+    "source_restored": true,
+    "rows": [
+      {
+        "kind": "baseline",
+        "mutation": null,
+        "exit_code": 0,
+        "log": "/tmp/van-learning-account-mutant-0.txt",
+        "sha256": "964ca6b97369074902f81b50f7fcdd26ee2b9f5faca63de9e08fb47476e4254c"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "native account/cohort learning admission bypass",
+        "exit_code": 1,
+        "log": "/tmp/van-learning-account-mutant-1.txt",
+        "sha256": "b861ad3efc1277fab4b1ded4b7f06a6b853bc0e1243e161e37e1126abc0817bb"
+      }
+    ]
+  },
+  "legacy_corpus_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "initial_real_service_counterexamples": 3,
+  "research_helpers_without_account": "Compatibility only; both actual production constructors bind native account/cohort",
+  "whole_unit_acceptance": "NOT_ISSUED",
+  "profitability_claimed": false,
+  "financial_policy_thresholds_changed": false
+}

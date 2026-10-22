@@ -352,6 +352,7 @@ class AccountCoordinatorService:
 
         self.learning = LearningHooks(
             environment=ENVIRONMENT_FOR_MODE[mandate.mode],
+            account_alias=account.alias,
             broker=str(getattr(account.broker, "value", account.broker)).lower(),
         )
         self.learning_replay = restore_learning_runtime(
@@ -362,6 +363,8 @@ class AccountCoordinatorService:
                 for symbol, evaluator in self.evaluators.items()
             },
         )
+        if self.learning.recovery_issue:
+            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, self.clock())
         self.news = self._build_news(events)
         self.lifecycle = AccountTradeLifecycle(
             ledger=self._ledger,
@@ -402,7 +405,7 @@ class AccountCoordinatorService:
         # One account-scoped lifecycle owns entry truth for reconciliation,
         # TCA, protection, trade review and reduce-only learning.
         self._entries = self.lifecycle.entries
-        if self.lifecycle.streaks.recovery_issue:
+        if self.lifecycle.streaks.recovery_issue or self.learning.recovery_issue:
             self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, self.clock())
 
         profile = TemperamentPolicy(mandate) if mandate.temperament_enabled else None
@@ -674,7 +677,7 @@ class AccountCoordinatorService:
                 else self.lifecycle.consecutive_losses if self.lifecycle is not None
                 else self.consecutive_losses
             ),
-            loss_streak_lock=streak.lock if streak is not None else "",
+            loss_streak_lock=(self.learning.recovery_issue if getattr(self, "learning", None) else "") or (streak.lock if streak is not None else ""),
             loss_streak_multiplier=streak.risk_multiplier if streak is not None else Decimal("1"),
             drawdown_top_state=self._drawdown_top_state(),
             open_positions=self._open_positions(), symbol_contract=contract,
@@ -1015,6 +1018,7 @@ class AccountCoordinatorService:
                 "week_start_equity": str(self.week_start_equity),
                 "kill_switch": sorted(t.value for t in self.kill.active),
                 "risk_history_issue": getattr(getattr(self.lifecycle, "streaks", None), "recovery_issue", ""),
+                "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
                 "mode": self.mandate.mode.value if self.mandate else "UNKNOWN",
                 "temperament": (self.mandate.trading_temperament.value
                                 if self.mandate and self.mandate.trading_temperament
@@ -1072,6 +1076,7 @@ class AccountCoordinatorService:
             "lease_epoch": self.lease.epoch if self.lease else None,
             "kill_switch": sorted(t.value for t in self.kill.active),
             "risk_history_issue": getattr(getattr(self.lifecycle, "streaks", None), "recovery_issue", ""),
+                "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
             "mtf_shadow": {
                 symbol: {
                     "complete": mtf.complete,

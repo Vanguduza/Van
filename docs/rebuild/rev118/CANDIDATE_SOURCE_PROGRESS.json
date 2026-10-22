@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T11:07:28.433115+00:00",
+  "updated_at_utc": "2026-10-22T11:32:48.406564+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -99,6 +99,10 @@
         {
           "description": "Account-bound native financial recovery, unresolved history refuses new risk while protection/owner readback continue;1741 full trading pass/zero skip.",
           "evidence": "backend/BE-003_009_ACCOUNT_RISK_RECOVERY.md; receipts/ACCOUNT_RISK_RECOVERY_SOURCE_20261022.json"
+        },
+        {
+          "description": "Native account/cohort scope for actual learning constructors, live evidence, replay, automatic demotions, quality/lessons and unresolved-history risk/readback fence;1755 distinct trading source cases executed with actual private PostgreSQL and DDS. No whole-unit or profit qualification.",
+          "evidence": "backend/BE-003_036_LEARNING_COHORT_SCOPE.md; receipts/LEARNING_COHORT_SCOPE_SOURCE_20261022.json"
         }
       ]
     },
@@ -170,6 +174,10 @@
         {
           "description": "Account-bound native financial recovery, unresolved history refuses new risk while protection/owner readback continue;1741 full trading pass/zero skip.",
           "evidence": "backend/BE-003_009_ACCOUNT_RISK_RECOVERY.md; receipts/ACCOUNT_RISK_RECOVERY_SOURCE_20261022.json"
+        },
+        {
+          "description": "Native account/cohort scope for actual learning constructors, live evidence, replay, automatic demotions, quality/lessons and unresolved-history risk/readback fence;1755 distinct trading source cases executed with actual private PostgreSQL and DDS. No whole-unit or profit qualification.",
+          "evidence": "backend/BE-003_036_LEARNING_COHORT_SCOPE.md; receipts/LEARNING_COHORT_SCOPE_SOURCE_20261022.json"
         }
       ]
     },
@@ -422,6 +430,10 @@
         {
           "description": "Authenticated existing-result speech production, actual Android consumer/cursors/interrupt, current owner context and truthful uncertain outcomes;155 backend/1302 JVM/195 app/44 owner+CI/78 rebuild pass. Native voice readiness failure retained; independent TTS startup and diagnostics await hosted rerun. No entire-unit acceptance.",
           "evidence": "backend/BE-029_AUTHENTICATED_SPEECH_DELIVERY.md; receipts/AUTHENTICATED_SPEECH_DELIVERY_SOURCE_20261022.json"
+        },
+        {
+          "description": "Actual native readiness diagnostic traced to single-speaker VITS count-zero semantics; pinned model/source verified,correct native identity retained self-test/drain;1306 JVM/195 app/APKs/lint pass,next native execution pending.",
+          "evidence": "backend/BE-029_NATIVE_VITS_SPEAKER_ID.md; receipts/NATIVE_VITS_SPEAKER_ID_SOURCE_20261022.json"
         }
       ]
     },
@@ -1174,6 +1186,10 @@
           "change": "Warm/cold process, cost and regime-fit parity without letting future corrections rewrite original observations",
           "evidence": "backend/BE-003_036_AS_DECIDED_LEARNING.md; receipts/LEARNING_AVAILABILITY_SOURCE_20261022.json",
           "result": "1691 full trading tests pass/zero skips with actual private PostgreSQL and pinned DDS source fixtures; partial candidate milestone"
+        },
+        {
+          "description": "Native account/cohort scope for actual learning constructors, live evidence, replay, automatic demotions, quality/lessons and unresolved-history risk/readback fence;1755 distinct trading source cases executed with actual private PostgreSQL and DDS. No whole-unit or profit qualification.",
+          "evidence": "backend/BE-003_036_LEARNING_COHORT_SCOPE.md; receipts/LEARNING_COHORT_SCOPE_SOURCE_20261022.json"
         }
       ]
     },

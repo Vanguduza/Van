@@ -120,8 +120,8 @@ class SherpaLocalTtsRuntime(context: Context) {
                 ),
             )
             try {
-                require(created.sampleRate() > 0 && speakerId < created.numSpeakers()) {
-                    "sherpa_tts_invalid_voice"
+                require(VitsSpeakerIdentity.accepts(created.sampleRate(), created.numSpeakers(), speakerId)) {
+                    "sherpa_tts_invalid_voice:rate=${created.sampleRate()},speakers=${created.numSpeakers()},id=$speakerId"
                 }
                 val probe = created.generate(WakeAcknowledgementPolicy.TEXT, speakerId, speed)
                 require(probe.samples.isNotEmpty() && probe.samples.all { it.isFinite() }) {

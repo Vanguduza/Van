@@ -362,7 +362,7 @@ class LedgerEvidenceResolver(TrustedEvidenceResolver):
     narrows the search; the hash must still match."""
 
     def __init__(self, ledger: Any, *, session_environment: Optional[Environment] = None,
-                 environment_ceiling: Optional[Environment] = None) -> None:
+                 environment_ceiling: Optional[Environment] = None, account_alias: str | None = None) -> None:
         if not isinstance(ledger, _ledger_types()):
             raise EvidenceError("live evidence resolves only from a VATI ledger")
         if session_environment is None and environment_ceiling is None:
@@ -372,6 +372,9 @@ class LedgerEvidenceResolver(TrustedEvidenceResolver):
         self.session_environment = Environment(session_environment) if session_environment is not None else None
         self.environment_ceiling = Environment(environment_ceiling) if environment_ceiling is not None else None
         self._cache: dict[str, EvidenceRecord] = {}
+        from vati.learning.scope import LearningScope
+        self.scope = (LearningScope(ledger, account_alias, self.environment_ceiling or self.session_environment)
+                      if account_alias is not None else None)
 
     def _find(self, ref: EvidenceRef, correlation_hint: Optional[str]):
         kind = LEDGER_EVENT_KIND[ref.evidence_class]
@@ -423,11 +426,17 @@ class LedgerEvidenceResolver(TrustedEvidenceResolver):
                 if ev.hash != canonical_hash(ev.body()):
                     raise EvidenceError("decision-quality event seal mismatch")
                 hit = ev
+        if hit is not None and self.scope is not None and not self.scope.admit(hit):
+            raise EvidenceError("decision-quality source is outside the native account/cohort or unresolved")
         return None if hit is None else json.loads(canonical_json(hit.payload))
 
     def resolve(self, ref: EvidenceRef, *, correlation_hint: Optional[str] = None) -> EvidenceRecord:
         if ref.evidence_class not in LEDGER_EVENT_KIND:
             raise EvidenceError(f"{ref.evidence_class.value} is not resolvable from the ledger")
+        if self.scope is not None:
+            event = self._find(ref, correlation_hint)
+            if event is None or not self.scope.admit(event):
+                raise EvidenceError("learning source is outside the native account/cohort or unresolved")
         hit = self._cache.get(ref.identity)
         if hit is None:
             ev = self._find(ref, correlation_hint)

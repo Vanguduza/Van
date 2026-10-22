@@ -356,7 +356,8 @@ class LessonStore:
     """
 
     def __init__(self, *, ledger=None, producer: str = "vati-lessons",
-                 per_key: int = 20) -> None:
+                 per_key: int = 20, scope=None) -> None:
+        self.scope = scope
         self._ledger = ledger
         self._producer = producer
         self.per_key = per_key
@@ -371,6 +372,8 @@ class LessonStore:
             raise ValueError("lesson seal mismatch")
         if sealed.lesson_version not in {"trade-lesson/5.1.0", "trade-lesson/5.1.1"}:
             raise ValueError("unsupported lesson version")
+        if self.scope is not None and not self.scope.admit_lesson(sealed.as_dict()):
+            raise ValueError("lesson has no admitted native account/cohort source")
         previous = self._known_hashes.get(sealed.lesson_id)
         if previous is not None:
             if previous != sealed.artifact_hash:
@@ -442,6 +445,8 @@ class LessonStore:
         n = 0
         for event in ledger.iter(EventKind.TRADE_LESSON):
             p = event.payload
+            if self.scope is not None and not self.scope.admit_lesson(p, source_event=event):
+                continue
             try:
                 if event.producer != self._producer or event.hash != canonical_hash(event.body()):
                     raise ValueError("lesson source or event seal mismatch")
