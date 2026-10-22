@@ -259,13 +259,17 @@ class AccountOnboarding:
             self._owner(pending, owner_device_id)
             if pending.get("broker") != broker:
                 raise HTTPException(400, "OAuth state belongs to a different broker")
+            if await self.pending.effects.owns_link(str(args['state']),broker,owner_device_id):
+                return None  # Original finality reader; never a new alias mutation.
         alias = args.get("alias")
         if not isinstance(alias, str) or not re.fullmatch(r"[a-z0-9_]{3,32}", alias.strip().lower()):
             raise HTTPException(422, "account alias must match [a-z0-9_]{3,32}")
         alias = alias.strip().lower()
         try:
             snapshot = await asyncio.to_thread(self.control.resource_version, alias)
-            if action in {'deriv_create_demo','deriv_oauth_link','ctrader_link'} and snapshot.get('state')=='REGISTERED':
+            original_uncertainty=(action in {'deriv_oauth_link','ctrader_link'} and args.get('state')
+                and await self.pending.effects.unresolved_link_target(alias))
+            if action in {'deriv_create_demo','deriv_oauth_link','ctrader_link'} and snapshot.get('state')=='REGISTERED' and not original_uncertainty:
                 raise HTTPException(409,'Account alias already exists; use a new alias or the verified update workflow')
             version = snapshot.get("resource_version")
             if snapshot.get("alias") != alias or not isinstance(version, str) or not re.fullmatch(r"[0-9a-f]{64}", version):

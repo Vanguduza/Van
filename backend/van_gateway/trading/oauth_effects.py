@@ -191,6 +191,17 @@ class OAuthEffects:
             raise HTTPException(400, 'OAuth state belongs to a different broker')
         return True
 
+    async def unresolved_link_target(self, alias):
+        """Read uncertainty before classifying an alias as a new-link collision.
+
+        This grants no execution: begin() still arbitrates the exact request,
+        original actor and global target in its existing atomic transaction.
+        """
+        row=await self.store.fetchone("""SELECT 1 FROM trading_oauth_effects
+            WHERE operation='LINK' AND target_key=? AND phase IN ('IN_FLIGHT','UNKNOWN') LIMIT 1""",
+            ('account:'+alias,))
+        return row is not None
+
     async def unconfirmed(self,state,owner_device_id):
         row = await self.store.fetchone("""SELECT * FROM trading_oauth_effects WHERE state=?
             ORDER BY CASE operation WHEN 'LINK' THEN 1 ELSE 0 END DESC LIMIT 1""",(state,))

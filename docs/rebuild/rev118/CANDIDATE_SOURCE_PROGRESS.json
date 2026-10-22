@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T21:13:30.431204+00:00",
+  "updated_at_utc": "2026-10-22T21:21:49.560334+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -71,6 +71,10 @@
         {
           "description": "Generic native account edits preserve omitted connection/settings and credential references; actual enabled control and official Deriv endpoint checks; complete native before/after review bound in A4 and rechecked by writer; existing Android review and typed action catalogue.1990fulltrading zero skip,51restored focused,203app JVM/APKs/lint0errors,192owner-plan and78rebuild pass.8faults caught after28controls and restored. Initial neutral redundant-check mutation retained. No migration/retirement or whole-unit acceptance.",
           "evidence": "backend/BE-002_004_005_ACCOUNT_UPDATE_REVIEW.md; receipts/ACCOUNT_UPDATE_REVIEW_SOURCE_20261022.json"
+        },
+        {
+          "description": "Broad9ea audit found5OAuth collision/recovery regressions and stopped after5; retained failure corrected by original device-owned operation reads and existing atomic unresolved target fence, with genuine alias collisions still refused.43restored gateway/78rebuild pass;3faults caught after8controls and restored. Initial neutral overlap fault retained; unavailable-inventory original UNKNOWN read added. Fresh broad audit pending; no unit admission.",
+          "evidence": "backend/BE-002_005_OAUTH_COLLISION_RECOVERY.md; receipts/OAUTH_COLLISION_RECOVERY_SOURCE_20261022.json"
         }
       ]
     },
@@ -143,6 +147,10 @@
         {
           "description": "Shared native position recovery history verifies actual account/venue, original command/correlation/seal, unique provenance, quantity/symbol/model and current venue stop. Related TCA/receipt/ticket facts scoped; historical pre-epoch commands preserved.9counterexamples fixed;2017fulltrading zero skip realPG/DDS before final chain-test-only tightening,28restored focus/78rebuild pass;10faults after16controls caught and restored. Single-symbol consumer/unknown-state projection remain.",
           "evidence": "backend/BE-003_010_NATIVE_POSITION_RECOVERY_SCOPE.md; receipts/NATIVE_POSITION_RECOVERY_SCOPE_SOURCE_20261022.json"
+        },
+        {
+          "description": "Broad9ea audit found5OAuth collision/recovery regressions and stopped after5; retained failure corrected by original device-owned operation reads and existing atomic unresolved target fence, with genuine alias collisions still refused.43restored gateway/78rebuild pass;3faults caught after8controls and restored. Initial neutral overlap fault retained; unavailable-inventory original UNKNOWN read added. Fresh broad audit pending; no unit admission.",
+          "evidence": "backend/BE-002_005_OAUTH_COLLISION_RECOVERY.md; receipts/OAUTH_COLLISION_RECOVERY_SOURCE_20261022.json"
         }
       ]
     },
@@ -230,6 +238,10 @@
         {
           "description": "Generic native account edits preserve omitted connection/settings and credential references; actual enabled control and official Deriv endpoint checks; complete native before/after review bound in A4 and rechecked by writer; existing Android review and typed action catalogue.1990fulltrading zero skip,51restored focused,203app JVM/APKs/lint0errors,192owner-plan and78rebuild pass.8faults caught after28controls and restored. Initial neutral redundant-check mutation retained. No migration/retirement or whole-unit acceptance.",
           "evidence": "backend/BE-002_004_005_ACCOUNT_UPDATE_REVIEW.md; receipts/ACCOUNT_UPDATE_REVIEW_SOURCE_20261022.json"
+        },
+        {
+          "description": "Broad9ea audit found5OAuth collision/recovery regressions and stopped after5; retained failure corrected by original device-owned operation reads and existing atomic unresolved target fence, with genuine alias collisions still refused.43restored gateway/78rebuild pass;3faults caught after8controls and restored. Initial neutral overlap fault retained; unavailable-inventory original UNKNOWN read added. Fresh broad audit pending; no unit admission.",
+          "evidence": "backend/BE-002_005_OAUTH_COLLISION_RECOVERY.md; receipts/OAUTH_COLLISION_RECOVERY_SOURCE_20261022.json"
         }
       ]
     },

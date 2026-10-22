@@ -322,3 +322,36 @@ async def test_mismatched_native_link_receipt_stays_unconfirmed(client,monkeypat
     assert (await act(ac,'oauth_pending',{'state':state})).json()['status']=='OUTCOME_UNCONFIRMED'
     assert (await act(ac,'deriv_oauth_link',args)).status_code==409
     assert calls==['deriv_oauth_link']
+
+
+@pytest.mark.asyncio
+async def test_a_new_link_cannot_replace_a_registered_alias_without_an_original_unresolved_effect(client,tmp_path):
+    from vati.accounts import Account,AccountRegistry,CredentialRef
+    ac,app=client
+    registry=AccountRegistry(tmp_path/'accounts.json')
+    original=registry.add(Account(alias='existing_native',broker='DERIV',mode='OBSERVE',currency='USD',
+        login='VRTC900',credential_ref=CredentialRef(env_var='FIXTURE_PRIVATE_NATIVE_REFERENCE')))
+    state=await ready_deriv(ac)
+    result=await act(ac,'deriv_oauth_link',{'state':state,'loginid':'VRTC900','alias':original.alias},expected_challenge_status=409)
+    assert result.status_code==409 and AccountRegistry(registry.path).get(original.alias)==original
+    assert not (tmp_path/'secrets/existing_native.env').exists()
+
+
+@pytest.mark.asyncio
+async def test_original_unconfirmed_link_read_does_not_depend_on_current_native_inventory(client,monkeypatch):
+    from fastapi import HTTPException
+    ac,app=client;state=await ready_deriv(ac);calls=[];real=app.state.onboarding.control.run
+    def observed(command,args):
+        calls.append(command);return real(command,args)
+    monkeypatch.setattr(app.state.onboarding.control,'run',observed)
+    def fail(point):
+        if point=='after_material_before_receipt':raise RuntimeError('induced lost native completion')
+    app.state.onboarding.pending.effects.fault=fail
+    args={'state':state,'loginid':'VRTC900','alias':'original_unconfirmed'}
+    assert (await act(ac,'deriv_oauth_link',args)).json()['effect_state']=='UNKNOWN'
+    app.state.onboarding.pending.effects.fault=None
+    def unavailable(alias):raise HTTPException(503,'fixture native inventory unavailable')
+    monkeypatch.setattr(app.state.onboarding.control,'resource_version',unavailable)
+    result=await act(ac,'deriv_oauth_link',args)
+    assert result.status_code==409 and result.json()['effect_state']=='UNKNOWN'
+    assert result.json()['reconciliation_required'] is True and calls==['deriv_oauth_link']
