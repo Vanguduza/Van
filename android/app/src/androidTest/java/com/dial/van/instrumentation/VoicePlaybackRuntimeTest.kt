@@ -44,7 +44,7 @@ class VoicePlaybackRuntimeTest {
     }
 
     @Test
-    fun realOfflineAnswerReachesTheApplicationQueueAsSpoken() = runBlocking {
+    fun realOfflineAnswerReachesTheApplicationQueueAsSpoken() = runBlocking<Unit> {
         ready()
         withContext(Dispatchers.Main) {
             VanSpokenAnswer.speak(app.voiceEdge, "The test is complete.")
@@ -53,7 +53,7 @@ class VoicePlaybackRuntimeTest {
     }
 
     @Test
-    fun cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer() = runBlocking {
+    fun cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer() = runBlocking<Unit> {
         ready()
         val oldStream = withContext(Dispatchers.Main) {
             VanSpokenAnswer.speak(app.voiceEdge, "The first answer is ready.")

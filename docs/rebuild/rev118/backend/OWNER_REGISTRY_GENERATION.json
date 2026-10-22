@@ -1,0 +1,11 @@
+{
+  "schema": "van.rebuild.owner-registry-generation/1",
+  "source_receipt_sha256": "5ce3fe17d30f7d82a8376dcd7c81fcb65f2de8cef8d8985de0c02a82ca6acfe4",
+  "outputs": {
+    "registries/owner_endpoint_schemas.json": "2d947323a21303aa9a7f58b5e39dafb0c0bc008679e5b770ccd3f2c407e0a3f0",
+    "registries/owner_endpoints.json": "373dd50c6d8323ada5dae245237bb23b2c2fc2d20bf57f4694199bd91fec07f4",
+    "registries/owner_features.json": "407f494e086025797eb3e508db342995f79be276521875ec5c769cddc3576154",
+    "registries/owner_screens.json": "10a8e9782f1b2d33ac78c78118b1851a36f49ce24319405c6e38f1a82feea318"
+  },
+  "qualification": "Derived source inventory only; no owner/native/admission signature."
+}

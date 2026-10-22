@@ -20,6 +20,10 @@ from tools.audit.export_owner_endpoints import export
 INPUT = "9f61e09f57ae0ea48614bf5ee75a4f19360941f4"
 CITATION_BASE = "b02075f327ea8180ab6d269eba358cf8c5479878"
 RECEIPT = "docs/rebuild/rev118/backend/OWNER_REGISTRY_SOURCE_REFRESH_20261022.json"
+GENERATION = "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json"
+LEGACY_GENERATION = "c36d6a21bea1618707e353912d3f5b9508eca5ba"
+REGISTRIES = frozenset("registries/"+name+".json" for name in (
+    "owner_endpoints", "owner_endpoint_schemas", "owner_features", "owner_screens"))
 
 
 def git_file(ref, path):
@@ -32,6 +36,31 @@ def sha(data):
 
 def encode(value):
     return (json.dumps(value, indent=2)+"\n").encode()
+
+
+def approved_preimage(path, current, read=git_file):
+    """Accept reviewed originals or an intact committed generation, never local edits."""
+    if path not in REGISTRIES:
+        return False
+    for ref in (INPUT, LEGACY_GENERATION):
+        try:
+            if current == read(ref, path):
+                return True
+        except subprocess.CalledProcessError:
+            pass
+    try:
+        record = json.loads(read("HEAD", GENERATION))
+        if (record.get("schema") != "van.rebuild.owner-registry-generation/1"
+            or set(record.get("outputs", {})) != REGISTRIES
+            or record.get("source_receipt_sha256") != sha(read("HEAD", RECEIPT))):
+            return False
+        # Validate the entire generation before accepting any of its files.
+        committed = {p: read("HEAD", p) for p in REGISTRIES}
+        if any(sha(data) != record["outputs"][p] for p, data in committed.items()):
+            return False
+        return current == committed[path]
+    except (subprocess.CalledProcessError, ValueError, KeyError, TypeError):
+        return False
 
 
 def build():
@@ -105,6 +134,10 @@ def build():
               RECEIPT: encoded_receipt}
     for name, document in documents.items():
         result["registries/"+name+".json"] = encode(document)
+    result[GENERATION] = encode({"schema": "van.rebuild.owner-registry-generation/1",
+        "source_receipt_sha256": sha(encoded_receipt),
+        "outputs": {p: sha(result[p]) for p in sorted(REGISTRIES)},
+        "qualification": "Derived source inventory only; no owner/native/admission signature."})
     return result
 
 
@@ -115,8 +148,15 @@ def main():
     changed = [p for p, data in outputs.items() if not (ROOT/p).is_file() or (ROOT/p).read_bytes() != data]
     if sys.argv[1] == "--apply":
         for path in changed:
-            if path.startswith("registries/") and (ROOT/path).read_bytes() != git_file(INPUT, path):
+            if path.startswith("registries/") and not approved_preimage(path, (ROOT/path).read_bytes()):
                 raise ValueError("Unexpected registry edits require review: "+path)
+            if not path.startswith("registries/") and (ROOT/path).exists():
+                try:
+                    old = git_file("HEAD", path)
+                except subprocess.CalledProcessError:
+                    old = None
+                if (ROOT/path).read_bytes() != old:
+                    raise ValueError("Unexpected generated-receipt edits require review: "+path)
         for path, data in outputs.items():
             (ROOT/path).parent.mkdir(parents=True, exist_ok=True)
             (ROOT/path).write_bytes(data)

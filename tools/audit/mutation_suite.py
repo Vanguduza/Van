@@ -611,7 +611,7 @@ ALL = [
     "        stream.last_spoken_segment = last_spoken_segment",
     "C30 a device that restarted its queue makes VAN repeat a sentence"),
    ("van_gateway/voice/speech_stream.py",
-    "        existing = self._by_response.get(response_id)\n        if existing is not None:\n            return self._streams[existing]",
+    "        existing = self._by_response.get(key)\n        if existing is not None:\n            stream = self._streams[existing]\n            if stream.request_digest != digest:\n                raise ValueError(\"speech_response_binding_conflict\")\n            return stream",
     "        existing = None",
     "C30 two streams for one answer, so de-duplication by segment id stops working"),
    ("van_gateway/voice/speech_stream.py",

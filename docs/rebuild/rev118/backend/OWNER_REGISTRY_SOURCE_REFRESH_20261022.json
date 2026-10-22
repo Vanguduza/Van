@@ -259,6 +259,22 @@
     }
   },
   "citation_changes": {
+    "android/app/src/main/java/com/dial/van/VanApplication.kt:830": {
+      "file": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+      "old_line": 830,
+      "new_line": 830,
+      "old_sha256": "22daa7c39be6d788f5c417b71a4cfd703f04678fd7413729063f808ab0be38dc",
+      "new_sha256": "d633836305d2f08354f61b80d89b5c5f47f9609364333972cba64e8f64f9b4bb",
+      "exact_anchor": "            val health = gatewayClient.health()"
+    },
+    "android/app/src/main/java/com/dial/van/VanApplication.kt:117": {
+      "file": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+      "old_line": 117,
+      "new_line": 117,
+      "old_sha256": "22daa7c39be6d788f5c417b71a4cfd703f04678fd7413729063f808ab0be38dc",
+      "new_sha256": "d633836305d2f08354f61b80d89b5c5f47f9609364333972cba64e8f64f9b4bb",
+      "exact_anchor": "    lateinit var gatewayClient: VanGatewayClient"
+    },
     "android/app/src/main/java/com/dial/van/command/nav/VanRoute.kt:195": {
       "file": "android/app/src/main/java/com/dial/van/command/nav/VanRoute.kt",
       "old_line": 195,
@@ -290,11 +306,59 @@
       "old_sha256": "c86dc5d984211f354e97845af9b146f92ce790305f814f6319cdd1a6837856b4",
       "new_sha256": "6d0f61013c7facdeb439e854c7c9b033f714bd248b78d627259d969c7305adaa",
       "exact_anchor": "ACTION_REVERSIBILITY: dict[str, Reversibility] = {"
+    },
+    "android/app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt:922": {
+      "file": "android/app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt",
+      "old_line": 922,
+      "new_line": 952,
+      "old_sha256": "aae23d5a8c7171326686928960cfbbc653683e172f0ed426d97c879897850a29",
+      "new_sha256": "d3ef7b4ceefba2707aecad1d5b5d63163d61d9105ead525f9055c4734ea91242",
+      "exact_anchor": "class VoiceSessionCoordinator("
+    },
+    "android/app/src/main/java/com/dial/van/voice/VoiceEdge.kt:29": {
+      "file": "android/app/src/main/java/com/dial/van/voice/VoiceEdge.kt",
+      "old_line": 29,
+      "new_line": 29,
+      "old_sha256": "4d9a9b05906780184c14404814c69eabdf61e5ad37c26203caad2359b1d47e7e",
+      "new_sha256": "466b9e88688b0c3efe9fe463503610f223b2edc19b4de712fbbd92d3cd579b07",
+      "exact_anchor": "class VoiceEdge("
+    },
+    "android/app/src/main/java/com/dial/van/VanApplication.kt:72": {
+      "file": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+      "old_line": 72,
+      "new_line": 72,
+      "old_sha256": "22daa7c39be6d788f5c417b71a4cfd703f04678fd7413729063f808ab0be38dc",
+      "new_sha256": "d633836305d2f08354f61b80d89b5c5f47f9609364333972cba64e8f64f9b4bb",
+      "exact_anchor": "class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {"
+    },
+    "android/app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt:69": {
+      "file": "android/app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt",
+      "old_line": 69,
+      "new_line": 72,
+      "old_sha256": "aae23d5a8c7171326686928960cfbbc653683e172f0ed426d97c879897850a29",
+      "new_sha256": "d3ef7b4ceefba2707aecad1d5b5d63163d61d9105ead525f9055c4734ea91242",
+      "exact_anchor": "class VoiceInputManager("
+    },
+    "android/app/src/main/java/com/dial/van/VanApplication.kt:401": {
+      "file": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+      "old_line": 401,
+      "new_line": 401,
+      "old_sha256": "22daa7c39be6d788f5c417b71a4cfd703f04678fd7413729063f808ab0be38dc",
+      "new_sha256": "d633836305d2f08354f61b80d89b5c5f47f9609364333972cba64e8f64f9b4bb",
+      "exact_anchor": "        val record = gatewayClient.deviceBindingStatus()"
+    },
+    "android/app/src/main/java/com/dial/van/VanApplication.kt:562": {
+      "file": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+      "old_line": 562,
+      "new_line": 562,
+      "old_sha256": "22daa7c39be6d788f5c417b71a4cfd703f04678fd7413729063f808ab0be38dc",
+      "new_sha256": "d633836305d2f08354f61b80d89b5c5f47f9609364333972cba64e8f64f9b4bb",
+      "exact_anchor": "                    gatewayClient.connectivityManifest(knownVersion)"
     }
   },
   "current_cited_source_sha256": {
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-    "android/app/src/main/java/com/dial/van/VanApplication.kt": "22daa7c39be6d788f5c417b71a4cfd703f04678fd7413729063f808ab0be38dc",
+    "android/app/src/main/java/com/dial/van/VanApplication.kt": "d633836305d2f08354f61b80d89b5c5f47f9609364333972cba64e8f64f9b4bb",
     "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt": "d9328ea0b06b5957919f0f24e5dda5a13e8173aba1ecb53d3deb8c296f1fe20a",
     "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
     "android/app/src/main/java/com/dial/van/command/home/HomeRoute.kt": "6db205303dcee9b40c5885035f60a4ed61b0b8f3cb5f5c6d90fdd46a94d184b3",
@@ -362,13 +426,13 @@
     "backend/van_gateway/auth/provider_transport.py": "1e62689d76a8488f2bb607d66b3853bec897b5a5efe76c78c1afec5d2fcd0b56",
     "backend/van_gateway/authority/descriptor.py": "6d0f61013c7facdeb439e854c7c9b033f714bd248b78d627259d969c7305adaa",
     "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt": "02ee077fa5c071d9a2335d0f84673f950a18b7bcbd881880b30adf7d87be5e0e",
-    "android/app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt": "aae23d5a8c7171326686928960cfbbc653683e172f0ed426d97c879897850a29",
+    "android/app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt": "d3ef7b4ceefba2707aecad1d5b5d63163d61d9105ead525f9055c4734ea91242",
     "android/app/src/main/java/com/dial/van/voice/VoiceTurnLifecycle.kt": "d0e241884f51357320918724e8e572f6667be6082475f419d6f9da4a7761115d",
     "android/app/src/main/java/com/dial/van/session/HttpSessionCarrier.kt": "28858dd265b38b8267a11ec1e56d398b07692726bf381ecb37a8617c736b140a",
     "android/app/src/main/java/com/dial/van/voice/AndroidOfflineTtsReadiness.kt": "909c21288e9bdb87fb384c667d096202734de61fe5550582e1fda31c91815ed6",
     "android/app/src/main/java/com/dial/van/voice/VoiceAssetInstaller.kt": "c24970b9a405e27acc5d7553dc2de1fd650572de4adb002389e8c44883bf4791",
     "android/app/src/main/java/com/dial/van/voice/EmbeddedVoiceAssetInstaller.kt": "bc0343237f1f023540769ef968190169933269476dd7af191ca531933fcf12e2",
-    "android/app/src/main/java/com/dial/van/voice/VoiceEdge.kt": "4d9a9b05906780184c14404814c69eabdf61e5ad37c26203caad2359b1d47e7e",
+    "android/app/src/main/java/com/dial/van/voice/VoiceEdge.kt": "466b9e88688b0c3efe9fe463503610f223b2edc19b4de712fbbd92d3cd579b07",
     "android/app/src/main/java/com/dial/van/voice/WakeRuntime.kt": "9895e4130a074d6b4e2eb51d192194c5dd64fbd098bea4618b2844705021cfd5",
     "android/app/src/main/java/com/dial/van/voice/OfflineVoiceTurn.kt": "5dfa700e4b057ecff197fd7b42570bcac8832adf17b6fa550e850f4bc7faf4d1",
     "android/app/src/main/java/com/dial/van/voice/SpeakerEnrollmentPanel.kt": "a3fee2eb5c43c1079e72e04bff5e953c3cabe1683d6916b371f88320c37e6df1",

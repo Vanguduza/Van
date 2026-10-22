@@ -2458,16 +2458,15 @@ def create_app() -> FastAPI:
         mission = await command_missions.existing_for_command(command_id)
         rows = await store.fetchall(
             "SELECT device_id, result, failure_reason, created_at_unix FROM audit "
-            "WHERE command_id = ? ORDER BY COALESCE(chain_seq, 0) DESC LIMIT 1",
-            (command_id,),
+            "WHERE command_id = ? AND device_id = ? ORDER BY COALESCE(chain_seq, 0) DESC LIMIT 1",
+            (command_id, device_id),
         )
         if mission is None and not rows:
             raise HTTPException(status_code=404, detail="command_unknown")
-        if rows and device_id and rows[0]["device_id"] and rows[0]["device_id"] != device_id:
-            # Not 403: that would confirm the command exists to a device that should not
-            # know it does.
+        if mission is not None and mission.owner_principal_id != f"device:{device_id}":
+            # Audit retention or a later unscoped observation cannot transfer
+            # ownership of a durable command result to another paired device.
             raise HTTPException(status_code=404, detail="command_unknown")
-
         if mission is not None:
             status = wire_status.from_mission_state(mission.state.value)
             return {

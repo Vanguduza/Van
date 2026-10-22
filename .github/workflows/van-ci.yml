@@ -194,10 +194,13 @@ jobs:
         run: >-
           python -m pytest -q
           backend/tests/test_voice_stream_continuity.py
+          backend/tests/test_voice_stream_binding.py
           backend/tests/test_voice_speech_stream.py
           backend/tests/test_speech_sync.py
           backend/tests/test_voice_speech_cues.py
           backend/tests/test_voice_speaker_authority.py
+          backend/tests/test_command_execution_result.py
+          backend/tests/test_command_success_contract.py
           --junitxml=voice-source-report.xml
       - name: Require executed voice cases without skips
         run: |
@@ -205,7 +208,7 @@ jobs:
           import xml.etree.ElementTree as ET
           suites = list(ET.parse("voice-source-report.xml").getroot().iter("testsuite"))
           counts = {key: sum(int(s.get(key, 0)) for s in suites) for key in ("tests", "failures", "errors", "skipped")}
-          assert counts["tests"] >= 48 and all(counts[k] == 0 for k in ("failures", "errors", "skipped")), counts
+          assert counts["tests"] >= 102 and all(counts[k] == 0 for k in ("failures", "errors", "skipped")), counts
           print(counts)
           PY
       - uses: actions/upload-artifact@v4

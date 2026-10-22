@@ -243,6 +243,46 @@ async def test_another_device_cannot_read_this_one_s_command(client):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("audit_state", ["removed", "unscoped_latest", "foreign_latest"])
+async def test_mission_identity_scopes_status_even_when_audit_cannot_supply_the_owner(client, audit_state):
+    ac, app = client
+    device_id = await _enrol(ac, app)
+    body = _signed(app, device_id, "brief me", idempotency_key="exec-owner-without-audit")
+    accepted = await ac.post("/v1/commands", json=body)
+    assert accepted.status_code == 200 and accepted.json()["mission_id"]
+    other = await app.state.auth.create_pairing_ticket("exec-other")
+    enrolled = await app.state.auth.pair_device(other.token, "exec-other", "s" * 32, "PEM", "other")
+    if audit_state == "removed":
+        await app.state.store.execute("DELETE FROM audit WHERE command_id = ?", (body["command_id"],))
+    else:
+        await app.state.orchestrator.audit.record(command_id=body["command_id"], result="observed", capability="source-status-test",
+            device_id="exec-other" if audit_state == "foreign_latest" else None)
+    assert (await ac.get(f"/v1/commands/{body['command_id']}")).status_code == 200
+    ac.headers.update({"X-Van-Device-Token": enrolled.access_token})
+    foreign = await ac.get(f"/v1/commands/{body['command_id']}")
+    assert foreign.status_code == 404
+    assert foreign.json()["detail"] == "command_unknown"
+
+
+@pytest.mark.asyncio
+async def test_a_later_unscoped_observation_cannot_expose_a_pre_mission_refusal(client):
+    ac, app = client
+    device_id = await _enrol(ac, app)
+    owner_token = ac.headers["X-Van-Device-Token"]
+    body = _signed(app, device_id, "private owner request", idempotency_key="refusal-scope")
+    body["signature"] = "not-a-signature"
+    assert (await ac.post("/v1/commands", json=body)).json()["status"] == "denied"
+    await app.state.orchestrator.audit.record(command_id=body["command_id"],result="observed",failure_reason="unscoped diagnostic")
+    ticket = await app.state.auth.create_pairing_ticket("other-reader")
+    other = await app.state.auth.pair_device(ticket.token,"other-reader","s"*32,"PEM","other")
+    ac.headers["X-Van-Device-Token"] = other.access_token
+    assert (await ac.get(f"/v1/commands/{body['command_id']}")).status_code == 404
+    ac.headers["X-Van-Device-Token"] = owner_token
+    own = await ac.get(f"/v1/commands/{body['command_id']}")
+    assert own.status_code == 200 and own.json()["owner_status"] == OwnerWorkStatus.REFUSED.value
+
+
+@pytest.mark.asyncio
 async def test_a_dispatch_that_never_comes_back_stops_reading_as_working(client):
     """The finding itself. Hermes accepts the run and never calls back."""
     ac, app = client

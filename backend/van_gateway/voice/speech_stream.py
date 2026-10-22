@@ -24,6 +24,8 @@ Gateway can or should second-guess.
 from __future__ import annotations
 
 import time
+import hashlib
+import json
 from dataclasses import dataclass, field
 
 from van_gateway.voice.segmentation import SpeechSegment, build_segments
@@ -47,6 +49,7 @@ class SpeechStream:
     last_received_segment: int = -1
     last_spoken_segment: int = -1
     interrupted: bool = False
+    request_digest: str = ""
 
     @property
     def final_index(self) -> int:
@@ -69,7 +72,7 @@ class SpeechStreamService:
 
     def __init__(self) -> None:
         self._streams: dict[str, SpeechStream] = {}
-        self._by_response: dict[str, str] = {}
+        self._by_response: dict[tuple[str, str], str] = {}
 
     def open(
         self,
@@ -88,11 +91,24 @@ class SpeechStreamService:
         de-duplication is by id.
         """
         now = int(time.time() * 1000) if now_ms is None else now_ms
-        existing = self._by_response.get(response_id)
+        if any(not isinstance(v, str) or not v.strip() for v in (response_id, turn_id, device_id)):
+            raise ValueError("speech_identity_required")
+        if not isinstance(text, str) or not text.strip():
+            raise ValueError("speech_text_empty")
+        if type(interruptible) is not bool:
+            raise ValueError("speech_interruptible_invalid")
+        self.sweep(now_ms=now)
+        key = (device_id, response_id)
+        digest = hashlib.sha256(json.dumps([turn_id, text, interruptible], separators=(",", ":")).encode()).hexdigest()
+        existing = self._by_response.get(key)
         if existing is not None:
-            return self._streams[existing]
+            stream = self._streams[existing]
+            if stream.request_digest != digest:
+                raise ValueError("speech_response_binding_conflict")
+            return stream
 
-        stream_id = f"sp_{response_id}"
+        identity = json.dumps([device_id, response_id, digest], separators=(",", ":"))
+        stream_id = "sp_" + hashlib.sha256(identity.encode()).hexdigest()
         stream = SpeechStream(
             speech_stream_id=stream_id,
             response_id=response_id,
@@ -105,9 +121,10 @@ class SpeechStreamService:
                 interruptible=interruptible,
             ),
             created_at_ms=now,
+            request_digest=digest,
         )
         self._streams[stream_id] = stream
-        self._by_response[response_id] = stream_id
+        self._by_response[key] = stream_id
         return stream
 
     def append(self, speech_stream_id: str, text: str, *, interruptible: bool = True) -> list[SpeechSegment]:
@@ -117,6 +134,7 @@ class SpeechStreamService:
         numbered after the last. Re-segmenting the whole accumulated text would renumber
         segments the device has already spoken.
         """
+        self.sweep()
         stream = self._streams.get(speech_stream_id)
         if stream is None or stream.interrupted:
             return []
@@ -149,9 +167,13 @@ class SpeechStreamService:
         queue, and honouring that would resend audio the owner has already heard — the
         exact §21.16 failure, arriving from the other direction.
         """
+        self.sweep()
         stream = self._streams.get(speech_stream_id)
         if stream is None:
             return
+        if (type(last_received_segment) is not int or type(last_spoken_segment) is not int
+            or not -1 <= last_spoken_segment <= last_received_segment < len(stream.segments)):
+            raise ValueError("speech_cursor_invalid")
         stream.last_received_segment = max(stream.last_received_segment, last_received_segment)
         stream.last_spoken_segment = max(stream.last_spoken_segment, last_spoken_segment)
 
@@ -161,6 +183,7 @@ class SpeechStreamService:
         Not after what arrived. The overlap is intentional and is de-duplicated on the
         device by `segment_id`.
         """
+        self.sweep()
         stream = self._streams.get(speech_stream_id)
         if stream is None or stream.interrupted:
             return []
@@ -184,6 +207,7 @@ class SpeechStreamService:
         is judged by what the owner heard: a stream whose final segment was delivered but
         never spoken is unfinished, and is exactly the case a resume exists to repair.
         """
+        self.sweep()
         candidates = [
             s for s in self._streams.values()
             if s.device_id == device_id and not s.complete and not s.interrupted
@@ -210,10 +234,11 @@ class SpeechStreamService:
             if now - s.created_at_ms > STREAM_RETENTION_MS
         ]
         for sid in stale:
-            response_id = self._streams[sid].response_id
+            stream = self._streams[sid]
             del self._streams[sid]
-            self._by_response.pop(response_id, None)
+            self._by_response.pop((stream.device_id, stream.response_id), None)
         return len(stale)
 
     def get(self, speech_stream_id: str) -> SpeechStream | None:
+        self.sweep()
         return self._streams.get(speech_stream_id)
