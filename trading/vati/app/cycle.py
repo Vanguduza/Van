@@ -121,7 +121,7 @@ class DecisionCycle:
             lease_fence=(lambda epoch: lease_permission() and runtime_lease.fence(epoch, now_ms=lease_clock(), min_validity_ms=2_000)) if runtime_lease else None,
             lease_submission_guard=self._runtime_submission_guard if runtime_lease else None,
             pretrade_controls=self.pretrade, style_selector=self.style_selector,
-            enforce_rev51_controls=True)
+            enforce_rev51_controls=True, clock=lease_clock)
         self.admission = admission or AdmissionLedger()
         self.ctx_fn = ctx_fn or (lambda st, cost: StrategyContext(round_trip_cost_pct=cost))
         self.peak_equity = ZERO

@@ -253,6 +253,7 @@ class AccountCoordinatorService:
             pretrade_controls=self.pretrade,
             style_selector=self.style_selector,
             enforce_rev51_controls=True,
+            clock=self.clock,
         )
 
         capsule_root = c.capsule_dir or ROOT / "strategies" / "registry"

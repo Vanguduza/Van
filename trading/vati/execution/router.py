@@ -81,7 +81,8 @@ class ExecutionRouter:
                  route_registry: Optional[RouteRegistry] = None,
                  pretrade_controls: Optional[PreTradeControls] = None,
                  style_selector: Optional[ExecutionStyleSelector] = None,
-                 enforce_rev51_controls: bool = False) -> None:
+                 enforce_rev51_controls: bool = False,
+                 clock: Optional[Callable[[], int]] = None) -> None:
         self.ledger, self.adapters, self.kill, self.protection, self.producer = ledger, adapters, kill_switch, protection, producer
         self.lease_fence = lease_fence
         self.lease_submission_guard = lease_submission_guard
@@ -89,6 +90,7 @@ class ExecutionRouter:
         self.pretrade_controls = pretrade_controls
         self.style_selector = style_selector
         self.enforce_rev51_controls = enforce_rev51_controls
+        self.clock = clock
         if enforce_rev51_controls and (
             route_registry is None or pretrade_controls is None or style_selector is None
         ):
@@ -106,6 +108,16 @@ class ExecutionRouter:
         event = make_event(kind, self.producer, payload, event_time_ms=now_ms, received_time_ms=now_ms, decision_time_ms=decision_time, correlation_id=corr)
         self.ledger.append(event)
         return event.hash
+
+    def _dispatch_time(self, mandate: TradingMandate, *, now_ms: int) -> int:
+        # Native service builders supply their current clock. Isolated replay
+        # callers supply their explicit event clock through now_ms.
+        observed=self.clock() if self.clock is not None else now_ms
+        if type(observed) is not int or type(now_ms) is not int or observed < 0 or observed < now_ms:
+            raise RouterError('mandate dispatch clock unavailable or moved backwards')
+        if not mandate.signed_at_unix*1000 <= observed < mandate.expires_at_unix*1000:
+            raise RouterError('mandate is outside its current validity interval; re-admission required')
+        return observed
 
     def _uncertain_exit(self, position_id: str, *, now_ms: int, request_ref: str) -> None:
         if position_id in self.protection.rules:
@@ -248,6 +260,7 @@ class ExecutionRouter:
             raise RouterError("risk approval does not match the current mandate; re-evaluation required")
         if not mandate.authority_matches_policy():
             raise RouterError("current mandate lacks its original policy-bound owner grant; re-admission required")
+        self._dispatch_time(mandate,now_ms=now_ms)
         if intent.idempotency_key in self._seen:
             raise RouterError("duplicate idempotency key")
         adapter = self.adapters.get(intent.venue)
@@ -378,6 +391,8 @@ class ExecutionRouter:
             if not lease_guard_ok:
                 raise RouterError(
                     f"account runtime submission guard refused epoch {lease_epoch!r}")
+            decision_time_ms=now_ms
+            now_ms=self._dispatch_time(mandate,now_ms=now_ms)
             self._seen.add(intent.idempotency_key)
             if self.enforce_rev51_controls:
                 assert self.pretrade_controls is not None
@@ -389,7 +404,7 @@ class ExecutionRouter:
                 )
             self._log(EventKind.ORDER_COMMAND, {**asdict(cmd), "direction": cmd.direction.value, "stop_mode": cmd.stop_mode.value, "loss_model": cmd.loss_model.value,
                                                 **({"requested_entry_type": requested_entry_type, "entry_type_substituted": True} if substituted else {})},
-                      now_ms=now_ms, corr=corr, decision_time=now_ms)
+                      now_ms=now_ms, corr=corr, decision_time=decision_time_ms)
             metrics.inc("vati_orders_sent_total", venue=intent.venue)
             receipt = adapter.submit(cmd, now_ms=now_ms)
             self._log(EventKind.EXECUTION_RECEIPT, {k: (v.value if hasattr(v, "value") else v) for k, v in asdict(receipt).items()}, now_ms=now_ms, corr=corr)

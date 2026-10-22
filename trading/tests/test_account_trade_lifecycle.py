@@ -177,7 +177,7 @@ def test_owner_sell_replay_repairs_missing_review_exactly_once_after_receipt_com
 
 def test_regular_broker_restart_repairs_missing_tca_exactly_once(mandate, eurusd):
     """Crash after durable fill receipt but before lifecycle.record_entry."""
-    from conftest import intent, mandate_dict, snapshot
+    from conftest import NOW, intent, mandate_dict, snapshot
     from vati.risk import RiskAuthority, StrategyState, TradingMandate
 
     contract = SymbolContract(**{**eurusd.__dict__, "venue": "paper"})
@@ -205,7 +205,7 @@ def test_regular_broker_restart_repairs_missing_tca_exactly_once(mandate, eurusd
         trade_intent,
         decision,
         live_mandate,
-        now_ms=10_000,
+        now_ms=NOW*1000+10_000,
         targets=(Decimal("1.10340"),),
     )
     assert receipt.status == "FILLED"
@@ -261,7 +261,7 @@ def test_regular_broker_restart_repairs_missing_tca_exactly_once(mandate, eurusd
 
 def test_corrupt_durable_fill_receipt_is_not_promoted_into_recovered_tca(mandate, eurusd):
     """Position safety may recover, but malformed execution evidence teaches nothing."""
-    from conftest import intent, mandate_dict, snapshot
+    from conftest import NOW, intent, mandate_dict, snapshot
     from vati.risk import RiskAuthority, StrategyState, TradingMandate
 
     contract = SymbolContract(**{**eurusd.__dict__, "venue": "paper"})
@@ -284,7 +284,7 @@ def test_corrupt_durable_fill_receipt_is_not_promoted_into_recovered_tca(mandate
         kill_switch=KillSwitch(),
         protection=ProtectionManager(),
     )
-    router.execute(trade_intent, decision, live_mandate, now_ms=20_000)
+    router.execute(trade_intent, decision, live_mandate, now_ms=NOW*1000+20_000)
 
     # Append a later entry-looking receipt with a deliberately invalid
     # receipt_hash. Recovery keeps the first valid router receipt and therefore
@@ -297,8 +297,8 @@ def test_corrupt_durable_fill_receipt_is_not_promoted_into_recovered_tca(mandate
         EventKind.EXECUTION_RECEIPT,
         "corrupt-test",
         corrupt,
-        event_time_ms=20_001,
-        received_time_ms=20_001,
+        event_time_ms=NOW*1000+20_001,
+        received_time_ms=NOW*1000+20_001,
         correlation_id="bad-receipt-intent",
     ))
 

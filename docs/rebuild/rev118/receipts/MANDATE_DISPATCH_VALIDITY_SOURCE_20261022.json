@@ -1,0 +1,204 @@
+{
+  "schema": "van.rebuild.mandate-dispatch-validity-source/1",
+  "source_parent": "165d6d0ebff7fc45e174fbbd0a49bb5b6211e478",
+  "source_sha256": {
+    "trading/vati/risk/authority.py": "ab6209cb3dd7b58bcc3f58b93c227aa93604c33b3c3dd11f636e3deae049cbf2",
+    "trading/vati/execution/router.py": "14b95befb35f7f8aa5ec136d5fb8279d866808404f033f2db6e628bc30e98ca0",
+    "trading/vati/app/cycle.py": "4323dc91fb58c7fc69bafc931b00d949e0617462a9a17404e88ccf5ce49989b5",
+    "trading/vati/app/account_service.py": "2f854a7b7d03742b6e6dec2d5aee54a95b5ec8ae3d488b23e22c9cedf05cf90d",
+    "trading/tests/test_mandate_dispatch_validity.py": "ace84a9fa4db759ed21617d5c26e82b53239498ea450f2eda63a53092e481092",
+    "trading/tests/conftest.py": "33296c6227458507873a528cedb9b73a5131274b94caa0526da3ee72aec19db2",
+    "trading/tests/test_account_trade_lifecycle.py": "bf97e1071d54f0a62009f4091fb92efbf58a9e46e2fd4840f9fc1c6f5a1cea71",
+    "trading/tests/test_backtest_runner_cli.py": "166e7154435ad1c7e91a36d337ebf5389b69ccf10b42854ebbe953e5717a57b7",
+    "trading/tests/test_boolean_execution_receipts.py": "33c02ea894d01e302c6ab5c70b8d0ba02dd862b1ad3da49ad37f0ccc6202e4d6",
+    "trading/tests/test_execution_scale_and_rounding.py": "8822eabf442ba40dff0e710629a45e4f75c3073f13d8d478fc64ad34fd284e0e",
+    "trading/tests/test_portfolio_views.py": "d66de1bc0da40318751dd4fa636ffeaf9679e0ec5740a6146bebedce974d78fc",
+    "trading/tests/test_single_session_lease.py": "bfe4f297c61794c361d6271018c5d4b03e21a9d05cf790937977bca42978626d"
+  },
+  "initial_counterexamples": {
+    "tests": 4,
+    "failures": 4,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "2ee440a8433144c321acbbd848950b958f9732ffac8975b28ed6485829127d1e"
+  },
+  "initial_full_suite_historical_clock_failures": {
+    "tests": 1831,
+    "failures": 20,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "1e4b567cd8ee096356d51f424ca2c5f9553a472e035e1f722f965633c0eb19c8"
+  },
+  "initial_full_suite_cross_fixture_account_collision": {
+    "tests": 2090,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "0ab0c647559496d3d63fd3fe105f509d32f6d6eb563cb057f33477ab6b410fbe"
+  },
+  "initial_native_book_setup_failure": {
+    "tests": 13,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "66d0a7d9e57cc8ca5a8de4e732f36bf9b483bb37443c4fe73eb06c537e8512a2"
+  },
+  "full_trading_real_private_postgresql": {
+    "tests": 2090,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "8900a32666ad9f2f42140095a1213060b51046dbdab4368aad966aa1027a0baf"
+  },
+  "focused_after_source_restoration": {
+    "tests": 106,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 4,
+    "sha256": "ee4ea60009cdec22b57be165b17d646d694c7217cfd82e4acbd01bfce185f663"
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "4b0985b15de30c10a4c644814a41d84a9931ce15de9e0f5ad8750bf38422372a"
+  },
+  "source_faults": {
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "5ceea94d0bc274b4cae475ad6f32427e3a1c0c4422a677b63c0719b16aaf3047"
+      },
+      {
+        "phase": "mutation",
+        "why": "approve a grant before its signed validity start",
+        "returncode": 1,
+        "log_sha256": "cf08319dd68636b2f9138d2a0391ddc8922c122d75e48c1e66d12f091e06b869"
+      },
+      {
+        "phase": "mutation",
+        "why": "ignore current native time after snapshot approval",
+        "returncode": 1,
+        "log_sha256": "2074b4be9fce0362d1eacb9957a9ad5bc52eb6c169325a83fb8cf438e2e7c7f3"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit the final post-guard clock/lifetime check",
+        "returncode": 1,
+        "log_sha256": "30758cf937453b64bfb1024c4d6bc23108c98df95ca47339209e81acad1a4096"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit the native dispatch validity start",
+        "returncode": 1,
+        "log_sha256": "04f236477a3f9f07bf77ea699c327d4284510d7b8268fbb716a20556a916f6fe"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit the native dispatch expiry",
+        "returncode": 1,
+        "log_sha256": "e176d5a9a3427986da4478a8643123c245a47fb8675ef35ef6705341730a2572"
+      },
+      {
+        "phase": "mutation",
+        "why": "allow a backward current clock to authorize entry",
+        "returncode": 1,
+        "log_sha256": "ca476e204c942940ac25d1f48127f41938e88ee5f0fbb2d05ec1eaf23cdece1b"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit the actual single-symbol factory current clock",
+        "returncode": 1,
+        "log_sha256": "069edb5ecc4fb7ae058a53a53a79aa29e21a289e1b38b4e428c7d574e50d3ef3"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit the actual multi-instrument factory current clock",
+        "returncode": 1,
+        "log_sha256": "1805356494475037b5a4460c24e64b6f7e2fc4f8d9060c45c72a214f16f45415"
+      }
+    ],
+    "definitions": [
+      [
+        "trading/vati/risk/authority.py",
+        "if snapshot.now_unix < m.signed_at_unix:",
+        "if False:",
+        "approve a grant before its signed validity start"
+      ],
+      [
+        "trading/vati/execution/router.py",
+        "observed=self.clock() if self.clock is not None else now_ms",
+        "observed=now_ms",
+        "ignore current native time after snapshot approval"
+      ],
+      [
+        "trading/vati/execution/router.py",
+        "now_ms=self._dispatch_time(mandate,now_ms=now_ms)",
+        "now_ms=now_ms",
+        "omit the final post-guard clock/lifetime check"
+      ],
+      [
+        "trading/vati/execution/router.py",
+        "not mandate.signed_at_unix*1000 <= observed < mandate.expires_at_unix*1000",
+        "not observed < mandate.expires_at_unix*1000",
+        "omit the native dispatch validity start"
+      ],
+      [
+        "trading/vati/execution/router.py",
+        "not mandate.signed_at_unix*1000 <= observed < mandate.expires_at_unix*1000",
+        "not mandate.signed_at_unix*1000 <= observed",
+        "omit the native dispatch expiry"
+      ],
+      [
+        "trading/vati/execution/router.py",
+        "type(observed) is not int or type(now_ms) is not int or observed < 0 or observed < now_ms",
+        "type(observed) is not int or type(now_ms) is not int or observed < 0",
+        "allow a backward current clock to authorize entry"
+      ],
+      [
+        "trading/vati/app/cycle.py",
+        "enforce_rev51_controls=True, clock=lease_clock)",
+        "enforce_rev51_controls=True)",
+        "omit the actual single-symbol factory current clock"
+      ],
+      [
+        "trading/vati/app/account_service.py",
+        "            clock=self.clock,\n        )",
+        "        )",
+        "omit the actual multi-instrument factory current clock"
+      ]
+    ],
+    "source_before_sha256": {
+      "trading/vati/app/account_service.py": "2f854a7b7d03742b6e6dec2d5aee54a95b5ec8ae3d488b23e22c9cedf05cf90d",
+      "trading/vati/app/cycle.py": "4323dc91fb58c7fc69bafc931b00d949e0617462a9a17404e88ccf5ce49989b5",
+      "trading/vati/execution/router.py": "14b95befb35f7f8aa5ec136d5fb8279d866808404f033f2db6e628bc30e98ca0",
+      "trading/vati/risk/authority.py": "ab6209cb3dd7b58bcc3f58b93c227aa93604c33b3c3dd11f636e3deae049cbf2"
+    },
+    "source_after_sha256": {
+      "trading/vati/app/account_service.py": "2f854a7b7d03742b6e6dec2d5aee54a95b5ec8ae3d488b23e22c9cedf05cf90d",
+      "trading/vati/app/cycle.py": "4323dc91fb58c7fc69bafc931b00d949e0617462a9a17404e88ccf5ce49989b5",
+      "trading/vati/execution/router.py": "14b95befb35f7f8aa5ec136d5fb8279d866808404f033f2db6e628bc30e98ca0",
+      "trading/vati/risk/authority.py": "ab6209cb3dd7b58bcc3f58b93c227aa93604c33b3c3dd11f636e3deae049cbf2"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "full_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "mutation_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "oracle_corrections": [
+    "Historical bar fixtures retain their prices/calendar and original assertions; test-owner signatures now cover the actual historical clock window.",
+    "Current decision/execution tests now use their real decision epoch instead of unrelated Unix-epoch toy timestamps.",
+    "Initial added timing oracle referenced nonexistent receipt.local_time_ms; actual contract received_time_unix_ms used. Not a product defect.",
+    "Book fixture requires two instruments and a distinct genuinely registered/signed account for its virtual clock; no other lease/epoch deleted or rewritten."
+  ],
+  "qualification": "Candidate source only; deferred provider execution, independent/native/whole-unit gates, full research study horizon, financial activation, profitability, production and S24 remain separate required work."
+}

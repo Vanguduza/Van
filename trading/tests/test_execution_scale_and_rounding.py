@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from conftest import mandate_dict
+from conftest import historical_mandate_dict, mandate_dict
 from test_intelligence import mk_bars, noisy_trend
 from vati.app import SessionConfig
 from vati.arbiter import OpportunityEngine
@@ -50,7 +50,7 @@ def jpy_bars():
 
 
 def run_jpy(tmp_path, slippage: Decimal):
-    m = mandate_dict(venue="paper", mode="DEMO_TRADER", instruments=["USDJPY"], allowed_strategies=[SID])
+    m = historical_mandate_dict(venue="paper", mode="DEMO_TRADER", instruments=["USDJPY"], allowed_strategies=[SID])
     cfg = SessionConfig(symbol="USDJPY", base="USD", quote="JPY", venue="paper", account_alias="fx_primary", contract=usdjpy(), mandate_dict=m, session_id="jpy-1")
     reg = CapsuleRegistry.load_dir(REG)
     engine = OpportunityEngine(reg, {SID: STRATEGY_IMPLEMENTATIONS[SID.rsplit("-", 1)[0]](strategy_id=SID)}, TradingMandate.from_mapping(m))

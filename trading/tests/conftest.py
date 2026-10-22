@@ -104,6 +104,18 @@ def mandate_dict(**overrides):
     return base
 
 
+def historical_mandate_dict(**overrides):
+    """Owner-signed test grant covering the unchanged historical bar fixtures.
+
+    Historical simulation is evaluated at its event clock, not a later grant's
+    start date. Keep the original prices/calendar and every behavioural oracle.
+    """
+    start=1_757_980_800-3600
+    values={'signed_at_unix':start,'expires_at_unix':start+90*86400}
+    values.update(overrides)
+    return mandate_dict(**values)
+
+
 @pytest.fixture
 def mandate() -> TradingMandate:
     return TradingMandate.from_mapping(mandate_dict())

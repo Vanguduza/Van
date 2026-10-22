@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from conftest import mandate_dict
+from conftest import historical_mandate_dict, mandate_dict
 from vati.accounts import Account,AccountRegistry,CredentialRef
 from vati.app.service import ServiceConfig,SessionService
 from vati.execution.paper import PaperAdapter
@@ -22,7 +22,7 @@ def config(tmp_path,contract,*,broker='PAPER',ledger=None):
     account=registry.add(Account(alias='paper_lease',broker=broker,mode='DEMO_TRADER',currency='USD',
         credential_ref=CredentialRef() if broker=='PAPER' else CredentialRef(env_var='SOURCE_FIXTURE_NOT_READ')))
     return ServiceConfig(account_alias=account.alias,symbol='EURUSD',base='EUR',quote='USD',timeframe='H1',
-        contract=contract_to_dict(contract),mandate=mandate_dict(venue=account.router_venue,mode='DEMO_TRADER',
+        contract=contract_to_dict(contract),mandate=historical_mandate_dict(venue=account.router_venue,mode='DEMO_TRADER',
             account_alias=account.alias,allowed_strategies=['FX-TREND-PULLBACK-01']),
         capsules=['FX-TREND-PULLBACK-01'],registry_path=str(registry.path),
         ledger=ledger or str(tmp_path/'native.sqlite'),heartbeat_path=str(tmp_path/'heartbeat.json'))

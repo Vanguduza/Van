@@ -3,7 +3,7 @@ from decimal import Decimal as D
 
 import pytest
 
-from conftest import intent,mandate_dict,snapshot
+from conftest import NOW,intent,mandate_dict,snapshot
 from test_mt5_pull import bridge
 from vati.core import Ledger
 from vati.execution.base import VenueUnavailable
@@ -33,14 +33,14 @@ def native_flow(contract,*,check=True,stop=True,modify=True):
 
 def test_false_text_from_order_check_cannot_reach_the_actual_send(eurusd):
     adapter,router,trade,decision,mandate,calls=native_flow(eurusd,check='false')
-    result=router.execute(trade,decision,mandate,now_ms=1000)
+    result=router.execute(trade,decision,mandate,now_ms=NOW*1000)
     assert result.status=='REJECTED' and calls==['sync_account','order_check']
 
 
 def test_unconfirmed_native_stop_is_not_reported_protected_and_uses_the_actual_flatten_path(eurusd):
     adapter,router,trade,decision,mandate,calls=native_flow(eurusd,stop='false')
     with pytest.raises(RouterError,match='flattened'):
-        router.execute(trade,decision,mandate,now_ms=1000)
+        router.execute(trade,decision,mandate,now_ms=NOW*1000)
     assert calls==['sync_account','order_check','order_send','close']
     assert KillSwitchTrigger.STOP_REJECTED in router.kill.active
 

@@ -218,6 +218,8 @@ class RiskAuthority:
             return rej("VENUE_MISMATCH", f"mandate venue {m.venue}")
 
         # 3. Mandate validity & mode
+        if snapshot.now_unix < m.signed_at_unix:
+            return rej('MANDATE_NOT_YET_VALID',f'valid from {m.signed_at_unix}')
         if m.is_expired(snapshot.now_unix):
             return rej("MANDATE_EXPIRED", f"expired at {m.expires_at_unix}")
         if not m.sends_orders():
