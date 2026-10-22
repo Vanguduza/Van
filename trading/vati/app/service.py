@@ -110,7 +110,7 @@ def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: D
     def bound(adapter):
         return bind_entry_authority(adapter, registry, account)
     if account.broker == BrokerKind.PAPER:
-        return bound(PaperAdapter(venue=account.router_venue, account_alias=account.alias, equity=equity_hint))
+        return bound(PaperAdapter(venue=account.router_venue, account_alias=account.alias, currency=account.currency, equity=equity_hint))
     if account.broker == BrokerKind.MT5:
         from vati.execution.mt5_bridge import Mt5BridgeAdapter, Mt5BridgeClient
         from vati.execution.transports.mt5_http import Mt5HttpTransport
@@ -149,7 +149,8 @@ def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: D
         return bound(Mt5PullAdapter(open_bridge_queue(secrets.get("BRIDGE_QUEUE", "")), account_alias=account.alias, venue=account.router_venue))
     if account.broker == BrokerKind.ZSE_OWNER_TICKET:
         from vati.execution.zse_ticket import OwnerTicketAdapter
-        return bound(OwnerTicketAdapter(equity=equity_hint, csd_verified=False))
+        return bound(OwnerTicketAdapter(venue=account.router_venue, account_alias=account.alias,
+            currency=account.currency, equity=equity_hint, csd_verified=False))
     raise RuntimeError(f"no adapter for broker {account.broker}")
 
 
