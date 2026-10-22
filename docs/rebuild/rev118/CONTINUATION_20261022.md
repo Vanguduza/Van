@@ -89,3 +89,7 @@ Frozen c36d6a21 full backend/contracts:6535 pass/166skip with zero forbidden tra
 ## Protective-close uncertainty and observation clocks
 
 Actual protective transport now journals the request before sending, atomically persists receipt/disposition/ticket definition, and retains unknowns across process death and upgrade. Native owner-ticket final and partial confirmations are bound to the original request and durable service receipt. Missing close prices preserve the entry. Hysteresis advances only on distinct admitted observations. Full trading:1629pass/2skip; rebuild:52pass; new cases:30, including four killed processes and two writers. See backend/BE-003_010_012_036_EXIT_AND_HEALTH.md for exact limits, including broker-specific native reconciliation still pending. Candidate work continues; this is no formal unit acceptance.
+
+## Statistical input integrity
+
+Canonical producer/evaluator and actual signed consumers now refuse invalid probabilities/counts, nonfinite statistics, wrong policy versions, adverse instrument evidence and silent feature-history truncation. CSCV no longer drops trailing observations. validation-policy/1.1.0 records changed estimator/validity semantics with unchanged numeric thresholds. Full trading1663pass/2skip before final two passing test-only controls;36latest integrity/88gateway tests pass. See backend/BE-013_021_035_VALIDATION_INTEGRITY.md. Untouched/prospective and complete chronological provenance remain separate. Continue implementing immutable as-decided evidence joins and mature corrected outcome projections.

@@ -24,6 +24,18 @@ from vati.validation.certificates import (
 from vati.validation.policy import ValidationStatistics
 
 
+def _finite_series(values, name):
+    out = []
+    for value in values:
+        if isinstance(value, bool) or not isinstance(value, (int, float, Decimal)):
+            raise ValueError(f"{name} requires numeric observations")
+        number = float(value)
+        if not math.isfinite(number):
+            raise ValueError(f"{name} requires finite observations")
+        out.append(number)
+    return out
+
+
 def _sharpe(xs: Sequence[float]) -> float:
     if len(xs) < 2:
         return 0.0
@@ -77,7 +89,15 @@ def build_strategy_validation_certificate(
         raise ValueError("pnls and r_multiples must describe the same observations")
     if len(r_multiples) < 3:
         raise ValueError("at least three validation observations are required")
-    trials = [tuple(float(v) for v in row) for row in trial_returns_matrix]
+    _finite_series(pnls, "pnls")
+    _finite_series(r_multiples, "r_multiples")
+    if not isinstance(start_equity, Decimal) or not start_equity.is_finite() or start_equity <= 0:
+        raise ValueError("start_equity must be a finite positive Decimal")
+    if type(walk_forward_windows) is not int or walk_forward_windows < 0:
+        raise ValueError("walk_forward_windows must be a nonnegative integer")
+    if cpcv_configuration is not None and cpcv_configuration.get("partitions", cpcv_partitions) != cpcv_partitions:
+        raise ValueError("reported CPCV partitions differ from the actual estimator")
+    trials = [tuple(_finite_series(row, "trial_returns_matrix")) for row in trial_returns_matrix]
     if not trials:
         raise ValueError("trial_returns_matrix is required for DSR/PBO")
     n_obs = min(len(row) for row in trials)
@@ -137,7 +157,9 @@ def build_strategy_validation_certificate(
 
 
 def _pearson(a: Sequence[float], b: Sequence[float]) -> float:
-    n = min(len(a), len(b))
+    if len(a) != len(b):
+        raise ValueError("feature correlation histories must be aligned, never truncated")
+    n = len(a)
     if n < 2:
         return 0.0
     aa, bb = list(a[:n]), list(b[:n])
@@ -178,17 +200,23 @@ def build_feature_validation_certificate(
     refs = tuple(str(x) for x in evidence_refs if str(x).strip())
     if not refs:
         raise ValueError("at least one immutable validation evidence reference is required")
-    n = min(len(baseline_returns), len(candidate_returns))
+    if len(baseline_returns) != len(candidate_returns):
+        raise ValueError("baseline/candidate return histories must be aligned, never truncated")
+    n = len(baseline_returns)
     if n < 3:
         raise ValueError("baseline/candidate validation histories are too short")
-    delta = [float(candidate_returns[i]) - float(baseline_returns[i]) for i in range(n)]
-    trials = [tuple(float(v) for v in row) for row in trial_delta_matrix]
+    baseline = _finite_series(baseline_returns, "baseline_returns")
+    candidate = _finite_series(candidate_returns, "candidate_returns")
+    delta = [candidate[i] - baseline[i] for i in range(n)]
+    trials = [tuple(_finite_series(row, "trial_delta_matrix")) for row in trial_delta_matrix]
     if not trials:
         raise ValueError("trial_delta_matrix is required for incremental DSR/PBO")
-    candidate_series = tuple(float(x) for x in candidate_feature_series)
+    candidate_series = tuple(_finite_series(candidate_feature_series, "candidate_feature_series"))
+    if len(candidate_series) < 2:
+        raise ValueError("candidate feature history is too short for a redundancy measurement")
     correlations = [
-        abs(_pearson(tuple(float(x) for x in series), candidate_series))
-        for series in baseline_feature_series if len(series) >= 2
+        abs(_pearson(tuple(_finite_series(series, "baseline_feature_series")), candidate_series))
+        for series in baseline_feature_series
     ]
     redundancy = max(correlations, default=0.0)
     delta_sr = _sharpe(delta)
@@ -209,9 +237,13 @@ def build_feature_validation_certificate(
         sr_variance_across_trials=_sample_variance(_trial_sharpes(trials)),
     )
     pbo = pbo_cscv(trials, partitions=cpcv_partitions)
-    wf_n = min(len(walk_forward_baseline), len(walk_forward_candidate))
+    if len(walk_forward_baseline) != len(walk_forward_candidate):
+        raise ValueError("walk-forward baseline/candidate histories must be aligned, never truncated")
+    wf_baseline = _finite_series(walk_forward_baseline, "walk_forward_baseline")
+    wf_candidate = _finite_series(walk_forward_candidate, "walk_forward_candidate")
+    wf_n = len(wf_baseline)
     wf_delta = (
-        mean(float(walk_forward_candidate[i]) - float(walk_forward_baseline[i]) for i in range(wf_n))
+        mean(wf_candidate[i] - wf_baseline[i] for i in range(wf_n))
         if wf_n else 0.0
     )
     identity = canonical_hash({

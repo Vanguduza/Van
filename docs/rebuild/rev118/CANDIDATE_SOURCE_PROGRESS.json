@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T07:38:56.946564+00:00",
+  "updated_at_utc": "2026-10-22T07:48:28.107220+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -268,9 +268,15 @@
         "BE-019",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "change": "Feature admission rejects nonfinite/wrong-version inputs and adverse instrument evidence",
+          "evidence": "backend/BE-013_021_035_VALIDATION_INTEGRITY.md; receipts/VALIDATION_INPUT_INTEGRITY_SOURCE_20261022.json",
+          "result": "1663 full trading pass/2skip before two additional passing controls;36 latest integrity tests/88 gateway tests pass; no unit acceptance"
+        }
+      ]
     },
     "BE-023": {
       "title": "Projects, tasks, missions and truthful workflow graphs",
@@ -417,9 +423,15 @@
         "BE-019",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "change": "Complete CSCV observation coverage and strict numerical/alignment producer/evaluator checks",
+          "evidence": "backend/BE-013_021_035_VALIDATION_INTEGRITY.md; receipts/VALIDATION_INPUT_INTEGRITY_SOURCE_20261022.json",
+          "result": "1663 full trading pass/2skip before two additional passing controls;36 latest integrity tests/88 gateway tests pass; no unit acceptance"
+        }
+      ]
     },
     "BE-013": {
       "title": "Strategy registry, signed trading modes and qualified edge-consumer contracts",
@@ -429,9 +441,15 @@
         "BE-035",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "change": "Actual signed capsule promotion refuses malformed/old-version certificate statistics",
+          "evidence": "backend/BE-013_021_035_VALIDATION_INTEGRITY.md; receipts/VALIDATION_INPUT_INTEGRITY_SOURCE_20261022.json",
+          "result": "1663 full trading pass/2skip before two additional passing controls;36 latest integrity tests/88 gateway tests pass; no unit acceptance"
+        }
+      ]
     },
     "BE-016": {
       "title": "Governed news effects D1\u2013D7 and news strategy lifecycle",
