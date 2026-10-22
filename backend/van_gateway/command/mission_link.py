@@ -35,6 +35,7 @@ is whatever the command's class is, which the registry cannot express.
 from __future__ import annotations
 
 import time
+import sqlite3
 
 from van_gateway.mission.models import (
     AuthorityEnvelope,
@@ -138,36 +139,46 @@ class CommandMissionLink:
             requires_owner_presence=owner_approved,
             source_command_id=req.command_id,
         )
-        return await self.missions.create(
-            owner_principal_id=f"device:{req.device_id}",
-            origin=ORIGIN_FOR_CHANNEL.get(req.origin_channel, MissionOrigin.OWNER_UI),
-            origin_channel=req.origin_channel,
-            title=title_for(req.text),
-            goal=req.text,
-            project_id=req.project_id,
-            # P1-LEARN-003 — the kind of work, which is what a strategy is learned *for*.
-            # The resolver already established it; until now the command path computed it
-            # and threw it away, so `StrategyLearning` keyed everything on a value no
-            # mission carried and could not accumulate a single row.
-            mission_class=(resolution.intent_id if resolution is not None else "GENERAL_OWNER_INTENT"),
-            # §6 — an empty contract is legal and can never yield VERIFIED_SUCCESS. The
-            # gateway does not know how to check an arbitrary instruction, and inventing a
-            # postcondition it cannot observe is how a mission ends up "verified" on
-            # nothing.
-            #
-            # P1-VERIFY-003 — but it *does* know how to check some of them. When the typed
-            # resolver matched an exact action, that action's post-state is declared and,
-            # for the ones with an independent observation, checkable. Leaving the contract
-            # empty there meant no owner command could ever be verified, however exactly
-            # VAN had understood it. `contract_for` emits a contract only where an
-            # observation is registered, and an empty one everywhere else.
-            success_contract=(
-                contract_for(resolution) if resolution is not None else SuccessContract()
-            ),
-            constraints=self._with_unverifiable_note(constraints, resolution),
-            authority_envelope=envelope,
-            sensitivity=SENSITIVITY_FOR_CLASS.get(effective_action_class, Sensitivity.ROUTINE),
-        )
+        try:
+            return await self.missions.create(
+                owner_principal_id=f"device:{req.device_id}",
+                origin=ORIGIN_FOR_CHANNEL.get(req.origin_channel, MissionOrigin.OWNER_UI),
+                origin_channel=req.origin_channel,
+                title=title_for(req.text),
+                goal=req.text,
+                project_id=req.project_id,
+                # P1-LEARN-003 — the kind of work, which is what a strategy is learned *for*.
+                # The resolver already established it; until now the command path computed it
+                # and threw it away, so `StrategyLearning` keyed everything on a value no
+                # mission carried and could not accumulate a single row.
+                mission_class=(resolution.intent_id if resolution is not None else "GENERAL_OWNER_INTENT"),
+                # §6 — an empty contract is legal and can never yield VERIFIED_SUCCESS. The
+                # gateway does not know how to check an arbitrary instruction, and inventing a
+                # postcondition it cannot observe is how a mission ends up "verified" on
+                # nothing.
+                #
+                # P1-VERIFY-003 — but it *does* know how to check some of them. When the typed
+                # resolver matched an exact action, that action's post-state is declared and,
+                # for the ones with an independent observation, checkable. Leaving the contract
+                # empty there meant no owner command could ever be verified, however exactly
+                # VAN had understood it. `contract_for` emits a contract only where an
+                # observation is registered, and an empty one everywhere else.
+                success_contract=(
+                    contract_for(resolution) if resolution is not None else SuccessContract()
+                ),
+                constraints=self._with_unverifiable_note(constraints, resolution),
+                authority_envelope=envelope,
+                sensitivity=SENSITIVITY_FOR_CLASS.get(effective_action_class, Sensitivity.ROUTINE),
+            )
+        except sqlite3.IntegrityError:
+            # Another writer can win after the optimistic lookup. The database
+            # fence already preserved one mission; return it rather than turning
+            # the safe duplicate into an owner-visible server error. Preserve any
+            # unrelated integrity error when no mission owns this command.
+            existing = await self.existing_for_command(req.command_id)
+            if existing is None:
+                raise
+            return existing
 
     @staticmethod
     def _with_unverifiable_note(

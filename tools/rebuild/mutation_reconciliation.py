@@ -78,12 +78,13 @@ def main():
     parser.add_argument("--part", choices=["python", "browser-agent", "kotlin"], required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--logs", type=Path, required=True)
-    parser.add_argument("--reason", help="Optional substring selecting a failed case for requalification")
+    parser.add_argument("--reason", help="Optional substring selecting any retained legacy case for follow-up qualification")
     args = parser.parse_args()
     count = preservation()
     selected = reference_cases()
     if args.reason:
-        selected = {reason for reason in selected if args.reason in reason}
+        legacy = [m[-1] for _, ms, _ in suite.groups() for m in ms] + [m[-1] for m in suite.KOTLIN]
+        selected = {reason for reason in legacy if args.reason in reason}
         if not selected:
             raise ValueError("selector matches no reference mutation")
     args.logs.mkdir(parents=True, exist_ok=True)

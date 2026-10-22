@@ -146,9 +146,9 @@
   },
   {
    "id": "BLK-008",
-   "what": "Legacy mutation registry preflight: 22 stale anchors, 11 missing source targets, 3 missing test targets. All 374 cases retained. CI error reporting and unmutated-control verification corrected; full corpus score unqualified.",
+   "what": "Original 36 input findings resolved and all 32 original retargeted cases assertion-detected. C35 invalid constant replacement and C11 combined uniqueness invariant also corrected/tested. All 374 identities preserved, 381 edits. Full current source CI pending; independent semantic review remains separate.",
    "blocks": "Claiming complete mutation evidence; independent preparation reviewer must disposition this limitation",
-   "needed_from": "Semantic reconciliation of mutation cases with the preserved current implementation; no case silently removed."
+   "needed_from": "Finish the full hosted corpus, triage any survivors/invalid executions, and retain independent preparation review of the semantic mappings."
   }
  ],
  "amendment_proposals": [
@@ -167,10 +167,10 @@
   "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
  },
  "checkpoint": {
-  "updated_utc": "2026-10-22",
+  "updated_utc": "2026-10-22T04:34:31.527295+00:00",
   "branch": "ccr-9e07e1af-8mgz1p",
   "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-  "background_jobs": "No native operation. Hosted run 39710993846 completed; Android and documentary results pass. Its mutation job reported success but aborted early; correction and registry findings are recorded separately.",
+  "background_jobs": "GitHub van-ci run 39721114929 is executing the complete component-partitioned mutation corpus at 5d6372fd. Native operations: none. Earlier run 39720155843 was superseded after an invalid Kotlin mutant was found; no complete score from that run is qualified.",
   "last_validation": [
    "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
    "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -185,7 +185,12 @@
    "Isolated rebuild suite: 31 passed; focused CI/acquisition/ICU regressions: 14 passed.",
    "Branch-local ledger: five commits 4fd466de..461186ef GREEN; source consolidation zero findings.",
    "Hosted run 39710993846 at tested merge b2ed4481 (tree-identical to head 637eaf96): instrumentation 14 passed / 0 failed / 4 core-mode skips; Character Forge core gate PASS; Android build/lint, rebuild-documentary PASS; mutation result invalid (early abort masked by CI). Overall workflow still fails on DDS credential and main trusted-checker prerequisites.",
-   "Mutation controls: 20 focused tests pass; read-only preflight retains 374 cases and reports 36 invalid input findings (32 mutation descriptions), no corpus execution."
+   "Mutation controls: 20 focused tests pass; read-only preflight retains 374 cases and reports 36 invalid input findings (32 mutation descriptions), no corpus execution.",
+   "2026-10-22: all 32 retargeted mutation cases assertion-detected (23 Python, 2 browser, 7 JVM); controls passed; source restored and journal absent. Full 374-case corpus pending hosted run 39721114929.",
+   "2026-10-22: 35 focused control/CI/recovery regressions and 52 isolated rebuild regressions pass; complete identity-preserving six-shard CI partition checked; 45-record intake prepared, not admitted.",
+   "Confirmed baseline maintenance: debug cleartext narrowed to exact loopback, main HTTPS-only policy explicit, debug rig privileged; 3 host checks / 195 app units / APK and instrumentation assembly / lint pass. Release manifest processing correctly refuses the missing real deployment profile.",
+   "Confirmed mission-creation race: pre-fix 1 failed / 1 passed; post-fix 53 recovery/contract tests and 46 command API integration tests pass; one created mission/event and unrelated integrity errors preserved.",
+   "C35 and composite C11 follow-up mutants assertion-detected after passing controls. All 374 original identities remain, now 381 edits, partitioned into nine disjoint CI shards."
   ],
   "environment_notes": [
    "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -196,8 +201,8 @@
    "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
    "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
   ],
-  "next_action": "External native registry/signing/reviewer access and owner/independent amendment admission are required for PRE-003. Provision DDS-only Actions read credential and adopt trusted-base framework/intake through its documented procedure. Continue dependency-ready implementation after real admission; no certificate is self-issued.",
-  "previous_head": "637eaf96ff617c608401754a044145811b8fd318"
+  "next_action": "Inspect full corpus results from actual run 39721114929; fix genuine findings and preserve failure receipts. PRE-003 still requires native registry/signing/eligible independent review and amendment admission. DDS CI credential and trusted-base adoption remain external prerequisites; no gate or owner decision is fabricated.",
+  "previous_head": "5d6372fdea20b31b300c32b66bb164904211bb0f"
  },
  "observations": [
   "OBS-001 BE-002 debug cleartext",
@@ -206,7 +211,7 @@
   "OBS-004 BE-003 committed SQLite snapshot",
   "OBS-005 legacy mutation registry and masked advisory failure"
  ],
- "obligations": "obligations/OBLIGATIONS.json: OBL-001..005 (OBS-003 owner corrected to BE-025)",
+ "obligations": "obligations/OBLIGATIONS.json: OBL-001..006; OBS-003 remains open and now records the absent production producer of legacy resume authorizations.",
  "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
  "pre002_reviews": "pre002/challenge/review/: NEG_REC_REVIEW (37 adequate / 6 gaps), PRODUCT_TRUTH_TRACE_REVIEW (189 classified), DECISION_REGISTER (49 real dependencies, 18 owner decisions)",
  "amendments": {
@@ -231,7 +236,8 @@
    "637eaf96"
   ],
   "tested_android_head": "637eaf96ff617c608401754a044145811b8fd318",
-  "hosted_result": "receipts/INSTRUMENTATION_637eaf96.json"
+  "hosted_result": "receipts/INSTRUMENTATION_637eaf96.json",
+  "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json"
  },
  "provenance_correction": {
   "finding": "90 forecast hashes previously reported unverifiable",

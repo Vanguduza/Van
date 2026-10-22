@@ -1,0 +1,25 @@
+{
+  "schema": "van.rebuild.mission-race-maintenance/1",
+  "source_state": "UNCOMMITTED_CANDIDATE_AFTER_5d6372fd",
+  "before": {
+    "exit": 1,
+    "failed": 1,
+    "passed": 1,
+    "log": "MISSION_RACE_BEFORE.txt"
+  },
+  "after": {
+    "recovery_and_success_contracts": {
+      "passed": 53,
+      "failed": 0
+    },
+    "command_api_integration": {
+      "passed": 46,
+      "failed": 0
+    }
+  },
+  "qualification": "SQLite source behavior only; not a complete downstream-effect deduplication or live provider acceptance claim",
+  "input_sha256": {
+    "backend/van_gateway/command/mission_link.py": "5493abee3b65efa725a3223e75e5c0f40829cd0186f7f4a72b62839feb52fa21",
+    "backend/tests/test_command_mission_creation_race.py": "3ea90b3e1c392972a57cd1e2d5f33402781af6ab9e88bcc42d353422567b9968"
+  }
+}

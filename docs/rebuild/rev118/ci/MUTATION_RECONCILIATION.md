@@ -1,6 +1,6 @@
 # Legacy mutation reconciliation — 22 October 2026
 
-Source candidate: `77e45b5668745642c3f9dcdf3976deebd2f5bde7`, PR #105.
+Source candidate: `5d6372fdea20b31b300c32b66bb164904211bb0f`, PR #105.
 This is verification maintenance on the inherited implementation. It does not issue
 PRE-003, independent admission, product qualification or handset acceptance.
 
@@ -53,3 +53,31 @@ Advisory job policy is preserved; errors and survivors remain visible failures.
 Final per-component execution receipts and hosted job outcomes are recorded beside
 this document. The full 374-case corpus must finish before claiming a complete score;
 valid input anchors or a passing subset cannot substitute for that result.
+
+The first Kotlin attempt also rejected an invalid replacement that used the computed
+`loaded` property as a constructor argument. Its compiler failure remains in
+`MUTATION_RECONCILIATION_KOTLIN_INITIAL.json`, never counted as detected. The
+replacement now uses the current `pagesApplied` constructor field. The shared runner
+also rejects pytest collection/usage failures and Gradle compilation/setup failures.
+
+Final local results: **32/32 assertion-detected**, zero survivors and zero invalid
+final executions: 23 Python, two browser and seven Kotlin. Each component's unmodified
+control passed. The source diff was empty after restoration and the journal absent.
+`MUTATION_RECONCILIATION_MAPPING.json` binds every old/new definition, input hash and
+execution receipt. Python/browser evidence is at `77e45b56`; their case definitions
+and source/test bytes are identical at `5d6372fd`. Kotlin was rerun at `5d6372fd`.
+Thirty-five focused harness/CI/recovery regressions and 52 isolated rebuild tests pass.
+
+Full hosted run `39721114929` at `5d6372fd` passed three Kotlin shards (87 cases)
+and the browser shard (26 cases), but correctly stopped the fourth Kotlin shard on
+another invalid replacement: C35 referred to an unimported queue constant. The
+replacement now uses its fully qualified name and its assertion is detected in
+`MUTATION_FOLLOWUP_C35.json`. No compiler failure is counted as a detection.
+
+The concurrent mission-creation repair adds a second safe return path behind the
+database uniqueness fence. C11 therefore now removes both the optimistic lookup
+and the unique index to exercise the original no-duplicate-mission invariant;
+deleting the lookup alone is safely tolerated. Its assertion is detected in
+`MUTATION_FOLLOWUP_C11.json`. All **374 identities remain**, now with **381 edits**.
+Four Python, four Kotlin and one browser shard cover every case exactly once.
+The complete updated-source score remains pending its own hosted execution.

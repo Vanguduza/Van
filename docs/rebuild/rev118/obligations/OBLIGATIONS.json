@@ -2,8 +2,8 @@
  "schema": "van.rebuild.rev118.obligations/1",
  "prepared_by": "lead (author-prepared, not independently reviewed)",
  "date_utc": "2026-10-21",
- "source_commit": "b02075f327ea8180ab6d269eba358cf8c5479878 (application roots unchanged on ccr-9e07e1af-8mgz1p)",
- "status_meaning": "OPEN_OBLIGATION = testable requirement assigned to its owning unit; nothing here changes application code, adds a Rev1.18 acceptance identity, or passes any test. Each obligation is executed as a concrete case of the cited existing acceptance identity when its unit is admitted (all units depend on PRE-003).",
+ "source_commit": "Frozen obligation baseline b02075f3; current maintenance evidence is separately bound in each current_review and receipts.",
+ "status_meaning": "Author-prepared obligations; source maintenance evidence does not admit or pass a Rev1.18 unit. The canonical PRE-003 and independent/release gates remain distinct.",
  "obligations": [
   {
    "id": "OBL-001",
@@ -26,7 +26,13 @@
    "environment": "JVM/host for manifest inspection; emulator for the debug request check. Not handset acceptance.",
    "pass_evidence": "Merged-manifest dump for both variants, the network-security XML, and the two request outcomes, bound to the APK SHA-256.",
    "proposed_change_for_owner": "Replace app-wide usesCleartextTraffic in the debug overlay with a debug network_security_config permitting cleartext only for 127.0.0.1/localhost; declare an explicit release config with cleartext off; restrict or drop export of RiveCandidateHostActivity. Application change under android/: needs unit admission and a ledger authorization.",
-   "status": "OPEN_OBLIGATION"
+   "status": "BASELINE_SOURCE_FIXED_DEBUG_RUNTIME_AND_RELEASE_QUALIFICATION_PENDING",
+   "current_review": {
+    "fix": "Explicit cleartext-off main policy; debug exceptions restricted to exact localhost/127.0.0.1/::1; exported debug rig requires android.permission.DUMP. Existing owner continuation authorization covers this confirmed baseline maintenance; no new frontend design or unit acceptance is asserted.",
+    "evidence": "receipts/android-cleartext/LOCAL_VALIDATION.json, DEBUG_PACKAGED_MANIFEST.txt, DEBUG_PACKAGED_POLICY.txt, RELEASE_MANIFEST_REFUSAL.txt",
+    "tests": "3 host checks, 195 app units, debug and instrumentation assembly and lint pass. New Android framework/real HTTP and rig-permission tests await hosted execution.",
+    "release_limit": "Actual release manifest processing refuses without VAN_DEPLOYMENT_PROFILE_FILE; no fake profile or signer was supplied."
+   }
   },
   {
    "id": "OBL-002",
@@ -45,7 +51,15 @@
    "recovery": "Case (c) resumes onto the existing mission without duplicating its effect.",
    "environment": "Backend source test (pytest), SQLite; Postgres too if the store is admitted for it (T-VAN-CX-008-POS).",
    "pass_evidence": "Test ids and output on the frozen baseline SHA, plus a mutation showing that removing the unique index or the existing_for_command check makes a case fail.",
-   "status": "OPEN_OBLIGATION"
+   "status": "CONCURRENT_MISSION_CREATION_SOURCE_FIXED_DOWNSTREAM_EFFECT_PROOF_PENDING",
+   "current_review": {
+    "correction": "test_recovery_matrix.py already covers stale claim retake returning the existing mission; the earlier finding overstated that test absence.",
+    "reproduced_defect": "Two separate Store/CommandMissionLink instances both read no mission; one then raises idx_missions_source_command IntegrityError.",
+    "fix": "On an integrity error, return the committed winning mission only if one exists for this command; otherwise propagate the original error. Preserve the unique index.",
+    "evidence": "receipts/MISSION_RACE_BEFORE.txt; receipts/MISSION_RACE_VALIDATION.json; ci/MUTATION_FOLLOWUP_C11.json",
+    "tests": "53 focused recovery/contract tests and 46 command API integration tests pass. Forced two-writer race returns one mission and one created event; unrelated primary-key failure still raises.",
+    "remaining": "Whole-orchestrator downstream-effect deduplication, crash/recovery and admitted-store variants remain BE-003 acceptance work."
+   }
   },
   {
    "id": "OBL-003",
@@ -66,7 +80,12 @@
    "recovery": "Restart between approval and assignment keeps the authorization ACTIVE and resumable once; expiry yields refusal, not continuation.",
    "environment": "Backend source test with the real BrowserAPI and store; provider browser stubbed only below the assignment boundary.",
    "pass_evidence": "Test output on the frozen baseline SHA with readback of the task and authorization rows.",
-   "status": "OPEN_OBLIGATION"
+   "status": "OPEN_OBLIGATION",
+   "current_review": {
+    "source_commit": "5d6372fdea20b31b300c32b66bb164904211bb0f",
+    "finding": "The legacy consumer alone is not a positive production path: _sync_waiting_owner_decision keeps advisory APPROVED/ANSWERED tasks WAITING_FOR_OWNER and requires a fresh sealed command. No production INSERT into browser_scope_authorizations was found; the one insert is in test_browser_review_i6_scope.py. The existing signed browser-plan path has its own source E2E tests, but that does not prove this same-task boundary-resume contract.",
+    "disposition": "Keep OPEN; bind a genuine supported sealed-command continuation and prove the same-task contract in BE-025. Do not manufacture legacy ACTIVE rows or turn an advisory decision into authority."
+   }
   },
   {
    "id": "OBL-004",
@@ -102,22 +121,22 @@
    "observable": "Instrumentation green on the exact head, or the Rive failure root-caused and assigned; handset results bound to APK SHA-256 and device identity.",
    "negative": "A JVM pass or an emulator pass is never reported as handset acceptance.",
    "recovery": "One rerun at most for a suspected flake; a second failure is real.",
-   "environment": "Emulator (instrumentation), S24 Ultra via Artemis (handset). Neither available in this session.",
+   "environment": "GitHub-hosted Android emulator core evidence at 637eaf96: 14 passed, 0 failed, 4 explicit core-mode skips. S24 Ultra via Artemis and full/production rig qualification remain pending.",
    "pass_evidence": "Instrumentation report and Artemis receipts for the exact APK.",
-   "status": "OPEN_OBLIGATION (JVM part satisfied as source evidence)"
+   "status": "OPEN_HANDSET_AND_FULL_RIG_QUALIFICATION (core emulator source evidence complete)"
   },
   {
    "id": "OBL-006",
    "from": "OBS-005",
    "owner_unit": "BQ-006 / QA-003",
-   "status": "OPEN_REGISTRY_RECONCILIATION_REQUIRED",
+   "status": "RETARGETED_CASES_VERIFIED_FULL_CORPUS_PENDING",
    "finding": "The 374-case legacy mutation corpus has 36 preflight findings. Its former CI success was an aborted run masked by tee and step continuation.",
    "proves": "Every retained mutation is bound to the current equivalent implementation and valid test target; each unmutated control passes before a mutation can count as caught.",
    "stimulus": "Reconcile each recorded stale/missing target preserving the invariant, run preflight, then execute controls and mutants in an isolated source checkout with the actual component dependencies.",
    "observable": "No invalid registry input, no collection/setup error counted as caught, no silent case omission; complete per-case outcomes and restoration proof.",
-   "evidence": "ci/MUTATION_REGISTRY_PREFLIGHT.json and ci/MUTATION_VERIFICATION_FINDING.md",
-   "completed_correction": "CI preserves failing status and publishes preflight artifacts; harness rejects failing unmutated controls. Twenty focused regressions pass.",
-   "remaining": "Semantic mapping/admission and execution of the full retained corpus."
+   "evidence": "ci/MUTATION_VERIFICATION_FINDING.md; ci/MUTATION_REGISTRY_CURRENT.json; ci/MUTATION_RECONCILIATION.md; ci/MUTATION_RECONCILIATION_MAPPING.json and per-component execution receipts",
+   "completed_correction": "All original 36 preflight findings resolved; all 374 case identities preserved (380 edits). All 32 retargeted cases pass controls and fail their intended assertions; invalid initial controls/compiler failures retained. Shared harness and CI reject misleading successes. 35 focused regressions and 52 isolated rebuild tests pass. Follow-up C35 replacement now qualifies the queue constant; C11 now jointly removes the optimistic lookup and unique fence, reflecting the actual combined invariant. Both induced failures detected. Current corpus: 374 identities, 381 edits, nine disjoint CI shards.",
+   "remaining": "Finish full retained-corpus run 39721114929 and triage actual outcomes; independent review of semantic equivalence remains separate."
   }
  ]
 }

@@ -590,9 +590,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - label: python
+          - label: python-0
             family: python
-            shard: 0/1
+            shard: 0/4
+          - label: python-1
+            family: python
+            shard: 1/4
+          - label: python-2
+            family: python
+            shard: 2/4
+          - label: python-3
+            family: python
+            shard: 3/4
           - label: browser-agent
             family: browser-agent
             shard: 0/1

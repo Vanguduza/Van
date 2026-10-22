@@ -1,0 +1,33 @@
+{
+  "schema": "van.rebuild.android-cleartext-maintenance/1",
+  "source_state": "UNCOMMITTED_CANDIDATE_AFTER_5d6372fd",
+  "host_tests": "3 passed",
+  "app_unit_tests": 195,
+  "app_unit_failures": 0,
+  "android_build_exit": 0,
+  "lint": {
+    "error_or_fatal": 0,
+    "warning": 89,
+    "hint": 22
+  },
+  "instrumentation_assembled": true,
+  "runtime_tests_added": [
+    "debugLoopbackHttpWorksButOtherCleartextIsRefused",
+    "exportedDebugRigRequiresPrivilegedCaller"
+  ],
+  "runtime_tests_executed_locally": false,
+  "release_manifest_exit": 1,
+  "release_manifest_refusal": "VAN_DEPLOYMENT_PROFILE_FILE is required for van-trading-core releases",
+  "owner_release_qualified": false,
+  "s24_tested": false,
+  "artifacts": {
+    "android/app/build/outputs/apk/debug/app-debug.apk": {
+      "sha256": "ca1605a14b1ee00d029052b5cfff4d791ac11f2b9f2914c56d273123f574ccca",
+      "bytes": 319783943
+    },
+    "android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+      "sha256": "867279dc8679e54c2abc0bc4a8dfede40116bb243d01f81682d0f552b42124c2",
+      "bytes": 2378335
+    }
+  }
+}

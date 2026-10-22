@@ -1,0 +1,44 @@
+{
+  "schema": "van.rebuild.mutation-reconciliation/1",
+  "part": "browser-agent",
+  "reference": "e56a38c8d5b51b7c64d3d4ac04e2d8a59f6c9b36",
+  "preserved_case_count": 374,
+  "selected_case_count": 2,
+  "registry_sha256": "a7ec143ea39a525390a1aa015d28d812afb198b703f02d1e1b8c677fb2b94674",
+  "results": [
+    {
+      "kind": "baseline",
+      "mutation": null,
+      "exit": 0,
+      "verdict": "PASS",
+      "log_sha256": "b2955b69691dddf314f858740d4dc6adb97574e775e240158d0abd4bbcc7e063",
+      "failed_oracles": [],
+      "summary": "........................................................................ [ 36%]\n........................................................................ [ 72%]\n......................................................                   [100%]\n198 passed in 2.63s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C29 file:/// reads the host's disk into a page the owner is watching",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "c79b9226fbc2bf9c121c5319a7d35415df73b8d6149ebae62209955f29041226",
+      "failed_oracles": [
+        "FAILED services/browser_control_agent/tests/test_control_authority.py::TestTheAgentIsNarrow::test_navigate_refuses_a_scheme_that_is_not_the_web"
+      ],
+      "summary": "...................F.................................................... [ 36%]\n........................................................................ [ 72%]\n......................................................                   [100%]\n=================================== FAILURES ===================================\n___ TestTheAgentIsNarrow.test_navigate_refuses_a_scheme_that_is_not_the_web ____\n\nself = <services.browser_control_agent.tests.test_control_authority.TestTheAgentIsNarrow object at 0x7febac70b440>\n\n    def test_navigate_refuses_a_scheme_that_is_not_the_web(self):\n        \"\"\"`file:///` reads the host's disk into a page the owner is watching.\"\"\"\n        cdp = RecordingCdp()\n        authority, _ = _authority()\n        agent = BrowserControlAgent(authority=authority, cdp=cdp)\n        for url in (\"file:///etc/passwd\", \"chrome://settings\", \"javascript:alert(1)\", \"\"):\n>           with pytest.raises(ValueError):\nE           Failed: DID NOT RAISE <class 'ValueError'>\n\nservices/browser_control_agent/tests/test_control_authority.py:298: Failed\n=========================== short test summary info ============================\nFAILED services/browser_control_agent/tests/test_control_authority.py::TestTheAgentIsNarrow::test_navigate_refuses_a_scheme_that_is_not_the_web\n1 failed, 197 passed in 2.67s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C29 a hostname is accepted, and resolves on a machine we do not control",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "129c626d7271331a5b3fc056476e153e88c86ecbacc2a1d8808260dd2b7945ba",
+      "failed_oracles": [
+        "FAILED services/browser_control_agent/tests/test_stream_host_package.py::TestTheCdpClientIsLoopbackOnly::test_a_hostname_is_refused_even_when_it_would_resolve_to_loopback"
+      ],
+      "summary": "........................................................................ [ 36%]\n...................F.................................................... [ 72%]\n......................................................                   [100%]\n=================================== FAILURES ===================================\n_ TestTheCdpClientIsLoopbackOnly.test_a_hostname_is_refused_even_when_it_would_resolve_to_loopback _\n\nself = <services.browser_control_agent.tests.test_stream_host_package.TestTheCdpClientIsLoopbackOnly object at 0x7f1e7d65f6e0>\n\n    def test_a_hostname_is_refused_even_when_it_would_resolve_to_loopback(self):\n        \"\"\"`localhost` resolves at connect time, on a machine this process does not control.\n        Only a literal is a guarantee.\"\"\"\n>       with pytest.raises(CdpUnavailable):\nE       Failed: DID NOT RAISE <class 'services.browser_control_agent.cdp.CdpUnavailable'>\n\nservices/browser_control_agent/tests/test_stream_host_package.py:122: Failed\n=========================== short test summary info ============================\nFAILED services/browser_control_agent/tests/test_stream_host_package.py::TestTheCdpClientIsLoopbackOnly::test_a_hostname_is_refused_even_when_it_would_resolve_to_loopback\n1 failed, 197 passed in 2.62s\n"
+    }
+  ],
+  "status": "PASS",
+  "duration_seconds": 9.017,
+  "source_commit": "77e45b5668745642c3f9dcdf3976deebd2f5bde7"
+}
