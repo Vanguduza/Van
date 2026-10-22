@@ -140,6 +140,20 @@ def build():
     }
     for row in (accounts, account_screen):
         row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(operation_extension))
+    catalogue = next(r for r in endpoint_doc["endpoints"] if r["path"] == "/v1/trading/accounts/catalog")
+    account_controls = {
+        "method": "GET", "path": catalogue["path"], "endpoint_id": catalogue["endpoint_id"],
+        "source_status": "CANDIDATE_SOURCE_ANDROID_REPAIR_NATIVE_ACCEPTANCE_PENDING",
+        "client_namespace": "VanGatewayClient", "client_function": "tradingAccountCatalog",
+        "source_ref": catalogue["source"], "authentication": catalogue["authentication"],
+        "device_proof_required_when_bound": catalogue["device_proof_required_when_bound"],
+        "authority": "READ_FIELD_CONTRACTS_ONLY_NO_APPROVAL_OR_ACCOUNT_EFFECT",
+        "scope": "Exact existing action fields, credential-key names, approval and original-result capabilities. Partial account edits preserve omitted settings. Generic edits require native resolved before/after review bound to the biometric proof and checked again by the native writer.",
+        "specification": "docs/rebuild/rev118/backend/BE-002_004_005_ACCOUNT_UPDATE_REVIEW.md",
+        "new_ui_implemented": False, "existing_android_repair": True, "live_qualified": False,
+    }
+    for row in (accounts, account_screen):
+        row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(account_controls))
     voice_clients = {
         ("POST", "/v1/voice/responses"): "openSpokenResult",
         ("GET", "/v1/voice/streams/{stream_id}"): "speechStream",

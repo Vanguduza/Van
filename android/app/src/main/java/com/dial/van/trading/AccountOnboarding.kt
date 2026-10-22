@@ -40,6 +40,8 @@ object AccountOnboarding {
                 ch == '\n' -> sb.append("\\n")
                 ch == '\r' -> sb.append("\\r")
                 ch == '\t' -> sb.append("\\t")
+                ch == '\b' -> sb.append("\\b")
+                ch == '\u000C' -> sb.append("\\f")
                 ch.code < 0x20 -> sb.append("\\u").append(String.format("%04x", ch.code))
                 else -> sb.append(ch)
             }
@@ -85,6 +87,49 @@ object AccountOnboarding {
         "mt5_ea_issue_key" -> "Issue a new MT5 bridge signing key"
         "oauth_start" -> "Begin linking a broker account"
         else -> "Confirm trading account change"
+    }
+
+    /** Display the native effective settings; never native locators or credential values. */
+    fun resolvedReviewText(review: JsonObject?): String? {
+        if (review?.str("schema") != "vati.account-review/1" || review.str("action") != "account_upsert") return null
+        val after = review.obj("after") ?: return null
+        val before = review.obj("before")
+        val labels = linkedMapOf("alias" to "Account", "broker" to "Broker", "label" to "Name",
+            "mode" to "Trading mode", "currency" to "Currency", "demo" to "Configured account type",
+            "enabled" to "Enabled", "login" to "Broker login", "server" to "Broker server / app ID",
+            "bridge_url" to "Provider connection", "venue" to "Venue", "mandate_ref" to "Policy reference",
+            "notes" to "Notes", "credential_ref" to "Credentials", "safety_identity" to "Safety identity")
+        if (after.keys != labels.keys || (before != null && before.keys != labels.keys)) return null
+        if (after.obj("credential_ref")?.keys != setOf("kind") ||
+            (before != null && before.obj("credential_ref")?.keys != setOf("kind"))) return null
+        val changed = labels.keys.filter { before == null || before[it] != after[it] }
+        val contextFields = setOf("broker", "login", "mode", "currency", "demo", "enabled", "mandate_ref")
+        fun display(record: JsonObject, key: String): String {
+            val value = record.str(key).orEmpty()
+            return when {
+                key == "demo" -> if (value == "true") "Demo" else "Live"
+                key == "enabled" -> if (value == "true") "Yes" else "No"
+                key == "mode" -> value.lowercase().replace('_', ' ')
+                else -> value.ifBlank { "not set" }
+            }
+        }
+        return buildString {
+            append(if (before == null) "Register account" else "Update account").append(" ").append(after.str("alias") ?: return null)
+            for (key in labels.keys.filter { it != "alias" && (it in changed || it in contextFields) }) {
+                if (key == "credential_ref") {
+                    append("\nCredentials: ").append(if (after.obj(key)?.str("kind") == "none") "not required" else if (before == null) "storage on trading host; no credential values supplied" else "existing values retained")
+                } else {
+                    val value = after.str(key).orEmpty()
+                    if (value.isNotBlank() || before != null) {
+                        append("\n").append(labels.getValue(key)).append(": ")
+                        if (before != null && key in changed) append(display(before, key)).append(" → ")
+                        append(display(after, key))
+                    }
+                }
+            }
+            if (changed.isEmpty()) append("\nNo setting values changed.")
+            append("\n\nBroker connectivity and trading policy are checked separately.")
+        }
     }
 
     fun requestBody(

@@ -87,6 +87,9 @@ class LocalAccountControl:
     def resource_version(self, alias: str) -> dict:
         return self.handlers["account_revision"]({"alias": alias})
 
+    def review(self, action: str, args: dict) -> dict:
+        return self.run('account_review',{'action':action,'args':args})
+
     def operation(self, operation_id: str, device_id: str) -> dict:
         return self.run("account_operation", {"operation_id": operation_id, "device_id": device_id})
 
@@ -104,6 +107,9 @@ class CommanderAccountControl:
 
     def resource_version(self, alias: str) -> dict:
         return self.run("account_revision", {"alias": alias})
+
+    def review(self, action: str, args: dict) -> dict:
+        return self.run('account_review',{'action':action,'args':args})
 
     def operation(self, operation_id: str, device_id: str) -> dict:
         return self.run("account_operation", {"operation_id": operation_id, "device_id": device_id})
@@ -209,6 +215,35 @@ class AccountOnboarding:
     def _cb(self, broker: str) -> str:
         return f"{self.public_base_url.rstrip('/')}/v1/trading/oauth/{broker}/callback"
 
+    async def approval_context(self,action,args,*,owner_device_id=None):
+        if action!='account_upsert':
+            return await self.resource_version(action,args,owner_device_id=owner_device_id),None
+        alias=args.get('alias')
+        if not isinstance(alias,str) or not re.fullmatch(r'[a-z0-9_]{3,32}',alias.strip().lower()):
+            raise HTTPException(422,'account alias must match [a-z0-9_]{3,32}')
+        _trading_path()
+        from vati.core.canonical import canonical_hash
+        from van_gateway.trading.account_contracts import AccountResolvedReview
+        try:
+            review=await asyncio.to_thread(self.control.review,action,args)
+            AccountResolvedReview.model_validate(review)
+            expected_changes=sorted(key for key,value in review['after'].items()
+                if review['before'] is None or review['before'].get(key)!=value)
+            if (review.get('schema')!='vati.account-review/1' or review.get('action')!=action
+                or review.get('alias')!=str(args.get('alias','')).strip().lower()
+                or review.get('request_digest')!=canonical_hash(args)
+                or review.get('review_digest')!=canonical_hash({k:v for k,v in review.items() if k!='review_digest'})
+                or not isinstance(review.get('after'),dict)
+                or review['after'].get('alias')!=alias.strip().lower()
+                or review.get('changed_fields')!=expected_changes
+                or not re.fullmatch(r'[0-9a-f]{64}',review.get('resource_version',''))):
+                raise ValueError('unbound native review')
+            return review['resource_version'],review
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(409,'Native account settings cannot be resolved for owner review; no change dispatched') from None
+
     async def resource_version(self, action: str, args: dict, *, owner_device_id: str | None = None) -> str | None:
         _trading_path()
         from commander.accounts import ACCOUNT_MUTATIONS
@@ -230,6 +265,8 @@ class AccountOnboarding:
         alias = alias.strip().lower()
         try:
             snapshot = await asyncio.to_thread(self.control.resource_version, alias)
+            if action in {'deriv_create_demo','deriv_oauth_link','ctrader_link'} and snapshot.get('state')=='REGISTERED':
+                raise HTTPException(409,'Account alias already exists; use a new alias or the verified update workflow')
             version = snapshot.get("resource_version")
             if snapshot.get("alias") != alias or not isinstance(version, str) or not re.fullmatch(r"[0-9a-f]{64}", version):
                 raise ValueError("invalid native resource version")
@@ -335,7 +372,7 @@ class AccountOnboarding:
         accts = await asyncio.to_thread(self.control.run,"ctrader_discover", {"client_id": p["client_id"], "client_secret": p["client_secret"], "access_token": p["access_token"]})
         return {"ready": True, "broker": "ctrader", "accounts": accts.get("accounts", []), "errors": accts.get("errors", [])}
 
-    async def run(self, action: str, args: dict, *, owner_device_id: str | None = None, native_resource_version: str | None = None, native_operation: dict | None = None) -> dict:
+    async def run(self, action: str, args: dict, *, owner_device_id: str | None = None, native_resource_version: str | None = None, native_operation: dict | None = None, native_review: dict | None = None) -> dict:
         if action == "oauth_start":
             return await self.oauth_start(args, owner_device_id=owner_device_id)
         if action == "oauth_pending":
@@ -393,6 +430,11 @@ class AccountOnboarding:
             if not native_operation or native_operation.get("device_id") != owner_device_id:
                 raise HTTPException(403, "verified native operation context is required")
             values["_native_operation"] = {**native_operation, "request_digest": canonical_hash(args)}
+            if action=='account_upsert':
+                if not native_review or native_review.get('resource_version')!=native_resource_version or native_review.get('request_digest')!=canonical_hash(args):
+                    raise HTTPException(409,'Resolved native account review is required')
+                values['_expected_review_digest']=native_review['review_digest']
+                values['_native_operation']['authority_ref']+='::review:'+native_review['review_digest']
         try:
             return await asyncio.to_thread(self.control.run,action,values)
         except HTTPException as exc:

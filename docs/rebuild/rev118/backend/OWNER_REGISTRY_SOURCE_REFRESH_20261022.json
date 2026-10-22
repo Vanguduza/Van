@@ -264,7 +264,7 @@
       "old_line": 529,
       "new_line": 556,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun health(): JSONObject = withContext(Dispatchers.IO) { getJson(\"/health\") }"
     },
     "android/app/src/main/java/com/dial/van/VanApplication.kt:830": {
@@ -288,39 +288,39 @@
       "old_line": 593,
       "new_line": 620,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun briefing(): JSONObject = withContext(Dispatchers.IO) { getJson(\"/v1/briefing\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1370": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1370,
-      "new_line": 1413,
+      "new_line": 1414,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun missions(activeOnly: Boolean = false): JSONArray = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:947": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 947,
-      "new_line": 990,
+      "new_line": 991,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun attention(): JSONArray = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1856": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1856,
-      "new_line": 1932,
+      "new_line": 1933,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingAssessment(): String = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:2007": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 2007,
-      "new_line": 2083,
+      "new_line": 2084,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun dispatchCommand("
     },
     "android/app/src/main/java/com/dial/van/control/VanCommandController.kt:249": {
@@ -350,9 +350,9 @@
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1826": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1826,
-      "new_line": 1869,
+      "new_line": 1870,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun commandStatus(commandId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/control/VanCommandController.kt:487": {
@@ -366,33 +366,33 @@
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1375": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1375,
-      "new_line": 1418,
+      "new_line": 1419,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun mission(missionId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1379": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1379,
-      "new_line": 1422,
+      "new_line": 1423,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun missionActivity(missionId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1383": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1383,
-      "new_line": 1426,
+      "new_line": 1427,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun missionEvidence(missionId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1393": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1393,
-      "new_line": 1436,
+      "new_line": 1437,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun activityFeed(): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/command/nav/VanRoute.kt:195": {
@@ -406,105 +406,105 @@
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1402": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1402,
-      "new_line": 1445,
+      "new_line": 1446,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun cancelMission(missionId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1410": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1410,
-      "new_line": 1453,
+      "new_line": 1454,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun messageMission(missionId: String, message: String): JSONObject ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:912": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 912,
-      "new_line": 955,
+      "new_line": 956,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun missionControl(missionId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:915": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 915,
-      "new_line": 958,
+      "new_line": 959,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun missionControlRequest(missionId: String, requestId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:918": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 918,
-      "new_line": 961,
+      "new_line": 962,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun writeMissionControl(missionId: String, operation: String, exactRequest: JSONObject): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:952": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 952,
-      "new_line": 995,
+      "new_line": 996,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun attentionAck(itemId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:957": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 957,
-      "new_line": 1000,
+      "new_line": 1001,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun attentionSnooze(itemId: String, untilUnix: Long): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1388": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1388,
-      "new_line": 1431,
+      "new_line": 1432,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun needsYou(): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:908": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 908,
-      "new_line": 951,
+      "new_line": 952,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun decisions(): JSONArray = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:932": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 932,
-      "new_line": 975,
+      "new_line": 976,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun resolveDecision(decisionId: String, approved: Boolean): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:923": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 923,
-      "new_line": 966,
+      "new_line": 967,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun decision(decisionId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:928": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 928,
-      "new_line": 971,
+      "new_line": 972,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun answerDecision(decisionId: String, exactRequest: JSONObject): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1503": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1503,
-      "new_line": 1546,
+      "new_line": 1547,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun authorityDescriptor(): JSONObject = withContext(Dispatchers.IO) { getJson(\"/v1/authority\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:589": {
@@ -512,7 +512,7 @@
       "old_line": 589,
       "new_line": 616,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun googleGmailDraftPreview(draftId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/control/VanCommandController.kt:101": {
@@ -534,57 +534,57 @@
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1666": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1666,
-      "new_line": 1709,
+      "new_line": 1710,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun createReminder(text: String, dueExpression: String, idempotencyKey: String): JSONObject ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1657": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1657,
-      "new_line": 1700,
+      "new_line": 1701,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun reminders(): JSONArray = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1675": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1675,
-      "new_line": 1718,
+      "new_line": 1719,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun resolveReminder(reminderId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1679": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1679,
-      "new_line": 1722,
+      "new_line": 1723,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun cancelReminder(reminderId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1622": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1622,
-      "new_line": 1665,
+      "new_line": 1666,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun stateOwnerFact("
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1643": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1643,
-      "new_line": 1686,
+      "new_line": 1687,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun forgetOwnerFact("
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1565": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1565,
-      "new_line": 1608,
+      "new_line": 1609,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun contextMemory(): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:56": {
@@ -592,287 +592,287 @@
       "old_line": 56,
       "new_line": 59,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "class VanGatewayClient(context: Context) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1596": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1596,
-      "new_line": 1639,
+      "new_line": 1640,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun contextExport(): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1586": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1586,
-      "new_line": 1629,
+      "new_line": 1630,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun eraseContextMemory(store: String? = null): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1569": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1569,
-      "new_line": 1612,
+      "new_line": 1613,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun contextRecords(store: String, limit: Int = 50, cursor: Int = 0): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1574": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1574,
-      "new_line": 1617,
+      "new_line": 1618,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun contextRecord(store: String, recordId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1578": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1578,
-      "new_line": 1621,
+      "new_line": 1622,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun exportContextRecord(store: String, recordId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1582": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1582,
-      "new_line": 1625,
+      "new_line": 1626,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun contextRecordErasurePlan(store: String, recordId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1606": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1606,
-      "new_line": 1649,
+      "new_line": 1650,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun contextHistory("
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1601": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1601,
-      "new_line": 1644,
+      "new_line": 1645,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun contextConflicts(): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1421": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1421,
-      "new_line": 1464,
+      "new_line": 1465,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun understanding(): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1456": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1456,
-      "new_line": 1499,
+      "new_line": 1500,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun confirmUnderstanding(assertionId: String): JSONObject ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1461": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1461,
-      "new_line": 1504,
+      "new_line": 1505,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun correctUnderstanding(assertionId: String, newValue: String): JSONObject ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1469": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1469,
-      "new_line": 1512,
+      "new_line": 1513,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun rejectUnderstanding(assertionId: String): JSONObject ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1425": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1425,
-      "new_line": 1468,
+      "new_line": 1469,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun ownerVocabulary(): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1429": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1429,
-      "new_line": 1472,
+      "new_line": 1473,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun saveOwnerVocabulary(definition: com.dial.van.memory.OwnerVocabularyDefinition,"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1441": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1441,
-      "new_line": 1484,
+      "new_line": 1485,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun ownerCollaborationPreferences(): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1445": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1445,
-      "new_line": 1488,
+      "new_line": 1489,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun saveOwnerCollaborationPreference(preference: com.dial.van.memory.OwnerCollaborationPreference,"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1479": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1479,
-      "new_line": 1522,
+      "new_line": 1523,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun confirmAdaptation(changeId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1475": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1475,
-      "new_line": 1518,
+      "new_line": 1519,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun revertAdaptation(changeId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1498": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1498,
-      "new_line": 1541,
+      "new_line": 1542,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun standingIntents(): JSONObject = withContext(Dispatchers.IO) { getJson(\"/v1/understanding/intents\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1499": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1499,
-      "new_line": 1542,
+      "new_line": 1543,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun decisionHistory(): JSONObject = withContext(Dispatchers.IO) { getJson(\"/v1/understanding/decisions\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1500": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1500,
-      "new_line": 1543,
+      "new_line": 1544,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun learnedStrategies(): JSONObject = withContext(Dispatchers.IO) { getJson(\"/v1/strategies\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1501": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1501,
-      "new_line": 1544,
+      "new_line": 1545,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun externalReality(): JSONObject = withContext(Dispatchers.IO) { getJson(\"/v1/external-reality\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1532": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1532,
-      "new_line": 1575,
+      "new_line": 1576,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun technologyRadar(): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1537": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1537,
-      "new_line": 1580,
+      "new_line": 1581,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun evalReport(): JSONObject = withContext(Dispatchers.IO) { getJson(\"/v1/eval\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1502": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1502,
-      "new_line": 1545,
+      "new_line": 1546,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun learningProducers(): JSONObject = withContext(Dispatchers.IO) { getJson(\"/v1/understanding/learning/producers\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:939": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 939,
-      "new_line": 982,
+      "new_line": 983,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun projects(): JSONArray = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:943": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 943,
-      "new_line": 986,
+      "new_line": 987,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun projectTruth(projectId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1539": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1539,
-      "new_line": 1582,
+      "new_line": 1583,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun projectStrategicMemory(projectId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1543": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1543,
-      "new_line": 1586,
+      "new_line": 1587,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun recordProjectRationale("
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1484": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1484,
-      "new_line": 1527,
+      "new_line": 1528,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun permissions(): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1492": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1492,
-      "new_line": 1535,
+      "new_line": 1536,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun revokePermission(grantId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1496": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1496,
-      "new_line": 1539,
+      "new_line": 1540,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun autonomy(): JSONObject = withContext(Dispatchers.IO) { getJson(\"/v1/autonomy\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1397": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1397,
-      "new_line": 1440,
+      "new_line": 1441,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun capabilityStatus(): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1487": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1487,
-      "new_line": 1530,
+      "new_line": 1531,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun permissionContracts(): JSONObject = withContext(Dispatchers.IO) { getJson(\"/v1/permissions/contracts\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1488": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1488,
-      "new_line": 1531,
+      "new_line": 1532,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun permissionGrant(grantId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:587": {
@@ -880,15 +880,15 @@
       "old_line": 587,
       "new_line": 614,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun googleStatus(): JSONObject = withContext(Dispatchers.IO) { getJson(\"/v1/google/status\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1833": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1833,
-      "new_line": 1909,
+      "new_line": 1910,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun googlePlanes(): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:584": {
@@ -896,167 +896,167 @@
       "old_line": 584,
       "new_line": 611,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun googleMesh(): JSONObject = withContext(Dispatchers.IO) { getJson(\"/v1/google/mesh\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1842": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1842,
-      "new_line": 1918,
+      "new_line": 1919,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun googleOwnerRevoke(): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1508": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1508,
-      "new_line": 1551,
+      "new_line": 1552,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun ownerResearch(limit: Int = 30): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1505": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1505,
-      "new_line": 1548,
+      "new_line": 1549,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun ownerKnowledge(limit: Int = 30): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1511": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1511,
-      "new_line": 1554,
+      "new_line": 1555,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun ownerAutomation(limit: Int = 30): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1514": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1514,
-      "new_line": 1557,
+      "new_line": 1558,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun automationContracts(): JSONObject = withContext(Dispatchers.IO) { getJson(\"/v1/owner/automation/contracts\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1515": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1515,
-      "new_line": 1558,
+      "new_line": 1559,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun proposeAutomationPlan(exactRequest: JSONObject): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1518": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1518,
-      "new_line": 1561,
+      "new_line": 1562,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun automationPlans(limit: Int = 30): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1521": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1521,
-      "new_line": 1564,
+      "new_line": 1565,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun automationPlan(artifactId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1179": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1179,
-      "new_line": 1222,
+      "new_line": 1223,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun automationPlanRequest(key: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1524": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1524,
-      "new_line": 1567,
+      "new_line": 1568,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun automationRun(runId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:975": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 975,
-      "new_line": 1018,
+      "new_line": 1019,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun browserStatus(): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:987": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 987,
-      "new_line": 1030,
+      "new_line": 1031,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun browserPolicy(): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:979": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 979,
-      "new_line": 1022,
+      "new_line": 1023,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun browserTasks(): JSONArray = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:991": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 991,
-      "new_line": 1034,
+      "new_line": 1035,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun browserEvidence(taskId: String): JSONArray = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:983": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 983,
-      "new_line": 1026,
+      "new_line": 1027,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun browserEscalations(): JSONArray = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1528": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1528,
-      "new_line": 1571,
+      "new_line": 1572,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun ownerBrowserOutcome(taskId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:995": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 995,
-      "new_line": 1038,
+      "new_line": 1039,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun browserActionPlans(sessionId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1001": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1001,
-      "new_line": 1044,
+      "new_line": 1045,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun createBrowserActionPlan(sessionId: String, exactDraft: JSONObject): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:998": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 998,
-      "new_line": 1041,
+      "new_line": 1042,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun browserActionPlan(sessionId: String, planId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1004": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1004,
-      "new_line": 1047,
+      "new_line": 1048,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun cancelBrowserActionPlan(sessionId: String, planId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/command/owner/OwnerServicePresentation.kt:60": {
@@ -1078,185 +1078,185 @@
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1018": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1018,
-      "new_line": 1061,
+      "new_line": 1062,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun interactiveBrowserCreate("
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1042": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1042,
-      "new_line": 1085,
+      "new_line": 1086,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun interactiveBrowserRead(sessionId: String): BrowserSessionSnapshot ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1047": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1047,
-      "new_line": 1090,
+      "new_line": 1091,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun interactiveBrowserStreamGrant(sessionId: String): BrowserStreamGrant ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1075": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1075,
-      "new_line": 1118,
+      "new_line": 1119,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun interactiveBrowserHeartbeat(sessionId: String): BrowserSessionSnapshot ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1084": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1084,
-      "new_line": 1127,
+      "new_line": 1128,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun interactiveBrowserProposeViewport("
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1105": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1105,
-      "new_line": 1148,
+      "new_line": 1149,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun interactiveBrowserAckViewport(sessionId: String, revision: Int,"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1118": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1118,
-      "new_line": 1161,
+      "new_line": 1162,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun interactiveBrowserSuspend(sessionId: String): BrowserSessionSnapshot ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1127": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1127,
-      "new_line": 1170,
+      "new_line": 1171,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun interactiveBrowserEnd(sessionId: String): BrowserSessionSnapshot ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1139": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1139,
-      "new_line": 1182,
+      "new_line": 1183,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun interactiveBrowserTabs(sessionId: String): JSONArray ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1193": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1193,
-      "new_line": 1236,
+      "new_line": 1237,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun interactiveBrowserEvents(sessionId: String): JSONArray ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1134": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1134,
-      "new_line": 1177,
+      "new_line": 1178,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun interactiveBrowserResume(sessionId: String): BrowserSessionSnapshot ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1057": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1057,
-      "new_line": 1100,
+      "new_line": 1101,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun interactiveBrowserTakeControl(sessionId: String): JSONObject ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1064": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1064,
-      "new_line": 1107,
+      "new_line": 1108,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun interactiveBrowserDelegateControl("
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1146": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1146,
-      "new_line": 1189,
+      "new_line": 1190,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun interactiveBrowserDownloads(sessionId: String): JSONArray ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1188": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1188,
-      "new_line": 1231,
+      "new_line": 1232,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun interactiveBrowserDeleteDownload(sessionId: String, downloadId: String): JSONObject ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1183": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1183,
-      "new_line": 1226,
+      "new_line": 1227,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun interactiveBrowserTransferGrant(sessionId: String, request: JSONObject): JSONObject ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1153": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1153,
-      "new_line": 1196,
+      "new_line": 1197,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun browserFileOperations(sessionId: String, downloadId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1157": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1157,
-      "new_line": 1200,
+      "new_line": 1201,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun browserFileProviderContracts(sessionId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1172": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1172,
-      "new_line": 1215,
+      "new_line": 1216,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun createBrowserFileProviderRequest(sessionId: String, exactDraft: JSONObject): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1162": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1162,
-      "new_line": 1205,
+      "new_line": 1206,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun browserFileProviderRequests(sessionId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1165": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1165,
-      "new_line": 1208,
+      "new_line": 1209,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun browserFileProviderRequest(sessionId: String, requestId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1175": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1175,
-      "new_line": 1218,
+      "new_line": 1219,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun cancelBrowserFileProviderRequest(sessionId: String, requestId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1169": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1169,
-      "new_line": 1212,
+      "new_line": 1213,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun browserFileProviderObservation(sessionId: String, requestId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "backend/van_gateway/authority/descriptor.py:143": {
@@ -1270,9 +1270,9 @@
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1205": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1205,
-      "new_line": 1248,
+      "new_line": 1249,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun sessionOpen("
     },
     "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:454": {
@@ -1302,9 +1302,9 @@
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1260": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1260,
-      "new_line": 1303,
+      "new_line": 1304,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun sessionResume("
     },
     "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:757": {
@@ -1318,17 +1318,17 @@
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1297": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1297,
-      "new_line": 1340,
+      "new_line": 1341,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun sessionStatus(vanSessionId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1301": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1301,
-      "new_line": 1344,
+      "new_line": 1345,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun sessionUpstream(envelope: JSONObject): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:502": {
@@ -1342,17 +1342,17 @@
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1311": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1311,
-      "new_line": 1354,
+      "new_line": 1355,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    fun sessionDownstream(vanSessionId: String, afterSeq: Long): Flow<JSONObject> = callbackFlow {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1344": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1344,
-      "new_line": 1387,
+      "new_line": 1388,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    fun sessionSocketUrl(vanSessionId: String): String {"
     },
     "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:490": {
@@ -1430,9 +1430,9 @@
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1876": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1876,
-      "new_line": 1952,
+      "new_line": 1953,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun events(afterSeq: Long = 0L): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:524": {
@@ -1440,7 +1440,7 @@
       "old_line": 524,
       "new_line": 551,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun ingestCapturedContext(payload: JSONObject): JSONObject ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:469": {
@@ -1448,7 +1448,7 @@
       "old_line": 469,
       "new_line": 496,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    private suspend fun pairThisDevice("
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:200": {
@@ -1456,7 +1456,7 @@
       "old_line": 200,
       "new_line": 227,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun bindThisDevice("
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:226": {
@@ -1464,7 +1464,7 @@
       "old_line": 226,
       "new_line": 253,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun deviceBindingStatus(): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/VanApplication.kt:401": {
@@ -1478,9 +1478,9 @@
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1359": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1359,
-      "new_line": 1402,
+      "new_line": 1403,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun connectivityManifest(knownVersion: Int): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/VanApplication.kt:562": {
@@ -1496,7 +1496,7 @@
       "old_line": 432,
       "new_line": 459,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    private fun recoverBootstrap(token: String): JSONObject? {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:181": {
@@ -1504,23 +1504,23 @@
       "old_line": 181,
       "new_line": 208,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    private fun ensureCertifiedIdentity() {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1711": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1711,
-      "new_line": 1754,
+      "new_line": 1755,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun degraded(): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1527": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1527,
-      "new_line": 1570,
+      "new_line": 1571,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun ownerDiagnostics(): JSONObject = withContext(Dispatchers.IO) { getJson(\"/v1/owner/diagnostics\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:739": {
@@ -1528,7 +1528,7 @@
       "old_line": 739,
       "new_line": 766,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingStatus(): String = withContext(Dispatchers.IO) { rawGet(\"/v1/trading/status\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:743": {
@@ -1536,39 +1536,39 @@
       "old_line": 743,
       "new_line": 770,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingPortfolio(): String = withContext(Dispatchers.IO) { rawGet(\"/v1/trading/portfolio\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1860": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1860,
-      "new_line": 1936,
+      "new_line": 1937,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingPositions(): String = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:751": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 751,
-      "new_line": 778,
+      "new_line": 779,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingRisk(): String = withContext(Dispatchers.IO) { rawGet(\"/v1/trading/risk\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:747": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 747,
-      "new_line": 774,
+      "new_line": 775,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingMarketState(symbol: String? = null): String = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:755": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 755,
-      "new_line": 782,
+      "new_line": 783,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingCognition(): String = withContext(Dispatchers.IO) { rawGet(\"/v1/trading/cognition\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:734": {
@@ -1576,47 +1576,47 @@
       "old_line": 734,
       "new_line": 761,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingTrades(view: String, limit: Int = 12): String = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:757": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 757,
-      "new_line": 784,
+      "new_line": 785,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingTradeDetail(tradeIntentId: String): String = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:761": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 761,
-      "new_line": 788,
+      "new_line": 789,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingBars(symbol: String, timeframe: String = \"H1\", limit: Int = 300): String = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1864": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1864,
-      "new_line": 1940,
+      "new_line": 1941,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingEvents(limit: Int = 20): String = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1868": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1868,
-      "new_line": 1944,
+      "new_line": 1945,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingPotential(): String = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1872": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1872,
-      "new_line": 1948,
+      "new_line": 1949,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingHistory(limit: Int = 50): String = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:745": {
@@ -1624,39 +1624,39 @@
       "old_line": 745,
       "new_line": 772,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingAccounts(): String = withContext(Dispatchers.IO) { rawGet(\"/v1/trading/accounts\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:883": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 883,
-      "new_line": 926,
+      "new_line": 927,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingAccountChallenge("
     },
     "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt:91": {
       "file": "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt",
       "old_line": 91,
-      "new_line": 103,
+      "new_line": 108,
       "old_sha256": "65453a311db8a9c7df8db038133ae7cd69acaafcc20b1cec09f62303efdbbe6f",
-      "new_sha256": "c464f4110602f5d3632cf14b0e3be73dc69c3aafc4a50d0bdc75974e63245840",
+      "new_sha256": "e12449a66d8dc9202b703f7fbace9caafe8c8f766f960ccd954db4d0a9ab204a",
       "exact_anchor": "            val challenge = runCatching { app.gatewayClient.tradingAccountChallenge(action, args) }.getOrNull()"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:847": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 847,
-      "new_line": 874,
+      "new_line": 875,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingAccountAction("
     },
     "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt:80": {
       "file": "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt",
       "old_line": 80,
-      "new_line": 90,
+      "new_line": 95,
       "old_sha256": "65453a311db8a9c7df8db038133ae7cd69acaafcc20b1cec09f62303efdbbe6f",
-      "new_sha256": "c464f4110602f5d3632cf14b0e3be73dc69c3aafc4a50d0bdc75974e63245840",
+      "new_sha256": "e12449a66d8dc9202b703f7fbace9caafe8c8f766f960ccd954db4d0a9ab204a",
       "exact_anchor": "                val outcome = runCatching { app.gatewayClient.tradingAccountAction(action, args, proof) }",
       "reviewed_replacement_anchor": "                val outcome = runCatching { app.gatewayClient.tradingAccountAction(action, args, proof, approvedIssuedAt) }",
       "reason": "Preserve the exact timestamp used in the existing owner approval, including biometric delay"
@@ -1664,25 +1664,25 @@
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:765": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 765,
-      "new_line": 792,
+      "new_line": 793,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingPromotionCandidates(): String = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:793": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 793,
-      "new_line": 820,
+      "new_line": 821,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingPromotionChallenge("
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:810": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 810,
-      "new_line": 837,
+      "new_line": 838,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingPromoteStrategy("
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:741": {
@@ -1690,164 +1690,164 @@
       "old_line": 741,
       "new_line": 768,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun tradingTickets(): String = withContext(Dispatchers.IO) { rawGet(\"/v1/trading/tickets\") }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1733": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1733,
-      "new_line": 1776,
+      "new_line": 1777,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "        suspend fun projects(): String = read(\"/projects\")"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1735": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1735,
-      "new_line": 1778,
+      "new_line": 1779,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "        suspend fun home(projectId: String): String = read(\"/projects/${encodeSegment(projectId)}/home\")"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1737": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1737,
-      "new_line": 1780,
+      "new_line": 1781,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "        suspend fun stagePlan(projectId: String): String = read(\"/projects/${encodeSegment(projectId)}/stage-plan\")"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1739": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1739,
-      "new_line": 1782,
+      "new_line": 1783,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "        suspend fun tasks(projectId: String, view: String): String ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1742": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1742,
-      "new_line": 1785,
+      "new_line": 1786,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "        suspend fun graph(projectId: String): String = read(\"/projects/${encodeSegment(projectId)}/graph\")"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1744": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1744,
-      "new_line": 1787,
+      "new_line": 1788,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "        suspend fun task(taskId: String): String = read(\"/tasks/${encodeSegment(taskId)}\")"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1746": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1746,
-      "new_line": 1789,
+      "new_line": 1790,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "        suspend fun agents(): String = read(\"/agents\")"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1759": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1759,
-      "new_line": 1802,
+      "new_line": 1803,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "        suspend fun section(section: HubSection): String = read(\"/${section.path}\")"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1763": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1763,
-      "new_line": 1806,
+      "new_line": 1807,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "        suspend fun infrastructure(): String = read(\"/infrastructure\")"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1761": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1761,
-      "new_line": 1804,
+      "new_line": 1805,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "        suspend fun evidence(ref: String): String = read(\"/evidence/${encodeSegment(ref)}\")"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1779": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1779,
-      "new_line": 1822,
+      "new_line": 1823,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "        fun events(): Flow<DialDevChange> = callbackFlow {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1770": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1770,
-      "new_line": 1813,
+      "new_line": 1814,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "        suspend fun submitAction(request: DialDevActionRequest): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1748": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1748,
-      "new_line": 1791,
+      "new_line": 1792,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "        suspend fun workspaces(): String = read(\"/workspaces\")"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1750": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1750,
-      "new_line": 1793,
+      "new_line": 1794,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "        suspend fun workspace(workspaceId: String): String = read(\"/workspaces/${encodeSegment(workspaceId)}\")"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1752": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1752,
-      "new_line": 1795,
+      "new_line": 1796,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "        suspend fun workspaceDiff(workspaceId: String): String = read(\"/workspaces/${encodeSegment(workspaceId)}/diff\")"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1755": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1755,
-      "new_line": 1798,
+      "new_line": 1799,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "        suspend fun workspaceTerminalTail(workspaceId: String, lines: Int = 200): String ="
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:971": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 971,
-      "new_line": 1014,
+      "new_line": 1015,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun artemisConsoleSession(): JSONObject = withContext(Dispatchers.IO) {"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1686": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1686,
-      "new_line": 1729,
+      "new_line": 1730,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun recordVisualAcceptance("
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1704": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1704,
-      "new_line": 1747,
+      "new_line": 1748,
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
-      "new_sha256": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+      "new_sha256": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
       "exact_anchor": "    suspend fun latestVisualAcceptance(): JSONObject = withContext(Dispatchers.IO) {"
     }
   },
   "current_cited_source_sha256": {
-    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
     "android/app/src/main/java/com/dial/van/VanApplication.kt": "9266a15f2caddfc1598daa7fdb95850cccc8b1969bf6429d9762178eac1bd59a",
     "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt": "d9328ea0b06b5957919f0f24e5dda5a13e8173aba1ecb53d3deb8c296f1fe20a",
     "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
@@ -1943,7 +1943,7 @@
     "android/app/src/main/java/com/dial/van/trading/ui/PositionDetailScreen.kt": "b3cb37a1cb693df7008c3ff76d922184ae5fa9d25b768e27558878ede5a27f96",
     "android/app/src/main/java/com/dial/van/trading/TradingNavigation.kt": "4421d0717aa2a5115eb43730b1c7c6b7ac926713617602d1e52ecba710e0e939",
     "android/app/src/main/java/com/dial/van/trading/ui/TradingRoute.kt": "fdb194d89657d099544d2f40b8ae0a824489d8c13081e4b0333289308335ff92",
-    "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "c464f4110602f5d3632cf14b0e3be73dc69c3aafc4a50d0bdc75974e63245840",
+    "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "e12449a66d8dc9202b703f7fbace9caafe8c8f766f960ccd954db4d0a9ab204a",
     "android/app/src/main/java/com/dial/van/trading/ui/StrategiesScreen.kt": "3b017e8e141f19a4f95efe09f4ec2d3399d0cb888e77880608a5edc40b601c43",
     "android/app/src/main/java/com/dial/van/trading/ui/TicketsScreen.kt": "32e07996a3b39ad84be69617f5e0bee3d65349a368729f356001dd50fb6c8126",
     "android/app/src/main/java/com/dial/van/command/dev/DevHomeRoute.kt": "ca92519623ddddcff5835fdcf1792665a2c177c6e2470209eb1a6e2d5090b699",
@@ -1963,8 +1963,8 @@
     "android/app/src/main/java/com/dial/van/command/artemis/ArtemisConsoleRoute.kt": "67ca665acc636cb6d4f4669d1b495273062ceae5c4a73c0b26aa418c8ef3b818",
     "android/app/src/main/java/com/dial/van/visual/VanCharacterAcceptance.kt": "7b282fa7815e4557cb4c2cd9e87d34ee9e5d4673b5fa5d93ecef2f1ded648e47"
   },
-  "endpoint_count": 438,
-  "schema_count": 256,
+  "endpoint_count": 439,
+  "schema_count": 262,
   "physical_cases_executed": 0,
   "owner_release": false,
   "deployment_accepted": false

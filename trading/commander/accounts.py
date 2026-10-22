@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 
 from fastapi import HTTPException
+from commander.account_config import resolve_account_config,validate_deriv_endpoint
 from commander.account_effects import (AccountEffectError, AccountEffectJournal, AccountOperationUnconfirmed,
     AccountOperationBlocked, JOURNALED_COMMANDS, invoke_account_effect, mark_account_effect, operation_intent, readback)
 
@@ -35,11 +36,12 @@ BROKER_SECRET_KEYS = {
 }
 ACCOUNT_MUTATIONS = frozenset({"account_upsert", "account_credentials", "account_remove",
     "deriv_create_demo", "deriv_oauth_link", "ctrader_link", "mt5_ea_issue_key"})
-ACCOUNT_COMMANDS = ("account_upsert", "account_credentials", "account_remove", "account_verify", "account_revision", "account_operation", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_oauth_exchange", "ctrader_link", "mt5_ea_issue_key")
+ACCOUNT_COMMANDS = ("account_upsert", "account_credentials", "account_remove", "account_verify", "account_revision", "account_review", "account_operation", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_oauth_exchange", "ctrader_link", "mt5_ea_issue_key")
 ACCOUNT_TOOL_SCHEMAS = {
+    "account_review": {"description": "Resolve public before/after metadata for the exact account edit without any writes or credential reads.", "properties": {"action": {"type": "string"}, "args": {"type": "object"}}, "required": ["action", "args"]},
     "account_operation": {"description": "Read the original native account-operation outcome for its gateway-authenticated owner device. No effect or credential export.", "properties": {"operation_id": {"type": "string"}, "device_id": {"type": "string"}}, "required": ["operation_id", "device_id"]},
     "account_revision": {"description": "Read the native non-secret account configuration version for exact owner-intent binding.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
-    "account_upsert": {"description": "Create or replace a non-secret account record (alias, broker, mode, currency, identifiers). Credentials go through account_credentials.", "properties": {"alias": {"type": "string"}, "broker": {"type": "string"}, "mode": {"type": "string"}, "currency": {"type": "string"}, "label": {"type": "string"}, "server": {"type": "string"}, "login": {"type": "string"}, "bridge_url": {"type": "string"}, "demo": {"type": "boolean"}}, "required": ["alias", "broker"]},
+    "account_upsert": {"description": "Register a new account or edit specified public settings. Existing omitted settings and credentials are preserved. New accounts require broker; native identity changes require verified migration.", "properties": {"alias": {"type": "string"}, "broker": {"type": "string"}, "mode": {"type": "string"}, "currency": {"type": "string"}, "label": {"type": "string"}, "server": {"type": "string"}, "login": {"type": "string"}, "bridge_url": {"type": "string"}, "demo": {"type": "boolean"}, "enabled": {"type": "boolean"}, "notes": {"type": "string"}, "venue": {"type": "string"}, "mandate_ref": {"type": "string"}}, "required": ["alias"]},
     "account_credentials": {"description": "Store credential values for an alias in its 0600 secrets file (allowlisted keys per broker). Values are never echoed.", "properties": {"alias": {"type": "string"}, "secrets": {"type": "object"}}, "required": ["alias", "secrets"]},
     "account_remove": {"description": "Remove an account record and shred its secrets file.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
     "account_verify": {"description": "Connect to the venue with the stored credentials and report equity/currency/connectivity. No order is placed.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
@@ -131,6 +133,11 @@ def require_resource_version(command: str, args: dict) -> None:
             operation_intent(command, args)
         except AccountEffectError as exc:
             raise HTTPException(409, str(exc)) from None
+    if command == "account_upsert":
+        review=args.get("_expected_review_digest")
+        authority=args.get("_native_operation",{}).get("authority_ref","")
+        if not isinstance(review,str) or not re.fullmatch(r"[0-9a-f]{64}",review) or not authority.endswith("::review:"+review):
+            raise HTTPException(409,"Resolved native owner review is required before an account edit")
 
 
 def _boolean(args: dict, name: str, default: bool) -> bool:
@@ -184,6 +191,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
 
     def verify_deriv_material(*, app_id: str, token: str, login: str, currency: str,
                               demo: bool | None, require_trade: bool, endpoint: str = "") -> dict:
+        validate_deriv_endpoint(endpoint)
         from vati.execution.deriv_identity import DerivIdentity, DerivIdentityError
         from vati.execution.transports.deriv_ws import DerivWebSocketTransport
         transport = DerivWebSocketTransport(app_id=app_id, token_provider=lambda: token,
@@ -215,6 +223,23 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         from vati.accounts.resource_version import resource_snapshot
         return resource_snapshot(reg(), _alias(a))
 
+    def cmd_account_review(a: dict) -> dict:
+        from vati.core.canonical import canonical_hash
+        if a.get('action')!='account_upsert' or not isinstance(a.get('args'),dict):
+            raise HTTPException(422,'Unsupported native account review action')
+        values=a['args']; alias=_alias(values)
+        with reg().operation_lock(alias):
+            registry=reg(); current=registry.accounts.get(alias)
+            candidate=resolve_account_config(values,alias=alias,current=current,secret_path=_secrets_path(st,alias))
+            before=current.public() if current else None; after=candidate.public()
+            public_args={key:value for key,value in values.items() if not key.startswith('_')}
+            body={'schema':'vati.account-review/1','action':'account_upsert','alias':alias,
+                'request_digest':canonical_hash(public_args),
+                'resource_version':cmd_account_revision({'alias':alias})['resource_version'],
+                'before':before,'after':after,
+                'changed_fields':sorted(key for key,value in after.items() if before is None or before.get(key)!=value)}
+            return {**body,'review_digest':canonical_hash(body)}
+
     def open_operation_ledger():
         from vati.core.ledger_pg import open_ledger
         if not st.operation_ledger:
@@ -235,13 +260,19 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
             led.close()
 
     def cmd_account_upsert(a: dict) -> dict:
+        if '_expected_review_digest' in a:
+            review=cmd_account_review({'action':'account_upsert','args':a})
+            if review['review_digest']!=a['_expected_review_digest']:
+                raise HTTPException(409,'Resolved account settings changed since owner review; current connection retained')
         alias = _alias(a)
-        broker = str(a.get("broker", "")).upper()
-        if broker not in BROKER_SECRET_KEYS:
-            raise HTTPException(422, f"broker must be one of {sorted(BROKER_SECRET_KEYS)}")
-        pub = upsert_record(alias, broker, mode=str(a.get("mode", "DEMO_TRADER")), currency=str(a.get("currency", "USD")).upper(), label=str(a.get("label", "")), server=str(a.get("server", "")), login=str(a.get("login", "")),
-                            bridge_url=str(a.get("bridge_url", "")), demo=_boolean(a, "demo", True), mandate_ref=str(a.get("mandate_ref", "")))
-        return {"account": pub, "secrets_file": str(_secrets_path(st, alias)) if broker in ("DERIV", "CTRADER", "MT5_EA", "MT5") else None}
+        registry=reg(); current=registry.accounts.get(alias)
+        candidate=resolve_account_config(a,alias=alias,current=current,secret_path=_secrets_path(st,alias))
+        if current is None and candidate.credential_ref.secrets_file:
+            mark_account_effect()
+            _write_secrets(Path(candidate.credential_ref.secrets_file),{})
+        mark_account_effect()
+        account=registry.replace(candidate) if current else registry.add(candidate)
+        return {"account":account.public(),"secrets_file":candidate.credential_ref.secrets_file}
 
     def cmd_account_credentials(a: dict) -> dict:
         alias = _alias(a)
@@ -398,6 +429,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
 
     def cmd_ctrader_link(a: dict) -> dict:
         alias = _alias(a)
+        require_new_alias(alias)
         ctid = int(a["ctid_trader_account_id"])
         is_live = _boolean(a, "is_live", False)
         pub = upsert_record(alias, "CTRADER", currency=str(a.get("currency") or "USD").upper(), label=str(a.get("label") or f"cTrader {ctid}"), server="live" if is_live else "demo", login=str(ctid), demo=not is_live, mode="DEMO_TRADER" if not is_live else "OBSERVE")
@@ -412,7 +444,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         store_secrets(alias, "MT5_EA", {"BRIDGE_SIGNING_KEY": key})
         return {"account": pub, "signing_key": key, "ea_inputs": {"Alias": alias, "SigningKey": key, "BridgeUrl": os.environ.get("VAN_PUBLIC_HOST", "") and f"https://{os.environ['VAN_PUBLIC_HOST']}"}, "note": "shown once; paste into VanBridgeEA inputs"}
 
-    handlers = {"account_upsert": cmd_account_upsert, "account_credentials": cmd_account_credentials, "account_remove": cmd_account_remove, "account_verify": cmd_account_verify, "account_revision": cmd_account_revision, "account_operation": cmd_account_operation,
+    handlers = {"account_upsert": cmd_account_upsert, "account_credentials": cmd_account_credentials, "account_remove": cmd_account_remove, "account_verify": cmd_account_verify, "account_revision": cmd_account_revision, "account_review":cmd_account_review, "account_operation": cmd_account_operation,
             "deriv_verify_email": cmd_deriv_verify_email, "deriv_create_demo": cmd_deriv_create_demo, "deriv_oauth_link": cmd_deriv_oauth_link, "ctrader_discover": cmd_ctrader_discover,
             "ctrader_oauth_exchange": cmd_ctrader_oauth_exchange, "ctrader_link": cmd_ctrader_link, "mt5_ea_issue_key": cmd_mt5_ea_issue_key}
 

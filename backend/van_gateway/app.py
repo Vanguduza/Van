@@ -182,6 +182,7 @@ from van_gateway.storage.db import Store
 from van_gateway.trading import TradingAuthorityError, TradingControlError, TradingService
 from van_gateway.visual.acceptance import VisualAcceptanceError, VisualAcceptanceService
 from van_gateway.trading.accounts import ACTIONS as ACCOUNT_ACTIONS, AccountOnboarding, CommanderAccountControl, LocalAccountControl, OAuthPending, canonical_action, account_approval_text, redact as redact_account_args, requires_owner_approval
+from van_gateway.trading.account_contracts import AccountChallengeResponse,AccountActionCatalog
 from van_gateway.trading.strategies import StrategyPromotionGateway, canonical_strategy_promotion
 
 
@@ -3461,7 +3462,7 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=403, detail="device_identity_mismatch")
         if req.action not in ACCOUNT_ACTIONS:
             raise HTTPException(status_code=404, detail="unknown account action")
-        if {"_expected_resource_version", "_native_operation"}.intersection(req.args):
+        if {"_expected_resource_version", "_native_operation", "_expected_review_digest"}.intersection(req.args):
             raise HTTPException(status_code=422, detail="native resource binding is supplied by the gateway")
         try:
             await auth.require_device(req.device_id)
@@ -3483,7 +3484,44 @@ def create_app() -> FastAPI:
         if abs(int(_time.time()) - req.issued_at_unix) > 300:
             raise HTTPException(status_code=403, detail="stale owner action; sign again")
 
-    @app.post("/v1/trading/accounts/challenge")
+    @app.get('/v1/trading/accounts/catalog',response_model=AccountActionCatalog)
+    async def trading_account_catalog(request: Request):
+        device_id=getattr(request.state,'van_device_id',None)
+        if not device_id:
+            raise HTTPException(403,'paired owner device is required')
+        try:
+            await auth.require_device(device_id)
+        except AuthError as exc:
+            raise HTTPException(403,exc.message) from None
+        from commander.accounts import ACCOUNT_TOOL_SCHEMAS,BROKER_SECRET_KEYS
+        from commander.account_effects import JOURNALED_COMMANDS
+        import copy
+        schemas={key:{'type':'object',**copy.deepcopy(value)} for key,value in ACCOUNT_TOOL_SCHEMAS.items()}
+        schemas['oauth_start']={'type':'object','properties':{'broker':{'enum':['deriv','ctrader']},
+            'app_id':{'type':'string'},'client_id':{'type':'string'},'client_secret':{'type':'string','writeOnly':True}},'required':['broker']}
+        schemas['oauth_pending']={'type':'object','properties':{'state':{'type':'string'}},'required':['state']}
+        for name in ('deriv_oauth_link','ctrader_link'):
+            selection={'type':'object','properties':{'alias':{'type':'string'},'state':{'type':'string'},
+                'label':{'type':'string'},'currency':{'type':'string'},
+                **({'loginid':{'type':'string'}} if name=='deriv_oauth_link' else
+                   {'ctid_trader_account_id':{'type':'integer'},'is_live':{'type':'boolean'}})},
+                'required':['alias','state','loginid'] if name=='deriv_oauth_link' else ['alias','state','ctid_trader_account_id']}
+            schemas[name]={'oneOf':[schemas[name],selection]}
+        def mark_private_inputs(definition):
+            for key,value in definition.get('properties',{}).items():
+                if re.search(r'secret|token|password|code',key,re.I): value['writeOnly']=True
+                mark_private_inputs(value)
+            for option in definition.get('oneOf',[]): mark_private_inputs(option)
+        for definition in schemas.values(): mark_private_inputs(definition)
+        schemas['account_credentials']['properties']['secrets']['additionalProperties']={'type':'string','writeOnly':True}
+        return {'schema':'van.account-actions/1',
+            'actions':[{'action':action,'requires_owner_approval':requires_owner_approval(action),
+                'requires_resolved_review':action=='account_upsert',
+                'supports_original_operation_readback':action in JOURNALED_COMMANDS,
+                'input_schema':schemas[action]} for action in ACCOUNT_ACTIONS],
+            'credential_keys_by_broker':{key:sorted(value) for key,value in BROKER_SECRET_KEYS.items()}}
+
+    @app.post("/v1/trading/accounts/challenge",response_model=AccountChallengeResponse)
     async def trading_account_challenge(request: Request, req: AccountChallengeRequest):
         """P1-SEC-004 — the one-time challenge the device signs inside the biometric.
 
@@ -3497,7 +3535,7 @@ def create_app() -> FastAPI:
                 status_code=400,
                 detail="this action is read-only and needs no owner approval",
             )
-        native_version = await onboarding.resource_version(req.action, req.args, owner_device_id=req.device_id)
+        native_version,native_review = await onboarding.approval_context(req.action, req.args, owner_device_id=req.device_id)
         challenge = await app.state.orchestrator.approvals.issue(
             device_id=req.device_id,
             source_command_id=f"account:{req.action}",
@@ -3505,6 +3543,7 @@ def create_app() -> FastAPI:
             action_id=f"trading.account.{req.action}",
             text=account_approval_text(req.device_id, req.issued_at_unix, req.action, req.args, native_version),
             project_id=None,
+            parameters={'native_review':native_review} if native_review else None,
         )
         return {
             "approval_challenge_id": challenge.challenge_id,
@@ -3512,6 +3551,7 @@ def create_app() -> FastAPI:
             "issued_at_unix": req.issued_at_unix,
             "approval_expires_at_unix": challenge.expires_at_unix,
             "resolved_action_id": f"trading.account.{req.action}",
+            "resolved_review":native_review,
         }
 
     @app.get("/v1/trading/accounts/operations/{operation_id}", response_model=AccountOperationResponse,
@@ -3544,6 +3584,7 @@ def create_app() -> FastAPI:
         await _authenticate_account_action(request, req)
         native_version = None
         native_operation = None
+        native_review = None
         # P1-SEC-004. This used to be guarded on the device by a biometric prompt whose
         # only output was "the prompt succeeded", which the gateway never saw and which
         # nothing bound to this action. The strong path already existed for A4 commands;
@@ -3562,7 +3603,7 @@ def create_app() -> FastAPI:
                     detail="owner biometric approval proof is required for this action",
                 )
             try:
-                native_version = await onboarding.resource_version(req.action, req.args, owner_device_id=req.device_id)
+                native_version,native_review = await onboarding.approval_context(req.action, req.args, owner_device_id=req.device_id)
             except HTTPException as exc:
                 if exc.status_code != 409:
                     raise
@@ -3583,6 +3624,7 @@ def create_app() -> FastAPI:
                         req.device_id, req.issued_at_unix, req.action, req.args, native_version
                     ),
                     project_id=None,
+                    parameters={'native_review':native_review} if native_review else None,
                 )
             except OwnerApprovalError as exc:
                 await audit.record(
@@ -3594,7 +3636,7 @@ def create_app() -> FastAPI:
                 )
                 raise HTTPException(status_code=403, detail=str(exc)) from exc
         try:
-            result = await onboarding.run(req.action, req.args, owner_device_id=req.device_id, native_resource_version=native_version, native_operation=native_operation)
+            result = await onboarding.run(req.action, req.args, owner_device_id=req.device_id, native_resource_version=native_version, native_operation=native_operation, native_review=native_review)
         except HTTPException as exc:
             unknown = isinstance(exc,OAuthEffectUnconfirmed) or getattr(exc, "effect_state", None) == "UNKNOWN"
             reconcile = unknown or isinstance(exc,OAuthTargetBlocked) or getattr(exc, "reconciliation_required", False)

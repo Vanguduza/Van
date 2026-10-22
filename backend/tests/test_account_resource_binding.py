@@ -129,6 +129,7 @@ async def test_failed_native_readback_returns_refused_without_dispatching_a_chan
     def unreadable(*args):raise RuntimeError('fixture-private-diagnostic')
     def no_effect(*args):raise AssertionError('mutation dispatched without native account version')
     monkeypatch.setattr(app.state.onboarding.control,'resource_version',unreadable)
+    monkeypatch.setattr(app.state.onboarding.control,'review',unreadable)
     monkeypatch.setattr(app.state.onboarding.control,'run',no_effect)
     response=await ac.post('/v1/trading/accounts/action',json=body)
     assert response.status_code==409,response.text

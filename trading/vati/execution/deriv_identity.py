@@ -1,10 +1,26 @@
 """Native authorize-response binding; registry labels never prove broker identity."""
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
+from urllib.parse import urlsplit
 
 
 class DerivIdentityError(ValueError):
     pass
+
+
+def validate_deriv_endpoint(endpoint):
+    """Production credentials go only to the official secure provider bases."""
+    if not endpoint:
+        return
+    try:
+        uri=urlsplit(endpoint)
+        accepted=(uri.scheme=='wss' and uri.hostname in {'ws.derivws.com','ws.binaryws.com'}
+            and uri.port in (None,443) and uri.path=='/websockets/v3'
+            and uri.username is None and uri.password is None and not uri.query and not uri.fragment)
+    except (TypeError,ValueError):
+        accepted=False
+    if not accepted:
+        raise DerivIdentityError('Deriv credentials require an official secure provider endpoint')
 
 
 @dataclass(frozen=True)

@@ -243,7 +243,10 @@
       "Hosteda2f11642/39826544689 and4fb7be1e/39829998652:374legacy faults each,18nativepass4core skips and bothVITS methods; source/merge trees verified identical.17f4bada/39835601715:374legacy faults/publicPG26/voice117/trading1930pass1privateDDSskip;native job FAIL/INCOMPLETE after Android12system_server display crash,12reported tests/1failure/1skip;missing methods not passes. Original DDS-key/trusted-main prerequisites retained.",
       "Single-symbol native authority:4valid constructor/control counterexamples fixed;1968fulltrading zero skips on privatePG/DDS,61focused+3platform/PGopt-ins covered separately/full,78rebuild pass;7actualfaults caught after validPG controls and source restored. Both SQLite and PG native processes arbitrate; genuine strategy reaches final guard under late takeover/halt/stop. Physical identity/safe retirement/startup restoration remain.",
       "Hosted396e0367/39841068638 completes374legacy faults/383edits;18nativepass4core skips andbothactualVITS cases2.784s/2.216s. PublicPG26/voice117/trading1955pass1privateDDSskip. Tree-identical testedmerge and actualDDSkey/trusted-main failures retained. Prior17f system crash failure retained.",
-      "Frozen886f fullbackend/contracts completed6619pass166skip0fail1747.97s,zero forbidden storage events,clean tree,exit0; receiptSOURCE_QUALIFICATION_886f2aea.json. New frozen396 audit stillrunning."
+      "Frozen886f fullbackend/contracts completed6619pass166skip0fail1747.97s,zero forbidden storage events,clean tree,exit0; receiptSOURCE_QUALIFICATION_886f2aea.json. New frozen396 audit stillrunning.",
+      "Account edit/review candidate:1990fulltrading zero skip privatePG/DDS;51restored focused/203appJVM and APKs/lint0errors/192owner-plan/78rebuild pass. Eight faults caught with passing control and restored source.439endpoints/262schemas preserve all original identities. No native migration, retirement or whole-unit acceptance.",
+      "Hosted45ec/39846328680 actual374legacy faults/383edits;18nativepass4explicitcore skips,real VITS2.384s/2.186s;publicPG26voice117trading1967pass1privateDDSskip. Tree-identical source/merge; actual privateDDS-key/trusted-main bootstrap failures retained.",
+      "Frozen396 fullbackend/contracts completed6628pass166skipzero failure1625.69s;zero forbidden storage events and clean tree. SOURCE_QUALIFICATION_396e0367.json; no skip promoted to pass."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -254,9 +257,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Continue autonomous original candidate programme: correct owner account update defaults and enable/disable controls with resolved native review; prevent unsafe native identity migration. Complete physical broker identity/shared scope and exposure/order/funds/lease/retention-safe retirement plus provider effect/adjudication contracts. Complete single-symbol position-state restoration and paper contract valuation. Collect frozen396 and new CI. No new frontend beforeBG-001; retain all131units and original independent/provider/signing/S24 gates.",
-    "previous_head": "396e036794c8ce96e5487099fa662da9d24a7db4",
-    "current_packet": "Single-symbol native account runtime lease and late stop/halt entry fencing; candidate source only"
+    "next_action": "Continue original candidate programme: contract-specific paper valuation and single-symbol restart/ledger position recovery; complete native physical-account identity/migration and exposure/order/funds/lease/retention-safe retirement, provider-operation finality/adjudication and remaining whole-product contracts. Freeze the committed gateway/account source for the next audited backend/contracts run. No new frontend before BG-001; retain all131 units and native/independent/provider/signing/S24 gates.",
+    "previous_head": "45ec06098542b8a3c1be58991141f049d806730d",
+    "current_packet": "Account edit preservation, native resolved A4 owner review and existing Android approval repair; candidate source only"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -314,6 +317,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Continue original BE-003/004/005 durable generic native account operation/result recovery, including unknown secret/key/demo-creation effects and exact owner/device/resource binding. Then unify native single-symbol runtime shared leases, physical account/alias identity, and exposure/funds/lease-safe unlink before claiming account lifecycle complete. Preserve original whole-product programme; no new frontend before BG-001.",
-  "updated_at_utc": "2026-10-22T20:06:52.602028+00:00"
+  "current_action": "Continue original candidate programme: contract-specific paper valuation and single-symbol restart/ledger position recovery; complete native physical-account identity/migration and exposure/order/funds/lease/retention-safe retirement, provider-operation finality/adjudication and remaining whole-product contracts. Freeze the committed gateway/account source for the next audited backend/contracts run. No new frontend before BG-001; retain all131 units and native/independent/provider/signing/S24 gates.",
+  "updated_at_utc": "2026-10-22T20:55:56.740472+00:00"
 }

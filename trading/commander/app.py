@@ -56,7 +56,7 @@ AGENT_HIDDEN_COMMANDS = GATEWAY_ONLY_COMMANDS
 # independently authorized, atomic reduce-only path. Unknown/new commands use
 # the serialized executor by default.
 PARALLEL_COMMANDS = frozenset({"status", "ledger_status", "services", "tail_log",
-    "doctor", "accounts", "positions", "assessment", "account_revision",
+    "doctor", "accounts", "positions", "assessment", "account_revision", "account_review",
     "account_verify", "account_operation", "ctrader_discover", "halt"})
 MAX_NATIVE_PENDING_COMMANDS = 16
 Runner = Callable[[list[str], int], tuple[int, str, str]]

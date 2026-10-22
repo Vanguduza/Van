@@ -1,6 +1,39 @@
 {
   "components": {
     "schemas": {
+      "AccountActionCatalog": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "van.account-actions/1",
+            "title": "Schema"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/AccountActionDefinition"
+            },
+            "type": "array",
+            "title": "Actions"
+          },
+          "credential_keys_by_broker": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Credential Keys By Broker"
+          }
+        },
+        "type": "object",
+        "required": [
+          "schema",
+          "actions",
+          "credential_keys_by_broker"
+        ],
+        "title": "AccountActionCatalog"
+      },
       "AccountActionConflictResponse": {
         "properties": {
           "detail": {
@@ -38,6 +71,40 @@
           "reconciliation_required"
         ],
         "title": "AccountActionConflictResponse"
+      },
+      "AccountActionDefinition": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "requires_owner_approval": {
+            "type": "boolean",
+            "title": "Requires Owner Approval"
+          },
+          "requires_resolved_review": {
+            "type": "boolean",
+            "title": "Requires Resolved Review"
+          },
+          "supports_original_operation_readback": {
+            "type": "boolean",
+            "title": "Supports Original Operation Readback"
+          },
+          "input_schema": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Input Schema"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action",
+          "requires_owner_approval",
+          "requires_resolved_review",
+          "supports_original_operation_readback",
+          "input_schema"
+        ],
+        "title": "AccountActionDefinition"
       },
       "AccountActionRequest": {
         "properties": {
@@ -115,6 +182,49 @@
         ],
         "title": "AccountChallengeRequest"
       },
+      "AccountChallengeResponse": {
+        "properties": {
+          "approval_challenge_id": {
+            "type": "string",
+            "title": "Approval Challenge Id"
+          },
+          "approval_challenge": {
+            "type": "string",
+            "title": "Approval Challenge"
+          },
+          "issued_at_unix": {
+            "type": "integer",
+            "title": "Issued At Unix"
+          },
+          "approval_expires_at_unix": {
+            "type": "integer",
+            "title": "Approval Expires At Unix"
+          },
+          "resolved_action_id": {
+            "type": "string",
+            "title": "Resolved Action Id"
+          },
+          "resolved_review": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AccountResolvedReview"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "approval_challenge_id",
+          "approval_challenge",
+          "issued_at_unix",
+          "approval_expires_at_unix",
+          "resolved_action_id"
+        ],
+        "title": "AccountChallengeResponse"
+      },
       "AccountOperationResponse": {
         "properties": {
           "operation_id": {
@@ -175,6 +285,73 @@
           "native_event_ref"
         ],
         "title": "AccountOperationResponse"
+      },
+      "AccountResolvedReview": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "vati.account-review/1",
+            "title": "Schema"
+          },
+          "action": {
+            "type": "string",
+            "const": "account_upsert",
+            "title": "Action"
+          },
+          "alias": {
+            "type": "string",
+            "title": "Alias"
+          },
+          "request_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Request Digest"
+          },
+          "resource_version": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Resource Version"
+          },
+          "review_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Review Digest"
+          },
+          "before": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PublicAccountRecord"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "after": {
+            "$ref": "#/components/schemas/PublicAccountRecord"
+          },
+          "changed_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Changed Fields"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "action",
+          "alias",
+          "request_digest",
+          "resource_version",
+          "review_digest",
+          "before",
+          "after",
+          "changed_fields"
+        ],
+        "title": "AccountResolvedReview"
       },
       "AcquisitionCheckpointBody": {
         "properties": {
@@ -2973,6 +3150,25 @@
           "C4_LOW_RISK_INTEGRATION"
         ],
         "title": "CredentialClass"
+      },
+      "CredentialReferenceSummary": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "none",
+              "file",
+              "env"
+            ],
+            "title": "Kind"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "title": "CredentialReferenceSummary"
       },
       "CredentialResolveBody": {
         "properties": {
@@ -7691,6 +7887,89 @@
           "bootstrap_token"
         ],
         "title": "ProvisioningStatusBody"
+      },
+      "PublicAccountRecord": {
+        "properties": {
+          "alias": {
+            "type": "string",
+            "title": "Alias"
+          },
+          "broker": {
+            "type": "string",
+            "title": "Broker"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "server": {
+            "type": "string",
+            "title": "Server"
+          },
+          "login": {
+            "type": "string",
+            "title": "Login"
+          },
+          "venue": {
+            "type": "string",
+            "title": "Venue"
+          },
+          "bridge_url": {
+            "type": "string",
+            "title": "Bridge Url"
+          },
+          "credential_ref": {
+            "$ref": "#/components/schemas/CredentialReferenceSummary"
+          },
+          "demo": {
+            "type": "boolean",
+            "title": "Demo"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "mandate_ref": {
+            "type": "string",
+            "title": "Mandate Ref"
+          },
+          "notes": {
+            "type": "string",
+            "title": "Notes"
+          },
+          "safety_identity": {
+            "type": "string",
+            "title": "Safety Identity"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "alias",
+          "broker",
+          "mode",
+          "currency",
+          "label",
+          "server",
+          "login",
+          "venue",
+          "bridge_url",
+          "credential_ref",
+          "demo",
+          "enabled",
+          "mandate_ref",
+          "notes",
+          "safety_identity"
+        ],
+        "title": "PublicAccountRecord"
       },
       "PublishHotBody": {
         "properties": {

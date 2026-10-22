@@ -7,6 +7,8 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,6 +20,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -75,6 +79,7 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
     var status by remember { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
     var recovery by remember { mutableStateOf(runCatching { app.gatewayClient.pendingAccountOperations() }) }
+    var ownerReview by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
 
     fun submit(action: String, args: JsonObject, then: (AccountOnboarding.ActionOutcome) -> Unit = {}) {
         val alias = args["alias"]?.jsonPrimitive?.contentOrNull?.trim()?.lowercase()
@@ -105,10 +110,16 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
                 ?.let { runCatching { Json.parseToJsonElement(it.second).jsonObject }.getOrNull() }
             val canonical = parsed?.get("approval_challenge")?.jsonPrimitive?.contentOrNull
             val challengeId = parsed?.get("approval_challenge_id")?.jsonPrimitive?.contentOrNull
+            val expiresAt = parsed?.get("approval_expires_at_unix")?.jsonPrimitive?.longOrNull
             approvedIssuedAt = parsed?.get("issued_at_unix")?.jsonPrimitive?.longOrNull
-            if (canonical.isNullOrBlank() || challengeId.isNullOrBlank() || approvedIssuedAt == null) {
+            if (canonical.isNullOrBlank() || challengeId.isNullOrBlank() || approvedIssuedAt == null || expiresAt == null) {
                 busy = false
                 status = "Could not obtain an approval challenge; nothing was sent."
+                return@launch
+            }
+            val resolved = (parsed["resolved_review"] as? JsonObject)?.let(AccountOnboarding::resolvedReviewText)
+            if (action == "account_upsert" && resolved == null) {
+                busy = false; status = "Native account review is unavailable; nothing was sent."
                 return@launch
             }
             val signature = runCatching { app.gatewayClient.newA4ApprovalSignature() }.getOrNull()
@@ -118,13 +129,20 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
                 return@launch
             }
             busy = false
-            gate.requestA4CommandApproval(
+            val requestApproval: () -> Unit = approval@{
+                if (System.currentTimeMillis() / 1000L >= expiresAt) {
+                    status = "Approval expired. Review and approve again; nothing was sent."
+                    return@approval
+                }
+                gate.requestA4CommandApproval(
                 signature = signature,
                 challenge = canonical,
                 title = "Approve trading account change",
                 subtitle = AccountOnboarding.approvalSubtitle(action),
                 onApproved = { signatureBase64 ->
-                    send(
+                    if (System.currentTimeMillis() / 1000L >= expiresAt) {
+                        status = "Approval expired. Review and approve again; nothing was sent."
+                    } else send(
                         buildJsonObject {
                             put("challenge_id", challengeId)
                             put("signature_b64", signatureBase64)
@@ -134,6 +152,8 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
                 },
                 onDenied = { reason -> status = "Owner approval was not granted: $reason" },
             )
+            }
+            if (resolved != null) ownerReview = resolved to requestApproval else requestApproval()
         }
     }
 
@@ -193,6 +213,15 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
                     "account links as READ ONLY until an owner-signed mandate changes its mode.",
             )
         }
+    }
+    ownerReview?.let { (text, proceed) ->
+        AlertDialog(
+            onDismissRequest = { ownerReview = null; status = "Account review cancelled; nothing was sent." },
+            title = { Text("Review account settings") },
+            text = { Column(Modifier.verticalScroll(rememberScrollState())) { Text(text) } },
+            confirmButton = { TextButton(onClick = { ownerReview = null; proceed() }) { Text("Continue to owner approval") } },
+            dismissButton = { TextButton(onClick = { ownerReview = null; status = "Account review cancelled; nothing was sent." }) { Text("Cancel") } },
+        )
     }
 }
 

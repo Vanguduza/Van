@@ -770,6 +770,7 @@ class VanGatewayClient(context: Context) {
     suspend fun tradingPortfolio(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/portfolio") }
 
     suspend fun tradingAccounts(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/accounts") }
+    suspend fun tradingAccountCatalog(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/accounts/catalog") }
 
     suspend fun tradingMarketState(symbol: String? = null): String = withContext(Dispatchers.IO) {
         rawGet("/v1/trading/market-state" + (symbol?.let { "?symbol=${encodeQuery(it)}" } ?: ""))

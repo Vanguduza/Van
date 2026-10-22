@@ -75,6 +75,13 @@ def post(client, name, args=None, token=TOKEN, headers=None):
                     "device_id": "source-test-owner", "authority_ref": "source-test-consumed-approval",
                     "request_digest": canonical_hash({k:v for k,v in args.items() if not k.startswith('_')}),
                     "expires_at_unix": int(time.time()) + 60}
+            if name == 'account_upsert':
+                review = post(client,'account_review',{'action':name,'args':{k:v for k,v in args.items() if not k.startswith('_')}},token=token)
+                if review.status_code != 200:
+                    return review
+                digest=review.json()['result']['review_digest']
+                args['_expected_review_digest']=digest
+                args['_native_operation']['authority_ref']+='::review:'+digest
     body = json.dumps({"args": args}).encode()
     h = headers or sign_headers(token, "POST", f"/v1/cmd/{name}", body)
     return client.post(f"/v1/cmd/{name}", content=body, headers={**h, "content-type": "application/json"})
@@ -208,6 +215,12 @@ def _call(client, name, token, args=None, requested_by=None):
             args["_native_operation"] = {"operation_id":secrets.token_urlsafe(24),"device_id":"source-test-owner",
                 "authority_ref":"source-test-consumed-approval","expires_at_unix":int(time.time())+60,
                 "request_digest":canonical_hash({k:v for k,v in args.items() if not k.startswith('_')})}
+        if name == 'account_upsert':
+            review=_call(client,'account_review',token,{'action':name,'args':{k:v for k,v in args.items() if not k.startswith('_')}})
+            assert review.status_code==200,review.text
+            digest=review.json()['result']['review_digest']
+            args['_expected_review_digest']=digest
+            args['_native_operation']['authority_ref']+='::review:'+digest
     payload = {"args": args}
     if requested_by is not None:
         payload["requested_by"] = requested_by

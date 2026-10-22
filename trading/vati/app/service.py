@@ -122,6 +122,8 @@ def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: D
         transport = Mt5HttpTransport(account.bridge_url, ca_file=secrets["BRIDGE_CA_FILE"], client_cert=secrets.get("BRIDGE_CLIENT_CERT"), client_key=secrets.get("BRIDGE_CLIENT_KEY"))
         return bound(Mt5BridgeAdapter(Mt5BridgeClient(signing_key=key.encode(), transport=transport), account_alias=account.alias, venue=account.router_venue))
     if account.broker == BrokerKind.DERIV:
+        from vati.execution.deriv_identity import validate_deriv_endpoint
+        validate_deriv_endpoint(account.bridge_url)
         from vati.execution.deriv import DerivAdapter
         from vati.execution.deriv_identity import DerivIdentity
         from vati.accounts.access import SENDING_MODES, entry_fence
