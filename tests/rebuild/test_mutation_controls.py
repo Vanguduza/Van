@@ -58,3 +58,31 @@ def test_registry_preflight_is_read_only_and_rejects_invalid_cases(tmp_path, def
     assert bool(report["findings"]) == (defect is not None)
     assert report["execution_state"] == "NOT_RUN"
     if victim.exists(): assert victim.read_text() == "guarded"
+
+
+def test_a_mutant_collection_error_is_not_counted_as_a_detected_invariant(tmp_path, monkeypatch):
+    harness = load("mutation_collection_test", ROOT / "tools/audit/mutation.py")
+    monkeypatch.setattr(harness, "JOURNAL", tmp_path / "journal.json")
+    victim = tmp_path / "guard.py"
+    victim.write_text("GUARDED = True\n")
+    (tmp_path / "test_guard.py").write_text("from guard import GUARDED\ndef test_guard():\n    assert GUARDED\n")
+    with pytest.raises(RuntimeError, match="MUTATION_EXECUTION_INVALID"):
+        harness.run([("guard.py", "True", "(", "unimportable mutant")], ["test_guard.py"], root=tmp_path, cwd=tmp_path)
+    assert victim.read_text() == "GUARDED = True\n"
+    assert not harness.JOURNAL.exists()
+
+
+def test_a_gradle_compile_failure_is_not_counted_as_a_detected_invariant(tmp_path, monkeypatch):
+    import subprocess
+
+    harness = load("mutation_gradle_test", ROOT / "tools/audit/mutation.py")
+    monkeypatch.setattr(harness, "JOURNAL", tmp_path / "journal.json")
+    victim = tmp_path / "Guard.kt"
+    victim.write_text("guarded")
+    replies = iter([subprocess.CompletedProcess([], 0, "1 tests completed", ""),
+                    subprocess.CompletedProcess([], 1, "> Task :compileKotlin FAILED", "Unresolved reference")])
+    monkeypatch.setattr(harness.subprocess, "run", lambda *a, **k: next(replies))
+    with pytest.raises(RuntimeError, match="MUTATION_EXECUTION_INVALID"):
+        harness.run([("Guard.kt", "guarded", "unsafe", "invalid Kotlin")], [], root=tmp_path, command=["gradle", "test"])
+    assert victim.read_text() == "guarded"
+    assert not harness.JOURNAL.exists()

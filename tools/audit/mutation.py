@@ -140,6 +140,17 @@ def run(mutations, tests, root=".", cwd=None, command=None, observe=None):
             _purge_bytecode(root)
         if observe is not None:
             observe("mutation", why, result)
+        if command is None and result.returncode not in (0, 1):
+            raise RuntimeError(
+                f"MUTATION_EXECUTION_INVALID (pytest exit {result.returncode}): {why}\n"
+                + result.stdout + result.stderr
+            )
+        if command and pathlib.Path(command[0]).name in {"gradle", "gradlew"} and result.returncode:
+            import re
+            output = result.stdout + result.stderr
+            if (re.search(r"(?:compile\w*Kotlin FAILED|Compilation error|Unresolved reference)", output)
+                or not re.search(r"\d+ tests? completed, \d+ failed", output)):
+                raise RuntimeError(f"MUTATION_EXECUTION_INVALID (Gradle): {why}\n" + output)
         caught = result.returncode != 0
         verdicts.append((caught, why))
         print(f"{'CAUGHT' if caught else '*** SURVIVED ***':18} {why}")

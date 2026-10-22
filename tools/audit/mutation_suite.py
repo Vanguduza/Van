@@ -1221,7 +1221,7 @@ KOTLIN = [
   "C40 the saved cursor goes backwards and the owner reads a morning twice"),
  ('android/app/src/main/java/com/dial/van/events/VanEventStreamStore.kt',
  '        val next = EventStream.applyPage(before, page)',
- '        val next = before.copy(events = page.events, cursor = page.nextCursor, loaded = true)',
+ '        val next = before.copy(events = page.events, cursor = page.nextCursor, pagesApplied = before.pagesApplied + 1)',
  'C40 a socket page replaces the history instead of merging with it'),
  # --- checkpoint 39: the durable write, and where it runs ---------------------------
  # --- checkpoint 38: the stored command has to be one the Gateway can accept ---------
