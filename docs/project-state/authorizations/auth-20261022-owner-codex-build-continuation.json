@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20261022-owner-codex-build-continuation",
+  "project": "van",
+  "authority": "OWNER_EXPLICIT",
+  "owner_instruction_sha256": "90d7fde72bcbd5524bfa567a69533bbbb99b8aea62cd5c30a9a3c4dc42e8083b",
+  "owner_instruction_excerpt": "opus is nolonger available finish building from the current state to completion",
+  "derivation": "Owner directs Codex to take over the existing rebuild and complete it. This reusable receipt covers necessary implementation, confirmed maintenance corrections, regression tests, CI prerequisites and durable build evidence. Dependency, review, financial activation and native release gates remain separately enforced.",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "codex",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "issued_at_utc": "2026-10-22T01:46:16.493260+00:00",
+  "branch_scope": "ccr-9e07e1af-8mgz1p and owner build continuation branches",
+  "authorized_paths": [
+    "android/**",
+    "backend/**",
+    "trading/**",
+    "services/**",
+    "hermes/**",
+    "tools/rebuild/**",
+    "tests/**",
+    "docs/rebuild/**",
+    ".github/workflows/**",
+    "tools/template_scaffold/**",
+    "README.md",
+    "CLAUDE.md"
+  ],
+  "reusable": true,
+  "revoked": false,
+  "limitations": [
+    "Applies only to the owner-requested VAN build and confirmed prerequisite fixes; no weakening of checks, hooks, financial protection or release gates.",
+    "Does not authorize independent certification, scope-lock signature, amendment admission, native host administration, financial effects, purchases or production release.",
+    "Original blueprint delivery, existing authorization records and ledger rows remain immutable. Application rebuild work follows the canonical dependency gates; confirmed baseline maintenance is recorded separately."
+  ]
+}
