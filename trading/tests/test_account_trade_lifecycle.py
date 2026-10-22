@@ -194,7 +194,7 @@ def test_regular_broker_restart_repairs_missing_tca_exactly_once(mandate, eurusd
     assert decision.decision.value in ("APPROVED", "REDUCED")
 
     ledger = Ledger()
-    adapter = PaperAdapter()
+    adapter = PaperAdapter(account_alias=trade_intent.account_alias)
     router = ExecutionRouter(
         ledger=ledger,
         adapters={"paper": adapter},
@@ -277,7 +277,7 @@ def test_corrupt_durable_fill_receipt_is_not_promoted_into_recovered_tca(mandate
         trade_intent, snapshot(contract))
 
     ledger = Ledger()
-    adapter = PaperAdapter()
+    adapter = PaperAdapter(account_alias=trade_intent.account_alias)
     router = ExecutionRouter(
         ledger=ledger,
         adapters={"paper": adapter},

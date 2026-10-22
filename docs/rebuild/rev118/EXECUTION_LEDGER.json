@@ -247,7 +247,8 @@
       "Account edit/review candidate:1990fulltrading zero skip privatePG/DDS;51restored focused/203appJVM and APKs/lint0errors/192owner-plan/78rebuild pass. Eight faults caught with passing control and restored source.439endpoints/262schemas preserve all original identities. No native migration, retirement or whole-unit acceptance.",
       "Hosted45ec/39846328680 actual374legacy faults/383edits;18nativepass4explicitcore skips,real VITS2.384s/2.186s;publicPG26voice117trading1967pass1privateDDSskip. Tree-identical source/merge; actual privateDDS-key/trusted-main bootstrap failures retained.",
       "Frozen396 fullbackend/contracts completed6628pass166skipzero failure1625.69s;zero forbidden storage events and clean tree. SOURCE_QUALIFICATION_396e0367.json; no skip promoted to pass.",
-      "Paper contract valuation:4valid counterexamples fixed;2001fulltrading zero skips realprivatePG/DDS,7source faults caught after11actualPG controls and restored,78rebuild pass. Both fixtures stopped/removed. Actual single/book/backtest consumers use configured contract account-currency units; no provider/payoff/profit acceptance."
+      "Paper contract valuation:4valid counterexamples fixed;2001fulltrading zero skips realprivatePG/DDS,7source faults caught after11actualPG controls and restored,78rebuild pass. Both fixtures stopped/removed. Actual single/book/backtest consumers use configured contract account-currency units; no provider/payoff/profit acceptance.",
+      "Native position recovery scope:9valid counterexamples fixed;2017fulltrading zero skip realprivatePG/DDS before final chain-test-only tightening;28restored focus/78rebuild pass. Ten actual faults caught after16controls, source restored/journal absent;privatefixturestopped/removed. Actual account/command uniqueness/current stop replace matching-label adoption; single-symbol startup stillnext."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -258,9 +259,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Continue original source programme: strict native account/intent provenance and single-symbol startup position reconciliation/protection; preserve unknown effects and do not infer a flat account from restarted memory. Complete physical account identity/migration, exposure/orders/funds/lease/retention-safe retirement, provider operation finality/adjudication and all remaining original product contracts. Frozen9ea broad backend audit and hosted39853172032 remain running; collect before replacing. No new frontend beforeBG-001 and no owner/native gate self-certification.",
-    "previous_head": "9ea88ce2e0385ef014b7229f5f6fe1cdc9526685",
-    "current_packet": "Contract-specific paper valuation in actual production and backtest factories; candidate source only"
+    "next_action": "Wire single-symbol startup to the shared native position history with durable pre-dispatch entry context, truthful flat/pending/unknown states, actual restored protection and exact source-owned feedback. Do not infer an empty account from restarted memory or replay orders. Complete physical-account identity/migration, exposure/orders/funds/lease/retention-safe retirement, provider finality/adjudication and remaining original product contracts. Collect frozen9ea audit and hosted39853172032 before replacing the needed run. No new frontend beforeBG-001; no native/owner gate self-certification.",
+    "previous_head": "d5bddfccddc6b6db60c97daf8b2e1c7cfb76a22e",
+    "current_packet": "Native account/command-scoped position recovery and actual stop readback; candidate source only"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -318,6 +319,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Continue original source programme: strict native account/intent provenance and single-symbol startup position reconciliation/protection; preserve unknown effects and do not infer a flat account from restarted memory. Complete physical account identity/migration, exposure/orders/funds/lease/retention-safe retirement, provider operation finality/adjudication and all remaining original product contracts. Frozen9ea broad backend audit and hosted39853172032 remain running; collect before replacing. No new frontend beforeBG-001 and no owner/native gate self-certification.",
-  "updated_at_utc": "2026-10-22T21:04:00.151384+00:00"
+  "current_action": "Wire single-symbol startup to the shared native position history with durable pre-dispatch entry context, truthful flat/pending/unknown states, actual restored protection and exact source-owned feedback. Do not infer an empty account from restarted memory or replay orders. Complete physical-account identity/migration, exposure/orders/funds/lease/retention-safe retirement, provider finality/adjudication and remaining original product contracts. Collect frozen9ea audit and hosted39853172032 before replacing the needed run. No new frontend beforeBG-001; no native/owner gate self-certification.",
+  "updated_at_utc": "2026-10-22T21:13:30.431204+00:00"
 }

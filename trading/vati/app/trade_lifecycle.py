@@ -196,15 +196,18 @@ class AccountTradeLifecycle:
         the exact ORDER_COMMAND that created it; otherwise the position remains
         unresolved and reconciliation blocks new risk.
         """
-        commands: dict[str, tuple[dict, int]] = {}
-        for event in self.ledger.iter(EventKind.ORDER_COMMAND):
-            iid = str(event.payload.get("trade_intent_id", ""))
-            if iid:
-                commands[iid] = (dict(event.payload), event.event_time_ms)
+        from vati.execution.recovery_scope import NativePositionHistory,PositionRecoveryError
+        alias=getattr(self.mandate,'account_alias',None) or getattr(self.adapter,'account_alias',None)
+        if alias!=getattr(self.adapter,'account_alias',None):
+            return (),('native-position-account-binding-conflict',)
+        try:
+            history=NativePositionHistory(self.ledger,account_alias=alias,venue=self.adapter.venue)
+        except (PositionRecoveryError,OSError):
+            return (),('native-position-history-unavailable',)
 
         latest_stops: dict[str, Decimal] = {}
         entry_receipts: dict[str, dict] = {}
-        for event in self.ledger.iter(EventKind.EXECUTION_RECEIPT):
+        for event in history.events(EventKind.EXECUTION_RECEIPT):
             iid = str(event.payload.get("trade_intent_id", ""))
             raw_stop = event.payload.get("protective_stop_price")
             if iid and raw_stop is not None:
@@ -225,13 +228,17 @@ class AccountTradeLifecycle:
                 entry_receipts.setdefault(iid, dict(event.payload))
 
         tca_cost_ratios: dict[str, Decimal] = {}
-        for event in self.ledger.iter(EventKind.TCA_RECORD):
+        for event in history.events(EventKind.TCA_RECORD):
             if event.correlation_id and event.payload.get("cost_ratio") is not None:
-                tca_cost_ratios[event.correlation_id] = Decimal(
-                    str(event.payload["cost_ratio"]))
+                try:
+                    ratio=Decimal(str(event.payload['cost_ratio']))
+                    if ratio.is_finite():
+                        tca_cost_ratios[event.correlation_id]=ratio
+                except (ValueError,ArithmeticError):
+                    pass
 
         tickets: dict[str, dict] = {}
-        for event in self.ledger.iter(EventKind.OWNER_TICKET):
+        for event in history.events(EventKind.OWNER_TICKET):
             ticket_id = str(event.payload.get("ticket") or "")
             if not ticket_id:
                 continue
@@ -245,7 +252,7 @@ class AccountTradeLifecycle:
             }
         applied_owner_tickets = {
             str(event.payload.get("broker_order_id") or "")
-            for event in self.ledger.iter(EventKind.EXECUTION_RECEIPT)
+            for event in history.events(EventKind.EXECUTION_RECEIPT)
             if event.payload.get("execution_channel") == "OWNER_TICKET"
             and event.payload.get("status") in ("OWNER_EXECUTED", "BROKER_CONFIRMED")
             and event.payload.get("broker_order_id")
@@ -261,7 +268,7 @@ class AccountTradeLifecycle:
         unresolved: list[str] = []
         for position in self.adapter.positions():
             iid = str(position.trade_intent_id or "")
-            joined = commands.get(iid)
+            joined = history.position_command(position)
             if not iid or joined is None:
                 unresolved.append(position.position_id)
                 continue
@@ -278,11 +285,10 @@ class AccountTradeLifecycle:
                 if raw_initial_stop is not None else None
             )
             software_stop = str(payload.get("stop_mode", "")) == "SOFTWARE"
-            current_stop = (
-                position.stop_price
-                or latest_stops.get(iid)
-                or initial_stop
-            )
+            # A remembered stop is not proof that the venue still holds it.
+            # Software protection is reconstructed from its durable contract;
+            # venue protection requires actual current venue readback.
+            current_stop = ((latest_stops.get(iid) or initial_stop) if software_stop else position.stop_price)
             targets = tuple(
                 Decimal(str(v)) for v in (payload.get("targets") or ())
             )
