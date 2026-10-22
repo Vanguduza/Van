@@ -87,6 +87,9 @@ class LocalAccountControl:
     def resource_version(self, alias: str) -> dict:
         return self.handlers["account_revision"]({"alias": alias})
 
+    def operation(self, operation_id: str, device_id: str) -> dict:
+        return self.run("account_operation", {"operation_id": operation_id, "device_id": device_id})
+
 
 class CommanderAccountControl:
     """Signed HTTPS to the trading VM's commander."""
@@ -102,6 +105,9 @@ class CommanderAccountControl:
     def resource_version(self, alias: str) -> dict:
         return self.run("account_revision", {"alias": alias})
 
+    def operation(self, operation_id: str, device_id: str) -> dict:
+        return self.run("account_operation", {"operation_id": operation_id, "device_id": device_id})
+
     def run(self, cmd: str, args: dict) -> dict:
         _trading_path()
         from commander.auth import sign_headers
@@ -111,14 +117,26 @@ class CommanderAccountControl:
         ctx = ssl.create_default_context(cafile=self.ca_file) if self.ca_file else ssl.create_default_context()
         try:
             with urlopen(Request(self.url + path, data=body, method="POST", headers=headers), timeout=self.timeout_s, context=ctx) as r:  # noqa: S310
-                return json.loads(r.read())["result"]
+                response = json.loads(r.read())
+                if response.get("command") != cmd or not isinstance(response.get("result"), dict):
+                    raise ValueError("native command response binding is invalid")
+                return response["result"]
         except Exception as exc:  # noqa: BLE001
+            from commander.account_effects import AccountOperationUnconfirmed, AccountOperationBlocked
             code = getattr(exc, "code", None)
             detail = ""
             try:
                 detail = json.loads(exc.read()).get("detail", "")  # type: ignore[attr-defined]
             except Exception:  # noqa: BLE001
-                detail = str(exc)[:200]
+                detail = "native command response unavailable"
+            if isinstance(detail, dict) and detail.get("code") == "account_operation_unconfirmed":
+                raise AccountOperationUnconfirmed(detail.get("operation_id")) from None
+            if (cmd == "account_operation" or args.get("_native_operation")) and (not code or int(code) >= 500):
+                # A timeout/502 is not evidence that a signed native command
+                # failed before effect. The caller already knows this ID.
+                raise AccountOperationUnconfirmed(args.get("_native_operation", {}).get("operation_id") or args.get("operation_id")) from None
+            if isinstance(detail, str) and "original native operation" in detail:
+                raise AccountOperationBlocked() from None
             raise HTTPException(int(code) if code and 400 <= int(code) < 600 else 502, f"commander: {detail}")
 
 
@@ -317,7 +335,7 @@ class AccountOnboarding:
         accts = await asyncio.to_thread(self.control.run,"ctrader_discover", {"client_id": p["client_id"], "client_secret": p["client_secret"], "access_token": p["access_token"]})
         return {"ready": True, "broker": "ctrader", "accounts": accts.get("accounts", []), "errors": accts.get("errors", [])}
 
-    async def run(self, action: str, args: dict, *, owner_device_id: str | None = None, native_resource_version: str | None = None) -> dict:
+    async def run(self, action: str, args: dict, *, owner_device_id: str | None = None, native_resource_version: str | None = None, native_operation: dict | None = None) -> dict:
         if action == "oauth_start":
             return await self.oauth_start(args, owner_device_id=owner_device_id)
         if action == "oauth_pending":
@@ -369,4 +387,19 @@ class AccountOnboarding:
             if native_resource_version is None:
                 raise HTTPException(409, "native account version is required before mutation")
             values["_expected_resource_version"] = native_resource_version
-        return await asyncio.to_thread(self.control.run,action,values)
+        from commander.account_effects import JOURNALED_COMMANDS, AccountOperationUnconfirmed
+        from vati.core.canonical import canonical_hash
+        if action in JOURNALED_COMMANDS:
+            if not native_operation or native_operation.get("device_id") != owner_device_id:
+                raise HTTPException(403, "verified native operation context is required")
+            values["_native_operation"] = {**native_operation, "request_digest": canonical_hash(args)}
+        try:
+            return await asyncio.to_thread(self.control.run,action,values)
+        except HTTPException as exc:
+            if action in JOURNALED_COMMANDS and exc.status_code >= 500:
+                raise AccountOperationUnconfirmed(native_operation["operation_id"]) from None
+            raise
+        except Exception:
+            if action in JOURNALED_COMMANDS:
+                raise AccountOperationUnconfirmed(native_operation["operation_id"]) from None
+            raise

@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T18:57:51.867117+00:00",
+  "updated_at_utc": "2026-10-22T19:32:03.948111+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -63,6 +63,10 @@
         {
           "description": "Exact native account version in A4 challenge and final locked writer CAS; per-alias durable generations/tombstones, credential-file generation without secret reads, and fork-safe reentrant cross-process locks.1926fulltrading zero skips/91auditedgateway/192owner-plan pass;7mutants after38controls. Existing callback escaping guard also corrected (4pass). Generic operation, resolved review, epoch, exposure/lease and provider lifecycle remain.",
           "evidence": "backend/BE-002_004_005_ACCOUNT_RESOURCE_BINDING.md; receipts/ACCOUNT_RESOURCE_BINDING_SOURCE_20261022.json"
+        },
+        {
+          "description": "Original native account operation IDs and ledger claims/outcomes for four current commands; authenticated outcome readback, exact biometric timestamp, Android durable non-secret recovery and alias uncertainty fences.1956fulltrading zero skips,114focused plus1PGopt-in covered in full,202Android/192owner/78rebuild/9wire pass.9source+2Android faults caught/restored. Actual two-process SQLite/PG claim arbitration. Provider effects, native adjudication, physical identity/leases and safe retirement remain.",
+          "evidence": "backend/BE-003_004_005_NATIVE_ACCOUNT_OPERATIONS.md; receipts/NATIVE_ACCOUNT_OPERATIONS_SOURCE_20261022.json"
         }
       ]
     },
@@ -127,6 +131,10 @@
         {
           "description": "Existing Commander remains readable during provider IO; bounded serialized native executor retains ownership through HTTP cancellation, revalidates authorization at dispatch and drains on lifecycle shutdown.1931fulltrading zero skips/26focused pass;5mutants after5controls. Durable original operations/results remain further work.",
           "evidence": "backend/BE-003_034_NATIVE_COMMAND_DISPATCH.md; receipts/NATIVE_COMMAND_DISPATCH_SOURCE_20261022.json"
+        },
+        {
+          "description": "Original native account operation IDs and ledger claims/outcomes for four current commands; authenticated outcome readback, exact biometric timestamp, Android durable non-secret recovery and alias uncertainty fences.1956fulltrading zero skips,114focused plus1PGopt-in covered in full,202Android/192owner/78rebuild/9wire pass.9source+2Android faults caught/restored. Actual two-process SQLite/PG claim arbitration. Provider effects, native adjudication, physical identity/leases and safe retirement remain.",
+          "evidence": "backend/BE-003_004_005_NATIVE_ACCOUNT_OPERATIONS.md; receipts/NATIVE_ACCOUNT_OPERATIONS_SOURCE_20261022.json"
         }
       ]
     },
@@ -159,6 +167,10 @@
         {
           "description": "Production paper and owner-ticket factories preserve configured currency/alias/venue instead of unrelated defaults; owner-ticket verification remains false.4counterexamples fixed;1935fulltrading zero skips with privatePG/DDS. No provider/money-conversion/unit qualification.",
           "evidence": "backend/BE-004_FACTORY_ACCOUNT_METADATA.md; receipts/FACTORY_ACCOUNT_METADATA_SOURCE_20261022.json"
+        },
+        {
+          "description": "Original native account operation IDs and ledger claims/outcomes for four current commands; authenticated outcome readback, exact biometric timestamp, Android durable non-secret recovery and alias uncertainty fences.1956fulltrading zero skips,114focused plus1PGopt-in covered in full,202Android/192owner/78rebuild/9wire pass.9source+2Android faults caught/restored. Actual two-process SQLite/PG claim arbitration. Provider effects, native adjudication, physical identity/leases and safe retirement remain.",
+          "evidence": "backend/BE-003_004_005_NATIVE_ACCOUNT_OPERATIONS.md; receipts/NATIVE_ACCOUNT_OPERATIONS_SOURCE_20261022.json"
         }
       ]
     },
@@ -190,6 +202,10 @@
         {
           "description": "Exact native account version in A4 challenge and final locked writer CAS; per-alias durable generations/tombstones, credential-file generation without secret reads, and fork-safe reentrant cross-process locks.1926fulltrading zero skips/91auditedgateway/192owner-plan pass;7mutants after38controls. Existing callback escaping guard also corrected (4pass). Generic operation, resolved review, epoch, exposure/lease and provider lifecycle remain.",
           "evidence": "backend/BE-002_004_005_ACCOUNT_RESOURCE_BINDING.md; receipts/ACCOUNT_RESOURCE_BINDING_SOURCE_20261022.json"
+        },
+        {
+          "description": "Original native account operation IDs and ledger claims/outcomes for four current commands; authenticated outcome readback, exact biometric timestamp, Android durable non-secret recovery and alias uncertainty fences.1956fulltrading zero skips,114focused plus1PGopt-in covered in full,202Android/192owner/78rebuild/9wire pass.9source+2Android faults caught/restored. Actual two-process SQLite/PG claim arbitration. Provider effects, native adjudication, physical identity/leases and safe retirement remain.",
+          "evidence": "backend/BE-003_004_005_NATIVE_ACCOUNT_OPERATIONS.md; receipts/NATIVE_ACCOUNT_OPERATIONS_SOURCE_20261022.json"
         }
       ]
     },

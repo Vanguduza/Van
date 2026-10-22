@@ -319,6 +319,17 @@ class AccountActionConflictResponse(BaseModel):
     detail: str
     effect_state: Literal["REFUSED","UNKNOWN"]
     reconciliation_required: bool
+    operation_id: str | None = None
+
+
+class AccountOperationResponse(BaseModel):
+    operation_id: str
+    action: str
+    effect_state: Literal["APPLIED", "REFUSED", "UNKNOWN"]
+    native_phase: Literal["IN_FLIGHT", "APPLIED", "REFUSED", "UNKNOWN"]
+    reconciliation_required: bool
+    result: dict | None = None
+    native_event_ref: str
 
 
 class AccountChallengeRequest(BaseModel):
@@ -654,7 +665,7 @@ def create_app() -> FastAPI:
     account_control = (
         CommanderAccountControl(settings.van_commander_url, settings.van_commander_token_file, settings.van_commander_ca_file)
         if settings.van_commander_url
-        else LocalAccountControl(settings.vati_accounts_registry, settings.vati_secrets_dir)
+        else LocalAccountControl(settings.vati_accounts_registry, settings.vati_secrets_dir, operation_ledger=settings.vati_ledger_path)
     )
     oauth_pending = OAuthPending(store, settings.google_token_fernet_key)
     onboarding = AccountOnboarding(account_control, oauth_pending, settings.van_public_base_url, settings.vati_deriv_app_id)
@@ -3450,7 +3461,7 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=403, detail="device_identity_mismatch")
         if req.action not in ACCOUNT_ACTIONS:
             raise HTTPException(status_code=404, detail="unknown account action")
-        if "_expected_resource_version" in req.args:
+        if {"_expected_resource_version", "_native_operation"}.intersection(req.args):
             raise HTTPException(status_code=422, detail="native resource binding is supplied by the gateway")
         try:
             await auth.require_device(req.device_id)
@@ -3498,14 +3509,41 @@ def create_app() -> FastAPI:
         return {
             "approval_challenge_id": challenge.challenge_id,
             "approval_challenge": challenge.canonical,
+            "issued_at_unix": req.issued_at_unix,
             "approval_expires_at_unix": challenge.expires_at_unix,
             "resolved_action_id": f"trading.account.{req.action}",
         }
+
+    @app.get("/v1/trading/accounts/operations/{operation_id}", response_model=AccountOperationResponse,
+             responses={409:{"model":AccountActionConflictResponse}})
+    async def trading_account_operation(request: Request, operation_id: str):
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(403, "paired owner device is required")
+        try:
+            await auth.require_device(device_id)
+        except AuthError as exc:
+            raise HTTPException(403, exc.message) from None
+        if not re.fullmatch(r"[A-Za-z0-9_-]{20,128}", operation_id):
+            raise HTTPException(422, "invalid account operation identity")
+        try:
+            return await asyncio.to_thread(onboarding.control.operation, operation_id, device_id)
+        except HTTPException as exc:
+            if getattr(exc, "effect_state", None) == "UNKNOWN":
+                return JSONResponse(status_code=409, content=AccountActionConflictResponse(
+                    detail="Original native operation is unconfirmed; do not repeat its effects",
+                    effect_state="UNKNOWN", reconciliation_required=True, operation_id=operation_id).model_dump())
+            raise
+        except Exception:
+            return JSONResponse(status_code=409, content=AccountActionConflictResponse(
+                detail="Original native operation cannot be verified; do not repeat its effects",
+                effect_state="UNKNOWN", reconciliation_required=True, operation_id=operation_id).model_dump())
 
     @app.post("/v1/trading/accounts/action", responses={409:{"model":AccountActionConflictResponse}})
     async def trading_account_action(request: Request, req: AccountActionRequest):
         await _authenticate_account_action(request, req)
         native_version = None
+        native_operation = None
         # P1-SEC-004. This used to be guarded on the device by a biometric prompt whose
         # only output was "the prompt succeeded", which the gateway never saw and which
         # nothing bound to this action. The strong path already existed for A4 commands;
@@ -3534,7 +3572,7 @@ def create_app() -> FastAPI:
                 return JSONResponse(status_code=409, content=AccountActionConflictResponse(
                     detail=str(exc.detail), effect_state="REFUSED", reconciliation_required=False).model_dump())
             try:
-                await app.state.orchestrator.approvals.verify_and_consume(
+                native_operation = await app.state.orchestrator.approvals.verify_and_consume(
                     challenge_id=proof.challenge_id,
                     source_command_id=f"account:{req.action}",
                     signature_b64=proof.signature_b64,
@@ -3556,10 +3594,10 @@ def create_app() -> FastAPI:
                 )
                 raise HTTPException(status_code=403, detail=str(exc)) from exc
         try:
-            result = await onboarding.run(req.action, req.args, owner_device_id=req.device_id, native_resource_version=native_version)
+            result = await onboarding.run(req.action, req.args, owner_device_id=req.device_id, native_resource_version=native_version, native_operation=native_operation)
         except HTTPException as exc:
-            unknown = isinstance(exc,OAuthEffectUnconfirmed)
-            reconcile = unknown or isinstance(exc,OAuthTargetBlocked)
+            unknown = isinstance(exc,OAuthEffectUnconfirmed) or getattr(exc, "effect_state", None) == "UNKNOWN"
+            reconcile = unknown or isinstance(exc,OAuthTargetBlocked) or getattr(exc, "reconciliation_required", False)
             await audit.record(
                 result="unknown" if unknown else "refused",
                 device_id=req.device_id,
@@ -3569,7 +3607,8 @@ def create_app() -> FastAPI:
             )
             if exc.status_code==409:
                 response = AccountActionConflictResponse(detail=str(exc.detail),
-                    effect_state="UNKNOWN" if unknown else "REFUSED",reconciliation_required=reconcile)
+                    effect_state="UNKNOWN" if unknown else "REFUSED",reconciliation_required=reconcile,
+                    operation_id=getattr(exc, "operation_id", None))
                 return JSONResponse(status_code=409,content=response.model_dump())
             raise
         await audit.record(
@@ -3583,6 +3622,10 @@ def create_app() -> FastAPI:
                 if k in ("account", "alias", "state", "ready", "stored_keys", "removed", "ok")
             },
         )
+        from commander.account_effects import JOURNALED_COMMANDS
+        if req.action in JOURNALED_COMMANDS and native_operation:
+            return {**result, "operation_id":native_operation["operation_id"], "action":req.action,
+                    "effect_state":"APPLIED", "reconciliation_required":False}
         return result
 
     def _strategy_promotion_text(req) -> str:

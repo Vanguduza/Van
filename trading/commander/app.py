@@ -15,7 +15,7 @@ import stat
 import subprocess
 import sys
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any, Callable, Optional
 from urllib.request import Request, urlopen
@@ -57,7 +57,7 @@ AGENT_HIDDEN_COMMANDS = GATEWAY_ONLY_COMMANDS
 # the serialized executor by default.
 PARALLEL_COMMANDS = frozenset({"status", "ledger_status", "services", "tail_log",
     "doctor", "accounts", "positions", "assessment", "account_revision",
-    "account_verify", "ctrader_discover", "halt"})
+    "account_verify", "account_operation", "ctrader_discover", "halt"})
 MAX_NATIVE_PENDING_COMMANDS = 16
 Runner = Callable[[list[str], int], tuple[int, str, str]]
 
@@ -422,7 +422,8 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
     handlers = {"status": cmd_status, "ledger_status": cmd_ledger_status, "services": cmd_services, "restart_service": cmd_restart, "tail_log": cmd_tail, "run_backtest": cmd_backtest,
                 "vekl_resolve": cmd_vekl, "halt": cmd_halt, "doctor": cmd_doctor, "accounts": cmd_accounts,
                 "positions": cmd_positions, "assessment": cmd_assessment,
-                **build_account_handlers(st.account_control or AccountControlSettings(registry_path=st.accounts_registry, secrets_dir=st.secrets_dir)),
+                **build_account_handlers(replace(st.account_control, operation_ledger=st.ledger) if st.account_control else
+                    AccountControlSettings(registry_path=st.accounts_registry, secrets_dir=st.secrets_dir, operation_ledger=st.ledger)),
                 **build_strategy_handlers(StrategyPromotionSettings(
                     capsule_dir=capsule_dir,
                     ledger=st.ledger,
@@ -510,7 +511,8 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
                 # executor resolves it; recheck authorization when it starts.
                 result = await asyncio.shield(waiter)
         except HTTPException as exc:
-            audit(name, parsed.requested_by, parsed.args, f"refused:{exc.detail}")
+            audit(name, parsed.requested_by, parsed.args,
+                ("unknown:" if getattr(exc, "effect_state", None) == "UNKNOWN" else "refused:") + str(exc.detail))
             raise
         audit(name, parsed.requested_by, parsed.args, "ok")
         return JSONResponse({"command": name, "result": result})

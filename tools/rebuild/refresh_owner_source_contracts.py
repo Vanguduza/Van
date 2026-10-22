@@ -24,6 +24,11 @@ GENERATION = "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json"
 LEGACY_GENERATION = "c36d6a21bea1618707e353912d3f5b9508eca5ba"
 REGISTRIES = frozenset("registries/"+name+".json" for name in (
     "owner_endpoints", "owner_endpoint_schemas", "owner_features", "owner_screens"))
+REVIEWED_CITATION_REPLACEMENTS = {
+    ("android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt",
+     "                val outcome = runCatching { app.gatewayClient.tradingAccountAction(action, args, proof) }"):
+     "                val outcome = runCatching { app.gatewayClient.tradingAccountAction(action, args, proof, approvedIssuedAt) }",
+}
 
 
 def git_file(ref, path):
@@ -80,13 +85,17 @@ def build():
                     if sha(old) != value.get("sha256"):
                         raise ValueError("Unreviewed citation source: "+file)
                     anchor = old.decode().splitlines()[value["line"]-1]
+                    current_anchor = REVIEWED_CITATION_REPLACEMENTS.get((file, anchor), anchor)
                     lines = data.decode().splitlines()
-                    matches = [i+1 for i, line in enumerate(lines) if line == anchor]
+                    matches = [i+1 for i, line in enumerate(lines) if line == current_anchor]
                     if len(matches) != 1:
                         raise ValueError("Changed/non-unique citation requires review: "+file+":"+str(value["line"]))
                     key = file+":"+str(value["line"])
                     changes[key] = {"file": file, "old_line": value["line"], "new_line": matches[0],
                         "old_sha256": value.get("sha256"), "new_sha256": sha(data), "exact_anchor": anchor}
+                    if current_anchor != anchor:
+                        changes[key].update(reviewed_replacement_anchor=current_anchor,
+                            reason="Preserve the exact timestamp used in the existing owner approval, including biometric delay")
                     value.update(line=matches[0], sha256=sha(data))
             if "endpoint_id" in value and "source_ref" in value:
                 value["source_ref"] = endpoints[value["endpoint_id"]]["source"]
@@ -115,6 +124,22 @@ def build():
         "specification": "docs/rebuild/rev118/backend/BE-025_BROWSER_CONTINUATION.md",
         "new_ui_implemented": False, "live_qualified": False})
     voice = next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-VOICE-001")
+    accounts = next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-TRADING-003")
+    account_screen = next(r for r in documents["owner_screens"]["screens"] if r["id"] == "van.trading.accounts.add")
+    operation_endpoint = next(r for r in endpoint_doc["endpoints"] if r["path"] == "/v1/trading/accounts/operations/{operation_id}")
+    operation_extension = {
+        "method": "GET", "path": operation_endpoint["path"], "endpoint_id": operation_endpoint["endpoint_id"],
+        "source_status": "CANDIDATE_SOURCE_ANDROID_REPAIR_NATIVE_ACCEPTANCE_PENDING",
+        "client_namespace": "VanGatewayClient", "client_function": "tradingAccountOperation",
+        "source_ref": operation_endpoint["source"], "authentication": operation_endpoint["authentication"],
+        "device_proof_required_when_bound": operation_endpoint["device_proof_required_when_bound"],
+        "authority": "READ_ORIGINAL_DEVICE_OWNED_ACCOUNT_OUTCOME_NO_EXECUTION_OR_CREDENTIAL_EXPORT",
+        "scope": "Native journal for account_upsert/account_credentials/account_remove/mt5_ea_issue_key; original non-secret operation identity survives Android restart; absence and incomplete effects stay UNKNOWN",
+        "specification": "docs/rebuild/rev118/backend/BE-003_004_005_NATIVE_ACCOUNT_OPERATIONS.md",
+        "new_ui_implemented": False, "existing_android_repair": True, "live_qualified": False,
+    }
+    for row in (accounts, account_screen):
+        row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(operation_extension))
     voice_clients = {
         ("POST", "/v1/voice/responses"): "openSpokenResult",
         ("GET", "/v1/voice/streams/{stream_id}"): "speechStream",

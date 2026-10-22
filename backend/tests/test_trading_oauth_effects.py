@@ -24,7 +24,7 @@ def isolated_native_deriv_authorization(client, tmp_path):
     from test_deriv_native_identity import Socket, native
     _,app=client
     app.state.onboarding.control=LocalAccountControl(str(tmp_path/"accounts.json"),str(tmp_path/"secrets"),
-        deriv_connector=lambda url: Socket(native()))
+        deriv_connector=lambda url: Socket(native()), operation_ledger=str(tmp_path/"vati.sqlite"))
 
 
 @pytest.mark.asyncio

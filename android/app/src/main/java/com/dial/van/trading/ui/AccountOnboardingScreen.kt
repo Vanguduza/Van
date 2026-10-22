@@ -44,6 +44,7 @@ import com.dial.van.design.components.StatusChip
 import com.dial.van.design.components.VanPanel
 import com.dial.van.security.BiometricGate
 import com.dial.van.trading.AccountOnboarding
+import com.dial.van.trading.AccountOperationRecovery
 import com.dial.van.trading.AccountOnboarding.Broker
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -54,6 +55,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.put
 
 /**
@@ -72,13 +74,23 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
     var broker by remember { mutableStateOf(Broker.DERIV) }
     var status by remember { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
+    var recovery by remember { mutableStateOf(runCatching { app.gatewayClient.pendingAccountOperations() }) }
 
     fun submit(action: String, args: JsonObject, then: (AccountOnboarding.ActionOutcome) -> Unit = {}) {
+        val alias = args["alias"]?.jsonPrimitive?.contentOrNull?.trim()?.lowercase()
+        if (action in AccountOperationRecovery.JOURNALED_ACTIONS && (recovery.isFailure ||
+                recovery.getOrNull().orEmpty().any { it.alias == alias })) {
+            status = "Check the original account change before trying this account again."
+            return
+        }
+        var approvedIssuedAt: Long? = null
         val send: (JsonObject?) -> Unit = { proof ->
             busy = true; status = "Signing and sending…"
             scope.launch {
-                val outcome = runCatching { app.gatewayClient.tradingAccountAction(action, args, proof) }
-                    .fold(onSuccess = { (code, body) -> AccountOnboarding.parseOutcome(action, body, code) }, onFailure = { AccountOnboarding.ActionOutcome(false, "Gateway unreachable: ${it.message?.take(80)}") })
+                val outcome = runCatching { app.gatewayClient.tradingAccountAction(action, args, proof, approvedIssuedAt) }
+                    .fold(onSuccess = { (code, body) -> AccountOnboarding.parseOutcome(action, body, code) }, onFailure = {
+                        AccountOnboarding.ActionOutcome(false, "Account change not confirmed. Check the original result before trying again.") })
+                recovery = runCatching { app.gatewayClient.pendingAccountOperations() }
                 status = outcome.message; busy = false; then(outcome)
             }
         }
@@ -93,7 +105,8 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
                 ?.let { runCatching { Json.parseToJsonElement(it.second).jsonObject }.getOrNull() }
             val canonical = parsed?.get("approval_challenge")?.jsonPrimitive?.contentOrNull
             val challengeId = parsed?.get("approval_challenge_id")?.jsonPrimitive?.contentOrNull
-            if (canonical.isNullOrBlank() || challengeId.isNullOrBlank()) {
+            approvedIssuedAt = parsed?.get("issued_at_unix")?.jsonPrimitive?.longOrNull
+            if (canonical.isNullOrBlank() || challengeId.isNullOrBlank() || approvedIssuedAt == null) {
                 busy = false
                 status = "Could not obtain an approval challenge; nothing was sent."
                 return@launch
@@ -132,6 +145,28 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
         item { SectionHeader(title = "Add trading account") }
         item { TradingTabs(Broker.entries.map { it.label }, broker.label) { l -> broker = Broker.entries.first { it.label == l } } }
         item { Text(broker.blurb, style = tokens.type.label, color = tokens.color.textTertiary) }
+        if (recovery.isFailure) item {
+            Text("Account recovery history could not be read. Account changes are paused.", style = tokens.type.body,
+                color = tokens.color.forStatusRole(StatusSemantics.ROLE_EVENT_RISK))
+        }
+        recovery.getOrNull().orEmpty().forEach { operation ->
+            item(key = "account-operation:" + operation.operationId) {
+                Column {
+                    Text("${operation.alias}: original account change needs checking", style = tokens.type.body,
+                        color = tokens.color.textSecondary)
+                    Button(enabled = !busy, onClick = {
+                        busy = true
+                        scope.launch {
+                            val outcome = runCatching { app.gatewayClient.tradingAccountOperation(operation) }
+                                .fold(onSuccess = { (code, body) -> AccountOnboarding.parseOutcome(operation.action, body, code) },
+                                    onFailure = { AccountOnboarding.ActionOutcome(false, "Original result is unavailable. No account change was repeated.") })
+                            recovery = runCatching { app.gatewayClient.pendingAccountOperations() }
+                            status = outcome.message; busy = false
+                        }
+                    }) { Text("Check original result") }
+                }
+            }
+        }
         item {
             when (broker) {
                 Broker.DERIV -> DerivForm(ctx, busy, ::submit)

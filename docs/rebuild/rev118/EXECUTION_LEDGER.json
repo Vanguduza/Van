@@ -170,15 +170,17 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-22T18:57:51.867117+00:00",
+    "updated_utc": "2026-10-22T19:32:03.948111+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
       {
-        "kind": "hosted-source",
-        "source": "4fb7be1e0a3b287125e81f17cb7eddd2ef95ffa4",
-        "run_id": 39829998652,
-        "observed_status": "RUNNING; collect terminal native/mutation evidence before a replacement push if still needed"
+        "kind": "frozen-backend-contract-audit",
+        "source": "886f2aea7e2ffa0a31a5a09377df48ed8d238a8e",
+        "checkout": "/workspace/van-autonomous-qualification-20261022/Van",
+        "exec_session": 51554,
+        "log": "/tmp/van-886f-full-backend.txt",
+        "observed_status": "RUNNING; collect actual exit/JUnit/storage-audit and clean-tree evidence"
       }
     ],
     "last_validation": [
@@ -236,7 +238,9 @@
       "Hosted79a4/39823714025 completes374legacy mutants/383edits,18nativepass4core-artworkskips,26PG117voice,1893publictradingpass1privateDDSskip. Both actual VITS methods pass. Tree-identical merge75a357ae. DDS-key/trusted-main bootstrap failures retained. Sourcea2f11642 pushed; its native run39826544689/job119991217074 remains running.",
       "Native Commander dispatch source:actual blocked event-loop counterexample fixed.1931fulltrading/zero skip with realPG/DDS,26focused pass;5mutants caught after5controls,source restored,private fixture stopped/removed. Reads/halt responsive; bounded native writes preserve ordering/cancellation capacity and dispatch-time authorization; no durable operation claim.",
       "Frozen4fb7 fullbackend/contracts:6619pass166skip0fail/1589.90s,zero forbidden storage events,clean tree. Existing static-title escaping failure resolved at that exact source; prior79a4failedreceipt retained. Source evidence only.",
-      "Factory account metadata:4original failures fixed;1935fulltrading zero skips with actualPG/DDS,28focused plus1PGopt-in skipped there and covered in full. Private fixture stopped/removed. Configured identity/denomination preserved without inventing provider verification or currency conversion."
+      "Factory account metadata:4original failures fixed;1935fulltrading zero skips with actualPG/DDS,28focused plus1PGopt-in skipped there and covered in full. Private fixture stopped/removed. Configured identity/denomination preserved without inventing provider verification or currency conversion.",
+      "Native account operations:1956fulltrading/zero skips with real privatePG and pinnedDDS;114focused +1PGopt-in (covered in full),202Androidapp JVM/192owner-plan/78rebuild/9wire pass;9source+2Android faults caught after valid controls and source restored. Two actual processes contend on bothSQLite/PG. Original native outcome readback and no secret-history exports; not whole-unit acceptance.",
+      "Hosteda2f11642/39826544689 and4fb7be1e/39829998652:374legacy faults each,18nativepass4core skips and bothVITS methods; source/merge trees verified identical.17f4bada/39835601715:374legacy faults/publicPG26/voice117/trading1930pass1privateDDSskip;native job FAIL/INCOMPLETE after Android12system_server display crash,12reported tests/1failure/1skip;missing methods not passes. Original DDS-key/trusted-main prerequisites retained."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -247,8 +251,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Continue original BE-003/004/005 durable generic native account operation/result recovery, including unknown secret/key/demo-creation effects and exact owner/device/resource binding. Then unify native single-symbol runtime shared leases, physical account/alias identity, and exposure/funds/lease-safe unlink before claiming account lifecycle complete. Preserve original whole-product programme; no new frontend before BG-001.",
-    "previous_head": "17f4badac6f7b23d2efb219ada60af7ef2afd506"
+    "next_action": "Continue autonomous canonical candidate source work: wire single-symbol production runtimes to shared account lease and final router fencing; prove concurrent admission and actual submission fences. Complete remaining native provider effect/adjudication contracts and physical account identity/exposure/funds/retention-safe lifecycle. Collect frozen886f audit and new hosted CI including native crash follow-up. No new frontend beforeBG-001; existing Android integration repairs only; original131units retained.",
+    "previous_head": "886f2aea7e2ffa0a31a5a09377df48ed8d238a8e",
+    "current_packet": "Candidate native account operations and existing Android recovery repair; no gate or unit acceptance"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -307,5 +312,5 @@
     }
   ],
   "current_action": "Continue original BE-003/004/005 durable generic native account operation/result recovery, including unknown secret/key/demo-creation effects and exact owner/device/resource binding. Then unify native single-symbol runtime shared leases, physical account/alias identity, and exposure/funds/lease-safe unlink before claiming account lifecycle complete. Preserve original whole-product programme; no new frontend before BG-001.",
-  "updated_at_utc": "2026-10-22T18:57:51.867117+00:00"
+  "updated_at_utc": "2026-10-22T19:32:03.948111+00:00"
 }

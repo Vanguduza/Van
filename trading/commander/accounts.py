@@ -22,6 +22,8 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 
 from fastapi import HTTPException
+from commander.account_effects import (AccountEffectError, AccountEffectJournal, AccountOperationUnconfirmed,
+    AccountOperationBlocked, JOURNALED_COMMANDS, invoke_account_effect, mark_account_effect, operation_intent, readback)
 
 ALIAS_RE = re.compile(r"^[a-z0-9_]{3,32}$")
 BROKER_SECRET_KEYS = {
@@ -33,8 +35,9 @@ BROKER_SECRET_KEYS = {
 }
 ACCOUNT_MUTATIONS = frozenset({"account_upsert", "account_credentials", "account_remove",
     "deriv_create_demo", "deriv_oauth_link", "ctrader_link", "mt5_ea_issue_key"})
-ACCOUNT_COMMANDS = ("account_upsert", "account_credentials", "account_remove", "account_verify", "account_revision", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_oauth_exchange", "ctrader_link", "mt5_ea_issue_key")
+ACCOUNT_COMMANDS = ("account_upsert", "account_credentials", "account_remove", "account_verify", "account_revision", "account_operation", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_oauth_exchange", "ctrader_link", "mt5_ea_issue_key")
 ACCOUNT_TOOL_SCHEMAS = {
+    "account_operation": {"description": "Read the original native account-operation outcome for its gateway-authenticated owner device. No effect or credential export.", "properties": {"operation_id": {"type": "string"}, "device_id": {"type": "string"}}, "required": ["operation_id", "device_id"]},
     "account_revision": {"description": "Read the native non-secret account configuration version for exact owner-intent binding.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
     "account_upsert": {"description": "Create or replace a non-secret account record (alias, broker, mode, currency, identifiers). Credentials go through account_credentials.", "properties": {"alias": {"type": "string"}, "broker": {"type": "string"}, "mode": {"type": "string"}, "currency": {"type": "string"}, "label": {"type": "string"}, "server": {"type": "string"}, "login": {"type": "string"}, "bridge_url": {"type": "string"}, "demo": {"type": "boolean"}}, "required": ["alias", "broker"]},
     "account_credentials": {"description": "Store credential values for an alias in its 0600 secrets file (allowlisted keys per broker). Values are never echoed.", "properties": {"alias": {"type": "string"}, "secrets": {"type": "object"}}, "required": ["alias", "secrets"]},
@@ -58,6 +61,7 @@ class AccountControlSettings:
     ctrader_transport_factory: Optional[Callable[[bool], Any]] = None               # is_live → CtraderTransport
     ctrader_http: Optional[Callable[[str, dict], dict]] = None
     verify_timeout_s: float = 20.0
+    operation_ledger: str = ""  # Actual constructors bind the existing native VATI ledger.
 
 
 def _secrets_path(st: AccountControlSettings, alias: str) -> Path:
@@ -122,6 +126,11 @@ def require_resource_version(command: str, args: dict) -> None:
     expected = args.get("_expected_resource_version")
     if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
         raise HTTPException(409, "native account resource version is required before mutation")
+    if command in JOURNALED_COMMANDS:
+        try:
+            operation_intent(command, args)
+        except AccountEffectError as exc:
+            raise HTTPException(409, str(exc)) from None
 
 
 def _boolean(args: dict, name: str, default: bool) -> bool:
@@ -142,6 +151,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         sec = _secrets_path(st, alias)
         if broker in ("DERIV", "CTRADER", "MT5_EA", "MT5"):
             if not sec.is_file():
+                mark_account_effect()
                 _write_secrets(sec, {})
             cref = CredentialRef(secrets_file=str(sec))
         else:
@@ -149,6 +159,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         try:
             candidate = Account(alias=alias, broker=broker, mode=mode, currency=currency, label=label or alias, server=server, login=login, bridge_url=bridge_url, credential_ref=cref, demo=demo, mandate_ref=mandate_ref)
             candidate.validate()
+            mark_account_effect()
             acc = r.replace(candidate) if alias in r.accounts else r.add(candidate)
         except AccountRegistryError as exc:
             raise HTTPException(422, str(exc))
@@ -166,6 +177,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
 
     def store_secrets(alias: str, broker: str, values: dict[str, Any]) -> list[str]:
         clean = clean_secrets(broker, values)
+        mark_account_effect()
         reg().touch(alias)
         _write_secrets(_secrets_path(st, alias), clean)
         return sorted(clean)
@@ -202,6 +214,25 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
     def cmd_account_revision(a: dict) -> dict:
         from vati.accounts.resource_version import resource_snapshot
         return resource_snapshot(reg(), _alias(a))
+
+    def open_operation_ledger():
+        from vati.core.ledger_pg import open_ledger
+        if not st.operation_ledger:
+            raise HTTPException(503, "native VATI operation ledger is not configured; no effect dispatched")
+        return open_ledger(st.operation_ledger)
+
+    def cmd_account_operation(a: dict) -> dict:
+        led = open_operation_ledger()
+        try:
+            state = AccountEffectJournal(led).status(a.get("operation_id"), a.get("device_id"))
+            if state is None:
+                # Absence does not prove a lost request can never arrive.
+                raise AccountOperationUnconfirmed(a.get("operation_id"))
+            return readback(state)
+        except AccountEffectError:
+            raise HTTPException(409, "native operation cannot be read for this owner device") from None
+        finally:
+            led.close()
 
     def cmd_account_upsert(a: dict) -> dict:
         alias = _alias(a)
@@ -240,6 +271,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
             # A failed subsequent file swap leaves an identity whose old token
             # must still pass native verification; it cannot switch principals.
             if not acc.login:
+                mark_account_effect()
                 registry.replace(replace(acc, login=profile["loginid"]))
         keys = store_secrets(alias, acc.broker, values)
         return {"alias": alias, "stored_keys": keys}
@@ -249,6 +281,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         r = reg()
         if alias not in r.accounts:
             raise HTTPException(404, f"unknown alias {alias}")
+        mark_account_effect()
         r.remove(alias); _shred(_secrets_path(st, alias))
         return {"alias": alias, "removed": True}
 
@@ -379,29 +412,56 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         store_secrets(alias, "MT5_EA", {"BRIDGE_SIGNING_KEY": key})
         return {"account": pub, "signing_key": key, "ea_inputs": {"Alias": alias, "SigningKey": key, "BridgeUrl": os.environ.get("VAN_PUBLIC_HOST", "") and f"https://{os.environ['VAN_PUBLIC_HOST']}"}, "note": "shown once; paste into VanBridgeEA inputs"}
 
-    handlers = {"account_upsert": cmd_account_upsert, "account_credentials": cmd_account_credentials, "account_remove": cmd_account_remove, "account_verify": cmd_account_verify, "account_revision": cmd_account_revision,
+    handlers = {"account_upsert": cmd_account_upsert, "account_credentials": cmd_account_credentials, "account_remove": cmd_account_remove, "account_verify": cmd_account_verify, "account_revision": cmd_account_revision, "account_operation": cmd_account_operation,
             "deriv_verify_email": cmd_deriv_verify_email, "deriv_create_demo": cmd_deriv_create_demo, "deriv_oauth_link": cmd_deriv_oauth_link, "ctrader_discover": cmd_ctrader_discover,
             "ctrader_oauth_exchange": cmd_ctrader_oauth_exchange, "ctrader_link": cmd_ctrader_link, "mt5_ea_issue_key": cmd_mt5_ea_issue_key}
 
-    def serialize_account_mutation(handler):
+    def serialize_account_mutation(command, handler):
         @wraps(handler)
         def invoke(args):
             from vati.core.file_lock import exclusive_state_lock
             alias = _alias(args)
             path = Path(st.registry_path).resolve()
             with exclusive_state_lock(path.with_name(path.name + ".operation." + alias)):
-                if "_expected_resource_version" in args:
-                    expected = args["_expected_resource_version"]
-                    actual = cmd_account_revision({"alias": alias})["resource_version"]
-                    if not isinstance(expected, str) or expected != actual:
-                        raise HTTPException(409, "account changed since owner approval; review the current account and approve again")
-                return handler(args)
+                def check_version():
+                    if "_expected_resource_version" in args:
+                        expected = args["_expected_resource_version"]
+                        actual = cmd_account_revision({"alias": alias})["resource_version"]
+                        if not isinstance(expected, str) or expected != actual:
+                            raise HTTPException(409, "account changed since owner approval; review the current account and approve again")
+                if command not in JOURNALED_COMMANDS or "_native_operation" not in args:
+                    # Internal native handler seams; real Local/HTTP ingress
+                    # separately requires the verified operation context.
+                    if st.operation_ledger:
+                        led = open_operation_ledger()
+                        try:
+                            AccountEffectJournal(led).require_clear_targets(("account:"+alias,))
+                        except AccountEffectError:
+                            raise AccountOperationBlocked() from None
+                        finally:
+                            led.close()
+                    check_version()
+                    return handler(args)
+                intent = operation_intent(command, args)
+                led = open_operation_ledger()
+                try:
+                    journal = AccountEffectJournal(led)
+                    # Known-result reads retain the ORIGINAL version. Never
+                    # rebase a completed request onto today's registry record.
+                    existing = journal.status(intent.operation_id, intent.device_id)
+                    if existing is None:
+                        check_version()
+                    return invoke_account_effect(journal, intent, lambda: handler(args))
+                except AccountEffectError:
+                    raise AccountOperationUnconfirmed(intent.operation_id) from None
+                finally:
+                    led.close()
         return invoke
 
     # Serialize before the registry lookup as well as the file swap. Otherwise
     # a rotation can read an alias, wait for unlink, then recreate orphan secrets.
     for command in ACCOUNT_MUTATIONS:
-        handlers[command] = serialize_account_mutation(handlers[command])
+        handlers[command] = serialize_account_mutation(command, handlers[command])
     return handlers
 
 

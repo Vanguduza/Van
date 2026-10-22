@@ -21,6 +21,9 @@ import com.dial.van.security.OwnerDeviceIdentity
 import com.dial.van.security.OwnerApprovalKeyManager
 import com.dial.van.security.OwnerAuthorityToken
 import com.dial.van.trading.StrategyPromotionProtocol
+import com.dial.van.trading.AccountOperationRecovery
+import com.dial.van.trading.AccountOperationStore
+import com.dial.van.trading.PendingAccountOperation
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -73,6 +76,30 @@ class VanGatewayClient(context: Context) {
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
     )
     private val approvalKeys = OwnerApprovalKeyManager()
+    private val accountOperations = AccountOperationRecovery(object : AccountOperationStore {
+        override fun load(): String? = prefs.getString("native_account_operations_v1", null)
+        override fun save(value: String): Boolean = prefs.edit().putString("native_account_operations_v1", value).commit()
+    })
+
+    fun pendingAccountOperations(): List<PendingAccountOperation> =
+        deviceId?.let(accountOperations::pending).orEmpty()
+
+    suspend fun tradingAccountOperation(value: PendingAccountOperation): Pair<Int, String> = withContext(Dispatchers.IO) {
+        require(value.deviceId == deviceId) { "account_operation_owner_changed" }
+        val path = "/v1/trading/accounts/operations/${encodeSegment(value.operationId)}"
+        val conn = open("$baseUrl$path").apply {
+            requestMethod = "GET"; applyIngressAuth(this)
+            proofHeaders("GET", path, "").forEach { (name, header) -> setRequestProperty(name, header) }
+            connectTimeout = 15_000; readTimeout = 30_000
+        }
+        try {
+            val code = conn.responseCode
+            val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+            val body = stream?.bufferedReader()?.use { it.readText() } ?: "{}"
+            accountOperations.observe(value, body, code)
+            code to body
+        } finally { conn.disconnect() }
+    }
 
     /**
      * ADR-RB-025 — the hardware key this phone signs privileged requests with.
@@ -848,11 +875,15 @@ class VanGatewayClient(context: Context) {
         action: String,
         args: kotlinx.serialization.json.JsonObject,
         approvalProof: kotlinx.serialization.json.JsonObject? = null,
+        issuedAtUnix: Long? = null,
     ): Pair<Int, String> = withContext(Dispatchers.IO) {
+        require(!com.dial.van.trading.AccountOnboarding.requiresOwnerApproval(action) || issuedAtUnix != null) {
+            "original_approved_account_timestamp_required"
+        }
         val id = deviceId ?: error("not_enrolled")
         val secret = deviceSecret ?: error("not_enrolled")
         val body = com.dial.van.trading.AccountOnboarding.requestBody(
-            secret, id, System.currentTimeMillis() / 1000L, action, args, approvalProof,
+            secret, id, issuedAtUnix ?: System.currentTimeMillis() / 1000L, action, args, approvalProof,
         )
         val bodyText = body.toString()
         val conn = open("$baseUrl/v1/trading/accounts/action").apply {
@@ -867,10 +898,22 @@ class VanGatewayClient(context: Context) {
         // P0-AND-012 — `requestBody` returns a JsonObject, not a String. This read
         // `body.toByteArray(...)`, which does not exist on JsonObject, so the
         // trading account-action path has never compiled.
-        conn.outputStream.use { it.write(bodyText.toByteArray(StandardCharsets.UTF_8)) }
-        val code = conn.responseCode
-        val stream = if (code in 200..299) conn.inputStream else conn.errorStream
-        code to (stream?.bufferedReader()?.readText() ?: "{}")
+        val operation = if (action in AccountOperationRecovery.JOURNALED_ACTIONS) {
+            val challengeId = approvalProof?.get("challenge_id")?.let {
+                (it as? kotlinx.serialization.json.JsonPrimitive)?.content
+            } ?: error("account_operation_approval_missing")
+            PendingAccountOperation(challengeId, action, id,
+                (args["alias"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.trim()?.lowercase().orEmpty())
+        } else null
+        try {
+            if (operation != null) accountOperations.remember(operation)
+            conn.outputStream.use { it.write(bodyText.toByteArray(StandardCharsets.UTF_8)) }
+            val code = conn.responseCode
+            val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+            val reply = stream?.bufferedReader()?.use { it.readText() } ?: "{}"
+            if (operation != null) accountOperations.observe(operation, reply, code)
+            code to reply
+        } finally { conn.disconnect() }
     }
 
     /**

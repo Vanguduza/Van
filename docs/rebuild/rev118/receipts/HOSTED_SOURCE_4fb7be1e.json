@@ -1,0 +1,141 @@
+{
+  "schema": "van.rebuild.hosted-source/1",
+  "run_id": 39829998652,
+  "source_head": "4fb7be1e0a3b287125e81f17cb7eddd2ef95ffa4",
+  "tested_merge": "fad36dcac777d2057f88e286cb35e5aeb4ad4e11",
+  "identical_source_tree": "94b621f91fbeb53e0c75dd79f5821e98c1b74a39",
+  "jobs": [
+    {
+      "id": 120003299201,
+      "name": "android-instrumentation",
+      "conclusion": "success"
+    },
+    {
+      "id": 120003299502,
+      "name": "postgres-ledger",
+      "conclusion": "success"
+    },
+    {
+      "id": 120003299533,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120003299547,
+      "name": "android-and-visual-evidence",
+      "conclusion": "success"
+    },
+    {
+      "id": 120003299603,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120003299611,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120003299621,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120003299677,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "id": 120003299990,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120003300048,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120003300051,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120003300154,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120003300189,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120003300242,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120003300294,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120008638504,
+      "name": "character-forge-gate",
+      "conclusion": "success"
+    }
+  ],
+  "public_source": {
+    "postgres-ledger-report.xml": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "df20c3920e0bdbdeb262514f0069420858a6f7da5e7ec16f7bafe0c627fd059e"
+    },
+    "voice-source-report.xml": {
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "a79a96925974372dabb7d3ef66a8fc83ff31f6c73ae7726dfb66053b5ac41274"
+    },
+    "trading-source-report.xml": {
+      "tests": 1926,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "sha256": "4fca9eb1062944d8e35711d6e5742a3f140ee0667612cd78cec5755971b31f1a"
+    }
+  },
+  "legacy_mutations": {
+    "caught": 374,
+    "survived": 0,
+    "receipt": "ci/MUTATION_CORPUS_4fb7be1e.json"
+  },
+  "instrumentation": {
+    "job_conclusion": "success",
+    "reported_counts": {
+      "tests": 22,
+      "failures": 0,
+      "skipped": 4
+    },
+    "voice_methods": {
+      "cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer": "3.139s",
+      "realOfflineAnswerReachesTheApplicationQueueAsSpoken": "2.103s"
+    },
+    "index_sha256": "cd0c8b3e63a4799d5b7dac68868b845e0ff667a3f35e2ee55c9cdc489c7b39ec",
+    "logcat_sha256": "06e09f9c6c3ba81578f9f0e1c47bf30f0263f72ea3b20c480c735f55d73fbf1b",
+    "complete": true
+  },
+  "retained_failures": {
+    "backend": "Private DDS contract read key is not provisioned",
+    "project-truth-ledger": "Current main lacks trusted-base bootstrap checker",
+    "logs": {
+      "backend-job.log": "422d2c60b4e253049418bf9705f9dfd9a87260845589a2ae04d58ffb73713e35",
+      "project-truth-ledger-job.log": "48a87c81af137139c9a3a86094cd8f49402c7ef3e261416d7c8fb39b3bfd6a76"
+    }
+  },
+  "qualification": "Hosted source/emulator evidence only. No S24, production, provider, independent gate or whole-unit acceptance."
+}

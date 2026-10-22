@@ -134,7 +134,7 @@ class OwnerApprovalService:
         project_id: str | None,
         parameters: dict[str, Any] | None = None,
         now_unix: int | None = None,
-    ) -> None:
+    ) -> dict:
         now = int(time.time()) if now_unix is None else now_unix
         if not challenge_id or not signature_b64:
             raise OwnerApprovalError("approval_proof_missing")
@@ -227,3 +227,8 @@ class OwnerApprovalService:
                 await db.rollback()
                 raise OwnerApprovalError("approval_challenge_unknown_or_consumed")
             await db.commit()
+            # Non-secret attestation for the already verified, consumed act.
+            # This return value never permits consuming the approval twice.
+            return {"operation_id": challenge_id, "device_id": device_id,
+                    "authority_ref": hashlib.sha256(str(record["canonical"]).encode()).hexdigest(),
+                    "expires_at_unix": int(record["expires_at_unix"])}

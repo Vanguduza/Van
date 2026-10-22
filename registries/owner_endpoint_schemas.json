@@ -18,6 +18,17 @@
           "reconciliation_required": {
             "type": "boolean",
             "title": "Reconciliation Required"
+          },
+          "operation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operation Id"
           }
         },
         "type": "object",
@@ -103,6 +114,67 @@
           "action"
         ],
         "title": "AccountChallengeRequest"
+      },
+      "AccountOperationResponse": {
+        "properties": {
+          "operation_id": {
+            "type": "string",
+            "title": "Operation Id"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "effect_state": {
+            "type": "string",
+            "enum": [
+              "APPLIED",
+              "REFUSED",
+              "UNKNOWN"
+            ],
+            "title": "Effect State"
+          },
+          "native_phase": {
+            "type": "string",
+            "enum": [
+              "IN_FLIGHT",
+              "APPLIED",
+              "REFUSED",
+              "UNKNOWN"
+            ],
+            "title": "Native Phase"
+          },
+          "reconciliation_required": {
+            "type": "boolean",
+            "title": "Reconciliation Required"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          },
+          "native_event_ref": {
+            "type": "string",
+            "title": "Native Event Ref"
+          }
+        },
+        "type": "object",
+        "required": [
+          "operation_id",
+          "action",
+          "effect_state",
+          "native_phase",
+          "reconciliation_required",
+          "native_event_ref"
+        ],
+        "title": "AccountOperationResponse"
       },
       "AcquisitionCheckpointBody": {
         "properties": {

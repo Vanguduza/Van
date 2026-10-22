@@ -426,7 +426,7 @@ async def test_account_onboarding_is_device_signed_and_forwards_without_storing_
     from van_gateway.trading.accounts import LocalAccountControl
     from test_commander_accounts import FakeDeriv
     deriv = FakeDeriv()
-    app.state.onboarding.control = LocalAccountControl(str(tmp_path / "accounts.json"), str(tmp_path / "secrets"), deriv_connector=deriv.connector)
+    app.state.onboarding.control = LocalAccountControl(str(tmp_path / "accounts.json"), str(tmp_path / "secrets"), deriv_connector=deriv.connector, operation_ledger=str(tmp_path / "vati.sqlite"))
     app.state.trading.accounts_registry = str(tmp_path / "accounts.json")
     now = int(_time.time())
     from van_gateway.trading.accounts import requires_owner_approval
