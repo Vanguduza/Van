@@ -1,266 +1,277 @@
 {
- "schema": "van.rebuild.execution-ledger/1",
- "purpose": "Compact continuation index for the Rev1.18 programme. Subordinate to the package plan; never a second roadmap.",
- "canonical_inputs": {
-  "package": "docs/review-inputs/van-rev115/package",
-  "package_tree": "ac0226a22a95f51642cfeb37b3709b40f7cacf10",
-  "archive_sha256": "6c7c7c1cb4fbd4748c0d63ceb2add9bd460778b66fb3b2302e16de09ac3a57a8",
-  "blueprint_delivery_commit": "3c3379bd791f7bda7ab66c21bba550d6077ba853",
-  "plan_revision": "1.18",
-  "plan": "plan/DEVELOPMENT_PLAN.json",
-  "effective_tests": "verification/EFFECTIVE_TEST_CONTRACTS_REV118.json",
-  "instructions": [
-   "CLAUDE.md",
-   "CONSOLIDATION_STATE.json",
-   "docs/consolidation/START_HERE.md",
-   "docs/consolidation/OPUS_BUILD_PROMPT.md"
-  ]
- },
- "source_baseline": {
-  "branch": "consolidation/opus-clean-rev118-20261021",
-  "commit": "b02075f327ea8180ab6d269eba358cf8c5479878",
-  "working_branch": "ccr-9e07e1af-8mgz1p"
- },
- "scope_counts": {
-  "requirements": 324,
-  "acceptance_identities": 1610,
-  "units": 131,
-  "backend_units": 82,
-  "backend_verification_units": 12,
-  "frontend_units": 23,
-  "contexts": 234,
-  "owner_actions": 349,
-  "features": 93,
-  "source_atoms": 171,
-  "truth_atoms": 22,
-  "domain_scenarios": 72
- },
- "status_vocabulary": [
-  "NOT_STARTED",
-  "IN_PROGRESS",
-  "SOURCE_IMPLEMENTED",
-  "SOURCE_TESTED",
-  "INTEGRATED",
-  "DEPLOYED",
-  "LIVE_VERIFIED",
-  "QUALIFIED",
-  "OWNER_ACCEPTED",
-  "BLOCKED"
- ],
- "units": {
-  "PRE-001": {
-   "packet": "VAN-PKT-001",
-   "binding": {
+  "schema": "van.rebuild.execution-ledger/1",
+  "purpose": "Compact continuation index for the Rev1.18 programme. Subordinate to the package plan; never a second roadmap.",
+  "canonical_inputs": {
+    "package": "docs/review-inputs/van-rev115/package",
+    "package_tree": "ac0226a22a95f51642cfeb37b3709b40f7cacf10",
+    "archive_sha256": "6c7c7c1cb4fbd4748c0d63ceb2add9bd460778b66fb3b2302e16de09ac3a57a8",
+    "blueprint_delivery_commit": "3c3379bd791f7bda7ab66c21bba550d6077ba853",
     "plan_revision": "1.18",
-    "unit_id": "PRE-001",
-    "scope_digest": "package tree ac0226a2",
-    "source_commit": "b02075f327ea8180ab6d269eba358cf8c5479878"
-   },
-   "status": "EVIDENCE_COMPLETE_EXCEPT_AP001_PENDING_INDEPENDENT_REVIEW",
-   "evidence": [
-    "docs/rebuild/rev118/pre001/STATUS.json",
-    "docs/rebuild/rev118/pre001/DISPOSITIONS.json",
-    "docs/rebuild/rev118/pre001/TEST_EVIDENCE.json"
-   ],
-   "open": {
-    "refs": 0,
-    "overlap": 0,
-    "source_files_unclassified": "0/2131",
-    "trace_findings": 5
-   },
-   "acceptance": {
-    "T-NX-071": "oracle green except AP-001 trace findings; independent verification pending",
-    "T-BF-015": "selftest 15/15; independent verification pending",
-    "T-VAN-CX-002-POS/NEG/REC": "dispositions + induced rejection evidence; independent review pending",
-    "T-HVA-002-POS/NEG/REC": "34 overlap rows resolved with executed tests; independent review pending"
-   },
-   "exit_requires": "all rows dispositioned with evidence, then INDEPENDENT review of the no-loss mapping (not self-issued)"
+    "plan": "plan/DEVELOPMENT_PLAN.json",
+    "effective_tests": "verification/EFFECTIVE_TEST_CONTRACTS_REV118.json",
+    "instructions": [
+      "CLAUDE.md",
+      "CONSOLIDATION_STATE.json",
+      "docs/consolidation/START_HERE.md",
+      "docs/consolidation/OPUS_BUILD_PROMPT.md"
+    ]
   },
-  "PRE-002": {
-   "status": "AUTHOR_WORK_COMPLETE_PENDING_INDEPENDENT_CHALLENGE",
-   "depends": [
-    "PRE-001"
-   ],
-   "evidence": [
-    "docs/rebuild/rev118/pre002/PRE002_STATUS.md",
-    "docs/rebuild/rev118/pre002/OWNER_DECISION_REGISTER.json",
-    "docs/rebuild/rev118/pre002/AP-001/"
-   ]
+  "source_baseline": {
+    "branch": "consolidation/opus-clean-rev118-20261021",
+    "commit": "b02075f327ea8180ab6d269eba358cf8c5479878",
+    "working_branch": "ccr-9e07e1af-8mgz1p"
   },
-  "PRE-003": {
-   "status": "BLOCKED",
-   "depends": [
-    "PRE-002"
-   ],
-   "blocker": "BLK-001",
-   "submission": "docs/rebuild/rev118/pre003/REVIEW_SUBMISSION.md"
+  "scope_counts": {
+    "requirements": 324,
+    "acceptance_identities": 1610,
+    "units": 131,
+    "backend_units": 82,
+    "backend_verification_units": 12,
+    "frontend_units": 23,
+    "contexts": 234,
+    "owner_actions": 349,
+    "features": 93,
+    "source_atoms": 171,
+    "truth_atoms": 22,
+    "domain_scenarios": 72
   },
-  "ALL_BE_BQ_UX_FE_QA_REL": {
-   "status": "NOT_STARTED",
-   "reason": "every backend unit depends on PRE-003"
-  }
- },
- "blockers": [
-  {
-   "id": "BLK-001",
-   "what": "PRE-003 F15: DDS predevelopment-forensic-gate.mjs on the DIAL control host over the registered 'van' project pack (fingerprinted certificate, not a signature) plus owner scope-lock signature (OQ-05) and independent reviewer populating pack evidence",
-   "blocks": "all 94 backend/backend-verification units and everything after",
-   "needed_from": "owner + trusted independent verifier via native DIAL",
-   "not_substitutable": "pack checker, generated PASS or this agent"
-  },
-  {
-   "id": "BLK-002",
-   "what": "Trusted-base Project Truth bootstrap absent on main (PR #94); PR #104 ledger job fails before judging",
-   "blocks": "main admission of any branch",
-   "needed_from": "owner/code-owner adoption through PR #94 policy"
-  },
-  {
-   "id": "BLK-003",
-   "what": "Current cloud catalog has no DIAL/Commander/Artemis tools or native binding. Local Android SDK has no emulator or KVM.",
-   "blocks": "native identity readback, device evidence, S24 acceptance",
-   "needed_from": "Admitted native control-host entrypoint for registry, root signer/reviewer and handset operations"
-  },
-  {
-   "id": "BLK-004",
-   "what": "18 actual owner decisions / 49 requirement dependencies after semantic review; source values and activation permissions remain distinct",
-   "blocks": "those units' START even after F15",
-   "needed_from": "Concrete decisions in pre002/challenge/review/DECISION_REGISTER.json"
-  },
-  {
-   "id": "BLK-005",
-   "what": "Native UUID/slug mapping unverified, not an observed identity mismatch. Certifier compares native registry identity with native pack identity, not package UUID directly.",
-   "blocks": "F15",
-   "needed_from": "Read-only native registry/pack readback"
-  },
-  {
-   "id": "BLK-006",
-   "what": "Source run 39725953372 passes all mutation shards, Android build/lint, emulator (16 pass/4 core skips), Character Forge core and rebuild checks. Workflow overall fails because DDS_CONTRACT_READ_DEPLOY_KEY is absent and the trusted checker is missing from main. Secret administration was HTTP 403; no gate bypass used.",
-   "blocks": "Complete CI and trusted-base admission",
-   "needed_from": "DDS-only CI credential provisioning and documented trusted-base bootstrap/intake"
-  },
-  {
-   "id": "BLK-007",
-   "what": "AP-001 and AP-002 are verified proposals, not admitted. Original delivery remains unchanged.",
-   "blocks": "PRE-001/002 exit and PRE-003 submission admission",
-   "needed_from": "Owner/eligible independent amendment review through the documented procedure"
-  }
- ],
- "amendment_proposals": [
-  {
-   "id": "AP-001",
-   "finding": "Units BQ-003, BQ-004, QA-002, QA-003, REL-002 own zero acceptance identities (plan acceptance_test_ids empty; effective registry has no test with these units). The package's verify_review_contracts.py 79/79 does not detect it.",
-   "evidence": "docs/rebuild/rev118/pre002/AP-001/",
-   "proposal": "Bind explicit POS/NEG/REC acceptance identities to each unit (or record that each aggregates named existing IDs) through an admitted amendment; package left unchanged",
-   "status": "PROPOSED_NOT_ADMITTED",
-   "verifier": "tools/rebuild/ap001.py (13/13 selftest)"
-  }
- ],
- "delegation": {
-  "model_routing_available": "No delegation used in Codex continuation; complex work performed by lead",
-  "delegated_packets": [],
-  "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
- },
- "checkpoint": {
-  "updated_utc": "2026-10-22T05:31:02.381853+00:00",
-  "branch": "ccr-9e07e1af-8mgz1p",
-  "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-  "background_jobs": "No running native operation. Full source run 39725953372 completed: all nine mutation shards, Android emulator/build/lint, Character Forge core and rebuild checks PASS. Workflow overall fails only the absent DDS CI credential and trusted-main checker prerequisites.",
-  "last_validation": [
-   "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
-   "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
-   "AP-001 candidate: 10/10 package checks on an amended copy; ap001_candidate.py 30/30, digest 8eb76af5\u2026; four induced defects caught",
-   "pytest tests/rebuild: 11 passed; consolidation verify.py zero findings; package unchanged vs 3c3379bd",
-   "CI: Artemis 136/136 with pinned sibling (2 passed/134 errors without); test_ci_dds_contract_pin 7 tests, induced failures caught; services 198/198 in stream venv",
-   "Local backend job: all steps run; non-passes classified in ci/BACKEND_JOB_LOCAL.json",
-   "ICU regex patch: JVM harness 1,273/1,273 on patched tree; ICU test fails before, passes after",
-   "2026-10-22: 1273 JVM / 195 app unit tests passed; debug + instrumentation APKs assembled; lint 0 Error/Fatal, 80 warnings.",
-   "All 90 forecast requirement and 48 packet source hashes reproduced; original digests unchanged.",
-   "AP-002 standalone 1618 and cumulative 1632: ten documentary checks each; thirteen preservation regressions passed.",
-   "Isolated rebuild suite: 31 passed; focused CI/acquisition/ICU regressions: 14 passed.",
-   "Branch-local ledger: five commits 4fd466de..461186ef GREEN; source consolidation zero findings.",
-   "Hosted run 39710993846 at tested merge b2ed4481 (tree-identical to head 637eaf96): instrumentation 14 passed / 0 failed / 4 core-mode skips; Character Forge core gate PASS; Android build/lint, rebuild-documentary PASS; mutation result invalid (early abort masked by CI). Overall workflow still fails on DDS credential and main trusted-checker prerequisites.",
-   "Mutation controls: 20 focused tests pass; read-only preflight retains 374 cases and reports 36 invalid input findings (32 mutation descriptions), no corpus execution.",
-   "2026-10-22: all 32 retargeted mutation cases assertion-detected (23 Python, 2 browser, 7 JVM); controls passed; source restored and journal absent. Full 374-case corpus pending hosted run 39721114929.",
-   "2026-10-22: 35 focused control/CI/recovery regressions and 52 isolated rebuild regressions pass; complete identity-preserving six-shard CI partition checked; 45-record intake prepared, not admitted.",
-   "Confirmed baseline maintenance: debug cleartext narrowed to exact loopback, main HTTPS-only policy explicit, debug rig privileged; 3 host checks / 195 app units / APK and instrumentation assembly / lint pass. Release manifest processing correctly refuses the missing real deployment profile.",
-   "Confirmed mission-creation race: pre-fix 1 failed / 1 passed; post-fix 53 recovery/contract tests and 46 command API integration tests pass; one created mission/event and unrelated integrity errors preserved.",
-   "C35 and composite C11 follow-up mutants assertion-detected after passing controls. All 374 original identities remain, now 381 edits, partitioned into nine disjoint CI shards.",
-   "Full source run fca473cc: complete 374-case coverage verified from every job log; 371 detections and three survivors (C26 unknown kind, C18 class filter, C15 test-only reporting), preserved in ci/MUTATION_CORPUS_fca473cc.json. All three corrected cases now assertion-detected after passing controls.",
-   "Android fca473cc: 20 collected, 15 pass / 1 legacy deep-link timing assertion failure / 4 core-mode skips. Both new network-policy/real HTTP and debug-rig permission tests pass; all Rive core cases pass. Corrected bounded destination wait compiles.",
-   "Final mission integrity guard: 100 related backend tests pass; recover only the expected source-command unique constraint, never a post-insert learning/event integrity failure.",
-   "Production connection/policy checks: 54 passed; the single opt-in actual AGP production-signing refusal check was then explicitly enabled and passed (55 covered; no production signer/profile installed).",
-   "Python shard controls are no longer repeated on four runners: whole groups are balanced, with 59/58/58/57 cases and eight controls each; CI partition/oracle tests verify every original case and every Python control exactly once.",
-   "Final source c2a27848 / merge 9ae436ab (identical tree 42e4a6b0): all 374 legacy mutations detected, zero survivors, all original identities observed exactly once; 382 edits. Complete per-case receipt ci/MUTATION_CORPUS_c2a27848.json.",
-   "Final hosted instrumentation: 20 collected, 16 passed / zero failed / four explicit core-mode skips; both actual HTTP/policy tests and both resident Intent deliveries pass; Character Forge core gate PASS. receipts/INSTRUMENTATION_c2a27848.json.",
-   "Final source CI: Android build/lint and isolated rebuild (52 passed) PASS. Overall workflow remains blocked by DDS_CONTRACT_READ_DEPLOY_KEY and missing trusted/tools/ci/project_truth_ledger.py on main; those are not waived.",
-   "Branch-local ledger 4fd466de..c2a27848 GREEN over 15 commits. This is separate from trusted-main admission."
+  "status_vocabulary": [
+    "NOT_STARTED",
+    "IN_PROGRESS",
+    "SOURCE_IMPLEMENTED",
+    "SOURCE_TESTED",
+    "INTEGRATED",
+    "DEPLOYED",
+    "LIVE_VERIFIED",
+    "QUALIFIED",
+    "OWNER_ACCEPTED",
+    "BLOCKED"
   ],
-  "environment_notes": [
-   "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
-   "pytest from backend/requirements.txt in a venv",
-   "rsync needed for tests/hermes installer test",
-   "DDS sibling at /home/user/dial-development-system fetched origin/master 204f2f3b for F15 source reading",
-   "Gradle: repo.maven.apache.org returned 429 repeatedly; an init script adding https://maven-central.storage-download.googleapis.com/maven2/ resolved the same coordinates",
-   "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
-   "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
+  "units": {
+    "PRE-001": {
+      "packet": "VAN-PKT-001",
+      "binding": {
+        "plan_revision": "1.18",
+        "unit_id": "PRE-001",
+        "scope_digest": "package tree ac0226a2",
+        "source_commit": "b02075f327ea8180ab6d269eba358cf8c5479878"
+      },
+      "status": "EVIDENCE_COMPLETE_EXCEPT_AP001_PENDING_INDEPENDENT_REVIEW",
+      "evidence": [
+        "docs/rebuild/rev118/pre001/STATUS.json",
+        "docs/rebuild/rev118/pre001/DISPOSITIONS.json",
+        "docs/rebuild/rev118/pre001/TEST_EVIDENCE.json"
+      ],
+      "open": {
+        "refs": 0,
+        "overlap": 0,
+        "source_files_unclassified": "0/2131",
+        "trace_findings": 5
+      },
+      "acceptance": {
+        "T-NX-071": "oracle green except AP-001 trace findings; independent verification pending",
+        "T-BF-015": "selftest 15/15; independent verification pending",
+        "T-VAN-CX-002-POS/NEG/REC": "dispositions + induced rejection evidence; independent review pending",
+        "T-HVA-002-POS/NEG/REC": "34 overlap rows resolved with executed tests; independent review pending"
+      },
+      "exit_requires": "all rows dispositioned with evidence, then INDEPENDENT review of the no-loss mapping (not self-issued)"
+    },
+    "PRE-002": {
+      "status": "AUTHOR_WORK_COMPLETE_PENDING_INDEPENDENT_CHALLENGE",
+      "depends": [
+        "PRE-001"
+      ],
+      "evidence": [
+        "docs/rebuild/rev118/pre002/PRE002_STATUS.md",
+        "docs/rebuild/rev118/pre002/OWNER_DECISION_REGISTER.json",
+        "docs/rebuild/rev118/pre002/AP-001/"
+      ]
+    },
+    "PRE-003": {
+      "status": "BLOCKED",
+      "depends": [
+        "PRE-002"
+      ],
+      "blocker": "BLK-001",
+      "submission": "docs/rebuild/rev118/pre003/REVIEW_SUBMISSION.md"
+    },
+    "ALL_BE_BQ_UX_FE_QA_REL": {
+      "status": "IN_PROGRESS",
+      "reason": "Owner directs autonomous candidate source construction; formal unit acceptance remains pending canonical dependencies. See CANDIDATE_SOURCE_PROGRESS.json for all 131 original units; no complete unit claimed."
+    },
+    "BE-003": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "evidence": [
+        "backend/tests/test_gateway_startup_storage.py",
+        "docs/rebuild/rev118/CANDIDATE_SOURCE_PROGRESS.json"
+      ]
+    }
+  },
+  "blockers": [
+    {
+      "id": "BLK-001",
+      "what": "PRE-003 F15: DDS predevelopment-forensic-gate.mjs on the DIAL control host over the registered 'van' project pack (fingerprinted certificate, not a signature) plus owner scope-lock signature (OQ-05) and independent reviewer populating pack evidence",
+      "blocks": "Formal PRE-003-dependent unit acceptance, integration and activation; candidate source development continues under the owner autonomous-build instruction.",
+      "needed_from": "owner + trusted independent verifier via native DIAL",
+      "not_substitutable": "pack checker, generated PASS or this agent"
+    },
+    {
+      "id": "BLK-002",
+      "what": "Trusted-base Project Truth bootstrap absent on main (PR #94); PR #104 ledger job fails before judging",
+      "blocks": "main admission of any branch",
+      "needed_from": "owner/code-owner adoption through PR #94 policy"
+    },
+    {
+      "id": "BLK-003",
+      "what": "Current cloud catalog has no DIAL/Commander/Artemis tools or native binding. Local Android SDK has no emulator or KVM.",
+      "blocks": "native identity readback, device evidence, S24 acceptance",
+      "needed_from": "Admitted native control-host entrypoint for registry, root signer/reviewer and handset operations"
+    },
+    {
+      "id": "BLK-004",
+      "what": "18 actual owner decisions / 49 requirement dependencies after semantic review; source values and activation permissions remain distinct",
+      "blocks": "those units' START even after F15",
+      "needed_from": "Concrete decisions in pre002/challenge/review/DECISION_REGISTER.json"
+    },
+    {
+      "id": "BLK-005",
+      "what": "Native UUID/slug mapping unverified, not an observed identity mismatch. Certifier compares native registry identity with native pack identity, not package UUID directly.",
+      "blocks": "F15",
+      "needed_from": "Read-only native registry/pack readback"
+    },
+    {
+      "id": "BLK-006",
+      "what": "Source run 39725953372 passes all mutation shards, Android build/lint, emulator (16 pass/4 core skips), Character Forge core and rebuild checks. Workflow overall fails because DDS_CONTRACT_READ_DEPLOY_KEY is absent and the trusted checker is missing from main. Secret administration was HTTP 403; no gate bypass used.",
+      "blocks": "Complete CI and trusted-base admission",
+      "needed_from": "DDS-only CI credential provisioning and documented trusted-base bootstrap/intake"
+    },
+    {
+      "id": "BLK-007",
+      "what": "AP-001 and AP-002 are verified proposals, not admitted. Original delivery remains unchanged.",
+      "blocks": "PRE-001/002 exit and PRE-003 submission admission",
+      "needed_from": "Owner/eligible independent amendment review through the documented procedure"
+    }
   ],
-  "next_action": "Native PRE-003 work: obtain current registry/pack/eligible independent review and valid scope-lock approval; admit the reviewed amendments and applicable owner decisions. Provision DDS-only Actions read credential and complete documented main framework/bootstrap intake. Then start the dependency-ready canonical backend programme; no new unit or handset qualification has been self-issued.",
-  "previous_head": "c2a278488f00bacaf912853ed6e711a5b1de986a"
- },
- "observations": [
-  "OBS-001 BE-002 debug cleartext",
-  "OBS-002 BE-003 stale-claim retake reliance",
-  "OBS-003 BE-025 positive approval-resume test (corrected from BE-028)",
-  "OBS-004 BE-003 committed SQLite snapshot",
-  "OBS-005 legacy mutation registry and masked advisory failure"
- ],
- "obligations": "obligations/OBLIGATIONS.json: OBL-001..006; OBS-003 remains open and now records the absent production producer of legacy resume authorizations.",
- "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
- "pre002_reviews": "pre002/challenge/review/: NEG_REC_REVIEW (37 adequate / 6 gaps), PRODUCT_TRUTH_TRACE_REVIEW (189 classified), DECISION_REGISTER (49 real dependencies, 18 owner decisions)",
- "amendments": {
-  "AP-001": "Original verified proposal retained; not admitted.",
-  "AP-002": "Standalone candidate 1618 / cumulative 1632; ten checks pass each, thirteen preservation regressions; not admitted."
- },
- "ci_prerequisite_commits": [
-  "0c7fa8cf DDS sibling checkout",
-  "17a7cb81 services stream-host environment"
- ],
- "continuation": {
-  "owner_instruction": "opus is nolonger available finish building from the current state to completion",
-  "lead": "Codex",
-  "recovered_head": "2a10b7884b9bcf214395d5c15815ab6d96f56845",
-  "pr": 105,
-  "report": "docs/rebuild/rev118/CONTINUATION_20261022.md",
-  "application_rebuild_started": false,
-  "baseline_maintenance_commits": [
-   "6ba1fef7",
-   "eba674ac",
-   "461186ef",
-   "637eaf96",
-   "fca473cc",
-   "c2a27848"
+  "amendment_proposals": [
+    {
+      "id": "AP-001",
+      "finding": "Units BQ-003, BQ-004, QA-002, QA-003, REL-002 own zero acceptance identities (plan acceptance_test_ids empty; effective registry has no test with these units). The package's verify_review_contracts.py 79/79 does not detect it.",
+      "evidence": "docs/rebuild/rev118/pre002/AP-001/",
+      "proposal": "Bind explicit POS/NEG/REC acceptance identities to each unit (or record that each aggregates named existing IDs) through an admitted amendment; package left unchanged",
+      "status": "PROPOSED_NOT_ADMITTED",
+      "verifier": "tools/rebuild/ap001.py (13/13 selftest)"
+    }
   ],
-  "tested_android_head": "637eaf96ff617c608401754a044145811b8fd318",
-  "hosted_result": "receipts/INSTRUMENTATION_637eaf96.json",
-  "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
-  "verified_source_head": "c2a278488f00bacaf912853ed6e711a5b1de986a",
-  "source_qualification_run": 39725953372,
-  "latest_checkpoint_report": "CHECKPOINT_c2a27848_20261022.md"
- },
- "provenance_correction": {
-  "finding": "90 forecast hashes previously reported unverifiable",
-  "resolution": "All 90 requirement and 48 packet hashes match original bundled records with sorted, non-ASCII-escaped JSON and default separators.",
-  "evidence": "pre002/challenge/review/FORECAST_PROVENANCE.json",
-  "qualification": "Documentary source provenance; independent review remains separate."
- },
- "resolved_blockers": [
-  {
-   "id": "BLK-008",
-   "what": "All 374 original legacy mutations pass in source run 39725953372; 382 edits, zero survivors, exact per-case coverage. Original stale inputs, misleading CI status, invalid mutants and three complete-corpus survivors corrected with retained failure evidence.",
-   "blocks": "No remaining legacy source-corpus execution gap; independent unit/admission review remains separate.",
-   "needed_from": "Finish the full hosted corpus, triage any survivors/invalid executions, and retain independent preparation review of the semantic mappings.",
-   "status": "RESOLVED_SOURCE_VERIFICATION",
-   "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
-  }
- ]
+  "delegation": {
+    "model_routing_available": "No delegation used in Codex continuation; complex work performed by lead",
+    "delegated_packets": [],
+    "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
+  },
+  "checkpoint": {
+    "updated_utc": "2026-10-22T05:31:02.381853+00:00",
+    "branch": "ccr-9e07e1af-8mgz1p",
+    "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
+    "background_jobs": "No running native operation. Full source run 39725953372 completed: all nine mutation shards, Android emulator/build/lint, Character Forge core and rebuild checks PASS. Workflow overall fails only the absent DDS CI credential and trusted-main checker prerequisites.",
+    "last_validation": [
+      "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
+      "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
+      "AP-001 candidate: 10/10 package checks on an amended copy; ap001_candidate.py 30/30, digest 8eb76af5\u2026; four induced defects caught",
+      "pytest tests/rebuild: 11 passed; consolidation verify.py zero findings; package unchanged vs 3c3379bd",
+      "CI: Artemis 136/136 with pinned sibling (2 passed/134 errors without); test_ci_dds_contract_pin 7 tests, induced failures caught; services 198/198 in stream venv",
+      "Local backend job: all steps run; non-passes classified in ci/BACKEND_JOB_LOCAL.json",
+      "ICU regex patch: JVM harness 1,273/1,273 on patched tree; ICU test fails before, passes after",
+      "2026-10-22: 1273 JVM / 195 app unit tests passed; debug + instrumentation APKs assembled; lint 0 Error/Fatal, 80 warnings.",
+      "All 90 forecast requirement and 48 packet source hashes reproduced; original digests unchanged.",
+      "AP-002 standalone 1618 and cumulative 1632: ten documentary checks each; thirteen preservation regressions passed.",
+      "Isolated rebuild suite: 31 passed; focused CI/acquisition/ICU regressions: 14 passed.",
+      "Branch-local ledger: five commits 4fd466de..461186ef GREEN; source consolidation zero findings.",
+      "Hosted run 39710993846 at tested merge b2ed4481 (tree-identical to head 637eaf96): instrumentation 14 passed / 0 failed / 4 core-mode skips; Character Forge core gate PASS; Android build/lint, rebuild-documentary PASS; mutation result invalid (early abort masked by CI). Overall workflow still fails on DDS credential and main trusted-checker prerequisites.",
+      "Mutation controls: 20 focused tests pass; read-only preflight retains 374 cases and reports 36 invalid input findings (32 mutation descriptions), no corpus execution.",
+      "2026-10-22: all 32 retargeted mutation cases assertion-detected (23 Python, 2 browser, 7 JVM); controls passed; source restored and journal absent. Full 374-case corpus pending hosted run 39721114929.",
+      "2026-10-22: 35 focused control/CI/recovery regressions and 52 isolated rebuild regressions pass; complete identity-preserving six-shard CI partition checked; 45-record intake prepared, not admitted.",
+      "Confirmed baseline maintenance: debug cleartext narrowed to exact loopback, main HTTPS-only policy explicit, debug rig privileged; 3 host checks / 195 app units / APK and instrumentation assembly / lint pass. Release manifest processing correctly refuses the missing real deployment profile.",
+      "Confirmed mission-creation race: pre-fix 1 failed / 1 passed; post-fix 53 recovery/contract tests and 46 command API integration tests pass; one created mission/event and unrelated integrity errors preserved.",
+      "C35 and composite C11 follow-up mutants assertion-detected after passing controls. All 374 original identities remain, now 381 edits, partitioned into nine disjoint CI shards.",
+      "Full source run fca473cc: complete 374-case coverage verified from every job log; 371 detections and three survivors (C26 unknown kind, C18 class filter, C15 test-only reporting), preserved in ci/MUTATION_CORPUS_fca473cc.json. All three corrected cases now assertion-detected after passing controls.",
+      "Android fca473cc: 20 collected, 15 pass / 1 legacy deep-link timing assertion failure / 4 core-mode skips. Both new network-policy/real HTTP and debug-rig permission tests pass; all Rive core cases pass. Corrected bounded destination wait compiles.",
+      "Final mission integrity guard: 100 related backend tests pass; recover only the expected source-command unique constraint, never a post-insert learning/event integrity failure.",
+      "Production connection/policy checks: 54 passed; the single opt-in actual AGP production-signing refusal check was then explicitly enabled and passed (55 covered; no production signer/profile installed).",
+      "Python shard controls are no longer repeated on four runners: whole groups are balanced, with 59/58/58/57 cases and eight controls each; CI partition/oracle tests verify every original case and every Python control exactly once.",
+      "Final source c2a27848 / merge 9ae436ab (identical tree 42e4a6b0): all 374 legacy mutations detected, zero survivors, all original identities observed exactly once; 382 edits. Complete per-case receipt ci/MUTATION_CORPUS_c2a27848.json.",
+      "Final hosted instrumentation: 20 collected, 16 passed / zero failed / four explicit core-mode skips; both actual HTTP/policy tests and both resident Intent deliveries pass; Character Forge core gate PASS. receipts/INSTRUMENTATION_c2a27848.json.",
+      "Final source CI: Android build/lint and isolated rebuild (52 passed) PASS. Overall workflow remains blocked by DDS_CONTRACT_READ_DEPLOY_KEY and missing trusted/tools/ci/project_truth_ledger.py on main; those are not waived.",
+      "Branch-local ledger 4fd466de..c2a27848 GREEN over 15 commits. This is separate from trusted-main admission."
+    ],
+    "environment_notes": [
+      "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
+      "pytest from backend/requirements.txt in a venv",
+      "rsync needed for tests/hermes installer test",
+      "DDS sibling at /home/user/dial-development-system fetched origin/master 204f2f3b for F15 source reading",
+      "Gradle: repo.maven.apache.org returned 429 repeatedly; an init script adding https://maven-central.storage-download.googleapis.com/maven2/ resolved the same coordinates",
+      "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
+      "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
+    ],
+    "next_action": "Native PRE-003 work: obtain current registry/pack/eligible independent review and valid scope-lock approval; admit the reviewed amendments and applicable owner decisions. Provision DDS-only Actions read credential and complete documented main framework/bootstrap intake. Then start the dependency-ready canonical backend programme; no new unit or handset qualification has been self-issued.",
+    "previous_head": "c2a278488f00bacaf912853ed6e711a5b1de986a"
+  },
+  "observations": [
+    "OBS-001 BE-002 debug cleartext",
+    "OBS-002 BE-003 stale-claim retake reliance",
+    "OBS-003 BE-025 positive approval-resume test (corrected from BE-028)",
+    "OBS-004 BE-003 committed SQLite snapshot",
+    "OBS-005 legacy mutation registry and masked advisory failure"
+  ],
+  "obligations": "obligations/OBLIGATIONS.json: OBL-001..006; OBS-003 remains open and now records the absent production producer of legacy resume authorizations.",
+  "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
+  "pre002_reviews": "pre002/challenge/review/: NEG_REC_REVIEW (37 adequate / 6 gaps), PRODUCT_TRUTH_TRACE_REVIEW (189 classified), DECISION_REGISTER (49 real dependencies, 18 owner decisions)",
+  "amendments": {
+    "AP-001": "Original verified proposal retained; not admitted.",
+    "AP-002": "Standalone candidate 1618 / cumulative 1632; ten checks pass each, thirteen preservation regressions; not admitted."
+  },
+  "ci_prerequisite_commits": [
+    "0c7fa8cf DDS sibling checkout",
+    "17a7cb81 services stream-host environment"
+  ],
+  "continuation": {
+    "owner_instruction": "opus is nolonger available finish building from the current state to completion",
+    "lead": "Codex",
+    "recovered_head": "2a10b7884b9bcf214395d5c15815ab6d96f56845",
+    "pr": 105,
+    "report": "docs/rebuild/rev118/CONTINUATION_20261022.md",
+    "application_rebuild_started": false,
+    "baseline_maintenance_commits": [
+      "6ba1fef7",
+      "eba674ac",
+      "461186ef",
+      "637eaf96",
+      "fca473cc",
+      "c2a27848"
+    ],
+    "tested_android_head": "637eaf96ff617c608401754a044145811b8fd318",
+    "hosted_result": "receipts/INSTRUMENTATION_637eaf96.json",
+    "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
+    "verified_source_head": "c2a278488f00bacaf912853ed6e711a5b1de986a",
+    "source_qualification_run": 39725953372,
+    "latest_checkpoint_report": "CHECKPOINT_c2a27848_20261022.md"
+  },
+  "provenance_correction": {
+    "finding": "90 forecast hashes previously reported unverifiable",
+    "resolution": "All 90 requirement and 48 packet hashes match original bundled records with sorted, non-ASCII-escaped JSON and default separators.",
+    "evidence": "pre002/challenge/review/FORECAST_PROVENANCE.json",
+    "qualification": "Documentary source provenance; independent review remains separate."
+  },
+  "resolved_blockers": [
+    {
+      "id": "BLK-008",
+      "what": "All 374 original legacy mutations pass in source run 39725953372; 382 edits, zero survivors, exact per-case coverage. Original stale inputs, misleading CI status, invalid mutants and three complete-corpus survivors corrected with retained failure evidence.",
+      "blocks": "No remaining legacy source-corpus execution gap; independent unit/admission review remains separate.",
+      "needed_from": "Finish the full hosted corpus, triage any survivors/invalid executions, and retain independent preparation review of the semantic mappings.",
+      "status": "RESOLVED_SOURCE_VERIFICATION",
+      "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
+    }
+  ],
+  "current_action": "Implement same-task browser continuation through genuine fresh sealed owner command; preserve advisory decisions and financial restrictions.",
+  "updated_at_utc": "2026-10-22T06:06:14.880598+00:00"
 }

@@ -8,7 +8,7 @@ Read `CONSOLIDATION_STATE.json` and `docs/consolidation/START_HERE.md` first. Th
 - Execute its `verification/EFFECTIVE_TEST_CONTRACTS_REV118.json`, not only the inherited test registry. Preserve 324 requirements, 1,610 acceptance identities, 234 contexts, 349 owner actions and 131 stable development units.
 - This source consolidation has not implemented the complete new blueprint or qualified a release. Existing source tests and documentary checks are separate from its future acceptance programme.
 - Install the existing Project Truth hooks with `sh tools/ci/install_project_truth_hooks.sh` before the first source commit. Keep existing Project Truth records, hooks, security, signing, visual locks, native authority and release gates. New planning documents cannot silently authorize financial or host effects.
-- Follow PRE admission and the canonical backend dependencies. No new frontend/prototype work before BG-001. Existing Android code remains the migration baseline.
+- Follow PRE admission and the canonical dependencies for unit acceptance, integration and activation. The owner's subsequent autonomous-build instruction permits candidate backend source implementation and source tests while native admission is pending; record that evidence separately and do not issue gate PASS claims. No new frontend/prototype work before BG-001. Existing Android code remains the migration baseline.
 
 ## Source boundaries
 

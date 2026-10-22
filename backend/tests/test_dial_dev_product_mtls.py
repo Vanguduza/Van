@@ -186,6 +186,7 @@ def test_real_settings_wire_production_product_identity(tls_gateway):
     config, *_ = tls_gateway
     settings = Settings(
         _env_file=None, van_env="production", require_device_binding=True,
+        database_path=str(Path(config.token_file).parent / "gateway.sqlite3"),
         hermes_base_url="http://10.77.0.1:8642", van_public_base_url="https://van.example:9443",
         dial_dev_enabled=True, dial_dev_base_url="https://10.77.0.2:8443",
         dial_dev_token_file=config.token_file, dial_dev_tls_ca_file=config.tls_ca_file,

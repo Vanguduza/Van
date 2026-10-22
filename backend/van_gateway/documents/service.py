@@ -29,6 +29,8 @@ class DocumentService:
         self.artifacts = artifacts
         base = Path(store.path).resolve().parent
         self.root = Path(root).resolve() if root else base / "documents"
+
+    def _ensure_root(self) -> None:
         self.root.mkdir(parents=True, exist_ok=True)
         try:
             os.chmod(self.root, 0o700)
@@ -80,6 +82,7 @@ class DocumentService:
             raise DocumentServiceError(exc.code, exc.detail) from exc
         document_id = f"doc_{uuid.uuid4().hex}"
         source_sha = self._sha(data)
+        self._ensure_root()
         source_path = self._path(document_id, "source")
         source_path.write_bytes(data)
         try:

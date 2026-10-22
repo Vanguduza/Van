@@ -17,6 +17,7 @@ def _base_env(monkeypatch, **overrides):
         "VAN_REQUIRE_DEVICE_BINDING": "true",
         "VAN_HERMES_BASE_URL": "https://hermes.internal.example",
         "VAN_PUBLIC_BASE_URL": "https://van.example.com",
+        "VAN_DATABASE_PATH": "/tmp/van-production-fixture/gateway.sqlite3",
     }
     env.update(overrides)
     for key, value in env.items():
@@ -104,6 +105,7 @@ def test_a_non_loopback_host_that_merely_contains_localhost_is_not_flagged(monke
 
 def core_only_settings(**changes):
     values = dict(_env_file=None, van_env="production", require_device_binding=True,
+                  database_path="/tmp/van-production-fixture/gateway.sqlite3",
                   deployment_topology="CORE_ONLY_V2", mtls_enabled=True, mtls_bind="10.0.1.233",
                   mtls_interface="enp0s6", mtls_port=8443, loopback_host="127.0.0.1", loopback_port=8787,
                   hermes_base_url="http://127.0.0.1:8642", van_public_base_url="https://owner.example:8443",

@@ -2548,10 +2548,10 @@ MIGRATIONS: dict[int, str] = {
 class Store:
     def __init__(self, path: str) -> None:
         self.path = path
-        Path(path).parent.mkdir(parents=True, exist_ok=True)
 
     @asynccontextmanager
     async def connection(self) -> AsyncIterator[aiosqlite.Connection]:
+        Path(self.path).parent.mkdir(parents=True, exist_ok=True)
         # Cancellation must not abandon the worker that is opening this connection.
         # Shutdown used to close the event loop while that worker still held futures.
         opening = asyncio.ensure_future(aiosqlite.connect(self.path))

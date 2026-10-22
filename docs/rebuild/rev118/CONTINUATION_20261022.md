@@ -61,3 +61,9 @@ checker on main. Read CHECKPOINT_c2a27848_20261022.md and the current ledger. Th
 canonical Rev1.18 programme remains blocked before PRE-003, not completed by this
 maintenance. Scope-lock/independent admission, production profile/signing, real
 service/provider/firewall evidence and S24 acceptance remain outstanding.
+
+## Autonomous candidate build resumed after f619ddf1
+
+The owner explicitly corrected the stop at native admission. New append-only receipt auth-20261022-owner-autonomous-candidate-build records source construction authority without issuing any certificate, signature or release permission. CLAUDE.md now distinguishes candidate implementation from formal acceptance. CANDIDATE_SOURCE_PROGRESS.json retains all 131 original unit identities/dependencies; no unit is declared complete.
+
+BE-003 storage: reproduced import mkdir side effects in fresh interpreters from root and backend. Implemented lazy compatible ASGI entry point, deferred Store/DocumentService directory creation, absolute development storage outside the checkout, and refusal of missing/relative production paths. Real TestClient startup migrates the configured store and retains ingress authentication. 122 targeted tests pass; broad suite audit is next. No original package bytes changed.

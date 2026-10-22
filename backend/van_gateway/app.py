@@ -3850,4 +3850,6 @@ def create_app() -> FastAPI:
     return app
 
 
-app = create_app()
+from van_gateway.lazy_app import LazyGateway
+
+app = LazyGateway(create_app)

@@ -3,6 +3,7 @@ from __future__ import annotations
 import ipaddress
 import re
 from functools import lru_cache
+from pathlib import Path
 from urllib.parse import urlsplit
 
 from pydantic import AliasChoices, Field, model_validator
@@ -48,7 +49,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="VAN_", env_file=".env", extra="ignore")
 
     app_name: str = "van-gateway"
-    database_path: str = "data/van_gateway.sqlite3"
+    database_path: str = Field(default_factory=lambda: str(
+        Path.home() / ".local" / "state" / "van" / "van_gateway.sqlite3"
+    ))
     hermes_base_url: str = "http://127.0.0.1:8642"
     deployment_topology: str = ""
     mtls_interface: str = ""
@@ -450,6 +453,8 @@ class Settings(BaseSettings):
         host has to remember to run is a check a release host will eventually skip.
         """
         self.assert_production_safe()
+        if not Path(self.database_path).is_absolute():
+            raise ValueError("VAN_DATABASE_PATH must be an absolute filesystem path")
         return self
 
     def _core_only_production_bindings(self) -> bool:
@@ -517,6 +522,8 @@ class Settings(BaseSettings):
                         "this host, or set VAN_ALLOW_LOOPBACK_IN_PRODUCTION=1 if this "
                         "deployment genuinely talks to itself only."
                     )
+        if "database_path" not in self.model_fields_set or not Path(self.database_path).is_absolute():
+            raise ValueError("VAN_DATABASE_PATH must be explicitly configured as an absolute path in production")
 
 
 @lru_cache

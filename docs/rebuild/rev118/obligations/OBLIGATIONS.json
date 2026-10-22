@@ -106,8 +106,13 @@
    "environment": "Host source tests.",
    "pass_evidence": "Audit-hook log (empty) and before/after snapshot hash on the frozen baseline SHA. Also an owner decision on whether the snapshot remains a tracked fixture.",
    "proposed_change_for_owner": "Make the app factory lazy (no create_app() at import) or have tests use a tmp database; give Settings no relative default in production. Application change: needs unit admission and a ledger authorization.",
-   "status": "OPEN_OBLIGATION",
-   "probe_result": "Audit hook (sqlite3.connect + os.mkdir) over trading/tests/test_oci_trading_topology_bootstrap.py + tests/hermes/test_profile_layout.py: 48 passed, no events. Over all of tests/contracts: 1,525 passed, 4 skipped, exactly two events (mkdir data, mkdir data/documents, both from test_artemis_console_boundary importing the module-level app) and zero sqlite3.connect to the tracked path. Snapshot sha256 unchanged (2599f07d79e698115dddf647deef263efb927d8de6c8bafc7a08e935fa29f95e). The WAL/shm side files observed earlier are therefore NOT explained by tests/contracts or the two suites above; their source remains unidentified (candidates not yet probed: backend suite run with cwd at the repo root, tools/ops/backup.py defaults). The obligation's audit-hook stimulus over every canonical root is what closes it."
+   "status": "IMPORT_AND_STARTUP_STORAGE_SOURCE_FIXED_BROAD_SUITE_AUDIT_PENDING",
+   "probe_result": "Audit hook (sqlite3.connect + os.mkdir) over trading/tests/test_oci_trading_topology_bootstrap.py + tests/hermes/test_profile_layout.py: 48 passed, no events. Over all of tests/contracts: 1,525 passed, 4 skipped, exactly two events (mkdir data, mkdir data/documents, both from test_artemis_console_boundary importing the module-level app) and zero sqlite3.connect to the tracked path. Snapshot sha256 unchanged (2599f07d79e698115dddf647deef263efb927d8de6c8bafc7a08e935fa29f95e). The WAL/shm side files observed earlier are therefore NOT explained by tests/contracts or the two suites above; their source remains unidentified (candidates not yet probed: backend suite run with cwd at the repo root, tools/ops/backup.py defaults). The obligation's audit-hook stimulus over every canonical root is what closes it.",
+   "current_review": {
+    "change": "LazyGateway preserves ASGI app import compatibility, constructs once on use and leaves storage initialization to startup/actual document writes. Settings uses an absolute user-state development default and requires explicit absolute production database path. Store and DocumentService constructors no longer create directories.",
+    "evidence": "backend/tests/test_gateway_startup_storage.py; 122 related gateway, production config, mTLS, document, backup, storage and endpoint boundary source tests pass. Both fresh-interpreter import probes failed before the fix, then passed.",
+    "remaining": "Audit all canonical suites and confirm tracked snapshot unchanged; independent unit and release acceptance not issued."
+   }
   },
   {
    "id": "OBL-005",

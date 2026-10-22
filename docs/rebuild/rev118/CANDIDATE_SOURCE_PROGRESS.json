@@ -1,0 +1,2265 @@
+{
+  "schema": "van.rebuild.candidate-source-progress/1",
+  "updated_at_utc": "2026-10-22T06:06:14.880598+00:00",
+  "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
+  "authority": "auth-20261022-owner-autonomous-candidate-build",
+  "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
+  "units": {
+    "PRE-001": {
+      "title": "Read-only complete evidence and feature inventory",
+      "dependencies": [],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "PRE-002": {
+      "title": "Whole-product semantic reconciliation and packet contracts",
+      "dependencies": [
+        "PRE-001"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "PRE-003": {
+      "title": "Independent DIAL F0\u2013F15 build-ready certification",
+      "dependencies": [
+        "PRE-002"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-001": {
+      "title": "Source consolidation and preservation oracle",
+      "dependencies": [
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-002": {
+      "title": "Device identity, bounded authority and intent fencing",
+      "dependencies": [
+        "BE-001",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-003": {
+      "title": "Durable event, readback and projection infrastructure",
+      "dependencies": [
+        "BE-002",
+        "PRE-003"
+      ],
+      "candidate_status": "IN_PROGRESS",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": [
+        {
+          "change": "Inert ASGI import, deferred storage creation and explicit absolute production database path",
+          "evidence": "backend/tests/test_gateway_startup_storage.py; /tmp/van-autonomous-storage-tests.txt",
+          "result": "122 focused source tests passed; import probe failed on the original source; not independent or live acceptance"
+        }
+      ]
+    },
+    "BE-004": {
+      "title": "Accounts, broker/exchange directory and operation capabilities",
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-005": {
+      "title": "Broker authentication, credential rotation and health",
+      "dependencies": [
+        "BE-004",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-006": {
+      "title": "Exact funding ledger and flow-adjusted accounting",
+      "dependencies": [
+        "BE-003",
+        "BE-004",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-007": {
+      "title": "Deposits, withdrawals, transfers and provider rails",
+      "dependencies": [
+        "BE-005",
+        "BE-006",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-008": {
+      "title": "Instrument identity, conventional/crypto market feeds, bars and depth",
+      "dependencies": [
+        "BE-003",
+        "BE-005",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-009": {
+      "title": "Mandates, risk, sizing and portfolio reservations",
+      "dependencies": [
+        "BE-002",
+        "BE-006",
+        "BE-008",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-010": {
+      "title": "Venue execution, parent/child orders, crypto spot adapters and reconciliation",
+      "dependencies": [
+        "BE-005",
+        "BE-008",
+        "BE-009",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-011": {
+      "title": "Manual trading, adds and management handover",
+      "dependencies": [
+        "BE-009",
+        "BE-010",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-012": {
+      "title": "Positions, protection, portfolio, history and TCA",
+      "dependencies": [
+        "BE-006",
+        "BE-010",
+        "BE-011",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-014": {
+      "title": "News, calendar and source-health ingestion",
+      "dependencies": [
+        "BE-003",
+        "BE-008",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-015": {
+      "title": "Event analysis, history, analogues and expectations",
+      "dependencies": [
+        "BE-014",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-018": {
+      "title": "Chart data contracts, indicators, drawings and workspaces",
+      "dependencies": [
+        "BE-003",
+        "BE-008",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-019": {
+      "title": "Historical replay, simulation and isolated practice data",
+      "dependencies": [
+        "BE-008",
+        "BE-018",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-020": {
+      "title": "Watchlists, persistent alerts and typed screening",
+      "dependencies": [
+        "BE-003",
+        "BE-008",
+        "BE-014",
+        "BE-018",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-021": {
+      "title": "Analyst, chart observations and cross-signal intelligence",
+      "dependencies": [
+        "BE-012",
+        "BE-015",
+        "BE-018",
+        "BE-019",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-023": {
+      "title": "Projects, tasks, missions and truthful workflow graphs",
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-024": {
+      "title": "Agents, Hermes, Muse and provider-bound interventions",
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "BE-023",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-025": {
+      "title": "Browser, remote interaction, artifact and share intake",
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "BE-024",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-026": {
+      "title": "ARTEMIS device tests and independent evidence services",
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "BE-023",
+        "BE-025",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-027": {
+      "title": "Memory, knowledge, goals, privacy and erasure",
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-028": {
+      "title": "Automation, reminders and schedules",
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "BE-023",
+        "BE-027",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-029": {
+      "title": "Conversation, voice and speaker-profile services",
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "BE-027",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-030": {
+      "title": "Attention, notifications, presence and compact summaries",
+      "dependencies": [
+        "BE-003",
+        "BE-012",
+        "BE-020",
+        "BE-023",
+        "BE-024",
+        "BE-028",
+        "BE-029",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-031": {
+      "title": "Connected providers, settings, devices and diagnostics",
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "BE-005",
+        "BE-024",
+        "BE-025",
+        "BE-029",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-034": {
+      "title": "Development studio, CI/security and evidence-workspace adapters",
+      "dependencies": [
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-035": {
+      "title": "Qualified chronological strategy evaluator and simulator oracle",
+      "dependencies": [
+        "BE-003",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "BE-019",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-013": {
+      "title": "Strategy registry, signed trading modes and qualified edge-consumer contracts",
+      "dependencies": [
+        "BE-009",
+        "BE-010",
+        "BE-035",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-016": {
+      "title": "Governed news effects D1\u2013D7 and news strategy lifecycle",
+      "dependencies": [
+        "BE-009",
+        "BE-012",
+        "BE-013",
+        "BE-015",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-017": {
+      "title": "Armed news tickets, readiness and single-use execution",
+      "dependencies": [
+        "BE-002",
+        "BE-010",
+        "BE-016",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-022": {
+      "title": "Owner diagnostics, pattern discovery and learning review",
+      "dependencies": [
+        "BE-011",
+        "BE-013",
+        "BE-019",
+        "BE-021",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-004": {
+      "title": "Pinned dependencies and isolated research runtime",
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-005": {
+      "title": "Point-in-time market dataset and universe snapshots",
+      "dependencies": [
+        "BE-001",
+        "BE-008",
+        "BE-010",
+        "PRE-003",
+        "VAN-ML-PKT-004"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-037": {
+      "title": "Chain-aware identity and permitted read-only discovery adapters",
+      "dependencies": [
+        "BE-003",
+        "BE-008",
+        "VAN-ML-PKT-005"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-038": {
+      "title": "Complete discovery cohorts and staged deterministic screening",
+      "dependencies": [
+        "BE-037",
+        "BE-020"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-039": {
+      "title": "Solana token capability and uncertainty analyzer",
+      "dependencies": [
+        "BE-037",
+        "BE-038"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-040": {
+      "title": "EVM contract/proxy capability and uncertainty analyzer",
+      "dependencies": [
+        "BE-037",
+        "BE-038"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-006": {
+      "title": "Shared feature definitions and Feast parity",
+      "dependencies": [
+        "BE-001",
+        "BE-003",
+        "BE-008",
+        "PRE-003",
+        "VAN-ML-PKT-005"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-042": {
+      "title": "Temporal wallet attribution and holder-flow intelligence",
+      "dependencies": [
+        "BE-039",
+        "BE-040",
+        "VAN-ML-PKT-006"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-007": {
+      "title": "Targets, executable labels and outcome provenance",
+      "dependencies": [
+        "BE-001",
+        "BE-008",
+        "BE-018",
+        "PRE-003",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-008": {
+      "title": "Chronological folds, lookahead and warmup diagnostics",
+      "dependencies": [
+        "BE-001",
+        "BE-035",
+        "PRE-003",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-009": {
+      "title": "Simulation accounting, intrabar and timing corrections",
+      "dependencies": [
+        "BE-001",
+        "BE-035",
+        "PRE-003",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-007"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-041": {
+      "title": "State-bound buy/sell simulations and executable quote facts",
+      "dependencies": [
+        "BE-039",
+        "BE-040",
+        "BE-010",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-009"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-010": {
+      "title": "Account-wide replay and execution-policy parity",
+      "dependencies": [
+        "BE-001",
+        "BE-012",
+        "BE-035",
+        "PRE-003",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-011": {
+      "title": "Qlib data, processor and recorder integration",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-012": {
+      "title": "LightGBM expected-return and net-edge regressors",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-013": {
+      "title": "LightGBM setup-event classification",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-014": {
+      "title": "LightGBM quantile and grouped ranking adapters",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-015": {
+      "title": "Challenger and simple baseline suite",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-016": {
+      "title": "NeuralForecast bridge and N-HiTS",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-010"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-017": {
+      "title": "N-BEATSx contextual forecasts and decomposition",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-016"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-018": {
+      "title": "DeepAR distributional forecasts and retained scenarios",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-016"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-019": {
+      "title": "Contextual and multivariate neural challengers",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-020": {
+      "title": "One calibration and uncertainty-validation boundary",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-021": {
+      "title": "Unified Optuna and rolling research studies",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-022": {
+      "title": "Safe model artifacts and candidate registry",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-023": {
+      "title": "Adaptive retraining scheduler and lifecycle",
+      "dependencies": [
+        "BE-001",
+        "BE-028",
+        "PRE-003",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-024": {
+      "title": "Forecast serving, cache, freshness and novelty gates",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-025": {
+      "title": "Forecast fusion, arbiter and mode evidence integration",
+      "dependencies": [
+        "BE-001",
+        "BE-013",
+        "PRE-003",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-024"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-026": {
+      "title": "Instrument and strategy protection policies",
+      "dependencies": [
+        "BE-001",
+        "BE-012",
+        "PRE-003",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-025"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-027": {
+      "title": "Outcome ledger, drift and proprietary learning data",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-043": {
+      "title": "Finality, reorganization and descendant revalidation",
+      "dependencies": [
+        "BE-037",
+        "BE-041",
+        "BE-042",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-027"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-028": {
+      "title": "Complete backend APIs and future-screen consumption",
+      "dependencies": [
+        "BE-001",
+        "BE-021",
+        "PRE-003",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-029": {
+      "title": "VM deployment, isolation, recovery and service operations",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-028"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-037": {
+      "title": "Prediction-market scope, VM profiles and source capability contracts",
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-014",
+        "PRE-003",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-038": {
+      "title": "Kalshi and comparison-provider ingestion, depth and history",
+      "dependencies": [
+        "BE-001",
+        "BE-003",
+        "BE-014",
+        "PRE-003",
+        "VAN-ML-PKT-037"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-039": {
+      "title": "Event semantics, settlement and cross-venue equivalence",
+      "dependencies": [
+        "BE-001",
+        "BE-015",
+        "PRE-003",
+        "VAN-ML-PKT-037"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-040": {
+      "title": "Coherent event distributions, quality and probability features",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-041": {
+      "title": "Event calibration, grouped chronology and frozen surprise",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-040"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-042": {
+      "title": "Conditional asset-response models and forecast-stack integration",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-041"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-043": {
+      "title": "Calibrated event value and bounded position evidence",
+      "dependencies": [
+        "BE-001",
+        "BE-009",
+        "BE-016",
+        "PRE-003",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-044": {
+      "title": "Execution-realistic prediction-contract replay",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-045": {
+      "title": "Contract-consistency and non-atomic arbitrage research laboratory",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-044"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-046": {
+      "title": "Inventory-aware event market-making research laboratory",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-044"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-047": {
+      "title": "Prediction-market incremental-value and prospective study programme",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-036": {
+      "title": "Continuous governed strategy and execution-policy development; operational learning integration",
+      "dependencies": [
+        "BE-003",
+        "BE-010",
+        "BE-012",
+        "BE-013",
+        "BE-021",
+        "BE-022",
+        "BE-028",
+        "BE-035",
+        "PRE-003",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-047"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-044": {
+      "title": "Read-only crypto end-to-end research, operations and native consumption contract",
+      "dependencies": [
+        "BE-038",
+        "BE-041",
+        "BE-042",
+        "BE-043",
+        "BE-021",
+        "BE-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-047"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-048": {
+      "title": "Prediction-market consumers, operations and complete backend integration",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-032": {
+      "title": "Whole-product capability, action and UI-consumption catalog",
+      "dependencies": [
+        "BE-004",
+        "BE-007",
+        "BE-012",
+        "BE-013",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-034",
+        "BE-036",
+        "BE-044",
+        "PRE-003",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-048"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BE-033": {
+      "title": "Backend deployment, recovery, capacity and observability",
+      "dependencies": [
+        "BE-032",
+        "PRE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BQ-001": {
+      "title": "Trade/account/market/risk/execution headless end-to-end",
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-013",
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034",
+        "BE-035",
+        "BE-036",
+        "BE-044",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BQ-002": {
+      "title": "Provider accounts, spot crypto, funds/settlement and concurrent risk qualification",
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-013",
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034",
+        "BE-035",
+        "BE-036",
+        "BE-044",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BQ-003": {
+      "title": "News/history/armed grants/chart-observation headless intelligence",
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-013",
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034",
+        "BE-035",
+        "BE-036",
+        "BE-044",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BQ-004": {
+      "title": "Work/agents/Muse/browser/voice/memory/automation service integration",
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-013",
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034",
+        "BE-035",
+        "BE-036",
+        "BE-044",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BQ-005": {
+      "title": "Backend privacy, recovery, capacity, restart and source fault injection",
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-013",
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034",
+        "BE-035",
+        "BE-036",
+        "BE-044",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BQ-008": {
+      "title": "Independent chain-provider, security and finality qualification",
+      "dependencies": [
+        "BE-037",
+        "BE-038",
+        "BE-039",
+        "BE-040",
+        "BE-041",
+        "BE-042",
+        "BE-043",
+        "BE-044"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-030": {
+      "title": "Reproducible forecast and economic qualification reports",
+      "dependencies": [
+        "BE-001",
+        "BE-044",
+        "PRE-003",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-031": {
+      "title": "Prospective shadow and controlled sandbox admission",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-030"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BQ-007": {
+      "title": "Independent execution, adaptive-loop, evaluator and signed-policy regression qualification",
+      "dependencies": [
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-030",
+        "VAN-ML-PKT-031"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BQ-009": {
+      "title": "Independent economics, cohort, evidence and advisory-authority qualification",
+      "dependencies": [
+        "BE-044",
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-030",
+        "VAN-ML-PKT-031"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "VAN-ML-PKT-032": {
+      "title": "Independent additive backend closure",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-030",
+        "VAN-ML-PKT-031",
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BQ-006": {
+      "title": "Whole-product backend feature/action/caller and independent Zuul audit",
+      "dependencies": [
+        "BQ-001",
+        "BQ-002",
+        "BQ-003",
+        "BQ-004",
+        "BQ-005",
+        "BQ-007",
+        "BQ-008",
+        "BQ-009",
+        "VAN-ML-PKT-032"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "BG-001": {
+      "title": "Global Backend Complete / Frontend Entry Certificate",
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-013",
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034",
+        "BE-035",
+        "BE-036",
+        "BE-037",
+        "BE-038",
+        "BE-039",
+        "BE-040",
+        "BE-041",
+        "BE-042",
+        "BE-043",
+        "BE-044",
+        "BQ-001",
+        "BQ-002",
+        "BQ-003",
+        "BQ-004",
+        "BQ-005",
+        "BQ-006",
+        "BQ-007",
+        "BQ-008",
+        "BQ-009",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-030",
+        "VAN-ML-PKT-031",
+        "VAN-ML-PKT-032",
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "UX-001": {
+      "title": "Full-product information architecture from the complete backend",
+      "dependencies": [
+        "BG-001"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "UX-002": {
+      "title": "Locked dark/light native material and component goldens",
+      "dependencies": [
+        "BG-001",
+        "UX-001"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "UX-003": {
+      "title": "Every-screen and action design contract acceptance",
+      "dependencies": [
+        "BG-001",
+        "UX-001",
+        "UX-002"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-001": {
+      "title": "Native typed ports, reactive client store, offline cache and device plumbing",
+      "dependencies": [
+        "BG-001",
+        "UX-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-002": {
+      "title": "Tactile Spatial components, tokens, isolation and accessibility semantics",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-003": {
+      "title": "Adaptive shell, deep links, shared intakes and full navigation",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-004": {
+      "title": "Home, metallic orb, compact Quick Hub and Attention",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-005": {
+      "title": "Floating VAN, gestures, dock/workboards and lifecycle",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-006": {
+      "title": "Trading Home, Markets, Watchlists, screener and Alerts",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-007": {
+      "title": "Native previews and professional chart renderer/bridge",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-008": {
+      "title": "Indicators, drawings, workspaces, depth and replay controls",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003",
+        "FE-007"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-009": {
+      "title": "Orders, manual review, positions, protection and handover",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-010": {
+      "title": "Accounts and Funds, provider-hosted flows and receipts",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-011": {
+      "title": "Portfolio, history, statements, TCA and Risk Command Centre",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-012": {
+      "title": "Strategies, trading modes and evidence/promotion views",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-013": {
+      "title": "News, calendar, history profiles and armed news ticket views",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-014": {
+      "title": "Analyst, chart observations, behaviour diagnostics and research",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-015": {
+      "title": "Work, Projects, tasks and live dependency diagrams",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-016": {
+      "title": "Agents, Muse/Hermes interactions and handoff maps",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-017": {
+      "title": "Browser/remote sessions, files, share and provider outcome views",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-018": {
+      "title": "ARTEMIS, development/studio, CI/security and evidence workspaces",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-019": {
+      "title": "Memory, citations, privacy/erasure, learning goals and adaptations",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-020": {
+      "title": "Automation, reminders, standing permissions and schedules",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-021": {
+      "title": "Conversation, voice and speaker consent workflows",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-022": {
+      "title": "Connected, settings, device provisioning, notifications and diagnostics",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "FE-023": {
+      "title": "Native model, strategy-development and prediction-research views",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003",
+        "FE-012",
+        "FE-013",
+        "FE-014"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "QA-001": {
+      "title": "All-feature/surface/action parity and no-loss reverse coverage",
+      "dependencies": [
+        "FE-001",
+        "FE-002",
+        "FE-003",
+        "FE-004",
+        "FE-005",
+        "FE-006",
+        "FE-007",
+        "FE-008",
+        "FE-009",
+        "FE-010",
+        "FE-011",
+        "FE-012",
+        "FE-013",
+        "FE-014",
+        "FE-015",
+        "FE-016",
+        "FE-017",
+        "FE-018",
+        "FE-019",
+        "FE-020",
+        "FE-021",
+        "FE-022",
+        "FE-023"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "QA-002": {
+      "title": "Real gateway/provider integration through the new signed app",
+      "dependencies": [
+        "FE-001",
+        "FE-002",
+        "FE-003",
+        "FE-004",
+        "FE-005",
+        "FE-006",
+        "FE-007",
+        "FE-008",
+        "FE-009",
+        "FE-010",
+        "FE-011",
+        "FE-012",
+        "FE-013",
+        "FE-014",
+        "FE-015",
+        "FE-016",
+        "FE-017",
+        "FE-018",
+        "FE-019",
+        "FE-020",
+        "FE-021",
+        "FE-022",
+        "FE-023"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "QA-003": {
+      "title": "Cross-domain adversarial security, authority and recovery",
+      "dependencies": [
+        "FE-001",
+        "FE-002",
+        "FE-003",
+        "FE-004",
+        "FE-005",
+        "FE-006",
+        "FE-007",
+        "FE-008",
+        "FE-009",
+        "FE-010",
+        "FE-011",
+        "FE-012",
+        "FE-013",
+        "FE-014",
+        "FE-015",
+        "FE-016",
+        "FE-017",
+        "FE-018",
+        "FE-019",
+        "FE-020",
+        "FE-021",
+        "FE-022",
+        "FE-023"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "QA-004": {
+      "title": "Physical S24 performance, thermal, accessibility and both-theme visual acceptance",
+      "dependencies": [
+        "FE-001",
+        "FE-002",
+        "FE-003",
+        "FE-004",
+        "FE-005",
+        "FE-006",
+        "FE-007",
+        "FE-008",
+        "FE-009",
+        "FE-010",
+        "FE-011",
+        "FE-012",
+        "FE-013",
+        "FE-014",
+        "FE-015",
+        "FE-016",
+        "FE-017",
+        "FE-018",
+        "FE-019",
+        "FE-020",
+        "FE-021",
+        "FE-022",
+        "FE-023"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "QA-005": {
+      "title": "Independent Zuul, exact APK and whole-product owner acceptance",
+      "dependencies": [
+        "QA-001",
+        "QA-002",
+        "QA-003",
+        "QA-004"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "REL-001": {
+      "title": "Controlled signed release and proven rollback",
+      "dependencies": [
+        "QA-005"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    },
+    "REL-002": {
+      "title": "Legacy presentation retirement after full parity",
+      "dependencies": [
+        "REL-001"
+      ],
+      "candidate_status": "NOT_STARTED",
+      "unit_acceptance": "NOT_ISSUED",
+      "milestones": []
+    }
+  }
+}

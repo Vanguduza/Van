@@ -39,7 +39,7 @@ See `../docs/GOOGLE_INTELLIGENCE_MESH.md`.
 
 | Variable | Purpose |
 |---|---|
-| `VAN_DATABASE_PATH` | SQLite path |
+| `VAN_DATABASE_PATH` | Absolute SQLite path, explicitly required in production. Development defaults to `~/.local/state/van/van_gateway.sqlite3`, never the checkout. Importing the ASGI entry point does not initialize storage. |
 | `VAN_HERMES_BASE_URL` | Hermes gateway |
 | `VAN_HERMES_BEARER_TOKEN` | Hermes API token |
 | `VAN_INTERNAL_CONTROL_TOKEN` | Privileged Hermes→gateway control credential. Since P0-SEC-001 it carries every control scope **except** `device_enrolment`, so it can no longer mint a pairing ticket. Never prompt-visible |
