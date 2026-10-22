@@ -10,6 +10,7 @@ a property of the code rather than a hope."""
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
+from contextlib import contextmanager
 from decimal import Decimal
 from typing import Callable, Optional, Sequence
 
@@ -88,9 +89,14 @@ class DecisionCycle:
     def __init__(self, *, cfg: SessionConfig, adapter: VenueAdapter, ledger: Ledger, engine: OpportunityEngine, cost_fn: Callable[[MarketState], Decimal],
                  calendar: MarketCalendar, events: EventMatrix, regime_engine: Optional[RegimeEngine] = None, kill_switch: Optional[KillSwitch] = None,
                  admission: Optional[AdmissionLedger] = None, ctx_fn: Optional[Callable[[MarketState, Decimal], StrategyContext]] = None,
-                 learning: Optional[LearningHooks] = None) -> None:
+                 learning: Optional[LearningHooks] = None, runtime_lease=None, lease_clock=None,
+                 lease_permission: Callable[[], bool] = lambda: True) -> None:
         self.cfg, self.adapter, self.ledger, self.engine, self.cost_fn, self.calendar, self.events = cfg, adapter, ledger, engine, cost_fn, calendar, events
         self.learning = learning
+        self.runtime_lease = runtime_lease
+        self._lease_clock, self._lease_permission = lease_clock, lease_permission
+        if runtime_lease is not None and not callable(lease_clock):
+            raise ValueError("native runtime lease requires a current clock")
         self.regime = regime_engine or RegimeEngine()
         self.kill = kill_switch or KillSwitch()
         self.mandate = TradingMandate.from_mapping(cfg.mandate_dict)
@@ -112,6 +118,8 @@ class DecisionCycle:
         self.router = ExecutionRouter(
             ledger=ledger, adapters={cfg.venue: adapter}, kill_switch=self.kill,
             protection=self.protection, route_registry=self.routes,
+            lease_fence=(lambda epoch: lease_permission() and runtime_lease.fence(epoch, now_ms=lease_clock(), min_validity_ms=2_000)) if runtime_lease else None,
+            lease_submission_guard=self._runtime_submission_guard if runtime_lease else None,
             pretrade_controls=self.pretrade, style_selector=self.style_selector,
             enforce_rev51_controls=True)
         self.admission = admission or AdmissionLedger()
@@ -159,6 +167,16 @@ class DecisionCycle:
         self.proposals: list = []
 
     # --------------------------------------------------------------- helpers
+    @contextmanager
+    def _runtime_submission_guard(self, epoch):
+        if not self._lease_permission():
+            yield False
+            return
+        with self.runtime_lease.submission_guard(epoch, now_ms=self._lease_clock()) as valid:
+            # Recheck native stop/renewal policy after acquiring authority. A
+            # control arriving after the early check must still block entry.
+            yield valid and self._lease_permission()
+
     def _log(self, kind: EventKind, payload: dict, *, now_ms: int, corr: str = "") -> None:
         if kind in {EventKind.SESSION, EventKind.RISK_DECISION}:
             payload = {**payload, "account_alias": self.cfg.account_alias}
@@ -373,6 +391,7 @@ class DecisionCycle:
                 stop_mode=StopMode.SOFTWARE if cfg.software_stops else StopMode.VENUE,
                 targets=targets, time_in_force=cfg.time_in_force, entry_type=oa.entry_type,
                 execution_policy_decision=policy_decision,
+                lease_epoch=self.runtime_lease.epoch if self.runtime_lease else None,
                 market_reference=MarketReference(
                     last_price=state.features.close,
                     mark_age_ms=state.quote_age_ms,

@@ -14,6 +14,7 @@ import json
 import os
 import signal
 import time
+import uuid
 from dataclasses import dataclass, field
 from decimal import Decimal
 from pathlib import Path
@@ -168,6 +169,10 @@ class SessionService:
     news: object = None
     _ledger: object = None
     _started_ms: int = 0
+    lease: object = None
+    _lease_store: object = None
+    _lease_allows_entry: bool = False
+    _lease_outcome: str = "NOT_ACQUIRED"
 
     def build(self) -> "SessionService":
         c = self.cfg
@@ -183,8 +188,18 @@ class SessionService:
         validate_mode(account, mandate.mode.value)
         if mandate.account_alias != account.alias:
             raise RuntimeError(f"mandate is signed for account {mandate.account_alias!r} but the session is for {account.alias!r}: refuse to start (every intent would be ACCOUNT_MISMATCH)")
+        from vati.accounts.access import SENDING_MODES
+        shared = str(c.ledger).startswith(("postgres://", "postgresql://"))
+        if not shared and account.broker != BrokerKind.PAPER and mandate.mode.value in SENDING_MODES:
+            raise RuntimeError("native venue entry requires the shared PostgreSQL VATI authority store; a local lease is not a cross-host fence")
         self.adapter = self.adapter or build_adapter(account, registry)
         self._ledger = open_ledger(c.ledger)
+        from vati.app.account_lease import AccountRuntimeLease, PostgresLeaseStore
+        from vati.app.sqlite_lease import SQLiteLeaseStore
+        self._lease_store = PostgresLeaseStore(c.ledger) if shared else SQLiteLeaseStore(c.ledger)
+        self.lease = AccountRuntimeLease(self._lease_store, account_alias=account.alias,
+            instance_id=f"{os.uname().nodename}:{os.getpid()}:{uuid.uuid4().hex}",
+            software_version="vati-single-session/1", git_sha=os.environ.get("VAN_GIT_SHA", ""))
         contract = contract_from_dict({**c.contract, "venue": account.router_venue})   # the account decides the venue; a contract copied from another venue must not silently mismatch
         scfg = SessionConfig(symbol=c.symbol, base=c.base, quote=c.quote, venue=account.router_venue, account_alias=account.alias, contract=contract, mandate_dict=c.mandate, timeframe=c.timeframe,
                              warmup_bars=c.warmup_bars, max_quote_age_ms=c.max_quote_age_ms, session_id=f"{account.alias}:{c.symbol}:{int(self.clock())}", activation_id=c.activation_id,
@@ -209,7 +224,8 @@ class SessionService:
         )
         self.learning_replay = restore_learning_runtime(
             self._ledger, learning, {c.symbol.upper(): engine})
-        cycle = DecisionCycle(cfg=scfg, adapter=self.adapter, ledger=self._ledger, engine=engine, cost_fn=lambda st: cost, calendar=FX_CALENDAR, events=build_matrix(c.calendar_path), learning=learning)
+        cycle = DecisionCycle(cfg=scfg, adapter=self.adapter, ledger=self._ledger, engine=engine, cost_fn=lambda st: cost, calendar=FX_CALENDAR, events=build_matrix(c.calendar_path), learning=learning,
+            runtime_lease=self.lease, lease_clock=self.clock, lease_permission=self._entry_permitted)
         # GAP-F-003. The single-symbol runtime gets the same headline ingress the
         # account runtime has, so backtest-to-live parity covers the thesis and
         # event path rather than only the order path. No `news` block in the
@@ -277,7 +293,9 @@ class SessionService:
         if getattr(self, "learning", None) is not None and getattr(self, "_ledger", None) is not None:
             self.learning.update_projection(self._ledger)
         hb = {"account_alias": self.cfg.account_alias, "symbol": self.cfg.symbol, "status": status, "cycles": self.cycles, "last_bar_end_ms": self.last_bar_end_ms,
-              "permit_new_orders": bool(self.runner and self.runner.permit_new_orders), "kill_switch": sorted(t.value for t in self.runner.cycle.kill.active) if self.runner else [],
+              "permit_new_orders": bool(self._entry_permitted()
+                  and self.lease and self.lease.fence(self.lease.epoch, now_ms=self.clock())), "kill_switch": sorted(t.value for t in self.runner.cycle.kill.active) if self.runner else [],
+              "lease_outcome": self._lease_outcome, "lease_epoch": self.lease.epoch if self.lease else None,
               "risk_history_issue": self.runner.cycle.streaks.recovery_issue if self.runner else "",
               "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
               "restated_learning": self.learning.projection_summary if getattr(self, "learning", None) else {"status":"NOT_CONSTRUCTED"},
@@ -303,6 +321,20 @@ class SessionService:
 
     def start(self) -> None:
         assert self.runner is not None, "build() first"
+        if self.runner.started:
+            raise RuntimeError("single-symbol runtime is already started")
+        result = self.lease.acquire(now_ms=self.clock())
+        self._lease_outcome = result.outcome.value
+        self._lease_allows_entry = result.permits_orders
+        if not result.permits_orders:
+            raise RuntimeError(f"account runtime lease refused: {result.outcome.value}")
+        try:
+            self._start_reconciled()
+        except BaseException:
+            self.close()
+            raise
+
+    def _start_reconciled(self) -> None:
         now = self.clock()
         self._started_ms = now
         rep = self.runner.startup(now_ms=now)
@@ -312,6 +344,15 @@ class SessionService:
         self._observe_owner_halt(now)
         self._account_snapshot(now)
         self._heartbeat("STARTED", {"reconciliation": rep.counts()})
+
+    def close(self) -> None:
+        self._lease_allows_entry = False
+        try:
+            if self.lease is not None:
+                self.lease.release(now_ms=self.clock())
+        finally:
+            if self._lease_store is not None:
+                self._lease_store.close()
 
     def _observe_owner_halt(self, now_ms: int) -> None:
         """An OWNER_HALT written by the gateway or the commander (A4) stops new orders.
@@ -353,10 +394,22 @@ class SessionService:
             correlation_id=self.runner.cycle.cfg.session_id,
         ))
 
+    def _entry_permitted(self) -> bool:
+        if self.stop_requested or self.runner is None:
+            return False
+        self._observe_owner_halt(self.clock())
+        return bool(self._lease_allows_entry and self.runner.permit_new_orders
+            and self.runner.cycle.mandate.sends_orders() and not self.runner.cycle.kill.halted)
+
     def step_once(self) -> Optional[str]:
         """One loop iteration; returns the cycle decision when a new bar closed, else None."""
         assert self.runner is not None
+        if not self.runner.started:
+            raise RuntimeError("start() first")
         now = self.clock()
+        result = self.lease.renew(now_ms=now)
+        self._lease_outcome = result.outcome.value
+        self._lease_allows_entry = result.permits_orders
         self._observe_owner_halt(now)
         bars = self.bar_source(now)
         if not bars:
@@ -383,6 +436,12 @@ class SessionService:
             self.stop_requested = True
         signal.signal(signal.SIGTERM, _stop)
         signal.signal(signal.SIGINT, _stop)
+        try:
+            return self._run_started_loop()
+        finally:
+            self.close()
+
+    def _run_started_loop(self) -> int:
         self.start()
         while not self.stop_requested:
             try:
@@ -393,6 +452,7 @@ class SessionService:
                 self._heartbeat("FAULT", {"error": str(exc)[:200]})
             time.sleep(self.cfg.poll_seconds)
         now = self.clock()
+        self._lease_allows_entry = False
         self.runner.cycle.ledger.append(make_event(EventKind.SESSION, "vati-service", {"event": "STOPPED", "open_positions": len(self.runner.cycle.adapter.positions())}, event_time_ms=now, received_time_ms=now, correlation_id=self.runner.cycle.cfg.session_id))
         self._heartbeat("STOPPED")
         return 0

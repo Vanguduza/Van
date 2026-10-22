@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T19:32:03.948111+00:00",
+  "updated_at_utc": "2026-10-22T20:06:52.602028+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -171,6 +171,10 @@
         {
           "description": "Original native account operation IDs and ledger claims/outcomes for four current commands; authenticated outcome readback, exact biometric timestamp, Android durable non-secret recovery and alias uncertainty fences.1956fulltrading zero skips,114focused plus1PGopt-in covered in full,202Android/192owner/78rebuild/9wire pass.9source+2Android faults caught/restored. Actual two-process SQLite/PG claim arbitration. Provider effects, native adjudication, physical identity/leases and safe retirement remain.",
           "evidence": "backend/BE-003_004_005_NATIVE_ACCOUNT_OPERATIONS.md; receipts/NATIVE_ACCOUNT_OPERATIONS_SOURCE_20261022.json"
+        },
+        {
+          "description": "Single-symbol native account lease/final router guard and current heartbeat permission; real venue senders require sharedPostgreSQL, local paper/non-sending path remains. Actual strategy entry is blocked on takeover/late owner halt/process stop; healthy first-insert PG race distinguished from outage.1968fulltrading zero skips,61focused+3opt-ins covered separately/full,78rebuild pass;7faults caught/restored after validPG controls. Physical identity/migration/retirement and complete startup positions remain.",
+          "evidence": "backend/BE-004_009_SINGLE_SESSION_LEASE.md; receipts/SINGLE_SESSION_LEASE_SOURCE_20261022.json"
         }
       ]
     },
@@ -272,6 +276,10 @@
         {
           "description": "All remaining production factory branches now enforce current account/mandate entry boundary while preserving native adapter types and protection.10counterexamples fixed;1909fulltrading zero skips with realPG/DDS,84focused pass;3mutants after15controls. Distributed exposure-safe unlink remains work.",
           "evidence": "backend/BE-004_009_REGISTRY_ENTRY_FENCE.md; receipts/REGISTRY_ENTRY_FENCE_SOURCE_20261022.json"
+        },
+        {
+          "description": "Single-symbol native account lease/final router guard and current heartbeat permission; real venue senders require sharedPostgreSQL, local paper/non-sending path remains. Actual strategy entry is blocked on takeover/late owner halt/process stop; healthy first-insert PG race distinguished from outage.1968fulltrading zero skips,61focused+3opt-ins covered separately/full,78rebuild pass;7faults caught/restored after validPG controls. Physical identity/migration/retirement and complete startup positions remain.",
+          "evidence": "backend/BE-004_009_SINGLE_SESSION_LEASE.md; receipts/SINGLE_SESSION_LEASE_SOURCE_20261022.json"
         }
       ]
     },

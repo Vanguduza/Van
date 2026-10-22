@@ -182,21 +182,27 @@ def test_ambiguous_scope_keeps_existing_venue_protection_running(eurusd):
 
 def test_real_service_start_exposes_the_scope_issue_to_owner_readback(eurusd,tmp_path):
     import json
-    from types import SimpleNamespace
     from vati.app.portfolio import account_states
-    from vati.app.runner import SessionRunner
-    from vati.app.service import SessionService
-    ledger=Ledger()
+    from vati.app.service import SessionService,ServiceConfig
+    from vati.accounts import Account,AccountRegistry
+    from vati.risk.serde import contract_to_dict
+    from conftest import mandate_dict
+    ledger=Ledger(tmp_path/'native.sqlite')
     record(ledger,EventKind.TRADE_REVIEW,{"strategy_id":STRATEGY,"pnl":"-10"})
-    cycle=_cycle(eurusd,ledger)
-    cfg=SimpleNamespace(account_alias="fx_primary",symbol="EURUSD",heartbeat_path=str(tmp_path/"heartbeat.json"))
-    service=SessionService(cfg,lambda now:[],clock=lambda:NOW)
-    service.runner=SessionRunner(cycle)
-    service.start()
-    heartbeat=json.loads((tmp_path/"heartbeat.json").read_text())
-    assert not heartbeat["permit_new_orders"] and "unbound" in heartbeat["risk_history_issue"]
-    accounts=account_states(ledger,[])
-    assert len(accounts)==1 and "unbound" in accounts[0]["risk_history_issue"]
+    registry=AccountRegistry(tmp_path/'accounts.json')
+    registry.add(Account(alias='fx_primary',broker='PAPER',mode='DEMO_TRADER',currency='USD'))
+    cfg=ServiceConfig(account_alias='fx_primary',symbol='EURUSD',base='EUR',quote='USD',timeframe='H1',
+        contract=contract_to_dict(eurusd),mandate=mandate_dict(venue='paper',mode='DEMO_TRADER',allowed_strategies=[STRATEGY]),
+        capsules=[STRATEGY],registry_path=str(registry.path),ledger=str(tmp_path/'native.sqlite'),
+        heartbeat_path=str(tmp_path/'heartbeat.json'))
+    service=SessionService(cfg,lambda now:[],clock=lambda:NOW).build()
+    try:
+        service.start()
+        heartbeat=json.loads((tmp_path/"heartbeat.json").read_text())
+        assert not heartbeat["permit_new_orders"] and "unbound" in heartbeat["risk_history_issue"]
+        accounts=account_states(ledger,[])
+        assert len(accounts)==1 and "unbound" in accounts[0]["risk_history_issue"]
+    finally: service.close(); service._ledger.close(); ledger.close()
 
 
 def test_account_runtime_adjustment_probe_retains_scope_refusal_without_a_strategy_id(eurusd):
