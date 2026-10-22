@@ -534,9 +534,11 @@ ALL = [
     '        usable = [p for p in paths if PathHealth(p["health"]).usable]',
     "        usable = list(paths)",
     "C26 a failed path counts towards redundancy"),
-   ("van_gateway/session/router.py",
-    "        if envelope.kind not in UPSTREAM_KINDS:",
-    "        if False:",
+   ([("van_gateway/session/router.py",
+      "        if envelope.kind not in UPSTREAM_KINDS:", "        if False:"),
+     ("van_gateway/session/router.py",
+      "        delegate = self._delegate_for(envelope.kind)",
+      "        delegate = self._delegate_for(envelope.kind) or self.delegates.submit_command")],
     "C26 an unknown kind is routed rather than refused"),
    ("van_gateway/session/router.py",
     "        if envelope.expires_at_ms is not None and envelope.expires_at_ms <= now:",
@@ -1731,6 +1733,25 @@ def groups(selector: str | None = None, family="all", shard=(0, 1)):
         candidates += [(tests, mutations, {"root": ROOT, "cwd": ROOT}) for tests, mutations in ROOT_LEVEL]
     if family in {"all", "browser-agent"}:
         candidates.append((AGENT_TESTS, CONTROL_AGENT, {"root": ROOT, "cwd": ROOT}))
+    if family == "python":
+        # Keep each Python group together: its unmodified control is expensive,
+        # and splitting every group across four runners repeated all controls
+        # four times. Balance complete groups without omitting any case.
+        index, count = shard
+        if not 0 <= index < count:
+            raise ValueError("shard must satisfy 0 <= index < count")
+        loads = [0] * count
+        assignments = {}
+        for group_index in sorted(range(len(candidates)), key=lambda i: (-len(candidates[i][1]), i)):
+            worker = min(range(count), key=lambda i: (loads[i], i))
+            assignments[group_index] = worker
+            loads[worker] += len(candidates[group_index][1]) + 1
+        for group_index, (tests, mutations, options) in enumerate(candidates):
+            if assignments[group_index] == index:
+                mutations = select(mutations, selector)
+                if mutations:
+                    yield tests, mutations, options
+        return
     selected = {id(case) for case in select([m for _, ms, _ in candidates for m in ms], selector, shard)}
     for tests, mutations, options in candidates:
         mutations = [m for m in mutations if id(m) in selected]

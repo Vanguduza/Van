@@ -146,7 +146,7 @@
   },
   {
    "id": "BLK-008",
-   "what": "Original 36 input findings resolved and all 32 original retargeted cases assertion-detected. C35 invalid constant replacement and C11 combined uniqueness invariant also corrected/tested. All 374 identities preserved, 381 edits. Full current source CI pending; independent semantic review remains separate.",
+   "what": "The complete fca473cc corpus executed all 374 cases: 371 detections and 3 survivors. All 3 test/oracle repairs are now locally detected; all 374 identities remain (382 edits). Fresh-source full corpus requalification and independent semantic review remain pending.",
    "blocks": "Claiming complete mutation evidence; independent preparation reviewer must disposition this limitation",
    "needed_from": "Finish the full hosted corpus, triage any survivors/invalid executions, and retain independent preparation review of the semantic mappings."
   }
@@ -167,10 +167,10 @@
   "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
  },
  "checkpoint": {
-  "updated_utc": "2026-10-22T04:34:31.527295+00:00",
+  "updated_utc": "2026-10-22T05:04:00.320181+00:00",
   "branch": "ccr-9e07e1af-8mgz1p",
   "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-  "background_jobs": "GitHub van-ci run 39721114929 is executing the complete component-partitioned mutation corpus at 5d6372fd. Native operations: none. Earlier run 39720155843 was superseded after an invalid Kotlin mutant was found; no complete score from that run is qualified.",
+  "background_jobs": "Run 39723196572 completed at fca473cc: all 374 identities executed, 371 detections / 3 survivors; new Android policy tests passed, resident deep-link test failed before Intent delivery completed. All three survivor corrections pass focused mutation reruns; deep-link test now awaits the exact selected destination and compiles. A fresh source run will be triggered on the next push and must be reconciled by commit.",
   "last_validation": [
    "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
    "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -190,7 +190,12 @@
    "2026-10-22: 35 focused control/CI/recovery regressions and 52 isolated rebuild regressions pass; complete identity-preserving six-shard CI partition checked; 45-record intake prepared, not admitted.",
    "Confirmed baseline maintenance: debug cleartext narrowed to exact loopback, main HTTPS-only policy explicit, debug rig privileged; 3 host checks / 195 app units / APK and instrumentation assembly / lint pass. Release manifest processing correctly refuses the missing real deployment profile.",
    "Confirmed mission-creation race: pre-fix 1 failed / 1 passed; post-fix 53 recovery/contract tests and 46 command API integration tests pass; one created mission/event and unrelated integrity errors preserved.",
-   "C35 and composite C11 follow-up mutants assertion-detected after passing controls. All 374 original identities remain, now 381 edits, partitioned into nine disjoint CI shards."
+   "C35 and composite C11 follow-up mutants assertion-detected after passing controls. All 374 original identities remain, now 381 edits, partitioned into nine disjoint CI shards.",
+   "Full source run fca473cc: complete 374-case coverage verified from every job log; 371 detections and three survivors (C26 unknown kind, C18 class filter, C15 test-only reporting), preserved in ci/MUTATION_CORPUS_fca473cc.json. All three corrected cases now assertion-detected after passing controls.",
+   "Android fca473cc: 20 collected, 15 pass / 1 legacy deep-link timing assertion failure / 4 core-mode skips. Both new network-policy/real HTTP and debug-rig permission tests pass; all Rive core cases pass. Corrected bounded destination wait compiles.",
+   "Final mission integrity guard: 100 related backend tests pass; recover only the expected source-command unique constraint, never a post-insert learning/event integrity failure.",
+   "Production connection/policy checks: 54 passed; the single opt-in actual AGP production-signing refusal check was then explicitly enabled and passed (55 covered; no production signer/profile installed).",
+   "Python shard controls are no longer repeated on four runners: whole groups are balanced, with 59/58/58/57 cases and eight controls each; CI partition/oracle tests verify every original case and every Python control exactly once."
   ],
   "environment_notes": [
    "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -201,8 +206,8 @@
    "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
    "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
   ],
-  "next_action": "Inspect full corpus results from actual run 39721114929; fix genuine findings and preserve failure receipts. PRE-003 still requires native registry/signing/eligible independent review and amendment admission. DDS CI credential and trusted-base adoption remain external prerequisites; no gate or owner decision is fabricated.",
-  "previous_head": "5d6372fdea20b31b300c32b66bb164904211bb0f"
+  "next_action": "Reconcile the fresh source CI run after publication. Preserve all failures and full-corpus per-case evidence; do not call an advisory job or a repaired subset a full pass. Native PRE-003/signing/eligible independent admission, owner decisions, DDS-only CI read credential and trusted-base main bootstrap remain external prerequisites.",
+  "previous_head": "fca473cc9b3dfee52642696fcd1c36aeec703bba"
  },
  "observations": [
   "OBS-001 BE-002 debug cleartext",

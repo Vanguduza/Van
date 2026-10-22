@@ -26,12 +26,13 @@
    "environment": "JVM/host for manifest inspection; emulator for the debug request check. Not handset acceptance.",
    "pass_evidence": "Merged-manifest dump for both variants, the network-security XML, and the two request outcomes, bound to the APK SHA-256.",
    "proposed_change_for_owner": "Replace app-wide usesCleartextTraffic in the debug overlay with a debug network_security_config permitting cleartext only for 127.0.0.1/localhost; declare an explicit release config with cleartext off; restrict or drop export of RiveCandidateHostActivity. Application change under android/: needs unit admission and a ledger authorization.",
-   "status": "BASELINE_SOURCE_FIXED_DEBUG_RUNTIME_AND_RELEASE_QUALIFICATION_PENDING",
+   "status": "DEBUG_NETWORK_POLICY_RUNTIME_VERIFIED_RELEASE_PROFILE_AND_UNIT_ACCEPTANCE_PENDING",
    "current_review": {
     "fix": "Explicit cleartext-off main policy; debug exceptions restricted to exact localhost/127.0.0.1/::1; exported debug rig requires android.permission.DUMP. Existing owner continuation authorization covers this confirmed baseline maintenance; no new frontend design or unit acceptance is asserted.",
     "evidence": "receipts/android-cleartext/LOCAL_VALIDATION.json, DEBUG_PACKAGED_MANIFEST.txt, DEBUG_PACKAGED_POLICY.txt, RELEASE_MANIFEST_REFUSAL.txt",
     "tests": "3 host checks, 195 app units, debug and instrumentation assembly and lint pass. New Android framework/real HTTP and rig-permission tests await hosted execution.",
-    "release_limit": "Actual release manifest processing refuses without VAN_DEPLOYMENT_PROFILE_FILE; no fake profile or signer was supplied."
+    "release_limit": "Actual release manifest processing refuses without VAN_DEPLOYMENT_PROFILE_FILE; no fake profile or signer was supplied.",
+    "runtime_evidence": "Run 39723196572, NetworkSecurityRuntimeTest: both tests pass (actual loopback HTTP, blocked non-loopback HTTP, exact framework policy, privileged debug rig). Instrumentation overall failed a separate legacy deep-link timing assertion; full release/handset and unit acceptance remain pending."
    }
   },
   {
@@ -58,7 +59,8 @@
     "fix": "On an integrity error, return the committed winning mission only if one exists for this command; otherwise propagate the original error. Preserve the unique index.",
     "evidence": "receipts/MISSION_RACE_BEFORE.txt; receipts/MISSION_RACE_VALIDATION.json; ci/MUTATION_FOLLOWUP_C11.json",
     "tests": "53 focused recovery/contract tests and 46 command API integration tests pass. Forced two-writer race returns one mission and one created event; unrelated primary-key failure still raises.",
-    "remaining": "Whole-orchestrator downstream-effect deduplication, crash/recovery and admitted-store variants remain BE-003 acceptance work."
+    "remaining": "Whole-orchestrator downstream-effect deduplication, crash/recovery and admitted-store variants remain BE-003 acceptance work.",
+    "post_insert_guard": "A further negative control showed a broad integrity handler could swallow a failed post-insert learning write. Recovery now requires the exact source-command uniqueness constraint; 100 related backend tests pass, including the real post-insert NOT NULL failure. Evidence: receipts/MISSION_POST_INSERT_BEFORE.txt and MISSION_RACE_VALIDATION.json."
    }
   },
   {
@@ -123,20 +125,22 @@
    "recovery": "One rerun at most for a suspected flake; a second failure is real.",
    "environment": "GitHub-hosted Android emulator core evidence at 637eaf96: 14 passed, 0 failed, 4 explicit core-mode skips. S24 Ultra via Artemis and full/production rig qualification remain pending.",
    "pass_evidence": "Instrumentation report and Artemis receipts for the exact APK.",
-   "status": "OPEN_HANDSET_AND_FULL_RIG_QUALIFICATION (core emulator source evidence complete)"
+   "status": "OPEN_HANDSET_AND_FULL_RIG_QUALIFICATION (core emulator source evidence complete)",
+   "current_runtime": "fca473cc report: 20 tests, 15 passed / 1 deep-link timing failure / 4 core skips. Both new network tests and all Rive core checks pass. Bounded route-selection wait compiled; fresh emulator run required."
   },
   {
    "id": "OBL-006",
    "from": "OBS-005",
    "owner_unit": "BQ-006 / QA-003",
-   "status": "RETARGETED_CASES_VERIFIED_FULL_CORPUS_PENDING",
+   "status": "COMPLETE_CORPUS_EXECUTED_THREE_ORACLES_CORRECTED_REQUALIFICATION_PENDING",
    "finding": "The 374-case legacy mutation corpus has 36 preflight findings. Its former CI success was an aborted run masked by tee and step continuation.",
    "proves": "Every retained mutation is bound to the current equivalent implementation and valid test target; each unmutated control passes before a mutation can count as caught.",
    "stimulus": "Reconcile each recorded stale/missing target preserving the invariant, run preflight, then execute controls and mutants in an isolated source checkout with the actual component dependencies.",
    "observable": "No invalid registry input, no collection/setup error counted as caught, no silent case omission; complete per-case outcomes and restoration proof.",
    "evidence": "ci/MUTATION_VERIFICATION_FINDING.md; ci/MUTATION_REGISTRY_CURRENT.json; ci/MUTATION_RECONCILIATION.md; ci/MUTATION_RECONCILIATION_MAPPING.json and per-component execution receipts",
    "completed_correction": "All original 36 preflight findings resolved; all 374 case identities preserved (380 edits). All 32 retargeted cases pass controls and fail their intended assertions; invalid initial controls/compiler failures retained. Shared harness and CI reject misleading successes. 35 focused regressions and 52 isolated rebuild tests pass. Follow-up C35 replacement now qualifies the queue constant; C11 now jointly removes the optimistic lookup and unique fence, reflecting the actual combined invariant. Both induced failures detected. Current corpus: 374 identities, 381 edits, nine disjoint CI shards.",
-   "remaining": "Finish full retained-corpus run 39721114929 and triage actual outcomes; independent review of semantic equivalence remains separate."
+   "remaining": "Fresh-source full run after the C26/C18/C15 repairs; independent semantic review stays separate.",
+   "full_corpus_evidence": "ci/MUTATION_CORPUS_fca473cc.json: every original identity exactly once, 371 detections/3 survivors. Repairs in MUTATION_FOLLOWUP_C26/C18/C15.json pass. Current corpus 374 identities / 382 edits. No case dropped."
   }
  ]
 }

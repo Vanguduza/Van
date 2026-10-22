@@ -81,3 +81,20 @@ deleting the lookup alone is safely tolerated. Its assertion is detected in
 `MUTATION_FOLLOWUP_C11.json`. All **374 identities remain**, now with **381 edits**.
 Four Python, four Kotlin and one browser shard cover every case exactly once.
 The complete updated-source score remains pending its own hosted execution.
+
+
+## First complete corpus and follow-up
+
+`MUTATION_CORPUS_fca473cc.json` verifies every original identity against all nine
+terminal job logs: **371 detected / three survived / 374 executed**. This is a
+failed full score, retained unchanged. Unknown-kind refusal now has two independent
+guards, so C26 removes both to exercise actual unsafe routing. C18 and C15 needed
+synthetic fixtures for ignored maturity classes and a graph with a test-only class;
+the clean real inventories could not prove those checker branches worked. All
+three repaired cases pass controls and detect their intended failures in the
+corresponding `MUTATION_FOLLOWUP_*.json` receipts. No identity was deleted.
+
+The current registry has 374 cases / 382 edits. Python groups now stay intact on
+balanced runners (59/58/58/57 cases, eight controls each), avoiding four repeated
+controls per group. Partition tests prove each case and Python control runs once.
+Fresh-source full execution and independent semantic review remain separate.

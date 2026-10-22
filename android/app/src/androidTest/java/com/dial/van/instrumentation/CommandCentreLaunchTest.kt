@@ -12,6 +12,8 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.isSelectable
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -111,8 +113,7 @@ class CommandCentreLaunchTest {
                         .setClass(activity, CommandCentreActivity::class.java)
                         .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP))
                 }
-                compose.waitForIdle()
-                navItem("Attention").assertIsSelected()
+                waitForDestination("Attention")
                 scenario.onActivity {
                     assertSame(resident, it)
                     assertEquals(Uri.parse("van://attention"), it.intent.data)
@@ -124,8 +125,7 @@ class CommandCentreLaunchTest {
                         .setClass(activity, CommandCentreActivity::class.java)
                         .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP))
                 }
-                compose.waitForIdle()
-                navItem("Work").assertIsSelected()
+                waitForDestination("Work")
                 scenario.onActivity {
                     assertSame(resident, it)
                     assertEquals(Uri.parse("van://work"), it.intent.data)
@@ -143,6 +143,18 @@ class CommandCentreLaunchTest {
 
     /** The navigation item, not a screen header that happens to carry the same word. */
     private fun navItem(label: String) = compose.onNode(hasText(label) and isSelectable())
+
+    private fun waitForDestination(label: String) {
+        // startActivity queues onNewIntent outside Compose's idling resources.
+        // An idle composition can still be the old destination. Await the exact
+        // selected tab, retaining a bounded failure for a missing delivery.
+        val selected = hasText(label) and isSelectable() and
+            SemanticsMatcher.expectValue(SemanticsProperties.Selected, true)
+        compose.waitUntil(10_000) {
+            compose.onAllNodes(selected).fetchSemanticsNodes().size == 1
+        }
+        navItem(label).assertIsSelected()
+    }
 
     private fun capture(name: String) {
         // AGP's additional-test-output channel: the runner argument names a directory the

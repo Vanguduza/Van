@@ -73,3 +73,20 @@ async def test_an_unrelated_integrity_failure_is_not_disguised_as_a_duplicate_co
         await link.open(request("different-command"), effective_action_class=ActionClass.A1, owner_approved=False)
     rows = await store.fetchall("SELECT mission_id FROM missions")
     assert [row["mission_id"] for row in rows] == [first.mission_id]
+
+
+@pytest.mark.asyncio
+async def test_a_post_insert_integrity_failure_is_not_reported_as_successful_duplicate_recovery(tmp_path):
+    store = Store(str(tmp_path / "post-insert.sqlite3"))
+    await store.migrate()
+
+    class BrokenLearning:
+        async def record_mission_opened(self, mission, *, now_ms):
+            # A real, unrelated database constraint after the mission insert. The
+            # presence of that mission must not turn this failed creation into success.
+            await store.execute("INSERT INTO missions(mission_id) VALUES (?)", ("incomplete-row",))
+
+    link = CommandMissionLink(MissionService(store, learning=BrokenLearning()))
+    with pytest.raises(sqlite3.IntegrityError, match="NOT NULL constraint failed"):
+        await link.open(request(), effective_action_class=ActionClass.A1, owner_approved=False)
+    assert len(await store.fetchall("SELECT mission_id FROM missions")) == 1

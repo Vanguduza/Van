@@ -192,6 +192,20 @@ def test_it_passes_on_a_ledger_that_is_right():
     assert "still unreached" in result.stdout
 
 
+def test_non_reachability_classes_are_not_judged_as_unreachability_claims():
+    # A live symbol and an entry without symbols distinguish the ignored class
+    # from both STALE and unverifiable. A clean real ledger cannot prove that.
+    result = _run_on({"components": [
+        _entry(component="AlreadyLive", maturity_class="CALLED_UNTESTED",
+               reachability_symbols=["MissionService"]),
+        _entry(component="NotAReachabilityClaim", maturity_class="CALLED_UNTESTED"),
+    ]}, "--strict")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "0 unreached claims confirmed" in result.stdout
+    assert "STALE" not in result.stdout
+    assert "unverifiable" not in result.stdout
+
+
 def test_an_entry_with_no_symbols_is_never_counted_as_verified():
     """Silence is not agreement. An unverifiable entry reported as confirmed would make the
     summary count it among the things that were checked."""

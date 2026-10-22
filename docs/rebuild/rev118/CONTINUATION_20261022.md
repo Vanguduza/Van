@@ -38,3 +38,15 @@ The 18 remaining policy/provider questions and their 49 verified requirement dep
 Final runtime diagnosis: AndroidX 1.6.1 filtered teardown callbacks after production correctly updated its Intent. The test verifies both real deliveries and restores its own launch identity for cleanup. Gaze changed only the visor eyes; measuring that region at the existing visibility floor removes whole-image dilution. Deterministic idle/action samples repeat exactly; no animation asset or action threshold was weakened. The 45-record current intake is in `pre003/MAIN_AUTHORIZATION_INTAKE_CURRENT.json`. The tested cloud refresh installer/start instructions were saved as an environment draft; publication is separate.
 
 Mutation continuation at `5d6372fd`: all 36 original input findings are resolved, all 374 case identities remain (380 edits), and all 32 retargeted cases are assertion-detected after valid controls. Initial survivors, missing dependencies and an invalid Kotlin replacement remain recorded as failed attempts. The shared runner rejects pytest collection and Gradle compilation/setup failures. See `ci/MUTATION_RECONCILIATION.md`, its exact mapping and per-component receipts. Thirty-five focused controls and 52 rebuild regressions pass. Full corpus run `39721114929` is in progress; its browser shard passed 26/26, with no complete corpus score claimed. Native admission, owner decisions and release/handset requirements remain unchanged.
+
+
+Latest maintenance delta after fca473cc: narrow the duplicate-mission handler to
+its exact unique constraint, so post-insert learning/event failures still surface;
+100 related backend tests pass. Debug cleartext is restricted to exact loopback,
+the main policy explicitly disables it, and the debug rig requires a privileged
+caller. Both new Android framework/real HTTP policy tests passed in run39723196572.
+The full mutation corpus finished 371/374 with three survivors; all are repaired
+and locally detected, without dropping cases (current 374 identities/382 edits).
+The resident deep-link test now awaits the exact destination after asynchronous
+Intent delivery; all identity/Intent assertions remain. A fresh source CI run is
+required. See the current ledger and exact retained receipts, including failures.

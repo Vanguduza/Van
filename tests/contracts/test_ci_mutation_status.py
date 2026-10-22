@@ -60,6 +60,10 @@ def test_ci_partitions_cover_every_retained_identity_exactly_once():
     assert len(expected) == 374
     assert Counter(actual) == Counter(expected)
     assert all(count == 1 for count in Counter(actual).values())
+    python_controls = [tuple(tests) for row in job()["strategy"]["matrix"]["include"]
+                       if row["family"] == "python"
+                       for tests, _, _ in suite.groups(family="python", shard=tuple(map(int, row["shard"].split("/"))))]
+    assert Counter(python_controls) == Counter(tuple(tests) for tests, _, _ in suite.groups(family="python"))
 
 
 def test_component_runtimes_are_prepared_without_merging_incompatible_locks():

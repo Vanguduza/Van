@@ -21,5 +21,24 @@
   "input_sha256": {
     "backend/van_gateway/command/mission_link.py": "5493abee3b65efa725a3223e75e5c0f40829cd0186f7f4a72b62839feb52fa21",
     "backend/tests/test_command_mission_creation_race.py": "3ea90b3e1c392972a57cd1e2d5f33402781af6ab9e88bcc42d353422567b9968"
+  },
+  "post_insert_guard": {
+    "base_source_commit": "fca473cc9b3dfee52642696fcd1c36aeec703bba",
+    "source_state": "UNCOMMITTED_CANDIDATE_AFTER_fca473cc",
+    "before": {
+      "exit": 1,
+      "failed": 1,
+      "log": "MISSION_POST_INSERT_BEFORE.txt"
+    },
+    "after": {
+      "related_backend_tests": 100,
+      "failed": 0,
+      "warnings": 2
+    },
+    "scope": "Recover only SQLITE_CONSTRAINT_UNIQUE on idx_missions_source_command; a later learning/event integrity failure must still propagate.",
+    "input_sha256": {
+      "backend/van_gateway/command/mission_link.py": "85006142b858d51f69225f143ef9f8d45738a35355b47e26b546fc2596fd9cc8",
+      "backend/tests/test_command_mission_creation_race.py": "470537eef319bdb46241bc85e8d368e204cf2d43016ff2fc711343204e9e7162"
+    }
   }
 }

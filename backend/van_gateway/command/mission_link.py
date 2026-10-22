@@ -170,11 +170,15 @@ class CommandMissionLink:
                 authority_envelope=envelope,
                 sensitivity=SENSITIVITY_FOR_CLASS.get(effective_action_class, Sensitivity.ROUTINE),
             )
-        except sqlite3.IntegrityError:
+        except sqlite3.IntegrityError as exc:
             # Another writer can win after the optimistic lookup. The database
             # fence already preserved one mission; return it rather than turning
             # the safe duplicate into an owner-visible server error. Preserve any
-            # unrelated integrity error when no mission owns this command.
+            # unrelated integrity error, including a learning/event write that
+            # failed after this caller's own mission insert had committed.
+            if (getattr(exc, "sqlite_errorcode", None) != sqlite3.SQLITE_CONSTRAINT_UNIQUE
+                    or "index 'idx_missions_source_command'" not in str(exc)):
+                raise
             existing = await self.existing_for_command(req.command_id)
             if existing is None:
                 raise
