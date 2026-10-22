@@ -79,6 +79,19 @@ def run(mutations, tests, root=".", cwd=None, command=None):
     stale = recover()
     if stale:
         print(f"recovered {len(stale)} file(s) a previous run left mutated: {stale}")
+    # A failing control cannot establish that a mutation was detected. In particular,
+    # missing imports, test collection failures and an unprepared Gradle environment
+    # must never inflate the caught count.
+    _purge_bytecode(root)
+    baseline = subprocess.run(
+        command or [sys.executable, "-m", "pytest", *tests, "-q"],
+        capture_output=True, text=True, cwd=cwd,
+    )
+    if baseline.returncode != 0:
+        raise RuntimeError(
+            f"BASELINE_TESTS_FAILED (exit {baseline.returncode}); no mutations executed\n"
+            + baseline.stdout + baseline.stderr
+        )
     verdicts = []
     for mutation in mutations:
         if len(mutation) == 2:

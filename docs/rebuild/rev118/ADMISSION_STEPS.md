@@ -1,6 +1,6 @@
 # Trusted-base admission steps — PR #94, then PR #104 (and this branch)
 
-**22 October continuation:** PR #105 now carries this branch. The complete candidate intake is `pre003/MAIN_AUTHORIZATION_INTAKE_CURRENT.json`: all 39 original consolidation records preserved plus four continuation records, 43 total against the recorded `8eb18898` base. Recompute against the actual base after bootstrap before intake. Android ICU fixes are applied and pass their two hosted runtime tests; source `637eaf96` corrects localized gaze measurement and deep-link harness cleanup after the first runtime run exposed those test issues. The immutable ASR acquisition fix and local APK build/lint pass are recorded in `CONTINUATION_20261022.md`. Do not use the historical "patch not applied" statements below as current status. Current F15/signature interpretation is in `pre003/F15_LIFECYCLE_REVIEW_20261022.md`. No arbitrary five-full-run requirement is introduced: execute the actual required runtime/visibility/within-test repeatability obligations and investigate remaining failures.
+**22 October continuation:** PR #105 now carries this branch. The complete candidate intake is `pre003/MAIN_AUTHORIZATION_INTAKE_CURRENT.json`: all 39 original consolidation records preserved plus five continuation records, 44 total against the recorded `8eb18898` base. Recompute against the actual base after bootstrap before intake. Android ICU fixes are applied and pass their two hosted runtime tests; source `637eaf96` corrects localized gaze measurement and deep-link harness cleanup after the first runtime run exposed those test issues. The immutable ASR acquisition fix and local APK build/lint pass are recorded in `CONTINUATION_20261022.md`. Do not use the historical "patch not applied" statements below as current status. Current F15/signature interpretation is in `pre003/F15_LIFECYCLE_REVIEW_20261022.md`. No arbitrary five-full-run requirement is introduced: execute the actual required runtime/visibility/within-test repeatability obligations and investigate remaining failures.
 
 The remaining text records the earlier admission plan and observations.
 
@@ -43,3 +43,5 @@ Full diagnosis: `ci/CI_DIAGNOSIS.md`. Summary:
 2. On `Vanguduza/Van` → Settings → Secrets and variables → Actions, add `DDS_CONTRACT_READ_DEPLOY_KEY` holding the private half.
 
 The workflow uses it only for a sparse checkout of three files at `64d6b7158c72` with `persist-credentials: false`. No other job sees it.
+
+Advisory mutation evidence is invalid pending registry reconciliation; see `ci/MUTATION_VERIFICATION_FINDING.md`. Its previous success is not a full mutation pass. The error-reporting and negative-control corrections preserve advisory policy and every registered case.

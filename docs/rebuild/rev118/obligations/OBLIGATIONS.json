@@ -105,6 +105,19 @@
    "environment": "Emulator (instrumentation), S24 Ultra via Artemis (handset). Neither available in this session.",
    "pass_evidence": "Instrumentation report and Artemis receipts for the exact APK.",
    "status": "OPEN_OBLIGATION (JVM part satisfied as source evidence)"
+  },
+  {
+   "id": "OBL-006",
+   "from": "OBS-005",
+   "owner_unit": "BQ-006 / QA-003",
+   "status": "OPEN_REGISTRY_RECONCILIATION_REQUIRED",
+   "finding": "The 374-case legacy mutation corpus has 36 preflight findings. Its former CI success was an aborted run masked by tee and step continuation.",
+   "proves": "Every retained mutation is bound to the current equivalent implementation and valid test target; each unmutated control passes before a mutation can count as caught.",
+   "stimulus": "Reconcile each recorded stale/missing target preserving the invariant, run preflight, then execute controls and mutants in an isolated source checkout with the actual component dependencies.",
+   "observable": "No invalid registry input, no collection/setup error counted as caught, no silent case omission; complete per-case outcomes and restoration proof.",
+   "evidence": "ci/MUTATION_REGISTRY_PREFLIGHT.json and ci/MUTATION_VERIFICATION_FINDING.md",
+   "completed_correction": "CI preserves failing status and publishes preflight artifacts; harness rejects failing unmutated controls. Twenty focused regressions pass.",
+   "remaining": "Semantic mapping/admission and execution of the full retained corpus."
   }
  ]
 }

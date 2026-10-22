@@ -601,14 +601,15 @@ jobs:
       - name: Mutation testing (non-blocking)
         working-directory: backend
         timeout-minutes: 45
-        continue-on-error: true
         run: |
+          set -euo pipefail
           mkdir -p ../artifacts/mutation
+          python ../tools/rebuild/mutation_registry.py --check | tee ../artifacts/mutation/mutation-registry.json
           python ../tools/audit/mutation_suite.py 2>&1 | tee ../artifacts/mutation/mutation-report.txt
       - name: Upload mutation report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: van-mutation-report
-          path: artifacts/mutation/mutation-report.txt
+          path: artifacts/mutation/
           if-no-files-found: warn

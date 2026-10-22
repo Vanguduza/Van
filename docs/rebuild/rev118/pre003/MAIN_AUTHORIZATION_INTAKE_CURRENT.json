@@ -1,7 +1,7 @@
 {
   "schema": "van.rebuild.authorization-intake-candidate/1",
   "status": "PREPARED_NOT_ADMITTED",
-  "source_head": "637eaf96ff617c608401754a044145811b8fd318",
+  "source_head": "370e3fca0610f36f643c705a1683af3a7250ab61",
   "base_head": "8eb1889822fc8a83f219977c15340172e16acd91",
   "records": [
     {
@@ -218,16 +218,22 @@
       "path": "docs/project-state/authorizations/auth-20261022-owner-codex-build-continuation.json",
       "sha256": "f47d139ff95c1fa8461cff0916d8be8070034b7f1ec1596c9af9e36a27b8f2cd",
       "git_blob": "6fdc3b8752d9b90ac0425cb7a00fdf06a4e440a6"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261022-owner-mutation-ci-prerequisite.json",
+      "sha256": "ea5842a05e452b596ca398eacfc817d723e9486484b1e6146a6d2683ca02b0a5",
+      "git_blob": "5a86a657e1ff906e53e04053c7c0328fd35c4bd3"
     }
   ],
-  "count": 43,
+  "count": 44,
   "conflicts": [],
   "previous_consolidation_records_preserved": 39,
   "continuation_records_added": [
     "docs/project-state/authorizations/auth-20261021-owner-rev118-ci-prerequisites.json",
     "docs/project-state/authorizations/auth-20261021-owner-rev118-ci-workflow-template.json",
     "docs/project-state/authorizations/auth-20261021-owner-rev118-pre001-pre002.json",
-    "docs/project-state/authorizations/auth-20261022-owner-codex-build-continuation.json"
+    "docs/project-state/authorizations/auth-20261022-owner-codex-build-continuation.json",
+    "docs/project-state/authorizations/auth-20261022-owner-mutation-ci-prerequisite.json"
   ],
   "limitations": [
     "No record is admitted by generating this manifest.",

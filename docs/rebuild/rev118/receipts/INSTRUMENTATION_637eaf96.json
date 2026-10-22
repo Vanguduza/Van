@@ -110,5 +110,11 @@
     }
   ],
   "log_sha256": "a1411fd428d2e836c9d1fbf3c4f6f7731bf822f403d0247b9703d47bc4af6b8a",
-  "conclusion": "Baseline Android regex regressions, real deep-link delivery/lifecycle cleanup, deterministic frame repeatability and core Rive contract tests pass. No artwork or action/noise threshold was changed. No full-blueprint, live provider, production signing or S24 qualification is issued."
+  "conclusion": "Baseline Android regex regressions, real deep-link delivery/lifecycle cleanup, deterministic frame repeatability and core Rive contract tests pass. No artwork or action/noise threshold was changed. No full-blueprint, live provider, production signing or S24 qualification is issued.",
+  "mutation_job_interpretation": {
+    "reported_conclusion": "success",
+    "evidence_valid": false,
+    "observed": "Runner aborted on stale source anchor; pipeline and step policy masked it. See ci/MUTATION_VERIFICATION_FINDING.md.",
+    "instrumentation_results_affected": false
+  }
 }

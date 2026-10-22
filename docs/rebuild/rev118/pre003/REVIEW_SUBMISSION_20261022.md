@@ -33,4 +33,6 @@ Use `tools/rebuild/requirements.lock` in an isolated environment and run `python
 
 The original planned acceptance registry remains NOT_RUN, as do additions in the candidate packages. No live host, provider, financial, native device or owner-acceptance effect occurred in this continuation.
 
-The complete trusted-base intake candidate is `MAIN_AUTHORIZATION_INTAKE_CURRENT.json` (43 records, original 39 unchanged plus four continuation records). Recompute it against the actual protected base after bootstrap.
+The complete trusted-base intake candidate is `MAIN_AUTHORIZATION_INTAKE_CURRENT.json` (44 records, original 39 unchanged plus five continuation records). Recompute it against the actual protected base after bootstrap.
+
+Mutation evidence correction: the previously successful advisory job aborted early. `ci/MUTATION_VERIFICATION_FINDING.md` and its preflight report preserve all 374 cases and identify 36 stale/missing-input findings. The runner now requires a passing unmutated control; CI preserves errors. Full mutation execution is unqualified pending semantic registry reconciliation.
