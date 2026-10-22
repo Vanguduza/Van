@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T20:55:56.740472+00:00",
+  "updated_at_utc": "2026-10-22T21:04:00.151384+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -183,6 +183,10 @@
         {
           "description": "Generic native account edits preserve omitted connection/settings and credential references; actual enabled control and official Deriv endpoint checks; complete native before/after review bound in A4 and rechecked by writer; existing Android review and typed action catalogue.1990fulltrading zero skip,51restored focused,203app JVM/APKs/lint0errors,192owner-plan and78rebuild pass.8faults caught after28controls and restored. Initial neutral redundant-check mutation retained. No migration/retirement or whole-unit acceptance.",
           "evidence": "backend/BE-002_004_005_ACCOUNT_UPDATE_REVIEW.md; receipts/ACCOUNT_UPDATE_REVIEW_SOURCE_20261022.json"
+        },
+        {
+          "description": "Actual single-symbol/book/backtest paper factories bind per-symbol account-currency tick valuation. Partial exits and resting entries preserve units; unknown symbols/currency conflicts/invalid money units and open/pending rescaling refused.2001fulltrading zero skip privatePG/DDS,7faults caught after11actualPG controls and restored,78rebuild pass. Simulation source only; native recovery and economic/provider qualification remain.",
+          "evidence": "backend/BE-004_012_PAPER_CONTRACT_VALUATION.md; receipts/PAPER_CONTRACT_VALUATION_SOURCE_20261022.json"
         }
       ]
     },
@@ -292,6 +296,10 @@
         {
           "description": "Single-symbol native account lease/final router guard and current heartbeat permission; real venue senders require sharedPostgreSQL, local paper/non-sending path remains. Actual strategy entry is blocked on takeover/late owner halt/process stop; healthy first-insert PG race distinguished from outage.1968fulltrading zero skips,61focused+3opt-ins covered separately/full,78rebuild pass;7faults caught/restored after validPG controls. Physical identity/migration/retirement and complete startup positions remain.",
           "evidence": "backend/BE-004_009_SINGLE_SESSION_LEASE.md; receipts/SINGLE_SESSION_LEASE_SOURCE_20261022.json"
+        },
+        {
+          "description": "Actual single-symbol/book/backtest paper factories bind per-symbol account-currency tick valuation. Partial exits and resting entries preserve units; unknown symbols/currency conflicts/invalid money units and open/pending rescaling refused.2001fulltrading zero skip privatePG/DDS,7faults caught after11actualPG controls and restored,78rebuild pass. Simulation source only; native recovery and economic/provider qualification remain.",
+          "evidence": "backend/BE-004_012_PAPER_CONTRACT_VALUATION.md; receipts/PAPER_CONTRACT_VALUATION_SOURCE_20261022.json"
         }
       ]
     },
@@ -374,6 +382,10 @@
         {
           "description": "Native parent cash deltas, unknown-money reconciliation fence, original/restated analytical views, atomic SQLite/PostgreSQL revision/contribution/cursor and existing account/portfolio owner readback. Partial candidate source; provider finality/correction and qualified positive adaptation remain.",
           "evidence": "backend/BE-003_036_RESTATED_LEARNING.md; receipts/RESTATED_LEARNING_SOURCE_20261022.json"
+        },
+        {
+          "description": "Actual single-symbol/book/backtest paper factories bind per-symbol account-currency tick valuation. Partial exits and resting entries preserve units; unknown symbols/currency conflicts/invalid money units and open/pending rescaling refused.2001fulltrading zero skip privatePG/DDS,7faults caught after11actualPG controls and restored,78rebuild pass. Simulation source only; native recovery and economic/provider qualification remain.",
+          "evidence": "backend/BE-004_012_PAPER_CONTRACT_VALUATION.md; receipts/PAPER_CONTRACT_VALUATION_SOURCE_20261022.json"
         }
       ]
     },

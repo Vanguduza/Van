@@ -105,13 +105,13 @@ class ServiceConfig:
 from vati.learning.scope import ENVIRONMENT_FOR_MODE
 
 
-def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: Decimal = Decimal("10000"), deriv_connector=None) -> VenueAdapter:
+def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: Decimal = Decimal("10000"), deriv_connector=None, symbol_contracts=None) -> VenueAdapter:
     """Adapter from the account record. Credentials are resolved inside the transport and never returned."""
     from vati.accounts.access import bind_entry_authority
     def bound(adapter):
         return bind_entry_authority(adapter, registry, account)
     if account.broker == BrokerKind.PAPER:
-        return bound(PaperAdapter(venue=account.router_venue, account_alias=account.alias, currency=account.currency, equity=equity_hint))
+        return bound(PaperAdapter(venue=account.router_venue, account_alias=account.alias, currency=account.currency, equity=equity_hint, symbol_contracts=symbol_contracts))
     if account.broker == BrokerKind.MT5:
         from vati.execution.mt5_bridge import Mt5BridgeAdapter, Mt5BridgeClient
         from vati.execution.transports.mt5_http import Mt5HttpTransport
@@ -194,7 +194,10 @@ class SessionService:
         shared = str(c.ledger).startswith(("postgres://", "postgresql://"))
         if not shared and account.broker != BrokerKind.PAPER and mandate.mode.value in SENDING_MODES:
             raise RuntimeError("native venue entry requires the shared PostgreSQL VATI authority store; a local lease is not a cross-host fence")
-        self.adapter = self.adapter or build_adapter(account, registry)
+        contract = contract_from_dict({**c.contract, "venue": account.router_venue})
+        self.adapter = self.adapter or build_adapter(account, registry, symbol_contracts={c.symbol: contract})
+        if isinstance(self.adapter, PaperAdapter):
+            self.adapter.bind_contracts({c.symbol: contract})
         self._ledger = open_ledger(c.ledger)
         from vati.app.account_lease import AccountRuntimeLease, PostgresLeaseStore
         from vati.app.sqlite_lease import SQLiteLeaseStore
@@ -202,7 +205,6 @@ class SessionService:
         self.lease = AccountRuntimeLease(self._lease_store, account_alias=account.alias,
             instance_id=f"{os.uname().nodename}:{os.getpid()}:{uuid.uuid4().hex}",
             software_version="vati-single-session/1", git_sha=os.environ.get("VAN_GIT_SHA", ""))
-        contract = contract_from_dict({**c.contract, "venue": account.router_venue})   # the account decides the venue; a contract copied from another venue must not silently mismatch
         scfg = SessionConfig(symbol=c.symbol, base=c.base, quote=c.quote, venue=account.router_venue, account_alias=account.alias, contract=contract, mandate_dict=c.mandate, timeframe=c.timeframe,
                              warmup_bars=c.warmup_bars, max_quote_age_ms=c.max_quote_age_ms, session_id=f"{account.alias}:{c.symbol}:{int(self.clock())}", activation_id=c.activation_id,
                              software_stops=account.broker == BrokerKind.ZSE_OWNER_TICKET)

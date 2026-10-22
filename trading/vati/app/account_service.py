@@ -183,7 +183,12 @@ class AccountCoordinatorService:
         self.account = account
         self.mandate = mandate
         self.authority = RiskAuthority(mandate)
-        self.adapter = self.adapter or build_adapter(account, registry)
+        self.contracts = {spec.symbol: contract_from_dict({**spec.contract, "venue": account.router_venue})
+                          for spec in self.specs.values()}
+        self.adapter = self.adapter or build_adapter(account, registry, symbol_contracts=self.contracts)
+        from vati.execution.paper import PaperAdapter
+        if isinstance(self.adapter, PaperAdapter):
+            self.adapter.bind_contracts(self.contracts)
         self._ledger = open_ledger(c.ledger)
         from vati.cognition.fabric import TriAnalystPlane
         self.tri_analyst = TriAnalystPlane(self._ledger, account_alias=c.account_alias,
@@ -257,7 +262,6 @@ class AccountCoordinatorService:
 
         evaluators: list[InstrumentEvaluator] = []
         for spec in self.specs.values():
-            self.contracts[spec.symbol] = contract_from_dict({**spec.contract, "venue": account.router_venue})
             chosen_capsules = [all_capsules.get(sid) for sid in spec.capsules]
             capsule_registry = CapsuleRegistry(chosen_capsules)
             implementations = {

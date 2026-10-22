@@ -16,7 +16,7 @@ from decimal import Decimal
 from typing import ClassVar, Optional
 
 from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCommand, StopMode, VenuePosition
-from vati.risk.contracts import Direction, LossModel
+from vati.risk.contracts import Direction, LossModel, SymbolContract
 
 ZERO = Decimal("0")
 DAY_MS = 86_400_000
@@ -40,7 +40,45 @@ class PaperAdapter:
     closed: list[dict] = field(default_factory=list)
     last_price: dict[str, Decimal] = field(default_factory=dict)
     pending: dict[str, dict] = field(default_factory=dict)
+    symbol_contracts: Optional[dict[str, SymbolContract]] = None
+    _contract_values: Optional[dict[str, tuple[LossModel, Decimal]]] = field(default=None, init=False, repr=False)
     supported_entry_types: ClassVar[tuple] = ("MARKET", "LIMIT", "PASSIVE_LIMIT", "STOP")
+
+    def __post_init__(self) -> None:
+        if self.symbol_contracts is not None:
+            self.bind_contracts(self.symbol_contracts)
+
+    def bind_contracts(self, contracts: dict[str, SymbolContract]) -> None:
+        """Pin simulated money units before entry; never rescale an open lot."""
+        if not contracts:
+            raise ValueError("paper symbol contracts are required")
+        values = {}
+        for symbol, contract in contracts.items():
+            key = symbol.upper()
+            if key != contract.symbol.upper() or key in values or contract.venue != self.venue:
+                raise ValueError("paper symbol contract identity differs from the configured route")
+            if contract.account_currency != self.currency:
+                raise ValueError("paper contract account currency differs from the registered account currency")
+            if (not contract.tick_size.is_finite() or contract.tick_size <= ZERO
+                or not contract.tick_value.is_finite() or contract.tick_value <= ZERO):
+                raise ValueError("paper contract tick valuation must be finite and positive")
+            factor = (contract.value_per_price_unit_per_lot
+                      if contract.loss_model is not LossModel.FULL_STAKE else Decimal(1))
+            values[key] = (contract.loss_model, factor)
+        for position in self._positions.values():
+            if values.get(position["symbol"].upper()) != (position["loss_model"], position["vppu"]):
+                raise ValueError("paper contract change would rescale an existing position")
+        for pending in self.pending.values():
+            cmd = pending["cmd"]
+            previous = (self._contract_values.get(cmd.symbol.upper()) if self._contract_values is not None
+                        else (cmd.loss_model, self.value_per_price_unit_per_lot
+                              if cmd.loss_model is LossModel.STOP_DISTANCE else Decimal(1)))
+            if values.get(cmd.symbol.upper()) != previous:
+                raise ValueError("paper contract change would orphan or rescale a pending order")
+        # The working map is copied, so later edits to a caller's dict cannot
+        # silently change units for a pending order or the next fill.
+        self.symbol_contracts = dict(contracts)
+        self._contract_values = values
 
     def sync_account(self) -> AccountState:
         unreal = sum((self._unrealised(p) for p in self._positions.values()), ZERO)
@@ -58,6 +96,13 @@ class PaperAdapter:
         return Health(not self.inject_disconnect, 0, now_ms)
 
     def submit(self, cmd: OrderCommand, *, now_ms: int) -> ExecutionReceipt:
+        if self._contract_values is not None and (
+            cmd.symbol.upper() not in self._contract_values
+            or self._contract_values[cmd.symbol.upper()][0] != cmd.loss_model
+        ):
+            return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None,
+                cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms,
+                reject_reason="paper symbol or loss model is not configured").sealed()
         if self.inject_disconnect:
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "UNKNOWN", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason="disconnected").sealed()
         if self.inject_reject_order:
@@ -101,7 +146,8 @@ class PaperAdapter:
         stop_ok = cmd.stop_mode is StopMode.SOFTWARE or (cmd.protective_stop is not None and not self.inject_reject_stop)
         self._positions[pid] = {"symbol": cmd.symbol, "direction": cmd.direction, "qty": cmd.quantity, "entry": fill,
                                 "stop": cmd.protective_stop if stop_ok and cmd.stop_mode is StopMode.VENUE else None,
-                                "intent": cmd.trade_intent_id, "loss_model": cmd.loss_model, "vppu": self.value_per_price_unit_per_lot if cmd.loss_model is LossModel.STOP_DISTANCE else Decimal(1),
+                                "intent": cmd.trade_intent_id, "loss_model": cmd.loss_model,
+                                "vppu": self._contract_values[cmd.symbol.upper()][1] if self._contract_values is not None else self.value_per_price_unit_per_lot if cmd.loss_model is LossModel.STOP_DISTANCE else Decimal(1),
                                 "targets": cmd.targets, "opened_ms": now_ms}
         if not reason:
             self.last_price[cmd.symbol] = cmd.entry_price

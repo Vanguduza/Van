@@ -246,7 +246,8 @@
       "Frozen886f fullbackend/contracts completed6619pass166skip0fail1747.97s,zero forbidden storage events,clean tree,exit0; receiptSOURCE_QUALIFICATION_886f2aea.json. New frozen396 audit stillrunning.",
       "Account edit/review candidate:1990fulltrading zero skip privatePG/DDS;51restored focused/203appJVM and APKs/lint0errors/192owner-plan/78rebuild pass. Eight faults caught with passing control and restored source.439endpoints/262schemas preserve all original identities. No native migration, retirement or whole-unit acceptance.",
       "Hosted45ec/39846328680 actual374legacy faults/383edits;18nativepass4explicitcore skips,real VITS2.384s/2.186s;publicPG26voice117trading1967pass1privateDDSskip. Tree-identical source/merge; actual privateDDS-key/trusted-main bootstrap failures retained.",
-      "Frozen396 fullbackend/contracts completed6628pass166skipzero failure1625.69s;zero forbidden storage events and clean tree. SOURCE_QUALIFICATION_396e0367.json; no skip promoted to pass."
+      "Frozen396 fullbackend/contracts completed6628pass166skipzero failure1625.69s;zero forbidden storage events and clean tree. SOURCE_QUALIFICATION_396e0367.json; no skip promoted to pass.",
+      "Paper contract valuation:4valid counterexamples fixed;2001fulltrading zero skips realprivatePG/DDS,7source faults caught after11actualPG controls and restored,78rebuild pass. Both fixtures stopped/removed. Actual single/book/backtest consumers use configured contract account-currency units; no provider/payoff/profit acceptance."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -257,9 +258,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Continue original candidate programme: contract-specific paper valuation and single-symbol restart/ledger position recovery; complete native physical-account identity/migration and exposure/order/funds/lease/retention-safe retirement, provider-operation finality/adjudication and remaining whole-product contracts. Freeze the committed gateway/account source for the next audited backend/contracts run. No new frontend before BG-001; retain all131 units and native/independent/provider/signing/S24 gates.",
-    "previous_head": "45ec06098542b8a3c1be58991141f049d806730d",
-    "current_packet": "Account edit preservation, native resolved A4 owner review and existing Android approval repair; candidate source only"
+    "next_action": "Continue original source programme: strict native account/intent provenance and single-symbol startup position reconciliation/protection; preserve unknown effects and do not infer a flat account from restarted memory. Complete physical account identity/migration, exposure/orders/funds/lease/retention-safe retirement, provider operation finality/adjudication and all remaining original product contracts. Frozen9ea broad backend audit and hosted39853172032 remain running; collect before replacing. No new frontend beforeBG-001 and no owner/native gate self-certification.",
+    "previous_head": "9ea88ce2e0385ef014b7229f5f6fe1cdc9526685",
+    "current_packet": "Contract-specific paper valuation in actual production and backtest factories; candidate source only"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -317,6 +318,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Continue original candidate programme: contract-specific paper valuation and single-symbol restart/ledger position recovery; complete native physical-account identity/migration and exposure/order/funds/lease/retention-safe retirement, provider-operation finality/adjudication and remaining whole-product contracts. Freeze the committed gateway/account source for the next audited backend/contracts run. No new frontend before BG-001; retain all131 units and native/independent/provider/signing/S24 gates.",
-  "updated_at_utc": "2026-10-22T20:55:56.740472+00:00"
+  "current_action": "Continue original source programme: strict native account/intent provenance and single-symbol startup position reconciliation/protection; preserve unknown effects and do not infer a flat account from restarted memory. Complete physical account identity/migration, exposure/orders/funds/lease/retention-safe retirement, provider operation finality/adjudication and all remaining original product contracts. Frozen9ea broad backend audit and hosted39853172032 remain running; collect before replacing. No new frontend beforeBG-001 and no owner/native gate self-certification.",
+  "updated_at_utc": "2026-10-22T21:04:00.151384+00:00"
 }

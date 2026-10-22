@@ -53,8 +53,10 @@ class BacktestEngine:
 
     def run(self, bars: Sequence[Bar], *, peek: bool = False) -> BacktestResult:
         cfg = self.cfg
-        paper = PaperAdapter(venue=cfg.venue, account_alias=cfg.account_alias, equity=self.start_equity, spread=self.spread, slippage=self.slippage,
-                             value_per_price_unit_per_lot=cfg.contract.value_per_price_unit_per_lot)
+        paper = PaperAdapter(venue=cfg.venue, account_alias=cfg.account_alias, currency=cfg.contract.account_currency,
+                             equity=self.start_equity, spread=self.spread, slippage=self.slippage,
+                             value_per_price_unit_per_lot=cfg.contract.value_per_price_unit_per_lot,
+                             symbol_contracts={cfg.symbol: cfg.contract})
         ledger = Ledger(self.ledger_path)
         cycle = DecisionCycle(cfg=cfg, adapter=paper, ledger=ledger, engine=self.engine, cost_fn=self.cost_fn, calendar=self.calendar, events=self.events, ctx_fn=self.ctx_fn, learning=self.learning)
         curve: list[tuple[int, Decimal]] = []
