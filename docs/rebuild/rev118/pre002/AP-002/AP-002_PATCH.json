@@ -1,8 +1,8 @@
 {
  "schema": "van.rebuild.amendment-patch/1",
  "amendment": "AP-002",
- "status": "PROPOSED_NOT_DRY_RUN_NOT_ADMITTED",
- "depends_on": "AP-001 decision (count chain 1,624 → 1,632 if AP-001 is admitted; 1,610 → 1,618 otherwise)",
+ "status": "PROPOSED_DRY_RUN_VERIFIED_NOT_ADMITTED",
+ "depends_on": "AP-001 and AP-002 require separate admission decisions. Verified standalone AP-002: 1,618 identities. Verified cumulative AP-001 + AP-002: 1,632 identities.",
  "base_package_tree": "ac0226a22a95f51642cfeb37b3709b40f7cacf10",
  "source": "docs/rebuild/rev118/pre002/challenge/review/NEG_REC_REVIEW.json (six GAP_REFINEMENT_PROPOSED dispositions)",
  "rule": "Additive only. No existing identity text, owner or digest changes; existing identities gain owners only through owner_additions.",
@@ -115,7 +115,7 @@
     "VAN-NX-049"
    ],
    "expectation": "Old credential stays valid and in use after a failed verify or crash; the attempt is recorded; a server/login change forces re-verification before any trading.",
-   "proves": "Credential rotation never leaves an account without valid credentials (master inherited §7.9.10).",
+   "proves": "Credential rotation never leaves an account without valid credentials (master inherited \u00a77.9.10).",
    "preconditions": "Linked account with a working credential; fault injection on verify and swap.",
    "stimulus": "Fail verification of the new secret; crash between verify and swap; change server/login.",
    "observable": "Old credential stays valid and in use after a failed verify or crash; the attempt is recorded; a server/login change forces re-verification before any trading.",
@@ -193,20 +193,20 @@
  "citation_errata": {
   "note": "Erratum records only; the identities' text is unchanged. The Rev1.18 master repeats 67 section numbers (whole-product contract then verbatim inherited spec).",
   "T-NX-027": {
-   "cites": "§7.4",
-   "means": "inherited §7.4 Owner manual trading (master L1470)"
+   "cites": "\u00a77.4",
+   "means": "inherited \u00a77.4 Owner manual trading (master L1470)"
   },
   "T-NX-032": {
-   "cites": "§8.4–§8.5",
-   "means": "inherited §8.4 History comparison (L1992) and §8.5 How news changes trading decisions (L2012)"
+   "cites": "\u00a78.4\u2013\u00a78.5",
+   "means": "inherited \u00a78.4 History comparison (L1992) and \u00a78.5 How news changes trading decisions (L2012)"
   },
   "T-NX-036": {
-   "cites": "§8.2, §8.4",
-   "means": "inherited §8.2 Live sources (L1958) and §8.4 History comparison (L1992)"
+   "cites": "\u00a78.2, \u00a78.4",
+   "means": "inherited \u00a78.2 Live sources (L1958) and \u00a78.4 History comparison (L1992)"
   },
   "T-NX-037": {
-   "cites": "§8.3",
-   "means": "inherited §8.3 Analysis of each story (L1977)"
+   "cites": "\u00a78.3",
+   "means": "inherited \u00a78.3 Analysis of each story (L1977)"
   }
  }
 }

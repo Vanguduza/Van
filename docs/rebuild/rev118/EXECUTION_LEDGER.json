@@ -116,33 +116,33 @@
   },
   {
    "id": "BLK-003",
-   "what": "Native DIAL Oracle/Commander/Artemis tools not exposed in this session; adb MCP failed (ENOENT)",
+   "what": "Current cloud catalog has no DIAL/Commander/Artemis tools or native binding. Local Android SDK has no emulator or KVM.",
    "blocks": "native identity readback, device evidence, S24 acceptance",
-   "needed_from": "enrolled dial-oracle-control / Artemis connection"
+   "needed_from": "Admitted native control-host entrypoint for registry, root signer/reviewer and handset operations"
   },
   {
    "id": "BLK-004",
-   "what": "21 owner questions unresolved in plan.owner_questions (START gates on BE-004/006/007/009/010/011/014/016/017/019/022, UX-002)",
+   "what": "18 actual owner decisions / 49 requirement dependencies after semantic review; source values and activation permissions remain distinct",
    "blocks": "those units' START even after F15",
-   "needed_from": "owner decisions"
+   "needed_from": "Concrete decisions in pre002/challenge/review/DECISION_REGISTER.json"
   },
   {
    "id": "BLK-005",
-   "what": "Project identity: package project_id 16f2f43a-... vs DDS registry id 'van'; certifier fails on mismatch; native readback unavailable here",
+   "what": "Native UUID/slug mapping unverified, not an observed identity mismatch. Certifier compares native registry identity with native pack identity, not package UUID directly.",
    "blocks": "F15",
-   "needed_from": "native DIAL readback / owner"
+   "needed_from": "Read-only native registry/pack readback"
   },
   {
    "id": "BLK-006",
-   "what": "PR #104 CI: backend fixed on this branch (DDS sibling 0c7fa8cf, services env 17a7cb81) pending the deploy-key secret; instrumentation has two causes, ICU regex (patch prepared) and Rive action-2 margin (both outcomes at one SHA; remedies prepared); ledger needs PR #94",
-   "blocks": "PRE-001 exit and F15 (preparation blocker)",
-   "needed_from": "owner: deploy key; android/ authorization for the ICU patch; visual-authority or android decision for Rive"
+   "what": "CI DDS source-contract read credential is absent; secret/key administration returns HTTP 403 through REST and gh. Voice acquisition is fixed; instrumentation correction awaits hosted runtime result. Trusted ledger gate awaits #94/intake.",
+   "blocks": "Complete CI and trusted-base admission",
+   "needed_from": "Scoped GitHub credential provisioning and native trusted-base admission; lead diagnoses runnable CI failures"
   },
   {
-   "id": "BLK-006",
-   "what": "PR #104 CI: backend fixed on this branch (DDS sibling 0c7fa8cf, services env 17a7cb81) pending the deploy-key secret; instrumentation has two causes, ICU regex (patch prepared) and Rive action-2 margin (both outcomes at one SHA; remedies prepared); ledger needs PR #94",
-   "blocks": "PR #104 merge",
-   "needed_from": "owner: deploy key; android/ authorization for the ICU patch; visual-authority or android decision for Rive"
+   "id": "BLK-007",
+   "what": "AP-001 and AP-002 are verified proposals, not admitted. Original delivery remains unchanged.",
+   "blocks": "PRE-001/002 exit and PRE-003 submission admission",
+   "needed_from": "Owner/eligible independent amendment review through the documented procedure"
   }
  ],
  "amendment_proposals": [
@@ -152,27 +152,32 @@
    "evidence": "docs/rebuild/rev118/pre002/AP-001/",
    "proposal": "Bind explicit POS/NEG/REC acceptance identities to each unit (or record that each aggregates named existing IDs) through an admitted amendment; package left unchanged",
    "status": "PROPOSED_NOT_ADMITTED",
-   "verifier": "tools/rebuild/ap001.py (9/9 selftest)"
+   "verifier": "tools/rebuild/ap001.py (13/13 selftest)"
   }
  ],
  "delegation": {
-  "model_routing_available": "Agent tool with subagent types; no smaller-model capability trial performed",
+  "model_routing_available": "No delegation used in Codex continuation; complex work performed by lead",
   "delegated_packets": [],
-  "note": "All work in this packet performed directly by the lead."
+  "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
  },
  "checkpoint": {
-  "updated_utc": "2026-10-21",
+  "updated_utc": "2026-10-22",
   "branch": "ccr-9e07e1af-8mgz1p",
   "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-  "background_jobs": "none",
+  "background_jobs": "GitHub Actions run 39709119778: Android build/instrumentation in progress at checkpoint preparation; verify actual job state before continuation.",
   "last_validation": [
    "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
    "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
-   "AP-001 candidate: 10/10 package checks on an amended copy; ap001_candidate.py 30/30, digest 8eb76af5…; four induced defects caught",
+   "AP-001 candidate: 10/10 package checks on an amended copy; ap001_candidate.py 30/30, digest 8eb76af5\u2026; four induced defects caught",
    "pytest tests/rebuild: 11 passed; consolidation verify.py zero findings; package unchanged vs 3c3379bd",
    "CI: Artemis 136/136 with pinned sibling (2 passed/134 errors without); test_ci_dds_contract_pin 7 tests, induced failures caught; services 198/198 in stream venv",
    "Local backend job: all steps run; non-passes classified in ci/BACKEND_JOB_LOCAL.json",
-   "ICU regex patch: JVM harness 1,273/1,273 on patched tree; ICU test fails before, passes after"
+   "ICU regex patch: JVM harness 1,273/1,273 on patched tree; ICU test fails before, passes after",
+   "2026-10-22: 1273 JVM / 195 app unit tests passed; debug + instrumentation APKs assembled; lint 0 Error/Fatal, 80 warnings.",
+   "All 90 forecast requirement and 48 packet source hashes reproduced; original digests unchanged.",
+   "AP-002 standalone 1618 and cumulative 1632: ten documentary checks each; thirteen preservation regressions passed.",
+   "Isolated rebuild suite: 31 passed; focused CI/acquisition/ICU regressions: 14 passed.",
+   "Branch-local ledger: five commits 4fd466de..461186ef GREEN; source consolidation zero findings."
   ],
   "environment_notes": [
    "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -183,8 +188,8 @@
    "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
    "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
   ],
-  "next_action": "Owner: provision DDS_CONTRACT_READ_DEPLOY_KEY; adopt PR #94; decide AP-001/AP-002, OQ-05 and the 18 owner decisions; authorize or reject the Android ICU patch and choose the Rive remedy; obtain native registry readback; name an eligible independent reviewer. Lead: no further PRE work is dependency-ready until those return; BE units remain blocked on PRE-003.",
-  "previous_head": "1cab6b2f5bd1e4e98c0a61538be34268f6280159"
+  "next_action": "Read hosted Android results; diagnose failures. Verify and push the current submission. Native registry/signing/reviewer access, amendment admission, DDS read credential and trusted-base bootstrap remain external prerequisites. No BE/FE gate is self-issued.",
+  "previous_head": "2a10b7884b9bcf214395d5c15815ab6d96f56845"
  },
  "observations": [
   "OBS-001 BE-002 debug cleartext",
@@ -196,11 +201,30 @@
  "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
  "pre002_reviews": "pre002/challenge/review/: NEG_REC_REVIEW (37 adequate / 6 gaps), PRODUCT_TRUTH_TRACE_REVIEW (189 classified), DECISION_REGISTER (49 real dependencies, 18 owner decisions)",
  "amendments": {
-  "AP-001": "candidate verified, digest 8eb76af5…, not admitted",
-  "AP-002": "additive follow-on, prepared, not dry-run"
+  "AP-001": "Original verified proposal retained; not admitted.",
+  "AP-002": "Standalone candidate 1618 / cumulative 1632; ten checks pass each, thirteen preservation regressions; not admitted."
  },
  "ci_prerequisite_commits": [
   "0c7fa8cf DDS sibling checkout",
   "17a7cb81 services stream-host environment"
- ]
+ ],
+ "continuation": {
+  "owner_instruction": "opus is nolonger available finish building from the current state to completion",
+  "lead": "Codex",
+  "recovered_head": "2a10b7884b9bcf214395d5c15815ab6d96f56845",
+  "pr": 105,
+  "report": "docs/rebuild/rev118/CONTINUATION_20261022.md",
+  "application_rebuild_started": false,
+  "baseline_maintenance_commits": [
+   "6ba1fef7",
+   "eba674ac",
+   "461186ef"
+  ]
+ },
+ "provenance_correction": {
+  "finding": "90 forecast hashes previously reported unverifiable",
+  "resolution": "All 90 requirement and 48 packet hashes match original bundled records with sorted, non-ASCII-escaped JSON and default separators.",
+  "evidence": "pre002/challenge/review/FORECAST_PROVENANCE.json",
+  "qualification": "Documentary source provenance; independent review remains separate."
+ }
 }

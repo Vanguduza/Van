@@ -39,9 +39,9 @@ FAMILY = {
  "VAN-JM": ("COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY",
    ["traceability/REV117_REQUIREMENTS.json", "contracts/self_optimization/MODEL_USE_CONTRACT.json", "verification/REV117_ACCEPTANCE_CONTRACTS.json"],
    "Owner-directed Jev/model hardening (OWNER_JEV_ARGON_DEEPSEEK_20261018) carried by the Rev1.17 registry and contract. Closest atoms VAN-PT-SO-01/SO-02."),
- "VAN-ML-REQ": ("COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
-   ["traceability/FORECAST_PACKET_CROSSWALK.json", "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"],
-   "Forecast requirements (REQUIRED_SOFTWARE_SEPARATE_ECONOMIC_ADMISSION). All 90 source_packet ids are present in the forecast packet crosswalk, but no source_obligation_sha256 re-derives from any string, line or paragraph in the package (checked against the crosswalk and FORECAST_TECHNICAL_SOURCE_REV1_1.md), so obligation-level provenance cannot be verified from the package. Finding for the reviewer, not a Product Truth gap."),
+ "VAN-ML-REQ": ("COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
+   ["traceability/FORECAST_PACKET_CROSSWALK.json", "lineage/forecast_rev1_1/plan/REQUIREMENTS.json", "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"],
+   "All 90 requirement hashes and 48 packet hashes reproduce from the bundled original JSON records using json.dumps(record, sort_keys=True, ensure_ascii=False), UTF-8 and default separators. The previous unverifiable-provenance claim was an instrument error. tools/rebuild/forecast_provenance.py checks the hashes, mappings and retained obligations without changing source or recorded digests. This establishes documentary provenance, not independent admission or product behavior."),
  "VAN-NX-BF": ("MISSING_REQUIRED_TRACE_ATOM_ABSENT",
    [],
    "Backend-first clauses. F0 names the owner's backend-first direction as part of Product Truth, but none of the 22 atoms states it (VAN-PT-18 describes the engineering chain, not backend-first ordering). Their source_row_sha256 equals sha256 of each clause's own text (18/18), so it is self-referential, not evidence of an external source. Owner action: add or confirm a backend-first atom; nothing is linked here."),
@@ -70,6 +70,7 @@ def main(argv):
     pt = json.loads((PKG / "traceability/PRODUCT_TRUTH.json").read_text())
     atoms = {a["id"] for a in pt["truth_atoms"]}
     reqs = {r["id"]: r for r in json.loads((PKG / "traceability/REQUIREMENTS_AND_DU_MAPPING.json").read_text())["requirements"]}
+    forecast = {r["id"]: r for r in json.loads((PKG / "lineage/forecast_rev1_1/plan/REQUIREMENTS.json").read_text())["requirements"]}
     dossiers = json.loads((ROOT / "docs/rebuild/rev118/pre002/challenge/DOSSIERS.json").read_text())["dossiers"]
     flagged = [d["id"] for d in dossiers if "NO_PRODUCT_TRUTH_TRACE" in d["author_flags"]]
     problems, rows = [], []
@@ -92,6 +93,8 @@ def main(argv):
                     problems.append(f"{rid} absent from {reg}")
             if fam == "VAN-ML-REQ" and reqs[rid]["source_packet"] not in (PKG / regs[0]).read_text():
                 problems.append(f"{rid} packet absent from crosswalk")
+            if fam == "VAN-ML-REQ" and hashlib.sha256(json.dumps(forecast[rid], sort_keys=True, ensure_ascii=False).encode()).hexdigest() != reqs[rid]["source_obligation_sha256"]:
+                problems.append(f"{rid}: original forecast record hash does not match")
             if fam == "VAN-NX-BF" and hashlib.sha256(reqs[rid]["text"].encode()).hexdigest() != reqs[rid]["source_row_sha256"]:
                 problems.append(f"{rid}: source_row_sha256 is not sha256(text) as recorded")
             rows.append({"id": rid, "classification": cls, "governing_registries": regs, "state": STATE})
@@ -108,7 +111,7 @@ def main(argv):
            "owner_actions": ["Add or confirm a Product Truth atom for the backend-first direction (18 VAN-NX-BF clauses).",
                              "Decide atoms for memory privacy/learning goals (VAN-NX-066, VAN-NX-067), which no atom covers.",
                              "Admit or correct candidate atoms for the other 12 owner-facing NX rows."],
-           "reviewer_actions": ["Obtain the forecast source that VAN-ML-REQ source_obligation_sha256 values hash, or record them as unverifiable."]}
+           "reviewer_actions": ["Independently reproduce all 90 requirement and 48 packet hashes with tools/rebuild/forecast_provenance.py check; original source and hashes are unchanged."]}
     text = json.dumps(out, indent=1, ensure_ascii=False) + "\n"
     if (argv[1] if len(argv) > 1 else "check") == "generate":
         OUT.parent.mkdir(parents=True, exist_ok=True); OUT.write_text(text)

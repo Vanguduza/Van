@@ -18,7 +18,7 @@ Active application roots are `android/`, `backend/`, `trading/`, `services/` and
 
 ## Execution discipline
 
-Opus performs complex work and verifies all delegated results. Smaller models may handle demonstrated, bounded tasks with explicit source, ownership and oracles. Use `docs/consolidation/OPUS_BUILD_PROMPT.md` for the complete owner build instruction.
+The owner transferred execution from unavailable Opus to Codex on 22 October 2026. The current lead performs complex work and verifies all delegated results. Smaller models may handle demonstrated, bounded tasks with explicit source, ownership and oracles. The historical `docs/consolidation/OPUS_BUILD_PROMPT.md` preserves the build requirements; its model assignment is superseded by this owner instruction. Resume from `docs/rebuild/rev118/EXECUTION_LEDGER.json` and `docs/rebuild/rev118/CONTINUATION_20261022.md`.
 
 Use the existing canonical programme and trackers. Maintain continuation checkpoints with branch/head, actual jobs, current packet, evidence, blockers and next action. Preserve accepted/running/applied/unknown/cancelled distinctions. Reconcile unknown effects before retrying. Never report mocks, acknowledgements or historical receipts as current live acceptance.
 

@@ -40,12 +40,13 @@
    "reasoning": "Owner-directed Jev/model hardening (OWNER_JEV_ARGON_DEEPSEEK_20261018) carried by the Rev1.17 registry and contract. Closest atoms VAN-PT-SO-01/SO-02."
   },
   "VAN-ML-REQ": {
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
-   "reasoning": "Forecast requirements (REQUIRED_SOFTWARE_SEPARATE_ECONOMIC_ADMISSION). All 90 source_packet ids are present in the forecast packet crosswalk, but no source_obligation_sha256 re-derives from any string, line or paragraph in the package (checked against the crosswalk and FORECAST_TECHNICAL_SOURCE_REV1_1.md), so obligation-level provenance cannot be verified from the package. Finding for the reviewer, not a Product Truth gap."
+   "reasoning": "All 90 requirement hashes and 48 packet hashes reproduce from the bundled original JSON records using json.dumps(record, sort_keys=True, ensure_ascii=False), UTF-8 and default separators. The previous unverifiable-provenance claim was an instrument error. tools/rebuild/forecast_provenance.py checks the hashes, mappings and retained obligations without changing source or recorded digests. This establishes documentary provenance, not independent admission or product behavior."
   },
   "VAN-NX-BF": {
    "classification": "MISSING_REQUIRED_TRACE_ATOM_ABSENT",
@@ -57,7 +58,7 @@
   "MISSING_REQUIRED_TRACE": 14,
   "MISSING_REQUIRED_TRACE_ATOM_ABSENT": 18,
   "COVERED_BY_OTHER_AUTHORITATIVE_REGISTRY": 67,
-  "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED": 90
+  "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE": 90
  },
  "reviews": [
   {
@@ -504,811 +505,901 @@
   },
   {
    "id": "VAN-ML-REQ-001",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-002",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-003",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-004",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-005",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-006",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-007",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-008",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-009",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-010",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-011",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-012",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-013",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-014",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-015",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-016",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-017",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-018",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-019",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-020",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-021",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-022",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-023",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-024",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-025",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-026",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-027",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-028",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-029",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-030",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-031",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-032",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-033",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-034",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-035",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-036",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-037",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-038",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-039",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-040",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-041",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-042",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-043",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-044",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-045",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-046",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-047",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-048",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-049",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-050",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-051",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-052",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-053",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-054",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-055",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-056",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-057",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-058",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-059",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-060",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-061",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-062",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-063",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-064",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-065",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-066",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-067",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-068",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-069",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-070",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-071",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-072",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-073",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-074",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-075",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-076",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-077",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-078",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-079",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-080",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-081",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-082",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-083",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-084",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-085",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-086",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-087",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-088",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-089",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
   {
    "id": "VAN-ML-REQ-090",
-   "classification": "COVERED_AT_PACKET_LEVEL_PROVENANCE_UNVERIFIED",
+   "classification": "COVERED_BY_ORIGINAL_FORECAST_PROVENANCE",
    "governing_registries": [
     "traceability/FORECAST_PACKET_CROSSWALK.json",
-    "research/FORECAST_TECHNICAL_SOURCE_REV1_1.md"
+    "lineage/forecast_rev1_1/plan/REQUIREMENTS.json",
+    "lineage/forecast_rev1_1/plan/IMPLEMENTATION_PLAN.json"
    ],
    "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
   },
@@ -1789,6 +1880,6 @@
   "Admit or correct candidate atoms for the other 12 owner-facing NX rows."
  ],
  "reviewer_actions": [
-  "Obtain the forecast source that VAN-ML-REQ source_obligation_sha256 values hash, or record them as unverifiable."
+  "Independently reproduce all 90 requirement and 48 packet hashes with tools/rebuild/forecast_provenance.py check; original source and hashes are unchanged."
  ]
 }

@@ -1,5 +1,7 @@
 # PRE-003 independent-review submission: VAN Rev1.18
 
+**Current continuation:** read [REVIEW_SUBMISSION_20261022.md](REVIEW_SUBMISSION_20261022.md) first. The text below is the historical 21 October submission. Its forecast-provenance finding, unapplied-regex status, AP-002 dry-run status and incomplete F15/signing recommendations are superseded by the evidenced continuation. It remains preserved as review history.
+
 Prepared by the lead on 2026-10-21 for the **independent** F15 reviewer. This is a submission, not a certificate. The lead has not issued, and cannot issue, F15, PRE-001/PRE-002 acceptance, an owner signature, or a review that counts as independent (see `F15_LIFECYCLE_AND_OQ05.md` §8). Every assessment below is **author-prepared** and is for the reviewer to challenge.
 
 ## 1. Identities to pin
