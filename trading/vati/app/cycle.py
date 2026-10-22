@@ -41,9 +41,10 @@ from vati.cognition.attribution import DecisionQualityInputs, DecisionQualityLed
 from vati.market_data.bars import Bar
 from vati.market_data.calendars import MarketCalendar
 from vati.observability import metrics
-from vati.risk.lockouts import DRAWDOWN_RESUME_EVENT, LockoutPolicy, LossStreakGovernor, relative_top_state, restore_peak_equity
+from vati.risk.lockouts import DRAWDOWN_RESUME_EVENT, LockoutPolicy, LossStreakGovernor, relative_top_state, restore_peak_equity, restore_equity_baselines
+from vati.risk.history_scope import RiskHistoryScopeError
 from vati.risk import Decision, KillSwitch, MarketIntegrityState, OpenPosition, RiskAuthority, RiskSnapshot, SymbolContract, TradingMandate
-from vati.risk.contracts import Direction, LossModel, StrategyState
+from vati.risk.contracts import Direction, KillSwitchTrigger, LossModel, StrategyState
 from vati.risk.serde import intent_to_dict, snapshot_to_dict
 from vati.strategies.base import StrategyContext
 from vati.arbiter.strategy_arbiter import ACTIVE_STATES
@@ -117,11 +118,17 @@ class DecisionCycle:
         self.peak_equity = ZERO
         self.day_start_equity = ZERO
         self.week_start_equity = ZERO
+        self._period_baselines_restored = False
         self.consecutive_losses = 0
         # P1-TRADE-RISK-005: lockouts and the high-water mark are rebuilt from the ledger,
         # so a restart can neither reset a losing-streak lock nor re-baseline the peak.
-        self.streaks = LossStreakGovernor.rebuild(LockoutPolicy(self.mandate.max_consecutive_losses), ledger.iter())
-        restored_peak = restore_peak_equity(ledger.iter())
+        self.streaks = LossStreakGovernor.rebuild(LockoutPolicy(self.mandate.max_consecutive_losses), ledger.iter(), account_alias=cfg.account_alias)
+        try:
+            restored_peak = restore_peak_equity(ledger.iter(), account_alias=cfg.account_alias)
+        except RiskHistoryScopeError:
+            restored_peak = None
+        if self.streaks.recovery_issue:
+            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, 0)
         if restored_peak is not None and restored_peak > ZERO:
             self.peak_equity = restored_peak
         self.integrity = MarketIntegrityState.NORMAL
@@ -149,6 +156,8 @@ class DecisionCycle:
 
     # --------------------------------------------------------------- helpers
     def _log(self, kind: EventKind, payload: dict, *, now_ms: int, corr: str = "") -> None:
+        if kind in {EventKind.SESSION, EventKind.RISK_DECISION}:
+            payload = {**payload, "account_alias": self.cfg.account_alias}
         self.ledger.append(make_event(kind, "vati-cycle", payload, event_time_ms=now_ms, received_time_ms=now_ms, correlation_id=corr or self.cfg.session_id))
 
     def _open_positions(self) -> tuple[OpenPosition, ...]:
@@ -234,7 +243,25 @@ class DecisionCycle:
                 continue
         return relative_top_state(states)
 
+    def restore_risk_baselines(self, now_ms: int) -> None:
+        if self._period_baselines_restored:
+            return
+        try:
+            peak, day, week = restore_equity_baselines(self.ledger.iter(), now_ms, account_alias=self.cfg.account_alias)
+        except RiskHistoryScopeError as exc:
+            self.streaks.recovery_issue = str(exc)
+            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, now_ms)
+        else:
+            if peak is not None:
+                self.peak_equity = max(peak, self.peak_equity)
+            if day is not None and self.day_start_equity == ZERO:
+                self.day_start_equity = day
+            if week is not None and self.week_start_equity == ZERO:
+                self.week_start_equity = week
+        self._period_baselines_restored = True
+
     def snapshot(self, *, now_ms: int, quote_age_ms: int, strategy_id: str = "") -> RiskSnapshot:
+        self.restore_risk_baselines(now_ms)
         acct = self.adapter.sync_account()
         if self.peak_equity == ZERO:
             self.peak_equity = acct.equity
@@ -243,7 +270,7 @@ class DecisionCycle:
         if self.week_start_equity == ZERO:
             self.week_start_equity = acct.equity
         self.peak_equity = max(self.peak_equity, acct.equity)
-        streak = self.streaks.verdict(strategy_id, now_ms) if strategy_id else None
+        streak = self.streaks.verdict(strategy_id, now_ms) if strategy_id or self.streaks.recovery_issue else None
         hb = self.adapter.heartbeat(now_ms=now_ms)
         return RiskSnapshot(now_unix=now_ms // 1000, account_alias=acct.account_alias, account_verified=acct.verified, equity=acct.equity, balance=acct.balance,
                             peak_equity=self.peak_equity, day_start_equity=self.day_start_equity, week_start_equity=self.week_start_equity,
@@ -693,7 +720,8 @@ class DecisionCycle:
                           broker_ok=measured.amount is not None,
                           initial_money_risk=initial_risk.amount if initial_risk else None,
                           initial_risk_evidence_ref=initial_risk.evidence_ref if initial_risk else None,
-                          pnl_basis=measured.basis, thesis_evidence_basis="PNL_SIGN_PROXY_NOT_SETUP_VALIDATION")
+                          pnl_basis=measured.basis, thesis_evidence_basis="PNL_SIGN_PROXY_NOT_SETUP_VALIDATION",
+                          account_alias=self.cfg.account_alias)
         self.reviews.append(rv)
         self._log(EventKind.TRADE_REVIEW, {k: (v.value if hasattr(v, "value") else (str(v) if isinstance(v, Decimal) else (list(v) if isinstance(v, tuple) else v))) for k, v in asdict(rv).items()}, now_ms=now_ms, corr=intent_id)
         self.admission.propose(rv.artifact_hash, knowledge_class="TRADE_EXPERIENCE", proposed_by=rv.proposed_by, trust_tier="T0_VAN_TRADING_POLICY")

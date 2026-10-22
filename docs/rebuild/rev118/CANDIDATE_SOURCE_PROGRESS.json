@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T08:59:53.003687+00:00",
+  "updated_at_utc": "2026-10-22T09:18:17.263733+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -86,6 +86,10 @@
         {
           "description": "Exact versioned trade/mandate approval binding and durable truthful stop-rejection recovery; 1713 trading pass/zero skip. Historical bodies unchanged.",
           "evidence": "backend/BE-010_012_EXACT_APPROVAL_BINDING.md; receipts/RISK_APPROVAL_BINDING_SOURCE_20261022.json"
+        },
+        {
+          "description": "Account-bound native financial recovery, unresolved history refuses new risk while protection/owner readback continue;1741 full trading pass/zero skip.",
+          "evidence": "backend/BE-003_009_ACCOUNT_RISK_RECOVERY.md; receipts/ACCOUNT_RISK_RECOVERY_SOURCE_20261022.json"
         }
       ]
     },
@@ -151,9 +155,14 @@
         "BE-008",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Account-bound native financial recovery, unresolved history refuses new risk while protection/owner readback continue;1741 full trading pass/zero skip.",
+          "evidence": "backend/BE-003_009_ACCOUNT_RISK_RECOVERY.md; receipts/ACCOUNT_RISK_RECOVERY_SOURCE_20261022.json"
+        }
+      ]
     },
     "BE-010": {
       "title": "Venue execution, parent/child orders, crypto spot adapters and reconciliation",
@@ -222,6 +231,10 @@
         {
           "description": "Exact versioned trade/mandate approval binding and durable truthful stop-rejection recovery; 1713 trading pass/zero skip. Historical bodies unchanged.",
           "evidence": "backend/BE-010_012_EXACT_APPROVAL_BINDING.md; receipts/RISK_APPROVAL_BINDING_SOURCE_20261022.json"
+        },
+        {
+          "description": "Account-bound native financial recovery, unresolved history refuses new risk while protection/owner readback continue;1741 full trading pass/zero skip.",
+          "evidence": "backend/BE-003_009_ACCOUNT_RISK_RECOVERY.md; receipts/ACCOUNT_RISK_RECOVERY_SOURCE_20261022.json"
         }
       ]
     },

@@ -273,6 +273,7 @@ class SessionService:
     def _heartbeat(self, status: str, extra: Optional[dict] = None) -> None:
         hb = {"account_alias": self.cfg.account_alias, "symbol": self.cfg.symbol, "status": status, "cycles": self.cycles, "last_bar_end_ms": self.last_bar_end_ms,
               "permit_new_orders": bool(self.runner and self.runner.permit_new_orders), "kill_switch": sorted(t.value for t in self.runner.cycle.kill.active) if self.runner else [],
+              "risk_history_issue": self.runner.cycle.streaks.recovery_issue if self.runner else "",
               "updated_ms": self.clock(), "pid": os.getpid(), **(extra or {})}
         Path(self.cfg.heartbeat_path).write_text(json.dumps(hb))
 
@@ -286,6 +287,7 @@ class SessionService:
             "account_alias": acct.account_alias, "equity": str(acct.equity), "balance": str(acct.balance), "currency": acct.currency, "verified": acct.verified,
             "connected": hb.connected, "server_offset_ms": hb.server_offset_ms, "open_positions": len(positions), "peak_equity": str(r.cycle.peak_equity), "day_start_equity": str(r.cycle.day_start_equity),
             "week_start_equity": str(r.cycle.week_start_equity), "kill_switch": sorted(t.value for t in r.cycle.kill.active), "mode": r.cycle.mandate.mode.value,
+            "risk_history_issue": r.cycle.streaks.recovery_issue,
         }, event_time_ms=now_ms, received_time_ms=now_ms, correlation_id=r.cycle.cfg.session_id))
 
     def start(self) -> None:

@@ -60,6 +60,7 @@ def account_states(ledger: Ledger, registry_public: list[dict]) -> list[dict[str
                "connected": p.get("connected"), "verified": p.get("verified"), "open_positions": open_by_alias.get(a["alias"], p.get("open_positions", 0)), "kill_switch": p.get("kill_switch", []),
                "last_sync_ms": s.event_time_ms if s else None, "connection_state": ("LIVE" if p.get("connected") else "OFFLINE") if s else "NEVER_SYNCED", "session_event": sessions.get(a["alias"]).payload.get("event") if sessions.get(a["alias"]) else None}
         out.append(row)
+        row["risk_history_issue"] = p.get("risk_history_issue") or None
     return out
 
 

@@ -62,6 +62,7 @@ from vati.observability.enhancement_metrics import (
     PORTFOLIO_INCREMENTAL_ES,
 )
 from vati.risk.lockouts import LockoutPolicy, LossStreakGovernor, relative_top_state, restore_equity_baselines
+from vati.risk.history_scope import RiskHistoryScopeError
 from vati.risk import KillSwitch, MarketIntegrityState, OpenPosition, RiskAuthority, RiskSnapshot, TradingMandate
 from vati.risk.contracts import Direction, KillSwitchTrigger, LossModel
 from vati.risk.dependency import PortfolioDependencyEngine
@@ -376,7 +377,7 @@ class AccountCoordinatorService:
             },
             learning=self.learning,
             cognition=self.cognition,
-            streaks=LossStreakGovernor.rebuild(LockoutPolicy(mandate.max_consecutive_losses), self._ledger.iter()),
+            streaks=LossStreakGovernor.rebuild(LockoutPolicy(mandate.max_consecutive_losses), self._ledger.iter(), account_alias=c.account_alias),
             # GAP-F-003. The adaptive-management path is given the same gate
             # the opening path uses: the account's RiskAuthority, its mandate,
             # and the same snapshot builder. A size-changing adjustment is a
@@ -401,6 +402,8 @@ class AccountCoordinatorService:
         # One account-scoped lifecycle owns entry truth for reconciliation,
         # TCA, protection, trade review and reduce-only learning.
         self._entries = self.lifecycle.entries
+        if self.lifecycle.streaks.recovery_issue:
+            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, self.clock())
 
         profile = TemperamentPolicy(mandate) if mandate.temperament_enabled else None
         base_allocator = OpportunityPortfolioAllocator()
@@ -660,7 +663,7 @@ class AccountCoordinatorService:
         integrity = state.integrity if state is not None else MarketIntegrityState.HALTED
         streaks = getattr(self.lifecycle, "streaks", None) if self.lifecycle is not None else None
         sid = getattr(candidate, "strategy_id", "")
-        streak = streaks.verdict(sid, now_ms) if (streaks is not None and sid) else None
+        streak = streaks.verdict(sid, now_ms) if (streaks is not None and (sid or streaks.recovery_issue)) else None
         return RiskSnapshot(
             now_unix=now_ms // 1000, account_alias=acct.account_alias,
             account_verified=acct.verified, equity=acct.equity, balance=acct.balance,
@@ -1011,6 +1014,7 @@ class AccountCoordinatorService:
                 "day_start_equity": str(self.day_start_equity),
                 "week_start_equity": str(self.week_start_equity),
                 "kill_switch": sorted(t.value for t in self.kill.active),
+                "risk_history_issue": getattr(getattr(self.lifecycle, "streaks", None), "recovery_issue", ""),
                 "mode": self.mandate.mode.value if self.mandate else "UNKNOWN",
                 "temperament": (self.mandate.trading_temperament.value
                                 if self.mandate and self.mandate.trading_temperament
@@ -1067,6 +1071,7 @@ class AccountCoordinatorService:
             "cognitive_packet_worker": {"state":self._packet_worker_state, "authority":"ADVISORY_CANDIDATE", "live_qualification_claimed":False},
             "lease_epoch": self.lease.epoch if self.lease else None,
             "kill_switch": sorted(t.value for t in self.kill.active),
+            "risk_history_issue": getattr(getattr(self.lifecycle, "streaks", None), "recovery_issue", ""),
             "mtf_shadow": {
                 symbol: {
                     "complete": mtf.complete,
@@ -1109,7 +1114,13 @@ class AccountCoordinatorService:
             self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, now)
         # P1-TRADE-RISK-005: a restart resumes the recorded high-water mark and, within the
         # same day/week, the recorded loss baselines; it no longer re-baselines them.
-        peak, day, week = restore_equity_baselines(self._ledger.iter(), now)
+        try:
+            peak, day, week = restore_equity_baselines(self._ledger.iter(), now, account_alias=self.cfg.account_alias)
+            risk_history_issue = ""
+        except RiskHistoryScopeError as exc:
+            peak = day = week = None
+            risk_history_issue = str(exc)
+            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, now)
         self.peak_equity = max(peak, acct.equity) if peak is not None else acct.equity
         self.day_start_equity = day if day is not None else acct.equity
         self.week_start_equity = week if week is not None else acct.equity
@@ -1124,6 +1135,7 @@ class AccountCoordinatorService:
                 "connected": hb.connected,
                 "restored_intents": list(restored),
                 "unresolved_positions": list(unresolved),
+                "risk_history_issue": risk_history_issue,
                 "kill": sorted(t.value for t in self.kill.active),
             },
             event_time_ms=now, received_time_ms=now,

@@ -172,8 +172,11 @@ def test_a_restart_keeps_the_cooldown_and_the_high_water_mark(eurusd):
     assert snap.loss_streak_lock
     cyc.peak_equity = D("12345")
     from vati.core.events import make_event
-    led.append(make_event(EventKind.RISK_DECISION, "t", {"inputs": {"snapshot": {"peak_equity": "12345", "day_start_equity": "12000", "week_start_equity": "12000"}}},
-                          event_time_ms=2_000, received_time_ms=2_000))
+    # Use the actual native account-bound producer. Unlabelled financial
+    # history is separately tested as unresolved rather than assigned to cfg.
+    cyc._log(EventKind.RISK_DECISION, {"inputs": {"intent": {"trade_intent_id": "peak-source", "account_alias": cyc.cfg.account_alias},
+        "snapshot": {"peak_equity": "12345", "day_start_equity": "12000", "week_start_equity": "12000"}}},
+        now_ms=2_000, corr="peak-source")
     again = _cycle(eurusd, led)
     assert again.snapshot(now_ms=3_000, quote_age_ms=0, strategy_id="FX-TREND-PULLBACK-01").loss_streak_lock, "restart reset the cooldown"
     assert again.peak_equity == D("12345"), "restart re-baselined the high-water mark"

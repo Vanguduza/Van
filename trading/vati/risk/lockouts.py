@@ -45,6 +45,7 @@ from decimal import Decimal
 from typing import Iterable, Optional
 
 from vati.risk.contracts import StrategyState
+from vati.risk.history_scope import risk_history_for_account, RiskHistoryScopeError
 
 ZERO, ONE = Decimal("0"), Decimal("1")
 ACCOUNT_SCOPE = "*ACCOUNT*"
@@ -102,6 +103,7 @@ class LossStreakGovernor:
     def __init__(self, policy: LockoutPolicy) -> None:
         self.policy = policy
         self._scopes: dict[str, _Scope] = {}
+        self.recovery_issue = ""
 
     def _scope(self, key: str) -> _Scope:
         return self._scopes.setdefault(key, _Scope())
@@ -135,6 +137,8 @@ class LossStreakGovernor:
 
     # ---------------------------------------------------------------- verdict
     def verdict(self, strategy_id: str, now_ms: int) -> StreakVerdict:
+        if self.recovery_issue:
+            return StreakVerdict(self.recovery_issue, ZERO, 0)
         mult = ONE
         for key in _scopes(strategy_id):
             s = self._scopes.get(key)
@@ -151,9 +155,13 @@ class LossStreakGovernor:
 
     # ---------------------------------------------------------------- rebuild
     @classmethod
-    def rebuild(cls, policy: LockoutPolicy, events: Iterable) -> "LossStreakGovernor":
+    def rebuild(cls, policy: LockoutPolicy, events: Iterable, *, account_alias: str | None = None) -> "LossStreakGovernor":
         """Fold TRADE_REVIEW outcomes and owner resets, in ledger order."""
         g = cls(policy)
+        if account_alias is not None:
+            history = risk_history_for_account(events, account_alias)
+            events = history.events
+            g.recovery_issue = history.issue
         for ev in events:
             kind = getattr(ev.kind, "value", ev.kind)
             if kind == "TRADE_REVIEW":
@@ -165,7 +173,7 @@ class LossStreakGovernor:
         return g
 
 
-def restore_peak_equity(events: Iterable) -> Optional[Decimal]:
+def restore_peak_equity(events: Iterable, *, account_alias: str | None = None) -> Optional[Decimal]:
     """The high-water mark the account last decided against, or an owner re-baseline.
 
     Read from RISK_DECISION inputs (every decision records its snapshot) and
@@ -173,6 +181,11 @@ def restore_peak_equity(events: Iterable) -> Optional[Decimal]:
     has neither.
     """
     peak: Optional[Decimal] = None
+    if account_alias is not None:
+        history = risk_history_for_account(events, account_alias)
+        if history.issue:
+            raise RiskHistoryScopeError(history.issue)
+        events = history.events
     for ev in events:
         kind = getattr(ev.kind, "value", ev.kind)
         if kind == "RISK_DECISION":
@@ -184,7 +197,7 @@ def restore_peak_equity(events: Iterable) -> Optional[Decimal]:
     return peak
 
 
-def restore_equity_baselines(events: Iterable, now_ms: int) -> tuple[Optional[Decimal], Optional[Decimal], Optional[Decimal]]:
+def restore_equity_baselines(events: Iterable, now_ms: int, *, account_alias: str | None = None) -> tuple[Optional[Decimal], Optional[Decimal], Optional[Decimal]]:
     """(peak, day_start, week_start) to resume with after a restart.
 
     The peak is always restored (see `restore_peak_equity`). The day and week
@@ -194,6 +207,11 @@ def restore_equity_baselines(events: Iterable, now_ms: int) -> tuple[Optional[De
     """
     peak = day = week = None
     last_ms = None
+    if account_alias is not None:
+        history = risk_history_for_account(events, account_alias)
+        if history.issue:
+            raise RiskHistoryScopeError(history.issue)
+        events = history.events
     events = list(events)
     peak = restore_peak_equity(events)
     for ev in events:

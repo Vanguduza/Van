@@ -1322,6 +1322,7 @@ class AccountTradeLifecycle:
             stop=entry["stop"] or entry["entry"],
             direction_long=entry["direction"] is Direction.LONG,
             pnl=pnl,
+            account_alias=getattr(self.mandate, "account_alias", "") or getattr(self.adapter, "account_alias", ""),
             thesis_correct=pnl_known and pnl > ZERO,
             process_ok=True,
             broker_ok=pnl_known,

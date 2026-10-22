@@ -132,13 +132,14 @@ class TradeReview:
     r_basis: str = "PRICE_MOVE_OVER_STOP_DISTANCE"
     pnl_basis: str = "CALLER_PROVIDED"
     thesis_evidence_basis: str = "CALLER_ASSERTION"
+    account_alias: str = ""
 
 
 def review_trade(*, trade_intent_id: str, strategy_id: str, entry: Decimal, exit_price: Decimal, stop: Decimal, direction_long: bool, pnl: Decimal,
                  thesis_correct: bool, process_ok: bool, execution_ok: bool = True, data_ok: bool = True, risk_ok: bool = True, broker_ok: bool = True,
                  exit_reason: str = "", exit_known: bool = True, initial_money_risk: Decimal | None = None,
                  initial_risk_evidence_ref: str | None = None, pnl_basis: str = "CALLER_PROVIDED",
-                 thesis_evidence_basis: str = "CALLER_ASSERTION") -> TradeReview:
+                 thesis_evidence_basis: str = "CALLER_ASSERTION", account_alias: str = "") -> TradeReview:
     risk_per_unit = abs(entry - stop)
     move = (exit_price - entry) if direction_long else (entry - exit_price)
     r = move / risk_per_unit if risk_per_unit > ZERO else ZERO
@@ -175,5 +176,5 @@ def review_trade(*, trade_intent_id: str, strategy_id: str, entry: Decimal, exit
     polarity = "POSITIVE" if outcome in (Outcome.GOOD_WIN, Outcome.GOOD_LOSS) else "ANTI_PATTERN"
     rv = TradeReview(trade_intent_id, strategy_id, r.quantize(Decimal("0.01")), pnl, thesis_correct, process_ok, execution_ok, data_ok, risk_ok, outcome, polarity, tuple(lessons),
         initial_money_risk=initial_money_risk, initial_risk_evidence_ref=initial_risk_evidence_ref,
-        r_basis=r_basis, pnl_basis=pnl_basis, thesis_evidence_basis=thesis_evidence_basis)
+        r_basis=r_basis, pnl_basis=pnl_basis, thesis_evidence_basis=thesis_evidence_basis, account_alias=account_alias)
     return TradeReview(**{**rv.__dict__, "artifact_hash": canonical_hash({k: v for k, v in rv.__dict__.items() if k != "artifact_hash"})})

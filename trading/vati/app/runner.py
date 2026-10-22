@@ -31,6 +31,7 @@ class SessionRunner:
 
     def startup(self, *, now_ms: int, ledger_positions: Iterable[LedgerPosition] = ()) -> ReconciliationResult:
         c = self.cycle
+        c.restore_risk_baselines(now_ms)
         acct = c.adapter.sync_account()
         hb = c.adapter.heartbeat(now_ms=now_ms)
         if not acct.verified:
