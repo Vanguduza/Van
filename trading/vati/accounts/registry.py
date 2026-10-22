@@ -13,6 +13,7 @@ import os
 import re
 import stat
 import tempfile
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Optional
@@ -70,6 +71,8 @@ class Account:
             raise AccountRegistryError(f"unknown broker kind {self.broker}")
         if self.mode not in MODES:
             raise AccountRegistryError(f"unknown mode {self.mode}")
+        if type(self.demo) is not bool or type(self.enabled) is not bool:
+            raise AccountRegistryError("demo and enabled must be JSON booleans")
         if self.broker in (BrokerKind.MT5, BrokerKind.MT5_EA, BrokerKind.DERIV, BrokerKind.CTRADER):
             self.credential_ref.validate()
         for k, v in asdict(self).items():
@@ -123,62 +126,76 @@ def load_secret_file(path: str) -> dict[str, str]:
 
 class AccountRegistry:
     def __init__(self, path: str | Path) -> None:
-        self.path = Path(path)
-        self.accounts: dict[str, Account] = {}
-        if self.path.is_file():
-            data = json.loads(self.path.read_text(encoding="utf-8"))
-            for rec in data.get("accounts", []):
-                self._put(Account(**{**rec, "credential_ref": CredentialRef(**rec.get("credential_ref", {}))}))
+        # All aliases of one existing file share its mutation lock.
+        self.path = Path(path).resolve()
+        self.accounts = self._read_accounts()
+        self._loaded_accounts = dict(self.accounts)
 
-    def _put(self, a: Account) -> None:
-        a.validate()
-        self.accounts[a.alias] = a
+    def _read_accounts(self) -> dict[str, Account]:
+        if not self.path.exists():
+            return {}
+        try:
+            data = json.loads(self.path.read_text(encoding="utf-8"))
+            if not isinstance(data, dict) or data.get("schema_version", 1) != 1 or not isinstance(data.get("accounts"), list):
+                raise AccountRegistryError("account registry schema is invalid")
+            records = {}
+            for rec in data["accounts"]:
+                account = Account(**{**rec, "credential_ref": CredentialRef(**rec.get("credential_ref", {}))})
+                account.validate()
+                if account.alias in records:
+                    raise AccountRegistryError("account registry contains duplicate identities")
+                records[account.alias] = account
+            return records
+        except (OSError, ValueError, TypeError) as exc:
+            raise AccountRegistryError("account registry cannot be read safely; reload or reconcile before mutation") from exc
+
+    @contextmanager
+    def _mutation_lock(self):
+        from vati.core.file_lock import exclusive_state_lock, StateFileLockError
+        try:
+            with exclusive_state_lock(self.path):
+                yield
+        except StateFileLockError as exc:
+            raise AccountRegistryError(str(exc)) from exc
+
+    def _mutate(self, operation: str, alias: str, account: Account | None = None):
+        if account is not None:
+            account.validate()
+        with self._mutation_lock():
+            current = self._read_accounts()
+            if operation == "add":
+                if alias in current:
+                    raise AccountRegistryError(f"alias {alias} already registered; reload before changing it")
+            else:
+                if alias not in self.accounts:
+                    raise AccountRegistryError(f"unknown account alias {alias}")
+                if current.get(alias) != self.accounts[alias]:
+                    raise AccountRegistryError(f"account {alias} changed since read; reload before mutation")
+            before = self.accounts
+            self.accounts = current
+            if operation == "remove":
+                del self.accounts[alias]
+            else:
+                self.accounts[alias] = account
+            try:
+                self._save_unlocked()
+            except BaseException:
+                self.accounts = before
+                raise
+            self._loaded_accounts = dict(self.accounts)
+        return account
 
     def add(self, a: Account) -> Account:
-        """Register a new account. Revert the in-memory change on any write failure."""
-        if a.alias in self.accounts:
-            raise AccountRegistryError(f"alias {a.alias} already registered; remove it first")
-        a.validate()
-        before = dict(self.accounts)
-        self.accounts[a.alias] = a
-        try:
-            self.save()
-        except Exception:
-            self.accounts = before
-            raise
-        return a
+        """Add against current persisted records without dropping other writers' edits."""
+        return self._mutate("add", a.alias, a)
 
     def replace(self, a: Account) -> Account:
-        """Validate first, then atomically replace the record without a delete gap.
-
-        This updates VAN's local registry, not any account owned by the broker.
-        The gateway's signed owner approval remains the mutation authority.
-        """
-        a.validate()
-        if a.alias not in self.accounts:
-            raise AccountRegistryError(f"unknown account alias {a.alias}")
-        before = self.accounts[a.alias]
-        self.accounts[a.alias] = a
-        try:
-            self.save()
-        except Exception:
-            self.accounts[a.alias] = before
-            raise
-        return a
+        """Replace one unchanged local record; stale exact-account edits refuse."""
+        return self._mutate("replace", a.alias, a)
 
     def remove(self, alias: str) -> None:
-        """Unlink a local record only; this does not close the broker account.
-
-        A higher-level owning service must prove safe exposure state before
-        authorising this operation, and must never present it as broker closure.
-        """
-        before = self.accounts[alias]
-        del self.accounts[alias]
-        try:
-            self.save()
-        except Exception:
-            self.accounts[alias] = before
-            raise
+        """Unlink an unchanged local record; broker/exposure authority belongs to its caller."""
+        self._mutate("remove", alias)
 
     def get(self, alias: str) -> Account:
         try:
@@ -187,6 +204,18 @@ class AccountRegistry:
             raise AccountRegistryError(f"unknown account alias {alias}") from None
 
     def save(self) -> None:
+        """Explicit whole-registry save refuses a stale baseline rather than overwriting it."""
+        with self._mutation_lock():
+            if self._read_accounts() != self._loaded_accounts:
+                raise AccountRegistryError("account registry changed since read; reload before save")
+            for alias, account in self.accounts.items():
+                account.validate()
+                if alias != account.alias:
+                    raise AccountRegistryError("registry key disagrees with account identity")
+            self._save_unlocked()
+            self._loaded_accounts = dict(self.accounts)
+
+    def _save_unlocked(self) -> None:
         """Write the complete registry through same-directory atomic replacement.
 
         Direct write_text could truncate the only valid record on interruption.

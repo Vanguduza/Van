@@ -170,10 +170,24 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-22T12:28:14.617913+00:00",
+    "updated_utc": "2026-10-22T12:41:51.078693+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": [],
+    "background_jobs": [
+      {
+        "source": "b1ab08bd",
+        "kind": "frozen full backend/contracts storage audit",
+        "session": 70771,
+        "log": "/tmp/van-b1ab-full-backend.txt"
+      },
+      {
+        "source": "b1ab08bd",
+        "kind": "hosted van-ci",
+        "run_id": 39778638488,
+        "native_job": 119823924980,
+        "status": "IN_PROGRESS; query actual state before next push to avoid concurrency cancellation"
+      }
+    ],
     "last_validation": [
       "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
       "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -216,7 +230,8 @@
       "Authenticated speech delivery:155 backend,1302 JVM,195 app,44 owner/CI and78 rebuild pass;APKs/lint0Error/Fatal89warnings.437endpoints/254schemas;all feature/screen/function identities preserved. Delayed-context mutant detected/restored,374 identities retained. Hosted9573:374mutations pass,16 native pass/4core skips/2 voice readiness failures;new independent TTS startup/diagnostics await hosted run.",
       "Learning/native packet:1754 full trading+one separate new PostgreSQL scope case all pass without skips;129 focused/66 owner-gateway/78 rebuild pass. Account/cohort bypass mutant caught/restored. VITS native diagnostic invalid_voice proved count-zero single-speaker metadata22050/0 from exact pinned weights and SDK11afbd00;1306 JVM/195 app/APKs/lint0Error/Fatal89warnings pass,next native run pending. Prior9599 hosted374mutants/publicPG/trading/117voice pass;16 native pass/4core skips/2real native-preparation failures. Frozen9573 fullbackend/contracts6557pass/166skip,no forbidden storage events.",
       "Frozen9599 fullbackend/contracts:6571pass/166skip/one literal-shell ABI oracle failure,no forbidden storage events. Corrected oracle:20pass/zero skips including real AGP release-profile refusal;workflow unchanged.",
-      "Restated-learning source:1797 full trading tests pass/zero skips with real private PostgreSQL;27 gateway tests/78 rebuild pass;three new accounting/restatement/transaction mutants caught after seven valid controls,source restored. Existing account/portfolio endpoints expose scoped recorded views. Registry437endpoints/254schemas and original374mutations/383edits retained;fixture stopped/removed. Native2fb3actual18pass/4core skips and6580backend pass retained separately."
+      "Restated-learning source:1797 full trading tests pass/zero skips with real private PostgreSQL;27 gateway tests/78 rebuild pass;three new accounting/restatement/transaction mutants caught after seven valid controls,source restored. Existing account/portfolio endpoints expose scoped recorded views. Registry437endpoints/254schemas and original374mutations/383edits retained;fixture stopped/removed. Native2fb3actual18pass/4core skips and6580backend pass retained separately.",
+      "Account persistence:1825 full trading pass/zero skip with real private PostgreSQL;36 focused/46 gateway pass;8 original failures reproduced,4 custom mutants caught/restored after7validcontrols. Original374identities/383edits and437endpoints/254schemas retained;fixture stopped/removed. Safe exposure unlink and native provider identity/OAuth remain required."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -227,8 +242,8 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Continue original canonical account/provider/readmodel and funds/economic scope, native settlement/correction producers and governed qualified adaptation; evaluate BE-004/005/006 source contracts next. No stopping at pending F15; no new UI before BG-001 or false source/unit/phone/profit acceptance.",
-    "previous_head": "2fb3c8c6bd98cabcef5009d26a022cc0523af1fb"
+    "next_action": "Continue canonical BE-004/005 exact OAuth state/broker/device binding, callback collision/recovery, native live/demo/read-only identity and exposure-safe unlink. Observe b1ab native/full audit before next push. Remaining original funds/qualified-adaptation and whole-product units retained.",
+    "previous_head": "b1ab08bddd1ca9a101e51eb07f74d28d3eb70767"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -286,6 +301,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Autonomous candidate source: finish native restatement evidence/checkpoint, then continue original account/provider/funds contracts; independent and production authority remains unissued.",
-  "updated_at_utc": "2026-10-22T12:23:38.868387+00:00"
+  "current_action": "Continue canonical BE-004/005 exact OAuth state/broker/device binding, callback collision/recovery, native live/demo/read-only identity and exposure-safe unlink. Observe b1ab native/full audit before next push. Remaining original funds/qualified-adaptation and whole-product units retained.",
+  "updated_at_utc": "2026-10-22T12:41:51.078693+00:00"
 }

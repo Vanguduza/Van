@@ -125,3 +125,16 @@ def test_mt5_ea_key_issue_and_verify(env, monkeypatch):
     assert post(client, "account_verify", {"alias": "mt5_ea"}).json()["result"]["ok"] is True
     # the audit never carries the key
     assert key not in (tmp / "log" / "commander-audit.jsonl").read_text()
+
+
+@pytest.mark.parametrize('action,args', [
+    ('account_upsert', {'alias': 'bad_flag', 'broker': 'PAPER', 'demo': 'false'}),
+    ('ctrader_link', {'alias': 'bad_flag', 'ctid_trader_account_id': 12345, 'is_live': 'false'}),
+    ('mt5_ea_issue_key', {'alias': 'bad_flag', 'login': '123', 'server': 'demo', 'demo': 1}),
+])
+def test_account_mutations_refuse_ambiguous_environment_flags_before_writing(env, action, args):
+    client, tmp, _, _ = env
+    response = post(client, action, args)
+    assert response.status_code == 422
+    assert 'JSON boolean' in response.json()['detail']
+    assert not (tmp/'accounts.json').exists() and not (tmp/'secrets'/'bad_flag.env').exists()

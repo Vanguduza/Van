@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T12:23:38.868387+00:00",
+  "updated_at_utc": "2026-10-22T12:41:51.078693+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -117,9 +117,14 @@
         "BE-003",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Existing account registry and Commander credentials serialize across real processes; stale exact-account edits refuse; credential swaps preserve previous bytes on failure; strict JSON identity flags and handler rotation/unlink ordering.1825 full realPG trading/36 focused/46 gateway pass;four induced defects caught/restored. Partial candidate evidence; native identity, OAuth, safe unlink and provider verification remain.",
+          "evidence": "backend/BE-004_005_ACCOUNT_PERSISTENCE.md; receipts/ACCOUNT_PERSISTENCE_SOURCE_20261022.json"
+        }
+      ]
     },
     "BE-005": {
       "title": "Broker authentication, credential rotation and health",
@@ -127,9 +132,14 @@
         "BE-004",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Existing account registry and Commander credentials serialize across real processes; stale exact-account edits refuse; credential swaps preserve previous bytes on failure; strict JSON identity flags and handler rotation/unlink ordering.1825 full realPG trading/36 focused/46 gateway pass;four induced defects caught/restored. Partial candidate evidence; native identity, OAuth, safe unlink and provider verification remain.",
+          "evidence": "backend/BE-004_005_ACCOUNT_PERSISTENCE.md; receipts/ACCOUNT_PERSISTENCE_SOURCE_20261022.json"
+        }
+      ]
     },
     "BE-006": {
       "title": "Exact funding ledger and flow-adjusted accounting",

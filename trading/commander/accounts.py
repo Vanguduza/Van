@@ -15,7 +15,9 @@ import os
 import re
 import secrets as pysecrets
 import time
+import tempfile
 from dataclasses import dataclass, field
+from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -60,26 +62,46 @@ def _secrets_path(st: AccountControlSettings, alias: str) -> Path:
 
 
 def _write_secrets(path: Path, values: dict[str, str], *, merge: bool = True) -> None:
+    from vati.core.file_lock import exclusive_state_lock
+    from vati.accounts.registry import load_secret_file
+
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-    existing: dict[str, str] = {}
-    if merge and path.is_file():
-        for line in path.read_text(encoding="utf-8").splitlines():
-            if "=" in line and not line.startswith("#"):
-                k, v = line.split("=", 1); existing[k.strip()] = v.strip()
-    existing.update({k: str(v) for k, v in values.items()})
-    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(fd, "w", encoding="utf-8") as f:
-        for k, v in existing.items():
-            f.write(f"{k}={v}\n")
-    os.chmod(path, 0o600)
+    if any(not isinstance(k, str) or not re.fullmatch(r"[A-Z][A-Z0-9_]*", k)
+           or not isinstance(v, str) or "\n" in v or "\r" in v for k, v in values.items()):
+        raise ValueError("credential file requires valid keys and single-line text values")
+    with exclusive_state_lock(path):
+        if path.is_symlink():
+            raise ValueError("credential destination must not be a symbolic link")
+        # Validate old ownership/permissions even when replacing, before reading or changing it.
+        old = load_secret_file(str(path)) if path.exists() else {}
+        existing = old if merge else {}
+        existing.update(values)
+        fd, temporary = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=str(path.parent))
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as stream:
+                for key, value in existing.items():
+                    stream.write(f"{key}={value}\n")
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.chmod(temporary, 0o600)
+            os.replace(temporary, path)
+        finally:
+            if os.path.exists(temporary):
+                os.unlink(temporary)
 
 
 def _shred(path: Path) -> None:
-    if path.is_file():
-        size = path.stat().st_size
-        with open(path, "r+b") as f:
-            f.write(os.urandom(size)); f.flush(); os.fsync(f.fileno())
-        path.unlink()
+    from vati.core.file_lock import exclusive_state_lock
+    with exclusive_state_lock(path):
+        if path.is_symlink():
+            raise ValueError("credential destination must not be a symbolic link")
+        if path.is_file():
+            size = path.stat().st_size
+            with open(path, "r+b") as stream:
+                stream.write(os.urandom(size))
+                stream.flush()
+                os.fsync(stream.fileno())
+            path.unlink()
 
 
 def _alias(a: dict) -> str:
@@ -87,6 +109,13 @@ def _alias(a: dict) -> str:
     if not ALIAS_RE.match(alias):
         raise HTTPException(422, "alias must match [a-z0-9_]{3,32}")
     return alias
+
+
+def _boolean(args: dict, name: str, default: bool) -> bool:
+    value = args.get(name, default)
+    if type(value) is not bool:
+        raise HTTPException(422, f"{name} must be a JSON boolean")
+    return value
 
 
 def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[dict], dict]]:
@@ -118,7 +147,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         if bad:
             raise HTTPException(422, f"keys not allowed for {broker}: {sorted(bad)}")
         clean = {k: str(v).strip() for k, v in values.items() if str(v).strip()}
-        if any("\n" in v for v in clean.values()):
+        if any("\n" in v or "\r" in v for v in clean.values()):
             raise HTTPException(422, "secret values must be single-line")
         _write_secrets(_secrets_path(st, alias), clean)
         return sorted(clean)
@@ -130,7 +159,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         if broker not in BROKER_SECRET_KEYS:
             raise HTTPException(422, f"broker must be one of {sorted(BROKER_SECRET_KEYS)}")
         pub = upsert_record(alias, broker, mode=str(a.get("mode", "DEMO_TRADER")), currency=str(a.get("currency", "USD")).upper(), label=str(a.get("label", "")), server=str(a.get("server", "")), login=str(a.get("login", "")),
-                            bridge_url=str(a.get("bridge_url", "")), demo=bool(a.get("demo", True)), mandate_ref=str(a.get("mandate_ref", "")))
+                            bridge_url=str(a.get("bridge_url", "")), demo=_boolean(a, "demo", True), mandate_ref=str(a.get("mandate_ref", "")))
         return {"account": pub, "secrets_file": str(_secrets_path(st, alias)) if broker in ("DERIV", "CTRADER", "MT5_EA", "MT5") else None}
 
     def cmd_account_credentials(a: dict) -> dict:
@@ -261,7 +290,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
     def cmd_ctrader_link(a: dict) -> dict:
         alias = _alias(a)
         ctid = int(a["ctid_trader_account_id"])
-        is_live = bool(a.get("is_live", False))
+        is_live = _boolean(a, "is_live", False)
         pub = upsert_record(alias, "CTRADER", currency=str(a.get("currency") or "USD").upper(), label=str(a.get("label") or f"cTrader {ctid}"), server="live" if is_live else "demo", login=str(ctid), demo=not is_live, mode="DEMO_TRADER" if not is_live else "OBSERVE")
         store_secrets(alias, "CTRADER", {"CTRADER_CLIENT_ID": a["client_id"], "CTRADER_CLIENT_SECRET": a["client_secret"], "CTRADER_ACCESS_TOKEN": a["access_token"], **({"CTRADER_REFRESH_TOKEN": a["refresh_token"]} if a.get("refresh_token") else {})})
         return {"account": pub}
@@ -270,13 +299,30 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
     def cmd_mt5_ea_issue_key(a: dict) -> dict:
         alias = _alias(a)
         key = pysecrets.token_hex(32)
-        pub = upsert_record(alias, "MT5_EA", currency=str(a.get("currency") or "USD").upper(), label=str(a.get("label") or f"MT5 {a.get('login')}"), server=str(a.get("server", "")), login=str(a.get("login", "")), demo=bool(a.get("demo", True)))
+        pub = upsert_record(alias, "MT5_EA", currency=str(a.get("currency") or "USD").upper(), label=str(a.get("label") or f"MT5 {a.get('login')}"), server=str(a.get("server", "")), login=str(a.get("login", "")), demo=_boolean(a, "demo", True))
         store_secrets(alias, "MT5_EA", {"BRIDGE_SIGNING_KEY": key})
         return {"account": pub, "signing_key": key, "ea_inputs": {"Alias": alias, "SigningKey": key, "BridgeUrl": os.environ.get("VAN_PUBLIC_HOST", "") and f"https://{os.environ['VAN_PUBLIC_HOST']}"}, "note": "shown once; paste into VanBridgeEA inputs"}
 
-    return {"account_upsert": cmd_account_upsert, "account_credentials": cmd_account_credentials, "account_remove": cmd_account_remove, "account_verify": cmd_account_verify,
+    handlers = {"account_upsert": cmd_account_upsert, "account_credentials": cmd_account_credentials, "account_remove": cmd_account_remove, "account_verify": cmd_account_verify,
             "deriv_verify_email": cmd_deriv_verify_email, "deriv_create_demo": cmd_deriv_create_demo, "deriv_oauth_link": cmd_deriv_oauth_link, "ctrader_discover": cmd_ctrader_discover,
             "ctrader_oauth_exchange": cmd_ctrader_oauth_exchange, "ctrader_link": cmd_ctrader_link, "mt5_ea_issue_key": cmd_mt5_ea_issue_key}
+
+    def serialize_account_mutation(handler):
+        @wraps(handler)
+        def invoke(args):
+            from vati.core.file_lock import exclusive_state_lock
+            alias = _alias(args)
+            path = Path(st.registry_path)
+            with exclusive_state_lock(path.with_name(path.name + ".operation." + alias)):
+                return handler(args)
+        return invoke
+
+    # Serialize before the registry lookup as well as the file swap. Otherwise
+    # a rotation can read an alias, wait for unlink, then recreate orphan secrets.
+    for command in ("account_upsert", "account_credentials", "account_remove",
+                    "deriv_create_demo", "deriv_oauth_link", "ctrader_link", "mt5_ea_issue_key"):
+        handlers[command] = serialize_account_mutation(handlers[command])
+    return handlers
 
 
 SECRET_ARG_KEYS = {"secrets", "client_password", "token", "access_token", "refresh_token", "client_secret", "verification_code", "code"}
