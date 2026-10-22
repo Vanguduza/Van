@@ -16,7 +16,7 @@ import re
 import secrets as pysecrets
 import time
 import tempfile
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Optional
@@ -141,7 +141,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
             raise HTTPException(422, str(exc))
         return acc.public()
 
-    def store_secrets(alias: str, broker: str, values: dict[str, Any]) -> list[str]:
+    def clean_secrets(broker: str, values: dict[str, Any]) -> dict[str, str]:
         allowed = BROKER_SECRET_KEYS.get(broker, set())
         bad = [k for k in values if k not in allowed]
         if bad:
@@ -149,8 +149,40 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         clean = {k: str(v).strip() for k, v in values.items() if str(v).strip()}
         if any("\n" in v or "\r" in v for v in clean.values()):
             raise HTTPException(422, "secret values must be single-line")
+        return clean
+
+    def store_secrets(alias: str, broker: str, values: dict[str, Any]) -> list[str]:
+        clean = clean_secrets(broker, values)
         _write_secrets(_secrets_path(st, alias), clean)
         return sorted(clean)
+
+    def verify_deriv_material(*, app_id: str, token: str, login: str, currency: str,
+                              demo: bool | None, require_trade: bool, endpoint: str = "") -> dict:
+        from vati.execution.deriv_identity import DerivIdentity, DerivIdentityError
+        from vati.execution.transports.deriv_ws import DerivWebSocketTransport
+        transport = DerivWebSocketTransport(app_id=app_id, token_provider=lambda: token,
+            endpoint=endpoint or "wss://ws.derivws.com/websockets/v3",
+            timeout_s=st.verify_timeout_s, connector=st.deriv_connector)
+        try:
+            response = transport({"authorize": "<token-from-vault-never-in-prompt>"})
+            profile = response.get("authorize", {})
+            virtual = profile.get("is_virtual")
+            if type(virtual) is not int or virtual not in (0, 1):
+                raise DerivIdentityError("Deriv native demo/live identity is unavailable")
+            identity = DerivIdentity(login or profile.get("loginid", ""), currency,
+                                     bool(virtual) if demo is None else demo, require_trade)
+            identity.validate(profile)
+            return profile
+        except Exception:
+            # An authorization read has no money effect. Do not include a raw
+            # broker exception or echo_req: either can contain credential data.
+            raise HTTPException(409, "Deriv credential or native account identity could not be verified; previous connection retained") from None
+        finally:
+            transport.close()
+
+    def require_new_alias(alias: str) -> None:
+        if alias in reg().accounts:
+            raise HTTPException(409, "account alias already exists; use the approved account update flow")
 
     # ------------------------------------------------------------ generic
     def cmd_account_upsert(a: dict) -> dict:
@@ -164,13 +196,33 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
 
     def cmd_account_credentials(a: dict) -> dict:
         alias = _alias(a)
+        registry = reg()
         try:
-            acc = reg().get(alias)
+            acc = registry.get(alias)
         except AccountRegistryError as exc:
             raise HTTPException(404, str(exc))
         values = a.get("secrets")
         if not isinstance(values, dict) or not values:
             raise HTTPException(422, "secrets must be a non-empty object")
+        if acc.broker == "DERIV":
+            from vati.accounts.access import SENDING_MODES
+            clean = clean_secrets(acc.broker, values)
+            expected_path = _secrets_path(st, alias).resolve()
+            if not acc.credential_ref.secrets_file or Path(acc.credential_ref.secrets_file).resolve() != expected_path:
+                raise HTTPException(409, "credential rotation must use the registered credential reference")
+            candidate = {**registry.credentials(alias), **clean}
+            app_id = acc.server or "1089"
+            if candidate.get("DERIV_APP_ID", app_id) != app_id:
+                raise HTTPException(409, "credential app ID differs from the registered connection")
+            profile = verify_deriv_material(app_id=app_id, token=candidate.get("DERIV_API_TOKEN", ""),
+                login=acc.login, currency=acc.currency, demo=acc.demo,
+                require_trade=acc.mode in SENDING_MODES, endpoint=acc.bridge_url)
+            # Pin an initially unbound account only after native readback. This
+            # happens under the account-operation lock, before an entry can run.
+            # A failed subsequent file swap leaves an identity whose old token
+            # must still pass native verification; it cannot switch principals.
+            if not acc.login:
+                registry.replace(replace(acc, login=profile["loginid"]))
         keys = store_secrets(alias, acc.broker, values)
         return {"alias": alias, "stored_keys": keys}
 
@@ -196,10 +248,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
             return {"alias": alias, "ok": hb.connected, "detail": "EA is polling" if hb.connected else "EA has not polled in the last 30 s; check BridgeUrl/Alias/SigningKey in the terminal", "safety_identity": acc.safety_identity}
         try:
             from vati.app.service import build_adapter
-            adapter = build_adapter(acc, r)
-            if st.deriv_connector and acc.broker == "DERIV":
-                from vati.execution.transports.deriv_ws import DerivWebSocketTransport
-                adapter.transport = DerivWebSocketTransport(app_id=acc.server or "1089", token_provider=lambda: r.credentials(alias).get("DERIV_API_TOKEN", ""), connector=st.deriv_connector)
+            adapter = build_adapter(acc, r, deriv_connector=st.deriv_connector)
             if st.ctrader_transport_factory and acc.broker == "CTRADER":
                 adapter.transport = st.ctrader_transport_factory(not acc.demo)
             state = adapter.sync_account()
@@ -225,6 +274,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
 
     def cmd_deriv_create_demo(a: dict) -> dict:
         alias = _alias(a)
+        require_new_alias(alias)
         app_id = str(a.get("app_id") or "1089")
         t = deriv_transport(app_id)
         r = t({"new_account_virtual": 1, "verification_code": str(a["verification_code"]).strip(), "client_password": str(a["client_password"]), "residence": str(a["residence"]).lower(), "type": "trading"})
@@ -234,18 +284,26 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         token = nav.get("oauth_token")
         if not token:
             raise HTTPException(502, "Deriv did not return an account token")
+        verify_deriv_material(app_id=app_id, token=token, login=str(nav.get("client_id", "")),
+            currency=str(nav.get("currency", "USD")), demo=True, require_trade=True)
         pub = upsert_record(alias, "DERIV", currency=str(nav.get("currency", "USD")), label=str(a.get("label") or f"Deriv demo {nav.get('client_id', '')}"), server=app_id, login=str(nav.get("client_id", "")), demo=True)
         store_secrets(alias, "DERIV", {"DERIV_API_TOKEN": token, "DERIV_APP_ID": app_id})
         return {"account": pub, "client_id": nav.get("client_id"), "currency": nav.get("currency"), "note": "virtual account created; token stored on van-trading-core"}
 
     def cmd_deriv_oauth_link(a: dict) -> dict:
         alias = _alias(a)
+        require_new_alias(alias)
         loginid = str(a.get("loginid", "")).strip().upper()
         token = str(a.get("token", "")).strip()
         if not loginid or not token:
             raise HTTPException(422, "loginid and token required")
-        demo = loginid.startswith("VR")
-        pub = upsert_record(alias, "DERIV", currency=str(a.get("currency") or "USD").upper(), label=str(a.get("label") or f"Deriv {loginid}"), server=str(a.get("app_id") or "1089"), login=loginid, demo=demo, mode="DEMO_TRADER" if demo else "OBSERVE")
+        currency = str(a.get("currency") or "USD").upper()
+        app_id = str(a.get("app_id") or "1089")
+        profile = verify_deriv_material(app_id=app_id, token=token, login=loginid,
+            currency=currency, demo=None, require_trade=False)
+        demo = bool(profile["is_virtual"])
+        mode = "DEMO_TRADER" if demo and "trade" in profile["scopes"] else "OBSERVE"
+        pub = upsert_record(alias, "DERIV", currency=currency, label=str(a.get("label") or f"Deriv {loginid}"), server=app_id, login=loginid, demo=demo, mode=mode)
         store_secrets(alias, "DERIV", {"DERIV_API_TOKEN": token, "DERIV_APP_ID": str(a.get("app_id") or "1089")})
         return {"account": pub}
 

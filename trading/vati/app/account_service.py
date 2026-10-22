@@ -173,8 +173,8 @@ class AccountCoordinatorService:
         mandate = TradingMandate.from_mapping(c.mandate)
         if mandate.account_alias != account.alias:
             raise RuntimeError(f"mandate is for {mandate.account_alias!r}, account is {account.alias!r}")
-        if mandate.mode.value in ("LIMITED_LIVE", "AUTONOMOUS_LIVE") and account.demo:
-            raise RuntimeError("live mandate cannot run against a demo account identity")
+        from vati.accounts.access import validate_mode
+        validate_mode(account, mandate.mode.value)
         if not str(c.ledger).startswith(("postgres://", "postgresql://")):
             raise RuntimeError(
                 "multi-instrument account coordination requires the shared PostgreSQL "

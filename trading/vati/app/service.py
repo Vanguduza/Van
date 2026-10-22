@@ -104,7 +104,7 @@ class ServiceConfig:
 from vati.learning.scope import ENVIRONMENT_FOR_MODE
 
 
-def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: Decimal = Decimal("10000")) -> VenueAdapter:
+def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: Decimal = Decimal("10000"), deriv_connector=None) -> VenueAdapter:
     """Adapter from the account record. Credentials are resolved inside the transport and never returned."""
     if account.broker == BrokerKind.PAPER:
         return PaperAdapter(venue=account.router_venue, account_alias=account.alias, equity=equity_hint)
@@ -119,10 +119,16 @@ def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: D
         return Mt5BridgeAdapter(Mt5BridgeClient(signing_key=key.encode(), transport=transport), account_alias=account.alias, venue=account.router_venue)
     if account.broker == BrokerKind.DERIV:
         from vati.execution.deriv import DerivAdapter
+        from vati.execution.deriv_identity import DerivIdentity
+        from vati.accounts.access import SENDING_MODES, entry_fence
         from vati.execution.transports.deriv_ws import DerivWebSocketTransport
+        identity = DerivIdentity(account.login, account.currency, account.demo, account.mode in SENDING_MODES)
         transport = DerivWebSocketTransport(app_id=account.server or "1089", token_provider=lambda: registry.credentials(account.alias).get("DERIV_API_TOKEN") or registry.credentials(account.alias).get("TOKEN", ""),
-                                            endpoint=account.bridge_url or "wss://ws.derivws.com/websockets/v3")
-        return DerivAdapter(venue=account.router_venue, account_alias=account.alias, transport=transport)
+                                            endpoint=account.bridge_url or "wss://ws.derivws.com/websockets/v3",
+                                            identity=identity, entry_scope=lambda: entry_fence(registry, account),
+                                            **({"connector": deriv_connector} if deriv_connector is not None else {}))
+        return DerivAdapter(venue=account.router_venue, account_alias=account.alias, transport=transport,
+                            identity=identity, entry_enabled=account.enabled and account.mode in SENDING_MODES)
     if account.broker == BrokerKind.CTRADER:
         from vati.execution.ctrader import DEMO_HOST, LIVE_HOST, CtraderAdapter, CtraderTransport
         secrets = registry.credentials(account.alias)
@@ -169,8 +175,8 @@ class SessionService:
         if mandate.temperament_enabled:
             raise RuntimeError("trading temperaments require AccountCoordinatorService; "
                                "single-symbol session refuses unsupported signed posture")
-        if mandate.mode.value in ("LIMITED_LIVE", "AUTONOMOUS_LIVE") and account.demo:
-            raise RuntimeError("mandate is live but the account record is demo: refuse to start with mismatched safety identity")
+        from vati.accounts.access import validate_mode
+        validate_mode(account, mandate.mode.value)
         if mandate.account_alias != account.alias:
             raise RuntimeError(f"mandate is signed for account {mandate.account_alias!r} but the session is for {account.alias!r}: refuse to start (every intent would be ACCOUNT_MISMATCH)")
         self.adapter = self.adapter or build_adapter(account, registry)

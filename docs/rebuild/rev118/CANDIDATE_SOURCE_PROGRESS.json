@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T13:53:33.281656+00:00",
+  "updated_at_utc": "2026-10-22T17:32:09.714920+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -131,6 +131,10 @@
         {
           "description": "Existing account registry and Commander credentials serialize across real processes; stale exact-account edits refuse; credential swaps preserve previous bytes on failure; strict JSON identity flags and handler rotation/unlink ordering.1825 full realPG trading/36 focused/46 gateway pass;four induced defects caught/restored. Partial candidate evidence; native identity, OAuth, safe unlink and provider verification remain.",
           "evidence": "backend/BE-004_005_ACCOUNT_PERSISTENCE.md; receipts/ACCOUNT_PERSISTENCE_SOURCE_20261022.json"
+        },
+        {
+          "description": "Production Deriv native login/currency/virtual/scopes binding, reconnect/rotation authentication, current registry entry fence and native-verified credential/link persistence; both real service builders enforce mode ceilings.83focused/82gateway pass;1874full trading/zero skip plus20later test-only controls;6mutants after67passing controls. Provider/product/operation/unlink qualifications remain.",
+          "evidence": "backend/BE-004_005_009_NATIVE_ACCOUNT_BINDING.md; receipts/NATIVE_ACCOUNT_BINDING_SOURCE_20261022.json"
         }
       ]
     },
@@ -154,6 +158,10 @@
         {
           "description": "Actual stateful OAuth callback/link durable claim, atomic material/receipt, encrypted binding, cached-confirmation recovery, unknown target fencing, real process death and responsive control transport.82 audited gateway/192 owner contracts/78 rebuild pass;6 mutants caught after9 controls. Partial source; native identity/credential/version/exposure/adjudication/retention remain.",
           "evidence": "backend/BE-003_005_OAUTH_EFFECT_RECOVERY.md; receipts/OAUTH_EFFECT_RECOVERY_SOURCE_20261022.json"
+        },
+        {
+          "description": "Production Deriv native login/currency/virtual/scopes binding, reconnect/rotation authentication, current registry entry fence and native-verified credential/link persistence; both real service builders enforce mode ceilings.83focused/82gateway pass;1874full trading/zero skip plus20later test-only controls;6mutants after67passing controls. Provider/product/operation/unlink qualifications remain.",
+          "evidence": "backend/BE-004_005_009_NATIVE_ACCOUNT_BINDING.md; receipts/NATIVE_ACCOUNT_BINDING_SOURCE_20261022.json"
         }
       ]
     },
@@ -212,6 +220,10 @@
         {
           "description": "Native parent cash deltas, unknown-money reconciliation fence, original/restated analytical views, atomic SQLite/PostgreSQL revision/contribution/cursor and existing account/portfolio owner readback. Partial candidate source; provider finality/correction and qualified positive adaptation remain.",
           "evidence": "backend/BE-003_036_RESTATED_LEARNING.md; receipts/RESTATED_LEARNING_SOURCE_20261022.json"
+        },
+        {
+          "description": "Production Deriv native login/currency/virtual/scopes binding, reconnect/rotation authentication, current registry entry fence and native-verified credential/link persistence; both real service builders enforce mode ceilings.83focused/82gateway pass;1874full trading/zero skip plus20later test-only controls;6mutants after67passing controls. Provider/product/operation/unlink qualifications remain.",
+          "evidence": "backend/BE-004_005_009_NATIVE_ACCOUNT_BINDING.md; receipts/NATIVE_ACCOUNT_BINDING_SOURCE_20261022.json"
         }
       ]
     },

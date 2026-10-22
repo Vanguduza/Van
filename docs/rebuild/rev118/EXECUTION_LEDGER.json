@@ -170,7 +170,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-22T13:53:33.281656+00:00",
+    "updated_utc": "2026-10-22T17:32:09.714920+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [],
@@ -220,7 +220,9 @@
       "Account persistence:1825 full trading pass/zero skip with real private PostgreSQL;36 focused/46 gateway pass;8 original failures reproduced,4 custom mutants caught/restored after7validcontrols. Original374identities/383edits and437endpoints/254schemas retained;fixture stopped/removed. Safe exposure unlink and native provider identity/OAuth remain required.",
       "OAuth exact state/broker/device:39gateway/192owner-registry+Artemis-plan/78rebuild pass;3 real pre-fix failures and3 bypass mutants verified,source restored. b1ab hosted39778638488 completes374legacy mutants,26PG/117voice,1796tradingpass+oneprivateDDSskip,18nativepass+4core skips. Separate cognitive-fabric workflow39778638515passes Python andAndroid.",
       "Stateful OAuth effects:82 audited gateway tests/zero root storage violations,192 owner+Artemis-plan contracts/78rebuild pass.3 replay/result failures+2 cipher transplants reproduced;6 current mutations caught/restored after9controls. Actual child process death, cancellation, atomic faults, owner polling and APPLIED result recovery covered. Typed409/audit preserve UNKNOWN vs REFUSED.",
-      "Frozenb1ab fullbackend/contracts:6584pass166skip7warnings1595.22s;zero storage violations,clean tree. Hostedc4e0/39782539388:all374mutants/383edits,18nativepass4core skips,26PG117voice,1824publictradingpass1privateDDSskip. Native voice bothpass; only actual DDS-key and trusted-main-checker prerequisites fail. No source/unit/provider/handset/release gates bypassed."
+      "Frozenb1ab fullbackend/contracts:6584pass166skip7warnings1595.22s;zero storage violations,clean tree. Hostedc4e0/39782539388:all374mutants/383edits,18nativepass4core skips,26PG117voice,1824publictradingpass1privateDDSskip. Native voice bothpass; only actual DDS-key and trusted-main-checker prerequisites fail. No source/unit/provider/handset/release gates bypassed.",
+      "Native account candidate:20 original counterexamples;83focused/82auditedgateway pass;1874fulltrading zero skips with actualPG and DDS,20later test-only controls pass.6currentmutants caught after67controls,source restored,fixture stopped/removed. Original374identities/383edits retained. No entire-unit/provider acceptance.",
+      "Hosted a027/39791051342:374legacy mutants,18nativepass4core skips,26PG117voice,1824publictradingpass1privateDDSskip. VITS bothpass. Actual backendDDS-key and trusted-main-checker failures retained. Tree-identical merge3627d293. Frozena027 broad backend audit ended without a live process,JUnit or exit receipt at93%;INTERRUPTED/UNCONFIRMED,not PASS; start new exact-source audit after commit."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -231,8 +233,8 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Continue original BE-004/005 native provider login/environment/read-only identity, verified credential swap and resource-version fencing; close exposure/funds/lease-safe unlink and native operation recovery. Start frozen full backend audit of the next committed packet and preserve its actual hosted native source evidence. Then original funds, governed adaptation and whole-product programme; no new frontend before BG-001.",
-    "previous_head": "c4e0e7b3bf123f6e7c58675f5d19b8472fa9baa1"
+    "next_action": "Continue original BE-004/005 exposure/funds/lease-safe unlink, native resource-version and durable generic operation recovery; then product-specific Deriv order/settlement/protection and eligible CEX/funds integrations. Freeze next committed source for the broad backend audit and retain current hosted jobs. Continue whole-product programme; no new frontend before BG-001.",
+    "previous_head": "a0270265f3c213d85be6c6a4173031681abbcc88"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -290,6 +292,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Continue original BE-004/005 native provider login/environment/read-only identity, verified credential swap and resource-version fencing; close exposure/funds/lease-safe unlink and native operation recovery. Start frozen full backend audit of the next committed packet and preserve its actual hosted native source evidence. Then original funds, governed adaptation and whole-product programme; no new frontend before BG-001.",
-  "updated_at_utc": "2026-10-22T13:53:33.281656+00:00"
+  "current_action": "Continue original BE-004/005 exposure/funds/lease-safe unlink, native resource-version and durable generic operation recovery; then product-specific Deriv order/settlement/protection and eligible CEX/funds integrations. Freeze next committed source for the broad backend audit and retain current hosted jobs. Continue whole-product programme; no new frontend before BG-001.",
+  "updated_at_utc": "2026-10-22T17:32:09.714920+00:00"
 }

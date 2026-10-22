@@ -16,6 +16,17 @@ def isolated_account_files(tmp_path,monkeypatch,_env):
     get_settings.cache_clear()
 
 
+@pytest.fixture(autouse=True)
+def isolated_native_deriv_authorization(client, tmp_path):
+    # The real control now reads native identity before persistence. Exercise it
+    # through actual websocket framing; never contact a provider in source tests.
+    from van_gateway.trading.accounts import LocalAccountControl
+    from test_deriv_native_identity import Socket, native
+    _,app=client
+    app.state.onboarding.control=LocalAccountControl(str(tmp_path/"accounts.json"),str(tmp_path/"secrets"),
+        deriv_connector=lambda url: Socket(native()))
+
+
 @pytest.mark.asyncio
 async def test_exact_callback_retry_does_not_exchange_a_provider_code_twice(client, monkeypatch):
     ac, app = client; calls=[]

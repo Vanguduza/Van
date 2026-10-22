@@ -94,7 +94,9 @@ def test_real_handlers_serialize_rotation_with_unlink_without_orphaning_secret_f
     from vati.accounts import AccountRegistry
     import commander.accounts as module
     registry = tmp_path/'accounts.json'; path = tmp_path/'secrets'/'deriv_demo.env'
-    handlers = build_account_handlers(AccountControlSettings(str(registry), str(path.parent)))
+    from test_deriv_native_identity import Socket, native
+    handlers = build_account_handlers(AccountControlSettings(str(registry), str(path.parent),
+        deriv_connector=lambda url: Socket(native())))
     handlers['account_upsert']({'alias': 'deriv_demo', 'broker': 'DERIV'})
     handlers['account_credentials']({'alias': 'deriv_demo', 'secrets': {'DERIV_API_TOKEN': 'fixture-old'}})
     started, release, removed = Event(), Event(), Event()
