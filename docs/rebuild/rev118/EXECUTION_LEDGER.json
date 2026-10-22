@@ -134,9 +134,9 @@
   },
   {
    "id": "BLK-006",
-   "what": "CI DDS source-contract read credential is absent; secret/key administration returns HTTP 403 through REST and gh. Voice acquisition is fixed; instrumentation correction awaits hosted runtime result. Trusted ledger gate awaits #94/intake.",
+   "what": "Hosted Android build/lint, instrumentation (14 pass / 4 core-mode skips), Character Forge core gate and rebuild documentary checks pass. Overall CI remains blocked on the absent DDS read credential and trusted main framework/intake. Secret administration is HTTP 403 through REST and gh.",
    "blocks": "Complete CI and trusted-base admission",
-   "needed_from": "Scoped GitHub credential provisioning and native trusted-base admission; lead diagnoses runnable CI failures"
+   "needed_from": "DDS-only CI credential provisioning and documented trusted-base bootstrap/intake"
   },
   {
    "id": "BLK-007",
@@ -164,7 +164,7 @@
   "updated_utc": "2026-10-22",
   "branch": "ccr-9e07e1af-8mgz1p",
   "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-  "background_jobs": "GitHub Actions run 39709119778: Android build/instrumentation in progress at checkpoint preparation; verify actual job state before continuation.",
+  "background_jobs": "none at tested source 637eaf96: GitHub Actions run 39710993846 completed; Android, instrumentation, Character Forge, documentary and mutation jobs pass; backend credential and trusted-ledger bootstrap jobs fail.",
   "last_validation": [
    "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
    "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -177,7 +177,8 @@
    "All 90 forecast requirement and 48 packet source hashes reproduced; original digests unchanged.",
    "AP-002 standalone 1618 and cumulative 1632: ten documentary checks each; thirteen preservation regressions passed.",
    "Isolated rebuild suite: 31 passed; focused CI/acquisition/ICU regressions: 14 passed.",
-   "Branch-local ledger: five commits 4fd466de..461186ef GREEN; source consolidation zero findings."
+   "Branch-local ledger: five commits 4fd466de..461186ef GREEN; source consolidation zero findings.",
+   "Hosted run 39710993846 at tested merge b2ed4481 (tree-identical to head 637eaf96): instrumentation 14 passed / 0 failed / 4 core-mode skips; Character Forge core gate PASS; Android build/lint, rebuild-documentary and mutation jobs PASS. Overall workflow still fails on DDS credential and main trusted-checker prerequisites."
   ],
   "environment_notes": [
    "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -188,8 +189,8 @@
    "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
    "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
   ],
-  "next_action": "Read hosted Android results; diagnose failures. Verify and push the current submission. Native registry/signing/reviewer access, amendment admission, DDS read credential and trusted-base bootstrap remain external prerequisites. No BE/FE gate is self-issued.",
-  "previous_head": "2a10b7884b9bcf214395d5c15815ab6d96f56845"
+  "next_action": "External native registry/signing/reviewer access and owner/independent amendment admission are required for PRE-003. Provision DDS-only Actions read credential and adopt trusted-base framework/intake through its documented procedure. Continue dependency-ready implementation after real admission; no certificate is self-issued.",
+  "previous_head": "637eaf96ff617c608401754a044145811b8fd318"
  },
  "observations": [
   "OBS-001 BE-002 debug cleartext",
@@ -218,8 +219,11 @@
   "baseline_maintenance_commits": [
    "6ba1fef7",
    "eba674ac",
-   "461186ef"
-  ]
+   "461186ef",
+   "637eaf96"
+  ],
+  "tested_android_head": "637eaf96ff617c608401754a044145811b8fd318",
+  "hosted_result": "receipts/INSTRUMENTATION_637eaf96.json"
  },
  "provenance_correction": {
   "finding": "90 forecast hashes previously reported unverifiable",

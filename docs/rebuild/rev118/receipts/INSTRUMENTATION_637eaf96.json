@@ -1,0 +1,114 @@
+{
+  "schema": "van.build.hosted-instrumentation/1",
+  "branch_head": "637eaf96ff617c608401754a044145811b8fd318",
+  "tested_merge_sha": "b2ed448137e8e9a8e2e90b169fc3dd675fee52a6",
+  "tested_tree": "aec813bdaecc7cdb351c029b2516a4c34880c7ab",
+  "source_equivalence": "Git tree of tested PR merge equals branch head tree exactly; verified with git rev-parse and empty git diff. Generated APK provenance uses the synthetic merge SHA.",
+  "run_id": 39710993846,
+  "job_id": 119602030385,
+  "device": "GitHub-hosted Android API 31 x86_64 emulator; not S24",
+  "tests": 18,
+  "passed": 14,
+  "failed": 0,
+  "skipped": 4,
+  "skipped_tests": [
+    "RiveContractTest.mandatoryCombinations",
+    "RiveContractTest.idleSoakFrameStats",
+    "RiveContractTest.productionAvatarPathKeepsRive",
+    "RiveContractTest.everyStateAndActionRenders"
+  ],
+  "skip_reason": "Candidate B core mode; full/production rig coverage remains unexecuted.",
+  "character_forge": {
+    "candidate_sha256": "772f517720f3e39b76b1a93291673d5dabf44c63d0349b2e57259df6d7635457",
+    "github": {
+      "repository": "Vanguduza/Van",
+      "run_attempt": "1",
+      "run_id": "39710993846",
+      "sha": "b2ed448137e8e9a8e2e90b169fc3dd675fee52a6"
+    },
+    "mode": "core",
+    "production_sha256": null,
+    "reasons": [],
+    "result": "PASS",
+    "schema_version": 1,
+    "tests": {
+      "artboardIsTransparentOnThreeBackgrounds": "passed",
+      "brokenAssetFallsBack": "passed",
+      "contractSurfaceMatches": "passed",
+      "coreInputsDriveTheRig": "passed",
+      "everyStateAndActionRenders": "skipped",
+      "identityColourFamilies": "passed",
+      "idleSoakFrameStats": "skipped",
+      "invalidInputsDegradeSafely": "passed",
+      "mandatoryCombinations": "skipped",
+      "productionAvatarPathKeepsRive": "skipped"
+    }
+  },
+  "jobs": [
+    {
+      "id": 119602030072,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119602030255,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119602030293,
+      "name": "android-and-visual-evidence",
+      "conclusion": "success"
+    },
+    {
+      "id": 119602030295,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "id": 119602030315,
+      "name": "mutation",
+      "conclusion": "success"
+    },
+    {
+      "id": 119602030385,
+      "name": "android-instrumentation",
+      "conclusion": "success"
+    },
+    {
+      "id": 119605850437,
+      "name": "character-forge-gate",
+      "conclusion": "success"
+    }
+  ],
+  "overall_workflow_green": false,
+  "remaining_ci_failures": [
+    "project-truth-ledger: trusted main lacks the framework pending #94/intake",
+    "backend: DDS_CONTRACT_READ_DEPLOY_KEY absent"
+  ],
+  "artifacts": [
+    {
+      "id": 12396979379,
+      "name": "van-instrumentation-report",
+      "sha256": "1d87fd67212b1c291a65bcf1470493e9b4f7a09d088d85cc998c5fda0141d0db"
+    },
+    {
+      "id": 12397532739,
+      "name": "van-character-forge-validation-binding",
+      "sha256": "fb60f2a115cacc67df60d8f4f7b674efd1383f99a4b1beec51a6407ea92d4f30"
+    },
+    {
+      "id": 12397482885,
+      "name": "van-instrumentation-screenshots",
+      "bytes": 3293362
+    },
+    {
+      "id": 12397800109,
+      "name": "van-debug-apk",
+      "archive_bytes": 237651271,
+      "qualification": "development build only; not owner production signing or handset acceptance"
+    }
+  ],
+  "log_sha256": "a1411fd428d2e836c9d1fbf3c4f6f7731bf822f403d0247b9703d47bc4af6b8a",
+  "conclusion": "Baseline Android regex regressions, real deep-link delivery/lifecycle cleanup, deterministic frame repeatability and core Rive contract tests pass. No artwork or action/noise threshold was changed. No full-blueprint, live provider, production signing or S24 qualification is issued."
+}

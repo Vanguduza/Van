@@ -1,0 +1,237 @@
+{
+  "schema": "van.rebuild.authorization-intake-candidate/1",
+  "status": "PREPARED_NOT_ADMITTED",
+  "source_head": "637eaf96ff617c608401754a044145811b8fd318",
+  "base_head": "8eb1889822fc8a83f219977c15340172e16acd91",
+  "records": [
+    {
+      "path": "docs/project-state/authorizations/auth-20260929-owner-stagehand-private-plane-gates.json",
+      "sha256": "ed79c329db1f6893669961cd3236f08766cd567fdf206fad5ba01ebf07c6902c",
+      "git_blob": "715727ed9cfa04eb73e98415b8b3f6ec2d145d5c"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-owner-derived-network-guard-scope-test-merge.json",
+      "sha256": "b8d042320f519ff42875c4acd3c212cdb094467162d0047768bce99fe2f9c0ce",
+      "git_blob": "c5b47c5f8e0e3316de13c165d433516fbcbeacd9"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-owner-derived-programme-a-ci-readme-rulesets.json",
+      "sha256": "793fcf77851211d4274d707fa8cb8ba421e1722422884641042c494289a1776d",
+      "git_blob": "d146cb4cc1ef60f0a1c2b9619220ce000ce2fa91"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-owner-derived-programme-a-ledger-push-trust.json",
+      "sha256": "639b581624aad9abcf31dc8d4746432e20a8333f774d76f3b417052d1297247d",
+      "git_blob": "cd0ea56d0c9e81501a0535414fe6fac44a970bfe"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-owner-derived-programme-a-memory-fabric.json",
+      "sha256": "d0f5a3cbad1f8901d0d7a4d6f40522e1d7d23f950b5caaea19fbb5a0b9ebce1a",
+      "git_blob": "415a64d9163316fe5614447c9a34ad1b424354d2"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-owner-derived-programme-b-browser-deploy.json",
+      "sha256": "56660cb52cc930d64d0b8008908ae0b2806be3b9600e941eb7a3a049588ad970",
+      "git_blob": "e2432737bf088675838ebac2cbb7c72d7d2f45b5"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-owner-derived-programme-b-remaining.json",
+      "sha256": "dc9dfeab1ed1557033b6e26293e5a440afd9792ae98fc665605922e9492a6f09",
+      "git_blob": "74ef34b49a492e547741464e8a5444d68349a7e8"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-owner-derived-programme-b-review-i5-remediation.json",
+      "sha256": "f2e633df22e17b26216c49aa12ad18ee996f89d42ff5d9f93f6c3e8e79db7e19",
+      "git_blob": "6bc9f0baf2468c0372fdf111db17add9cec2a00b"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-owner-derived-programme-b-review-i6-remediation.json",
+      "sha256": "3148319115bfbe1a7df3b1fe170478b904a84019171497836886c3fd4edbf96a",
+      "git_blob": "772c63dcd76c63918106a7ec3365fa5376f451c4"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-owner-derived-programme-b-review-i7-remediation.json",
+      "sha256": "06737674ce58714150be5ec94cbd9efec0f6e5a27821566f23f84115a0edba51",
+      "git_blob": "67bf5489e510a9b8adc4d338510569a57af70c9c"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-owner-derived-programme-b-review-i8-egress-remediation.json",
+      "sha256": "8bdb830017d3b6c1318028b9b08b0499a3bdb6aeca33935393f0735b1594852c",
+      "git_blob": "aae3caa8c5301c68a8cd8050d12e40cbadf75b3b"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-owner-derived-programme-b-review-i8-guard-remediation.json",
+      "sha256": "538b0241d3c57a75a57ceea13e7a5ce3314c66575c339d787fbe46446e6cb9f3",
+      "git_blob": "0bd2e41762cbdbac66f8a8c8e212174502e42db3"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-owner-derived-van-ledger-review-i6-g9a.json",
+      "sha256": "28988bac393a95d6c669d3a9da0f2263beee52e4e4312c3e363d8b3aa798e4ef",
+      "git_blob": "0b691c8591a16c6ba3ec0a6405449cac2dd71e3f"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-owner-explicit-browser-egress-and-beacons.json",
+      "sha256": "dbada2ef8a7e87895398531f9820c7ee1d57f83cb674ea90bc4c32b8324879fe",
+      "git_blob": "108eacd67f5e27411842724265a4c7874ee067a4"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-owner-explicit-guard-canary-origin.json",
+      "sha256": "8d985cbe6db31f58f2d98c301e4720312bdd142b493a7b4b10643b0f60378fd5",
+      "git_blob": "f509cee60bd9015f6d14fa59bafc86b7c0e3a780"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-owner-explicit-network-effect-guard.json",
+      "sha256": "5941e513f270b915193294dac4064e33c49d67de7e27d00d1f84d039c5d79ca7",
+      "git_blob": "1ab01cef20b5de8cf4320c9f1b77709d9d2f6c5e"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-owner-explicit-task-scope-confirmation.json",
+      "sha256": "64ba9008d44e6a12f6ead4baa3bd335d3941630139e4b014f80bdf7f894e535f",
+      "git_blob": "7186d49f6fd4cd679f4b07304c3642c74a42ef68"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-owner-van-ledger-enforcement.json",
+      "sha256": "e466e73245dd6202ccbf88fb88dff82d5f2566e27731d2e671671858f8f74182",
+      "git_blob": "57fa8d4dc5533d6beb06bbb8b10472a3f3ebea0a"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-scope-binding-network-effect-guard.json",
+      "sha256": "82b110d750e9297a2284dfe522b4624fbc84aa8f82dcb01a4cc1102f66fdd100",
+      "git_blob": "33e7e8c2989a526e0c51667de795e93c064275c4"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-scope-binding-programme-a-legacy.json",
+      "sha256": "eef791c2afc40aed7d98f0e67dbfcef8e4591496b76970f583a3f0d4862c4f84",
+      "git_blob": "36590be35894181ce1b66abc34f6328dc0c9e67f"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-scope-binding-programme-b-legacy.json",
+      "sha256": "b15a03c6f7449391004b6d691f45ada47e54d8a87f072d7d6184eb130fe5ee44",
+      "git_blob": "4e9bf735512d0d8f7510f017746fae84fd2d5bf6"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-scope-binding-programme-b-review-i6-remediation.json",
+      "sha256": "9886e10a6ea12ed3a1d4d86b9be1a162883e8208262a76a9e5e1bea216690c5c",
+      "git_blob": "e57e92996e760f86c61a598266489c2bfa73201b"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20260930-scope-binding-van-ledger-enforcement.json",
+      "sha256": "b5694f3104d067c2bae038c519ac92ad5bd7ba91ec61bc90812146e2ee62f7e3",
+      "git_blob": "5bf2de9e8bc2df1ef8adf9d13ae6bd74963495f6"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261001-owner-derived-programme-b-review-i9-remediation.json",
+      "sha256": "5d3a715650e02552105532f5f61e749542e0d107ec284d1034d69fcb6b631a40",
+      "git_blob": "e036145c163b1d9ab845f157f791419d6c8b5001"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261002-owner-derived-programme-a-ledger-abbrev-pin.json",
+      "sha256": "a5adda6b1e7b45035d85bbf563c50a3b68c458c9c4d9d5585ccfe04d9eec060f",
+      "git_blob": "4d97e1a941ea95a8b1afabceb1a88a37ceb976a5"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261006-owner-cognitive-fabric-native-qualification.json",
+      "sha256": "224e620d250110e630c359ebf11db0b6f08c524919d92c6aa755d04874506bbb",
+      "git_blob": "980d94eb792037d5251a62bec26c5578b3b4fff4"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261006-owner-cognitive-fabric-r161-direct.json",
+      "sha256": "7f18985800674fbb8635d535dec13aa36d64fc7cfe5383d2f1f608f0be5b4a94",
+      "git_blob": "4de3cf6f932a1011b94c63a8a31a47a747d4ab0e"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261006-owner-derived-cognitive-fabric-complete-closure.json",
+      "sha256": "e0288554387f7fac9fe3e2c8985505e400074c1b8fa5571c9c0078e01a69963c",
+      "git_blob": "2129f2b114d4ad2c9ff75a6cd94eacfa3ebee6a4"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261009-owner-audit-fix-van-canon-housekeeping.json",
+      "sha256": "037261695f4baf1709d49287e473a34a4d1d1d1dcf71519331171920fc66e8e9",
+      "git_blob": "0da0ea9da35dd52f2a6be7c04865ede7d1ba53b4"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261010-owner-adoption-artemis-transfer-dead-kotlin.json",
+      "sha256": "7e01898e993e051bd573a16471326bd40af86ed87bef4ab4b7894b5e08663b29",
+      "git_blob": "7edcb63cfb8b6002b78951fc016bb1f3146efc28"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261010-owner-adoption-signature-basis.json",
+      "sha256": "ef7c27746cad51687dabb46c3991169a91d6c19d88c1390f18ae542d5db2cc96",
+      "git_blob": "9334b5337e83f7d9cd9ce671ee4e5451f90d04ab"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261010-owner-close-leftovers.json",
+      "sha256": "b64287cdb0dd73825eac60eeb172f092d327efe98daa1d0c598da9ca4353fc5e",
+      "git_blob": "7415658d0bbe8e523d5181abf9dcc8083a012cbe"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261010-owner-dead-kotlin-register-citations.json",
+      "sha256": "87a5b6dfd5cf70e74974aff6a29e847bf1e871b76678c7cffc09f6fc787fa9c9",
+      "git_blob": "eb3139c6fa670279c1b65a43126ee66084aea93d"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261010-owner-historical-ledger-reconciliation-van.json",
+      "sha256": "69a2973ea177b99518852e7c10ec112d4a2f17f689b60d8f82e1fc34fa9e5fb3",
+      "git_blob": "596e17f195cab3315aaa698bcdb29d20668c5ce3"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261021-owner-consolidation-asr-requalification.json",
+      "sha256": "21587b7bea8988cfa22aa45520d55712fb706f27798e11fe57db3d6656b0c517",
+      "git_blob": "8261f78ae5fe05a982099e3567e187952ae1023d"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261021-owner-consolidation-cognitive-ci.json",
+      "sha256": "015d828a1fbda6ddd7d71c09e96079d9766c7d514c581341c2ae4497c4ddc8df",
+      "git_blob": "9e511a22318083af7666850a9c8df6b9b8566ac8"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261021-owner-consolidation-release-workflow.json",
+      "sha256": "94e32e72187427d21aa24ebe19af1f488739b2b64f628289719603e5097c89b6",
+      "git_blob": "a6e655c2c032fba247d2b816bac6eced4eadf9d8"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261021-owner-consolidation-test-discovery.json",
+      "sha256": "b50dbb33b4689b0d4463480956b85746cbeb2511a3f7326732af22d2a3488e1c",
+      "git_blob": "fe541fcdb737bebfaf5401456a26eb2e88514576"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261021-owner-repository-consolidation.json",
+      "sha256": "fc88d20eb36b5ca3321a32f3a4f29e6a50814757b52092095f134d0d8a675430",
+      "git_blob": "3d9f08142b97a72af99f68feced84ea9a8b99ac5"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261021-owner-rev118-ci-prerequisites.json",
+      "sha256": "656d1dd55b8cbb6006bc7dad308beaade5c06c0b51b68de32ed94a1920b0c703",
+      "git_blob": "632f5c395180bc30642376cc3fcec9e86b683a25"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261021-owner-rev118-ci-workflow-template.json",
+      "sha256": "7de30bec956c909ba198918cd0f938066acdf131defa5def303ca93d4b671e9a",
+      "git_blob": "21b1ace1ad32f4fc67955cab924bcb38f44f2117"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261021-owner-rev118-pre001-pre002.json",
+      "sha256": "c402530ba0f0bd5511bd7e081229c5dea457fb05f5fc4500b22a8a4c53233a84",
+      "git_blob": "3a723ebf1c34c41be035a16bcfc2fb65d9837c81"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261022-owner-codex-build-continuation.json",
+      "sha256": "f47d139ff95c1fa8461cff0916d8be8070034b7f1ec1596c9af9e36a27b8f2cd",
+      "git_blob": "6fdc3b8752d9b90ac0425cb7a00fdf06a4e440a6"
+    }
+  ],
+  "count": 43,
+  "conflicts": [],
+  "previous_consolidation_records_preserved": 39,
+  "continuation_records_added": [
+    "docs/project-state/authorizations/auth-20261021-owner-rev118-ci-prerequisites.json",
+    "docs/project-state/authorizations/auth-20261021-owner-rev118-ci-workflow-template.json",
+    "docs/project-state/authorizations/auth-20261021-owner-rev118-pre001-pre002.json",
+    "docs/project-state/authorizations/auth-20261022-owner-codex-build-continuation.json"
+  ],
+  "limitations": [
+    "No record is admitted by generating this manifest.",
+    "Recompute against the actual protected base after framework bootstrap.",
+    "Separate additive intake, code-owner review and trusted-base verification remain required; no historical record may be edited."
+  ]
+}

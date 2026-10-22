@@ -1,5 +1,9 @@
 # Trusted-base admission steps — PR #94, then PR #104 (and this branch)
 
+**22 October continuation:** PR #105 now carries this branch. The complete candidate intake is `pre003/MAIN_AUTHORIZATION_INTAKE_CURRENT.json`: all 39 original consolidation records preserved plus four continuation records, 43 total against the recorded `8eb18898` base. Recompute against the actual base after bootstrap before intake. Android ICU fixes are applied and pass their two hosted runtime tests; source `637eaf96` corrects localized gaze measurement and deep-link harness cleanup after the first runtime run exposed those test issues. The immutable ASR acquisition fix and local APK build/lint pass are recorded in `CONTINUATION_20261022.md`. Do not use the historical "patch not applied" statements below as current status. Current F15/signature interpretation is in `pre003/F15_LIFECYCLE_REVIEW_20261022.md`. No arbitrary five-full-run requirement is introduced: execute the actual required runtime/visibility/within-test repeatability obligations and investigate remaining failures.
+
+The remaining text records the earlier admission plan and observations.
+
 Facts observed 2026-10-21 (PR state re-read at about 21:30 UTC: unchanged since 11:17 UTC; #104 head `b02075f3` and #94 head `296d647d` are drafts with no reviews):
 - `main` is `8eb18898`. Its workflows are `canonical-tree-guard.yml` and `van-ci.yml`. Neither runs the Project Truth ledger; `tools/ci/project_truth_ledger.py` is absent on `main`.
 - The candidate workflow (consolidation `b02075f3`) runs `python trusted/tools/ci/project_truth_ledger.py --repo head verify-pr --base "$TRUSTED_SHA" ...`, checking out the base as `trusted/`. On base `main` that file does not exist, so the job fails before judging the PR (consolidation VALIDATION.md, run 39588721836).
