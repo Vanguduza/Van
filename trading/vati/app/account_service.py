@@ -999,6 +999,8 @@ class AccountCoordinatorService:
         return tuple(sorted(unresolved))
 
     def _account_snapshot(self, now_ms: int) -> None:
+        if getattr(self, "learning", None) is not None and getattr(self, "_ledger", None) is not None:
+            self.learning.update_projection(self._ledger)
         assert self.adapter is not None
         acct = self.adapter.sync_account()
         hb = self.adapter.heartbeat(now_ms=now_ms)
@@ -1018,7 +1020,8 @@ class AccountCoordinatorService:
                 "week_start_equity": str(self.week_start_equity),
                 "kill_switch": sorted(t.value for t in self.kill.active),
                 "risk_history_issue": getattr(getattr(self.lifecycle, "streaks", None), "recovery_issue", ""),
-                "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
+            "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
+                "restated_learning": self.learning.projection_summary if getattr(self, "learning", None) else {"status":"NOT_CONSTRUCTED"},
                 "mode": self.mandate.mode.value if self.mandate else "UNKNOWN",
                 "temperament": (self.mandate.trading_temperament.value
                                 if self.mandate and self.mandate.trading_temperament
@@ -1069,6 +1072,8 @@ class AccountCoordinatorService:
                 decision_time_ms=now_ms, correlation_id=outcome.candidate_id,
             ))
     def _heartbeat(self, status: str, extra: Optional[dict] = None) -> None:
+        if getattr(self, "learning", None) is not None and getattr(self, "_ledger", None) is not None:
+            self.learning.update_projection(self._ledger)
         payload = {
             "account_alias": self.cfg.account_alias, "symbols": sorted(self.specs),
             "status": status, "cycles": self.cycles,
@@ -1076,7 +1081,8 @@ class AccountCoordinatorService:
             "lease_epoch": self.lease.epoch if self.lease else None,
             "kill_switch": sorted(t.value for t in self.kill.active),
             "risk_history_issue": getattr(getattr(self.lifecycle, "streaks", None), "recovery_issue", ""),
-                "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
+            "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
+            "restated_learning": self.learning.projection_summary if getattr(self, "learning", None) else {"status":"NOT_CONSTRUCTED"},
             "mtf_shadow": {
                 symbol: {
                     "complete": mtf.complete,

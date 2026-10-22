@@ -77,6 +77,40 @@ class PnlMeasurement:
     basis: str
 
 
+def _reported_parent_cash(rows):
+    """Aggregate labelled execution deltas, preserving legacy snapshot semantics."""
+    if not rows:
+        return None
+    scopes = {row.get("pnl_scope") for row in rows}
+    if "EXECUTION_DELTA" not in scopes:
+        if not scopes <= {None, "PARENT_SNAPSHOT"}:
+            raise ValueError("unknown reported PnL scope")
+        row = rows[-1]
+        return Decimal(str(row["pnl"])), row.get("pnl_basis")
+    if scopes != {"EXECUTION_DELTA"}:
+        raise ValueError("mixed cash delta and parent snapshot")
+    seen = {}
+    basis = {row.get("pnl_basis") for row in rows}
+    if len(basis) != 1 or next(iter(basis)) not in {"GROSS_PRICE_MOVEMENT", "NET_CONFIRMED"}:
+        raise ValueError("cash delta basis is ambiguous")
+    total = ZERO
+    for row in rows:
+        identity = row.get("close_id")
+        if not isinstance(identity, str) or not identity:
+            raise ValueError("cash delta lacks native identity")
+        digest = canonical_hash(row)
+        if identity in seen:
+            if seen[identity] != digest:
+                raise ValueError("conflicting native cash delta identity")
+            continue
+        seen[identity] = digest
+        amount = Decimal(str(row["pnl"]))
+        if not amount.is_finite():
+            raise ValueError("nonfinite cash delta")
+        total += amount
+    return total, next(iter(basis))
+
+
 def closed_trade_pnl(entry, exit_price: Decimal, contract, reported_rows=()) -> PnlMeasurement:
     """Share the caller's explicit net/gross convention across both runtimes.
 
@@ -88,14 +122,16 @@ def closed_trade_pnl(entry, exit_price: Decimal, contract, reported_rows=()) -> 
         fees, carry = Decimal(str(entry.get("fees", ZERO))), Decimal(str(entry.get("carry", ZERO)))
         if not fees.is_finite() or not carry.is_finite():
             return PnlMeasurement(None, "UNKNOWN_CHARGES")
-        for row in reversed(reported_rows or ()):
-            if row.get("intent") == entry.get("trade_intent_id"):
-                amount = Decimal(str(row["pnl"]))
-                if not amount.is_finite():
-                    return PnlMeasurement(None, "UNKNOWN_REPORTED_PNL")
-                if row.get("pnl_basis") == "GROSS_PRICE_MOVEMENT":
-                    return PnlMeasurement(amount-fees+carry, "REPORTED_GROSS_NET_RECORDED_CHARGES")
-                return PnlMeasurement(amount, "REPORTED_NET_OR_LEGACY_UNSPECIFIED_CONVENTION")
+        reported = _reported_parent_cash([row for row in reported_rows or ()
+                                         if row.get("intent") == entry.get("trade_intent_id")])
+        if reported is not None:
+            amount, basis = reported
+            if not amount.is_finite():
+                return PnlMeasurement(None, "UNKNOWN_REPORTED_PNL")
+            if basis == "GROSS_PRICE_MOVEMENT":
+                return PnlMeasurement(amount-fees+carry, "REPORTED_GROSS_NET_RECORDED_CHARGES")
+            return PnlMeasurement(amount, "REPORTED_NET_CONFIRMED" if basis == "NET_CONFIRMED"
+                                  else "REPORTED_NET_OR_LEGACY_UNSPECIFIED_CONVENTION")
         quantity, opened = Decimal(str(entry.get("quantity", ZERO))), Decimal(str(entry["entry"]))
         if contract is None or contract.loss_model is LossModel.FULL_STAKE:
             return PnlMeasurement(None, "UNKNOWN_REQUIRES_PRODUCT_SETTLEMENT")
@@ -133,13 +169,18 @@ class TradeReview:
     pnl_basis: str = "CALLER_PROVIDED"
     thesis_evidence_basis: str = "CALLER_ASSERTION"
     account_alias: str = ""
+    review_version: str = "trade-review/5.2.0"
+    record_revision: int = 0
+    supersedes_review_ref: str | None = None
+    maturity: dict = field(default_factory=dict)
+    broker_ok: bool = True
 
 
 def review_trade(*, trade_intent_id: str, strategy_id: str, entry: Decimal, exit_price: Decimal, stop: Decimal, direction_long: bool, pnl: Decimal,
                  thesis_correct: bool, process_ok: bool, execution_ok: bool = True, data_ok: bool = True, risk_ok: bool = True, broker_ok: bool = True,
                  exit_reason: str = "", exit_known: bool = True, initial_money_risk: Decimal | None = None,
                  initial_risk_evidence_ref: str | None = None, pnl_basis: str = "CALLER_PROVIDED",
-                 thesis_evidence_basis: str = "CALLER_ASSERTION", account_alias: str = "") -> TradeReview:
+                 thesis_evidence_basis: str = "CALLER_ASSERTION", account_alias: str = "", maturity: dict | None = None) -> TradeReview:
     risk_per_unit = abs(entry - stop)
     move = (exit_price - entry) if direction_long else (entry - exit_price)
     r = move / risk_per_unit if risk_per_unit > ZERO else ZERO
@@ -176,5 +217,32 @@ def review_trade(*, trade_intent_id: str, strategy_id: str, entry: Decimal, exit
     polarity = "POSITIVE" if outcome in (Outcome.GOOD_WIN, Outcome.GOOD_LOSS) else "ANTI_PATTERN"
     rv = TradeReview(trade_intent_id, strategy_id, r.quantize(Decimal("0.01")), pnl, thesis_correct, process_ok, execution_ok, data_ok, risk_ok, outcome, polarity, tuple(lessons),
         initial_money_risk=initial_money_risk, initial_risk_evidence_ref=initial_risk_evidence_ref,
-        r_basis=r_basis, pnl_basis=pnl_basis, thesis_evidence_basis=thesis_evidence_basis, account_alias=account_alias)
+        r_basis=r_basis, pnl_basis=pnl_basis, thesis_evidence_basis=thesis_evidence_basis, account_alias=account_alias,
+        maturity=dict(maturity or {}), broker_ok=broker_ok)
     return TradeReview(**{**rv.__dict__, "artifact_hash": canonical_hash({k: v for k, v in rv.__dict__.items() if k != "artifact_hash"})})
+
+def native_economic_maturity(adapter, trade_intent_id: str, measurement: PnlMeasurement) -> dict:
+    """Only an adapter-owned settled model supplies economic finality.
+
+    Deterministic paper has no external fee/settlement stream. Its confirmed
+    closed balance, no remaining parent position/order and exact zero-fee
+    model may establish DEMO finality. Other providers require their own
+    admitted finality/reconciliation producer; a finite PnL alone is not one.
+    """
+    from vati.execution.paper import PaperAdapter
+    unknown = {"parent_final": False, "fees_final": False, "cash_reconciled": False,
+               "source_environment": None, "source": "PROVIDER_FINALITY_UNAVAILABLE"}
+    if type(adapter) is not PaperAdapter or adapter.inject_disconnect or measurement.amount is None:
+        return unknown
+    matches = [row for row in adapter.closed if row.get("intent") == trade_intent_id]
+    if not matches:
+        return unknown
+    try:
+        exact_cash = _reported_parent_cash(matches)[0] == measurement.amount
+        final = (exact_cash and not any(row.trade_intent_id == trade_intent_id for row in adapter.positions())
+                 and not any(row["cmd"].trade_intent_id == trade_intent_id for row in adapter.pending.values()))
+    except (ValueError, KeyError, TypeError, ArithmeticError):
+        return unknown
+    return {"parent_final": final, "fees_final": final, "cash_reconciled": final,
+            "source_environment": "DEMO", "account_currency": adapter.currency,
+            "source": "DETERMINISTIC_PAPER_SETTLEMENT"}

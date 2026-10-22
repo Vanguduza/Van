@@ -31,6 +31,7 @@ from vati.intelligence.events import EventMatrix, EventWindowState
 from vati.intelligence.market_state import MarketState, build_market_state
 from vati.intelligence.regimes import RegimeEngine
 from vati.learning.episodes import LessonStore, lesson_from_verdict
+from vati.execution.review import native_economic_maturity
 from vati.learning.hooks import LearningHooks, to_payload
 from vati.lifecycle.scale_policy import (
     Adjustment, AdjustmentPolicyRegistry, PositionAdjustmentEngine, ScalePolicyRegistry,
@@ -718,8 +719,12 @@ class DecisionCycle:
         pnl = measured.amount if measured.amount is not None else ZERO
         initial_risk = initial_risk_from_ledger(self.ledger, intent_id,
             available_cutoff_ms=int(e.get("opened_ms") or 0) or None)
-        for lock_event in self.streaks.on_close(e["strategy_id"], pnl, now_ms):
-            self._log(EventKind.SESSION, lock_event, now_ms=now_ms, corr=intent_id)
+        if measured.amount is None:
+            self.streaks.recovery_issue = "unresolved closed-trade money outcome; native reconciliation required"
+            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, now_ms)
+        else:
+            for lock_event in self.streaks.on_close(e["strategy_id"], pnl, now_ms):
+                self._log(EventKind.SESSION, lock_event, now_ms=now_ms, corr=intent_id)
         self.consecutive_losses = self.streaks.verdict(e["strategy_id"], now_ms).losses
         rv = review_trade(trade_intent_id=intent_id, strategy_id=e["strategy_id"], entry=e["entry"], exit_price=exit_price, stop=e["stop"] or e["entry"], direction_long=e["direction"] is Direction.LONG,
                           pnl=pnl, thesis_correct=pnl > ZERO, process_ok=True, exit_reason=reason,
@@ -727,7 +732,8 @@ class DecisionCycle:
                           initial_money_risk=initial_risk.amount if initial_risk else None,
                           initial_risk_evidence_ref=initial_risk.evidence_ref if initial_risk else None,
                           pnl_basis=measured.basis, thesis_evidence_basis="PNL_SIGN_PROXY_NOT_SETUP_VALIDATION",
-                          account_alias=self.cfg.account_alias)
+                          account_alias=self.cfg.account_alias,
+                          maturity=native_economic_maturity(self.adapter, intent_id, measured))
         self.reviews.append(rv)
         self._log(EventKind.TRADE_REVIEW, {k: (v.value if hasattr(v, "value") else (str(v) if isinstance(v, Decimal) else (list(v) if isinstance(v, tuple) else v))) for k, v in asdict(rv).items()}, now_ms=now_ms, corr=intent_id)
         self.admission.propose(rv.artifact_hash, knowledge_class="TRADE_EXPERIENCE", proposed_by=rv.proposed_by, trust_tier="T0_VAN_TRADING_POLICY")

@@ -30,7 +30,7 @@ class AccountRiskHistory:
 
     @property
     def issue(self):
-        return (f"account risk history has {len(self.unresolved_refs)} unbound or conflicting records; native reconciliation required"
+        return (f"account risk history has {len(self.unresolved_refs)} unresolved, unbound or conflicting records; native reconciliation required"
                 if self.unresolved_refs else "")
 
 
@@ -62,9 +62,15 @@ def risk_history_for_account(events, account_alias: str) -> AccountRiskHistory:
             invalid.add(event.hash)
             continue
         if kind == "TRADE_REVIEW":
+            if p.get("record_revision", 0) != 0 or type(p.get("record_revision", 0)) is not int:
+                invalid.add(event.hash)
+                continue  # revisions use their own analytical channel, never a second financial close
             try:
                 valid = (isinstance(p.get("strategy_id"), str) and bool(p["strategy_id"])
-                         and Decimal(str(p["pnl"])).is_finite())
+                         and Decimal(str(p["pnl"])).is_finite()
+                         and p.get("broker_ok") is not False
+                         and p.get("outcome") not in {"UNKNOWN", "BROKER_FAILURE"}
+                         and not str(p.get("pnl_basis", "")).startswith("UNKNOWN"))
             except (KeyError, ValueError, InvalidOperation):
                 valid = False
             if not valid:

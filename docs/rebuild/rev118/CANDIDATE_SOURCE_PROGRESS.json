@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T11:44:37.446794+00:00",
+  "updated_at_utc": "2026-10-22T12:23:38.868387+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -103,6 +103,10 @@
         {
           "description": "Native account/cohort scope for actual learning constructors, live evidence, replay, automatic demotions, quality/lessons and unresolved-history risk/readback fence;1755 distinct trading source cases executed with actual private PostgreSQL and DDS. No whole-unit or profit qualification.",
           "evidence": "backend/BE-003_036_LEARNING_COHORT_SCOPE.md; receipts/LEARNING_COHORT_SCOPE_SOURCE_20261022.json"
+        },
+        {
+          "description": "Native parent cash deltas, unknown-money reconciliation fence, original/restated analytical views, atomic SQLite/PostgreSQL revision/contribution/cursor and existing account/portfolio owner readback. Partial candidate source; provider finality/correction and qualified positive adaptation remain.",
+          "evidence": "backend/BE-003_036_RESTATED_LEARNING.md; receipts/RESTATED_LEARNING_SOURCE_20261022.json"
         }
       ]
     },
@@ -178,6 +182,10 @@
         {
           "description": "Native account/cohort scope for actual learning constructors, live evidence, replay, automatic demotions, quality/lessons and unresolved-history risk/readback fence;1755 distinct trading source cases executed with actual private PostgreSQL and DDS. No whole-unit or profit qualification.",
           "evidence": "backend/BE-003_036_LEARNING_COHORT_SCOPE.md; receipts/LEARNING_COHORT_SCOPE_SOURCE_20261022.json"
+        },
+        {
+          "description": "Native parent cash deltas, unknown-money reconciliation fence, original/restated analytical views, atomic SQLite/PostgreSQL revision/contribution/cursor and existing account/portfolio owner readback. Partial candidate source; provider finality/correction and qualified positive adaptation remain.",
+          "evidence": "backend/BE-003_036_RESTATED_LEARNING.md; receipts/RESTATED_LEARNING_SOURCE_20261022.json"
         }
       ]
     },
@@ -205,6 +213,10 @@
         {
           "description": "Exact versioned trade/mandate approval binding and durable truthful stop-rejection recovery; 1713 trading pass/zero skip. Historical bodies unchanged.",
           "evidence": "backend/BE-010_012_EXACT_APPROVAL_BINDING.md; receipts/RISK_APPROVAL_BINDING_SOURCE_20261022.json"
+        },
+        {
+          "description": "Native parent cash deltas, unknown-money reconciliation fence, original/restated analytical views, atomic SQLite/PostgreSQL revision/contribution/cursor and existing account/portfolio owner readback. Partial candidate source; provider finality/correction and qualified positive adaptation remain.",
+          "evidence": "backend/BE-003_036_RESTATED_LEARNING.md; receipts/RESTATED_LEARNING_SOURCE_20261022.json"
         }
       ]
     },
@@ -252,6 +264,10 @@
         {
           "description": "Account-bound native financial recovery, unresolved history refuses new risk while protection/owner readback continue;1741 full trading pass/zero skip.",
           "evidence": "backend/BE-003_009_ACCOUNT_RISK_RECOVERY.md; receipts/ACCOUNT_RISK_RECOVERY_SOURCE_20261022.json"
+        },
+        {
+          "description": "Native parent cash deltas, unknown-money reconciliation fence, original/restated analytical views, atomic SQLite/PostgreSQL revision/contribution/cursor and existing account/portfolio owner readback. Partial candidate source; provider finality/correction and qualified positive adaptation remain.",
+          "evidence": "backend/BE-003_036_RESTATED_LEARNING.md; receipts/RESTATED_LEARNING_SOURCE_20261022.json"
         }
       ]
     },
@@ -434,6 +450,10 @@
         {
           "description": "Actual native readiness diagnostic traced to single-speaker VITS count-zero semantics; pinned model/source verified,correct native identity retained self-test/drain;1306 JVM/195 app/APKs/lint pass,next native execution pending.",
           "evidence": "backend/BE-029_NATIVE_VITS_SPEAKER_ID.md; receipts/NATIVE_VITS_SPEAKER_ID_SOURCE_20261022.json"
+        },
+        {
+          "description": "Actual hosted API31 native offline voice and cancellation/replacement pass:22 collected/18 passed/zero failed/4 existing core-artwork skips. No S24/acoustic/production or whole-unit acceptance.",
+          "evidence": "receipts/HOSTED_SOURCE_2fb3c8c6.json"
         }
       ]
     },
@@ -1195,6 +1215,10 @@
         {
           "description": "Native account/cohort scope for actual learning constructors, live evidence, replay, automatic demotions, quality/lessons and unresolved-history risk/readback fence;1755 distinct trading source cases executed with actual private PostgreSQL and DDS. No whole-unit or profit qualification.",
           "evidence": "backend/BE-003_036_LEARNING_COHORT_SCOPE.md; receipts/LEARNING_COHORT_SCOPE_SOURCE_20261022.json"
+        },
+        {
+          "description": "Native parent cash deltas, unknown-money reconciliation fence, original/restated analytical views, atomic SQLite/PostgreSQL revision/contribution/cursor and existing account/portfolio owner readback. Partial candidate source; provider finality/correction and qualified positive adaptation remain.",
+          "evidence": "backend/BE-003_036_RESTATED_LEARNING.md; receipts/RESTATED_LEARNING_SOURCE_20261022.json"
         }
       ]
     },

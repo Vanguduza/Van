@@ -150,6 +150,8 @@ class PaperAdapter:
 
     def close(self, position_id: str, quantity: Optional[Decimal], *, now_ms: int, reason: str) -> ExecutionReceipt:
         p = self._positions[position_id]
+        if quantity is not None and (not isinstance(quantity, Decimal) or not quantity.is_finite() or quantity <= ZERO):
+            raise ValueError("paper close quantity must be finite and positive")
         qty = p["qty"] if quantity is None else min(quantity, p["qty"])
         px = self.last_price.get(p["symbol"], p["entry"])
         half = self.spread / 2
@@ -157,7 +159,10 @@ class PaperAdapter:
         sign = Decimal(1) if p["direction"] is Direction.LONG else Decimal(-1)
         pnl = (fill - p["entry"]) * sign * qty * p["vppu"]
         self.realised_pnl += pnl; self.equity += pnl
-        self.closed.append({"position_id": position_id, "intent": p["intent"], "symbol": p["symbol"], "qty": qty, "entry": p["entry"], "exit": fill, "pnl": pnl, "pnl_basis": "GROSS_PRICE_MOVEMENT", "reason": reason, "closed_ms": now_ms})
+        # Distinct reductions can have equal timestamps and prices. This local
+        # identity labels a cash delta; it is not a venue ordering guarantee.
+        self.closed.append({"close_id": f"{position_id}:close:{len(self.closed)+1}",
+            "pnl_scope": "EXECUTION_DELTA", "position_id": position_id, "intent": p["intent"], "symbol": p["symbol"], "qty": qty, "entry": p["entry"], "exit": fill, "pnl": pnl, "pnl_basis": "GROSS_PRICE_MOVEMENT", "reason": reason, "closed_ms": now_ms})
         p["qty"] -= qty
         if p["qty"] <= ZERO:
             del self._positions[position_id]

@@ -37,6 +37,7 @@ class LearningReplayReport:
     owner_promotions_restored: int = 0
     unresolved_scope_refs: tuple[str, ...] = ()
     excluded_scope_refs: tuple[str, ...] = ()
+    restated_projection_status: str = "NOT_CONSTRUCTED"
 
 
 def _engines_for_strategy(engines_by_symbol: Mapping[str, object], strategy_id: str):
@@ -279,6 +280,7 @@ def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, o
     exact_demotions, owner_promotions = _restore_capsule_state_events(
         ledger, engines_by_symbol, scope=scope
     )
+    projection = learning.update_projection(ledger)
     return LearningReplayReport(
         tca_observations=tca_n,
         health_observations=health_n,
@@ -286,6 +288,7 @@ def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, o
         broker_multipliers=broker_multipliers,
         demotions_restored=exact_demotions,
         owner_promotions_restored=owner_promotions,
+        restated_projection_status=projection["status"],
         unresolved_scope_refs=tuple(sorted(scope.unresolved_refs)) if scope is not None else (),
         excluded_scope_refs=tuple(sorted(scope.excluded_refs)) if scope is not None else (),
     )

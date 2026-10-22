@@ -554,3 +554,47 @@ def test_cognitive_projections_and_imports_cannot_reach_order_authority(tmp_path
     assert appended and all(event.kind == EventKind.COGNITIVE_FABRIC for event in appended)
     assert authority.call_count == 0
     ledger.close()
+
+
+@pytest.mark.asyncio
+async def test_existing_account_endpoint_exposes_recorded_learning_with_scope_and_source(client, tmp_path):
+    ac, app = client
+    report = {'status': 'ANALYSIS_ONLY', 'selection_authority': False, 'as_decided_preserved': True,
+        'scope': {'account_alias': 'paper_lab', 'environment': 'DEMO'},
+        'views': {'AS_DECIDED': {'USD': {'count': 1, 'net_pnl': '5'}},
+                  'RESTATED_ANALYSIS': {'USD': {'count': 1, 'net_pnl': '-3'}}}}
+    ledger = Ledger(tmp_path/'vati.sqlite')
+    event = make_event(EventKind.ACCOUNT_SNAPSHOT, 'vati-service',
+        {'account_alias': 'paper_lab', 'currency': 'USD', 'mode': 'DEMO_TRADER',
+         'restated_learning': report, 'learning_history_issue': 'native reconciliation pending'},
+        event_time_ms=1000, received_time_ms=1001, correlation_id='paper_lab')
+    ledger.append(event)
+    before = ledger.count(), ledger.head()
+    for route in ('/v1/trading/accounts', '/v1/trading/portfolio'):
+        response = await ac.get(route)
+        assert response.status_code == 200, response.text
+        row = response.json()['accounts'][0]
+        assert row['restated_learning']['views'] == report['views']
+        assert row['restated_learning']['source_event_hash'] == event.hash
+        assert row['restated_learning']['freshness'] == 'RECORDED_ACCOUNT_SNAPSHOT_ONLY'
+        assert row['learning_history_issue'] == 'native reconciliation pending'
+    assert (ledger.count(), ledger.head()) == before
+    ledger.close()
+
+
+@pytest.mark.parametrize('patch', [
+    {'scope': {'account_alias': 'other', 'environment': 'DEMO'}},
+    {'scope': {'account_alias': 'paper_lab', 'environment': 'LIVE'}},
+    {'selection_authority': True},
+])
+def test_account_learning_readback_refuses_other_accounts_cohorts_or_authority(patch, tmp_path):
+    from van_gateway.trading.service import TradingService
+    ledger = Ledger(tmp_path/'scope.sqlite')
+    report = {'status': 'ANALYSIS_ONLY', 'selection_authority': False, 'as_decided_preserved': True,
+        'scope': {'account_alias': 'paper_lab', 'environment': 'DEMO'}, 'views': {}, **patch}
+    ledger.append(make_event(EventKind.ACCOUNT_SNAPSHOT, 'vati-service',
+        {'account_alias': 'paper_lab', 'mode': 'DEMO_TRADER', 'restated_learning': report},
+        event_time_ms=1, received_time_ms=1, correlation_id='paper_lab'))
+    ledger.close()
+    assert TradingService(str(tmp_path/'scope.sqlite')).accounts()['accounts'][0]['restated_learning'] == {
+        'status': 'UNVERIFIED_REPORT', 'selection_authority': False}

@@ -61,6 +61,9 @@ def account_states(ledger: Ledger, registry_public: list[dict]) -> list[dict[str
                "last_sync_ms": s.event_time_ms if s else None, "connection_state": ("LIVE" if p.get("connected") else "OFFLINE") if s else "NEVER_SYNCED", "session_event": sessions.get(a["alias"]).payload.get("event") if sessions.get(a["alias"]) else None}
         out.append(row)
         row["risk_history_issue"] = p.get("risk_history_issue") or None
+        row["learning_history_issue"] = p.get("learning_history_issue") or None
+        from vati.readmodels.learning import reported_restated_learning
+        row["restated_learning"] = reported_restated_learning(s, a["alias"])
     return out
 
 

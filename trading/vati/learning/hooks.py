@@ -61,6 +61,28 @@ class LearningHooks:
     refusals: list[str] = field(default_factory=list)
 
     _resolvers: dict[tuple[int, bool], LedgerEvidenceResolver] = field(default_factory=dict, repr=False)
+    _projections: dict[int, Any] = field(default_factory=dict, init=False, repr=False)
+    projection_error: str = field(default="", init=False)
+    projection_summary: dict = field(default_factory=lambda: {"status": "NOT_CONSTRUCTED", "selection_authority": False}, init=False)
+
+    def update_projection(self, ledger):
+        if self.account_alias is None:
+            return {"status": "UNSCOPED_RESEARCH_ONLY", "selection_authority": False}
+        try:
+            from vati.learning.restatement import RestatedTradeProjection
+            projection = self._projections.get(id(ledger))
+            if projection is None or projection.ledger is not ledger:
+                projection = RestatedTradeProjection(ledger, self.resolver(ledger, replay=True).scope)
+                self._projections[id(ledger)] = projection
+            self.projection_summary = projection.catch_up()
+            self.projection_error = ""
+        except Exception as exc:
+            # A projection fault cannot stop protection or erase previous source facts.
+            self.projection_error = "restated learning projection unavailable: " + type(exc).__name__
+            self.projection_summary = {"status": "UNAVAILABLE", "selection_authority": False,
+                                       "reason": self.projection_error}
+        return self.projection_summary
+
 
     def resolver(self, ledger: Ledger, *, replay: bool = False) -> LedgerEvidenceResolver:
         key = (id(ledger), replay)
@@ -75,6 +97,8 @@ class LearningHooks:
     @property
     def recovery_issue(self) -> str:
         issues = sorted({r.scope.issue for r in self._resolvers.values() if r.scope is not None and r.scope.issue})
+        if self.projection_error:
+            issues.append(self.projection_error)
         return "; ".join(issues)
 
     @staticmethod
@@ -116,6 +140,7 @@ class LearningHooks:
         resolver = self.resolver(ledger)
         if resolver.scope is not None and (not history or not resolver.scope.admit(history[-1])):
             self.refusals.append(f"review {trade_intent_id}: native account/cohort unresolved or excluded")
+            self.update_projection(ledger)
             return None, None
         ep = episode_from_ledger(ledger, trade_intent_id, environment=self.environment, available_through=cutoff)
         if ep is not None:
@@ -123,6 +148,7 @@ class LearningHooks:
             self.episodes.append(ep)
         review = self._latest(ledger, EventKind.TRADE_REVIEW, trade_intent_id, {"strategy_id": strategy_id}, available_through=cutoff)
         if review is None:
+            self.update_projection(ledger)
             return ep, None   # no TRADE_REVIEW on the ledger: no health evidence (never the intent id)
         try:
             self.health.observe(HealthObservation(strategy_id, self.environment, r_multiple, process_ok, min(cost_ratio, Decimal("10")), regime_fit,
@@ -130,10 +156,12 @@ class LearningHooks:
                                 resolver=self.resolver(ledger), correlation_hint=trade_intent_id)
         except EvidenceError as e:
             self.refusals.append(f"review {trade_intent_id}: {e}")
+            self.update_projection(ledger)
             return ep, None
         adj = self.health.live_adjustment(strategy_id)
         if adj is not None:
             self.adjustments.append(adj)
+        self.update_projection(ledger)
         return ep, adj
 
     # ---------------------------------------------------------- read-only

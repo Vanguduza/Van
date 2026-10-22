@@ -264,14 +264,19 @@ class SessionService:
 
     # ------------------------------------------------------------------ loop
     def _heartbeat(self, status: str, extra: Optional[dict] = None) -> None:
+        if getattr(self, "learning", None) is not None and getattr(self, "_ledger", None) is not None:
+            self.learning.update_projection(self._ledger)
         hb = {"account_alias": self.cfg.account_alias, "symbol": self.cfg.symbol, "status": status, "cycles": self.cycles, "last_bar_end_ms": self.last_bar_end_ms,
               "permit_new_orders": bool(self.runner and self.runner.permit_new_orders), "kill_switch": sorted(t.value for t in self.runner.cycle.kill.active) if self.runner else [],
               "risk_history_issue": self.runner.cycle.streaks.recovery_issue if self.runner else "",
               "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
+              "restated_learning": self.learning.projection_summary if getattr(self, "learning", None) else {"status":"NOT_CONSTRUCTED"},
               "updated_ms": self.clock(), "pid": os.getpid(), **(extra or {})}
         Path(self.cfg.heartbeat_path).write_text(json.dumps(hb))
 
     def _account_snapshot(self, now_ms: int) -> None:
+        if getattr(self, "learning", None) is not None and getattr(self, "_ledger", None) is not None:
+            self.learning.update_projection(self._ledger)
         r = self.runner
         assert r is not None
         acct = r.cycle.adapter.sync_account()
@@ -283,6 +288,7 @@ class SessionService:
             "week_start_equity": str(r.cycle.week_start_equity), "kill_switch": sorted(t.value for t in r.cycle.kill.active), "mode": r.cycle.mandate.mode.value,
             "risk_history_issue": r.cycle.streaks.recovery_issue,
             "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
+            "restated_learning": self.learning.projection_summary if getattr(self, "learning", None) else {"status":"NOT_CONSTRUCTED"},
         }, event_time_ms=now_ms, received_time_ms=now_ms, correlation_id=r.cycle.cfg.session_id))
 
     def start(self) -> None:

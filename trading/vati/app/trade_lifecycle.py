@@ -22,6 +22,7 @@ from vati.execution.review import (Outcome, review_trade, closed_trade_pnl, init
                                    STRATEGY_LEARNING_OUTCOMES)
 from vati.execution.router import ExecutionRouter
 from vati.execution.tca import compute_tca
+from vati.execution.review import native_economic_maturity
 from vati.learning.hooks import LearningHooks, to_payload
 from vati.lifecycle.envelope import EnvelopeCalculator
 from vati.lifecycle.expansion import ProfitExpansionEngine
@@ -41,7 +42,7 @@ from vati.cognition.attribution import (
 from vati.learning.episodes import LessonStore, lesson_from_verdict
 from vati.market_data.bars import Bar
 from vati.observability import metrics
-from vati.risk.contracts import Direction, LossModel, StrategyState, SymbolContract, TradeIntent
+from vati.risk.contracts import Direction, KillSwitchTrigger, LossModel, StrategyState, SymbolContract, TradeIntent
 from vati.risk.serde import intent_to_dict, snapshot_to_dict
 from vati.arbiter.strategy_arbiter import ACTIVE_STATES
 from vati.vtil import AdmissionLedger
@@ -1317,6 +1318,10 @@ class AccountTradeLifecycle:
                 self.consecutive_losses = self.streaks.verdict(entry["strategy_id"], now_ms).losses
             else:
                 self.consecutive_losses = self.consecutive_losses + 1 if pnl < ZERO else 0
+        else:
+            if self.streaks is not None:
+                self.streaks.recovery_issue = "unresolved closed-trade money outcome; native reconciliation required"
+            self.router.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, now_ms)
 
         review = review_trade(
             trade_intent_id=intent_id,
@@ -1327,6 +1332,7 @@ class AccountTradeLifecycle:
             direction_long=entry["direction"] is Direction.LONG,
             pnl=pnl,
             account_alias=getattr(self.mandate, "account_alias", "") or getattr(self.adapter, "account_alias", ""),
+            maturity=native_economic_maturity(self.adapter, intent_id, measured),
             thesis_correct=pnl_known and pnl > ZERO,
             process_ok=True,
             broker_ok=pnl_known,

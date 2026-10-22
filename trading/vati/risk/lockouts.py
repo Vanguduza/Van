@@ -138,7 +138,8 @@ class LossStreakGovernor:
     # ---------------------------------------------------------------- verdict
     def verdict(self, strategy_id: str, now_ms: int) -> StreakVerdict:
         if self.recovery_issue:
-            return StreakVerdict(self.recovery_issue, ZERO, 0)
+            own = self._scopes.get(strategy_id)
+            return StreakVerdict(self.recovery_issue, ZERO, own.losses if own else 0)
         mult = ONE
         for key in _scopes(strategy_id):
             s = self._scopes.get(key)
