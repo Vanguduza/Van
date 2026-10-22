@@ -832,7 +832,7 @@
           "expected"
         ],
         "title": "AdmitBody",
-        "description": "§221 — walk an artifact through the lifecycle, one guarded step at a time."
+        "description": "\u00a7221 \u2014 walk an artifact through the lifecycle, one guarded step at a time."
       },
       "AppPolicy": {
         "type": "string",
@@ -963,7 +963,7 @@
           "allowed_domains"
         ],
         "title": "AssignmentBody",
-        "description": "§379 — what Hermes hands a worker, and the only way a worker starts.\n\nEvery field except the optional deadline is a bound the worker cannot widen.\nThere is deliberately no \"unbounded\" option and no way to omit the turn: an\nautonomous run with no assigning turn is an independent agent loop, which the\nsecurity policy does not permit on any surface but Hermes itself."
+        "description": "\u00a7379 \u2014 what Hermes hands a worker, and the only way a worker starts.\n\nEvery field except the optional deadline is a bound the worker cannot widen.\nThere is deliberately no \"unbounded\" option and no way to omit the turn: an\nautonomous run with no assigning turn is an independent agent loop, which the\nsecurity policy does not permit on any surface but Hermes itself."
       },
       "AssumptionRecordBody": {
         "properties": {
@@ -1367,7 +1367,7 @@
           "L5_STAGEHAND_AGENT"
         ],
         "title": "AutonomyTier",
-        "description": "§88 — the Stagehand determinism ladder.\n\nL0-L3 keep action selection deterministic. L4/L5 place it inside the worker,\nwhich is why they are gated: `docs/SECURITY_POLICY.md` says Hermes is the sole\nagent runtime."
+        "description": "\u00a788 \u2014 the Stagehand determinism ladder.\n\nL0-L3 keep action selection deterministic. L4/L5 place it inside the worker,\nwhich is why they are gated: `docs/SECURITY_POLICY.md` says Hermes is the sole\nagent runtime."
       },
       "Body_import_document_v1_documents_import_post": {
         "properties": {
@@ -1652,7 +1652,7 @@
           "TRADING_EXECUTION"
         ],
         "title": "CapabilityClass",
-        "description": "§7 — the coverage the registry must span."
+        "description": "\u00a77 \u2014 the coverage the registry must span."
       },
       "CapabilityGrant": {
         "properties": {
@@ -2189,7 +2189,7 @@
           "signature"
         ],
         "title": "CompileBody",
-        "description": "§220 — compile a capability from a template (WARM) or an IR (COLD result)."
+        "description": "\u00a7220 \u2014 compile a capability from a template (WARM) or an IR (COLD result)."
       },
       "ComplementPreferenceBody": {
         "properties": {
@@ -2908,7 +2908,7 @@
           "credential_class"
         ],
         "title": "CredentialResolveBody",
-        "description": "P2-DEAD-001 — the alias a workflow asks for, and the class it claims."
+        "description": "P2-DEAD-001 \u2014 the alias a workflow asks for, and the class it claims."
       },
       "DecisionAnswer": {
         "properties": {
@@ -3436,7 +3436,7 @@
           "value"
         ],
         "title": "DeviceTelemetrySample",
-        "description": "One device-produced measurement (P3-OBS-002).\n\nThe name must be one the catalogue declares — see\n`instruments.DEVICE_HISTOGRAMS` and `DEVICE_GAUGES`. An unknown name is\nrefused rather than registered, because a metric that appears at runtime with\nno declared producer is exactly the drift Gate 11 exists to stop."
+        "description": "One device-produced measurement (P3-OBS-002).\n\nThe name must be one the catalogue declares \u2014 see\n`instruments.DEVICE_HISTOGRAMS` and `DEVICE_GAUGES`. An unknown name is\nrefused rather than registered, because a metric that appears at runtime with\nno declared producer is exactly the drift Gate 11 exists to stop."
       },
       "DomainSkillCanaryBody": {
         "properties": {
@@ -3735,7 +3735,7 @@
           "public_key_pem"
         ],
         "title": "EnrollBody",
-        "description": "The device identity an enrolment establishes.\n\nP4-DOC-004 — these fields are documented here, once. `PairDeviceBody` inherits them\nand adds only what pairing adds, rather than restating them: the two descriptions had\nalready drifted apart once, and a field whose meaning is written down twice is a field\nwhose meaning is eventually written down two different ways."
+        "description": "The device identity an enrolment establishes.\n\nP4-DOC-004 \u2014 these fields are documented here, once. `PairDeviceBody` inherits them\nand adds only what pairing adds, rather than restating them: the two descriptions had\nalready drifted apart once, and a field whose meaning is written down twice is a field\nwhose meaning is eventually written down two different ways."
       },
       "EnvelopeBody": {
         "properties": {
@@ -3856,7 +3856,7 @@
           "kind"
         ],
         "title": "EnvelopeBody",
-        "description": "§20.4's envelope, as a request body. Identical fields on every carrier."
+        "description": "\u00a720.4's envelope, as a request body. Identical fields on every carrier."
       },
       "EpistemicState": {
         "type": "string",
@@ -3989,7 +3989,7 @@
           "principal_type"
         ],
         "title": "ExecuteBody",
-        "description": "§222 — execute an admitted capability under an existing command authority.\n\nThere is no field here for an action class or an approval: both come from\nthe sealed command record, which is why this endpoint cannot be used to\nescalate one. A standing run passes `standing_authority_id` instead of an\nowner command of its own."
+        "description": "\u00a7222 \u2014 execute an admitted capability under an existing command authority.\n\nThere is no field here for an action class or an approval: both come from\nthe sealed command record, which is why this endpoint cannot be used to\nescalate one. A standing run passes `standing_authority_id` instead of an\nowner command of its own."
       },
       "FailureClass": {
         "type": "string",
@@ -4003,7 +4003,7 @@
           "UNKNOWN"
         ],
         "title": "FailureClass",
-        "description": "§77 — what kind of failure this was, because they do not weigh the same."
+        "description": "\u00a777 \u2014 what kind of failure this was, because they do not weigh the same."
       },
       "FillDocumentRequest": {
         "properties": {
@@ -4126,7 +4126,7 @@
           "signature"
         ],
         "title": "GenerateBody",
-        "description": "§22 — COLD generation. The gateway ships only the deterministic proposer."
+        "description": "\u00a722 \u2014 COLD generation. The gateway ships only the deterministic proposer."
       },
       "GoalCreate": {
         "properties": {
@@ -4610,7 +4610,7 @@
           "due_expression"
         ],
         "title": "HermesReminderCreateBody",
-        "description": "What Hermes may ask the gateway to remind the owner about, on the owner's behalf.\n\n`text` must be the owner's own words, not Hermes's paraphrase (AGENTS.md's run\nprocedure says so explicitly). `mission_id` is correlation context for the caller, not\nowner-authored data, and is echoed back in this route's response rather than persisted\n(reminders has no mission_id column). `source` on the request is likewise echoed back\nas this route received it — it is Hermes's own label, not trusted as the persisted\nrecord of who reached this route. The *persisted* `source` column (added for\nGAP-F-002, closing the gap this docstring used to name: \"reminders has no free-form\nmetadata column to hold them\") is always the literal `\"hermes\"` this route sets, never\n`body.source`, because only a RUNTIME-scoped internal-control credential can reach here\nat all, and that is the fact worth recording. `created_by` in the response says the\nsame thing for the reader who does not want to open the database to see it."
+        "description": "What Hermes may ask the gateway to remind the owner about, on the owner's behalf.\n\n`text` must be the owner's own words, not Hermes's paraphrase (AGENTS.md's run\nprocedure says so explicitly). `mission_id` is correlation context for the caller, not\nowner-authored data, and is echoed back in this route's response rather than persisted\n(reminders has no mission_id column). `source` on the request is likewise echoed back\nas this route received it \u2014 it is Hermes's own label, not trusted as the persisted\nrecord of who reached this route. The *persisted* `source` column (added for\nGAP-F-002, closing the gap this docstring used to name: \"reminders has no free-form\nmetadata column to hold them\") is always the literal `\"hermes\"` this route sets, never\n`body.source`, because only a RUNTIME-scoped internal-control credential can reach here\nat all, and that is the fact worth recording. `created_by` in the response says the\nsame thing for the reader who does not want to open the database to see it."
       },
       "HermesSuggestionCreateBody": {
         "properties": {
@@ -4766,7 +4766,7 @@
           "mutation_class"
         ],
         "title": "IntentSignature",
-        "description": "§26 — semantic index key, so natural phrasing maps to one capability."
+        "description": "\u00a726 \u2014 semantic index key, so natural phrasing maps to one capability."
       },
       "InteractionStepBody": {
         "properties": {
@@ -6000,7 +6000,7 @@
           "UNVERIFIABLE"
         ],
         "title": "MissionState",
-        "description": "§3.2 — deterministic. Anything not in LEGAL_TRANSITIONS fails closed."
+        "description": "\u00a73.2 \u2014 deterministic. Anything not in LEGAL_TRANSITIONS fails closed."
       },
       "NotebookConsumerAskRequest": {
         "properties": {
@@ -6041,7 +6041,7 @@
           "MODEL_INFERRED"
         ],
         "title": "ObservationOrigin",
-        "description": "Contract C1 — where one supporting episode came from. Persisted per episode."
+        "description": "Contract C1 \u2014 where one supporting episode came from. Persisted per episode."
       },
       "ObserveBody": {
         "properties": {
@@ -6226,7 +6226,7 @@
           "operation_type"
         ],
         "title": "OperationRequest",
-        "description": "Every field is a binding §38 requires; none is optional in spirit."
+        "description": "Every field is a binding \u00a738 requires; none is optional in spirit."
       },
       "OperationType": {
         "type": "string",
@@ -6253,7 +6253,7 @@
           "GIT_APPLY_PATCH"
         ],
         "title": "OperationType",
-        "description": "§38 — typed operations only. This set is the boundary.\n\nThere is deliberately no RUN_ARBITRARY, EXECUTE or EVAL. Anything a new\nintegration needs is a new member here, reviewed as a change to this file,\nrather than a new string passed at runtime."
+        "description": "\u00a738 \u2014 typed operations only. This set is the boundary.\n\nThere is deliberately no RUN_ARBITRARY, EXECUTE or EVAL. Anything a new\nintegration needs is a new member here, reviewed as a change to this file,\nrather than a new string passed at runtime."
       },
       "OriginChannel": {
         "type": "string",
@@ -6955,7 +6955,7 @@
           "evidence_preferences"
         ],
         "title": "OwnerModelField",
-        "description": "§11's field list. Collaboration, never personality."
+        "description": "\u00a711's field list. Collaboration, never personality."
       },
       "OwnerPlanBody": {
         "properties": {
@@ -7161,7 +7161,7 @@
           "C_REPLAY_FLOOR"
         ],
         "title": "PathClass",
-        "description": "§20.5 — the three-level continuity ladder."
+        "description": "\u00a720.5 \u2014 the three-level continuity ladder."
       },
       "PhoneNotification": {
         "properties": {
@@ -7317,7 +7317,7 @@
           "kind"
         ],
         "title": "PostconditionSpec",
-        "description": "What the IR declared must become true (§165)."
+        "description": "What the IR declared must become true (\u00a7165)."
       },
       "PremiseAssessmentBody": {
         "properties": {
@@ -7368,7 +7368,7 @@
           "semantic_class"
         ],
         "title": "PremiseAssessmentBody",
-        "description": "What the owner asserted, what VAN concluded, and what it cited.\n\n`agreed_without_evidence` is deliberately absent: the kernel derives it, so a caller\ncannot mark its own agreement well-founded. That derivation is what makes §17's\nunsupported-agreement rate a measurement rather than a self-report."
+        "description": "What the owner asserted, what VAN concluded, and what it cited.\n\n`agreed_without_evidence` is deliberately absent: the kernel derives it, so a caller\ncannot mark its own agreement well-founded. That derivation is what makes \u00a717's\nunsupported-agreement rate a measurement rather than a self-report."
       },
       "Primitive": {
         "type": "string",
@@ -7393,7 +7393,7 @@
           "DELETE_TRANSIENT_FILE"
         ],
         "title": "Primitive",
-        "description": "§147 — the stable compiler contract. n8n node versions are backends."
+        "description": "\u00a7147 \u2014 the stable compiler contract. n8n node versions are backends."
       },
       "PrincipalType": {
         "type": "string",
@@ -7525,7 +7525,7 @@
           "gateway_url"
         ],
         "title": "ProvisioningPayloadBody",
-        "description": "ADR-RB-026 — what the installer asks for, which is deliberately almost nothing.\n\nThe installer names the Gateway the device should reach, because it is the only party\nthat knows which deployment this is. Everything else — the one-time credential, the\nattestation challenge, the expiry — is the Gateway's to mint, so that an installer\ncannot extend a provisioning window or reuse a token by asking for it."
+        "description": "ADR-RB-026 \u2014 what the installer asks for, which is deliberately almost nothing.\n\nThe installer names the Gateway the device should reach, because it is the only party\nthat knows which deployment this is. Everything else \u2014 the one-time credential, the\nattestation challenge, the expiry \u2014 is the Gateway's to mint, so that an installer\ncannot extend a provisioning window or reuse a token by asking for it."
       },
       "ProvisioningStatusBody": {
         "properties": {
@@ -7775,7 +7775,7 @@
           "failure_class"
         ],
         "title": "RepairOpenBody",
-        "description": "P2-DEAD-001 — what a failing capability needs to become a repair candidate."
+        "description": "P2-DEAD-001 \u2014 what a failing capability needs to become a repair candidate."
       },
       "ResearchCitation": {
         "properties": {
@@ -8004,6 +8004,66 @@
         ],
         "title": "ResumeBody"
       },
+      "ResumeContract": {
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id"
+          },
+          "escalation_id": {
+            "type": "string",
+            "title": "Escalation Id"
+          },
+          "scope_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Scope Sha256"
+          },
+          "scope": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Scope"
+          },
+          "action_id": {
+            "type": "string",
+            "const": "browser.task.resume",
+            "title": "Action Id"
+          },
+          "action_class": {
+            "type": "string",
+            "const": "A4",
+            "title": "Action Class"
+          },
+          "approval_command": {
+            "type": "string",
+            "title": "Approval Command"
+          },
+          "grants_authority": {
+            "type": "boolean",
+            "const": false,
+            "title": "Grants Authority"
+          },
+          "single_use": {
+            "type": "boolean",
+            "const": true,
+            "title": "Single Use"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "task_id",
+          "escalation_id",
+          "scope_sha256",
+          "scope",
+          "action_id",
+          "action_class",
+          "approval_command",
+          "grants_authority",
+          "single_use"
+        ],
+        "title": "ResumeContract"
+      },
       "RetryClass": {
         "type": "string",
         "enum": [
@@ -8112,7 +8172,7 @@
           "PROJECT_TRUTH"
         ],
         "title": "SemanticClass",
-        "description": "§14 — the nine classes, and they are not interchangeable."
+        "description": "\u00a714 \u2014 the nine classes, and they are not interchangeable."
       },
       "Sensitivity": {
         "type": "string",
@@ -8307,7 +8367,7 @@
           "owner_authority_evidence_ref"
         ],
         "title": "StandingIntentBody",
-        "description": "§227 — creating a persistent trigger is itself a mutation."
+        "description": "\u00a7227 \u2014 creating a persistent trigger is itself a mutation."
       },
       "StandingRunBody": {
         "properties": {
@@ -8512,7 +8572,7 @@
         },
         "type": "object",
         "title": "SuccessContract",
-        "description": "§6 — machine-readable, so \"done\" is checkable rather than asserted.\n\n`postconditions` are the claims a verifier must observe. An empty contract is\nlegal (not every mission is consequential) but it can never yield\nVERIFIED_SUCCESS — `MissionService` routes it to UNVERIFIABLE instead, since\na mission with nothing to check has not been verified, only finished."
+        "description": "\u00a76 \u2014 machine-readable, so \"done\" is checkable rather than asserted.\n\n`postconditions` are the claims a verifier must observe. An empty contract is\nlegal (not every mission is consequential) but it can never yield\nVERIFIED_SUCCESS \u2014 `MissionService` routes it to UNVERIFIABLE instead, since\na mission with nothing to check has not been verified, only finished."
       },
       "SuggestionCreate": {
         "properties": {
@@ -8733,7 +8793,7 @@
           "target"
         ],
         "title": "TransitionBody",
-        "description": "P0-VERIFY-001 — there is deliberately no `verification` field.\n\nIt used to accept a VerificationRecord from the caller, and the audit drove a mission\nto VERIFIED_SUCCESS through this route with `verifier_version: \"i-say-so/1.0\"` and\n`evidence_refs: [\"evidence://trust-me\"]`. A receipt written by whoever is claiming the\noutcome is the claim restated, not evidence for it. The gateway now runs the verifier\nthe mission's own success contract names, and the record it produces is the only one\nthat can be stored, so there is nothing useful a caller could put here.\n\nPydantic is configured to reject unknown fields on this body rather than ignore them,\nso an old client still sending `verification` gets a 422 and learns the rule instead of\nbelieving it was honoured."
+        "description": "P0-VERIFY-001 \u2014 there is deliberately no `verification` field.\n\nIt used to accept a VerificationRecord from the caller, and the audit drove a mission\nto VERIFIED_SUCCESS through this route with `verifier_version: \"i-say-so/1.0\"` and\n`evidence_refs: [\"evidence://trust-me\"]`. A receipt written by whoever is claiming the\noutcome is the claim restated, not evidence for it. The gateway now runs the verifier\nthe mission's own success contract names, and the record it produces is the only one\nthat can be stored, so there is nothing useful a caller could put here.\n\nPydantic is configured to reject unknown fields on this body rather than ignore them,\nso an old client still sending `verification` gets a 422 and learns the rule instead of\nbelieving it was honoured."
       },
       "ValidationError": {
         "properties": {
@@ -9419,7 +9479,7 @@
           "SUPERSEDED"
         ],
         "title": "WorkflowLifecycle",
-        "description": "§§51, 155. GENERATED is the pre-persistence state; PROPOSED is the first stored one."
+        "description": "\u00a7\u00a751, 155. GENERATED is the pre-persistence state; PROPOSED is the first stored one."
       },
       "WorkflowStepEffect": {
         "type": "string",
@@ -10423,7 +10483,7 @@
           "metered"
         ],
         "title": "LinkReportBody",
-        "description": "§27's inputs, as the phone can measure them.\n\nDeliberately absent: `quality_mode`, `status`, `profile` and anything resembling\n`high_quality_certified`. The device reports observations; the verdict is the\nGateway's, and a body that carried one would let a client certify its own session.\n\n`extra=\"forbid\"` rather than pydantic's default of ignoring unknown fields, and the\ndifference is the whole point of §26.2. An ignored `high_quality_certified` is a field\na caller believes it set and the next maintainer finds already arriving; a refused one\nis an error the caller reads. The claim is refused where it is made."
+        "description": "\u00a727's inputs, as the phone can measure them.\n\nDeliberately absent: `quality_mode`, `status`, `profile` and anything resembling\n`high_quality_certified`. The device reports observations; the verdict is the\nGateway's, and a body that carried one would let a client certify its own session.\n\n`extra=\"forbid\"` rather than pydantic's default of ignoring unknown fields, and the\ndifference is the whole point of \u00a726.2. An ignored `high_quality_certified` is a field\na caller believes it set and the next maintainer finds already arriving; a refused one\nis an error the caller reads. The claim is refused where it is made."
       },
       "MediaPreferenceBody": {
         "properties": {
