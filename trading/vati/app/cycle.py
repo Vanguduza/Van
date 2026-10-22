@@ -24,7 +24,7 @@ from vati.execution.pretrade import MarketReference, PreTradeControls
 from vati.execution.route_registry import RouteRegistry
 from vati.execution.style_selector import ExecutionStyleSelector, LiquidityView
 from vati.execution.router import ExecutionRouter, RouterError
-from vati.execution.review import review_trade
+from vati.execution.review import review_trade, closed_trade_pnl, initial_risk_from_ledger, STRATEGY_LEARNING_OUTCOMES
 from vati.execution.tca import compute_tca
 from vati.execution.reconciliation import LedgerPosition, reconcile
 from vati.intelligence.events import EventMatrix, EventWindowState
@@ -138,6 +138,7 @@ class DecisionCycle:
             ledger=ledger, policies=self.adjustment_policies)
         self.scale_policies = ScalePolicyRegistry()
         self.decision_quality = DecisionQualityLedger(ledger=ledger)
+        self.decision_quality.restore_from_ledger(ledger)
         self.lessons = LessonStore(ledger=ledger)
         self.lessons.restore_from_ledger(ledger)
         self.engine.lessons = self.lessons
@@ -376,7 +377,7 @@ class DecisionCycle:
                 "entry": entry_price, "stop": intent.stop, "direction": intent.direction,
                 "strategy_id": intent.strategy_id, "cost_pct": cost,
                 "decision_price": intent.entry,
-                "quantity": rec.filled_qty,
+                "quantity": rec.filled_qty, "fees": rec.fees,
                 "broker_position_id": rec.broker_position_id,
                 "opened_ms": now_ms,
                 "best_price": entry_price, "worst_price": entry_price,
@@ -637,7 +638,7 @@ class DecisionCycle:
                     self._on_close(intent_id, receipt.average_fill, "EXIT", now_ms)
                     self.protection.forget(position_id)
 
-    def _classify_decision(self, intent_id: str, entry: dict, rv, now_ms: int):
+    def _classify_decision(self, intent_id: str, entry: dict, rv, now_ms: int, *, outcome_known: bool = True):
         """Decision quality x outcome, and the lesson it teaches (GAP-F-003)."""
         thesis = self.thesis.thesis_for(intent_id)
         inputs = DecisionQualityInputs(
@@ -656,8 +657,9 @@ class DecisionCycle:
         )
         verdict = self.decision_quality.record(
             inputs, symbol=self.cfg.symbol, r_multiple=rv.r_multiple, now_ms=now_ms,
+            outcome_known=outcome_known,
             evidence_refs=(rv.artifact_hash,) + ((thesis.seal,) if thesis else ()))
-        if self.learning is not None:
+        if self.learning is not None and outcome_known:
             self.lessons.record(lesson_from_verdict(
                 verdict, symbol=self.cfg.symbol,
                 regime=str(entry.get("regime", "")), session=str(entry.get("session", "")),
@@ -670,29 +672,32 @@ class DecisionCycle:
         e = self._entries.pop(intent_id, None)
         if e is None or exit_price is None:
             return
-        closed = getattr(self.adapter, "closed", None)
-        pnl = ZERO
-        if closed:
-            for c in reversed(closed):
-                if c["intent"] == intent_id:
-                    pnl = c["pnl"]; break
+        e["trade_intent_id"] = intent_id
+        measured = closed_trade_pnl(e, exit_price, self.cfg.contract, getattr(self.adapter, "closed", None))
+        pnl = measured.amount if measured.amount is not None else ZERO
+        initial_risk = initial_risk_from_ledger(self.ledger, intent_id,
+            available_cutoff_ms=int(e.get("opened_ms") or 0) or None)
         for lock_event in self.streaks.on_close(e["strategy_id"], pnl, now_ms):
             self._log(EventKind.SESSION, lock_event, now_ms=now_ms, corr=intent_id)
         self.consecutive_losses = self.streaks.verdict(e["strategy_id"], now_ms).losses
         rv = review_trade(trade_intent_id=intent_id, strategy_id=e["strategy_id"], entry=e["entry"], exit_price=exit_price, stop=e["stop"] or e["entry"], direction_long=e["direction"] is Direction.LONG,
-                          pnl=pnl, thesis_correct=pnl > ZERO, process_ok=True, exit_reason=reason)
+                          pnl=pnl, thesis_correct=pnl > ZERO, process_ok=True, exit_reason=reason,
+                          broker_ok=measured.amount is not None,
+                          initial_money_risk=initial_risk.amount if initial_risk else None,
+                          initial_risk_evidence_ref=initial_risk.evidence_ref if initial_risk else None,
+                          pnl_basis=measured.basis, thesis_evidence_basis="PNL_SIGN_PROXY_NOT_SETUP_VALIDATION")
         self.reviews.append(rv)
         self._log(EventKind.TRADE_REVIEW, {k: (v.value if hasattr(v, "value") else (str(v) if isinstance(v, Decimal) else (list(v) if isinstance(v, tuple) else v))) for k, v in asdict(rv).items()}, now_ms=now_ms, corr=intent_id)
         self.admission.propose(rv.artifact_hash, knowledge_class="TRADE_EXPERIENCE", proposed_by=rv.proposed_by, trust_tier="T0_VAN_TRADING_POLICY")
         metrics.inc("vati_trades_closed_total", outcome=rv.outcome.value)
         verdict = None
         try:
-            verdict = self._classify_decision(intent_id, e, rv, now_ms)
+            verdict = self._classify_decision(intent_id, e, rv, now_ms, outcome_known=measured.amount is not None)
         except Exception as exc:  # noqa: BLE001 — classification never blocks a close
             self._log(EventKind.SESSION,
                       {"event": "DECISION_QUALITY_FAULT", "error": str(exc)[:300]},
                       now_ms=now_ms, corr=intent_id)
-        if self.learning is not None:
+        if self.learning is not None and rv.outcome in STRATEGY_LEARNING_OUTCOMES:
             self._learn(intent_id, rv, e.get("cost_ratio", Decimal(1)), now_ms,
                         process_ok=(verdict is None or not verdict.faults))
 

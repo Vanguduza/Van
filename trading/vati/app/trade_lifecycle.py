@@ -18,7 +18,8 @@ from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind, make_event
 from vati.execution.base import ExecutionReceipt, VenueAdapter
 from vati.execution.protection import ProtectionManager
-from vati.execution.review import Outcome, review_trade
+from vati.execution.review import (Outcome, review_trade, closed_trade_pnl, initial_risk_from_ledger,
+                                   STRATEGY_LEARNING_OUTCOMES)
 from vati.execution.router import ExecutionRouter
 from vati.execution.tca import compute_tca
 from vati.learning.hooks import LearningHooks, to_payload
@@ -47,9 +48,6 @@ from vati.vtil import AdmissionLedger
 
 ZERO = Decimal("0")
 ONE = Decimal("1")
-STRATEGY_LEARNING_OUTCOMES = frozenset({
-    Outcome.GOOD_WIN, Outcome.GOOD_LOSS, Outcome.BAD_WIN, Outcome.BAD_LOSS,
-})
 
 
 @dataclass
@@ -118,6 +116,7 @@ class AccountTradeLifecycle:
         self.adjustments = PositionAdjustmentEngine(
             ledger=self.ledger, policies=self.adjustment_policies)
         self.decision_quality = DecisionQualityLedger(ledger=self.ledger)
+        self.decision_quality.restore_from_ledger(self.ledger)
         self.lessons = LessonStore(ledger=self.ledger)
 
     @property
@@ -1264,28 +1263,9 @@ class AccountTradeLifecycle:
                 self.protection.forget(receipt.broker_position_id)
 
     def _realised_pnl(self, entry: dict, exit_price: Decimal) -> tuple[Decimal, bool]:
-        closed = getattr(self.adapter, "closed", None)
-        if closed:
-            for row in reversed(closed):
-                if row.get("intent") == entry.get("trade_intent_id"):
-                    return Decimal(str(row["pnl"])), True
-
-        symbol = str(entry["symbol"]).upper()
-        contract = self.contracts.get(symbol)
-        qty = Decimal(str(entry.get("quantity", ZERO)))
-        if contract is None or qty <= ZERO:
-            return ZERO, False
-        if contract.loss_model is LossModel.FULL_STAKE:
-            # Fixed-payout products need venue settlement, not a linear price proxy.
-            return ZERO, False
-        sign = Decimal("1") if entry["direction"] is Direction.LONG else Decimal("-1")
-        return (
-            (exit_price - Decimal(str(entry["entry"])))
-            * sign
-            * qty
-            * contract.value_per_price_unit_per_lot,
-            True,
-        )
+        measured = closed_trade_pnl(entry, exit_price,
+            self.contracts.get(str(entry["symbol"]).upper()), getattr(self.adapter, "closed", None))
+        return measured.amount if measured.amount is not None else ZERO, measured.amount is not None
 
     def _on_close(
         self,
@@ -1313,7 +1293,11 @@ class AccountTradeLifecycle:
             )
             self._family_halts.pop(family.family_id, None)
         entry["trade_intent_id"] = intent_id
-        pnl, pnl_known = self._realised_pnl(entry, exit_price)
+        measured = closed_trade_pnl(entry, exit_price,
+            self.contracts.get(str(entry["symbol"]).upper()), getattr(self.adapter, "closed", None))
+        pnl, pnl_known = measured.amount if measured.amount is not None else ZERO, measured.amount is not None
+        initial_risk = initial_risk_from_ledger(self.ledger, intent_id,
+            available_cutoff_ms=int(entry.get("opened_ms") or 0) or None)
         if pnl_known:
             if self.streaks is not None:
                 for lock_event in self.streaks.on_close(entry["strategy_id"], pnl, now_ms):
@@ -1334,6 +1318,10 @@ class AccountTradeLifecycle:
             process_ok=True,
             broker_ok=pnl_known,
             exit_reason=reason,
+            initial_money_risk=initial_risk.amount if initial_risk else None,
+            initial_risk_evidence_ref=initial_risk.evidence_ref if initial_risk else None,
+            pnl_basis=measured.basis,
+            thesis_evidence_basis="PNL_SIGN_PROXY_NOT_SETUP_VALIDATION",
         )
         self.reviews.append(review)
         self._log(
@@ -1356,42 +1344,50 @@ class AccountTradeLifecycle:
             shadow_entry = self.cognition.resolve_trade(
                 intent_id, actual_r=review.r_multiple, now_ms=now_ms)
 
-        contract = self.contracts.get(str(entry["symbol"]).upper())
-        stop = entry.get("stop")
-        qty = Decimal(str(entry.get("quantity", ZERO)))
-        if (
-            contract is not None
-            and stop is not None
-            and qty > ZERO
-            and contract.loss_model is not LossModel.FULL_STAKE
-        ):
-            risk_distance = abs(
-                Decimal(str(entry["entry"])) - Decimal(str(stop)))
-            value_per_unit = (
-                contract.value_per_price_unit_per_lot
-                if contract.loss_model is LossModel.STOP_DISTANCE
-                else Decimal("1")
-            )
-            money_risk = risk_distance * qty * value_per_unit
-            if money_risk > ZERO:
-                self.attribution.attribute(
-                    TradeFacts(
-                        trade_intent_id=intent_id,
-                        symbol=str(entry["symbol"]),
-                        strategy_id=str(entry["strategy_id"]),
-                        direction=entry["direction"],
-                        quantity=qty,
-                        decision_price=Decimal(str(entry["decision_price"])),
-                        fill_price=Decimal(str(entry["entry"])),
-                        exit_price=exit_price,
-                        money_risk=money_risk,
-                        costs=Decimal(str(entry.get("fees", ZERO))),
-                        opened_ms=int(entry.get("opened_ms") or 0),
-                        closed_ms=now_ms,
-                    ),
-                    shadow_entry=shadow_entry,
-                    now_ms=now_ms,
+        try:
+            contract = self.contracts.get(str(entry["symbol"]).upper())
+            stop = entry.get("stop")
+            qty = Decimal(str(entry.get("quantity", ZERO)))
+            if (
+                contract is not None
+                and stop is not None
+                and qty > ZERO
+                and contract.loss_model is not LossModel.FULL_STAKE
+            ):
+                risk_distance = abs(
+                    Decimal(str(entry["entry"])) - Decimal(str(stop)))
+                value_per_unit = (
+                    contract.value_per_price_unit_per_lot
+                    if contract.loss_model is LossModel.STOP_DISTANCE
+                    else Decimal("1")
                 )
+                money_risk = initial_risk.amount if initial_risk else risk_distance * qty * value_per_unit
+                if money_risk > ZERO:
+                    self.attribution.attribute(
+                        TradeFacts(
+                            trade_intent_id=intent_id,
+                            symbol=str(entry["symbol"]),
+                            strategy_id=str(entry["strategy_id"]),
+                            direction=entry["direction"],
+                            quantity=qty,
+                            decision_price=Decimal(str(entry["decision_price"])),
+                            fill_price=Decimal(str(entry["entry"])),
+                            exit_price=exit_price,
+                            money_risk=money_risk,
+                            contract_value_per_price_unit=value_per_unit,
+                            account_currency=contract.account_currency,
+                            costs=Decimal(str(entry.get("fees", ZERO))),
+                            carry=Decimal(str(entry.get("carry", ZERO))),
+                            reported_net_pnl=pnl if pnl_known else None,
+                            opened_ms=int(entry.get("opened_ms") or 0),
+                            closed_ms=now_ms,
+                        ),
+                        shadow_entry=shadow_entry,
+                        now_ms=now_ms,
+                    )
+        except Exception as exc:  # derived explanation must never block a completed protective close
+            self._log(EventKind.SESSION, {"event": "PNL_ATTRIBUTION_UNRECONCILED",
+                "error_type": type(exc).__name__, "reason": str(exc)[:240]}, now_ms=now_ms, corr=intent_id)
 
         self.admission.propose(
             review.artifact_hash,
@@ -1402,7 +1398,7 @@ class AccountTradeLifecycle:
         metrics.inc("vati_trades_closed_total", outcome=review.outcome.value)
 
         verdict = self._classify_decision(
-            intent_id=intent_id, entry=entry, review=review, now_ms=now_ms)
+            intent_id=intent_id, entry=entry, review=review, now_ms=now_ms, outcome_known=pnl_known)
         self.thesis.forget(intent_id)
 
         if (
@@ -1417,7 +1413,7 @@ class AccountTradeLifecycle:
                 process_ok=(verdict is None or not verdict.faults),
             )
 
-    def _classify_decision(self, *, intent_id: str, entry: dict, review, now_ms: int):
+    def _classify_decision(self, *, intent_id: str, entry: dict, review, now_ms: int, outcome_known: bool = True):
         """Place the closed trade on both axes and write the lesson it taught.
 
         GAP-F-003. The four process facts are all ex-ante: the thesis was
@@ -1451,6 +1447,7 @@ class AccountTradeLifecycle:
             verdict = self.decision_quality.record(
                 inputs, symbol=str(entry.get("symbol", "")),
                 r_multiple=review.r_multiple, now_ms=now_ms,
+                outcome_known=outcome_known,
                 evidence_refs=(review.artifact_hash,)
                 + ((thesis.seal,) if thesis is not None else ()))
         except Exception as exc:  # noqa: BLE001 — classification never blocks a close
@@ -1461,7 +1458,7 @@ class AccountTradeLifecycle:
                 now_ms=now_ms, corr=intent_id)
             return None
 
-        if self.learning is not None:
+        if self.learning is not None and outcome_known:
             try:
                 self.lessons.record(lesson_from_verdict(
                     verdict,

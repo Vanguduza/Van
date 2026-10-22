@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T06:44:23.769824+00:00",
+  "updated_at_utc": "2026-10-22T07:25:08.387414+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -62,6 +62,11 @@
           "change": "Inert ASGI import, deferred storage creation and explicit absolute production database path",
           "evidence": "backend/tests/test_gateway_startup_storage.py; /tmp/van-autonomous-storage-tests.txt",
           "result": "122 focused source tests passed; import probe failed on the original source; not independent or live acceptance"
+        },
+        {
+          "change": "Native sealed quality/lesson cold-start parity, duplicate checks and durable-before-cache ordering",
+          "evidence": "backend/BE-003_012_036_LEARNING_REPLAY.md; receipts/LEARNING_REPLAY_SOURCE_20261022.json",
+          "result": "1599 full trading tests passed / 2 skipped; candidate milestone only"
         }
       ]
     },
@@ -175,6 +180,11 @@
           "change": "Versioned signed-fill TCA with complete decomposition and actual filled-quantity/notional provenance",
           "result": "Full trading source suite: 1576 pass, 2 skip. These are partial unit milestones; no policy qualification or profit claim.",
           "evidence": "backend/BE-010_012_036_EXECUTION_ECONOMICS.md; receipts/EXECUTION_ECONOMICS_SOURCE_20261022.json"
+        },
+        {
+          "change": "Contract-scaled reconciled PnL attribution and net return over immutable approved money risk",
+          "evidence": "backend/BE-003_012_036_LEARNING_REPLAY.md; receipts/LEARNING_REPLAY_SOURCE_20261022.json",
+          "result": "1599 full trading tests passed / 2 skipped; candidate milestone only"
         }
       ]
     },
@@ -1059,6 +1069,11 @@
           "change": "Complete-objective mean cost estimate; missing/partial objective costs cannot select an apparently free template",
           "result": "Full trading source suite: 1576 pass, 2 skip. These are partial unit milestones; no policy qualification or profit claim.",
           "evidence": "backend/BE-010_012_036_EXECUTION_ECONOMICS.md; receipts/EXECUTION_ECONOMICS_SOURCE_20261022.json"
+        },
+        {
+          "change": "Unknown outcome exclusion; source-version/environment-preserving lesson replay; no single-trade randomness inference",
+          "evidence": "backend/BE-003_012_036_LEARNING_REPLAY.md; receipts/LEARNING_REPLAY_SOURCE_20261022.json",
+          "result": "1599 full trading tests passed / 2 skipped; candidate milestone only"
         }
       ]
     },

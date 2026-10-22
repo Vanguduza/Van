@@ -157,7 +157,7 @@ class PaperAdapter:
         sign = Decimal(1) if p["direction"] is Direction.LONG else Decimal(-1)
         pnl = (fill - p["entry"]) * sign * qty * p["vppu"]
         self.realised_pnl += pnl; self.equity += pnl
-        self.closed.append({"position_id": position_id, "intent": p["intent"], "symbol": p["symbol"], "qty": qty, "entry": p["entry"], "exit": fill, "pnl": pnl, "reason": reason, "closed_ms": now_ms})
+        self.closed.append({"position_id": position_id, "intent": p["intent"], "symbol": p["symbol"], "qty": qty, "entry": p["entry"], "exit": fill, "pnl": pnl, "pnl_basis": "GROSS_PRICE_MOVEMENT", "reason": reason, "closed_ms": now_ms})
         p["qty"] -= qty
         if p["qty"] <= ZERO:
             del self._positions[position_id]

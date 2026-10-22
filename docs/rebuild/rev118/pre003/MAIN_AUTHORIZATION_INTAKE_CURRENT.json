@@ -1,7 +1,7 @@
 {
   "schema": "van.rebuild.authorization-intake-candidate/1",
   "status": "PREPARED_NOT_ADMITTED",
-  "source_head": "c2a278488f00bacaf912853ed6e711a5b1de986a",
+  "source_head": "c36d6a21bea1618707e353912d3f5b9508eca5ba",
   "base_head": "8eb1889822fc8a83f219977c15340172e16acd91",
   "records": [
     {
@@ -215,6 +215,16 @@
       "git_blob": "3a723ebf1c34c41be035a16bcfc2fb65d9837c81"
     },
     {
+      "path": "docs/project-state/authorizations/auth-20261022-owner-autonomous-candidate-build.json",
+      "sha256": "aad59dfaa9c40663f084b69e0b8207559701a3a7dde712bc9e522105e440cc97",
+      "git_blob": "31a1311f37b2d0fd00df433912d3d74f2849889f"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261022-owner-browser-resume-capability.json",
+      "sha256": "73ebd6ce418077e5163ceae50a5c946e4bdae88930887e601f2a6aa80c7d5240",
+      "git_blob": "4caa4570f972b6f3ab952cc9fbeb16cdceef3a7e"
+    },
+    {
       "path": "docs/project-state/authorizations/auth-20261022-owner-codex-build-continuation.json",
       "sha256": "f47d139ff95c1fa8461cff0916d8be8070034b7f1ec1596c9af9e36a27b8f2cd",
       "git_blob": "6fdc3b8752d9b90ac0425cb7a00fdf06a4e440a6"
@@ -228,6 +238,11 @@
       "path": "docs/project-state/authorizations/auth-20261022-owner-mutation-registry-reconciliation.json",
       "sha256": "fcc1d591e1f683f0feea658843c3637ad85d9915f2f63f5295c0f663b91a1490",
       "git_blob": "8fb3d39d368ab44a3b278701904f5dfb9089bb73"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261022-owner-owner-contract-refresh.json",
+      "sha256": "e5c9d36698aecd6ca33e64c9a07f3acff57209da93bec6259db63be5abc4e937",
+      "git_blob": "3c1b8da9b6b349964a8c043d69fba2255f782186"
     }
   ],
   "count": 45,

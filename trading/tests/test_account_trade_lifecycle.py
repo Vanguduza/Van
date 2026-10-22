@@ -326,6 +326,8 @@ def test_downstream_evidence_lookup_exhausts_transactional_iterator():
             self.cleaned_up = False
 
         def iter(self, kind=None, correlation_id=None):
+            if kind is EventKind.DECISION_QUADRANT:
+                return  # no process-quality history in this narrow iterator fixture
             assert kind is EventKind.TCA_RECORD
             assert correlation_id == "intent-1"
             try:

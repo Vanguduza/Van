@@ -143,7 +143,7 @@
     },
     {
       "id": "BLK-006",
-      "what": "Source run 39725953372 passes all mutation shards, Android build/lint, emulator (16 pass/4 core skips), Character Forge core and rebuild checks. Workflow overall fails because DDS_CONTRACT_READ_DEPLOY_KEY is absent and the trusted checker is missing from main. Secret administration was HTTP 403; no gate bypass used.",
+      "what": "Latest source CI39736489867 passes Android emulator/build/lint, all374mutation identities, Character Forge core and rebuild. Only DDS private read credential and trusted-main bootstrap fail. Neither gate is waived.",
       "blocks": "Complete CI and trusted-base admission",
       "needed_from": "DDS-only CI credential provisioning and documented trusted-base bootstrap/intake"
     },
@@ -170,10 +170,10 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-22T05:31:02.381853+00:00",
+    "updated_utc": "2026-10-22T07:25:08.387414+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": "No running native operation. Full source run 39725953372 completed: all nine mutation shards, Android emulator/build/lint, Character Forge core and rebuild checks PASS. Workflow overall fails only the absent DDS CI credential and trusted-main checker prerequisites.",
+    "background_jobs": "No current local or hosted job. Full frozen backend/contracts run complete; current learning full trading suite complete.",
     "last_validation": [
       "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
       "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -202,7 +202,9 @@
       "Final source c2a27848 / merge 9ae436ab (identical tree 42e4a6b0): all 374 legacy mutations detected, zero survivors, all original identities observed exactly once; 382 edits. Complete per-case receipt ci/MUTATION_CORPUS_c2a27848.json.",
       "Final hosted instrumentation: 20 collected, 16 passed / zero failed / four explicit core-mode skips; both actual HTTP/policy tests and both resident Intent deliveries pass; Character Forge core gate PASS. receipts/INSTRUMENTATION_c2a27848.json.",
       "Final source CI: Android build/lint and isolated rebuild (52 passed) PASS. Overall workflow remains blocked by DDS_CONTRACT_READ_DEPLOY_KEY and missing trusted/tools/ci/project_truth_ledger.py on main; those are not waived.",
-      "Branch-local ledger 4fd466de..c2a27848 GREEN over 15 commits. This is separate from trusted-main admission."
+      "Branch-local ledger 4fd466de..c2a27848 GREEN over 15 commits. This is separate from trusted-main admission.",
+      "c36d6a21: backend/contracts 6535 passed / 166 skipped, zero forbidden storage events; 52 rebuild regressions passed. Hosted Android instrumentation16 passed/4 skipped and all374 mutation identities detected. Only DDS private credential and trusted-main bootstrap jobs fail.",
+      "Current candidate feedback source:1599 trading tests passed/2 skipped; contract scale, original approved money risk, unknown settlement and native cold-start replay covered."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -213,8 +215,8 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Native PRE-003 work: obtain current registry/pack/eligible independent review and valid scope-lock approval; admit the reviewed amendments and applicable owner decisions. Provision DDS-only Actions read credential and complete documented main framework/bootstrap intake. Then start the dependency-ready canonical backend programme; no new unit or handset qualification has been self-issued.",
-    "previous_head": "c2a278488f00bacaf912853ed6e711a5b1de986a"
+    "next_action": "Continue candidate source construction: deterministic outcome reconciliation and mutation-free health reads, preserving all canonical unit acceptance/native/signing gates.",
+    "previous_head": "c36d6a21bea1618707e353912d3f5b9508eca5ba"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -223,7 +225,7 @@
     "OBS-004 BE-003 committed SQLite snapshot",
     "OBS-005 legacy mutation registry and masked advisory failure"
   ],
-  "obligations": "obligations/OBLIGATIONS.json: OBL-001..006; OBS-003 remains open and now records the absent production producer of legacy resume authorizations.",
+  "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
   "pre002_reviews": "pre002/challenge/review/: NEG_REC_REVIEW (37 adequate / 6 gaps), PRODUCT_TRUTH_TRACE_REVIEW (189 classified), DECISION_REGISTER (49 real dependencies, 18 owner decisions)",
   "amendments": {
@@ -240,7 +242,7 @@
     "recovered_head": "2a10b7884b9bcf214395d5c15815ab6d96f56845",
     "pr": 105,
     "report": "docs/rebuild/rev118/CONTINUATION_20261022.md",
-    "application_rebuild_started": false,
+    "application_rebuild_started": true,
     "baseline_maintenance_commits": [
       "6ba1fef7",
       "eba674ac",

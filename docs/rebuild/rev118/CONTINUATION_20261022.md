@@ -79,3 +79,9 @@ Corrected still-active R05/R07 arithmetic: versioned direct signed fill-cost TCA
 ## Derived owner contracts refreshed without feature loss
 
 Existing endpoint/citation checks reproduced two real drifts, including four WORKSPACE_PATCH citations from earlier regex/descriptor fixes. tools/rebuild/refresh_owner_source_contracts.py regenerates actual routes and schemas and refreshes only uniquely identical source anchors against the preserved consolidation source. It retains all feature/screen/function identities, historical qualification records and refusal/authority states; unexpected current registry edits refuse application. The browser backend extension is explicitly Android-consumer-pending. Current source review remains validation-pending and not independent/live acceptance. All 115 endpoint/redesign/Artemis-plan contract tests now pass.
+
+## Feedback accounting/replay and complete source validation checkpoint
+
+Current feedback packet corrects FX price-leg scaling, records net PnL over sealed original approved money risk, preserves unknown settlement, and restores native sealed process-quality/lesson state without duplicate samples or silent version/environment changes. Real subprocess crash windows are covered. Full trading suite:1599 pass/2skip. See backend/BE-003_012_036_LEARNING_REPLAY.md. Higher-revision outcome correction and positive qualified adaptation remain implementation work.
+
+Frozen c36d6a21 full backend/contracts:6535 pass/166skip with zero forbidden tracked-data writes. Hosted39736489867 tested an identical source tree:all374mutation identities detected, Android16pass/4core skips; build/visual, Character Forge and rebuild pass. Only private DDS credential and trusted-main bootstrap jobs fail; source work continues. The current authorization intake is refreshed with all actual records, still PREPARED_NOT_ADMITTED.

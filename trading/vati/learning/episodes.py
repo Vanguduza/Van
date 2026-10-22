@@ -201,7 +201,7 @@ a lucky win is an anti-lesson, and `cognition/attribution.py` is where that
 distinction is drawn.
 """
 
-LESSON_VERSION = "trade-lesson/5.1.0"
+LESSON_VERSION = "trade-lesson/5.1.1"
 
 #: Weighted samples before a lesson is allowed to claim real confidence.
 LESSON_MIN_WEIGHTED_SAMPLES = Decimal("2")
@@ -239,6 +239,12 @@ class Lesson:
     artifact_hash: str = ""
 
     def __post_init__(self) -> None:
+        if not isinstance(self.confidence, Decimal) or not self.confidence.is_finite():
+            raise ValueError("lesson confidence must be finite")
+        if not isinstance(self.r_multiple, Decimal) or not self.r_multiple.is_finite():
+            raise ValueError("lesson return must be finite")
+        if type(self.created_ms) is not int or self.created_ms < 0 or not isinstance(self.environment, Environment):
+            raise ValueError("lesson time and environment must be explicit")
         if not (ZERO <= self.confidence <= LESSON_MAX_CONFIDENCE):
             raise ValueError(f"lesson confidence {self.confidence} is outside [0, 1]")
 
@@ -282,11 +288,14 @@ def lesson_from_verdict(verdict, *, symbol: str, regime: str, session: str,
     reason for having the axis at all:
 
     * good/good — keep the process; the result confirms nothing on its own
-    * good/bad  — keep the process; the loss is variance, not a defect
+    * good/bad  — no detected breach; randomness and edge remain unestablished
     * bad/good  — **avoid** the process; the win is the warning
     * bad/bad   — avoid the process; the loss merely agrees with it
     """
-    from vati.cognition.attribution import PROCESS_FAULTS, DecisionQuality
+    from vati.cognition.attribution import PROCESS_FAULTS, DecisionQuality, OutcomeQuality
+
+    if verdict.quadrant.outcome is OutcomeQuality.UNKNOWN:
+        raise ValueError("an unresolved outcome cannot produce a trade lesson")
 
     quadrant = verdict.quadrant
     faults = tuple(verdict.faults)
@@ -299,8 +308,8 @@ def lesson_from_verdict(verdict, *, symbol: str, regime: str, session: str,
             "discipline, execution policy and event compliance were all sound")
         if quadrant.is_unlucky:
             keep.append(
-                "the loss came from the market, not from the process; do not degrade "
-                "this capsule for it")
+                "the recorded checks found no process breach; one loss cannot establish "
+                "randomness or rule out unmeasured faults; assess edge on a preregistered cohort")
     else:
         for fault in faults:
             avoid.append(f"{fault}: {PROCESS_FAULTS[fault]}")
@@ -348,17 +357,20 @@ class LessonStore:
         self.per_key = per_key
         self._by_key: dict[tuple[str, str, str], list[Lesson]] = {}
         self._by_strategy: dict[str, list[Lesson]] = {}
+        self._known_hashes: dict[str, str] = {}
+        self.replay_rejections: list[dict[str, str]] = []
 
     def record(self, lesson: Lesson, *, now_ms: Optional[int] = None) -> Lesson:
         sealed = lesson if lesson.artifact_hash else lesson.sealed()
-        rows = self._by_key.setdefault(sealed.key, [])
-        if any(r.lesson_id == sealed.lesson_id for r in rows):
+        if sealed.artifact_hash != canonical_hash(sealed.as_dict()):
+            raise ValueError("lesson seal mismatch")
+        if sealed.lesson_version not in {"trade-lesson/5.1.0", "trade-lesson/5.1.1"}:
+            raise ValueError("unsupported lesson version")
+        previous = self._known_hashes.get(sealed.lesson_id)
+        if previous is not None:
+            if previous != sealed.artifact_hash:
+                raise ValueError("conflicting lesson requires an explicit correction")
             return sealed
-        rows.append(sealed)
-        del rows[:-self.per_key]
-        srows = self._by_strategy.setdefault(sealed.strategy_id, [])
-        srows.append(sealed)
-        del srows[:-self.per_key * 4]
         if self._ledger is not None:
             t = now_ms if now_ms is not None else sealed.created_ms
             self._ledger.append(make_event(
@@ -366,7 +378,23 @@ class LessonStore:
                 sealed.as_dict() | {"artifact_hash": sealed.artifact_hash},
                 event_time_ms=t, received_time_ms=t,
                 correlation_id=sealed.strategy_id))
+        self._remember(sealed)
         return sealed
+
+    def _remember(self, lesson: Lesson) -> bool:
+        previous = self._known_hashes.get(lesson.lesson_id)
+        if previous is not None:
+            if previous != lesson.artifact_hash:
+                raise ValueError("conflicting lesson")
+            return False
+        rows = self._by_key.setdefault(lesson.key, [])
+        rows.append(lesson)
+        del rows[:-self.per_key]
+        srows = self._by_strategy.setdefault(lesson.strategy_id, [])
+        srows.append(lesson)
+        del srows[:-self.per_key * 4]
+        self._known_hashes[lesson.lesson_id] = lesson.artifact_hash
+        return True
 
     def lessons_for(self, strategy_id: str, regime: str = "", session: str = "",
                     *, limit: int = 5) -> tuple[Lesson, ...]:
@@ -399,39 +427,38 @@ class LessonStore:
         out: list[str] = []
         for lesson in self.lessons_for(strategy_id, regime, session, limit=limit):
             for statement in lesson.avoid:
-                out.append(f"lesson[{lesson.quadrant}] avoid: {statement}"[:300])
+                out.append(f"lesson[{lesson.quadrant}] {lesson.environment.value} process evidence, not causal proof; avoid: {statement}"[:300])
             for statement in lesson.keep:
-                out.append(f"lesson[{lesson.quadrant}] keep: {statement}"[:300])
+                out.append(f"lesson[{lesson.quadrant}] {lesson.environment.value} process evidence, not causal proof; keep: {statement}"[:300])
         return tuple(dict.fromkeys(out))[:limit * 2]
 
     def restore_from_ledger(self, ledger) -> int:
-        """Rebuild the store from TRADE_LESSON events after a restart."""
+        """Rebuild the bounded index from native sealed records, preserving versions."""
         n = 0
         for event in ledger.iter(EventKind.TRADE_LESSON):
             p = event.payload
             try:
+                if event.producer != self._producer or event.hash != canonical_hash(event.body()):
+                    raise ValueError("lesson source or event seal mismatch")
+                if p["lesson_version"] not in {"trade-lesson/5.1.0", "trade-lesson/5.1.1"}:
+                    raise ValueError("unsupported lesson version")
+                from vati.cognition.attribution import Quadrant, OutcomeQuality
+                if Quadrant(p["quadrant"]).outcome is OutcomeQuality.UNKNOWN:
+                    raise ValueError("unresolved outcome cannot be a lesson")
                 lesson = Lesson(
-                    lesson_id=str(p["lesson_id"]),
-                    strategy_id=str(p["strategy_id"]),
-                    symbol=str(p.get("symbol", "")),
-                    regime=str(p.get("regime", "")),
-                    session=str(p.get("session", "")),
-                    quadrant=str(p.get("quadrant", "")),
-                    keep=tuple(p.get("keep") or ()),
-                    avoid=tuple(p.get("avoid") or ()),
-                    confidence=Decimal(str(p.get("confidence", "0"))),
-                    environment=Environment(str(p.get("environment", "SHADOW"))),
-                    evidence_refs=tuple(p.get("evidence_refs") or ()),
-                    r_multiple=Decimal(str(p.get("r_multiple", "0"))),
-                    created_ms=int(p.get("created_ms", event.event_time_ms)),
-                    artifact_hash=str(p.get("artifact_hash", "")),
+                    lesson_id=p["lesson_id"], strategy_id=p["strategy_id"], symbol=p["symbol"],
+                    regime=p["regime"], session=p["session"], quadrant=p["quadrant"],
+                    keep=tuple(p["keep"]), avoid=tuple(p["avoid"]),
+                    confidence=Decimal(str(p["confidence"])), environment=Environment(p["environment"]),
+                    evidence_refs=tuple(p["evidence_refs"]), r_multiple=Decimal(str(p["r_multiple"])),
+                    created_ms=p["created_ms"], artifact_hash=p["artifact_hash"], lesson_version=p["lesson_version"],
                 )
-            except Exception:  # noqa: BLE001 — a malformed row is skipped, never guessed
+                if (lesson.artifact_hash != canonical_hash(lesson.as_dict())
+                    or event.correlation_id != lesson.strategy_id
+                    or {k:v for k,v in p.items() if k != "artifact_hash"} != lesson.as_dict()):
+                    raise ValueError("lesson record seal mismatch")
+                n += int(self._remember(lesson))
+            except (ValueError, TypeError, KeyError, ArithmeticError) as exc:
+                self.replay_rejections.append({"event_hash": event.hash, "reason": type(exc).__name__})
                 continue
-            rows = self._by_key.setdefault(lesson.key, [])
-            if any(r.lesson_id == lesson.lesson_id for r in rows):
-                continue
-            rows.append(lesson)
-            self._by_strategy.setdefault(lesson.strategy_id, []).append(lesson)
-            n += 1
         return n
