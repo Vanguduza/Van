@@ -7,14 +7,16 @@ from test_trading_api import client, _env, _approval_proof, DEVICE_PEM, HDR
 from van_gateway.trading.accounts import canonical_action, requires_owner_approval
 
 
-async def act(ac, action, args, *, device='test-device', secret='test-device-secret', headers=None):
+async def act(ac, action, args, *, device='test-device', secret='test-device-secret', headers=None, expected_challenge_status=200):
     import hashlib,hmac
     issued = int(time.time())
     signature = hmac.new(secret.encode(), canonical_action(device,issued,action,args).encode(),hashlib.sha256).hexdigest()
     body = {'device_id':device,'issued_at_unix':issued,'signature':signature,'action':action,'args':args}
     if requires_owner_approval(action):
         challenge = await ac.post('/v1/trading/accounts/challenge',json=body,headers=headers)
-        assert challenge.status_code == 200, challenge.text
+        assert challenge.status_code == expected_challenge_status, challenge.text
+        if expected_challenge_status != 200:
+            return challenge
         body['approval_proof'] = _approval_proof(challenge.json())
     return await ac.post('/v1/trading/accounts/action',json=body,headers=headers)
 
@@ -53,7 +55,7 @@ async def test_pending_state_is_owned_by_the_device_that_started_it(client):
     assert paired.status_code == 200, paired.text
     headers={'X-Van-Ingress-Token':paired.json()['ingress_token'],'X-Van-Device-Token':paired.json()['device_access_token']}
     for action,args in [('oauth_pending',{'state':state}),('deriv_oauth_link',{'state':state,'loginid':'VRTC900','alias':'wrong_device'})]:
-        response = await act(ac,action,args,device='second-device',secret='second-device-secret',headers=headers)
+        response = await act(ac,action,args,device='second-device',secret='second-device-secret',headers=headers, expected_challenge_status=403 if action=='deriv_oauth_link' else 200)
         assert response.status_code == 403, response.text
     own = await act(ac,'oauth_pending',{'state':state})
     assert own.status_code == 200 and own.json()['ready'] is True

@@ -9,7 +9,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from conftest_owner_authority import OwnerAuthorityHarness
-from commander.accounts import ACCOUNT_COMMANDS
+from commander.accounts import ACCOUNT_COMMANDS, ACCOUNT_MUTATIONS
 from commander.strategies import PROMOTION_COMMANDS
 from commander.app import AGENT_HIDDEN_COMMANDS, COMMANDS, CommanderSettings, create_app, redact
 from commander.auth import HDR_NONCE, HDR_SIG, HDR_TS, NonceCache, sign_headers, verify_request
@@ -58,7 +58,14 @@ def env(tmp_path):
 def post(client, name, args=None, token=TOKEN, headers=None):
     # P1-HER-005 — `requested_by` is no longer the caller's to declare, so it is omitted;
     # the commander fills it from whichever token signed the request.
-    body = json.dumps({"args": args or {}}).encode()
+    args = dict(args or {})
+    # Follow the real producer's native version read; this is a CAS precondition,
+    # not owner approval. Authentication/forged-body tests keep their own bytes.
+    if name in ACCOUNT_MUTATIONS and headers is None:
+        observed = post(client, "account_revision", {"alias": args.get("alias")}, token=token)
+        if observed.status_code == 200:
+            args["_expected_resource_version"] = observed.json()["result"]["resource_version"]
+    body = json.dumps({"args": args}).encode()
     h = headers or sign_headers(token, "POST", f"/v1/cmd/{name}", body)
     return client.post(f"/v1/cmd/{name}", content=body, headers={**h, "content-type": "application/json"})
 
@@ -179,7 +186,12 @@ def two_principal_env(tmp_path):
 
 
 def _call(client, name, token, args=None, requested_by=None):
-    payload = {"args": args or {}}
+    args = dict(args or {})
+    if name in ACCOUNT_MUTATIONS and token == GATEWAY_TOKEN:
+        snapshot = _call(client, "account_revision", token, {"alias": args.get("alias")})
+        assert snapshot.status_code == 200, snapshot.text
+        args["_expected_resource_version"] = snapshot.json()["result"]["resource_version"]
+    payload = {"args": args}
     if requested_by is not None:
         payload["requested_by"] = requested_by
     body = json.dumps(payload).encode()
@@ -307,3 +319,14 @@ def test_the_observation_commands_are_described_for_the_tool_surface(env):
         schema = TOOL_SCHEMAS[name]
         assert "Read-only" in schema["description"]
         assert "properties" in schema
+
+
+@pytest.mark.parametrize('expected',[None,'not-a-native-version'])
+def test_native_http_account_writer_requires_an_exact_resource_version(two_principal_env,expected):
+    client=two_principal_env
+    args={'alias':'paper_lab','broker':'PAPER'}
+    if expected is not None:args['_expected_resource_version']=expected
+    body=json.dumps({'args':args}).encode()
+    response=client.post('/v1/cmd/account_upsert',content=body,
+        headers={**sign_headers(GATEWAY_TOKEN,'POST','/v1/cmd/account_upsert',body),'content-type':'application/json'})
+    assert response.status_code==409,response.text

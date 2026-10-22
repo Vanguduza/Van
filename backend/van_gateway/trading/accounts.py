@@ -15,6 +15,7 @@ import asyncio
 import hashlib
 import json
 import os
+import re
 import secrets
 import ssl
 import sys
@@ -53,6 +54,11 @@ def canonical_action(device_id: str, issued_at_unix: int, action: str, args: dic
     return "|".join(["trading-account", device_id, str(issued_at_unix), action, hashlib.sha256(canonical_args(args)).hexdigest()])
 
 
+def account_approval_text(device_id: str, issued_at_unix: int, action: str, args: dict, resource_version: str | None) -> str:
+    text = canonical_action(device_id, issued_at_unix, action, args)
+    return text if resource_version is None else text + "|native-resource:" + resource_version
+
+
 def redact(args: dict) -> dict:
     return {k: ("[REDACTED]" if k in SECRET_ARG_KEYS else v) for k, v in args.items()}
 
@@ -74,7 +80,12 @@ class LocalAccountControl:
     def run(self, cmd: str, args: dict) -> dict:
         if cmd not in self.handlers:
             raise HTTPException(404, f"unknown account command {cmd}")
+        from commander.accounts import require_resource_version
+        require_resource_version(cmd, args)
         return self.handlers[cmd](args)
+
+    def resource_version(self, alias: str) -> dict:
+        return self.handlers["account_revision"]({"alias": alias})
 
 
 class CommanderAccountControl:
@@ -87,6 +98,9 @@ class CommanderAccountControl:
         if not p.is_file():
             raise HTTPException(503, "commander token file not configured on the gateway")
         return p.read_text().strip()
+
+    def resource_version(self, alias: str) -> dict:
+        return self.run("account_revision", {"alias": alias})
 
     def run(self, cmd: str, args: dict) -> dict:
         _trading_path()
@@ -176,6 +190,36 @@ class AccountOnboarding:
 
     def _cb(self, broker: str) -> str:
         return f"{self.public_base_url.rstrip('/')}/v1/trading/oauth/{broker}/callback"
+
+    async def resource_version(self, action: str, args: dict, *, owner_device_id: str | None = None) -> str | None:
+        _trading_path()
+        from commander.accounts import ACCOUNT_MUTATIONS
+        if action not in ACCOUNT_MUTATIONS:
+            return None
+        if action in {"deriv_oauth_link", "ctrader_link"} and args.get("state"):
+            broker = "deriv" if action == "deriv_oauth_link" else "ctrader"
+            pending = await self.pending.get(str(args["state"]))
+            if pending is None:
+                if await self.pending.effects.owns_link(str(args["state"]), broker, owner_device_id):
+                    return None  # Only the original known/unknown result can be read.
+                raise HTTPException(404, "unknown or expired OAuth state")
+            self._owner(pending, owner_device_id)
+            if pending.get("broker") != broker:
+                raise HTTPException(400, "OAuth state belongs to a different broker")
+        alias = args.get("alias")
+        if not isinstance(alias, str) or not re.fullmatch(r"[a-z0-9_]{3,32}", alias.strip().lower()):
+            raise HTTPException(422, "account alias must match [a-z0-9_]{3,32}")
+        alias = alias.strip().lower()
+        try:
+            snapshot = await asyncio.to_thread(self.control.resource_version, alias)
+            version = snapshot.get("resource_version")
+            if snapshot.get("alias") != alias or not isinstance(version, str) or not re.fullmatch(r"[0-9a-f]{64}", version):
+                raise ValueError("invalid native resource version")
+            return version
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(409, "native account version is unavailable; no account change was sent") from None
 
     @staticmethod
     def _owner(pending: dict, owner_device_id: str | None) -> None:
@@ -273,7 +317,7 @@ class AccountOnboarding:
         accts = await asyncio.to_thread(self.control.run,"ctrader_discover", {"client_id": p["client_id"], "client_secret": p["client_secret"], "access_token": p["access_token"]})
         return {"ready": True, "broker": "ctrader", "accounts": accts.get("accounts", []), "errors": accts.get("errors", [])}
 
-    async def run(self, action: str, args: dict, *, owner_device_id: str | None = None) -> dict:
+    async def run(self, action: str, args: dict, *, owner_device_id: str | None = None, native_resource_version: str | None = None) -> dict:
         if action == "oauth_start":
             return await self.oauth_start(args, owner_device_id=owner_device_id)
         if action == "oauth_pending":
@@ -299,6 +343,9 @@ class AccountOnboarding:
                 else:
                     values = {"alias":args.get("alias"),"client_id":p["client_id"],"client_secret":p["client_secret"],"access_token":p["access_token"],"refresh_token":p.get("refresh_token"),
                               "ctid_trader_account_id":args["ctid_trader_account_id"],"is_live":args.get("is_live",False),"label":args.get("label",""),"currency":args.get("currency","USD")}
+                if native_resource_version is None:
+                    raise HTTPException(409, "native account version is required before a new link")
+                values["_expected_resource_version"] = native_resource_version
                 result = await asyncio.to_thread(self.control.run,action,values)
                 account_result = result.get("account") if isinstance(result,dict) else None
                 expected_login = values["loginid"] if broker=="deriv" else str(values["ctid_trader_account_id"])
@@ -315,4 +362,11 @@ class AccountOnboarding:
                 return await self._recover_effect(state,"LINK",claim,exc)
         if action not in ACTIONS:
             raise HTTPException(404, f"unknown account action {action}")
-        return await asyncio.to_thread(self.control.run,action,args)
+        _trading_path()
+        from commander.accounts import ACCOUNT_MUTATIONS
+        values = dict(args)
+        if action in ACCOUNT_MUTATIONS:
+            if native_resource_version is None:
+                raise HTTPException(409, "native account version is required before mutation")
+            values["_expected_resource_version"] = native_resource_version
+        return await asyncio.to_thread(self.control.run,action,values)

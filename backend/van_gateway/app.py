@@ -181,7 +181,7 @@ from van_gateway.runtime_api import OwnerRuntimeApi
 from van_gateway.storage.db import Store
 from van_gateway.trading import TradingAuthorityError, TradingControlError, TradingService
 from van_gateway.visual.acceptance import VisualAcceptanceError, VisualAcceptanceService
-from van_gateway.trading.accounts import ACTIONS as ACCOUNT_ACTIONS, AccountOnboarding, CommanderAccountControl, LocalAccountControl, OAuthPending, canonical_action, redact as redact_account_args, requires_owner_approval
+from van_gateway.trading.accounts import ACTIONS as ACCOUNT_ACTIONS, AccountOnboarding, CommanderAccountControl, LocalAccountControl, OAuthPending, canonical_action, account_approval_text, redact as redact_account_args, requires_owner_approval
 from van_gateway.trading.strategies import StrategyPromotionGateway, canonical_strategy_promotion
 
 
@@ -3450,6 +3450,8 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=403, detail="device_identity_mismatch")
         if req.action not in ACCOUNT_ACTIONS:
             raise HTTPException(status_code=404, detail="unknown account action")
+        if "_expected_resource_version" in req.args:
+            raise HTTPException(status_code=422, detail="native resource binding is supplied by the gateway")
         try:
             await auth.require_device(req.device_id)
             auth.verify_signature(
@@ -3484,12 +3486,13 @@ def create_app() -> FastAPI:
                 status_code=400,
                 detail="this action is read-only and needs no owner approval",
             )
+        native_version = await onboarding.resource_version(req.action, req.args, owner_device_id=req.device_id)
         challenge = await app.state.orchestrator.approvals.issue(
             device_id=req.device_id,
             source_command_id=f"account:{req.action}",
             turn_id=None,
             action_id=f"trading.account.{req.action}",
-            text=canonical_action(req.device_id, req.issued_at_unix, req.action, req.args),
+            text=account_approval_text(req.device_id, req.issued_at_unix, req.action, req.args, native_version),
             project_id=None,
         )
         return {
@@ -3502,6 +3505,7 @@ def create_app() -> FastAPI:
     @app.post("/v1/trading/accounts/action", responses={409:{"model":AccountActionConflictResponse}})
     async def trading_account_action(request: Request, req: AccountActionRequest):
         await _authenticate_account_action(request, req)
+        native_version = None
         # P1-SEC-004. This used to be guarded on the device by a biometric prompt whose
         # only output was "the prompt succeeded", which the gateway never saw and which
         # nothing bound to this action. The strong path already existed for A4 commands;
@@ -3520,6 +3524,16 @@ def create_app() -> FastAPI:
                     detail="owner biometric approval proof is required for this action",
                 )
             try:
+                native_version = await onboarding.resource_version(req.action, req.args, owner_device_id=req.device_id)
+            except HTTPException as exc:
+                if exc.status_code != 409:
+                    raise
+                await audit.record(result="refused", device_id=req.device_id,
+                    capability=f"trading.account.{req.action}", failure_reason=str(exc.detail),
+                    before=redact_account_args(req.args))
+                return JSONResponse(status_code=409, content=AccountActionConflictResponse(
+                    detail=str(exc.detail), effect_state="REFUSED", reconciliation_required=False).model_dump())
+            try:
                 await app.state.orchestrator.approvals.verify_and_consume(
                     challenge_id=proof.challenge_id,
                     source_command_id=f"account:{req.action}",
@@ -3527,8 +3541,8 @@ def create_app() -> FastAPI:
                     device_id=req.device_id,
                     turn_id=None,
                     action_id=f"trading.account.{req.action}",
-                    text=canonical_action(
-                        req.device_id, req.issued_at_unix, req.action, req.args
+                    text=account_approval_text(
+                        req.device_id, req.issued_at_unix, req.action, req.args, native_version
                     ),
                     project_id=None,
                 )
@@ -3542,7 +3556,7 @@ def create_app() -> FastAPI:
                 )
                 raise HTTPException(status_code=403, detail=str(exc)) from exc
         try:
-            result = await onboarding.run(req.action, req.args, owner_device_id=req.device_id)
+            result = await onboarding.run(req.action, req.args, owner_device_id=req.device_id, native_resource_version=native_version)
         except HTTPException as exc:
             unknown = isinstance(exc,OAuthEffectUnconfirmed)
             reconcile = unknown or isinstance(exc,OAuthTargetBlocked)
@@ -3770,7 +3784,7 @@ def create_app() -> FastAPI:
         except HTTPException as exc:
             title = "authorization status unconfirmed" if isinstance(exc,OAuthEffectUnconfirmed) else "authorization refused"
             return HTMLResponse(
-                f"<h2>Van: {title}</h2><p>{html.escape(str(exc.detail))}</p>",
+                f"<h2>Van: {html.escape(title)}</h2><p>{html.escape(str(exc.detail))}</p>",
                 status_code=exc.status_code, headers=headers,
             )
         return HTMLResponse(

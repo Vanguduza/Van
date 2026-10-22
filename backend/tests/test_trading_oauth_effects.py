@@ -248,7 +248,7 @@ asyncio.run(main())
 async def test_invalid_link_alias_is_refused_before_claim_and_can_be_corrected(client):
     ac,app=client;state=await ready_deriv(ac)
     args={'state':state,'loginid':'VRTC900','alias':'invalid alias'}
-    invalid=await act(ac,'deriv_oauth_link',args)
+    invalid=await act(ac,'deriv_oauth_link',args,expected_challenge_status=422)
     assert invalid.status_code==422
     row=await app.state.store.fetchone("SELECT phase FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
     assert row is None

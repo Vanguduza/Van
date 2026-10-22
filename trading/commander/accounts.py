@@ -31,8 +31,11 @@ BROKER_SECRET_KEYS = {
     "MT5": {"BRIDGE_SIGNING_KEY", "BRIDGE_CA_FILE", "BRIDGE_CLIENT_CERT", "BRIDGE_CLIENT_KEY"},
     "PAPER": set(), "ZSE_OWNER_TICKET": set(),
 }
-ACCOUNT_COMMANDS = ("account_upsert", "account_credentials", "account_remove", "account_verify", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_oauth_exchange", "ctrader_link", "mt5_ea_issue_key")
+ACCOUNT_MUTATIONS = frozenset({"account_upsert", "account_credentials", "account_remove",
+    "deriv_create_demo", "deriv_oauth_link", "ctrader_link", "mt5_ea_issue_key"})
+ACCOUNT_COMMANDS = ("account_upsert", "account_credentials", "account_remove", "account_verify", "account_revision", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_oauth_exchange", "ctrader_link", "mt5_ea_issue_key")
 ACCOUNT_TOOL_SCHEMAS = {
+    "account_revision": {"description": "Read the native non-secret account configuration version for exact owner-intent binding.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
     "account_upsert": {"description": "Create or replace a non-secret account record (alias, broker, mode, currency, identifiers). Credentials go through account_credentials.", "properties": {"alias": {"type": "string"}, "broker": {"type": "string"}, "mode": {"type": "string"}, "currency": {"type": "string"}, "label": {"type": "string"}, "server": {"type": "string"}, "login": {"type": "string"}, "bridge_url": {"type": "string"}, "demo": {"type": "boolean"}}, "required": ["alias", "broker"]},
     "account_credentials": {"description": "Store credential values for an alias in its 0600 secrets file (allowlisted keys per broker). Values are never echoed.", "properties": {"alias": {"type": "string"}, "secrets": {"type": "object"}}, "required": ["alias", "secrets"]},
     "account_remove": {"description": "Remove an account record and shred its secrets file.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
@@ -111,6 +114,16 @@ def _alias(a: dict) -> str:
     return alias
 
 
+def require_resource_version(command: str, args: dict) -> None:
+    """Required on actual gateway/Commander ingress; direct handlers are native code."""
+    if command not in ACCOUNT_MUTATIONS:
+        return
+    _alias(args)
+    expected = args.get("_expected_resource_version")
+    if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
+        raise HTTPException(409, "native account resource version is required before mutation")
+
+
 def _boolean(args: dict, name: str, default: bool) -> bool:
     value = args.get(name, default)
     if type(value) is not bool:
@@ -153,6 +166,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
 
     def store_secrets(alias: str, broker: str, values: dict[str, Any]) -> list[str]:
         clean = clean_secrets(broker, values)
+        reg().touch(alias)
         _write_secrets(_secrets_path(st, alias), clean)
         return sorted(clean)
 
@@ -185,6 +199,10 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
             raise HTTPException(409, "account alias already exists; use the approved account update flow")
 
     # ------------------------------------------------------------ generic
+    def cmd_account_revision(a: dict) -> dict:
+        from vati.accounts.resource_version import resource_snapshot
+        return resource_snapshot(reg(), _alias(a))
+
     def cmd_account_upsert(a: dict) -> dict:
         alias = _alias(a)
         broker = str(a.get("broker", "")).upper()
@@ -361,7 +379,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         store_secrets(alias, "MT5_EA", {"BRIDGE_SIGNING_KEY": key})
         return {"account": pub, "signing_key": key, "ea_inputs": {"Alias": alias, "SigningKey": key, "BridgeUrl": os.environ.get("VAN_PUBLIC_HOST", "") and f"https://{os.environ['VAN_PUBLIC_HOST']}"}, "note": "shown once; paste into VanBridgeEA inputs"}
 
-    handlers = {"account_upsert": cmd_account_upsert, "account_credentials": cmd_account_credentials, "account_remove": cmd_account_remove, "account_verify": cmd_account_verify,
+    handlers = {"account_upsert": cmd_account_upsert, "account_credentials": cmd_account_credentials, "account_remove": cmd_account_remove, "account_verify": cmd_account_verify, "account_revision": cmd_account_revision,
             "deriv_verify_email": cmd_deriv_verify_email, "deriv_create_demo": cmd_deriv_create_demo, "deriv_oauth_link": cmd_deriv_oauth_link, "ctrader_discover": cmd_ctrader_discover,
             "ctrader_oauth_exchange": cmd_ctrader_oauth_exchange, "ctrader_link": cmd_ctrader_link, "mt5_ea_issue_key": cmd_mt5_ea_issue_key}
 
@@ -370,15 +388,19 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         def invoke(args):
             from vati.core.file_lock import exclusive_state_lock
             alias = _alias(args)
-            path = Path(st.registry_path)
+            path = Path(st.registry_path).resolve()
             with exclusive_state_lock(path.with_name(path.name + ".operation." + alias)):
+                if "_expected_resource_version" in args:
+                    expected = args["_expected_resource_version"]
+                    actual = cmd_account_revision({"alias": alias})["resource_version"]
+                    if not isinstance(expected, str) or expected != actual:
+                        raise HTTPException(409, "account changed since owner approval; review the current account and approve again")
                 return handler(args)
         return invoke
 
     # Serialize before the registry lookup as well as the file swap. Otherwise
     # a rotation can read an alias, wait for unlink, then recreate orphan secrets.
-    for command in ("account_upsert", "account_credentials", "account_remove",
-                    "deriv_create_demo", "deriv_oauth_link", "ctrader_link", "mt5_ea_issue_key"):
+    for command in ACCOUNT_MUTATIONS:
         handlers[command] = serialize_account_mutation(handlers[command])
     return handlers
 

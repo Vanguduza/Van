@@ -174,6 +174,23 @@ class OAuthEffects:
             return self._receipt(row)
         return None
 
+    async def owns_link(self, state, broker, owner_device_id):
+        """Read historical ownership without claiming, replaying or decoding a result.
+
+        Completed links consume pending material. Their original result must
+        remain reachable; begin() still verifies the exact request and encrypted
+        receipt after owner approval, and never starts another effect for a row.
+        """
+        row = await self.store.fetchone(
+            "SELECT owner_device_id,broker FROM trading_oauth_effects WHERE state=? AND operation='LINK'", (state,))
+        if row is None:
+            return False
+        if not owner_device_id or row['owner_device_id'] != owner_device_id:
+            raise HTTPException(403, 'OAuth state belongs to another device')
+        if row['broker'] != broker:
+            raise HTTPException(400, 'OAuth state belongs to a different broker')
+        return True
+
     async def unconfirmed(self,state,owner_device_id):
         row = await self.store.fetchone("""SELECT * FROM trading_oauth_effects WHERE state=?
             ORDER BY CASE operation WHEN 'LINK' THEN 1 ELSE 0 END DESC LIMIT 1""",(state,))

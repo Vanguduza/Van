@@ -19,7 +19,7 @@ from fastapi import FastAPI, HTTPException, Request as FastRequest
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from commander.accounts import ACCOUNT_COMMANDS, ACCOUNT_TOOL_SCHEMAS, AccountControlSettings, build_account_handlers, redact_args
+from commander.accounts import ACCOUNT_COMMANDS, ACCOUNT_TOOL_SCHEMAS, AccountControlSettings, build_account_handlers, redact_args, require_resource_version
 from commander.strategies import (
     PROMOTION_COMMANDS,
     PROMOTION_TOOL_SCHEMAS,
@@ -453,6 +453,7 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
                 "credential and strategy mutations require the authenticated van-gateway principal",
             )
         try:
+            require_resource_version(name, parsed.args)
             result = handlers[name](parsed.args)
         except HTTPException as exc:
             audit(name, parsed.requested_by, parsed.args, f"refused:{exc.detail}")

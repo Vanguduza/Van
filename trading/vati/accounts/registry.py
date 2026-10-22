@@ -13,7 +13,7 @@ import os
 import re
 import stat
 import tempfile
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Optional
@@ -128,16 +128,25 @@ class AccountRegistry:
     def __init__(self, path: str | Path) -> None:
         # All aliases of one existing file share its mutation lock.
         self.path = Path(path).resolve()
+        self._resource_revisions = {}
         self.accounts = self._read_accounts()
         self._loaded_accounts = dict(self.accounts)
+        self._loaded_revisions = dict(self._resource_revisions)
 
     def _read_accounts(self) -> dict[str, Account]:
         if not self.path.exists():
+            self._resource_revisions = {}
             return {}
         try:
             data = json.loads(self.path.read_text(encoding="utf-8"))
             if not isinstance(data, dict) or data.get("schema_version", 1) != 1 or not isinstance(data.get("accounts"), list):
                 raise AccountRegistryError("account registry schema is invalid")
+            revisions = data.get("resource_revisions", {})
+            if (not isinstance(revisions, dict) or any(
+                not isinstance(alias, str) or not re.fullmatch(r"[a-z0-9_]{3,32}", alias)
+                or type(epoch) is not int or not 0 < epoch < 2**63
+                for alias, epoch in revisions.items())):
+                raise AccountRegistryError("account resource revisions are invalid")
             records = {}
             for rec in data["accounts"]:
                 account = Account(**{**rec, "credential_ref": CredentialRef(**rec.get("credential_ref", {}))})
@@ -145,6 +154,7 @@ class AccountRegistry:
                 if account.alias in records:
                     raise AccountRegistryError("account registry contains duplicate identities")
                 records[account.alias] = account
+            self._resource_revisions = dict(revisions)
             return records
         except (OSError, ValueError, TypeError) as exc:
             raise AccountRegistryError("account registry cannot be read safely; reload or reconcile before mutation") from exc
@@ -158,10 +168,16 @@ class AccountRegistry:
         except StateFileLockError as exc:
             raise AccountRegistryError(str(exc)) from exc
 
+    def operation_lock(self, alias: str):
+        from vati.core.file_lock import exclusive_state_lock
+        if not re.fullmatch(r"[a-z0-9_]{3,32}", alias):
+            raise AccountRegistryError("account alias is invalid")
+        return exclusive_state_lock(self.path.with_name(self.path.name + ".operation." + alias))
+
     def _mutate(self, operation: str, alias: str, account: Account | None = None):
         if account is not None:
             account.validate()
-        with self._mutation_lock():
+        with self.operation_lock(alias), self._mutation_lock():
             current = self._read_accounts()
             if operation == "add":
                 if alias in current:
@@ -171,18 +187,24 @@ class AccountRegistry:
                     raise AccountRegistryError(f"unknown account alias {alias}")
                 if current.get(alias) != self.accounts[alias]:
                     raise AccountRegistryError(f"account {alias} changed since read; reload before mutation")
+            if self._resource_revisions.get(alias, 0) != self._loaded_revisions.get(alias, 0):
+                raise AccountRegistryError(f"account {alias} changed since read; reload before mutation")
             before = self.accounts
+            previous_revisions = dict(self._resource_revisions)
             self.accounts = current
             if operation == "remove":
                 del self.accounts[alias]
             else:
                 self.accounts[alias] = account
+            self._resource_revisions[alias] = self._resource_revisions.get(alias, 0) + 1
             try:
                 self._save_unlocked()
             except BaseException:
                 self.accounts = before
+                self._resource_revisions = previous_revisions
                 raise
             self._loaded_accounts = dict(self.accounts)
+            self._loaded_revisions = dict(self._resource_revisions)
         return account
 
     def add(self, a: Account) -> Account:
@@ -197,6 +219,10 @@ class AccountRegistry:
         """Unlink an unchanged local record; broker/exposure authority belongs to its caller."""
         self._mutate("remove", alias)
 
+    def touch(self, alias: str) -> None:
+        """Advance a native credential/resource generation without changing metadata."""
+        self._mutate("touch", alias, self.get(alias))
+
     def get(self, alias: str) -> Account:
         try:
             return self.accounts[alias]
@@ -205,15 +231,28 @@ class AccountRegistry:
 
     def save(self) -> None:
         """Explicit whole-registry save refuses a stale baseline rather than overwriting it."""
-        with self._mutation_lock():
-            if self._read_accounts() != self._loaded_accounts:
+        with ExitStack() as locks:
+            for alias in sorted(set(self.accounts) | set(self._loaded_accounts)):
+                locks.enter_context(self.operation_lock(alias))
+            locks.enter_context(self._mutation_lock())
+            current = self._read_accounts()
+            if current != self._loaded_accounts or self._resource_revisions != self._loaded_revisions:
                 raise AccountRegistryError("account registry changed since read; reload before save")
             for alias, account in self.accounts.items():
                 account.validate()
                 if alias != account.alias:
                     raise AccountRegistryError("registry key disagrees with account identity")
-            self._save_unlocked()
+            previous_revisions = dict(self._resource_revisions)
+            for alias in set(current) | set(self.accounts):
+                if current.get(alias) != self.accounts.get(alias):
+                    self._resource_revisions[alias] = self._resource_revisions.get(alias, 0) + 1
+            try:
+                self._save_unlocked()
+            except BaseException:
+                self._resource_revisions = previous_revisions
+                raise
             self._loaded_accounts = dict(self.accounts)
+            self._loaded_revisions = dict(self._resource_revisions)
 
     def _save_unlocked(self) -> None:
         """Write the complete registry through same-directory atomic replacement.
@@ -221,9 +260,12 @@ class AccountRegistry:
         Direct write_text could truncate the only valid record on interruption.
         Existing permission bits are preserved; new files default to owner-only.
         """
+        if any(type(epoch) is not int or not 0 < epoch < 2**63 for epoch in self._resource_revisions.values()):
+            raise AccountRegistryError("account resource revision exhausted or invalid; reconcile before mutation")
         self.path.parent.mkdir(parents=True, exist_ok=True)
         payload = json.dumps(
-            {"schema_version": 1, "accounts": [asdict(a) for a in sorted(self.accounts.values(), key=lambda x: x.alias)]},
+            {"schema_version": 1, "accounts": [asdict(a) for a in sorted(self.accounts.values(), key=lambda x: x.alias)],
+             "resource_revisions": self._resource_revisions},
             indent=2,
         ) + "\n"
         fd, temp_name = tempfile.mkstemp(prefix=f".{self.path.name}.", suffix=".tmp", dir=str(self.path.parent))
