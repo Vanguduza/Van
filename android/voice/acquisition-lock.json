@@ -16,21 +16,6 @@
     },
     {
       "archive": {
-        "archive": "archives/sherpa-onnx-zipformer-gigaspeech-2023-12-12.tar.bz2",
-        "published_sha256": "4e8097ebda27dad47353bd4a7edea77c985e2dd5330d5f1cdc07354bb12ab00d",
-        "sha256": "4e8097ebda27dad47353bd4a7edea77c985e2dd5330d5f1cdc07354bb12ab00d",
-        "size": 310453030
-      },
-      "capability": "asr",
-      "license": {
-        "license": "Apache-2.0",
-        "model_card_revision": "4115aa3f7d3ff431cc04ce8223d8a20a37ef3cae",
-        "model_card_url": "https://huggingface.co/k2-fsa/sherpa-onnx-zipformer-gigaspeech-2023-12-12"
-      },
-      "source_url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-zipformer-gigaspeech-2023-12-12.tar.bz2"
-    },
-    {
-      "archive": {
         "archive": "archives/vits-ljs.tar.bz2",
         "published_sha256": null,
         "sha256": "78f7df445fcd42d1dd6df2c78c66c2c2fee8b7abecc6ae255a5950097a6558bc",
@@ -54,6 +39,42 @@
       "sha256": "5ef208a9da1453335308a6b6f4e6dfbd7e183a38b604de0a57664f45d257fe94",
       "size": 26534365,
       "source_url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/wespeaker_en_voxceleb_resnet34.onnx"
+    },
+    {
+      "license": {
+        "license": "Apache-2.0",
+        "model_card_revision": "4115aa3f7d3ff431cc04ce8223d8a20a37ef3cae",
+        "model_card_url": "https://huggingface.co/k2-fsa/sherpa-onnx-zipformer-gigaspeech-2023-12-12"
+      },
+      "path": "asr/decoder-epoch-30-avg-1.int8.onnx",
+      "sha256": "2b0580feb757696fa929922670b7126aaee609630349a1809fd5a2aee926d56e",
+      "size": 540688,
+      "source_revision": "4115aa3f7d3ff431cc04ce8223d8a20a37ef3cae",
+      "source_url": "https://huggingface.co/k2-fsa/sherpa-onnx-zipformer-gigaspeech-2023-12-12/resolve/4115aa3f7d3ff431cc04ce8223d8a20a37ef3cae/decoder-epoch-30-avg-1.int8.onnx"
+    },
+    {
+      "license": {
+        "license": "Apache-2.0",
+        "model_card_revision": "4115aa3f7d3ff431cc04ce8223d8a20a37ef3cae",
+        "model_card_url": "https://huggingface.co/k2-fsa/sherpa-onnx-zipformer-gigaspeech-2023-12-12"
+      },
+      "path": "asr/encoder-epoch-30-avg-1.int8.onnx",
+      "sha256": "d3eff4b1bd747bd781a47966795988539227d05638524b0313f26d3a166962d7",
+      "size": 72850738,
+      "source_revision": "4115aa3f7d3ff431cc04ce8223d8a20a37ef3cae",
+      "source_url": "https://huggingface.co/k2-fsa/sherpa-onnx-zipformer-gigaspeech-2023-12-12/resolve/4115aa3f7d3ff431cc04ce8223d8a20a37ef3cae/encoder-epoch-30-avg-1.int8.onnx"
+    },
+    {
+      "license": {
+        "license": "Apache-2.0",
+        "model_card_revision": "4115aa3f7d3ff431cc04ce8223d8a20a37ef3cae",
+        "model_card_url": "https://huggingface.co/k2-fsa/sherpa-onnx-zipformer-gigaspeech-2023-12-12"
+      },
+      "path": "asr/joiner-epoch-30-avg-1.int8.onnx",
+      "sha256": "80160e45cca71dd52f6b0a6d3d12be18126f5308b2d4ba03f001300fea377c64",
+      "size": 259417,
+      "source_revision": "4115aa3f7d3ff431cc04ce8223d8a20a37ef3cae",
+      "source_url": "https://huggingface.co/k2-fsa/sherpa-onnx-zipformer-gigaspeech-2023-12-12/resolve/4115aa3f7d3ff431cc04ce8223d8a20a37ef3cae/joiner-epoch-30-avg-1.int8.onnx"
     }
   ],
   "schema_version": 1,
