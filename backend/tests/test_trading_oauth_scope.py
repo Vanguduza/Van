@@ -110,7 +110,13 @@ async def test_unreadable_encrypted_pending_state_is_an_explicit_error_not_an_em
 async def test_expired_state_refuses_the_callback_and_releases_no_account_identifiers(client):
     ac, app = client
     state = (await act(ac,'oauth_start',{'broker':'deriv'})).json()['state']
-    await app.state.store.execute('UPDATE trading_oauth_pending SET created_at_unix=1 WHERE state=?',(state,))
+    import json
+    pending=app.state.onboarding.pending
+    row=await app.state.store.fetchone('SELECT payload_enc FROM trading_oauth_pending WHERE state=?',(state,))
+    material=json.loads(pending._f.decrypt(row['payload_enc'].encode()))
+    material['_created_at_unix']=1
+    encrypted=pending._f.encrypt(json.dumps(material).encode()).decode()
+    await app.state.store.execute('UPDATE trading_oauth_pending SET created_at_unix=1,payload_enc=? WHERE state=?',(encrypted,state))
     response = await ac.get('/v1/trading/oauth/deriv/callback',params={'state':state,
         'acct1':'VRTC900','token1':'fixture-token','cur1':'USD'})
     assert response.status_code == 400

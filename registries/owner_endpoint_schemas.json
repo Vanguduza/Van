@@ -1,6 +1,33 @@
 {
   "components": {
     "schemas": {
+      "AccountActionConflictResponse": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "effect_state": {
+            "type": "string",
+            "enum": [
+              "REFUSED",
+              "UNKNOWN"
+            ],
+            "title": "Effect State"
+          },
+          "reconciliation_required": {
+            "type": "boolean",
+            "title": "Reconciliation Required"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail",
+          "effect_state",
+          "reconciliation_required"
+        ],
+        "title": "AccountActionConflictResponse"
+      },
       "AccountActionRequest": {
         "properties": {
           "device_id": {

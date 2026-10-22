@@ -11,6 +11,7 @@ pending store and are deleted once linked."""
 from __future__ import annotations
 
 import base64
+import asyncio
 import hashlib
 import json
 import os
@@ -113,27 +114,39 @@ class OAuthPending:
         from cryptography.fernet import Fernet
         self.store = store
         self._f = Fernet(fernet_key.encode() if fernet_key else Fernet.generate_key())
+        from van_gateway.trading.oauth_effects import OAuthEffects
+        self.effects = OAuthEffects(store,self._f,self._decode_row)
 
     async def migrate(self) -> None:
         await self.store.execute("CREATE TABLE IF NOT EXISTS trading_oauth_pending (state TEXT PRIMARY KEY, broker TEXT NOT NULL, payload_enc TEXT NOT NULL, created_at_unix INTEGER NOT NULL)")
+        await self.effects.migrate()
 
     async def create(self, broker: str, payload: dict) -> str:
         state = secrets.token_urlsafe(24)
         await self.store.execute("DELETE FROM trading_oauth_pending WHERE created_at_unix < ?", (int(time.time()) - PENDING_TTL_S,))
-        await self.store.execute("INSERT INTO trading_oauth_pending(state, broker, payload_enc, created_at_unix) VALUES (?, ?, ?, ?)", (state, broker, self._f.encrypt(json.dumps(payload).encode()).decode(), int(time.time())))
+        created = int(time.time())
+        material = {**payload,"_state":state,"_broker":broker,"_created_at_unix":created}
+        await self.store.execute("INSERT INTO trading_oauth_pending(state, broker, payload_enc, created_at_unix) VALUES (?, ?, ?, ?)", (state, broker, self._f.encrypt(json.dumps(material).encode()).decode(), created))
         return state
 
     async def get(self, state: str) -> Optional[dict]:
-        row = await self.store.fetchone("SELECT broker, payload_enc, created_at_unix FROM trading_oauth_pending WHERE state = ?", (state,))
-        if row is None or int(row["created_at_unix"]) < int(time.time()) - PENDING_TTL_S:
+        row = await self.store.fetchone("SELECT state, broker, payload_enc, created_at_unix FROM trading_oauth_pending WHERE state = ?", (state,))
+        return self._decode_row(row)
+
+    def _decode_row(self,row):
+        if row is None:
             return None
         from cryptography.fernet import InvalidToken
         try:
             payload = json.loads(self._f.decrypt(row["payload_enc"].encode()))
-            if not isinstance(payload, dict):
-                raise ValueError("invalid pending payload")
+            if (not isinstance(payload, dict) or payload.get("_state") != row["state"]
+                or payload.get("_broker") != row["broker"] or type(payload.get("_created_at_unix")) is not int
+                or payload["_created_at_unix"] != int(row["created_at_unix"])):
+                raise ValueError("invalid or unbound pending payload")
         except (InvalidToken, ValueError, TypeError):
             raise HTTPException(409, "OAuth state cannot be read; restart linking without adopting old credentials") from None
+        if payload["_created_at_unix"] < int(time.time()) - PENDING_TTL_S:
+            return None
         return {**payload, "broker": row["broker"]}
 
     async def latest(self, broker: str) -> Optional[str]:
@@ -141,6 +154,8 @@ class OAuthPending:
         return row["state"] if row else None
 
     async def update(self, state: str, payload: dict) -> None:
+        if {"broker","_owner_device_id","_state","_broker","_created_at_unix"} & payload.keys():
+            raise ValueError("OAuth update cannot rebind an authorization")
         cur = await self.get(state)
         if cur is None:
             raise HTTPException(404, "unknown or expired OAuth state")
@@ -185,33 +200,69 @@ class AccountOnboarding:
             return {"state": state, "url": authorize_url(cid, self._cb("ctrader"), state=state), "callback": self._cb("ctrader"), "note": "the application's redirect URI must equal the callback"}
         raise HTTPException(422, "broker must be deriv or ctrader")
 
+    async def _recover_effect(self,state,operation,claim,exc):
+        from van_gateway.trading.oauth_effects import OAuthEffectUnconfirmed
+        try:
+            await asyncio.shield(self.pending.effects.uncertain(state,operation,claim.digest,type(exc).__name__))
+            if isinstance(exc,asyncio.CancelledError):
+                raise exc
+            receipt = await self.pending.effects.applied(state,operation,claim.digest)
+            if receipt is not None:
+                return receipt
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            pass
+        raise OAuthEffectUnconfirmed() from None
+
     async def oauth_callback(self, broker: str, query: dict) -> dict:
+        state = str(query.get("state", ""))
         if broker == "ctrader":
-            state, code = str(query.get("state", "")), str(query.get("code", ""))
-            p = await self.pending.get(state)
-            if p is None or p.get("broker") != "ctrader" or not p.get("_owner_device_id") or not code:
-                raise HTTPException(400, "missing code or unknown, unbound or wrong-broker state")
-            tok = self.control.run("ctrader_oauth_exchange", {"client_id": p["client_id"], "client_secret": p["client_secret"], "code": code, "redirect_uri": self._cb("ctrader")})
-            await self.pending.update(state, {"access_token": tok["access_token"], "refresh_token": tok.get("refresh_token"), "ready": True})
-            return {"broker": "ctrader", "state": state, "ready": True}
-        if broker == "deriv":
-            state = str(query.get("state", ""))
-            p = await self.pending.get(state)
-            if p is None or p.get("broker") != "deriv" or not p.get("_owner_device_id"):
-                raise HTTPException(400, "unknown, expired, unbound or wrong-broker state")
+            code = str(query.get("code", ""))
+            if not code:
+                raise HTTPException(400,"missing OAuth code")
+            payload = {"code":code}
+        elif broker == "deriv":
             accounts = []
             i = 1
             while f"acct{i}" in query and f"token{i}" in query:
-                accounts.append({"loginid": str(query[f"acct{i}"]), "token": str(query[f"token{i}"]), "currency": str(query.get(f"cur{i}", ""))})
+                account = {"loginid":str(query[f"acct{i}"]),"token":str(query[f"token{i}"]),"currency":str(query.get(f"cur{i}",""))}
+                if any(not value.strip() for value in account.values()):
+                    raise HTTPException(400,"Deriv authorization requires explicit nonempty account, token and currency")
+                accounts.append(account)
                 i += 1
             if not accounts:
-                raise HTTPException(400, "no accounts in Deriv redirect")
-            await self.pending.update(state, {"accounts": accounts, "ready": True})
-            return {"broker": "deriv", "state": state, "ready": True, "accounts": len(accounts)}
-        raise HTTPException(404, "unknown broker")
+                raise HTTPException(400,"no accounts in Deriv redirect")
+            payload = {"accounts":accounts}
+        else:
+            raise HTTPException(404,"unknown broker")
+        claim = await self.pending.effects.begin(state,"CALLBACK",broker,payload)
+        if not claim.fresh:
+            return claim.receipt
+        try:
+            if broker == "ctrader":
+                p = claim.material
+                tokens = await asyncio.to_thread(self.control.run,"ctrader_oauth_exchange",{
+                    "client_id":p["client_id"],"client_secret":p["client_secret"],"code":code,"redirect_uri":self._cb("ctrader")})
+                if (not isinstance(tokens,dict) or not isinstance(tokens.get("access_token"),str) or not tokens["access_token"].strip()
+                    or tokens.get("refresh_token") is not None and not isinstance(tokens["refresh_token"],str)):
+                    raise ValueError("provider token response is incomplete")
+                patch = {"access_token":tokens["access_token"],"refresh_token":tokens.get("refresh_token"),"ready":True}
+                receipt = {"broker":broker,"state":state,"ready":True}
+            else:
+                patch = {**payload,"ready":True}
+                receipt = {"broker":broker,"state":state,"ready":True,"accounts":len(accounts)}
+            await self.pending.effects.complete(state,"CALLBACK",claim.digest,receipt,patch=patch)
+            return receipt
+        except BaseException as exc:
+            return await self._recover_effect(state,"CALLBACK",claim,exc)
 
     async def oauth_pending(self, args: dict, *, owner_device_id: str | None = None) -> dict:
-        p = await self.pending.get(str(args.get("state", "")))
+        state = str(args.get("state", ""))
+        effect = await self.pending.effects.unconfirmed(state,owner_device_id)
+        if effect is not None:
+            return effect
+        p = await self.pending.get(state)
         if p is None:
             return {"ready": False, "expired": True}
         self._owner(p, owner_device_id)
@@ -219,7 +270,7 @@ class AccountOnboarding:
             return {"ready": False}
         if p["broker"] == "deriv":
             return {"ready": True, "broker": "deriv", "accounts": [{"loginid": a["loginid"], "currency": a["currency"], "demo": a["loginid"].upper().startswith("VR")} for a in p.get("accounts", [])]}
-        accts = self.control.run("ctrader_discover", {"client_id": p["client_id"], "client_secret": p["client_secret"], "access_token": p["access_token"]})
+        accts = await asyncio.to_thread(self.control.run,"ctrader_discover", {"client_id": p["client_id"], "client_secret": p["client_secret"], "access_token": p["access_token"]})
         return {"ready": True, "broker": "ctrader", "accounts": accts.get("accounts", []), "errors": accts.get("errors", [])}
 
     async def run(self, action: str, args: dict, *, owner_device_id: str | None = None) -> dict:
@@ -227,26 +278,41 @@ class AccountOnboarding:
             return await self.oauth_start(args, owner_device_id=owner_device_id)
         if action == "oauth_pending":
             return await self.oauth_pending(args, owner_device_id=owner_device_id)
-        if action == "deriv_oauth_link" and args.get("state"):
-            p = await self.pending.get(str(args["state"]))
-            if p is None or p.get("broker") != "deriv" or not p.get("ready"):
-                raise HTTPException(404, "unknown, expired, incomplete or wrong-broker OAuth state")
-            self._owner(p, owner_device_id)
-            acct = next((a for a in p.get("accounts", []) if a["loginid"].upper() == str(args.get("loginid", "")).upper()), None)
-            if acct is None:
-                raise HTTPException(422, "loginid not in the OAuth result")
-            out = self.control.run("deriv_oauth_link", {"alias": args.get("alias"), "loginid": acct["loginid"], "token": acct["token"], "currency": acct["currency"], "app_id": p.get("app_id"), "label": args.get("label", "")})
-            await self.pending.consume(str(args["state"]))
-            return out
-        if action == "ctrader_link" and args.get("state"):
-            p = await self.pending.get(str(args["state"]))
-            if p is None or p.get("broker") != "ctrader" or not p.get("ready"):
-                raise HTTPException(404, "unknown, expired, incomplete or wrong-broker OAuth state")
-            self._owner(p, owner_device_id)
-            out = self.control.run("ctrader_link", {"alias": args.get("alias"), "client_id": p["client_id"], "client_secret": p["client_secret"], "access_token": p["access_token"], "refresh_token": p.get("refresh_token"),
-                                                     "ctid_trader_account_id": args.get("ctid_trader_account_id"), "is_live": args.get("is_live", False), "label": args.get("label", ""), "currency": args.get("currency", "USD")})
-            await self.pending.consume(str(args["state"]))
-            return out
+        if action in {"deriv_oauth_link","ctrader_link"} and args.get("state"):
+            broker = "deriv" if action=="deriv_oauth_link" else "ctrader"
+            state = str(args["state"])
+            def validate(p):
+                if broker == "deriv":
+                    if not any(a["loginid"].upper()==str(args.get("loginid","")).upper() for a in p.get("accounts",[])):
+                        raise HTTPException(422,"loginid not in the OAuth result")
+                elif (type(args.get("ctid_trader_account_id")) is not int or args["ctid_trader_account_id"]<=0
+                      or type(args.get("is_live",False)) is not bool):
+                    raise HTTPException(422,"cTrader account identity and environment must be typed")
+            claim = await self.pending.effects.begin(state,"LINK",broker,args,owner_device_id=owner_device_id,validate=validate)
+            if not claim.fresh:
+                return claim.receipt
+            try:
+                p = claim.material
+                if broker == "deriv":
+                    account = next(a for a in p["accounts"] if a["loginid"].upper()==str(args.get("loginid","")).upper())
+                    values = {"alias":args.get("alias"),"loginid":account["loginid"],"token":account["token"],"currency":account["currency"],"app_id":p.get("app_id"),"label":args.get("label","")}
+                else:
+                    values = {"alias":args.get("alias"),"client_id":p["client_id"],"client_secret":p["client_secret"],"access_token":p["access_token"],"refresh_token":p.get("refresh_token"),
+                              "ctid_trader_account_id":args["ctid_trader_account_id"],"is_live":args.get("is_live",False),"label":args.get("label",""),"currency":args.get("currency","USD")}
+                result = await asyncio.to_thread(self.control.run,action,values)
+                account_result = result.get("account") if isinstance(result,dict) else None
+                expected_login = values["loginid"] if broker=="deriv" else str(values["ctid_trader_account_id"])
+                if (not isinstance(account_result,dict)
+                    or account_result.get("alias") != str(values["alias"]).strip().lower()
+                    or account_result.get("broker") != broker.upper()
+                    or str(account_result.get("login")) != str(expected_login)
+                    or account_result.get("currency") != str(values["currency"]).upper()
+                    or account_result.get("mode") not in {"DEMO_TRADER","OBSERVE"}):
+                    raise ValueError("native account receipt does not match the requested link")
+                await self.pending.effects.complete(state,"LINK",claim.digest,result,consume=True)
+                return result
+            except BaseException as exc:
+                return await self._recover_effect(state,"LINK",claim,exc)
         if action not in ACTIONS:
             raise HTTPException(404, f"unknown account action {action}")
-        return self.control.run(action, args)
+        return await asyncio.to_thread(self.control.run,action,args)

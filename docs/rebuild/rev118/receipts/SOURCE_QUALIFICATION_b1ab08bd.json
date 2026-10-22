@@ -1,0 +1,17 @@
+{
+  "schema": "van.rebuild.source-qualification/1",
+  "source_head": "b1ab08bddd1ca9a101e51eb07f74d28d3eb70767",
+  "command": "pytest backend/tests tests/contracts; repo-root storage audit",
+  "passed": 6584,
+  "skipped": 166,
+  "failed": 0,
+  "warnings": 7,
+  "seconds": "1595.22",
+  "junit_sha256": "407be976128d9d96dd8a666df300540e0d83efe880746976c4498bfa8e9c0579",
+  "storage_audit": {
+    "forbidden_events": [],
+    "scope": "backend/tests plus tests/contracts; repo-root invocation; writes and SQLite opens under root/data or backend/data refused"
+  },
+  "checkout_clean_after": true,
+  "scope": "Full source backend/contracts suite at this exact commit. Separate from 1610 canonical acceptances and actual live/unit/release qualification."
+}

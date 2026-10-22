@@ -12,7 +12,7 @@ import json
 import re
 import shutil
 import time
-from typing import Any
+from typing import Any, Literal
 from pathlib import Path
 
 from fastapi import FastAPI, Header, HTTPException, Request
@@ -99,6 +99,7 @@ from van_gateway.projects.router import ProjectRouter
 from van_gateway.proactive.autonomy import ActionAutonomyGate, DomainTrustService
 from van_gateway.proactive.followups import ProactiveFollowUpJob
 from van_gateway.trading.bridge import TradingEventBridge
+from van_gateway.trading.oauth_effects import OAuthEffectUnconfirmed, OAuthTargetBlocked
 from van_gateway.reminders.service import ReminderService
 from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
 from van_gateway.automation.api import AutomationApi
@@ -312,6 +313,12 @@ class AccountActionRequest(BaseModel):
     #: The device signs the gateway's one-time challenge inside the biometric callback
     #: with a keystore key, so a prompt that merely succeeded is not authority.
     approval_proof: OwnerApprovalProof | None = None
+
+
+class AccountActionConflictResponse(BaseModel):
+    detail: str
+    effect_state: Literal["REFUSED","UNKNOWN"]
+    reconciliation_required: bool
 
 
 class AccountChallengeRequest(BaseModel):
@@ -3492,7 +3499,7 @@ def create_app() -> FastAPI:
             "resolved_action_id": f"trading.account.{req.action}",
         }
 
-    @app.post("/v1/trading/accounts/action")
+    @app.post("/v1/trading/accounts/action", responses={409:{"model":AccountActionConflictResponse}})
     async def trading_account_action(request: Request, req: AccountActionRequest):
         await _authenticate_account_action(request, req)
         # P1-SEC-004. This used to be guarded on the device by a biometric prompt whose
@@ -3537,13 +3544,19 @@ def create_app() -> FastAPI:
         try:
             result = await onboarding.run(req.action, req.args, owner_device_id=req.device_id)
         except HTTPException as exc:
+            unknown = isinstance(exc,OAuthEffectUnconfirmed)
+            reconcile = unknown or isinstance(exc,OAuthTargetBlocked)
             await audit.record(
-                result="refused",
+                result="unknown" if unknown else "refused",
                 device_id=req.device_id,
                 capability=f"trading.account.{req.action}",
                 failure_reason=str(exc.detail)[:200],
                 before=redact_account_args(req.args),
             )
+            if exc.status_code==409:
+                response = AccountActionConflictResponse(detail=str(exc.detail),
+                    effect_state="UNKNOWN" if unknown else "REFUSED",reconciliation_required=reconcile)
+                return JSONResponse(status_code=409,content=response.model_dump())
             raise
         await audit.record(
             result="ok",
@@ -3755,8 +3768,9 @@ def create_app() -> FastAPI:
         try:
             result = await onboarding.oauth_callback(broker, dict(request.query_params))
         except HTTPException as exc:
+            title = "authorization status unconfirmed" if isinstance(exc,OAuthEffectUnconfirmed) else "authorization refused"
             return HTMLResponse(
-                f"<h2>Van: linking failed</h2><p>{html.escape(str(exc.detail))}</p>",
+                f"<h2>Van: {title}</h2><p>{html.escape(str(exc.detail))}</p>",
                 status_code=exc.status_code, headers=headers,
             )
         return HTMLResponse(
