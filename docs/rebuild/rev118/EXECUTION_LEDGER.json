@@ -170,10 +170,25 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-22T17:32:09.714920+00:00",
+    "updated_utc": "2026-10-22T17:41:09.319845+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": [],
+    "background_jobs": [
+      {
+        "kind": "hosted-source",
+        "source": "79a4a56f05831e6f5a8e3a4bcd1d950d70b39388",
+        "run_id": 39823714025,
+        "instrumentation_job": 119981331744,
+        "observed_status": "RUNNING; collect current actual result before pushing another source"
+      },
+      {
+        "kind": "frozen-backend-contracts-audit",
+        "source": "79a4a56f05831e6f5a8e3a4bcd1d950d70b39388",
+        "exec_session": 95201,
+        "log": "/tmp/van-79a4-full-backend.txt",
+        "observed_status": "RUNNING; zero-checkout-storage audit enabled"
+      }
+    ],
     "last_validation": [
       "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
       "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -222,7 +237,8 @@
       "Stateful OAuth effects:82 audited gateway tests/zero root storage violations,192 owner+Artemis-plan contracts/78rebuild pass.3 replay/result failures+2 cipher transplants reproduced;6 current mutations caught/restored after9controls. Actual child process death, cancellation, atomic faults, owner polling and APPLIED result recovery covered. Typed409/audit preserve UNKNOWN vs REFUSED.",
       "Frozenb1ab fullbackend/contracts:6584pass166skip7warnings1595.22s;zero storage violations,clean tree. Hostedc4e0/39782539388:all374mutants/383edits,18nativepass4core skips,26PG117voice,1824publictradingpass1privateDDSskip. Native voice bothpass; only actual DDS-key and trusted-main-checker prerequisites fail. No source/unit/provider/handset/release gates bypassed.",
       "Native account candidate:20 original counterexamples;83focused/82auditedgateway pass;1874fulltrading zero skips with actualPG and DDS,20later test-only controls pass.6currentmutants caught after67controls,source restored,fixture stopped/removed. Original374identities/383edits retained. No entire-unit/provider acceptance.",
-      "Hosted a027/39791051342:374legacy mutants,18nativepass4core skips,26PG117voice,1824publictradingpass1privateDDSskip. VITS bothpass. Actual backendDDS-key and trusted-main-checker failures retained. Tree-identical merge3627d293. Frozena027 broad backend audit ended without a live process,JUnit or exit receipt at93%;INTERRUPTED/UNCONFIRMED,not PASS; start new exact-source audit after commit."
+      "Hosted a027/39791051342:374legacy mutants,18nativepass4core skips,26PG117voice,1824publictradingpass1privateDDSskip. VITS bothpass. Actual backendDDS-key and trusted-main-checker failures retained. Tree-identical merge3627d293. Frozena027 broad backend audit ended without a live process,JUnit or exit receipt at93%;INTERRUPTED/UNCONFIRMED,not PASS; start new exact-source audit after commit.",
+      "Current registry entry source:10counterexamples fixed;1909fulltrading/zero skip with realPG/DDS,84focused;3mutants caught after15controls,source restored,fixture stopped/removed. Native protection and exact adapter types retained. Safe exposure unlink/distributed revocation remain original obligations."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -234,7 +250,7 @@
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
     "next_action": "Continue original BE-004/005 exposure/funds/lease-safe unlink, native resource-version and durable generic operation recovery; then product-specific Deriv order/settlement/protection and eligible CEX/funds integrations. Freeze next committed source for the broad backend audit and retain current hosted jobs. Continue whole-product programme; no new frontend before BG-001.",
-    "previous_head": "a0270265f3c213d85be6c6a4173031681abbcc88"
+    "previous_head": "79a4a56f05831e6f5a8e3a4bcd1d950d70b39388"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -293,5 +309,5 @@
     }
   ],
   "current_action": "Continue original BE-004/005 exposure/funds/lease-safe unlink, native resource-version and durable generic operation recovery; then product-specific Deriv order/settlement/protection and eligible CEX/funds integrations. Freeze next committed source for the broad backend audit and retain current hosted jobs. Continue whole-product programme; no new frontend before BG-001.",
-  "updated_at_utc": "2026-10-22T17:32:09.714920+00:00"
+  "updated_at_utc": "2026-10-22T17:41:09.319845+00:00"
 }

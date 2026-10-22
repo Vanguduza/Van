@@ -1,8 +1,11 @@
 """Registry ceilings and an entry fence shared with account mutation writers."""
 from contextlib import contextmanager
+from functools import wraps
+from decimal import Decimal
 
 from vati.accounts.registry import Account, AccountRegistry, AccountRegistryError
 from vati.core.file_lock import exclusive_state_lock
+from vati.core.file_lock import StateFileLockError
 
 SENDING_MODES = frozenset({"DEMO_TRADER", "LIMITED_LIVE", "AUTONOMOUS_LIVE"})
 
@@ -25,7 +28,7 @@ def validate_mode(account: Account, mandate_mode: str) -> None:
 def native_binding(account: Account) -> tuple:
     return (account.alias, account.broker, account.login, account.server,
             account.currency, account.demo, account.router_venue,
-            account.bridge_url, account.credential_ref)
+            account.bridge_url, account.credential_ref, account.mandate_ref)
 
 
 @contextmanager
@@ -46,3 +49,38 @@ def entry_fence(registry: AccountRegistry, bound: Account):
                 raise AccountRegistryError("account currently refuses new entries")
             validate_mode(current, bound.mode)
             yield
+
+
+def bind_entry_authority(adapter, registry: AccountRegistry, bound: Account):
+    """Fence factory-created senders without replacing their native adapter type.
+
+    Type identity matters to existing paper finality/replay. Only the entry
+    method is bound: stop maintenance and protective closes retain their native
+    implementation. A registry denial occurs before delegation and cannot turn
+    a provider exception after send into a false rejection.
+    """
+    from vati.execution.base import ExecutionReceipt
+    native_submit = adapter.submit
+
+    @wraps(native_submit)
+    def submit(command, *, now_ms, **options):
+        def refused():
+            return ExecutionReceipt(command.trade_intent_id, command.decision_hash,
+                bound.router_venue, "REJECTED", Decimal("0"), None,
+                command.entry_price, command.entry_price, command.entry_price,
+                False, now_ms, now_ms,
+                reject_reason="registered account entry authority changed or command binding differs").sealed()
+        if command.account_alias != bound.alias or command.venue != bound.router_venue:
+            return refused()
+        scope = entry_fence(registry, bound)
+        try:
+            scope.__enter__()
+        except (AccountRegistryError, StateFileLockError, OSError):
+            return refused()
+        try:
+            return native_submit(command, now_ms=now_ms, **options)
+        finally:
+            scope.__exit__(None, None, None)
+
+    adapter.submit = submit
+    return adapter
