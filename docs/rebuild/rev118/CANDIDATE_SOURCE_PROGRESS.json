@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T08:29:16.167693+00:00",
+  "updated_at_utc": "2026-10-22T08:59:53.003687+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -82,6 +82,10 @@
           "change": "Captured immutable learning journal cutoff across assembly, actual observation and delayed persistence; native source-seal verification",
           "evidence": "backend/BE-003_036_AS_DECIDED_LEARNING.md; receipts/LEARNING_AVAILABILITY_SOURCE_20261022.json",
           "result": "1691 full trading tests pass/zero skips with actual private PostgreSQL and pinned DDS source fixtures; partial candidate milestone"
+        },
+        {
+          "description": "Exact versioned trade/mandate approval binding and durable truthful stop-rejection recovery; 1713 trading pass/zero skip. Historical bodies unchanged.",
+          "evidence": "backend/BE-010_012_EXACT_APPROVAL_BINDING.md; receipts/RISK_APPROVAL_BINDING_SOURCE_20261022.json"
         }
       ]
     },
@@ -171,6 +175,10 @@
           "change": "No blind retry after unknown close; same producer handles market/preservation and native owner confirmation",
           "evidence": "backend/BE-003_010_012_036_EXIT_AND_HEALTH.md; receipts/EXIT_UNCERTAINTY_AND_HEALTH_SOURCE_20261022.json",
           "result": "1629 full trading tests pass/2 skip; partial candidate milestone"
+        },
+        {
+          "description": "Exact versioned trade/mandate approval binding and durable truthful stop-rejection recovery; 1713 trading pass/zero skip. Historical bodies unchanged.",
+          "evidence": "backend/BE-010_012_EXACT_APPROVAL_BINDING.md; receipts/RISK_APPROVAL_BINDING_SOURCE_20261022.json"
         }
       ]
     },
@@ -210,6 +218,10 @@
           "change": "Missing/nonfinite close-price state retained for later reconciliation; pending fills retain fees",
           "evidence": "backend/BE-003_010_012_036_EXIT_AND_HEALTH.md; receipts/EXIT_UNCERTAINTY_AND_HEALTH_SOURCE_20261022.json",
           "result": "1629 full trading tests pass/2 skip; partial candidate milestone"
+        },
+        {
+          "description": "Exact versioned trade/mandate approval binding and durable truthful stop-rejection recovery; 1713 trading pass/zero skip. Historical bodies unchanged.",
+          "evidence": "backend/BE-010_012_EXACT_APPROVAL_BINDING.md; receipts/RISK_APPROVAL_BINDING_SOURCE_20261022.json"
         }
       ]
     },

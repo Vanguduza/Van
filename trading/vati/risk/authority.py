@@ -28,6 +28,7 @@ from vati.risk.conformal import ConformalAdmissionGate, ConformalAdmissionRefuse
 from vati.risk.governor import drawdown_verdict
 from vati.risk.lockouts import at_or_above
 from vati.risk.heat import currency_leg_exposure, open_stop_risk
+from vati.risk.serde import intent_binding_hash, mandate_binding_hash, RISK_APPROVAL_SCHEMA_VERSION
 from vati.risk.mandate import AuthorizationMode, PlatformCeilings, TradingMandate
 from vati.risk.sizing import Multipliers, SizingRejected, size_illiquid_equity, size_stake_contract, size_stop_contract
 
@@ -75,9 +76,17 @@ class RiskDecision:
     mandate_version: str
     risk_snapshot_hash: str
     decision_hash: str = ""
+    intent_hash: Optional[str] = None
+    mandate_hash: Optional[str] = None
+    approval_schema_version: Optional[int] = None
 
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
+        # Historical v1 bodies remain byte-equivalent when decoded. They are
+        # readable evidence, but cannot authorize a new broker submission.
+        for key in ("intent_hash", "mandate_hash", "approval_schema_version"):
+            if d[key] is None:
+                d.pop(key)
         for k, v in list(d.items()):
             if isinstance(v, Decimal):
                 d[k] = str(v)
@@ -129,6 +138,9 @@ class RiskAuthority:
             mandate_id=self.mandate.mandate_id,
             mandate_version=self.mandate.version,
             risk_snapshot_hash=snap_hash,
+            intent_hash=intent_binding_hash(intent),
+            mandate_hash=mandate_binding_hash(self.mandate),
+            approval_schema_version=RISK_APPROVAL_SCHEMA_VERSION,
         )
         return self._seal(d)
 
@@ -405,5 +417,8 @@ class RiskAuthority:
             mandate_id=m.mandate_id,
             mandate_version=m.version,
             risk_snapshot_hash=snap_hash,
+            intent_hash=intent_binding_hash(intent),
+            mandate_hash=mandate_binding_hash(m),
+            approval_schema_version=RISK_APPROVAL_SCHEMA_VERSION,
         )
         return self._seal(d)

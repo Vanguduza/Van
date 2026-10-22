@@ -55,6 +55,9 @@ def initial_risk_from_ledger(ledger, trade_intent_id: str, *, available_cutoff_m
                 or decision["decision"] not in {"APPROVED", "REDUCED"}
                 or canonical_hash({k: v for k, v in decision.items() if k != "decision_hash"}) != decision["decision_hash"]):
                 return None
+            version = decision.get("approval_schema_version")
+            if version not in (None, 2) or (version == 2 and canonical_hash(inputs["intent"]) != decision.get("intent_hash")):
+                return None
             snapshot = snapshot_from_dict(inputs["snapshot"])
             if _canonical_hash(snapshot) != decision["risk_snapshot_hash"]:
                 return None

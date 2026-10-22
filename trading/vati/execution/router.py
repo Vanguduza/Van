@@ -30,6 +30,7 @@ from vati.risk.authority import Decision, RiskDecision
 from vati.risk.contracts import KillSwitchTrigger, LossModel, TradeIntent
 from vati.risk.governor import KillSwitch
 from vati.risk.mandate import TradingMandate
+from vati.risk.serde import intent_binding_hash, mandate_binding_hash, RISK_APPROVAL_SCHEMA_VERSION
 
 ZERO = Decimal("0")
 
@@ -235,10 +236,16 @@ class ExecutionRouter:
             raise RouterError(f"decision is {decision.decision.value}")
         if recompute_decision_hash(decision) != decision.decision_hash:
             raise RouterError("decision hash does not recompute; refusing")
+        if getattr(decision, "approval_schema_version", None) != RISK_APPROVAL_SCHEMA_VERSION or not getattr(decision, "intent_hash", None):
+            raise RouterError("risk approval lacks exact intent binding; re-evaluation required")
+        if decision.intent_hash != intent_binding_hash(intent):
+            raise RouterError("risk approval does not match the exact trade intent; re-evaluation required")
         if decision.mandate_id != mandate.mandate_id or decision.mandate_version != mandate.version:
             raise RouterError("decision was made under a different mandate")
         if not mandate.sends_orders():
             raise RouterError(f"mode {mandate.mode.value} does not send orders")
+        if getattr(decision, "mandate_hash", None) != mandate_binding_hash(mandate):
+            raise RouterError("risk approval does not match the current mandate; re-evaluation required")
         if intent.idempotency_key in self._seen:
             raise RouterError("duplicate idempotency key")
         adapter = self.adapters.get(intent.venue)
@@ -387,12 +394,21 @@ class ExecutionRouter:
             # --- protection ---
             if receipt.status in ("FILLED", "PARTIAL") and receipt.filled_qty > ZERO:
                 if cmd.stop_mode is StopMode.VENUE and not receipt.protective_stop_confirmed:
-                    flat = adapter.close(receipt.broker_position_id, None, now_ms=now_ms, reason="STOP_REJECTED_FLATTEN")
                     self.kill.trip(KillSwitchTrigger.STOP_REJECTED, now_ms)
                     self._log(EventKind.KILL_SWITCH, {"trigger": "STOP_REJECTED", "position": receipt.broker_position_id}, now_ms=now_ms, corr=corr)
-                    self._log(EventKind.EXECUTION_RECEIPT, {k: (v.value if hasattr(v, "value") else v) for k, v in asdict(flat).items()}, now_ms=now_ms, corr=corr)
-                    metrics.inc("vati_unprotected_flatten_total", venue=intent.venue)
-                    raise RouterError("protective stop not confirmed; position flattened and kill switch tripped")
+                    try:
+                        flat = self._send_close(intent.venue, position_id=receipt.broker_position_id,
+                            trade_intent_id=corr, quantity=None, action="FULL_CLOSE",
+                            now_ms=now_ms, reason="STOP_REJECTED_FLATTEN")
+                    except Exception as exc:
+                        raise RouterError("protective stop not confirmed; protective recovery unresolved; reconcile before new risk") from exc
+                    if flat.status in ("FILLED", "OWNER_EXECUTED", "BROKER_CONFIRMED"):
+                        metrics.inc("vati_unprotected_flatten_total", venue=intent.venue)
+                        raise RouterError("protective stop not confirmed; position flattened and kill switch tripped")
+                    latest = self.exit_journal.latest(intent.venue, receipt.broker_position_id)
+                    self._uncertain_exit(receipt.broker_position_id, now_ms=now_ms,
+                        request_ref=latest.payload.get("request_ref", latest.hash))
+                    raise RouterError("protective stop not confirmed; protective recovery unresolved; reconcile before new risk")
                 if cmd.protective_stop is not None:
                     self.protection.register(receipt.broker_position_id, symbol=intent.symbol, direction=intent.direction, entry=receipt.average_fill or cmd.entry_price, stop=cmd.protective_stop,
                                              target=targets[0] if targets else None, opened_ms=now_ms, software_stop=(cmd.stop_mode is StopMode.SOFTWARE))

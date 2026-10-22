@@ -27,7 +27,14 @@ def test_no_unregistered_schema_files():
 
 def test_risk_decision_schema_matches_dataclass():
     fields = {f.name for f in dataclasses.fields(RiskDecision)}
-    assert fields == required_keys("risk_decision")
+    schema = load_schema("risk_decision")
+    assert fields == set(schema["properties"])
+    # Historical v1 records omit these fields. V2 requires the complete binding
+    # as a group; promoting them to unconditional requirements would invalidate
+    # the immutable historical evidence rather than version it.
+    binding = {"intent_hash", "mandate_hash", "approval_schema_version"}
+    assert required_keys("risk_decision") == fields - binding
+    assert schema["properties"]["approval_schema_version"]["const"] == 2
 
 
 def test_risk_snapshot_schema_matches_dataclass():

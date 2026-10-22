@@ -8,6 +8,9 @@ from decimal import Decimal
 from typing import Any
 
 from vati.risk.contracts import Direction, KillSwitchTrigger, LossModel, MarketIntegrityState, OpenPosition, RiskSnapshot, StrategyState, SymbolContract, TradeIntent
+from vati.core.canonical import canonical_hash
+
+RISK_APPROVAL_SCHEMA_VERSION = 2
 
 DEC_FIELDS_INTENT = {"entry", "stop", "requested_risk_pct", "stake", "expected_gross_move_pct", "regime_multiplier", "confidence_multiplier", "volatility_multiplier", "liquidity_multiplier", "event_risk_multiplier", "correlation_multiplier"}
 
@@ -27,6 +30,8 @@ def _enc(v: Any) -> Any:
 
 
 def intent_to_dict(i: TradeIntent) -> dict: return _enc(asdict(i))
+def intent_binding_hash(i: TradeIntent) -> str: return canonical_hash(intent_to_dict(i))
+def mandate_binding_hash(mandate) -> str: return canonical_hash(_enc(asdict(mandate)))
 def contract_to_dict(c: SymbolContract) -> dict: return _enc(asdict(c))
 def position_to_dict(p: OpenPosition) -> dict: return _enc(asdict(p))
 
