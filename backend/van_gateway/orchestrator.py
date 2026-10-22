@@ -103,6 +103,7 @@ class CommandOrchestrator:
         google: Any | None = None,
         browser_plans: Any | None = None,
         browser_preparation: Any | None = None,
+        browser_resume: Any | None = None,
         browser_artifacts: Any | None = None,
         automation: Any | None = None,
     ) -> None:
@@ -135,6 +136,7 @@ class CommandOrchestrator:
         self.trading = trading
         self.google = google
         self.browser_plans = browser_plans
+        self.browser_resume = browser_resume
         self.browser_preparation = browser_preparation
         self.browser_artifacts = browser_artifacts
         self.automation = automation
@@ -1447,7 +1449,7 @@ class CommandOrchestrator:
             parameters=parameters,
             client_context=req.client_context or {},
             now_ms=int(time.time() * 1000),
-            browser_plans=self.browser_plans, browser_preparation=self.browser_preparation, execution_id=execution.execution_id,
+            browser_plans=self.browser_plans, browser_preparation=self.browser_preparation, browser_resume=self.browser_resume, execution_id=execution.execution_id,
             automation=self.automation,
             browser_artifacts=self.browser_artifacts,
         )

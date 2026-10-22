@@ -25,7 +25,7 @@ import time
 from typing import Any
 from urllib.parse import urlsplit
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from van_gateway.auth.control_scopes import ControlScope, require_scoped_internal
@@ -55,6 +55,7 @@ from van_gateway.browser.models import (
     BrowserTaskStatus,
 )
 from van_gateway.browser.policy import BrowserPolicyEngine, BrowserPolicyError
+from van_gateway.browser.resume import ResumeContract
 from van_gateway.browser.task_scope import TaskScope, TaskScopeError, load_scope
 from van_gateway.browser.service import (
     BrowserSessionBroker,
@@ -314,6 +315,7 @@ class BrowserApi:
         #: Programme B / B5 — set by create_app; None keeps the fabric testable alone.
         self.interaction_router: Any | None = None
         self.decisions = decisions
+        self.resume_authorizations = None  # create_app binds the sealed production producer/consumer
         self.router = APIRouter(prefix="/v1/browser", tags=["browser"])
         self._install_routes()
 
@@ -358,6 +360,13 @@ class BrowserApi:
         )
         declared_hosts = scope.hosts()
         for grant in grants:
+            if self.resume_authorizations is not None:
+                full = await self.store.fetchone("SELECT * FROM browser_scope_authorizations WHERE authorization_id=?", (grant["authorization_id"],))
+                try:
+                    async with self.store.connection() as db:
+                        await self.resume_authorizations._validated(db, full, now=int(time.time()*1000), require_verified=True)
+                except (ValueError, KeyError, TypeError):
+                    continue
             try:
                 approved = json.loads(str(grant["approved_domains_json"]))
                 delta = json.loads(str(grant["requested_scope_delta_json"]))
@@ -722,6 +731,7 @@ class BrowserApi:
             if status in self.tasks.WORKING_TASK_STATUSES:
                 await self.tasks.set_working_status(
                     task_id=task.task_id, status=status, error_code=error_code, now_ms=now,
+                    expected_status=task.status,
                 )
             else:
                 await self.tasks.complete(
@@ -800,10 +810,12 @@ class BrowserApi:
     async def _enforce_resume_authorization(
         self, task: BrowserTask, assignment: SubagentAssignment
     ) -> None:
-        await self.consume_resume_authorization(
+        grant = await self.consume_resume_authorization(
             task, requested_domains=list(assignment.allowed_domains),
             requested_class=assignment.action_class_ceiling,
         )
+        if grant.get("expires_at_ms") is not None:
+            assignment.deadline_ms = min(assignment.deadline_ms or grant["expires_at_ms"], grant["expires_at_ms"])
 
     async def consume_resume_authorization(
         self,
@@ -821,16 +833,20 @@ class BrowserApi:
         concurrent resumes cannot both spend it. Returns ``{"authorization_id",
         "approved_action_class_ceiling", "approved_domains"}``.
         """
+        if self.resume_authorizations is not None:
+            return await self.resume_authorizations.consume(task,
+                requested_domains=requested_domains, requested_class=requested_class)
         row = await self.store.fetchone(
             """
             SELECT authorization_id, approved_domains_json,
                    approved_action_class_ceiling, status
             FROM browser_scope_authorizations
             WHERE task_id = ? AND status = 'ACTIVE'
+              AND (expires_at_ms IS NULL OR expires_at_ms > ?)
             ORDER BY issued_at_ms DESC
             LIMIT 1
             """,
-            (task.task_id,),
+            (task.task_id, int(time.time()*1000)),
         )
         if row is None:
             raise HTTPException(status_code=409, detail="BROWSER_RESUME_AUTHORIZATION_MISSING")
@@ -846,8 +862,8 @@ class BrowserApi:
         async with self.store.connection() as db:
             cur = await db.execute(
                 "UPDATE browser_scope_authorizations SET status = 'CONSUMED', consumed_at_ms = ? "
-                "WHERE authorization_id = ? AND status = 'ACTIVE'",
-                (int(time.time() * 1000), row["authorization_id"]),
+                "WHERE authorization_id = ? AND status = 'ACTIVE' AND (expires_at_ms IS NULL OR expires_at_ms > ?)",
+                (int(time.time() * 1000), row["authorization_id"], int(time.time()*1000)),
             )
             await db.commit()
             if cur.rowcount != 1:
@@ -1368,6 +1384,18 @@ class BrowserApi:
                     "automated_payment",
                 ],
             }
+
+        @router.get("/tasks/{task_id}/resume-contract", response_model=ResumeContract)
+        async def resume_contract(task_id: str, request: Request):
+            if self.resume_authorizations is None:
+                raise HTTPException(status_code=503, detail="BROWSER_RESUME_UNCONFIGURED")
+            device_id = getattr(request.state, "van_device_id", None)
+            if not device_id:
+                raise HTTPException(status_code=401, detail="owner_device_required")
+            try:
+                return await self.resume_authorizations.contract(task_id, device_id)
+            except ValueError as exc:
+                raise HTTPException(status_code=409, detail=str(exc)) from exc
 
         @router.get("/tasks/{task_id}/evidence")
         async def task_evidence(task_id: str):

@@ -791,7 +791,8 @@ class BrowserTaskService:
 
     async def set_working_status(
         self, *, task_id: str, status: BrowserTaskStatus, error_code: str | None = None,
-        now_ms: int | None = None, evidence_pointer: str | None = None,
+        now_ms: int | None = None, evidence_pointer: str | None = None, connection=None,
+        expected_status: BrowserTaskStatus | None = None,
     ) -> None:
         """Move a live task to WAITING_FOR_OWNER / RESUME_AUTHORIZED / VERIFYING.
 
@@ -805,9 +806,10 @@ class BrowserTaskService:
         await self._write_status(
             task_id=task_id, status=status, evidence_pointer=evidence_pointer, error_code=error_code,
             completed=False, now_ms=now_ms,
+            connection=connection,
             require_current=(
                 BrowserTaskStatus.WAITING_FOR_OWNER
-                if status is BrowserTaskStatus.RESUME_AUTHORIZED else None
+                if status is BrowserTaskStatus.RESUME_AUTHORIZED else expected_status
             ),
         )
 
@@ -825,6 +827,7 @@ class BrowserTaskService:
         self, *, task_id: str, status: BrowserTaskStatus, evidence_pointer: str | None,
         error_code: str | None, completed: bool, now_ms: int | None,
         verdict_id: str | None = None, require_current: BrowserTaskStatus | None = None,
+        connection=None,
     ) -> None:
         """The only ``UPDATE browser_tasks SET status`` in VAN. Never out of an end state."""
         now = int(time.time() * 1000) if now_ms is None else now_ms
@@ -844,12 +847,20 @@ class BrowserTaskService:
         if verdict_id is not None:
             sql += f" AND ({self._LATEST_VERDICT_SQL}) = ?"
             params.extend([task_id, VERIFICATION_EVIDENCE_KIND, verdict_id])
-        async with self.store.connection() as db:
-            cur = await db.execute(sql, tuple(params))
-            await db.commit()
-            changed = cur.rowcount
+        if connection is None:
+            async with self.store.connection() as db:
+                cur = await db.execute(sql, tuple(params))
+                await db.commit()
+                changed = cur.rowcount
+        else:
+            # The caller owns commit/rollback when the transition must be atomic
+            # with its sealed grant. Keep this the single guarded status writer.
+            changed = (await connection.execute(sql, tuple(params))).rowcount
         if changed != 1:
-            row = await self.store.fetchone("SELECT status FROM browser_tasks WHERE task_id = ?", (task_id,))
+            if connection is None:
+                row = await self.store.fetchone("SELECT status FROM browser_tasks WHERE task_id = ?", (task_id,))
+            else:
+                row = await (await connection.execute("SELECT status FROM browser_tasks WHERE task_id = ?", (task_id,))).fetchone()
             current = None if row is None else str(row["status"])
             if row is None:
                 why = "TASK_UNKNOWN"

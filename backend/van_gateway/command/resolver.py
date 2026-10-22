@@ -301,6 +301,19 @@ class TypedCommandResolver:
             except (ValueError, TypeError, RecursionError):
                 pass
 
+        match = re.fullmatch(r"resume browser task\s+(\{.*\})", text.strip(), re.IGNORECASE | re.DOTALL)
+        if match and len(match.group(1).encode()) <= 1024:
+            try:
+                values = json.loads(match.group(1), object_pairs_hook=_unique_json_object)
+                if (not isinstance(values, dict) or set(values) != {"task_id", "escalation_id", "scope_sha256"}
+                    or not all(isinstance(values[k], str) and re.fullmatch(r"[A-Za-z0-9._:-]{1,256}", values[k]) for k in ("task_id", "escalation_id"))
+                    or not isinstance(values["scope_sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", values["scope_sha256"])):
+                    raise ValueError("browser_resume_exact_parameters_required")
+                return _from_action("browser.task.resume", text=normalized, intent_id="OWNER_BROWSER_RESUME",
+                    parameters=values, rule_id="browser.task.resume.exact.v1")
+            except (ValueError, TypeError, RecursionError):
+                pass
+
         match = re.fullmatch(r"execute browser plan\s+(\{.*\})", text.strip(), re.IGNORECASE | re.DOTALL)
         if match and len(match.group(1)) <= 1024:
             try:

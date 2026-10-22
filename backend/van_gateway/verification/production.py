@@ -297,7 +297,7 @@ DECLARED_BUT_UNOBSERVABLE_STRATEGIES: dict[str, str] = {
 
 
 def build_mission_registry(
-    *, store: Store, trading: Any, knowledge: Any, google: Any = None, github: Any = None, browser_plans: Any = None, automation: Any = None, browser_artifacts: Any = None, jev: Any | None = None
+    *, store: Store, trading: Any, knowledge: Any, google: Any = None, github: Any = None, browser_plans: Any = None, automation: Any = None, browser_artifacts: Any = None, browser_resume: Any = None, jev: Any | None = None
 ) -> VerifierRegistry:
     """The registry MissionService runs when a mission asks for a verification outcome.
 
@@ -309,6 +309,17 @@ def build_mission_registry(
     knowledge=owner_runtime.knowledge)` — pick up both new strategies with no wiring change.
     """
     registry = VerifierRegistry()
+    async def browser_resume_observe(context):
+        from van_gateway.command.authority import CommandAuthorityService
+        command_id = str((context.get("authority_envelope") or {}).get("source_command_id") or "")
+        authority = await CommandAuthorityService(store).get(command_id)
+        if browser_resume is None or authority is None or authority.typed_action_id != "browser.task.resume":
+            raise ValueError("browser_resume_observer_unconfigured")
+        result = await browser_resume.readback(command_id, authority.typed_parameter_constraints)
+        result["evidence_refs"] = [result["evidence_pointer"]]
+        return result
+    registry.register("browser-resume-readback", ObservationVerifier(browser_resume_observe,
+        verifier_version="browser-resume-readback/1", evidence_prefix="browser-resume://"))
     async def browser_artifact_observe(context):
         from van_gateway.command.authority import CommandAuthorityService
         from van_gateway.action.service import ActionRuntime

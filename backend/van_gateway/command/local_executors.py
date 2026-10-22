@@ -101,6 +101,7 @@ class LocalExecutionContext:
     client_context: dict[str, Any]
     now_ms: int
     browser_preparation: Any | None = None
+    browser_resume: Any | None = None
     browser_plans: Any | None = None
     browser_artifacts: Any | None = None
     automation: Any | None = None
@@ -534,6 +535,23 @@ class BrowserPlanExecutor:
             evidence_ref=observed["evidence_pointer"], observed_postcondition=observed)
 
 
+class BrowserTaskResumeExecutor:
+    async def execute(self, ctx: LocalExecutionContext) -> LocalExecutionResult:
+        from van_gateway.action.service import ActionRuntime
+        from van_gateway.browser.resume import ResumeError
+        if ctx.browser_resume is None or not ctx.execution_id:
+            raise LocalExecutionError("browser_resume_unconfigured", "Browser continuation is unavailable", status="degraded")
+        execution = await ActionRuntime(ctx.store).get_execution(ctx.execution_id)
+        if execution is None:
+            raise LocalExecutionError("browser_resume_execution_unknown", "Browser continuation execution is unknown")
+        try:
+            observed = await ctx.browser_resume.authorize(execution, ctx.parameters)
+        except (ResumeError, ValueError) as exc:
+            raise LocalExecutionError(str(exc), "Browser continuation requires a fresh exact approval of the current task scope", status="degraded") from exc
+        return LocalExecutionResult(summary="One bounded continuation of the same browser task is authorized.",
+            evidence_ref=observed["evidence_pointer"], observed_postcondition=observed)
+
+
 class BrowserTaskPrepareExecutor:
     async def execute(self, ctx: LocalExecutionContext) -> LocalExecutionResult:
         from van_gateway.action.service import ActionRuntime
@@ -655,6 +673,7 @@ class JevGlobalControlExecutor:
 #: executor may be given per-call state one day; today each is stateless and the factory is
 #: just its class.
 LOCAL_EXECUTORS: dict[str, type[LocalActionExecutor]] = {
+    "browser.task.resume": BrowserTaskResumeExecutor,
     "browser.file.provider.submit": BrowserFileProviderExecutor,
     "browser.task.prepare": BrowserTaskPrepareExecutor,
     "browser.plan.execute": BrowserPlanExecutor,

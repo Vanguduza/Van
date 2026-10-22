@@ -2,6 +2,7 @@
   "version": "1.0.0",
   "principle": "Rev 1 \u00a77 \u2014 a capability not declared here is not routable for production mutation. This file declares WHAT a capability is and what contract it must meet; it never declares whether one is ready right now. Readiness stays with the subsystem that already owns it (readiness_source), so this registry subsumes the automation and Google registries without becoming a third copy of their state.",
   "readiness_sources": {
+    "GATEWAY_LOCAL": "Current configured local owner-control handler. It attests neither external provider availability nor native browser qualification.",
     "STATIC": "Declared-ready. Native gateway reads and owner-gated controls with no external dependency.",
     "AUTOMATION_REGISTRY": "automation_capabilities lifecycle \u2014 ready iff an ADMITTED artifact exists.",
     "GOOGLE_MESH": "GoogleIdentityBroker.capability_status \u2014 ready iff state is READY.",
@@ -135,6 +136,31 @@
       "readiness_source": "STATIC",
       "fallback_capabilities": [],
       "no_fallback_reason": "A signed exact owner command prepares read-only task bindings without starting a worker or delegating browser control."
+    },
+    {
+      "capability_id": "browser.task.resume",
+      "provider": "van",
+      "executor": "GATEWAY_LOCAL",
+      "capability_class": "NATIVE_CONTROL",
+      "authority_class": "A4",
+      "requires_network": false,
+      "requires_owner_presence": true,
+      "data_domains": [
+        "browser_session"
+      ],
+      "side_effects": [
+        "AUTHORIZE_ONE_EXACT_BROWSER_TASK_CONTINUATION"
+      ],
+      "idempotency": "IDEMPOTENT_WITH_KEY",
+      "supports_checkpoint": true,
+      "supports_resume": true,
+      "verification_strategy": "API_READBACK",
+      "latency_class": "INTERACTIVE",
+      "cost_class": "FREE",
+      "privacy_class": "OWNER_PRIVATE",
+      "readiness_source": "GATEWAY_LOCAL",
+      "fallback_capabilities": [],
+      "no_fallback_reason": "Only a fresh exact sealed owner A4 may authorize one continuation of the same waiting task. Local readiness is not native browser qualification; advisory decisions never issue authority."
     },
     {
       "capability_id": "native.owner_context.read",

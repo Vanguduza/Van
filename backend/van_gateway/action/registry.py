@@ -7,6 +7,13 @@ from van_gateway.models import ActionClass, PrincipalType
 
 BUILTIN_ACTIONS: tuple[ActionDefinition, ...] = (
     ActionDefinition(
+        action_id="browser.task.resume", action_class=ActionClass.A4,
+        mutates_state=True, allowed_principals={PrincipalType.OWNER_DEVICE},
+        verifier_type=VerifierType.STATE_PREDICATE, no_stale_replay=True,
+        max_age_seconds=30, parameter_schema={"required": ["task_id", "escalation_id", "scope_sha256"],
+            "properties": {"task_id": "string", "escalation_id": "string", "scope_sha256": "string"}},
+    ),
+    ActionDefinition(
         action_id="browser.file.provider.submit", action_class=ActionClass.A4,
         mutates_state=True, allowed_principals={PrincipalType.OWNER_DEVICE},
         verifier_type=VerifierType.STATE_PREDICATE, no_stale_replay=True,

@@ -148,6 +148,7 @@ ACTION_REVERSIBILITY: dict[str, Reversibility] = {
     # Preparation creates a bounded local task that can be cancelled. A browser
     # effect may disclose or change external state with no reliable undo.
     "browser.task.prepare": Reversibility.REVERSIBLE,
+    "browser.task.resume": Reversibility.IRREVERSIBLE,
     "browser.plan.execute": Reversibility.IRREVERSIBLE,
     "browser.file.provider.submit": Reversibility.IRREVERSIBLE,
     "owner.context.read": Reversibility.READ_ONLY,

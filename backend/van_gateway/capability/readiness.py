@@ -18,6 +18,20 @@ from van_gateway.capability.models import CapabilityDeclaration
 from van_gateway.storage.db import Store
 
 
+class GatewayLocalReadiness:
+    """Local control wiring/configuration only; never attests an external provider."""
+    def __init__(self, browser_resume_getter):
+        self.browser_resume_getter = browser_resume_getter
+
+    async def is_ready(self, declaration):
+        if declaration.capability_id != "browser.task.resume":
+            return False, "LOCAL_CONTROL_NOT_REGISTERED"
+        service = self.browser_resume_getter()
+        if service is None or not service.browser.settings.browser_enabled:
+            return False, "BROWSER_RESUME_DISABLED"
+        return True, None
+
+
 class OwnerArtifactProviderReadiness:
     """Ask the configured provider's current signed-admission capability contract."""
 

@@ -123,6 +123,12 @@ def contract_for(resolution: CommandResolution) -> SuccessContract:
         return SuccessContract(verifier_class="browser-artifact-readback", postconditions={
             "request_id": p["request_id"], "request_sha256": p["request_sha256"], "success": True}, evidence_required=True)
 
+    if action_id == "browser.task.resume":
+        p = resolution.parameters
+        if set(p) != {"task_id", "escalation_id", "scope_sha256"}:
+            return SuccessContract()
+        return SuccessContract(verifier_class="browser-resume-readback", postconditions={**p, "success": True}, evidence_required=True)
+
     if action_id == "browser.plan.execute":
         p = resolution.parameters
         if set(p) != {"session_id", "plan_id", "plan_sha256"}:

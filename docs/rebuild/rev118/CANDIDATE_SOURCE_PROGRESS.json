@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T06:06:14.880598+00:00",
+  "updated_at_utc": "2026-10-22T06:39:00.579570+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -266,9 +266,15 @@
         "BE-024",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "change": "Production same-task browser continuation through canonical exact owner A4, atomic durable grant/status, separate verifier and single-use worker consumption",
+          "result": "128 focused source tests pass; source E2E uses fixture provider transport, not native/browser/handset qualification",
+          "evidence": "backend/BE-025_BROWSER_CONTINUATION.md; receipts/BROWSER_CONTINUATION_SOURCE_20261022.json"
+        }
+      ]
     },
     "BE-026": {
       "title": "ARTEMIS device tests and independent evidence services",

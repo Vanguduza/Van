@@ -82,11 +82,11 @@
    "recovery": "Restart between approval and assignment keeps the authorization ACTIVE and resumable once; expiry yields refusal, not continuation.",
    "environment": "Backend source test with the real BrowserAPI and store; provider browser stubbed only below the assignment boundary.",
    "pass_evidence": "Test output on the frozen baseline SHA with readback of the task and authorization rows.",
-   "status": "OPEN_OBLIGATION",
+   "status": "SEALED_SAME_TASK_CONTINUATION_SOURCE_TESTED_NATIVE_ACCEPTANCE_PENDING",
    "current_review": {
-    "source_commit": "5d6372fdea20b31b300c32b66bb164904211bb0f",
-    "finding": "The legacy consumer alone is not a positive production path: _sync_waiting_owner_decision keeps advisory APPROVED/ANSWERED tasks WAITING_FOR_OWNER and requires a fresh sealed command. No production INSERT into browser_scope_authorizations was found; the one insert is in test_browser_review_i6_scope.py. The existing signed browser-plan path has its own source E2E tests, but that does not prove this same-task boundary-resume contract.",
-    "disposition": "Keep OPEN; bind a genuine supported sealed-command continuation and prove the same-task contract in BE-025. Do not manufacture legacy ACTIVE rows or turn an advisory decision into authority."
+    "implementation": "New browser.task.resume producer and strict production consumer bind exact canonical owner A4, original task/escalation/scope, device, expiry, action execution and parent controls. Grant/witness/status commit atomically. Original task/decision preserved; advisory answers never grant authority.",
+    "evidence": "backend/BE-025_BROWSER_CONTINUATION.md; backend/tests/test_browser_sealed_resume.py; 128 final focused tests pass. Real HTTP approval, app recreation, same-task assignment and single consumption are exercised with controlled provider transport.",
+    "remaining": "Full BE-025 unit/native acceptance, independent review, S24 UI/Artemis evidence and reconciliation of externally uncertain effects."
    }
   },
   {

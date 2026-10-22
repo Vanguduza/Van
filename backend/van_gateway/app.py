@@ -161,6 +161,7 @@ from van_gateway.capability.readiness import (
     ExternalRuntimeReadiness,
     GoogleMeshReadiness,
     OwnerArtifactProviderReadiness,
+    GatewayLocalReadiness,
 )
 from van_gateway.capability.registry import CapabilityRegistry
 from van_gateway.capability.router import CapabilityRouter
@@ -680,6 +681,7 @@ def create_app() -> FastAPI:
     capability_registry = CapabilityRegistry(
         store,
         probes={
+            ReadinessSource.GATEWAY_LOCAL: GatewayLocalReadiness(lambda: browser_resume),
             ReadinessSource.AUTOMATION_REGISTRY: AutomationReadiness(
                 store, enabled=settings.automation_enabled
             ),
@@ -797,9 +799,13 @@ def create_app() -> FastAPI:
         providers=artifact_config["providers"], source_clients=artifact_config["source_clients"],
         signer=artifact_config["signer"], current_configuration=current_artifact_configuration)
 
+    from van_gateway.browser.resume import BrowserResumeService
+    browser_resume = BrowserResumeService(browser, owner_runtime.authority)
+    browser.resume_authorizations = browser_resume
+
     verifiers = build_mission_registry(
         store=store, trading=trading, knowledge=owner_runtime.knowledge, google=google, browser_plans=browser_action_plans, automation=automation,
-        browser_artifacts=browser_artifacts, jev=jev_projection.client,
+        browser_artifacts=browser_artifacts, browser_resume=browser_resume, jev=jev_projection.client,
     )
     # P1-AUTO-001 — the dispatcher was constructed with an empty observer map, so every
     # production run came back UNVERIFIABLE and owner_success could never be true; the
@@ -876,7 +882,7 @@ def create_app() -> FastAPI:
         # GAP-F-001/002/005: gateway-executed typed actions (memory, reminders,
         # trading halt) run here with the same authority/action/mission ledgers.
         actions=owner_runtime.actions,
-        browser_plans=browser_action_plans, browser_preparation=browser_preparation, automation=automation,
+        browser_plans=browser_action_plans, browser_preparation=browser_preparation, browser_resume=browser_resume, automation=automation,
         browser_artifacts=browser_artifacts,
         owner_fact_author=owner_fact_author,
         reminders=reminders,
@@ -1507,6 +1513,7 @@ def create_app() -> FastAPI:
     app.state.van_sessions = van_sessions
     app.state.session_router = session_router
     app.state.browser_preparation = browser_preparation
+    app.state.browser_resume = browser_resume
     app.state.browser_action_plans = browser_action_plans
     app.state.interactive_sessions = interactive_sessions
     app.state.browser_control_leases = browser_control_leases

@@ -2273,6 +2273,8 @@ def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter)
                 grant = await consume(task)
                 step.resume_ceiling = grant.get("approved_action_class_ceiling") or step.action_class_ceiling
                 step.resume_authorization_id = grant.get("authorization_id")
+                if grant.get("expires_at_ms") is not None:
+                    deadline = min(deadline, max(0, (grant["expires_at_ms"]-int(time.time()*1000))/1000))
             # The Harness is told which lease generation each action runs under, and refuses
             # a generation older than the newest it has seen for the profile.
             # Review I4 MINOR-A — the guard re-checks the lease (and renews it when due)
