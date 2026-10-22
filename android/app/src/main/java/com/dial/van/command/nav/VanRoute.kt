@@ -194,7 +194,7 @@ object VanRoute {
     /** Persist the admitted destination's actual arguments, never its unresolved template. */
     fun concreteRoute(template: String, arguments: Map<String, String?>): String? {
         if (template !in ALL_TEMPLATES) return null
-        val placeholder = Regex("\\{(\\w+)}")
+        val placeholder = Regex("\\{(\\w+)\\}")
         var missingPathArgument = false
         val path = placeholder.replace(template.substringBefore('?')) { match ->
             val value = arguments[match.groupValues[1]]?.takeIf { it.isNotBlank() }

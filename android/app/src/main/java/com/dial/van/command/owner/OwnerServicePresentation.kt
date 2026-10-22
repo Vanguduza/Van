@@ -40,7 +40,7 @@ object OwnerServicePresentation {
             if (value.isBlank() || '\n' in value || '\r' in value) return null
             command = command.replace("{$field}", value)
         }
-        return command.takeIf { !Regex("\\{[a-z_]+}").containsMatchIn(it) }
+        return command.takeIf { !Regex("\\{[a-z_]+\\}").containsMatchIn(it) }
     }
 
     fun unavailable(code: String): String = when (code) {
