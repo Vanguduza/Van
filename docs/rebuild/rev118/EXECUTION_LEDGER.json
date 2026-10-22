@@ -250,7 +250,8 @@
       "Paper contract valuation:4valid counterexamples fixed;2001fulltrading zero skips realprivatePG/DDS,7source faults caught after11actualPG controls and restored,78rebuild pass. Both fixtures stopped/removed. Actual single/book/backtest consumers use configured contract account-currency units; no provider/payoff/profit acceptance.",
       "Native position recovery scope:9valid counterexamples fixed;2017fulltrading zero skip realprivatePG/DDS before final chain-test-only tightening;28restored focus/78rebuild pass. Ten actual faults caught after16controls, source restored/journal absent;privatefixturestopped/removed. Actual account/command uniqueness/current stop replace matching-label adoption; single-symbol startup stillnext.",
       "Frozen9ea broad audit FAIL:4842pass159skip5failure,stopped after5 at1024.34s;zero forbidden storage events,clean checkout. Five preflight/recovery regressions retained and corrected with43restored gateway/78rebuild/3faults after8controls. New exact-source broad audit required.",
-      "Hosted9ea/39853172032 actual374legacy faults/383edits;18nativepass4core skips,VITS3.189s/2.189s;publicPG26voice117trading1989pass1privateDDSskip;actual source/merge trees equal. Only actual privateDDS-key/trusted-main prerequisite jobs fail. Separate broad9ea failures remain retained."
+      "Hosted9ea/39853172032 actual374legacy faults/383edits;18nativepass4core skips,VITS3.189s/2.189s;publicPG26voice117trading1989pass1privateDDSskip;actual source/merge trees equal. Only actual privateDDS-key/trusted-main prerequisite jobs fail. Separate broad9ea failures remain retained.",
+      "Single-symbol startup/source:6initial+2additional counterexample cases fixed;2032fulltrading zero skip realprivatePG/DDS,54restored focused+2PGopt-ins covered in full,78rebuild pass;11actual faults caught after31passing controls and restored. Exact pre-dispatch setup, native entries/protection/thesis/health; unknown contexts cannot manufacture feedback. Registry unchanged439/262; fixture stopped/removed. No provider/finality/unit/handset acceptance."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -261,9 +262,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Start fresh frozen backend/contracts audit on the committed OAuth correction; prior9ea audit FAILED5/4842pass159skip then stopped, not a full pass. Resume saved single-symbol startup tests (/tmp/van-single-session-recovery-pending.py): six valid failures. Implement durable pre-dispatch entry context, actual original-native history/position/protection recovery and truthful open/pending/unknown/flat states with no order replay or guessed feedback. Then physical identity/migration/safe retirement/provider finality and all remaining original units. No new frontend beforeBG-001; retain native/independent/owner/provider/production/signing/S24 gates.",
-    "previous_head": "658214bb6808b84335fac9fbc049bdca7000cf56",
-    "current_packet": "Broad-audit OAuth collision/recovery repair and retained actual hosted9ea evidence; candidate source only"
+    "next_action": "Continue original candidate programme: validate boolean native facts at the shared RiskAuthority (startup nowstrict but shared kernel truthiness remains to reproduce), reconcile economic finality/fees/cash consistently in live/replay risk and feedback, repair missing TCA/legacy context where native proof exists, implement persistent paper/native pending/late outcomes, physical account identity/migration and exposure/orders/funds/lease/retention-safe retirement. Frozen181a broad audit and hosted39856698736 are running; collect actual outcomes before replacing. No new frontend beforeBG-001; preserve all131units and original native/independent/owner/provider/production/signing/S24 gates.",
+    "previous_head": "181a11007591c53417cbb1fd902a340c4ab0548d",
+    "current_packet": "Original native single-symbol startup/setup/protection and uncertain-effect recovery; candidate source only"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -321,6 +322,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Start fresh frozen backend/contracts audit on the committed OAuth correction; prior9ea audit FAILED5/4842pass159skip then stopped, not a full pass. Resume saved single-symbol startup tests (/tmp/van-single-session-recovery-pending.py): six valid failures. Implement durable pre-dispatch entry context, actual original-native history/position/protection recovery and truthful open/pending/unknown/flat states with no order replay or guessed feedback. Then physical identity/migration/safe retirement/provider finality and all remaining original units. No new frontend beforeBG-001; retain native/independent/owner/provider/production/signing/S24 gates.",
-  "updated_at_utc": "2026-10-22T21:21:49.560334+00:00"
+  "current_action": "Continue original candidate programme: validate boolean native facts at the shared RiskAuthority (startup nowstrict but shared kernel truthiness remains to reproduce), reconcile economic finality/fees/cash consistently in live/replay risk and feedback, repair missing TCA/legacy context where native proof exists, implement persistent paper/native pending/late outcomes, physical account identity/migration and exposure/orders/funds/lease/retention-safe retirement. Frozen181a broad audit and hosted39856698736 are running; collect actual outcomes before replacing. No new frontend beforeBG-001; preserve all131units and original native/independent/owner/provider/production/signing/S24 gates.",
+  "updated_at_utc": "2026-10-22T21:42:16.368143+00:00"
 }

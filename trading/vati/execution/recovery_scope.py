@@ -15,6 +15,9 @@ RELATED_PRODUCERS = {
     EventKind.EXECUTION_RECEIPT: frozenset({'vati-execution-router','vati-cycle','vati-account-service','vati-account-lifecycle'}),
     EventKind.TCA_RECORD: frozenset({'vati-cycle','vati-account-lifecycle'}),
     EventKind.OWNER_TICKET: frozenset({'vati-execution-router','vati-account-service','vati-account-lifecycle','van-gateway'}),
+    EventKind.TRADE_THESIS: frozenset({'vati-trade-thesis'}),
+    EventKind.TRADE_HEALTH: frozenset({'vati-trade-health'}),
+    EventKind.TRADE_REVIEW: frozenset({'vati-cycle','vati-account-lifecycle'}),
 }
 
 
@@ -33,8 +36,8 @@ class NativePositionHistory:
             raise PositionRecoveryError('native recovery ledger chain is invalid')
         self.rows=tuple(ledger.iter())
         self.account_alias=account_alias;self.venue=venue
-        self.commands={};self.conflicts=set()
-        candidates={};identities={}
+        self.commands={};self.command_refs={};self.conflicts=set()
+        candidates={};identities={};refs={}
         command_fields={f.name for f in fields(OrderCommand)}-{'command_hash'}
         for event in self.rows:
             if event.kind is not EventKind.ORDER_COMMAND or event.producer!='vati-execution-router':
@@ -56,6 +59,7 @@ class NativePositionHistory:
                 _positive(p['quantity']);_positive(p['entry_price'])
                 identities.setdefault(iid,set()).add(digest)
                 candidates.setdefault(iid,(dict(p),event.event_time_ms))
+                refs.setdefault(iid,event.hash)
             except (KeyError,TypeError,ValueError,InvalidOperation):
                 self.conflicts.add(iid)
         for iid,(p,when) in candidates.items():
@@ -63,6 +67,7 @@ class NativePositionHistory:
                 self.conflicts.add(iid)
             if iid not in self.conflicts and p['account_alias']==account_alias and p['venue']==venue:
                 self.commands[iid]=(p,when)
+                self.command_refs[iid]=refs[iid]
 
     def events(self,kind):
         """Native related facts must join the unique original account command."""
@@ -78,6 +83,7 @@ class NativePositionHistory:
             if (p.get('trade_intent_id',event.correlation_id)!=event.correlation_id
                 or p.get('account_alias',self.account_alias)!=self.account_alias
                 or p.get('venue',self.venue)!=self.venue
+                or p.get('symbol',command['symbol'])!=command['symbol']
                 or (p.get('decision_hash') and p['decision_hash']!=command.get('decision_hash'))):
                 continue
             if kind is EventKind.EXECUTION_RECEIPT and p.get('receipt_hash')!=canonical_hash({k:v for k,v in p.items() if k in receipt_fields}):
@@ -85,6 +91,8 @@ class NativePositionHistory:
             yield event
 
     def position_command(self,position):
+        if not isinstance(position.position_id,str) or not position.position_id:
+            return None
         joined=self.commands.get(position.trade_intent_id)
         if joined is None:
             return None

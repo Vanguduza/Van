@@ -144,6 +144,7 @@ class DecisionCycle:
         self.reviews: list = []
         self._closed_seen = 0
         self._entries: dict[str, dict] = {}   # trade_intent_id → {entry, stop, direction, strategy_id, cost_pct}
+        self.recovery_unresolved: tuple[str, ...] = ()
         # GAP-F-003. Active-trade intelligence on the single-symbol runtime.
         # Same components the account runtime uses, so backtest-to-live parity
         # covers the thesis path too rather than only the order path.
@@ -210,6 +211,8 @@ class DecisionCycle:
         only set the cycle can speak for; a position the venue holds that this cycle never
         opened is an orphan, and `reconcile` already treats it as blocking.
         """
+        if self.recovery_unresolved:
+            return False
         ledger_positions = [
             LedgerPosition(
                 trade_intent_id=iid,
@@ -386,6 +389,21 @@ class DecisionCycle:
                 event_state=state.event_window.value,
                 entry_type=oa.entry_type,
             )
+            # Durable before dispatch: restart may not invent the old setup
+            # from today's state, capsule, costs or policy.
+            entry_context = {
+                'symbol':cfg.symbol, 'strategy_id':intent.strategy_id,
+                'direction':intent.direction.value, 'cost_pct':str(cost),
+                'original_approved_risk_pct':str(decision.approved_risk_pct),
+                'session':state.session.value, 'regime':state.regime.trend.value,
+                'event_window':state.event_window.value,
+                'opened_in_blackout':state.event_window.value in ('PRE_BLACKOUT','POST_BLACKOUT'),
+                'event_certified':bool(intent.is_event_certified),
+                'execution_policy_applied':True, 'targets':[str(t) for t in targets],
+            }
+            self._log(EventKind.SESSION,{'event':'ENTRY_CONTEXT','schema':'vati.entry-context/1',
+                'decision_hash':decision.decision_hash,'context':entry_context,
+                'context_hash':canonical_hash(entry_context)},now_ms=now_ms,corr=intent.trade_intent_id)
             rec = self.router.execute(
                 intent, decision, self.mandate, now_ms=now_ms,
                 stop_mode=StopMode.SOFTWARE if cfg.software_stops else StopMode.VENUE,
@@ -579,6 +597,8 @@ class DecisionCycle:
     def _review_open_theses(self, bid: Decimal, ask: Decimal, *, now_ms: int) -> None:
         """Assess every open position's claim and act on what the policy allows."""
         for intent_id, row in list(self._entries.items()):
+            if row.get('recovery_context_complete') is False:
+                continue  # retain native protection; no invented adaptive setup
             if row.get("pending"):
                 continue   # a resting entry is not a position yet
             thesis = self.thesis.thesis_for(intent_id)
@@ -759,12 +779,13 @@ class DecisionCycle:
         metrics.inc("vati_trades_closed_total", outcome=rv.outcome.value)
         verdict = None
         try:
-            verdict = self._classify_decision(intent_id, e, rv, now_ms, outcome_known=measured.amount is not None)
+            if e.get('recovery_context_complete') is not False:
+                verdict = self._classify_decision(intent_id, e, rv, now_ms, outcome_known=measured.amount is not None)
         except Exception as exc:  # noqa: BLE001 — classification never blocks a close
             self._log(EventKind.SESSION,
                       {"event": "DECISION_QUALITY_FAULT", "error": str(exc)[:300]},
                       now_ms=now_ms, corr=intent_id)
-        if self.learning is not None and rv.outcome in STRATEGY_LEARNING_OUTCOMES:
+        if self.learning is not None and rv.outcome in STRATEGY_LEARNING_OUTCOMES and e.get('recovery_context_complete') is not False:
             self._learn(intent_id, rv, e.get("cost_ratio", Decimal(1)), now_ms,
                         process_ok=(verdict is None or not verdict.faults))
 

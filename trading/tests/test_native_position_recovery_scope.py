@@ -17,7 +17,7 @@ def publish(ledger,command,*,producer='vati-execution-router',correlation=None,p
 
 
 @pytest.mark.parametrize('fault',['foreign-owner','ambiguous-owner','wrong-symbol','wrong-venue',
-    'foreign-producer','bad-command-seal','wrong-correlation','missing-native-stop','excess-quantity'])
+    'foreign-producer','bad-command-seal','wrong-correlation','missing-native-stop','excess-quantity','missing-position-identity'])
 def test_native_recovery_cannot_adopt_a_label_with_missing_or_conflicting_provenance(fault):
     ledger=Ledger();adapter=PaperAdapter(account_alias='acct',slippage=D('0'))
     original=_command('original-native-intent')
@@ -34,6 +34,7 @@ def test_native_recovery_cannot_adopt_a_label_with_missing_or_conflicting_proven
     elif fault=='wrong-correlation':correlation='some-other-original-operation'
     elif fault=='missing-native-stop':adapter._positions[result.broker_position_id]['stop']=None
     elif fault=='excess-quantity':adapter._positions[result.broker_position_id]['qty']*=2
+    elif fault=='missing-position-identity':adapter._positions['']=adapter._positions.pop(result.broker_position_id)
     publish(ledger,changed,producer=producer,correlation=correlation,payload=payload)
     lifecycle=_lifecycle(ledger,adapter)
     restored,unresolved=lifecycle.recover_from_venue()
