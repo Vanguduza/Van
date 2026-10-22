@@ -1,0 +1,255 @@
+{
+  "schema": "van.rebuild.explicit-boolean-facts-source/1",
+  "source_parent": "183342f3d2404484d8c826a7df466f77263f1c5f",
+  "initial_kernel_actual_fill_counterexamples": {
+    "tests": 5,
+    "failures": 5,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "e6a920a681879cbf97072cfa19a2d6bf7dfe82f1e39c58aac5d2c41948ff5550"
+  },
+  "valid_old_source_producer_counterexamples": {
+    "tests": 5,
+    "failures": 5,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "e74f6b3a2713597842dbc102f4d6ce61cb0e033096218134da231e7a840f867b"
+  },
+  "initial_execution_counterexamples": {
+    "tests": 6,
+    "failures": 6,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "a7ece2e12e8c25c02be00261286cc99635644816518ce610773b87c1e8b3c508"
+  },
+  "full_trading_real_private_postgresql": {
+    "tests": 2055,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "113506413db087600abe36bdd937924e541ead3d029a725751a513c4a6135a6d"
+  },
+  "focused_after_source_restoration": {
+    "tests": 88,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "0b08e92de38442a2105a5aaa4f813682725e2eb9854c0a7b2c431ab5fe0c9aae"
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "2d6ad077515435d1e3d5eeee3a91dbc5c27fa6dbef6ea4a49735048938ee3cff"
+  },
+  "source_faults": {
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "e0935da3b17fb412af8036e4cf0163afae2e58e5d2c6b25fc3ca7ec90a031703"
+      },
+      {
+        "phase": "mutation",
+        "why": "bypass the sealed kernel boolean-fact gate",
+        "returncode": 1,
+        "log_sha256": "fa6756299bbab351e23dc2d01cf6485e793552a5ce0efe45135db6322f692fc3"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit intent boolean facts",
+        "returncode": 1,
+        "log_sha256": "35961ab3877e0dbc9d254c05ff2c46e149b9edf484000bf3588f0223e43f0662"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit instrument boolean facts",
+        "returncode": 1,
+        "log_sha256": "7c9b17310ec37773e312c4aa448079ae7243e09a9bd47cbde7bd0acaceac4af1"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit current position protection facts",
+        "returncode": 1,
+        "log_sha256": "7e6682ea4685bea11a86a88232857f3736019ec1cdd8a7a9739fd7b2daf12395"
+      },
+      {
+        "phase": "mutation",
+        "why": "coerce signed bridge account strings to native permission",
+        "returncode": 1,
+        "log_sha256": "94b56ef6894e1e84d3a92f6f08c8608671963a0ba9676fa1daa874c78ec2a8e0"
+      },
+      {
+        "phase": "mutation",
+        "why": "coerce authenticated EA snapshot strings to native permission",
+        "returncode": 1,
+        "log_sha256": "9c1f6089870686fe66edc6fa1984dfa2228d6abfe111873eebd77ad5877a057d"
+      },
+      {
+        "phase": "mutation",
+        "why": "coerce a policy string into weekend permission",
+        "returncode": 1,
+        "log_sha256": "1ba10433c4476cd127eec50a7283cf80a1858c5d25fd8dac5813452a07ff98cb"
+      },
+      {
+        "phase": "mutation",
+        "why": "coerce the signed drawdown policy",
+        "returncode": 1,
+        "log_sha256": "5fd75c88c32cc483b346441d80e1e55edbbdbe9221d987187cfe4bb58269f14f"
+      },
+      {
+        "phase": "mutation",
+        "why": "skip direct policy object validation",
+        "returncode": 1,
+        "log_sha256": "80aa3a65e14c39e280aef74b44345dce41deea24d983af7f3cc988dc71ef79b1"
+      },
+      {
+        "phase": "mutation",
+        "why": "send after a false-text native preflight",
+        "returncode": 1,
+        "log_sha256": "799eee9fc5d8d025e25f1b899e5beeb2427278a325dded62b871430527c4e891"
+      },
+      {
+        "phase": "mutation",
+        "why": "invent stop protection from false text",
+        "returncode": 1,
+        "log_sha256": "ae4eca3f521f7202d4b4b0a2e6d3ab2edbcd58dd48067915756d2c6ab169c2c1"
+      },
+      {
+        "phase": "mutation",
+        "why": "invent successful native modification from false text",
+        "returncode": 1,
+        "log_sha256": "4cf999122ba6215732564032f3e987ef1cde6493965c6df198a1da3de9f67e4f"
+      },
+      {
+        "phase": "mutation",
+        "why": "report a still-queued native modification as no effect",
+        "returncode": 1,
+        "log_sha256": "e215fb946f9e59e907537a4ad970901a87d99d7a9290a549d8d998cf13c1ff0d"
+      }
+    ],
+    "definitions": [
+      [
+        "trading/vati/risk/authority.py",
+        "if invalid_fact:",
+        "if False:",
+        "bypass the sealed kernel boolean-fact gate"
+      ],
+      [
+        "trading/vati/risk/authority.py",
+        "records=[('snapshot',snapshot,RiskSnapshot),('intent',intent,TradeIntent),",
+        "records=[('snapshot',snapshot,RiskSnapshot),",
+        "omit intent boolean facts"
+      ],
+      [
+        "trading/vati/risk/authority.py",
+        "for name in BOOLEAN_FACT_FIELDS[contract]:",
+        "for name in (() if contract is SymbolContract else BOOLEAN_FACT_FIELDS[contract]):",
+        "omit instrument boolean facts"
+      ],
+      [
+        "trading/vati/risk/authority.py",
+        "for index,position in enumerate(snapshot.open_positions)",
+        "for index,position in enumerate(())",
+        "omit current position protection facts"
+      ],
+      [
+        [
+          [
+            "trading/vati/execution/mt5_bridge.py",
+            "if type(verified) is not bool or type(hedging) is not bool:",
+            "if False:"
+          ],
+          [
+            "trading/vati/execution/mt5_bridge.py",
+            "a[\"currency\"], verified, hedging,",
+            "a[\"currency\"], bool(verified), bool(hedging),"
+          ]
+        ],
+        "coerce signed bridge account strings to native permission"
+      ],
+      [
+        [
+          [
+            "trading/vati/execution/mt5_pull.py",
+            "if type(allowed) is not bool or type(hedging) is not bool:",
+            "if False:"
+          ],
+          [
+            "trading/vati/execution/mt5_pull.py",
+            "allowed and bool(a.get(\"login\")), hedging,",
+            "bool(allowed) and bool(a.get(\"login\")), bool(hedging),"
+          ]
+        ],
+        "coerce authenticated EA snapshot strings to native permission"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "_boolean(data[\"weekend_hold_allowed\"],'weekend_hold_allowed')",
+        "bool(data[\"weekend_hold_allowed\"])",
+        "coerce a policy string into weekend permission"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "_boolean(item.get(\"top_tier_only\", False),'drawdown_tier.top_tier_only')",
+        "bool(item.get(\"top_tier_only\",False))",
+        "coerce the signed drawdown policy"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "        _boolean(self.weekend_hold_allowed,'weekend_hold_allowed')",
+        "        pass",
+        "skip direct policy object validation"
+      ],
+      [
+        "trading/vati/execution/mt5_bridge.py",
+        "if chk.get(\"ok\") is not True:",
+        "if not chk.get(\"ok\"):",
+        "send after a false-text native preflight"
+      ],
+      [
+        "trading/vati/execution/mt5_bridge.py",
+        "stop_confirmed=r.get('sl_confirmed') is True",
+        "stop_confirmed=bool(r.get('sl_confirmed'))",
+        "invent stop protection from false text"
+      ],
+      [
+        "trading/vati/execution/mt5_bridge.py",
+        "ok=r.get('ok');status=",
+        "ok=bool(r.get('ok'));status=",
+        "invent successful native modification from false text"
+      ],
+      [
+        "trading/vati/execution/mt5_pull.py",
+        "status='ACCEPTED' if ok is True else 'REJECTED' if ok is False else 'UNKNOWN'",
+        "status='ACCEPTED' if ok is True else 'REJECTED'",
+        "report a still-queued native modification as no effect"
+      ]
+    ],
+    "source_before_sha256": {
+      "trading/vati/execution/mt5_bridge.py": "e847f94e53540af31caf2e1e76e30426a1ea51c5b07d5287f4ed332d13403241",
+      "trading/vati/execution/mt5_pull.py": "d83404aa6b264346237a0362dbfc59aee3a4d96e9a8240eb10911a8d83322828",
+      "trading/vati/risk/authority.py": "450ed889ab2494bcb6f21119072973393d12bfa27dc2755537887f5ecfce5291",
+      "trading/vati/risk/mandate.py": "7992c97f4e51e65bbb1a6f35b34d0182531e5e8c802fb669d4a30ebe17fe9195"
+    },
+    "source_after_sha256": {
+      "trading/vati/execution/mt5_bridge.py": "e847f94e53540af31caf2e1e76e30426a1ea51c5b07d5287f4ed332d13403241",
+      "trading/vati/execution/mt5_pull.py": "d83404aa6b264346237a0362dbfc59aee3a4d96e9a8240eb10911a8d83322828",
+      "trading/vati/risk/authority.py": "450ed889ab2494bcb6f21119072973393d12bfa27dc2755537887f5ecfce5291",
+      "trading/vati/risk/mandate.py": "7992c97f4e51e65bbb1a6f35b34d0182531e5e8c802fb669d4a30ebe17fe9195"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "oracle_corrections": [
+    "The initial custom drawdown fixture lacked its mandatory final suspending tier; corrected before the valid old-source producer run.",
+    "The initial execution call-list oracle omitted the native preliminary account read: two focused and full-run failures corrected by a valid account fixture and exact observed call sequence. Financial-effect and protection assertions retained."
+  ],
+  "qualification": "Candidate source only; no native provider, whole-unit, independent, production, profitable strategy or physical handset acceptance."
+}

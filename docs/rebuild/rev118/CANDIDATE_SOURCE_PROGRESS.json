@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T21:42:16.368143+00:00",
+  "updated_at_utc": "2026-10-22T22:17:33.981282+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -207,6 +207,10 @@
         {
           "description": "Actual single-symbol/book/backtest paper factories bind per-symbol account-currency tick valuation. Partial exits and resting entries preserve units; unknown symbols/currency conflicts/invalid money units and open/pending rescaling refused.2001fulltrading zero skip privatePG/DDS,7faults caught after11actualPG controls and restored,78rebuild pass. Simulation source only; native recovery and economic/provider qualification remain.",
           "evidence": "backend/BE-004_012_PAPER_CONTRACT_VALUATION.md; receipts/PAPER_CONTRACT_VALUATION_SOURCE_20261022.json"
+        },
+        {
+          "description": "Explicit boolean facts at shared RiskAuthority, native MT5 account/preflight/stop readers and mandate flags; missing/malformed sent-modification outcomes remain UNKNOWN.2055fulltrading zero skip privatePG/DDS,88focused,78rebuild;13faults after23controls caught/restored. Candidate source only; full native finality and authority/content binding remain.",
+          "evidence": "backend/BE-004_009_EXPLICIT_BOOLEAN_FACTS.md; receipts/EXPLICIT_BOOLEAN_FACTS_SOURCE_20261022.json"
         }
       ]
     },
@@ -332,6 +336,10 @@
         {
           "description": "Actual default single-symbol startup recovers native history/current positions, original pre-dispatch setup, local protection/thesis/health and distinguishes native rejection from pending/lost effects and historical closure. Missing/late/conflicting context retains protection without guessed feedback.6initial+2additional invalid-fact cases fixed;2032fulltrading zero skip privatePG/DDS,54restored+2PGopt-ins covered in full,78rebuild pass;11faults caught after31controls and restored. Provider finality/legacy/persistent-paper reconciliation remain.",
           "evidence": "backend/BE-003_009_010_SINGLE_SESSION_RECOVERY.md; receipts/SINGLE_SESSION_RECOVERY_SOURCE_20261022.json"
+        },
+        {
+          "description": "Explicit boolean facts at shared RiskAuthority, native MT5 account/preflight/stop readers and mandate flags; missing/malformed sent-modification outcomes remain UNKNOWN.2055fulltrading zero skip privatePG/DDS,88focused,78rebuild;13faults after23controls caught/restored. Candidate source only; full native finality and authority/content binding remain.",
+          "evidence": "backend/BE-004_009_EXPLICIT_BOOLEAN_FACTS.md; receipts/EXPLICIT_BOOLEAN_FACTS_SOURCE_20261022.json"
         }
       ]
     },

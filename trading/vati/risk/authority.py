@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, fields
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Optional
@@ -22,6 +22,7 @@ from vati.risk.contracts import (
     OpenPosition,
     RiskSnapshot,
     StrategyState,
+    SymbolContract,
     TradeIntent,
 )
 from vati.risk.conformal import ConformalAdmissionGate, ConformalAdmissionRefused
@@ -51,6 +52,26 @@ STRATEGY_STATES_FOR_MODE = {
     AuthorizationMode.LIMITED_LIVE: frozenset({StrategyState.LIMITED_LIVE, StrategyState.CERTIFIED_LIVE}),
     AuthorizationMode.AUTONOMOUS_LIVE: frozenset({StrategyState.CERTIFIED_LIVE}),
 }
+
+# Native producers must publish an explicit boolean, never a truthy string,
+# integer, missing value or generic container. Derive the field lists from
+# the declared contracts so a new boolean fact cannot silently skip this gate.
+BOOLEAN_FACT_FIELDS = {
+    cls: tuple(f.name for f in fields(cls) if f.type in (bool, 'bool'))
+    for cls in (RiskSnapshot,TradeIntent,SymbolContract,OpenPosition)
+}
+
+
+def invalid_boolean_fact(intent, snapshot):
+    records=[('snapshot',snapshot,RiskSnapshot),('intent',intent,TradeIntent),
+             ('contract',snapshot.symbol_contract,SymbolContract)]
+    records.extend((f'open_positions[{index}]',position,OpenPosition)
+                   for index,position in enumerate(snapshot.open_positions))
+    for scope,record,contract in records:
+        for name in BOOLEAN_FACT_FIELDS[contract]:
+            if type(getattr(record,name)) is not bool:
+                return f'{scope}.{name} requires an explicit boolean source fact'
+    return None
 
 
 class Decision(str, Enum):
@@ -171,6 +192,10 @@ class RiskAuthority:
         # 1. Kill switch
         if snapshot.kill_switch_triggers:
             return rej("KILL_SWITCH", ",".join(sorted(t.value for t in snapshot.kill_switch_triggers)))
+
+        invalid_fact=invalid_boolean_fact(intent,snapshot)
+        if invalid_fact:
+            return rej('INVALID_BOOLEAN_FACT',invalid_fact)
 
         # 1b. Post-entry preservation has precedence over new risk. The
         # lifecycle may describe why, but only RiskAuthority turns that fact

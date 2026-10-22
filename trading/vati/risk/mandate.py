@@ -26,6 +26,12 @@ class MandateError(ValueError):
     """Raised when a mandate is malformed, unsigned, expired or exceeds ceilings."""
 
 
+def _boolean(value, name):
+    if type(value) is not bool:
+        raise MandateError(f'{name} must be an explicit boolean')
+    return value
+
+
 class AuthorizationMode(str, Enum):
     OBSERVE = "OBSERVE"
     ADVISOR = "ADVISOR"
@@ -268,7 +274,7 @@ class TradingMandate:
             max_positions_per_instrument=int(data["max_positions_per_instrument"]),
             max_total_positions=int(data["max_total_positions"]),
             tier1_event_policy=str(data["tier1_event_policy"]),
-            weekend_hold_allowed=bool(data["weekend_hold_allowed"]),
+            weekend_hold_allowed=_boolean(data["weekend_hold_allowed"],'weekend_hold_allowed'),
             forbidden=forbidden,
             owner_signature_ref=verified.ref,
             signed_at_unix=int(data["signed_at_unix"]),
@@ -298,6 +304,9 @@ class TradingMandate:
                 raise MandateError(f"strategy_risk_budget for {sid}, which is not in allowed_strategies")
 
     def validate(self, ceilings: PlatformCeilings) -> None:
+        _boolean(self.weekend_hold_allowed,'weekend_hold_allowed')
+        for tier in self.drawdown_tiers:
+            _boolean(tier.top_tier_only,'drawdown_tier.top_tier_only')
         if self.temperament_enabled and not self.temperament_owner_signature_ref.startswith("owner-authority:"):
             raise MandateError("owner-verified temperament grant reference required")
         if not self.temperament_enabled and self.temperament_owner_signature_ref:
@@ -402,7 +411,7 @@ def _parse_tiers(raw: Any) -> tuple[DrawdownTier, ...]:
             DrawdownTier(
                 threshold=_dec(item["threshold"], "drawdown_tier.threshold"),
                 multiplier=_dec(item["multiplier"], "drawdown_tier.multiplier"),
-                top_tier_only=bool(item.get("top_tier_only", False)),
+                top_tier_only=_boolean(item.get("top_tier_only", False),'drawdown_tier.top_tier_only'),
             )
         )
     return tuple(tiers)

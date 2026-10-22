@@ -195,7 +195,10 @@ class Mt5PullAdapter:
 
     def sync_account(self) -> AccountState:
         a = self._state()["account"]
-        return AccountState(self.account_alias, Decimal(str(a["equity"])), Decimal(str(a["balance"])), a.get("currency", "USD"), bool(a.get("trade_allowed", True)) and bool(a.get("login")), bool(a.get("hedging", True)), int(a.get("server_time_ms", 0)))
+        allowed=a.get('trade_allowed',False);hedging=a.get('hedging',True)
+        if type(allowed) is not bool or type(hedging) is not bool:
+            raise VenueUnavailable('MT5 EA account permissions and topology require explicit boolean facts')
+        return AccountState(self.account_alias, Decimal(str(a["equity"])), Decimal(str(a["balance"])), a.get("currency", "USD"), allowed and bool(a.get("login")), hedging, int(a.get("server_time_ms", 0)))
 
     def positions(self) -> list[VenuePosition]:
         out = []
@@ -225,8 +228,9 @@ class Mt5PullAdapter:
             return rej("EA did not report within timeout; reconcile before retrying", "UNKNOWN")
         if r.get("status") != "FILLED":
             return rej(str(r.get("reason", r.get("status", "REJECTED"))), "REJECTED" if r.get("status") != "UNKNOWN" else "UNKNOWN")
+        stop_confirmed=r.get('sl_confirmed') is True
         return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "FILLED", Decimal(str(r.get("volume", cmd.quantity))), Decimal(str(r["price"])), cmd.entry_price, Decimal(str(r.get("arrival", r["price"]))), cmd.entry_price,
-                                bool(r.get("sl_confirmed")), int(r.get("server_time_ms", now_ms)), now_ms, broker_order_id=str(r.get("order", "")), broker_position_id=str(r.get("position", "")), protective_stop_price=cmd.protective_stop if r.get("sl_confirmed") else None).sealed()
+                                stop_confirmed, int(r.get("server_time_ms", now_ms)), now_ms, broker_order_id=str(r.get("order", "")), broker_position_id=str(r.get("position", "")), protective_stop_price=cmd.protective_stop if stop_confirmed else None).sealed()
 
     def modify_stop(self, position_id: str, new_stop: Decimal, *, now_ms: int) -> ExecutionReceipt:
         try:
@@ -240,8 +244,9 @@ class Mt5PullAdapter:
             return ExecutionReceipt("", "", self.venue, "REJECTED", ZERO, None, ZERO, ZERO, ZERO, False, now_ms, now_ms, broker_position_id=position_id, reject_reason="refusing to widen protective stop").sealed()
         cid = self.queue.enqueue(self.account_alias, "MODIFY_SL", {"position": str(position_id), "symbol": pos["symbol"], "sl": str(new_stop), "tp": str(pos.get("tp") or "")}, now_ms=now_ms)
         r = self._await(cid)
-        ok = bool(r and r.get("ok"))
-        return ExecutionReceipt("", "", self.venue, "ACCEPTED" if ok else "REJECTED", ZERO, None, ZERO, ZERO, ZERO, ok, now_ms, now_ms, broker_position_id=position_id, protective_stop_price=new_stop if ok else None, reject_reason="" if ok else str((r or {}).get("reason", "EA timeout"))).sealed()
+        ok=r.get('ok') if r is not None else None
+        status='ACCEPTED' if ok is True else 'REJECTED' if ok is False else 'UNKNOWN'
+        return ExecutionReceipt("", "", self.venue, status, ZERO, None, ZERO, ZERO, ZERO, ok is True, now_ms, now_ms, broker_position_id=position_id, protective_stop_price=new_stop if ok is True else None, reject_reason="" if ok is True else str((r or {}).get("reason", "EA result unconfirmed; reconcile original request"))).sealed()
 
     def close(self, position_id: str, quantity: Optional[Decimal], *, now_ms: int, reason: str) -> ExecutionReceipt:
         cid = self.queue.enqueue(self.account_alias, "CLOSE", {"position": str(position_id), "volume": str(quantity) if quantity else "", "comment": f"vati-close:{reason}"[:31]}, now_ms=now_ms)

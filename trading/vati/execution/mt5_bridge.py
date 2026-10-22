@@ -75,7 +75,10 @@ class Mt5BridgeAdapter:
     def sync_account(self) -> AccountState:
         r = self.client.call("sync_account", {"alias": self.account_alias}, now_ms=self.clock())
         a = r["account"]
-        return AccountState(self.account_alias, Decimal(str(a["equity"])), Decimal(str(a["balance"])), a["currency"], bool(a.get("verified")), bool(a.get("hedging", True)), int(a.get("server_time_ms", 0)))
+        verified=a.get('verified',False);hedging=a.get('hedging',True)
+        if type(verified) is not bool or type(hedging) is not bool:
+            raise VenueUnavailable('MT5 account verification and topology require explicit boolean facts')
+        return AccountState(self.account_alias, Decimal(str(a["equity"])), Decimal(str(a["balance"])), a["currency"], verified, hedging, int(a.get("server_time_ms", 0)))
 
     def positions(self) -> list[VenuePosition]:
         r = self.client.call("positions", {"alias": self.account_alias}, now_ms=self.clock())
@@ -96,18 +99,20 @@ class Mt5BridgeAdapter:
                 "sl": str(cmd.protective_stop), "tp": str(cmd.targets[0]) if cmd.targets else None, "deviation": str(cmd.max_slippage) if cmd.max_slippage else None,
                 "comment": f"vati:{cmd.trade_intent_id}", "magic": int(cmd.decision_hash[:8], 16) % 2_147_483_647, "order_type": cmd.entry_type}
         chk = self.client.call("order_check", body, now_ms=now_ms)
-        if not chk.get("ok"):
+        if chk.get("ok") is not True:
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason=str(chk.get("reason", "order_check failed"))).sealed()
         r = self.client.call("order_send", body, now_ms=now_ms)
         filled = Decimal(str(r.get("volume", "0")))
+        stop_confirmed=r.get('sl_confirmed') is True
         return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, r.get("status", "UNKNOWN"), filled, Decimal(str(r["price"])) if r.get("price") else None,
-                                cmd.entry_price, Decimal(str(r.get("arrival", cmd.entry_price))), cmd.entry_price, bool(r.get("sl_confirmed")), int(r.get("server_time_ms", now_ms)), now_ms,
-                                broker_order_id=str(r.get("order", "")), broker_position_id=str(r.get("position", "")), protective_stop_price=cmd.protective_stop if r.get("sl_confirmed") else None,
+                                cmd.entry_price, Decimal(str(r.get("arrival", cmd.entry_price))), cmd.entry_price, stop_confirmed, int(r.get("server_time_ms", now_ms)), now_ms,
+                                broker_order_id=str(r.get("order", "")), broker_position_id=str(r.get("position", "")), protective_stop_price=cmd.protective_stop if stop_confirmed else None,
                                 reject_reason=str(r.get("reason") or r.get("error") or "") if r.get("status", "UNKNOWN") in ("REJECTED", "UNKNOWN") else "").sealed()
 
     def modify_stop(self, position_id: str, new_stop: Decimal, *, now_ms: int) -> ExecutionReceipt:
         r = self.client.call("modify_sl_tp", {"alias": self.account_alias, "position": position_id, "sl": str(new_stop)}, now_ms=now_ms)
-        return ExecutionReceipt("", "", self.venue, "ACCEPTED" if r.get("ok") else "REJECTED", ZERO, None, ZERO, ZERO, ZERO, bool(r.get("ok")), now_ms, now_ms, broker_position_id=position_id, protective_stop_price=new_stop if r.get("ok") else None).sealed()
+        ok=r.get('ok');status='ACCEPTED' if ok is True else 'REJECTED' if ok is False else 'UNKNOWN'
+        return ExecutionReceipt("", "", self.venue, status, ZERO, None, ZERO, ZERO, ZERO, ok is True, now_ms, now_ms, broker_position_id=position_id, protective_stop_price=new_stop if ok is True else None).sealed()
 
     def close(self, position_id: str, quantity: Optional[Decimal], *, now_ms: int, reason: str) -> ExecutionReceipt:
         r = self.client.call("close", {"alias": self.account_alias, "position": position_id, "volume": str(quantity) if quantity else None, "reason": reason}, now_ms=now_ms)
