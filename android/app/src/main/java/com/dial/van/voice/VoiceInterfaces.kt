@@ -55,6 +55,9 @@ interface TtsOutputCallback {
     fun onSpeakingChanged(speaking: Boolean)
     fun onSpeechFrame(frame: SpeechSyncFrame)
     fun onUtteranceDone(utteranceId: String)
+    fun onUtteranceStarted(utteranceId: String) = Unit
+    fun onUtteranceFailed(utteranceId: String) = Unit
+    fun onUtteranceInterrupted(utteranceId: String) = Unit
 }
 
 interface BargeInHook {
@@ -617,6 +620,8 @@ class TtsOutputManager(
     private var androidShutDown = false
     private val sherpa = SherpaLocalTtsRuntime(context.applicationContext)
     private val speaking = AtomicBoolean(false)
+    private val playbackLock = Any()
+    private val playback = SpeechPlaybackState()
     @Volatile private var activeEngine: TtsEngineKind? = null
     private val main by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { Handler(Looper.getMainLooper()) }
 
@@ -679,30 +684,36 @@ class TtsOutputManager(
         val listenerInstalled = try {
             engine.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             override fun onStart(utteranceId: String?) {
-                markStarted(TtsEngineKind.ANDROID_OFFLINE, pendingCueTiming)
+                main.post { markStarted(TtsEngineKind.ANDROID_OFFLINE, utteranceId.orEmpty(), pendingCueTiming) }
             }
 
             override fun onDone(utteranceId: String?) {
-                markDone(TtsEngineKind.ANDROID_OFFLINE, utteranceId.orEmpty())
+                main.post { markDone(TtsEngineKind.ANDROID_OFFLINE, utteranceId.orEmpty()) }
             }
 
             @Deprecated("Deprecated in API")
             override fun onError(utteranceId: String?) {
-                markError(TtsEngineKind.ANDROID_OFFLINE)
+                main.post { markError(TtsEngineKind.ANDROID_OFFLINE, utteranceId.orEmpty()) }
+            }
+
+            override fun onStop(utteranceId: String?, interrupted: Boolean) {
+                main.post { markError(TtsEngineKind.ANDROID_OFFLINE, utteranceId.orEmpty(), interrupted = true) }
             }
 
             override fun onRangeStart(utteranceId: String?, start: Int, end: Int, frame: Int) {
-                if (activeEngine != TtsEngineKind.ANDROID_OFFLINE || activeCueTiming != null) return
-                val open = ((frame % 10) / 10f).coerceIn(0f, 1f)
-                val viseme = frame % 15
-                val sync = SpeechSyncFrame(
-                    System.currentTimeMillis(),
-                    rmsDb = open,
-                    mouthOpen = open,
-                    viseme = viseme,
-                )
-                callback.onSpeechFrame(sync)
-                _visualState.value = _visualState.value.copy(mouthOpen = open, viseme = viseme)
+                main.post {
+                    synchronized(playbackLock) {
+                        if (playback.current(TtsEngineKind.ANDROID_OFFLINE, utteranceId.orEmpty()) == null ||
+                            !speaking.get() || activeCueTiming != null) return@synchronized
+                        val open = ((frame % 10) / 10f).coerceIn(0f, 1f)
+                        val viseme = frame % 15
+                        val sync = SpeechSyncFrame(
+                            System.currentTimeMillis(), rmsDb = open, mouthOpen = open, viseme = viseme,
+                        )
+                        _visualState.value = _visualState.value.copy(mouthOpen = open, viseme = viseme)
+                        callback.onSpeechFrame(sync)
+                    }
+                }
             }
             }) == TextToSpeech.SUCCESS
         } catch (_: Exception) {
@@ -760,28 +771,31 @@ class TtsOutputManager(
             if (!sherpa.ready) {
                 false
             } else {
-                activeEngine = TtsEngineKind.SHERPA_ONNX
+                val token = beginPlayback(TtsEngineKind.SHERPA_ONNX, utteranceId, SegmentCueTiming.EMPTY)
                 activeCueTiming = null
-                sherpa.speak(
+                val accepted = sherpa.speak(
                     text = text,
-                    utteranceId = utteranceId,
+                    utteranceId = token.nativeId,
                     onStart = {
                         // PCM frames from SherpaLocalTtsRuntime own mouth-open while this
                         // engine speaks; estimated text cues are intentionally not started.
-                        markStarted(TtsEngineKind.SHERPA_ONNX, SegmentCueTiming.EMPTY)
+                        markStarted(TtsEngineKind.SHERPA_ONNX, token.nativeId, SegmentCueTiming.EMPTY)
                     },
                     onFrame = { frame ->
-                        if (activeEngine == TtsEngineKind.SHERPA_ONNX && speaking.get()) {
-                            callback.onSpeechFrame(frame)
-                            _visualState.value = _visualState.value.copy(
-                                mouthOpen = frame.mouthOpen,
-                                viseme = frame.viseme,
-                            )
+                        synchronized(playbackLock) {
+                            if (playback.current(TtsEngineKind.SHERPA_ONNX, token.nativeId) != null && speaking.get()) {
+                                _visualState.value = _visualState.value.copy(
+                                    mouthOpen = frame.mouthOpen, viseme = frame.viseme,
+                                )
+                                callback.onSpeechFrame(frame)
+                            }
                         }
                     },
                     onDone = { id -> markDone(TtsEngineKind.SHERPA_ONNX, id) },
-                    onError = { markError(TtsEngineKind.SHERPA_ONNX) },
+                    onError = { markError(TtsEngineKind.SHERPA_ONNX, token.nativeId) },
                 )
+                if (!accepted) markError(TtsEngineKind.SHERPA_ONNX, token.nativeId)
+                accepted
             }
         }
 
@@ -790,14 +804,13 @@ class TtsOutputManager(
                 if (!androidOfflineReadiness().usableOffline) {
                     false
                 } else {
-                    activeEngine = TtsEngineKind.ANDROID_OFFLINE
-                    pendingCueTiming = cueTiming
+                    val token = beginPlayback(TtsEngineKind.ANDROID_OFFLINE, utteranceId, cueTiming)
                     val started = try {
-                        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId) == TextToSpeech.SUCCESS
+                        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, token.nativeId) == TextToSpeech.SUCCESS
                     } catch (_: Exception) {
                         false
                     }
-                    if (!started) markError(TtsEngineKind.ANDROID_OFFLINE)
+                    if (!started) markError(TtsEngineKind.ANDROID_OFFLINE, token.nativeId)
                     started
                 }
             }
@@ -807,10 +820,18 @@ class TtsOutputManager(
         TtsEngineKind.CRITICAL_PHRASE_BANK -> false
     }
 
-    private fun markStarted(engine: TtsEngineKind, cueTiming: SegmentCueTiming) {
-        if (activeEngine != engine) return
+    private fun beginPlayback(engine: TtsEngineKind, utteranceId: String, cueTiming: SegmentCueTiming): SpeechPlaybackState.Token {
+        onBargeInRequested()
+        return synchronized(playbackLock) {
+            activeEngine = engine
+            pendingCueTiming = cueTiming
+            playback.begin(engine, utteranceId)
+        }
+    }
+
+    private fun markStarted(engine: TtsEngineKind, nativeId: String, cueTiming: SegmentCueTiming) = synchronized(playbackLock) {
+        val token = playback.start(engine, nativeId) ?: return@synchronized
         speaking.set(true)
-        callback.onSpeakingChanged(true)
         _visualState.value = _visualState.value.copy(
             durableState = VanDurableState.SPEAKING,
             speaking = true,
@@ -822,14 +843,14 @@ class TtsOutputManager(
             cueGeneration += 1L
             tickCues(cueGeneration, timing)
         }
+        callback.onSpeakingChanged(true)
+        callback.onUtteranceStarted(token.utteranceId)
     }
 
-    private fun markDone(engine: TtsEngineKind, utteranceId: String) {
-        if (activeEngine != engine) return
+    private fun markDone(engine: TtsEngineKind, nativeId: String) = synchronized(playbackLock) {
+        val token = playback.complete(engine, nativeId) ?: return@synchronized
         speaking.set(false)
         activeEngine = null
-        callback.onSpeakingChanged(false)
-        callback.onUtteranceDone(utteranceId)
         activeCueTiming = null
         cueGeneration += 1L
         _visualState.value = _visualState.value.copy(
@@ -837,13 +858,14 @@ class TtsOutputManager(
             speaking = false,
             mouthOpen = 0f,
         )
+        callback.onSpeakingChanged(false)
+        callback.onUtteranceDone(token.utteranceId)
     }
 
-    private fun markError(engine: TtsEngineKind) {
-        if (activeEngine != engine) return
+    private fun markError(engine: TtsEngineKind, nativeId: String, interrupted: Boolean = false) = synchronized(playbackLock) {
+        val token = playback.fail(engine, nativeId) ?: return@synchronized
         speaking.set(false)
         activeEngine = null
-        callback.onSpeakingChanged(false)
         activeCueTiming = null
         cueGeneration += 1L
         _visualState.value = _visualState.value.copy(
@@ -851,6 +873,9 @@ class TtsOutputManager(
             speaking = false,
             mouthOpen = 0f,
         )
+        callback.onSpeakingChanged(false)
+        if (interrupted) callback.onUtteranceInterrupted(token.utteranceId)
+        else callback.onUtteranceFailed(token.utteranceId)
     }
 
     /**
@@ -880,25 +905,30 @@ class TtsOutputManager(
     }
 
     override fun onBargeInRequested() {
-        if (speaking.get()) {
-            sherpa.stop()
-            tts?.stop()
+        // Native generation may be queued even before onStart sets speaking.
+        synchronized(playbackLock) {
+            val pending = playback.cancel()
+            val wasSpeaking = speaking.getAndSet(false)
+            runCatching { sherpa.stop() }
+            runCatching { tts?.stop() }
             speaking.set(false)
             activeEngine = null
             activeCueTiming = null
             cueGeneration += 1L
-            callback.onSpeakingChanged(false)
-            _visualState.value = _visualState.value.copy(
-                speaking = false,
-                mouthOpen = 0f,
-                durableState = VanDurableState.LISTENING,
-            )
+            if (pending != null || wasSpeaking) {
+                _visualState.value = _visualState.value.copy(
+                    speaking = false, mouthOpen = 0f, durableState = VanDurableState.LISTENING,
+                )
+                callback.onSpeakingChanged(false)
+            }
+            if (pending != null) callback.onUtteranceInterrupted(pending.utteranceId)
         }
     }
 
     override fun isSpeaking(): Boolean = speaking.get()
 
     fun shutdown() {
+        onBargeInRequested()
         sherpa.release()
         synchronized(androidLock) {
             androidShutDown = true
@@ -925,7 +955,7 @@ class VoiceSessionCoordinator(
 ) {
     val ownerTurnActive: StateFlow<Boolean> = input.ownerTurnActive
     fun beginOwnerTurn(turnId: String = UUID.randomUUID().toString()): String {
-        if (output.isSpeaking()) output.onBargeInRequested()
+        output.onBargeInRequested()  // pending synthesis is also interruptible work
         return input.startListening(turnId)
     }
 

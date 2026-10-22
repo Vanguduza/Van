@@ -326,6 +326,8 @@ class SpeechQueueTest {
         queue.mark("sp_58_0001", SpeechSegmentState.READY)
         assertFalse(queue.completed(), "delivered is not heard")
         queue.mark("sp_58_0001", SpeechSegmentState.SPOKEN)
+        assertFalse(queue.completed(), "the first sentence was never heard")
+        queue.mark("sp_58_0000", SpeechSegmentState.SPOKEN)
         assertTrue(queue.completed())
     }
 
@@ -347,6 +349,8 @@ class SpeechQueueTest {
         (0..3).forEach { queue.offer(segment(it)) }
         queue.mark("sp_58_0002", SpeechSegmentState.READY)
         queue.mark("sp_58_0001", SpeechSegmentState.READY)
+        assertNull(queue.nextToSpeak(), "an earlier sentence still needs synthesis")
+        queue.mark("sp_58_0000", SpeechSegmentState.SPOKEN)
         assertEquals(1, queue.nextToSpeak()?.segmentIndex)
     }
 

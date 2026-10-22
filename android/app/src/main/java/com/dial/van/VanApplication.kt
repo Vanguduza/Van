@@ -922,11 +922,13 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     }
 
     override fun onSpeakingChanged(speaking: Boolean) {
-        if (speaking) {
-            VanLiveVisualState.speakingStarted()
-        } else {
-            VanLiveVisualState.speakingEnded()
-            VanLiveVisualState.settleToIdle()
+        appScope.launch(Dispatchers.Main.immediate) {
+            if (ttsOutput.isSpeaking()) {
+                VanLiveVisualState.speakingStarted()
+            } else {
+                VanLiveVisualState.speakingEnded()
+                VanLiveVisualState.settleToIdle()
+            }
         }
     }
 
@@ -935,8 +937,31 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     }
 
     override fun onUtteranceDone(utteranceId: String) {
-        VanLiveVisualState.speakingEnded()
-        VanLiveVisualState.settleToIdle()
+        appScope.launch(Dispatchers.Main.immediate) {
+            if (!ttsOutput.isSpeaking()) {
+                VanLiveVisualState.speakingEnded()
+                VanLiveVisualState.settleToIdle()
+            }
+            if (::voiceEdge.isInitialized) voiceEdge.onUtteranceDone(utteranceId)
+        }
+    }
+
+    override fun onUtteranceStarted(utteranceId: String) {
+        appScope.launch(Dispatchers.Main.immediate) {
+            if (::voiceEdge.isInitialized) voiceEdge.onUtteranceStarted(utteranceId)
+        }
+    }
+
+    override fun onUtteranceFailed(utteranceId: String) {
+        appScope.launch(Dispatchers.Main.immediate) {
+            if (::voiceEdge.isInitialized) voiceEdge.onUtteranceFailed(utteranceId)
+        }
+    }
+
+    override fun onUtteranceInterrupted(utteranceId: String) {
+        appScope.launch(Dispatchers.Main.immediate) {
+            if (::voiceEdge.isInitialized) voiceEdge.onUtteranceInterrupted(utteranceId)
+        }
     }
 
     companion object {

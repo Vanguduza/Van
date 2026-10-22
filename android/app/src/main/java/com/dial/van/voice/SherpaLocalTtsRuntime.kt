@@ -6,6 +6,7 @@ import android.media.AudioFormat
 import android.media.AudioTrack
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import com.k2fsa.sherpa.onnx.OfflineTts
 import com.k2fsa.sherpa.onnx.OfflineTtsConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsKokoroModelConfig
@@ -193,7 +194,15 @@ class SherpaLocalTtsRuntime(context: Context) {
                     offset += written
                 }
 
-                if (playback.isCurrent(epoch)) {
+                val drained = awaitSpeechPlaybackDrain(
+                    submittedFrames = offset,
+                    sampleRate = audio.sampleRate,
+                    playedFrames = { player.playbackHeadPosition.toLong() and 0xffffffffL },
+                    isCurrent = { playback.isCurrent(epoch) },
+                    clockMs = { SystemClock.elapsedRealtime() },
+                    waitForProgress = { Thread.sleep(10) },
+                )
+                if (drained && playback.isCurrent(epoch)) {
                     player.stop()
                     main.post { if (playback.isCurrent(epoch)) onDone(utteranceId) }
                 }

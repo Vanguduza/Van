@@ -118,12 +118,8 @@ class SpeechStreamService:
         segments the device has already spoken.
         """
         stream = self._streams.get(speech_stream_id)
-        if stream is None:
+        if stream is None or stream.interrupted:
             return []
-        # The previous last segment stops being final: an answer that continues did not end.
-        if stream.segments:
-            last = stream.segments[-1]
-            stream.segments[-1] = SpeechSegment(**{**last.__dict__, "final": False})
         fresh = build_segments(
             response_id=stream.response_id,
             speech_stream_id=stream.speech_stream_id,
@@ -131,6 +127,12 @@ class SpeechStreamService:
             interruptible=interruptible,
             first_index=len(stream.segments),
         )
+        if not fresh:
+            return []
+        # An empty provider chunk cannot rescind a previously published end.
+        if stream.segments:
+            last = stream.segments[-1]
+            stream.segments[-1] = SpeechSegment(**{**last.__dict__, "final": False})
         stream.segments.extend(fresh)
         return fresh
 
@@ -160,7 +162,7 @@ class SpeechStreamService:
         device by `segment_id`.
         """
         stream = self._streams.get(speech_stream_id)
-        if stream is None:
+        if stream is None or stream.interrupted:
             return []
         return [s for s in stream.segments if s.segment_index > stream.last_spoken_segment]
 
@@ -193,8 +195,8 @@ class SpeechStreamService:
             "response_id": stream.response_id,
             "speech_stream_id": stream.speech_stream_id,
             "turn_id": stream.turn_id,
-            "last_received_segment": max(stream.last_received_segment, 0),
-            "last_spoken_segment": max(stream.last_spoken_segment, 0),
+            "last_received_segment": stream.last_received_segment,
+            "last_spoken_segment": stream.last_spoken_segment,
             "resume_from_segment": stream.last_spoken_segment + 1,
             "total_segments": len(stream.segments),
             "segments": [s.as_json() for s in self.resume_from(stream.speech_stream_id)],

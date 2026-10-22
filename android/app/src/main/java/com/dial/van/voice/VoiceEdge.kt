@@ -71,7 +71,10 @@ class VoiceEdge(
     private val _readiness = MutableStateFlow(Readiness())
     val readiness: StateFlow<Readiness> = _readiness.asStateFlow()
 
-    private val speech = SpeechQueue()
+    private var speech = SpeechQueue()
+    private var browserAudioForSpeech = false
+    private var utteranceGeneration = 0L
+    private var activeUtterance: Pair<String, String>? = null
     private var currentDucking: DuckingAction = DuckingAction.NONE
 
     /**
@@ -168,14 +171,31 @@ class VoiceEdge(
      * answer either way, which is the point of §21.18's fallback chain ending in text.
      */
     fun speak(segment: SpeechSegment, browserAudioPlaying: Boolean): String? {
+        val currentStream = speech.cursors().speechStreamId
+        if (currentStream != null && currentStream != segment.speechStreamId) {
+            tts.onBargeInRequested()
+            speech.bargeIn()
+            activeUtterance = null
+            speech = SpeechQueue()
+        }
+        if (!speech.offer(segment)) return null
+        browserAudioForSpeech = browserAudioPlaying
+        return playNext()
+    }
+
+    private fun playNext(): String? {
+        val segment = speech.nextForSynthesis() ?: return null
         val selection = LocalTtsRouter.select(SpeechKind.ASSISTANT_ANSWER, engines(segment.text))
-        if (selection is TtsSelection.Silent) return selection.ownerSentence
+        if (selection is TtsSelection.Silent) {
+            speech.mark(segment.segmentId, SpeechSegmentState.FAILED)
+            return selection.ownerSentence
+        }
         selection as TtsSelection.Engine
 
         currentDucking = AudioFocusPolicy.decide(
             vanIsSpeaking = true,
-            browserAudioPlaying = browserAudioPlaying,
-            callInProgress = audio?.mode == AudioManager.MODE_IN_CALL,
+            browserAudioPlaying = browserAudioForSpeech,
+            callInProgress = audio?.mode in setOf(AudioManager.MODE_IN_CALL, AudioManager.MODE_IN_COMMUNICATION),
             otherMediaHasFocus = audio?.isMusicActive == true,
         )
         if (currentDucking == DuckingAction.YIELD) {
@@ -183,25 +203,59 @@ class VoiceEdge(
             // failure to answer: the segment stays queued.
             return null
         }
+        speech.mark(segment.segmentId, SpeechSegmentState.SYNTHESIZING)
+        val utteranceId = "voice-edge-${++utteranceGeneration}"
+        activeUtterance = utteranceId to segment.segmentId
         val started = tts.speak(
             segment.text,
-            utteranceId = segment.segmentId,
+            utteranceId = utteranceId,
             cueTiming = segment.cueTiming,
             engine = selection.kind,
         )
         if (!started) {
+            if (activeUtterance?.first == utteranceId) activeUtterance = null
+            speech.mark(segment.segmentId, SpeechSegmentState.FAILED)
+            releaseAudio()
             return "I can't answer aloud right now — it's on the screen instead."
         }
-        speech.mark(segment.segmentId, SpeechSegmentState.SPEAKING)
         return null
+    }
+
+    fun onUtteranceStarted(utteranceId: String) {
+        val segmentId = activeUtterance?.takeIf { it.first == utteranceId }?.second ?: return
+        speech.mark(segmentId, SpeechSegmentState.SPEAKING)
+    }
+
+    fun onUtteranceDone(utteranceId: String) {
+        val segmentId = activeUtterance?.takeIf { it.first == utteranceId }?.second ?: return
+        activeUtterance = null
+        speech.mark(segmentId, SpeechSegmentState.SPOKEN)
+        releaseAudio()
+        playNext()
+    }
+
+    fun onUtteranceFailed(utteranceId: String) {
+        val segmentId = activeUtterance?.takeIf { it.first == utteranceId }?.second ?: return
+        activeUtterance = null
+        speech.mark(segmentId, SpeechSegmentState.FAILED)
+        releaseAudio()
+    }
+
+    fun onUtteranceInterrupted(utteranceId: String) {
+        if (activeUtterance?.first != utteranceId) return
+        activeUtterance = null
+        speech.bargeIn()
+        releaseAudio()
     }
 
     /** §21.21 — the owner spoke. Local first, always. */
     fun bargeIn(): Int {
+        val interrupted = speech.snapshot().count { it.state in setOf(SpeechSegmentState.RECEIVED,
+            SpeechSegmentState.SYNTHESIZING, SpeechSegmentState.READY, SpeechSegmentState.SPEAKING) }
         for (step in BargeInPolicy.sequence()) {
             when (step) {
                 BargeInStep.STOP_PLAYBACK -> tts.onBargeInRequested()
-                BargeInStep.MARK_SEGMENTS_INTERRUPTED -> return speech.bargeIn()
+                BargeInStep.MARK_SEGMENTS_INTERRUPTED -> { speech.bargeIn(); return interrupted }
                 else -> Unit
             }
         }

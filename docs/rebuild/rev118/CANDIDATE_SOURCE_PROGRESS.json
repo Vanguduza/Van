@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T09:18:17.263733+00:00",
+  "updated_at_utc": "2026-10-22T09:48:59.831364+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -399,9 +399,14 @@
         "BE-027",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Existing spoken-result queue now receives actual native start/stop/error/completion with exact delivery bindings and drain/cancellation guards;1290 JVM,195 app units,48 backend tests pass;two native tests compiled, runtime pending.",
+          "evidence": "backend/BE-029_SPEECH_CONTINUITY.md; receipts/SPEECH_CONTINUITY_SOURCE_20261022.json"
+        }
+      ]
     },
     "BE-030": {
       "title": "Attention, notifications, presence and compact summaries",

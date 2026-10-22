@@ -190,6 +190,24 @@ jobs:
           assert all("dial-new checkout not available (set DIAL_REPO)" in c.find("skipped").get("message", "") for c in cases if c.find("skipped") is not None), skipped
           print({"source_cases": len(cases), "private_source_not_executed_here": skipped})
           PY
+      - name: Public voice, speaker-authority and speech-continuity checks
+        run: >-
+          python -m pytest -q
+          backend/tests/test_voice_stream_continuity.py
+          backend/tests/test_voice_speech_stream.py
+          backend/tests/test_speech_sync.py
+          backend/tests/test_voice_speech_cues.py
+          backend/tests/test_voice_speaker_authority.py
+          --junitxml=voice-source-report.xml
+      - name: Require executed voice cases without skips
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          suites = list(ET.parse("voice-source-report.xml").getroot().iter("testsuite"))
+          counts = {key: sum(int(s.get(key, 0)) for s in suites) for key in ("tests", "failures", "errors", "skipped")}
+          assert counts["tests"] >= 48 and all(counts[k] == 0 for k in ("failures", "errors", "skipped")), counts
+          print(counts)
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -197,6 +215,7 @@ jobs:
           path: |
             postgres-ledger-report.xml
             trading-source-report.xml
+            voice-source-report.xml
 
   backend:
     runs-on: ubuntu-latest

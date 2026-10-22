@@ -170,7 +170,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-22T09:18:17.263733+00:00",
+    "updated_utc": "2026-10-22T09:48:59.831364+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": "No local database/test remains running. Source9e345e68 run39745717242 pending two mutation shards at last read; refresh before attributing a full score. New source CI not yet launched.",
@@ -210,7 +210,8 @@
       "Real PostgreSQL named-ledger/migration candidate:5 original failures reproduced;1680 full trading pass/1skip before final two test-only controls; latest zero-skip CI selection26/26;18 CI/deployer contract tests pass. Private fixture stopped/removed.",
       "Current captured-availability source:1691 full trading pass, zero skips, with actual private PostgreSQL and pinned DDS source fixtures;102 learning/recovery,19 cutoff/CI,7 Ubuntu prerequisite controls pass. Hosted9e345 database job26/26 passes; Android acquisition blocked before tests by MicrosoftAPT403, helper fix pending new hosted source run.",
       "Exact approval binding:1713 full trading pass/zero skips on private PostgreSQL plus pinned DDS;82 focused,22 new source cases;12 real JSON Schema controls pass. Fixture stopped/removed. Hosted e68dd210:374/374 mutation identities,16 instrumentation pass/4 explicit skips,26 PG and1690 public trading pass/one private-source skip; only DDS key and trusted-main jobs fail.",
-      "Account risk recovery:1741 full trading pass/zero skips on private PostgreSQL and pinned DDS,28 new cases;74 focused/one PG case covered in full,41 gateway,154 owner/Artemis-plan contracts pass. All foreign financial-state counterexamples fixed; unknown scope retains protection and owner-visible refusal. Private fixture stopped/removed."
+      "Account risk recovery:1741 full trading pass/zero skips on private PostgreSQL and pinned DDS,28 new cases;74 focused/one PG case covered in full,41 gateway,154 owner/Artemis-plan contracts pass. All foreign financial-state counterexamples fixed; unknown scope retains protection and owner-visible refusal. Private fixture stopped/removed.",
+      "Speech candidate:1290 JVM/195 app units/48 backend pass;debug and instrumentation APKs assemble;lint0Error/Fatal89warnings. Three affected Kotlin mutants assertion-detected after control, source restored;374 identities retained/383 edits. Two actual offline TTS/owner-turn instrumentation cases compile, awaiting hosted execution; no local emulator/native acceptance claim."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -221,8 +222,8 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Push account recovery checkpoint, then close actual voice queue/playback race and producer/consumer gaps; broader learning/readmodel scope binding remains source work.",
-    "previous_head": "ae433a07a69b9d8edf433103722b2dbfff28e697"
+    "next_action": "Push voice checkpoint with native tests, inspect actual hosted results, then wire authenticated server response production/resume/cursors and delayed context. Continue full-unit source work; no blanket stop at native admission.",
+    "previous_head": "0a2971673417d585e444747c39afbd8bea5c1ee7"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -280,6 +281,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Complete account risk recovery checkpoint; then source voice producer/queue/playback callback integration. Continue whole canonical programme without issuing native/admission gates.",
-  "updated_at_utc": "2026-10-22T09:18:17.263733+00:00"
+  "current_action": "Verify and push source speech-continuity checkpoint, execute new hosted native TTS tests and continue real gateway speech producer/cursor/context wiring and the preserved whole-product programme.",
+  "updated_at_utc": "2026-10-22T09:48:59.831364+00:00"
 }
