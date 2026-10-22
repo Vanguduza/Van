@@ -134,7 +134,12 @@ class RiveContractTest {
         val rig = rigOrSkip()
         val gazeA = capture(rig, "gaze-neg", state = 4, attentionX = -1f, attentionY = -1f)
         val gazeB = capture(rig, "gaze-pos", state = 4, attentionX = 1f, attentionY = 1f)
-        assertTrue("gaze extremes are pixel-identical", meanAbsRgb(gazeA, gazeB) > 0.001)
+        // Gaze moves the visor eyes, not the entire silhouette. At fixed animation time
+        // the unchanged body no longer contributes breathing noise to this measurement.
+        // Use the locked rig's eye region and retain the absolute visibility floor.
+        val gazeDiff = meanAbsRgbRegion(gazeA, gazeB, 0.38, 0.18, 0.60, 0.31)
+        assertTrue("gaze extremes do not visibly move the eye region ($gazeDiff)",
+            gazeDiff > MIN_DISTINCT_RGB)
         val mouth0 = capture(rig, "mouth-0", state = 9, speaking = true, mouthOpen = 0f, viseme = 2)
         val mouth1 = capture(rig, "mouth-1", state = 9, speaking = true, mouthOpen = 1f, viseme = 2)
         val mouthDiff = meanAbsRgbRegion(mouth0, mouth1, 0.38, 0.20, 0.58, 0.36)

@@ -23,6 +23,7 @@ import com.dial.van.command.CommandCentreActivity
 import org.junit.Rule
 import org.junit.Test
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertEquals
 import org.junit.runner.RunWith
 import java.io.File
 
@@ -99,26 +100,44 @@ class CommandCentreLaunchTest {
         ActivityScenario.launch(CommandCentreActivity::class.java).use { scenario ->
             compose.waitForIdle()
             lateinit var resident: CommandCentreActivity
+            lateinit var launchIntent: Intent
             scenario.onActivity { activity ->
                 resident = activity
-                activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("van://attention"))
-                    .setClass(activity, CommandCentreActivity::class.java)
-                    .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP))
+                launchIntent = Intent(activity.intent)
             }
-            compose.waitForIdle()
-            navItem("Attention").assertIsSelected()
-            scenario.onActivity { assertSame(resident, it) }
-            // A subsequent request must still steer the same resident Activity,
-            // including when the first destination has already been consumed.
-            scenario.onActivity { activity ->
-                activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("van://work"))
-                    .setClass(activity, CommandCentreActivity::class.java)
-                    .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP))
+            try {
+                scenario.onActivity { activity ->
+                    activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("van://attention"))
+                        .setClass(activity, CommandCentreActivity::class.java)
+                        .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP))
+                }
+                compose.waitForIdle()
+                navItem("Attention").assertIsSelected()
+                scenario.onActivity {
+                    assertSame(resident, it)
+                    assertEquals(Uri.parse("van://attention"), it.intent.data)
+                }
+                // A subsequent request must still steer the same resident Activity,
+                // including when the first destination has already been consumed.
+                scenario.onActivity { activity ->
+                    activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("van://work"))
+                        .setClass(activity, CommandCentreActivity::class.java)
+                        .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP))
+                }
+                compose.waitForIdle()
+                navItem("Work").assertIsSelected()
+                scenario.onActivity {
+                    assertSame(resident, it)
+                    assertEquals(Uri.parse("van://work"), it.intent.data)
+                }
+                capture("resident-deeplink-work")
+            } finally {
+                // ActivityScenario 1.6.1 filters lifecycle callbacks by launch Intent
+                // action/data. Production correctly calls setIntent on deep-link delivery;
+                // restore the harness identity only after verifying both real deliveries,
+                // so Scenario can observe STOPPED/DESTROYED during close().
+                scenario.onActivity { it.intent = launchIntent }
             }
-            compose.waitForIdle()
-            navItem("Work").assertIsSelected()
-            scenario.onActivity { assertSame(resident, it) }
-            capture("resident-deeplink-work")
         }
     }
 
