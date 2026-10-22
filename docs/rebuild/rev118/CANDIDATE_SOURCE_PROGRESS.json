@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T11:32:48.406564+00:00",
+  "updated_at_utc": "2026-10-22T11:44:37.446794+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -477,9 +477,14 @@
         "BE-026",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Actual CI ABI oracle reads direct/wrapped command arguments and rejects missing/wrong/conflicting/nonexecuting declarations;20 checks pass including actual AGP production-profile refusal. Original broad audit failure retained. No complete unit admission.",
+          "evidence": "backend/BE-034_CI_ABI_COMMAND_ORACLE.md; receipts/CI_ABI_ORACLE_SOURCE_20261022.json"
+        }
+      ]
     },
     "BE-035": {
       "title": "Qualified chronological strategy evaluator and simulator oracle",

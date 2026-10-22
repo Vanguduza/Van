@@ -12,18 +12,67 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def shell_commands(script):
+    """Read literal CI command arguments, including the diagnostics' bash -c body."""
+    lexer = shlex.shlex(script, posix=True, punctuation_chars=";&|\n")
+    lexer.whitespace = " \t\r"
+    lexer.whitespace_split = True
+    commands, current = [], []
+    for token in lexer:
+        if token and all(character in ";&|\n" for character in token):
+            if current:
+                commands.append(current)
+                current = []
+        else:
+            current.append(token)
+    if current:
+        commands.append(current)
+    for command in commands:
+        if len(command) >= 3 and Path(command[0]).name in {"bash", "sh"} and command[1] == "-c":
+            yield from shell_commands(command[2])
+        else:
+            yield command
+
+
+def require_instrumentation_abi(script, architecture):
+    commands = [command for command in shell_commands(script)
+                if Path(command[0]).name == "gradlew" and ":app:connectedDebugAndroidTest" in command]
+    assert len(commands) == 1, "one actual instrumentation Gradle invocation is required"
+    overrides = [argument for argument in commands[0] if argument.startswith("-PVAN_TEST_ABI=")]
+    assert overrides == [f"-PVAN_TEST_ABI={architecture}"], overrides
+
+
 def test_ci_selects_the_emulator_native_abi_only_for_instrumentation():
     workflow = yaml.safe_load((ROOT / ".github/workflows/van-ci.yml").read_text())
     steps = workflow["jobs"]["android-instrumentation"]["steps"]
     runner = next(step for step in steps if step.get("uses", "").startswith("reactivecircus/android-emulator-runner@"))
     options = runner["with"]
-    commands = [shlex.split(line) for line in options["script"].splitlines() if line.strip()]
-    command = next(command for command in commands if ":app:connectedDebugAndroidTest" in command)
-    assert f"-PVAN_TEST_ABI={options['arch']}" in command
+    require_instrumentation_abi(options["script"], options["arch"])
     assert options["arch"] == "x86_64"
     for job_name, job in workflow["jobs"].items():
         if job_name != "android-instrumentation":
             assert "VAN_TEST_ABI" not in str(job)
+
+
+@pytest.mark.parametrize("script", [
+    "./gradlew :app:connectedDebugAndroidTest -PVAN_TEST_ABI=x86_64",
+    "bash -c 'set +e; ./gradlew :app:connectedDebugAndroidTest -PVAN_TEST_ABI=x86_64; result=$?; echo diagnostics; exit \"$result\"'",
+])
+def test_abi_oracle_reads_direct_and_diagnostics_wrapped_commands(script):
+    require_instrumentation_abi(script, "x86_64")
+
+
+@pytest.mark.parametrize("script", [
+    "./gradlew :app:connectedDebugAndroidTest",
+    "./gradlew :app:connectedDebugAndroidTest -PVAN_TEST_ABI=arm64-v8a",
+    "./gradlew :app:connectedDebugAndroidTest -PVAN_TEST_ABI=x86_64 -PVAN_TEST_ABI=arm64-v8a",
+    "# ./gradlew :app:connectedDebugAndroidTest -PVAN_TEST_ABI=x86_64",
+    "echo ./gradlew :app:connectedDebugAndroidTest -PVAN_TEST_ABI=x86_64",
+    "bash -c 'echo ./gradlew :app:connectedDebugAndroidTest -PVAN_TEST_ABI=x86_64'",
+])
+def test_abi_oracle_rejects_missing_wrong_overridden_and_nonexecuting_declarations(script):
+    with pytest.raises(AssertionError):
+        require_instrumentation_abi(script, "x86_64")
 
 
 def test_test_override_preserves_default_handset_abi_and_refuses_release():
