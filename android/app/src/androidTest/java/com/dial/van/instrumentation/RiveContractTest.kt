@@ -170,6 +170,22 @@ class RiveContractTest {
     }
 
     @Test
+    fun repeatedFixedTimeCapturesStayBelowTheVisibilityFloor() {
+        val rig = rigOrSkip()
+        for ((action, trigger) in listOf(0 to null, 2 to "ack")) {
+            val reference = capture(rig, "repeat-$action-0", state = 2, action = action,
+                trigger = trigger, settleMs = ACTION_PEAK_MS)
+            repeat(3) { index ->
+                val again = capture(rig, "repeat-$action-${index + 1}", state = 2,
+                    action = action, trigger = trigger, settleMs = ACTION_PEAK_MS)
+                val noise = meanAbsRgb(reference, again)
+                assertTrue("fixed-time action $action is not repeatable: $noise",
+                    noise <= threshold("min_distinct_rgb", MIN_DISTINCT_RGB))
+            }
+        }
+    }
+
+    @Test
     fun everyStateAndActionRenders() {
         val rig = rigOrSkip()
         assumeTrue("FULL_OR_PRODUCTION_ONLY", rig.mode != Mode.CORE)
@@ -364,7 +380,7 @@ class RiveContractTest {
         rig: Rig, background: String = "dark", state: Int = 2, speaking: Boolean = false,
         listening: Boolean = false, attentionX: Float = 0f, attentionY: Float = 0f,
         mouthOpen: Float = 0f, urgency: Float = 0f, viseme: Int = 0, action: Int = 0,
-        trigger: String? = null, sizeDp: Int = 320,
+        trigger: String? = null, sizeDp: Int = 320, sampleMs: Long = 850L,
     ): ActivityScenario<RiveCandidateHostActivity> {
         val intent = Intent(targetContext, RiveCandidateHostActivity::class.java)
             .putExtra(RiveCandidateHostActivity.EXTRA_TEST_MODE, true)
@@ -380,6 +396,7 @@ class RiveContractTest {
             .putExtra(RiveCandidateHostActivity.EXTRA_URGENCY, urgency)
             .putExtra(RiveCandidateHostActivity.EXTRA_VISEME, viseme)
             .putExtra(RiveCandidateHostActivity.EXTRA_ACTION, action)
+            .putExtra(RiveCandidateHostActivity.EXTRA_SAMPLE_TIME_MS, sampleMs)
         if (trigger != null) intent.putExtra(RiveCandidateHostActivity.EXTRA_TRIGGER, trigger)
         return ActivityScenario.launch(intent)
     }
@@ -391,9 +408,14 @@ class RiveContractTest {
         viseme: Int = 0, action: Int = 0, trigger: String? = null, sizeDp: Int = 320,
         settleMs: Long = 850L,
     ): Bitmap {
-        launchScenario(rig, background, state, speaking, listening, attentionX, attentionY, mouthOpen, urgency, viseme, action, trigger, sizeDp).use {
+        launchScenario(rig, background, state, speaking, listening, attentionX, attentionY, mouthOpen, urgency, viseme, action, trigger, sizeDp, settleMs).use {
             instrumentation.waitForIdleSync()
-            SystemClock.sleep(settleMs)
+            val deadline = SystemClock.uptimeMillis() + 10_000L
+            while (RiveCandidateHostActivity.lastSampleTimeMs != settleMs && SystemClock.uptimeMillis() < deadline) {
+                SystemClock.sleep(20L)
+            }
+            assertEquals("debug renderer did not draw the requested animation time", settleMs,
+                RiveCandidateHostActivity.lastSampleTimeMs)
             fun takeCrop(): Bitmap {
                 val screen = instrumentation.uiAutomation.takeScreenshot()
                 val density = targetContext.resources.displayMetrics.density
@@ -428,8 +450,8 @@ class RiveContractTest {
     }
 
     /**
-     * Two IDLE captures differ by breathing/blink phase alone. A state or action only counts as
-     * "different" when it clears that measured noise with margin, never a fixed 0.1 %.
+     * Two IDLE captures at the same animation time measure rendering repeatability. The
+     * absolute visibility floor and the 3x measured-noise margin remain unchanged.
      */
     private fun distinctThreshold(rig: Rig): Double {
         val a = capture(rig, "noise-idle-a", state = 2)
