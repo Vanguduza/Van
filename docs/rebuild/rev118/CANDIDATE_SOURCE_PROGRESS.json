@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-22T07:48:28.107220+00:00",
+  "updated_at_utc": "2026-10-22T08:07:47.328817+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -72,6 +72,11 @@
           "change": "Existing ledger atomic protective request/receipt journal and four real process-death boundaries",
           "evidence": "backend/BE-003_010_012_036_EXIT_AND_HEALTH.md; receipts/EXIT_UNCERTAINTY_AND_HEALTH_SOURCE_20261022.json",
           "result": "1629 full trading tests pass/2 skip; partial candidate milestone"
+        },
+        {
+          "change": "Real PostgreSQL named event/chain isolation, transactional reader cleanup, explicit verified legacy migration and zero-skip CI job",
+          "evidence": "backend/BE-003_POSTGRES_LEDGER_SCOPE.md; receipts/POSTGRES_LEDGER_SCOPE_SOURCE_20261022.json",
+          "result": "1680 full trading pass/1skip before final two test-only controls; exact latest CI selection26/26 actual PostgreSQL pass. Runtime/account/readmodel binding and native migration remain further work."
         }
       ]
     },

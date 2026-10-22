@@ -120,6 +120,65 @@ jobs:
         working-directory: head
         run: pip install pytest && pytest -q tests/contracts/test_project_truth_ledger.py
 
+  postgres-ledger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        # Disposable source-test database; no production credentials or data.
+        image: postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27
+        env:
+          POSTGRES_USER: van_fixture
+          POSTGRES_PASSWORD: van_ephemeral_test_only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U van_fixture -d postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      PYTHONPATH: backend:trading:.
+      VATI_TEST_PG_DSN: postgresql://van_fixture:van_ephemeral_test_only@127.0.0.1:5432/postgres
+      VATI_TEST_PG_ISOLATED_FIXTURE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned PostgreSQL verification dependencies
+        run: |
+          python -m pip install -r backend/requirements.lock
+          python -m pip install --no-deps psycopg==3.2.9 psycopg-binary==3.2.9
+      - name: Initialize the disposable test schema
+        run: |
+          python - <<'PY'
+          import os, psycopg
+          assert psycopg.__version__ == "3.2.9"
+          with psycopg.connect(os.environ["VATI_TEST_PG_DSN"]) as connection:
+              connection.execute("CREATE SCHEMA vati")
+          PY
+      - name: Real PostgreSQL isolation, migration, writer and recovery checks
+        run: >-
+          python -m pytest -q
+          trading/tests/test_postgres_ledger_isolation.py
+          trading/tests/test_consolidated_ledger_transactions.py
+          trading/tests/test_infra_live.py::test_postgres_ledger_matches_sqlite_chain_and_detects_tampering
+          --junitxml=postgres-ledger-report.xml
+      - name: Require executed PostgreSQL cases without skips
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          suites = list(ET.parse("postgres-ledger-report.xml").getroot().iter("testsuite"))
+          counts = {key: sum(int(s.get(key, 0)) for s in suites) for key in ("tests", "failures", "errors", "skipped")}
+          assert counts["tests"] >= 26 and all(counts[k] == 0 for k in ("failures", "errors", "skipped")), counts
+          print(counts)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: van-postgres-ledger-report
+          path: postgres-ledger-report.xml
+
   backend:
     runs-on: ubuntu-latest
     steps:

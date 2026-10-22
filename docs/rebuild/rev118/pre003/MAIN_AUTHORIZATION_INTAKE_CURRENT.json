@@ -1,7 +1,7 @@
 {
   "schema": "van.rebuild.authorization-intake-candidate/1",
   "status": "PREPARED_NOT_ADMITTED",
-  "source_head": "c36d6a21bea1618707e353912d3f5b9508eca5ba",
+  "source_head": "eb94d0f8b7792d27d88b51c37b83dcf8b6340bce",
   "base_head": "8eb1889822fc8a83f219977c15340172e16acd91",
   "records": [
     {
@@ -243,6 +243,11 @@
       "path": "docs/project-state/authorizations/auth-20261022-owner-owner-contract-refresh.json",
       "sha256": "e5c9d36698aecd6ca33e64c9a07f3acff57209da93bec6259db63be5abc4e937",
       "git_blob": "3c1b8da9b6b349964a8c043d69fba2255f782186"
+    },
+    {
+      "path": "docs/project-state/authorizations/auth-20261022-owner-postgres-schema-isolation.json",
+      "sha256": "10ef5bce8761cfbb92f5d77a3a9821a240f7e00b668d282546e093d26fa40129",
+      "git_blob": "efc1e9b56255dcfe84c9d21261bc37fecbd3a8b2"
     }
   ],
   "count": 45,

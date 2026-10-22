@@ -19,15 +19,16 @@ from vati.core.ledger import GENESIS, IncrementalChainVerifier, LedgerError, Rep
 # Runtime deliberately has no CREATE privilege on the database.
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS vati.events (
-  seq BIGSERIAL PRIMARY KEY,
+  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,
   kind TEXT NOT NULL, producer TEXT NOT NULL, correlation_id TEXT NOT NULL,
   event_time_ms BIGINT NOT NULL, received_time_ms BIGINT NOT NULL, decision_time_ms BIGINT,
   schema_version INTEGER NOT NULL, payload_json TEXT NOT NULL,
-  event_hash TEXT NOT NULL, prev_hash TEXT NOT NULL, chain_hash TEXT NOT NULL UNIQUE,
+  event_hash TEXT NOT NULL, prev_hash TEXT NOT NULL, chain_hash TEXT NOT NULL,
+  CONSTRAINT events_ledger_chain_hash_key UNIQUE(ledger, chain_hash),
   inserted_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS ix_vati_events_corr ON vati.events(correlation_id);
-CREATE INDEX IF NOT EXISTS ix_vati_events_kind ON vati.events(kind);
+CREATE INDEX IF NOT EXISTS ix_vati_events_ledger_corr ON vati.events(ledger, correlation_id);
+CREATE INDEX IF NOT EXISTS ix_vati_events_ledger_kind ON vati.events(ledger, kind);
 CREATE TABLE IF NOT EXISTS vati.chain_head (
   ledger TEXT PRIMARY KEY, chain_hash TEXT NOT NULL, seq BIGINT NOT NULL
 );
@@ -44,20 +45,44 @@ CREATE TABLE IF NOT EXISTS vati.account_runtime_leases (
 """
 
 
+def require_scoped_schema(cursor) -> None:
+    cursor.execute("SELECT is_nullable FROM information_schema.columns WHERE table_schema = 'vati' AND table_name = 'events' AND column_name = 'ledger'")
+    column = cursor.fetchone()
+    cursor.execute("SELECT contype, pg_get_constraintdef(oid) FROM pg_constraint WHERE conrelid = 'vati.events'::regclass AND conname = 'events_ledger_chain_hash_key'")
+    constraint = cursor.fetchone()
+    cursor.execute("SELECT EXISTS (SELECT 1 FROM pg_index i JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey::smallint[]) WHERE i.indrelid = 'vati.events'::regclass AND i.indisunique AND i.indnkeyatts = 1 AND a.attname = 'chain_hash')")
+    global_unique = cursor.fetchone()[0]
+    if column != ("NO",) or constraint != ("u", "UNIQUE (ledger, chain_hash)") or global_unique:
+        raise LedgerError("PostgreSQL ledger scope schema incomplete; explicit verified migration required")
+
+
 class PostgresLedger:
     """Drop-in for `Ledger` over a PostgreSQL DSN (postgres://user:pw@host:port/db)."""
 
     def __init__(self, dsn: str, *, ledger_name: str = "vati", connect: Optional[Callable[[str], object]] = None) -> None:
         import psycopg  # local import: the SQLite ledger must not need psycopg
+        if not isinstance(ledger_name, str) or not ledger_name.strip() or len(ledger_name) > 128:
+            raise LedgerError("ledger_name must identify one bounded nonempty scope")
         self.path = dsn
         self.name = ledger_name
         self._atomic_depth = 0
         self._conn = (connect or psycopg.connect)(dsn)
         self._conn.autocommit = False
-        with self._conn.cursor() as cur:
-            cur.execute(SCHEMA)
-            cur.execute("INSERT INTO vati.chain_head(ledger, chain_hash, seq) VALUES (%s, %s, 0) ON CONFLICT (ledger) DO NOTHING", (ledger_name, GENESIS))
-        self._conn.commit()
+        try:
+            with self._conn.cursor() as cur:
+                cur.execute("SELECT to_regclass('vati.events')")
+                if cur.fetchone()[0] is not None:
+                    cur.execute("SELECT 1 FROM information_schema.columns WHERE table_schema = 'vati' AND table_name = 'events' AND column_name = 'ledger'")
+                    if cur.fetchone() is None:
+                        raise LedgerError("legacy PostgreSQL ledger requires explicit verified scope migration before runtime use")
+                cur.execute(SCHEMA)
+                require_scoped_schema(cur)
+                cur.execute("INSERT INTO vati.chain_head(ledger, chain_hash, seq) VALUES (%s, %s, 0) ON CONFLICT (ledger) DO NOTHING", (ledger_name, GENESIS))
+            self._conn.commit()
+        except BaseException:
+            self._conn.rollback()
+            self._conn.close()
+            raise
 
     # ------------------------------------------------------------------ write
     @contextmanager
@@ -93,9 +118,9 @@ class PostgresLedger:
                 prev = cur.fetchone()[0]
                 chain = hashlib.sha256((prev + event.hash).encode()).hexdigest()
                 cur.execute(
-                    "INSERT INTO vati.events(kind, producer, correlation_id, event_time_ms, received_time_ms, decision_time_ms, schema_version, payload_json, event_hash, prev_hash, chain_hash) "
-                    "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING seq",
-                    (event.kind.value, event.producer, event.correlation_id, event.event_time_ms, event.received_time_ms, event.decision_time_ms, event.schema_version,
+                    "INSERT INTO vati.events(ledger, kind, producer, correlation_id, event_time_ms, received_time_ms, decision_time_ms, schema_version, payload_json, event_hash, prev_hash, chain_hash) "
+                    "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING seq",
+                    (self.name, event.kind.value, event.producer, event.correlation_id, event.event_time_ms, event.received_time_ms, event.decision_time_ms, event.schema_version,
                      canonical_json(event.payload), event.hash, prev, chain),
                 )
                 seq = cur.fetchone()[0]
@@ -115,7 +140,7 @@ class PostgresLedger:
 
     def iter(self, kind: Optional[EventKind] = None, correlation_id: Optional[str] = None) -> Iterator[Event]:
         q = "SELECT seq, kind, producer, correlation_id, event_time_ms, received_time_ms, decision_time_ms, schema_version, payload_json, event_hash FROM vati.events"
-        cond, args = [], []
+        cond, args = ["ledger = %s"], [self.name]
         if kind is not None:
             cond.append("kind = %s"); args.append(kind.value)
         if correlation_id is not None:
@@ -123,18 +148,20 @@ class PostgresLedger:
         if cond:
             q += " WHERE " + " AND ".join(cond)
         q += " ORDER BY seq"
-        with self._conn.cursor() as cur:
-            cur.execute(q, args)
-            for r in cur:
-                yield self._row_to_event(r)
-        self._finish_read()
+        try:
+            with self._conn.cursor() as cur:
+                cur.execute(q, args)
+                for r in cur:
+                    yield self._row_to_event(r)
+        finally:
+            self._finish_read()
 
     def count(self, kind: Optional[EventKind] = None) -> int:
         with self._conn.cursor() as cur:
             if kind is None:
-                cur.execute("SELECT COUNT(*) FROM vati.events")
+                cur.execute("SELECT COUNT(*) FROM vati.events WHERE ledger = %s", (self.name,))
             else:
-                cur.execute("SELECT COUNT(*) FROM vati.events WHERE kind = %s", (kind.value,))
+                cur.execute("SELECT COUNT(*) FROM vati.events WHERE ledger = %s AND kind = %s", (self.name, kind.value))
             n = cur.fetchone()[0]
         self._finish_read()
         return n
@@ -152,7 +179,7 @@ class PostgresLedger:
         ok, n, _seq, prev = self._verify_from(0, GENESIS)
         if not ok:
             return False, n
-        if n and prev != self.head():
+        if prev != self.head():
             return False, n
         return True, n
 
@@ -162,7 +189,7 @@ class PostgresLedger:
         if getattr(self, "_incremental", None) is None:
             self._incremental = IncrementalChainVerifier(self)
         ok, n = self._incremental.verify()
-        if ok and n and self._incremental._anchor and self._incremental._anchor[1] != self.head():
+        if ok and self._incremental._anchor and self._incremental._anchor[1] != self.head():
             self._incremental._anchor = None
             return False, n
         return ok, n
@@ -170,7 +197,7 @@ class PostgresLedger:
     def _verify_from(self, after_seq: int, prev: str) -> tuple[bool, int, int, str]:
         n, seq = 0, after_seq
         with self._conn.cursor() as cur:
-            cur.execute("SELECT event_hash, prev_hash, chain_hash, payload_json, kind, producer, correlation_id, event_time_ms, received_time_ms, decision_time_ms, schema_version, seq FROM vati.events WHERE seq > %s ORDER BY seq", (after_seq,))
+            cur.execute("SELECT event_hash, prev_hash, chain_hash, payload_json, kind, producer, correlation_id, event_time_ms, received_time_ms, decision_time_ms, schema_version, seq FROM vati.events WHERE ledger = %s AND seq > %s ORDER BY seq", (self.name, after_seq))
             for r in cur:
                 if not _check_row(prev, r):
                     self._finish_read()
@@ -182,14 +209,14 @@ class PostgresLedger:
 
     def _chain_at(self, seq: int) -> Optional[str]:
         with self._conn.cursor() as cur:
-            cur.execute("SELECT chain_hash FROM vati.events WHERE seq = %s", (seq,))
+            cur.execute("SELECT chain_hash FROM vati.events WHERE ledger = %s AND seq = %s", (self.name, seq))
             row = cur.fetchone()
         self._finish_read()
         return row[0] if row else None
 
     def _count_upto(self, seq: int) -> int:
         with self._conn.cursor() as cur:
-            cur.execute("SELECT COUNT(*) FROM vati.events WHERE seq <= %s", (seq,))
+            cur.execute("SELECT COUNT(*) FROM vati.events WHERE ledger = %s AND seq <= %s", (self.name, seq))
             n = cur.fetchone()[0]
         self._finish_read()
         return n
