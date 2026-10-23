@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T11:33:49.516637+00:00",
+  "updated_at_utc": "2026-10-23T11:49:22.216547+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -247,6 +247,10 @@
         {
           "description": "Mission activity wire preserves dependency/retry/verification contracts; transactional admission refuses invalid/orphan/foreign dependencies and terminal-race work. Owner graph reads one durable snapshot, stable IDs, owner-visible evidence and raw executor outcomes; cycles/orphans/conflicting bindings explicit, no layout authority or invented success/duration.2original failures fixed;157affected/166combined source cases,78rebuild,35owner contracts;10meaningful faults+controls caught/restored including actual concurrent-writer snapshot. Source only; project-wide CRUD/timed scheduling/native provider integration and whole-unit gates remain.",
           "evidence": "backend/BE-023_MISSION_DEPENDENCY_GRAPH.md; receipts/MISSION_DEPENDENCY_GRAPH_SOURCE_20261023.json"
+        },
+        {
+          "description": "Reminder request-bound idempotency and actual concurrent create/fire are atomic; cancelled/resolved conflicts explicit, follow-up rollback/project/source preserved. Durable FIRED publication replays same event/attention after lost ACK, preserves original owner ACK and legacy events; server persistence never claims handset delivery. Attention concurrent upsert and persisted source/project corrected. Typed time errors/unique wall instants/elapsed DST arithmetic.12reminder+2attention beforefailures fixed;86focused/252combined pass0skip,78rebuild/35owner contracts;12faults+controls caught/restored, initial nondeterministic survivor retained and oracle corrected with actual independent owner write. Source only, original units/gates remain.",
+          "evidence": "backend/BE-028_030_REMINDER_PUBLICATION.md; receipts/REMINDER_PUBLICATION_SOURCE_20261023.json"
         }
       ]
     },
@@ -808,9 +812,14 @@
         "BE-027",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "SOURCE_TESTED",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Reminder request-bound idempotency and actual concurrent create/fire are atomic; cancelled/resolved conflicts explicit, follow-up rollback/project/source preserved. Durable FIRED publication replays same event/attention after lost ACK, preserves original owner ACK and legacy events; server persistence never claims handset delivery. Attention concurrent upsert and persisted source/project corrected. Typed time errors/unique wall instants/elapsed DST arithmetic.12reminder+2attention beforefailures fixed;86focused/252combined pass0skip,78rebuild/35owner contracts;12faults+controls caught/restored, initial nondeterministic survivor retained and oracle corrected with actual independent owner write. Source only, original units/gates remain.",
+          "evidence": "backend/BE-028_030_REMINDER_PUBLICATION.md; receipts/REMINDER_PUBLICATION_SOURCE_20261023.json"
+        }
+      ]
     },
     "BE-029": {
       "title": "Conversation, voice and speaker-profile services",
@@ -857,9 +866,14 @@
         "BE-029",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "SOURCE_TESTED",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Reminder request-bound idempotency and actual concurrent create/fire are atomic; cancelled/resolved conflicts explicit, follow-up rollback/project/source preserved. Durable FIRED publication replays same event/attention after lost ACK, preserves original owner ACK and legacy events; server persistence never claims handset delivery. Attention concurrent upsert and persisted source/project corrected. Typed time errors/unique wall instants/elapsed DST arithmetic.12reminder+2attention beforefailures fixed;86focused/252combined pass0skip,78rebuild/35owner contracts;12faults+controls caught/restored, initial nondeterministic survivor retained and oracle corrected with actual independent owner write. Source only, original units/gates remain.",
+          "evidence": "backend/BE-028_030_REMINDER_PUBLICATION.md; receipts/REMINDER_PUBLICATION_SOURCE_20261023.json"
+        }
+      ]
     },
     "BE-031": {
       "title": "Connected providers, settings, devices and diagnostics",

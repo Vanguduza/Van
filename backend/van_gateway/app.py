@@ -100,7 +100,7 @@ from van_gateway.proactive.autonomy import ActionAutonomyGate, DomainTrustServic
 from van_gateway.proactive.followups import ProactiveFollowUpJob
 from van_gateway.trading.bridge import TradingEventBridge
 from van_gateway.trading.oauth_effects import OAuthEffectUnconfirmed, OAuthTargetBlocked
-from van_gateway.reminders.service import ReminderService
+from van_gateway.reminders.service import ReminderService, ReminderConflict
 from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
 from van_gateway.automation.api import AutomationApi
 from van_gateway.automation.dispatch import AutomationDispatcher
@@ -926,23 +926,11 @@ def create_app() -> FastAPI:
         never becomes two things to look at.
         """
         fired = await reminders.fire_due()
-        for item in fired:
-            await events.publish("reminder.fired", {
-                "reminder_id": item["id"],
-                "text": item["text"],
-                "due_at_unix": item["due_at_unix"],
-            })
-            await attention.upsert(
-                title=item["text"],
-                severity=AttentionSeverity.FOLLOW_UP,
-                source="reminder",
-                dedupe_key=f"reminder:{item['id']}",
-                payload={"reminder_id": item["id"], "due_at_unix": item["due_at_unix"]},
-            )
+        published = await reminders.publish_pending(events, attention)
         observability_instruments.set_queue_depth(
             "reminders_due", len(await reminders.list_open())
         )
-        return {"fired": len(fired)}
+        return {"fired": len(fired), "published": published}
 
     async def _expire_overdue_missions() -> dict:
         """P0-EXEC-002 — notice the commands that never came back.
@@ -2581,7 +2569,10 @@ def create_app() -> FastAPI:
 
     @app.post("/v1/reminders")
     async def create_reminder(body: ReminderCreate):
-        return await reminders.create(body)
+        try:
+            return await reminders.create(body)
+        except ReminderConflict as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     @app.get("/v1/reminders")
     async def list_reminders():
@@ -2593,11 +2584,18 @@ def create_app() -> FastAPI:
             await reminders.resolve(reminder_id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail="reminder_not_found") from exc
+        except ReminderConflict as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
         return {"resolved": True}
 
     @app.post("/v1/reminders/{reminder_id}/cancel")
     async def cancel_reminder(reminder_id: str):
-        await reminders.cancel(reminder_id)
+        try:
+            await reminders.cancel(reminder_id)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail="reminder_not_found") from exc
+        except ReminderConflict as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
         return {"cancelled": True}
 
     @app.post("/v1/reminders/parse")
@@ -2606,14 +2604,12 @@ def create_app() -> FastAPI:
             due = parse_due_expression(body.due_expression)
         except TimeParseError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
-        return await reminders.create(
-            ReminderCreate(
-                text=body.text,
-                due_at_unix=due,
-                idempotency_key=body.idempotency_key,
-                project_id=body.project_id,
-            )
-        )
+        try:
+            return await reminders.create(
+                ReminderCreate(text=body.text,due_at_unix=due,
+                    idempotency_key=body.idempotency_key,project_id=body.project_id))
+        except ReminderConflict as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     @app.post("/v1/decisions/escalate")
     async def escalate_decision(body: DecisionCreate):

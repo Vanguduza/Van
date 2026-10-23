@@ -14,9 +14,9 @@ Owner-access endpoints and service dependencies are listed separately below. An 
 
 | Registry | SHA-256 |
 | --- | --- |
-| [owner_features.json](../../../../registries/owner_features.json) | `f4b2133448708164426dc871c0cab80f26f0097c6dd167345ec6935886d4e851` |
-| [owner_screens.json](../../../../registries/owner_screens.json) | `50031295c19ddc09423cb4328a296e7e208a429b5bee7764033c5ab04f4c4096` |
-| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `8132c28ec7f7908c97b58ae349a66800a404d6c177370f6d06223b69e7557ee1` |
+| [owner_features.json](../../../../registries/owner_features.json) | `14d17cd226862b7796d036043af487b73a6be019b485836329956b63f1843f77` |
+| [owner_screens.json](../../../../registries/owner_screens.json) | `3f88775a444a39cbea640d0e9b7ca5a6e62a9b2d5a1196b87715c687f5ac071e` |
+| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `74279136649f58b47e782e8d5310dbebbde51f6e524bf53bad0800dda03765fc` |
 | [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `6cf352912c6768af3f182a3b798fe18881faefcce90041f1d0a4577ad0f0cb15` |
 
 Regenerate with `python3 tools/rebuild/render_frontend_registry.py --apply`; verify with `--check`.
@@ -2545,6 +2545,16 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; frontend integration: `OWNER_CONTROL
 | POST | /v1/reminders/{reminder_id}/resolve | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.resolveReminder |
 | POST | /v1/reminders/{reminder_id}/cancel | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.cancelReminder |
 
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/reminders | .UNWIRED | CANDIDATE_BACKEND_SOURCE_EXISTING_ANDROID_FLOW_ACCEPTANCE_PENDING | Original request-bound idempotency, atomic follow-ups with project/source retained, terminal-state conflicts and recoverable server publication. Attention preserves owner acknowledgement under concurrent reports. |
+| POST /v1/reminders | .UNWIRED | CANDIDATE_BACKEND_SOURCE_EXISTING_ANDROID_FLOW_ACCEPTANCE_PENDING | Original request-bound idempotency, atomic follow-ups with project/source retained, terminal-state conflicts and recoverable server publication. Attention preserves owner acknowledgement under concurrent reports. |
+| POST /v1/reminders/parse | .UNWIRED | CANDIDATE_BACKEND_SOURCE_EXISTING_ANDROID_FLOW_ACCEPTANCE_PENDING | Original request-bound idempotency, atomic follow-ups with project/source retained, terminal-state conflicts and recoverable server publication. Attention preserves owner acknowledgement under concurrent reports. |
+| POST /v1/reminders/{reminder_id}/cancel | .UNWIRED | CANDIDATE_BACKEND_SOURCE_EXISTING_ANDROID_FLOW_ACCEPTANCE_PENDING | Original request-bound idempotency, atomic follow-ups with project/source retained, terminal-state conflicts and recoverable server publication. Attention preserves owner acknowledgement under concurrent reports. |
+| POST /v1/reminders/{reminder_id}/resolve | .UNWIRED | CANDIDATE_BACKEND_SOURCE_EXISTING_ANDROID_FLOW_ACCEPTANCE_PENDING | Original request-bound idempotency, atomic follow-ups with project/source retained, terminal-state conflicts and recoverable server publication. Attention preserves owner acknowledgement under concurrent reports. |
+
 ### van.memory.history — Fact History
 
 Owner goal: Inspect and control fact history.
@@ -4498,6 +4508,16 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; integration: `OWNER_CONTROLS_SOURCE_
 | GET | /v1/reminders | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.reminders |
 | POST | /v1/reminders/{reminder_id}/resolve | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.resolveReminder |
 | POST | /v1/reminders/{reminder_id}/cancel | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.cancelReminder |
+
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/reminders | .UNWIRED | CANDIDATE_BACKEND_SOURCE_EXISTING_ANDROID_FLOW_ACCEPTANCE_PENDING | Original request-bound idempotency, atomic follow-ups with project/source retained, terminal-state conflicts and recoverable server publication. Attention preserves owner acknowledgement under concurrent reports. |
+| POST /v1/reminders | .UNWIRED | CANDIDATE_BACKEND_SOURCE_EXISTING_ANDROID_FLOW_ACCEPTANCE_PENDING | Original request-bound idempotency, atomic follow-ups with project/source retained, terminal-state conflicts and recoverable server publication. Attention preserves owner acknowledgement under concurrent reports. |
+| POST /v1/reminders/parse | .UNWIRED | CANDIDATE_BACKEND_SOURCE_EXISTING_ANDROID_FLOW_ACCEPTANCE_PENDING | Original request-bound idempotency, atomic follow-ups with project/source retained, terminal-state conflicts and recoverable server publication. Attention preserves owner acknowledgement under concurrent reports. |
+| POST /v1/reminders/{reminder_id}/cancel | .UNWIRED | CANDIDATE_BACKEND_SOURCE_EXISTING_ANDROID_FLOW_ACCEPTANCE_PENDING | Original request-bound idempotency, atomic follow-ups with project/source retained, terminal-state conflicts and recoverable server publication. Attention preserves owner acknowledgement under concurrent reports. |
+| POST /v1/reminders/{reminder_id}/resolve | .UNWIRED | CANDIDATE_BACKEND_SOURCE_EXISTING_ANDROID_FLOW_ACCEPTANCE_PENDING | Original request-bound idempotency, atomic follow-ups with project/source retained, terminal-state conflicts and recoverable server publication. Attention preserves owner acknowledgement under concurrent reports. |
 
 ### OF-MEMORY-001 — Owner facts CRUD
 

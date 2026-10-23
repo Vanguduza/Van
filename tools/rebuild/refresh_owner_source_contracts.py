@@ -138,6 +138,24 @@ def build():
     }
     for row in (mission_feature, mission_screen):
         row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(graph_extension))
+    reminder_feature = next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-REMINDER-001")
+    reminder_screen = next(r for r in documents["owner_screens"]["screens"] if r["id"] == "van.reminders.manage")
+    for endpoint in endpoint_doc["endpoints"]:
+        if not endpoint["path"].startswith("/v1/reminders"):
+            continue
+        extension = {
+            "method": endpoint["method"], "path": endpoint["path"], "endpoint_id": endpoint["endpoint_id"],
+            "source_ref": endpoint["source"], "authentication": endpoint["authentication"],
+            "source_status": "CANDIDATE_BACKEND_SOURCE_EXISTING_ANDROID_FLOW_ACCEPTANCE_PENDING",
+            "authority": "EXISTING_REMINDER_SCOPE_NO_NEW_EXECUTION_OR_FINANCIAL_GRANT",
+            "scope": "Original request-bound idempotency, atomic follow-ups with project/source retained, terminal-state conflicts and recoverable server publication. Attention preserves owner acknowledgement under concurrent reports.",
+            "publication_scope": "SERVER_EVENT_AND_ATTENTION_PERSISTENCE_ONLY",
+            "time_contract": "Relative elapsed time; explicit UTC default; supplied local wall times require one unique instant. No inferred handset timezone or owner DST preference.",
+            "specification": "docs/rebuild/rev118/backend/BE-028_030_REMINDER_PUBLICATION.md",
+            "new_ui_implemented": False, "live_qualified": False,
+        }
+        for row in (reminder_feature, reminder_screen):
+            row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(extension))
     accounts = next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-TRADING-003")
     account_screen = next(r for r in documents["owner_screens"]["screens"] if r["id"] == "van.trading.accounts.add")
     recovery_feature = next(r for r in documents['owner_features']['features'] if r['id'] == 'OF-TRADING-005')

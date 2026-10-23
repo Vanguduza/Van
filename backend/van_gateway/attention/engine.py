@@ -116,60 +116,64 @@ class AttentionEngine:
             "attention_candidate_id": scored.candidate_id,
             **({"jev_attention": jev_evidence} if jev_evidence is not None else {}),
         }
-        existing = await self.store.fetchone(
-            "SELECT id, title, severity, state, source, project_id, created_at_unix, updated_at_unix, dedupe_key, snooze_until_unix, payload_json FROM attention WHERE dedupe_key = ?",
-            (dedupe_key,),
-        )
-        if existing:
-            # P3-OPS-005: this used to write `state` unconditionally, so a source that
-            # re-reported the same condition — which is what a source does after a
-            # restart — silently moved an item the owner had already acknowledged,
-            # snoozed or handled back to OPEN. Only a *re-report* is overridden: a
-            # caller that explicitly resolves the item still resolves it, because
-            # "VAN finished the thing" must be able to close an acknowledged item.
-            previous = AttentionState(existing["state"])
-            effective_state = (
-                previous if state is AttentionState.OPEN and previous is not AttentionState.OPEN
-                else state
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            existing = await (await db.execute(
+                "SELECT id, title, severity, state, source, project_id, created_at_unix, updated_at_unix, dedupe_key, snooze_until_unix, payload_json FROM attention WHERE dedupe_key = ?",
+                (dedupe_key,),
+            )).fetchone()
+            if existing:
+                # P3-OPS-005: this used to write `state` unconditionally, so a source that
+                # re-reported the same condition — which is what a source does after a
+                # restart — silently moved an item the owner had already acknowledged,
+                # snoozed or handled back to OPEN. Only a *re-report* is overridden: a
+                # caller that explicitly resolves the item still resolves it, because
+                # "VAN finished the thing" must be able to close an acknowledged item.
+                previous = AttentionState(existing["state"])
+                effective_state = (
+                    previous if state is AttentionState.OPEN and previous is not AttentionState.OPEN
+                    else state
+                )
+                await db.execute(
+                    "UPDATE attention SET title = ?, severity = ?, state = ?, updated_at_unix = ?, payload_json = ?, source = ?, project_id = ? WHERE dedupe_key = ?",
+                    (title, severity.value, effective_state.value, now, Store.dumps(payload or {}), source, project_id or existing["project_id"], dedupe_key),
+                )
+                await db.commit()
+                return AttentionItem(
+                    id=existing["id"],
+                    title=title,
+                    severity=severity,
+                    state=effective_state,
+                    source=source,
+                    project_id=project_id or existing["project_id"],
+                    created_at_unix=int(existing["created_at_unix"]),
+                    updated_at_unix=now,
+                    dedupe_key=dedupe_key,
+                    snooze_until_unix=existing["snooze_until_unix"],
+                    payload=payload or {},
+                )
+            item_id = str(uuid.uuid4())
+            await db.execute(
+                """
+                INSERT INTO attention(id, title, severity, state, source, project_id, created_at_unix, updated_at_unix, dedupe_key, snooze_until_unix, payload_json)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)
+                """,
+                (item_id, title, severity.value, state.value, source, project_id, now, now, dedupe_key, Store.dumps(payload or {})),
             )
-            await self.store.execute(
-                "UPDATE attention SET title = ?, severity = ?, state = ?, updated_at_unix = ?, payload_json = ? WHERE dedupe_key = ?",
-                (title, severity.value, effective_state.value, now, Store.dumps(payload or {}), dedupe_key),
-            )
+            await db.commit()
             return AttentionItem(
-                id=existing["id"],
+                id=item_id,
                 title=title,
                 severity=severity,
-                state=effective_state,
+                state=state,
                 source=source,
-                project_id=project_id or existing["project_id"],
-                created_at_unix=int(existing["created_at_unix"]),
+                project_id=project_id,
+                created_at_unix=now,
                 updated_at_unix=now,
                 dedupe_key=dedupe_key,
-                snooze_until_unix=existing["snooze_until_unix"],
+                snooze_until_unix=None,
                 payload=payload or {},
             )
-        item_id = str(uuid.uuid4())
-        await self.store.execute(
-            """
-            INSERT INTO attention(id, title, severity, state, source, project_id, created_at_unix, updated_at_unix, dedupe_key, snooze_until_unix, payload_json)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)
-            """,
-            (item_id, title, severity.value, state.value, source, project_id, now, now, dedupe_key, Store.dumps(payload or {})),
-        )
-        return AttentionItem(
-            id=item_id,
-            title=title,
-            severity=severity,
-            state=state,
-            source=source,
-            project_id=project_id,
-            created_at_unix=now,
-            updated_at_unix=now,
-            dedupe_key=dedupe_key,
-            snooze_until_unix=None,
-            payload=payload or {},
-        )
 
     @staticmethod
     def candidate_for(
