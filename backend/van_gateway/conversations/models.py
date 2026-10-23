@@ -54,4 +54,19 @@ class ConversationThread(BaseModel):
     archived_at_ms: int | None = None
     draft_text: str = ""
     messages: list[ConversationMessage] = Field(default_factory=list)
+    message_count: int = 0
+    messages_has_more: bool = False
+    messages_next_before_id: str | None = None
     followups: list[ConversationFollowUp] = Field(default_factory=list)
+
+
+class ConversationMessagePage(BaseModel):
+    thread_id: str
+    messages: list[ConversationMessage]
+    total_count: int
+    has_more: bool
+    next_before_message_id: str | None = None
+
+
+class FollowUpDecisionResult(ConversationFollowUp):
+    fresh_owner_prompt: str | None = None

@@ -259,6 +259,24 @@ def build():
             "specification": "docs/rebuild/rev118/backend/BE-029_AUTHENTICATED_SPEECH_DELIVERY.md",
             "new_ui_implemented": False, "live_qualified": False,
         })
+    history = next(r for r in endpoint_doc["endpoints"] if
+        (r["method"], r["path"]) == ("GET", "/v1/conversations/{thread_id}/messages"))
+    conversation_history = {
+        "method": "GET", "path": history["path"], "endpoint_id": history["endpoint_id"],
+        "source_ref": history["source"], "authentication": history["authentication"],
+        "device_proof_required_when_bound": history["device_proof_required_when_bound"],
+        "client_namespace": "VanGatewayClient", "client_function": "convergenceThreadMessages",
+        "source_status": "CANDIDATE_BACKEND_AND_ANDROID_CLIENT_SOURCE_UI_PAGING_CONSUMER_PENDING",
+        "authority": "READ_THREAD_CONTEXT_ONLY_NO_EXECUTION_OR_APPROVAL_AUTHORITY",
+        "scope": "Latest bounded history with total count, has_more and next_before_message_id. Older pages use a message identity scoped to this thread; invalid, deleted and foreign cursors are refused. Equal-time messages are paged exactly once in chronological order. Atomic message/draft/follow-up writes and original projection scope preserve current owner thread state. Late canonical replies may complete archived history without reopening it. Follow-up promotion supplies a fresh owner prompt and never dispatches a command.",
+        "specification": "docs/rebuild/rev118/backend/BE-003_029_CONVERSATION_STATE_INTEGRITY.md",
+        "new_ui_implemented": False, "live_qualified": False,
+    }
+    conversation_rows = [next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-COMMAND-001")]
+    conversation_rows += [r for r in documents["owner_screens"]["screens"] if r["id"] in {
+        "van.work", "van.floating", "van.voice.turn"}]
+    for row in conversation_rows:
+        row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(conversation_history))
     receipt = {"scope": "BOUNDED_SOURCE_REFERENCE_REFRESH_NOT_FULL_PRODUCT_REVIEW",
         "input_registry_commit": INPUT, "citation_source_commit": CITATION_BASE,
         "preserved_identity_sets": preserved, "citation_changes": changes,

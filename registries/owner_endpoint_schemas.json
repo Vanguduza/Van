@@ -3043,6 +3043,261 @@
         ],
         "title": "ContextSnapshotBody"
       },
+      "ConversationFollowUp": {
+        "properties": {
+          "followup_id": {
+            "type": "string",
+            "title": "Followup Id"
+          },
+          "thread_id": {
+            "type": "string",
+            "title": "Thread Id"
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt"
+          },
+          "status": {
+            "$ref": "#/components/schemas/FollowUpStatus"
+          },
+          "command_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command Id"
+          },
+          "created_at_ms": {
+            "type": "integer",
+            "title": "Created At Ms"
+          },
+          "updated_at_ms": {
+            "type": "integer",
+            "title": "Updated At Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "followup_id",
+          "thread_id",
+          "prompt",
+          "status",
+          "created_at_ms",
+          "updated_at_ms"
+        ],
+        "title": "ConversationFollowUp"
+      },
+      "ConversationMessage": {
+        "properties": {
+          "message_id": {
+            "type": "string",
+            "title": "Message Id"
+          },
+          "thread_id": {
+            "type": "string",
+            "title": "Thread Id"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "command_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command Id"
+          },
+          "mission_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mission Id"
+          },
+          "artifact_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Artifact Refs"
+          },
+          "terminal": {
+            "type": "boolean",
+            "title": "Terminal",
+            "default": false
+          },
+          "created_at_ms": {
+            "type": "integer",
+            "title": "Created At Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message_id",
+          "thread_id",
+          "role",
+          "body",
+          "created_at_ms"
+        ],
+        "title": "ConversationMessage"
+      },
+      "ConversationMessagePage": {
+        "properties": {
+          "thread_id": {
+            "type": "string",
+            "title": "Thread Id"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ConversationMessage"
+            },
+            "type": "array",
+            "title": "Messages"
+          },
+          "total_count": {
+            "type": "integer",
+            "title": "Total Count"
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More"
+          },
+          "next_before_message_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Before Message Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "thread_id",
+          "messages",
+          "total_count",
+          "has_more"
+        ],
+        "title": "ConversationMessagePage"
+      },
+      "ConversationThread": {
+        "properties": {
+          "thread_id": {
+            "type": "string",
+            "title": "Thread Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ThreadKind"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ThreadStatus"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "created_at_ms": {
+            "type": "integer",
+            "title": "Created At Ms"
+          },
+          "updated_at_ms": {
+            "type": "integer",
+            "title": "Updated At Ms"
+          },
+          "archived_at_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archived At Ms"
+          },
+          "draft_text": {
+            "type": "string",
+            "title": "Draft Text",
+            "default": ""
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ConversationMessage"
+            },
+            "type": "array",
+            "title": "Messages"
+          },
+          "message_count": {
+            "type": "integer",
+            "title": "Message Count",
+            "default": 0
+          },
+          "messages_has_more": {
+            "type": "boolean",
+            "title": "Messages Has More",
+            "default": false
+          },
+          "messages_next_before_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Messages Next Before Id"
+          },
+          "followups": {
+            "items": {
+              "$ref": "#/components/schemas/ConversationFollowUp"
+            },
+            "type": "array",
+            "title": "Followups"
+          }
+        },
+        "type": "object",
+        "required": [
+          "thread_id",
+          "title",
+          "kind",
+          "status",
+          "created_at_ms",
+          "updated_at_ms"
+        ],
+        "title": "ConversationThread"
+      },
       "CorrectBody": {
         "properties": {
           "new_value": {
@@ -5117,6 +5372,74 @@
           "action"
         ],
         "title": "FollowUpDecision"
+      },
+      "FollowUpDecisionResult": {
+        "properties": {
+          "followup_id": {
+            "type": "string",
+            "title": "Followup Id"
+          },
+          "thread_id": {
+            "type": "string",
+            "title": "Thread Id"
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt"
+          },
+          "status": {
+            "$ref": "#/components/schemas/FollowUpStatus"
+          },
+          "command_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command Id"
+          },
+          "created_at_ms": {
+            "type": "integer",
+            "title": "Created At Ms"
+          },
+          "updated_at_ms": {
+            "type": "integer",
+            "title": "Updated At Ms"
+          },
+          "fresh_owner_prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fresh Owner Prompt"
+          }
+        },
+        "type": "object",
+        "required": [
+          "followup_id",
+          "thread_id",
+          "prompt",
+          "status",
+          "created_at_ms",
+          "updated_at_ms"
+        ],
+        "title": "FollowUpDecisionResult"
+      },
+      "FollowUpStatus": {
+        "type": "string",
+        "enum": [
+          "QUEUED",
+          "PROMOTED",
+          "DISMISSED"
+        ],
+        "title": "FollowUpStatus"
       },
       "GenerateBody": {
         "properties": {
@@ -10904,6 +11227,14 @@
           "title"
         ],
         "title": "ThreadCreate"
+      },
+      "ThreadKind": {
+        "type": "string",
+        "enum": [
+          "MAIN",
+          "SIDE"
+        ],
+        "title": "ThreadKind"
       },
       "ThreadRename": {
         "properties": {

@@ -1,6 +1,6 @@
 # VAN current frontend screen and feature registry
 
-Current source inventory: **42 features, 105 source functions, 78 screens/hosted surfaces, 447 endpoint declarations and 302 schemas**.
+Current source inventory: **42 features, 105 source functions, 78 screens/hosted surfaces, 448 endpoint declarations and 309 schemas**.
 
 This generated document renders the current source contracts, including gaps and unverified states. It does not declare features complete, qualify live services or authorize a redesigned frontend. No new frontend/prototype before BG-001. Current source features are distinct from the frozen Rev1.18 programme of **93 planned features, 349 owner actions, 324 requirements, 1,610 acceptance identities and 131 units**. The complete planned scope remains in [the frozen package](../../../review-inputs/van-rev115/package/) and its [backend consumption contract](../../../review-inputs/van-rev115/package/contracts/BACKEND_TO_FRONTEND_CONSUMPTION_CONTRACT.md).
 
@@ -14,10 +14,10 @@ Owner-access endpoints and service dependencies are listed separately below. An 
 
 | Registry | SHA-256 |
 | --- | --- |
-| [owner_features.json](../../../../registries/owner_features.json) | `933e98918b54f35e97c5d734c8fbdce99122c451131d8e6f5314264c2d7386bd` |
-| [owner_screens.json](../../../../registries/owner_screens.json) | `cdae833567992d29a1d8273d9f760716770ab651d7f64fb3b9cbdafefd686d5a` |
-| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `b4aa9beb1e257ea490466ff65e85cfd698401028a30bd416369fbe2d2567be5a` |
-| [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `a5d33d901581dae91c9cb24db5e01a192c87291cd7bd06723a4b2847d91b1638` |
+| [owner_features.json](../../../../registries/owner_features.json) | `a8c5c49a8035d9764e8ed848b7fefa2abeca7d47d4578bd3d8d48e5fbc133e1a` |
+| [owner_screens.json](../../../../registries/owner_screens.json) | `6c0b4c09ad65b6cadff744bba51c0b6c4f6317834b6ee559250c986e1984d349` |
+| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `5c60eacf0a9bd8ab00c6fccc52ea86d28e7f70779cfc5dc8e38a8529d628a716` |
+| [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `eb89ad0ac4d2a1fc4cd86d4b8a67a8be452d312996934cf14d6ad389dea92b2f` |
 
 Regenerate with `python3 tools/rebuild/render_frontend_registry.py --apply`; verify with `--check`.
 
@@ -284,6 +284,12 @@ Wiring: `EXTERNAL_CONTRACT_OR_ASSET_REQUIRED`; frontend integration: `PARTIAL_OW
 | POST | /v1/missions/{mission_id}/cancel | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.cancelMission |
 | POST | /v1/missions/{mission_id}/message | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.messageMission |
 | GET | /v1/owner/google/gmail/drafts/{draft_id}/preview | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.googleGmailDraftPreview |
+
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/conversations/{thread_id}/messages | VanGatewayClient.convergenceThreadMessages | CANDIDATE_BACKEND_AND_ANDROID_CLIENT_SOURCE_UI_PAGING_CONSUMER_PENDING | Latest bounded history with total count, has_more and next_before_message_id. Older pages use a message identity scoped to this thread; invalid, deleted and foreign cursors are refused. Equal-time messages are paged exactly once in chronological order. Atomic message/draft/follow-up writes and original projection scope preserve current owner thread state. Late canonical replies may complete archived history without reopening it. Follow-up promotion supplies a fresh owner prompt and never dispatches a command. |
 
 ### van.work.mission — Mission deep link
 
@@ -2141,6 +2147,12 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; frontend integration: `PARTIAL_OWNER
 | POST | /v1/commands | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.dispatchCommand |
 | GET | /v1/trading/trades | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.tradingTrades |
 
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/conversations/{thread_id}/messages | VanGatewayClient.convergenceThreadMessages | CANDIDATE_BACKEND_AND_ANDROID_CLIENT_SOURCE_UI_PAGING_CONSUMER_PENDING | Latest bounded history with total count, has_more and next_before_message_id. Older pages use a message identity scoped to this thread; invalid, deleted and foreign cursors are refused. Equal-time messages are paged exactly once in chronological order. Atomic message/draft/follow-up writes and original projection scope preserve current owner thread state. Late canonical replies may complete archived history without reopening it. Follow-up promotion supplies a fresh owner prompt and never dispatches a command. |
+
 ### van.voice.turn — Voice Turn
 
 Owner goal: Speak, review transcription and interrupt safely.
@@ -2193,6 +2205,12 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; frontend integration: `PARTIAL_OWNER
 | POST | /v1/commands | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.dispatchCommand |
 | POST | /v1/session/messages | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.sessionUpstream |
 | GET | /v1/session/events-stream | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.sessionDownstream |
+
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/conversations/{thread_id}/messages | VanGatewayClient.convergenceThreadMessages | CANDIDATE_BACKEND_AND_ANDROID_CLIENT_SOURCE_UI_PAGING_CONSUMER_PENDING | Latest bounded history with total count, has_more and next_before_message_id. Older pages use a message identity scoped to this thread; invalid, deleted and foreign cursors are refused. Equal-time messages are paged exactly once in chronological order. Atomic message/draft/follow-up writes and original projection scope preserve current owner thread state. Late canonical replies may complete archived history without reopening it. Follow-up promotion supplies a fresh owner prompt and never dispatches a command. |
 
 ### van.browser.interactive — Remote Browser
 
@@ -4169,6 +4187,12 @@ Wiring: `EXTERNAL_CONTRACT_OR_ASSET_REQUIRED`; integration: `PARTIAL_OWNER_SURFA
 | --- | --- | --- | --- |
 | POST | /v1/commands | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.dispatchCommand |
 | GET | /v1/commands/{command_id} | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.commandStatus |
+
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/conversations/{thread_id}/messages | VanGatewayClient.convergenceThreadMessages | CANDIDATE_BACKEND_AND_ANDROID_CLIENT_SOURCE_UI_PAGING_CONSUMER_PENDING | Latest bounded history with total count, has_more and next_before_message_id. Older pages use a message identity scoped to this thread; invalid, deleted and foreign cursors are refused. Equal-time messages are paged exactly once in chronological order. Atomic message/draft/follow-up writes and original projection scope preserve current owner thread state. Late canonical replies may complete archived history without reopening it. Follow-up promotion supplies a fresh owner prompt and never dispatches a command. |
 
 ### OF-MISSION-001 — Mission detail, activity and proof
 

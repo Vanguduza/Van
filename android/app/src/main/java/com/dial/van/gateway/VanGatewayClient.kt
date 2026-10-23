@@ -785,6 +785,15 @@ class VanGatewayClient(context: Context) {
         getJson("/v1/conversations/${encodeSegment(threadId)}")
     }
 
+    suspend fun convergenceThreadMessages(
+        threadId: String,
+        beforeMessageId: String? = null,
+        limit: Int = 200,
+    ): JSONObject = withContext(Dispatchers.IO) {
+        val cursor = beforeMessageId?.let { "&before_message_id=${encodeQuery(it)}" }.orEmpty()
+        getJson("/v1/conversations/${encodeSegment(threadId)}/messages?limit=${limit.coerceIn(1, 1000)}$cursor")
+    }
+
     suspend fun convergenceCreateThread(title: String): JSONObject = withContext(Dispatchers.IO) {
         postProved("/v1/conversations", JSONObject().put("title", title))
     }

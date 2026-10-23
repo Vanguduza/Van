@@ -3297,7 +3297,13 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ConversationThread"
+                },
+                "title": "Response Listing V1 Conversations Get"
+              }
             }
           }
         },
@@ -3335,7 +3341,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/ConversationThread"
+              }
             }
           }
         }
@@ -3373,7 +3381,87 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/ConversationThread"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-1e55f1416f96",
+      "method": "GET",
+      "path": "/v1/conversations/{thread_id}/messages",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/conversations/api.py:92",
+      "summary": "History",
+      "tags": [
+        "conversations"
+      ],
+      "parameters": [
+        {
+          "name": "thread_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Thread Id"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": 1,
+            "default": 200,
+            "title": "Limit"
+          }
+        },
+        {
+          "name": "before_message_id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Before Message Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConversationMessagePage"
+              }
             }
           }
         },
@@ -11577,7 +11665,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/ConversationThread"
+              }
             }
           }
         },
@@ -11634,7 +11724,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/ConversationThread"
+              }
             }
           }
         },
@@ -17019,7 +17111,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/ConversationThread"
+              }
             }
           }
         },
@@ -17076,7 +17170,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/ConversationFollowUp"
+              }
             }
           }
         },
@@ -17142,7 +17238,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/FollowUpDecisionResult"
+              }
             }
           }
         },
@@ -17168,7 +17266,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/conversations/api.py:92",
+      "source": "backend/van_gateway/conversations/api.py:97",
       "summary": "Message",
       "tags": [
         "conversations"
@@ -17199,7 +17297,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/ConversationMessage"
+              }
             }
           }
         },
@@ -23744,7 +23844,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/ConversationThread"
+              }
             }
           }
         },

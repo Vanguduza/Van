@@ -172,10 +172,19 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T16:52:57.858765+00:00",
+    "updated_utc": "2026-10-23T17:18:37.054679+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": [],
+    "background_jobs": [
+      {
+        "job": "frozen f124741f backend/contracts then full trading",
+        "session": 78905,
+        "source": "f124741f2d176f005ab19578f104c446de8a0bc8",
+        "worktree": "/workspace/van-autonomous-qualification-20261022/Van",
+        "stage_file": "/tmp/van-f124741f-qualification-stage.txt",
+        "state": "RUNNING_NOT_A_PASS"
+      }
+    ],
     "last_validation": [
       "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
       "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -325,7 +334,9 @@
       "Document publication: fsynced private immutable bytes before one nativeSQLite transaction for document/artifact/minimal commit witness. Rollback/cancellation cleans only new files, never prior versions; lost commit ACK returns captured original despite later writer, unavailable readback remains UNKNOWN withIDs. Canonical cards serialized/owner-scoped/sensitivity-bound. Partial/concurrent edits merge verified current values; nativeoutput readback and fields cache updated; stale proposal/context refused and empty required disclosed. Fullhash version refs and exact published/legacy readback respect expiry/SECRET_REF_ONLY.8initial+1required failures,2candidate policy guards corrected;53 isolated/224 integrated audited/29 registry/79 rebuild pass0skip;17 fault/control pairs caught/restored after initial timing survivor. No external submission, firstHTTPexactly-once, crash-reaper/completeprivacy, unit/native/production/handset claim.",
       "Completed frozen74fe2ea7:6999backend/contracts pass9skips/7008cases,2517trading pass0skip, actualprivatePG/Chromium/AGP/pinnedDDS, strongerstorageaudit0forbiddenevents, cleancheckout, PGstoppedremoved. This is earlier exactsource, not a blanket qualification of later commits.",
       "Hosted exact20125954/39982450483 all374legacy383edits/native18pass4existingartworkskips/VITS2.886+2.609s/publicPG26voice117trading2538pass1DDSskip. Native39982450472MetaEditor0errors0warnings/freshEX5, invalid4/noEX5. OnlyDDSreadcredential/trustedmainbootstrap CI failures remain; gates not waived.",
-      "Hosted exact804ffe73/39986003124 all374legacy383edits/native18pass4existingartworkskips/source-mergetrees equal/publicPG26voice117trading2538pass1DDSskip;native39986003602MetaEditor0errors0warningsfreshEX5,invalid4/noEX5.OnlyDDSreadcredential/trustedmainbootstrapfail.Voiceactualmethods {'cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer': 'PASS 4.021s', 'realOfflineAnswerReachesTheApplicationQueueAsSpoken': 'PASS 2.354s'}"
+      "Hosted exact804ffe73/39986003124 all374legacy383edits/native18pass4existingartworkskips/source-mergetrees equal/publicPG26voice117trading2538pass1DDSskip;native39986003602MetaEditor0errors0warningsfreshEX5,invalid4/noEX5.OnlyDDSreadcredential/trustedmainbootstrapfail.Voiceactualmethods {'cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer': 'PASS 4.021s', 'realOfflineAnswerReachesTheApplicationQueueAsSpoken': 'PASS 2.354s'}",
+      "Conversation integrity: serialized main creation and follow-up decisions; atomic message/draft/projection/follow-up parent updates; coherent thread snapshot; latest bounded history with actual total and scoped cursor paging, stable equal-time ordering; original canonical projection identity/scope, including late archived result without reopening. Typed API and existing Android SDK method added; UI paging consumer remains pending.8 original failures corrected;26 focused/169 integrated audited/29 owner contracts/79 rebuild pass0skip;12 fault/control pairs caught and source restored after an initial timing survivor. Android222 JVM pass0skip, debugAPK assembled and lint passes with pinned sealed voice assets. No history-as-authority, promotion dispatch, new frontend, whole-unit/native/production/S24 claim.",
+      "Hosted f124741f/39990636936 all374 inherited cases383edits caught, emulator18pass4existingartworkskips; nativeVITS methods3.818/2.381s are method durations, not latencySLO/S24. PublicPG26voice117trading2538pass1DDSskip. NativeMetaEditor39990637062 zeroerrors/warnings freshEX5, invalid4errors/noEX5. OriginalDDSreadkey andtrustedmain CI failures retained."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -336,9 +347,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Commit source-tested document publication, collect completed804ffe73 hosted/native receipts, push, then freeze the next committed source for fullbackend/contracts+trading qualification. Continue whole-product source work next on existing ConversationService: inspect/prove main-thread creation race, oldest-only bounded history with no pagination, message/projection parent timestamp and partial-write failures, concurrent follow-up decisions and projection-key thread binding. History remains presentation/context, never execution truth; preserve native command/mission/voice identity and no-dispatch promotion. Existing debug XML already denies all cleartext except exactlocalhost/127.0.0.1/::1: earlier any-host observation is stale; do not reintroduce or fabricate a fix. All131units/93features/BG001/native/release/S24 obligations remain. No gatePASS issued.",
-    "previous_head": "804ffe73c7117c1fa0624e857afcb2ae3d592ff4",
-    "current_packet": "Versioned document publication and original local outcomes, source tested."
+    "next_action": "Commit and push the source-tested conversation/history packet and exact f124741f hosted receipts. Keep frozen f124741f full qualification running unchanged. Continue whole-product owner-memory source work in the isolated worktree:6 reproduced failures in IntentContinuityGraph (concurrent duplicate nodes/lost counts, partial superseding relation, mission replay inflation, discarded later constraints and backwards observation times); first implementation passes56 focused tests. Finish mission-bound replay/rollback/cycle/unknown-source tests, fault checks and integrated validation before copying only memory.py/feed.py/new test. Original131units/93plannedfeatures, BG001, independent/native/signing/production/provider/S24 obligations remain; no gatePASS issued.",
+    "previous_head": "f124741f2d176f005ab19578f104c446de8a0bc8",
+    "current_packet": "Conversation history and state source tested; next owner-memory observations."
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -396,6 +407,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Commit source-tested document publication, collect completed804ffe73 hosted/native receipts, push, then freeze the next committed source for fullbackend/contracts+trading qualification. Continue whole-product source work next on existing ConversationService: inspect/prove main-thread creation race, oldest-only bounded history with no pagination, message/projection parent timestamp and partial-write failures, concurrent follow-up decisions and projection-key thread binding. History remains presentation/context, never execution truth; preserve native command/mission/voice identity and no-dispatch promotion. Existing debug XML already denies all cleartext except exactlocalhost/127.0.0.1/::1: earlier any-host observation is stale; do not reintroduce or fabricate a fix. All131units/93features/BG001/native/release/S24 obligations remain. No gatePASS issued.",
-  "updated_at_utc": "2026-10-23T16:52:57.858765+00:00"
+  "current_action": "Commit and push the source-tested conversation/history packet and exact f124741f hosted receipts. Keep frozen f124741f full qualification running unchanged. Continue whole-product owner-memory source work in the isolated worktree:6 reproduced failures in IntentContinuityGraph (concurrent duplicate nodes/lost counts, partial superseding relation, mission replay inflation, discarded later constraints and backwards observation times); first implementation passes56 focused tests. Finish mission-bound replay/rollback/cycle/unknown-source tests, fault checks and integrated validation before copying only memory.py/feed.py/new test. Original131units/93plannedfeatures, BG001, independent/native/signing/production/provider/S24 obligations remain; no gatePASS issued.",
+  "updated_at_utc": "2026-10-23T17:18:37.054679+00:00"
 }

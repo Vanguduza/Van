@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter,HTTPException,Query
 from pydantic import BaseModel,Field
 
-from .models import ThreadStatus
+from .models import ThreadStatus,ConversationThread,ConversationMessage,ConversationMessagePage,ConversationFollowUp,FollowUpDecisionResult
 from .service import ConversationService,ConversationServiceError
 
 
@@ -37,46 +37,46 @@ def build_conversation_router(service:ConversationService)->APIRouter:
     def fail(exc:ConversationServiceError)->None:
         raise HTTPException(status_code=404 if exc.code=="THREAD_UNKNOWN" else 409,detail=exc.code) from exc
 
-    @router.get("/main")
+    @router.get("/main",response_model=ConversationThread)
     async def main():
         return (await service.ensure_main()).model_dump(mode="json")
 
-    @router.post("")
+    @router.post("",response_model=ConversationThread)
     async def create(body:ThreadCreate):
         try:return (await service.create(body.title,body.project_id)).model_dump(mode="json")
         except ConversationServiceError as exc:fail(exc)
 
-    @router.get("")
+    @router.get("",response_model=list[ConversationThread])
     async def listing(status:ThreadStatus|None=None,limit:int=Query(default=100,ge=1,le=500)):
         return [x.model_dump(mode="json") for x in await service.list(status,limit)]
 
-    @router.get("/{thread_id}")
+    @router.get("/{thread_id}",response_model=ConversationThread)
     async def get_one(thread_id:str):
         item=await service.get(thread_id)
         if item is None:raise HTTPException(status_code=404,detail="thread_unknown")
         return item.model_dump(mode="json")
 
-    @router.patch("/{thread_id}/title")
+    @router.patch("/{thread_id}/title",response_model=ConversationThread)
     async def rename(thread_id:str,body:ThreadRename):
         try:return (await service.rename(thread_id,body.title)).model_dump(mode="json")
         except ConversationServiceError as exc:fail(exc)
 
-    @router.patch("/{thread_id}/status")
+    @router.patch("/{thread_id}/status",response_model=ConversationThread)
     async def state(thread_id:str,body:ThreadStatePatch):
         try:return (await service.set_status(thread_id,body.status)).model_dump(mode="json")
         except ConversationServiceError as exc:fail(exc)
 
-    @router.put("/{thread_id}/draft")
+    @router.put("/{thread_id}/draft",response_model=ConversationThread)
     async def draft(thread_id:str,body:DraftBody):
         try:return (await service.save_draft(thread_id,body.text)).model_dump(mode="json")
         except ConversationServiceError as exc:fail(exc)
 
-    @router.post("/{thread_id}/followups")
+    @router.post("/{thread_id}/followups",response_model=ConversationFollowUp)
     async def queue_followup(thread_id:str,body:FollowUpCreate):
         try:return (await service.queue_followup(thread_id,body.prompt)).model_dump(mode="json")
         except ConversationServiceError as exc:fail(exc)
 
-    @router.post("/{thread_id}/followups/{followup_id}/decision")
+    @router.post("/{thread_id}/followups/{followup_id}/decision",response_model=FollowUpDecisionResult)
     async def decide_followup(thread_id:str,followup_id:str,body:FollowUpDecision):
         try:
             item=await service.decide_followup(
@@ -89,7 +89,12 @@ def build_conversation_router(service:ConversationService)->APIRouter:
             return payload
         except ConversationServiceError as exc:fail(exc)
 
-    @router.post("/{thread_id}/messages")
+    @router.get("/{thread_id}/messages",response_model=ConversationMessagePage)
+    async def history(thread_id:str,limit:int=Query(default=200,ge=1,le=1000),before_message_id:str|None=None):
+        try:return await service.messages_page(thread_id,limit=limit,before_message_id=before_message_id)
+        except ConversationServiceError as exc:fail(exc)
+
+    @router.post("/{thread_id}/messages",response_model=ConversationMessage)
     async def message(thread_id:str,body:MessageBody):
         try:
             return (await service.append_message(
