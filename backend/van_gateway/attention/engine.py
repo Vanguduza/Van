@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+import json
 import uuid
 from typing import Any
 
@@ -60,7 +61,14 @@ class AttentionEngine:
         state: AttentionState = AttentionState.OPEN,
         candidate: AttentionCandidate | None = None,
         quiet_hours: bool = False,
+        source_revision: int | None = None,
     ) -> AttentionItem:
+        if source_revision is not None and (type(source_revision) is not int or source_revision < 1):
+            raise ValueError("attention_source_revision_invalid")
+        # This reserved field is supplied by the durable source, never its payload.
+        payload = {k: v for k, v in (payload or {}).items() if k != "_source_revision"}
+        if source_revision is not None:
+            payload["_source_revision"] = source_revision
         now = int(time.time())
         base_candidate = candidate or self.candidate_for(
             title=title, severity=severity, source=source, dedupe_key=dedupe_key
@@ -123,6 +131,20 @@ class AttentionEngine:
                 (dedupe_key,),
             )).fetchone()
             if existing:
+                old_payload = json.loads(existing["payload_json"] or "{}")
+                old_revision = old_payload.get("_source_revision")
+                if source_revision is not None:
+                    if existing["source"] != source or (existing["project_id"] or None) != (project_id or None):
+                        raise ValueError("attention_source_scope_conflict")
+                    if type(old_revision) is int and old_revision >= source_revision:
+                        # A delayed publisher must never downgrade a newer failure
+                        # or overwrite an owner's acknowledgement on replay.
+                        return AttentionItem(
+                            id=existing["id"], title=existing["title"], severity=AttentionSeverity(existing["severity"]),
+                            state=AttentionState(existing["state"]), source=existing["source"], project_id=existing["project_id"],
+                            created_at_unix=existing["created_at_unix"], updated_at_unix=existing["updated_at_unix"],
+                            dedupe_key=existing["dedupe_key"], snooze_until_unix=existing["snooze_until_unix"], payload=old_payload,
+                        )
                 # P3-OPS-005: this used to write `state` unconditionally, so a source that
                 # re-reported the same condition — which is what a source does after a
                 # restart — silently moved an item the owner had already acknowledged,

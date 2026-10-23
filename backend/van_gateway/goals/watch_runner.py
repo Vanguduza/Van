@@ -25,7 +25,7 @@ from van_gateway.browser.service import (
 from van_gateway.models import ActionClass
 
 from .models import Watch, WatchConditionKind, WatchObservation, WatchSourceKind
-from .service import GoalService
+from .service import GoalService, GoalServiceError
 
 class _HandedToOwner(Exception):
     """Unit G15 — the watch's page lease came back with a network owner code."""
@@ -91,6 +91,17 @@ class WatchRunner:
             "title": str(info.get("title") or "")[:512],
         }
 
+    async def _record_failure(self, watch_id: str, code: str, now_ms: int) -> None:
+        try:
+            await self.service.record_observation(
+                watch_id, WatchObservation(success=False, error_code=code[:200]), now_ms=now_ms,
+            )
+        except GoalServiceError as exc:
+            # Owner pause/cancel during a read is authoritative. Discard this
+            # result without recording a failure or resuming the watch.
+            if exc.code not in {"WATCH_NOT_ACTIVE", "WATCH_UNKNOWN"}:
+                raise
+
     async def run(self, *, now_ms: int | None = None, limit: int = 20) -> dict[str, Any]:
         now = int(time.time() * 1000) if now_ms is None else now_ms
         due = await self.service.due_watches(
@@ -102,14 +113,7 @@ class WatchRunner:
         status = await self.harness.status()
         if not bool(getattr(status, "ready", False)):
             for watch in due:
-                await self.service.record_observation(
-                    watch.watch_id,
-                    WatchObservation(
-                        success=False,
-                        error_code="WATCH_BROWSER_RUNTIME_NOT_READY",
-                    ),
-                    now_ms=now,
-                )
+                await self._record_failure(watch.watch_id, "WATCH_BROWSER_RUNTIME_NOT_READY", now)
             return {"due": len(due), "checked": 0, "triggered": 0, "failed": len(due)}
 
         checked = triggered = failed = 0
@@ -194,11 +198,7 @@ class WatchRunner:
                 triggered += 1 if result["triggered"] else 0
             except _HandedToOwner as handed:
                 failed += 1
-                await self.service.record_observation(
-                    watch.watch_id,
-                    WatchObservation(success=False, error_code=f"WATCH_OWNER_TAKEOVER:{handed.code}"[:200]),
-                    now_ms=now,
-                )
+                await self._record_failure(watch.watch_id, f"WATCH_OWNER_TAKEOVER:{handed.code}", now)
                 try:
                     await self.tasks.set_working_status(
                         task_id=task.task_id, status=BrowserTaskStatus.WAITING_FOR_OWNER,
@@ -209,11 +209,7 @@ class WatchRunner:
             except Exception as exc:  # one broken watch cannot stop the scheduler job
                 failed += 1
                 code = str(exc) if str(exc).startswith("WATCH_") else type(exc).__name__
-                await self.service.record_observation(
-                    watch.watch_id,
-                    WatchObservation(success=False, error_code=code[:200]),
-                    now_ms=now,
-                )
+                await self._record_failure(watch.watch_id, code, now)
                 if task is not None:
                     try:
                         await self.tasks.complete(

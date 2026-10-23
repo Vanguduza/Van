@@ -172,19 +172,10 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T15:07:55.615174+00:00",
+    "updated_utc": "2026-10-23T15:30:38.656592+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": [
-      {
-        "kind": "LOCAL_FROZEN_SOURCE_QUALIFICATION",
-        "source_head": "2e93ab52066565dc81edf9a92ed3423e70c64edc",
-        "session": 64306,
-        "log": "/tmp/van-2e93ab52-full-backend.txt",
-        "driver": "/tmp/van-2e93ab52-qualification-driver.txt",
-        "phase": "Check actual stage/result; privatePG cleaned in finally; never mutate active QA checkout."
-      }
-    ],
+    "background_jobs": [],
     "last_validation": [
       "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
       "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -322,7 +313,10 @@
       "Frozen exact39807eff full backend/contracts:6967pass9explicit skips2stale route-contract failures/6978cases2833.39s. Added only existing owner/native original-action GET to expected-route set; exact-surface/GET-only/soleprovedPOST/leak/negative controls retained.20 affected boundary+native API tests pass; failed full run retained, zero observed SQLite/mkdir runtime-store violations, clean tree/privatePGstoppedremoved. Raw-file-write audit limitation stated explicitly.",
       "Explicit OrderCommand expiry retained in signed MT5 body and checked before RPC/afterreadonlyprecheck/finalnativeSDKboundary. Typedorder_send_expiring fenceslegacy/rollback; strictinteger/missingdeadline refused, None retainsoriginalcontract.15of16beforefailures fixed;74focused/2500fulltrading pass0skip realPGstoppedremoved,79rebuild;7faults+7controls caught/restored. Initialnativeexpiry survivor retained; correctedsecond/sendquote oracle provesfinalnativecheck. RealmTLS/JSON/HMAC withSDKfixture. Storageguard14filesystemprobes and20DIALcontrolspass, limitations explicit. Sourceonly; nativeclock/finality/epoch/riskbudget/whole-unit/provider/production/handset obligations remain.",
       "Native MT5 replay admission persists bounded nonce/clock metadata withSQLiteFULL/atomicclaim beforeSDK, sharedworkers/processrestarts cannot repeat same signed effect. Defaultbackendpath derives from existing signing profile, no in-memoryfallback. Clockrollback/purge, corrupt/missingclock, storelock/lostcommitACK failclosed; strictheaders/uint128 rollover.2original duplicateSDKeffects and1missing-clock counterexample fixed;91focused/2517fulltrading pass0skip realPGstoppedremoved;8faults+8controls caught/restored inclactualprocessSDKcounter. Nonceclaim is not brokeroutcome or native/whole-unit/production qualification.",
-      "Hosted exactc9dd2a9c/39964015528 all374legacyfaults383edits/native18pass4existingartworkskips/VITS2.335/1.900s/PG26voice117publictrading2477pass1DDSskip;testedmergecce39c4btreeequal. OnlyoriginalDDSreadkey/trustedmainbootstrapfail. Native39964015330 MetaEditor0errors0warnings/freshEX5, invalid4errors/noEX5;actualreceipt retained."
+      "Hosted exactc9dd2a9c/39964015528 all374legacyfaults383edits/native18pass4existingartworkskips/VITS2.335/1.900s/PG26voice117publictrading2477pass1DDSskip;testedmergecce39c4btreeequal. OnlyoriginalDDSreadkey/trustedmainbootstrapfail. Native39964015330 MetaEditor0errors0warnings/freshEX5, invalid4errors/noEX5;actualreceipt retained.",
+      "Atomic owner-watch observation/projection/history/publication intent; strict finite/boolean/text evidence, serialized edges/counters and owner pause. Restart/lost-alert-reply recovery preserves original project and acknowledged attention; monotonic failure versions survive history retention and late publishers. Actual owner.watches scheduler drains pending intent without due browser work; typed server publication result.133 affected cases including actual Chromium guards,2 typed gateway,29 owner contracts,79 rebuild pass without skips;8 fault/control pairs caught and source restored. Source evidence only; no device delivery or unit acceptance.",
+      "Frozen exact2e93ab52 broad run:6980backend/contracts pass9skips;2500trading pass0skip. Actual privatePG, Chromium, Android build dependencies and pinnedDDS; stronger storage audit0forbiddenevents, clean checkout, PGstoppedremoved. Later native nonce source independently2517fulltrading pass0skip; laterwatch source has separate receipt.",
+      "Hosted exact2e93ab52/39969793584 all374legacy cases383edits/native18pass4existingartworkskips/VITS2.811+2.208seconds/publicPG26voice117trading2499pass1DDSskip; onlymissingDDSreadcredential/trustedmainbootstrapfail. Native39969793548 MetaEditor0errors0warnings/freshEX5, invalid4errors/noEX5; kernel39969793563SUCCESS."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -333,9 +327,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Publish tested nonce packet, collect new hosted results. Continue original whole-product source work: isolated backend/tests/test_watch_observation_integrity.py in /tmp/van-ctrader-outcome-work-20261023 has8validbeforefailures: stringfalse Boolean, invalidnumericNaN/Inf/bool accepted, non-atomicprojection/runinsert, concurrentfailurecount loss/duplicateedgealerts, lostattentionreply no durablepublication. Implement in existing GoalService/watch runner, preserveownerpause andexactexistingnotifications/authority. Full frozen2e93ab52 backend/contracts+trading audit session64306 stillrunning; collectactualresults/storageaudit/cleanup. Nativefinancialfinality/epoch/risk/workingorderexpiry and wholeproductfeatures remain;131units/93plannedfeatures/BG001 preserved, no invented acceptance.",
-    "previous_head": "2e93ab52066565dc81edf9a92ed3423e70c64edc",
-    "current_packet": "Durable native MT5 replay admission, source tested."
+    "next_action": "Commit and publish tested watch packet, then continue original whole-product implementation. Isolated bar-lake source packet has11validbeforefailures: partition escape, mismatched instrument, duplicate/conflicting intervals, false manifest metadata, nonfinite prices, external slice path and hash/parse snapshot race. In existing market_data/feeds/lake.py and csv_source.py, repair exact-byte reads, validation, atomic manifest and existing cross-process writer locking; preserve legacy paths/hashes and source semantics. Expanded16cases pass, first36affected pass1PGskip; run full real-PG/DDS suite after integration and deliberate faults. Freeze a new committed source head for broadbackend/contracts+trading qualification. All131units/93plannedfeatures/nativefinancialfinality/epoch/risk/workingorderexpiry and all assistant functions remain in scope; BG001 and native/release/handset gates are not waived.",
+    "previous_head": "7dacc007c21c49673abed79810a849afd449251d",
+    "current_packet": "Owner watch observation and durable alert publication, source tested."
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -393,6 +387,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Publish tested nonce packet, collect new hosted results. Continue original whole-product source work: isolated backend/tests/test_watch_observation_integrity.py in /tmp/van-ctrader-outcome-work-20261023 has8validbeforefailures: stringfalse Boolean, invalidnumericNaN/Inf/bool accepted, non-atomicprojection/runinsert, concurrentfailurecount loss/duplicateedgealerts, lostattentionreply no durablepublication. Implement in existing GoalService/watch runner, preserveownerpause andexactexistingnotifications/authority. Full frozen2e93ab52 backend/contracts+trading audit session64306 stillrunning; collectactualresults/storageaudit/cleanup. Nativefinancialfinality/epoch/risk/workingorderexpiry and wholeproductfeatures remain;131units/93plannedfeatures/BG001 preserved, no invented acceptance.",
-  "updated_at_utc": "2026-10-23T15:07:55.615174+00:00"
+  "current_action": "Commit and publish tested watch packet, then continue original whole-product implementation. Isolated bar-lake source packet has11validbeforefailures: partition escape, mismatched instrument, duplicate/conflicting intervals, false manifest metadata, nonfinite prices, external slice path and hash/parse snapshot race. In existing market_data/feeds/lake.py and csv_source.py, repair exact-byte reads, validation, atomic manifest and existing cross-process writer locking; preserve legacy paths/hashes and source semantics. Expanded16cases pass, first36affected pass1PGskip; run full real-PG/DDS suite after integration and deliberate faults. Freeze a new committed source head for broadbackend/contracts+trading qualification. All131units/93plannedfeatures/nativefinancialfinality/epoch/risk/workingorderexpiry and all assistant functions remain in scope; BG001 and native/release/handset gates are not waived.",
+  "updated_at_utc": "2026-10-23T15:30:38.656592+00:00"
 }

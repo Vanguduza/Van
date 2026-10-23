@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from .models import GoalCreate, GoalPatch, GoalStatus, WatchCreate, WatchObservation, WatchStatus
+from .models import GoalCreate, GoalPatch, GoalStatus, WatchCreate, WatchObservation, WatchObservationResult, WatchStatus
 from .service import GoalService, GoalServiceError
 
 
@@ -75,7 +75,7 @@ def build_goal_router(service: GoalService) -> APIRouter:
         try: return (await service.set_watch_status(watch_id,body.status)).model_dump(mode="json")
         except GoalServiceError as exc: fail(exc)
 
-    @router.post("/v1/watches/{watch_id}/observations")
+    @router.post("/v1/watches/{watch_id}/observations", response_model=WatchObservationResult)
     async def record_watch_observation(watch_id:str,body:WatchObservation):
         try: return await service.record_observation(watch_id,body)
         except GoalServiceError as exc: fail(exc)

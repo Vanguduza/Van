@@ -273,56 +273,135 @@ class GoalService:
             return (value > threshold and (old is None or old <= threshold)) if kind is WatchConditionKind.NUMERIC_ABOVE else (value < threshold and (old is None or old >= threshold))
         return False
 
+    @staticmethod
+    def _validate_observation(condition: dict[str, Any], observation: Any) -> None:
+        kind = WatchConditionKind(str(condition.get("kind", "")).upper())
+        try:
+            # Strict JSON prevents NaN/Infinity anywhere in stored owner state.
+            json.dumps(observation, allow_nan=False)
+            if kind is WatchConditionKind.BOOLEAN_TRUE and type(observation) is not bool:
+                raise ValueError("boolean required")
+            if kind in {WatchConditionKind.NUMERIC_ABOVE, WatchConditionKind.NUMERIC_BELOW}:
+                if isinstance(observation, bool) or not math.isfinite(float(observation)):
+                    raise ValueError("finite number required")
+            if kind is WatchConditionKind.TEXT_CONTAINS and not isinstance(observation, str):
+                raise ValueError("text required")
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise GoalServiceError("WATCH_OBSERVATION_INVALID") from exc
+
     async def record_observation(
         self, watch_id: str, body: WatchObservation, *, now_ms: int | None = None
     ) -> dict[str, Any]:
-        watch=await self.get_watch(watch_id)
-        if watch is None: raise GoalServiceError("WATCH_UNKNOWN")
-        if watch.status is not WatchStatus.ACTIVE: raise GoalServiceError("WATCH_NOT_ACTIVE")
-        now=int(time.time()*1000) if now_ms is None else now_ms
-        run_id=f"wrun_{uuid.uuid4().hex}"
-        if not body.success:
-            failures=watch.consecutive_failures+1
-            streak=watch.failure_streak + (1 if watch.consecutive_failures == 0 else 0)
-            paused=failures >= 3
-            await self.store.execute(
-                """
-                UPDATE watches SET consecutive_failures = ?, failure_streak = ?,
-                   status = ?, next_run_at_ms = ?, updated_at_ms = ?
-                 WHERE watch_id = ?
-                """,
-                (failures,streak,"PAUSED" if paused else "ACTIVE",now+watch.interval_seconds*1000,now,watch_id),
-            )
-            await self.store.execute(
-                "INSERT INTO watch_runs(run_id, watch_id, status, observation_json, changed, error_code, created_at_ms) VALUES (?, ?, 'FAILED', NULL, 0, ?, ?)",
-                (run_id,watch_id,body.error_code or "WATCH_SOURCE_FAILED",now),
-            )
-            severity=AttentionSeverity.BLOCKER if paused else AttentionSeverity.FOLLOW_UP
-            await self.attention.upsert(
-                title=(f"{watch.title} paused after repeated failures" if paused else f"{watch.title} could not be checked"),
-                severity=severity, source="watch",
-                dedupe_key=f"watch:{watch_id}:failure:{streak}",
-                payload={"watch_id":watch_id,"failure_streak":streak,"failures":failures,"error_code":body.error_code},
-            )
-            return {"run_id":run_id,"triggered":False,"paused":paused,"failure_streak":streak}
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        run_id = f"wrun_{uuid.uuid4().hex}"
+        publication = None
+        # A run, its projection and notification intent are one durable decision.
+        # Reading under this lock also serializes edge detection and failure counts.
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            row = await (await db.execute("SELECT * FROM watches WHERE watch_id=?", (watch_id,))).fetchone()
+            if row is None:
+                raise GoalServiceError("WATCH_UNKNOWN")
+            watch = self._watch(row)
+            if watch.status is not WatchStatus.ACTIVE:
+                raise GoalServiceError("WATCH_NOT_ACTIVE")
+            triggered = paused = False
+            streak = watch.failure_streak
+            if not body.success:
+                failures = watch.consecutive_failures + 1
+                streak += 1 if watch.consecutive_failures == 0 else 0
+                paused = failures >= 3
+                await db.execute(
+                    "UPDATE watches SET consecutive_failures=?,failure_streak=?,status=?,next_run_at_ms=?,updated_at_ms=? WHERE watch_id=?",
+                    (failures, streak, "PAUSED" if paused else "ACTIVE", now+watch.interval_seconds*1000, now, watch_id),
+                )
+                await db.execute(
+                    "INSERT INTO watch_runs(run_id, watch_id, status, observation_json, changed, error_code, created_at_ms) VALUES (?, ?, 'FAILED', NULL, 0, ?, ?)",
+                    (run_id, watch_id, body.error_code or "WATCH_SOURCE_FAILED", now),
+                )
+                publication = {
+                    "title": f"{watch.title} paused after repeated failures" if paused else f"{watch.title} could not be checked",
+                    "severity": "BLOCKER" if paused else "FOLLOW_UP",
+                    "dedupe_key": f"watch:{watch_id}:failure:{streak}",
+                    "payload": {"watch_id": watch_id, "failure_streak": streak, "failures": failures, "error_code": body.error_code},
+                }
+            else:
+                self._validate_observation(watch.condition, body.observation)
+                triggered = self._condition_triggered(watch.condition, watch.last_observation, body.observation)
+                await db.execute(
+                    "UPDATE watches SET consecutive_failures=0,last_success_at_ms=?,last_observation_json=?,next_run_at_ms=?,updated_at_ms=? WHERE watch_id=?",
+                    (now, Store.dumps(body.observation), now+watch.interval_seconds*1000, now, watch_id),
+                )
+                await db.execute(
+                    "INSERT INTO watch_runs(run_id, watch_id, status, observation_json, changed, error_code, created_at_ms) VALUES (?, ?, 'SUCCEEDED', ?, ?, NULL, ?)",
+                    (run_id, watch_id, Store.dumps(body.observation), int(triggered), now),
+                )
+                if triggered:
+                    publication = {
+                        "title": watch.title, "severity": "FOLLOW_UP",
+                        "dedupe_key": f"watch:{watch_id}:trigger:{run_id}",
+                        "payload": {"watch_id": watch_id, "observation": body.observation, "condition": watch.condition},
+                    }
+            if publication is not None:
+                revision_key = "watch_publication_revision:"+watch_id
+                previous = await (await db.execute("SELECT value FROM runtime_meta WHERE key=?", (revision_key,))).fetchone()
+                try:
+                    revision = 0 if previous is None else json.loads(previous["value"])
+                    if type(revision) is not int or revision < 0:
+                        raise ValueError("invalid publication revision")
+                except (TypeError, ValueError) as exc:
+                    raise GoalServiceError("WATCH_PUBLICATION_STATE_INVALID") from exc
+                publication["source_revision"] = revision+1
+                await db.execute(
+                    "INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at_unix_ms=excluded.updated_at_unix_ms",
+                    (revision_key, str(revision+1), now),
+                )
+                publication["run_id"] = run_id
+                publication["project_id"] = None
+                if watch.goal_id is not None:
+                    goal = await (await db.execute("SELECT project_id FROM owner_goals WHERE goal_id=?", (watch.goal_id,))).fetchone()
+                    publication["project_id"] = goal["project_id"] if goal else None
+                await db.execute(
+                    "INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)",
+                    ("watch_publication:"+run_id, Store.dumps(publication), now),
+                )
+            await db.commit()
+        # Publication outages cannot convert an accepted observation into a second
+        # failed observation. A restart sweeps the original immutable intent.
+        state = "NOT_REQUIRED"
+        if publication is not None:
+            state = "PENDING"
+            try:
+                await self.publish_pending(run_id=run_id)
+                receipt = await self.store.fetchone("SELECT key FROM runtime_meta WHERE key=?", ("watch_publication_receipt:"+run_id,))
+                if receipt is not None:
+                    state = "PUBLISHED"
+            except Exception:
+                pass  # pending intent remains durable; scheduler retries it
+        return {"run_id": run_id, "triggered": triggered, "paused": paused, "failure_streak": streak, "notification_state": state}
 
-        triggered=self._condition_triggered(watch.condition,watch.last_observation,body.observation)
-        await self.store.execute(
-            """
-            UPDATE watches SET consecutive_failures = 0, last_success_at_ms = ?,
-              last_observation_json = ?, next_run_at_ms = ?, updated_at_ms = ?
-             WHERE watch_id = ?
-            """,
-            (now,Store.dumps(body.observation),now+watch.interval_seconds*1000,now,watch_id),
+    async def publish_pending(self, *, run_id: str | None = None, limit: int = 100) -> int:
+        rows = await self.store.fetchall(
+            "SELECT m.value FROM runtime_meta m LEFT JOIN runtime_meta r ON r.key='watch_publication_receipt:'||substr(m.key,19) "
+            "WHERE m.key LIKE 'watch_publication:%' AND r.key IS NULL "
+            "AND (? IS NULL OR m.key='watch_publication:'||?) "
+            "ORDER BY m.updated_at_unix_ms,m.key LIMIT ?", (run_id, run_id, max(1, min(limit, 500))),
         )
-        await self.store.execute(
-            "INSERT INTO watch_runs(run_id, watch_id, status, observation_json, changed, error_code, created_at_ms) VALUES (?, ?, 'SUCCEEDED', ?, ?, NULL, ?)",
-            (run_id,watch_id,Store.dumps(body.observation),1 if triggered else 0,now),
-        )
-        if triggered:
-            await self.attention.upsert(
-                title=watch.title, severity=AttentionSeverity.FOLLOW_UP, source="watch",
-                dedupe_key=f"watch:{watch_id}:trigger:{run_id}",
-                payload={"watch_id":watch_id,"observation":body.observation,"condition":watch.condition},
-            )
-        return {"run_id":run_id,"triggered":triggered,"paused":False,"failure_streak":watch.failure_streak}
+        published = 0
+        for row in rows:
+            publication = json.loads(row["value"])
+            try:
+                await self.attention.upsert(
+                    title=publication["title"], severity=AttentionSeverity(publication["severity"]), source="watch",
+                    dedupe_key=publication["dedupe_key"], project_id=publication["project_id"],
+                    payload=publication["payload"], source_revision=publication["source_revision"],
+                )
+                await self.store.execute(
+                    "INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?) ON CONFLICT(key) DO NOTHING",
+                    ("watch_publication_receipt:"+publication["run_id"], Store.dumps({"schema": "van.watch-publication/1", "run_id": publication["run_id"]}), int(time.time()*1000)),
+                )
+                published += 1
+            except Exception:
+                # One unavailable alert must not starve independent watches.
+                continue
+        return published

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -104,3 +104,13 @@ class WatchObservation(BaseModel):
     observation: Any = None
     success: bool = True
     error_code: str | None = Field(default=None, max_length=200)
+
+
+class WatchObservationResult(BaseModel):
+    """Committed observation and server alert persistence, never device delivery."""
+
+    run_id: str
+    triggered: bool
+    paused: bool
+    failure_streak: int
+    notification_state: Literal["NOT_REQUIRED", "PENDING", "PUBLISHED"]

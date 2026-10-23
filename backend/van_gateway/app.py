@@ -1056,7 +1056,9 @@ def create_app() -> FastAPI:
     async def _run_owner_watches() -> dict:
         # Individual watches carry their own next_run_at_ms. The scheduler tick merely
         # wakes the bounded runner; a restart therefore does not re-check every watch.
-        return await watch_runner.run(now_ms=int(time.time() * 1000))
+        published = await goals.publish_pending()
+        result = await watch_runner.run(now_ms=int(time.time() * 1000))
+        return {**result, "published": published}
 
     async def _reconcile_mission_publications() -> dict:
         return {"published": await missions.reconcile_terminal_projections()}

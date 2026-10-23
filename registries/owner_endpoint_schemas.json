@@ -10767,6 +10767,45 @@
         "type": "object",
         "title": "WatchObservation"
       },
+      "WatchObservationResult": {
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "triggered": {
+            "type": "boolean",
+            "title": "Triggered"
+          },
+          "paused": {
+            "type": "boolean",
+            "title": "Paused"
+          },
+          "failure_streak": {
+            "type": "integer",
+            "title": "Failure Streak"
+          },
+          "notification_state": {
+            "type": "string",
+            "enum": [
+              "NOT_REQUIRED",
+              "PENDING",
+              "PUBLISHED"
+            ],
+            "title": "Notification State"
+          }
+        },
+        "type": "object",
+        "required": [
+          "run_id",
+          "triggered",
+          "paused",
+          "failure_streak",
+          "notification_state"
+        ],
+        "title": "WatchObservationResult",
+        "description": "Committed observation and server alert persistence, never device delivery."
+      },
       "WatchSourceKind": {
         "type": "string",
         "enum": [
