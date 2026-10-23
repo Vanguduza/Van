@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class GoalStatus(str, Enum):
@@ -45,12 +45,33 @@ class GoalCreate(BaseModel):
     milestones: list[str] = Field(default_factory=list, max_length=100)
 
 
+    @field_validator("title")
+    @classmethod
+    def non_blank_title(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("goal title must not be blank")
+        return value.strip()
+
+    @field_validator("milestones")
+    @classmethod
+    def explicit_milestones(cls, values: list[str]) -> list[str]:
+        if any(not value.strip() for value in values):
+            raise ValueError("milestone title must not be blank")
+        return [value.strip() for value in values]
+
 class GoalPatch(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=300)
     description: str | None = Field(default=None, max_length=4000)
     priority: int | None = Field(default=None, ge=0, le=100)
     status: GoalStatus | None = None
 
+
+    @field_validator("title")
+    @classmethod
+    def non_blank_title(cls, value: str | None) -> str | None:
+        if value is not None and not value.strip():
+            raise ValueError("goal title must not be blank")
+        return None if value is None else value.strip()
 
 class WatchSourceKind(str, Enum):
     BROWSER = "BROWSER"
@@ -99,6 +120,13 @@ class WatchCreate(BaseModel):
     interval_seconds: int = Field(default=3600, ge=60, le=31 * 24 * 3600)
     goal_id: str | None = None
 
+
+    @field_validator("title", "target")
+    @classmethod
+    def non_blank_watch_input(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("watch title and target must not be blank")
+        return value.strip()
 
 class WatchObservation(BaseModel):
     observation: Any = None

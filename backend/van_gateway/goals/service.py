@@ -32,18 +32,21 @@ class GoalService:
         self.store = store
         self.attention = attention
 
-    async def _goal(self, goal_id: str) -> Goal | None:
-        row = await self.store.fetchone("SELECT * FROM owner_goals WHERE goal_id = ?", (goal_id,))
+    async def _goal(self, goal_id: str, *, db: Any | None = None) -> Goal | None:
+        # Goal fields, milestones and links belong to one read snapshot.
+        if db is None:
+            async with self.store.connection() as db:
+                await db.execute("BEGIN")
+                return await self._goal(goal_id, db=db)
+        row = await (await db.execute("SELECT * FROM owner_goals WHERE goal_id = ?", (goal_id,))).fetchone()
         if row is None:
             return None
-        milestones = await self.store.fetchall(
-            "SELECT * FROM goal_milestones WHERE goal_id = ? ORDER BY sort_order, created_at_ms",
-            (goal_id,),
-        )
-        missions = await self.store.fetchall(
-            "SELECT mission_id FROM goal_mission_links WHERE goal_id = ? ORDER BY linked_at_ms",
-            (goal_id,),
-        )
+        milestones = await (await db.execute(
+            "SELECT * FROM goal_milestones WHERE goal_id = ? ORDER BY sort_order, created_at_ms", (goal_id,),
+        )).fetchall()
+        missions = await (await db.execute(
+            "SELECT mission_id FROM goal_mission_links WHERE goal_id = ? ORDER BY linked_at_ms", (goal_id,),
+        )).fetchall()
         return Goal(
             goal_id=row["goal_id"], title=row["title"], description=row["description"],
             status=GoalStatus(row["status"]), priority=int(row["priority"]),
@@ -63,26 +66,28 @@ class GoalService:
     async def create(self, body: GoalCreate, *, now_ms: int | None = None) -> Goal:
         now = int(time.time() * 1000) if now_ms is None else now_ms
         goal_id = f"goal_{uuid.uuid4().hex}"
-        await self.store.execute(
-            """
-            INSERT INTO owner_goals(
-              goal_id, title, description, status, priority, project_id, evidence_refs_json,
-              created_at_ms, updated_at_ms, completed_at_ms
-            ) VALUES (?, ?, ?, 'ACTIVE', ?, ?, ?, ?, ?, NULL)
-            """,
-            (goal_id, body.title.strip(), body.description.strip(), body.priority,
-             body.project_id, Store.dumps(body.evidence_refs), now, now),
-        )
-        for order, title in enumerate(body.milestones):
-            if title.strip():
-                await self.store.execute(
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            await db.execute(
+                """
+                INSERT INTO owner_goals(
+                  goal_id, title, description, status, priority, project_id, evidence_refs_json,
+                  created_at_ms, updated_at_ms, completed_at_ms
+                ) VALUES (?, ?, ?, 'ACTIVE', ?, ?, ?, ?, ?, NULL)
+                """,
+                (goal_id, body.title, body.description.strip(), body.priority,
+                 body.project_id, Store.dumps(body.evidence_refs), now, now),
+            )
+            for order, title in enumerate(body.milestones):
+                await db.execute(
                     """
                     INSERT INTO goal_milestones(
                       milestone_id, goal_id, title, done, due_at_ms, sort_order, created_at_ms, updated_at_ms
                     ) VALUES (?, ?, ?, 0, NULL, ?, ?, ?)
                     """,
-                    (f"gms_{uuid.uuid4().hex}", goal_id, title.strip(), order, now, now),
+                    (f"gms_{uuid.uuid4().hex}", goal_id, title, order, now, now),
                 )
+            await db.commit()
         goal = await self._goal(goal_id)
         assert goal is not None
         return goal
@@ -95,64 +100,77 @@ class GoalService:
         where = ""
         if status is not None:
             where = " WHERE status = ?"; params.append(status.value)
-        rows = await self.store.fetchall(
-            f"SELECT goal_id FROM owner_goals{where} ORDER BY priority DESC, updated_at_ms DESC LIMIT ?",
-            tuple(params + [max(1, min(limit, 500))]),
-        )
-        out=[]
-        for row in rows:
-            goal=await self._goal(row["goal_id"])
-            if goal is not None: out.append(goal)
-        return out
+        async with self.store.connection() as db:
+            await db.execute("BEGIN")
+            rows = await (await db.execute(
+                f"SELECT goal_id FROM owner_goals{where} ORDER BY priority DESC, updated_at_ms DESC LIMIT ?",
+                tuple(params + [max(1, min(limit, 500))]),
+            )).fetchall()
+            out = []
+            for row in rows:
+                goal = await self._goal(row["goal_id"], db=db)
+                if goal is not None:
+                    out.append(goal)
+            return out
 
     async def patch(self, goal_id: str, body: GoalPatch, *, now_ms: int | None = None) -> Goal:
-        current = await self._goal(goal_id)
-        if current is None:
-            raise GoalServiceError("GOAL_UNKNOWN")
-        now = int(time.time() * 1000) if now_ms is None else now_ms
-        title = current.title if body.title is None else body.title.strip()
-        description = current.description if body.description is None else body.description.strip()
-        priority = current.priority if body.priority is None else body.priority
-        status = current.status if body.status is None else body.status
-        completed_at = current.completed_at_ms
-        if status is GoalStatus.COMPLETED and current.status is not GoalStatus.COMPLETED:
-            completed_at = now
-        elif status is not GoalStatus.COMPLETED:
-            completed_at = None
-        await self.store.execute(
-            """
-            UPDATE owner_goals SET title = ?, description = ?, priority = ?, status = ?,
-                                   completed_at_ms = ?, updated_at_ms = ?
-             WHERE goal_id = ?
-            """,
-            (title, description, priority, status.value, completed_at, now, goal_id),
-        )
+        now = int(time.time()*1000) if now_ms is None else now_ms
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            row = await (await db.execute("SELECT * FROM owner_goals WHERE goal_id = ?", (goal_id,))).fetchone()
+            if row is None:
+                raise GoalServiceError("GOAL_UNKNOWN")
+            title = row["title"] if body.title is None else body.title
+            description = row["description"] if body.description is None else body.description.strip()
+            priority = int(row["priority"]) if body.priority is None else body.priority
+            old_status = GoalStatus(row["status"])
+            status = old_status if body.status is None else body.status
+            completed_at = row["completed_at_ms"]
+            if status is GoalStatus.COMPLETED and old_status is not GoalStatus.COMPLETED:
+                completed_at = now
+            elif status is not GoalStatus.COMPLETED:
+                completed_at = None
+            await db.execute(
+                "UPDATE owner_goals SET title=?,description=?,priority=?,status=?,completed_at_ms=?,updated_at_ms=? WHERE goal_id=?",
+                (title, description, priority, status.value, completed_at, now, goal_id),
+            )
+            await db.commit()
         updated=await self._goal(goal_id); assert updated is not None
         return updated
 
     async def set_milestone(self, goal_id: str, milestone_id: str, done: bool, *, now_ms: int | None = None) -> Goal:
-        if await self._goal(goal_id) is None:
-            raise GoalServiceError("GOAL_UNKNOWN")
-        row=await self.store.fetchone(
-            "SELECT milestone_id FROM goal_milestones WHERE goal_id = ? AND milestone_id = ?",
-            (goal_id,milestone_id),
-        )
-        if row is None: raise GoalServiceError("MILESTONE_UNKNOWN")
-        now=int(time.time()*1000) if now_ms is None else now_ms
-        await self.store.execute(
-            "UPDATE goal_milestones SET done = ?, updated_at_ms = ? WHERE milestone_id = ?",
-            (1 if done else 0, now, milestone_id),
-        )
+        now = int(time.time()*1000) if now_ms is None else now_ms
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            if await (await db.execute("SELECT goal_id FROM owner_goals WHERE goal_id=?", (goal_id,))).fetchone() is None:
+                raise GoalServiceError("GOAL_UNKNOWN")
+            row = await (await db.execute("SELECT milestone_id FROM goal_milestones WHERE goal_id=? AND milestone_id=?", (goal_id,milestone_id))).fetchone()
+            if row is None:
+                raise GoalServiceError("MILESTONE_UNKNOWN")
+            await db.execute(
+                "UPDATE goal_milestones SET done=?,updated_at_ms=? WHERE milestone_id=? AND goal_id=?",
+                (int(done), now, milestone_id, goal_id),
+            )
+            await db.execute("UPDATE owner_goals SET updated_at_ms=? WHERE goal_id=?", (now,goal_id))
+            await db.commit()
         goal=await self._goal(goal_id); assert goal is not None
         return goal
 
     async def link_mission(self, goal_id: str, mission_id: str, *, now_ms: int | None = None) -> Goal:
-        if await self._goal(goal_id) is None: raise GoalServiceError("GOAL_UNKNOWN")
-        now=int(time.time()*1000) if now_ms is None else now_ms
-        await self.store.execute(
-            "INSERT OR IGNORE INTO goal_mission_links(goal_id, mission_id, linked_at_ms) VALUES (?, ?, ?)",
-            (goal_id, mission_id, now),
-        )
+        now = int(time.time()*1000) if now_ms is None else now_ms
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            if await (await db.execute("SELECT goal_id FROM owner_goals WHERE goal_id=?", (goal_id,))).fetchone() is None:
+                raise GoalServiceError("GOAL_UNKNOWN")
+            if await (await db.execute("SELECT mission_id FROM missions WHERE mission_id=?", (mission_id,))).fetchone() is None:
+                raise GoalServiceError("MISSION_UNKNOWN")
+            inserted = await db.execute(
+                "INSERT OR IGNORE INTO goal_mission_links(goal_id,mission_id,linked_at_ms) VALUES(?,?,?)",
+                (goal_id, mission_id, now),
+            )
+            if inserted.rowcount == 1:
+                await db.execute("UPDATE owner_goals SET updated_at_ms=? WHERE goal_id=?", (now,goal_id))
+            await db.commit()
         goal=await self._goal(goal_id); assert goal is not None
         return goal
 
@@ -180,6 +198,8 @@ class GoalService:
             raise GoalServiceError("WATCH_CONDITION_INVALID") from exc
         if kind in {WatchConditionKind.NUMERIC_ABOVE, WatchConditionKind.NUMERIC_BELOW}:
             try:
+                if isinstance(body.condition["threshold"], bool):
+                    raise ValueError("boolean is not a price threshold")
                 float(body.condition["threshold"])
             except (KeyError, TypeError, ValueError) as exc:
                 raise GoalServiceError("WATCH_THRESHOLD_INVALID") from exc

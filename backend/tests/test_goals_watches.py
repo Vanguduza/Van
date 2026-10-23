@@ -20,8 +20,13 @@ async def test_goal_is_distinct_from_mission_and_tracks_milestones(tmp_path):
     assert len(goal.milestones)==2
     goal=await service.set_milestone(goal.goal_id,goal.milestones[0].milestone_id,True)
     assert goal.milestones[0].done is True
-    goal=await service.link_mission(goal.goal_id,"mission-1")
-    assert goal.mission_ids==["mission-1"]
+    from van_gateway.mission.service import MissionService
+    from van_gateway.mission.models import MissionOrigin
+    from van_gateway.models import OriginChannel
+    mission=await MissionService(store).create(owner_principal_id="owner",origin=MissionOrigin.OWNER_VOICE,
+        origin_channel=OriginChannel.VOICE,title="Launch work",goal="Existing linked execution")
+    goal=await service.link_mission(goal.goal_id,mission.mission_id)
+    assert goal.mission_ids==[mission.mission_id]
     goal=await service.patch(goal.goal_id,GoalPatch(status=GoalStatus.COMPLETED))
     assert goal.completed_at_ms is not None
 

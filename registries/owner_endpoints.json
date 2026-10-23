@@ -4806,7 +4806,13 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Goal"
+                },
+                "title": "Response List Goals V1 Goals Get"
+              }
             }
           }
         },
@@ -4854,7 +4860,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/Goal"
+              }
             }
           }
         },
@@ -10608,7 +10616,13 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Watch"
+                },
+                "title": "Response List Watches V1 Watches Get"
+              }
             }
           }
         },
@@ -10656,7 +10670,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/Watch"
+              }
             }
           }
         },
@@ -11521,7 +11537,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/Goal"
+              }
             }
           }
         },
@@ -11578,7 +11596,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/Watch"
+              }
             }
           }
         },
@@ -18119,7 +18139,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/Goal"
+              }
             }
           }
         },
@@ -18185,7 +18207,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/Goal"
+              }
             }
           }
         },
@@ -18242,7 +18266,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/Goal"
+              }
             }
           }
         },
@@ -23350,7 +23376,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/Watch"
+              }
             }
           }
         },

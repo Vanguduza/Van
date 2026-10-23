@@ -4729,6 +4729,93 @@
         "title": "GenerateBody",
         "description": "\u00a722 \u2014 COLD generation. The gateway ships only the deterministic proposer."
       },
+      "Goal": {
+        "properties": {
+          "goal_id": {
+            "type": "string",
+            "title": "Goal Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "status": {
+            "$ref": "#/components/schemas/GoalStatus",
+            "default": "ACTIVE"
+          },
+          "priority": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Priority",
+            "default": 50
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "evidence_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Refs"
+          },
+          "milestones": {
+            "items": {
+              "$ref": "#/components/schemas/GoalMilestone"
+            },
+            "type": "array",
+            "title": "Milestones"
+          },
+          "mission_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Mission Ids"
+          },
+          "created_at_ms": {
+            "type": "integer",
+            "title": "Created At Ms"
+          },
+          "updated_at_ms": {
+            "type": "integer",
+            "title": "Updated At Ms"
+          },
+          "completed_at_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "goal_id",
+          "title",
+          "created_at_ms",
+          "updated_at_ms"
+        ],
+        "title": "Goal"
+      },
       "GoalCreate": {
         "properties": {
           "title": {
@@ -4782,6 +4869,45 @@
           "title"
         ],
         "title": "GoalCreate"
+      },
+      "GoalMilestone": {
+        "properties": {
+          "milestone_id": {
+            "type": "string",
+            "title": "Milestone Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "done": {
+            "type": "boolean",
+            "title": "Done",
+            "default": false
+          },
+          "due_at_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At Ms"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "milestone_id",
+          "title"
+        ],
+        "title": "GoalMilestone"
       },
       "GoalPatch": {
         "properties": {
@@ -10690,6 +10816,98 @@
           "system_operationalization"
         ],
         "title": "VocabularyDefinitionBody"
+      },
+      "Watch": {
+        "properties": {
+          "watch_id": {
+            "type": "string",
+            "title": "Watch Id"
+          },
+          "goal_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "source_kind": {
+            "$ref": "#/components/schemas/WatchSourceKind"
+          },
+          "target": {
+            "type": "string",
+            "title": "Target"
+          },
+          "condition": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Condition"
+          },
+          "interval_seconds": {
+            "type": "integer",
+            "title": "Interval Seconds"
+          },
+          "status": {
+            "$ref": "#/components/schemas/WatchStatus"
+          },
+          "consecutive_failures": {
+            "type": "integer",
+            "title": "Consecutive Failures"
+          },
+          "failure_streak": {
+            "type": "integer",
+            "title": "Failure Streak"
+          },
+          "next_run_at_ms": {
+            "type": "integer",
+            "title": "Next Run At Ms"
+          },
+          "last_success_at_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Success At Ms"
+          },
+          "last_observation": {
+            "title": "Last Observation"
+          },
+          "created_at_ms": {
+            "type": "integer",
+            "title": "Created At Ms"
+          },
+          "updated_at_ms": {
+            "type": "integer",
+            "title": "Updated At Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "watch_id",
+          "title",
+          "source_kind",
+          "target",
+          "condition",
+          "interval_seconds",
+          "status",
+          "consecutive_failures",
+          "failure_streak",
+          "next_run_at_ms",
+          "created_at_ms",
+          "updated_at_ms"
+        ],
+        "title": "Watch"
       },
       "WatchCreate": {
         "properties": {

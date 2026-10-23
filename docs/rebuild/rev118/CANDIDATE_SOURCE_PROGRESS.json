@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T15:44:10.006627+00:00",
+  "updated_at_utc": "2026-10-23T15:54:34.130471+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -267,6 +267,10 @@
         {
           "description": "Atomic owner-watch observation/projection/history/publication intent; strict finite/boolean/text evidence, serialized edges/counters and owner pause. Restart/lost-alert-reply recovery preserves original project and acknowledged attention; monotonic failure versions survive history retention and late publishers. Actual owner.watches scheduler drains pending intent without due browser work; typed server publication result.133 affected cases including actual Chromium guards,2 typed gateway,29 owner contracts,79 rebuild pass without skips;8 fault/control pairs caught and source restored. Source evidence only; no device delivery or unit acceptance.",
           "evidence": "backend/BE-027_030_WATCH_OBSERVATION_PUBLICATION.md; receipts/WATCH_OBSERVATION_PUBLICATION_SOURCE_20261023.json"
+        },
+        {
+          "description": "Owner goals: atomic create/milestones, patches that preserve concurrent omitted-field edits, coherent goal/list snapshots, parent change timestamps atomic with milestone/link writes, idempotent real existing-mission links without dispatch or mission-state changes, nonblank inputs and strict boolean/price distinction. Typed goal/watch endpoint response schemas refreshed without newUI.13 reproduced failures;41 isolated/108 integrated audited/29 registry/79 rebuild cases pass0skip;11 deliberate fault/control pairs caught/restored. Legacy phantom-positive fixture now creates a real mission. Existing legacy references retained; original-request recovery for allCRUD and whole-unit/native/production/handset acceptance not claimed.",
+          "evidence": "backend/BE-003_027_OWNER_GOAL_INTEGRITY.md; receipts/OWNER_GOAL_INTEGRITY_SOURCE_20261023.json"
         }
       ]
     },
@@ -875,6 +879,10 @@
         {
           "description": "Atomic owner-watch observation/projection/history/publication intent; strict finite/boolean/text evidence, serialized edges/counters and owner pause. Restart/lost-alert-reply recovery preserves original project and acknowledged attention; monotonic failure versions survive history retention and late publishers. Actual owner.watches scheduler drains pending intent without due browser work; typed server publication result.133 affected cases including actual Chromium guards,2 typed gateway,29 owner contracts,79 rebuild pass without skips;8 fault/control pairs caught and source restored. Source evidence only; no device delivery or unit acceptance.",
           "evidence": "backend/BE-027_030_WATCH_OBSERVATION_PUBLICATION.md; receipts/WATCH_OBSERVATION_PUBLICATION_SOURCE_20261023.json"
+        },
+        {
+          "description": "Owner goals: atomic create/milestones, patches that preserve concurrent omitted-field edits, coherent goal/list snapshots, parent change timestamps atomic with milestone/link writes, idempotent real existing-mission links without dispatch or mission-state changes, nonblank inputs and strict boolean/price distinction. Typed goal/watch endpoint response schemas refreshed without newUI.13 reproduced failures;41 isolated/108 integrated audited/29 registry/79 rebuild cases pass0skip;11 deliberate fault/control pairs caught/restored. Legacy phantom-positive fixture now creates a real mission. Existing legacy references retained; original-request recovery for allCRUD and whole-unit/native/production/handset acceptance not claimed.",
+          "evidence": "backend/BE-003_027_OWNER_GOAL_INTEGRITY.md; receipts/OWNER_GOAL_INTEGRITY_SOURCE_20261023.json"
         }
       ]
     },

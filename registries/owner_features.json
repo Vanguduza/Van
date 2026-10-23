@@ -46666,7 +46666,7 @@
     "android_receipt": null,
     "android_receipt_sha256": null,
     "scope": "Bounded current source-citation/endpoint refresh; previous reviews retained. Whole-product, Android, deployment/provider and handset qualifications remain separate.",
-    "source_review_manifest_sha256": "b55a36c69c87d521a8fb1fa77a1312804060e9ec2cab77b127f043ac4dc640d6"
+    "source_review_manifest_sha256": "6f7b7224d1d67f2206973386cdeea4454f0dd7abffaa2e3072517115aa3a291f"
   },
   "functional_wiring_status_semantics": {
     "SOURCE_WIRED_REQUIRES_ACCEPTANCE": "Supported source producer/consumer path is reviewed; stated provider, deployment, visual or physical acceptance remains required.",
