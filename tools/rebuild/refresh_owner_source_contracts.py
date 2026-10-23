@@ -156,7 +156,9 @@ def build():
             'client_original_operations':'com.dial.van.trading.RuntimeRecoveryOperations',
             'client_specification':'docs/rebuild/rev118/backend/BE-003_009_RUNTIME_RECOVERY_ANDROID_CLIENT.md',
             'authority':'CURRENT_PAIRED_OWNER_DEVICE_EXACT_A4_ACCOUNT_SESSION_LEASE_AND_RISK_STATE',
-            'scope':'Single-session kill clear, loss-scope reset and drawdown rebaseline. Original approval ID and durable public proof survive uncertain dispatch. Reads never dispatch. APPLIED is not blanket entry authority; all other holds, profile and final native fences remain.',
+            'scope':'Single-session and multi-instrument account kill clear, loss-scope reset and drawdown rebaseline. The native account actor publishes its opaque session identity; symbol/contract configuration and lease changes invalidate an old review. Original approval ID and durable public proof survive uncertain dispatch. Reads never dispatch. APPLIED is not blanket entry authority; all other holds, unresolved original orders, profile and final native fences remain.',
+            'supported_runtimes':['single-session','account'],
+            'account_runtime_specification':'docs/rebuild/rev118/backend/BE-003_009_ACCOUNT_RUNTIME_RECOVERY.md',
             'specification':'docs/rebuild/rev118/backend/BE-003_009_RUNTIME_RECOVERY.md',
             'new_ui_implemented':False, 'live_qualified':False}
         for row in (recovery_feature, recovery_screen):

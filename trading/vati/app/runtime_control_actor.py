@@ -6,15 +6,25 @@ is performed while holding the event-chain writer lock.
 """
 from dataclasses import asdict
 from decimal import Decimal
+from cryptography.exceptions import UnsupportedAlgorithm
 
 from vati.app.runtime_control_journal import RuntimeControlJournal
 from vati.app.runtime_control_protocol import RuntimeControlError, recovery_profile_ref
 from vati.authority import load_owner_keys
+from vati.authority_registry import owner_key_id,owner_registry_path
 from vati.core import EventKind, make_event
+from vati.core.file_lock import exclusive_state_lock
 from vati.core.canonical import canonical_hash
 from vati.risk.contracts import KillSwitchTrigger
 from vati.risk.lockouts import LossStreakGovernor, RESET_EVENT, DRAWDOWN_RESUME_EVENT
 from vati.risk.mandate import mandate_subject
+
+
+def _recovery_cycle(service):
+    runner=getattr(service,'runner',None)
+    if runner is not None:return runner.cycle
+    from vati.app.account_recovery import AccountRecoveryView
+    return AccountRecoveryView(service)
 
 
 def outstanding_owner_halts(ledger, account_alias):
@@ -53,9 +63,8 @@ def outstanding_owner_halts(ledger, account_alias):
 
 def recovery_review(service):
     """Stable over polls; changes with authority, risk, or process/lease identity."""
-    c = service.runner.cycle
+    c = _recovery_cycle(service)
     from vati.accounts import AccountRegistry
-    from vati.accounts.access import native_binding
     try:
         account = AccountRegistry(service.cfg.registry_path).get(service.cfg.account_alias)
         profile = recovery_profile_ref(account,service.cfg.owner_authority_keys)
@@ -82,7 +91,7 @@ def recovery_review(service):
 
 def _reconciled(c, positions):
     from vati.execution.reconciliation import reconcile, LedgerPosition
-    rows = [LedgerPosition(iid, c.cfg.symbol, entry.get('quantity', Decimal(0)), entry.get('stop'),
+    rows = c.ledger_positions() if callable(getattr(c,'ledger_positions',None)) else [LedgerPosition(iid, c.cfg.symbol, entry.get('quantity', Decimal(0)), entry.get('stop'),
                            bool(c.cfg.software_stops))
             for iid, entry in c._entries.items() if entry.get('open', True)]
     return not c.recovery_unresolved and reconcile(rows, positions, account_verified=True).permit_new_orders
@@ -109,9 +118,14 @@ def _eligible(c, state, account, heartbeat, positions, now_ms):
     return True
 
 
+def _same_owner_key(pem,expected):
+    try:return owner_key_id(pem)==owner_key_id(expected)
+    except (ValueError,TypeError,AttributeError,UnsupportedAlgorithm):return False
+
+
 def process_recovery_requests(service):
     """Run only on the current actor; original requests never dispatch orders."""
-    c = service.runner.cycle
+    c = _recovery_cycle(service)
     journal = RuntimeControlJournal(c.ledger, clock=lambda: service.clock() // 1000)
     for request in journal.pending_account(c.cfg.account_alias):
         # Venue reads stay outside the transaction and do not claim a fill or
@@ -122,7 +136,10 @@ def process_recovery_requests(service):
         committed = None
         try:
             with service.lease.submission_guard(service.lease.epoch, now_ms=service.clock()) as valid:
-                with c.ledger.atomic():
+                # Same lease -> issuer -> ledger order as entry submission.
+                # Revocation must not acknowledge between checking the key and
+                # committing its owner-approved recovery effect.
+                with exclusive_state_lock(owner_registry_path(service.cfg.owner_authority_keys or None)), c.ledger.atomic():
                     current = journal.status(request.proof.operation_id, request.intent.device_id)
                     if current.phase != 'REQUESTED':
                         continue
@@ -140,7 +157,7 @@ def process_recovery_requests(service):
                         except (OSError, ValueError, TypeError):
                             keys = {}
                         if (request.proof.key_id not in keys
-                            or keys[request.proof.key_id].strip() != request.public_key_pem.strip()):
+                            or not _same_owner_key(keys[request.proof.key_id],request.public_key_pem)):
                             reason = 'OWNER_KEY_UNREGISTERED'
                         else:
                             try:
@@ -187,8 +204,11 @@ def process_recovery_requests(service):
             try:
                 committed = journal.status(request.proof.operation_id, request.intent.device_id)
             except Exception:
-                service._lease_allows_entry = False
-                service.runner.permit_new_orders = False
+                if callable(getattr(c,'hold_entries',None)):
+                    c.hold_entries()
+                else:
+                    service._lease_allows_entry = False
+                    service.runner.permit_new_orders = False
                 raise
             if committed is None or committed.phase == 'REQUESTED':
                 raise
@@ -205,5 +225,6 @@ def process_recovery_requests(service):
                 c.peak_equity = restore_peak_equity(c.ledger.iter(), account_alias=c.cfg.account_alias)
             # Clearing a cause is not blanket authority. Native reconciliation,
             # all other latches, profile, mode and final lease fences still apply.
-            service.runner.permit_new_orders = bool(_reconciled(c, positions)
-                and not c.kill.halted and not c.unresolved_entry_attempts)
+            if getattr(service,'runner',None) is not None:
+                service.runner.permit_new_orders = bool(_reconciled(c, positions)
+                    and not c.kill.halted and not c.unresolved_entry_attempts)

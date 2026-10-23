@@ -172,20 +172,10 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T07:44:42.019181+00:00",
+    "updated_utc": "2026-10-23T08:11:45.756627+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": [
-      {
-        "scope": "Frozen exact f35 source audited backend/contracts",
-        "checkout": "/workspace/van-autonomous-qualification-20261022/Van",
-        "session_id": 61065,
-        "stage": "TRADING_PASS_BACKEND_RUNNING",
-        "trading_passed": 2295,
-        "trading_skipped": 0,
-        "source_mutation_forbidden": true
-      }
-    ],
+    "background_jobs": [],
     "last_validation": [
       "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
       "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -292,7 +282,10 @@
       "Frozen exactf3 clean auditedbackend/contracts6875pass9explicit skips6884cases2657.19s;2281tradingpass0skip478.14s; zero forbidden runtime storage, realPG/Chrome/AGP/bothDDS, privatePGstopped/removed/driverexit0. Separate kernel supplement6actualpass0skip bound to identical test/applicationfiles; productionhostfirewall unqualified.",
       "Hostedf3/39908982147 all374legacy faults383edits,native18pass4artworkmode skips,VITS2.306/1.932s,PG26voice117publictrading2280pass1DDSskip; treeidentical testedmerge. Only DDSreadkey/trustedmain bootstrap prerequisites fail.",
       "Standing policy admission binds the exact cryptographically verified signer and captured native source; current risk and final submission reject retirement, unreadable source or changed material. Same native key-file lock serializes actual send and revocation ACK. Independent temperament signer, equivalent PEM, explicit archived research, immutable policy/risk wire, real session/book status and retained protective exits covered.2535full trading/recovery pass0skip realprivatePG,78rebuild,7registry tests and unchanged contract derivation;9faults caught/restored. Source only; deferred providers and original gates remain.",
-      "Hostedf35/39915974290 all374legacy faults383edits,native18pass4artworkmode skips,VITS3.038/2.390s,PG26voice117publictrading2294pass1DDSskip; testedmerge treeidentical. DDSreadkey/trusted-main bootstrap failures retained. Kernel39915974384SUCCESS; six-check detailed supplement remains its prior source-bound receipt."
+      "Hostedf35/39915974290 all374legacy faults383edits,native18pass4artworkmode skips,VITS3.038/2.390s,PG26voice117publictrading2294pass1DDSskip; testedmerge treeidentical. DDSreadkey/trusted-main bootstrap failures retained. Kernel39915974384SUCCESS; six-check detailed supplement remains its prior source-bound receipt.",
+      "Actual multi-instrument account actor reuses signed recovery/journal and PostgreSQL atomic effects; state binds opaque current account/lease/specs/contracts identity. Account-scoped owner halts, idle lease renewal, current issuer file guard and decoded PEM equivalence; original unknown/partial/invalid-money commands block recovery and new risk, while genuine zero-effect readback supports fresh approval without resend. Actual pairedgateway->signedCommander->PGactor original replay and realPGrollback/lostACK covered.2560full trading/recovery pass0skip605.59s,269affected,78rebuild,12owner contracts;14faults caught/restored. Source only; original native/provider/release gates remain.",
+      "Frozen exactf35 source broad qualification complete:2295trading pass0skip494s;6906backend/contracts pass9explicit skips6915cases2740.96s. Zero forbidden runtime storage, clean checkout, realPG/Chrome/AGP/bothDDS, actual driverexit0/privatePGstoppedremoved. Source-bound6kernel supplement retained separately.",
+      "Hosted3b/39919882928 all374legacy faults383edits,native18pass4explicitartworkmode skips,VITS3.237/2.442s,PG26voice117publictrading2310pass1DDSskip; testedmerge treeidentical. Only DDSreadkey/trusted-main bootstrap prerequisites fail. Current source registry42features105functions78surfaces445endpoints279schemas;93plannedfeatures remain distinct."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -303,9 +296,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Continue autonomous whole-product source implementation. Complete the reproduced multi-instrument owner recovery/state contract and account-scoped halt defects (11 valid counterexamples), preserving original signed proof/readback/lease/journal semantics. Keep exact f35 full backend qualification checkout untouched until actual exit. Finish safe account retirement, native MQL precision/order vs position identity, deferred worker deadlines/epochs/risk envelopes, provider financial finality/corrections and all remaining assistant features. No new frontend before BG-001 or invented acceptance.",
-    "previous_head": "f35bf94b6f098f0d2ac8ee2aab77b5864dfb3aa0",
-    "current_packet": "Current standing policy signer availability and native revocation/submission serialization"
+    "next_action": "Continue autonomous whole-product implementation. Preserve complete current source before starting new packet. Qualify MQL source with actual MetaEditor in a disposable hosted Windows runner (pending script/workflow in /tmp, not yet applied); fix native precision/order-vs-position identity, provider result integrity, deferred worker deadlines/epochs/risk envelopes. Complete original fill/provider financial finality/corrections, safe account retirement and all remaining assistant features. Run a fresh clean exact-commit backend/contracts audit in the owned QA checkout after its completed f35 run. No new frontend beforeBG-001 or invented unit/native/provider/production/S24 acceptance.",
+    "previous_head": "3b4049bdf067c04ddc6f9419cae228c3ccf37d3a",
+    "current_packet": "Shared signed account-runtime recovery, native uncertainty and gateway source integration"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",

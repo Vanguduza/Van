@@ -139,7 +139,7 @@ class RuntimeRecoveryCatalog(BaseModel):
     native_phases: list[str]
     gateway_phases: list[str]
     applied_is_entry_permission: Literal[False]
-    supported_runtime: Literal['single-session']
+    supported_runtime: Literal['single-session','single-session-and-account']
     state_route: str
     operation_route: str
 
@@ -200,7 +200,7 @@ def register_runtime_control_routes(app, *, auth, store, promotions, audit):
             'requires_owner_approval': True, 'original_operation_id': 'approval_challenge_id',
             'native_phases':['REQUESTED','APPLIED','REFUSED'],
             'gateway_phases':['PENDING_DISPATCH','UNKNOWN'],
-            'applied_is_entry_permission':False, 'supported_runtime':'single-session',
+            'applied_is_entry_permission':False, 'supported_runtime':'single-session-and-account',
             'state_route':'/v1/trading/runtime/recovery/state',
             'operation_route':'/v1/trading/runtime/recovery/operations/{operation_id}'}
 

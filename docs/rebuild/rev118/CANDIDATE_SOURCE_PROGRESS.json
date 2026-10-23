@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T07:44:42.019181+00:00",
+  "updated_at_utc": "2026-10-23T08:11:45.756627+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -103,6 +103,10 @@
         {
           "description": "Standing policy admission binds the exact cryptographically verified signer and captured native source; current risk and final submission reject retirement, unreadable source or changed material. Same native key-file lock serializes actual send and revocation ACK. Independent temperament signer, equivalent PEM, explicit archived research, immutable policy/risk wire, real session/book status and retained protective exits covered.2535full trading/recovery pass0skip realprivatePG,78rebuild,7registry tests and unchanged contract derivation;9faults caught/restored. Source only; deferred providers and original gates remain.",
           "evidence": "backend/BE-002_031_CURRENT_MANDATE_SIGNER.md; receipts/CURRENT_MANDATE_SIGNER_SOURCE_20261023.json"
+        },
+        {
+          "description": "Actual multi-instrument account actor reuses signed recovery/journal and PostgreSQL atomic effects; state binds opaque current account/lease/specs/contracts identity. Account-scoped owner halts, idle lease renewal, current issuer file guard and decoded PEM equivalence; original unknown/partial/invalid-money commands block recovery and new risk, while genuine zero-effect readback supports fresh approval without resend. Actual pairedgateway->signedCommander->PGactor original replay and realPGrollback/lostACK covered.2560full trading/recovery pass0skip605.59s,269affected,78rebuild,12owner contracts;14faults caught/restored. Source only; original native/provider/release gates remain.",
+          "evidence": "backend/BE-003_009_ACCOUNT_RUNTIME_RECOVERY.md; receipts/ACCOUNT_RUNTIME_RECOVERY_SOURCE_20261023.json"
         }
       ]
     },
@@ -219,6 +223,10 @@
         {
           "description": "Paired-device revocation atomically persists native work with local device/grant disable; local actions/certs precede native IO. Gateway-only native command durably tombstones the exact P256 key across aliases, rejects stale reenrollment, serializes independent writers, preserves same-key policy labels/PEM equivalence and unrelated keys. Current Commander verification reloads keys without resetting consumed tokens; actor review binds actual native key-file identity. Typed PENDING/APPLIED/UNKNOWN plus readonly original GET under dedicated enrolment scope. Full2511pass0skip before final alias/status hardening,155final affectedpass,17source faults caught/restored,actual two-process race pass;78rebuild/19owner registry checks pass on final source. Fresh committed full qualification next; no whole-unit/live acceptance.",
           "evidence": "backend/BE-002_031_NATIVE_OWNER_KEY_REVOCATION.md; receipts/NATIVE_OWNER_KEY_REVOCATION_SOURCE_20261023.json"
+        },
+        {
+          "description": "Actual multi-instrument account actor reuses signed recovery/journal and PostgreSQL atomic effects; state binds opaque current account/lease/specs/contracts identity. Account-scoped owner halts, idle lease renewal, current issuer file guard and decoded PEM equivalence; original unknown/partial/invalid-money commands block recovery and new risk, while genuine zero-effect readback supports fresh approval without resend. Actual pairedgateway->signedCommander->PGactor original replay and realPGrollback/lostACK covered.2560full trading/recovery pass0skip605.59s,269affected,78rebuild,12owner contracts;14faults caught/restored. Source only; original native/provider/release gates remain.",
+          "evidence": "backend/BE-003_009_ACCOUNT_RUNTIME_RECOVERY.md; receipts/ACCOUNT_RUNTIME_RECOVERY_SOURCE_20261023.json"
         }
       ]
     },
@@ -464,6 +472,10 @@
         {
           "description": "Standing policy admission binds the exact cryptographically verified signer and captured native source; current risk and final submission reject retirement, unreadable source or changed material. Same native key-file lock serializes actual send and revocation ACK. Independent temperament signer, equivalent PEM, explicit archived research, immutable policy/risk wire, real session/book status and retained protective exits covered.2535full trading/recovery pass0skip realprivatePG,78rebuild,7registry tests and unchanged contract derivation;9faults caught/restored. Source only; deferred providers and original gates remain.",
           "evidence": "backend/BE-002_031_CURRENT_MANDATE_SIGNER.md; receipts/CURRENT_MANDATE_SIGNER_SOURCE_20261023.json"
+        },
+        {
+          "description": "Actual multi-instrument account actor reuses signed recovery/journal and PostgreSQL atomic effects; state binds opaque current account/lease/specs/contracts identity. Account-scoped owner halts, idle lease renewal, current issuer file guard and decoded PEM equivalence; original unknown/partial/invalid-money commands block recovery and new risk, while genuine zero-effect readback supports fresh approval without resend. Actual pairedgateway->signedCommander->PGactor original replay and realPGrollback/lostACK covered.2560full trading/recovery pass0skip605.59s,269affected,78rebuild,12owner contracts;14faults caught/restored. Source only; original native/provider/release gates remain.",
+          "evidence": "backend/BE-003_009_ACCOUNT_RUNTIME_RECOVERY.md; receipts/ACCOUNT_RUNTIME_RECOVERY_SOURCE_20261023.json"
         }
       ]
     },
@@ -820,6 +832,10 @@
         {
           "description": "Standing policy admission binds the exact cryptographically verified signer and captured native source; current risk and final submission reject retirement, unreadable source or changed material. Same native key-file lock serializes actual send and revocation ACK. Independent temperament signer, equivalent PEM, explicit archived research, immutable policy/risk wire, real session/book status and retained protective exits covered.2535full trading/recovery pass0skip realprivatePG,78rebuild,7registry tests and unchanged contract derivation;9faults caught/restored. Source only; deferred providers and original gates remain.",
           "evidence": "backend/BE-002_031_CURRENT_MANDATE_SIGNER.md; receipts/CURRENT_MANDATE_SIGNER_SOURCE_20261023.json"
+        },
+        {
+          "description": "Actual multi-instrument account actor reuses signed recovery/journal and PostgreSQL atomic effects; state binds opaque current account/lease/specs/contracts identity. Account-scoped owner halts, idle lease renewal, current issuer file guard and decoded PEM equivalence; original unknown/partial/invalid-money commands block recovery and new risk, while genuine zero-effect readback supports fresh approval without resend. Actual pairedgateway->signedCommander->PGactor original replay and realPGrollback/lostACK covered.2560full trading/recovery pass0skip605.59s,269affected,78rebuild,12owner contracts;14faults caught/restored. Source only; original native/provider/release gates remain.",
+          "evidence": "backend/BE-003_009_ACCOUNT_RUNTIME_RECOVERY.md; receipts/ACCOUNT_RUNTIME_RECOVERY_SOURCE_20261023.json"
         }
       ]
     },

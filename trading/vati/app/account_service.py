@@ -151,6 +151,8 @@ class AccountCoordinatorService:
         self.day_start_equity = Decimal("0")
         self.week_start_equity = Decimal("0")
         self.consecutive_losses = 0
+        self._recovery_unresolved = ()
+        self._lease_outcome = 'NOT_ACQUIRED'
 
     def _load_specs(self) -> None:
         primary = LiveInstrumentSpec.from_mapping({}, defaults=self.cfg)
@@ -664,6 +666,8 @@ class AccountCoordinatorService:
         self.peak_equity = max(self.peak_equity, acct.equity)
         hb = self.adapter.heartbeat(now_ms=now_ms)
         report = reconcile(self._ledger_positions(), self.adapter.positions(), account_verified=acct.verified)
+        from vati.app.account_recovery import unresolved_account_entries
+        originals_unresolved=bool(unresolved_account_entries(self))
         state = self.evaluators[candidate.symbol.upper()].last_state
         quote_age = state.quote_age_ms if state is not None else self.cfg.max_quote_age_ms + 1
         blackout = bool(
@@ -688,7 +692,7 @@ class AccountCoordinatorService:
             drawdown_top_state=self._drawdown_top_state(),
             open_positions=self._open_positions(), symbol_contract=contract,
             quote_age_ms=quote_age, max_quote_age_ms=self.cfg.max_quote_age_ms,
-            broker_connected=hb.connected, reconciliation_ok=report.permit_new_orders,
+            broker_connected=hb.connected, reconciliation_ok=report.permit_new_orders and not originals_unresolved,
             clock_sync_ok=abs(hb.server_offset_ms) < 2000,
             risk_store_ok=self._risk_store_ok(), market_integrity=integrity,
             tier1_event_blackout_active=blackout,
@@ -822,12 +826,9 @@ class AccountCoordinatorService:
         return receipt
 
     def _observe_owner_halt(self, now_ms: int) -> None:
-        latest = None
-        for event in self._ledger.iter(EventKind.KILL_SWITCH):
-            if event.payload.get("trigger") != "OWNER_HALT":
-                continue
-            latest = None if event.payload.get("cleared") else event
-        if latest is not None:
+        from vati.app.runtime_control_actor import outstanding_owner_halts
+        if (KillSwitchTrigger.OWNER_HALT not in self.kill.active
+            and outstanding_owner_halts(self._ledger,self.cfg.account_alias)):
             self.kill.trip(KillSwitchTrigger.OWNER_HALT, now_ms)
 
     def _owner_ticket_projection(self):
@@ -1088,6 +1089,7 @@ class AccountCoordinatorService:
             "status": status, "cycles": self.cycles,
             "cognitive_packet_worker": {"state":self._packet_worker_state, "authority":"ADVISORY_CANDIDATE", "live_qualification_claimed":False},
             "lease_epoch": self.lease.epoch if self.lease else None,
+            "lease_outcome": self._lease_outcome,
             "kill_switch": sorted(t.value for t in self.kill.active),
             "risk_history_issue": getattr(getattr(self.lifecycle, "streaks", None), "recovery_issue", ""),
             "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
@@ -1101,6 +1103,10 @@ class AccountCoordinatorService:
                 for symbol, mtf in sorted(self.mtf_shadow.items())
             },
             "updated_ms": self.clock(), "pid": os.getpid(), **(extra or {})}
+        from vati.app.runtime_control_actor import recovery_review
+        if self.lease is not None and self.mandate is not None and self.lifecycle is not None:
+            payload['runtime_recovery']=recovery_review(self)
+            payload['session_id']=payload['runtime_recovery']['state']['session_id']
         Path(self.cfg.heartbeat_path).write_text(json.dumps(payload))
 
     def start(self) -> None:
@@ -1108,6 +1114,7 @@ class AccountCoordinatorService:
         assert self.lifecycle is not None
         now = self.clock()
         result = self.lease.acquire(now_ms=now)
+        self._lease_outcome=result.outcome.value
         if not result.permits_orders:
             raise RuntimeError(f"account runtime lease refused: {result.outcome.value}")
 
@@ -1126,6 +1133,7 @@ class AccountCoordinatorService:
             + unresolved_buy_tickets
             + unresolved_sell_tickets
         )))
+        self._recovery_unresolved = unresolved
         report = reconcile(
             self._ledger_positions(), self.adapter.positions(),
             account_verified=acct.verified,
@@ -1184,7 +1192,13 @@ class AccountCoordinatorService:
     def step_once(self):
         assert self.coordinator is not None and self.lifecycle is not None
         now = self.clock()
+        if self.lease is not None:
+            renewal=self.lease.renew(now_ms=now)
+            self._lease_outcome=renewal.outcome.value
         self._observe_owner_halt(now)
+        from vati.app.runtime_control_actor import process_recovery_requests
+        if self.lease is not None and self.mandate is not None:
+            process_recovery_requests(self)
         owner_ticket_unresolved = tuple(sorted(set(
             self._sync_owner_ticket_buys(now)
             + self._sync_owner_ticket_sells(now)

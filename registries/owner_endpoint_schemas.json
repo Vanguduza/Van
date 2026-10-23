@@ -8882,7 +8882,10 @@
           },
           "supported_runtime": {
             "type": "string",
-            "const": "single-session",
+            "enum": [
+              "single-session",
+              "single-session-and-account"
+            ],
             "title": "Supported Runtime"
           },
           "state_route": {

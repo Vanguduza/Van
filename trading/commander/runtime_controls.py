@@ -14,7 +14,7 @@ from vati.core.canonical import canonical_hash
 RUNTIME_COMMANDS = ('runtime_recovery_review', 'runtime_recovery_request', 'runtime_recovery_operation')
 RUNTIME_TOOL_SCHEMAS = {
     name: {'description': description, 'properties': {}} for name, description in (
-        ('runtime_recovery_review', 'Current single-session recovery state; never an entry grant.'),
+        ('runtime_recovery_review', 'Current single-session or account-runtime recovery state; never an entry grant.'),
         ('runtime_recovery_request', 'Queue an exact device-signed owner recovery for the fenced runtime.'),
         ('runtime_recovery_operation', 'Read the original recovery outcome for its owning device.'))}
 
