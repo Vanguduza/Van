@@ -175,11 +175,14 @@ class SessionService:
     _lease_store: object = None
     _lease_allows_entry: bool = False
     _lease_outcome: str = "NOT_ACQUIRED"
+    _entry_registry: object = None
+    _entry_account: object = None
 
     def build(self) -> "SessionService":
         c = self.cfg
         registry = AccountRegistry(c.registry_path)
         account = registry.get(c.account_alias)
+        self._entry_registry,self._entry_account=registry,account
         if not account.enabled:
             raise RuntimeError(f"account {account.alias} is disabled")
         mandate = TradingMandate.from_mapping(c.mandate)
@@ -296,7 +299,7 @@ class SessionService:
     def _heartbeat(self, status: str, extra: Optional[dict] = None) -> None:
         if getattr(self, "learning", None) is not None and getattr(self, "_ledger", None) is not None:
             self.learning.update_projection(self._ledger)
-        hb = {"account_alias": self.cfg.account_alias, "symbol": self.cfg.symbol, "status": status, "cycles": self.cycles, "last_bar_end_ms": self.last_bar_end_ms,
+        hb = {"account_alias": self.cfg.account_alias, "symbol": self.cfg.symbol, "session_id": self.runner.cycle.cfg.session_id if self.runner else None, "status": status, "cycles": self.cycles, "last_bar_end_ms": self.last_bar_end_ms,
               "permit_new_orders": bool(self._entry_permitted()
                   and self.lease and self.lease.fence(self.lease.epoch, now_ms=self.clock())), "kill_switch": sorted(t.value for t in self.runner.cycle.kill.active) if self.runner else [],
               "lease_outcome": self._lease_outcome, "lease_epoch": self.lease.epoch if self.lease else None,
@@ -404,7 +407,16 @@ class SessionService:
         if self.stop_requested or self.runner is None:
             return False
         self._observe_owner_halt(self.clock())
-        return bool(self._lease_allows_entry and self.runner.permit_new_orders
+        from vati.accounts.access import entry_fence,AccountModeAuthorityError
+        from vati.core.file_lock import StateFileLockError
+        try:
+            # The adapter remains the final submission fence. This fresh check
+            # keeps the session gate and owner readback consistent with it.
+            with entry_fence(self._entry_registry,self._entry_account):
+                profile_permitted=True
+        except (ValueError,AccountModeAuthorityError,OSError,StateFileLockError):
+            profile_permitted=False
+        return bool(profile_permitted and self._lease_allows_entry and self.runner.permit_new_orders
             and not self.runner.cycle.unresolved_entry_attempts
             and self.runner.cycle.mandate.sends_orders() and not self.runner.cycle.kill.halted)
 

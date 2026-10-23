@@ -1,0 +1,2533 @@
+{
+  "schema": "van.rebuild.real-browser-supplement/1",
+  "observed_at_utc": "2026-10-23T01:15:23.910424+00:00",
+  "application_source": "90868b6f0f5dfb6052d645b62f89417990da6474",
+  "source_overlay": {
+    "backend/tests/test_browser_late_block_callers.py": "c163826125e26838e8d2aeeaea5473fd574b2aa80fdc3e990e0026ae21cb4690"
+  },
+  "application_source_unchanged": true,
+  "engine": {
+    "playwright_lock": "1.63.0",
+    "version": "Google Chrome for Testing 153.0.8010.12",
+    "executable_sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+    "old_fixture_default": "chromium-1194; not used or relabeled as this engine"
+  },
+  "initial_run": {
+    "tests": 373,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "62b094894307b48ab45b726a158d6bd5b66d15fead959a5fe4b3897a54647345"
+  },
+  "followup_late_caller_module": {
+    "tests": 20,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "609bfc1abf4f7573cd1fa3eaab58a3d6863c0ee55bc2ee1ab7a5ccb044fc913f"
+  },
+  "distinct_case_ids_passing_across_runs": 422,
+  "case_ids": [
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_a_normal_task_cannot_reach_the_canary_origin"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_an_owner_approval_never_widens_a_task_onto_the_overlay"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_guard_canary_passes_end_to_end_through_the_proxy_and_the_harness_handler"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_loopback_and_every_other_non_global_upstream_stay_refused_while_the_canary_is_armed"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_no_gateway_code_can_mint_the_canary_mac"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_overlay_names_are_reserved[-False]"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_overlay_names_are_reserved[X.INTERNAL-True]"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_overlay_names_are_reserved[canary.van-browser-core.internal-True]"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_overlay_names_are_reserved[example.com-False]"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_overlay_names_are_reserved[foo.internals.com-False]"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_overlay_names_are_reserved[internal-True]"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_overlay_names_are_reserved[internal.example.com-False]"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_overlay_names_are_reserved[x.internal.-True]"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_task_scope_refuses_the_canary_origin_and_every_overlay_host"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_the_armed_canary_lease_loads_its_page_from_the_overlay_address_through_the_proxy"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_the_canary_exception_refuses_a_websocket_upgrade_and_ends_with_the_lease"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_the_canary_upstream_is_verified_against_its_pinned_certificate_only"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_the_create_path_refuses_a_scope_naming_the_canary_origin"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_the_harness_refuses_overlay_scopes_except_the_canarys_own_call"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_the_worker_handler_refuses_before_the_fence_is_touched"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_without_a_key_or_a_canary_config_no_call_is_the_canarys"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_a_guard_freeze_revokes_the_lease_policy"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_a_lease_start_revokes_the_older_lease_policy"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_a_mutating_task_may_open_a_websocket_inside_its_scope"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_a_mutating_task_may_write_inside_its_scope_only"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_a_policy_without_a_valid_effect_mac_is_refused_and_leaves_the_old_one"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_a_revocation_without_a_valid_mac_is_refused"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_a_trust_zone_worker_refuses_to_start_chromium_without_the_proxy"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_an_older_lease_release_leaves_the_newer_lease_policy"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_chromium_is_launched_through_the_proxy_with_quic_disabled"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_in_scope_get_passes_through_the_interception"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_interception_is_trusted_only_through_the_pinned_leaf_key"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_loopback_goes_through_the_proxy_and_is_refused"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_no_policy_means_every_request_is_refused"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_out_of_scope_wss_host_and_out_of_scope_get_are_refused_at_connect"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_the_lease_end_revokes_even_when_the_page_cannot_be_frozen"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_the_lease_end_revokes_finally_and_the_policy_cannot_come_back"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_through_the_worker_handler_a_lease_start_removes_an_older_lease_policy"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_through_the_worker_handler_the_proxy_policy_follows_the_page_lease"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_writes_after_the_guard_window_are_refused_for_a_read_only_task"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_ws_handshake_to_ws_pay_is_refused_and_never_reaches_the_server"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_wss_handshake_to_ws_pay_is_refused_inside_tls_and_never_reaches_the_server"
+    },
+    {
+      "class": "tests.test_browser_guard_lost_regression",
+      "name": "test_a_busy_renderer_cannot_make_the_lease_guard_forget_the_click[busy-20s-mutating]"
+    },
+    {
+      "class": "tests.test_browser_guard_lost_regression",
+      "name": "test_a_busy_renderer_cannot_make_the_lease_guard_forget_the_click[busy-20s-read-only]"
+    },
+    {
+      "class": "tests.test_browser_guard_lost_regression",
+      "name": "test_a_busy_renderer_cannot_make_the_lease_guard_forget_the_click[control-3s-read-only]"
+    },
+    {
+      "class": "tests.test_browser_guard_lost_regression",
+      "name": "test_a_freeze_that_did_not_land_is_retried"
+    },
+    {
+      "class": "tests.test_browser_guard_lost_regression",
+      "name": "test_a_guard_handed_back_broken_by_the_tick_is_recorded"
+    },
+    {
+      "class": "tests.test_browser_guard_lost_regression",
+      "name": "test_a_lease_the_guard_thread_gave_up_on_is_reported_at_release_and_resumed_not_replaced"
+    },
+    {
+      "class": "tests.test_browser_guard_lost_regression",
+      "name": "test_a_lease_whose_guard_hands_back_nothing_mid_lease_is_broken_not_restarted"
+    },
+    {
+      "class": "tests.test_browser_guard_lost_regression",
+      "name": "test_a_navigation_started_outside_the_page_between_calls_keeps_its_guard"
+    },
+    {
+      "class": "tests.test_browser_guard_lost_regression",
+      "name": "test_a_page_that_navigates_itself_between_calls_keeps_its_guard"
+    },
+    {
+      "class": "tests.test_browser_guard_lost_regression",
+      "name": "test_a_retired_lease_released_under_a_newer_lease_does_not_freeze_the_newer_page"
+    },
+    {
+      "class": "tests.test_browser_guard_lost_regression",
+      "name": "test_the_in_script_guard_carries_acted_and_pending_into_a_fresh_start"
+    },
+    {
+      "class": "tests.test_browser_i5_integration_g8",
+      "name": "test_a_redacted_text_media_or_form_entry_is_a4"
+    },
+    {
+      "class": "tests.test_browser_i5_integration_g8",
+      "name": "test_real_chromium_redacts_text_media_and_form_and_routes_them_to_a4"
+    },
+    {
+      "class": "tests.test_browser_i5_integration_g8",
+      "name": "test_the_bound_operations_carry_the_fence_mac_and_a_keyed_harness_requires_it"
+    },
+    {
+      "class": "tests.test_browser_i5_integration_g8",
+      "name": "test_the_profile_lock_covers_the_bound_click"
+    },
+    {
+      "class": "tests.test_browser_i5_integration_g8",
+      "name": "test_the_python_sanitizer_redacts_the_g6a_fields"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_a_failed_release_is_never_read_as_clean_by_the_broker"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_a_release_the_harness_never_answered_goes_to_the_owner"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_a_terminal_task_stays_terminal_and_the_release_still_reports_the_code"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_a_watch_whose_navigate_was_refused_still_hands_the_release_code_to_the_owner"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_assignments_hands_a_late_block_to_the_owner[control]"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_assignments_hands_a_late_block_to_the_owner[late-block]"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_assignments_on_a_lease_the_task_holds_ends_the_page_before_the_outcome"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_assignments_real_harness_late_write_goes_to_the_owner"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_assignments_that_raise_still_hand_a_late_block_to_the_owner"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_complete_cannot_write_completed_over_a_late_block_on_a_held_lease"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_leases_release_hands_a_late_block_to_the_owner[control]"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_leases_release_hands_a_late_block_to_the_owner[late-block]"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_the_notebook_consumer_gives_the_lease_back_before_its_end_state"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_the_owner_code_is_the_closed_vocabulary_only"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_the_watch_runner_reads_the_release_before_its_end_state[control]"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_the_watch_runner_reads_the_release_before_its_end_state[dropped-background]"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_the_watch_runner_reads_the_release_before_its_end_state[late-block]"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_the_watch_runner_real_harness[/docs/analytics-expected0]"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_the_watch_runner_real_harness[/docs/post_after_load-expected1]"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_the_watch_runner_real_harness[/docs/ws_after_load-expected2]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_beacon_from_a_service_worker_controlled_page_does_not_escape"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_custom_method_is_reported_in_the_closed_vocabulary_only"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_get_only_benign_click_still_runs"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_keyed_harness_refuses_a_forged_mutating_flag_or_widened_scope"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_mutating_flag_without_the_fence_key_is_not_trusted"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_mutating_task_is_blocked_writing_outside_its_scope"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_mutating_task_is_blocked_writing_to_its_own_origin_outside_the_path_scope"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_mutating_task_may_submit_a_form_inside_its_scope"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_request_submit_the_event_guard_sees_is_cancelled_before_the_network"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_script_without_the_event_stream_refuses_the_action"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_service_worker_write_does_not_escape"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_shared_worker_cannot_be_started_to_write"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_websocket_open_is_detected_and_goes_to_the_owner"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_an_in_scope_link_still_navigates"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_assignments_hand_a_blocked_write_to_the_owner"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/beacon-BEACON]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/capture-POST]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/eventsource-EVENTSOURCE]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/form_get-FORM_SUBMIT]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/keepalive-POST]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/n_fetch-POST]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/popup-POPUP]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/request_submit-FORM_SUBMIT]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/sync_xhr-POST]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/timeout-POST]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/xframe-CROSS_ORIGIN_FRAME]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_frames_created_after_the_guard_are_not_left_paused"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_handler_payment_behind_a_benign_label_is_blocked_in_every_lane[#w5-deterministic]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_handler_payment_behind_a_benign_label_is_blocked_in_every_lane[#w5-jev]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_handler_payment_behind_a_benign_label_is_blocked_in_every_lane[#w5-stagehand]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_handler_payment_behind_a_benign_label_is_blocked_in_every_lane[#w8-deterministic]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_handler_payment_behind_a_benign_label_is_blocked_in_every_lane[#w8-jev]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_handler_payment_behind_a_benign_label_is_blocked_in_every_lane[#w8-stagehand]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_interaction_step_hands_a_blocked_write_to_the_owner_with_a_closed_code"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_interception_that_cannot_be_enabled_refuses_the_action[Fetch.enable]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_interception_that_cannot_be_enabled_refuses_the_action[Target.attachToBrowserTarget]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_interception_that_cannot_be_enabled_refuses_the_action[Target.autoAttachRelated]"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_navigate_is_guarded_too"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_the_gateway_and_harness_macs_agree"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_the_guard_covers_the_landing_check_after_the_action"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_the_mutating_flag_is_task_truth_and_defaults_to_non_mutating"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_background_write_after_the_first_click_is_not_background"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_delayed_write_after_a_click_on_a_read_only_task_still_goes_to_the_owner"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_document_replacestated_into_the_scope_is_judged_by_its_real_url[frame-navigated]"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_document_replacestated_into_the_scope_is_judged_by_its_real_url[navigation-timing]"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_load_time_beacon_on_a_read_only_watch_is_dropped_and_the_task_continues"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_newer_lease_ends_the_older_leases_guard_first"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_websocket_open_is_detected_named_so_and_the_page_is_closed"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_write_after_the_action_window_never_reaches_the_server[/docs/delay2500]"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_write_after_the_action_window_never_reaches_the_server[/docs/delay6000]"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_write_after_the_action_window_never_reaches_the_server[/docs/dworker]"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_write_after_the_action_window_never_reaches_the_server[/docs/open_blank_delay]"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_write_after_the_action_window_never_reaches_the_server[/docs/retry]"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_write_after_the_action_window_never_reaches_the_server[/docs/sw_delay]"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_write_blocked_between_steps_of_a_held_lease_goes_to_the_owner_at_the_next_step"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_interaction_step_gives_the_lease_back_through_the_harness"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_reads_between_actions_still_flow_under_the_guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_release_is_fenced"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_releasing_the_lease_freezes_the_page_before_a_late_write"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_the_mutating_flag_is_not_granted_by_a_read"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_the_retry_after_a_block_is_stopped_by_the_freeze"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_the_settle_window_alone_catches_a_write_between_the_action_and_the_landing"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_advisory_owner_approval_does_not_widen_task_scope"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_assignment_paths_apply_the_scope_rule"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_creation_path_records_scope_and_legacy_rows_fail_closed"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major1_name_content_mismatch_rule"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major1_visible_text_is_reported_and_classified"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major2_a_label_changed_after_classification_is_refused"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major2_binding_survives_a_selector_swap_and_refuses_a_replaced_node"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major2_hit_test_refuses_an_overlay_the_describe_did_not_see"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major2_swap_during_the_click_is_cancelled"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major2_unresolved_structures_are_a4"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major3_key_classifier"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major3_press_key_is_classified_against_the_focused_element"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major3_unknown_focus_and_moved_focus"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major4_fill_in_a_form_goes_to_the_bound_field"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major4_form_context_is_reported_and_judged"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major5_image_and_css_names_are_text_and_empty_names_are_a4"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Add to basket]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Add to cart]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Bid now]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Charge card]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Claim]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Commit]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Complete]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Continue]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Contribute]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Execute trade]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Finalise]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Finalize]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Finish]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Five dollars]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Hire]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Invest now]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Lend]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Mint]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Place bid]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Place my 0rder now]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Pledge]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Proceed]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Redeem]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Rent]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Sell all]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Stake]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Start free trial]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Swap]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Top up]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Trade]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Unlock for 5 dollars]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Wire funds]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_commitment_verbs_are_a4[Yes, charge me]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_documented_false_positives[Claim a username]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_documented_false_positives[Complete profile]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_documented_false_positives[Continue reading]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_documented_false_positives[Desktop update]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_documented_false_positives[Discharge summary]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_documented_false_positives[Euro 2024 results]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_documented_false_positives[Executive summary]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_documented_false_positives[Industrial design]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_documented_false_positives[Investigate logs]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_documented_false_positives[Place of birth]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_documented_false_positives[Proceedings 2025]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_documented_false_positives[Swap panels]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[Bestseller list]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[Calendar]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[Committee]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[Current release]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[Forbidden city]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[Go]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[I understand]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[Install guide]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[Let's go]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[Marketplace]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[Mistake report]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[Next page]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[Next]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[Ok]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[Read more]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[Search]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[Trademark notice]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[Wireless setup]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major6_word_matching_keeps_ordinary_words_benign[Yes]"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_real_chromium_harness_rechecks_scope_and_binding_at_the_click"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_real_chromium_link_destination_must_be_in_scope"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_real_chromium_no_scope_fails_closed_and_path_scope_holds"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_scope_is_recorded_from_the_task_never_an_allowlist"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_scope_rule_origin_path_and_missing_scope"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m1_historical_authorization_delta_is_bounded_and_advisory_answer_mints_nothing"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m2_harness_refuses_mutating_paths_without_a_scope"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_control_runtime_destination_in_scope_succeeds"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_describe_runs_in_an_isolated_world[/docs/getattr_poison]"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_describe_runs_in_an_isolated_world[/docs/url_poison]"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_gateway_checks_the_page_the_harness_reports"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_harness_itself_refuses_an_out_of_scope_landing"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_harness_refuses_navigate_traversal_on_its_own[https://docs.example.com/docs/%2e%2e/checkout/pay]"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_harness_refuses_navigate_traversal_on_its_own[https://docs.example.com/docs/../checkout/pay]"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_harness_refuses_navigate_traversal_on_its_own[https://docs.example.com/docs/..\\\\checkout/pay]"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_navigate_in_scope_still_lands"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_runtime_destination_out_of_scope_is_lane_4_and_closed[/docs/href_swap-#a]"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_runtime_destination_out_of_scope_is_lane_4_and_closed[/docs/onclick_out-#b]"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_sanitizer_masks_name_and_description"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_scope_entries_must_be_normal"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_the_page_script_itself_masks_the_name"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_token_in_link_text_is_masked_and_never_reaches_jev"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_vectors_match_real_chromiums_whatwg_parser"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_verifier_never_verifies_a_page_outside_the_scope"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m4_executor_exception_text_is_not_a_reason"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m4_page_role_never_reaches_the_step_ledger"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m4_reason_sources_and_ledger_vocabulary"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m4_the_ledger_record_filters_whatever_reaches_reasons"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_a_native_dialog_reports_no_elements_and_unknown_login"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_b2_observation_reads_the_harness_shape"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_both_bounds_hold"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_login_state_is_true_false_or_unknown_never_a_guess[snapshot0--False-expected0]"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_login_state_is_true_false_or_unknown_never_a_guess[snapshot1-owner@x-False-expected1]"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_login_state_is_true_false_or_unknown_never_a_guess[snapshot2--False-expected2]"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_login_state_is_true_false_or_unknown_never_a_guess[snapshot3--True-expected3]"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_login_state_is_true_false_or_unknown_never_a_guess[snapshot4--False-expected4]"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_login_state_is_true_false_or_unknown_never_a_guess[snapshot5--False-expected5]"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_login_state_is_true_false_or_unknown_never_a_guess[snapshot6--None-expected6]"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_login_state_is_true_false_or_unknown_never_a_guess[snapshot7--None-expected7]"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_page_info_script_reports_cookie_presence_not_contents"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_real_chromium_benign_public_page_is_classifiable"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_real_chromium_in_page_snapshot_is_already_redacted"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_real_chromium_reports_roles_names_attributes_and_redacts"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_real_page_benign_click_resolves_and_executes_pay_goes_to_takeover"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_resolver_always_describes_and_carries_the_binding"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_shape_bounds_the_list_and_never_carries_a_value"
+    },
+    {
+      "class": "tests.test_harness_i5_redaction",
+      "name": "test_other_origin_storage_or_an_unreadable_count_is_unknown[0-expected0]"
+    },
+    {
+      "class": "tests.test_harness_i5_redaction",
+      "name": "test_other_origin_storage_or_an_unreadable_count_is_unknown[512-expected1]"
+    },
+    {
+      "class": "tests.test_harness_i5_redaction",
+      "name": "test_other_origin_storage_or_an_unreadable_count_is_unknown[None-expected2]"
+    },
+    {
+      "class": "tests.test_harness_i5_redaction",
+      "name": "test_real_chromium_login_state_is_unknown_with_any_site_state"
+    },
+    {
+      "class": "tests.test_harness_i5_redaction",
+      "name": "test_real_chromium_redacts_mirrored_values_and_url_tokens"
+    },
+    {
+      "class": "tests.test_harness_i5_redaction",
+      "name": "test_the_python_sanitizer_redacts_what_a_hostile_page_script_reports"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[boolean-hit-id]"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[descriptor-error]"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[floating-hit-id]"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[missing-node]"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[missing-pseudos]"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[noninteger-pseudo-id]"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[string-hit-id]"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[unknown-pseudo-type]"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[zero-hit-id]"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_direct_pseudo_owner_describes_and_activates_bound_button_once[after]"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_direct_pseudo_owner_describes_and_activates_bound_button_once[before]"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_foreign_overlay_is_occluded_and_never_activated[pseudo-overlay]"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_foreign_overlay_is_occluded_and_never_activated[regular-overlay]"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_nested_interactive_control_cannot_be_normalized_to_wrapper[nested-control-pseudo]"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_nested_interactive_control_cannot_be_normalized_to_wrapper[nested-control]"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_ownership_and_hit_are_fresh_after_successful_description[late-pseudo-overlay]"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_ownership_and_hit_are_fresh_after_successful_description[late-regular-overlay]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_action_class_enum_ceiling_is_accepted"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-01]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-02]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-03]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-04]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-05]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-06]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-07]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-08]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-09]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-10]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-11]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-12]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-13]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-14]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-15]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-16]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-17]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-18]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-19]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-20]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-21]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-22]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-23]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-24]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-25]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-26]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-27]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-28]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-29]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-30]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-31]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-32]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-33]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-34]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-35]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-36]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-37]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-38]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-39]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-40]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-41]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-42]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-43]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-44]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_adversarial_fixture[adv-45]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_both_sets_cover_every_class"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_ceiling_outside_a0_a3_is_refused[A4_0]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_ceiling_outside_a0_a3_is_refused[A4_1]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_ceiling_outside_a0_a3_is_refused[A5_0]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_ceiling_outside_a0_a3_is_refused[A5_1]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_ceiling_outside_a0_a3_is_refused[A9]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_ceiling_outside_a0_a3_is_refused[None]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_ceiling_outside_a0_a3_is_refused[a1]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_corpus_stats"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_default_policy_admits_no_public_allowlisted_origin"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_duplicate_operations_are_collapsed_for_unique_items"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[adm-01]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[adm-02]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[adm-03]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[amb-01]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[amb-02]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[amb-03]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[amb-04]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[card-01]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[card-02]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[card-03]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[cred-01]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[cred-02]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[cred-03]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[cred-04]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[cred-05]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[cred-06]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[lbl-01]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[lbl-02]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[lbl-03]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[lbl-04]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[lbl-05]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[lbl-06]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[lbl-07]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[own-01]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[own-02]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[own-03]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[own-04]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[own-05]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[own-06]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[own-07]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[own-08]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pol-01]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pol-02]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pol-03]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pol-04]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pol-05]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pol-06]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pol-07]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pub-01]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pub-02]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pub-03]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pub-04]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pub-05]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pub-06]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pub-07]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pub-08]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pub-09]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pub-10]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pub-11]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[pub-12]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[trade-01]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[trade-02]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[trade-03]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[trade-04]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[trade-05]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[trade-06]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_each_dds_fixture_is_reproduced[trade-07]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_every_emitted_payload_is_schema_valid_and_egress_clean"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_every_ineligible_fixture_emits_nothing_and_reasons_are_codes_only"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_existing_browser_observation_model_is_denied"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_export_mode_writes_dds_format"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_fresh_export_is_byte_identical_to_dds_modulo_opaque_ids"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_independent_value_scan_of_every_emitted_label"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_inputs_cover_exactly_the_dds_fixtures_in_order"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_module_constants_mirror_schema"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_operation_set_outside_closed_set_is_refused[None]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_operation_set_outside_closed_set_is_refused[click]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_operation_set_outside_closed_set_is_refused[ops0]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_operation_set_outside_closed_set_is_refused[ops1]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_operation_set_outside_closed_set_is_refused[ops4]"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_payload_carries_no_url_host_ref_title"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_payload_violations_catches_tampering"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_schema_validator_is_live"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_target_ids_and_epochs_are_fresh_per_observation"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_vendored_dds_files_are_the_audited_blobs"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_withheld_reason_and_private_findings_units"
+    }
+  ],
+  "previously_skipped_case_ids_executed_passing": [
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_a_normal_task_cannot_reach_the_canary_origin",
+      "previous_reason": "needs the pinned Chromium, openssl and a local non-loopback address"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_guard_canary_passes_end_to_end_through_the_proxy_and_the_harness_handler",
+      "previous_reason": "needs the pinned Chromium, openssl and a local non-loopback address"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_loopback_and_every_other_non_global_upstream_stay_refused_while_the_canary_is_armed",
+      "previous_reason": "needs the pinned Chromium, openssl and a local non-loopback address"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_the_armed_canary_lease_loads_its_page_from_the_overlay_address_through_the_proxy",
+      "previous_reason": "needs the pinned Chromium, openssl and a local non-loopback address"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_the_canary_exception_refuses_a_websocket_upgrade_and_ends_with_the_lease",
+      "previous_reason": "needs the pinned Chromium, openssl and a local non-loopback address"
+    },
+    {
+      "class": "tests.test_browser_canary_origin",
+      "name": "test_the_canary_upstream_is_verified_against_its_pinned_certificate_only",
+      "previous_reason": "needs the pinned Chromium, openssl and a local non-loopback address"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_a_guard_freeze_revokes_the_lease_policy",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_a_lease_start_revokes_the_older_lease_policy",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_a_mutating_task_may_open_a_websocket_inside_its_scope",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_a_mutating_task_may_write_inside_its_scope_only",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_a_policy_without_a_valid_effect_mac_is_refused_and_leaves_the_old_one",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_a_revocation_without_a_valid_mac_is_refused",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_a_trust_zone_worker_refuses_to_start_chromium_without_the_proxy",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_an_older_lease_release_leaves_the_newer_lease_policy",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_chromium_is_launched_through_the_proxy_with_quic_disabled",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_in_scope_get_passes_through_the_interception",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_interception_is_trusted_only_through_the_pinned_leaf_key",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_loopback_goes_through_the_proxy_and_is_refused",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_no_policy_means_every_request_is_refused",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_out_of_scope_wss_host_and_out_of_scope_get_are_refused_at_connect",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_the_lease_end_revokes_even_when_the_page_cannot_be_frozen",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_the_lease_end_revokes_finally_and_the_policy_cannot_come_back",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_through_the_worker_handler_a_lease_start_removes_an_older_lease_policy",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_through_the_worker_handler_the_proxy_policy_follows_the_page_lease",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_writes_after_the_guard_window_are_refused_for_a_read_only_task",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_ws_handshake_to_ws_pay_is_refused_and_never_reaches_the_server",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_egress_proxy",
+      "name": "test_wss_handshake_to_ws_pay_is_refused_inside_tls_and_never_reaches_the_server",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_guard_lost_regression",
+      "name": "test_a_busy_renderer_cannot_make_the_lease_guard_forget_the_click[busy-20s-mutating]",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_guard_lost_regression",
+      "name": "test_a_busy_renderer_cannot_make_the_lease_guard_forget_the_click[busy-20s-read-only]",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_guard_lost_regression",
+      "name": "test_a_busy_renderer_cannot_make_the_lease_guard_forget_the_click[control-3s-read-only]",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_guard_lost_regression",
+      "name": "test_a_freeze_that_did_not_land_is_retried",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_guard_lost_regression",
+      "name": "test_a_navigation_started_outside_the_page_between_calls_keeps_its_guard",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_guard_lost_regression",
+      "name": "test_a_page_that_navigates_itself_between_calls_keeps_its_guard",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_i5_integration_g8",
+      "name": "test_real_chromium_redacts_text_media_and_form_and_routes_them_to_a4",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_i5_integration_g8",
+      "name": "test_the_bound_operations_carry_the_fence_mac_and_a_keyed_harness_requires_it",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_i5_integration_g8",
+      "name": "test_the_profile_lock_covers_the_bound_click",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_assignments_real_harness_late_write_goes_to_the_owner",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_the_watch_runner_real_harness[/docs/analytics-expected0]",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_the_watch_runner_real_harness[/docs/post_after_load-expected1]",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_late_block_callers",
+      "name": "test_the_watch_runner_real_harness[/docs/ws_after_load-expected2]",
+      "previous_reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_beacon_from_a_service_worker_controlled_page_does_not_escape",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_custom_method_is_reported_in_the_closed_vocabulary_only",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_get_only_benign_click_still_runs",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_keyed_harness_refuses_a_forged_mutating_flag_or_widened_scope",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_mutating_flag_without_the_fence_key_is_not_trusted",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_mutating_task_is_blocked_writing_outside_its_scope",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_mutating_task_is_blocked_writing_to_its_own_origin_outside_the_path_scope",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_mutating_task_may_submit_a_form_inside_its_scope",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_request_submit_the_event_guard_sees_is_cancelled_before_the_network",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_script_without_the_event_stream_refuses_the_action",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_service_worker_write_does_not_escape",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_shared_worker_cannot_be_started_to_write",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_a_websocket_open_is_detected_and_goes_to_the_owner",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_an_in_scope_link_still_navigates",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_assignments_hand_a_blocked_write_to_the_owner",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/beacon-BEACON]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/capture-POST]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/eventsource-EVENTSOURCE]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/form_get-FORM_SUBMIT]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/keepalive-POST]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/n_fetch-POST]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/popup-POPUP]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/request_submit-FORM_SUBMIT]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/sync_xhr-POST]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/timeout-POST]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/xframe-CROSS_ORIGIN_FRAME]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_frames_created_after_the_guard_are_not_left_paused",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_handler_payment_behind_a_benign_label_is_blocked_in_every_lane[#w5-deterministic]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_handler_payment_behind_a_benign_label_is_blocked_in_every_lane[#w5-jev]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_handler_payment_behind_a_benign_label_is_blocked_in_every_lane[#w5-stagehand]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_handler_payment_behind_a_benign_label_is_blocked_in_every_lane[#w8-deterministic]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_handler_payment_behind_a_benign_label_is_blocked_in_every_lane[#w8-jev]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_handler_payment_behind_a_benign_label_is_blocked_in_every_lane[#w8-stagehand]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_interaction_step_hands_a_blocked_write_to_the_owner_with_a_closed_code",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_interception_that_cannot_be_enabled_refuses_the_action[Fetch.enable]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_interception_that_cannot_be_enabled_refuses_the_action[Target.attachToBrowserTarget]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_interception_that_cannot_be_enabled_refuses_the_action[Target.autoAttachRelated]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_navigate_is_guarded_too",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_the_gateway_and_harness_macs_agree",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_the_guard_covers_the_landing_check_after_the_action",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_effect_guard",
+      "name": "test_the_mutating_flag_is_task_truth_and_defaults_to_non_mutating",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_background_write_after_the_first_click_is_not_background",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_delayed_write_after_a_click_on_a_read_only_task_still_goes_to_the_owner",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_document_replacestated_into_the_scope_is_judged_by_its_real_url[frame-navigated]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_document_replacestated_into_the_scope_is_judged_by_its_real_url[navigation-timing]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_load_time_beacon_on_a_read_only_watch_is_dropped_and_the_task_continues",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_newer_lease_ends_the_older_leases_guard_first",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_websocket_open_is_detected_named_so_and_the_page_is_closed",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_write_after_the_action_window_never_reaches_the_server[/docs/delay2500]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_write_after_the_action_window_never_reaches_the_server[/docs/delay6000]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_write_after_the_action_window_never_reaches_the_server[/docs/dworker]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_write_after_the_action_window_never_reaches_the_server[/docs/open_blank_delay]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_write_after_the_action_window_never_reaches_the_server[/docs/retry]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_write_after_the_action_window_never_reaches_the_server[/docs/sw_delay]",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_a_write_blocked_between_steps_of_a_held_lease_goes_to_the_owner_at_the_next_step",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_interaction_step_gives_the_lease_back_through_the_harness",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_reads_between_actions_still_flow_under_the_guard",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_release_is_fenced",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_releasing_the_lease_freezes_the_page_before_a_late_write",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_the_mutating_flag_is_not_granted_by_a_read",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_the_retry_after_a_block_is_stopped_by_the_freeze",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_network_guard_lease",
+      "name": "test_the_settle_window_alone_catches_a_write_between_the_action_and_the_landing",
+      "previous_reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major1_visible_text_is_reported_and_classified",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major2_a_label_changed_after_classification_is_refused",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major2_binding_survives_a_selector_swap_and_refuses_a_replaced_node",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major2_hit_test_refuses_an_overlay_the_describe_did_not_see",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major2_swap_during_the_click_is_cancelled",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major2_unresolved_structures_are_a4",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major3_press_key_is_classified_against_the_focused_element",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major3_unknown_focus_and_moved_focus",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major4_fill_in_a_form_goes_to_the_bound_field",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major4_form_context_is_reported_and_judged",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_major5_image_and_css_names_are_text_and_empty_names_are_a4",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_real_chromium_harness_rechecks_scope_and_binding_at_the_click",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_real_chromium_link_destination_must_be_in_scope",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i5_task_scope",
+      "name": "test_real_chromium_no_scope_fails_closed_and_path_scope_holds",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m2_harness_refuses_mutating_paths_without_a_scope",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_control_runtime_destination_in_scope_succeeds",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_describe_runs_in_an_isolated_world[/docs/getattr_poison]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_describe_runs_in_an_isolated_world[/docs/url_poison]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_harness_itself_refuses_an_out_of_scope_landing",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_harness_refuses_navigate_traversal_on_its_own[https://docs.example.com/docs/%2e%2e/checkout/pay]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_harness_refuses_navigate_traversal_on_its_own[https://docs.example.com/docs/../checkout/pay]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_harness_refuses_navigate_traversal_on_its_own[https://docs.example.com/docs/..\\\\checkout/pay]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_navigate_in_scope_still_lands",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_runtime_destination_out_of_scope_is_lane_4_and_closed[/docs/href_swap-#a]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_runtime_destination_out_of_scope_is_lane_4_and_closed[/docs/onclick_out-#b]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_the_page_script_itself_masks_the_name",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_token_in_link_text_is_masked_and_never_reaches_jev",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m3_vectors_match_real_chromiums_whatwg_parser",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_browser_review_i6_scope",
+      "name": "test_m4_page_role_never_reaches_the_step_ledger",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_real_chromium_benign_public_page_is_classifiable",
+      "previous_reason": "no Chromium/Playwright available for the real-browser element test"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_real_chromium_in_page_snapshot_is_already_redacted",
+      "previous_reason": "no Chromium/Playwright available for the real-browser element test"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_real_chromium_reports_roles_names_attributes_and_redacts",
+      "previous_reason": "no Chromium/Playwright available for the real-browser element test"
+    },
+    {
+      "class": "tests.test_harness_elements",
+      "name": "test_real_page_benign_click_resolves_and_executes_pay_goes_to_takeover",
+      "previous_reason": "no Chromium/Playwright available for the real-browser element test"
+    },
+    {
+      "class": "tests.test_harness_i5_redaction",
+      "name": "test_real_chromium_login_state_is_unknown_with_any_site_state",
+      "previous_reason": "no Chromium/Playwright available for the real-browser element test"
+    },
+    {
+      "class": "tests.test_harness_i5_redaction",
+      "name": "test_real_chromium_redacts_mirrored_values_and_url_tokens",
+      "previous_reason": "no Chromium/Playwright available for the real-browser element test"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[boolean-hit-id]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[descriptor-error]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[floating-hit-id]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[missing-node]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[missing-pseudos]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[noninteger-pseudo-id]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[string-hit-id]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[unknown-pseudo-type]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[zero-hit-id]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_direct_pseudo_owner_describes_and_activates_bound_button_once[after]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_direct_pseudo_owner_describes_and_activates_bound_button_once[before]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_foreign_overlay_is_occluded_and_never_activated[pseudo-overlay]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_foreign_overlay_is_occluded_and_never_activated[regular-overlay]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_nested_interactive_control_cannot_be_normalized_to_wrapper[nested-control-pseudo]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_nested_interactive_control_cannot_be_normalized_to_wrapper[nested-control]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_ownership_and_hit_are_fresh_after_successful_description[late-pseudo-overlay]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_harness_pseudo_hit_ownership",
+      "name": "test_ownership_and_hit_are_fresh_after_successful_description[late-regular-overlay]",
+      "previous_reason": "no Chromium/Playwright available"
+    },
+    {
+      "class": "tests.test_jev_browser_eligibility",
+      "name": "test_vendored_dds_files_are_the_audited_blobs",
+      "previous_reason": "DDS checkout not present; blob hashes pinned above"
+    }
+  ],
+  "retained_initial_failure": {
+    "case_ids": [
+      {
+        "class": "tests.test_browser_late_block_callers",
+        "name": "test_assignments_real_harness_late_write_goes_to_the_owner"
+      }
+    ],
+    "observed": "Lease release froze the page before the2500ms callback ran. Actual release blocked=None,taskCOMPLETED,server_writes=[]. No blocked write was exercised.",
+    "correction": "At the caller release boundary, await the actual native guard NETWORK_WRITE_BLOCKED:POST event under its read lock. No guard state is assigned. Existing no-server-write and owner-takeover assertions are preserved.",
+    "initial_log_sha256": "bd667a9382b5a10ee20ca4172a79103e4b1865162bfce862dd48c72c7610aadf",
+    "followup_log_sha256": "391cf73f0e815a19106b5cd0cd1cbb0446c80130eeb3634147ad2bab282ad997"
+  },
+  "dds_contract_dependency": {
+    "historical_object": "39d377713a6f650285da319d2124f9237f89605c",
+    "working_head_preserved": "64d6b7158c723b7700e5b53175ea8048d4e92d00",
+    "setting": "DIAL_DDS_ROOT points at actual checkout; missing object fetched without changing the working tree"
+  },
+  "qualification": "Source/local fixture evidence with real browser and worker/proxy. Original failed run retained; corrected followup is not reported as an unmodified full-suite pass. No native estate, production/provider, independent/whole-unit, financial effect or physical S24 acceptance.",
+  "case_identity_comparison": "Normalize only the leading backend. package prefix between the broad and focused pytest imports; names, parameters and remaining class path stay exact. Uniqueness checked.",
+  "previously_skipped_now_passing": 155,
+  "previous_skip_reasons_now_executed": {
+    "needs the pinned Chromium, openssl and a local non-loopback address": 6,
+    "needs the pinned Chromium and openssl": 31,
+    "no Chromium/Playwright available": 49,
+    "no Chromium for the network-effect guard": 62,
+    "no Chromium/Playwright available for the real-browser element test": 6,
+    "DDS checkout not present; blob hashes pinned above": 1
+  },
+  "remaining_browser_modules": {
+    "tests": 49,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xml_sha256": "4aec6b2453bdb40e06d48587cab67d012689668d4ec1301c8d7aee3e254cfa7c",
+    "log_sha256": "c2d8b8936a54d88caddef1a389378d2054701970e29a5ba9b52867c18490e458"
+  }
+}

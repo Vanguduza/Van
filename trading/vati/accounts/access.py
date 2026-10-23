@@ -7,6 +7,10 @@ from vati.accounts.registry import Account, AccountRegistry, AccountRegistryErro
 from vati.core.file_lock import exclusive_state_lock
 from vati.core.file_lock import StateFileLockError
 
+class AccountModeAuthorityError(RuntimeError):
+    """A current valid profile no longer permits the bound sending mode."""
+
+
 SENDING_MODES = frozenset({"DEMO_TRADER", "LIMITED_LIVE", "AUTONOMOUS_LIVE"})
 
 
@@ -15,14 +19,14 @@ def validate_mode(account: Account, mandate_mode: str) -> None:
     if mandate_mode not in SENDING_MODES:
         return
     if (mandate_mode == "DEMO_TRADER") != account.demo:
-        raise RuntimeError("mandate and account have mismatched demo/live safety identity")
+        raise AccountModeAuthorityError("mandate and account have mismatched demo/live safety identity")
     allowed = {
         "DEMO_TRADER": {"DEMO_TRADER"},
         "LIMITED_LIVE": {"LIMITED_LIVE"},
         "AUTONOMOUS_LIVE": {"LIMITED_LIVE", "AUTONOMOUS_LIVE"},
     }.get(account.mode, set())
     if mandate_mode not in allowed:
-        raise RuntimeError("mandate exceeds the configured account mode")
+        raise AccountModeAuthorityError("mandate exceeds the configured account mode")
 
 
 def native_binding(account: Account) -> tuple:
@@ -75,7 +79,7 @@ def bind_entry_authority(adapter, registry: AccountRegistry, bound: Account):
         scope = entry_fence(registry, bound)
         try:
             scope.__enter__()
-        except (AccountRegistryError, StateFileLockError, OSError):
+        except (AccountRegistryError, AccountModeAuthorityError, StateFileLockError, OSError):
             return refused()
         try:
             return native_submit(command, now_ms=now_ms, **options)

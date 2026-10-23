@@ -172,7 +172,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T00:45:35.426470+00:00",
+    "updated_utc": "2026-10-23T01:28:28.088273+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [],
@@ -249,7 +249,12 @@
       "Frozen 9f4c and4e4a broad audits each6636pass166skip/zero failures,zero forbidden runtime storage and clean checkout; actual hosted4e4a374legacy cases383edits/18nativepass4explicit core-artwork skips, both real VITS methods,public PG26/voice117/trading2089+1privateDDSskip. DDS secret/trusted-main bootstrap failures retained.",
       "Native outbox batch claim is atomic across independent bridge connections; actual signed HTTP race reproduced twice,23focused native protocol tests pass. Before-commit failure rolls back; lost successful commit remains TAKEN without redelivery. One source fault caught after passing control/restored. Source only, native worker/execution and full programme still required.",
       "Pre-dispatch v2 context archives exact capsule/thesis and original risk/market facts; cold original-result readback reserves native quantity and restores actual protection/setup/cost without resend. Typed direction, native persisted-thesis lost-reply recovery, legacy zero-fill refusal, malformed setup preservation and actual-fill target-R verified. Final2134trading pass/zero skip realprivatePG/DDS;78rebuild;13faults caught after controls/restored. Owner kill latch is not auto-cleared; source only, original full programme retained.",
-      "Frozen32118b50 actual broad6636pass166skip/zero errors and forbidden runtime storage/clean tree, process exit0. Exact-source hosted39877043007:374legacy faults383edits,18emulatorpass4core-artworkskips, realVITS3.310s/2.594s, PG26voice117publictrading2117pass1privateDDSskip. Testedmerge8cdb81b8 treeequal. DDS key and trusted-main bootstrap failures retained."
+      "Frozen32118b50 actual broad6636pass166skip/zero errors and forbidden runtime storage/clean tree, process exit0. Exact-source hosted39877043007:374legacy faults383edits,18emulatorpass4core-artworkskips, realVITS3.310s/2.594s, PG26voice117publictrading2117pass1privateDDSskip. Testedmerge8cdb81b8 treeequal. DDS key and trusted-main bootstrap failures retained.",
+      "Fresh persisted profile agrees with session permission/final outer fence and preserves native protection; harmless labels remain live, reenabling cannot clear signed halt. Typed sending-mode refusal is explicit zero effect. Signed native rejected/cancelled/expired outcomes no longer masquerade as prior risk approval.2146fulltrading pass0skip privatePG/DDS;78rebuild;8faults caught/restored. Source only; native physical identity and original whole-product obligations retained.",
+      "Actual908frozen backend/contracts audit6637pass165skip0fail1630.05s; zero forbidden runtime storage, clean checkout, actual exit0. Earlier environment-restart interruption preserved. Actual historical DDS39d3777object fetched without working-head change64d6b715; one dependency skip now executed.",
+      "Real-browser source supplement:422distinct passing case IDs across retained initial/followup runs,154previousChromium skips plus1DDS provenance pass. Initial373run372pass1timing-oracle failure, correctedlate20pass andremaining49pass. Runtimebrowserapplication908unchanged; test overlay hash/engine153.0.8010.12/Playwright1.63recorded. Root/namespace/AGP/B1 exclusions remain explicit.",
+      "Hosted908/39880083139 complete:374legacy cases383edits;18nativepass4core-artworkskips,VITS3.264s/2.652s,PG26voice117publictrading2133pass1privateDDSskip. Testedmergea2479719 treeequal; actualDDS-key/trusted-main failures retained.",
+      "Two formerly skipped actual AGP release/signing guard checks executedPASS with preparedGradle8.11.1/JDK21/SDK; missing target and missing signing each refuse directpackageRelease--dry-run. No signing/provisioning or phone qualification."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -260,9 +265,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Continue original programme with usable owner-signed kill-clear/loss-reset/drawdown-resume commands and device-owned original-operation readback/registry contracts, current permission/profile enforcement, then native identity/epoch/deadline/precision, financial finality and remaining whole-product functions. No new frontend before BG001. Freeze new exact source for broad audit after commit; retain original gates and no fabricated native/provider/production/S24 acceptance.",
-    "previous_head": "6d8fc6d757fb60e08707339b09fb09d9a55b6db3",
-    "current_packet": "Original prepared entry provenance and cold readback; candidate source only"
+    "next_action": "Continue original programme: implement usable signed kill-clear/loss-reset/drawdown-resume commands and device-owned original-operation readback/contracts; actual native physical identity/epoch/deadline, monetary maturity/fees/cash live+replay, paper/study provenance and safe retirement; preserve all other whole-product functions. Freeze new committed source for broad audit; hosted908native/full374corpus collected with actual failures retained. No new frontend beforeBG001 or fabricated native/independent/unit/production/S24 acceptance.",
+    "previous_head": "90868b6f0f5dfb6052d645b62f89417990da6474",
+    "current_packet": "Current profile authority and actual native error outcomes; browser source qualification"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -320,6 +325,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Continue original programme with usable owner-signed kill-clear/loss-reset/drawdown-resume commands and device-owned original-operation readback/registry contracts, current permission/profile enforcement, then native identity/epoch/deadline/precision, financial finality and remaining whole-product functions. No new frontend before BG001. Freeze new exact source for broad audit after commit; retain original gates and no fabricated native/provider/production/S24 acceptance.",
-  "updated_at_utc": "2026-10-23T00:45:35.426470+00:00"
+  "current_action": "Continue original programme: implement usable signed kill-clear/loss-reset/drawdown-resume commands and device-owned original-operation readback/contracts; actual native physical identity/epoch/deadline, monetary maturity/fees/cash live+replay, paper/study provenance and safe retirement; preserve all other whole-product functions. Freeze new committed source for broad audit; hosted908native/full374corpus collected with actual failures retained. No new frontend beforeBG001 or fabricated native/independent/unit/production/S24 acceptance.",
+  "updated_at_utc": "2026-10-23T01:34:48.316514+00:00"
 }

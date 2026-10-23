@@ -17,6 +17,7 @@ I8 measured). The ``real`` cases drive the real Harness worker, egress proxy and
 """
 from __future__ import annotations
 
+import asyncio
 import threading
 import time
 from http.server import ThreadingHTTPServer
@@ -373,6 +374,18 @@ async def test_assignments_real_harness_late_write_goes_to_the_owner(monkeypatch
     real_release = harness.release_page
 
     async def spy(**kw):
+        # Hold the caller at its release boundary until the actual delayed
+        # request is blocked. Faster engines can otherwise freeze the page
+        # before its timer ever runs, which does not exercise a late block.
+        deadline = time.monotonic() + 10.0
+        while True:
+            with rig.hs.NET_GUARDS.lock:
+                observed = any(lease.pending == "NETWORK_WRITE_BLOCKED:POST"
+                               for lease in rig.hs.NET_GUARDS.leases.values())
+            if observed:
+                break
+            assert time.monotonic() < deadline, "fixture late write did not reach the actual guard"
+            await asyncio.sleep(0.05)
         out = await real_release(**kw)
         releases.append(out)
         return out

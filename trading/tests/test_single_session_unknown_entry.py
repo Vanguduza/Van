@@ -21,7 +21,7 @@ pytestmark=pytest.mark.skipif(not os.environ.get('VATI_TEST_PG_DSN') or os.envir
 
 
 @contextmanager
-def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_partial_status=None,omit_context=False):
+def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_partial_status=None,omit_context=False,initial_terminal_status=None):
     alias='delayed_mt5_'+uuid.uuid4().hex[:12];key=b'local-source-fixture-key-32-bytes!'
     bars=synthetic_bars();clock={'ms':bars[100].end_ms};queue=BridgeQueue(tmp_path/'native-ea.sqlite')
     app=create_pull_app(queue,lambda who:key if who==alias else None,clock=lambda:clock['ms'])
@@ -47,6 +47,11 @@ def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_
                 'order':'partial-original','position':900,'sl_confirmed':True,'server_time_ms':clock['ms']}],positions=[native])
             return adapter.queue.result(cid)
         adapter._await=partial_reply
+    if initial_terminal_status:
+        def terminal_reply(cid):
+            poll();poll(results=[{'id':cid,'status':initial_terminal_status,'volume':'0','reason':'original native no-effect outcome'}])
+            return adapter.queue.result(cid)
+        adapter._await=terminal_reply
     if lose_enqueue_reply:
         enqueue=adapter.queue.enqueue
         def lost_reply(*args,**kwargs):
@@ -92,7 +97,7 @@ def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_
             if orders():
                 receipts=list(service._ledger.iter(EventKind.EXECUTION_RECEIPT,correlation_id=orders()[0].correlation_id))
                 if receipts:
-                    assert receipts[-1].payload['status']==('PARTIAL' if initial_partial_status else 'UNKNOWN')
+                    assert receipts[-1].payload['status']==(initial_terminal_status or ('PARTIAL' if initial_partial_status else 'UNKNOWN'))
                     if not initial_partial_status:assert receipts[-1].payload['filled_qty']=='0'
                 else:
                     assert lose_enqueue_reply
@@ -389,3 +394,13 @@ def test_late_native_fill_keeps_original_setup_and_derives_target_r_from_actual_
         expected=(D(fields[7])-fill)/abs(fill-D(fields[6]))
         assert D(thesis.expected_path['target_r'])==expected
         assert len(orders())==1
+
+
+@pytest.mark.parametrize('native_status',['REJECTED','CANCELLED','EXPIRED'])
+def test_initial_confirmed_native_no_effect_is_not_reported_as_a_risk_approval(tmp_path,eurusd,native_status):
+    with delayed_native_session(tmp_path,eurusd,initial_terminal_status=native_status) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+        original=orders()[0].correlation_id
+        assert result==native_status
+        assert original not in service.runner.cycle._entries
+        assert original not in service.runner.cycle.unresolved_entry_attempts
+        assert len(orders())==1 and not service.adapter.positions()

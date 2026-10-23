@@ -490,6 +490,8 @@ class DecisionCycle:
             }
             self._seal_thesis(intent, decision, state, targets, entry_price, now_ms)
             self._record_tca(rec, intent.direction, cost, state.session.value, state.event_window.value, now_ms=now_ms)
+        if rec.status in {"REJECTED","CANCELLED","EXPIRED"}:
+            return CycleResult(state.as_of_ms,state.state_hash,rec.status,rec.reject_reason,decision.approved_size)
         return CycleResult(state.as_of_ms, state.state_hash, decision.decision.value, "", decision.approved_size)
 
     # ------------------------------------------------- owner-signed recovery (A4)
