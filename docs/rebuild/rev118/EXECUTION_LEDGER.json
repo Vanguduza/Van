@@ -172,10 +172,19 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T14:25:27.938373+00:00",
+    "updated_utc": "2026-10-23T15:07:55.615174+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": [],
+    "background_jobs": [
+      {
+        "kind": "LOCAL_FROZEN_SOURCE_QUALIFICATION",
+        "source_head": "2e93ab52066565dc81edf9a92ed3423e70c64edc",
+        "session": 64306,
+        "log": "/tmp/van-2e93ab52-full-backend.txt",
+        "driver": "/tmp/van-2e93ab52-qualification-driver.txt",
+        "phase": "Check actual stage/result; privatePG cleaned in finally; never mutate active QA checkout."
+      }
+    ],
     "last_validation": [
       "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
       "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -311,7 +320,9 @@
       "Original approved memory erasure replays its committed witness/counts read-only instead of deleting later owner facts, replacing proof or bumping revision. Exact-record absence/expired original reads/legacy witness supported under existing sealed scope and active-device checks; malformed/foreign witnesses and revoked devices refuse. New erasure still needs fresh exact approval.2valid initial failures and8of10 integrated baseline failures fixed;79combined+1legacy distinct source cases,78rebuild,29registry pass;5faults+5controls caught/restored, actual signedA4/domaincommit+lostreply/concurrency and independent post-state. Source only, no whole-unit privacy/native/production certification.",
       "Native MT5 signed transport freshness/physical identity/permissions/connection rechecked after blocking native reads immediatelybeforeSDKentry. A failed private server-side dispatch guard refuseszero effect, preserving original issuedtime; no serializedcallback/host setting.4initialbeforefailures+1positive and5of6integratedbaseline failures fixed;58focused/2484fulltrading pass0skip realPGstoppedremoved;5faults+5controls caught/restored inclfinal native-account-readclock delay. ExistingmTLS/HMAC plusactualSDKfixture. Source only; explicit commanddeadline/leaseepoch/riskbudget envelopes and nativebroker/gates remain.",
       "Frozen exact39807eff full backend/contracts:6967pass9explicit skips2stale route-contract failures/6978cases2833.39s. Added only existing owner/native original-action GET to expected-route set; exact-surface/GET-only/soleprovedPOST/leak/negative controls retained.20 affected boundary+native API tests pass; failed full run retained, zero observed SQLite/mkdir runtime-store violations, clean tree/privatePGstoppedremoved. Raw-file-write audit limitation stated explicitly.",
-      "Explicit OrderCommand expiry retained in signed MT5 body and checked before RPC/afterreadonlyprecheck/finalnativeSDKboundary. Typedorder_send_expiring fenceslegacy/rollback; strictinteger/missingdeadline refused, None retainsoriginalcontract.15of16beforefailures fixed;74focused/2500fulltrading pass0skip realPGstoppedremoved,79rebuild;7faults+7controls caught/restored. Initialnativeexpiry survivor retained; correctedsecond/sendquote oracle provesfinalnativecheck. RealmTLS/JSON/HMAC withSDKfixture. Storageguard14filesystemprobes and20DIALcontrolspass, limitations explicit. Sourceonly; nativeclock/finality/epoch/riskbudget/whole-unit/provider/production/handset obligations remain."
+      "Explicit OrderCommand expiry retained in signed MT5 body and checked before RPC/afterreadonlyprecheck/finalnativeSDKboundary. Typedorder_send_expiring fenceslegacy/rollback; strictinteger/missingdeadline refused, None retainsoriginalcontract.15of16beforefailures fixed;74focused/2500fulltrading pass0skip realPGstoppedremoved,79rebuild;7faults+7controls caught/restored. Initialnativeexpiry survivor retained; correctedsecond/sendquote oracle provesfinalnativecheck. RealmTLS/JSON/HMAC withSDKfixture. Storageguard14filesystemprobes and20DIALcontrolspass, limitations explicit. Sourceonly; nativeclock/finality/epoch/riskbudget/whole-unit/provider/production/handset obligations remain.",
+      "Native MT5 replay admission persists bounded nonce/clock metadata withSQLiteFULL/atomicclaim beforeSDK, sharedworkers/processrestarts cannot repeat same signed effect. Defaultbackendpath derives from existing signing profile, no in-memoryfallback. Clockrollback/purge, corrupt/missingclock, storelock/lostcommitACK failclosed; strictheaders/uint128 rollover.2original duplicateSDKeffects and1missing-clock counterexample fixed;91focused/2517fulltrading pass0skip realPGstoppedremoved;8faults+8controls caught/restored inclactualprocessSDKcounter. Nonceclaim is not brokeroutcome or native/whole-unit/production qualification.",
+      "Hosted exactc9dd2a9c/39964015528 all374legacyfaults383edits/native18pass4existingartworkskips/VITS2.335/1.900s/PG26voice117publictrading2477pass1DDSskip;testedmergecce39c4btreeequal. OnlyoriginalDDSreadkey/trustedmainbootstrapfail. Native39964015330 MetaEditor0errors0warnings/freshEX5, invalid4errors/noEX5;actualreceipt retained."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -322,9 +333,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Commit/push qualified source packet, freeze newhead in cleanownedQA and run full backend/contracts with actualPG/browser/AGP/DDS and source_storage_audit.py. Prior398 failedfullreceipt preserved; exactroutecontractfix20PASS. Next native nonce durability gap: isolated tests /tmp/van-ctrader-outcome-work-20261023/trading/tests/test_mt5_nonce_durability.py reproduce twoSDK effects fromsame signed request across independentworkers and actualprocessrestart; nonce storage currentlyvolatile. Read /tmp/van-mt5-native-nonce-before.xml. Implement persistent bounded replay authority without invented owner policy, then requirednativefinancial epoch/risk/finality and originalwholeproduct work. Preserve131units/93plannedfeatures/BG001; no nativecerts or repeatedconnectorpermission questions.",
-    "previous_head": "1c06852cbc6c30416c18a276e633ce8dee16ca19",
-    "current_packet": "Explicit native MT5 entry deadline and source-storage audit instrument, source tested."
+    "next_action": "Publish tested nonce packet, collect new hosted results. Continue original whole-product source work: isolated backend/tests/test_watch_observation_integrity.py in /tmp/van-ctrader-outcome-work-20261023 has8validbeforefailures: stringfalse Boolean, invalidnumericNaN/Inf/bool accepted, non-atomicprojection/runinsert, concurrentfailurecount loss/duplicateedgealerts, lostattentionreply no durablepublication. Implement in existing GoalService/watch runner, preserveownerpause andexactexistingnotifications/authority. Full frozen2e93ab52 backend/contracts+trading audit session64306 stillrunning; collectactualresults/storageaudit/cleanup. Nativefinancialfinality/epoch/risk/workingorderexpiry and wholeproductfeatures remain;131units/93plannedfeatures/BG001 preserved, no invented acceptance.",
+    "previous_head": "2e93ab52066565dc81edf9a92ed3423e70c64edc",
+    "current_packet": "Durable native MT5 replay admission, source tested."
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -382,6 +393,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Commit/push qualified source packet, freeze newhead in cleanownedQA and run full backend/contracts with actualPG/browser/AGP/DDS and source_storage_audit.py. Prior398 failedfullreceipt preserved; exactroutecontractfix20PASS. Next native nonce durability gap: isolated tests /tmp/van-ctrader-outcome-work-20261023/trading/tests/test_mt5_nonce_durability.py reproduce twoSDK effects fromsame signed request across independentworkers and actualprocessrestart; nonce storage currentlyvolatile. Read /tmp/van-mt5-native-nonce-before.xml. Implement persistent bounded replay authority without invented owner policy, then requirednativefinancial epoch/risk/finality and originalwholeproduct work. Preserve131units/93plannedfeatures/BG001; no nativecerts or repeatedconnectorpermission questions.",
-  "updated_at_utc": "2026-10-23T14:25:27.938373+00:00"
+  "current_action": "Publish tested nonce packet, collect new hosted results. Continue original whole-product source work: isolated backend/tests/test_watch_observation_integrity.py in /tmp/van-ctrader-outcome-work-20261023 has8validbeforefailures: stringfalse Boolean, invalidnumericNaN/Inf/bool accepted, non-atomicprojection/runinsert, concurrentfailurecount loss/duplicateedgealerts, lostattentionreply no durablepublication. Implement in existing GoalService/watch runner, preserveownerpause andexactexistingnotifications/authority. Full frozen2e93ab52 backend/contracts+trading audit session64306 stillrunning; collectactualresults/storageaudit/cleanup. Nativefinancialfinality/epoch/risk/workingorderexpiry and wholeproductfeatures remain;131units/93plannedfeatures/BG001 preserved, no invented acceptance.",
+  "updated_at_utc": "2026-10-23T15:07:55.615174+00:00"
 }

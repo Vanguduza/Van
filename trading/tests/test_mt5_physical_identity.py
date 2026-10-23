@@ -23,7 +23,7 @@ def build(tmp_path,**actual):
     for k,v in actual.items():setattr(fake,k,v)
     pw=tmp_path/'password';pw.write_text('s3cret')
     account={'login':12345678,'server':'Broker-Demo','currency':'USD','demo':True,'password_file':str(pw)}
-    cfg={'accounts':{'fx_primary':account}}
+    cfg={'nonce_store':str(tmp_path/'worker-nonces.sqlite'),'accounts':{'fx_primary':account}}
     worker=worker_mod.Worker(cfg,worker_mod.Terminal(fake),KEY,clock=lambda:1000000)
     client=Mt5BridgeClient(signing_key=KEY,transport=worker.handle)
     return worker,client,fake
@@ -72,7 +72,7 @@ def test_parallel_aliases_cannot_switch_the_terminal_between_identity_check_and_
             before_dispatch()
             self.sends.append((body['alias'],self.selected))
             return {'status':'FILLED'}
-    terminal=Terminal();cfg={'accounts':{}}
+    terminal=Terminal();cfg={'nonce_store':str(tmp_path/'worker-nonces.sqlite'),'accounts':{}}
     for alias in ['account_one','account_two']:
         cfg['accounts'][alias]={'login':12345678,'server':alias,'currency':'USD','demo':True}
     worker=worker_mod.Worker(cfg,terminal,KEY,clock=lambda:1000000)

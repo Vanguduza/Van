@@ -68,7 +68,7 @@ class FakeMt5:
 
 def make_worker(tmp_path, clock):
     pw = tmp_path / "fx.pw"; pw.write_text("s3cret\n")
-    cfg = {"accounts": {"fx_primary": {"login": 12345678, "server": "Broker-Demo", "currency": "USD", "demo": True, "password_file": str(pw)}}}
+    cfg = {"nonce_store":str(tmp_path/'worker-nonces.sqlite'),"accounts": {"fx_primary": {"login": 12345678, "server": "Broker-Demo", "currency": "USD", "demo": True, "password_file": str(pw)}}}
     return worker_mod.Worker(cfg, worker_mod.Terminal(FakeMt5()), KEY, clock=clock), cfg
 
 

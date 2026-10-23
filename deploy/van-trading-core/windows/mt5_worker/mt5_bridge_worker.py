@@ -24,6 +24,8 @@ import hashlib
 import hmac
 import json
 import math
+import os
+import sqlite3
 import ssl
 import sys
 import threading
@@ -40,20 +42,70 @@ def canonical_json(obj: Any) -> str:
     return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
 
+class NonceStoreUnavailable(RuntimeError):
+    pass
+
+
+class NonceClockRollback(RuntimeError):
+    pass
+
+
 class NonceStore:
-    def __init__(self) -> None:
-        self._seen: dict[int, int] = {}
-        self._lock = threading.Lock()
+    """Atomic replay cache shared by restarts and workers using the same file.
+
+    Keep the existing ten-skew-window retention; the durable clock high-water
+    prevents a backward clock from making purged signed envelopes fresh again.
+    This claims a request nonce, not a broker effect or an execution outcome.
+    """
+    def __init__(self, path: str) -> None:
+        if not isinstance(path,str) or not path or path==':memory:':
+            raise ValueError('persistent native nonce store required')
+        self.path=Path(path).absolute()
+        if self.path.is_symlink():raise ValueError('native nonce store cannot be a symbolic link')
+        try:
+            fd=os.open(self.path,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
+        except FileExistsError:pass
+        else:os.close(fd)
+        db=self._connect()
+        try:
+            db.execute('CREATE TABLE IF NOT EXISTS van_native_nonces(nonce TEXT PRIMARY KEY,seen_ms INTEGER NOT NULL)')
+            db.execute('CREATE TABLE IF NOT EXISTS van_native_replay_clock(singleton INTEGER PRIMARY KEY CHECK(singleton=1),high_water_ms INTEGER NOT NULL)')
+        finally:db.close()
+
+    def _connect(self):
+        db=sqlite3.connect(self.path,timeout=5,isolation_level=None)
+        try:
+            db.execute('PRAGMA synchronous=FULL')
+            db.execute('PRAGMA busy_timeout=5000')
+        except sqlite3.Error:
+            db.close()
+            raise
+        return db
 
     def accept(self, nonce: int, now_ms: int) -> bool:
-        with self._lock:
-            for k, t in list(self._seen.items()):
-                if now_ms - t > 10 * SKEW_MS:
-                    del self._seen[k]
-            if nonce in self._seen:
-                return False
-            self._seen[nonce] = now_ms
-            return True
+        db=None
+        try:
+            db=self._connect();db.execute('BEGIN IMMEDIATE')
+            row=db.execute('SELECT high_water_ms FROM van_native_replay_clock WHERE singleton=1').fetchone()
+            if row is None and db.execute('SELECT 1 FROM van_native_nonces LIMIT 1').fetchone() is not None:
+                raise NonceStoreUnavailable()
+            previous=row[0] if row else now_ms
+            if type(previous) is not int or not 0<=previous<2**63:raise NonceStoreUnavailable()
+            if now_ms+SKEW_MS<previous:raise NonceClockRollback()
+            high=max(now_ms,previous)
+            db.execute('DELETE FROM van_native_nonces WHERE seen_ms<?',(high-10*SKEW_MS,))
+            inserted=db.execute('INSERT OR IGNORE INTO van_native_nonces(nonce,seen_ms) VALUES(?,?)',
+                (str(nonce),now_ms)).rowcount==1
+            db.execute('INSERT INTO van_native_replay_clock(singleton,high_water_ms) VALUES(1,?) '
+                'ON CONFLICT(singleton) DO UPDATE SET high_water_ms=excluded.high_water_ms',(high,))
+            db.commit()
+            return inserted
+        except sqlite3.Error:
+            raise NonceStoreUnavailable() from None
+        finally:
+            if db is not None:
+                try:db.rollback()
+                finally:db.close()
 
 
 class Terminal:
@@ -285,7 +337,11 @@ class Terminal:
 class Worker:
     def __init__(self, config: dict, terminal: Terminal, signing_key: bytes, *, clock=lambda: int(time.time() * 1000)) -> None:
         self.cfg, self.t, self.key, self.clock = config, terminal, signing_key, clock
-        self.nonces = NonceStore()
+        nonce_path=config.get('nonce_store')
+        if nonce_path is None and config.get('signing_key_file'):
+            nonce_path=str(Path(config['signing_key_file']).resolve().with_name(
+                Path(config['signing_key_file']).name+'.nonces.sqlite3'))
+        self.nonces = NonceStore(nonce_path)
         self.audit: list[dict] = []
         self._terminal_lock = threading.RLock()
 
@@ -306,26 +362,36 @@ class Worker:
         return a
 
     def verify(self, req: dict) -> tuple[bool, str]:
+        if not isinstance(req,dict):return False,'invalid signed request'
         for k in ("op", "nonce", "issued_ms", "body", "signature"):
             if k not in req:
                 return False, f"missing {k}"
+        if (type(req['nonce']) is not int or not 0<=req['nonce']<2**128
+            or type(req['issued_ms']) is not int or not 0<=req['issued_ms']<2**63
+            or not isinstance(req['op'],str) or not isinstance(req['body'],dict)
+            or not isinstance(req['signature'],str)):
+            return False,'invalid signed request'
         payload = {"op": req["op"], "nonce": req["nonce"], "issued_ms": req["issued_ms"], "body": req["body"]}
         sig = hmac.new(self.key, canonical_json(payload).encode(), hashlib.sha256).hexdigest()
+        if not req['signature'].isascii():return False,'bad signature'
         if not hmac.compare_digest(sig, str(req["signature"])):
             return False, "bad signature"
         now = self.clock()
+        if type(now) is not int or not 0<=now<2**63:return False,'native clock unavailable'
         if abs(now - int(req["issued_ms"])) > SKEW_MS:
             return False, "clock skew"
-        if not self.nonces.accept(int(req["nonce"]), now):
-            return False, "nonce replayed"
         if req["op"] not in OPS:
             return False, "op not in contract"
+        try:
+            if not self.nonces.accept(req['nonce'],now):return False,'nonce replayed'
+        except NonceStoreUnavailable:return False,'native replay store unavailable'
+        except NonceClockRollback:return False,'native replay clock rollback requires recovery'
         return True, "ok"
 
     def handle(self, req: dict) -> dict:
         ok, why = self.verify(req)
         if not ok:
-            return {"error": why, "nonce": req.get("nonce"), "worker_time_ms": self.clock()}
+            return {"error": why, "nonce": req.get("nonce") if isinstance(req,dict) else None, "worker_time_ms": self.clock()}
         op, b = req["op"], req["body"]
         try:
             with self._terminal_lock:

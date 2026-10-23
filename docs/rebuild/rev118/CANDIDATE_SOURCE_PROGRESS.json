@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T14:25:27.938373+00:00",
+  "updated_at_utc": "2026-10-23T15:07:55.615174+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -259,6 +259,10 @@
         {
           "description": "Original approved memory erasure replays its committed witness/counts read-only instead of deleting later owner facts, replacing proof or bumping revision. Exact-record absence/expired original reads/legacy witness supported under existing sealed scope and active-device checks; malformed/foreign witnesses and revoked devices refuse. New erasure still needs fresh exact approval.2valid initial failures and8of10 integrated baseline failures fixed;79combined+1legacy distinct source cases,78rebuild,29registry pass;5faults+5controls caught/restored, actual signedA4/domaincommit+lostreply/concurrency and independent post-state. Source only, no whole-unit privacy/native/production certification.",
           "evidence": "backend/BE-003_027_MEMORY_ERASURE_ORIGINAL_RESULT.md; receipts/MEMORY_ERASURE_ORIGINAL_RESULT_SOURCE_20261023.json"
+        },
+        {
+          "description": "Native MT5 replay admission persists bounded nonce/clock metadata withSQLiteFULL/atomicclaim beforeSDK, sharedworkers/processrestarts cannot repeat same signed effect. Defaultbackendpath derives from existing signing profile, no in-memoryfallback. Clockrollback/purge, corrupt/missingclock, storelock/lostcommitACK failclosed; strictheaders/uint128 rollover.2original duplicateSDKeffects and1missing-clock counterexample fixed;91focused/2517fulltrading pass0skip realPGstoppedremoved;8faults+8controls caught/restored inclactualprocessSDKcounter. Nonceclaim is not brokeroutcome or native/whole-unit/production qualification.",
+          "evidence": "backend/BE-003_010_MT5_DURABLE_REPLAY.md; receipts/MT5_DURABLE_REPLAY_SOURCE_20261023.json"
         }
       ]
     },
@@ -607,6 +611,10 @@
         {
           "description": "Explicit OrderCommand expiry retained in signed MT5 body and checked before RPC/afterreadonlyprecheck/finalnativeSDKboundary. Typedorder_send_expiring fenceslegacy/rollback; strictinteger/missingdeadline refused, None retainsoriginalcontract.15of16beforefailures fixed;74focused/2500fulltrading pass0skip realPGstoppedremoved,79rebuild;7faults+7controls caught/restored. Initialnativeexpiry survivor retained; correctedsecond/sendquote oracle provesfinalnativecheck. RealmTLS/JSON/HMAC withSDKfixture. Storageguard14filesystemprobes and20DIALcontrolspass, limitations explicit. Sourceonly; nativeclock/finality/epoch/riskbudget/whole-unit/provider/production/handset obligations remain.",
           "evidence": "backend/BE-010_MT5_EXPLICIT_ENTRY_DEADLINE.md; receipts/MT5_EXPLICIT_ENTRY_DEADLINE_SOURCE_20261023.json"
+        },
+        {
+          "description": "Native MT5 replay admission persists bounded nonce/clock metadata withSQLiteFULL/atomicclaim beforeSDK, sharedworkers/processrestarts cannot repeat same signed effect. Defaultbackendpath derives from existing signing profile, no in-memoryfallback. Clockrollback/purge, corrupt/missingclock, storelock/lostcommitACK failclosed; strictheaders/uint128 rollover.2original duplicateSDKeffects and1missing-clock counterexample fixed;91focused/2517fulltrading pass0skip realPGstoppedremoved;8faults+8controls caught/restored inclactualprocessSDKcounter. Nonceclaim is not brokeroutcome or native/whole-unit/production qualification.",
+          "evidence": "backend/BE-003_010_MT5_DURABLE_REPLAY.md; receipts/MT5_DURABLE_REPLAY_SOURCE_20261023.json"
         }
       ]
     },

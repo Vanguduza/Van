@@ -40,7 +40,8 @@ class Mt5BridgeClient:
         if not signing_key:
             raise ValueError("signing key required")
         self._key, self._transport, self.max_skew_ms = signing_key, transport, max_skew_ms
-        # Worker replay protection spans connections and process restarts.
+        # Worker replay protection persists across its restarts. Core clients
+        # use independent 96-bit namespaces and a 32-bit local sequence.
         # A fresh connection gets its own random namespace; calls keep a
         # locked local sequence rather than reusing another client's nonce 1.
         self._nonce = secrets.randbits(96) << 32
@@ -60,6 +61,8 @@ class Mt5BridgeClient:
         if self._transport is None:
             raise VenueUnavailable("MT5 bridge transport not configured; fail closed")
         with self._nonce_lock:
+            if self._nonce & 0xffffffff==0xffffffff:
+                self._nonce=secrets.randbits(96)<<32
             self._nonce += 1
             nonce = self._nonce
         req = self.sign(BridgeRequest(op, nonce, now_ms, body))
