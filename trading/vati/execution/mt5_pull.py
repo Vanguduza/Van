@@ -68,6 +68,10 @@ class BridgeQueue:
         self._conn.execute("""CREATE TABLE IF NOT EXISTS commands (id INTEGER PRIMARY KEY AUTOINCREMENT, alias TEXT NOT NULL, op TEXT NOT NULL, body_json TEXT NOT NULL,
                               status TEXT NOT NULL DEFAULT 'QUEUED', result_json TEXT, created_ms INTEGER NOT NULL, taken_ms INTEGER, done_ms INTEGER)""")
         self._conn.execute("CREATE TABLE IF NOT EXISTS state (alias TEXT PRIMARY KEY, account_json TEXT NOT NULL, positions_json TEXT NOT NULL, updated_ms INTEGER NOT NULL, last_nonce TEXT)")
+        if 'orders_json' not in {r[1] for r in self._conn.execute('PRAGMA table_info(state)')}:
+            try:self._conn.execute('ALTER TABLE state ADD COLUMN orders_json TEXT')
+            except sqlite3.OperationalError:
+                if 'orders_json' not in {r[1] for r in self._conn.execute('PRAGMA table_info(state)')}:raise
         self._conn.execute("CREATE TABLE IF NOT EXISTS nonces (alias TEXT NOT NULL, nonce TEXT NOT NULL, seen_ms INTEGER NOT NULL, PRIMARY KEY(alias, nonce))")
         self._conn.execute("""CREATE UNIQUE INDEX IF NOT EXISTS native_entry_command
             ON commands(alias,json_extract(body_json,'$.native_command_hash'))
@@ -152,16 +156,16 @@ class BridgeQueue:
             return None
         return json.loads(row[1])
 
-    def set_state(self, alias: str, account: dict, positions: list[dict], *, now_ms: int, nonce: str) -> None:
+    def set_state(self, alias: str, account: dict, positions: list[dict], *, now_ms: int, nonce: str, orders=None) -> None:
         with self._lock:
-            self._conn.execute("INSERT INTO state(alias, account_json, positions_json, updated_ms, last_nonce) VALUES (?,?,?,?,?) ON CONFLICT(alias) DO UPDATE SET account_json=excluded.account_json, positions_json=excluded.positions_json, updated_ms=excluded.updated_ms, last_nonce=excluded.last_nonce",
-                               (alias, json.dumps(account, sort_keys=True), json.dumps(positions, sort_keys=True), now_ms, nonce))
+            self._conn.execute("INSERT INTO state(alias, account_json, positions_json, updated_ms, last_nonce,orders_json) VALUES (?,?,?,?,?,?) ON CONFLICT(alias) DO UPDATE SET account_json=excluded.account_json, positions_json=excluded.positions_json, updated_ms=excluded.updated_ms, last_nonce=excluded.last_nonce,orders_json=excluded.orders_json",
+                               (alias, json.dumps(account, sort_keys=True), json.dumps(positions, sort_keys=True), now_ms, nonce,json.dumps(orders,sort_keys=True) if orders is not None else None))
 
     def state(self, alias: str) -> Optional[dict]:
-        row = self._conn.execute("SELECT account_json, positions_json, updated_ms FROM state WHERE alias = ?", (alias,)).fetchone()
+        row = self._conn.execute("SELECT account_json, positions_json, updated_ms,orders_json FROM state WHERE alias = ?", (alias,)).fetchone()
         if row is None:
             return None
-        return {"account": json.loads(row[0]), "positions": json.loads(row[1]), "updated_ms": row[2]}
+        return {"account": json.loads(row[0]), "positions": json.loads(row[1]), "updated_ms": row[2],"orders":json.loads(row[3]) if row[3] is not None else None}
 
     def nonce_fresh(self, alias: str, nonce: str, *, now_ms: int) -> bool:
         with self._lock:
@@ -298,6 +302,12 @@ class Mt5PullAdapter:
             return Health(False, 0, now_ms)
         fresh = st is not None and now_ms - st["updated_ms"] <= STATE_FRESH_MS
         return Health(fresh, int(st["account"].get("server_time_ms", now_ms)) - now_ms if fresh else 0, now_ms)
+
+    def orders(self) -> list[dict]:
+        orders=self._state().get('orders')
+        if not isinstance(orders,list):
+            raise VenueUnavailable('MT5 EA native pending orders unavailable; update and reconcile the terminal observation')
+        return orders
 
     def _entry_body(self, cmd: OrderCommand) -> dict:
         if cmd.account_alias!=self.account_alias or cmd.venue!=self.venue:
@@ -468,6 +478,8 @@ def create_pull_app(queue: BridgeQueue, key_provider: Callable[[str], Optional[b
             raise HTTPException(400, "body must be JSON")
         if (not isinstance(data,dict) or not isinstance(data.get('results',[]),list)
             or not isinstance(data.get('positions',[]),list)
+            or ('account' in data and not isinstance(data.get('positions'),list))
+            or ('orders' in data and not isinstance(data['orders'],list))
             or ('account' in data and not isinstance(data['account'],dict))):
             raise HTTPException(400, 'native poll body shape is invalid')
         scope = key_provider.poll_binding(alias) if isinstance(key_provider, RegistryKeyProvider) else nullcontext((key,identity,allow_entry))
@@ -480,7 +492,7 @@ def create_pull_app(queue: BridgeQueue, key_provider: Callable[[str], Optional[b
                 except VenueUnavailable:
                     raise HTTPException(409, 'native account identity differs from its registered binding')
             if "account" in data:
-                queue.set_state(alias, data.get("account", {}), data.get("positions", []), now_ms=now, nonce=nonce)
+                queue.set_state(alias, data.get("account", {}), data.get("positions", []), now_ms=now, nonce=nonce,orders=data.get('orders'))
             for r in data.get("results", []):
                 try:
                     queue.complete(alias, r["id"], {k: v for k, v in r.items() if k != "id"}, now_ms=now)

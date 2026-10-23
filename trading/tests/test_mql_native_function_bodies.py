@@ -164,3 +164,15 @@ def test_native_netting_entry_cannot_change_existing_exposure_or_protection(ea,c
 
 def test_native_empty_netting_account_can_still_submit_its_first_entry(ea):
     assert ea('entry-netting-empty')['entry_calls']==1
+
+
+def test_native_pending_order_snapshot_is_explicit_and_precise(ea):
+    assert ea('snapshot')['orders']==[]
+    order=ea('snapshot-pending')['orders'][0]
+    assert order['ticket']==11 and order['symbol']=='EURUSD'
+    assert abs(Decimal(order['volume'])-Decimal('.00123456'))<Decimal('1e-15')
+    assert abs(Decimal(order['price'])-Decimal('1.123456789012345'))<Decimal('1e-15')
+
+
+def test_failed_native_pending_order_read_stays_unknown(ea):
+    assert ea('snapshot-order-unavailable')['orders'] is None

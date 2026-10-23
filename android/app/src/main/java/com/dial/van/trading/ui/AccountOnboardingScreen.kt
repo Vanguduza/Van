@@ -118,7 +118,7 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
                 return@launch
             }
             val resolved = (parsed["resolved_review"] as? JsonObject)?.let(AccountOnboarding::resolvedReviewText)
-            if (action == "account_upsert" && resolved == null) {
+            if (action in setOf("account_upsert", "account_remove") && resolved == null) {
                 busy = false; status = "Native account review is unavailable; nothing was sent."
                 return@launch
             }

@@ -93,7 +93,19 @@ class CtraderAdapter:
         self._ensure_auth()
         _, r = self.transport.call("ProtoOATraderReq", {"ctidTraderAccountId": self.ctid_trader_account_id})
         t = r["trader"]
-        self._money_digits = int(t.get("moneyDigits", 2))
+        try:
+            digits=t['moneyDigits'];deposit=t['depositAssetId'];balance=t['balance']
+            if (type(self.ctid_trader_account_id) is not int or self.ctid_trader_account_id<=0
+                or r['ctidTraderAccountId']!=self.ctid_trader_account_id or t['ctidTraderAccountId']!=self.ctid_trader_account_id
+                or type(digits) is not int or not 0<=digits<=18 or type(deposit) is not int or deposit<=0
+                or type(balance) is not int):raise ValueError()
+            _,assets=self.transport.call('ProtoOAAssetListReq',{'ctidTraderAccountId':self.ctid_trader_account_id})
+            if assets['ctidTraderAccountId']!=self.ctid_trader_account_id or not isinstance(assets.get('asset'),list):raise ValueError()
+            matches=[a for a in assets['asset'] if a.get('assetId')==deposit]
+            if len(matches)!=1 or not isinstance(matches[0].get('name'),str) or not matches[0]['name'].strip():raise ValueError()
+            self._currency=matches[0]['name'];self._money_digits=digits
+        except (KeyError,TypeError,ValueError,ArithmeticError):
+            raise VenueUnavailable('cTrader native account identity, money precision or deposit currency unavailable') from None
         bal = Decimal(t["balance"]) / (Decimal(10) ** self._money_digits)
         unrealised = ZERO
         for p in self._positions_raw():
@@ -107,8 +119,18 @@ class CtraderAdapter:
         return AccountState(self.account_alias, bal + unrealised, bal, self._currency, True, t.get("accountType", "HEDGED") == "HEDGED", self.clock())
 
     def _positions_raw(self) -> list[dict]:
-        _, r = self.transport.call("ProtoOAReconcileReq", {"ctidTraderAccountId": self.ctid_trader_account_id})
-        return [p for p in r.get("position", []) if p.get("positionStatus") in ("POSITION_STATUS_OPEN", 1, None)]
+        return [p for p in self._reconcile_raw()['position'] if p.get("positionStatus") in ("POSITION_STATUS_OPEN", 1, None)]
+
+    def _reconcile_raw(self):
+        _, r = self.transport.call('ProtoOAReconcileReq',{'ctidTraderAccountId':self.ctid_trader_account_id})
+        if (not isinstance(r,dict) or r.get('ctidTraderAccountId')!=self.ctid_trader_account_id
+            or not isinstance(r.get('position',[]),list) or not isinstance(r.get('order',[]),list)):
+            raise VenueUnavailable('cTrader native positions or pending orders unavailable')
+        return {'position':r.get('position',[]),'order':r.get('order',[])}
+
+    def orders(self) -> list[dict]:
+        self._ensure_auth()
+        return self._reconcile_raw()['order']
 
     def positions(self) -> list[VenuePosition]:
         self._ensure_auth()

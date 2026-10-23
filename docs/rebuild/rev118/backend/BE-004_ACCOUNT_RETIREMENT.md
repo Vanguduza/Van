@@ -1,0 +1,15 @@
+# Safe local account unlink
+
+Local unlink now requires a resolved review and current native evidence. An idle account lease, its submission fence and the account registry lock protect the destructive step. Original-operation results are read before reacquiring a lease, so a lost acknowledgement can be reconciled without repeating deletion. A live runtime, unreachable authority, open position or pending order, missing funds, ambiguous original command, unresolved protective exit or changed review retains the profile and credentials.
+
+The review binds the exact account version, local-link change, current funds, scoped history digest and credential disposition. The gateway requires the bound review for owner approval and native dispatch. Existing Android confirmation and result parsing show retained broker funds, historical-data retention and credential handling; no new screen or frontend design is introduced.
+
+Unlink does not close a remote account or transfer money. Only an alias-owned regular credential file in the managed directory can be deleted. Shared files, external references and symlinks are retained. Ownership is checked again under the registry lock, including a reference added after review. Public contracts disclose the disposition without exposing paths or secrets.
+
+Native observations now include pending orders. MT5 pull snapshots distinguish an explicit empty list from missing or failed observation; older SQLite state retains NULL for unknown orders. The EA emits precise order facts or null on a read failure. cTrader resolves the deposit asset through its native asset protocol and requires the account identity and money precision. Deriv missing balance/currency is unavailable rather than an invented zero USD balance. Paper unlink retains its existing simulated history without constructing a fresh simulator as evidence.
+
+The accompanying receipt records the reproduced failures, final source suites, actual isolated PostgreSQL contention checks, deliberate fault checks, Android unit/build/lint results and source hashes. SDK and venue replies in source tests are controlled fixtures. Actual MetaEditor compilation is recorded separately for each published EA revision. No broker funds, owner device, production host or remote account is changed by these checks.
+
+Financial finality for completed real-provider trades remains an original implementation obligation: this change refuses unlink when it cannot prove it. Only the existing deterministic Paper settlement producer currently supplies qualifying completed-trade finality. Legacy protective exits without account provenance conservatively block the venue until reconciled. Aggregate multi-intent netting allocation, native deadline/epoch/risk envelopes, provider late/corrected fills and all original assistant features and admission gates remain in scope. This source packet issues no whole-unit or release certificate.
+
+Evidence: `receipts/ACCOUNT_RETIREMENT_SOURCE_20261023.json`. The generated owner screen/endpoint registry preserves every existing identity and includes the typed unlink review and result in the existing account flow.

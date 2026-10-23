@@ -3551,7 +3551,7 @@ def create_app() -> FastAPI:
         schemas['account_credentials']['properties']['secrets']['additionalProperties']={'type':'string','writeOnly':True}
         return {'schema':'van.account-actions/1',
             'actions':[{'action':action,'requires_owner_approval':requires_owner_approval(action),
-                'requires_resolved_review':action=='account_upsert',
+                'requires_resolved_review':action in {'account_upsert','account_remove'},
                 'supports_original_operation_readback':action in JOURNALED_COMMANDS,
                 'input_schema':schemas[action]} for action in ACCOUNT_ACTIONS],
             'credential_keys_by_broker':{key:sorted(value) for key,value in BROKER_SECRET_KEYS.items()}}

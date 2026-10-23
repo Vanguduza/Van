@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T09:58:32.772723+00:00",
+  "updated_at_utc": "2026-10-23T11:30:23.134620+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -45,7 +45,7 @@
         "BE-001",
         "PRE-003"
       ],
-      "candidate_status": "IN_PROGRESS",
+      "candidate_status": "SOURCE_TESTED",
       "unit_acceptance": "NOT_ISSUED",
       "milestones": [
         {
@@ -107,6 +107,10 @@
         {
           "description": "Actual multi-instrument account actor reuses signed recovery/journal and PostgreSQL atomic effects; state binds opaque current account/lease/specs/contracts identity. Account-scoped owner halts, idle lease renewal, current issuer file guard and decoded PEM equivalence; original unknown/partial/invalid-money commands block recovery and new risk, while genuine zero-effect readback supports fresh approval without resend. Actual pairedgateway->signedCommander->PGactor original replay and realPGrollback/lostACK covered.2560full trading/recovery pass0skip605.59s,269affected,78rebuild,12owner contracts;14faults caught/restored. Source only; original native/provider/release gates remain.",
           "evidence": "backend/BE-003_009_ACCOUNT_RUNTIME_RECOVERY.md; receipts/ACCOUNT_RUNTIME_RECOVERY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Local account unlink binds exact resolved review/native funds/history/credential disposition; actual account lease row and submission guard exclude runtime, unresolved effects/exposure/stale facts retain profile. Shared/external credential references preserved, including late ownership drift. Typed gateway approval/native replay and existing Android confirmation wired; MT5 pending-orders and native cTrader/Deriv funding facts refuse missing observations. 2675 full trading/recovery pass0skip realPG(cleaned),91focused/29writer/3actualPG/78rebuild,16faults+controls caught/restored; Android222JVM/2APKs/lint0ErrorFatal. Source only; completed real-provider finality and all original gates remain.",
+          "evidence": "backend/BE-004_ACCOUNT_RETIREMENT.md; receipts/ACCOUNT_RETIREMENT_SOURCE_20261023.json"
         }
       ]
     },
@@ -116,7 +120,7 @@
         "BE-002",
         "PRE-003"
       ],
-      "candidate_status": "IN_PROGRESS",
+      "candidate_status": "SOURCE_TESTED",
       "unit_acceptance": "NOT_ISSUED",
       "milestones": [
         {
@@ -235,6 +239,10 @@
         {
           "description": "Both MT5 channels preserve distinct native order/deal/position IDs, observed equally-strong stop confirmation and partial/uncertain outcomes. Python worker resolves exact native order-filtered deal to current position identifier; missing readback cannot erase known fill. Pending receipt null no longer crashes consumer. Six invalid-parameter cases refused before SDK; both routes prevent entries over existing/unknown netting exposure/pending orders while allowing first empty-account entry.12original+5netting+6parameter counterexamples fixed;81focused/2635full trading-recovery0skip realPG(cleaned)/78rebuild,11faults+controls caught/restored; initial neutral initializer fault retained and corrected. New EA netting guard native compile pending; no whole-unit/native-provider acceptance.",
           "evidence": "backend/BE-031_NATIVE_RESULT_PARITY.md; receipts/MT5_NATIVE_RESULT_SOURCE_20261023.json"
+        },
+        {
+          "description": "Local account unlink binds exact resolved review/native funds/history/credential disposition; actual account lease row and submission guard exclude runtime, unresolved effects/exposure/stale facts retain profile. Shared/external credential references preserved, including late ownership drift. Typed gateway approval/native replay and existing Android confirmation wired; MT5 pending-orders and native cTrader/Deriv funding facts refuse missing observations. 2675 full trading/recovery pass0skip realPG(cleaned),91focused/29writer/3actualPG/78rebuild,16faults+controls caught/restored; Android222JVM/2APKs/lint0ErrorFatal. Source only; completed real-provider finality and all original gates remain.",
+          "evidence": "backend/BE-004_ACCOUNT_RETIREMENT.md; receipts/ACCOUNT_RETIREMENT_SOURCE_20261023.json"
         }
       ]
     },
@@ -245,7 +253,7 @@
         "BE-003",
         "PRE-003"
       ],
-      "candidate_status": "IN_PROGRESS",
+      "candidate_status": "SOURCE_TESTED",
       "unit_acceptance": "NOT_ISSUED",
       "milestones": [
         {
@@ -295,6 +303,10 @@
         {
           "description": "Actual MT5push/pull factories bind physical login/server/currency/demo; signedworkerack and preflight rejectlegacy/foreign workers; independentnonce namespaces fixfresh/concurrent client collisions. Registeredpoll locks freshkey/identity/permission, onlyQUEUEDcanNoEffectrefuse; bound17fieldwire/explicitentrytype/hexidentity andMQLsourceguard, originalhistoricalread separatedfromcurrentstaleguard.2nonce+8factoryfailures fixed;2281fulltrading0skip realPG/DDS,15faults caught/restored,78rebuild. MQLnotnativecompiled; precision/epochs/deadlines/finalityremain.",
           "evidence": "backend/BE-004_005_MT5_FACTORY_IDENTITY.md; receipts/MT5_FACTORY_IDENTITY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Local account unlink binds exact resolved review/native funds/history/credential disposition; actual account lease row and submission guard exclude runtime, unresolved effects/exposure/stale facts retain profile. Shared/external credential references preserved, including late ownership drift. Typed gateway approval/native replay and existing Android confirmation wired; MT5 pending-orders and native cTrader/Deriv funding facts refuse missing observations. 2675 full trading/recovery pass0skip realPG(cleaned),91focused/29writer/3actualPG/78rebuild,16faults+controls caught/restored; Android222JVM/2APKs/lint0ErrorFatal. Source only; completed real-provider finality and all original gates remain.",
+          "evidence": "backend/BE-004_ACCOUNT_RETIREMENT.md; receipts/ACCOUNT_RETIREMENT_SOURCE_20261023.json"
         }
       ]
     },
@@ -304,7 +316,7 @@
         "BE-004",
         "PRE-003"
       ],
-      "candidate_status": "IN_PROGRESS",
+      "candidate_status": "SOURCE_TESTED",
       "unit_acceptance": "NOT_ISSUED",
       "milestones": [
         {
@@ -342,6 +354,10 @@
         {
           "description": "Actual MT5push/pull factories bind physical login/server/currency/demo; signedworkerack and preflight rejectlegacy/foreign workers; independentnonce namespaces fixfresh/concurrent client collisions. Registeredpoll locks freshkey/identity/permission, onlyQUEUEDcanNoEffectrefuse; bound17fieldwire/explicitentrytype/hexidentity andMQLsourceguard, originalhistoricalread separatedfromcurrentstaleguard.2nonce+8factoryfailures fixed;2281fulltrading0skip realPG/DDS,15faults caught/restored,78rebuild. MQLnotnativecompiled; precision/epochs/deadlines/finalityremain.",
           "evidence": "backend/BE-004_005_MT5_FACTORY_IDENTITY.md; receipts/MT5_FACTORY_IDENTITY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Local account unlink binds exact resolved review/native funds/history/credential disposition; actual account lease row and submission guard exclude runtime, unresolved effects/exposure/stale facts retain profile. Shared/external credential references preserved, including late ownership drift. Typed gateway approval/native replay and existing Android confirmation wired; MT5 pending-orders and native cTrader/Deriv funding facts refuse missing observations. 2675 full trading/recovery pass0skip realPG(cleaned),91focused/29writer/3actualPG/78rebuild,16faults+controls caught/restored; Android222JVM/2APKs/lint0ErrorFatal. Source only; completed real-provider finality and all original gates remain.",
+          "evidence": "backend/BE-004_ACCOUNT_RETIREMENT.md; receipts/ACCOUNT_RETIREMENT_SOURCE_20261023.json"
         }
       ]
     },
@@ -386,7 +402,7 @@
         "BE-008",
         "PRE-003"
       ],
-      "candidate_status": "IN_PROGRESS",
+      "candidate_status": "SOURCE_TESTED",
       "unit_acceptance": "NOT_ISSUED",
       "milestones": [
         {
@@ -492,6 +508,10 @@
         {
           "description": "Both MT5 channels preserve distinct native order/deal/position IDs, observed equally-strong stop confirmation and partial/uncertain outcomes. Python worker resolves exact native order-filtered deal to current position identifier; missing readback cannot erase known fill. Pending receipt null no longer crashes consumer. Six invalid-parameter cases refused before SDK; both routes prevent entries over existing/unknown netting exposure/pending orders while allowing first empty-account entry.12original+5netting+6parameter counterexamples fixed;81focused/2635full trading-recovery0skip realPG(cleaned)/78rebuild,11faults+controls caught/restored; initial neutral initializer fault retained and corrected. New EA netting guard native compile pending; no whole-unit/native-provider acceptance.",
           "evidence": "backend/BE-031_NATIVE_RESULT_PARITY.md; receipts/MT5_NATIVE_RESULT_SOURCE_20261023.json"
+        },
+        {
+          "description": "Local account unlink binds exact resolved review/native funds/history/credential disposition; actual account lease row and submission guard exclude runtime, unresolved effects/exposure/stale facts retain profile. Shared/external credential references preserved, including late ownership drift. Typed gateway approval/native replay and existing Android confirmation wired; MT5 pending-orders and native cTrader/Deriv funding facts refuse missing observations. 2675 full trading/recovery pass0skip realPG(cleaned),91focused/29writer/3actualPG/78rebuild,16faults+controls caught/restored; Android222JVM/2APKs/lint0ErrorFatal. Source only; completed real-provider finality and all original gates remain.",
+          "evidence": "backend/BE-004_ACCOUNT_RETIREMENT.md; receipts/ACCOUNT_RETIREMENT_SOURCE_20261023.json"
         }
       ]
     },
@@ -838,7 +858,7 @@
         "BE-029",
         "PRE-003"
       ],
-      "candidate_status": "IN_PROGRESS",
+      "candidate_status": "SOURCE_TESTED",
       "unit_acceptance": "NOT_ISSUED",
       "milestones": [
         {
@@ -884,6 +904,10 @@
         {
           "description": "Both MT5 channels preserve distinct native order/deal/position IDs, observed equally-strong stop confirmation and partial/uncertain outcomes. Python worker resolves exact native order-filtered deal to current position identifier; missing readback cannot erase known fill. Pending receipt null no longer crashes consumer. Six invalid-parameter cases refused before SDK; both routes prevent entries over existing/unknown netting exposure/pending orders while allowing first empty-account entry.12original+5netting+6parameter counterexamples fixed;81focused/2635full trading-recovery0skip realPG(cleaned)/78rebuild,11faults+controls caught/restored; initial neutral initializer fault retained and corrected. New EA netting guard native compile pending; no whole-unit/native-provider acceptance.",
           "evidence": "backend/BE-031_NATIVE_RESULT_PARITY.md; receipts/MT5_NATIVE_RESULT_SOURCE_20261023.json"
+        },
+        {
+          "description": "Local account unlink binds exact resolved review/native funds/history/credential disposition; actual account lease row and submission guard exclude runtime, unresolved effects/exposure/stale facts retain profile. Shared/external credential references preserved, including late ownership drift. Typed gateway approval/native replay and existing Android confirmation wired; MT5 pending-orders and native cTrader/Deriv funding facts refuse missing observations. 2675 full trading/recovery pass0skip realPG(cleaned),91focused/29writer/3actualPG/78rebuild,16faults+controls caught/restored; Android222JVM/2APKs/lint0ErrorFatal. Source only; completed real-provider finality and all original gates remain.",
+          "evidence": "backend/BE-004_ACCOUNT_RETIREMENT.md; receipts/ACCOUNT_RETIREMENT_SOURCE_20261023.json"
         }
       ]
     },

@@ -76,7 +76,7 @@ def post(client, name, args=None, token=TOKEN, headers=None):
                     "device_id": "source-test-owner", "authority_ref": "source-test-consumed-approval",
                     "request_digest": canonical_hash({k:v for k,v in args.items() if not k.startswith('_')}),
                     "expires_at_unix": int(time.time()) + 60}
-            if name == 'account_upsert':
+            if name in {'account_upsert', 'account_remove'}:
                 review = post(client,'account_review',{'action':name,'args':{k:v for k,v in args.items() if not k.startswith('_')}},token=token)
                 if review.status_code != 200:
                     return review
@@ -216,7 +216,7 @@ def _call(client, name, token, args=None, requested_by=None):
             args["_native_operation"] = {"operation_id":secrets.token_urlsafe(24),"device_id":"source-test-owner",
                 "authority_ref":"source-test-consumed-approval","expires_at_unix":int(time.time())+60,
                 "request_digest":canonical_hash({k:v for k,v in args.items() if not k.startswith('_')})}
-        if name == 'account_upsert':
+        if name in {'account_upsert', 'account_remove'}:
             review=_call(client,'account_review',token,{'action':name,'args':{k:v for k,v in args.items() if not k.startswith('_')}})
             assert review.status_code==200,review.text
             digest=review.json()['result']['review_digest']

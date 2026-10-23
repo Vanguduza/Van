@@ -79,7 +79,7 @@ object AccountOnboarding {
     fun approvalSubtitle(action: String): String = when (action) {
         "account_upsert" -> "Add or change a trading account"
         "account_credentials" -> "Store broker credentials for this account"
-        "account_remove" -> "Remove a trading account"
+        "account_remove" -> "Unlink an account from VAN"
         "deriv_verify_email" -> "Send a Deriv verification email"
         "deriv_create_demo" -> "Create a Deriv demo account"
         "deriv_oauth_link" -> "Link a Deriv account"
@@ -91,7 +91,9 @@ object AccountOnboarding {
 
     /** Display the native effective settings; never native locators or credential values. */
     fun resolvedReviewText(review: JsonObject?): String? {
-        if (review?.str("schema") != "vati.account-review/1" || review.str("action") != "account_upsert") return null
+        if (review?.str("schema") != "vati.account-review/1") return null
+        if (review.str("action") == "account_remove") return resolvedUnlinkReviewText(review)
+        if (review.str("action") != "account_upsert") return null
         val after = review.obj("after") ?: return null
         val before = review.obj("before")
         val labels = linkedMapOf("alias" to "Account", "broker" to "Broker", "label" to "Name",
@@ -130,6 +132,40 @@ object AccountOnboarding {
             if (changed.isEmpty()) append("\nNo setting values changed.")
             append("\n\nBroker connectivity and trading policy are checked separately.")
         }
+    }
+
+    private fun resolvedUnlinkReviewText(review: JsonObject): String? {
+        val before = review.obj("before") ?: return null
+        if (review["after"] != JsonNull) return null
+        val facts = review.obj("retirement") ?: return null
+        if (facts.str("schema") != "vati.local-unlink-review/1" ||
+            facts["remote_account_closed"] != JsonPrimitive(false) ||
+            facts["historical_data_retained"] != JsonPrimitive(true)) return null
+        val alias = before.str("alias")?.takeIf { validateAlias(it) == null } ?: return null
+        val broker = before.str("broker")?.takeIf { it.isNotBlank() } ?: return null
+        val currency = before.str("currency")?.takeIf { it.isNotBlank() } ?: return null
+        val credential = before.obj("credential_ref") ?: return null
+        if (credential.keys != setOf("kind")) return null
+        val fundsText = if (broker == "PAPER") {
+            if (facts["retained_remote_funds"] != JsonNull) return null
+            "Simulation only; no broker funds."
+        } else {
+            val funds = facts.obj("retained_remote_funds") ?: return null
+            if (funds.keys != setOf("balance", "equity", "currency") || funds.str("currency") != currency) return null
+            val balance = funds.str("balance")?.takeIf { it.toBigDecimalOrNull() != null } ?: return null
+            val equity = funds.str("equity")?.takeIf { it.toBigDecimalOrNull() != null } ?: return null
+            "Funds remain at the broker: balance $balance $currency; equity $equity $currency."
+        }
+        val credentialText = when (facts.str("credential_cleanup")) {
+            "DELETE_MANAGED" -> "Its managed local credentials will be removed."
+            "KEEP_SHARED" -> "Shared credentials are kept for the other accounts."
+            "KEEP_EXTERNAL" -> "Externally managed credentials are retained."
+            "NONE" -> "No managed local credentials need removal."
+            else -> return null
+        }
+        return "Unlink $alias from VAN\nBroker: $broker\n$fundsText\n$credentialText\n\n" +
+            "This removes the local connection. " +
+            "It does not close the broker account or move funds. VAN trading history is retained."
     }
 
     fun requestBody(
@@ -209,7 +245,10 @@ object AccountOnboarding {
             "oauth_start" -> ActionOutcome(true, o.str("note") ?: "Continue in the browser", state = o.str("state"), url = o.str("url"), raw = o)
             "oauth_pending" -> ActionOutcome(o.bool("ready") == true, if (o.bool("expired") == true) "Link expired; start again" else if (o.bool("ready") == true) "Accounts found" else "Waiting for the browser sign-in", raw = o)
             "deriv_verify_email" -> ActionOutcome(o.bool("sent") == true, if (o.bool("sent") == true) "Verification code sent to ${o.str("email")}" else "Could not send the code", raw = o)
-            "account_remove" -> ActionOutcome(o.bool("removed") == true, "Account removed", raw = o)
+            "account_remove" -> ActionOutcome(o.bool("removed") == true && o.bool("remote_account_closed") != true,
+                if (o.bool("remote_account_closed") == false && o.bool("historical_data_retained") == true)
+                    "Account unlinked locally. Broker account and funds remain; VAN trading history is retained."
+                else "Local removal reported; verify broker account and history status.", raw = o)
             "account_credentials" -> ActionOutcome(true, "Stored: ${o.strList("stored_keys").joinToString()}", raw = o)
             else -> ActionOutcome(true, if (acct != null) "${acct.label} ${acct.safety.label}" else "Done", acct, raw = o)
         }

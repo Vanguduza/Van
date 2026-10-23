@@ -94,6 +94,8 @@ class FakeCtrader:
             return self.send("ProtoOASymbolByIdRes", {"ctidTraderAccountId": acct, "symbol": [s for s in syms if s["symbolId"] in body["symbolId"]]}, cid)
         if name == "ProtoOATraderReq":
             return self.send("ProtoOATraderRes", {"ctidTraderAccountId": acct, "trader": {"ctidTraderAccountId": acct, "balance": 1005309, "depositAssetId": 1, "moneyDigits": 2, "traderLogin": 5551234}}, cid)
+        if name == 'ProtoOAAssetListReq':
+            return self.send('ProtoOAAssetListRes',{'ctidTraderAccountId':acct,'asset':[{'assetId':1,'name':'USD'}]},cid)
         if name == "ProtoOAReconcileReq":
             return self.send("ProtoOAReconcileRes", {"ctidTraderAccountId": acct, "position": list(self.positions.values())}, cid)
         if name == "ProtoOANewOrderReq":

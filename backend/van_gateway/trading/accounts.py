@@ -216,7 +216,7 @@ class AccountOnboarding:
         return f"{self.public_base_url.rstrip('/')}/v1/trading/oauth/{broker}/callback"
 
     async def approval_context(self,action,args,*,owner_device_id=None):
-        if action!='account_upsert':
+        if action not in {'account_upsert','account_remove'}:
             return await self.resource_version(action,args,owner_device_id=owner_device_id),None
         alias=args.get('alias')
         if not isinstance(alias,str) or not re.fullmatch(r'[a-z0-9_]{3,32}',alias.strip().lower()):
@@ -227,14 +227,18 @@ class AccountOnboarding:
         try:
             review=await asyncio.to_thread(self.control.review,action,args)
             AccountResolvedReview.model_validate(review)
-            expected_changes=sorted(key for key,value in review['after'].items()
-                if review['before'] is None or review['before'].get(key)!=value)
+            if action=='account_upsert':
+                expected_changes=sorted(key for key,value in review['after'].items()
+                    if review['before'] is None or review['before'].get(key)!=value)
+                alias_bound=review['after'].get('alias')==alias.strip().lower()
+            else:
+                expected_changes=['local_link']
+                alias_bound=review['before'].get('alias')==alias.strip().lower() and review['after'] is None
             if (review.get('schema')!='vati.account-review/1' or review.get('action')!=action
                 or review.get('alias')!=str(args.get('alias','')).strip().lower()
                 or review.get('request_digest')!=canonical_hash(args)
                 or review.get('review_digest')!=canonical_hash({k:v for k,v in review.items() if k!='review_digest'})
-                or not isinstance(review.get('after'),dict)
-                or review['after'].get('alias')!=alias.strip().lower()
+                or not alias_bound
                 or review.get('changed_fields')!=expected_changes
                 or not re.fullmatch(r'[0-9a-f]{64}',review.get('resource_version',''))):
                 raise ValueError('unbound native review')
@@ -434,7 +438,7 @@ class AccountOnboarding:
             if not native_operation or native_operation.get("device_id") != owner_device_id:
                 raise HTTPException(403, "verified native operation context is required")
             values["_native_operation"] = {**native_operation, "request_digest": canonical_hash(args)}
-            if action=='account_upsert':
+            if action in {'account_upsert','account_remove'}:
                 if not native_review or native_review.get('resource_version')!=native_resource_version or native_review.get('request_digest')!=canonical_hash(args):
                     raise HTTPException(409,'Resolved native account review is required')
                 values['_expected_review_digest']=native_review['review_digest']

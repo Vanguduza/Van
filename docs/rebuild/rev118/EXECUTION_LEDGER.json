@@ -172,7 +172,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T09:58:32.772723+00:00",
+    "updated_utc": "2026-10-23T11:30:23.134620+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [],
@@ -298,7 +298,9 @@
       "Native EA exact numeric snapshots, deal-to-position identity, truthful partial/uncertain effects, observed stop protection and original fill retained across emergency close; final native entry guards. Pull consumer preserves null IDs and unconfirmed protection.18original+4entry+3consumer counterexamples fixed;56focused/78rebuild pass,9faults and9controls caught/restored. Full trading/recovery running; new actual MetaEditor compile pending. Source only; native finality/expiry/provider and original gates remain.",
       "Hosted815/39930454915 all374legacycases383edits, Android18pass4existingartworkskips,VITS3.263/2.563s,PG26voice117publictrading2355pass1DDSskip; testedmerge54eb71c treeequal. Only DDSreadkey/trustedmain bootstrap fail. Separate native MetaEditor39930454950 SUCCESS0errors0warnings/invalid4errors.",
       "Both MT5 channels preserve distinct native order/deal/position IDs, observed equally-strong stop confirmation and partial/uncertain outcomes. Python worker resolves exact native order-filtered deal to current position identifier; missing readback cannot erase known fill. Pending receipt null no longer crashes consumer. Six invalid-parameter cases refused before SDK; both routes prevent entries over existing/unknown netting exposure/pending orders while allowing first empty-account entry.12original+5netting+6parameter counterexamples fixed;81focused/2635full trading-recovery0skip realPG(cleaned)/78rebuild,11faults+controls caught/restored; initial neutral initializer fault retained and corrected. New EA netting guard native compile pending; no whole-unit/native-provider acceptance.",
-      "Exact625EA native39932985633 compiled0errors0warnings/freshEX5 with invalid4errors/noEX5; tree/log/EX5 fingerprints verified. Local exact6252610fulltrading-recovery0skip completed and PGcleaned; originalMQLreceiptupdated with actual result. Hosted62539932985638 all374legacyfaults/383edits;Android18pass4artworkskips,VITS2.135/2.312s,PG26voice117public2384pass1DDSskip; testedmergeebbc51a3treeequal. Only DDSreadkey/trustedmain fail."
+      "Exact625EA native39932985633 compiled0errors0warnings/freshEX5 with invalid4errors/noEX5; tree/log/EX5 fingerprints verified. Local exact6252610fulltrading-recovery0skip completed and PGcleaned; originalMQLreceiptupdated with actual result. Hosted62539932985638 all374legacyfaults/383edits;Android18pass4artworkskips,VITS2.135/2.312s,PG26voice117public2384pass1DDSskip; testedmergeebbc51a3treeequal. Only DDSreadkey/trustedmain fail.",
+      "Local account unlink binds exact resolved review/native funds/history/credential disposition; actual account lease row and submission guard exclude runtime, unresolved effects/exposure/stale facts retain profile. Shared/external credential references preserved, including late ownership drift. Typed gateway approval/native replay and existing Android confirmation wired; MT5 pending-orders and native cTrader/Deriv funding facts refuse missing observations. 2675 full trading/recovery pass0skip realPG(cleaned),91focused/29writer/3actualPG/78rebuild,16faults+controls caught/restored; Android222JVM/2APKs/lint0ErrorFatal. Source only; completed real-provider finality and all original gates remain.",
+      "Exact d88 MetaEditor run39935785223 compiled0errors0warnings/freshEX5; negative4errors/noEX5. Hosted39935785250 all374legacyfaults383edits/native18pass4existingartworkskips/VITS5.291s3.431s/PG26voice117/publictrading2409pass1DDSskip. Source and tested merge trees equal; DDSreadkey/trustedmain bootstrap still fail."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -309,9 +311,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Continue autonomous whole-product source construction. Publish verified native parity packet and collect new native EA compile. Safe local account retirement WIP is isolated in /tmp/van-retirement-source-20261023 at6255:7actual beforefailures fixed by original journal claim -> native lease -> alias fence, fresh native funds/position/order/unknown-original guards, original review/native before+after contract.7firstguard tests pass; public typed review/gateway changes partly wired. Must complete real adapter pending-order/funds observations, Android existing confirmation, signed native/gateway replay/race controls, registry regeneration and full regression before applying isolated patch to active branch. Provider financial finality (Paper-only producer currently), deferred worker expiry/epoch/risk envelopes, native pending/late/corrected facts and all original assistant features remain. Preserve131units/93plannedfeatures and BG001; no invented acceptance.",
-    "previous_head": "6255c6c40608e529553d69c905567e35cbc37ff4",
-    "current_packet": "Native MT5 result parity and safe netting admission; source tests complete, next native compile and isolated account unlink implementation."
+    "next_action": "Continue original whole-product implementation: review and implement truthful mission dependency graphs and service-bound assistant features. Collect new published EA native MetaEditor/full hosted evidence; start fresh clean exact-commit backend/contracts qualification in the owned QA checkout. Finish native worker deadline/epoch/risk envelopes, provider late/corrected fills/financial finality and original domains. Preserve131units/93plannedfeatures and BG001; no invented acceptance.",
+    "previous_head": "d88d6678008d7c2b264913e5d90671fa04f0fa39",
+    "current_packet": "Safe local account retirement, native observation and existing Android contract wiring, source tested."
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -369,6 +371,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Continue autonomous whole-product source implementation. Add source Android clients and immutable exact A4 recovery protocol for existing backend endpoints; no newfrontend beforeBG001. Finish nativeMQLnumericprecision, fullsignedworker deadline/epoch/risk envelopes, providerfinality/corrections, originalfill/statusintegrity, device-key propagation andsafe retirement; preserve all original assistant features. Frozen d6 auditedbackend/contracts stillrunning separately withrealChrome/AGP/PG, do notmodify; its2281-parent trading2229clean verified. Collect needed currenthostednative/full374 evidence before replacing. No invented unit/native/provider/production/S24 acceptance.",
-  "updated_at_utc": "2026-10-23T05:02:21.120606+00:00"
+  "current_action": "Continue original whole-product implementation: review and implement truthful mission dependency graphs and service-bound assistant features. Collect new published EA native MetaEditor/full hosted evidence; start fresh clean exact-commit backend/contracts qualification in the owned QA checkout. Finish native worker deadline/epoch/risk envelopes, provider late/corrected fills/financial finality and original domains. Preserve131units/93plannedfeatures and BG001; no invented acceptance.",
+  "updated_at_utc": "2026-10-23T11:30:23.134620+00:00"
 }

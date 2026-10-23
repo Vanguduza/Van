@@ -17410,7 +17410,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt",
               "line": 108,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "e12449a66d8dc9202b703f7fbace9caafe8c8f766f960ccd954db4d0a9ab204a",
+              "sha256": "59cb2169e0c2fc05d7e898f2fb9347702d99a3a680dfd05df56ab1560355569d",
               "receiver": "app.gatewayClient",
               "symbol": "tradingAccountChallenge",
               "namespace": "VanGatewayClient",
@@ -17451,7 +17451,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt",
               "line": 95,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "e12449a66d8dc9202b703f7fbace9caafe8c8f766f960ccd954db4d0a9ab204a",
+              "sha256": "59cb2169e0c2fc05d7e898f2fb9347702d99a3a680dfd05df56ab1560355569d",
               "receiver": "app.gatewayClient",
               "symbol": "tradingAccountAction",
               "namespace": "VanGatewayClient",
@@ -17481,7 +17481,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt",
           "line": 108,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "e12449a66d8dc9202b703f7fbace9caafe8c8f766f960ccd954db4d0a9ab204a",
+          "sha256": "59cb2169e0c2fc05d7e898f2fb9347702d99a3a680dfd05df56ab1560355569d",
           "receiver": "app.gatewayClient",
           "symbol": "tradingAccountChallenge",
           "namespace": "VanGatewayClient",
@@ -17508,7 +17508,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt",
           "line": 95,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "e12449a66d8dc9202b703f7fbace9caafe8c8f766f960ccd954db4d0a9ab204a",
+          "sha256": "59cb2169e0c2fc05d7e898f2fb9347702d99a3a680dfd05df56ab1560355569d",
           "receiver": "app.gatewayClient",
           "symbol": "tradingAccountAction",
           "namespace": "VanGatewayClient",
@@ -73638,7 +73638,7 @@
     "android_receipt": null,
     "android_receipt_sha256": null,
     "scope": "Bounded current source-citation/endpoint refresh; previous reviews retained. Whole-product, Android, deployment/provider and handset qualifications remain separate.",
-    "source_review_manifest_sha256": "08aa0752675fd17f062622b67c62578bddf59b13a892d0a22a838eb7039233d9"
+    "source_review_manifest_sha256": "9b586f32e4ea7e31b86c6e36ad32059e37d0b426fe71de0922baa66c8e5808cd"
   },
   "repaired_mutations": [
     {

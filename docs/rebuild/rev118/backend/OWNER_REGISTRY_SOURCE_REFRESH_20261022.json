@@ -1640,7 +1640,7 @@
       "old_line": 91,
       "new_line": 108,
       "old_sha256": "65453a311db8a9c7df8db038133ae7cd69acaafcc20b1cec09f62303efdbbe6f",
-      "new_sha256": "e12449a66d8dc9202b703f7fbace9caafe8c8f766f960ccd954db4d0a9ab204a",
+      "new_sha256": "59cb2169e0c2fc05d7e898f2fb9347702d99a3a680dfd05df56ab1560355569d",
       "exact_anchor": "            val challenge = runCatching { app.gatewayClient.tradingAccountChallenge(action, args) }.getOrNull()"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:847": {
@@ -1656,7 +1656,7 @@
       "old_line": 80,
       "new_line": 95,
       "old_sha256": "65453a311db8a9c7df8db038133ae7cd69acaafcc20b1cec09f62303efdbbe6f",
-      "new_sha256": "e12449a66d8dc9202b703f7fbace9caafe8c8f766f960ccd954db4d0a9ab204a",
+      "new_sha256": "59cb2169e0c2fc05d7e898f2fb9347702d99a3a680dfd05df56ab1560355569d",
       "exact_anchor": "                val outcome = runCatching { app.gatewayClient.tradingAccountAction(action, args, proof) }",
       "reviewed_replacement_anchor": "                val outcome = runCatching { app.gatewayClient.tradingAccountAction(action, args, proof, approvedIssuedAt) }",
       "reason": "Preserve the exact timestamp used in the existing owner approval, including biometric delay"
@@ -1943,7 +1943,7 @@
     "android/app/src/main/java/com/dial/van/trading/ui/PositionDetailScreen.kt": "b3cb37a1cb693df7008c3ff76d922184ae5fa9d25b768e27558878ede5a27f96",
     "android/app/src/main/java/com/dial/van/trading/TradingNavigation.kt": "4421d0717aa2a5115eb43730b1c7c6b7ac926713617602d1e52ecba710e0e939",
     "android/app/src/main/java/com/dial/van/trading/ui/TradingRoute.kt": "fdb194d89657d099544d2f40b8ae0a824489d8c13081e4b0333289308335ff92",
-    "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "e12449a66d8dc9202b703f7fbace9caafe8c8f766f960ccd954db4d0a9ab204a",
+    "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "59cb2169e0c2fc05d7e898f2fb9347702d99a3a680dfd05df56ab1560355569d",
     "android/app/src/main/java/com/dial/van/trading/ui/StrategiesScreen.kt": "3b017e8e141f19a4f95efe09f4ec2d3399d0cb888e77880608a5edc40b601c43",
     "android/app/src/main/java/com/dial/van/trading/ui/TicketsScreen.kt": "32e07996a3b39ad84be69617f5e0bee3d65349a368729f356001dd50fb6c8126",
     "android/app/src/main/java/com/dial/van/command/dev/DevHomeRoute.kt": "ca92519623ddddcff5835fdcf1792665a2c177c6e2470209eb1a6e2d5090b699",
@@ -1964,7 +1964,7 @@
     "android/app/src/main/java/com/dial/van/visual/VanCharacterAcceptance.kt": "7b282fa7815e4557cb4c2cd9e87d34ee9e5d4673b5fa5d93ecef2f1ded648e47"
   },
   "endpoint_count": 445,
-  "schema_count": 279,
+  "schema_count": 281,
   "physical_cases_executed": 0,
   "owner_release": false,
   "deployment_accepted": false

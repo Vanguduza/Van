@@ -82,7 +82,8 @@ long HistoryDealGetInteger(ulong, int) { return 900; }
 bool OrderSelect(ulong ticket) { return pending_order_visible && ticket==11; }
 int OrdersTotal() { return pending_count; }
 ulong OrderGetTicket(int) { return 11; }
-double OrderGetDouble(int) { return 1.12; }
+double OrderGetDouble(int field) { return field==ORDER_VOLUME_CURRENT ? .00123456 : field==ORDER_PRICE_OPEN ? 1.123456789012345 : 1.12; }
+long OrderGetInteger(int field) { return field==ORDER_TYPE ? 2 : 123; }
 string OrderGetString(int) { return "EURUSD"; }
 struct Trade {
  uint rc=TRADE_RETCODE_DONE; ulong order=11, deal=77; double volume=.00123456, price=1.123456789012345;
@@ -108,9 +109,11 @@ std::vector<string> pendingResults;
 
 int main(int argc, char** argv) {
  string c=argv[1];
- if(c=="snapshot" || c=="snapshot-missing" || c=="snapshot-escaped") {
+ if(c=="snapshot" || c=="snapshot-missing" || c=="snapshot-escaped" || c=="snapshot-pending" || c=="snapshot-order-unavailable") {
   if(c=="snapshot-missing") selection_ok=false;
   if(c=="snapshot-escaped") positions[42].symbol="ABC\"Q\\R";
+  if(c=="snapshot-pending" || c=="snapshot-order-unavailable") pending_count=1;
+  if(c=="snapshot-order-unavailable") pending_order_visible=false;
   std::cout<<SnapshotJson(); return 0;
  }
  if(c=="partial-close") { trade.rc=TRADE_RETCODE_DONE_PARTIAL; ExecClose("1",42,.001); }

@@ -63,7 +63,19 @@ class DerivAdapter:
                 self.identity.validate(a)
             except DerivIdentityError:
                 return AccountState(self.account_alias, ZERO, ZERO, self.identity.currency, False)
-        return AccountState(self.account_alias, Decimal(str(a.get("balance", "0"))), Decimal(str(a.get("balance", "0"))), a.get("currency", "USD"), bool(a.get("loginid")))
+        try:
+            balance=Decimal(str(a['balance']));currency=a['currency']
+            if not balance.is_finite() or not isinstance(currency,str) or not currency.strip():raise ValueError()
+        except (KeyError,TypeError,ValueError,ArithmeticError):
+            raise VenueUnavailable('Deriv native funds or currency observation unavailable') from None
+        return AccountState(self.account_alias,balance,balance,currency,bool(a.get('loginid')))
+
+    def orders(self) -> list[dict]:
+        # This immediate digital-contract route has no resting entry order.
+        # A proposal is only a quote; accepted financial contracts are exposed
+        # by the native portfolio, and in-flight buys remain in the journal.
+        self.positions()
+        return []
 
     def positions(self) -> list[VenuePosition]:
         r = self._call({"portfolio": 1})

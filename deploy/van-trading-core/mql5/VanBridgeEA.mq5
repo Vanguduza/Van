@@ -157,10 +157,23 @@ string SnapshotJson()
          JsonNumber(PositionGetDouble(POSITION_SL)), JsonNumber(PositionGetDouble(POSITION_TP)), JsonEscape(PositionGetString(POSITION_COMMENT)), PositionGetInteger(POSITION_MAGIC), JsonNumber(PositionGetDouble(POSITION_PROFIT)));
    }
    if(pos != "null") pos += "]";
+   string orders = "[";
+   for(int i = 0; i < OrdersTotal(); i++)
+   {
+      ulong ticket = OrderGetTicket(i);
+      if(ticket == 0 || !OrderSelect(ticket)) { orders = "null"; break; }
+      if(i > 0) orders += ",";
+      orders += StringFormat("{\"ticket\":%I64u,\"symbol\":\"%s\",\"type\":%I64d,\"volume\":%s,\"price\":%s,\"sl\":%s,\"tp\":%s,\"comment\":\"%s\",\"magic\":%I64d}",
+         ticket, JsonEscape(OrderGetString(ORDER_SYMBOL)), OrderGetInteger(ORDER_TYPE),
+         JsonNumber(OrderGetDouble(ORDER_VOLUME_CURRENT)), JsonNumber(OrderGetDouble(ORDER_PRICE_OPEN)),
+         JsonNumber(OrderGetDouble(ORDER_SL)), JsonNumber(OrderGetDouble(ORDER_TP)),
+         JsonEscape(OrderGetString(ORDER_COMMENT)), OrderGetInteger(ORDER_MAGIC));
+   }
+   if(orders != "null") orders += "]";
    string res = "[";
    for(int i = 0; i < ArraySize(pendingResults); i++) { if(i > 0) res += ","; res += pendingResults[i]; }
    res += "]";
-   return "{\"account\":" + acct + ",\"positions\":" + pos + ",\"results\":" + res + "}";
+   return "{\"account\":" + acct + ",\"positions\":" + pos + ",\"orders\":" + orders + ",\"results\":" + res + "}";
 }
 
 void PushResult(const string json) { int n = ArraySize(pendingResults); ArrayResize(pendingResults, n + 1); pendingResults[n] = json; }

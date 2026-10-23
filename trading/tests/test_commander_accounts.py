@@ -38,6 +38,8 @@ class FakeDeriv:
                 {"req_id": rid, "error": {"message": "InvalidToken", "code": "InvalidToken"}})
         elif "ping" in m:
             self.out.append({"req_id": rid, "ping": "pong"})
+        elif "portfolio" in m:
+            self.out.append({"req_id": rid, "portfolio": {"contracts": []}})
         else:
             self.out.append({"req_id": rid})
     def recv(self):
@@ -75,7 +77,9 @@ def test_upsert_credentials_verify_remove_never_echo_secrets(env):
     assert v["ok"] is True and v["equity"] == "10000.00" and v["currency"] == "USD" and "token" not in json.dumps(v).lower()
     audit = (tmp / "log" / "commander-audit.jsonl").read_text()
     assert "a1-linked" not in audit and "[REDACTED]" in audit
-    assert post(client, "account_remove", {"alias": "deriv_demo"}).json()["result"]["removed"] and not sec.exists()
+    removed = post(client, "account_remove", {"alias": "deriv_demo"})
+    assert removed.status_code == 200, removed.text
+    assert removed.json()["result"]["removed"] and not sec.exists()
     assert post(client, "account_verify", {"alias": "deriv_demo"}).status_code == 404
     assert redact_args({"alias": "x", "secrets": {"K": "v"}, "code": "c"}) == {"alias": "x", "secrets": "[REDACTED]", "code": "[REDACTED]"}
 

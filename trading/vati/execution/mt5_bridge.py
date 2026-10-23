@@ -120,6 +120,12 @@ class Mt5BridgeAdapter:
         except VenueUnavailable:
             return Health(False, 0, now_ms)
 
+    def orders(self) -> list[dict]:
+        response=self._call('orders',{'alias':self.account_alias},now_ms=self.clock())
+        if not isinstance(response.get('orders'),list):
+            raise VenueUnavailable('MT5 native pending orders unavailable')
+        return response['orders']
+
     def submit(self, cmd: OrderCommand, *, now_ms: int) -> ExecutionReceipt:
         if cmd.protective_stop is None:
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason="MT5 orders require SL in the same request").sealed()

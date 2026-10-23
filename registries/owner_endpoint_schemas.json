@@ -295,7 +295,10 @@
           },
           "action": {
             "type": "string",
-            "const": "account_upsert",
+            "enum": [
+              "account_upsert",
+              "account_remove"
+            ],
             "title": "Action"
           },
           "alias": {
@@ -328,7 +331,14 @@
             ]
           },
           "after": {
-            "$ref": "#/components/schemas/PublicAccountRecord"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PublicAccountRecord"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "changed_fields": {
             "items": {
@@ -336,6 +346,16 @@
             },
             "type": "array",
             "title": "Changed Fields"
+          },
+          "retirement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AccountRetirementReview"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -352,6 +372,67 @@
           "changed_fields"
         ],
         "title": "AccountResolvedReview"
+      },
+      "AccountRetirementReview": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "vati.local-unlink-review/1",
+            "title": "Schema"
+          },
+          "remote_account_closed": {
+            "type": "boolean",
+            "const": false,
+            "title": "Remote Account Closed"
+          },
+          "historical_data_retained": {
+            "type": "boolean",
+            "const": true,
+            "title": "Historical Data Retained"
+          },
+          "retained_remote_funds": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RetainedRemoteFunds"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "trade_history_ref": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Trade History Ref"
+          },
+          "trade_history_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Trade History Count"
+          },
+          "credential_cleanup": {
+            "type": "string",
+            "enum": [
+              "DELETE_MANAGED",
+              "KEEP_SHARED",
+              "KEEP_EXTERNAL",
+              "NONE"
+            ],
+            "title": "Credential Cleanup"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "remote_account_closed",
+          "historical_data_retained",
+          "retained_remote_funds",
+          "trade_history_ref",
+          "trade_history_count",
+          "credential_cleanup"
+        ],
+        "title": "AccountRetirementReview"
       },
       "AcquisitionCheckpointBody": {
         "properties": {
@@ -8662,6 +8743,30 @@
           "single_use"
         ],
         "title": "ResumeContract"
+      },
+      "RetainedRemoteFunds": {
+        "properties": {
+          "balance": {
+            "type": "string",
+            "title": "Balance"
+          },
+          "equity": {
+            "type": "string",
+            "title": "Equity"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "balance",
+          "equity",
+          "currency"
+        ],
+        "title": "RetainedRemoteFunds"
       },
       "RetryClass": {
         "type": "string",

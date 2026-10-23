@@ -38,12 +38,12 @@ ACCOUNT_MUTATIONS = frozenset({"account_upsert", "account_credentials", "account
     "deriv_create_demo", "deriv_oauth_link", "ctrader_link", "mt5_ea_issue_key"})
 ACCOUNT_COMMANDS = ("account_upsert", "account_credentials", "account_remove", "account_verify", "account_revision", "account_review", "account_operation", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_oauth_exchange", "ctrader_link", "mt5_ea_issue_key")
 ACCOUNT_TOOL_SCHEMAS = {
-    "account_review": {"description": "Resolve public before/after metadata for the exact account edit without any writes or credential reads.", "properties": {"action": {"type": "string"}, "args": {"type": "object"}}, "required": ["action", "args"]},
+    "account_review": {"description": "Resolve exact public before/after settings or local-unlink safety facts without broker effects. Native readonly checks may use host credentials; credential values and locators are never exported.", "properties": {"action": {"type": "string"}, "args": {"type": "object"}}, "required": ["action", "args"]},
     "account_operation": {"description": "Read the original native account-operation outcome for its gateway-authenticated owner device. No effect or credential export.", "properties": {"operation_id": {"type": "string"}, "device_id": {"type": "string"}}, "required": ["operation_id", "device_id"]},
     "account_revision": {"description": "Read the native non-secret account configuration version for exact owner-intent binding.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
     "account_upsert": {"description": "Register a new account or edit specified public settings. Existing omitted settings and credentials are preserved. New accounts require broker; native identity changes require verified migration.", "properties": {"alias": {"type": "string"}, "broker": {"type": "string"}, "mode": {"type": "string"}, "currency": {"type": "string"}, "label": {"type": "string"}, "server": {"type": "string"}, "login": {"type": "string"}, "bridge_url": {"type": "string"}, "demo": {"type": "boolean"}, "enabled": {"type": "boolean"}, "notes": {"type": "string"}, "venue": {"type": "string"}, "mandate_ref": {"type": "string"}}, "required": ["alias"]},
     "account_credentials": {"description": "Store credential values for an alias in its 0600 secrets file (allowlisted keys per broker). Values are never echoed.", "properties": {"alias": {"type": "string"}, "secrets": {"type": "object"}}, "required": ["alias", "secrets"]},
-    "account_remove": {"description": "Remove an account record and shred its secrets file.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
+    "account_remove": {"description": "Unlink the VAN-local account only after exact owner review, inactive runtime and fresh known funds, positions, pending orders and original outcomes. Keeps history and remote account/funds; no broker closure or money movement.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
     "account_verify": {"description": "Connect to the venue with the stored credentials and report equity/currency/connectivity. No order is placed.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
     "deriv_verify_email": {"description": "Start Deriv account opening: send the verification email.", "properties": {"email": {"type": "string"}, "app_id": {"type": "string"}}, "required": ["email"]},
     "deriv_create_demo": {"description": "Create a Deriv virtual (demo) account from the emailed code and register it under an alias.", "properties": {"alias": {"type": "string"}, "email": {"type": "string"}, "verification_code": {"type": "string"}, "client_password": {"type": "string"}, "residence": {"type": "string"}, "app_id": {"type": "string"}}, "required": ["alias", "verification_code", "client_password", "residence"]},
@@ -133,7 +133,7 @@ def require_resource_version(command: str, args: dict) -> None:
             operation_intent(command, args)
         except AccountEffectError as exc:
             raise HTTPException(409, str(exc)) from None
-    if command == "account_upsert":
+    if command in {'account_upsert','account_remove'}:
         review=args.get("_expected_review_digest")
         authority=args.get("_native_operation",{}).get("authority_ref","")
         if not isinstance(review,str) or not re.fullmatch(r"[0-9a-f]{64}",review) or not authority.endswith("::review:"+review):
@@ -223,8 +223,36 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         from vati.accounts.resource_version import resource_snapshot
         return resource_snapshot(reg(), _alias(a))
 
+    def retirement_review(values,*,inside_removal=False,native_ledger=None):
+        from commander.account_retirement import inspect_retirement,require_idle_runtime,authority_path
+        from vati.core.ledger_pg import open_ledger
+        from vati.core.canonical import canonical_hash
+        alias=_alias(values)
+        # Never wait for the runtime lease while holding the alias lock: the
+        # router holds its lease before entering the account submission fence.
+        if not inside_removal:require_idle_runtime(st,alias)
+        # Initialize authority storage before alias/lease locks. Reopening a PG
+        # ledger under its lease guard could wait on DDL held by this same call.
+        ledger=native_ledger if native_ledger is not None else open_ledger(authority_path(st))
+        try:
+            with reg().operation_lock(alias):
+                registry=reg()
+                try:current=registry.get(alias)
+                except Exception:raise HTTPException(404,'Unknown native account alias') from None
+                facts=inspect_retirement(st,registry,current,inside_removal=True,native_ledger=ledger,
+                    operation_id=(values.get('_native_operation') or {}).get('operation_id'))
+                body={'schema':'vati.account-review/1','action':'account_remove','alias':alias,
+                    'request_digest':canonical_hash({k:v for k,v in values.items() if not k.startswith('_')}),
+                    'resource_version':cmd_account_revision({'alias':alias})['resource_version'],
+                    'before':current.public(),'after':None,'changed_fields':['local_link'],'retirement':facts}
+                return {**body,'review_digest':canonical_hash(body)}
+        finally:
+            if native_ledger is None:ledger.close()
+
     def cmd_account_review(a: dict) -> dict:
         from vati.core.canonical import canonical_hash
+        if a.get('action')=='account_remove' and isinstance(a.get('args'),dict):
+            return retirement_review(a['args'])
         if a.get('action')!='account_upsert' or not isinstance(a.get('args'),dict):
             raise HTTPException(422,'Unsupported native account review action')
         values=a['args']; alias=_alias(values)
@@ -307,14 +335,31 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         keys = store_secrets(alias, acc.broker, values)
         return {"alias": alias, "stored_keys": keys}
 
-    def cmd_account_remove(a: dict) -> dict:
+    def cmd_account_remove(a: dict,*,native_ledger=None) -> dict:
+        from commander.account_retirement import credential_cleanup
+        from contextlib import nullcontext
+        from vati.core.file_lock import exclusive_state_lock
         alias = _alias(a)
         r = reg()
         if alias not in r.accounts:
             raise HTTPException(404, f"unknown alias {alias}")
-        mark_account_effect()
-        r.remove(alias); _shred(_secrets_path(st, alias))
-        return {"alias": alias, "removed": True}
+        review=retirement_review(a,inside_removal=True,native_ledger=native_ledger)
+        if ('_native_operation' in a or '_expected_review_digest' in a) and a.get('_expected_review_digest')!=review['review_digest']:
+            raise HTTPException(409,'Native unlink facts changed or owner review missing; local connection retained')
+        # Freeze all credential-reference writers through the final plan check
+        # and deletion. An alias added during venue IO must retain its access.
+        with r._mutation_lock():
+            current=reg();account=current.get(alias);cleanup,target=credential_cleanup(st,current,account)
+            if cleanup!=review['retirement']['credential_cleanup']:
+                raise HTTPException(409,'Credential reference ownership changed; review local unlink again')
+            with exclusive_state_lock(target) if target is not None else nullcontext():
+                if cmd_account_revision({'alias':alias})['resource_version']!=review['resource_version']:
+                    raise HTTPException(409,'Native credential generation changed; local connection retained')
+                mark_account_effect()
+                current.remove(alias)
+                if target is not None:_shred(target)
+        return {"alias": alias, "removed": True,**{k:review['retirement'][k] for k in (
+            'remote_account_closed','historical_data_retained','retained_remote_funds','credential_cleanup')}}
 
     def cmd_account_verify(a: dict) -> dict:
         alias = _alias(a)
@@ -490,10 +535,34 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                     led.close()
         return invoke
 
+    def serialize_retirement(handler):
+        @wraps(handler)
+        def invoke(args):
+            from commander.account_retirement import retirement_scope
+            alias=_alias(args)
+            ledger=open_operation_ledger()
+            def retire():
+                # The unique original journal claim is durable before taking
+                # lease -> alias locks. No ledger transaction spans venue IO.
+                with retirement_scope(st,alias),reg().operation_lock(alias):
+                    if '_expected_resource_version' in args:
+                        if args['_expected_resource_version']!=cmd_account_revision({'alias':alias})['resource_version']:
+                            raise HTTPException(409,'Account changed since owner approval; local connection retained')
+                    return handler(args,native_ledger=ledger)
+            try:
+                if '_native_operation' not in args:return retire()
+                intent=operation_intent('account_remove',args)
+                return invoke_account_effect(AccountEffectJournal(ledger),intent,retire)
+            except AccountEffectError:
+                raise AccountOperationUnconfirmed(args.get('_native_operation',{}).get('operation_id')) from None
+            finally:ledger.close()
+        return invoke
+
     # Serialize before the registry lookup as well as the file swap. Otherwise
     # a rotation can read an alias, wait for unlink, then recreate orphan secrets.
     for command in ACCOUNT_MUTATIONS:
-        handlers[command] = serialize_account_mutation(command, handlers[command])
+        handlers[command] = (serialize_retirement(handlers[command]) if command=='account_remove'
+                             else serialize_account_mutation(command, handlers[command]))
     return handlers
 
 
