@@ -41,7 +41,7 @@ class FakeMt5:
 
     def initialize(self): return True
     def login(self, login, password=None, server=None): self.login_calls.append((login, server, "pw-redacted")); return login == self._login and password == "s3cret"
-    def account_info(self): return NS(login=self._login, equity=10_250.5, balance=10_000.0, currency="USD", margin_free=9_000.0, leverage=30, margin_mode=2, trade_allowed=self.trade_allowed)
+    def account_info(self): return NS(login=self._login, server="Broker-Demo", trade_mode=0, equity=10_250.5, balance=10_000.0, currency="USD", margin_free=9_000.0, leverage=30, margin_mode=2, trade_allowed=self.trade_allowed)
     def symbol_info(self, s): return NS(volume_min=0.01, volume_step=0.01, volume_max=100.0, trade_stops_level=5, point=0.00001, digits=5, trade_contract_size=100000.0, trade_tick_value=1.0, trade_tick_size=0.00001, spread=8, trade_mode=4)
     def symbol_info_tick(self, s): return NS(bid=1.10000, ask=1.10008)
     def order_check(self, req): return NS(retcode=0, comment="ok", margin=33.0, margin_free=8967.0)
@@ -61,7 +61,7 @@ class FakeMt5:
 
 def make_worker(tmp_path, clock):
     pw = tmp_path / "fx.pw"; pw.write_text("s3cret\n")
-    cfg = {"accounts": {"fx_primary": {"login": 12345678, "server": "Broker-Demo", "password_file": str(pw)}}}
+    cfg = {"accounts": {"fx_primary": {"login": 12345678, "server": "Broker-Demo", "currency": "USD", "demo": True, "password_file": str(pw)}}}
     return worker_mod.Worker(cfg, worker_mod.Terminal(FakeMt5()), KEY, clock=clock), cfg
 
 

@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T04:17:54.229482+00:00",
+  "updated_at_utc": "2026-10-23T04:32:01.206416+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -243,6 +243,10 @@
         {
           "description": "Explicit boolean facts at shared RiskAuthority, native MT5 account/preflight/stop readers and mandate flags; missing/malformed sent-modification outcomes remain UNKNOWN.2055fulltrading zero skip privatePG/DDS,88focused,78rebuild;13faults after23controls caught/restored. Candidate source only; full native finality and authority/content binding remain.",
           "evidence": "backend/BE-004_009_EXPLICIT_BOOLEAN_FACTS.md; receipts/EXPLICIT_BOOLEAN_FACTS_SOURCE_20261022.json"
+        },
+        {
+          "description": "Native worker source binds complete configured login/server/currency/demo to actual terminal facts, strict permission/mode/profile, server-aware login cache and serialized alias selection/readback/effect; signed timewindow rechecked afterlogin.5original+1delayeddispatchvalidfailures fixed;2249fulltrading0skip realprivatePG/DDS,45restored/78rebuild;8faults caught/restored. Native terminal/factory/PullEA/epoch/finality gates remain.",
+          "evidence": "backend/BE-004_MT5_WORKER_PHYSICAL_IDENTITY.md; receipts/MT5_WORKER_PHYSICAL_IDENTITY_SOURCE_20261023.json"
         }
       ]
     },
@@ -404,6 +408,10 @@
         {
           "description": "Closed private proof IDs/expiry before native journal lookup, including direct dataclass bypass and malformed original reads.10counterexamples inclauthenticated nativeHTTP500 fixed to403/noevent.65restored realprivatePG recovery pass0skip;78rebuild;4faults caught/restored. Valid owner signatures/expiry/replay/atomic outcomes retained; source only.",
           "evidence": "backend/BE-003_009_RUNTIME_RECOVERY.md; receipts/RUNTIME_RECOVERY_PROOF_SHAPE_SOURCE_20261023.json"
+        },
+        {
+          "description": "Native worker source binds complete configured login/server/currency/demo to actual terminal facts, strict permission/mode/profile, server-aware login cache and serialized alias selection/readback/effect; signed timewindow rechecked afterlogin.5original+1delayeddispatchvalidfailures fixed;2249fulltrading0skip realprivatePG/DDS,45restored/78rebuild;8faults caught/restored. Native terminal/factory/PullEA/epoch/finality gates remain.",
+          "evidence": "backend/BE-004_MT5_WORKER_PHYSICAL_IDENTITY.md; receipts/MT5_WORKER_PHYSICAL_IDENTITY_SOURCE_20261023.json"
         }
       ]
     },

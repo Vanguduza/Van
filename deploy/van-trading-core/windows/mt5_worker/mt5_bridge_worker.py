@@ -12,7 +12,7 @@ widens a stop, and refuses an order without SL in the same request.
 
 worker.json (0600-equivalent ACL: owner only):
   {"listen": "0.0.0.0", "port": 9443, "cert": "mt5-worker.crt", "key": "mt5-worker.key", "ca": "ca.crt",
-   "signing_key_file": "bridge.key", "accounts": {"fx_primary": {"login": 12345678, "server": "Broker-Demo", "password_file": "fx_primary.pw"}}}
+   "signing_key_file": "bridge.key", "accounts": {"fx_primary": {"login": 12345678, "server": "Broker-Demo", "currency": "USD", "demo": true, "password_file": "fx_primary.pw"}}}
 
 The MetaTrader5 Python package is imported lazily so this file also runs under
 tests on Linux with an injected fake terminal."""
@@ -62,22 +62,28 @@ class Terminal:
         if mt5 is None:
             import MetaTrader5 as mt5  # type: ignore  # Windows only
         self.mt5 = mt5
-        self.logged_in: Optional[int] = None
+        self.logged_in: Optional[tuple[int, str]] = None
 
     def login(self, login: int, server: str, password: str) -> bool:
-        if self.logged_in == login:
+        if self.logged_in == (login, server):
             return True
         if not self.mt5.initialize():
             return False
         ok = bool(self.mt5.login(login, password=password, server=server))
-        self.logged_in = login if ok else None
+        self.logged_in = (login, server) if ok else None
         return ok
 
     def account(self) -> dict:
         a = self.mt5.account_info()
         if a is None:
             raise RuntimeError("account_info unavailable")
-        return {"login": a.login, "equity": str(a.equity), "balance": str(a.balance), "currency": a.currency, "margin_free": str(a.margin_free), "leverage": a.leverage, "hedging": getattr(a, "margin_mode", 2) == 2, "trade_allowed": bool(getattr(a, "trade_allowed", True))}
+        mode = getattr(a, "trade_mode", None)
+        demo = mode == 0 if type(mode) is int and mode in (0, 2) else None
+        return {"login": a.login, "server": getattr(a, "server", None), "demo": demo,
+                "equity": str(a.equity), "balance": str(a.balance), "currency": a.currency,
+                "margin_free": str(a.margin_free), "leverage": a.leverage,
+                "hedging": getattr(a, "margin_mode", 2) == 2,
+                "trade_allowed": getattr(a, "trade_allowed", None)}
 
     def symbol(self, symbol: str) -> dict:
         s = self.mt5.symbol_info(symbol)
@@ -171,11 +177,19 @@ class Worker:
         self.cfg, self.t, self.key, self.clock = config, terminal, signing_key, clock
         self.nonces = NonceStore()
         self.audit: list[dict] = []
+        self._terminal_lock = threading.RLock()
 
     def _account(self, alias: str) -> dict:
         a = self.cfg["accounts"].get(alias)
         if not a:
             raise PermissionError(f"alias {alias} not configured on this worker")
+        login = a.get("login")
+        if (not ((type(login) is int and login > 0)
+                 or (isinstance(login, str) and login.isascii() and login.isdigit() and int(login) > 0))
+            or not isinstance(a.get("server"), str) or not a["server"].strip()
+            or not isinstance(a.get("currency"), str) or not a["currency"].strip()
+            or type(a.get("demo")) is not bool):
+            raise PermissionError("configured physical account identity is incomplete")
         pw = Path(a["password_file"]).read_text().strip() if a.get("password_file") else a.get("password", "")
         if not self.t.login(int(a["login"]), a["server"], pw):
             raise RuntimeError(f"MT5 login failed for {alias}")
@@ -204,33 +218,42 @@ class Worker:
             return {"error": why, "nonce": req.get("nonce"), "worker_time_ms": self.clock()}
         op, b = req["op"], req["body"]
         try:
-            acc = self._account(str(b.get("alias", "")))
-            a = self.t.account()
-            if int(a["login"]) != int(acc["login"]):
-                return {"error": "terminal logged into a different account; refusing", "nonce": req["nonce"], "worker_time_ms": self.clock()}
-            if op == "sync_account":
-                out = {"account": {**a, "verified": True, "server_time_ms": self.clock()}}
-            elif op == "sync_symbols":
-                out = {"symbols": [self.t.symbol(s) for s in b.get("symbols", [])]}
-            elif op == "order_check":
-                out = self.t.order_check(b)
-            elif op == "order_send":
-                if not a.get("trade_allowed", True):
-                    out = {"status": "REJECTED", "reason": "terminal trade not allowed"}
+            with self._terminal_lock:
+                acc = self._account(str(b.get("alias", "")))
+                a = self.t.account()
+                if (not isinstance(acc.get("server"), str) or not acc["server"]
+                    or not isinstance(acc.get("currency"), str) or not acc["currency"]
+                    or type(acc.get("demo")) is not bool):
+                    raise PermissionError("configured physical account identity is incomplete")
+                if (type(a.get("login")) is not int or a["login"] != int(acc["login"])
+                    or a.get("server") != acc["server"] or a.get("currency") != acc["currency"]
+                    or type(a.get("demo")) is not bool or a["demo"] is not acc["demo"]):
+                    raise PermissionError("terminal physical account identity differs from the configured alias")
+                if op == "sync_account":
+                    out = {"account": {**a, "verified": True, "server_time_ms": self.clock()}}
+                elif op == "sync_symbols":
+                    out = {"symbols": [self.t.symbol(s) for s in b.get("symbols", [])]}
+                elif op == "order_check":
+                    out = self.t.order_check(b)
+                elif op == "order_send":
+                    if abs(self.clock() - int(req["issued_ms"])) > SKEW_MS:
+                        out = {"status": "REJECTED", "reason": "signed entry request expired before terminal dispatch"}
+                    elif a.get("trade_allowed") is not True:
+                        out = {"status": "REJECTED", "reason": "terminal trade not allowed"}
+                    else:
+                        out = self.t.order_send(b)
+                elif op == "positions":
+                    out = {"positions": self.t.positions()}
+                elif op == "orders":
+                    out = {"orders": self.t.orders()}
+                elif op == "history":
+                    out = {"deals": self.t.history(int(b.get("from_s", 0)), int(b.get("to_s", time.time())))}
+                elif op == "modify_sl_tp":
+                    out = self.t.modify_sl_tp(int(b["position"]), b.get("sl"), b.get("tp"))
+                elif op == "close":
+                    out = self.t.close(int(b["position"]), b.get("volume"), str(b.get("reason", "")))
                 else:
-                    out = self.t.order_send(b)
-            elif op == "positions":
-                out = {"positions": self.t.positions()}
-            elif op == "orders":
-                out = {"orders": self.t.orders()}
-            elif op == "history":
-                out = {"deals": self.t.history(int(b.get("from_s", 0)), int(b.get("to_s", time.time())))}
-            elif op == "modify_sl_tp":
-                out = self.t.modify_sl_tp(int(b["position"]), b.get("sl"), b.get("tp"))
-            elif op == "close":
-                out = self.t.close(int(b["position"]), b.get("volume"), str(b.get("reason", "")))
-            else:
-                out = {"error": "unreachable"}
+                    out = {"error": "unreachable"}
         except Exception as exc:  # noqa: BLE001 — venue faults become data for the client's fail-closed path
             out = {"error": str(exc)[:200]}
         self.audit.append({"ts": self.clock(), "op": op, "alias": b.get("alias"), "result": "error" if "error" in out else (out.get("status") or "ok")})
