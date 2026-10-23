@@ -13,12 +13,36 @@ $receipt = [ordered]@{
     qualification = 'Source compilation only; no terminal account, broker order, deployed EA, financial or handset acceptance.'
     compile_cases = @()
 }
+$receipt.source_blob_oid = (& git rev-parse 'HEAD:deploy/van-trading-core/mql5/VanBridgeEA.mq5').Trim()
+$receipt.checkout_blob_oid = (& git hash-object --no-filters 'deploy/van-trading-core/mql5/VanBridgeEA.mq5').Trim()
 function Assert-Publisher([string]$Path) {
     $signature = Get-AuthenticodeSignature -LiteralPath $Path
     if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Subject -notmatch '(?i)(?:CN|O)="?MetaQuotes (?:Ltd\.?|Software Corp\.?)"?(?:,|$)') {
         throw 'Official MetaQuotes Authenticode signature is required before execution'
     }
     return [ordered]@{status=[string]$signature.Status; subject=$signature.SignerCertificate.Subject; thumbprint=$signature.SignerCertificate.Thumbprint}
+}
+function Read-SetupDiagnostics {
+    $snapshot = [ordered]@{observed_at_utc=[DateTime]::UtcNow.ToString('o'); candidates=@(); processes=@()}
+    foreach ($candidate in $script:compilerCandidates) {
+        $snapshot.candidates += @{path=$candidate; exists=(Test-Path -LiteralPath $candidate)}
+    }
+    $snapshot.processes = @(Get-Process mt5setup,terminal,terminal64,metaeditor,metaeditor64 -ErrorAction SilentlyContinue |
+        Select-Object ProcessName,MainWindowTitle,Path)
+    # This disposable runner has no owner accounts or credentials. Inspect only
+    # the installer window, not process environments or unrelated applications.
+    try {
+        Add-Type -AssemblyName UIAutomationClient
+        $setupProcesses = @(Get-Process mt5setup -ErrorAction SilentlyContinue)
+        foreach ($process in $setupProcesses) {
+            if ($process.MainWindowHandle -eq 0) { continue }
+            $window = [System.Windows.Automation.AutomationElement]::FromHandle($process.MainWindowHandle)
+            $elements = $window.FindAll([System.Windows.Automation.TreeScope]::Descendants,[System.Windows.Automation.Condition]::TrueCondition)
+            $snapshot.installer_controls = @($elements | ForEach-Object { $_.Current.Name } | Where-Object { $_ } | Select-Object -First 80)
+        }
+    } catch { $snapshot.window_diagnostic = $_.Exception.Message }
+    $script:receipt.setup_diagnostic = $snapshot
+    $snapshot | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $report 'setup-diagnostic.json') -Encoding utf8
 }
 function Read-Compile([string]$Compiler,[string]$Include,[string]$Source,[bool]$ExpectSuccess) {
     $binary = [IO.Path]::ChangeExtension($Source, '.ex5')
@@ -48,6 +72,9 @@ function Read-Compile([string]$Compiler,[string]$Include,[string]$Source,[bool]$
     if (-not $ExpectSuccess -and ($errors -le 0 -or $hasBinary)) { throw 'The native compiler failed to reject deliberately invalid source' }
 }
 try {
+    if ($receipt.source_blob_oid -ne $receipt.checkout_blob_oid) {
+        throw 'Native compilation requires exact Git source bytes; Windows checkout line-ending conversion is not admitted'
+    }
     $page = Invoke-WebRequest -Uri 'https://www.metatrader5.com/en/download' -TimeoutSec 90
     $links = [regex]::Matches($page.Content, 'https://[^"<>\s]+/mt5setup\.exe(?:\?[^"<>\s]*)?')
     if ($links.Count -eq 0) { throw 'The official download page exposes no MT5 SDK installer' }
@@ -58,26 +85,58 @@ try {
     Invoke-WebRequest -Uri $uri -OutFile $installer -TimeoutSec 90
     $receipt.installer_url = $url
     $receipt.installer_sha256 = (Get-FileHash $installer -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($receipt.installer_sha256 -ne 'c8c0a73f86c58974df62fb48f8256a099d6698518cf2defc2b3f169773729e22') {
+        throw 'Official SDK bootstrap changed from the prior native Windows readback; source toolchain review required'
+    }
+    $receipt.installer_bytes = (Get-Item $installer).Length
     $receipt.installer_signature = Assert-Publisher $installer
     $install = Join-Path $owned 'sdk'
     $setup = Start-Process -FilePath $installer -ArgumentList @('/auto',('/path:"{0}"' -f $install)) -PassThru
-    $candidates = @((Join-Path $install 'metaeditor64.exe'),(Join-Path ${env:ProgramFiles} 'MetaTrader 5\metaeditor64.exe'))
+    $script:compilerCandidates = @((Join-Path $install 'metaeditor64.exe'),(Join-Path ${env:ProgramFiles} 'MetaTrader 5\metaeditor64.exe'))
     $deadline = [DateTime]::UtcNow.AddMinutes(8)
+    $diagnoseAt = [DateTime]::UtcNow.AddSeconds(45)
+    $diagnosed = $false
     $compiler = $null
+    $include = $null
     while ([DateTime]::UtcNow -lt $deadline) {
-        foreach ($candidate in $candidates) {
-            if ((Test-Path -LiteralPath $candidate) -and (Test-Path -LiteralPath (Join-Path (Split-Path $candidate) 'MQL5\Include\Trade\Trade.mqh'))) { $compiler=$candidate; break }
+        # Standard installations separate the signed executable from their
+        # per-terminal MQL5 data directory. Do not require a portable layout.
+        $roots = @($install,(Join-Path ${env:ProgramFiles} 'MetaTrader 5'))
+        foreach ($base in @(${env:ProgramFiles},${env:ProgramFiles(x86)},(Join-Path $env:LOCALAPPDATA 'Programs'))) {
+            if (Test-Path -LiteralPath $base) {
+                $roots += @(Get-ChildItem -LiteralPath $base -Directory -ErrorAction SilentlyContinue |
+                    Where-Object { $_.Name -match '(?i)MetaTrader|MetaQuotes' } | ForEach-Object { $_.FullName })
+            }
         }
-        if ($null -ne $compiler -and $setup.HasExited) { break }
+        $script:compilerCandidates = @($roots | Sort-Object -Unique | ForEach-Object { Join-Path $_ 'metaeditor64.exe' })
+        foreach ($candidate in $script:compilerCandidates) {
+            if (Test-Path -LiteralPath $candidate) { $compiler=$candidate; break }
+        }
+        $includeRoots = @($roots | ForEach-Object { Join-Path $_ 'MQL5' })
+        foreach ($base in @((Join-Path $env:APPDATA 'MetaQuotes\Terminal'),(Join-Path $env:LOCALAPPDATA 'MetaQuotes\Terminal'))) {
+            if (Test-Path -LiteralPath $base) {
+                $includeRoots += @(Get-ChildItem -LiteralPath $base -Directory -ErrorAction SilentlyContinue |
+                    ForEach-Object { Join-Path $_.FullName 'MQL5' })
+            }
+        }
+        foreach ($candidate in $includeRoots) {
+            if (Test-Path -LiteralPath (Join-Path $candidate 'Include\Trade\Trade.mqh')) { $include=$candidate; break }
+        }
+        if ($null -ne $compiler -and $null -ne $include -and $setup.HasExited) { break }
+        if (-not $diagnosed -and [DateTime]::UtcNow -gt $diagnoseAt) {
+            try { Read-SetupDiagnostics } catch { $receipt.setup_diagnostic_failure=$_.Exception.Message }
+            $diagnosed=$true
+        }
         Start-Sleep -Seconds 1
     }
+    try { Read-SetupDiagnostics } catch { $receipt.setup_diagnostic_failure=$_.Exception.Message }
     Get-Process terminal,terminal64 -ErrorAction SilentlyContinue | Stop-Process -Force
     if (-not $setup.HasExited) { $setup.Kill(); $setup.WaitForExit(10000) | Out-Null }
-    if ($null -eq $compiler) { throw 'The official SDK installer did not supply MetaEditor and the native standard library' }
+    if ($null -eq $compiler -or $null -eq $include) { throw 'The official SDK installer did not supply MetaEditor and the native standard library' }
     $receipt.compiler_signature = Assert-Publisher $compiler
     $receipt.compiler_sha256 = (Get-FileHash $compiler -Algorithm SHA256).Hash.ToLowerInvariant()
     $receipt.compiler_file_version = (Get-Item $compiler).VersionInfo.FileVersion
-    $include = Join-Path (Split-Path $compiler) 'MQL5'
+    $receipt.standard_library_trade_sha256 = (Get-FileHash (Join-Path $include 'Include\Trade\Trade.mqh') -Algorithm SHA256).Hash.ToLowerInvariant()
     $sourceDir = Join-Path $owned 'source'
     New-Item -ItemType Directory -Path $sourceDir | Out-Null
     $source = Join-Path $sourceDir 'VanBridgeEA.mq5'

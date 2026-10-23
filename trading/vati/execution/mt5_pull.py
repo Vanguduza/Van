@@ -140,8 +140,10 @@ class BridgeQueue:
                 raise
 
     def complete(self, alias: str, cid: int, result: dict, *, now_ms: int) -> bool:
+        if type(cid) is not int or not 0<cid<2**63 or not isinstance(result,dict):
+            return False
         with self._lock:
-            n = self._conn.execute("UPDATE commands SET status = 'DONE', result_json = ?, done_ms = ? WHERE id = ? AND alias = ? AND status IN ('TAKEN', 'QUEUED')", (json.dumps(result, sort_keys=True), now_ms, cid, alias)).rowcount
+            n = self._conn.execute("UPDATE commands SET status = 'DONE', result_json = ?, done_ms = ? WHERE id = ? AND alias = ? AND status = 'TAKEN'", (json.dumps(result, sort_keys=True), now_ms, cid, alias)).rowcount
             return n == 1
 
     def result(self, cid: int) -> Optional[dict]:
@@ -481,7 +483,7 @@ def create_pull_app(queue: BridgeQueue, key_provider: Callable[[str], Optional[b
                 queue.set_state(alias, data.get("account", {}), data.get("positions", []), now_ms=now, nonce=nonce)
             for r in data.get("results", []):
                 try:
-                    queue.complete(alias, int(r["id"]), {k: v for k, v in r.items() if k != "id"}, now_ms=now)
+                    queue.complete(alias, r["id"], {k: v for k, v in r.items() if k != "id"}, now_ms=now)
                 except (KeyError, ValueError, TypeError):
                     continue
             return format_commands(queue.take_pending(alias, now_ms=now,

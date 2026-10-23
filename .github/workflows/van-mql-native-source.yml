@@ -20,6 +20,11 @@ jobs:
     runs-on: windows-2025
     timeout-minutes: 20
     steps:
+      - name: Preserve exact Git source bytes on Windows
+        shell: pwsh
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
