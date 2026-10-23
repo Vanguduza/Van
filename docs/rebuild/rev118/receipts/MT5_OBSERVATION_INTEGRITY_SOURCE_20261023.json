@@ -1,0 +1,460 @@
+{
+  "schema": "van.rebuild.mt5-observation-integrity-source/1",
+  "observed_at_utc": "2026-10-23T09:10:47.822795+00:00",
+  "source_parent": "8d2f53889963baee482a7f524bf42828cdaa36b8",
+  "source_sha256": {
+    "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "b94ee4b6116c28af9793af27037971608d115c61732327ddb1ab14aa11c18168",
+    "trading/vati/execution/mt5_bridge.py": "6bf4a9b8bf6dcba27a279c4f2def75c06275deb98e52713a215d9258aaba79f8",
+    "trading/tests/test_mt5_worker.py": "a5f7ea96d82f8517e9a5bba2723b66949a9266e5f47a0ccbb7af2fc252facaa8",
+    "trading/tests/test_mt5_observation_integrity.py": "e2fcdd49b81b16da1c51d294b0d600df9d11885157a0697a30d8f46a37a17449"
+  },
+  "executions": {
+    "before": {
+      "tests": 10,
+      "failures": 9,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.385,
+      "sha256": "d73080ac167ed607a2c9a46eb796dfbc2e0941d539bad8e8f6d3dca4bb43083c"
+    },
+    "protective-before": {
+      "tests": 12,
+      "failures": 11,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.33,
+      "sha256": "72995f8fb0fa802d184f3a15dcdc7e1072547f00fe78766f9045f92749d4f3e3"
+    },
+    "valid-before": {
+      "tests": 15,
+      "failures": 14,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.367,
+      "sha256": "bb3c9b514367ea7df1e818799ae1719744b777367968facf1b5309b327e8b24f"
+    },
+    "first": {
+      "tests": 54,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.809,
+      "sha256": "b476e97d004a901b9073204dabbed271968e3c9f7fedd548990eb9f728ce69a1"
+    },
+    "unconfirmed-stop-before": {
+      "tests": 2,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.324,
+      "sha256": "989b57fb416585f675493e907ff471ffdb20367b0e940287e40812169f9f2c96"
+    },
+    "final-focused": {
+      "tests": 54,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.902,
+      "sha256": "c52b23d7dde7f5730bdb51e64a81eb4d0b77328d0edd0247bf90a27ac6bf2275"
+    }
+  },
+  "full_private_postgresql": {
+    "tests": 2581,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 607.699,
+    "sha256": "9247996e6ec78d68a99a20cfa9cc1aea172129f532f6724264cfbe13ff017cce"
+  },
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "faults": {
+    "definitions": [
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "        if not isinstance(rows,(tuple,list)):\n            raise RuntimeError(f'native {kind} observation unavailable')",
+          "        if rows is None:return []",
+          "report a failed native collection read as a known empty account"
+        ],
+        "trading/tests/test_mt5_observation_integrity.py::test_failed_native_collection_read_cannot_report_a_successful_empty_collection[positions-positions_get-positions]"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "return {\"status\": \"UNKNOWN\", \"reason\": \"native order outcome unconfirmed; reconcile the original command\"}",
+          "return {\"status\": \"REJECTED\", \"reason\": \"native order outcome unconfirmed; reconcile the original command\"}",
+          "report no effect after a native entry executed but its SDK reply was lost"
+        ],
+        "trading/tests/test_mt5_observation_integrity.py::test_native_send_with_an_effect_but_no_sdk_reply_remains_unknown"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "if terminal is None or getattr(terminal,'connected',None) is not True:",
+          "if False:",
+          "treat a cached physical account identity as a current broker connection"
+        ],
+        "trading/tests/test_mt5_observation_integrity.py::test_a_cached_account_identity_is_not_a_current_broker_connection[False]"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "permissions[0] and permissions[1] and permissions[2] and not permissions[3]",
+          "permissions[0] and permissions[1] and not permissions[3]",
+          "send entry with terminal algorithmic trading disabled"
+        ],
+        "trading/tests/test_mt5_observation_integrity.py::test_terminal_disabled_algorithmic_trading_refuses_before_native_send"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "permissions[0] and permissions[1] and permissions[2] and not permissions[3]",
+          "permissions[0] and permissions[2] and not permissions[3]",
+          "ignore an account-level expert-trading denial"
+        ],
+        "trading/tests/test_mt5_observation_integrity.py::test_other_native_algorithmic_permission_denials_prevent_entry[account-expert]"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "permissions[0] and permissions[1] and permissions[2] and not permissions[3]",
+          "permissions[0] and permissions[1] and permissions[2]",
+          "ignore a native Python trading API denial"
+        ],
+        "trading/tests/test_mt5_observation_integrity.py::test_other_native_algorithmic_permission_denials_prevent_entry[python-api]"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "if r is None:return {'ok':None,'reason':'native stop change outcome unconfirmed; reconcile the original command'}",
+          "if r is None:return {'ok':False,'reason':'native stop change outcome unconfirmed; reconcile the original command'}",
+          "claim a rejected stop change after the native stop actually moved"
+        ],
+        "trading/tests/test_mt5_observation_integrity.py::test_native_protective_effect_with_no_sdk_reply_cannot_report_no_effect[modify]"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "if r is None:return {'status':'UNKNOWN','reason':'native close outcome unconfirmed; reconcile the original command'}",
+          "if r is None:return {'status':'REJECTED','reason':'native close outcome unconfirmed; reconcile the original command'}",
+          "claim a rejected close after the native position actually closed"
+        ],
+        "trading/tests/test_mt5_observation_integrity.py::test_native_protective_effect_with_no_sdk_reply_cannot_report_no_effect[close]"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "status='PARTIAL' if r.retcode==m.TRADE_RETCODE_DONE_PARTIAL else 'FILLED' if ok else 'REJECTED'",
+          "status='FILLED' if ok else 'REJECTED'",
+          "label a native partial close as a complete fill"
+        ],
+        "trading/tests/test_mt5_observation_integrity.py::test_native_partial_close_is_not_labeled_a_complete_fill"
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_bridge.py",
+          "ZERO, ZERO, ZERO, r.get('sl_confirmed') is True, now_ms",
+          "ZERO, ZERO, ZERO, True, now_ms",
+          "invent protective stop confirmation while the native close outcome is unknown"
+        ],
+        "trading/tests/test_mt5_observation_integrity.py::test_native_protective_effect_with_no_sdk_reply_cannot_report_no_effect[close]"
+      ]
+    ],
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "c2fdf2e61c46f482140d595d7ab36b5b2a940b118046be5b28f42152e603f868",
+        "log_sha256": "730410d23add507d10274b5400f29dd16f80db2f65bf9ef1c50a875848f3486b"
+      },
+      {
+        "phase": "mutation",
+        "why": "report a failed native collection read as a known empty account",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "62653f08292db59341bfd0cfb12dfbd8f8fa547582a4b9d073f4f4f134df8294",
+        "log_sha256": "5f18d614d96090107388d62f91f1ddb6235ad655199fb98045aa23114bc0fb9d"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "a36d74631b1a8752e8b2549862c41f25ac9cf593d92b36006fcf1680393bff3e",
+        "log_sha256": "3dd8a455f93386b2d78b9d5605f1c2f52fd55f0962f89b0bd7d602cae0ead952"
+      },
+      {
+        "phase": "mutation",
+        "why": "report no effect after a native entry executed but its SDK reply was lost",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "2f8e9b83d15905841d58289ad5227155b0b5ea50fe8c7dcc53274509a72a4831",
+        "log_sha256": "8b29d0d672377a28bf14e25c672660e38ee967f8dda5b4491a8c22395e5f4471"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "f52d94e587afb0ffbe034bf4f88f6d55b7dc442deeeee79fcd5aa0db48f3a84a",
+        "log_sha256": "82c201bb904df7561785e93b567cf9f67336470fb20ba42c9846547bf1029aea"
+      },
+      {
+        "phase": "mutation",
+        "why": "treat a cached physical account identity as a current broker connection",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "f9493ad8959104141c71044a002069bfe535bdfb87ed518a759c09635dafaea8",
+        "log_sha256": "53df21f171263511b8fddfcc0b1e9b71b5dfbee6ff5571a36f3db235d0676059"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "1d72a93f93fdf543fd7110d97d1011ea8f316a402967a025a407546be0a74810",
+        "log_sha256": "0234d51de03c8da96792f0ed8d0043697c9f1b2888dbf66e9cf6b5620819903b"
+      },
+      {
+        "phase": "mutation",
+        "why": "send entry with terminal algorithmic trading disabled",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "b403c12f49368c1066c2923fc0be1a5529b84bfda45626cf98cfb23ae76feb8e",
+        "log_sha256": "7c41d466a858b95420839a82ddf0443be7773e6a0e8fc8aa67f17219c34eba2a"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "a557aad4d4ff3604e9f6d6a4d6778e6748f2645f7178636e84ec69384c036523",
+        "log_sha256": "8afe2471606046b386cbefd7224d475f9d94ddb804d914ca3a5b3472c14d8f5c"
+      },
+      {
+        "phase": "mutation",
+        "why": "ignore an account-level expert-trading denial",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "9a595075f08c35a5f1e1975c59c2185d7811172a2ed61fa67fd601f12522e915",
+        "log_sha256": "cdefe85dd46188f095079577391682123e74d765ed6fb0b4e1fcbeb30e62847c"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "62f2d281e70344aba13bfa965e046a1f90cdb48c283ef98e567a6b5707bc0061",
+        "log_sha256": "8afe2471606046b386cbefd7224d475f9d94ddb804d914ca3a5b3472c14d8f5c"
+      },
+      {
+        "phase": "mutation",
+        "why": "ignore a native Python trading API denial",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "d90891e8d7ab5c7c9a8445335a76bba9a5fedef449e4cb410b5bc2b4b7e06f7e",
+        "log_sha256": "6e935a29f138debe4907ecc2d1957519d7deec377f61a53ce50f4b5bb57f0bad"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "331aae8fd57bac613b6d1595cc913af16f351a9983d26dcaa9e63cc46e9bab12",
+        "log_sha256": "0234d51de03c8da96792f0ed8d0043697c9f1b2888dbf66e9cf6b5620819903b"
+      },
+      {
+        "phase": "mutation",
+        "why": "claim a rejected stop change after the native stop actually moved",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "de9fea559b8b03c713fe187380acb792472ed55b18a45d2272dae4dae5f4a888",
+        "log_sha256": "d214fd28f78c63989e2c8901f3d8bc5debf9c86919dc3f98cd6b8d58b1036d1d"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "9460a6e44e97f8f273222e5dccb57a1b372b84743721ec5ab93566e2b6cf90f3",
+        "log_sha256": "8afe2471606046b386cbefd7224d475f9d94ddb804d914ca3a5b3472c14d8f5c"
+      },
+      {
+        "phase": "mutation",
+        "why": "claim a rejected close after the native position actually closed",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "2b9ad44208b29036e81977f6c572fa7d6c16dc7c223ee91d34a4656e1c3bb01f",
+        "log_sha256": "1b0c2fa2f07b7dfe326822d8a9707776a0d81902aaaa766370ad0128c7f8aaf4"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "dc38cf90a859c27fb92f0a1e77614e83fdc92585169a337e04091d016ca351ad",
+        "log_sha256": "63203b4ec2b29e7ab8c45616e4d500960794bb60488784fb13fb7fe05b0386bf"
+      },
+      {
+        "phase": "mutation",
+        "why": "label a native partial close as a complete fill",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "9f9e44ac06110a80a0bca5a427c74557efa998d108036946113a2e80c9c9b32d",
+        "log_sha256": "d6af6e7e82488b46eba31aae34168e371c64302b632d6467dfc5ebb6b494202f"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "f8fc50d017ccdda35844a58ffbcfbf7c769062f4920f3a15f44d9b0ef6be623c",
+        "log_sha256": "1ab9905d8b0f34f6d791ff7da4efa2de0f7f3e282a078758cc0496cc0230c0f0"
+      },
+      {
+        "phase": "mutation",
+        "why": "invent protective stop confirmation while the native close outcome is unknown",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "b2eddc7678af03e5248142a81697de22c00148c423897d8f0195960076c1fa29",
+        "log_sha256": "290a50e6f8615531616294ffb169cc6e0b395c51428d6d6423ea41648a4897c4"
+      }
+    ],
+    "source_before_sha256": {
+      "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "b94ee4b6116c28af9793af27037971608d115c61732327ddb1ab14aa11c18168",
+      "trading/vati/execution/mt5_bridge.py": "6bf4a9b8bf6dcba27a279c4f2def75c06275deb98e52713a215d9258aaba79f8"
+    },
+    "source_after_sha256": {
+      "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "b94ee4b6116c28af9793af27037971608d115c61732327ddb1ab14aa11c18168",
+      "trading/vati/execution/mt5_bridge.py": "6bf4a9b8bf6dcba27a279c4f2def75c06275deb98e52713a215d9258aaba79f8"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "interpretation": [
+    "Fourteen valid original failures and one successful known-empty control were reproduced at parent source before applying the worker fix. Earlier oracle iteration expected transport unavailability for a stop change; the existing protocol supports a typed UNKNOWN receipt, corrected before the fourteen-case before run.",
+    "The shared SDK fixture now supplies the real terminal_info connection/API flags and account trade_expert fields. This is a fixture schema correction, not evidence of a live Windows terminal or broker.",
+    "The initial54 affected cases pass after the worker change; a later source counterexample proved an UNKNOWN close still invented stop confirmation in the Linux adapter. That field was corrected, then final54 affected and full2581 cases pass.",
+    "All ten isolated controls pass; all ten semantic regressions fail assertions with no setup/collection errors/skips, and both production files are byte-restored.",
+    "Actual worker HTTPS/HMAC/source code is exercised using an SDK fixture. Fixture effects precede the deliberately lost replies. No real money, broker account or provider execution is claimed."
+  ],
+  "source_provenance": "Full selection completed after final app changes and restored mutations. SDK preparation tooling changed separately during this application run; its native qualification is separately pending. No exact-current full backend/contracts rerun claimed.",
+  "qualification": "Candidate source only. No whole-unit, provider financial finality, production, release signing, independent certificate, profitability or handset acceptance.",
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "1ac8671c78f7883270e7567cc4fee42ed7fbda1f24040b71caf176f63dec3908"
+  },
+  "owner_contract_derivation": {
+    "changed": [],
+    "applied": false,
+    "scope": "SOURCE_CONTRACTS_ONLY"
+  }
+}

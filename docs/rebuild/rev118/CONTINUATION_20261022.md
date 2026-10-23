@@ -434,3 +434,14 @@ Continue autonomous whole-product implementation. Collect complete a1ee hosted n
 
 
 Hosted a1ee/39923342436 complete:374legacy faults383edits,native18pass4artworkskips,VITS2.862/2.475s,PG26voice117trading2334pass1DDSskip. Exact source/merge trees equal; onlyDDSreadkey/trusted-main prerequisites fail. SeparateWindowsSDKattempt failed preparation, no MQL compiler case ran; failure and CRLF source transform retained. Current compiler retry adds split SDK discovery, setup diagnostics, observed-bootstrap pin and exact rawGit source-byte guard.
+
+
+## Native observation integrity and offline SDK data preparation
+
+Native SDK None/malformed collections are unavailable rather than knownempty; current terminal connection and account/expert/terminal/PythonAPI permissions gate entry. Lost SDK replies after entry/stop/close stayUNKNOWN; partialclosePARTIAL; no invented stop confirmation on unknownclose.14original beforefailures+1positivecontrol, laterunconfirmedstopfieldcounterexample fixed;54finalaffected,2581fulltrading/recovery0skip608.33s realPG/stoppedremoved,78rebuild;10semanticfaults caught/restored. SDKfixtureIO plusactualmTLS/HMAC; no realbroker/wholeunit acceptance.
+
+NativeWindowsretry39925980276 proves exact rawGitinput and installed MetaEditor executable, but cannotlocatestdlib;0compiler cases, FAIL retained. Bounded signededitor/offlineTerminal data initialization prepared with enforcing program-specificoutboundblock, expertsdisabled andnocredentials; parserPASS, nativeinitialization/notcompiler success remainspending.
+
+Exactclean8f7backend-only audit6907pass9explicit skips6916cases2747.61s/zero forbiddenruntime storage/PGcleanup/exit0; prior2560trading-recovery separate. Hosted8dfull374/native18+4skips complete, VITS2.389/2.054s, onlyDDSreadkey/trustedmain prereqs fail. Debugcleartext alreadyresolvedfca473cc; noAndroideditneeded.
+
+Continue autonomous whole-product implementation. Publish verified native observation/SDKdata changes, collect actual next Windows source compiler run and fix real MQL compiler/precision/order-vs-position defects. Complete safe local account retirement with native freshfunds/positions/pendingorders/originalunknown/lease fences; existing BE004 forbids deletion with activeexposure/unknownfunds/stalereadback. Then deferredworker epoch/deadline/risk envelopes, nativeoriginal fill/finality/corrections and remaining assistant domains. Alloriginal131units/93plannedfeatures preserved, no frontend beforeBG001 or invented native/provider/production/S24 acceptance. Debugcleartext observation alreadyresolved atfca473cc(loopbackonly), do notredo fromstaleOBS001text. Exact8f7broadQAcompleted, ownedcheckoutmaynowbe reused aftercleanreadback.

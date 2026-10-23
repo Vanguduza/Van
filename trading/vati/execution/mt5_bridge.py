@@ -144,4 +144,4 @@ class Mt5BridgeAdapter:
 
     def close(self, position_id: str, quantity: Optional[Decimal], *, now_ms: int, reason: str) -> ExecutionReceipt:
         r = self._call("close", {"alias": self.account_alias, "position": position_id, "volume": str(quantity) if quantity else None, "reason": reason}, now_ms=now_ms)
-        return ExecutionReceipt("", "", self.venue, r.get("status", "UNKNOWN"), Decimal(str(r.get("volume", "0"))), Decimal(str(r["price"])) if r.get("price") else None, ZERO, ZERO, ZERO, True, now_ms, now_ms, broker_position_id=position_id, reject_reason=reason).sealed()
+        return ExecutionReceipt("", "", self.venue, r.get("status", "UNKNOWN"), Decimal(str(r.get("volume", "0"))), Decimal(str(r["price"])) if r.get("price") else None, ZERO, ZERO, ZERO, r.get('sl_confirmed') is True, now_ms, now_ms, broker_position_id=position_id, reject_reason=reason).sealed()

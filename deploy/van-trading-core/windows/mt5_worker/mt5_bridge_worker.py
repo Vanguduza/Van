@@ -77,13 +77,26 @@ class Terminal:
         a = self.mt5.account_info()
         if a is None:
             raise RuntimeError("account_info unavailable")
+        terminal = self.mt5.terminal_info()
+        if terminal is None or getattr(terminal,'connected',None) is not True:
+            raise RuntimeError('current terminal broker connection unavailable')
+        permissions=(getattr(a,'trade_allowed',None),getattr(a,'trade_expert',None),
+                     getattr(terminal,'trade_allowed',None),getattr(terminal,'tradeapi_disabled',None))
+        trading_allowed=(permissions[0] and permissions[1] and permissions[2] and not permissions[3]
+                         if all(type(value) is bool for value in permissions) else None)
         mode = getattr(a, "trade_mode", None)
         demo = mode == 0 if type(mode) is int and mode in (0, 2) else None
         return {"login": a.login, "server": getattr(a, "server", None), "demo": demo,
                 "equity": str(a.equity), "balance": str(a.balance), "currency": a.currency,
                 "margin_free": str(a.margin_free), "leverage": a.leverage,
                 "hedging": getattr(a, "margin_mode", 2) == 2,
-                "trade_allowed": getattr(a, "trade_allowed", None)}
+                "trade_allowed": trading_allowed}
+
+    @staticmethod
+    def _observed_rows(rows,kind):
+        if not isinstance(rows,(tuple,list)):
+            raise RuntimeError(f'native {kind} observation unavailable')
+        return rows
 
     def symbol(self, symbol: str) -> dict:
         s = self.mt5.symbol_info(symbol)
@@ -122,7 +135,7 @@ class Terminal:
         m = self.mt5
         r = m.order_send(self._request(b))
         if r is None:
-            return {"status": "REJECTED", "reason": "order_send returned None"}
+            return {"status": "UNKNOWN", "reason": "native order outcome unconfirmed; reconcile the original command"}
         done = r.retcode in (m.TRADE_RETCODE_DONE, m.TRADE_RETCODE_DONE_PARTIAL, m.TRADE_RETCODE_PLACED)
         status = "FILLED" if r.retcode == m.TRADE_RETCODE_DONE else ("PARTIAL" if r.retcode == m.TRADE_RETCODE_DONE_PARTIAL else ("ACCEPTED" if r.retcode == m.TRADE_RETCODE_PLACED else "REJECTED"))
         sl_confirmed = False
@@ -134,19 +147,19 @@ class Terminal:
 
     def positions(self) -> list[dict]:
         m = self.mt5
-        return [{"ticket": p.ticket, "symbol": p.symbol, "type": "BUY" if p.type == m.ORDER_TYPE_BUY else "SELL", "volume": str(p.volume), "price_open": str(p.price_open), "sl": str(p.sl) if p.sl else None, "tp": str(p.tp) if p.tp else None, "comment": p.comment, "magic": p.magic, "profit": str(p.profit)} for p in (m.positions_get() or [])]
+        return [{"ticket": p.ticket, "symbol": p.symbol, "type": "BUY" if p.type == m.ORDER_TYPE_BUY else "SELL", "volume": str(p.volume), "price_open": str(p.price_open), "sl": str(p.sl) if p.sl else None, "tp": str(p.tp) if p.tp else None, "comment": p.comment, "magic": p.magic, "profit": str(p.profit)} for p in self._observed_rows(m.positions_get(),'positions')]
 
     def orders(self) -> list[dict]:
-        return [{"ticket": o.ticket, "symbol": o.symbol, "type": o.type, "volume": str(o.volume_current), "price": str(o.price_open), "sl": str(o.sl) if o.sl else None, "comment": o.comment} for o in (self.mt5.orders_get() or [])]
+        return [{"ticket": o.ticket, "symbol": o.symbol, "type": o.type, "volume": str(o.volume_current), "price": str(o.price_open), "sl": str(o.sl) if o.sl else None, "comment": o.comment} for o in self._observed_rows(self.mt5.orders_get(),'orders')]
 
     def history(self, from_s: int, to_s: int) -> list[dict]:
         from datetime import datetime, timezone
-        deals = self.mt5.history_deals_get(datetime.fromtimestamp(from_s, timezone.utc), datetime.fromtimestamp(to_s, timezone.utc)) or []
+        deals = self._observed_rows(self.mt5.history_deals_get(datetime.fromtimestamp(from_s, timezone.utc), datetime.fromtimestamp(to_s, timezone.utc)),'deals')
         return [{"ticket": d.ticket, "order": d.order, "position": d.position_id, "symbol": d.symbol, "type": d.type, "entry": d.entry, "volume": str(d.volume), "price": str(d.price), "profit": str(d.profit), "commission": str(d.commission), "swap": str(d.swap), "time_ms": int(d.time) * 1000, "comment": d.comment} for d in deals]
 
     def modify_sl_tp(self, position: int, sl: Optional[str], tp: Optional[str]) -> dict:
         m = self.mt5
-        pos = [p for p in (m.positions_get(ticket=int(position)) or []) if p.ticket == int(position)]
+        pos = [p for p in self._observed_rows(m.positions_get(ticket=int(position)),'positions') if p.ticket == int(position)]
         if not pos:
             return {"ok": False, "reason": "position not found"}
         p = pos[0]
@@ -155,11 +168,12 @@ class Terminal:
         if p.sl and ((p.type == m.ORDER_TYPE_BUY and new_sl < float(p.sl)) or (p.type == m.ORDER_TYPE_SELL and new_sl > float(p.sl))):
             return {"ok": False, "reason": "refusing to widen protective stop"}
         r = m.order_send({"action": m.TRADE_ACTION_SLTP, "position": int(position), "symbol": p.symbol, "sl": new_sl, "tp": float(tp) if tp else float(p.tp)})
+        if r is None:return {'ok':None,'reason':'native stop change outcome unconfirmed; reconcile the original command'}
         return {"ok": r is not None and r.retcode == m.TRADE_RETCODE_DONE, "retcode": getattr(r, "retcode", None), "reason": getattr(r, "comment", "")}
 
     def close(self, position: int, volume: Optional[str], reason: str) -> dict:
         m = self.mt5
-        pos = [p for p in (m.positions_get(ticket=int(position)) or []) if p.ticket == int(position)]
+        pos = [p for p in self._observed_rows(m.positions_get(ticket=int(position)),'positions') if p.ticket == int(position)]
         if not pos:
             return {"status": "UNKNOWN", "reason": "position not found"}
         p = pos[0]
@@ -168,8 +182,10 @@ class Terminal:
         req = {"action": m.TRADE_ACTION_DEAL, "position": int(position), "symbol": p.symbol, "volume": float(volume) if volume else float(p.volume), "type": m.ORDER_TYPE_SELL if is_buy else m.ORDER_TYPE_BUY,
                "price": tick.bid if is_buy else tick.ask, "deviation": 20, "magic": p.magic, "comment": f"vati-close:{reason}"[:31], "type_filling": m.ORDER_FILLING_IOC}
         r = m.order_send(req)
+        if r is None:return {'status':'UNKNOWN','reason':'native close outcome unconfirmed; reconcile the original command'}
         ok = r is not None and r.retcode in (m.TRADE_RETCODE_DONE, m.TRADE_RETCODE_DONE_PARTIAL)
-        return {"status": "FILLED" if ok else "REJECTED", "retcode": getattr(r, "retcode", None), "reason": getattr(r, "comment", reason), "volume": str(getattr(r, "volume", 0)), "price": str(getattr(r, "price", 0)) if ok else None}
+        status='PARTIAL' if r.retcode==m.TRADE_RETCODE_DONE_PARTIAL else 'FILLED' if ok else 'REJECTED'
+        return {"status": status, "retcode": getattr(r, "retcode", None), "reason": getattr(r, "comment", reason), "volume": str(getattr(r, "volume", 0)), "price": str(getattr(r, "price", 0)) if ok else None}
 
 
 class Worker:

@@ -29,6 +29,10 @@ function Read-SetupDiagnostics {
     }
     $snapshot.processes = @(Get-Process mt5setup,terminal,terminal64,metaeditor,metaeditor64 -ErrorAction SilentlyContinue |
         Select-Object ProcessName,MainWindowTitle,Path)
+    if (Test-Path -LiteralPath $script:sdkInstall) {
+        $snapshot.sdk_files = @(Get-ChildItem -LiteralPath $script:sdkInstall -File -Recurse -ErrorAction SilentlyContinue |
+            Select-Object -First 300 @{Name='relative_path';Expression={[IO.Path]::GetRelativePath($script:sdkInstall,$_.FullName)}},Length)
+    }
     # This disposable runner has no owner accounts or credentials. Inspect only
     # the installer window, not process environments or unrelated applications.
     try {
@@ -43,6 +47,42 @@ function Read-SetupDiagnostics {
     } catch { $snapshot.window_diagnostic = $_.Exception.Message }
     $script:receipt.setup_diagnostic = $snapshot
     $snapshot | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $report 'setup-diagnostic.json') -Encoding utf8
+}
+function Initialize-OfflineSdkData([string]$Compiler,[string]$Install) {
+    $script:receipt.data_initialization = [ordered]@{editor_signature=(Assert-Publisher $Compiler); terminal_started=$false}
+    $editor = Start-Process -FilePath $Compiler -ArgumentList '/portable' -PassThru
+    try {
+        Start-Sleep -Seconds 8
+        $editor.CloseMainWindow() | Out-Null
+        if (-not $editor.WaitForExit(5000)) { $editor.Kill(); $editor.WaitForExit(5000) | Out-Null }
+    } finally { if (-not $editor.HasExited) { $editor.Kill() } }
+    if (Test-Path -LiteralPath (Join-Path $Install 'MQL5\Include\Trade\Trade.mqh')) { return }
+    # MT5 seeds some standard-library data on its first start. Confine that
+    # initialization to this disposable runner: no broker networking, account,
+    # credentials, experts, DLL imports or trading source are supplied.
+    $terminal = Join-Path $Install 'terminal64.exe'
+    if (-not (Test-Path -LiteralPath $terminal)) { return }
+    $script:receipt.data_initialization.terminal_signature = Assert-Publisher $terminal
+    Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled True
+    if ((Get-Service MpsSvc).Status -ne 'Running' -or @(Get-NetFirewallProfile | Where-Object { [string]$_.Enabled -ne 'True' }).Count -ne 0) {
+        throw 'Offline SDK initialization requires an enforcing Windows firewall'
+    }
+    $rule = 'van-sdk-offline-' + [guid]::NewGuid().ToString('N')
+    New-NetFirewallRule -Name $rule -DisplayName $rule -Direction Outbound -Action Block -Program $terminal -Profile Any -Enabled True | Out-Null
+    $filter = Get-NetFirewallRule -Name $rule | Get-NetFirewallApplicationFilter
+    if ($filter.Program -ne $terminal) { throw 'Offline SDK firewall did not bind the exact terminal executable' }
+    $config = Join-Path $Install 'van-offline-sdk.ini'
+    [IO.File]::WriteAllText($config, "[Common]`r`nLogin=0`r`n[Experts]`r`nEnabled=0`r`nAllowLiveTrading=0`r`nAllowDllImport=0`r`n")
+    $script:receipt.data_initialization.network_blocked_program = $terminal
+    $script:receipt.data_initialization.firewall_profiles_enabled = $true
+    $script:receipt.data_initialization.terminal_started = $true
+    $process = Start-Process -FilePath $terminal -ArgumentList @('/portable',('/config:"{0}"' -f $config)) -PassThru
+    try {
+        $deadline = [DateTime]::UtcNow.AddSeconds(25)
+        while ([DateTime]::UtcNow -lt $deadline -and -not (Test-Path -LiteralPath (Join-Path $Install 'MQL5\Include\Trade\Trade.mqh'))) { Start-Sleep -Milliseconds 200 }
+    } finally {
+        if (-not $process.HasExited) { $process.Kill(); $process.WaitForExit(5000) | Out-Null }
+    }
 }
 function Read-Compile([string]$Compiler,[string]$Include,[string]$Source,[bool]$ExpectSuccess) {
     $binary = [IO.Path]::ChangeExtension($Source, '.ex5')
@@ -91,11 +131,13 @@ try {
     $receipt.installer_bytes = (Get-Item $installer).Length
     $receipt.installer_signature = Assert-Publisher $installer
     $install = Join-Path $owned 'sdk'
+    $script:sdkInstall = $install
     $setup = Start-Process -FilePath $installer -ArgumentList @('/auto',('/path:"{0}"' -f $install)) -PassThru
     $script:compilerCandidates = @((Join-Path $install 'metaeditor64.exe'),(Join-Path ${env:ProgramFiles} 'MetaTrader 5\metaeditor64.exe'))
     $deadline = [DateTime]::UtcNow.AddMinutes(8)
     $diagnoseAt = [DateTime]::UtcNow.AddSeconds(45)
     $diagnosed = $false
+    $dataInitializationAttempted = $false
     $compiler = $null
     $include = $null
     while ([DateTime]::UtcNow -lt $deadline) {
@@ -121,6 +163,13 @@ try {
         }
         foreach ($candidate in $includeRoots) {
             if (Test-Path -LiteralPath (Join-Path $candidate 'Include\Trade\Trade.mqh')) { $include=$candidate; break }
+        }
+        if ($null -ne $compiler -and $null -eq $include -and $setup.HasExited -and -not $dataInitializationAttempted) {
+            Initialize-OfflineSdkData $compiler (Split-Path $compiler)
+            $dataInitializationAttempted=$true
+            # Initialization is bounded and must be observed, never assumed.
+            $deadline=[DateTime]::UtcNow.AddSeconds(10)
+            continue
         }
         if ($null -ne $compiler -and $null -ne $include -and $setup.HasExited) { break }
         if (-not $diagnosed -and [DateTime]::UtcNow -gt $diagnoseAt) {

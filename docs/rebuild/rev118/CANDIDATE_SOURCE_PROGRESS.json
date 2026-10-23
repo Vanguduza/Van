@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T08:35:42.900434+00:00",
+  "updated_at_utc": "2026-10-23T09:14:31.170875+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -476,6 +476,10 @@
         {
           "description": "Actual multi-instrument account actor reuses signed recovery/journal and PostgreSQL atomic effects; state binds opaque current account/lease/specs/contracts identity. Account-scoped owner halts, idle lease renewal, current issuer file guard and decoded PEM equivalence; original unknown/partial/invalid-money commands block recovery and new risk, while genuine zero-effect readback supports fresh approval without resend. Actual pairedgateway->signedCommander->PGactor original replay and realPGrollback/lostACK covered.2560full trading/recovery pass0skip605.59s,269affected,78rebuild,12owner contracts;14faults caught/restored. Source only; original native/provider/release gates remain.",
           "evidence": "backend/BE-003_009_ACCOUNT_RUNTIME_RECOVERY.md; receipts/ACCOUNT_RUNTIME_RECOVERY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Native SDK None/malformed collections are unavailable rather than knownempty; current terminal connection and account/expert/terminal/PythonAPI permissions gate entry. Lost SDK replies after entry/stop/close stayUNKNOWN; partialclosePARTIAL; no invented stop confirmation on unknownclose.14original beforefailures+1positivecontrol, laterunconfirmedstopfieldcounterexample fixed;54finalaffected,2581fulltrading/recovery0skip608.33s realPG/stoppedremoved,78rebuild;10semanticfaults caught/restored. SDKfixtureIO plusactualmTLS/HMAC; no realbroker/wholeunit acceptance.",
+          "evidence": "backend/BE-031_NATIVE_OBSERVATION_INTEGRITY.md; receipts/MT5_OBSERVATION_INTEGRITY_SOURCE_20261023.json"
         }
       ]
     },
@@ -848,6 +852,14 @@
         {
           "description": "First actual Windows native SDK attempt verified official bootstrap+Authenticode but could not locate compiler/library, executed0compiler cases and returnedFAIL. Its input SHA matches deterministic Windows CRLF checkout conversion. Preserve actual artifact; correct split executable/data discovery, pin observed bootstrap, capture setup controls/files, disable checkout EOL conversion and require raw sourceblob identity. PowerShell parse passes; new native execution remains pending.",
           "evidence": "backend/BE-031_NATIVE_METAEDITOR_SOURCE.md; receipts/NATIVE_METAEDITOR_a1ee86b2.json"
+        },
+        {
+          "description": "Native SDK None/malformed collections are unavailable rather than knownempty; current terminal connection and account/expert/terminal/PythonAPI permissions gate entry. Lost SDK replies after entry/stop/close stayUNKNOWN; partialclosePARTIAL; no invented stop confirmation on unknownclose.14original beforefailures+1positivecontrol, laterunconfirmedstopfieldcounterexample fixed;54finalaffected,2581fulltrading/recovery0skip608.33s realPG/stoppedremoved,78rebuild;10semanticfaults caught/restored. SDKfixtureIO plusactualmTLS/HMAC; no realbroker/wholeunit acceptance.",
+          "evidence": "backend/BE-031_NATIVE_OBSERVATION_INTEGRITY.md; receipts/MT5_OBSERVATION_INTEGRITY_SOURCE_20261023.json"
+        },
+        {
+          "description": "NativeWindowsretry39925980276 proves exact rawGitinput and installed MetaEditor executable, but cannotlocatestdlib;0compiler cases, FAIL retained. Bounded signededitor/offlineTerminal data initialization prepared with enforcing program-specificoutboundblock, expertsdisabled andnocredentials; parserPASS, nativeinitialization/notcompiler success remainspending.",
+          "evidence": "backend/BE-031_NATIVE_METAEDITOR_SOURCE.md; receipts/NATIVE_METAEDITOR_8d2f5388.json"
         }
       ]
     },
