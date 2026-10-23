@@ -172,10 +172,19 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T02:41:30.312509+00:00",
+    "updated_utc": "2026-10-23T03:10:02.771503+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": [],
+    "background_jobs": [
+      {
+        "job": "frozen_a4_broad_source_qualification",
+        "source": "a4a91e8e56120db6bd8433a1512f5d9963d5377e",
+        "session_id": 68010,
+        "script": "/tmp/van-a4a91e8e-broad-pg.py",
+        "log": "/tmp/van-a4a91e8e-full-backend.txt",
+        "scope": "backend/tests+tests/contracts; actualChromium/AGP/bothDDSenv+realprivatePG/storageaudit; do not edit ownedqualificationclone while active"
+      }
+    ],
     "last_validation": [
       "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
       "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -258,7 +267,10 @@
       "Owner device A4 exact-state recovery: three gateway-only native commands, five typed API routes, single-session account/lease/state/current-key/expiry/fact fences, atomic domain effect+original outcome, scoped halt cause release and durable gateway consumption+public dispatch receipt. Native duplicate/lost response/commit ACK/rollback/restart and other-account boundaries verified.2200full source cases pass0skip privatePG;29final typed-transport/approval and78rebuild pass;12meaningful faults caught/restored. New DTO declarations were added after full runtime run and verified separately. No blanket entry authority, new frontend or unit/live acceptance.",
       "Frozen0ba broad actual-browser+AGP+bothDDS-env audit6793pass9skip2601.45s,6802cases,exit0,zero forbidden storage,clean checkout.154oldChromium and2AGP skips closed; root/nft/setpriv6 andB1closedset3 remain explicit.",
       "Actual hosted0ba source tree equals merge0f79f6c2cac74f6e178eea2043b481909d6e2e60;374legacy cases caught;18native pass4explicit skips,realVITS2.356/2.061s,PG26voice117publictrading2145pass1DDSskip. Only failures missing DDS read key and trusted-main ledger bootstrap.",
-      "Owner source contract export444endpoints276schemas; existing feature/screen/function identity sets preserved.5recoveryextensions at OF-TRADING-005 / van.trading.halt, Android consumer pending."
+      "Owner source contract export444endpoints276schemas; existing feature/screen/function identity sets preserved.5recoveryextensions at OF-TRADING-005 / van.trading.halt, Android consumer pending.",
+      "Estimated unsettled profit cannot reset losses/probation in cycle/account/scalar close or cold fold; scalar flat close preserves counts. Explicit settled-profit opt-in, strict native flags/source/environment/net convention/currency, one maturity observation persisted. ActualPaperorder+cashclose positive control remains functional.4actual counterexamples fixed;2183fulltrading pass0skip realprivatePG/DDS;79restoredfocused,78rebuild;8faults caught/restored. Provider finality and learning-health admission remain separate original obligations.",
+      "Current connection repository metadata grants admin but GETVanActionssecret/publickey and DDSdeploykeys each403; no credential changes. Specific Kotlin2dependencyHTTP403 control rerun accepted201 on exacta4commit. Initial hosted345caught/29absent, not full corpus; retry active.",
+      "Owner export444endpoints276schemas remains unchanged;374legacy anchors valid. No source registry identities, frozen package or gates changed."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -269,9 +281,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Fix reproduced monetary-maturity bug in both close paths and cold risk history: finite estimated unsettled gain must not erase previous settled losses or become evidence of a validated setup; integrate actual native settlement without fabricating finality. Continue coordinator/device-key recovery propagation, native physical identity/worker epoch/deadline/precision, pending/partial/corrected-fill economics, paper/study provenance, safe retirement and all original assistant/voice/browser/workflow/memory/resource obligations. No new frontend before BG001 or native/independent/financial/production/S24 acceptance claims.",
-    "previous_head": "0ba7178b61ba72dcc2f12e7cb4f7f2a3c48d1bdd",
-    "current_packet": "Owner runtime recovery and broad frozen-source qualification"
+    "next_action": "Continue original whole-product programme. Harden learning-health admission and immutable episode monetary maturity while preserving explicit backtest/replay/counterfactual studies; add actual native provider fee/cash finality/corrections, physical account and worker identity/epoch/deadline/precision, safe retirement and device-key propagation. Private recovery-proof malformed-ID/expiry shape currently can raise500 before verification; public typed gateway already prevents those forms; close private error contract. No new frontend beforeBG001 or invented gates. Collect exact-source hostedA4 Kotlin2 rerun and full374corpus; broadA4source audit active with realPG/browser/AGP. GitHub secret/deploy-key administration actually403 despite admin metadata; source push and specific Actions rerun201 available.",
+    "previous_head": "a4a91e8e56120db6bd8433a1512f5d9963d5377e",
+    "current_packet": "Settled profit cannot erase loss limits"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -329,6 +341,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Fix reproduced monetary-maturity bug in both close paths and cold risk history: finite estimated unsettled gain must not erase previous settled losses or become evidence of a validated setup; integrate actual native settlement without fabricating finality. Continue coordinator/device-key recovery propagation, native physical identity/worker epoch/deadline/precision, pending/partial/corrected-fill economics, paper/study provenance, safe retirement and all original assistant/voice/browser/workflow/memory/resource obligations. No new frontend before BG001 or native/independent/financial/production/S24 acceptance claims.",
-  "updated_at_utc": "2026-10-23T02:41:30.312509+00:00"
+  "current_action": "Continue original whole-product programme. Harden learning-health admission and immutable episode monetary maturity while preserving explicit backtest/replay/counterfactual studies; add actual native provider fee/cash finality/corrections, physical account and worker identity/epoch/deadline/precision, safe retirement and device-key propagation. Private recovery-proof malformed-ID/expiry shape currently can raise500 before verification; public typed gateway already prevents those forms; close private error contract. No new frontend beforeBG001 or invented gates. Collect exact-source hostedA4 Kotlin2 rerun and full374corpus; broadA4source audit active with realPG/browser/AGP. GitHub secret/deploy-key administration actually403 despite admin metadata; source push and specific Actions rerun201 available.",
+  "updated_at_utc": "2026-10-23T03:10:02.771503+00:00"
 }

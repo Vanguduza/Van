@@ -49,7 +49,7 @@ def test_after_the_cooldown_the_strategy_trades_on_probation_until_it_wins():
     _lose(g, "A", 4)
     later = 24 * HOUR_MS + 10
     assert g.verdict("A", later).risk_multiplier == D("0.5")
-    g.on_close("A", WIN, later + 1)
+    g.on_close("A", WIN, later + 1, profit_final=True)
     assert g.verdict("A", later + 2).risk_multiplier == D("1")
 
 

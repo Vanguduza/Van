@@ -1314,16 +1314,24 @@ class AccountTradeLifecycle:
         entry["trade_intent_id"] = intent_id
         measured = closed_trade_pnl(entry, exit_price,
             self.contracts.get(str(entry["symbol"]).upper()), getattr(self.adapter, "closed", None))
+        maturity = native_economic_maturity(self.adapter, intent_id, measured)
+        from vati.execution.review import economic_outcome_final
+        contract = self.contracts.get(str(entry['symbol']).upper())
+        profit_final = economic_outcome_final(maturity, measured.basis,
+            account_currency=contract.account_currency if contract else '')
         pnl, pnl_known = measured.amount if measured.amount is not None else ZERO, measured.amount is not None
         initial_risk = initial_risk_from_ledger(self.ledger, intent_id,
             available_cutoff_ms=int(entry.get("opened_ms") or 0) or None)
         if pnl_known:
             if self.streaks is not None:
-                for lock_event in self.streaks.on_close(entry["strategy_id"], pnl, now_ms):
+                for lock_event in self.streaks.on_close(entry["strategy_id"], pnl, now_ms, profit_final=profit_final):
                     self._log(EventKind.SESSION, lock_event, now_ms=now_ms, corr=intent_id)
                 self.consecutive_losses = self.streaks.verdict(entry["strategy_id"], now_ms).losses
             else:
-                self.consecutive_losses = self.consecutive_losses + 1 if pnl < ZERO else 0
+                if pnl < ZERO:
+                    self.consecutive_losses += 1
+                elif pnl > ZERO and profit_final:
+                    self.consecutive_losses = 0
         else:
             if self.streaks is not None:
                 self.streaks.recovery_issue = "unresolved closed-trade money outcome; native reconciliation required"
@@ -1338,7 +1346,7 @@ class AccountTradeLifecycle:
             direction_long=entry["direction"] is Direction.LONG,
             pnl=pnl,
             account_alias=getattr(self.mandate, "account_alias", "") or getattr(self.adapter, "account_alias", ""),
-            maturity=native_economic_maturity(self.adapter, intent_id, measured),
+            maturity=maturity,
             thesis_correct=pnl_known and pnl > ZERO,
             process_ok=True,
             broker_ok=pnl_known,

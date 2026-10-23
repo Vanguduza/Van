@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T02:41:30.312509+00:00",
+  "updated_at_utc": "2026-10-23T03:10:02.771503+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -392,6 +392,10 @@
         {
           "description": "Owner device A4 exact-state recovery: three gateway-only native commands, five typed API routes, single-session account/lease/state/current-key/expiry/fact fences, atomic domain effect+original outcome, scoped halt cause release and durable gateway consumption+public dispatch receipt. Native duplicate/lost response/commit ACK/rollback/restart and other-account boundaries verified.2200full source cases pass0skip privatePG;29final typed-transport/approval and78rebuild pass;12meaningful faults caught/restored. New DTO declarations were added after full runtime run and verified separately. No blanket entry authority, new frontend or unit/live acceptance.",
           "evidence": "backend/BE-003_009_RUNTIME_RECOVERY.md; receipts/RUNTIME_RECOVERY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Estimated unsettled profit cannot reset losses/probation in cycle/account/scalar close or cold fold; scalar flat close preserves counts. Explicit settled-profit opt-in, strict native flags/source/environment/net convention/currency, one maturity observation persisted. ActualPaperorder+cashclose positive control remains functional.4actual counterexamples fixed;2183fulltrading pass0skip realprivatePG/DDS;79restoredfocused,78rebuild;8faults caught/restored. Provider finality and learning-health admission remain separate original obligations.",
+          "evidence": "backend/BE-009_SETTLED_PROFIT_LOSS_LIMITS.md; receipts/SETTLED_PROFIT_LOSS_LIMITS_SOURCE_20261023.json"
         }
       ]
     },
@@ -447,6 +451,10 @@
         {
           "description": "Fresh persisted profile agrees with session permission/final outer fence and preserves native protection; harmless labels remain live, reenabling cannot clear signed halt. Typed sending-mode refusal is explicit zero effect. Signed native rejected/cancelled/expired outcomes no longer masquerade as prior risk approval.2146fulltrading pass0skip privatePG/DDS;78rebuild;8faults caught/restored. Source only; native physical identity and original whole-product obligations retained.",
           "evidence": "backend/BE-003_009_010_CURRENT_PROFILE_AUTHORITY.md; receipts/CURRENT_PROFILE_AUTHORITY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Estimated unsettled profit cannot reset losses/probation in cycle/account/scalar close or cold fold; scalar flat close preserves counts. Explicit settled-profit opt-in, strict native flags/source/environment/net convention/currency, one maturity observation persisted. ActualPaperorder+cashclose positive control remains functional.4actual counterexamples fixed;2183fulltrading pass0skip realprivatePG/DDS;79restoredfocused,78rebuild;8faults caught/restored. Provider finality and learning-health admission remain separate original obligations.",
+          "evidence": "backend/BE-009_SETTLED_PROFIT_LOSS_LIMITS.md; receipts/SETTLED_PROFIT_LOSS_LIMITS_SOURCE_20261023.json"
         }
       ]
     },

@@ -109,12 +109,16 @@ class LossStreakGovernor:
         return self._scopes.setdefault(key, _Scope())
 
     # ----------------------------------------------------------------- events
-    def on_close(self, strategy_id: str, pnl: Decimal, now_ms: int) -> list[dict]:
-        """Record one closed trade. Returns lockout events to log."""
+    def on_close(self, strategy_id: str, pnl: Decimal, now_ms: int, *, profit_final: bool = False) -> list[dict]:
+        """Count losses conservatively; only settled profit releases restrictions.
+
+        Callers with a genuinely settled money result must opt in explicitly.
+        An estimated gain or a flat close never erases losses/probation.
+        """
         out: list[dict] = []
         for key in _scopes(strategy_id):
             s = self._scope(key)
-            if pnl > ZERO:
+            if pnl > ZERO and profit_final is True:
                 s.losses, s.probation = 0, False
             elif pnl < ZERO:
                 s.losses += 1
@@ -168,7 +172,9 @@ class LossStreakGovernor:
             if kind == "TRADE_REVIEW":
                 sid, pnl = ev.payload.get("strategy_id"), ev.payload.get("pnl")
                 if sid and pnl is not None:
-                    g.on_close(sid, Decimal(str(pnl)), ev.event_time_ms)
+                    from vati.execution.review import economic_outcome_final
+                    g.on_close(sid, Decimal(str(pnl)), ev.event_time_ms,
+                        profit_final=economic_outcome_final(ev.payload.get('maturity'), ev.payload.get('pnl_basis')))
             elif kind == "SESSION" and ev.payload.get("event") == RESET_EVENT:
                 g.reset(ev.payload["scope"])
         return g

@@ -77,6 +77,25 @@ class PnlMeasurement:
     basis: str
 
 
+def economic_outcome_final(maturity, pnl_basis, *, account_currency=None) -> bool:
+    """Whether this native money result can release a settled loss restriction.
+
+    Finite prices or PnL are insufficient. Additional providers need an actual
+    admitted settlement producer; merely setting finality flags cannot admit one.
+    Paper is currently the only implemented native finality producer.
+    """
+    if (not isinstance(maturity, dict) or not isinstance(pnl_basis, str)
+        or pnl_basis not in {'REPORTED_GROSS_NET_RECORDED_CHARGES',
+            'PRICE_DERIVED_NET_RECORDED_CHARGES', 'REPORTED_NET_CONFIRMED'}
+        or any(maturity.get(flag) is not True for flag in ('parent_final','fees_final','cash_reconciled'))
+        or maturity.get('source') != 'DETERMINISTIC_PAPER_SETTLEMENT'
+        or maturity.get('source_environment') != 'DEMO'):
+        return False
+    currency = maturity.get('account_currency')
+    return bool(isinstance(currency, str) and currency.strip()
+                and (account_currency is None or currency == account_currency))
+
+
 def _reported_parent_cash(rows):
     """Aggregate labelled execution deltas, preserving legacy snapshot semantics."""
     if not rows:
