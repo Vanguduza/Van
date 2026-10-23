@@ -38,7 +38,9 @@ class SymbolInfo:
         return vol
 
     def volume_to_lots(self, volume: int) -> Decimal:
-        return (Decimal(volume) / Decimal(self.lot_size_cents)).quantize(Decimal("0.01"))
+        # Native steps and partial fills can be smaller than a centilot. The
+        # broker's actual quantity must not be rounded to the requested UI step.
+        return Decimal(volume) / Decimal(self.lot_size_cents)
 
 
 @dataclass
@@ -107,16 +109,50 @@ class CtraderAdapter:
         except (KeyError,TypeError,ValueError,ArithmeticError):
             raise VenueUnavailable('cTrader native account identity, money precision or deposit currency unavailable') from None
         bal = Decimal(t["balance"]) / (Decimal(10) ** self._money_digits)
-        unrealised = ZERO
-        for p in self._positions_raw():
-            sym = next((s for s in self.symbols.values() if s.symbol_id == p["tradeData"]["symbolId"]), None)
-            spot = self._last_spot.get(p["tradeData"]["symbolId"])
-            if sym and spot and p.get("price"):
-                bid, ask = spot
-                units = Decimal(p["tradeData"]["volume"]) / 100
-                px = Decimal(str(p["price"]))
-                unrealised += (bid - px) * units if p["tradeData"]["tradeSide"] == "BUY" else (px - ask) * units
+        unrealised = self._native_unrealised()
+        # Separate native reads are not an atomic account snapshot. Refuse a
+        # visible funds/currency change across the position mark instead of
+        # combining old balance with newer PnL and reporting it verified.
+        try:
+            name,latest=self.transport.call('ProtoOATraderReq',{'ctidTraderAccountId':self.ctid_trader_account_id})
+            if (name!='ProtoOATraderRes' or type(latest.get('ctidTraderAccountId')) is not int
+                or latest['ctidTraderAccountId']!=self.ctid_trader_account_id):raise ValueError()
+            fields=('ctidTraderAccountId','balance','moneyDigits','depositAssetId')
+            if any(type(latest['trader'][k]) is not int or latest['trader'][k]!=t[k] for k in fields):raise ValueError()
+        except (CtraderApiError,KeyError,TypeError,ValueError):
+            raise VenueUnavailable('cTrader native funds changed during position PnL observation; refresh required') from None
         return AccountState(self.account_alias, bal + unrealised, bal, self._currency, True, t.get("accountType", "HEDGED") == "HEDGED", self.clock())
+
+    def _native_unrealised(self) -> Decimal:
+        """Broker net mark in deposit currency, never a missing-quote zero.
+
+        The native response defines its own decimal exponent and excludes
+        potential closing commission. This is current equity, not settled PnL.
+        A changed or incomplete position set needs a fresh read, not a guess.
+        """
+        try:
+            positions = self._positions_raw()
+            expected = [p['positionId'] for p in positions]
+            if (any(type(i) is not int or not 0<i<2**63 for i in expected)
+                or len(set(expected))!=len(expected)):raise ValueError()
+            name,r = self.transport.call('ProtoOAGetPositionUnrealizedPnLReq',
+                {'ctidTraderAccountId':self.ctid_trader_account_id})
+            if (name!='ProtoOAGetPositionUnrealizedPnLRes' or not isinstance(r,dict)
+                or type(r.get('ctidTraderAccountId')) is not int
+                or r['ctidTraderAccountId']!=self.ctid_trader_account_id):raise ValueError()
+            digits=r['moneyDigits'];rows=r.get('positionUnrealizedPnL',[])
+            if type(digits) is not int or not 0<=digits<=18 or not isinstance(rows,list):raise ValueError()
+            observed=[];total=0
+            for row in rows:
+                if not isinstance(row,dict):raise ValueError()
+                pid=row['positionId'];net=row['netUnrealizedPnL'];gross=row['grossUnrealizedPnL']
+                if (type(pid) is not int or not 0<pid<2**63
+                    or any(type(v) is not int or not -(2**63)<=v<2**63 for v in (net,gross))):raise ValueError()
+                observed.append(pid);total+=net
+            if len(set(observed))!=len(observed) or set(observed)!=set(expected):raise ValueError()
+            return Decimal(total)/(Decimal(10)**digits)
+        except (CtraderApiError,KeyError,TypeError,ValueError,ArithmeticError):
+            raise VenueUnavailable('cTrader native deposit-currency position PnL unavailable or inconsistent') from None
 
     def _positions_raw(self) -> list[dict]:
         return [p for p in self._reconcile_raw()['position'] if p.get("positionStatus") in ("POSITION_STATUS_OPEN", 1, None)]

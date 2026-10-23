@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T13:14:20.838346+00:00",
+  "updated_at_utc": "2026-10-23T13:28:54.186934+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -524,6 +524,10 @@
         {
           "description": "Local account unlink binds exact resolved review/native funds/history/credential disposition; actual account lease row and submission guard exclude runtime, unresolved effects/exposure/stale facts retain profile. Shared/external credential references preserved, including late ownership drift. Typed gateway approval/native replay and existing Android confirmation wired; MT5 pending-orders and native cTrader/Deriv funding facts refuse missing observations. 2675 full trading/recovery pass0skip realPG(cleaned),91focused/29writer/3actualPG/78rebuild,16faults+controls caught/restored; Android222JVM/2APKs/lint0ErrorFatal. Source only; completed real-provider finality and all original gates remain.",
           "evidence": "backend/BE-004_ACCOUNT_RETIREMENT.md; receipts/ACCOUNT_RETIREMENT_SOURCE_20261023.json"
+        },
+        {
+          "description": "Native cTrader fill/position quantities preserve sub-centilot ratios; equity uses broker net PnL in deposit currency with its own exponent, complete native position identities and cross-read funds fence. Missing/foreign/malformed marks refuse verification; no missing-quote zero.14 original failures+1positive,3 funds-drift failures fixed;44 focused/2454 fulltrading pass0skip actualprivatePG/stoppedremoved,7faults+7controls caught/restored. Actual framed negative native mark exercised. Source only; no settled financial maturity/whole-unit/native/provider acceptance.",
+          "evidence": "backend/BE-009_010_012_CTRADER_NATIVE_MONEY.md; receipts/CTRADER_NATIVE_MONEY_SOURCE_20261023.json"
         }
       ]
     },
@@ -535,7 +539,7 @@
         "BE-009",
         "PRE-003"
       ],
-      "candidate_status": "IN_PROGRESS",
+      "candidate_status": "SOURCE_TESTED",
       "unit_acceptance": "NOT_ISSUED",
       "milestones": [
         {
@@ -583,6 +587,10 @@
         {
           "description": "Estimated unsettled profit cannot reset losses/probation in cycle/account/scalar close or cold fold; scalar flat close preserves counts. Explicit settled-profit opt-in, strict native flags/source/environment/net convention/currency, one maturity observation persisted. ActualPaperorder+cashclose positive control remains functional.4actual counterexamples fixed;2183fulltrading pass0skip realprivatePG/DDS;79restoredfocused,78rebuild;8faults caught/restored. Provider finality and learning-health admission remain separate original obligations.",
           "evidence": "backend/BE-009_SETTLED_PROFIT_LOSS_LIMITS.md; receipts/SETTLED_PROFIT_LOSS_LIMITS_SOURCE_20261023.json"
+        },
+        {
+          "description": "Native cTrader fill/position quantities preserve sub-centilot ratios; equity uses broker net PnL in deposit currency with its own exponent, complete native position identities and cross-read funds fence. Missing/foreign/malformed marks refuse verification; no missing-quote zero.14 original failures+1positive,3 funds-drift failures fixed;44 focused/2454 fulltrading pass0skip actualprivatePG/stoppedremoved,7faults+7controls caught/restored. Actual framed negative native mark exercised. Source only; no settled financial maturity/whole-unit/native/provider acceptance.",
+          "evidence": "backend/BE-009_010_012_CTRADER_NATIVE_MONEY.md; receipts/CTRADER_NATIVE_MONEY_SOURCE_20261023.json"
         }
       ]
     },
@@ -605,7 +613,7 @@
         "BE-011",
         "PRE-003"
       ],
-      "candidate_status": "IN_PROGRESS",
+      "candidate_status": "SOURCE_TESTED",
       "unit_acceptance": "NOT_ISSUED",
       "milestones": [
         {
@@ -646,6 +654,10 @@
         {
           "description": "Actual default single-symbol startup recovers native history/current positions, original pre-dispatch setup, local protection/thesis/health and distinguishes native rejection from pending/lost effects and historical closure. Missing/late/conflicting context retains protection without guessed feedback.6initial+2additional invalid-fact cases fixed;2032fulltrading zero skip privatePG/DDS,54restored+2PGopt-ins covered in full,78rebuild pass;11faults caught after31controls and restored. Provider finality/legacy/persistent-paper reconciliation remain.",
           "evidence": "backend/BE-003_009_010_SINGLE_SESSION_RECOVERY.md; receipts/SINGLE_SESSION_RECOVERY_SOURCE_20261022.json"
+        },
+        {
+          "description": "Native cTrader fill/position quantities preserve sub-centilot ratios; equity uses broker net PnL in deposit currency with its own exponent, complete native position identities and cross-read funds fence. Missing/foreign/malformed marks refuse verification; no missing-quote zero.14 original failures+1positive,3 funds-drift failures fixed;44 focused/2454 fulltrading pass0skip actualprivatePG/stoppedremoved,7faults+7controls caught/restored. Actual framed negative native mark exercised. Source only; no settled financial maturity/whole-unit/native/provider acceptance.",
+          "evidence": "backend/BE-009_010_012_CTRADER_NATIVE_MONEY.md; receipts/CTRADER_NATIVE_MONEY_SOURCE_20261023.json"
         }
       ]
     },

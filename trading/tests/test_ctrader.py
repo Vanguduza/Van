@@ -98,6 +98,10 @@ class FakeCtrader:
             return self.send('ProtoOAAssetListRes',{'ctidTraderAccountId':acct,'asset':[{'assetId':1,'name':'USD'}]},cid)
         if name == "ProtoOAReconcileReq":
             return self.send("ProtoOAReconcileRes", {"ctidTraderAccountId": acct, "position": list(self.positions.values())}, cid)
+        if name == 'ProtoOAGetPositionUnrealizedPnLReq':
+            return self.send('ProtoOAGetPositionUnrealizedPnLRes',{'ctidTraderAccountId':acct,'moneyDigits':2,
+                'positionUnrealizedPnL':[{'positionId':pid,'grossUnrealizedPnL':0,'netUnrealizedPnL':0}
+                    for pid in self.positions]},cid)
         if name == "ProtoOANewOrderReq":
             if self.reject_next_order:
                 self.reject_next_order = False

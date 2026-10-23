@@ -16,6 +16,8 @@ class FundsTransport:
         if name=='ProtoOATraderReq':return 'ProtoOATraderRes',{'ctidTraderAccountId':12345,'trader':self.trader}
         if name=='ProtoOAAssetListReq':return 'ProtoOAAssetListRes',{'ctidTraderAccountId':12345,'asset':self.assets}
         if name=='ProtoOAReconcileReq':return 'ProtoOAReconcileRes',{'ctidTraderAccountId':12345,'position':[],'order':[]}
+        if name=='ProtoOAGetPositionUnrealizedPnLReq':return 'ProtoOAGetPositionUnrealizedPnLRes',{
+            'ctidTraderAccountId':12345,'moneyDigits':2,'positionUnrealizedPnL':[]}
         raise AssertionError('unexpected effectful/provider call '+name)
 
 
