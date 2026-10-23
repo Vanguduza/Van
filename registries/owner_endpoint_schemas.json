@@ -1232,6 +1232,76 @@
         ],
         "title": "AppPolicy"
       },
+      "ApplyDocumentFillRequest": {
+        "properties": {
+          "values": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Values"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "command_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command Id"
+          },
+          "mission_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mission Id"
+          },
+          "execution_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Id"
+          },
+          "expected_proposal_sha256": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Proposal Sha256"
+          }
+        },
+        "type": "object",
+        "required": [
+          "values"
+        ],
+        "title": "ApplyDocumentFillRequest"
+      },
       "ArtifactKind": {
         "type": "string",
         "enum": [
@@ -4039,6 +4109,26 @@
         ],
         "title": "DialDevNativeActionEnvelope"
       },
+      "DocumentErrorResponse": {
+        "properties": {
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/DocumentPublicationUncertainty"
+              }
+            ],
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "DocumentErrorResponse"
+      },
       "DocumentField": {
         "properties": {
           "name": {
@@ -4125,6 +4215,12 @@
             "type": "string",
             "title": "Source Sha256"
           },
+          "baseline_sha256": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64,
+            "title": "Baseline Sha256"
+          },
           "proposed_values": {
             "additionalProperties": true,
             "type": "object",
@@ -4136,6 +4232,13 @@
             },
             "type": "array",
             "title": "Missing Fields"
+          },
+          "missing_required_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Required Fields"
           },
           "unknown_fields": {
             "items": {
@@ -4158,10 +4261,47 @@
         "required": [
           "document_id",
           "source_sha256",
+          "baseline_sha256",
           "proposed_values",
           "proposal_sha256"
         ],
         "title": "DocumentFillProposal"
+      },
+      "DocumentPublicationUncertainty": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "DOCUMENT_PUBLICATION_UNKNOWN",
+            "title": "Code"
+          },
+          "document_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Id"
+          },
+          "publication_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publication Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "title": "DocumentPublicationUncertainty"
       },
       "DocumentRecord": {
         "properties": {

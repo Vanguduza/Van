@@ -2850,6 +2850,9 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
         except Exception as exc:
             code = getattr(exc, "code", "gmail_attachment_import_failed")
+            if code == "DOCUMENT_PUBLICATION_UNKNOWN":
+                raise HTTPException(status_code=503,detail={"code":code,"document_id":exc.document_id,
+                    "publication_id":exc.publication_id}) from exc
             raise HTTPException(status_code=422, detail=str(code)) from exc
 
     @app.get("/v1/google/calendar/review")

@@ -1988,7 +1988,7 @@
     "android/app/src/main/java/com/dial/van/visual/VanCharacterAcceptance.kt": "7b282fa7815e4557cb4c2cd9e87d34ee9e5d4673b5fa5d93ecef2f1ded648e47"
   },
   "endpoint_count": 447,
-  "schema_count": 299,
+  "schema_count": 302,
   "physical_cases_executed": 0,
   "owner_release": false,
   "deployment_accepted": false

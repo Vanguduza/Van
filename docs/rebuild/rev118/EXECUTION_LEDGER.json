@@ -172,19 +172,10 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T16:10:31.486091+00:00",
+    "updated_utc": "2026-10-23T16:52:57.858765+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": [
-      {
-        "kind": "LOCAL_FROZEN_SOURCE_QUALIFICATION",
-        "source_head": "74fe2ea77a3ff7b774ad6592405404539e4eb2d3",
-        "session": 66803,
-        "driver": "/tmp/van-74fe2ea7-qualification-driver.txt",
-        "log": "/tmp/van-74fe2ea7-full-backend.txt",
-        "phase": "Running backend/contracts then trading with actualprivatePG/Chromium/AGP/DDS and committed stronger storage audit. Do not edit QA checkout until completed and cleaned."
-      }
-    ],
+    "background_jobs": [],
     "last_validation": [
       "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
       "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -330,7 +321,11 @@
       "Hosted exact7dacc007/39976400482 all374legacy cases383edits/native18pass4existingartworkskips/VITS3.185+2.175seconds/publicPG26voice117trading2516pass1DDSskip. Native39976400533 MetaEditor0errors0warnings/freshEX5, invalid4errors/noEX5; kernel39976400459SUCCESS. OnlyDDSreadcredential and trustedmainbootstrap CI failures remain, not waived.",
       "Owner goals: atomic create/milestones, patches that preserve concurrent omitted-field edits, coherent goal/list snapshots, parent change timestamps atomic with milestone/link writes, idempotent real existing-mission links without dispatch or mission-state changes, nonblank inputs and strict boolean/price distinction. Typed goal/watch endpoint response schemas refreshed without newUI.13 reproduced failures;41 isolated/108 integrated audited/29 registry/79 rebuild cases pass0skip;11 deliberate fault/control pairs caught/restored. Legacy phantom-positive fixture now creates a real mission. Existing legacy references retained; original-request recovery for allCRUD and whole-unit/native/production/handset acceptance not claimed.",
       "Hosted exact74fe2ea7/39979120825 all374legacy cases383edits; native18pass4existingartworkskips; source and tested merge trees equal; publicPG26voice117trading2516pass1DDSskip. Native39979120828 MetaEditor0errors0warnings/freshEX5, invalid4errors/noEX5; onlyDDSreadcredential/trustedmainbootstrap CI failures, no gate waiver. Voice method observations: {'cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer': 'PASS 2.935s', 'realOfflineAnswerReachesTheApplicationQueueAsSpoken': 'PASS 2.371s'}",
-      "PDF required-field metadata/strict flag types, typed corrupt-page refusals and independent requested-value readback before publication. Actual custom checkbox states and no-op/wrong writer outcomes; false success leaves original document/artifact untouched. Unicode-safe RFC5987 download headers, real PDF binary response and supported variant schema, typed document/field/proposal responses.6 reproduced failures;23 isolated/60 integrated audited/29 registry/79 rebuild pass0skip;7 fault/control pairs caught/restored. Initial reporting-helper failure retained and rerun. No newUI, external submission, physical rendering, unit/native/production/handset qualification;6 publication defects remain next."
+      "PDF required-field metadata/strict flag types, typed corrupt-page refusals and independent requested-value readback before publication. Actual custom checkbox states and no-op/wrong writer outcomes; false success leaves original document/artifact untouched. Unicode-safe RFC5987 download headers, real PDF binary response and supported variant schema, typed document/field/proposal responses.6 reproduced failures;23 isolated/60 integrated audited/29 registry/79 rebuild pass0skip;7 fault/control pairs caught/restored. Initial reporting-helper failure retained and rerun. No newUI, external submission, physical rendering, unit/native/production/handset qualification;6 publication defects remain next.",
+      "Document publication: fsynced private immutable bytes before one nativeSQLite transaction for document/artifact/minimal commit witness. Rollback/cancellation cleans only new files, never prior versions; lost commit ACK returns captured original despite later writer, unavailable readback remains UNKNOWN withIDs. Canonical cards serialized/owner-scoped/sensitivity-bound. Partial/concurrent edits merge verified current values; nativeoutput readback and fields cache updated; stale proposal/context refused and empty required disclosed. Fullhash version refs and exact published/legacy readback respect expiry/SECRET_REF_ONLY.8initial+1required failures,2candidate policy guards corrected;53 isolated/224 integrated audited/29 registry/79 rebuild pass0skip;17 fault/control pairs caught/restored after initial timing survivor. No external submission, firstHTTPexactly-once, crash-reaper/completeprivacy, unit/native/production/handset claim.",
+      "Completed frozen74fe2ea7:6999backend/contracts pass9skips/7008cases,2517trading pass0skip, actualprivatePG/Chromium/AGP/pinnedDDS, strongerstorageaudit0forbiddenevents, cleancheckout, PGstoppedremoved. This is earlier exactsource, not a blanket qualification of later commits.",
+      "Hosted exact20125954/39982450483 all374legacy383edits/native18pass4existingartworkskips/VITS2.886+2.609s/publicPG26voice117trading2538pass1DDSskip. Native39982450472MetaEditor0errors0warnings/freshEX5, invalid4/noEX5. OnlyDDSreadcredential/trustedmainbootstrap CI failures remain; gates not waived.",
+      "Hosted exact804ffe73/39986003124 all374legacy383edits/native18pass4existingartworkskips/source-mergetrees equal/publicPG26voice117trading2538pass1DDSskip;native39986003602MetaEditor0errors0warningsfreshEX5,invalid4/noEX5.OnlyDDSreadcredential/trustedmainbootstrapfail.Voiceactualmethods {'cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer': 'PASS 4.021s', 'realOfflineAnswerReachesTheApplicationQueueAsSpoken': 'PASS 2.354s'}"
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -341,9 +336,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Commit tested PDF component packet and preserve current20125954 hosted results before next push. Continue original whole-product source implementation: isolated backend/tests/test_document_publication_integrity.py has6validbeforefailures (import/fill metadata/file orphans, duplicate canonical output cards, lost prior partial values/concurrent edits, mutable content refs for immutable old output artifacts). Repair in existing DocumentService/ArtifactService using one nativeSQLite transaction, existing canonical projection owner, immutable byte identity/version readback and failclosed unknown-commit reconciliation; no parallel authority layer. Keep original source immutable, actual requested field readback, scoped browser upload grants and zero in-app host configuration. Full frozen74fe2ea7 QA session66803 stillactive; backend/contracts then alltrading actualPG/Chrome/AGP/DDS, do not edit QA checkout. All131units/93features/BG001/native/release/handset obligations remain and no gate PASS is issued.",
-    "previous_head": "20125954be25a13658a4c3f70beb8ee678cb011f",
-    "current_packet": "PDF field/value, input refusal and download integrity, source tested."
+    "next_action": "Commit source-tested document publication, collect completed804ffe73 hosted/native receipts, push, then freeze the next committed source for fullbackend/contracts+trading qualification. Continue whole-product source work next on existing ConversationService: inspect/prove main-thread creation race, oldest-only bounded history with no pagination, message/projection parent timestamp and partial-write failures, concurrent follow-up decisions and projection-key thread binding. History remains presentation/context, never execution truth; preserve native command/mission/voice identity and no-dispatch promotion. Existing debug XML already denies all cleartext except exactlocalhost/127.0.0.1/::1: earlier any-host observation is stale; do not reintroduce or fabricate a fix. All131units/93features/BG001/native/release/S24 obligations remain. No gatePASS issued.",
+    "previous_head": "804ffe73c7117c1fa0624e857afcb2ae3d592ff4",
+    "current_packet": "Versioned document publication and original local outcomes, source tested."
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -401,6 +396,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Commit tested PDF component packet and preserve current20125954 hosted results before next push. Continue original whole-product source implementation: isolated backend/tests/test_document_publication_integrity.py has6validbeforefailures (import/fill metadata/file orphans, duplicate canonical output cards, lost prior partial values/concurrent edits, mutable content refs for immutable old output artifacts). Repair in existing DocumentService/ArtifactService using one nativeSQLite transaction, existing canonical projection owner, immutable byte identity/version readback and failclosed unknown-commit reconciliation; no parallel authority layer. Keep original source immutable, actual requested field readback, scoped browser upload grants and zero in-app host configuration. Full frozen74fe2ea7 QA session66803 stillactive; backend/contracts then alltrading actualPG/Chrome/AGP/DDS, do not edit QA checkout. All131units/93features/BG001/native/release/handset obligations remain and no gate PASS is issued.",
-  "updated_at_utc": "2026-10-23T16:10:31.486091+00:00"
+  "current_action": "Commit source-tested document publication, collect completed804ffe73 hosted/native receipts, push, then freeze the next committed source for fullbackend/contracts+trading qualification. Continue whole-product source work next on existing ConversationService: inspect/prove main-thread creation race, oldest-only bounded history with no pagination, message/projection parent timestamp and partial-write failures, concurrent follow-up decisions and projection-key thread binding. History remains presentation/context, never execution truth; preserve native command/mission/voice identity and no-dispatch promotion. Existing debug XML already denies all cleartext except exactlocalhost/127.0.0.1/::1: earlier any-host observation is stale; do not reintroduce or fabricate a fix. All131units/93features/BG001/native/release/S24 obligations remain. No gatePASS issued.",
+  "updated_at_utc": "2026-10-23T16:52:57.858765+00:00"
 }

@@ -68,6 +68,7 @@ class ArtifactService:
         expires_at_ms: int | None = None,
         artifact_id: str | None = None,
         now_ms: int | None = None,
+        _db: Any | None = None,
     ) -> OwnerArtifact:
         digest = canonical_source_digest.strip().lower()
         if not _SHA256.fullmatch(digest):
@@ -88,7 +89,10 @@ class ArtifactService:
             evidence_refs=list(evidence_refs or []), created_at_ms=now,
             expires_at_ms=expires_at_ms, sensitivity=sensitivity,
         )
-        await self.store.execute(
+        if _db is not None and not _db.in_transaction:
+            raise ArtifactServiceError("artifact_publication_transaction_required")
+        execute = self.store.execute if _db is None else _db.execute
+        await execute(
             """
             INSERT INTO owner_artifacts(
               artifact_id, owner_id, project_id, command_id, mission_id, execution_id,
@@ -131,6 +135,7 @@ class ArtifactService:
         sensitivity: ArtifactSensitivity = ArtifactSensitivity.OWNER_PRIVATE,
         expires_at_ms: int | None = None,
         now_ms: int | None = None,
+        _db: Any | None = None,
     ) -> OwnerArtifact:
         """Return the existing projection for the exact canonical source or create it.
 
@@ -138,30 +143,39 @@ class ArtifactService:
         Canonical identity is source type + source id + source digest; title/summary are
         presentation and cannot change that identity.
         """
-        digest = canonical_source_digest.strip().lower()
-        row = await self.store.fetchone(
-            """
-            SELECT * FROM owner_artifacts
-             WHERE canonical_source_type = ?
-               AND canonical_source_id = ?
-               AND canonical_source_digest = ?
-             ORDER BY created_at_ms ASC
-             LIMIT 1
-            """,
-            (canonical_source_type.strip(), canonical_source_id.strip(), digest),
-        )
-        if row is not None:
-            return self._row(row)
-        return await self.create(
+        fields = dict(
             kind=kind, title=title, summary=summary, owner_id=owner_id,
             project_id=project_id, command_id=command_id, mission_id=mission_id,
             execution_id=execution_id, mime_type=mime_type, byte_size=byte_size,
             canonical_source_type=canonical_source_type,
             canonical_source_id=canonical_source_id,
-            canonical_source_digest=digest, content_ref=content_ref,
+            canonical_source_digest=canonical_source_digest, content_ref=content_ref,
             preview_ref=preview_ref, evidence_refs=evidence_refs,
             sensitivity=sensitivity, expires_at_ms=expires_at_ms, now_ms=now_ms,
         )
+        if _db is None:
+            async with self.store.connection() as db:
+                await db.execute("BEGIN IMMEDIATE")
+                artifact = await self.ensure_projection(**fields, _db=db)
+                await db.commit()
+                return artifact
+        if not _db.in_transaction:
+            raise ArtifactServiceError("artifact_publication_transaction_required")
+        digest = canonical_source_digest.strip().lower()
+        row = await (await _db.execute(
+            """
+            SELECT * FROM owner_artifacts
+             WHERE owner_id = ? AND canonical_source_type = ?
+               AND canonical_source_id = ? AND canonical_source_digest = ?
+             ORDER BY created_at_ms ASC, artifact_id ASC LIMIT 1
+            """,
+            (owner_id, canonical_source_type.strip(), canonical_source_id.strip(), digest),
+        )).fetchone()
+        if row is not None:
+            if row["sensitivity"] != sensitivity.value:
+                raise ArtifactServiceError("artifact_projection_sensitivity_conflict")
+            return self._row(row)
+        return await self.create(**fields, _db=_db)
 
     async def get(self, artifact_id: str) -> OwnerArtifact | None:
         row = await self.store.fetchone(

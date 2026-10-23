@@ -1,0 +1,1022 @@
+{
+  "schema": "van.rebuild.document-publication-source/1",
+  "observed_at_utc": "2026-10-23T16:52:57.858765+00:00",
+  "source_parent": "804ffe73c7117c1fa0624e857afcb2ae3d592ff4",
+  "source_sha256": {
+    "backend/van_gateway/artifacts/service.py": "d1a593633768cb235ee756ff1cbb41e5cd34b369ccab09e9bb9b9720bf121ca9",
+    "backend/van_gateway/documents/service.py": "d14752b0d54c66d8d778c24537339231d8726a38c3574d4cf3f805bab8559b22",
+    "backend/van_gateway/documents/models.py": "e6a5cd16004982aa4d88129554dd3d5659727a633746abd5f479e60c4cd0d505",
+    "backend/van_gateway/documents/api.py": "c0ee3faa02430d34477654f4da0ceaa5cd2bcdaec818470d6958a9b910e67a97",
+    "backend/van_gateway/app.py": "62cdfb54f5e1e7059df0383fb31848d120407b6e25a05eacbcc80e73f0ff9e65",
+    "backend/tests/test_document_publication_integrity.py": "136617870d0fe366a571b22899fd22d1899a0dbab8d91c212d2208e7408a2d77",
+    "backend/tests/test_document_publication_gateway.py": "10ea21cdca743251339861bdd4db904ce1eef12f78b78cf6c3a3eb91fc92105a",
+    "backend/tests/test_document_publication_google.py": "46f5777a5d6528354a6681c5a8a06bf13c2dec5864cda46f98af1663e0600fe2"
+  },
+  "executions": {
+    "initial_document_before": {
+      "tests": 6,
+      "failures": 6,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.912,
+      "xml_sha256": "39378860aefd40e4be00d4d020323db51593f2158188578e4a4569f246ccff7d"
+    },
+    "artifact_owner_and_race_before": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.388,
+      "xml_sha256": "fc7e1b161602397506e2dc33303d2f3bdd5927031bf1afd25999800f20b0fc34"
+    },
+    "empty_required_before": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.134,
+      "xml_sha256": "57b59431732b30e8223207ca63e5d1bd79b0e325a962ff7b190f1e1bf459bb3a"
+    },
+    "intermediate_candidate_sensitivity_before": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.411,
+      "xml_sha256": "a66cd4ada2e0faaae0e710373b522a0e24a9c2ff1efb6ec68190452fd5d7b4b6"
+    },
+    "isolated_final": {
+      "tests": 53,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 11.845,
+      "xml_sha256": "44d09b2595833ef213fa1defca206fb9abfdceab7cdc8bf46d73942491373685"
+    },
+    "integrated_audited": {
+      "tests": 224,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 54.751,
+      "xml_sha256": "2be0ac4382872c0b2dc97bd9fa96e20105820283090d99933c78c01b6d88a378"
+    },
+    "owner_contracts": {
+      "tests": 29,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.526,
+      "xml_sha256": "cd1a65548824922d113de22b08ac71c2c984c4aa020916fc8ef7e806b846124f"
+    },
+    "rebuild": {
+      "tests": 79,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 33.355,
+      "xml_sha256": "e5af6804f45b85c52b7f13a84d95a3d78bae613ff334c07ea36d982620f22742"
+    }
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "defer canonical artifact writer admission",
+        [
+          [
+            "backend/van_gateway/artifacts/service.py",
+            "await db.execute(\"BEGIN IMMEDIATE\")",
+            "await db.execute(\"BEGIN\")",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_canonical_artifact_publication_excludes_a_real_read_write_interleaving"
+      ],
+      [
+        "adopt a foreign owners canonical artifact",
+        [
+          [
+            "backend/van_gateway/artifacts/service.py",
+            "WHERE owner_id = ? AND canonical_source_type = ?",
+            "WHERE canonical_source_type = ?",
+            1
+          ],
+          [
+            "backend/van_gateway/artifacts/service.py",
+            "(owner_id, canonical_source_type.strip(), canonical_source_id.strip(), digest)",
+            "(canonical_source_type.strip(), canonical_source_id.strip(), digest)",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_projection_lookup_cannot_adopt_a_different_owners_private_artifact"
+      ],
+      [
+        "publish artifact before document import transaction",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "                await db.execute(\n                    \"\"\"INSERT INTO documents(",
+            "                await db.commit()\n                await db.execute(\n                    \"\"\"INSERT INTO documents(",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_failed_import_does_not_leave_a_published_artifact_or_unowned_pdf"
+      ],
+      [
+        "publish output artifact before current-document update",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "                await db.execute(\n                    \"UPDATE documents SET output_artifact_id=",
+            "                await db.commit()\n                await db.execute(\n                    \"UPDATE documents SET output_artifact_id=",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_failed_fill_does_not_leave_an_output_artifact_or_orphaned_copy"
+      ],
+      [
+        "discard omitted values on a partial fill",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "fill_pdf(source, proposal.proposed_values)",
+            "fill_pdf(source, values)",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_later_partial_fill_preserves_owner_values_already_written"
+      ],
+      [
+        "defer document writer admission until after baseline read",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "await db.execute(\"BEGIN IMMEDIATE\")\n                row =",
+            "await db.execute(\"BEGIN\")\n                row =",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_concurrent_partial_fills_preserve_both_independent_owner_edits"
+      ],
+      [
+        "create another card for identical canonical output",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "artifact = await self.artifacts.ensure_projection(",
+            "artifact = await self.artifacts.create(",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_replaying_identical_canonical_output_reuses_its_original_result_card"
+      ],
+      [
+        "reuse one mutable content ref for different output digests",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "content_ref=f\"document:{document_id}:output:{output_sha}\"",
+            "content_ref=f\"document:{document_id}:output\"",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_old_and_new_output_artifacts_do_not_share_a_mutable_byte_reference"
+      ],
+      [
+        "return another writers latest result on lost acknowledgement",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "            if committed and not isinstance(exc, asyncio.CancelledError):\n                assert result is not None\n                return result",
+            "            if committed and not isinstance(exc, asyncio.CancelledError):\n                return await self.get(document_id)",
+            2
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_lost_ack_returns_original_version_even_after_another_writer_commits"
+      ],
+      [
+        "claim commit without available native readback",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "            except Exception as exc:\n                raise DocumentServiceError(\"DOCUMENT_PUBLICATION_UNKNOWN\", document_id=document_id,\n                                           publication_id=publication_id) from exc",
+            "            except Exception as exc:\n                return True",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_unknown_commit_readback_preserves_bytes_and_reports_uncertainty"
+      ],
+      [
+        "delete prior published bytes after a refused identical replay",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "        if created and path is not None:",
+            "        if path is not None:",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_rollback_of_identical_replay_does_not_delete_an_existing_version"
+      ],
+      [
+        "ignore exact-version query at owner transport",
+        [
+          [
+            "backend/van_gateway/documents/api.py",
+            "await service.bytes_for(document_id,variant,sha256=sha256)",
+            "await service.bytes_for(document_id,variant)",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_gateway.py::test_gateway_returns_exact_versions_and_rejects_a_stale_review"
+      ],
+      [
+        "accept a stale owner proposal",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "if expected_proposal_sha256 is not None and proposal.proposal_sha256 != expected_proposal_sha256:",
+            "if False:",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_stale_owner_review_cannot_overwrite_a_later_edit"
+      ],
+      [
+        "revive expired baseline values during a fresh fill",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "                if row[\"output_sha256\"] is not None:\n                    await self._published_output(document_id,row[\"output_sha256\"],_db=db)",
+            "                # broken: ignore expired baseline",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_expired_current_copy_cannot_be_used_to_revive_retained_values"
+      ],
+      [
+        "hide empty required fields from owner review",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "missing_required = [name for name in missing if known[name].required]",
+            "missing_required = []",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_explicit_empty_required_value_is_still_reported_missing"
+      ],
+      [
+        "adopt a differently classified projection as private content",
+        [
+          [
+            "backend/van_gateway/artifacts/service.py",
+            "if row[\"sensitivity\"] != sensitivity.value:",
+            "if False:",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_restricted_artifact_projection_is_not_adopted_as_private_content"
+      ],
+      [
+        "serve a secret-reference-only version as document bytes",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "if artifact[\"sensitivity\"] == ArtifactSensitivity.SECRET_REF_ONLY.value:",
+            "if False:",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_document_version_cannot_bypass_secret_reference_only_policy"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "defer canonical artifact writer admission",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "79871395d0c8c0da4e43bd909c059306c3e37ab065dfd148154172b83e7f804d"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "defer canonical artifact writer admission",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "185c8145b76ca17984fef4b900ca9bdea4cd396d9c8da52c256953e55ee11b60"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "adopt a foreign owners canonical artifact",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "62528530d9227df179e84324bd28fd483d84e74060a1ddf65e813af20c64f4fa"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "adopt a foreign owners canonical artifact",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "f5a05394f9a848d87a3498d767cddc1a32b4da6aefcb99140df858cd792cfd70"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "publish artifact before document import transaction",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "6fa1dfdeabeedeb8a57b66f59ec1c9eb5bd8f145baf7f93082a53701ec17e4be"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "publish artifact before document import transaction",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "8e3bfc0bed47eb3eb09655d62b5366aa43695cbac8095a5cb82d7d4387e5e9ea"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "publish output artifact before current-document update",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "326078fcf7c5b55ffce7a589dd4a71dc3c6d3c7129f0ef5f47fe154aef460b50"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "publish output artifact before current-document update",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "fecc79ec04414b73d2fe7a96b29f6154d732accce1efe64389d55b5c2dcf5856"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "discard omitted values on a partial fill",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "704b531214750d38589f03edbc585386ba2bd36c514e25ffb70b67daaad2461a"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "discard omitted values on a partial fill",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "bc09d0435e6894ddb60e26fd393b9910754d8c65ad7f04aa4fbc17af0de92f8f"
+      },
+      {
+        "case": 5,
+        "phase": "control",
+        "reason": "defer document writer admission until after baseline read",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "3778156cc95c0d1aefb47178b6ba9f64f0c9cf2e95a8bb6c2909c016335b9d66"
+      },
+      {
+        "case": 5,
+        "phase": "fault",
+        "reason": "defer document writer admission until after baseline read",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "c553fba37ad6f4f13bcf7b19b9be1db356d40ef131f1b1ef296e047c006aa89f"
+      },
+      {
+        "case": 6,
+        "phase": "control",
+        "reason": "create another card for identical canonical output",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "e3e0790ca0935d14187fd16310f108a9e1c79f9a7008518393edf3ce6adf4eda"
+      },
+      {
+        "case": 6,
+        "phase": "fault",
+        "reason": "create another card for identical canonical output",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "5f5bfd6d54c652ecbbb0978917a1adc65d64e0144b311779e388805b09602cdc"
+      },
+      {
+        "case": 7,
+        "phase": "control",
+        "reason": "reuse one mutable content ref for different output digests",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "bc5c429ae3f3d4951e4047dd8c5eec769c51d8539fb3edeb97424da3d137905b"
+      },
+      {
+        "case": 7,
+        "phase": "fault",
+        "reason": "reuse one mutable content ref for different output digests",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "ad3e4a4ce1e6df7a97be8dc0097f66c5c798973af5d726515ab3edb99d7c9c01"
+      },
+      {
+        "case": 8,
+        "phase": "control",
+        "reason": "return another writers latest result on lost acknowledgement",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "57fa9a2a0dcb6420d3251c13863bee00295336f72d5c526e68559f85729b035d"
+      },
+      {
+        "case": 8,
+        "phase": "fault",
+        "reason": "return another writers latest result on lost acknowledgement",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "0d528b2db6c30824c47714688d89f8c52200c92641d96d65aa6c3c4ceaf2b578"
+      },
+      {
+        "case": 9,
+        "phase": "control",
+        "reason": "claim commit without available native readback",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "c7cdd40ab66e86040ae9c538e8b4f125456f0b9bab73b1976ed49abbc830e32c"
+      },
+      {
+        "case": 9,
+        "phase": "fault",
+        "reason": "claim commit without available native readback",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "ceca8986b5cc9d45fde0cfbc4ca516ae6c2af3b7da8fe381421ba841a6995d5a"
+      },
+      {
+        "case": 10,
+        "phase": "control",
+        "reason": "delete prior published bytes after a refused identical replay",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "0a05005572feecded9de146cc84e1e8d2f80c6518a1e79ddd3aae71336148992"
+      },
+      {
+        "case": 10,
+        "phase": "fault",
+        "reason": "delete prior published bytes after a refused identical replay",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "554f6486a606feff8e7ff4b10073fecbe98480eeb9c4b8718066e86943a75e66"
+      },
+      {
+        "case": 11,
+        "phase": "control",
+        "reason": "ignore exact-version query at owner transport",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "41fa4911c666cc1add3e7961a54250250e82ba749ba460e81a422d4e56d9fc72"
+      },
+      {
+        "case": 11,
+        "phase": "fault",
+        "reason": "ignore exact-version query at owner transport",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "110543658bf3f5dd804968a1f30ea3b915bfee598705144de59699ab47eb4742"
+      },
+      {
+        "case": 12,
+        "phase": "control",
+        "reason": "accept a stale owner proposal",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "edabcbbab2a370c9f62cbfd0bd9f614d9b8ac808ae88c590074ef64484c4e91d"
+      },
+      {
+        "case": 12,
+        "phase": "fault",
+        "reason": "accept a stale owner proposal",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "b3ff04468d8f1fd91322d633da29e2ff37d212f75cd8cdcd5c91f9d4faa57832"
+      },
+      {
+        "case": 13,
+        "phase": "control",
+        "reason": "revive expired baseline values during a fresh fill",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "17e208119c665bf1a2385e3a7b54bd3ea4168f188ac89fd2a54755161dab9776"
+      },
+      {
+        "case": 13,
+        "phase": "fault",
+        "reason": "revive expired baseline values during a fresh fill",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "67dc9600a58709d1fe4bce0dcdc04ebc583d0692d6e2f477254cfdd984b9d6c2"
+      },
+      {
+        "case": 14,
+        "phase": "control",
+        "reason": "hide empty required fields from owner review",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "c16fcbbfb87e358aace7390557a79ec9183429b262a8da6dbcd46f4a64c138e3"
+      },
+      {
+        "case": 14,
+        "phase": "fault",
+        "reason": "hide empty required fields from owner review",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "abfad29e76e66294a1aabf4f91d1304a8837fde35ccd38a8c38aa5a2e9cf04fa"
+      },
+      {
+        "case": 15,
+        "phase": "control",
+        "reason": "adopt a differently classified projection as private content",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "a59c2be38a5d723ca070e8e1aa191e700a601993237f2e3f7d64b90b62630c45"
+      },
+      {
+        "case": 15,
+        "phase": "fault",
+        "reason": "adopt a differently classified projection as private content",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "967027f739e9ec7e22bb7cd180b8fbd1a0624009c675b26caea276d2c36ed793"
+      },
+      {
+        "case": 16,
+        "phase": "control",
+        "reason": "serve a secret-reference-only version as document bytes",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "417245bb0780f99e5144eec24c1a0c6fa62970dc0e35a508c6ef7ad85047bf09"
+      },
+      {
+        "case": 16,
+        "phase": "fault",
+        "reason": "serve a secret-reference-only version as document bytes",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "b37e4f3aee62a2042d3f1a7b4d34f10ec3a6b8a9c0fd186acff9ad5fa1bcb22b"
+      }
+    ],
+    "before": {
+      "backend/van_gateway/documents/service.py": "d14752b0d54c66d8d778c24537339231d8726a38c3574d4cf3f805bab8559b22",
+      "backend/van_gateway/artifacts/service.py": "d1a593633768cb235ee756ff1cbb41e5cd34b369ccab09e9bb9b9720bf121ca9",
+      "backend/van_gateway/documents/api.py": "c0ee3faa02430d34477654f4da0ceaa5cd2bcdaec818470d6958a9b910e67a97"
+    },
+    "after": {
+      "backend/van_gateway/documents/service.py": "d14752b0d54c66d8d778c24537339231d8726a38c3574d4cf3f805bab8559b22",
+      "backend/van_gateway/artifacts/service.py": "d1a593633768cb235ee756ff1cbb41e5cd34b369ccab09e9bb9b9720bf121ca9",
+      "backend/van_gateway/documents/api.py": "c0ee3faa02430d34477654f4da0ceaa5cd2bcdaec818470d6958a9b910e67a97"
+    },
+    "source_restored": true
+  },
+  "initial_survivor": {
+    "definitions": [
+      [
+        "defer canonical artifact writer admission",
+        [
+          [
+            "backend/van_gateway/artifacts/service.py",
+            "await db.execute(\"BEGIN IMMEDIATE\")",
+            "await db.execute(\"BEGIN\")",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_concurrent_canonical_artifact_publishers_share_one_identity"
+      ],
+      [
+        "adopt a foreign owners canonical artifact",
+        [
+          [
+            "backend/van_gateway/artifacts/service.py",
+            "WHERE owner_id = ? AND canonical_source_type = ?",
+            "WHERE canonical_source_type = ?",
+            1
+          ],
+          [
+            "backend/van_gateway/artifacts/service.py",
+            "(owner_id, canonical_source_type.strip(), canonical_source_id.strip(), digest)",
+            "(canonical_source_type.strip(), canonical_source_id.strip(), digest)",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_projection_lookup_cannot_adopt_a_different_owners_private_artifact"
+      ],
+      [
+        "publish artifact before document import transaction",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "                await db.execute(\n                    \"\"\"INSERT INTO documents(",
+            "                await db.commit()\n                await db.execute(\n                    \"\"\"INSERT INTO documents(",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_failed_import_does_not_leave_a_published_artifact_or_unowned_pdf"
+      ],
+      [
+        "publish output artifact before current-document update",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "                await db.execute(\n                    \"UPDATE documents SET output_artifact_id=",
+            "                await db.commit()\n                await db.execute(\n                    \"UPDATE documents SET output_artifact_id=",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_failed_fill_does_not_leave_an_output_artifact_or_orphaned_copy"
+      ],
+      [
+        "discard omitted values on a partial fill",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "fill_pdf(source, proposal.proposed_values)",
+            "fill_pdf(source, values)",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_later_partial_fill_preserves_owner_values_already_written"
+      ],
+      [
+        "defer document writer admission until after baseline read",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "await db.execute(\"BEGIN IMMEDIATE\")\n                row =",
+            "await db.execute(\"BEGIN\")\n                row =",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_concurrent_partial_fills_preserve_both_independent_owner_edits"
+      ],
+      [
+        "create another card for identical canonical output",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "artifact = await self.artifacts.ensure_projection(",
+            "artifact = await self.artifacts.create(",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_replaying_identical_canonical_output_reuses_its_original_result_card"
+      ],
+      [
+        "reuse one mutable content ref for different output digests",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "content_ref=f\"document:{document_id}:output:{output_sha}\"",
+            "content_ref=f\"document:{document_id}:output\"",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_old_and_new_output_artifacts_do_not_share_a_mutable_byte_reference"
+      ],
+      [
+        "return another writers latest result on lost acknowledgement",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "            if committed and not isinstance(exc, asyncio.CancelledError):\n                assert result is not None\n                return result",
+            "            if committed and not isinstance(exc, asyncio.CancelledError):\n                return await self.get(document_id)",
+            2
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_lost_ack_returns_original_version_even_after_another_writer_commits"
+      ],
+      [
+        "claim commit without available native readback",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "            except Exception as exc:\n                raise DocumentServiceError(\"DOCUMENT_PUBLICATION_UNKNOWN\", document_id=document_id,\n                                           publication_id=publication_id) from exc",
+            "            except Exception as exc:\n                return True",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_unknown_commit_readback_preserves_bytes_and_reports_uncertainty"
+      ],
+      [
+        "delete prior published bytes after a refused identical replay",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "        if created and path is not None:",
+            "        if path is not None:",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_rollback_of_identical_replay_does_not_delete_an_existing_version"
+      ],
+      [
+        "ignore exact-version query at owner transport",
+        [
+          [
+            "backend/van_gateway/documents/api.py",
+            "await service.bytes_for(document_id,variant,sha256=sha256)",
+            "await service.bytes_for(document_id,variant)",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_gateway.py::test_gateway_returns_exact_versions_and_rejects_a_stale_review"
+      ],
+      [
+        "accept a stale owner proposal",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "if expected_proposal_sha256 is not None and proposal.proposal_sha256 != expected_proposal_sha256:",
+            "if False:",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_stale_owner_review_cannot_overwrite_a_later_edit"
+      ],
+      [
+        "revive expired baseline values during a fresh fill",
+        [
+          [
+            "backend/van_gateway/documents/service.py",
+            "                if row[\"output_sha256\"] is not None:\n                    await self._published_output(document_id,row[\"output_sha256\"],_db=db)",
+            "                # broken: ignore expired baseline",
+            1
+          ]
+        ],
+        "backend/tests/test_document_publication_integrity.py::test_expired_current_copy_cannot_be_used_to_revive_retained_values"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "defer canonical artifact writer admission",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "b6ce0559db298f1ce09b2f426a362be72d3b191cf52ed92b98dc7c2c1c9c7bb8"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "defer canonical artifact writer admission",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "65e4937b058791a2036d4b30f9ed031219e198ae1ce62e3e101bc435be057b7f"
+      }
+    ],
+    "before": {
+      "backend/van_gateway/documents/service.py": "928d310c381dd928f61954568dba1198bafc068c80bbef0d7ea6a80ba41f234d",
+      "backend/van_gateway/artifacts/service.py": "f0667724de73decfca782847cb1c53ca2d9cc8623d9e0d791b4f5b7fa9bc6fd8",
+      "backend/van_gateway/documents/api.py": "34c1b3342b7dc6b129ee55c56950e2a9520c9c56c20e6249b2f26d999840fb88"
+    },
+    "after": {
+      "backend/van_gateway/documents/service.py": "928d310c381dd928f61954568dba1198bafc068c80bbef0d7ea6a80ba41f234d",
+      "backend/van_gateway/artifacts/service.py": "f0667724de73decfca782847cb1c53ca2d9cc8623d9e0d791b4f5b7fa9bc6fd8",
+      "backend/van_gateway/documents/api.py": "34c1b3342b7dc6b129ee55c56950e2a9520c9c56c20e6249b2f26d999840fb88"
+    },
+    "source_restored": true
+  },
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-review-2026-10-18/publish",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "legacy_mutation_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "provenance": "Initial6document+2artifact failures occur before this packet. Empty-required reproduces existing proposal omission. Additional2sensitivity refusals were exercised on the intermediate new version-read candidate and corrected before integration; they are not misreported as tests run on the original branch. The first deferred-lock fault survived ordinary scheduling; an independent SQLite insert in the real read/write gap now catches it.",
+  "qualification": "Candidate source only. Coordinated file+SQL publication and exact commit witness do not certify power loss, daemon crash cleanup, all first-HTTP-response/request-ID recovery, complete erasure/retention, external upload/submission, physical PDF rendering, whole units, production or handset acceptance."
+}

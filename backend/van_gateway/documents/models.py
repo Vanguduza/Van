@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -57,8 +57,10 @@ class FillDocumentRequest(BaseModel):
 class DocumentFillProposal(BaseModel):
     document_id: str
     source_sha256: str
+    baseline_sha256: str = Field(min_length=64, max_length=64)
     proposed_values: dict[str, Any]
     missing_fields: list[str] = Field(default_factory=list)
+    missing_required_fields: list[str] = Field(default_factory=list)
     unknown_fields: list[str] = Field(default_factory=list)
     proposal_sha256: str
     requires_owner_confirmation: bool = True
@@ -67,3 +69,17 @@ class DocumentFillProposal(BaseModel):
 class DocumentFieldsView(BaseModel):
     document_id: str
     fields: list[DocumentField]
+
+
+class ApplyDocumentFillRequest(FillDocumentRequest):
+    expected_proposal_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+
+
+class DocumentPublicationUncertainty(BaseModel):
+    code: Literal["DOCUMENT_PUBLICATION_UNKNOWN"]
+    document_id: str | None = None
+    publication_id: str | None = None
+
+
+class DocumentErrorResponse(BaseModel):
+    detail: str | DocumentPublicationUncertainty
