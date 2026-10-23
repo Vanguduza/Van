@@ -5147,6 +5147,27 @@
         ],
         "title": "InteractionStepBody"
       },
+      "KillSwitchTrigger": {
+        "type": "string",
+        "enum": [
+          "MAX_DAILY_LOSS",
+          "MAX_WEEKLY_DRAWDOWN",
+          "EQUITY_DRAWDOWN",
+          "STALE_DATA",
+          "RECONCILIATION_FAILURE",
+          "ABNORMAL_SPREAD",
+          "REJECT_STORM",
+          "DUPLICATE_ORDER_RISK",
+          "TIME_SYNC_FAULT",
+          "CORRUPT_STATE",
+          "UNAUTHORIZED_ACCOUNT",
+          "VENUE_DISCONNECT",
+          "RISK_STORE_UNAVAILABLE",
+          "OWNER_HALT",
+          "STOP_REJECTED"
+        ],
+        "title": "KillSwitchTrigger"
+      },
       "KnowledgeActionExecuteBody": {
         "properties": {
           "execution_id": {
@@ -8503,6 +8524,43 @@
         ],
         "title": "RetryClass"
       },
+      "RuntimeLossScope": {
+        "properties": {
+          "losses": {
+            "type": "integer",
+            "title": "Losses"
+          },
+          "cooldown_until_ms": {
+            "type": "integer",
+            "title": "Cooldown Until Ms"
+          },
+          "probation": {
+            "type": "boolean",
+            "title": "Probation"
+          },
+          "suspended": {
+            "type": "boolean",
+            "title": "Suspended"
+          },
+          "cooldowns": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Cooldowns"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "losses",
+          "cooldown_until_ms",
+          "probation",
+          "suspended",
+          "cooldowns"
+        ],
+        "title": "RuntimeLossScope"
+      },
       "RuntimeReadiness": {
         "properties": {
           "capability": {
@@ -8586,6 +8644,561 @@
           "egress_enabled"
         ],
         "title": "RuntimeReadiness"
+      },
+      "RuntimeRecoveryApprovalProof": {
+        "properties": {
+          "challenge_id": {
+            "type": "string",
+            "title": "Challenge Id"
+          },
+          "signature_b64": {
+            "type": "string",
+            "title": "Signature B64"
+          },
+          "algorithm": {
+            "type": "string",
+            "const": "ECDSA_P256_SHA256",
+            "title": "Algorithm"
+          },
+          "expires_at_unix": {
+            "type": "integer",
+            "title": "Expires At Unix"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "challenge_id",
+          "signature_b64",
+          "algorithm",
+          "expires_at_unix"
+        ],
+        "title": "RuntimeRecoveryApprovalProof"
+      },
+      "RuntimeRecoveryCatalog": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "vati.runtime-recovery-catalog/1",
+            "title": "Schema"
+          },
+          "actions": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "clear_kill_switch",
+                "reset_loss_streak",
+                "resume_drawdown"
+              ]
+            },
+            "type": "array",
+            "title": "Actions"
+          },
+          "argument_schemas": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Argument Schemas"
+          },
+          "requires_owner_approval": {
+            "type": "boolean",
+            "const": true,
+            "title": "Requires Owner Approval"
+          },
+          "original_operation_id": {
+            "type": "string",
+            "const": "approval_challenge_id",
+            "title": "Original Operation Id"
+          },
+          "native_phases": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Native Phases"
+          },
+          "gateway_phases": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Gateway Phases"
+          },
+          "applied_is_entry_permission": {
+            "type": "boolean",
+            "const": false,
+            "title": "Applied Is Entry Permission"
+          },
+          "supported_runtime": {
+            "type": "string",
+            "const": "single-session",
+            "title": "Supported Runtime"
+          },
+          "state_route": {
+            "type": "string",
+            "title": "State Route"
+          },
+          "operation_route": {
+            "type": "string",
+            "title": "Operation Route"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "actions",
+          "argument_schemas",
+          "requires_owner_approval",
+          "original_operation_id",
+          "native_phases",
+          "gateway_phases",
+          "applied_is_entry_permission",
+          "supported_runtime",
+          "state_route",
+          "operation_route"
+        ],
+        "title": "RuntimeRecoveryCatalog"
+      },
+      "RuntimeRecoveryChallengeRequest": {
+        "properties": {
+          "intent": {
+            "$ref": "#/components/schemas/RuntimeRecoveryIntent"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "intent"
+        ],
+        "title": "RuntimeRecoveryChallengeRequest"
+      },
+      "RuntimeRecoveryChallengeResponse": {
+        "properties": {
+          "approval_challenge_id": {
+            "type": "string",
+            "title": "Approval Challenge Id"
+          },
+          "approval_challenge": {
+            "type": "string",
+            "title": "Approval Challenge"
+          },
+          "approval_expires_at_unix": {
+            "type": "integer",
+            "title": "Approval Expires At Unix"
+          },
+          "resolved_action_id": {
+            "type": "string",
+            "title": "Resolved Action Id"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/RuntimeRecoveryIntent"
+          },
+          "resolved_review": {
+            "$ref": "#/components/schemas/RuntimeRecoveryReview"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "approval_challenge_id",
+          "approval_challenge",
+          "approval_expires_at_unix",
+          "resolved_action_id",
+          "intent",
+          "resolved_review"
+        ],
+        "title": "RuntimeRecoveryChallengeResponse"
+      },
+      "RuntimeRecoveryIntent": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "vati.runtime-recovery/1",
+            "title": "Schema"
+          },
+          "device_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Device Id"
+          },
+          "account_alias": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]{3,32}$",
+            "title": "Account Alias"
+          },
+          "session_id": {
+            "type": "string",
+            "maxLength": 384,
+            "minLength": 1,
+            "title": "Session Id"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "clear_kill_switch",
+              "reset_loss_streak",
+              "resume_drawdown"
+            ],
+            "title": "Action"
+          },
+          "state_ref": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "State Ref"
+          },
+          "issued_at_unix": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Issued At Unix"
+          },
+          "args": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Args"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "device_id",
+          "account_alias",
+          "session_id",
+          "action",
+          "state_ref",
+          "issued_at_unix",
+          "args"
+        ],
+        "title": "RuntimeRecoveryIntent"
+      },
+      "RuntimeRecoveryOperation": {
+        "properties": {
+          "operation_id": {
+            "type": "string",
+            "title": "Operation Id"
+          },
+          "phase": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "APPLIED",
+              "REFUSED"
+            ],
+            "title": "Phase"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/RuntimeRecoveryIntent"
+          },
+          "authority_ref": {
+            "type": "string",
+            "title": "Authority Ref"
+          },
+          "accepted_at_unix": {
+            "type": "integer",
+            "title": "Accepted At Unix"
+          },
+          "expires_at_unix": {
+            "type": "integer",
+            "title": "Expires At Unix"
+          },
+          "native_event_ref": {
+            "type": "string",
+            "title": "Native Event Ref"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RuntimeRecoveryResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "operation_id",
+          "phase",
+          "intent",
+          "authority_ref",
+          "accepted_at_unix",
+          "expires_at_unix",
+          "native_event_ref",
+          "result"
+        ],
+        "title": "RuntimeRecoveryOperation"
+      },
+      "RuntimeRecoveryPendingDispatch": {
+        "properties": {
+          "operation_id": {
+            "type": "string",
+            "title": "Operation Id"
+          },
+          "phase": {
+            "type": "string",
+            "const": "PENDING_DISPATCH",
+            "title": "Phase"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/RuntimeRecoveryIntent"
+          },
+          "native_effect_confirmed": {
+            "type": "boolean",
+            "const": false,
+            "title": "Native Effect Confirmed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "operation_id",
+          "phase",
+          "intent",
+          "native_effect_confirmed"
+        ],
+        "title": "RuntimeRecoveryPendingDispatch"
+      },
+      "RuntimeRecoveryRequest": {
+        "properties": {
+          "intent": {
+            "$ref": "#/components/schemas/RuntimeRecoveryIntent"
+          },
+          "approval_proof": {
+            "$ref": "#/components/schemas/RuntimeRecoveryApprovalProof"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "intent",
+          "approval_proof"
+        ],
+        "title": "RuntimeRecoveryRequest"
+      },
+      "RuntimeRecoveryResult": {
+        "properties": {
+          "reason_code": {
+            "type": "string",
+            "enum": [
+              "APPLIED",
+              "APPROVAL_EXPIRED",
+              "OWNER_KEY_UNREGISTERED",
+              "SESSION_CHANGED",
+              "STATE_CHANGED",
+              "PRECONDITION_UNMET",
+              "ACTOR_LEASE_LOST"
+            ],
+            "title": "Reason Code"
+          },
+          "effect_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Effect Refs"
+          },
+          "entry_authority_granted": {
+            "type": "boolean",
+            "const": false,
+            "title": "Entry Authority Granted"
+          },
+          "remaining_kill": {
+            "items": {
+              "$ref": "#/components/schemas/KillSwitchTrigger"
+            },
+            "type": "array",
+            "title": "Remaining Kill"
+          },
+          "state_ref": {
+            "type": "string",
+            "title": "State Ref"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reason_code",
+          "effect_refs",
+          "entry_authority_granted",
+          "remaining_kill",
+          "state_ref"
+        ],
+        "title": "RuntimeRecoveryResult"
+      },
+      "RuntimeRecoveryReview": {
+        "properties": {
+          "state": {
+            "$ref": "#/components/schemas/RuntimeRecoveryState"
+          },
+          "state_ref": {
+            "type": "string",
+            "title": "State Ref"
+          },
+          "observed_ms": {
+            "type": "integer",
+            "title": "Observed Ms"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state",
+          "state_ref",
+          "observed_ms"
+        ],
+        "title": "RuntimeRecoveryReview"
+      },
+      "RuntimeRecoveryState": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "vati.runtime-recovery-state/1",
+            "title": "Schema"
+          },
+          "account_alias": {
+            "type": "string",
+            "title": "Account Alias"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "lease_epoch": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lease Epoch"
+          },
+          "holder_instance_id": {
+            "type": "string",
+            "title": "Holder Instance Id"
+          },
+          "profile_ref": {
+            "type": "string",
+            "title": "Profile Ref"
+          },
+          "mandate_ref": {
+            "type": "string",
+            "title": "Mandate Ref"
+          },
+          "effective_mandate_ref": {
+            "type": "string",
+            "title": "Effective Mandate Ref"
+          },
+          "kill_switch": {
+            "items": {
+              "$ref": "#/components/schemas/KillSwitchTrigger"
+            },
+            "type": "array",
+            "title": "Kill Switch"
+          },
+          "kill_history_ref": {
+            "type": "string",
+            "title": "Kill History Ref"
+          },
+          "owner_halt_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Owner Halt Refs"
+          },
+          "loss_scopes": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/RuntimeLossScope"
+            },
+            "type": "object",
+            "title": "Loss Scopes"
+          },
+          "peak_equity": {
+            "type": "string",
+            "title": "Peak Equity"
+          },
+          "risk_history_issue": {
+            "type": "string",
+            "title": "Risk History Issue"
+          },
+          "risk_control_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Risk Control Refs"
+          },
+          "unresolved_entry_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Unresolved Entry Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "account_alias",
+          "session_id",
+          "lease_epoch",
+          "holder_instance_id",
+          "profile_ref",
+          "mandate_ref",
+          "effective_mandate_ref",
+          "kill_switch",
+          "kill_history_ref",
+          "owner_halt_refs",
+          "loss_scopes",
+          "peak_equity",
+          "risk_history_issue",
+          "risk_control_refs",
+          "unresolved_entry_ids"
+        ],
+        "title": "RuntimeRecoveryState"
+      },
+      "RuntimeRecoveryUnknown": {
+        "properties": {
+          "operation_id": {
+            "type": "string",
+            "title": "Operation Id"
+          },
+          "phase": {
+            "type": "string",
+            "const": "UNKNOWN",
+            "title": "Phase"
+          },
+          "reconciliation_required": {
+            "type": "boolean",
+            "const": true,
+            "title": "Reconciliation Required"
+          },
+          "readback_route": {
+            "type": "string",
+            "title": "Readback Route"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "operation_id",
+          "phase",
+          "reconciliation_required",
+          "readback_route"
+        ],
+        "title": "RuntimeRecoveryUnknown"
       },
       "SemanticClass": {
         "type": "string",

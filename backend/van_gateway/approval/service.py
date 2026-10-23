@@ -134,6 +134,7 @@ class OwnerApprovalService:
         project_id: str | None,
         parameters: dict[str, Any] | None = None,
         now_unix: int | None = None,
+        durable_receipt: dict[str, Any] | None = None,
     ) -> dict:
         now = int(time.time()) if now_unix is None else now_unix
         if not challenge_id or not signature_b64:
@@ -226,6 +227,18 @@ class OwnerApprovalService:
             if deleted.rowcount != 1:
                 await db.rollback()
                 raise OwnerApprovalError("approval_challenge_unknown_or_consumed")
+            if durable_receipt is not None:
+                # A verified recovery dispatch may lose its HTTP response, or
+                # the process may stop before contacting the native journal.
+                # Persist its public exact-operation proof in this SAME commit
+                # as consumption. This contains no bearer/private signing key.
+                receipt = {"operation_id": challenge_id, "device_id": device_id,
+                    "expires_at_unix": int(record["expires_at_unix"]),
+                    "intent_digest": expected_digest, "context": durable_receipt}
+                await db.execute(
+                    "INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)",
+                    ("owner_approval_receipt:" + challenge_id,
+                     json.dumps(receipt, sort_keys=True, separators=(",", ":"), allow_nan=False), now*1000))
             await db.commit()
             # Non-secret attestation for the already verified, consumed act.
             # This return value never permits consuming the approval twice.

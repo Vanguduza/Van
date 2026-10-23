@@ -1,0 +1,644 @@
+{
+  "schema": "van.rebuild.runtime-recovery-source/1",
+  "observed_at_utc": "2026-10-23T02:41:30.312509+00:00",
+  "source_parent": "0ba7178b61ba72dcc2f12e7cb4f7f2a3c48d1bdd",
+  "current_source_sha256": {
+    "trading/vati/app/service.py": "c79dcdebd3bd940505b3b7a5e272722a419677d5cc9bf06aa23210d6a7f5b832",
+    "trading/vati/app/runtime_control_actor.py": "1511748ca8f49d94be5a12d1999772b8320299ac8a77a3d3385d97b64ff77a5d",
+    "trading/vati/app/runtime_control_journal.py": "9f08a4250ee60756066010ae47b0920f2f8a9b0f24edf1627c77cafe4e87a87c",
+    "trading/vati/app/runtime_control_protocol.py": "b289cdcb59ff67ec716defe09a45bf5dea0c111ad726575528fd35cb8744288e",
+    "trading/commander/app.py": "3efd46c153abcb20091768080bf84a8c274534fcf1f8b948c82d8e5002d1f938",
+    "trading/commander/runtime_controls.py": "516a0a827e361cc68729b1047807c3fcc405d6e14786dd5cae5f3e5e94e7a319",
+    "backend/van_gateway/app.py": "2203a031bdf53fa547cd0d301592f4b6ac178f514d5d28afac5d1e0f51870323",
+    "backend/van_gateway/approval/service.py": "9df5bd8b582bfdfb2a04e5809e5063f310e2c9fb2b4b7540efbec66f2c4f5af8",
+    "backend/van_gateway/trading/runtime_controls.py": "76693e6b7d62d6c69ab7f991620020f5febed2712d6da59bf4fc0b4b8b24c3e6",
+    "backend/tests/test_runtime_recovery_gateway.py": "17209f6f7b91de38f61d197b3693f085dc1762f1011d2f5576b887826bea87e8",
+    "backend/tests/test_runtime_recovery_faults.py": "05b4d321a1f2feb5b89f32abbf6df4e23947984f8bf5ed26414efeb8e0e45c63",
+    "backend/tests/test_runtime_recovery_journal.py": "2efbfc5b156bb2dc804d481891f2337e1744a2a83401878730dd84784d37fbd4",
+    "backend/tests/test_runtime_recovery_protocol.py": "33f1b6ecb08d2ccf5184818d185b1960b9b13fe56b14af33dd7ade29d440826b",
+    "trading/tests/test_runtime_recovery_actor.py": "77a135129e68925fea061955c5819a2dfb66a7a257b921562d8c249de59e09b5",
+    "trading/tests/test_commander.py": "6bfa9a72a353fb88bf5ae5be90c085620e6b779f79731f5eb93b11ed92361d3c"
+  },
+  "full_trading_and_selected_recovery_real_private_postgresql": {
+    "tests": 2200,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 474.829,
+    "sha256": "7aaabdf4e22597556cd5492c97217786edcda21a517c8769bb0a25bc04e54a8b"
+  },
+  "after_full_suite_changes": {
+    "files": [
+      "backend/van_gateway/trading/runtime_controls.py",
+      "backend/tests/test_runtime_recovery_gateway.py"
+    ],
+    "scope": "Only typed response model declarations and route response schemas plus a catalogue/OpenAPI oracle; runtime, journal, proof and actor implementation unchanged. Final affected gateway+inherited approval tests rerun separately.",
+    "affected_transport_approval_contracts": {
+      "tests": 29,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration_seconds": 17.955,
+      "sha256": "9ba2f486af26d53d3d97bd213056d2f272a7e7fe25db81e88ec8ca3a9bacb8fb"
+    }
+  },
+  "intermediate_full_before_late_native_fact_and_lease_hardening": {
+    "tests": 2191,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 495.051,
+    "sha256": "7ebe16b4e13cf221bc39ef9d8b174784a7425427a6e8d06b5838f6bdb67ce710"
+  },
+  "earlier_protocol_counterexamples": {
+    "tests": 18,
+    "failures": 5,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 2.054,
+    "sha256": "9911f534b9476372818474c5f9130e1fa6c7f34685b7772bb75e831d24ee9c58"
+  },
+  "initial_actor_fixture_and_hidden_set_failures": {
+    "tests": 45,
+    "failures": 2,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 2.785,
+    "sha256": "a8c6f7610db94629bf65efbdb6633ac17e4a0b65b26f0f8c3cf99e7f29fb2b6b"
+  },
+  "focused_hardened_before_full_pg": {
+    "tests": 54,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 5,
+    "duration_seconds": 9.535,
+    "sha256": "9f5751ce5b2a10da73a3e2b33a553e91405ff3cd20dc2e1b12715fdb991975df"
+  },
+  "gateway_atomic_receipt_fault_controls": {
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 3.516,
+    "sha256": "6b5f8b6d76a8c2ddbec44e337b7b25dc1c736ec7ff94a37f28f897cc49396d63"
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 30.911,
+    "sha256": "b115955365908300f0ef5235c9034bb08eeb28edc1c65eb4cb4250a60c259375"
+  },
+  "initial_rebuild_wrong_environment": {
+    "outcome": "COLLECTION_ERROR_MISSING_JSONSCHEMA_NOT_A_PRODUCT_FAILURE",
+    "log_sha256": "46374b91f9ab1d2d305866533cf27eb1b01420a1a9e15f85401a7cb642a1839b",
+    "resolution": "Executed existing separate rebuild environment;78passed."
+  },
+  "deliberate_regressions": {
+    "final_meaningful_faults_caught": 12,
+    "first_six": {
+      "definitions": [
+        [
+          [
+            "trading/vati/app/runtime_control_protocol.py",
+            "key.verify(signature,statement.encode(),ec.ECDSA(hashes.SHA256()))",
+            "pass",
+            "accept an altered financial recovery without its valid P256 signature"
+          ],
+          [
+            "backend/tests/test_runtime_recovery_protocol.py::test_a4_proof_cannot_move_to_another_device_session_state_or_recovery[state_ref]"
+          ]
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_actor.py",
+            "elif request.intent.state_ref != before['state_ref']:",
+            "elif False:",
+            "clear a newer halt using an older reviewed risk state"
+          ],
+          [
+            "trading/tests/test_runtime_recovery_actor.py::test_changed_authority_or_target_refuses_without_clearing[new-halt-STATE_CHANGED]"
+          ]
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_actor.py",
+            "keys = load_owner_keys(service.cfg.owner_authority_keys or None)",
+            "keys = {request.proof.key_id:request.public_key_pem}",
+            "treat archived public proof as current authority after native key revocation"
+          ],
+          [
+            "trading/tests/test_runtime_recovery_actor.py::test_changed_authority_or_target_refuses_without_clearing[revoked-OWNER_KEY_UNREGISTERED]"
+          ]
+        ],
+        [
+          [
+            [
+              [
+                "trading/vati/app/runtime_control_actor.py",
+                "request.proof.verify(request.intent, keys, now_unix=service.clock() // 1000)",
+                "request.proof.verify(request.intent, keys, now_unix=request.accepted_at_unix)"
+              ],
+              [
+                "trading/vati/app/runtime_control_actor.py",
+                "if reason == 'APPLIED' and now // 1000 >= request.proof.expires_at_unix:",
+                "if False:"
+              ]
+            ],
+            "apply an expired original approval by reusing its old accepted clock"
+          ],
+          [
+            "trading/tests/test_runtime_recovery_actor.py::test_changed_authority_or_target_refuses_without_clearing[expired-APPROVAL_EXPIRED]"
+          ]
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_actor.py",
+            "if reason == 'APPLIED' and (held is None or not held.live_at(now)):",
+            "if False:",
+            "clear risk after the lease actually expired while waiting for the chain writer"
+          ],
+          [
+            "trading/tests/test_runtime_recovery_actor.py::test_lease_expiry_while_waiting_for_chain_writer_cannot_apply_a_clear"
+          ]
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_actor.py",
+            "if alias == account_alias and event.hash in authorized:",
+            "if alias == account_alias:",
+            "let a clear-shaped ledger event release a real halt without native owner evidence"
+          ],
+          [
+            "trading/tests/test_runtime_recovery_actor.py::test_a_clear_shaped_event_without_native_approval_cannot_release_an_owner_halt"
+          ]
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_actor.py",
+            "if alias and alias != account_alias:",
+            "if False:",
+            "let an account-scoped clear release a global halt for another account"
+          ],
+          [
+            "trading/tests/test_runtime_recovery_actor.py::test_owner_clear_applies_once_without_an_order_or_blanket_entry_grant"
+          ]
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_actor.py",
+            "account.verified is not True",
+            "not account.verified",
+            "admit a truthy unverified native account claim"
+          ],
+          [
+            "trading/tests/test_runtime_recovery_actor.py::test_ambiguous_native_account_facts_never_clear_risk[verified-string]"
+          ]
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_actor.py",
+            "heartbeat.connected is not True",
+            "not heartbeat.connected",
+            "admit a truthy unverified native connection claim"
+          ],
+          [
+            "trading/tests/test_runtime_recovery_actor.py::test_ambiguous_native_account_facts_never_clear_risk[connected-string]"
+          ]
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_journal.py",
+            "if old.intent!=intent or old.proof!=proof:",
+            "if False:",
+            "return an original recovery for a different actor or target"
+          ],
+          [
+            "backend/tests/test_runtime_recovery_journal.py::test_original_control_cannot_change_actor_args_or_outcome[sqlite]"
+          ]
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_journal.py",
+            "if phase=='APPLIED':self._validate_effects(current,result)",
+            "if False:self._validate_effects(current,result)",
+            "mark a recovery applied without actual owned native effect evidence"
+          ],
+          [
+            "backend/tests/test_runtime_recovery_journal.py::test_control_does_not_become_applied_without_actual_owned_effect_evidence[sqlite]"
+          ]
+        ],
+        [
+          [
+            "backend/van_gateway/approval/service.py",
+            "await db.execute(\n                    \"INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)\",",
+            "await db.commit()\n                await db.execute(\n                    \"INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)\",",
+            "commit approval consumption before its durable dispatch receipt"
+          ],
+          [
+            "backend/tests/test_runtime_recovery_faults.py::test_failure_before_approval_commit_restores_both_challenge_and_dispatch_receipt"
+          ]
+        ]
+      ],
+      "records": [
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "log_sha256": "acb50bc88917f57929611d63c707e0ccd387dae970fefba6e9100a81f12eba7b"
+        },
+        {
+          "phase": "mutation",
+          "why": "accept an altered financial recovery without its valid P256 signature",
+          "returncode": 1,
+          "log_sha256": "43a507486dd1f533f7567c081f0d620b8e0cf054fb8c8d06dcbb8a65d8f20bbd"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "log_sha256": "59b9466559aeabf218a54ec041fd83cd357cf9bf1d80a17c47aab62ed0c205bf"
+        },
+        {
+          "phase": "mutation",
+          "why": "clear a newer halt using an older reviewed risk state",
+          "returncode": 1,
+          "log_sha256": "e24e50bdec692075e3f1a6b56e7654690f16dfb52bd6b4439280dd7f996c26d6"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "log_sha256": "ac03dc55bdc1ce87ab5a711fdf5a7d72d345e62c471c4cb4e9de283e03475f14"
+        },
+        {
+          "phase": "mutation",
+          "why": "treat archived public proof as current authority after native key revocation",
+          "returncode": 1,
+          "log_sha256": "117a518c25b8cd86b4cecb8ac530fa423ef2569059e3f6531d0a504687ca89ff"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "log_sha256": "ac03dc55bdc1ce87ab5a711fdf5a7d72d345e62c471c4cb4e9de283e03475f14"
+        },
+        {
+          "phase": "mutation",
+          "why": "apply an expired original approval by reusing its old accepted clock",
+          "returncode": 1,
+          "log_sha256": "ff4b53d47cdd08a5268545815ecfebe3bca86f4aca4809e8fd44c965024f2fcc"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "log_sha256": "f6b6e232e0345fa742cf57cbc60c8884709a6f029bd43161ca6e812c9175f2a8"
+        },
+        {
+          "phase": "mutation",
+          "why": "clear risk after the lease actually expired while waiting for the chain writer",
+          "returncode": 1,
+          "log_sha256": "6dc862436b705adbf997c5529bbd1c2ee7eb8218b68b90ccaa72b57bb68352a6"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "log_sha256": "59b9466559aeabf218a54ec041fd83cd357cf9bf1d80a17c47aab62ed0c205bf"
+        },
+        {
+          "phase": "mutation",
+          "why": "let a clear-shaped ledger event release a real halt without native owner evidence",
+          "returncode": 1,
+          "log_sha256": "9fdeaa2724d77d76b153bebe1bcebaa8b9a1cf7605a8eb4a74485c0ca0f58c72"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "log_sha256": "59b9466559aeabf218a54ec041fd83cd357cf9bf1d80a17c47aab62ed0c205bf"
+        }
+      ],
+      "source_before_sha256": {
+        "backend/van_gateway/approval/service.py": "9df5bd8b582bfdfb2a04e5809e5063f310e2c9fb2b4b7540efbec66f2c4f5af8",
+        "trading/vati/app/runtime_control_actor.py": "1511748ca8f49d94be5a12d1999772b8320299ac8a77a3d3385d97b64ff77a5d",
+        "trading/vati/app/runtime_control_journal.py": "9f08a4250ee60756066010ae47b0920f2f8a9b0f24edf1627c77cafe4e87a87c",
+        "trading/vati/app/runtime_control_protocol.py": "b289cdcb59ff67ec716defe09a45bf5dea0c111ad726575528fd35cb8744288e"
+      },
+      "source_after_sha256": {
+        "backend/van_gateway/approval/service.py": "9df5bd8b582bfdfb2a04e5809e5063f310e2c9fb2b4b7540efbec66f2c4f5af8",
+        "trading/vati/app/runtime_control_actor.py": "1511748ca8f49d94be5a12d1999772b8320299ac8a77a3d3385d97b64ff77a5d",
+        "trading/vati/app/runtime_control_journal.py": "9f08a4250ee60756066010ae47b0920f2f8a9b0f24edf1627c77cafe4e87a87c",
+        "trading/vati/app/runtime_control_protocol.py": "b289cdcb59ff67ec716defe09a45bf5dea0c111ad726575528fd35cb8744288e"
+      },
+      "source_restored": true,
+      "journal_present": false
+    },
+    "last_six": {
+      "definitions": [
+        [
+          [
+            "trading/vati/app/runtime_control_protocol.py",
+            "key.verify(signature,statement.encode(),ec.ECDSA(hashes.SHA256()))",
+            "pass",
+            "accept an altered financial recovery without its valid P256 signature"
+          ],
+          [
+            "backend/tests/test_runtime_recovery_protocol.py::test_a4_proof_cannot_move_to_another_device_session_state_or_recovery[state_ref]"
+          ]
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_actor.py",
+            "elif request.intent.state_ref != before['state_ref']:",
+            "elif False:",
+            "clear a newer halt using an older reviewed risk state"
+          ],
+          [
+            "trading/tests/test_runtime_recovery_actor.py::test_changed_authority_or_target_refuses_without_clearing[new-halt-STATE_CHANGED]"
+          ]
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_actor.py",
+            "keys = load_owner_keys(service.cfg.owner_authority_keys or None)",
+            "keys = {request.proof.key_id:request.public_key_pem}",
+            "treat archived public proof as current authority after native key revocation"
+          ],
+          [
+            "trading/tests/test_runtime_recovery_actor.py::test_changed_authority_or_target_refuses_without_clearing[revoked-OWNER_KEY_UNREGISTERED]"
+          ]
+        ],
+        [
+          [
+            [
+              [
+                "trading/vati/app/runtime_control_actor.py",
+                "request.proof.verify(request.intent, keys, now_unix=service.clock() // 1000)",
+                "request.proof.verify(request.intent, keys, now_unix=request.accepted_at_unix)"
+              ],
+              [
+                "trading/vati/app/runtime_control_actor.py",
+                "if reason == 'APPLIED' and now // 1000 >= request.proof.expires_at_unix:",
+                "if False:"
+              ]
+            ],
+            "apply an expired original approval by reusing its old accepted clock"
+          ],
+          [
+            "trading/tests/test_runtime_recovery_actor.py::test_changed_authority_or_target_refuses_without_clearing[expired-APPROVAL_EXPIRED]"
+          ]
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_actor.py",
+            "if reason == 'APPLIED' and (held is None or not held.live_at(now)):",
+            "if False:",
+            "clear risk after the lease actually expired while waiting for the chain writer"
+          ],
+          [
+            "trading/tests/test_runtime_recovery_actor.py::test_lease_expiry_while_waiting_for_chain_writer_cannot_apply_a_clear"
+          ]
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_actor.py",
+            "if alias == account_alias and event.hash in authorized:",
+            "if alias == account_alias:",
+            "let a clear-shaped ledger event release a real halt without native owner evidence"
+          ],
+          [
+            "trading/tests/test_runtime_recovery_actor.py::test_a_clear_shaped_event_without_native_approval_cannot_release_an_owner_halt"
+          ]
+        ],
+        [
+          [
+            [
+              [
+                "trading/vati/app/runtime_control_actor.py",
+                "if alias and alias != account_alias:",
+                "if False:"
+              ],
+              [
+                "trading/vati/app/runtime_control_actor.py",
+                "control.intent.account_alias == account_alias",
+                "True"
+              ],
+              [
+                "trading/vati/app/runtime_control_actor.py",
+                "if alias == account_alias and event.hash in authorized:",
+                "if event.hash in authorized:"
+              ]
+            ],
+            "remove account scoping from both original halt sources and approved clear evidence"
+          ],
+          [
+            "trading/tests/test_runtime_recovery_actor.py::test_owner_clear_applies_once_without_an_order_or_blanket_entry_grant"
+          ]
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_actor.py",
+            "account.verified is not True",
+            "not account.verified",
+            "admit a truthy unverified native account claim"
+          ],
+          [
+            "trading/tests/test_runtime_recovery_actor.py::test_ambiguous_native_account_facts_never_clear_risk[verified-string]"
+          ]
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_actor.py",
+            "heartbeat.connected is not True",
+            "not heartbeat.connected",
+            "admit a truthy unverified native connection claim"
+          ],
+          [
+            "trading/tests/test_runtime_recovery_actor.py::test_ambiguous_native_account_facts_never_clear_risk[connected-string]"
+          ]
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_journal.py",
+            "if old.intent!=intent or old.proof!=proof:",
+            "if False:",
+            "return an original recovery for a different actor or target"
+          ],
+          [
+            "backend/tests/test_runtime_recovery_journal.py::test_original_control_cannot_change_actor_args_or_outcome[sqlite]"
+          ]
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_journal.py",
+            "if phase=='APPLIED':self._validate_effects(current,result)",
+            "if False:self._validate_effects(current,result)",
+            "mark a recovery applied without actual owned native effect evidence"
+          ],
+          [
+            "backend/tests/test_runtime_recovery_journal.py::test_control_does_not_become_applied_without_actual_owned_effect_evidence[sqlite]"
+          ]
+        ],
+        [
+          [
+            "backend/van_gateway/approval/service.py",
+            "await db.execute(\n                    \"INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)\",",
+            "await db.commit()\n                await db.execute(\n                    \"INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)\",",
+            "commit approval consumption before its durable dispatch receipt"
+          ],
+          [
+            "backend/tests/test_runtime_recovery_faults.py::test_failure_before_approval_commit_restores_both_challenge_and_dispatch_receipt"
+          ]
+        ]
+      ],
+      "records": [
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "log_sha256": "f6b6e232e0345fa742cf57cbc60c8884709a6f029bd43161ca6e812c9175f2a8"
+        },
+        {
+          "phase": "mutation",
+          "why": "remove account scoping from both original halt sources and approved clear evidence",
+          "returncode": 1,
+          "log_sha256": "113e37bda6d0d58f32e979cff0e79637560ce98a5c4040ade2f98e1c95dd3502"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "log_sha256": "59b9466559aeabf218a54ec041fd83cd357cf9bf1d80a17c47aab62ed0c205bf"
+        },
+        {
+          "phase": "mutation",
+          "why": "admit a truthy unverified native account claim",
+          "returncode": 1,
+          "log_sha256": "4205b3c7fc6fd7742cf980a12affe9e1b9fa89904331e23bae69c52558f76238"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "log_sha256": "b4eb7be9000651a3e89c6a77e8b346d05d1d706d620aa6f8193e574a39b3ced1"
+        },
+        {
+          "phase": "mutation",
+          "why": "admit a truthy unverified native connection claim",
+          "returncode": 1,
+          "log_sha256": "080601fcf11d37f5399fc01c257650c3dd14ee8aa2ab2bf3fd8fd5970d8f35e1"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "log_sha256": "718af798eb1450a812074f301573c1f498edd3575a2450f85ee649d7e03c3c72"
+        },
+        {
+          "phase": "mutation",
+          "why": "return an original recovery for a different actor or target",
+          "returncode": 1,
+          "log_sha256": "4cfdcec9e7bc8ce486e491c60209acc27d65c62a0bed6aaacd6a19ac58e7d867"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "log_sha256": "718af798eb1450a812074f301573c1f498edd3575a2450f85ee649d7e03c3c72"
+        },
+        {
+          "phase": "mutation",
+          "why": "mark a recovery applied without actual owned native effect evidence",
+          "returncode": 1,
+          "log_sha256": "c5bfe3fa3dd0f85a1e2e63e1e7f3440e52e91336d09e54ef0af58d5804bbc0d4"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "log_sha256": "cedbea6ac8dafd4901c3061567c7f6a90a953633e80d003e347339fff87c6fc3"
+        },
+        {
+          "phase": "mutation",
+          "why": "commit approval consumption before its durable dispatch receipt",
+          "returncode": 1,
+          "log_sha256": "8b8096601e747b1a86ff64110101e40453041d6b5692ba1fa13d0445e8e2b291"
+        }
+      ],
+      "source_before_sha256": {
+        "backend/van_gateway/approval/service.py": "9df5bd8b582bfdfb2a04e5809e5063f310e2c9fb2b4b7540efbec66f2c4f5af8",
+        "trading/vati/app/runtime_control_actor.py": "1511748ca8f49d94be5a12d1999772b8320299ac8a77a3d3385d97b64ff77a5d",
+        "trading/vati/app/runtime_control_journal.py": "9f08a4250ee60756066010ae47b0920f2f8a9b0f24edf1627c77cafe4e87a87c",
+        "trading/vati/app/runtime_control_protocol.py": "b289cdcb59ff67ec716defe09a45bf5dea0c111ad726575528fd35cb8744288e"
+      },
+      "source_after_sha256": {
+        "backend/van_gateway/approval/service.py": "9df5bd8b582bfdfb2a04e5809e5063f310e2c9fb2b4b7540efbec66f2c4f5af8",
+        "trading/vati/app/runtime_control_actor.py": "1511748ca8f49d94be5a12d1999772b8320299ac8a77a3d3385d97b64ff77a5d",
+        "trading/vati/app/runtime_control_journal.py": "9f08a4250ee60756066010ae47b0920f2f8a9b0f24edf1627c77cafe4e87a87c",
+        "trading/vati/app/runtime_control_protocol.py": "b289cdcb59ff67ec716defe09a45bf5dea0c111ad726575528fd35cb8744288e"
+      },
+      "source_restored": true,
+      "journal_present": false
+    },
+    "initial_redundant_account_guard_survivor": {
+      "test_result": "PASS; another two account guards still held the boundary",
+      "log_sha256": "59b9466559aeabf218a54ec041fd83cd357cf9bf1d80a17c47aab62ed0c205bf",
+      "resolution": "Final compound fault removes source and approved-effect account scoping; actual other-account halt remains the oracle and detects it."
+    }
+  },
+  "private_full_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "intermediate_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "owner_contract_check": {
+    "changed": [],
+    "applied": false,
+    "scope": "SOURCE_CONTRACTS_ONLY"
+  },
+  "owner_api_counts": {
+    "endpoint_count": 444,
+    "schema_count": 276
+  },
+  "legacy_anchor_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "consolidation": {
+    "scope": "SOURCE_CONSOLIDATION_ONLY",
+    "branches_evaluated": 70,
+    "blueprint_archive_sha256": "6c7c7c1cb4fbd4748c0d63ceb2add9bd460778b66fb3b2302e16de09ac3a57a8",
+    "findings": [],
+    "runtime_qualification_issued": false
+  },
+  "remaining_obligations": [
+    "Account-coordinator recovery and Android consumer remain; no new UI before BG-001.",
+    "Owner device revocation must propagate to native public-key authority.",
+    "Actual monetary maturity, fees/cash, live+replay risk/learning; native identity, worker epoch/deadline/precision, safe retirement and all original whole-product obligations remain.",
+    "Current read-only next-packet counter: finite unsettled estimated gain resets3prior losses to0 despite fees_final=false/cash_reconciled=false. No fix or provider financial finality is claimed here."
+  ],
+  "next_financial_counterexample": {
+    "test_source_sha256": "e9b171628d274c38a17f062e17e5c47d53a9f4a87485cb720133a64202b39df1",
+    "test_result": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "duration_seconds": 0.463,
+      "sha256": "c61577a32cd96b47a25a866668879d077feaaff75c13646d8216715c563a0bab"
+    },
+    "log_sha256": "7245710c8a58c32ba65070a6855efaae272d3d4896aa2edec696f099d9ad1657"
+  },
+  "qualification": "Candidate source and in-process authenticated HTTP/real P256/native SQLite+private PostgreSQL evidence only; no real handset/Keystore/S24, live funds/provider, production provisioning/signing, independent certificate or whole-unit/product acceptance."
+}

@@ -184,6 +184,7 @@ from van_gateway.visual.acceptance import VisualAcceptanceError, VisualAcceptanc
 from van_gateway.trading.accounts import ACTIONS as ACCOUNT_ACTIONS, AccountOnboarding, CommanderAccountControl, LocalAccountControl, OAuthPending, canonical_action, account_approval_text, redact as redact_account_args, requires_owner_approval
 from van_gateway.trading.account_contracts import AccountChallengeResponse,AccountActionCatalog
 from van_gateway.trading.strategies import StrategyPromotionGateway, canonical_strategy_promotion
+from van_gateway.trading.runtime_controls import register_runtime_control_routes
 
 
 class VisualAcceptanceBody(BaseModel):
@@ -1148,6 +1149,7 @@ def create_app() -> FastAPI:
             await scheduler.stop()
 
     app = FastAPI(title="VAN Gateway", version="0.5.0-dev", lifespan=lifespan)
+    register_runtime_control_routes(app, auth=auth, store=store, promotions=strategy_promotions, audit=audit)
     # P3-OBS-001/P3-OBS-002 — outermost, so it measures what the client waited
     # for rather than what the handler took after every other middleware.
     app.add_middleware(MetricsMiddleware)

@@ -92,6 +92,8 @@ class ServiceConfig:
     #: News is reduce-only wherever it lands; the economic calendar remains the
     #: blackout authority.
     news: dict = field(default_factory=dict)
+    #: Native public owner keys, shared with Commander; no private signing key.
+    owner_authority_keys: str = ""
 
     @classmethod
     def load(cls, path: str | Path) -> "ServiceConfig":
@@ -309,6 +311,9 @@ class SessionService:
               "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
               "restated_learning": self.learning.projection_summary if getattr(self, "learning", None) else {"status":"NOT_CONSTRUCTED"},
               "updated_ms": self.clock(), "pid": os.getpid(), **(extra or {})}
+        if self.runner and self.lease:
+            from vati.app.runtime_control_actor import recovery_review
+            hb['runtime_recovery'] = recovery_review(self)
         Path(self.cfg.heartbeat_path).write_text(json.dumps(hb))
 
     def _account_snapshot(self, now_ms: int) -> None:
@@ -380,18 +385,11 @@ class SessionService:
         from vati.risk.contracts import KillSwitchTrigger
         if KillSwitchTrigger.OWNER_HALT in self.runner.cycle.kill.active:
             return
-        latest_halt = None
-        for ev in self.runner.cycle.ledger.iter(EventKind.KILL_SWITCH):
-            if ev.producer == "vati-runner":
-                continue
-            if ev.payload.get("trigger") != "OWNER_HALT":
-                continue
-            if ev.payload.get("cleared"):
-                latest_halt = None
-                continue
-            latest_halt = ev
-        if latest_halt is None:
+        from vati.app.runtime_control_actor import outstanding_owner_halts
+        halts = outstanding_owner_halts(self.runner.cycle.ledger, self.cfg.account_alias)
+        if not halts:
             return
+        latest_halt = halts[-1]
         self.runner.cycle.kill.trip(KillSwitchTrigger.OWNER_HALT, now_ms)
         self.runner.permit_new_orders = False
         self.runner.cycle.ledger.append(make_event(
@@ -432,6 +430,8 @@ class SessionService:
         self._observe_owner_halt(now)
         from vati.app.entry_recovery import reconcile_inflight_entries
         reconcile_inflight_entries(self.runner.cycle,now_ms=now)
+        from vati.app.runtime_control_actor import process_recovery_requests
+        process_recovery_requests(self)
         bars = self.bar_source(now)
         if not bars:
             self.runner.cycle.ledger.append(make_event(EventKind.MARKET_DATA_HEALTH, "vati-service", {"symbol": self.cfg.symbol, "state": "NO_DATA"}, event_time_ms=now, received_time_ms=now, correlation_id=self.cfg.symbol))

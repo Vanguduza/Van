@@ -126,6 +126,22 @@ def build():
     voice = next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-VOICE-001")
     accounts = next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-TRADING-003")
     account_screen = next(r for r in documents["owner_screens"]["screens"] if r["id"] == "van.trading.accounts.add")
+    recovery_feature = next(r for r in documents['owner_features']['features'] if r['id'] == 'OF-TRADING-005')
+    recovery_screen = next(r for r in documents['owner_screens']['screens'] if r['id'] == 'van.trading.halt')
+    for endpoint in endpoint_doc['endpoints']:
+        if not endpoint['path'].startswith('/v1/trading/runtime/recovery/'):
+            continue
+        extension = {
+            'method':endpoint['method'], 'path':endpoint['path'], 'endpoint_id':endpoint['endpoint_id'],
+            'source_ref':endpoint['source'], 'authentication':endpoint['authentication'],
+            'device_proof_required_when_bound':endpoint['device_proof_required_when_bound'],
+            'source_status':'CANDIDATE_BACKEND_SOURCE_ANDROID_CONSUMER_PENDING',
+            'authority':'CURRENT_PAIRED_OWNER_DEVICE_EXACT_A4_ACCOUNT_SESSION_LEASE_AND_RISK_STATE',
+            'scope':'Single-session kill clear, loss-scope reset and drawdown rebaseline. Original approval ID and durable public proof survive uncertain dispatch. Reads never dispatch. APPLIED is not blanket entry authority; all other holds, profile and final native fences remain.',
+            'specification':'docs/rebuild/rev118/backend/BE-003_009_RUNTIME_RECOVERY.md',
+            'new_ui_implemented':False, 'live_qualified':False}
+        for row in (recovery_feature, recovery_screen):
+            row.setdefault('backend_contract_extensions', []).append(copy.deepcopy(extension))
     operation_endpoint = next(r for r in endpoint_doc["endpoints"] if r["path"] == "/v1/trading/accounts/operations/{operation_id}")
     operation_extension = {
         "method": "GET", "path": operation_endpoint["path"], "endpoint_id": operation_endpoint["endpoint_id"],

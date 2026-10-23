@@ -1963,8 +1963,8 @@
     "android/app/src/main/java/com/dial/van/command/artemis/ArtemisConsoleRoute.kt": "67ca665acc636cb6d4f4669d1b495273062ceae5c4a73c0b26aa418c8ef3b818",
     "android/app/src/main/java/com/dial/van/visual/VanCharacterAcceptance.kt": "7b282fa7815e4557cb4c2cd9e87d34ee9e5d4673b5fa5d93ecef2f1ded648e47"
   },
-  "endpoint_count": 439,
-  "schema_count": 262,
+  "endpoint_count": 444,
+  "schema_count": 276,
   "physical_cases_executed": 0,
   "owner_release": false,
   "deployment_accepted": false

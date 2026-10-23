@@ -32,6 +32,7 @@ from commander.strategies import (
     build_strategy_handlers,
 )
 from commander.auth import DEFAULT_PRINCIPAL, NonceCache, verify_request_principal
+from commander.runtime_controls import RUNTIME_COMMANDS, RUNTIME_TOOL_SCHEMAS, build_runtime_control_handlers
 
 REDACT = re.compile(r"(?i)(password|passwd|token|api[_-]?key|secret|bearer|signing[_-]?key)(\s*[:=]\s*)\S+")
 UNIT_RE = re.compile(r"^[A-Za-z0-9@._-]+$")
@@ -43,13 +44,13 @@ COMMANDS = ("status", "ledger_status", "services", "restart_service", "tail_log"
             # projections of the VATI ledger; neither can create, size, modify
             # or cancel anything, and neither is in GATEWAY_ONLY_COMMANDS
             # because observation is not a mutation.
-            "positions", "assessment") + ACCOUNT_COMMANDS + PROMOTION_COMMANDS
+            "positions", "assessment") + ACCOUNT_COMMANDS + PROMOTION_COMMANDS + RUNTIME_COMMANDS
 # Credential-bearing and strategy-promotion commands are gateway-only. This is a
 # positive allow-list: the authenticated principal must be exactly van-gateway.
 # A legacy/shared credential or a future/renamed agent cannot acquire mutation
 # authority merely by avoiding a deny-list.
 GATEWAY_PRINCIPAL = "van-gateway"
-GATEWAY_ONLY_COMMANDS = frozenset(ACCOUNT_COMMANDS + PROMOTION_COMMANDS)
+GATEWAY_ONLY_COMMANDS = frozenset(ACCOUNT_COMMANDS + PROMOTION_COMMANDS + RUNTIME_COMMANDS)
 # Compatibility name used by the MCP/tool-list contract.
 AGENT_HIDDEN_COMMANDS = GATEWAY_ONLY_COMMANDS
 # Reads do not wait behind native writes or a long backtest. Halt remains an
@@ -57,7 +58,7 @@ AGENT_HIDDEN_COMMANDS = GATEWAY_ONLY_COMMANDS
 # the serialized executor by default.
 PARALLEL_COMMANDS = frozenset({"status", "ledger_status", "services", "tail_log",
     "doctor", "accounts", "positions", "assessment", "account_revision", "account_review",
-    "account_verify", "account_operation", "ctrader_discover", "halt"})
+    "account_verify", "account_operation", "ctrader_discover", "halt", "runtime_recovery_review", "runtime_recovery_operation"})
 MAX_NATIVE_PENDING_COMMANDS = 16
 Runner = Callable[[list[str], int], tuple[int, str, str]]
 
@@ -201,6 +202,7 @@ TOOL_SCHEMAS = {
     "assessment": {"description": "VAN's reading of the book: urgent risks, portfolio heat, available risk headroom, active theses by state, kill-switch state and the cognition invoker actually configured. Read-only; a reading, never a permission.", "properties": {}},
     **ACCOUNT_TOOL_SCHEMAS,
     **PROMOTION_TOOL_SCHEMAS,
+    **RUNTIME_TOOL_SCHEMAS,
 }
 
 
@@ -424,6 +426,7 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
                 "positions": cmd_positions, "assessment": cmd_assessment,
                 **build_account_handlers(replace(st.account_control, operation_ledger=st.ledger) if st.account_control else
                     AccountControlSettings(registry_path=st.accounts_registry, secrets_dir=st.secrets_dir, operation_ledger=st.ledger)),
+                **build_runtime_control_handlers(st),
                 **build_strategy_handlers(StrategyPromotionSettings(
                     capsule_dir=capsule_dir,
                     ledger=st.ledger,
