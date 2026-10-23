@@ -115,6 +115,11 @@ class RuntimeControlJournal:
             event.hash,state.accepted_at_unix,result)
 
     def enqueue(self,intent,proof,keys):
+        if not isinstance(intent,RecoveryIntent) or not isinstance(proof,RecoveryProof):
+            raise RuntimeControlError('native recovery intent or proof type is invalid')
+        if RecoveryIntent.from_mapping(intent.body())!=intent:
+            raise RuntimeControlError('native recovery arguments are not canonical')
+        RecoveryProof.from_mapping(proof.public_record())
         with self.ledger.atomic():
             old=self._states().get(proof.operation_id)
             if old is not None:
@@ -126,6 +131,7 @@ class RuntimeControlJournal:
             return self._append(state,'REQUESTED')
 
     def status(self,operation_id,device_id):
+        if not isinstance(operation_id,str):return None
         with self.ledger.atomic():
             state=self._states().get(operation_id)
             # A different device does not gain an operation-existence oracle.

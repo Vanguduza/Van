@@ -106,6 +106,11 @@ class RecoveryProof:
         if not isinstance(value,dict) or set(value)!={'operation_id','expires_at_unix','key_id','signature_b64','algorithm'}:
             raise RuntimeControlError('runtime approval proof shape is invalid')
         proof=cls(**value)
+        if (not isinstance(proof.operation_id,str)
+            or not re.fullmatch(r'[A-Za-z0-9_-]{20,128}',proof.operation_id)):
+            raise RuntimeControlError('runtime original operation identity is invalid')
+        if type(proof.expires_at_unix) is not int or proof.expires_at_unix<0:
+            raise RuntimeControlError('runtime approval expiry is invalid')
         if (not isinstance(proof.key_id,str) or not proof.key_id or len(proof.key_id)>128
             or not isinstance(proof.signature_b64,str) or not 1<=len(proof.signature_b64)<=1024
             or proof.algorithm!=ALGORITHM):raise RuntimeControlError('runtime approval proof fields are invalid')

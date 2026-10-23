@@ -23,3 +23,7 @@ Clearing OWNER_HALT cites its original halt events and applies only to this acco
 The registry extends the existing `OF-TRADING-005` feature and `van.trading.halt` screen contract. The five routes and typed intent/proof schemas are exported from the actual application. The Android consumer is pending; no new UI/prototype is introduced before BG-001. Account-coordinator recovery, public-to-native owner-key revocation propagation, deferred provider identity/expiry, complete financial finality and all other original feature obligations remain separately tracked.
 
 Executed controls, induced failures, exact source hashes and limitations belong in `../receipts/RUNTIME_RECOVERY_SOURCE_20261023.json`. Source checks do not replace the original 1,610 acceptance contracts or issue an independent/native certificate.
+
+## Private proof shape hardening
+
+The proof parser now validates the original operation ID and strict integer expiry before native journal lookup. The journal applies the same validation to directly constructed objects; a malformed original read returns no operation. Ten counterexamples included an authenticated native HTTP500 for a list-valued ID. These now become explicit refusals without native events. Real signature, expiry, device ownership, replay, atomic effect and restart behavior remain covered by the real PostgreSQL recovery suite. The separate `../receipts/RUNTIME_RECOVERY_PROOF_SHAPE_SOURCE_20261023.json` retains the counterexamples, restored controls and deliberate regressions.

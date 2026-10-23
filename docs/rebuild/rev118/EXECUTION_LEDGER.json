@@ -172,7 +172,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T03:10:02.771503+00:00",
+    "updated_utc": "2026-10-23T03:20:49.846614+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
@@ -270,7 +270,9 @@
       "Owner source contract export444endpoints276schemas; existing feature/screen/function identity sets preserved.5recoveryextensions at OF-TRADING-005 / van.trading.halt, Android consumer pending.",
       "Estimated unsettled profit cannot reset losses/probation in cycle/account/scalar close or cold fold; scalar flat close preserves counts. Explicit settled-profit opt-in, strict native flags/source/environment/net convention/currency, one maturity observation persisted. ActualPaperorder+cashclose positive control remains functional.4actual counterexamples fixed;2183fulltrading pass0skip realprivatePG/DDS;79restoredfocused,78rebuild;8faults caught/restored. Provider finality and learning-health admission remain separate original obligations.",
       "Current connection repository metadata grants admin but GETVanActionssecret/publickey and DDSdeploykeys each403; no credential changes. Specific Kotlin2dependencyHTTP403 control rerun accepted201 on exacta4commit. Initial hosted345caught/29absent, not full corpus; retry active.",
-      "Owner export444endpoints276schemas remains unchanged;374legacy anchors valid. No source registry identities, frozen package or gates changed."
+      "Owner export444endpoints276schemas remains unchanged;374legacy anchors valid. No source registry identities, frozen package or gates changed.",
+      "Closed private proof IDs/expiry before native journal lookup, including direct dataclass bypass and malformed original reads.10counterexamples inclauthenticated nativeHTTP500 fixed to403/noevent.65restored realprivatePG recovery pass0skip;78rebuild;4faults caught/restored. Valid owner signatures/expiry/replay/atomic outcomes retained; source only.",
+      "Actual hostedA4all374legacy cases caught from same-source original345andrerun29 after MavendependencyHTTP403; originalfailure retained. Native18pass4explicit skips,actualVITS2.709/1.874s,PG26voice117publictrading2162pass1DDSskip. Only retained final CI failures are DDSreadkey andtrustedmainbootstrap."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -281,9 +283,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Continue original whole-product programme. Harden learning-health admission and immutable episode monetary maturity while preserving explicit backtest/replay/counterfactual studies; add actual native provider fee/cash finality/corrections, physical account and worker identity/epoch/deadline/precision, safe retirement and device-key propagation. Private recovery-proof malformed-ID/expiry shape currently can raise500 before verification; public typed gateway already prevents those forms; close private error contract. No new frontend beforeBG001 or invented gates. Collect exact-source hostedA4 Kotlin2 rerun and full374corpus; broadA4source audit active with realPG/browser/AGP. GitHub secret/deploy-key administration actually403 despite admin metadata; source push and specific Actions rerun201 available.",
-    "previous_head": "a4a91e8e56120db6bd8433a1512f5d9963d5377e",
-    "current_packet": "Settled profit cannot erase loss limits"
+    "next_action": "Continue whole-product source implementation. Harden learning-health mature-outcome admission and immutable episode monetary provenance while preserving explicit studies; native provider fee/cash/corrections, physical account and worker identity/epoch/deadline/precision, safe retirement, device-key propagation and all original assistant features remain. Keep new frontend behindBG001 and acceptance gates unissued. ExactA4broadaudit remainsactive; hostedA4full374andnative18pass4skip collected after actualKotlin2same-source dependency rerun, initial345/29missingHTTP403 retained. CIsecret/deploykey administration actual403; no new credentials.",
+    "previous_head": "df947e1de57a5f0d78ea0e93c885115a24b4c7b7",
+    "current_packet": "Private runtime proof error-state contract; A4 hosted evidence complete"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -341,6 +343,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Continue original whole-product programme. Harden learning-health admission and immutable episode monetary maturity while preserving explicit backtest/replay/counterfactual studies; add actual native provider fee/cash finality/corrections, physical account and worker identity/epoch/deadline/precision, safe retirement and device-key propagation. Private recovery-proof malformed-ID/expiry shape currently can raise500 before verification; public typed gateway already prevents those forms; close private error contract. No new frontend beforeBG001 or invented gates. Collect exact-source hostedA4 Kotlin2 rerun and full374corpus; broadA4source audit active with realPG/browser/AGP. GitHub secret/deploy-key administration actually403 despite admin metadata; source push and specific Actions rerun201 available.",
-  "updated_at_utc": "2026-10-23T03:10:02.771503+00:00"
+  "current_action": "Continue whole-product source implementation. Harden learning-health mature-outcome admission and immutable episode monetary provenance while preserving explicit studies; native provider fee/cash/corrections, physical account and worker identity/epoch/deadline/precision, safe retirement, device-key propagation and all original assistant features remain. Keep new frontend behindBG001 and acceptance gates unissued. ExactA4broadaudit remainsactive; hostedA4full374andnative18pass4skip collected after actualKotlin2same-source dependency rerun, initial345/29missingHTTP403 retained. CIsecret/deploykey administration actual403; no new credentials.",
+  "updated_at_utc": "2026-10-23T03:20:49.846614+00:00"
 }
