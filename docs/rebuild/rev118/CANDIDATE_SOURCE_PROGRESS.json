@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T14:00:57.558698+00:00",
+  "updated_at_utc": "2026-10-23T14:25:27.938373+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -603,6 +603,10 @@
         {
           "description": "Native MT5 signed transport freshness/physical identity/permissions/connection rechecked after blocking native reads immediatelybeforeSDKentry. A failed private server-side dispatch guard refuseszero effect, preserving original issuedtime; no serializedcallback/host setting.4initialbeforefailures+1positive and5of6integratedbaseline failures fixed;58focused/2484fulltrading pass0skip realPGstoppedremoved;5faults+5controls caught/restored inclfinal native-account-readclock delay. ExistingmTLS/HMAC plusactualSDKfixture. Source only; explicit commanddeadline/leaseepoch/riskbudget envelopes and nativebroker/gates remain.",
           "evidence": "backend/BE-010_MT5_FINAL_NATIVE_ENTRY_FENCE.md; receipts/MT5_FINAL_NATIVE_ENTRY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Explicit OrderCommand expiry retained in signed MT5 body and checked before RPC/afterreadonlyprecheck/finalnativeSDKboundary. Typedorder_send_expiring fenceslegacy/rollback; strictinteger/missingdeadline refused, None retainsoriginalcontract.15of16beforefailures fixed;74focused/2500fulltrading pass0skip realPGstoppedremoved,79rebuild;7faults+7controls caught/restored. Initialnativeexpiry survivor retained; correctedsecond/sendquote oracle provesfinalnativecheck. RealmTLS/JSON/HMAC withSDKfixture. Storageguard14filesystemprobes and20DIALcontrolspass, limitations explicit. Sourceonly; nativeclock/finality/epoch/riskbudget/whole-unit/provider/production/handset obligations remain.",
+          "evidence": "backend/BE-010_MT5_EXPLICIT_ENTRY_DEADLINE.md; receipts/MT5_EXPLICIT_ENTRY_DEADLINE_SOURCE_20261023.json"
         }
       ]
     },

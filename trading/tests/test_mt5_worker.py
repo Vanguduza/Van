@@ -148,5 +148,15 @@ def test_full_mtls_round_trip_client_transport_to_worker_https_server(tmp_path):
         # wrong signing key on the client side → the worker answers "bad signature" and the adapter's sync raises KeyError→ treated as fault by callers
         bad = Mt5BridgeClient(signing_key=b"x" * 32, transport=t)
         assert bad.call("positions", {"alias": "fx_primary"}, now_ms=int(time.time() * 1000))["error"] == "bad signature"
+        # The optional core deadline survives real TLS/JSON/HMAC transport and
+        # the actual worker dispatch path. The terminal SDK is the fixture.
+        live_now=int(time.time()*1000)
+        cmd=OrderCommand('deadline-tls','d'*64,'original','fx_primary','mt5','EURUSD',Direction.LONG,
+            'MARKET',D('.1'),D('1.1'),D('1.09'),StopMode.VENUE,LossModel.STOP_DISTANCE,
+            expires_at_ms=live_now+5000).sealed()
+        assert adapter.submit(cmd,now_ms=live_now).status=='FILLED'
+        actual=[r for r in adapter.client.sent if r.op=='order_send_expiring']
+        assert len(actual)==1 and actual[0].body['expires_at_ms']==cmd.expires_at_ms
+        assert adapter.client.verify(actual[0]) and len(w.t.mt5.sent)==1
     finally:
         srv.shutdown()

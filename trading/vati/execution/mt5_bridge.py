@@ -19,7 +19,7 @@ from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCom
 from vati.execution.mt5_identity import Mt5Identity
 from vati.risk.contracts import Direction, LossModel
 
-OPS = ("sync_account", "sync_symbols", "order_check", "order_send", "positions", "orders", "history", "modify_sl_tp", "close")
+OPS = ("sync_account", "sync_symbols", "order_check", "order_send", "order_send_expiring", "positions", "orders", "history", "modify_sl_tp", "close")
 ZERO = Decimal("0")
 
 
@@ -127,15 +127,33 @@ class Mt5BridgeAdapter:
         return response['orders']
 
     def submit(self, cmd: OrderCommand, *, now_ms: int) -> ExecutionReceipt:
+        def deadline_rejected(reason):
+            return ExecutionReceipt(cmd.trade_intent_id,cmd.decision_hash,self.venue,'REJECTED',ZERO,None,
+                cmd.entry_price,cmd.entry_price,cmd.entry_price,False,now_ms,now_ms,reject_reason=reason).sealed()
+        expiry=cmd.expires_at_ms
+        if expiry is not None:
+            if type(expiry) is not int or not 0<expiry<2**63 or expiry<=max(now_ms,self.clock()):
+                return deadline_rejected('explicit native entry deadline is invalid or expired; not dispatched')
+            try:
+                support=self._call('sync_account',{'alias':self.account_alias},now_ms=now_ms).get('entry_constraints')
+            except VenueUnavailable:
+                return deadline_rejected('native entry deadline support unavailable; not dispatched')
+            if support!={'schema':'van.mt5.entry-constraints/1','explicit_deadline':True,'required_op':'order_send_expiring'} or type(support.get('explicit_deadline')) is not bool:
+                return deadline_rejected('native worker cannot enforce the explicit entry deadline; not dispatched')
         if cmd.protective_stop is None:
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason="MT5 orders require SL in the same request").sealed()
         body = {"alias": self.account_alias, "symbol": cmd.symbol, "type": "BUY" if cmd.direction is Direction.LONG else "SELL", "volume": str(cmd.quantity), "price": str(cmd.entry_price),
                 "sl": str(cmd.protective_stop), "tp": str(cmd.targets[0]) if cmd.targets else None, "deviation": str(cmd.max_slippage) if cmd.max_slippage else None,
                 "comment": f"vati:{cmd.trade_intent_id}", "magic": int(cmd.decision_hash[:8], 16) % 2_147_483_647, "order_type": cmd.entry_type}
+        if expiry is not None:body['expires_at_ms']=expiry
         chk = self._call("order_check", body, now_ms=now_ms)
         if chk.get("ok") is not True:
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason=str(chk.get("reason", "order_check failed"))).sealed()
-        r = self._call("order_send", body, now_ms=now_ms)
+        if expiry is not None and expiry<=self.clock():
+            return deadline_rejected('explicit native entry deadline expired during precheck; not dispatched')
+        # A typed operation also fences a worker rollback between capability
+        # read and dispatch: legacy workers refuse the unknown operation.
+        r = self._call("order_send_expiring" if expiry is not None else "order_send", body, now_ms=now_ms)
         filled = Decimal(str(r.get("volume", "0")))
         stop_confirmed=r.get('sl_confirmed') is True
         return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, r.get("status", "UNKNOWN"), filled, Decimal(str(r["price"])) if r.get("price") else None,

@@ -32,7 +32,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-OPS = ("sync_account", "sync_symbols", "order_check", "order_send", "positions", "orders", "history", "modify_sl_tp", "close")
+OPS = ("sync_account", "sync_symbols", "order_check", "order_send", "order_send_expiring", "positions", "orders", "history", "modify_sl_tp", "close")
 SKEW_MS = 5000
 
 
@@ -349,12 +349,13 @@ class Worker:
                     or expected != physical):
                     raise PermissionError('terminal account identity differs from the signed Linux binding')
                 if op == "sync_account":
-                    out = {"account": {**a, "verified": True, "server_time_ms": self.clock()}}
+                    out = {"account": {**a, "verified": True, "server_time_ms": self.clock()},
+                           "entry_constraints":{"schema":"van.mt5.entry-constraints/1","explicit_deadline":True,"required_op":"order_send_expiring"}}
                 elif op == "sync_symbols":
                     out = {"symbols": [self.t.symbol(s) for s in b.get("symbols", [])]}
                 elif op == "order_check":
                     out = self.t.order_check(b)
-                elif op == "order_send":
+                elif op in ("order_send","order_send_expiring"):
                     if abs(self.clock() - int(req["issued_ms"])) > SKEW_MS:
                         out = {"status": "REJECTED", "reason": "signed entry request expired before terminal dispatch"}
                     elif a.get("trade_allowed") is not True:
@@ -371,6 +372,12 @@ class Worker:
                             # HTTP admission. This does not renew signed time.
                             if abs(self.clock()-int(req['issued_ms']))>SKEW_MS:
                                 raise PermissionError('signed native entry request expired')
+                            if op=='order_send_expiring' and 'expires_at_ms' not in b:
+                                raise PermissionError('explicit native entry deadline required')
+                            if 'expires_at_ms' in b:
+                                expiry=b['expires_at_ms']
+                                if type(expiry) is not int or not 0<expiry<2**63 or self.clock()>=expiry:
+                                    raise PermissionError('explicit native entry deadline invalid or expired')
                         out = self.t.order_send(b,before_dispatch=final_entry_guard)
                 elif op == "positions":
                     out = {"positions": self.t.positions()}
