@@ -105,12 +105,20 @@ class BridgeQueue:
 
     def take_pending(self, alias: str, *, now_ms: int, limit: int = 10) -> list[dict]:
         with self._lock:
-            rows = self._conn.execute("SELECT id, op, body_json FROM commands WHERE alias = ? AND status = 'QUEUED' ORDER BY id LIMIT ?", (alias, limit)).fetchall()
-            out = []
-            for cid, op, body in rows:
-                self._conn.execute("UPDATE commands SET status = 'TAKEN', taken_ms = ? WHERE id = ?", (now_ms, cid))
-                out.append({"id": cid, "op": op, **json.loads(body)})
-            return out
+            # Independent poll servers share the database, not this lock.
+            # Claim the complete batch before any consumer can receive it.
+            self._conn.execute('BEGIN IMMEDIATE')
+            try:
+                rows = self._conn.execute("SELECT id, op, body_json FROM commands WHERE alias = ? AND status = 'QUEUED' ORDER BY id LIMIT ?", (alias, limit)).fetchall()
+                out = []
+                for cid, op, body in rows:
+                    self._conn.execute("UPDATE commands SET status = 'TAKEN', taken_ms = ? WHERE id = ?", (now_ms, cid))
+                    out.append({"id": cid, "op": op, **json.loads(body)})
+                self._conn.commit()
+                return out
+            except BaseException:
+                self._conn.rollback()
+                raise
 
     def complete(self, alias: str, cid: int, result: dict, *, now_ms: int) -> bool:
         with self._lock:
