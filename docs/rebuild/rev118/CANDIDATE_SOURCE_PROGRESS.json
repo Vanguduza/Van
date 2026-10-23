@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T15:30:38.656592+00:00",
+  "updated_at_utc": "2026-10-23T15:44:10.006627+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -414,9 +414,14 @@
         "BE-005",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "SOURCE_TESTED",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Research lake verifies and parses one captured blob; validates instrument/timeframe/finite market values, duplicates, manifest metadata and conflicting overlaps. Encoded contained partitions and slice paths, legacy twelve-character filename/hash compatibility, existing cross-process state-file lock and flushed atomic manifest replacement. Actual concurrent threads/processes and failed/lost-ACK publication retain original snapshots without duplicate history.11 reproduced failures;22 focused/audited and2539 full trading cases pass0skip with privatePG stopped/removed;8 deliberate fault/control pairs caught/restored. Real public historical probe returnedHTTP429 and stays unqualified. No source-use, provider, native, unit, profitability or handset acceptance.",
+          "evidence": "backend/BE-008_015_RESEARCH_LAKE_INTEGRITY.md; receipts/RESEARCH_LAKE_INTEGRITY_SOURCE_20261023.json"
+        }
+      ]
     },
     "BE-009": {
       "title": "Mandates, risk, sizing and portfolio reservations",
@@ -710,9 +715,14 @@
         "BE-014",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "SOURCE_TESTED",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Research lake verifies and parses one captured blob; validates instrument/timeframe/finite market values, duplicates, manifest metadata and conflicting overlaps. Encoded contained partitions and slice paths, legacy twelve-character filename/hash compatibility, existing cross-process state-file lock and flushed atomic manifest replacement. Actual concurrent threads/processes and failed/lost-ACK publication retain original snapshots without duplicate history.11 reproduced failures;22 focused/audited and2539 full trading cases pass0skip with privatePG stopped/removed;8 deliberate fault/control pairs caught/restored. Real public historical probe returnedHTTP429 and stays unqualified. No source-use, provider, native, unit, profitability or handset acceptance.",
+          "evidence": "backend/BE-008_015_RESEARCH_LAKE_INTEGRITY.md; receipts/RESEARCH_LAKE_INTEGRITY_SOURCE_20261023.json"
+        }
+      ]
     },
     "BE-018": {
       "title": "Chart data contracts, indicators, drawings and workspaces",
