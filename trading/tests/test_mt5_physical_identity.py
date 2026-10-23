@@ -120,3 +120,13 @@ def test_incomplete_profile_cannot_open_credentials_or_log_into_a_terminal(tmp_p
     worker.cfg['accounts']['fx_primary']['password_file']=str(tmp_path/'not-created')
     result=send(client)
     assert 'identity' in result.get('error','') and not fake.login_calls and not fake.sent
+
+
+@pytest.mark.parametrize('field,value',[('login','999999'),('server','Other-Server'),('currency','EUR'),('demo',False),('demo',1)])
+def test_the_signed_linux_binding_must_match_the_worker_native_readback_before_sending(tmp_path,field,value):
+    worker,client,fake=build(tmp_path)
+    expected={'login':'12345678','server':'Broker-Demo','currency':'USD','demo':True}
+    expected[field]=value
+    result=client.call('order_send',{'alias':'fx_primary','symbol':'EURUSD','type':'BUY','volume':'0.1',
+        'price':'1.1','sl':'1.09','order_type':'MARKET','expected_account':expected},now_ms=1000000)
+    assert 'binding' in result.get('error','') and not fake.sent

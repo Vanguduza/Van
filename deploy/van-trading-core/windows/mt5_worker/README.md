@@ -30,3 +30,5 @@ Where the Windows host lives is the owner's choice (an x86 OCI Windows instance 
 straightforward option; the firewall rule in `install.ps1` admits only `10.0.1.233`).
 
 Each alias must explicitly declare `currency` and a JSON boolean `demo`; older incomplete records refuse until corrected. The worker reads native server and trade mode on every request, preserves explicit terminal permission facts, and serializes login, readback and terminal operations across concurrent aliases. Its login cache includes the server. These are source safeguards; native terminal and deployment qualification remain required.
+
+The Linux factory signs its expected physical account into each request. The worker validates that binding within its terminal lock and acknowledges the native identity it observed. Factory clients preflight this acknowledgement before effectful calls, so an older worker is refused before receiving an entry. Fresh connections use independent nonce namespaces while original signed requests remain protected against replay.

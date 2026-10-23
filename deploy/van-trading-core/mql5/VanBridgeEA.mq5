@@ -11,7 +11,7 @@
 //|   X-Van-Ts, X-Van-Nonce, X-Van-Signature =                         |
 //|   HMAC-SHA256(SigningKey, ts + "\n" + nonce + "\n" + alias + "\n" + SHA256hex(body)) |
 //| Reply: one command per line                                        |
-//|   id|op|symbol|type|volume|price|sl|tp|position|comment|magic|deviation |
+//|   id|op|symbol|type|volume|price|sl|tp|position|comment|magic|deviation|order_type|login|server_hex|currency_hex|demo |
 //|                                                                    |
 //| Terminal setting required: Tools ▸ Options ▸ Expert Advisors ▸    |
 //| "Allow WebRequest for listed URL" → add BridgeUrl.                 |
@@ -76,13 +76,33 @@ string HmacSha256Hex(const string keyStr, const uchar &msg[])
 
 string JsonEscape(string s) { StringReplace(s, "\\", "\\\\"); StringReplace(s, "\"", "\\\""); StringReplace(s, "\n", " "); return s; }
 
+string Utf8Hex(const string value)
+{
+   uchar data[]; StringToCharArray(value, data, 0, StringLen(value), CP_UTF8);
+   return HexOf(data);
+}
+
+bool NativeIdentityMatches(const string &f[])
+{
+   if(ArraySize(f) != 17) return false;
+   long mode = AccountInfoInteger(ACCOUNT_TRADE_MODE);
+   if(mode != ACCOUNT_TRADE_MODE_DEMO && mode != ACCOUNT_TRADE_MODE_REAL) return false;
+   return f[13] == IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN))
+      && f[14] == Utf8Hex(AccountInfoString(ACCOUNT_SERVER))
+      && f[15] == Utf8Hex(AccountInfoString(ACCOUNT_CURRENCY))
+      && f[16] == (mode == ACCOUNT_TRADE_MODE_DEMO ? "true" : "false");
+}
+
 //+------------------------------------------------------------------+
 //| snapshot                                                           |
 //+------------------------------------------------------------------+
 string SnapshotJson()
 {
-   string acct = StringFormat("{\"login\":%d,\"equity\":%.2f,\"balance\":%.2f,\"currency\":\"%s\",\"trade_allowed\":%s,\"hedging\":%s,\"server_time_ms\":%I64d}",
-      (int)AccountInfoInteger(ACCOUNT_LOGIN), AccountInfoDouble(ACCOUNT_EQUITY), AccountInfoDouble(ACCOUNT_BALANCE), AccountInfoString(ACCOUNT_CURRENCY),
+   long accountMode = AccountInfoInteger(ACCOUNT_TRADE_MODE);
+   string accountDemo = accountMode == ACCOUNT_TRADE_MODE_DEMO ? "true" : accountMode == ACCOUNT_TRADE_MODE_REAL ? "false" : "null";
+   string acct = StringFormat("{\"login\":%I64d,\"server\":\"%s\",\"demo\":%s,\"equity\":%.2f,\"balance\":%.2f,\"currency\":\"%s\",\"trade_allowed\":%s,\"hedging\":%s,\"server_time_ms\":%I64d}",
+      AccountInfoInteger(ACCOUNT_LOGIN), JsonEscape(AccountInfoString(ACCOUNT_SERVER)), accountDemo,
+      AccountInfoDouble(ACCOUNT_EQUITY), AccountInfoDouble(ACCOUNT_BALANCE), JsonEscape(AccountInfoString(ACCOUNT_CURRENCY)),
       (AccountInfoInteger(ACCOUNT_TRADE_ALLOWED) && TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) && MQLInfoInteger(MQL_TRADE_ALLOWED)) ? "true" : "false",
       AccountInfoInteger(ACCOUNT_MARGIN_MODE) == ACCOUNT_MARGIN_MODE_RETAIL_HEDGING ? "true" : "false", (long)TimeGMT() * 1000);
    string pos = "[";
@@ -182,7 +202,17 @@ void OnTimer()
       string f[]; int k = StringSplit(lines[i], '|', f);
       if(k < 12) { Print("VanBridgeEA: malformed command line"); continue; }
       string id = f[0], op = f[1];
-      if(op == "ORDER_SEND")      ExecOrderSend(id, f[2], f[3], StringToDouble(f[4]), StringToDouble(f[5]), StringToDouble(f[6]), StringToDouble(f[7]), f[9], StringToInteger(f[10]), (int)StringToInteger(f[11]), StringFind(f[9], "LIMIT") >= 0 ? "LIMIT" : "MARKET");
+      if(!NativeIdentityMatches(f))
+      {
+         PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"ok\":false,\"volume\":\"0\",\"reason\":\"native physical identity binding differs\"}", id));
+         continue;
+      }
+      if(op == "ORDER_SEND" && f[12] != "MARKET" && f[12] != "LIMIT")
+      {
+         PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"volume\":\"0\",\"reason\":\"unsupported explicit order type\"}", id));
+         continue;
+      }
+      if(op == "ORDER_SEND")      ExecOrderSend(id, f[2], f[3], StringToDouble(f[4]), StringToDouble(f[5]), StringToDouble(f[6]), StringToDouble(f[7]), f[9], StringToInteger(f[10]), (int)StringToInteger(f[11]), f[12]);
       else if(op == "MODIFY_SL")  ExecModifySl(id, (ulong)StringToInteger(f[8]), StringToDouble(f[6]), StringToDouble(f[7]));
       else if(op == "CLOSE")      ExecClose(id, (ulong)StringToInteger(f[8]), StringToDouble(f[4]));
       else PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"reason\":\"op not in contract\"}", id));

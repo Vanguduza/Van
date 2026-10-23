@@ -116,6 +116,8 @@ def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: D
     if account.broker == BrokerKind.PAPER:
         return bound(PaperAdapter(venue=account.router_venue, account_alias=account.alias, currency=account.currency, equity=equity_hint, symbol_contracts=symbol_contracts))
     if account.broker == BrokerKind.MT5:
+        from vati.execution.mt5_identity import Mt5Identity
+        identity = Mt5Identity.from_account(account)
         from vati.execution.mt5_bridge import Mt5BridgeAdapter, Mt5BridgeClient
         from vati.execution.transports.mt5_http import Mt5HttpTransport
         secrets = registry.credentials(account.alias)
@@ -123,7 +125,8 @@ def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: D
         if not key:
             raise RuntimeError(f"{account.alias}: BRIDGE_SIGNING_KEY missing from secrets")
         transport = Mt5HttpTransport(account.bridge_url, ca_file=secrets["BRIDGE_CA_FILE"], client_cert=secrets.get("BRIDGE_CLIENT_CERT"), client_key=secrets.get("BRIDGE_CLIENT_KEY"))
-        return bound(Mt5BridgeAdapter(Mt5BridgeClient(signing_key=key.encode(), transport=transport), account_alias=account.alias, venue=account.router_venue))
+        return bound(Mt5BridgeAdapter(Mt5BridgeClient(signing_key=key.encode(), transport=transport), account_alias=account.alias, venue=account.router_venue,
+            identity=identity))
     if account.broker == BrokerKind.DERIV:
         from vati.execution.deriv_identity import validate_deriv_endpoint
         validate_deriv_endpoint(account.bridge_url)
@@ -148,11 +151,14 @@ def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: D
         return bound(CtraderAdapter(CtraderTransport(host=host), client_id=secrets["CTRADER_CLIENT_ID"], client_secret_provider=lambda: registry.credentials(account.alias)["CTRADER_CLIENT_SECRET"],
                               access_token_provider=lambda: registry.credentials(account.alias)["CTRADER_ACCESS_TOKEN"], ctid_trader_account_id=int(account.login), account_alias=account.alias, venue=account.router_venue))
     if account.broker == BrokerKind.MT5_EA:
+        from vati.execution.mt5_identity import Mt5Identity
+        identity = Mt5Identity.from_account(account)
         from vati.execution.mt5_pull import Mt5PullAdapter, open_bridge_queue
         secrets = registry.credentials(account.alias)
         if not secrets.get("BRIDGE_SIGNING_KEY"):
             raise RuntimeError(f"{account.alias}: BRIDGE_SIGNING_KEY missing from secrets")
-        return bound(Mt5PullAdapter(open_bridge_queue(secrets.get("BRIDGE_QUEUE", "")), account_alias=account.alias, venue=account.router_venue))
+        return bound(Mt5PullAdapter(open_bridge_queue(secrets.get("BRIDGE_QUEUE", "")), account_alias=account.alias, venue=account.router_venue,
+            identity=identity))
     if account.broker == BrokerKind.ZSE_OWNER_TICKET:
         from vati.execution.zse_ticket import OwnerTicketAdapter
         return bound(OwnerTicketAdapter(venue=account.router_venue, account_alias=account.alias,

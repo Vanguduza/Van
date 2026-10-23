@@ -278,7 +278,9 @@
       "Actual execution/research cohort independent from policy permission: Backtest rejects nonBACKTESThooks twice, Paper services stay simulated, sealed risk cohort drives cold scope and rejects simulatedLIVE/unknown binding.6validbeforefailures fixed; full2228pass1newfixturecleanupfailure retained, correctedactualPGcontrol passes;8faults caught/restored, focused55pass and1PGcase separatelyexecuted,78rebuild. Fresh clean exact-commit full run pending; no unit acceptance.",
       "Kernel39898232618 actual6pass0skip, testedmerge4296a6cc treeequals169053c9; six fixture/application files identical toA4broad source. Separate productionhost firewall stillunverified.",
       "Native worker source binds complete configured login/server/currency/demo to actual terminal facts, strict permission/mode/profile, server-aware login cache and serialized alias selection/readback/effect; signed timewindow rechecked afterlogin.5original+1delayeddispatchvalidfailures fixed;2249fulltrading0skip realprivatePG/DDS,45restored/78rebuild;8faults caught/restored. Native terminal/factory/PullEA/epoch/finality gates remain.",
-      "Frozen exactd6 source cleanfull2229pass0skip483.41s, actualdriverexit0. Separate backend/contracts audit continues; fixture cleanup not yet claimed. Hosted169/39898232568 all374mutations/383edits;18nativepass4artworkskips,VITS2.082/1.884s,PG26voice117publictrading2212pass1DDSskip; testedmerge4296a6cc treeequal. Only DDSreadkey andtrustedmainbootstrap failures retained."
+      "Frozen exactd6 source cleanfull2229pass0skip483.41s, actualdriverexit0. Separate backend/contracts audit continues; fixture cleanup not yet claimed. Hosted169/39898232568 all374mutations/383edits;18nativepass4artworkskips,VITS2.082/1.884s,PG26voice117publictrading2212pass1DDSskip; testedmerge4296a6cc treeequal. Only DDSreadkey andtrustedmainbootstrap failures retained.",
+      "Actual MT5push/pull factories bind physical login/server/currency/demo; signedworkerack and preflight rejectlegacy/foreign workers; independentnonce namespaces fixfresh/concurrent client collisions. Registeredpoll locks freshkey/identity/permission, onlyQUEUEDcanNoEffectrefuse; bound17fieldwire/explicitentrytype/hexidentity andMQLsourceguard, originalhistoricalread separatedfromcurrentstaleguard.2nonce+8factoryfailures fixed;2281fulltrading0skip realPG/DDS,15faults caught/restored,78rebuild. MQLnotnativecompiled; precision/epochs/deadlines/finalityremain.",
+      "Hosted4700/39900846394 complete374legacycases/383edits,native18pass4artworkskips,realVITS2.758/2.516s,PG26voice117publictrading2248pass1DDSskip. Actual source/merge trees equal; DDSreadkey andtrustedmain failures retained."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -289,9 +291,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Continue autonomous original whole-product build. Fix actual MT5freshclientnonce collisions, Linux profile/worker identity binding, PullEAphysicalidentity/precision/epoch/deadline, provider finality/corrections, device-key propagation, safe retirement and all assistant functions. Frozen d6 source trading2229pass0skip; auditedbackend/contracts stillrunning separately inownedcheckout, do notmodify. Hosted169full374/native18pass4skips complete; kernel6pass0skip complete. No newfrontend beforeBG001 or fabricated unit/native/provider/production/S24 acceptance.",
-    "previous_head": "d6fa7eee9c449cd182bfd0514cb6b4cb6bf7cb13",
-    "current_packet": "MT5 worker physical identity and serialized native dispatch"
+    "next_action": "Continue autonomous whole-product source implementation. Add source Android clients and immutable exact A4 recovery protocol for existing backend endpoints; no newfrontend beforeBG001. Finish nativeMQLnumericprecision, fullsignedworker deadline/epoch/risk envelopes, providerfinality/corrections, originalfill/statusintegrity, device-key propagation andsafe retirement; preserve all original assistant features. Frozen d6 auditedbackend/contracts stillrunning separately withrealChrome/AGP/PG, do notmodify; its2281-parent trading2229clean verified. Collect needed currenthostednative/full374 evidence before replacing. No invented unit/native/provider/production/S24 acceptance.",
+    "previous_head": "4700cba23e6afaeb7a55edda9e8771f18f6337ba",
+    "current_packet": "MT5 factory physical binding, reconnect and original bound delivery"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -349,6 +351,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Continue autonomous original whole-product build. Fix actual MT5freshclientnonce collisions, Linux profile/worker identity binding, PullEAphysicalidentity/precision/epoch/deadline, provider finality/corrections, device-key propagation, safe retirement and all assistant functions. Frozen d6 source trading2229pass0skip; auditedbackend/contracts stillrunning separately inownedcheckout, do notmodify. Hosted169full374/native18pass4skips complete; kernel6pass0skip complete. No newfrontend beforeBG001 or fabricated unit/native/provider/production/S24 acceptance.",
-  "updated_at_utc": "2026-10-23T04:32:01.206416+00:00"
+  "current_action": "Continue autonomous whole-product source implementation. Add source Android clients and immutable exact A4 recovery protocol for existing backend endpoints; no newfrontend beforeBG001. Finish nativeMQLnumericprecision, fullsignedworker deadline/epoch/risk envelopes, providerfinality/corrections, originalfill/statusintegrity, device-key propagation andsafe retirement; preserve all original assistant features. Frozen d6 auditedbackend/contracts stillrunning separately withrealChrome/AGP/PG, do notmodify; its2281-parent trading2229clean verified. Collect needed currenthostednative/full374 evidence before replacing. No invented unit/native/provider/production/S24 acceptance.",
+  "updated_at_utc": "2026-10-23T05:02:21.120606+00:00"
 }

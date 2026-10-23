@@ -13,7 +13,8 @@ waits; the pull server (`create_pull_app`) hands commands to the EA and stores r
 Wire (EA → server): POST /ea/v1/{alias}/poll   JSON {ts, nonce, account, positions, results}
   headers: X-Van-Ts, X-Van-Nonce, X-Van-Signature = HMAC-SHA256(key, "{ts}\\n{nonce}\\n{alias}\\n{sha256(body)}")
 Wire (server → EA): text/plain, one command per line:
-  id|op|symbol|type|volume|price|sl|tp|position|comment|magic|deviation
+  id|op|symbol|type|volume|price|sl|tp|position|comment|magic|deviation|order_type|login|server_hex|currency_hex|demo
+  (legacy unbound component fixtures retain the original 12-column format)
 The EA never receives a command whose op is outside ORDER_SEND, MODIFY_SL, CLOSE."""
 
 from __future__ import annotations
@@ -24,6 +25,7 @@ import json
 import sqlite3
 import threading
 import time
+from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass, field
 from decimal import Decimal
 from pathlib import Path
@@ -33,6 +35,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import PlainTextResponse
 
 from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCommand, VenuePosition, VenueUnavailable
+from vati.execution.mt5_identity import Mt5Identity
 from vati.risk.contracts import Direction, LossModel
 
 ZERO = Decimal("0")
@@ -103,7 +106,8 @@ class BridgeQueue:
                      'result':json.loads(result) if result is not None else None}
                     for cid,body,status,result in rows]
 
-    def take_pending(self, alias: str, *, now_ms: int, limit: int = 10) -> list[dict]:
+    def take_pending(self, alias: str, *, now_ms: int, limit: int = 10,
+                     expected_identity: Mt5Identity | None = None, allow_entry: bool = True) -> list[dict]:
         with self._lock:
             # Independent poll servers share the database, not this lock.
             # Claim the complete batch before any consumer can receive it.
@@ -112,8 +116,23 @@ class BridgeQueue:
                 rows = self._conn.execute("SELECT id, op, body_json FROM commands WHERE alias = ? AND status = 'QUEUED' ORDER BY id LIMIT ?", (alias, limit)).fetchall()
                 out = []
                 for cid, op, body in rows:
+                    payload = json.loads(body)
+                    if expected_identity is not None:
+                        try:
+                            bound = Mt5Identity(**payload['expected_account'])
+                            admitted = bound == expected_identity and (op != 'ORDER_SEND' or allow_entry)
+                        except (KeyError, TypeError, ValueError, VenueUnavailable):
+                            admitted = False
+                        if not admitted:
+                            # QUEUED has never been handed to a terminal. Do not
+                            # apply this refusal to TAKEN/uncertain operations.
+                            result = {'status':'REJECTED','volume':'0','ok':False,
+                                'reason':'registered physical account binding or entry permission changed'}
+                            self._conn.execute("UPDATE commands SET status='DONE', result_json=?, done_ms=? WHERE id=?",
+                                (json.dumps(result,sort_keys=True),now_ms,cid))
+                            continue
                     self._conn.execute("UPDATE commands SET status = 'TAKEN', taken_ms = ? WHERE id = ?", (now_ms, cid))
-                    out.append({"id": cid, "op": op, **json.loads(body)})
+                    out.append({"id": cid, "op": op, **payload})
                 self._conn.commit()
                 return out
             except BaseException:
@@ -170,6 +189,10 @@ def format_commands(cmds: list[dict]) -> str:
     for c in cmds:
         f = [str(c["id"]), c["op"], c.get("symbol", ""), c.get("type", ""), str(c.get("volume", "")), str(c.get("price", "")), str(c.get("sl", "")), str(c.get("tp", "")), str(c.get("position", "")),
              str(c.get("comment", "")).replace("|", "/")[:31], str(c.get("magic", 0)), str(c.get("deviation", 20))]
+        if 'expected_account' in c:
+            identity = Mt5Identity(**c['expected_account'])
+            f += [str(c.get('order_type','')), identity.login, identity.server.encode().hex(),
+                  identity.currency.encode().hex(), 'true' if identity.demo else 'false']
         lines.append("|".join(f))
     return "\n".join(lines) + ("\n" if lines else "")
 
@@ -212,6 +235,7 @@ class Mt5PullAdapter:
     clock: Callable[[], int] = field(default=lambda: int(time.time() * 1000))
     poll_s: float = 0.2
     point_sizes: dict = field(default_factory=dict)
+    identity: Mt5Identity | None = None
 
     def _state(self) -> dict:
         st = self.queue.state(self.account_alias)
@@ -219,6 +243,8 @@ class Mt5PullAdapter:
             raise VenueUnavailable("MT5 EA has never reported; fail closed")
         if self.clock() - st["updated_ms"] > STATE_FRESH_MS:
             raise VenueUnavailable(f"MT5 EA snapshot stale ({(self.clock() - st['updated_ms']) // 1000}s); fail closed")
+        if self.identity is not None:
+            self.identity.validate(st.get('account'))
         return st
 
     def _await(self, cid: int) -> Optional[dict]:
@@ -264,7 +290,10 @@ class Mt5PullAdapter:
         return out
 
     def heartbeat(self, *, now_ms: int) -> Health:
-        st = self.queue.state(self.account_alias)
+        try:
+            st = self._state()
+        except VenueUnavailable:
+            return Health(False, 0, now_ms)
         fresh = st is not None and now_ms - st["updated_ms"] <= STATE_FRESH_MS
         return Health(fresh, int(st["account"].get("server_time_ms", now_ms)) - now_ms if fresh else 0, now_ms)
 
@@ -275,7 +304,8 @@ class Mt5PullAdapter:
             raise VenueUnavailable('native entry command seal is invalid')
         return {"symbol": cmd.symbol, "type": "BUY" if cmd.direction is Direction.LONG else "SELL", "volume": str(cmd.quantity), "price": str(cmd.entry_price), "sl": str(cmd.protective_stop), "tp": str(cmd.targets[0]) if cmd.targets else "",
                 "comment": f"vati:{cmd.trade_intent_id}"[:31], "magic": int(cmd.decision_hash[:8], 16) % 2_147_483_647, "deviation": str(deviation_points(cmd.symbol, cmd.max_slippage, self.point_sizes)), "order_type": cmd.entry_type,
-                'native_command_hash':cmd.command_hash,'trade_intent_id':cmd.trade_intent_id}
+                'native_command_hash':cmd.command_hash,'trade_intent_id':cmd.trade_intent_id,
+                **({'expected_account':self.identity.as_dict()} if self.identity is not None else {})}
 
     def _entry_receipt(self, cmd: OrderCommand, r, *, now_ms: int) -> ExecutionReceipt:
         rej = lambda why, status="REJECTED": ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, status, ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason=why).sealed()  # noqa: E731
@@ -305,7 +335,8 @@ class Mt5PullAdapter:
         body=self._entry_body(cmd)
         rows=[e for e in self.queue.native_entries(self.account_alias) if e['body'].get('native_command_hash')==cmd.command_hash]
         if len(rows)!=1 or rows[0]['body']!=body:return None
-        self._state()  # absence/staleness is not a healthy empty account
+        # Original result readback is historical, not a current account view.
+        # Consumers still need positions()/sync_account() before applying it.
         return self._entry_receipt(cmd,rows[0]['result'],now_ms=now_ms)
 
     def submit(self, cmd: OrderCommand, *, now_ms: int) -> ExecutionReceipt:
@@ -339,14 +370,18 @@ class Mt5PullAdapter:
         old = Decimal(str(pos["sl"])) if pos.get("sl") else None
         if old is not None and ((pos["type"] == "BUY" and new_stop < old) or (pos["type"] == "SELL" and new_stop > old)):
             return ExecutionReceipt("", "", self.venue, "REJECTED", ZERO, None, ZERO, ZERO, ZERO, False, now_ms, now_ms, broker_position_id=position_id, reject_reason="refusing to widen protective stop").sealed()
-        cid = self.queue.enqueue(self.account_alias, "MODIFY_SL", {"position": str(position_id), "symbol": pos["symbol"], "sl": str(new_stop), "tp": str(pos.get("tp") or "")}, now_ms=now_ms)
+        cid = self.queue.enqueue(self.account_alias, "MODIFY_SL", {"position": str(position_id), "symbol": pos["symbol"], "sl": str(new_stop), "tp": str(pos.get("tp") or ""),
+            **({'expected_account':self.identity.as_dict()} if self.identity is not None else {})}, now_ms=now_ms)
         r = self._await(cid)
         ok=r.get('ok') if r is not None else None
         status='ACCEPTED' if ok is True else 'REJECTED' if ok is False else 'UNKNOWN'
         return ExecutionReceipt("", "", self.venue, status, ZERO, None, ZERO, ZERO, ZERO, ok is True, now_ms, now_ms, broker_position_id=position_id, protective_stop_price=new_stop if ok is True else None, reject_reason="" if ok is True else str((r or {}).get("reason", "EA result unconfirmed; reconcile original request"))).sealed()
 
     def close(self, position_id: str, quantity: Optional[Decimal], *, now_ms: int, reason: str) -> ExecutionReceipt:
-        cid = self.queue.enqueue(self.account_alias, "CLOSE", {"position": str(position_id), "volume": str(quantity) if quantity else "", "comment": f"vati-close:{reason}"[:31]}, now_ms=now_ms)
+        if self.identity is not None:
+            self._state()
+        cid = self.queue.enqueue(self.account_alias, "CLOSE", {"position": str(position_id), "volume": str(quantity) if quantity else "", "comment": f"vati-close:{reason}"[:31],
+            **({'expected_account':self.identity.as_dict()} if self.identity is not None else {})}, now_ms=now_ms)
         r = self._await(cid)
         if r is None:
             return ExecutionReceipt("", "", self.venue, "UNKNOWN", ZERO, None, ZERO, ZERO, ZERO, True, now_ms, now_ms, broker_position_id=position_id, reject_reason=f"{reason}; EA timeout").sealed()
@@ -396,7 +431,12 @@ def create_pull_app(queue: BridgeQueue, key_provider: Callable[[str], Optional[b
     async def poll(alias: str, request: Request):
         if not alias.replace("_", "").isalnum():
             raise HTTPException(400, "bad alias")
-        key = key_provider(alias)
+        identity = None
+        allow_entry = True
+        if isinstance(key_provider, RegistryKeyProvider):
+            key, identity, allow_entry = key_provider.binding(alias)
+        else:
+            key = key_provider(alias)
         if not key:
             raise HTTPException(404, "unknown alias")
         body = await request.body()
@@ -424,29 +464,65 @@ def create_pull_app(queue: BridgeQueue, key_provider: Callable[[str], Optional[b
             data = json.loads(body or b"{}")
         except ValueError:
             raise HTTPException(400, "body must be JSON")
-        if "account" in data:
-            queue.set_state(alias, data.get("account", {}), data.get("positions", []), now_ms=now, nonce=nonce)
-        for r in data.get("results", []):
-            try:
-                queue.complete(alias, int(r["id"]), {k: v for k, v in r.items() if k != "id"}, now_ms=now)
-            except (KeyError, ValueError, TypeError):
-                continue
-        return format_commands(queue.take_pending(alias, now_ms=now))
+        if (not isinstance(data,dict) or not isinstance(data.get('results',[]),list)
+            or not isinstance(data.get('positions',[]),list)
+            or ('account' in data and not isinstance(data['account'],dict))):
+            raise HTTPException(400, 'native poll body shape is invalid')
+        scope = key_provider.poll_binding(alias) if isinstance(key_provider, RegistryKeyProvider) else nullcontext((key,identity,allow_entry))
+        with scope as (current_key,identity,allow_entry):
+            if current_key is None or not hmac.compare_digest(key,current_key):
+                raise HTTPException(409, 'native poll credential binding changed')
+            if identity is not None:
+                try:
+                    identity.validate(data.get('account'))
+                except VenueUnavailable:
+                    raise HTTPException(409, 'native account identity differs from its registered binding')
+            if "account" in data:
+                queue.set_state(alias, data.get("account", {}), data.get("positions", []), now_ms=now, nonce=nonce)
+            for r in data.get("results", []):
+                try:
+                    queue.complete(alias, int(r["id"]), {k: v for k, v in r.items() if k != "id"}, now_ms=now)
+                except (KeyError, ValueError, TypeError):
+                    continue
+            return format_commands(queue.take_pending(alias, now_ms=now,
+                expected_identity=identity, allow_entry=allow_entry))
 
     return app
 
 
-def key_provider_from_registry(registry_path: str) -> Callable[[str], Optional[bytes]]:
-    """Per-alias EA signing keys from the account registry's secrets (BRIDGE_SIGNING_KEY)."""
-    def provider(alias: str) -> Optional[bytes]:
+class RegistryKeyProvider:
+    """Read the key and expected identity from the same registered account."""
+    def __init__(self, registry_path):
+        self.registry_path = registry_path
+
+    def binding(self, alias):
         try:
             from vati.accounts import AccountRegistry
-            reg = AccountRegistry(registry_path)
+            from vati.accounts.access import SENDING_MODES
+            reg = AccountRegistry(self.registry_path)
             a = reg.get(alias)
             if a.broker != "MT5_EA":
-                return None
+                return None, None, False
+            identity = Mt5Identity.from_account(a)
             k = reg.credentials(alias).get("BRIDGE_SIGNING_KEY", "")
-            return k.encode() if len(k) >= 32 else None
+            return (k.encode(),identity,a.enabled and a.mode in SENDING_MODES) if len(k)>=32 else (None,None,False)
         except Exception:  # noqa: BLE001 — unknown alias / missing secret = 404, never a stack trace to the EA
-            return None
-    return provider
+            return None, None, False
+
+    def __call__(self, alias):
+        return self.binding(alias)[0]
+
+    @contextmanager
+    def poll_binding(self, alias):
+        from vati.accounts import AccountRegistry
+        registry = AccountRegistry(self.registry_path)
+        # Same lock order as profile/key writers. Re-read after receiving and
+        # verifying the body; a slow poll cannot extend the old permission.
+        with registry.operation_lock(alias):
+            with registry._mutation_lock():
+                yield self.binding(alias)
+
+
+def key_provider_from_registry(registry_path: str) -> Callable[[str], Optional[bytes]]:
+    """Production poll provider includes the current native binding and entry ceiling."""
+    return RegistryKeyProvider(registry_path)

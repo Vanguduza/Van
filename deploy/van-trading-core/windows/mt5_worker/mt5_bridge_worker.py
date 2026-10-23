@@ -229,6 +229,15 @@ class Worker:
                     or a.get("server") != acc["server"] or a.get("currency") != acc["currency"]
                     or type(a.get("demo")) is not bool or a["demo"] is not acc["demo"]):
                     raise PermissionError("terminal physical account identity differs from the configured alias")
+                expected = b.get('expected_account')
+                physical = {'login': str(a['login']), 'server': a['server'],
+                            'currency': a['currency'], 'demo': a['demo']}
+                if expected is not None and (
+                    not isinstance(expected, dict) or set(expected) != set(physical)
+                    or type(expected['demo']) is not bool
+                    or any(type(expected[k]) is not str for k in ('login','server','currency'))
+                    or expected != physical):
+                    raise PermissionError('terminal account identity differs from the signed Linux binding')
                 if op == "sync_account":
                     out = {"account": {**a, "verified": True, "server_time_ms": self.clock()}}
                 elif op == "sync_symbols":
@@ -254,6 +263,8 @@ class Worker:
                     out = self.t.close(int(b["position"]), b.get("volume"), str(b.get("reason", "")))
                 else:
                     out = {"error": "unreachable"}
+                if expected is not None and 'error' not in out:
+                    out['identity_binding'] = physical
         except Exception as exc:  # noqa: BLE001 — venue faults become data for the client's fail-closed path
             out = {"error": str(exc)[:200]}
         self.audit.append({"ts": self.clock(), "op": op, "alias": b.get("alias"), "result": "error" if "error" in out else (out.get("status") or "ok")})
