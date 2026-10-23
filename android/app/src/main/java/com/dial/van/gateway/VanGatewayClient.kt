@@ -24,6 +24,11 @@ import com.dial.van.trading.StrategyPromotionProtocol
 import com.dial.van.trading.AccountOperationRecovery
 import com.dial.van.trading.AccountOperationStore
 import com.dial.van.trading.PendingAccountOperation
+import com.dial.van.trading.RuntimeRecoveryIntent
+import com.dial.van.trading.RuntimeRecoveryChallenge
+import com.dial.van.trading.RuntimeRecoveryProtocol
+import com.dial.van.trading.RuntimeRecoveryOperations
+import com.dial.van.trading.PendingRuntimeRecovery
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -80,6 +85,76 @@ class VanGatewayClient(context: Context) {
         override fun load(): String? = prefs.getString("native_account_operations_v1", null)
         override fun save(value: String): Boolean = prefs.edit().putString("native_account_operations_v1", value).commit()
     })
+    private val runtimeRecoveries = RuntimeRecoveryOperations(object : AccountOperationStore {
+        override fun load(): String? = prefs.getString("native_runtime_recoveries_v1", null)
+        override fun save(value: String): Boolean = prefs.edit().putString("native_runtime_recoveries_v1", value).commit()
+    })
+
+    fun pendingRuntimeRecoveries(): List<PendingRuntimeRecovery> =
+        deviceId?.let(runtimeRecoveries::pending).orEmpty()
+
+    suspend fun tradingRuntimeRecoveryCatalog(): JSONObject = withContext(Dispatchers.IO) {
+        val (code, body) = runtimeRecoveryExchange("GET", "/v1/trading/runtime/recovery/catalog")
+        if (code !in 200..299) throw GatewayHttpException(code,body)
+        JSONObject(body)
+    }
+
+    suspend fun tradingRuntimeRecoveryState(accountAlias: String, sessionId: String): JSONObject = withContext(Dispatchers.IO) {
+        require(com.dial.van.trading.AccountOnboarding.validateAlias(accountAlias) == null && sessionId.isNotBlank())
+        val path = "/v1/trading/runtime/recovery/state?account_alias=${encodeQuery(accountAlias)}&session_id=${encodeQuery(sessionId)}"
+        val (code,body) = runtimeRecoveryExchange("GET",path)
+        if (code !in 200..299) throw GatewayHttpException(code,body)
+        JSONObject(body)
+    }
+
+    suspend fun tradingRuntimeRecoveryChallenge(intent: RuntimeRecoveryIntent): RuntimeRecoveryChallenge = withContext(Dispatchers.IO) {
+        require(intent.deviceId == deviceId) { "runtime_recovery_owner_changed" }
+        check(runtimeRecoveries.pending(intent.deviceId).none { it.accountAlias == intent.accountAlias }) {
+            "runtime_recovery_requires_original_readback"
+        }
+        val payload = JSONObject().put("intent",JSONObject(intent.body().toString())).toString()
+        val (code,body) = runtimeRecoveryExchange("POST","/v1/trading/runtime/recovery/challenge",payload)
+        if (code !in 200..299) throw GatewayHttpException(code,body)
+        RuntimeRecoveryProtocol.challenge(intent,body)
+    }
+
+    suspend fun tradingRuntimeRecoveryRequest(challenge: RuntimeRecoveryChallenge, signatureBase64: String): Pair<Int,String> = withContext(Dispatchers.IO) {
+        require(challenge.intent.deviceId == deviceId) { "runtime_recovery_owner_changed" }
+        val original = PendingRuntimeRecovery.from(challenge)
+        val payload = challenge.requestBody(signatureBase64).toString()
+        val response = runtimeRecoveryExchange("POST","/v1/trading/runtime/recovery/request",payload) {
+            runtimeRecoveries.prepareDispatch(challenge,System.currentTimeMillis()/1000L)
+        }
+        runtimeRecoveries.observe(original,response.second,response.first)
+        response
+    }
+
+    suspend fun tradingRuntimeRecoveryOperation(original: PendingRuntimeRecovery): Pair<Int,String> = withContext(Dispatchers.IO) {
+        require(original.deviceId == deviceId && RuntimeRecoveryProtocol.validOperationId(original.operationId)) {
+            "runtime_recovery_original_owner_invalid"
+        }
+        val response = runtimeRecoveryExchange("GET","/v1/trading/runtime/recovery/operations/${encodeSegment(original.operationId)}")
+        runtimeRecoveries.observe(original,response.second,response.first)
+        response
+    }
+
+    /** One exact request. Unknown effects retain the original ID; reads never dispatch. */
+    private fun runtimeRecoveryExchange(method: String, path: String, payload: String = "", beforeDispatch: () -> Unit = {}): Pair<Int,String> {
+        require(method == "GET" || method == "POST")
+        val conn = open("$baseUrl$path").apply {
+            requestMethod = method; applyIngressAuth(this)
+            proofHeaders(method,path,payload).forEach { (name,value) -> setRequestProperty(name,value) }
+            connectTimeout = 15_000; readTimeout = 30_000
+            if (method == "POST") { doOutput = true; setRequestProperty("Content-Type","application/json") }
+        }
+        try {
+            beforeDispatch()
+            if (method == "POST") conn.outputStream.use { it.write(payload.toByteArray(StandardCharsets.UTF_8)) }
+            val code = conn.responseCode
+            val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+            return code to (stream?.bufferedReader()?.use { it.readText() } ?: "{}")
+        } finally { conn.disconnect() }
+    }
 
     fun pendingAccountOperations(): List<PendingAccountOperation> =
         deviceId?.let(accountOperations::pending).orEmpty()

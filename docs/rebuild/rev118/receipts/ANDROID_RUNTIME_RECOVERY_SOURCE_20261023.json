@@ -1,0 +1,573 @@
+{
+  "schema": "van.rebuild.android-runtime-recovery-source/1",
+  "observed_at_utc": "2026-10-23T05:40:19.497780+00:00",
+  "source_parent": "2d183ac69688e72ac0047987b81b6fe55a62e365",
+  "source_provenance": "Uncommitted candidate patch over source_parent; source hashes below bind tested inputs. APKs are debug candidate artifacts, not a production release.",
+  "source_sha256": {
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "b0d2cd927e076fdf7a4a9b06b9a323262f77794a3e38745e28a2762d055109eb",
+    "android/app/src/test/java/com/dial/van/trading/RuntimeRecoveryProtocolTest.kt": "58dfbc7b3275f5440ff3fb0af4c2a7141317558fd1d72448aaa67336fb63fa56",
+    "android/app/src/test/java/com/dial/van/trading/RuntimeRecoveryOperationsTest.kt": "7b9df6ae961bf96994d8f86bf2e30ede30d9c24b82aa170f1019ea29d2027338",
+    "android/app/src/main/java/com/dial/van/trading/RuntimeRecoveryOperations.kt": "1b8623f745d734fa45225da93220f3a3a60b8f97e4f732ea37462915fc00fad9",
+    "android/app/src/main/java/com/dial/van/trading/RuntimeRecoveryProtocol.kt": "12ee82dcfbdcabb2a75940fca23a7ff0220cb43ef36225c83167443b18d2c050",
+    "android/app/src/test/resources/runtime_recovery_contract.json": "42c960a27de863b816d9d13a53c4c681840c87564c6824ccaf6bf6f1bb75c773",
+    "tools/rebuild/refresh_owner_source_contracts.py": "57a54b5ca9b2ec886c0d8dc93363b4a7c27ab7e73aae7a3d206ca9a419e9148d"
+  },
+  "app_unit_tests": {
+    "tests": 215,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "new_recovery_tests": {
+      "com.dial.van.trading.RuntimeRecoveryOperationsTest": 7,
+      "com.dial.van.trading.RuntimeRecoveryProtocolTest": 5
+    },
+    "xml_sha256": {
+      "TEST-com.dial.van.overlay.VanOverlayInteractionTest.xml": "8d4b527239a664bc65ab881d366d132a43b37f09a54a7e5a358c628fa6321c58",
+      "TEST-com.dial.van.trading.AccountOnboardingTest.xml": "7ad249e9506cbb1c726b2e285fc3bcc05734343148ede7535a0b959cdb4ca754",
+      "TEST-com.dial.van.design.StatusSemanticsTest.xml": "38779975535d1737e54f223adc02b3ae0df6369e37b865ddf3c35f45843be2c5",
+      "TEST-com.dial.van.queue.EncryptedCommandQueueLogicTest.xml": "bb73dfa489488d17637a95bda23f0117dff09bbd509a292626089335dfe578f4",
+      "TEST-com.dial.van.projects.ProjectModelsTest.xml": "6217ae89b83ebe6b3e65b38848a81e0ed34bd5a1de539d725b1a71872d6004d7",
+      "TEST-com.dial.van.design.charts.ChartAxesTest.xml": "1733d79e8f073d02508c300fb2b19b74b6025a1493aeffce5eb9d5290b652795",
+      "TEST-com.dial.van.gateway.ReplayDispatchPolicyTest.xml": "d164c2ac28c3fd339f2c6d600bd7e75590ab7e5f26ca56f58943c75f80da7bc7",
+      "TEST-com.dial.van.visual.VanEffectPolicyTest.xml": "c253be32e5a92842885b131c9bd2b6ca7c4e2dc3e734daac677f3a9a3babeaab",
+      "TEST-com.dial.van.trading.ChartGeometryTest.xml": "f31babb2f30a72b19c82b28d478eeb208e7c913283a9d5337510910b832691b2",
+      "TEST-com.dial.van.visual.VanCharacterMotionTest.xml": "1c5739c8b1438874cafbd3f539688a6c81472443657388f45e515de0aaa83996",
+      "TEST-com.dial.van.trading.AccountOperationRecoveryTest.xml": "cfed068fea1db007d4bb82470dca325de19d038feeccccd149547e9e004136cb",
+      "TEST-com.dial.van.voice.VoiceRecognitionPolicyTest.xml": "a37e2419fff8a3e46eaa495df096f1d3104a725034f737f1dbe03e4e6e3b4cac",
+      "TEST-com.dial.van.security.OwnerAuthorityTokenTest.xml": "c7d1c5054a7a9a4a793c6acd4355867fb80727279a3df95272ee44428f6a4214",
+      "TEST-com.dial.van.design.MotionSpecTest.xml": "02425798e8871eb26f51156ddaae51a2f87231d0ba52b47cf0a19c718ae6276d",
+      "TEST-com.dial.van.trading.RuntimeRecoveryOperationsTest.xml": "b96b25dfea64e29130f6c77b78ddbc7b79ddc5fa3f13a51a2448483c480c686a",
+      "TEST-com.dial.van.design.DensityTierTest.xml": "8a5703c3ad2d12d8d53609192af413d73ba4284fe622f3f395e70598f5501e7a",
+      "TEST-com.dial.van.mission.MissionSurfaceTest.xml": "2dd7b8f454603931b5d045c28116f78abbc32485a1fb08dfb545d96b9fb101eb",
+      "TEST-com.dial.van.design.ScreenStateTest.xml": "6d726207d4eecde964199156373b9586f00dab45ce9cdf5a37c0bfb9ab8a2877",
+      "TEST-com.dial.van.visual.VanCharacterOpacityTest.xml": "24c23503376bf2ae5352d140d980cbdf38c360e72af794ffbebf4baab279d00a",
+      "TEST-com.dial.van.voice.VoiceSecondPassTest.xml": "b61195fcd6a905eb7517562e354ce330e199de9f3726956c70d2a9f70f9536eb",
+      "TEST-com.dial.van.visual.VanWindFieldMotionTest.xml": "f5710354365d1d8cc36f0a370e923cb6650fc5ee046daa01ec4e04d531d4fb70",
+      "TEST-com.dial.van.degraded.DegradedModeStoreTest.xml": "204c29cf0500c7e1d1520652e3c1b204638f27edfbaf0faadd2556d483764113",
+      "TEST-com.dial.van.visual.VanSceneIdentityTest.xml": "8d59502bf2494f688024953adeebc86acf5cae3416d5e0023952a078ad7e721b",
+      "TEST-com.dial.van.design.LiveBadgeFormatTest.xml": "4066685d525ee6f725873248f65037776e51601791f49118f33d4b2852389eb7",
+      "TEST-com.dial.van.memory.MemoryModelsTest.xml": "adca22e7956acf097bd4c203dc6c13caa2a05e37b122d7fdab7c867444521d80",
+      "TEST-com.dial.van.visual.VanVisualRuntimeTest.xml": "5efeba97794e38838e4578de781cda53528fb75036799fc949ade769ef6f433c",
+      "TEST-com.dial.van.trading.CognitionSurfacesTest.xml": "2e0ab7348c0ddb9eb6328d4de493c67a767bc085491e532f429d5768528dc853",
+      "TEST-com.dial.van.visual.VanAuraEnvelopeTest.xml": "733e37b6ea7a57592c31c7cd8b6a0f89e3f847a7854f26f56f8e5a1d3f5c158b",
+      "TEST-com.dial.van.voice.WakeRuntimeTest.xml": "71950bd6b2bfd33c6a94802384dd240d126fab9970221e9ec6b27d46e9500a67",
+      "TEST-com.dial.van.visual.VanPresenceTest.xml": "601bc58bb9639c972f9ed37f4071f0086bc503df929e8111e5b41ba414ca2845",
+      "TEST-com.dial.van.trading.TradeBookTest.xml": "38eeeb56c7590c036867af73facb3b69d47e709f5022f5ac7f40b265e9074035",
+      "TEST-com.dial.van.trading.StrategyPromotionVerificationTest.xml": "7d1ccd224dd4d6f4a33ca9bb7b8e78aa9224a106ab83731f5d381b2074f03ec2",
+      "TEST-com.dial.van.trading.TradingModelsTest.xml": "ed4be3323c5aece29a147451496faec8c6f44272d0c3589313f9e9d92c2369ec",
+      "TEST-com.dial.van.overlay.VanOverlayChromeTest.xml": "e86171c2066ac91191020341b7b0f2ce283b4b2190c7421028557da0096a9eda",
+      "TEST-com.dial.van.trading.RuntimeRecoveryProtocolTest.xml": "860174c3ea3bc38f3f040bef5e1c2a7dcf8fbbf1110ad707ac116efb7540e24a",
+      "TEST-com.dial.van.visual.RiveContractTest.xml": "91fd0cbfd7bca87b79cc8070f9861ef8b6b23171f10f417d812cf00d333a9162",
+      "TEST-com.dial.van.visual.VanPresenceFrameTest.xml": "8999ac7232614cea4a41362fab1314e1641300566122f4ab4e56329f0240f18d"
+    }
+  },
+  "lint": {
+    "severity_counts": {
+      "Warning": 91,
+      "Hint": 22
+    },
+    "xml_sha256": "6a3c1639eb8b6481ff4268d1a372b813620d9f4c37281d10a2237fab5def4cb6"
+  },
+  "apk_assembly": {
+    "android/app/build/outputs/apk/debug/app-debug.apk": {
+      "bytes": 322450539,
+      "sha256": "abdad1dacf4b74c7bad95ad1049ffd0c2cfc0942eff97d86a8b367f73ad0cead"
+    },
+    "android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+      "bytes": 2394031,
+      "sha256": "beca8056f551a0a6a2b4a85c810fe45335a139f33e0740f3e95f7f7e162cd2c2"
+    }
+  },
+  "gradle": {
+    "path": "/tmp/van-android-runtime-recovery-final-app.txt",
+    "sha256": "6e6e3aa1776a96868e132f06abd05e992ae55576e7ab499bfe1458fead711f3b",
+    "tail": "roidTest\n> Task :app:generateDebugAndroidTestLintModel\n> Task :app:generateDebugLintReportModel\n> Task :app:generateDebugUnitTestLintModel\n> Task :app:packageDebug\n> Task :app:createDebugApkListingFileRedirect UP-TO-DATE\n> Task :app:assembleDebug\n> Task :app:lintAnalyzeDebugAndroidTest\n> Task :app:lintAnalyzeDebugUnitTest\n> Task :app:lintAnalyzeDebug\n\n> Task :app:lintReportDebug\nWrote HTML report to file:///workspace/van-review-2026-10-18/publish/android/app/build/reports/lint-results-debug.html\n\n> Task :app:lintDebug\n\nBUILD SUCCESSFUL in 1m 46s\n88 actionable tasks: 18 executed, 70 up-to-date\n"
+  },
+  "induced_regressions": {
+    "caught": 9,
+    "baseline_passes": 9,
+    "invalid_runs": 0,
+    "source_restored": true,
+    "journal_present": false,
+    "evidence": {
+      "definitions": [
+        [
+          [
+            "android/app/src/main/java/com/dial/van/trading/RuntimeRecoveryProtocol.kt",
+            "canonical == intent.approvalStatement(operationId, expiresAtUnix)",
+            "true",
+            "accept an owner challenge that names another canonical statement"
+          ],
+          "com.dial.van.trading.RuntimeRecoveryProtocolTest.foreignOrChangedChallengeCannotReachBiometricSigning"
+        ],
+        [
+          [
+            "android/app/src/main/java/com/dial/van/trading/RuntimeRecoveryProtocol.kt",
+            "java.util.Collections.unmodifiableMap(LinkedHashMap(arguments))",
+            "arguments",
+            "change the approved target through a caller-owned argument map"
+          ],
+          "com.dial.van.trading.RuntimeRecoveryProtocolTest.callerMapMutationCannotChangeTheApprovedTargetOrTimestamp"
+        ],
+        [
+          [
+            "android/app/src/main/java/com/dial/van/trading/RuntimeRecoveryOperations.kt",
+            "check(store.save(body.toString())) { \"runtime_recovery_identity_not_saved_no_dispatch\" }",
+            "store.save(body.toString())",
+            "send without durable original identity after preference failure"
+          ],
+          "com.dial.van.trading.RuntimeRecoveryOperationsTest.aFailedIdentityWritePreventsDispatchAndDoesNotOverwriteThePreviousOperation"
+        ],
+        [
+          [
+            "android/app/src/main/java/com/dial/van/trading/RuntimeRecoveryOperations.kt",
+            "intent.digest != value.bodyDigest",
+            "false",
+            "clear tracking using another original body or timestamp"
+          ],
+          "com.dial.van.trading.RuntimeRecoveryOperationsTest.uncertaintyAndForeignOrWeakenedNativeReceiptsNeverClearTheOriginal"
+        ],
+        [
+          [
+            "android/app/src/main/java/com/dial/van/trading/RuntimeRecoveryOperations.kt",
+            "if (phase !in setOf(\"APPLIED\",\"REFUSED\")) return false",
+            "if (false) return false",
+            "treat provisional or unknown recovery as confirmed"
+          ],
+          "com.dial.van.trading.RuntimeRecoveryOperationsTest.uncertaintyAndForeignOrWeakenedNativeReceiptsNeverClearTheOriginal"
+        ],
+        [
+          [
+            "android/app/src/main/java/com/dial/van/trading/RuntimeRecoveryOperations.kt",
+            "permission.isString || permission.content != \"false\"",
+            "false",
+            "accept a receipt that grants entry or coerces a permission string"
+          ],
+          "com.dial.van.trading.RuntimeRecoveryOperationsTest.uncertaintyAndForeignOrWeakenedNativeReceiptsNeverClearTheOriginal"
+        ],
+        [
+          [
+            "android/app/src/main/java/com/dial/van/trading/RuntimeRecoveryOperations.kt",
+            "private val lock = Any()",
+            "private val lock get() = Any()",
+            "lose original identities between independent gateway client instances"
+          ],
+          "com.dial.van.trading.RuntimeRecoveryOperationsTest.twoClientInstancesCannotLoseAnOriginalIdentityThroughConcurrentPreferenceUpdates"
+        ],
+        [
+          [
+            "android/app/src/main/java/com/dial/van/trading/RuntimeRecoveryOperations.kt",
+            "require(nowUnix < challenge.expiresAtUnix)",
+            "require(true)",
+            "persist a new expired approval as a dispatch attempt"
+          ],
+          "com.dial.van.trading.RuntimeRecoveryOperationsTest.anExpiredNewApprovalCannotPersistAnIdentityOrDispatchButItsOriginalRetryStaysOriginal"
+        ],
+        [
+          [
+            "android/app/src/main/java/com/dial/van/trading/RuntimeRecoveryProtocol.kt",
+            "?.takeIf { !it.isString }?.longOrNull",
+            "?.longOrNull",
+            "coerce quoted native timestamps instead of preserving the integer contract"
+          ],
+          "com.dial.van.trading.RuntimeRecoveryProtocolTest.targetShapeAndStrictIntegerFieldsAreNotCoerced"
+        ]
+      ],
+      "records": [
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "bab744c3a65ad7282d567dfeb299395308004bb33e336077d1fa2eaac616b9bf",
+          "xml_sha256": {
+            "TEST-com.dial.van.trading.RuntimeRecoveryProtocolTest.xml": "31c872c9239753d065e0641a9e1c07aac2e742addb452c20ce4e1501b998501c"
+          }
+        },
+        {
+          "phase": "mutation",
+          "why": "accept an owner challenge that names another canonical statement",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "090d03f7bd0d0714c2a8f5fe49cee3cdde21e1dfe4df656485b15205eadb97f7",
+          "xml_sha256": {
+            "TEST-com.dial.van.trading.RuntimeRecoveryProtocolTest.xml": "f29e84da3baee22a2b49508c345794d5e3d6d346e14d280adc5f8d2c5a167c72"
+          }
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "081b13a22db24e75e14edd65edd81a389024d6998c94931c8cdf0972a856ab7e",
+          "xml_sha256": {
+            "TEST-com.dial.van.trading.RuntimeRecoveryProtocolTest.xml": "70824a305b754938253222113a903ba6e4632228d7d34910d3249d46081d21ee"
+          }
+        },
+        {
+          "phase": "mutation",
+          "why": "change the approved target through a caller-owned argument map",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "e4b5673301b0c1e6a511a1bcc74e93304b30458ee736d23456d2eb4737812875",
+          "xml_sha256": {
+            "TEST-com.dial.van.trading.RuntimeRecoveryProtocolTest.xml": "aa272ad5a24974a87d8ba0ae257164d40696b46bc6d60f0e20aab7d1cce079e4"
+          }
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "9fd1ce34af64d320195859a8616ae0a98a1405c623446ce07fb25a6332f67045",
+          "xml_sha256": {
+            "TEST-com.dial.van.trading.RuntimeRecoveryOperationsTest.xml": "af2f4dc5d38cf35076949865e7c065605be0b6ede2dba8c4470740e58771cc46"
+          }
+        },
+        {
+          "phase": "mutation",
+          "why": "send without durable original identity after preference failure",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "773ccf765d186ae1a5f33b0cfabdcf70cd80ce31ec837333f6229e514c88abe3",
+          "xml_sha256": {
+            "TEST-com.dial.van.trading.RuntimeRecoveryOperationsTest.xml": "72f9e547193e312bdd2d84d6e2f9e16e4f5f9c0868eeee25e92594b402f833f3"
+          }
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "031a76d37f3665f651cf7c5f0b92dc39ef1223a70ed37046204a72859b04de18",
+          "xml_sha256": {
+            "TEST-com.dial.van.trading.RuntimeRecoveryOperationsTest.xml": "75cbbd7d53dba04419fc0a48364df7721e3b6837c6345899d885a35bd2b20e26"
+          }
+        },
+        {
+          "phase": "mutation",
+          "why": "clear tracking using another original body or timestamp",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "62ad7737f6d645bca6e7852324114674a07a8d00e2ba158b881b227b69f52cd5",
+          "xml_sha256": {
+            "TEST-com.dial.van.trading.RuntimeRecoveryOperationsTest.xml": "b1ce7047229df399172590d508c17f7c6bcee87483c27ce542a7449bc4976655"
+          }
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "031a76d37f3665f651cf7c5f0b92dc39ef1223a70ed37046204a72859b04de18",
+          "xml_sha256": {
+            "TEST-com.dial.van.trading.RuntimeRecoveryOperationsTest.xml": "4d744b04887ff516edada0e3502b6905564652f76604f02be488abc75621317f"
+          }
+        },
+        {
+          "phase": "mutation",
+          "why": "treat provisional or unknown recovery as confirmed",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "87ac6be76d8ce986a10a6f9c33f3bb71105b9f877bc409d2546de9a81b5919bf",
+          "xml_sha256": {
+            "TEST-com.dial.van.trading.RuntimeRecoveryOperationsTest.xml": "6f52992be78a466896d9fba59803d6525dbb9f8c8f1101a5ccfdd8d241b0fb67"
+          }
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "b053244cd9a2e821d77b501fc0ebc4dcefef7023fa079a79bad0db28166b1256",
+          "xml_sha256": {
+            "TEST-com.dial.van.trading.RuntimeRecoveryOperationsTest.xml": "0d9d53c23ef0dc5b6f61ca299358478aaddc992138a2466cae000d6645e7b73b"
+          }
+        },
+        {
+          "phase": "mutation",
+          "why": "accept a receipt that grants entry or coerces a permission string",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "7f36c1e03b2a4f505a82217f0ab024553d81b1b2ad9b0cc368ac8d5c467cf9e6",
+          "xml_sha256": {
+            "TEST-com.dial.van.trading.RuntimeRecoveryOperationsTest.xml": "feaab5c1a6fe069fded882db4f4da81f2a23b4080708f58d2dae1c708bf28e2b"
+          }
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "031a76d37f3665f651cf7c5f0b92dc39ef1223a70ed37046204a72859b04de18",
+          "xml_sha256": {
+            "TEST-com.dial.van.trading.RuntimeRecoveryOperationsTest.xml": "60fbf2d1999525bbbe4457f3e4aa1ab521459d40ff04579a0af30ac85b8e9a36"
+          }
+        },
+        {
+          "phase": "mutation",
+          "why": "lose original identities between independent gateway client instances",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "0c278fdbb240756318e9f24590c620eeb782dfa12eeef921c505c7bdceea5c00",
+          "xml_sha256": {
+            "TEST-com.dial.van.trading.RuntimeRecoveryOperationsTest.xml": "627724e3c20b94d9e280023d032408b6ae2dab7e3edd62f5069e713bc1ad1866"
+          }
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "fbfb19416782507b49810cb85dc475726e55b819d478ea9340c7f50412301471",
+          "xml_sha256": {
+            "TEST-com.dial.van.trading.RuntimeRecoveryOperationsTest.xml": "cbc100b2b994792f114a040bf39edbc9ddbce9da75d6e40c1af4a4534c4e678e"
+          }
+        },
+        {
+          "phase": "mutation",
+          "why": "persist a new expired approval as a dispatch attempt",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "753152920c71dc8282b2e2a43b06e71e175b30c01c90aca644bef3be3420e963",
+          "xml_sha256": {
+            "TEST-com.dial.van.trading.RuntimeRecoveryOperationsTest.xml": "6482bf72013aba7d96f70584648f6646a685f19dc1869b50a630a6e0a6a23998"
+          }
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "a1caab31bfc5631082a195e165feed081259321dff9d2eb9f7c9e2ce370de6f5",
+          "xml_sha256": {
+            "TEST-com.dial.van.trading.RuntimeRecoveryProtocolTest.xml": "088ff09b2b87ecb3539ecc370c9a3423c0d44643c2eba6ca4ca573bc0761fdc8"
+          }
+        },
+        {
+          "phase": "mutation",
+          "why": "coerce quoted native timestamps instead of preserving the integer contract",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "a6bcfc2813b8921145e0c06cd466fa70aae1f7516f652836b6df8405184d8d66",
+          "xml_sha256": {
+            "TEST-com.dial.van.trading.RuntimeRecoveryProtocolTest.xml": "346c677f61e90ff5a8a71182b9ce72b057143e1fd4848154944571d26b68ad65"
+          }
+        }
+      ],
+      "source_before_sha256": {
+        "android/app/src/main/java/com/dial/van/trading/RuntimeRecoveryProtocol.kt": "12ee82dcfbdcabb2a75940fca23a7ff0220cb43ef36225c83167443b18d2c050",
+        "android/app/src/main/java/com/dial/van/trading/RuntimeRecoveryOperations.kt": "1b8623f745d734fa45225da93220f3a3a60b8f97e4f732ea37462915fc00fad9"
+      },
+      "source_after_sha256": {
+        "android/app/src/main/java/com/dial/van/trading/RuntimeRecoveryProtocol.kt": "12ee82dcfbdcabb2a75940fca23a7ff0220cb43ef36225c83167443b18d2c050",
+        "android/app/src/main/java/com/dial/van/trading/RuntimeRecoveryOperations.kt": "1b8623f745d734fa45225da93220f3a3a60b8f97e4f732ea37462915fc00fad9"
+      },
+      "source_restored": true,
+      "journal_present": false
+    }
+  },
+  "checks": {
+    "rebuild": {
+      "path": "/tmp/van-android-runtime-recovery-rebuild.txt",
+      "sha256": "47e5d117333490dd3420772279b3db19e630ff05600dca53703c06dea40c2dda",
+      "tail": "........................................................................ [ 92%]\n......                                                                   [100%]\n78 passed in 45.59s\n"
+    },
+    "owner_contracts": {
+      "path": "/tmp/van-android-runtime-recovery-owner-contracts.txt",
+      "sha256": "cc79c35bb36b45f3dad61ba04bdf3679624121c08b06b90901b597d9d2a52605",
+      "tail": ".......................                                                  [100%]\n23 passed in 14.07s\n"
+    },
+    "consolidation": {
+      "path": "/tmp/van-android-runtime-recovery-consolidation.txt",
+      "sha256": "d87b8fe5f7b2b4ca7312b9ba93c4e1aa24ae2301f775aa6f915d81572aec7870",
+      "tail": "{\n  \"scope\": \"SOURCE_CONSOLIDATION_ONLY\",\n  \"branches_evaluated\": 70,\n  \"blueprint_archive_sha256\": \"6c7c7c1cb4fbd4748c0d63ceb2add9bd460778b66fb3b2302e16de09ac3a57a8\",\n  \"findings\": [],\n  \"runtime_qualification_issued\": false\n}\n"
+    },
+    "legacy_preflight": {
+      "schema": "van.rebuild.mutation-registry-preflight/1",
+      "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+      "mutation_count": 374,
+      "edit_count": 383,
+      "findings": [],
+      "execution_state": "NOT_RUN",
+      "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+    }
+  },
+  "retained_initial_failures": {
+    "van-android-runtime-recovery-first.txt": {
+      "path": "/tmp/van-android-runtime-recovery-first.txt",
+      "sha256": "c7393335fbdce482f3183f6dda1a139b0dce49f10c0676338b00c9dd4568352e",
+      "tail": "erence: changed\n\nFAILURE: Build failed with an exception.\n\n* What went wrong:\nExecution failed for task ':app:compileDebugUnitTestKotlin'.\n> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction\n   > Compilation error. See log for more details\n\n* Try:\n> Run with --stacktrace option to get the stack trace.\n> Run with --info or --debug option to get more log output.\n> Run with --scan to get full insights.\n> Get more help at https://help.gradle.org.\n\nBUILD FAILED in 33s\n32 actionable tasks: 12 executed, 20 up-to-date\n"
+    },
+    "van-android-runtime-recovery-second.txt": {
+      "path": "/tmp/van-android-runtime-recovery-second.txt",
+      "sha256": "cda20803e88d169418ec64e614d568247b367e9414aac538e72cadf01547413a",
+      "tail": "estKotlin FAILED\n\nFAILURE: Build failed with an exception.\n\n* What went wrong:\nExecution failed for task ':app:compileDebugUnitTestKotlin'.\n> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction\n   > Compilation error. See log for more details\n\n* Try:\n> Run with --stacktrace option to get the stack trace.\n> Run with --info or --debug option to get more log output.\n> Run with --scan to get full insights.\n> Get more help at https://help.gradle.org.\n\nBUILD FAILED in 15s\n32 actionable tasks: 3 executed, 29 up-to-date\n"
+    },
+    "van-android-runtime-recovery-contract-checks.txt": {
+      "path": "/tmp/van-android-runtime-recovery-contract-checks.txt",
+      "sha256": "249b9c2a8393c17767a3c2f66cea12d4353b4ce7d14104b82442984267080690",
+      "tail": "^^^^^^^^^\nbackend/tests/test_owner_automation_plans.py:6: in <module>\n    from tests.test_device_proof_enforcement import (_settings, client, _paired, _bind, _proof_headers, _base_headers, INGRESS, INTERNAL)\nbackend/tests/test_device_proof_enforcement.py:29: in <module>\n    from cryptography.fernet import Fernet\nE   ModuleNotFoundError: No module named 'cryptography'\n=========================== short test summary info ============================\nERROR backend/tests/test_owner_automation_plans.py\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n1 error in 0.41s\n"
+    }
+  },
+  "intermediate_source_controls": {
+    "van-android-runtime-recovery-third.txt": {
+      "path": "/tmp/van-android-runtime-recovery-third.txt",
+      "sha256": "7910c439c3ad340e58bfb0644d4f22ea02f823e1f026f4d2b2cca36ac34dacbe",
+      "tail": "Task :app:mergeDebugShaders UP-TO-DATE\n> Task :app:compileDebugShaders NO-SOURCE\n> Task :app:generateDebugAssets UP-TO-DATE\n> Task :app:generateVanBuildProvenance UP-TO-DATE\n> Task :app:mergeDebugAssets UP-TO-DATE\n> Task :app:packageDebugUnitTestForUnitTest UP-TO-DATE\n> Task :app:generateDebugUnitTestConfig UP-TO-DATE\n> Task :app:processDebugJavaRes UP-TO-DATE\n> Task :app:compileDebugUnitTestKotlin\n> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE\n> Task :app:processDebugUnitTestJavaRes\n> Task :app:testDebugUnitTest\n\nBUILD SUCCESSFUL in 18s\n34 actionable tasks: 5 executed, 29 up-to-date\n"
+    },
+    "van-android-runtime-recovery-expiry-controls.txt": {
+      "path": "/tmp/van-android-runtime-recovery-expiry-controls.txt",
+      "sha256": "bcdae8d82f6dd975b339cae672f8e7462af11ff92c7d0ff80ea3445935a39b0e",
+      "tail": "ask :app:mergeDebugAssets UP-TO-DATE\n> Task :app:packageDebugUnitTestForUnitTest UP-TO-DATE\n> Task :app:generateDebugUnitTestConfig UP-TO-DATE\n> Task :app:compileDebugKotlin\n> Task :app:compileDebugJavaWithJavac UP-TO-DATE\n> Task :app:bundleDebugClassesToRuntimeJar\n> Task :app:processDebugJavaRes UP-TO-DATE\n> Task :app:bundleDebugClassesToCompileJar\n> Task :app:compileDebugUnitTestKotlin\n> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE\n> Task :app:processDebugUnitTestJavaRes UP-TO-DATE\n> Task :app:testDebugUnitTest\n\nBUILD SUCCESSFUL in 32s\n34 actionable tasks: 7 executed, 27 up-to-date\n"
+    },
+    "van-android-runtime-recovery-final-controls.txt": {
+      "path": "/tmp/van-android-runtime-recovery-final-controls.txt",
+      "sha256": "5f1f4e8a3fb47a6ad1e1baecae1fe220edb3d432591c489edfee5e2687b3af9f",
+      "tail": "ask :app:mergeDebugAssets UP-TO-DATE\n> Task :app:packageDebugUnitTestForUnitTest UP-TO-DATE\n> Task :app:generateDebugUnitTestConfig UP-TO-DATE\n> Task :app:compileDebugKotlin\n> Task :app:compileDebugJavaWithJavac UP-TO-DATE\n> Task :app:bundleDebugClassesToRuntimeJar\n> Task :app:processDebugJavaRes UP-TO-DATE\n> Task :app:bundleDebugClassesToCompileJar\n> Task :app:compileDebugUnitTestKotlin\n> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE\n> Task :app:processDebugUnitTestJavaRes UP-TO-DATE\n> Task :app:testDebugUnitTest\n\nBUILD SUCCESSFUL in 22s\n34 actionable tasks: 7 executed, 27 up-to-date\n"
+    },
+    "van-android-runtime-recovery-full-app.txt": {
+      "path": "/tmp/van-android-runtime-recovery-full-app.txt",
+      "sha256": "76405769b3c572e89bd42657358a67d31aa81a6fccbca3f034d6c6d0f09f64f8",
+      "tail": "DATE\n> Task :app:mergeDebugAndroidTestJavaResource UP-TO-DATE\n> Task :app:mergeProjectDexDebugAndroidTest\n> Task :app:packageDebugAndroidTest\n> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE\n> Task :app:assembleDebugAndroidTest\n> Task :app:lintAnalyzeDebugAndroidTest\n> Task :app:lintAnalyzeDebugUnitTest\n> Task :app:lintAnalyzeDebug\n\n> Task :app:lintReportDebug\nWrote HTML report to file:///workspace/van-review-2026-10-18/publish/android/app/build/reports/lint-results-debug.html\n\n> Task :app:lintDebug\n\nBUILD SUCCESSFUL in 1m 53s\n88 actionable tasks: 21 executed, 67 up-to-date\n"
+    },
+    "van-android-runtime-recovery-verification.txt": {
+      "path": "/tmp/van-android-runtime-recovery-verification.txt",
+      "sha256": "93e69292e53334e64ca6573f33621a5b3b8924b4f29ca3a55a599f146a417978",
+      "tail": "fer to https://docs.gradle.org/8.11.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.\nDaemon will be stopped at the end of the build \n> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED\n> Task :compileKotlin UP-TO-DATE\n> Task :compileJava NO-SOURCE\n> Task :processResources NO-SOURCE\n> Task :classes UP-TO-DATE\n> Task :jar UP-TO-DATE\n> Task :compileTestKotlin UP-TO-DATE\n> Task :compileTestJava NO-SOURCE\n> Task :processTestResources UP-TO-DATE\n> Task :testClasses UP-TO-DATE\n> Task :test UP-TO-DATE\n\nBUILD SUCCESSFUL in 10s\n5 actionable tasks: 5 up-to-date\n"
+    }
+  },
+  "registry_regeneration": {
+    "first_intermediate_generation_review": {
+      "review": "All six files byte-match the exact first self-generated recipe; no staged edits; restoring only these self-generated outputs before current guarded regeneration.",
+      "files": {
+        "registries/owner_endpoints.json": {
+          "first_generation_sha256": "2e0016012cd2e5afeb8a37f5f858ae527692d04b482ff761a77d2c5ca9f370c4",
+          "committed_preimage_sha256": "2e0016012cd2e5afeb8a37f5f858ae527692d04b482ff761a77d2c5ca9f370c4"
+        },
+        "registries/owner_endpoint_schemas.json": {
+          "first_generation_sha256": "1db68f85f025ea74827021a4e4756f072dd062b5cb4c4eda35397d7d9359082f",
+          "committed_preimage_sha256": "1db68f85f025ea74827021a4e4756f072dd062b5cb4c4eda35397d7d9359082f"
+        },
+        "docs/rebuild/rev118/backend/OWNER_REGISTRY_SOURCE_REFRESH_20261022.json": {
+          "first_generation_sha256": "0867a0f071b62a7ea64436b8552fe1d106dcce13c58a009e89e53b1ee2fa6a20",
+          "committed_preimage_sha256": "a1a9826f32219a262cd11d91a2535ad35e4e34c89d40bc870df0179fdf8ba018"
+        },
+        "registries/owner_features.json": {
+          "first_generation_sha256": "a3e044e942f9e6ed7cd5c90c764a596ef8aaac6fd4d9f0af661adf1fa69d1901",
+          "committed_preimage_sha256": "577d953411d1430091830da6a2ec4fa4fbcd15fbb21dffd53f28a0db617962f9"
+        },
+        "registries/owner_screens.json": {
+          "first_generation_sha256": "9e56cac16230f7f7cef0b1c3756359d4d0f2769461479679d435d6b169c015e1",
+          "committed_preimage_sha256": "9bcd2e2ff7076c25e1e14f1044e1d22180831ffbf2af082415c946e199d2c1b7"
+        },
+        "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json": {
+          "first_generation_sha256": "5e029e4ca147ea00e714fcd165b525884a6c33b29bc9420a7648a0296a095e21",
+          "committed_preimage_sha256": "a80361bf54adb829b791c48e8e26104057cd2129fbdc3771043a5430e8fe48fd"
+        }
+      }
+    },
+    "unexpected_local_output_guard_retained": true,
+    "latest_generation": "backend/OWNER_REGISTRY_GENERATION.json",
+    "existing_source_features": 42,
+    "endpoints": 444,
+    "schemas": 276,
+    "new_ui_implemented": false
+  },
+  "known_backend_obligations": [
+    "Durable gateway dispatch after process death, including expired original adjudication",
+    "Current native device-key revocation propagation",
+    "Account-coordinator recovery controls"
+  ],
+  "qualification": "Candidate source/data-layer tests only; no new UI before BG-001, native biometric/production/provisioning/provider/S24/whole-unit acceptance. Original programme and frozen package unchanged."
+}

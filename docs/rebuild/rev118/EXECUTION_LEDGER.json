@@ -172,19 +172,10 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T03:20:49.846614+00:00",
+    "updated_utc": "2026-10-23T05:40:38.714667+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": [
-      {
-        "job": "frozen_a4_broad_source_qualification",
-        "source": "a4a91e8e56120db6bd8433a1512f5d9963d5377e",
-        "session_id": 68010,
-        "script": "/tmp/van-a4a91e8e-broad-pg.py",
-        "log": "/tmp/van-a4a91e8e-full-backend.txt",
-        "scope": "backend/tests+tests/contracts; actualChromium/AGP/bothDDSenv+realprivatePG/storageaudit; do not edit ownedqualificationclone while active"
-      }
-    ],
+    "background_jobs": [],
     "last_validation": [
       "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
       "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -280,7 +271,10 @@
       "Native worker source binds complete configured login/server/currency/demo to actual terminal facts, strict permission/mode/profile, server-aware login cache and serialized alias selection/readback/effect; signed timewindow rechecked afterlogin.5original+1delayeddispatchvalidfailures fixed;2249fulltrading0skip realprivatePG/DDS,45restored/78rebuild;8faults caught/restored. Native terminal/factory/PullEA/epoch/finality gates remain.",
       "Frozen exactd6 source cleanfull2229pass0skip483.41s, actualdriverexit0. Separate backend/contracts audit continues; fixture cleanup not yet claimed. Hosted169/39898232568 all374mutations/383edits;18nativepass4artworkskips,VITS2.082/1.884s,PG26voice117publictrading2212pass1DDSskip; testedmerge4296a6cc treeequal. Only DDSreadkey andtrustedmainbootstrap failures retained.",
       "Actual MT5push/pull factories bind physical login/server/currency/demo; signedworkerack and preflight rejectlegacy/foreign workers; independentnonce namespaces fixfresh/concurrent client collisions. Registeredpoll locks freshkey/identity/permission, onlyQUEUEDcanNoEffectrefuse; bound17fieldwire/explicitentrytype/hexidentity andMQLsourceguard, originalhistoricalread separatedfromcurrentstaleguard.2nonce+8factoryfailures fixed;2281fulltrading0skip realPG/DDS,15faults caught/restored,78rebuild. MQLnotnativecompiled; precision/epochs/deadlines/finalityremain.",
-      "Hosted4700/39900846394 complete374legacycases/383edits,native18pass4artworkskips,realVITS2.758/2.516s,PG26voice117publictrading2248pass1DDSskip. Actual source/merge trees equal; DDSreadkey andtrustedmain failures retained."
+      "Hosted4700/39900846394 complete374legacycases/383edits,native18pass4artworkskips,realVITS2.758/2.516s,PG26voice117publictrading2248pass1DDSskip. Actual source/merge trees equal; DDSreadkey andtrustedmain failures retained.",
+      "Existing Android data layer now wires all five exact native runtime-recovery endpoints, immutable A4 canonical body, strict timestamps/Base64 and durable original public IDs across uncertain responses/restarts.215app unit pass0skip incl12new, debug/instrumentationAPKs assembled, lint0Error/Fatal(91warnings22hints),9faults caught/restored,78rebuild/23owner contracts pass. No new UI; gateway durable dispatch/expired originals/device-key propagation/coordinator controls remain.",
+      "Frozen exactd6 source audit COMPLETE:2229tradingpass0skip,6841backend/contracts pass9explicit skips; zero forbidden storage, clean checkout, privatePGstopped/removed. Separate actual kernel6pass0skip evidence remains bound to equal source files.",
+      "Hosted2d/39903571744 complete374legacy regressions/383edits,native18pass4artworkmode skips,VITS2.383/2.529s,PG26voice117publictrading2280pass1DDSskip. Source/merge trees equal; only DDSreadkey/trustedmain prerequisites fail."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -291,9 +285,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Continue autonomous whole-product source implementation. Add source Android clients and immutable exact A4 recovery protocol for existing backend endpoints; no newfrontend beforeBG001. Finish nativeMQLnumericprecision, fullsignedworker deadline/epoch/risk envelopes, providerfinality/corrections, originalfill/statusintegrity, device-key propagation andsafe retirement; preserve all original assistant features. Frozen d6 auditedbackend/contracts stillrunning separately withrealChrome/AGP/PG, do notmodify; its2281-parent trading2229clean verified. Collect needed currenthostednative/full374 evidence before replacing. No invented unit/native/provider/production/S24 acceptance.",
-    "previous_head": "4700cba23e6afaeb7a55edda9e8771f18f6337ba",
-    "current_packet": "MT5 factory physical binding, reconnect and original bound delivery"
+    "next_action": "Continue autonomous whole-product source implementation. Resolve durable gateway dispatch after process death and expired original adjudication without renewing owner consent; propagate native device-key revocation and extend coordinator controls. Finish native numeric precision/worker deadline/epoch/risk envelopes, original fill integrity/provider finality/corrections, safe retirement and all original assistant features. No new frontend before BG001 or invented unit/native/provider/production/S24 acceptance. Exact d6 broad source audit complete; current2d hosted native/full374 collected.",
+    "previous_head": "2d183ac69688e72ac0047987b81b6fe55a62e365",
+    "current_packet": "Android original runtime recovery data-layer wiring"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",

@@ -128,14 +128,33 @@ def build():
     account_screen = next(r for r in documents["owner_screens"]["screens"] if r["id"] == "van.trading.accounts.add")
     recovery_feature = next(r for r in documents['owner_features']['features'] if r['id'] == 'OF-TRADING-005')
     recovery_screen = next(r for r in documents['owner_screens']['screens'] if r['id'] == 'van.trading.halt')
+    recovery_clients = {
+        '/v1/trading/runtime/recovery/catalog':'tradingRuntimeRecoveryCatalog',
+        '/v1/trading/runtime/recovery/state':'tradingRuntimeRecoveryState',
+        '/v1/trading/runtime/recovery/challenge':'tradingRuntimeRecoveryChallenge',
+        '/v1/trading/runtime/recovery/request':'tradingRuntimeRecoveryRequest',
+        '/v1/trading/runtime/recovery/operations/{operation_id}':'tradingRuntimeRecoveryOperation',
+    }
     for endpoint in endpoint_doc['endpoints']:
         if not endpoint['path'].startswith('/v1/trading/runtime/recovery/'):
             continue
+        client_file = 'android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt'
+        client_data = (ROOT/client_file).read_bytes()
+        client_lines = [i+1 for i,line in enumerate(client_data.decode().splitlines())
+                        if 'suspend fun '+recovery_clients[endpoint['path']]+'(' in line]
+        if len(client_lines) != 1:
+            raise ValueError('Runtime recovery client source is missing or ambiguous: '+endpoint['path'])
+        sources[client_file] = sha(client_data)
         extension = {
             'method':endpoint['method'], 'path':endpoint['path'], 'endpoint_id':endpoint['endpoint_id'],
+            'client_source_ref':{'file':client_file, 'line':client_lines[0], 'sha256':sha(client_data), 'ref':'WORKSPACE_PATCH'},
             'source_ref':endpoint['source'], 'authentication':endpoint['authentication'],
             'device_proof_required_when_bound':endpoint['device_proof_required_when_bound'],
-            'source_status':'CANDIDATE_BACKEND_SOURCE_ANDROID_CONSUMER_PENDING',
+            'source_status':'CANDIDATE_BACKEND_AND_ANDROID_CLIENT_SOURCE_UI_CONSUMER_PENDING',
+            'client_namespace':'VanGatewayClient', 'client_function':recovery_clients[endpoint['path']],
+            'client_protocol':'com.dial.van.trading.RuntimeRecoveryProtocol',
+            'client_original_operations':'com.dial.van.trading.RuntimeRecoveryOperations',
+            'client_specification':'docs/rebuild/rev118/backend/BE-003_009_RUNTIME_RECOVERY_ANDROID_CLIENT.md',
             'authority':'CURRENT_PAIRED_OWNER_DEVICE_EXACT_A4_ACCOUNT_SESSION_LEASE_AND_RISK_STATE',
             'scope':'Single-session kill clear, loss-scope reset and drawdown rebaseline. Original approval ID and durable public proof survive uncertain dispatch. Reads never dispatch. APPLIED is not blanket entry authority; all other holds, profile and final native fences remain.',
             'specification':'docs/rebuild/rev118/backend/BE-003_009_RUNTIME_RECOVERY.md',

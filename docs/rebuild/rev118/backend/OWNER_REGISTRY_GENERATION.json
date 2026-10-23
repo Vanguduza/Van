@@ -1,11 +1,11 @@
 {
   "schema": "van.rebuild.owner-registry-generation/1",
-  "source_receipt_sha256": "a1a9826f32219a262cd11d91a2535ad35e4e34c89d40bc870df0179fdf8ba018",
+  "source_receipt_sha256": "0867a0f071b62a7ea64436b8552fe1d106dcce13c58a009e89e53b1ee2fa6a20",
   "outputs": {
     "registries/owner_endpoint_schemas.json": "1db68f85f025ea74827021a4e4756f072dd062b5cb4c4eda35397d7d9359082f",
     "registries/owner_endpoints.json": "2e0016012cd2e5afeb8a37f5f858ae527692d04b482ff761a77d2c5ca9f370c4",
-    "registries/owner_features.json": "577d953411d1430091830da6a2ec4fa4fbcd15fbb21dffd53f28a0db617962f9",
-    "registries/owner_screens.json": "9bcd2e2ff7076c25e1e14f1044e1d22180831ffbf2af082415c946e199d2c1b7"
+    "registries/owner_features.json": "9bdb737f28a790c578110ad6c5cb1253e32f00d33c7479568ea07614460ec046",
+    "registries/owner_screens.json": "055a99b15b17aae0ad1312fcae77ee2f691a3c1ba6e61d27ba1f6009e7867386"
   },
   "qualification": "Derived source inventory only; no owner/native/admission signature."
 }
