@@ -172,7 +172,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T13:45:28.799824+00:00",
+    "updated_utc": "2026-10-23T14:00:57.558698+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
@@ -317,7 +317,8 @@
       "Native cTrader fill/position quantities preserve sub-centilot ratios; equity uses broker net PnL in deposit currency with its own exponent, complete native position identities and cross-read funds fence. Missing/foreign/malformed marks refuse verification; no missing-quote zero.14 original failures+1positive,3 funds-drift failures fixed;44 focused/2454 fulltrading pass0skip actualprivatePG/stoppedremoved,7faults+7controls caught/restored. Actual framed negative native mark exercised. Source only; no settled financial maturity/whole-unit/native/provider acceptance.",
       "Native cTrader lost entry/close/stop replies/events stayUNKNOWN; close binds actual admission/account/order/position/closing-deal identity. No requested-volume/price substitution or bool/string quantity; partial fills remainexact/PARTIAL. Stop requires native matching readback; unsupported remaining protection staysfalse without discarding actual partialfill.22original failures+2positive controls fixed;54focused/2478fulltrading pass0skip actualPGstoppedremoved;11faults+11controls caught/restored. Source only, not settled financial maturity/whole-unit/provider/native/handset acceptance.",
       "Exact39807eff hosted39959688518 all374legacy faults383edits;Android18pass4existingartworkskips,VITS5.300/2.311s,PG26voice117publictrading2434pass1DDSskip;merge2cd0316dtreeequal. Only originalDDSreadkey/trustedmainbootstrap fail. Native39959688543 MetaEditor0errors0warnings/freshEX5, invalid4errors/noEX5, receipt retained.",
-      "Original approved memory erasure replays its committed witness/counts read-only instead of deleting later owner facts, replacing proof or bumping revision. Exact-record absence/expired original reads/legacy witness supported under existing sealed scope and active-device checks; malformed/foreign witnesses and revoked devices refuse. New erasure still needs fresh exact approval.2valid initial failures and8of10 integrated baseline failures fixed;79combined+1legacy distinct source cases,78rebuild,29registry pass;5faults+5controls caught/restored, actual signedA4/domaincommit+lostreply/concurrency and independent post-state. Source only, no whole-unit privacy/native/production certification."
+      "Original approved memory erasure replays its committed witness/counts read-only instead of deleting later owner facts, replacing proof or bumping revision. Exact-record absence/expired original reads/legacy witness supported under existing sealed scope and active-device checks; malformed/foreign witnesses and revoked devices refuse. New erasure still needs fresh exact approval.2valid initial failures and8of10 integrated baseline failures fixed;79combined+1legacy distinct source cases,78rebuild,29registry pass;5faults+5controls caught/restored, actual signedA4/domaincommit+lostreply/concurrency and independent post-state. Source only, no whole-unit privacy/native/production certification.",
+      "Native MT5 signed transport freshness/physical identity/permissions/connection rechecked after blocking native reads immediatelybeforeSDKentry. A failed private server-side dispatch guard refuseszero effect, preserving original issuedtime; no serializedcallback/host setting.4initialbeforefailures+1positive and5of6integratedbaseline failures fixed;58focused/2484fulltrading pass0skip realPGstoppedremoved;5faults+5controls caught/restored inclfinal native-account-readclock delay. ExistingmTLS/HMAC plusactualSDKfixture. Source only; explicit commanddeadline/leaseepoch/riskbudget envelopes and nativebroker/gates remain."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -328,9 +329,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Commit/push tested DIAL/cTrader/memory packets with hooks and ledger intact. Finish native Windows SDK entry final-check gap: isolated tests in /tmp/van-ctrader-outcome-work-20261023/trading/tests/test_mt5_final_native_entry_fence.py reproduce4before failures/1positive when blocking native reads change request age, physical identity, trading permission or connection after worker admission but before SDK send. No worker runtime edits yet. Collect session74321 exact39807eff full backend/contracts+trading qualification (check actual phase/result/cleanup). Continue native financial finality, worker deadlines/epoch/risk envelopes and all original whole-product obligations;131units/93plannedfeatures and BG001 retained.",
-    "previous_head": "bc0e5def865234ea5dffe92fb869c073e15cc0b8",
-    "current_packet": "Approved owner-memory original-result recovery, source tested."
+    "next_action": "Finish explicit MT5 OrderCommand expiry propagation/enforcement and legacy-capability refusal in isolated /tmp/van-ctrader-outcome-work-20261023. Eight valid beforecounterexamples;13 focused deadline contracts/71combined initiallypass, initialnativeexpiry mutant survived because delayoccurredinreadonlyprecheck; corrected quote-oracle targetssecond/sendquote and full6fault campaignrerun pendingreadback. Preserve survivor receipt. RootSDKguard full2484PASS. Frozen39807eff broadQA session74321 has2failures near86%; stillrunning~93%, collectsummary/storageaudit/privatePGcleanup before anyQAcheckoutmutation and resolveactual failures. Continue131units/93plannedfeatures/BG001 and remainingnativeprovider/wholeproduct obligations, no invented certifications.",
+    "previous_head": "c9dd2a9c0c309e73e866f7b9fc60df00ad07f5dc",
+    "current_packet": "Final native MT5 SDK entry guard, source tested."
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -388,6 +389,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Commit/push tested DIAL/cTrader/memory packets with hooks and ledger intact. Finish native Windows SDK entry final-check gap: isolated tests in /tmp/van-ctrader-outcome-work-20261023/trading/tests/test_mt5_final_native_entry_fence.py reproduce4before failures/1positive when blocking native reads change request age, physical identity, trading permission or connection after worker admission but before SDK send. No worker runtime edits yet. Collect session74321 exact39807eff full backend/contracts+trading qualification (check actual phase/result/cleanup). Continue native financial finality, worker deadlines/epoch/risk envelopes and all original whole-product obligations;131units/93plannedfeatures and BG001 retained.",
-  "updated_at_utc": "2026-10-23T13:45:28.799824+00:00"
+  "current_action": "Finish explicit MT5 OrderCommand expiry propagation/enforcement and legacy-capability refusal in isolated /tmp/van-ctrader-outcome-work-20261023. Eight valid beforecounterexamples;13 focused deadline contracts/71combined initiallypass, initialnativeexpiry mutant survived because delayoccurredinreadonlyprecheck; corrected quote-oracle targetssecond/sendquote and full6fault campaignrerun pendingreadback. Preserve survivor receipt. RootSDKguard full2484PASS. Frozen39807eff broadQA session74321 has2failures near86%; stillrunning~93%, collectsummary/storageaudit/privatePGcleanup before anyQAcheckoutmutation and resolveactual failures. Continue131units/93plannedfeatures/BG001 and remainingnativeprovider/wholeproduct obligations, no invented certifications.",
+  "updated_at_utc": "2026-10-23T14:00:57.558698+00:00"
 }

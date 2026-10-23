@@ -30,7 +30,7 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 OPS = ("sync_account", "sync_symbols", "order_check", "order_send", "positions", "orders", "history", "modify_sl_tp", "close")
 SKEW_MS = 5000
@@ -146,7 +146,7 @@ class Terminal:
         r = self.mt5.order_check(request)
         return {"ok": r is not None and r.retcode == 0, "retcode": getattr(r, "retcode", None), "reason": getattr(r, "comment", ""), "margin": str(getattr(r, "margin", "")), "margin_free": str(getattr(r, "margin_free", ""))}
 
-    def order_send(self, b: dict) -> dict:
+    def order_send(self, b: dict, *, before_dispatch: Optional[Callable[[], None]] = None) -> dict:
         if not b.get("sl"):
             return {"status": "REJECTED", "reason": "protective stop (sl) required in the same request"}
         m = self.mt5
@@ -155,6 +155,12 @@ class Terminal:
             return {'status':'REJECTED','volume':'0','reason':'invalid native entry parameters'}
         if not self._netting_symbol_clear(b['symbol']):
             return {'status':'REJECTED','volume':'0','reason':'netting symbol has existing or unknown exposure; allocation reconciliation required'}
+        # Native symbol/tick/exposure reads can block after signed admission.
+        # The worker supplies this private guard; it is not a request field.
+        if before_dispatch is not None:
+            try:before_dispatch()
+            except Exception:
+                return {'status':'REJECTED','volume':'0','reason':'native final entry authorization unavailable; not dispatched'}
         r = m.order_send(request)
         if r is None:
             return {"status": "UNKNOWN", "reason": "native order outcome unconfirmed; reconcile the original command"}
@@ -354,7 +360,18 @@ class Worker:
                     elif a.get("trade_allowed") is not True:
                         out = {"status": "REJECTED", "reason": "terminal trade not allowed"}
                     else:
-                        out = self.t.order_send(b)
+                        def final_entry_guard():
+                            current=self.t.account()
+                            if (type(current.get('login')) is not int or str(current['login'])!=physical['login']
+                                or current.get('server')!=physical['server'] or current.get('currency')!=physical['currency']
+                                or type(current.get('demo')) is not bool or current['demo'] is not physical['demo']
+                                or current.get('trade_allowed') is not True):
+                                raise PermissionError('native entry identity or permissions changed')
+                            # Check after the final native read as well as at
+                            # HTTP admission. This does not renew signed time.
+                            if abs(self.clock()-int(req['issued_ms']))>SKEW_MS:
+                                raise PermissionError('signed native entry request expired')
+                        out = self.t.order_send(b,before_dispatch=final_entry_guard)
                 elif op == "positions":
                     out = {"positions": self.t.positions()}
                 elif op == "orders":

@@ -65,10 +65,11 @@ def test_parallel_aliases_cannot_switch_the_terminal_between_identity_check_and_
             self.selected=None;self.sends=[];self.first_sending=threading.Event();self.second_sending=threading.Event()
         def login(self,login,server,password):self.selected=server;return True
         def account(self):return {'login':12345678,'server':self.selected,'currency':'USD','demo':True,'trade_allowed':True}
-        def order_send(self,body):
+        def order_send(self,body,*,before_dispatch):
             if body['alias']=='account_one':
                 self.first_sending.set();self.second_sending.wait(timeout=0.5)
             else:self.second_sending.set()
+            before_dispatch()
             self.sends.append((body['alias'],self.selected))
             return {'status':'FILLED'}
     terminal=Terminal();cfg={'accounts':{}}
