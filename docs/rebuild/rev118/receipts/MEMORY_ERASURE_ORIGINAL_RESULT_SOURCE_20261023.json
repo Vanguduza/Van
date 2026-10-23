@@ -1,0 +1,275 @@
+{
+  "schema": "van.rebuild.memory-erasure-original-result-source/1",
+  "observed_at_utc": "2026-10-23T13:45:28.799824+00:00",
+  "source_parent": "bc0e5def865234ea5dffe92fb869c073e15cc0b8",
+  "source_sha256": {
+    "backend/van_gateway/context/memory_erasure.py": "d0057f673e27e87a8863ddb3e4857cd36c15b0fd6fa888c2ca7ebc0101422d7c",
+    "backend/tests/test_memory_erasure_original_operation.py": "c24fd1169acf13e74ec4d3554db2635586b43d06bf50d4584e620df69f719e9f",
+    "registries/owner_features.json": "37851e2cf165cbba772968f56c646d3bdbca14275d1b85a6a0be6a55053d6d01",
+    "registries/owner_screens.json": "423357ab81b18933a19766288f89d88d84a7754cef694230396f73cfe2dab94f"
+  },
+  "executions": {
+    "initial_pairing_instrument_attempt": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.241,
+      "sha256": "c54838d866990e3dbdef9bcd86d48cddb04d7d0887275e82ea3ceebc5afa6ea4"
+    },
+    "valid_initial_before": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.565,
+      "sha256": "98ec0a4d1bcaa36bc0c7125f1e3265a2289c0a3171a55a7174406c919e67b377"
+    },
+    "shape_before": {
+      "tests": 8,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 12.941,
+      "sha256": "d19ba3f720e254889404883ddf9a7d646ce6034a8011243d38c353cbcb356e99"
+    },
+    "isolated_focused": {
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 13.93,
+      "sha256": "9d3ec5b19df35f913f08b76fb365c29723f4b6fdb921f56d28db8c06fdb456ef"
+    },
+    "isolated_combined": {
+      "tests": 79,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 45.81,
+      "sha256": "143582a59b08d0da1d80da40e15564894fe4e55a1a79d55b27f26657aaf6bdb7"
+    },
+    "integrated_original_before": {
+      "tests": 10,
+      "failures": 8,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 12.833,
+      "sha256": "2bf2dbde6d49edf2e624624134611d21aa3904411f2c380ebf87d76ad607b6c7"
+    },
+    "integrated_combined": {
+      "tests": 79,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 47.541,
+      "sha256": "6519eb0eda15bc7bb8dc76fa8f39e5f3d74eff4424bb0781516969e13a60bffd"
+    },
+    "legacy_original": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.442,
+      "sha256": "781ebaec738da8db99f854949119e2d89444b5560f0eb04a1119d3059ea066bb"
+    },
+    "rebuild": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 36.773,
+      "sha256": "2271a4be3a9f24c277dbdb5a50c18e546c041b570d48647b5d6bf8974418a58b"
+    },
+    "owner_registry": {
+      "tests": 29,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 4.153,
+      "sha256": "7a62586af45bd35457e57fab914bf8cfb3876a94c2abe4a51fa45a5b25633079"
+    }
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "erase again instead of reading original",
+        "if original is not None:",
+        "if False:",
+        "backend/tests/test_memory_erasure_original_operation.py::test_completed_erase_replays_original_result_without_deleting_new_facts"
+      ],
+      [
+        "mutate context revision on original replay",
+        "                await db.rollback()\n                return cached",
+        "                await db.execute(\"UPDATE runtime_meta SET value=CAST(value AS INTEGER)+1 WHERE key='owner_context_revision'\")\n                await db.commit()\n                return cached",
+        "backend/tests/test_memory_erasure_original_operation.py::test_original_erasure_witness_and_context_revision_survive_duplicate_execution"
+      ],
+      [
+        "accept original witness for another device",
+        "or original.get('device_id',device_id)!=device_id",
+        "or False",
+        "backend/tests/test_memory_erasure_original_operation.py::test_unreadable_original_witness_refuses_another_erase[foreign_device]"
+      ],
+      [
+        "coerce original schema boolean",
+        "type(original.get('schema_version')) is not int or ",
+        "",
+        "backend/tests/test_memory_erasure_original_operation.py::test_unreadable_original_witness_refuses_another_erase[bool_schema]"
+      ],
+      [
+        "allow revoked device original read",
+        "if device is None or device[\"revoked_at_unix\"] is not None:",
+        "if device is None:",
+        "backend/tests/test_memory_erasure_original_operation.py::test_revoked_device_cannot_read_original_through_the_erasure_executor"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "erase again instead of reading original",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "c5436b44e33dbed2c8c049eded22ceb000d19cc423f3f3d8c479346e8bceb66c"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "erase again instead of reading original",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "1ef56ee23520b505983c452ecf4bd325972022c56399b9f173209883e7abab47"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "mutate context revision on original replay",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "7a54ddba132fe7ea64d1a19f9c96728420afb6694cf8bdfccee2a91307466a00"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "mutate context revision on original replay",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "cc141c7438df045e558611e16205ed928cb7581e7aae3ffab340f013777cdbd3"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "accept original witness for another device",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "7f9dcebd8128af3bde2c2fa3538a07d7b7c58994844e2cc9416664470ac1cd65"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "accept original witness for another device",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "41068e3d03f7e1dc1d9cc2531c123d42c61a1f81e9b45a919de31610dc61c11e"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "coerce original schema boolean",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "7f5075ae0f8d7f7bc43485f997321885b5fe7c2d03153bfcf3c3e3382d7e4224"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "coerce original schema boolean",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "674c47b2e24ac537bf69cb1af53ea9ce715a3d5e0ed09fde85ea01c79dc9f652"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "allow revoked device original read",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "2d7b99a51b31bdf394a7e0416b44854842b1d0bdb153e16d893d6d709240f89d"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "allow revoked device original read",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "36c31c112033f3f199f9c169028681b350f1c2d54c98d2da376e62b1ca02fad9"
+      }
+    ],
+    "source_sha256": "d0057f673e27e87a8863ddb3e4857cd36c15b0fd6fa888c2ca7ebc0101422d7c",
+    "source_restored": true
+  },
+  "instrument_corrections": [
+    "First test module omitted its existing autouse environment fixture; pairing failed before any approved erasure. Imported the actual fixture, then obtained two valid behavioral failures. No pairing failure counted as product behavior."
+  ],
+  "qualification": "Candidate source only. Existing original result is not a new erase permit or proof the current store contains no later memory. No retention expansion, new frontend, whole-unit, independent/native/production or handset acceptance."
+}

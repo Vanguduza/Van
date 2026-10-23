@@ -643,6 +643,14 @@
       "new_sha256": "9f2ed6841f7eb790515abcf52db838f8be96416e134140e01f53109ff1a8c06a",
       "exact_anchor": "    suspend fun contextRecordErasurePlan(store: String, recordId: String): JSONObject = withContext(Dispatchers.IO) {"
     },
+    "backend/van_gateway/context/memory_erasure.py:94": {
+      "file": "backend/van_gateway/context/memory_erasure.py",
+      "old_line": 94,
+      "new_line": 124,
+      "old_sha256": "39a8f0ee2fbf7087d989ccceef4e61fed3f70b39829e3f6ca300e2d6a4a556c0",
+      "new_sha256": "d0057f673e27e87a8863ddb3e4857cd36c15b0fd6fa888c2ca7ebc0101422d7c",
+      "exact_anchor": "async def erase_memory(store: Store, store_id: str, command_id: str, *, device_id: str,"
+    },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1606": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1606,
@@ -1894,7 +1902,7 @@
     "android/app/src/main/java/com/dial/van/memory/DerivedMemoryRecordsSection.kt": "da111f4209c5d094890befccb7bb1cc1cb8e4de9b74b97591040680e6d163a65",
     "android/app/src/main/java/com/dial/van/memory/MemoryEffectReceipt.kt": "eaa28e7fdab7dff3c7a7a6fc3ff462b70a33a026337d29b371d41e7c334f6f83",
     "backend/van_gateway/understanding/records.py": "2c55cc5943fa75790734f6fb0e6e25d6488a3cebab48076a27d4b146a6c32bdd",
-    "backend/van_gateway/context/memory_erasure.py": "39a8f0ee2fbf7087d989ccceef4e61fed3f70b39829e3f6ca300e2d6a4a556c0",
+    "backend/van_gateway/context/memory_erasure.py": "d0057f673e27e87a8863ddb3e4857cd36c15b0fd6fa888c2ca7ebc0101422d7c",
     "android/app/src/main/java/com/dial/van/memory/UnderstandingRoutes.kt": "febe4fe7a78d45b710bde189f0edc19b2fdd016bb97c875b8a5a4ae985060925",
     "android/app/src/main/java/com/dial/van/memory/OwnerDeclarationSections.kt": "ff35ceccb97055000c11693c94dad8f3cbceb54b257be24ddafc02ed2839e426",
     "backend/van_gateway/understanding/owner_preferences.py": "795252eff1e2b41b87e627b4597139d5352168ec5206787b5f7f65c8953e4d83",

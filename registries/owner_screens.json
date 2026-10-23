@@ -65698,9 +65698,9 @@
             "source_citations": [
               {
                 "file": "backend/van_gateway/context/memory_erasure.py",
-                "line": 94,
+                "line": 124,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "39a8f0ee2fbf7087d989ccceef4e61fed3f70b39829e3f6ca300e2d6a4a556c0",
+                "sha256": "d0057f673e27e87a8863ddb3e4857cd36c15b0fd6fa888c2ca7ebc0101422d7c",
                 "review_scope": "Reviewed current production entry."
               },
               {
@@ -69297,9 +69297,9 @@
             "source_citations": [
               {
                 "file": "backend/van_gateway/context/memory_erasure.py",
-                "line": 94,
+                "line": 124,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "39a8f0ee2fbf7087d989ccceef4e61fed3f70b39829e3f6ca300e2d6a4a556c0",
+                "sha256": "d0057f673e27e87a8863ddb3e4857cd36c15b0fd6fa888c2ca7ebc0101422d7c",
                 "review_scope": "Reviewed current production entry."
               },
               {
@@ -73806,7 +73806,7 @@
     "android_receipt": null,
     "android_receipt_sha256": null,
     "scope": "Bounded current source-citation/endpoint refresh; previous reviews retained. Whole-product, Android, deployment/provider and handset qualifications remain separate.",
-    "source_review_manifest_sha256": "1bb89020f6dae510cc7be2ce27fe0b20254900fcd2821f399b46ff4a17bc51a8"
+    "source_review_manifest_sha256": "9220626a7b3aaec8a2210e68f31b0b474c056a2288939e4fadb783d279acc0b1"
   },
   "repaired_mutations": [
     {

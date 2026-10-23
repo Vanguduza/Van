@@ -91,13 +91,43 @@ async def _ids(db: Any, entry: ForgettableStore, store_id: str, *, dependent_sco
     return columns, sorted(identities)
 
 
+def _original_removed(raw: str, *, entries: tuple[ForgettableStore, ...], store_id: str,
+                      command_id: str, device_id: str, record_id: str | None,
+                      expected_sha256: str | None) -> dict[str, int]:
+    """A committed witness is an original receipt, never another erase permit."""
+    from van_gateway.understanding.records import PRIMARY_KEYS
+    try:
+        original = json.loads(raw)
+        if (not isinstance(original,dict) or type(original.get('schema_version')) is not int or original['schema_version']!=1
+            or original.get('command_id')!=command_id or original.get('store')!=store_id
+            or original.get('owner_principal_id')!=OWNER_PRINCIPAL
+            or original.get('device_id',device_id)!=device_id
+            or original.get('record_id')!=record_id or original.get('expected_sha256')!=expected_sha256
+            or not isinstance(original.get('tables'),dict)
+            or set(original['tables'])!={entry.table for entry in entries}):raise ValueError()
+        before=original['context_revision_before'];after=original['context_revision_after']
+        if type(before) is not int or before<0 or type(after) is not int or after!=before+1:raise ValueError()
+        removed={}
+        for entry in entries:
+            row=original['tables'][entry.table];ids=row['before_ids']
+            if (not isinstance(ids,list) or any(not isinstance(i,str) or len(i)!=64
+                or any(c not in '0123456789abcdef' for c in i) for i in ids)
+                or len(set(ids))!=len(ids) or row['primary_key_columns']!=list(PRIMARY_KEYS[entry.table])
+                or type(row['before_count']) is not int or row['before_count']!=len(ids)
+                or type(row['removed_count']) is not int or row['removed_count']!=len(ids)):raise ValueError()
+            removed[entry.table]=row['removed_count']
+        return removed
+    except (KeyError,TypeError,ValueError):
+        raise MemoryErasureDenied('memory_erasure_original_witness_unreadable') from None
+
+
 async def erase_memory(store: Store, store_id: str, command_id: str, *, device_id: str,
                        record_id: str | None = None, expected_sha256: str | None = None) -> dict[str, int]:
     """Recheck sealed A4 authority inside the same lock as the destructive write."""
     entries = selected_stores(store_id)
     witness: dict[str, Any] = {
         "schema_version": 1, "command_id": command_id, "store": store_id,
-        "owner_principal_id": OWNER_PRINCIPAL, "tables": {},
+        "owner_principal_id": OWNER_PRINCIPAL, "device_id": device_id, "tables": {},
     }
     removed = {}
     record_key = None
@@ -123,19 +153,29 @@ async def erase_memory(store: Store, store_id: str, command_id: str, *, device_i
                 parameters = record_parameters(store_id, record_id or "", expected_sha256 or "")
                 if any(authority.typed_parameter_constraints.get(name) != value for name, value in parameters.items()):
                     raise MemoryErasureDenied("memory_erasure_record_approval_mismatch")
-                row, record_key = await find_record(db, store_id, record_id)
-                if row is None:
-                    raise MemoryErasureDenied("memory_record_not_found")
-                if await record_revision(db, store_id, row) != expected_sha256:
-                    raise MemoryErasureDenied("memory_record_revision_stale")
                 witness.update(record_id=record_id, expected_sha256=expected_sha256)
             elif any(authority.typed_parameter_constraints.get(name) is not None for name in ("record_id", "expected_sha256")):
                 raise MemoryErasureDenied("memory_erasure_record_scope_required")
             device = await (await db.execute("SELECT revoked_at_unix FROM devices WHERE device_id=?", (device_id,))).fetchone()
             if device is None or device["revoked_at_unix"] is not None:
                 raise MemoryErasureDenied("memory_erasure_device_revoked")
+            original = await (await db.execute('SELECT value FROM runtime_meta WHERE key=?',
+                (WITNESS_PREFIX+command_id,))).fetchone()
+            if original is not None:
+                cached=_original_removed(original['value'],entries=entries,store_id=store_id,
+                    command_id=command_id,device_id=device_id,record_id=record_id,expected_sha256=expected_sha256)
+                # End this read-only transaction. New facts and the original
+                # witness/revision remain untouched, including after expiry.
+                await db.rollback()
+                return cached
             if _now_ms() // 1000 >= authority.expires_at_unix:
                 raise MemoryErasureDenied("memory_erasure_authority_expired")
+            if record_id is not None:
+                row, record_key = await find_record(db, store_id, record_id)
+                if row is None:
+                    raise MemoryErasureDenied("memory_record_not_found")
+                if await record_revision(db, store_id, row) != expected_sha256:
+                    raise MemoryErasureDenied("memory_record_revision_stale")
             for entry in entries:
                 columns, ids = await _ids(db, entry, store_id, dependent_scope=True, record_key=record_key)
                 witness["tables"][entry.table] = {"primary_key_columns": columns, "before_ids": ids, "before_count": len(ids)}
