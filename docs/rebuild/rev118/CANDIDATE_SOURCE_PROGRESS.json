@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T05:40:38.714667+00:00",
+  "updated_at_utc": "2026-10-23T06:00:23.075090+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -91,6 +91,10 @@
         {
           "description": "Existing Android data layer now wires all five exact native runtime-recovery endpoints, immutable A4 canonical body, strict timestamps/Base64 and durable original public IDs across uncertain responses/restarts.215app unit pass0skip incl12new, debug/instrumentationAPKs assembled, lint0Error/Fatal(91warnings22hints),9faults caught/restored,78rebuild/23owner contracts pass. No new UI; gateway durable dispatch/expired originals/device-key propagation/coordinator controls remain.",
           "evidence": "backend/BE-003_009_RUNTIME_RECOVERY_ANDROID_CLIENT.md; receipts/ANDROID_RUNTIME_RECOVERY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Durable gateway recovery dispatcher resumes exact consumed A4 receipts without another phone POST or renewed consent; current device/key/signature/metadata, fair bounded cursor, original native readback and durable delivery marker. Native expired-first-delivery signature/atomic absence yields terminal no-effect refusal with null unobserved risk state, never actor authority; previous original outcome always wins.5valid beforefailures fixed;2371fulltrading+recovery pass0skip realprivatePG,97focused+2keycontrols,78rebuild/19owner contracts/8Androidcompatibility pass;11faults caught/restored. Source only; native key propagation/coordinator/retirement remain.",
+          "evidence": "backend/BE-003_009_RUNTIME_RECOVERY_OUTBOX.md; receipts/RUNTIME_RECOVERY_OUTBOX_SOURCE_20261023.json"
         }
       ]
     },
@@ -199,6 +203,10 @@
         {
           "description": "Existing Android data layer now wires all five exact native runtime-recovery endpoints, immutable A4 canonical body, strict timestamps/Base64 and durable original public IDs across uncertain responses/restarts.215app unit pass0skip incl12new, debug/instrumentationAPKs assembled, lint0Error/Fatal(91warnings22hints),9faults caught/restored,78rebuild/23owner contracts pass. No new UI; gateway durable dispatch/expired originals/device-key propagation/coordinator controls remain.",
           "evidence": "backend/BE-003_009_RUNTIME_RECOVERY_ANDROID_CLIENT.md; receipts/ANDROID_RUNTIME_RECOVERY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Durable gateway recovery dispatcher resumes exact consumed A4 receipts without another phone POST or renewed consent; current device/key/signature/metadata, fair bounded cursor, original native readback and durable delivery marker. Native expired-first-delivery signature/atomic absence yields terminal no-effect refusal with null unobserved risk state, never actor authority; previous original outcome always wins.5valid beforefailures fixed;2371fulltrading+recovery pass0skip realprivatePG,97focused+2keycontrols,78rebuild/19owner contracts/8Androidcompatibility pass;11faults caught/restored. Source only; native key propagation/coordinator/retirement remain.",
+          "evidence": "backend/BE-003_009_RUNTIME_RECOVERY_OUTBOX.md; receipts/RUNTIME_RECOVERY_OUTBOX_SOURCE_20261023.json"
         }
       ]
     },
@@ -436,6 +444,10 @@
         {
           "description": "Existing Android data layer now wires all five exact native runtime-recovery endpoints, immutable A4 canonical body, strict timestamps/Base64 and durable original public IDs across uncertain responses/restarts.215app unit pass0skip incl12new, debug/instrumentationAPKs assembled, lint0Error/Fatal(91warnings22hints),9faults caught/restored,78rebuild/23owner contracts pass. No new UI; gateway durable dispatch/expired originals/device-key propagation/coordinator controls remain.",
           "evidence": "backend/BE-003_009_RUNTIME_RECOVERY_ANDROID_CLIENT.md; receipts/ANDROID_RUNTIME_RECOVERY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Durable gateway recovery dispatcher resumes exact consumed A4 receipts without another phone POST or renewed consent; current device/key/signature/metadata, fair bounded cursor, original native readback and durable delivery marker. Native expired-first-delivery signature/atomic absence yields terminal no-effect refusal with null unobserved risk state, never actor authority; previous original outcome always wins.5valid beforefailures fixed;2371fulltrading+recovery pass0skip realprivatePG,97focused+2keycontrols,78rebuild/19owner contracts/8Androidcompatibility pass;11faults caught/restored. Source only; native key propagation/coordinator/retirement remain.",
+          "evidence": "backend/BE-003_009_RUNTIME_RECOVERY_OUTBOX.md; receipts/RUNTIME_RECOVERY_OUTBOX_SOURCE_20261023.json"
         }
       ]
     },
@@ -1602,9 +1614,14 @@
         "VAN-ML-PKT-028",
         "VAN-ML-PKT-048"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Generated current Markdown frontend screen/feature registry from all42features/78surfaces/444endpoints/276schemas with actions, states, gaps, navigation and client extensions. Original93plannedfeature/349action scope remains separate; no newfrontend or whole catalog acceptance. Renderer validates row identity and reference preservation and check reports zero drift.",
+          "evidence": "backend/OWNER_FRONTEND_SCREEN_REGISTRY.md; tools/rebuild/render_frontend_registry.py"
+        }
+      ]
     },
     "BE-033": {
       "title": "Backend deployment, recovery, capacity and observability",

@@ -97,8 +97,8 @@ class RuntimeRecoveryResult(BaseModel):
         'STATE_CHANGED','PRECONDITION_UNMET','ACTOR_LEASE_LOST']
     effect_refs: list[str]
     entry_authority_granted: Literal[False]
-    remaining_kill: list[KillSwitchTrigger]
-    state_ref: str
+    remaining_kill: list[KillSwitchTrigger] | None
+    state_ref: str | None
 
 
 class RuntimeRecoveryOperation(BaseModel):

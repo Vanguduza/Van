@@ -185,6 +185,7 @@ from van_gateway.trading.accounts import ACTIONS as ACCOUNT_ACTIONS, AccountOnbo
 from van_gateway.trading.account_contracts import AccountChallengeResponse,AccountActionCatalog
 from van_gateway.trading.strategies import StrategyPromotionGateway, canonical_strategy_promotion
 from van_gateway.trading.runtime_controls import register_runtime_control_routes
+from van_gateway.trading.runtime_recovery_dispatch import RuntimeRecoveryDispatcher
 
 
 class VisualAcceptanceBody(BaseModel):
@@ -1113,6 +1114,8 @@ def create_app() -> FastAPI:
     scheduler = OpsScheduler(store, _scheduler_jobs())
     started_at = time.monotonic()
 
+    runtime_recovery_dispatcher = RuntimeRecoveryDispatcher(store=store, auth=auth, promotions=strategy_promotions)
+
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
         # P3-OBS-001 — the gateway emitted no application logs at all. This is the
@@ -1139,11 +1142,13 @@ def create_app() -> FastAPI:
                 await asyncio.sleep(60)
                 speech_streams.sweep()
         speech_cleanup = asyncio.create_task(expire_speech_text())
+        recovery_dispatch = asyncio.create_task(runtime_recovery_dispatcher.run())
         try:
             yield
         finally:
             speech_cleanup.cancel()
-            await asyncio.gather(speech_cleanup, return_exceptions=True)
+            recovery_dispatch.cancel()
+            await asyncio.gather(speech_cleanup, recovery_dispatch, return_exceptions=True)
             speech_streams.clear()
             await dial_dev_attention.stop()
             await scheduler.stop()
@@ -1214,6 +1219,7 @@ def create_app() -> FastAPI:
     app.state.trading = trading
     app.state.onboarding = onboarding
     app.state.strategy_promotions = strategy_promotions
+    app.state.runtime_recovery_dispatcher = runtime_recovery_dispatcher
     app.state.dial_dev_config = dial_dev_config
     app.state.dial_dev_client = dial_dev_client
     app.state.dial_dev_attention = dial_dev_attention

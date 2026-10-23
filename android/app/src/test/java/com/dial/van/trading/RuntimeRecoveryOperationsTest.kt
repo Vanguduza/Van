@@ -126,4 +126,14 @@ class RuntimeRecoveryOperationsTest {
         }
     }
 
+    @Test fun nativeExpiredNoEffectReceiptFinishesTheOriginalWithoutInventingCurrentRiskState() {
+        val disk = Disk(); val history = RuntimeRecoveryOperations(disk); history.remember(original)
+        val final = result("REFUSED")
+        val refused = JsonObject(final + ("result" to JsonObject(final["result"]!!.jsonObject + mapOf(
+            "reason_code" to JsonPrimitive("APPROVAL_EXPIRED"),
+            "remaining_kill" to JsonNull, "state_ref" to JsonNull))))
+        assertTrue(history.observe(original,refused.toString(),200))
+        assertTrue(RuntimeRecoveryOperations(disk).pending(original.deviceId).isEmpty())
+    }
+
 }

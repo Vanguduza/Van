@@ -14,6 +14,7 @@ from vati.app.runtime_control_protocol import RecoveryIntent,RecoveryProof,Runti
 
 PRODUCER='vati-runtime-recovery-control'
 SCHEMA='vati.runtime-control-operation/1'
+EXPIRED_SCHEMA='vati.runtime-control-expired-refusal/1'
 FINAL=frozenset({'APPLIED','REFUSED'})
 REASONS=frozenset({'APPLIED','APPROVAL_EXPIRED','OWNER_KEY_UNREGISTERED','SESSION_CHANGED',
     'STATE_CHANGED','PRECONDITION_UNMET','ACTOR_LEASE_LOST'})
@@ -37,6 +38,7 @@ class RuntimeControlState:
     event_ref: str
     accepted_at_unix: int
     result: dict | None=None
+    expired_without_dispatch: bool=False
 
     def public(self):
         return {'operation_id':self.proof.operation_id,'phase':self.phase,
@@ -45,13 +47,18 @@ class RuntimeControlState:
             'native_event_ref':self.event_ref,'result':deepcopy(self.result)}
 
 
-def validate_result(result,phase):
+def validate_result(result,phase,*,expired_without_dispatch=False):
     expected={'reason_code','effect_refs','entry_authority_granted','remaining_kill','state_ref'}
     if not isinstance(result,dict) or set(result)!=expected or result['reason_code'] not in REASONS:
         raise RuntimeControlStoreError('native recovery result shape is invalid')
-    if (phase=='APPLIED')!=(result['reason_code']=='APPLIED') or type(result['entry_authority_granted']) is not bool:
+    if (phase=='APPLIED')!=(result['reason_code']=='APPLIED') or result['entry_authority_granted'] is not False:
         raise RuntimeControlStoreError('native recovery result phase is invalid')
     from vati.risk.contracts import KillSwitchTrigger
+    if expired_without_dispatch:
+        if (phase!='REFUSED' or result['reason_code']!='APPROVAL_EXPIRED'
+            or result['effect_refs']!=[] or result['remaining_kill'] is not None or result['state_ref'] is not None):
+            raise RuntimeControlStoreError('expired original refusal cannot assert an effect or current risk state')
+        return
     if (not isinstance(result['remaining_kill'],list)
         or any(x not in {k.value for k in KillSwitchTrigger} for x in result['remaining_kill'])):
         raise RuntimeControlStoreError('native remaining kill state is invalid')
@@ -76,16 +83,29 @@ class RuntimeControlJournal:
             if event.producer!=PRODUCER:continue
             try:
                 p=event.payload
-                if (event.hash!=canonical_hash(event.body()) or p['schema']!=SCHEMA
+                if (event.hash!=canonical_hash(event.body()) or p['schema'] not in {SCHEMA,EXPIRED_SCHEMA}
                     or set(p)!={'schema','intent','proof','public_key_pem','authority_ref','phase','previous_ref','accepted_at_unix','result'}):
                     raise ValueError('native recovery record shape')
                 intent=RecoveryIntent.from_mapping(p['intent']);proof=RecoveryProof.from_mapping(p['proof'])
                 previous=states.get(proof.operation_id)
                 if event.correlation_id!=proof.operation_id or type(p['accepted_at_unix']) is not int:
                     raise ValueError('native original recovery identity')
-                reference=proof.verify(intent,{proof.key_id:p['public_key_pem']},now_unix=p['accepted_at_unix'])
+                expired=p['schema']==EXPIRED_SCHEMA
+                if expired:
+                    # A signed, expired original may only receive a terminal
+                    # no-dispatch refusal. It never enters the actor queue.
+                    if (previous is not None or p['phase']!='REFUSED' or p['previous_ref']
+                        or p['accepted_at_unix']<proof.expires_at_unix
+                        or p['accepted_at_unix']!=event.received_time_ms//1000):
+                        raise ValueError('expired original refusal lineage')
+                    reference=proof.verify_signature(intent,{proof.key_id:p['public_key_pem']})
+                    validate_result(p['result'],'REFUSED',expired_without_dispatch=True)
+                else:
+                    reference=proof.verify(intent,{proof.key_id:p['public_key_pem']},now_unix=p['accepted_at_unix'])
                 if reference!=p['authority_ref']:raise ValueError('native recovery proof reference')
-                if previous is None:
+                if expired:
+                    pass
+                elif previous is None:
                     if (p['phase']!='REQUESTED' or p['previous_ref'] or p['result'] is not None
                         or p['accepted_at_unix']!=event.received_time_ms//1000):
                         raise ValueError('native recovery first phase')
@@ -98,21 +118,23 @@ class RuntimeControlJournal:
                     validate_result(p['result'],p['phase'])
                     if p['phase']=='APPLIED':self._validate_effects(previous,p['result'],before_ref=event.hash)
                 states[proof.operation_id]=RuntimeControlState(intent,proof,p['public_key_pem'],reference,p['phase'],
-                    event.hash,p['accepted_at_unix'],p['result'])
+                    event.hash,p['accepted_at_unix'],p['result'],expired)
             except (KeyError,TypeError,ValueError,AttributeError) as exc:
                 raise RuntimeControlStoreError('native recovery record is invalid') from exc
         return states
 
     def _append(self,state,phase,*,previous_ref='',result=None):
         now=state.accepted_at_unix if phase=='REQUESTED' else self.clock()
-        payload={'schema':SCHEMA,'intent':state.intent.body(),'proof':state.proof.public_record(),
+        if state.expired_without_dispatch and phase!='REFUSED':
+            raise RuntimeControlStoreError('an expired original refusal cannot authorize another phase')
+        payload={'schema':EXPIRED_SCHEMA if state.expired_without_dispatch else SCHEMA,'intent':state.intent.body(),'proof':state.proof.public_record(),
             'public_key_pem':state.public_key_pem,'authority_ref':state.authority_ref,'phase':phase,
             'previous_ref':previous_ref,'accepted_at_unix':state.accepted_at_unix,'result':result}
         event=make_event(EventKind.SESSION,PRODUCER,payload,event_time_ms=now*1000,received_time_ms=now*1000,
             correlation_id=state.proof.operation_id)
         self.ledger.append(event)
         return RuntimeControlState(state.intent,state.proof,state.public_key_pem,state.authority_ref,phase,
-            event.hash,state.accepted_at_unix,result)
+            event.hash,state.accepted_at_unix,result,state.expired_without_dispatch)
 
     def enqueue(self,intent,proof,keys):
         if not isinstance(intent,RecoveryIntent) or not isinstance(proof,RecoveryProof):
@@ -126,7 +148,21 @@ class RuntimeControlJournal:
                 if old.intent!=intent or old.proof!=proof:
                     raise RuntimeControlConflict('original recovery request differs from its signed actor or target')
                 return old
-            now=self.clock();ref=proof.verify(intent,keys,now_unix=now)
+            now=self.clock()
+            try:
+                ref=proof.verify(intent,keys,now_unix=now)
+            except RuntimeControlError:
+                if type(now) is not int or now<proof.expires_at_unix:
+                    raise
+                ref=proof.verify_signature(intent,keys)
+                # Absence is established under the same ledger writer lock as
+                # this terminal event. No REQUESTED state or actor effect exists.
+                state=RuntimeControlState(intent,proof,keys[proof.key_id],ref,'REFUSED','',now,
+                    expired_without_dispatch=True)
+                result={'reason_code':'APPROVAL_EXPIRED','effect_refs':[],'entry_authority_granted':False,
+                    'remaining_kill':None,'state_ref':None}
+                validate_result(result,'REFUSED',expired_without_dispatch=True)
+                return self._append(state,'REFUSED',result=result)
             state=RuntimeControlState(intent,proof,keys[proof.key_id],ref,'REQUESTED','',now)
             return self._append(state,'REQUESTED')
 

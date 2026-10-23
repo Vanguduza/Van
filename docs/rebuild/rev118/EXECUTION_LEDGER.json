@@ -172,7 +172,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T05:40:38.714667+00:00",
+    "updated_utc": "2026-10-23T06:00:23.075090+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [],
@@ -274,7 +274,10 @@
       "Hosted4700/39900846394 complete374legacycases/383edits,native18pass4artworkskips,realVITS2.758/2.516s,PG26voice117publictrading2248pass1DDSskip. Actual source/merge trees equal; DDSreadkey andtrustedmain failures retained.",
       "Existing Android data layer now wires all five exact native runtime-recovery endpoints, immutable A4 canonical body, strict timestamps/Base64 and durable original public IDs across uncertain responses/restarts.215app unit pass0skip incl12new, debug/instrumentationAPKs assembled, lint0Error/Fatal(91warnings22hints),9faults caught/restored,78rebuild/23owner contracts pass. No new UI; gateway durable dispatch/expired originals/device-key propagation/coordinator controls remain.",
       "Frozen exactd6 source audit COMPLETE:2229tradingpass0skip,6841backend/contracts pass9explicit skips; zero forbidden storage, clean checkout, privatePGstopped/removed. Separate actual kernel6pass0skip evidence remains bound to equal source files.",
-      "Hosted2d/39903571744 complete374legacy regressions/383edits,native18pass4artworkmode skips,VITS2.383/2.529s,PG26voice117publictrading2280pass1DDSskip. Source/merge trees equal; only DDSreadkey/trustedmain prerequisites fail."
+      "Hosted2d/39903571744 complete374legacy regressions/383edits,native18pass4artworkmode skips,VITS2.383/2.529s,PG26voice117publictrading2280pass1DDSskip. Source/merge trees equal; only DDSreadkey/trustedmain prerequisites fail.",
+      "Durable gateway recovery dispatcher resumes exact consumed A4 receipts without another phone POST or renewed consent; current device/key/signature/metadata, fair bounded cursor, original native readback and durable delivery marker. Native expired-first-delivery signature/atomic absence yields terminal no-effect refusal with null unobserved risk state, never actor authority; previous original outcome always wins.5valid beforefailures fixed;2371fulltrading+recovery pass0skip realprivatePG,97focused+2keycontrols,78rebuild/19owner contracts/8Androidcompatibility pass;11faults caught/restored. Source only; native key propagation/coordinator/retirement remain.",
+      "Hosted882/39907152419 all374legacy faults/383edits,native18pass4artworkmode skips,realVITS3.516/2.488s,PG26voice117publictrading2280pass1DDSskip; actual source/merge trees equal. DDSreadkey/trustedmain prerequisites retained.",
+      "Current source Markdown registry generated from42features/78surfaces/444endpoints/276schemas; complete frozen93feature planned programme distinct. No UI redesign."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -285,9 +288,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Continue autonomous whole-product source implementation. Resolve durable gateway dispatch after process death and expired original adjudication without renewing owner consent; propagate native device-key revocation and extend coordinator controls. Finish native numeric precision/worker deadline/epoch/risk envelopes, original fill integrity/provider finality/corrections, safe retirement and all original assistant features. No new frontend before BG001 or invented unit/native/provider/production/S24 acceptance. Exact d6 broad source audit complete; current2d hosted native/full374 collected.",
-    "previous_head": "2d183ac69688e72ac0047987b81b6fe55a62e365",
-    "current_packet": "Android original runtime recovery data-layer wiring"
+    "next_action": "Continue autonomous whole-product source implementation. Propagate native owner-device key revocation with durable recovery and truthful partial acknowledgement, then extend coordinator controls, safe account retirement, native numeric precision/worker deadline/epoch/risk envelopes, original fill integrity/provider financial finality/corrections and all remaining assistant features. Preserve all original 131units/93plannedfeatures; no newfrontend beforeBG001 or invented unit/native/provider/production/S24 acceptance. Current882hostednative/full374 collected; exact new source broad qualification next.",
+    "previous_head": "882e99e42ab44b0814563573bf0197fa75265f5d",
+    "current_packet": "Durable original recovery dispatch and native expired-first-delivery refusal"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",

@@ -132,6 +132,18 @@ class RecoveryProof:
             raise RuntimeControlError('runtime request time is stale or not yet valid')
         if not now_unix<self.expires_at_unix<=now_unix+MAX_APPROVAL_SECONDS:
             raise RuntimeControlError('runtime owner approval expired or exceeds its native lifetime')
+        return self.verify_signature(intent, keys)
+
+    def verify_signature(self,intent: RecoveryIntent,keys: Mapping[str,str]):
+        """Authenticate immutable history only; this method grants NO current authority.
+
+        Used for an expired first-delivery refusal and archived readback. Effects
+        must still pass verify(), including native clock and lifetime checks.
+        """
+        if RecoveryIntent.from_mapping(intent.body()) != intent:
+            raise RuntimeControlError('runtime recovery arguments are not canonical')
+        RecoveryProof.from_mapping(self.public_record())
+        statement=approval_statement(intent,self.operation_id,self.expires_at_unix)
         pem=keys.get(self.key_id)
         if not isinstance(pem,str) or not pem:raise RuntimeControlError('runtime owner key is not currently registered')
         try:

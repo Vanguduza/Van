@@ -9012,14 +9012,28 @@
             "title": "Entry Authority Granted"
           },
           "remaining_kill": {
-            "items": {
-              "$ref": "#/components/schemas/KillSwitchTrigger"
-            },
-            "type": "array",
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/KillSwitchTrigger"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Remaining Kill"
           },
           "state_ref": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "State Ref"
           }
         },
