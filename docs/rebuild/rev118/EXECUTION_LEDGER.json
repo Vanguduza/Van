@@ -172,7 +172,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T13:28:54.186934+00:00",
+    "updated_utc": "2026-10-23T13:39:37.750954+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
@@ -183,12 +183,6 @@
         "log": "/tmp/van-39807eff-full-backend.txt",
         "driver": "/tmp/van-39807eff-qualification-driver.txt",
         "phase": "Check actual stage/result at continuation; private PostgreSQL stopped/removed in finally."
-      },
-      {
-        "kind": "HOSTED_SOURCE",
-        "source_head": "39807eff3c76841eed92f0a477751635b998f4d8",
-        "run_id": 39959688518,
-        "state": "Read current API status; do not infer completion."
       }
     ],
     "last_validation": [
@@ -320,7 +314,9 @@
       "Reminder request-bound idempotency and actual concurrent create/fire are atomic; cancelled/resolved conflicts explicit, follow-up rollback/project/source preserved. Durable FIRED publication replays same event/attention after lost ACK, preserves original owner ACK and legacy events; server persistence never claims handset delivery. Attention concurrent upsert and persisted source/project corrected. Typed time errors/unique wall instants/elapsed DST arithmetic.12reminder+2attention beforefailures fixed;86focused/252combined pass0skip,78rebuild/35owner contracts;12faults+controls caught/restored, initial nondeterministic survivor retained and oracle corrected with actual independent owner write. Source only, original units/gates remain.",
       "Encrypted Android original DIAL controls survive restart with original body/key/revision; exact owner-authenticated native action read beyond recent lists, scoped typed acknowledgements, stale/foreign/malformed/uncertain facts retain identity. Distinct protective controls retain native authorization; late observers cannot settle newer work. 163 affected backend,7 typed-read,1326 pure Kotlin,222 app JVM,2 debug APKs,lint zero Error/Fatal;15 faults+15 controls assertion-caught/restored.78 rebuild,29 registry,15 actual-PG/lease pass. Failed broad59 backend/trading executions retained with focused test-only corrections; source candidate, no unit/live certification.",
       "Hosted exact59d5777e all374 legacyfaults383edits/native18pass4explicitartworkskips/MetaEditor0errors0warnings+invalid4errors/noEX5. Full local frozen59 backend6961pass9skip1old-onboardingtestfail; trading2434pass1lease-testCAS-oraclefail. Both retained; focused corrected expectations pass without relaxing production guards.",
-      "Native cTrader fill/position quantities preserve sub-centilot ratios; equity uses broker net PnL in deposit currency with its own exponent, complete native position identities and cross-read funds fence. Missing/foreign/malformed marks refuse verification; no missing-quote zero.14 original failures+1positive,3 funds-drift failures fixed;44 focused/2454 fulltrading pass0skip actualprivatePG/stoppedremoved,7faults+7controls caught/restored. Actual framed negative native mark exercised. Source only; no settled financial maturity/whole-unit/native/provider acceptance."
+      "Native cTrader fill/position quantities preserve sub-centilot ratios; equity uses broker net PnL in deposit currency with its own exponent, complete native position identities and cross-read funds fence. Missing/foreign/malformed marks refuse verification; no missing-quote zero.14 original failures+1positive,3 funds-drift failures fixed;44 focused/2454 fulltrading pass0skip actualprivatePG/stoppedremoved,7faults+7controls caught/restored. Actual framed negative native mark exercised. Source only; no settled financial maturity/whole-unit/native/provider acceptance.",
+      "Native cTrader lost entry/close/stop replies/events stayUNKNOWN; close binds actual admission/account/order/position/closing-deal identity. No requested-volume/price substitution or bool/string quantity; partial fills remainexact/PARTIAL. Stop requires native matching readback; unsupported remaining protection staysfalse without discarding actual partialfill.22original failures+2positive controls fixed;54focused/2478fulltrading pass0skip actualPGstoppedremoved;11faults+11controls caught/restored. Source only, not settled financial maturity/whole-unit/provider/native/handset acceptance.",
+      "Exact39807eff hosted39959688518 all374legacy faults383edits;Android18pass4existingartworkskips,VITS5.300/2.311s,PG26voice117publictrading2434pass1DDSskip;merge2cd0316dtreeequal. Only originalDDSreadkey/trustedmainbootstrap fail. Native39959688543 MetaEditor0errors0warnings/freshEX5, invalid4errors/noEX5, receipt retained."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -331,9 +327,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Complete original cTrader entry/close/stop uncertainty and native partial-close outcomes; nine valid before probes retained in /tmp/test_van_ctrader_next_outcomes.py and /tmp/van-ctrader-next-outcomes-before.xml. Collect exact39807eff hosted374/native results and frozen broad source qualification. Continue provider settled/corrected money and worker deadline/epoch/risk envelopes plus all original whole-product features. Preserve131units/93plannedfeatures/BG001 and native/independent/production gates.",
-    "previous_head": "39807eff3c76841eed92f0a477751635b998f4d8",
-    "current_packet": "Native cTrader exact quantity and deposit-currency equity, source tested."
+    "next_action": "Integrate isolated approved memory-erasure original-result recovery after adverse/atomic/lost-reply tests; two valid before counterexamples delete later owner facts and overwrite the original witness. Candidate work in /tmp/van-ctrader-outcome-work-20261023. Collect frozen39807eff full backend/contracts+trading result from session74321. Continue all original native provider financial finality/deadline/epoch/risk and whole-product domains;131units/93plannedfeatures retained, no newfrontend beforeBG001 or invented certificates.",
+    "previous_head": "26bc936e6a44ddb844b24192394a1ac3b0e94aec",
+    "current_packet": "Native cTrader truthful original execution/protection outcomes, source tested."
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -391,6 +387,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Complete original cTrader entry/close/stop uncertainty and native partial-close outcomes; nine valid before probes retained in /tmp/test_van_ctrader_next_outcomes.py and /tmp/van-ctrader-next-outcomes-before.xml. Collect exact39807eff hosted374/native results and frozen broad source qualification. Continue provider settled/corrected money and worker deadline/epoch/risk envelopes plus all original whole-product features. Preserve131units/93plannedfeatures/BG001 and native/independent/production gates.",
-  "updated_at_utc": "2026-10-23T13:28:54.186934+00:00"
+  "current_action": "Integrate isolated approved memory-erasure original-result recovery after adverse/atomic/lost-reply tests; two valid before counterexamples delete later owner facts and overwrite the original witness. Candidate work in /tmp/van-ctrader-outcome-work-20261023. Collect frozen39807eff full backend/contracts+trading result from session74321. Continue all original native provider financial finality/deadline/epoch/risk and whole-product domains;131units/93plannedfeatures retained, no newfrontend beforeBG001 or invented certificates.",
+  "updated_at_utc": "2026-10-23T13:39:37.750954+00:00"
 }

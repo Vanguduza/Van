@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T13:28:54.186934+00:00",
+  "updated_at_utc": "2026-10-23T13:39:37.750954+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -591,6 +591,10 @@
         {
           "description": "Native cTrader fill/position quantities preserve sub-centilot ratios; equity uses broker net PnL in deposit currency with its own exponent, complete native position identities and cross-read funds fence. Missing/foreign/malformed marks refuse verification; no missing-quote zero.14 original failures+1positive,3 funds-drift failures fixed;44 focused/2454 fulltrading pass0skip actualprivatePG/stoppedremoved,7faults+7controls caught/restored. Actual framed negative native mark exercised. Source only; no settled financial maturity/whole-unit/native/provider acceptance.",
           "evidence": "backend/BE-009_010_012_CTRADER_NATIVE_MONEY.md; receipts/CTRADER_NATIVE_MONEY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Native cTrader lost entry/close/stop replies/events stayUNKNOWN; close binds actual admission/account/order/position/closing-deal identity. No requested-volume/price substitution or bool/string quantity; partial fills remainexact/PARTIAL. Stop requires native matching readback; unsupported remaining protection staysfalse without discarding actual partialfill.22original failures+2positive controls fixed;54focused/2478fulltrading pass0skip actualPGstoppedremoved;11faults+11controls caught/restored. Source only, not settled financial maturity/whole-unit/provider/native/handset acceptance.",
+          "evidence": "backend/BE-010_012_CTRADER_ORIGINAL_OUTCOMES.md; receipts/CTRADER_ORIGINAL_OUTCOMES_SOURCE_20261023.json"
         }
       ]
     },
@@ -658,6 +662,10 @@
         {
           "description": "Native cTrader fill/position quantities preserve sub-centilot ratios; equity uses broker net PnL in deposit currency with its own exponent, complete native position identities and cross-read funds fence. Missing/foreign/malformed marks refuse verification; no missing-quote zero.14 original failures+1positive,3 funds-drift failures fixed;44 focused/2454 fulltrading pass0skip actualprivatePG/stoppedremoved,7faults+7controls caught/restored. Actual framed negative native mark exercised. Source only; no settled financial maturity/whole-unit/native/provider acceptance.",
           "evidence": "backend/BE-009_010_012_CTRADER_NATIVE_MONEY.md; receipts/CTRADER_NATIVE_MONEY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Native cTrader lost entry/close/stop replies/events stayUNKNOWN; close binds actual admission/account/order/position/closing-deal identity. No requested-volume/price substitution or bool/string quantity; partial fills remainexact/PARTIAL. Stop requires native matching readback; unsupported remaining protection staysfalse without discarding actual partialfill.22original failures+2positive controls fixed;54focused/2478fulltrading pass0skip actualPGstoppedremoved;11faults+11controls caught/restored. Source only, not settled financial maturity/whole-unit/provider/native/handset acceptance.",
+          "evidence": "backend/BE-010_012_CTRADER_ORIGINAL_OUTCOMES.md; receipts/CTRADER_ORIGINAL_OUTCOMES_SOURCE_20261023.json"
         }
       ]
     },
