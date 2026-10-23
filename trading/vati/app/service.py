@@ -309,6 +309,7 @@ class SessionService:
         if getattr(self, "learning", None) is not None and getattr(self, "_ledger", None) is not None:
             self.learning.update_projection(self._ledger)
         hb = {"account_alias": self.cfg.account_alias, "symbol": self.cfg.symbol, "session_id": self.runner.cycle.cfg.session_id if self.runner else None, "status": status, "cycles": self.cycles, "last_bar_end_ms": self.last_bar_end_ms,
+              "owner_policy_current": bool(self.runner and self.runner.cycle.mandate.owner_keys_current()),
               "permit_new_orders": bool(self._entry_permitted()
                   and self.lease and self.lease.fence(self.lease.epoch, now_ms=self.clock())), "kill_switch": sorted(t.value for t in self.runner.cycle.kill.active) if self.runner else [],
               "lease_outcome": self._lease_outcome, "lease_epoch": self.lease.epoch if self.lease else None,
@@ -423,7 +424,8 @@ class SessionService:
             profile_permitted=False
         return bool(profile_permitted and self._lease_allows_entry and self.runner.permit_new_orders
             and not self.runner.cycle.unresolved_entry_attempts
-            and self.runner.cycle.mandate.sends_orders() and not self.runner.cycle.kill.halted)
+            and self.runner.cycle.mandate.sends_orders() and self.runner.cycle.mandate.owner_keys_current()
+            and not self.runner.cycle.kill.halted)
 
     def step_once(self) -> Optional[str]:
         """One loop iteration; returns the cycle decision when a new bar closed, else None."""

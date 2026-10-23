@@ -172,10 +172,20 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T07:04:27.193747+00:00",
+    "updated_utc": "2026-10-23T07:44:42.019181+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": [],
+    "background_jobs": [
+      {
+        "scope": "Frozen exact f35 source audited backend/contracts",
+        "checkout": "/workspace/van-autonomous-qualification-20261022/Van",
+        "session_id": 61065,
+        "stage": "TRADING_PASS_BACKEND_RUNNING",
+        "trading_passed": 2295,
+        "trading_skipped": 0,
+        "source_mutation_forbidden": true
+      }
+    ],
     "last_validation": [
       "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
       "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -280,7 +290,9 @@
       "Current source Markdown registry generated from42features/78surfaces/444endpoints/276schemas; complete frozen93feature planned programme distinct. No UI redesign.",
       "Paired-device revocation atomically persists native work with local device/grant disable; local actions/certs precede native IO. Gateway-only native command durably tombstones the exact P256 key across aliases, rejects stale reenrollment, serializes independent writers, preserves same-key policy labels/PEM equivalence and unrelated keys. Current Commander verification reloads keys without resetting consumed tokens; actor review binds actual native key-file identity. Typed PENDING/APPLIED/UNKNOWN plus readonly original GET under dedicated enrolment scope. Full2511pass0skip before final alias/status hardening,155final affectedpass,17source faults caught/restored,actual two-process race pass;78rebuild/19owner registry checks pass on final source. Fresh committed full qualification next; no whole-unit/live acceptance.",
       "Frozen exactf3 clean auditedbackend/contracts6875pass9explicit skips6884cases2657.19s;2281tradingpass0skip478.14s; zero forbidden runtime storage, realPG/Chrome/AGP/bothDDS, privatePGstopped/removed/driverexit0. Separate kernel supplement6actualpass0skip bound to identical test/applicationfiles; productionhostfirewall unqualified.",
-      "Hostedf3/39908982147 all374legacy faults383edits,native18pass4artworkmode skips,VITS2.306/1.932s,PG26voice117publictrading2280pass1DDSskip; treeidentical testedmerge. Only DDSreadkey/trustedmain bootstrap prerequisites fail."
+      "Hostedf3/39908982147 all374legacy faults383edits,native18pass4artworkmode skips,VITS2.306/1.932s,PG26voice117publictrading2280pass1DDSskip; treeidentical testedmerge. Only DDSreadkey/trustedmain bootstrap prerequisites fail.",
+      "Standing policy admission binds the exact cryptographically verified signer and captured native source; current risk and final submission reject retirement, unreadable source or changed material. Same native key-file lock serializes actual send and revocation ACK. Independent temperament signer, equivalent PEM, explicit archived research, immutable policy/risk wire, real session/book status and retained protective exits covered.2535full trading/recovery pass0skip realprivatePG,78rebuild,7registry tests and unchanged contract derivation;9faults caught/restored. Source only; deferred providers and original gates remain.",
+      "Hostedf35/39915974290 all374legacy faults383edits,native18pass4artworkmode skips,VITS3.038/2.390s,PG26voice117publictrading2294pass1DDSskip; testedmerge treeidentical. DDSreadkey/trusted-main bootstrap failures retained. Kernel39915974384SUCCESS; six-check detailed supplement remains its prior source-bound receipt."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -291,9 +303,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Continue autonomous original whole-product source implementation. Run exact committed current-key source qualification; harden current signer availability for standing mandate entry without discarding historical research or protection. Finish coordinator recovery, safe account retirement, MQL precision/order-vs-position IDs, native worker deadline/epoch/risk envelopes and provider finality/corrections, plus remaining assistant functions. Preserve131units/324requirements/1610acceptanceIDs/234contexts/349actions/93plannedfeatures. No newfrontend beforeBG001 or fabricated unit/native/provider/production/S24 acceptance. Frozenf3 auditedbackend/contracts and hostednative/full374 complete and retained.",
-    "previous_head": "f3c2e13886e5bbab0904329d25f7c0491bb796e5",
-    "current_packet": "Native owner-key revocation, authority-source binding and readonly original outcomes"
+    "next_action": "Continue autonomous whole-product source implementation. Complete the reproduced multi-instrument owner recovery/state contract and account-scoped halt defects (11 valid counterexamples), preserving original signed proof/readback/lease/journal semantics. Keep exact f35 full backend qualification checkout untouched until actual exit. Finish safe account retirement, native MQL precision/order vs position identity, deferred worker deadlines/epochs/risk envelopes, provider financial finality/corrections and all remaining assistant features. No new frontend before BG-001 or invented acceptance.",
+    "previous_head": "f35bf94b6f098f0d2ac8ee2aab77b5864dfb3aa0",
+    "current_packet": "Current standing policy signer availability and native revocation/submission serialization"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",

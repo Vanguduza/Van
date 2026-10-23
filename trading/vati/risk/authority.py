@@ -200,6 +200,9 @@ class RiskAuthority:
         if not m.authority_matches_policy():
             return rej('MANDATE_AUTHORITY_MISMATCH','current effective policy lacks its original owner grant; re-admission required')
 
+        if not m.owner_keys_current():
+            return rej('MANDATE_SIGNER_UNAVAILABLE','current owner signer is not registered or changed; re-admission required')
+
         # 1b. Post-entry preservation has precedence over new risk. The
         # lifecycle may describe why, but only RiskAuthority turns that fact
         # into a refusal (INV-AUTH-001).

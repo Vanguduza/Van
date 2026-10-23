@@ -9,6 +9,7 @@ that asks for more than the ceiling is rejected at load time, never widened.
 from __future__ import annotations
 
 import time
+from contextlib import contextmanager, ExitStack
 
 from dataclasses import asdict, dataclass, field, replace
 from decimal import Decimal, InvalidOperation
@@ -167,6 +168,30 @@ class TradingMandate:
         return (bool(self.owner_policy_subject) and self.owner_signature_ref.startswith("owner-authority:")
                 and self.owner_policy_subject == mandate_subject(self))
 
+    def owner_keys_current(self) -> bool:
+        # Runtime trust handles are attached only after successful signature
+        # verification. They are not policy fields and never enter wire hashes,
+        # data exports or a newly replaced/unadmitted mandate.
+        bindings=getattr(self,'_verified_owner_key_bindings',())
+        return bool(bindings) and all(binding is not None and binding.is_current() for binding in bindings)
+
+    @contextmanager
+    def owner_authority_submission_guard(self):
+        from vati.core.file_lock import exclusive_state_lock
+        bindings=getattr(self,'_verified_owner_key_bindings',())
+        paths=sorted({binding.registry_path for binding in bindings if binding is not None and binding.registry_path is not None})
+        stack=ExitStack()
+        try:
+            for path in paths:stack.enter_context(exclusive_state_lock(path))
+        except (OSError,ValueError):
+            stack.close()
+            yield False
+            return
+        try:
+            yield self.owner_keys_current()
+        finally:
+            stack.close()
+
     @property
     def temperament_enabled(self) -> bool:
         return self.trading_temperament is not None or bool(self.strategy_temperaments)
@@ -241,6 +266,7 @@ class TradingMandate:
         if not requested_profile and profile_ref:
             raise MandateError("temperament signature without selected temperament")
         verified_profile_ref = ""
+        verified_profile = None
         if requested_profile:
             try:
                 verified_profile = verifier.verify(
@@ -262,6 +288,9 @@ class TradingMandate:
         m = replace(policy, owner_signature_ref=verified.ref,
                     temperament_owner_signature_ref=verified_profile_ref)
         object.__setattr__(m,"owner_policy_subject",verified.subject)
+        grants=(verified,) if verified_profile is None else (verified,verified_profile)
+        object.__setattr__(m,'_verified_owner_key_bindings',tuple(
+            getattr(grant,'_verified_key_binding',None) for grant in grants))
         if m.expires_at_unix > verified.expires_at_unix:
             raise MandateError("mandate expiry exceeds its owner-signed grant lifetime")
         m.validate(ceilings)

@@ -39,11 +39,11 @@ import hashlib
 import json
 import os
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable, Mapping, MutableSet
 
-from cryptography.exceptions import InvalidSignature
+from cryptography.exceptions import InvalidSignature, UnsupportedAlgorithm
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 
@@ -83,6 +83,28 @@ class OwnerAuthority:
     def ref(self) -> str:
         """A short, stable reference to record in a ledger entry."""
         return f"owner-authority:{self.key_id}:{self.nonce}"
+
+
+@dataclass(frozen=True)
+class OwnerKeyBinding:
+    """The exact verified key and its current trust source; never a bearer grant."""
+    key_id: str
+    public_key_sha256: str
+    registry_path: str | None
+    _source: object = field(repr=False, compare=False)
+
+    def is_current(self) -> bool:
+        try:
+            if self.key_id in self._source.revoked_key_ids:
+                return False
+            keys=load_owner_keys(self.registry_path) if self.registry_path is not None else self._source.keys
+            pem=keys.get(self.key_id)
+            if not isinstance(pem,str):return False
+            key=serialization.load_pem_public_key(pem.encode())
+            der=key.public_bytes(serialization.Encoding.DER,serialization.PublicFormat.SubjectPublicKeyInfo)
+            return hashlib.sha256(der).hexdigest()==self.public_key_sha256
+        except (OSError,ValueError,TypeError,AttributeError,UnsupportedAlgorithm):
+            return False
 
 
 def _b64u(raw: bytes) -> str:
@@ -177,6 +199,9 @@ class OwnerAuthorityVerifier:
         revoked_key_ids: Iterable[str] = (),
         registry_path: str | os.PathLike[str] | None = None,
     ) -> None:
+        if keys is None and registry_path is None:
+            from vati.authority_registry import owner_registry_path
+            registry_path=owner_registry_path()
         self.registry_path = (str(Path(registry_path).resolve()) if registry_path is not None else None)
         self.keys = dict(keys) if keys is not None else load_owner_keys(registry_path)
         # Single use is enforced here so that a caller that forgets to pass a store still
@@ -221,9 +246,10 @@ class OwnerAuthorityVerifier:
         key_id = str(payload.get("kid", ""))
         if not key_id or key_id in self.revoked_key_ids:
             raise OwnerAuthorityError(f"{act}: owner authority key {key_id!r} is not usable")
-        if self.registry_path is not None:
+        verified_registry_path = self.registry_path
+        if verified_registry_path is not None:
             try:
-                self.keys = load_owner_keys(self.registry_path)
+                self.keys = load_owner_keys(verified_registry_path)
             except (OSError, ValueError, TypeError) as exc:
                 raise OwnerAuthorityError(f"{act}: current owner authority registry is unavailable") from exc
         pem = self.keys.get(key_id)
@@ -282,10 +308,14 @@ class OwnerAuthorityVerifier:
                 )
             self.consumed.add(fingerprint)
 
-        return OwnerAuthority(
+        authority = OwnerAuthority(
             act=act, subject=subject, issued_at_unix=issued, expires_at_unix=expires,
             nonce=nonce, key_id=key_id,
         )
+        der=public_key.public_bytes(serialization.Encoding.DER,serialization.PublicFormat.SubjectPublicKeyInfo)
+        object.__setattr__(authority,'_verified_key_binding',OwnerKeyBinding(
+            key_id,hashlib.sha256(der).hexdigest(),verified_registry_path,self))
+        return authority
 
 
 __all__ = [

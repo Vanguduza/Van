@@ -1029,6 +1029,7 @@ class AccountCoordinatorService:
                 "risk_history_issue": getattr(getattr(self.lifecycle, "streaks", None), "recovery_issue", ""),
             "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
                 "restated_learning": self.learning.projection_summary if getattr(self, "learning", None) else {"status":"NOT_CONSTRUCTED"},
+                "owner_policy_current": bool(self.mandate and self.mandate.owner_keys_current()),
                 "mode": self.mandate.mode.value if self.mandate else "UNKNOWN",
                 "temperament": (self.mandate.trading_temperament.value
                                 if self.mandate and self.mandate.trading_temperament
@@ -1082,6 +1083,7 @@ class AccountCoordinatorService:
         if getattr(self, "learning", None) is not None and getattr(self, "_ledger", None) is not None:
             self.learning.update_projection(self._ledger)
         payload = {
+            "owner_policy_current": bool(self.mandate and self.mandate.owner_keys_current()),
             "account_alias": self.cfg.account_alias, "symbols": sorted(self.specs),
             "status": status, "cycles": self.cycles,
             "cognitive_packet_worker": {"state":self._packet_worker_state, "authority":"ADVISORY_CANDIDATE", "live_qualification_claimed":False},
@@ -1163,7 +1165,9 @@ class AccountCoordinatorService:
             EventKind.SESSION, "vati-account-service",
             {
                 "event": "STARTED",
-                "permit_new_orders": report.permit_new_orders and not self.kill.halted,
+                "permit_new_orders": bool(report.permit_new_orders and not self.kill.halted
+                    and self.mandate and self.mandate.owner_keys_current()),
+                "owner_policy_current": bool(self.mandate and self.mandate.owner_keys_current()),
                 "mode": self.mandate.mode.value if self.mandate else "UNKNOWN",
                 "lease_epoch": self.lease.epoch,
             },

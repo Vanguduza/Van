@@ -117,6 +117,8 @@ class ExecutionRouter:
             raise RouterError('mandate dispatch clock unavailable or moved backwards')
         if not mandate.signed_at_unix*1000 <= observed < mandate.expires_at_unix*1000:
             raise RouterError('mandate is outside its current validity interval; re-admission required')
+        if not mandate.owner_keys_current():
+            raise RouterError('current mandate owner signer is unavailable; re-admission required')
         return observed
 
     def _uncertain_exit(self, position_id: str, *, now_ms: int, request_ref: str) -> None:
@@ -387,10 +389,12 @@ class ExecutionRouter:
             if self.lease_submission_guard is not None
             else nullcontext(True)
         )
-        with guard as lease_guard_ok:
+        with guard as lease_guard_ok, mandate.owner_authority_submission_guard() as owner_key_ok:
             if not lease_guard_ok:
                 raise RouterError(
                     f"account runtime submission guard refused epoch {lease_epoch!r}")
+            if not owner_key_ok:
+                raise RouterError('current mandate owner signer is unavailable; re-admission required')
             decision_time_ms=now_ms
             now_ms=self._dispatch_time(mandate,now_ms=now_ms)
             self._seen.add(intent.idempotency_key)
