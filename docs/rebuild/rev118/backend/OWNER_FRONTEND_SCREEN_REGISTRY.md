@@ -1,6 +1,6 @@
 # VAN current frontend screen and feature registry
 
-Current source inventory: **42 features, 105 source functions, 78 screens/hosted surfaces, 445 endpoint declarations and 281 schemas**.
+Current source inventory: **42 features, 105 source functions, 78 screens/hosted surfaces, 446 endpoint declarations and 287 schemas**.
 
 This generated document renders the current source contracts, including gaps and unverified states. It does not declare features complete, qualify live services or authorize a redesigned frontend. No new frontend/prototype before BG-001. Current source features are distinct from the frozen Rev1.18 programme of **93 planned features, 349 owner actions, 324 requirements, 1,610 acceptance identities and 131 units**. The complete planned scope remains in [the frozen package](../../../review-inputs/van-rev115/package/) and its [backend consumption contract](../../../review-inputs/van-rev115/package/contracts/BACKEND_TO_FRONTEND_CONSUMPTION_CONTRACT.md).
 
@@ -14,10 +14,10 @@ Owner-access endpoints and service dependencies are listed separately below. An 
 
 | Registry | SHA-256 |
 | --- | --- |
-| [owner_features.json](../../../../registries/owner_features.json) | `88b52ccd4d4e8919f1f1a8f43cba6ff3d26ec927871a94e23630c6c979f77cab` |
-| [owner_screens.json](../../../../registries/owner_screens.json) | `19c9f180c740c7e82c6542ce41e0c4b37f78b05b4a7fd8d64b31ac4a2a1c4f69` |
-| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `f13681d8bf64307d0890607e4681a04d8ca4ec60fca5a5b398ca2dfbf5b96bfd` |
-| [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `87cac862d7e389b561787f9fb3ede7b89b0ce7be3edb1366779bbdbb8e288674` |
+| [owner_features.json](../../../../registries/owner_features.json) | `f4b2133448708164426dc871c0cab80f26f0097c6dd167345ec6935886d4e851` |
+| [owner_screens.json](../../../../registries/owner_screens.json) | `50031295c19ddc09423cb4328a296e7e208a429b5bee7764033c5ab04f4c4096` |
+| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `8132c28ec7f7908c97b58ae349a66800a404d6c177370f6d06223b69e7557ee1` |
+| [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `6cf352912c6768af3f182a3b798fe18881faefcce90041f1d0a4577ad0f0cb15` |
 
 Regenerate with `python3 tools/rebuild/render_frontend_registry.py --apply`; verify with `--check`.
 
@@ -342,6 +342,12 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; frontend integration: `PARTIAL_OWNER
 | POST | /v1/missions/{mission_id}/pause | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.writeMissionControl |
 | POST | /v1/missions/{mission_id}/resume | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.writeMissionControl |
 | POST | /v1/missions/{mission_id}/direction | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.writeMissionControl |
+
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/missions/{mission_id}/graph | .UNWIRED | CANDIDATE_BACKEND_SOURCE_ANDROID_CONSUMER_PENDING | One durable mission snapshot: stable activity and dependency identities, owner-visible stage evidence, observed executor outcomes, explicit cycles/orphans/conflicting executor claims. Critical path is dependency count only; no invented duration or verified success. Payload limits refuse rather than omit work. |
 
 ### van.work.activity — Activity
 
@@ -4186,6 +4192,12 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; integration: `PARTIAL_OWNER_SURFACE`
 | GET | /v1/missions/{mission_id}/activity | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.missionActivity |
 | GET | /v1/missions/{mission_id}/evidence | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.missionEvidence |
 | GET | /v1/activity | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.activityFeed |
+
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/missions/{mission_id}/graph | .UNWIRED | CANDIDATE_BACKEND_SOURCE_ANDROID_CONSUMER_PENDING | One durable mission snapshot: stable activity and dependency identities, owner-visible stage evidence, observed executor outcomes, explicit cycles/orphans/conflicting executor claims. Critical path is dependency count only; no invented duration or verified success. Payload limits refuse rather than omit work. |
 
 ### OF-MISSION-002 — Mission intervention
 

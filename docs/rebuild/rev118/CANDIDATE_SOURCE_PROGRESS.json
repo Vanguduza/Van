@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T11:30:23.134620+00:00",
+  "updated_at_utc": "2026-10-23T11:33:49.516637+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -243,6 +243,10 @@
         {
           "description": "Local account unlink binds exact resolved review/native funds/history/credential disposition; actual account lease row and submission guard exclude runtime, unresolved effects/exposure/stale facts retain profile. Shared/external credential references preserved, including late ownership drift. Typed gateway approval/native replay and existing Android confirmation wired; MT5 pending-orders and native cTrader/Deriv funding facts refuse missing observations. 2675 full trading/recovery pass0skip realPG(cleaned),91focused/29writer/3actualPG/78rebuild,16faults+controls caught/restored; Android222JVM/2APKs/lint0ErrorFatal. Source only; completed real-provider finality and all original gates remain.",
           "evidence": "backend/BE-004_ACCOUNT_RETIREMENT.md; receipts/ACCOUNT_RETIREMENT_SOURCE_20261023.json"
+        },
+        {
+          "description": "Mission activity wire preserves dependency/retry/verification contracts; transactional admission refuses invalid/orphan/foreign dependencies and terminal-race work. Owner graph reads one durable snapshot, stable IDs, owner-visible evidence and raw executor outcomes; cycles/orphans/conflicting bindings explicit, no layout authority or invented success/duration.2original failures fixed;157affected/166combined source cases,78rebuild,35owner contracts;10meaningful faults+controls caught/restored including actual concurrent-writer snapshot. Source only; project-wide CRUD/timed scheduling/native provider integration and whole-unit gates remain.",
+          "evidence": "backend/BE-023_MISSION_DEPENDENCY_GRAPH.md; receipts/MISSION_DEPENDENCY_GRAPH_SOURCE_20261023.json"
         }
       ]
     },
@@ -719,9 +723,14 @@
         "BE-003",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "SOURCE_TESTED",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Mission activity wire preserves dependency/retry/verification contracts; transactional admission refuses invalid/orphan/foreign dependencies and terminal-race work. Owner graph reads one durable snapshot, stable IDs, owner-visible evidence and raw executor outcomes; cycles/orphans/conflicting bindings explicit, no layout authority or invented success/duration.2original failures fixed;157affected/166combined source cases,78rebuild,35owner contracts;10meaningful faults+controls caught/restored including actual concurrent-writer snapshot. Source only; project-wide CRUD/timed scheduling/native provider integration and whole-unit gates remain.",
+          "evidence": "backend/BE-023_MISSION_DEPENDENCY_GRAPH.md; receipts/MISSION_DEPENDENCY_GRAPH_SOURCE_20261023.json"
+        }
+      ]
     },
     "BE-024": {
       "title": "Agents, Hermes, Muse and provider-bound interventions",
@@ -731,9 +740,14 @@
         "BE-023",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "SOURCE_TESTED",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Mission activity wire preserves dependency/retry/verification contracts; transactional admission refuses invalid/orphan/foreign dependencies and terminal-race work. Owner graph reads one durable snapshot, stable IDs, owner-visible evidence and raw executor outcomes; cycles/orphans/conflicting bindings explicit, no layout authority or invented success/duration.2original failures fixed;157affected/166combined source cases,78rebuild,35owner contracts;10meaningful faults+controls caught/restored including actual concurrent-writer snapshot. Source only; project-wide CRUD/timed scheduling/native provider integration and whole-unit gates remain.",
+          "evidence": "backend/BE-023_MISSION_DEPENDENCY_GRAPH.md; receipts/MISSION_DEPENDENCY_GRAPH_SOURCE_20261023.json"
+        }
+      ]
     },
     "BE-025": {
       "title": "Browser, remote interaction, artifact and share intake",

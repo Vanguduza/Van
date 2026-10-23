@@ -472,3 +472,10 @@ Local account unlink binds exact resolved review/native funds/history/credential
 Exactd88EA native39935785223 compiled0errors0warnings/freshEX5 with invalid4errors/noEX5, independently fingerprinted. Hosted39935785250 all374legacyfaults/383edits,Android18pass4existingartworkskips,VITS5.291/3.431s,PG26voice117/publictrading2409pass1DDSskip; source/merge trees equal. Only originalDDSreadkey/trusted-main prerequisites fail. Receipts retained separately.
 
 Continue original whole-product implementation: review and implement truthful mission dependency graphs and service-bound assistant features. Collect new published EA native MetaEditor/full hosted evidence; start fresh clean exact-commit backend/contracts qualification in the owned QA checkout. Finish native worker deadline/epoch/risk envelopes, provider late/corrected fills/financial finality and original domains. Preserve131units/93plannedfeatures and BG001; no invented acceptance.
+
+
+## Truthful mission dependency graph
+
+Mission activity wire preserves dependency/retry/verification contracts; transactional admission refuses invalid/orphan/foreign dependencies and terminal-race work. Owner graph reads one durable snapshot, stable IDs, owner-visible evidence and raw executor outcomes; cycles/orphans/conflicting bindings explicit, no layout authority or invented success/duration.2original failures fixed;157affected/166combined source cases,78rebuild,35owner contracts;10meaningful faults+controls caught/restored including actual concurrent-writer snapshot. Source only; project-wide CRUD/timed scheduling/native provider integration and whole-unit gates remain.
+
+Continue autonomous whole-product source work. Finish confirmed reminder concurrency, atomic follow-up and durable notification recovery, plus typed DST/time errors;12before counterexamples reproduced in owned assistant worktree. Collect published native MetaEditor/full374 hosted evidence, run clean exact committed backend/contracts audit. Preserve all original131units/93plannedfeatures, provider financial finality/worker deadline-epoch-risk and other original domains; no newfrontend beforeBG001 or invented acceptance.

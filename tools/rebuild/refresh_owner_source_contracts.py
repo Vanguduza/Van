@@ -124,6 +124,20 @@ def build():
         "specification": "docs/rebuild/rev118/backend/BE-025_BROWSER_CONTINUATION.md",
         "new_ui_implemented": False, "live_qualified": False})
     voice = next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-VOICE-001")
+    mission_feature = next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-MISSION-001")
+    mission_screen = next(r for r in documents["owner_screens"]["screens"] if r["id"] == "van.work.mission")
+    graph_endpoint = next(r for r in endpoint_doc["endpoints"] if r["path"] == "/v1/missions/{mission_id}/graph")
+    graph_extension = {
+        "method": "GET", "path": graph_endpoint["path"], "endpoint_id": graph_endpoint["endpoint_id"],
+        "source_ref": graph_endpoint["source"], "authentication": graph_endpoint["authentication"],
+        "source_status": "CANDIDATE_BACKEND_SOURCE_ANDROID_CONSUMER_PENDING",
+        "authority": "OWNER_READ_ONLY_GRAPH_GRANTS_NO_EXECUTION_AUTHORITY",
+        "scope": "One durable mission snapshot: stable activity and dependency identities, owner-visible stage evidence, observed executor outcomes, explicit cycles/orphans/conflicting executor claims. Critical path is dependency count only; no invented duration or verified success. Payload limits refuse rather than omit work.",
+        "specification": "docs/rebuild/rev118/backend/BE-023_MISSION_DEPENDENCY_GRAPH.md",
+        "new_ui_implemented": False, "live_qualified": False,
+    }
+    for row in (mission_feature, mission_screen):
+        row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(graph_extension))
     accounts = next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-TRADING-003")
     account_screen = next(r for r in documents["owner_screens"]["screens"] if r["id"] == "van.trading.accounts.add")
     recovery_feature = next(r for r in documents['owner_features']['features'] if r['id'] == 'OF-TRADING-005')

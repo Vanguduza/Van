@@ -1092,6 +1092,19 @@
         "type": "object",
         "title": "ActionSubmittedBody"
       },
+      "ActivityState": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "RUNNING",
+          "CHECKPOINTED",
+          "WAITING",
+          "COMPLETED",
+          "FAILED",
+          "SKIPPED"
+        ],
+        "title": "ActivityState"
+      },
       "AddActivityBody": {
         "properties": {
           "activity_type": {
@@ -1132,8 +1145,27 @@
               }
             ],
             "title": "Authority Ref"
+          },
+          "dependency_activity_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 256,
+            "title": "Dependency Activity Ids"
+          },
+          "retry_policy": {
+            "type": "string",
+            "title": "Retry Policy",
+            "default": "NONE"
+          },
+          "verification_contract": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Verification Contract"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "activity_type",
@@ -3745,6 +3777,37 @@
         ],
         "title": "DecisionStatus"
       },
+      "DependencyPath": {
+        "properties": {
+          "basis": {
+            "type": "string",
+            "const": "DEPENDENCY_COUNT",
+            "title": "Basis",
+            "default": "DEPENDENCY_COUNT"
+          },
+          "node_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Node Ids"
+          },
+          "edge_count": {
+            "type": "integer",
+            "title": "Edge Count"
+          },
+          "estimated_duration_ms": {
+            "type": "null",
+            "title": "Estimated Duration Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "node_ids",
+          "edge_count"
+        ],
+        "title": "DependencyPath"
+      },
       "DeterministicAction": {
         "properties": {
           "operation": {
@@ -4869,6 +4932,129 @@
           "BOTH"
         ],
         "title": "GraphDirection"
+      },
+      "GraphEdge": {
+        "properties": {
+          "edge_id": {
+            "type": "string",
+            "title": "Edge Id"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "target": {
+            "type": "string",
+            "title": "Target"
+          }
+        },
+        "type": "object",
+        "required": [
+          "edge_id",
+          "source",
+          "target"
+        ],
+        "title": "GraphEdge"
+      },
+      "GraphIssue": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "MISSING_DEPENDENCY",
+              "CYCLE",
+              "CONFLICTING_EXECUTOR_BINDING"
+            ],
+            "title": "Code"
+          },
+          "node_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Node Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "node_ids"
+        ],
+        "title": "GraphIssue"
+      },
+      "GraphNode": {
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "title": "Node Id"
+          },
+          "state": {
+            "$ref": "#/components/schemas/ActivityState"
+          },
+          "executor": {
+            "type": "string",
+            "title": "Executor"
+          },
+          "executor_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Executor Ref"
+          },
+          "executor_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Executor State"
+          },
+          "executor_observation_available": {
+            "type": "boolean",
+            "title": "Executor Observation Available",
+            "default": false
+          },
+          "evidence_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Refs"
+          },
+          "started_at_ms": {
+            "type": "integer",
+            "title": "Started At Ms"
+          },
+          "ended_at_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ended At Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "node_id",
+          "state",
+          "executor",
+          "executor_ref",
+          "started_at_ms",
+          "ended_at_ms"
+        ],
+        "title": "GraphNode"
       },
       "HTTPValidationError": {
         "properties": {
@@ -6351,6 +6537,70 @@
           "message"
         ],
         "title": "MissionDirectionBody"
+      },
+      "MissionGraph": {
+        "properties": {
+          "mission_id": {
+            "type": "string",
+            "title": "Mission Id"
+          },
+          "mission_state": {
+            "$ref": "#/components/schemas/MissionState"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/GraphNode"
+            },
+            "type": "array",
+            "title": "Nodes"
+          },
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/GraphEdge"
+            },
+            "type": "array",
+            "title": "Edges"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/GraphIssue"
+            },
+            "type": "array",
+            "title": "Issues"
+          },
+          "critical_path": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DependencyPath"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "authority_granted": {
+            "type": "boolean",
+            "const": false,
+            "title": "Authority Granted",
+            "default": false
+          },
+          "snapshot_basis": {
+            "type": "string",
+            "const": "GATEWAY_DURABLE_STATE",
+            "title": "Snapshot Basis",
+            "default": "GATEWAY_DURABLE_STATE"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mission_id",
+          "mission_state",
+          "nodes",
+          "edges",
+          "issues",
+          "critical_path"
+        ],
+        "title": "MissionGraph"
       },
       "MissionLink": {
         "properties": {

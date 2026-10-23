@@ -35,6 +35,7 @@ from van_gateway.capability.router import CapabilityRouter
 from van_gateway.coherence import owner_status
 from van_gateway.config import Settings
 from van_gateway.mission.binding import MissionBinder
+from van_gateway.mission.graph import MissionGraph
 from van_gateway.mission.control import MissionControlError, MissionExecutionControlService
 from van_gateway.mission.control_models import (
     MissionControlBody, MissionControlReceipt, MissionControlState, MissionDirectionBody,
@@ -97,12 +98,17 @@ class TransitionBody(BaseModel):
 
 
 class AddActivityBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     activity_type: str
     capability_id: str
     executor: str
     executor_ref: str | None = None
     input_contract: dict[str, Any] = Field(default_factory=dict)
     authority_ref: str | None = None
+    dependency_activity_ids: list[str] = Field(default_factory=list, max_length=256)
+    retry_policy: str = "NONE"
+    verification_contract: dict[str, Any] = Field(default_factory=dict)
 
 
 class RouteBody(BaseModel):
@@ -151,8 +157,12 @@ class MissionApi:
             status = 404
         elif exc.code.startswith("MISSION_CAPABILITY_NOT_PERMITTED"):
             status = 403
-        elif exc.code in ("MISSION_GOAL_REQUIRED",):
+        elif exc.code in ("MISSION_GOAL_REQUIRED", "ACTIVITY_DEPENDENCY_INVALID"):
             status = 422
+        elif exc.code.startswith("MISSION_GRAPH_") and exc.code.endswith("_LIMIT"):
+            status = 413
+        elif exc.code == "MISSION_GRAPH_SOURCE_INVALID":
+            status = 503
         return HTTPException(status_code=status, detail={"error": exc.code, "detail": exc.detail})
 
     async def _mission_summary(self, mission) -> dict[str, Any]:
@@ -228,6 +238,13 @@ class MissionApi:
                 "activities": [a.model_dump(mode="json") for a in activities],
                 "events": [e.model_dump(mode="json") for e in events],
             }
+
+        @router.get("/missions/{mission_id}/graph", response_model=MissionGraph)
+        async def mission_graph(mission_id: str):
+            try:
+                return await self.missions.dependency_graph(mission_id)
+            except MissionError as exc:
+                raise self._translate(exc) from exc
 
         @router.get("/missions/{mission_id}/evidence")
         async def mission_evidence(mission_id: str):
@@ -517,6 +534,9 @@ class MissionApi:
                     capability_id=body.capability_id, executor=body.executor,
                     executor_ref=body.executor_ref, input_contract=body.input_contract,
                     authority_ref=body.authority_ref,
+                    dependency_activity_ids=body.dependency_activity_ids,
+                    retry_policy=body.retry_policy,
+                    verification_contract=body.verification_contract,
                 )
             except MissionError as exc:
                 raise self._translate(exc) from exc

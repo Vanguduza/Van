@@ -635,18 +635,37 @@ class MissionService:
             raise MissionError("MISSION_TERMINAL", mission.state.value)
         await self._assert_capability_permitted(mission, capability_id)
 
+        if dependency_activity_ids is not None and not isinstance(dependency_activity_ids, list):
+            raise MissionError("ACTIVITY_DEPENDENCY_INVALID")
+        dependencies = list(dependency_activity_ids or [])
+        if (len(dependencies) > 256 or any(not isinstance(d, str) or not d.strip() for d in dependencies)
+                or len(set(dependencies)) != len(dependencies)):
+            raise MissionError("ACTIVITY_DEPENDENCY_INVALID")
+
         activity = Activity(
             activity_id=f"act_{uuid.uuid4().hex}",
             mission_id=mission_id, activity_type=activity_type, capability_id=capability_id,
             executor=executor, executor_ref=executor_ref,
             input_contract=dict(input_contract or {}), authority_ref=authority_ref,
-            dependency_activity_ids=list(dependency_activity_ids or []),
+            dependency_activity_ids=dependencies,
             retry_policy=retry_policy,
             verification_contract=dict(verification_contract or {}),
             started_at_ms=now,
         )
-        await self.store.execute(
-            """
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            current = await (await db.execute("SELECT state FROM missions WHERE mission_id=?", (mission_id,))).fetchone()
+            if current is None:
+                raise MissionError("MISSION_UNKNOWN", mission_id)
+            if MissionState(current["state"]) in TERMINAL_STATES:
+                raise MissionError("MISSION_TERMINAL", current["state"])
+            for dependency in dependencies:
+                row = await (await db.execute("SELECT mission_id FROM mission_activities WHERE activity_id=?", (dependency,))).fetchone()
+                if row is None:
+                    raise MissionError("ACTIVITY_DEPENDENCY_UNKNOWN", dependency)
+                if row["mission_id"] != mission_id:
+                    raise MissionError("ACTIVITY_DEPENDENCY_SCOPE_MISMATCH", dependency)
+            await db.execute("""
             INSERT INTO mission_activities(
               activity_id, mission_id, activity_type, capability_id, executor, executor_ref,
               input_contract_json, authority_ref, state, attempt, started_at_ms, ended_at_ms,
@@ -660,8 +679,44 @@ class MissionService:
                 activity.state.value, now, Store.dumps(activity.dependency_activity_ids),
                 retry_policy, Store.dumps(activity.verification_contract),
             ),
-        )
+            )
+            await db.commit()
         return activity
+
+    async def dependency_graph(self, mission_id: str):
+        """Read one durable snapshot. Rendering never starts or completes work."""
+        from van_gateway.mission.graph import project_graph
+        async with self.store.connection() as db:
+            await db.execute("BEGIN")
+            mission = await (await db.execute("SELECT state FROM missions WHERE mission_id=?", (mission_id,))).fetchone()
+            if mission is None:
+                raise MissionError("MISSION_UNKNOWN", mission_id)
+            rows = await (await db.execute("SELECT * FROM mission_activities WHERE mission_id=? ORDER BY activity_id LIMIT 2001", (mission_id,))).fetchall()
+            if len(rows)>2000:
+                raise MissionError('MISSION_GRAPH_NODE_LIMIT')
+            evidence_rows = await (await db.execute("SELECT DISTINCT activity_id,evidence_ref FROM mission_events WHERE mission_id=? AND owner_visibility=1 AND evidence_ref IS NOT NULL LIMIT 10001", (mission_id,))).fetchall()
+            if len(evidence_rows)>10000:
+                raise MissionError('MISSION_GRAPH_EVIDENCE_LIMIT')
+            observations = {}
+            for executor, table, ref_column in (
+                ('BROWSER_FABRIC','browser_tasks','task_id'),
+                ('AUTOMATION_FABRIC','automation_runs','run_id'),
+            ):
+                observed = await (await db.execute(
+                    f"SELECT a.activity_id,s.status,s.evidence_pointer FROM mission_activities a JOIN {table} s ON s.{ref_column}=a.executor_ref WHERE a.mission_id=? AND a.executor=?",
+                    (mission_id,executor))).fetchall()
+                for row in observed:
+                    observations[row['activity_id']]={'state':row['status'],'evidence_ref':row['evidence_pointer']}
+            evidence = {}
+            for row in evidence_rows:
+                if row['activity_id'] is not None:
+                    evidence.setdefault(row['activity_id'],[]).append(row['evidence_ref'])
+            try:
+                return project_graph(mission_id, mission['state'], [self._row_to_activity(r) for r in rows], evidence=evidence,observations=observations)
+            except ValueError as exc:
+                if str(exc).startswith('MISSION_GRAPH_'):
+                    raise MissionError(str(exc)) from exc
+                raise MissionError('MISSION_GRAPH_SOURCE_INVALID') from exc
 
     async def set_activity_state(
         self,

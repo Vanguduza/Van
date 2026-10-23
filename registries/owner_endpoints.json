@@ -471,7 +471,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:264",
+      "source": "backend/van_gateway/mission/api.py:281",
       "summary": "Activity Feed",
       "tags": [
         "missions"
@@ -879,7 +879,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:321",
+      "source": "backend/van_gateway/mission/api.py:338",
       "summary": "Authority",
       "tags": [
         "missions"
@@ -2511,7 +2511,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:297",
+      "source": "backend/van_gateway/mission/api.py:314",
       "summary": "Capability Status",
       "tags": [
         "missions"
@@ -6207,7 +6207,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:193",
+      "source": "backend/van_gateway/mission/api.py:203",
       "summary": "List Missions",
       "tags": [
         "missions"
@@ -6272,7 +6272,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:201",
+      "source": "backend/van_gateway/mission/api.py:211",
       "summary": "Get Mission",
       "tags": [
         "missions"
@@ -6320,7 +6320,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:217",
+      "source": "backend/van_gateway/mission/api.py:227",
       "summary": "Mission Activity",
       "tags": [
         "missions"
@@ -6368,7 +6368,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:397",
+      "source": "backend/van_gateway/mission/api.py:414",
       "summary": "Read Mission Control",
       "tags": [
         "missions"
@@ -6418,7 +6418,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:405",
+      "source": "backend/van_gateway/mission/api.py:422",
       "summary": "Read Mission Control Request",
       "tags": [
         "missions"
@@ -6477,7 +6477,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:232",
+      "source": "backend/van_gateway/mission/api.py:249",
       "summary": "Mission Evidence",
       "tags": [
         "missions"
@@ -6518,6 +6518,56 @@
       "readiness": "REPOSITORY_DECLARATION_ONLY"
     },
     {
+      "endpoint_id": "VE-fa5aee1c5f5e",
+      "method": "GET",
+      "path": "/v1/missions/{mission_id}/graph",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/mission/api.py:242",
+      "summary": "Mission Graph",
+      "tags": [
+        "missions"
+      ],
+      "parameters": [
+        {
+          "name": "mission_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Mission Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MissionGraph"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
       "endpoint_id": "VE-a1156fd05054",
       "method": "GET",
       "path": "/v1/needs-you",
@@ -6525,7 +6575,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:250",
+      "source": "backend/van_gateway/mission/api.py:267",
       "summary": "Needs You",
       "tags": [
         "missions"
@@ -18889,7 +18939,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:475",
+      "source": "backend/van_gateway/mission/api.py:492",
       "summary": "Create Mission",
       "tags": [
         "missions"
@@ -18953,7 +19003,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:525",
+      "source": "backend/van_gateway/mission/api.py:545",
       "summary": "Route Capability",
       "tags": [
         "missions"
@@ -19017,7 +19067,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:508",
+      "source": "backend/van_gateway/mission/api.py:525",
       "summary": "Add Activity",
       "tags": [
         "missions"
@@ -19090,7 +19140,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:563",
+      "source": "backend/van_gateway/mission/api.py:583",
       "summary": "Backfill",
       "tags": [
         "missions"
@@ -19154,7 +19204,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:436",
+      "source": "backend/van_gateway/mission/api.py:453",
       "summary": "Cancel Mission",
       "tags": [
         "missions"
@@ -19202,7 +19252,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:432",
+      "source": "backend/van_gateway/mission/api.py:449",
       "summary": "Direct Mission",
       "tags": [
         "missions"
@@ -19261,7 +19311,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:454",
+      "source": "backend/van_gateway/mission/api.py:471",
       "summary": "Message Mission",
       "tags": [
         "missions"
@@ -19318,7 +19368,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:424",
+      "source": "backend/van_gateway/mission/api.py:441",
       "summary": "Pause Mission",
       "tags": [
         "missions"
@@ -19377,7 +19427,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:428",
+      "source": "backend/van_gateway/mission/api.py:445",
       "summary": "Resume Mission",
       "tags": [
         "missions"
@@ -19436,7 +19486,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/mission/api.py:493",
+      "source": "backend/van_gateway/mission/api.py:510",
       "summary": "Transition Mission",
       "tags": [
         "missions"
