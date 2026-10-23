@@ -1,0 +1,70 @@
+name: van-kernel-source
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: van-kernel-source-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  browser-kernel-boundaries:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepare ephemeral kernel test runner
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends nftables util-linux openssl
+          python -m venv .kernel-venv
+          .kernel-venv/bin/python -m pip install -r tools/rebuild/kernel-source-requirements.lock
+          mkdir -p kernel-source-report
+          {
+            git rev-parse HEAD
+            uname -a
+            nft --version
+            unshare --version
+            .kernel-venv/bin/python --version
+          } > kernel-source-report/environment.txt
+      # Root is confined to this disposable CI VM. The five firewall tests load
+      # the real ruleset in throwaway network namespaces, never the host namespace.
+      # No DIAL credentials, host deployment or provider authority are used.
+      - name: Exercise real nftables and socket UID enforcement
+        run: |
+          set -euo pipefail
+          sudo unshare -n true
+          sudo env PYTHONPATH=backend:backend/tests:.:trading "$PWD/.kernel-venv/bin/python" -m pytest -q -rA \
+            tests/contracts/test_van_browser_core_firewall.py::test_live_ruleset_drops_browser_udp_and_direct_tcp \
+            tests/contracts/test_van_browser_core_firewall.py::test_live_dns_to_an_off_host_resolver_is_udp_only \
+            tests/contracts/test_van_browser_core_firewall.py::test_live_qualify_reports_the_firewall_and_the_proxy_green \
+            tests/contracts/test_van_browser_core_firewall.py::test_live_qualify_fails_without_the_ruleset \
+            tests/contracts/test_van_browser_core_firewall.py::test_live_qualify_does_not_take_a_kernel_reset_for_the_ruleset \
+            backend/tests/test_browser_egress_proxy_i8.py::test_only_the_configured_client_uid_may_use_a_listener \
+            --junitxml=kernel-source-report/results.xml 2>&1 | tee kernel-source-report/pytest.txt
+      - name: Require six executed tests with no skips
+        run: |
+          .kernel-venv/bin/python - <<'PY'
+          import xml.etree.ElementTree as ET
+          suites = list(ET.parse('kernel-source-report/results.xml').getroot().iter('testsuite'))
+          counts = {key: sum(int(s.get(key, 0)) for s in suites)
+                    for key in ('tests', 'failures', 'errors', 'skipped')}
+          assert counts == {'tests': 6, 'failures': 0, 'errors': 0, 'skipped': 0}, counts
+          print(counts)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: van-kernel-source-report
+          path: kernel-source-report/
+          if-no-files-found: error
