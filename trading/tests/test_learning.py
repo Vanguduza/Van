@@ -360,9 +360,31 @@ def test_cycle_applies_boundary_checked_demotion_and_capsule_stops_trading(eurus
         for sid in ("FX-TREND-PULLBACK-01", "FX-LONDON-BREAKOUT-01"):
             obs(hooks.health, sid, -1.0, env=Environment.DEMO, process_ok=False, cost=D("2.5"), fit=False, i=i)
     engine = fx_engine(cfg)
-    bt = BacktestEngine(cfg=cfg, engine=engine, cost_fn=lambda st: D("0.0003"), calendar=FX_CALENDAR, events=EventMatrix(), ledger_path=str(tmp_path / "bt.sqlite"), learning=hooks)
-    res = bt.run(synthetic_bars())
+    # Exercise an actual demo runtime; a historical backtest has no live
+    # adjustment authority, even if a caller supplies DEMO-labelled hooks.
+    from types import SimpleNamespace
+    from vati.app.cycle import DecisionCycle
+    from vati.execution import PaperAdapter
+    from vati.risk import RiskAuthority, TradingMandate
+    from vati.risk.serde import intent_from_dict, snapshot_from_dict
     led = Ledger(tmp_path / "bt.sqlite")
+    paper = PaperAdapter(venue="paper", account_alias=cfg.account_alias,
+        value_per_price_unit_per_lot=cfg.contract.value_per_price_unit_per_lot,
+        symbol_contracts={cfg.symbol:cfg.contract})
+    cycle = DecisionCycle(cfg=cfg, adapter=paper, ledger=led, engine=engine,
+        cost_fn=lambda st:D("0.0003"), calendar=FX_CALENDAR, events=EventMatrix(), learning=hooks)
+    bars = synthetic_bars(); cycles = []
+    for index, bar in enumerate(bars):
+        for price in (bar.open,bar.low,bar.high,bar.close):
+            cycle.mark(price-D("0.00005"),price+D("0.00005"),now_ms=bar.end_ms)
+        cycles.append(cycle.step(bars[:index+1],now_ms=bar.end_ms,last_quote_ms=bar.end_ms))
+    for position in paper.positions():
+        closed=paper.close(position.position_id,None,now_ms=bars[-1].end_ms,reason="END_OF_TEST")
+        cycle._on_close(position.trade_intent_id,closed.average_fill,"END_OF_TEST",bars[-1].end_ms)
+    replay=led.replay_decisions(lambda inp:RiskAuthority(TradingMandate.from_mapping(inp["mandate"])).evaluate(
+        intent_from_dict(inp["intent"]),snapshot_from_dict(inp["snapshot"])).to_dict())
+    res=SimpleNamespace(trades=len(paper.closed),cycles=cycles,ledger_ok=led.verify_chain()[0],
+        decision_replay_identical=replay.ok,summary=lambda:{"trades":len(paper.closed)})
     # every capsule that closes a trade is demoted on that first close; a demoted capsule never trades again
     assert 1 <= res.trades <= 2 and len(hooks.demotions) == res.trades == led.count(EventKind.CAPSULE_STATE), res.summary()
     assert hooks.refusals == []

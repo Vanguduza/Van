@@ -90,7 +90,7 @@ class DecisionCycle:
                  calendar: MarketCalendar, events: EventMatrix, regime_engine: Optional[RegimeEngine] = None, kill_switch: Optional[KillSwitch] = None,
                  admission: Optional[AdmissionLedger] = None, ctx_fn: Optional[Callable[[MarketState, Decimal], StrategyContext]] = None,
                  learning: Optional[LearningHooks] = None, runtime_lease=None, lease_clock=None,
-                 lease_permission: Callable[[], bool] = lambda: True) -> None:
+                 lease_permission: Callable[[], bool] = lambda: True, research_environment=None) -> None:
         self.cfg, self.adapter, self.ledger, self.engine, self.cost_fn, self.calendar, self.events = cfg, adapter, ledger, engine, cost_fn, calendar, events
         self.learning = learning
         self.runtime_lease = runtime_lease
@@ -100,6 +100,11 @@ class DecisionCycle:
         self.regime = regime_engine or RegimeEngine()
         self.kill = kill_switch or KillSwitch()
         self.mandate = TradingMandate.from_mapping(cfg.mandate_dict)
+        from vati.learning.runtime_cohort import execution_cohort_for
+        self.execution_cohort = execution_cohort_for(adapter, self.mandate.mode,
+            research_environment=research_environment)
+        if learning is not None and learning.environment is not self.execution_cohort.environment:
+            raise ValueError('learning cohort differs from the actual runtime execution cohort')
         if self.mandate.temperament_enabled:
             raise RuntimeError("DecisionCycle single-symbol path does not admit temperament profiles")
         self.authority = RiskAuthority(self.mandate)
@@ -182,6 +187,8 @@ class DecisionCycle:
     def _log(self, kind: EventKind, payload: dict, *, now_ms: int, corr: str = "") -> None:
         if kind in {EventKind.SESSION, EventKind.RISK_DECISION}:
             payload = {**payload, "account_alias": self.cfg.account_alias}
+        if kind is EventKind.RISK_DECISION:
+            payload = {**payload, "execution_cohort": self.execution_cohort.as_dict()}
         if kind is EventKind.CAPSULE_STATE and self.learning is not None:
             payload = {**payload, "account_alias": self.cfg.account_alias,
                        "learning_environment": self.learning.environment.value}

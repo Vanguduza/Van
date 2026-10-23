@@ -35,6 +35,7 @@ from vati.market_data.feeds.lake import TIMEFRAMES_MS, BarLake
 from vati.learning.episodes import Environment
 from vati.learning.hooks import LearningHooks
 from vati.learning.replay import restore_learning_runtime
+from vati.learning.runtime_cohort import execution_cohort_for
 from vati.risk import AuthorizationMode, TradingMandate
 from vati.risk.serde import contract_from_dict
 from vati.strategies import STRATEGY_IMPLEMENTATIONS, CapsuleRegistry
@@ -219,15 +220,15 @@ class SessionService:
         cost = Decimal(c.round_trip_cost_pct)
         # P1-TRADE-008 — `learning` was never passed here, so capsule-health demotion,
         # broker-liquidity learning and experience artefacts existed only in backtests.
-        # The environment is taken from the mandate's mode rather than assumed, because a
-        # DEMO session's experience must not be pooled with a LIVE one's.
+        # Bind actual adapter provenance as well as the policy ceiling: a Paper
+        # account configured with a live policy still supplies simulated facts.
         #
         # This is safe to wire because the effects it can have are already bounded: the
         # LearningBoundary permits reduce-only adjustments, and a demotion moves a capsule
         # towards SHADOW or DEGRADED, never towards more authority. That boundary is what
         # made this a wiring job rather than a design one.
         learning = LearningHooks(
-            environment=ENVIRONMENT_FOR_MODE[mandate.mode],
+            environment=execution_cohort_for(self.adapter, mandate.mode).environment,
             account_alias=account.alias,
             broker=str(getattr(account.broker, "value", account.broker)).lower(),
         )

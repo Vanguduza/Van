@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T04:02:16.719996+00:00",
+  "updated_at_utc": "2026-10-23T04:17:54.229482+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -646,6 +646,10 @@
         {
           "description": "Actual Chrome153/lockedPlaywright1.63 qualification covers422distinct browser-related source cases across preserved initial373(1timing-oracle failure), corrected20late-callers and49remainingtests. All154old browser skips executed plus actual DDS provenance. No server write; real blocked POST reaches owner before release in corrected fixture. No production/browser runtime code changed or native/unit qualification.",
           "evidence": "receipts/REAL_BROWSER_90868b6f_SOURCE_20261023.json; backend/tests/test_browser_late_block_callers.py"
+        },
+        {
+          "description": "Six formerly privileged source checks executed on isolated hostedUbuntuVM: actual nftables namespace confinement/qualification and real proxy socketUID enforcement.6pass0skip, source169053c9/testedmerge4296a6cc treeequal. No productionhost or entireunit qualification.",
+          "evidence": "backend/BE-025_KERNEL_SOURCE_QUALIFICATION.md; receipts/KERNEL_SOURCE_169053c9.json"
         }
       ]
     },
@@ -1489,6 +1493,10 @@
         {
           "description": "Mature native financial facts required for real-cohort health; immutable episodes retain maturity/net convention/broker/thesis basis/original review hash. Explicit historical studies retained.3original failures fixed;2213fulltrading zero skip actual privatePG/DDS,125affected/121restored focus/78rebuild;9faults caught/restored. Paper fixtures honestly DEMO with unchanged weighted minimum; provider finality/cohort identity remain.",
           "evidence": "backend/BE-036_MONETARY_MATURITY_LEARNING.md; receipts/LEARNING_MONETARY_MATURITY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Actual execution/research cohort independent from policy permission: Backtest rejects nonBACKTESThooks twice, Paper services stay simulated, sealed risk cohort drives cold scope and rejects simulatedLIVE/unknown binding.6validbeforefailures fixed; full2228pass1newfixturecleanupfailure retained, correctedactualPGcontrol passes;8faults caught/restored, focused55pass and1PGcase separatelyexecuted,78rebuild. Fresh clean exact-commit full run pending; no unit acceptance.",
+          "evidence": "backend/BE-036_EXECUTION_COHORT_BINDING.md; receipts/EXECUTION_COHORT_SOURCE_20261023.json"
         }
       ]
     },

@@ -57,6 +57,7 @@ from vati.observability import metrics
 from vati.observability.rejection_analytics import RejectionAnalyticsEngine
 from vati.learning.hooks import LearningHooks
 from vati.learning.replay import restore_learning_runtime
+from vati.learning.runtime_cohort import execution_cohort_for
 from vati.observability.enhancement_metrics import (
     CORRELATION_MULTIPLIER, EXECUTION_FILL_PROBABILITY, EXECUTION_POLICY_SELECTED,
     PORTFOLIO_INCREMENTAL_ES,
@@ -356,7 +357,7 @@ class AccountCoordinatorService:
         self.rejection_analytics = RejectionAnalyticsEngine(ledger=self._ledger)
 
         self.learning = LearningHooks(
-            environment=ENVIRONMENT_FOR_MODE[mandate.mode],
+            environment=execution_cohort_for(self.adapter, mandate.mode).environment,
             account_alias=account.alias,
             broker=str(getattr(account.broker, "value", account.broker)).lower(),
         )
@@ -709,7 +710,8 @@ class AccountCoordinatorService:
             EventKind.RISK_DECISION, "vati-account-coordinator",
             {"inputs": {"intent": intent_to_dict(intent), "snapshot": snapshot_to_dict(snapshot),
                         "mandate": self.cfg.mandate},
-             "decision": decision.to_dict()},
+             "decision": decision.to_dict(),
+             "execution_cohort": execution_cohort_for(self.adapter, self.mandate.mode).as_dict()},
             event_time_ms=now, received_time_ms=now, decision_time_ms=now,
             correlation_id=intent.trade_intent_id))
         metrics.inc("vati_decisions_total", outcome=decision.decision.value)

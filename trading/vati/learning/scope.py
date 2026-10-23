@@ -83,7 +83,12 @@ class LearningScope:
                 if mandate is not None:
                     if mandate.get("account_alias") != alias:
                         raise LearningScopeError("native mandate account conflict")
-                    environments.add(ENVIRONMENT_FOR_MODE[AuthorizationMode(mandate["mode"])])
+                    mode = AuthorizationMode(mandate["mode"])
+                    if "execution_cohort" in p:
+                        from vati.learning.runtime_cohort import recorded_cohort
+                        environments.add(recorded_cohort(p["execution_cohort"], mode))
+                    else:
+                        environments.add(ENVIRONMENT_FOR_MODE[mode])
             elif row.kind is EventKind.ORDER_COMMAND and row.producer == "vati-execution-router":
                 if row.hash != canonical_hash(row.body()):
                     raise LearningScopeError("native order identity seal mismatch")
