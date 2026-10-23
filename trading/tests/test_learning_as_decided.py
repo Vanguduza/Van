@@ -3,7 +3,7 @@ from decimal import Decimal as D
 
 import pytest
 
-from test_learning_evidence import Src
+from test_learning_evidence import Src, settled_review_fields
 from vati.core.events import EventKind
 from vati.learning.episodes import Environment
 from vati.learning.evidence import EvidenceClass, EvidenceError, make_evidence_ref
@@ -26,7 +26,7 @@ def test_actual_cold_learning_restore_keeps_the_original_quality_cutoff(original
         trade = f"intent-{number}"
         quality(source,trade,bad=original_bad)
         digest = source.append(EventKind.TRADE_EXPERIENCE_ARTIFACT,
-            {"environment":"LIVE","strategy_id":"cutoff","outcome":{"r_multiple":"0.5"},
+            {"environment":"LIVE","strategy_id":"cutoff","outcome":{"r_multiple":"0.5",**settled_review_fields()},
              "review":{"process_ok":True},"execution":{"tca":{"cost_ratio":"1"}}},trade)
         warm.observe_evidence("cutoff",make_evidence_ref(EvidenceClass.VTIL_ARTIFACT,digest),resolver=source.resolver)
     # A correction is a separate analytical fact. Without an explicit restated
@@ -83,7 +83,7 @@ def test_actual_hook_captures_once_even_when_new_quality_arrives_before_episode_
         "decision":decision.to_dict()},i.trade_intent_id)
     source.append(EventKind.TCA_RECORD,{"learning_environment":"LIVE","cost_ratio":"1"},i.trade_intent_id)
     source.append(EventKind.TRADE_REVIEW,{"trade_intent_id":i.trade_intent_id,"strategy_id":i.strategy_id,
-        "r_multiple":"0.5","process_ok":True},i.trade_intent_id)
+        "r_multiple":"0.5","process_ok":True,**source.settled_review_fields()},i.trade_intent_id)
     original = quality(source,i.trade_intent_id,bad=False)
     live = LearningHooks(environment=Environment.LIVE)
     episode,_ = live.on_review(source.ledger,trade_intent_id=i.trade_intent_id,strategy_id=i.strategy_id,
@@ -104,7 +104,7 @@ def test_an_artifact_cannot_claim_a_quality_anchor_published_in_its_future():
     future = make_event(EventKind.DECISION_QUADRANT,"vati-decision-quality",
         {"trade_intent_id":"future","faults":[]},event_time_ms=2,received_time_ms=2,correlation_id="future")
     digest = source.append(EventKind.TRADE_EXPERIENCE_ARTIFACT,
-        {"environment":"LIVE","strategy_id":"cutoff","outcome":{"r_multiple":"0.5"},
+        {"environment":"LIVE","strategy_id":"cutoff","outcome":{"r_multiple":"0.5",**settled_review_fields()},
          "review":{"process_ok":True},"execution":{"tca":{"cost_ratio":"1"}},
          "learning_cutoff_ref":future.hash},"future")
     source.ledger.append(future)

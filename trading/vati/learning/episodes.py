@@ -4,6 +4,7 @@ weights (Rev 4 improvement: quantified) and hashes."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from copy import deepcopy
 from decimal import Decimal
 from enum import Enum
 from typing import Optional
@@ -167,8 +168,13 @@ def episode_from_ledger(ledger: Ledger, trade_intent_id: str, *, environment: En
         risk={"requested_risk_pct": d["requested_risk_pct"], "approved_risk_pct": d["approved_risk_pct"], "approved_size": d["approved_size"], "heat_before": d["portfolio_heat_before"], "heat_after": d["portfolio_heat_after"], "decision": d["decision"], "decision_hash": d["decision_hash"]},
         execution={"fill": entry_rec.payload.get("average_fill") if entry_rec else None, "channel": entry_rec.payload.get("execution_channel") if entry_rec else None,
                    "receipt_hash": entry_rec.payload.get("receipt_hash") if entry_rec else None, "tca": tca.payload if tca else None},
-        outcome={"pnl": rev.payload.get("pnl") if rev else None, "r_multiple": rev.payload.get("r_multiple") if rev else None, "exit_reason": exit_rec.payload.get("reject_reason") if exit_rec else None},
-        review={"outcome": rev.payload.get("outcome"), "polarity": rev.payload.get("polarity"), "thesis_correct": rev.payload.get("thesis_correct"), "process_ok": rev.payload.get("process_ok"), "lessons": rev.payload.get("lessons")} if rev else {},
+        outcome={"pnl": rev.payload.get("pnl") if rev else None, "r_multiple": rev.payload.get("r_multiple") if rev else None,
+                 "exit_reason": exit_rec.payload.get("reject_reason") if exit_rec else None,
+                 "maturity": deepcopy(rev.payload.get("maturity")) if rev else None,
+                 "pnl_basis": rev.payload.get("pnl_basis") if rev else None,
+                 "broker_ok": rev.payload.get("broker_ok") if rev else None},
+        review={"outcome": rev.payload.get("outcome"), "polarity": rev.payload.get("polarity"), "thesis_correct": rev.payload.get("thesis_correct"), "process_ok": rev.payload.get("process_ok"), "lessons": rev.payload.get("lessons"),
+                "thesis_evidence_basis": rev.payload.get("thesis_evidence_basis"), "source_review_ref": rev.hash} if rev else {},
         opened_ms=dec.event_time_ms, closed_ms=rev.event_time_ms if rev else None,
         evidence_refs=tuple(x for x in (dec.hash, entry_rec.hash if entry_rec else None, tca.hash if tca else None, rev.hash if rev else None) if x),
         learning_cutoff_ref=available_through,

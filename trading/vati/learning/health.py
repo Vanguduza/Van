@@ -20,6 +20,34 @@ HEALTH_SOURCE_CLASSES = frozenset({EvidenceClass.TRADE_REVIEW, EvidenceClass.VTI
 
 ONE, ZERO = Decimal(1), Decimal(0)
 COST_RATIO_CAP = Decimal("10")
+STUDY_ENVIRONMENTS = frozenset({Environment.BACKTEST, Environment.REPLAY,
+    Environment.COUNTERFACTUAL, Environment.SHADOW})
+
+
+def require_economic_readiness(rec: EvidenceRecord) -> None:
+    """A research model is distinct from a demonstrated financial outcome.
+
+    The native review producer owns settlement observations. Refused data stays
+    on the ledger for analysis; it cannot become a live health sample by losing
+    its maturity labels during episode serialization.
+    """
+    if rec.environment in STUDY_ENVIRONMENTS:
+        return
+    p = rec.content['payload']
+    values = p.get('outcome') if rec.evidence_class is EvidenceClass.VTIL_ARTIFACT else p
+    if not isinstance(values, Mapping):
+        raise EvidenceError('health evidence has no settled monetary outcome')
+    maturity = values.get('maturity')
+    if (not isinstance(maturity, Mapping)
+        or any(maturity.get(flag) is not True for flag in ('parent_final','fees_final','cash_reconciled'))
+        or maturity.get('source_environment') != rec.environment.value
+        or not isinstance(maturity.get('source'), str) or not maturity['source'].strip()
+        or not isinstance(maturity.get('account_currency'), str) or not maturity['account_currency'].strip()
+        or values.get('broker_ok') is not True
+        or not isinstance(values.get('pnl_basis'),str)
+        or values['pnl_basis'] not in {'REPORTED_GROSS_NET_RECORDED_CHARGES',
+            'PRICE_DERIVED_NET_RECORDED_CHARGES','REPORTED_NET_CONFIRMED'}):
+        raise EvidenceError('health evidence monetary maturity/finality is not established')
 
 
 def _decimal(v: Any, what: str, rec: EvidenceRecord) -> Decimal:
@@ -94,6 +122,7 @@ def health_facts(rec: EvidenceRecord, resolver: LedgerEvidenceResolver, *, avail
         proc = not faults
     if not isinstance(proc, bool):
         raise EvidenceError(f"evidence {rec.ref} records no process_ok")
+    require_economic_readiness(rec)
     return r, proc, cost
 
 

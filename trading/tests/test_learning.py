@@ -19,7 +19,7 @@ from vati.learning import (
     cluster_failures, curriculum_gate, daily_report, episode_from_ledger, evaluate_missed_opportunity, monthly_report, propose_candidate, run_counterfactuals, weekly_report,
 )
 from vati.learning.boundary import FORBIDDEN_TARGETS, LiveTarget
-from test_learning_evidence import Src, observe_fact, observe_review
+from test_learning_evidence import Src, observe_fact, observe_review, settled_review_fields
 from vati.learning.hooks import LearningHooks
 from vati.learning.replay import restore_learning_runtime
 from vati.market_data import FX_CALENDAR
@@ -139,7 +139,7 @@ def test_restart_replays_capsule_health_before_new_decisions(eurusd, tmp_path):
                 "artifact_hash": artifact_hash,
                 "environment": "LIVE",
                 "strategy_id": sid,
-                "outcome": {"r_multiple": "-1.00"},
+                "outcome": {"r_multiple": "-1.00", **settled_review_fields()},
                 "review": {"process_ok": False},
                 "execution": {"tca": {"cost_ratio": "2.5"}},
             },
@@ -353,11 +353,12 @@ def test_cycle_emits_experience_artifacts_but_backtest_evidence_cannot_adjust_li
 def test_cycle_applies_boundary_checked_demotion_and_capsule_stops_trading(eurusd, tmp_path):
     from vati.learning import LearningHooks
     cfg = fx_cfg(eurusd)
-    hooks = LearningHooks(environment=Environment.LIVE, health=StrategyHealthTracker(sustain=1))
-    # 35 weighted live observations of process breaches: the next close crosses the sustain gate
-    for i in range(35):
+    hooks = LearningHooks(environment=Environment.DEMO, health=StrategyHealthTracker(sustain=1))
+    # 59 completed DEMO outcomes: the real paper close reaches 30 weighted samples.
+    # A historical paper result cannot masquerade as LIVE cash evidence.
+    for i in range(59):
         for sid in ("FX-TREND-PULLBACK-01", "FX-LONDON-BREAKOUT-01"):
-            obs(hooks.health, sid, -1.0, process_ok=False, cost=D("2.5"), fit=False, i=i)
+            obs(hooks.health, sid, -1.0, env=Environment.DEMO, process_ok=False, cost=D("2.5"), fit=False, i=i)
     engine = fx_engine(cfg)
     bt = BacktestEngine(cfg=cfg, engine=engine, cost_fn=lambda st: D("0.0003"), calendar=FX_CALENDAR, events=EventMatrix(), ledger_path=str(tmp_path / "bt.sqlite"), learning=hooks)
     res = bt.run(synthetic_bars())

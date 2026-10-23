@@ -27,6 +27,13 @@ BKEY = "mt5-a:EURUSD:LONDON"
 _SEQ = itertools.count(1)
 
 
+def settled_review_fields(env=Environment.LIVE):
+    """Explicit completed native-outcome model, not live qualification."""
+    return {'broker_ok':True,'pnl_basis':'REPORTED_NET_CONFIRMED',
+        'maturity':{'parent_final':True,'fees_final':True,'cash_reconciled':True,
+            'source_environment':env.value,'account_currency':'USD','source':'UNIT_TEST_NATIVE_OUTCOME'}}
+
+
 class Src:
     """A real VATI ledger plus the runtime-bound resolver for it."""
 
@@ -40,13 +47,23 @@ class Src:
         self.ledger.append(ev)
         return ev.hash
 
+    def settled_review_fields(self) -> dict:
+        """Explicit native-outcome model for component math/identity tests.
+
+        This is fixture input, not provider or live financial qualification.
+        Negative cases can omit/override any required fact; production has no
+        fixture exception and must supply its actual settlement observations.
+        """
+        return settled_review_fields(self.env)
+
     def review(self, sid: str, i: int, *, r: str = "-1", process_ok: bool = False, cost: str = "2.5", **extra) -> str:
         """One closed trade as the runtime records it: its entry TCA_RECORD, then a TradeReview-shaped
         TRADE_REVIEW (no environment in its payload, as in production). The observed values live in
         the ledger, where the health tracker reads them (A-VATI M3)."""
         corr = f"{sid}-{i}"
         self.append(EventKind.TCA_RECORD, {"trade_intent_id": corr, "learning_environment": self.env.value, "cost_ratio": cost}, corr)
-        h = self.append(EventKind.TRADE_REVIEW, {"trade_intent_id": corr, "strategy_id": sid, "r_multiple": r, "process_ok": process_ok, **extra}, corr)
+        h = self.append(EventKind.TRADE_REVIEW, {"trade_intent_id": corr, "strategy_id": sid, "r_multiple": r, "process_ok": process_ok,
+            **self.settled_review_fields(), **extra}, corr)
         return make_evidence_ref(EvidenceClass.TRADE_REVIEW, h)
 
     def tca(self, broker: str, symbol: str, session: str, i: int, env: Environment | None = None, **extra) -> str:
@@ -204,7 +221,7 @@ def test_hooks_learn_only_from_ledger_events_and_never_from_intent_ids():
     assert SID not in hooks.health._obs and hooks.brokers.profiles == {}
     # the same review re-seen 40 times is one sample
     led.append(make_event(EventKind.TCA_RECORD, "vati-cycle", {"trade_intent_id": "intent-x", "learning_environment": "LIVE", "cost_ratio": "2.5"}, event_time_ms=1, received_time_ms=1, correlation_id="intent-x"))
-    led.append(make_event(EventKind.TRADE_REVIEW, "vati-cycle", {"trade_intent_id": "intent-x", "strategy_id": SID, "r_multiple": "-1", "process_ok": False}, event_time_ms=1, received_time_ms=1, correlation_id="intent-x"))
+    led.append(make_event(EventKind.TRADE_REVIEW, "vati-cycle", {"trade_intent_id": "intent-x", "strategy_id": SID, "r_multiple": "-1", "process_ok": False, **settled_review_fields()}, event_time_ms=1, received_time_ms=1, correlation_id="intent-x"))
     for _ in range(40):
         hooks.on_review(led, trade_intent_id="intent-x", strategy_id=SID, r_multiple=D("-1"), process_ok=False, cost_ratio=D("2.5"))
     assert hooks.health.verdict(SID).weighted_samples == D("1.0") and hooks.refusals == []
@@ -216,7 +233,7 @@ def test_positive_path_30_distinct_real_trade_reviews_still_demote():
     adj = None
     for i in range(30):
         corr = f"intent-{i}"
-        led.append(make_event(EventKind.TRADE_REVIEW, "vati-cycle", {"trade_intent_id": corr, "strategy_id": SID, "r_multiple": "-1", "process_ok": False}, event_time_ms=i, received_time_ms=i, correlation_id=corr))
+        led.append(make_event(EventKind.TRADE_REVIEW, "vati-cycle", {"trade_intent_id": corr, "strategy_id": SID, "r_multiple": "-1", "process_ok": False, **settled_review_fields()}, event_time_ms=i, received_time_ms=i, correlation_id=corr))
         led.append(make_event(EventKind.TCA_RECORD, "vati-cycle", {"learning_environment": "LIVE", "broker": "mt5-a", "symbol": "EURUSD", "session": "LONDON", "event_window": "QUIET", "cost_ratio": "1.5",
                                                                    "slippage": "1", "rejected": False},
                               event_time_ms=i, received_time_ms=i, correlation_id=corr))
@@ -455,7 +472,7 @@ def test_replay_cannot_weigh_a_fact_above_the_restarted_runtime(tmp_path):
     led = Ledger(tmp_path / "replay-ceiling.sqlite")
     for i in range(30):
         led.append(make_event(EventKind.TRADE_EXPERIENCE_ARTIFACT, "vati-cycle",
-                              {"episode_id": f"i-{i}", "strategy_id": SID, "environment": "LIVE", "outcome": {"r_multiple": "-1"},
+                              {"episode_id": f"i-{i}", "strategy_id": SID, "environment": "LIVE", "outcome": {"r_multiple": "-1", **settled_review_fields()},
                                "review": {"process_ok": False}, "execution": {"tca": {"cost_ratio": "2.5"}}},
                               event_time_ms=i, received_time_ms=i, correlation_id=f"i-{i}"))
     demo = LearningHooks(environment=Environment.DEMO)
@@ -478,10 +495,10 @@ def _trade_artifacts(src: Src, corr: str, sid: str = SID) -> tuple[str, str]:
     """The TRADE_REVIEW and the TRADE_EXPERIENCE_ARTIFACT of one trade, as the runtime writes them."""
     src.append(EventKind.TCA_RECORD, {"trade_intent_id": corr, "learning_environment": src.env.value, "cost_ratio": "2.5"}, corr)
     review = make_evidence_ref(EvidenceClass.TRADE_REVIEW, src.append(
-        EventKind.TRADE_REVIEW, {"trade_intent_id": corr, "strategy_id": sid, "r_multiple": "-1", "process_ok": False}, corr))
+        EventKind.TRADE_REVIEW, {"trade_intent_id": corr, "strategy_id": sid, "r_multiple": "-1", "process_ok": False, **src.settled_review_fields()}, corr))
     artifact = make_evidence_ref(EvidenceClass.VTIL_ARTIFACT, src.append(
         EventKind.TRADE_EXPERIENCE_ARTIFACT, {"episode_id": corr, "strategy_id": sid, "environment": src.env.value,
-                                             "outcome": {"r_multiple": "-1"}, "review": {"process_ok": False},
+                                             "outcome": {"r_multiple": "-1", **settled_review_fields()}, "review": {"process_ok": False},
                                              "execution": {"tca": {"cost_ratio": "2.5"}}}, corr))
     return review, artifact
 
@@ -577,7 +594,7 @@ def test_a_value_the_evidence_does_not_record_is_refused_not_defaulted(missing):
     if missing != "tca":
         src.append(EventKind.TCA_RECORD, {"trade_intent_id": corr, "learning_environment": "LIVE",
                                           **({} if missing == "tca_cost" else {"cost_ratio": "1"})}, corr)
-    payload = {"trade_intent_id": corr, "strategy_id": SID, "r_multiple": "-1", "process_ok": False}
+    payload = {"trade_intent_id": corr, "strategy_id": SID, "r_multiple": "-1", "process_ok": False, **settled_review_fields()}
     payload.pop(missing, None)
     ref = make_evidence_ref(EvidenceClass.TRADE_REVIEW, src.append(EventKind.TRADE_REVIEW, payload, corr))
     with pytest.raises(EvidenceError, match="records no|no TCA_RECORD"):
@@ -611,7 +628,7 @@ def test_hooks_refuse_a_disagreeing_close_without_interrupting_it():
     hooks = LearningHooks(environment=Environment.LIVE, broker="mt5-a")
     led = Ledger()
     led.append(make_event(EventKind.TCA_RECORD, "vati-cycle", {"trade_intent_id": "t-x", "learning_environment": "LIVE", "cost_ratio": "1"}, event_time_ms=1, received_time_ms=1, correlation_id="t-x"))
-    led.append(make_event(EventKind.TRADE_REVIEW, "vati-cycle", {"trade_intent_id": "t-x", "strategy_id": SID, "r_multiple": "2.5", "process_ok": True}, event_time_ms=1, received_time_ms=1, correlation_id="t-x"))
+    led.append(make_event(EventKind.TRADE_REVIEW, "vati-cycle", {"trade_intent_id": "t-x", "strategy_id": SID, "r_multiple": "2.5", "process_ok": True, **settled_review_fields()}, event_time_ms=1, received_time_ms=1, correlation_id="t-x"))
     ep, adj = hooks.on_review(led, trade_intent_id="t-x", strategy_id=SID, r_multiple=D("-50"), process_ok=False, cost_ratio=D("10"))
     assert adj is None and SID not in hooks.health._obs and len(hooks.refusals) == 1 and "disagrees" in hooks.refusals[0]
 
@@ -632,7 +649,7 @@ def test_review_d_evicted_trade_is_not_readmitted_as_a_new_sample():
     # an evicted trade re-cited through its other artifact is not a new sample either
     corr = f"{SID}-5000"
     art = make_evidence_ref(EvidenceClass.VTIL_ARTIFACT, src.append(EventKind.TRADE_EXPERIENCE_ARTIFACT, {
-        "episode_id": corr, "strategy_id": SID, "environment": "LIVE", "outcome": {"r_multiple": "-1"}, "review": {"process_ok": True},
+        "episode_id": corr, "strategy_id": SID, "environment": "LIVE", "outcome": {"r_multiple": "-1", **settled_review_fields()}, "review": {"process_ok": True},
         "execution": {"tca": {"cost_ratio": "1"}}}, corr))
     t.observe(HealthObservation(SID, Environment.LIVE, D("-1"), True, D("1"), True, art), resolver=src.resolver)
     assert t._refs[SID] == window_before and len(t.evidence) == t.window
