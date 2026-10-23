@@ -155,3 +155,12 @@ class RecoveryProof:
         except (ValueError,TypeError,InvalidSignature) as exc:
             raise RuntimeControlError('runtime owner signature is invalid') from exc
         return 'owner-runtime-control:'+hashlib.sha256(statement.encode()+b'\n'+signature).hexdigest()
+
+
+def recovery_profile_ref(account,owner_keys_path):
+    """Bind reviewed authority to the same native key registry as its actor."""
+    from vati.accounts.access import native_binding
+    from vati.authority_registry import owner_registry_path
+    from vati.core.canonical import canonical_hash
+    return canonical_hash([native_binding(account),account.enabled,account.mode,
+        'owner-key-registry:'+canonical_hash(str(owner_registry_path(owner_keys_path or None)))])

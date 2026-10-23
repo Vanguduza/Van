@@ -162,9 +162,8 @@ def load_owner_keys(path: str | os.PathLike[str] | None = None) -> dict[str, str
     )
     if not candidate.is_file():
         return {}
-    data = json.loads(candidate.read_text(encoding="utf-8"))
-    keys = data.get("keys", data) if isinstance(data, dict) else {}
-    return {str(k): str(v) for k, v in keys.items() if str(v).strip()}
+    from vati.authority_registry import read_registry, active_keys
+    return active_keys(read_registry(candidate))
 
 
 class OwnerAuthorityVerifier:
@@ -176,8 +175,10 @@ class OwnerAuthorityVerifier:
         *,
         consumed: MutableSet[str] | None = None,
         revoked_key_ids: Iterable[str] = (),
+        registry_path: str | os.PathLike[str] | None = None,
     ) -> None:
-        self.keys = dict(keys) if keys is not None else load_owner_keys()
+        self.registry_path = (str(Path(registry_path).resolve()) if registry_path is not None else None)
+        self.keys = dict(keys) if keys is not None else load_owner_keys(registry_path)
         # Single use is enforced here so that a caller that forgets to pass a store still
         # gets it for the life of the process, rather than silently getting nothing.
         self.consumed: MutableSet[str] = consumed if consumed is not None else set()
@@ -220,6 +221,11 @@ class OwnerAuthorityVerifier:
         key_id = str(payload.get("kid", ""))
         if not key_id or key_id in self.revoked_key_ids:
             raise OwnerAuthorityError(f"{act}: owner authority key {key_id!r} is not usable")
+        if self.registry_path is not None:
+            try:
+                self.keys = load_owner_keys(self.registry_path)
+            except (OSError, ValueError, TypeError) as exc:
+                raise OwnerAuthorityError(f"{act}: current owner authority registry is unavailable") from exc
         pem = self.keys.get(key_id)
         if not pem:
             raise OwnerAuthorityError(

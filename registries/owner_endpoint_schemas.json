@@ -3700,6 +3700,40 @@
         "title": "DeterministicAction",
         "description": "A typed action the caller already knows. No model involved."
       },
+      "DeviceRevocationResponse": {
+        "properties": {
+          "revoked": {
+            "type": "boolean",
+            "const": true,
+            "title": "Revoked"
+          },
+          "device_id": {
+            "type": "string",
+            "title": "Device Id"
+          },
+          "revoked_privileged_executions": {
+            "type": "integer",
+            "title": "Revoked Privileged Executions"
+          },
+          "revoked_client_certificates": {
+            "type": "integer",
+            "title": "Revoked Client Certificates"
+          },
+          "native_authority_revocation": {
+            "$ref": "#/components/schemas/NativeOwnerKeyRevocationState"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "revoked",
+          "device_id",
+          "revoked_privileged_executions",
+          "revoked_client_certificates",
+          "native_authority_revocation"
+        ],
+        "title": "DeviceRevocationResponse"
+      },
       "DeviceTelemetryBody": {
         "properties": {
           "samples": {
@@ -6338,6 +6372,121 @@
         ],
         "title": "MissionState",
         "description": "\u00a73.2 \u2014 deterministic. Anything not in LEGAL_TRANSITIONS fails closed."
+      },
+      "NativeOwnerKeyRevocationReceipt": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "vati.owner-device-key-revocation/1",
+            "title": "Schema"
+          },
+          "operation_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Operation Id"
+          },
+          "device_id": {
+            "type": "string",
+            "title": "Device Id"
+          },
+          "key_id": {
+            "type": "string",
+            "pattern": "^device-[0-9a-f]{24}$",
+            "title": "Key Id"
+          },
+          "phase": {
+            "type": "string",
+            "const": "APPLIED",
+            "title": "Phase"
+          },
+          "revoked": {
+            "type": "boolean",
+            "const": true,
+            "title": "Revoked"
+          },
+          "key_active": {
+            "type": "boolean",
+            "const": false,
+            "title": "Key Active"
+          },
+          "revocation_ref": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Revocation Ref"
+          },
+          "registry_ref": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Registry Ref"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "operation_id",
+          "device_id",
+          "key_id",
+          "phase",
+          "revoked",
+          "key_active",
+          "revocation_ref",
+          "registry_ref"
+        ],
+        "title": "NativeOwnerKeyRevocationReceipt"
+      },
+      "NativeOwnerKeyRevocationState": {
+        "properties": {
+          "operation_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Operation Id"
+          },
+          "device_id": {
+            "type": "string",
+            "title": "Device Id"
+          },
+          "key_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Key Id"
+          },
+          "phase": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPLIED",
+              "UNKNOWN"
+            ],
+            "title": "Phase"
+          },
+          "native_result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NativeOwnerKeyRevocationReceipt"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "operation_id",
+          "device_id",
+          "key_id",
+          "phase",
+          "native_result"
+        ],
+        "title": "NativeOwnerKeyRevocationState"
       },
       "NotebookConsumerAskRequest": {
         "properties": {

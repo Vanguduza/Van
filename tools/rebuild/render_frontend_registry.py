@@ -87,6 +87,23 @@ def render():
         listing('Current navigation contract', [row['current_navigation_contract']] if row.get('current_navigation_contract') else [])
         listing('Located source functions (not whole-feature acceptance)',[f"{f['id']}: {f.get('owner_action','')} — {f.get('status','UNSPECIFIED')}" for f in row.get('current_implementation',{}).get('functions',[])])
         endpoint_table(row)
+    planned_path=ROOT/'docs/review-inputs/van-rev115/package/reference/REV2_FEATURE_REGISTRY.json'
+    planned=json.loads(planned_path.read_text())
+    planned_rows=planned['features']
+    if planned['count']!=len(planned_rows) or len({r['id'] for r in planned_rows})!=len(planned_rows):
+        raise ValueError('Planned feature inventory is incomplete or duplicated')
+    lines+=['','## Complete frozen planned feature scope','',
+        f"All **{len(planned_rows)} planned features** are copied below from the frozen registry. These are distinct from the {len(features)} current-source feature groups above. A frozen stage or provisional surface is a planning statement, not implementation, visual design, endpoint coverage or acceptance.",'',
+        f"Source: [REV2_FEATURE_REGISTRY.json](../../../review-inputs/van-rev115/package/reference/REV2_FEATURE_REGISTRY.json); SHA-256 `{hashlib.sha256(planned_path.read_bytes()).hexdigest()}`.",'',
+        '| Planned ID | Domain | Feature | Primary / provisional surface | Frozen stage |',
+        '| --- | --- | --- | --- | --- |']
+    for row in planned_rows:
+        lines.append('| '+' | '.join(cell(x) for x in (row['id'],row['domain'],row['title'],
+            str(row.get('primary_surface_id',''))+' / '+str(row.get('provisional_primary_surface_id','')),row.get('stage','UNSPECIFIED')))+' |')
+    for row in planned_rows:
+        lines+=['',f"#### {row['id']} — {cell(row['title'])}",'',cell(row.get('description','')),
+            '',f"Technology: {cell(row.get('product_technology',''))}; functional authority: `{cell(row.get('functional_authority',''))}`; visual authority: `{cell(row.get('visual_authority',''))}`."]
+        listing('Required states',row.get('required_states',[]));listing('Required identities',row.get('requirement_ids',[]))
     output='\n'.join(lines)+'\n'
     # Every identity must survive rendering, without silently trimming rows or text.
     if sum(line.startswith('### ') for line in lines)!=len(screens)+len(features):raise ValueError('Rendered row omitted')

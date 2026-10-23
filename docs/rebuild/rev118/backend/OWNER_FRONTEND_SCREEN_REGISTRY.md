@@ -1,6 +1,6 @@
 # VAN current frontend screen and feature registry
 
-Current source inventory: **42 features, 105 source functions, 78 screens/hosted surfaces, 444 endpoint declarations and 276 schemas**.
+Current source inventory: **42 features, 105 source functions, 78 screens/hosted surfaces, 445 endpoint declarations and 279 schemas**.
 
 This generated document renders the current source contracts, including gaps and unverified states. It does not declare features complete, qualify live services or authorize a redesigned frontend. No new frontend/prototype before BG-001. Current source features are distinct from the frozen Rev1.18 programme of **93 planned features, 349 owner actions, 324 requirements, 1,610 acceptance identities and 131 units**. The complete planned scope remains in [the frozen package](../../../review-inputs/van-rev115/package/) and its [backend consumption contract](../../../review-inputs/van-rev115/package/contracts/BACKEND_TO_FRONTEND_CONSUMPTION_CONTRACT.md).
 
@@ -14,10 +14,10 @@ Owner-access endpoints and service dependencies are listed separately below. An 
 
 | Registry | SHA-256 |
 | --- | --- |
-| [owner_features.json](../../../../registries/owner_features.json) | `16957a15bf1cdc057358b3f79ffd053e4d7f56a320828ef98fbd4cc4ea4df6a7` |
-| [owner_screens.json](../../../../registries/owner_screens.json) | `0cd9af3649dcce9c757bd27a547c8102139cad0c009e05072711ca5cc856ddaa` |
-| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `d7cb0d3e1f666cde6b1d6eb88e648f582d06416c582c11ad6884ec72bb1543e6` |
-| [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `e551c50a75aba6541ece4674bb343ae90865b085aebf8fd793351be7e2b6fb68` |
+| [owner_features.json](../../../../registries/owner_features.json) | `7253e0c7d0dae84dfd484d40bbd0b4ce40a91ec2ac1865ec5dd90ef499408251` |
+| [owner_screens.json](../../../../registries/owner_screens.json) | `44f0be68c6e4ea0242c23686f9a056ff0b568383cd9fb17e0e336c13b290448a` |
+| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `f13681d8bf64307d0890607e4681a04d8ca4ec60fca5a5b398ca2dfbf5b96bfd` |
+| [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `bde67b8406d5ff1211fcfd05ea48094f8507c743bf2de95b8dcd273919ed3a0d` |
 
 Regenerate with `python3 tools/rebuild/render_frontend_registry.py --apply`; verify with `--check`.
 
@@ -6595,3 +6595,2043 @@ Wiring: `EXTERNAL_CONTRACT_OR_ASSET_REQUIRED`; integration: `SOURCE_PRESENT_REQU
 | GET | /v1/events | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.events |
 | POST | /v1/visual/acceptance | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.recordVisualAcceptance |
 | GET | /v1/visual/acceptance | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.latestVisualAcceptance |
+
+## Complete frozen planned feature scope
+
+All **93 planned features** are copied below from the frozen registry. These are distinct from the 42 current-source feature groups above. A frozen stage or provisional surface is a planning statement, not implementation, visual design, endpoint coverage or acceptance.
+
+Source: [REV2_FEATURE_REGISTRY.json](../../../review-inputs/van-rev115/package/reference/REV2_FEATURE_REGISTRY.json); SHA-256 `9748ff23550847816fb2a909921002f9d13248f2bfb45e482586b814c91aedb5`.
+
+| Planned ID | Domain | Feature | Primary / provisional surface | Frozen stage |
+| --- | --- | --- | --- | --- |
+| VNX-F-HOME-01 | HOME | Spatial Home | VNX-S-HOME-01 / VNX-S-HOME-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-HOME-02 | HOME | State-aware metallic orb | VNX-S-HOME-02 / VNX-S-HOME-02 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-HOME-03 | HOME | Home quick hub | VNX-S-HOME-02 / VNX-S-HOME-02 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-HOME-04 | HOME | Attention preview | VNX-S-HOME-03 / VNX-S-HOME-03 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-HOME-05 | HOME | Smart briefing | VNX-S-HOME-01 / VNX-S-HOME-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-HOME-06 | HOME | Semantic deep links | VNX-S-HOME-01 / VNX-S-HOME-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-HOME-07 | HOME | Home state fallbacks | VNX-S-HOME-01 / VNX-S-HOME-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-TRADE-01 | TRADE | Trading Home | VNX-S-TRADE-01 / VNX-S-TRADE-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-TRADE-02 | TRADE | Portfolio summary | VNX-S-TRADE-02 / VNX-S-TRADE-02 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-TRADE-03 | TRADE | Markets overview | VNX-S-TRADE-03 / VNX-S-TRADE-03 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-TRADE-04 | TRADE | Watchlists | VNX-S-TRADE-06 / VNX-S-TRADE-06 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-TRADE-05 | TRADE | Opportunity discovery | VNX-S-TRADE-01 / VNX-S-TRADE-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-TRADE-06 | TRADE | Charts entry | VNX-S-TRADE-09 / VNX-S-TRADE-09 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-TRADE-07 | TRADE | Intelligence entry | VNX-S-TRADE-10 / VNX-S-TRADE-10 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-TRADE-08 | TRADE | Account context entry | VNX-S-TRADE-10 / VNX-S-TRADE-10 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-CHART-01 | CHART | Native chart previews | VNX-S-CHART-20 / VNX-S-CHART-20 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-CHART-02 | CHART | Rich chart terminal | VNX-S-CHART-02 / VNX-S-CHART-02 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-CHART-03 | CHART | Instrument search and alias mapping | VNX-S-CHART-01 / VNX-S-CHART-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-CHART-04 | CHART | Price and timeframe precision | VNX-S-CHART-08 / VNX-S-CHART-08 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-CHART-05 | CHART | Indicators and parameters | VNX-S-CHART-01 / VNX-S-CHART-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-CHART-06 | CHART | Drawing tools and persistence | VNX-S-CHART-05 / VNX-S-CHART-05 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-CHART-07 | CHART | Chart overlays and crosshair | VNX-S-CHART-17 / VNX-S-CHART-17 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-CHART-08 | CHART | Bar replay sandbox | VNX-S-CHART-12 / VNX-S-CHART-12 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-CHART-09 | CHART | Multi-chart layouts | VNX-S-CHART-01 / VNX-S-CHART-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-CHART-10 | CHART | Orderbook market depth | VNX-S-CHART-15 / VNX-S-CHART-15 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-CHART-11 | CHART | Chart alert creation | VNX-S-CHART-01 / VNX-S-CHART-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-CHART-12 | CHART | Order and position overlays | VNX-S-CHART-01 / VNX-S-CHART-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-CHART-13 | CHART | Chart source integrity | VNX-S-CHART-01 / VNX-S-CHART-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-CHART-14 | CHART | Chart observation export | VNX-S-CHART-19 / VNX-S-CHART-19 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-CHART-15 | CHART | Chart renderer failover | VNX-S-CHART-01 / VNX-S-CHART-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ORDERS-01 | ORDERS | Open positions | VNX-S-ORDERS-01 / VNX-S-ORDERS-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ORDERS-02 | ORDERS | Position details | VNX-S-ORDERS-02 / VNX-S-ORDERS-02 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ORDERS-03 | ORDERS | Pending orders | VNX-S-ORDERS-04 / VNX-S-ORDERS-04 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ORDERS-04 | ORDERS | Order creation proposals | VNX-S-ORDERS-05 / VNX-S-ORDERS-05 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ORDERS-05 | ORDERS | Owner order approval | VNX-S-ORDERS-07 / VNX-S-ORDERS-07 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ORDERS-06 | ORDERS | Broker order receipt | VNX-S-ORDERS-08 / VNX-S-ORDERS-08 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ORDERS-07 | ORDERS | Stop loss take profit management | VNX-S-ORDERS-09 / VNX-S-ORDERS-09 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ORDERS-08 | ORDERS | Partial reduction intents | VNX-S-ORDERS-10 / VNX-S-ORDERS-10 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ORDERS-09 | ORDERS | Trade history and TCA | VNX-S-ORDERS-11 / VNX-S-ORDERS-11 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ORDERS-10 | ORDERS | Risk command centre | VNX-S-ORDERS-06 / VNX-S-ORDERS-06 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ACCOUNTS-01 | ACCOUNTS | Accounts overview | VNX-S-ACCOUNTS-01 / VNX-S-ACCOUNTS-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ACCOUNTS-02 | ACCOUNTS | Link existing broker account | VNX-S-ACCOUNTS-05 / VNX-S-ACCOUNTS-05 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ACCOUNTS-03 | ACCOUNTS | Create demo account | VNX-S-ACCOUNTS-03 / VNX-S-ACCOUNTS-03 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ACCOUNTS-04 | ACCOUNTS | Apply for live broker account | VNX-S-ACCOUNTS-04 / VNX-S-ACCOUNTS-04 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ACCOUNTS-05 | ACCOUNTS | Edit local account configuration | VNX-S-ACCOUNTS-07 / VNX-S-ACCOUNTS-07 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ACCOUNTS-06 | ACCOUNTS | Edit broker account details | VNX-S-ACCOUNTS-08 / VNX-S-ACCOUNTS-08 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ACCOUNTS-07 | ACCOUNTS | Credential rotation | VNX-S-ACCOUNTS-01 / VNX-S-ACCOUNTS-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ACCOUNTS-08 | ACCOUNTS | Account connection validation | VNX-S-ACCOUNTS-02 / VNX-S-ACCOUNTS-02 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ACCOUNTS-09 | ACCOUNTS | Unlink local account | VNX-S-ACCOUNTS-07 / VNX-S-ACCOUNTS-07 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ACCOUNTS-10 | ACCOUNTS | Close remote broker account | VNX-S-ACCOUNTS-02 / VNX-S-ACCOUNTS-02 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ACCOUNTS-11 | ACCOUNTS | Deposit funds | VNX-S-ACCOUNTS-01 / VNX-S-ACCOUNTS-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ACCOUNTS-12 | ACCOUNTS | Withdraw funds | VNX-S-ACCOUNTS-01 / VNX-S-ACCOUNTS-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ACCOUNTS-13 | ACCOUNTS | Transfer between accounts | VNX-S-ACCOUNTS-01 / VNX-S-ACCOUNTS-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ACCOUNTS-14 | ACCOUNTS | Payment methods | VNX-S-ACCOUNTS-01 / VNX-S-ACCOUNTS-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ACCOUNTS-15 | ACCOUNTS | Transaction and settlement history | VNX-S-ACCOUNTS-01 / VNX-S-ACCOUNTS-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ACCOUNTS-16 | ACCOUNTS | KYC account restrictions | VNX-S-ACCOUNTS-01 / VNX-S-ACCOUNTS-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-ACCOUNTS-17 | ACCOUNTS | Leverage and account permissions | VNX-S-ACCOUNTS-01 / VNX-S-ACCOUNTS-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-INTEL-01 | INTEL | Intelligence overview | VNX-S-INTEL-01 / VNX-S-INTEL-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-INTEL-02 | INTEL | News feed | VNX-S-INTEL-02 / VNX-S-INTEL-02 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-INTEL-03 | INTEL | Full article analysis | VNX-S-INTEL-03 / VNX-S-INTEL-03 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-INTEL-04 | INTEL | Economic calendar | VNX-S-INTEL-04 / VNX-S-INTEL-04 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-INTEL-05 | INTEL | Instrument and portfolio impact | VNX-S-INTEL-06 / VNX-S-INTEL-06 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-INTEL-06 | INTEL | Source verification and contradictions | VNX-S-INTEL-09 / VNX-S-INTEL-09 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-INTEL-07 | INTEL | Live VAN trading analyst | VNX-S-INTEL-11 / VNX-S-INTEL-11 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-INTEL-08 | INTEL | Strategy evidence analysis | VNX-S-INTEL-08 / VNX-S-INTEL-08 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-INTEL-09 | INTEL | Trading opportunity reasoning | VNX-S-INTEL-12 / VNX-S-INTEL-12 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-INTEL-10 | INTEL | Cross-signal intelligence packet | VNX-S-INTEL-01 / VNX-S-INTEL-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-INTEL-11 | INTEL | Learning and outcome review | VNX-S-INTEL-01 / VNX-S-INTEL-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-WORK-01 | WORK | Work command centre | VNX-S-WORK-01 / VNX-S-WORK-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-WORK-02 | WORK | Projects overview | VNX-S-WORK-02 / VNX-S-WORK-02 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-WORK-03 | WORK | Task lists | VNX-S-WORK-04 / VNX-S-WORK-04 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-WORK-04 | WORK | Live dependency graph | VNX-S-WORK-06 / VNX-S-WORK-06 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-WORK-05 | WORK | Agent relationship graph | VNX-S-WORK-07 / VNX-S-WORK-07 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-WORK-06 | WORK | Evidence-based progress | VNX-S-WORK-09 / VNX-S-WORK-09 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-WORK-07 | WORK | Muse native control | VNX-S-WORK-11 / VNX-S-WORK-11 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-WORK-08 | WORK | ARTEMIS testing surface | VNX-S-WORK-13 / VNX-S-WORK-13 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-WORK-09 | WORK | Review and approval queue | VNX-S-WORK-14 / VNX-S-WORK-14 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-WORK-10 | WORK | Blocker and handoff tracking | VNX-S-WORK-08 / VNX-S-WORK-08 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-WORK-11 | WORK | Activity and execution receipts | VNX-S-WORK-16 / VNX-S-WORK-16 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-WORK-12 | WORK | Workflow accessibility parity | VNX-S-WORK-01 / VNX-S-WORK-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-PRESENCE-01 | PRESENCE | Floating VAN service | VNX-S-PRESENCE-01 / VNX-S-PRESENCE-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-PRESENCE-02 | PRESENCE | Floating workboard | VNX-S-PRESENCE-02 / VNX-S-PRESENCE-02 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-PRESENCE-03 | PRESENCE | Voice and conversation | VNX-S-PRESENCE-05 / VNX-S-PRESENCE-05 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-PRESENCE-04 | PRESENCE | Floating gestures and recovery | VNX-S-PRESENCE-06 / VNX-S-PRESENCE-06 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-PRESENCE-05 | PRESENCE | Shared orb presence projection | VNX-S-PRESENCE-01 / VNX-S-PRESENCE-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-MEMORY-01 | MEMORY | Memory and record search | VNX-S-MEMORY-02 / VNX-S-MEMORY-02 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-MEMORY-02 | MEMORY | Research and sources | VNX-S-MEMORY-03 / VNX-S-MEMORY-03 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-MEMORY-03 | MEMORY | Memory privacy and erasure | VNX-S-MEMORY-04 / VNX-S-MEMORY-04 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-MEMORY-04 | MEMORY | Learning goals and adaptations | VNX-S-MEMORY-01 / VNX-S-MEMORY-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-MORE-01 | MORE | Connected services | VNX-S-MORE-02 / VNX-S-MORE-02 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-MORE-02 | MORE | Permissions and device authority | VNX-S-MORE-03 / VNX-S-MORE-03 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-MORE-03 | MORE | Automation and schedules | VNX-S-MORE-01 / VNX-S-MORE-01 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+| VNX-F-MORE-04 | MORE | Settings diagnostics appearance | VNX-S-MORE-04 / VNX-S-MORE-04 | DESIGN_CANDIDATE_NOT_IMPLEMENTED |
+
+#### VNX-F-HOME-01 — Spatial Home
+
+Provide a correctly state-bound, accessible spatial home capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-001
+- VNX-R-014
+- VNX-R-018
+- VNX-R-019
+- VNX-R-143
+- VNX-R-165
+- VNX-R-166
+- VNX-R-168
+- VNX-R-169
+- VNX-R-170
+- VNX-R-171
+
+#### VNX-F-HOME-02 — State-aware metallic orb
+
+Provide a correctly state-bound, accessible state-aware metallic orb capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-002
+- VNX-R-020
+- VNX-R-142
+- VNX-R-145
+- VNX-R-146
+- VNX-R-164
+- VNX-R-167
+
+#### VNX-F-HOME-03 — Home quick hub
+
+Provide a correctly state-bound, accessible home quick hub capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-003
+- VNX-R-021
+- VNX-R-144
+
+#### VNX-F-HOME-04 — Attention preview
+
+Provide a correctly state-bound, accessible attention preview capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-022
+
+#### VNX-F-HOME-05 — Smart briefing
+
+Provide a correctly state-bound, accessible smart briefing capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-023
+
+#### VNX-F-HOME-06 — Semantic deep links
+
+Provide a correctly state-bound, accessible semantic deep links capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-024
+
+#### VNX-F-HOME-07 — Home state fallbacks
+
+Provide a correctly state-bound, accessible home state fallbacks capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-025
+
+#### VNX-F-TRADE-01 — Trading Home
+
+Provide a correctly state-bound, accessible trading home capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-005
+- VNX-R-026
+
+#### VNX-F-TRADE-02 — Portfolio summary
+
+Provide a correctly state-bound, accessible portfolio summary capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-027
+
+#### VNX-F-TRADE-03 — Markets overview
+
+Provide a correctly state-bound, accessible markets overview capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-028
+
+#### VNX-F-TRADE-04 — Watchlists
+
+Provide a correctly state-bound, accessible watchlists capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-029
+
+#### VNX-F-TRADE-05 — Opportunity discovery
+
+Provide a correctly state-bound, accessible opportunity discovery capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-030
+
+#### VNX-F-TRADE-06 — Charts entry
+
+Provide a correctly state-bound, accessible charts entry capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-031
+
+#### VNX-F-TRADE-07 — Intelligence entry
+
+Provide a correctly state-bound, accessible intelligence entry capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-032
+
+#### VNX-F-TRADE-08 — Account context entry
+
+Provide a correctly state-bound, accessible account context entry capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-033
+
+#### VNX-F-CHART-01 — Native chart previews
+
+Provide a correctly state-bound, accessible native chart previews capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-034
+- VNX-R-132
+- VNX-R-135
+- VNX-R-136
+- VNX-R-138
+- VNX-R-139
+
+#### VNX-F-CHART-02 — Rich chart terminal
+
+Keep full toolset hidden in contextual sheets while preserving precision and interaction.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-035
+- VNX-R-134
+
+#### VNX-F-CHART-03 — Instrument search and alias mapping
+
+Provide a correctly state-bound, accessible instrument search and alias mapping capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-036
+
+#### VNX-F-CHART-04 — Price and timeframe precision
+
+Provide a correctly state-bound, accessible price and timeframe precision capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-037
+
+#### VNX-F-CHART-05 — Indicators and parameters
+
+Provide a correctly state-bound, accessible indicators and parameters capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-038
+
+#### VNX-F-CHART-06 — Drawing tools and persistence
+
+Provide a correctly state-bound, accessible drawing tools and persistence capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-039
+- VNX-R-133
+
+#### VNX-F-CHART-07 — Chart overlays and crosshair
+
+Provide a correctly state-bound, accessible chart overlays and crosshair capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-040
+
+#### VNX-F-CHART-08 — Bar replay sandbox
+
+Provide a correctly state-bound, accessible bar replay sandbox capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-041
+- VNX-R-137
+
+#### VNX-F-CHART-09 — Multi-chart layouts
+
+Provide a correctly state-bound, accessible multi-chart layouts capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-042
+
+#### VNX-F-CHART-10 — Orderbook market depth
+
+Provide a correctly state-bound, accessible orderbook market depth capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-043
+- VNX-R-140
+
+#### VNX-F-CHART-11 — Chart alert creation
+
+Provide a correctly state-bound, accessible chart alert creation capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-044
+
+#### VNX-F-CHART-12 — Order and position overlays
+
+Provide a correctly state-bound, accessible order and position overlays capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-006
+- VNX-R-045
+
+#### VNX-F-CHART-13 — Chart source integrity
+
+Provide a correctly state-bound, accessible chart source integrity capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-046
+
+#### VNX-F-CHART-14 — Chart observation export
+
+Emit provenance-bound drawing/crosshair/annotation observations as non-authoritative analyst inputs.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-047
+- VNX-R-141
+
+#### VNX-F-CHART-15 — Chart renderer failover
+
+Provide a correctly state-bound, accessible chart renderer failover capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-048
+
+#### VNX-F-ORDERS-01 — Open positions
+
+Provide a correctly state-bound, accessible open positions capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VATI_RISK_EXECUTION`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-049
+
+#### VNX-F-ORDERS-02 — Position details
+
+Provide a correctly state-bound, accessible position details capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VATI_RISK_EXECUTION`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-050
+
+#### VNX-F-ORDERS-03 — Pending orders
+
+Provide a correctly state-bound, accessible pending orders capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VATI_RISK_EXECUTION`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-007
+- VNX-R-051
+
+#### VNX-F-ORDERS-04 — Order creation proposals
+
+Chart/assistant can draft order but only VATI and owner mandate can authorize execution.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VATI_RISK_EXECUTION`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-052
+
+#### VNX-F-ORDERS-05 — Owner order approval
+
+Provide a correctly state-bound, accessible owner order approval capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VATI_RISK_EXECUTION`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-053
+
+#### VNX-F-ORDERS-06 — Broker order receipt
+
+Provide a correctly state-bound, accessible broker order receipt capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VATI_RISK_EXECUTION`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-054
+
+#### VNX-F-ORDERS-07 — Stop loss take profit management
+
+Provide a correctly state-bound, accessible stop loss take profit management capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VATI_RISK_EXECUTION`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-055
+
+#### VNX-F-ORDERS-08 — Partial reduction intents
+
+Provide a correctly state-bound, accessible partial reduction intents capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VATI_RISK_EXECUTION`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-056
+
+#### VNX-F-ORDERS-09 — Trade history and TCA
+
+Provide a correctly state-bound, accessible trade history and tca capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VATI_RISK_EXECUTION`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-057
+
+#### VNX-F-ORDERS-10 — Risk command centre
+
+Provide a correctly state-bound, accessible risk command centre capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VATI_RISK_EXECUTION`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-058
+
+#### VNX-F-ACCOUNTS-01 — Accounts overview
+
+Provide a correctly state-bound, accessible accounts overview capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-059
+- VNX-R-116
+- VNX-R-117
+- VNX-R-122
+- VNX-R-123
+- VNX-R-124
+- VNX-R-130
+- VNX-R-154
+- VNX-R-155
+- VNX-R-156
+- VNX-R-157
+- VNX-R-158
+- VNX-R-159
+- VNX-R-160
+- VNX-R-162
+- VNX-R-163
+
+#### VNX-F-ACCOUNTS-02 — Link existing broker account
+
+Provide a correctly state-bound, accessible link existing broker account capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `BROKER_MONEY_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-009
+- VNX-R-060
+- VNX-R-119
+- VNX-R-129
+
+#### VNX-F-ACCOUNTS-03 — Create demo account
+
+Provide a correctly state-bound, accessible create demo account capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-061
+- VNX-R-112
+- VNX-R-127
+
+#### VNX-F-ACCOUNTS-04 — Apply for live broker account
+
+Provide a correctly state-bound, accessible apply for live broker account capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `BROKER_MONEY_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-015
+- VNX-R-062
+
+#### VNX-F-ACCOUNTS-05 — Edit local account configuration
+
+Validate immutable account identity and use atomic write before reporting success.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-063
+- VNX-R-114
+- VNX-R-115
+- VNX-R-128
+
+#### VNX-F-ACCOUNTS-06 — Edit broker account details
+
+Provide a correctly state-bound, accessible edit broker account details capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `BROKER_MONEY_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-064
+
+#### VNX-F-ACCOUNTS-07 — Credential rotation
+
+Provide a correctly state-bound, accessible credential rotation capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-065
+- VNX-R-118
+- VNX-R-161
+
+#### VNX-F-ACCOUNTS-08 — Account connection validation
+
+Read fresh broker/account heartbeat, credentials valid and independent state.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-016
+- VNX-R-066
+
+#### VNX-F-ACCOUNTS-09 — Unlink local account
+
+Provide a correctly state-bound, accessible unlink local account capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-067
+- VNX-R-113
+
+#### VNX-F-ACCOUNTS-10 — Close remote broker account
+
+Only broker can close external account; local unlink alone must never mark remote closure.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `BROKER_MONEY_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-068
+- VNX-R-125
+
+#### VNX-F-ACCOUNTS-11 — Deposit funds
+
+Issue only provider-authorized deposit intent; require provider settlement readback and owner context.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `BROKER_MONEY_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-069
+- VNX-R-120
+- VNX-R-121
+- VNX-R-126
+
+#### VNX-F-ACCOUNTS-12 — Withdraw funds
+
+Require account and beneficiary binding, amount/fee quote, A4, provider receipt and eventual settlement.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `BROKER_MONEY_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-070
+
+#### VNX-F-ACCOUNTS-13 — Transfer between accounts
+
+Bind exact source/destination/currency/fees and independent transfer reconciliation.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `BROKER_MONEY_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-071
+
+#### VNX-F-ACCOUNTS-14 — Payment methods
+
+Provide a correctly state-bound, accessible payment methods capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-072
+- VNX-R-131
+
+#### VNX-F-ACCOUNTS-15 — Transaction and settlement history
+
+Provide a correctly state-bound, accessible transaction and settlement history capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-073
+
+#### VNX-F-ACCOUNTS-16 — KYC account restrictions
+
+Provide a correctly state-bound, accessible kyc account restrictions capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-074
+
+#### VNX-F-ACCOUNTS-17 — Leverage and account permissions
+
+Provide a correctly state-bound, accessible leverage and account permissions capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-075
+
+#### VNX-F-INTEL-01 — Intelligence overview
+
+Provide a correctly state-bound, accessible intelligence overview capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-008
+- VNX-R-076
+
+#### VNX-F-INTEL-02 — News feed
+
+Use source age, dedupe, relevance and trust evidence; do not fabricate articles or timestamps.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-077
+
+#### VNX-F-INTEL-03 — Full article analysis
+
+Separate verified claims, counterevidence, uncertainty, prices and account impact.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-078
+
+#### VNX-F-INTEL-04 — Economic calendar
+
+Provide a correctly state-bound, accessible economic calendar capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-079
+
+#### VNX-F-INTEL-05 — Instrument and portfolio impact
+
+Provide a correctly state-bound, accessible instrument and portfolio impact capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-080
+
+#### VNX-F-INTEL-06 — Source verification and contradictions
+
+Provide a correctly state-bound, accessible source verification and contradictions capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-081
+
+#### VNX-F-INTEL-07 — Live VAN trading analyst
+
+Provide a correctly state-bound, accessible live van trading analyst capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-082
+
+#### VNX-F-INTEL-08 — Strategy evidence analysis
+
+Provide a correctly state-bound, accessible strategy evidence analysis capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-083
+
+#### VNX-F-INTEL-09 — Trading opportunity reasoning
+
+Provide a correctly state-bound, accessible trading opportunity reasoning capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-084
+
+#### VNX-F-INTEL-10 — Cross-signal intelligence packet
+
+Provide a correctly state-bound, accessible cross-signal intelligence packet capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-085
+
+#### VNX-F-INTEL-11 — Learning and outcome review
+
+Reject lookahead bias and preserve outcomes, counterfactuals and owner annotations.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `VAN_DISPLAY_EVIDENCE`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-086
+
+#### VNX-F-WORK-01 — Work command centre
+
+Provide a correctly state-bound, accessible work command centre capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-017
+- VNX-R-087
+
+#### VNX-F-WORK-02 — Projects overview
+
+Provide a correctly state-bound, accessible projects overview capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-088
+
+#### VNX-F-WORK-03 — Task lists
+
+Provide a correctly state-bound, accessible task lists capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-089
+
+#### VNX-F-WORK-04 — Live dependency graph
+
+Render typed task edges, owner restrictions, proof counts, revision and accessibility list.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-090
+- VNX-R-147
+- VNX-R-150
+
+#### VNX-F-WORK-05 — Agent relationship graph
+
+Show live actor responsibilities, lease, handoff, contention and independently verified status.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-091
+- VNX-R-148
+
+#### VNX-F-WORK-06 — Evidence-based progress
+
+Provide a correctly state-bound, accessible evidence-based progress capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-011
+- VNX-R-092
+- VNX-R-149
+
+#### VNX-F-WORK-07 — Muse native control
+
+Provide a correctly state-bound, accessible muse native control capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-093
+- VNX-R-151
+
+#### VNX-F-WORK-08 — ARTEMIS testing surface
+
+Provide a correctly state-bound, accessible artemis testing surface capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-094
+- VNX-R-152
+
+#### VNX-F-WORK-09 — Review and approval queue
+
+Provide a correctly state-bound, accessible review and approval queue capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-095
+
+#### VNX-F-WORK-10 — Blocker and handoff tracking
+
+Provide a correctly state-bound, accessible blocker and handoff tracking capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-096
+
+#### VNX-F-WORK-11 — Activity and execution receipts
+
+Provide a correctly state-bound, accessible activity and execution receipts capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-010
+- VNX-R-097
+
+#### VNX-F-WORK-12 — Workflow accessibility parity
+
+Provide a correctly state-bound, accessible workflow accessibility parity capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `OWNER_A4_GATEWAY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-098
+- VNX-R-153
+
+#### VNX-F-PRESENCE-01 — Floating VAN service
+
+Provide a correctly state-bound, accessible floating van service capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `PRODUCT_CONSENT_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-099
+
+#### VNX-F-PRESENCE-02 — Floating workboard
+
+Provide a correctly state-bound, accessible floating workboard capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `PRODUCT_CONSENT_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-100
+
+#### VNX-F-PRESENCE-03 — Voice and conversation
+
+Provide a correctly state-bound, accessible voice and conversation capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `PRODUCT_CONSENT_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-101
+
+#### VNX-F-PRESENCE-04 — Floating gestures and recovery
+
+Provide a correctly state-bound, accessible floating gestures and recovery capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `PRODUCT_CONSENT_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-004
+- VNX-R-102
+
+#### VNX-F-PRESENCE-05 — Shared orb presence projection
+
+Separate operational state from animation; priority and expiry must be deterministic.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `PRODUCT_CONSENT_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-103
+
+#### VNX-F-MEMORY-01 — Memory and record search
+
+Provide a correctly state-bound, accessible memory and record search capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `PRODUCT_CONSENT_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-012
+- VNX-R-104
+
+#### VNX-F-MEMORY-02 — Research and sources
+
+Provide a correctly state-bound, accessible research and sources capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `PRODUCT_CONSENT_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-105
+
+#### VNX-F-MEMORY-03 — Memory privacy and erasure
+
+Provide a correctly state-bound, accessible memory privacy and erasure capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `PRODUCT_CONSENT_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-106
+
+#### VNX-F-MEMORY-04 — Learning goals and adaptations
+
+Provide a correctly state-bound, accessible learning goals and adaptations capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `PRODUCT_CONSENT_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-107
+
+#### VNX-F-MORE-01 — Connected services
+
+Provide a correctly state-bound, accessible connected services capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `PRODUCT_CONSENT_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-108
+
+#### VNX-F-MORE-02 — Permissions and device authority
+
+Provide a correctly state-bound, accessible permissions and device authority capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `PRODUCT_CONSENT_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-013
+- VNX-R-109
+
+#### VNX-F-MORE-03 — Automation and schedules
+
+Provide a correctly state-bound, accessible automation and schedules capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `PRODUCT_CONSENT_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-110
+
+#### VNX-F-MORE-04 — Settings diagnostics appearance
+
+Provide a correctly state-bound, accessible settings diagnostics appearance capability in VAN Next without importing legacy visual code.
+
+Technology: Android Jetpack Compose + typed gateway adapters; functional authority: `PRODUCT_CONSENT_AUTHORITY`; visual authority: `VAN_LOCKED_DARK_LIGHT`.
+
+**Required states**
+
+- LOADING
+- READY
+- EMPTY
+- STALE
+- OFFLINE
+- ERROR
+- UNKNOWN
+
+**Required identities**
+
+- VNX-R-111

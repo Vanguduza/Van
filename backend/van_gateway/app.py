@@ -186,6 +186,7 @@ from van_gateway.trading.account_contracts import AccountChallengeResponse,Accou
 from van_gateway.trading.strategies import StrategyPromotionGateway, canonical_strategy_promotion
 from van_gateway.trading.runtime_controls import register_runtime_control_routes
 from van_gateway.trading.runtime_recovery_dispatch import RuntimeRecoveryDispatcher
+from van_gateway.auth.native_revocation import NativeOwnerRevocations, DeviceRevocationResponse, NativeOwnerKeyRevocationState
 
 
 class VisualAcceptanceBody(BaseModel):
@@ -1115,6 +1116,7 @@ def create_app() -> FastAPI:
     started_at = time.monotonic()
 
     runtime_recovery_dispatcher = RuntimeRecoveryDispatcher(store=store, auth=auth, promotions=strategy_promotions)
+    native_owner_revocations = NativeOwnerRevocations(store=store, promotions=strategy_promotions)
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
@@ -1143,12 +1145,14 @@ def create_app() -> FastAPI:
                 speech_streams.sweep()
         speech_cleanup = asyncio.create_task(expire_speech_text())
         recovery_dispatch = asyncio.create_task(runtime_recovery_dispatcher.run())
+        revocation_dispatch = asyncio.create_task(native_owner_revocations.run())
         try:
             yield
         finally:
             speech_cleanup.cancel()
             recovery_dispatch.cancel()
-            await asyncio.gather(speech_cleanup, recovery_dispatch, return_exceptions=True)
+            revocation_dispatch.cancel()
+            await asyncio.gather(speech_cleanup, recovery_dispatch, revocation_dispatch, return_exceptions=True)
             speech_streams.clear()
             await dial_dev_attention.stop()
             await scheduler.stop()
@@ -1220,6 +1224,7 @@ def create_app() -> FastAPI:
     app.state.onboarding = onboarding
     app.state.strategy_promotions = strategy_promotions
     app.state.runtime_recovery_dispatcher = runtime_recovery_dispatcher
+    app.state.native_owner_revocations = native_owner_revocations
     app.state.dial_dev_config = dial_dev_config
     app.state.dial_dev_client = dial_dev_client
     app.state.dial_dev_attention = dial_dev_attention
@@ -1694,6 +1699,8 @@ def create_app() -> FastAPI:
         if method == "POST" and path in {"/v1/devices/enroll", "/v1/devices/pairing-ticket"}:
             # The scope that can mint owner-device authority, and the reason this module
             # exists. Not granted to the legacy token.
+            return ControlScope.DEVICE_ENROLMENT
+        if method == "GET" and re.fullmatch(r"/v1/devices/[^/]+/revocations/[^/]+", path):
             return ControlScope.DEVICE_ENROLMENT
         if method == "POST" and path.startswith("/v1/devices/") and path.endswith("/revoke"):
             return ControlScope.DEVICE_ENROLMENT
@@ -2195,24 +2202,44 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=409 if exc.code == "already_enrolled" else 400, detail=exc.message) from exc
         return {"device_id": device.device_id, "enrolled_at_unix": device.enrolled_at_unix}
 
-    @app.post("/v1/devices/{device_id}/revoke")
+    @app.get("/v1/devices/{device_id}/revocations/{operation_id}", response_model=NativeOwnerKeyRevocationState)
+    async def device_revocation_original(device_id: str, operation_id: str,
+        x_van_internal_token: str | None = Header(default=None)):
+        require_internal_control(x_van_internal_token, ControlScope.DEVICE_ENROLMENT)
+        if not re.fullmatch(r"[0-9a-f]{64}",operation_id):
+            raise HTTPException(422,"invalid original device revocation identity")
+        row=await store.fetchone("SELECT value FROM runtime_meta WHERE key=?",("native_owner_revocation:"+operation_id,))
+        if row is None:raise HTTPException(404,"unknown original device revocation")
+        try:
+            original=await native_owner_revocations.original(operation_id)
+        except (ValueError,TypeError,KeyError,OSError) as exc:
+            raise HTTPException(503,"original device revocation history is unavailable") from exc
+        if original['device_id']!=device_id:raise HTTPException(404,"unknown original device revocation")
+        return original
+
+    @app.post("/v1/devices/{device_id}/revoke", response_model=DeviceRevocationResponse)
     async def revoke(
         device_id: str,
         x_van_internal_token: str | None = Header(default=None),
     ):
         require_internal_control(x_van_internal_token, ControlScope.DEVICE_ENROLMENT)
         try:
-            await auth.revoke(device_id)
+            native_revocation = await auth.revoke(device_id)
         except AuthError as exc:
             raise HTTPException(status_code=404, detail=exc.message) from exc
         revoked_executions = await owner_runtime.actions.revoke_privileged_for_device(f"device:{device_id}")
         device_ca = getattr(app.state, "device_ca", None)
         revoked_certificates = device_ca.revoke_device(device_id) if device_ca is not None else 0
+        try:
+            native_revocation = await native_owner_revocations.reconcile_operation(native_revocation['operation_id'])
+        except (OSError, ValueError, TypeError):
+            native_revocation['phase'] = 'UNKNOWN'
         return {
             "revoked": True,
             "device_id": device_id,
             "revoked_privileged_executions": revoked_executions,
             "revoked_client_certificates": revoked_certificates,
+            "native_authority_revocation": native_revocation,
         }
 
     @app.post("/v1/devices/tls-certificate")

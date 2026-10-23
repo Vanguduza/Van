@@ -8,7 +8,7 @@ from dataclasses import asdict
 from decimal import Decimal
 
 from vati.app.runtime_control_journal import RuntimeControlJournal
-from vati.app.runtime_control_protocol import RuntimeControlError
+from vati.app.runtime_control_protocol import RuntimeControlError, recovery_profile_ref
 from vati.authority import load_owner_keys
 from vati.core import EventKind, make_event
 from vati.core.canonical import canonical_hash
@@ -58,7 +58,7 @@ def recovery_review(service):
     from vati.accounts.access import native_binding
     try:
         account = AccountRegistry(service.cfg.registry_path).get(service.cfg.account_alias)
-        profile = canonical_hash([native_binding(account), account.enabled, account.mode])
+        profile = recovery_profile_ref(account,service.cfg.owner_authority_keys)
     except (OSError, ValueError):
         profile = 'UNAVAILABLE'
     state = {

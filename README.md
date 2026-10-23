@@ -6,6 +6,9 @@ The owner-requested source consolidation for **Rev1.18** starts at [CLAUDE.md](C
 
 Use the active package's canonical authority and effective acceptance registry for new work. The architecture and quick-start text below describe the inherited application. Historical plans and dated evidence remain available for provenance and do not create a second active programme.
 
+The [current Markdown screen and feature registry](docs/rebuild/rev118/backend/OWNER_FRONTEND_SCREEN_REGISTRY.md) includes source wiring, endpoint/client contracts, required states, gaps and the full frozen 93-feature planned inventory. [Candidate source progress](docs/rebuild/rev118/CANDIDATE_SOURCE_PROGRESS.json) tracks the original 131 units without claiming unit or live acceptance.
+
+
 
 DIAL's owner-facing AI personal assistant and operator.
 

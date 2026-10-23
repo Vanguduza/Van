@@ -6,7 +6,7 @@ import time
 from fastapi import HTTPException
 
 from vati.app.runtime_control_journal import RuntimeControlJournal, RuntimeControlConflict
-from vati.app.runtime_control_protocol import RecoveryIntent, RecoveryProof, RuntimeControlError
+from vati.app.runtime_control_protocol import RecoveryIntent, RecoveryProof, RuntimeControlError, recovery_profile_ref
 from vati.authority import load_owner_keys
 from vati.core import open_ledger
 from vati.core.canonical import canonical_hash
@@ -25,8 +25,11 @@ def build_runtime_control_handlers(settings):
         for path in Path(settings.heartbeat_dir).glob('*.json'):
             try:
                 hb = json.loads(path.read_text())
+                if not isinstance(hb,dict):continue
                 value = hb.get('runtime_recovery', {})
+                if not isinstance(value,dict):continue
                 state = value.get('state', {})
+                if not isinstance(state,dict):continue
                 if (state.get('account_alias') != args.get('account_alias')
                     or state.get('session_id') != args.get('session_id')):
                     continue
@@ -34,8 +37,12 @@ def build_runtime_control_handlers(settings):
                 if (type(value.get('observed_ms')) is not int or not 0 <= now-value['observed_ms'] <= 30000
                     or value.get('state_ref') != canonical_hash(state)):
                     continue
+                from vati.accounts import AccountRegistry
+                account=AccountRegistry(settings.accounts_registry).get(state['account_alias'])
+                if state.get('profile_ref')!=recovery_profile_ref(account,settings.owner_authority_keys):
+                    continue
                 matches.append(value)
-            except (OSError, ValueError, TypeError):
+            except (OSError, ValueError, TypeError, KeyError):
                 continue
         if len(matches) != 1:
             raise HTTPException(409, 'a unique fresh native recovery review is unavailable')

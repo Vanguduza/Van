@@ -150,7 +150,7 @@ class CommanderSettings:
 
         if self._owner_authority is None:
             self._owner_authority = OwnerAuthorityVerifier(
-                load_owner_keys(self.owner_authority_keys)
+                load_owner_keys(self.owner_authority_keys), registry_path=self.owner_authority_keys
             )
         return self._owner_authority
 

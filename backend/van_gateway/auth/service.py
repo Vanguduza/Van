@@ -358,22 +358,30 @@ class AuthService:
         """Test/recovery helper; production restart restoration uses encrypted DB state."""
         self._device_secrets[device_id] = device_secret.encode("utf-8")
 
-    async def revoke(self, device_id: str) -> None:
+    async def revoke(self, device_id: str) -> dict:
+        from van_gateway.auth.native_revocation import pending_record, public, PREFIX
+        import json
         now = int(time.time())
-        row = await self.store.fetchone("SELECT device_id FROM devices WHERE device_id = ?", (device_id,))
-        if row is None:
-            raise AuthError("unknown_device", "Device not found")
         async with self.store.connection() as db:
+            await db.execute('BEGIN IMMEDIATE')
+            cursor = await db.execute('SELECT device_id,public_key_pem,revoked_at_unix FROM devices WHERE device_id=?',(device_id,))
+            row = await cursor.fetchone()
+            if row is None:
+                raise AuthError("unknown_device", "Device not found")
+            record=pending_record(device_id,row['public_key_pem'],int(row['revoked_at_unix']) if row['revoked_at_unix'] is not None else now)
             await db.execute(
                 "UPDATE capability_grants SET revoked_at_unix = ? WHERE device_id = ? AND revoked_at_unix IS NULL",
                 (now, device_id),
             )
             await db.execute(
-                "UPDATE devices SET revoked_at_unix = ? WHERE device_id = ?",
+                "UPDATE devices SET revoked_at_unix = COALESCE(revoked_at_unix, ?) WHERE device_id = ?",
                 (now, device_id),
             )
+            await db.execute('INSERT OR IGNORE INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)',
+                (PREFIX+record['operation_id'],json.dumps(record,sort_keys=True,separators=(',',':')),now*1000))
             await db.commit()
         self._device_secrets.pop(device_id, None)
+        return public(record)
 
     async def require_device(self, device_id: str) -> DeviceRecord:
         row = await self.store.fetchone(
