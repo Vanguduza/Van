@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T15:54:34.130471+00:00",
+  "updated_at_utc": "2026-10-23T16:10:31.486091+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -846,6 +846,10 @@
         {
           "description": "Six formerly privileged source checks executed on isolated hostedUbuntuVM: actual nftables namespace confinement/qualification and real proxy socketUID enforcement.6pass0skip, source169053c9/testedmerge4296a6cc treeequal. No productionhost or entireunit qualification.",
           "evidence": "backend/BE-025_KERNEL_SOURCE_QUALIFICATION.md; receipts/KERNEL_SOURCE_169053c9.json"
+        },
+        {
+          "description": "PDF required-field metadata/strict flag types, typed corrupt-page refusals and independent requested-value readback before publication. Actual custom checkbox states and no-op/wrong writer outcomes; false success leaves original document/artifact untouched. Unicode-safe RFC5987 download headers, real PDF binary response and supported variant schema, typed document/field/proposal responses.6 reproduced failures;23 isolated/60 integrated audited/29 registry/79 rebuild pass0skip;7 fault/control pairs caught/restored. Initial reporting-helper failure retained and rerun. No newUI, external submission, physical rendering, unit/native/production/handset qualification;6 publication defects remain next.",
+          "evidence": "backend/BE-025_PDF_VALUE_AND_DOWNLOAD_INTEGRITY.md; receipts/PDF_VALUE_AND_DOWNLOAD_SOURCE_20261023.json"
         }
       ]
     },

@@ -63,10 +63,10 @@ def _checkbox_on_value(field: Any) -> str:
 
 
 def _field_flags(field: Any) -> int:
-    try:
-        return int(field.get("/Ff", 0))
-    except (TypeError, ValueError):
-        return 0
+    flags = _object(field.get("/Ff", 0))
+    if isinstance(flags, bool) or not isinstance(flags, int) or not 0 <= flags < 2**32:
+        raise PdfDocumentError("PDF_FIELD_FLAGS_INVALID")
+    return flags
 
 
 def inspect_pdf(data: bytes) -> PdfInspection:
@@ -76,8 +76,14 @@ def inspect_pdf(data: bytes) -> PdfInspection:
         raise PdfDocumentError("PDF_SIGNATURE_INVALID")
     try:
         reader = PdfReader(io.BytesIO(data), strict=True)
-    except (PdfReadError, ValueError, TypeError) as exc:
+        return _inspect_reader(reader)
+    except PdfDocumentError:
+        raise
+    except (PdfReadError, ValueError, TypeError, AttributeError, KeyError, IndexError, RecursionError) as exc:
         raise PdfDocumentError("PDF_INVALID") from exc
+
+
+def _inspect_reader(reader: PdfReader) -> PdfInspection:
     if reader.is_encrypted:
         raise PdfDocumentError("PDF_ENCRYPTED_UNSUPPORTED")
     if len(reader.pages) > MAX_PAGES:
@@ -96,7 +102,7 @@ def inspect_pdf(data: bytes) -> PdfInspection:
         if field_type == "/Tx":
             value = field.get("/V")
             fields.append(DocumentField(
-                name=str(name), kind=DocumentFieldKind.TEXT,
+                name=str(name), kind=DocumentFieldKind.TEXT, required=bool(flags & 2),
                 value=None if value is None else str(value),
             ))
             continue
@@ -107,7 +113,7 @@ def inspect_pdf(data: bytes) -> PdfInspection:
             on_value = _checkbox_on_value(field)
             value = str(field.get("/V", "/Off")) != "/Off"
             fields.append(DocumentField(
-                name=str(name), kind=DocumentFieldKind.CHECKBOX,
+                name=str(name), kind=DocumentFieldKind.CHECKBOX, required=bool(flags & 2),
                 value=value, on_value=on_value,
             ))
             continue
@@ -166,5 +172,10 @@ def fill_pdf(data: bytes, values: dict[str, Any]) -> tuple[bytes, PdfInspection]
     writer.write(out)
     output = out.getvalue()
     # Re-parse output before publication; a writer success is not enough evidence.
-    inspect_pdf(output)
+    observed = {field.name: field for field in inspect_pdf(output).fields}
+    for name, raw in values.items():
+        actual = observed.get(name)
+        expected = raw if known[name].kind is DocumentFieldKind.CHECKBOX else ("" if raw is None else str(raw))
+        if actual is None or actual.kind is not known[name].kind or actual.value != expected:
+            raise PdfDocumentError("PDF_FIELD_POSTCONDITION_FAILED", name)
     return output, inspection

@@ -62,3 +62,8 @@ class DocumentFillProposal(BaseModel):
     unknown_fields: list[str] = Field(default_factory=list)
     proposal_sha256: str
     requires_owner_confirmation: bool = True
+
+
+class DocumentFieldsView(BaseModel):
+    document_id: str
+    fields: list[DocumentField]

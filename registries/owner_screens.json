@@ -73806,7 +73806,7 @@
     "android_receipt": null,
     "android_receipt_sha256": null,
     "scope": "Bounded current source-citation/endpoint refresh; previous reviews retained. Whole-product, Android, deployment/provider and handset qualifications remain separate.",
-    "source_review_manifest_sha256": "6f7b7224d1d67f2206973386cdeea4454f0dd7abffaa2e3072517115aa3a291f"
+    "source_review_manifest_sha256": "1a812fbc056da150960d42678f040af60c67e090630cf2b415e270f581c4825b"
   },
   "repaired_mutations": [
     {

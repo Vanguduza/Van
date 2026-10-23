@@ -1,6 +1,6 @@
 # VAN current frontend screen and feature registry
 
-Current source inventory: **42 features, 105 source functions, 78 screens/hosted surfaces, 447 endpoint declarations and 293 schemas**.
+Current source inventory: **42 features, 105 source functions, 78 screens/hosted surfaces, 447 endpoint declarations and 299 schemas**.
 
 This generated document renders the current source contracts, including gaps and unverified states. It does not declare features complete, qualify live services or authorize a redesigned frontend. No new frontend/prototype before BG-001. Current source features are distinct from the frozen Rev1.18 programme of **93 planned features, 349 owner actions, 324 requirements, 1,610 acceptance identities and 131 units**. The complete planned scope remains in [the frozen package](../../../review-inputs/van-rev115/package/) and its [backend consumption contract](../../../review-inputs/van-rev115/package/contracts/BACKEND_TO_FRONTEND_CONSUMPTION_CONTRACT.md).
 
@@ -14,10 +14,10 @@ Owner-access endpoints and service dependencies are listed separately below. An 
 
 | Registry | SHA-256 |
 | --- | --- |
-| [owner_features.json](../../../../registries/owner_features.json) | `df490e706f1f3f7abc71166481ed20459ca50d5bdb3177c5b6e9a4204b0a466a` |
-| [owner_screens.json](../../../../registries/owner_screens.json) | `f6312d01d7f06195915800ccaba0d7e924aa23ab9b65c1918e65c013e2646940` |
-| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `2d6fd1f1f4975f2235229474bc88c14c56bb99f99e958c4b15adf2cd0f6773f1` |
-| [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `8fc54e0c628d375ac4d7d8049f8aad432fdcf559458e93509eecab0e563e03dd` |
+| [owner_features.json](../../../../registries/owner_features.json) | `0b3bd3f867ed59bf67b52e9cc001c62550b559409fcdca12173e8648bcc4156c` |
+| [owner_screens.json](../../../../registries/owner_screens.json) | `42768f3a4c31f0a9e329e1847492dd29ce54f6d68878ae586703ca1febe6a23e` |
+| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `f1c2661a6d487b9ccb1536eb5ce01d061723b8a907a87e1f3b888124e091dfd7` |
+| [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `c610092a3cb30b41a56cede029d0db53955054ca836cbba57e76cc69574457e6` |
 
 Regenerate with `python3 tools/rebuild/render_frontend_registry.py --apply`; verify with `--check`.
 

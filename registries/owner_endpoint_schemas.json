@@ -4039,6 +4039,280 @@
         ],
         "title": "DialDevNativeActionEnvelope"
       },
+      "DocumentField": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/DocumentFieldKind"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required",
+            "default": false
+          },
+          "on_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "On Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "kind"
+        ],
+        "title": "DocumentField"
+      },
+      "DocumentFieldKind": {
+        "type": "string",
+        "enum": [
+          "TEXT",
+          "CHECKBOX"
+        ],
+        "title": "DocumentFieldKind"
+      },
+      "DocumentFieldsView": {
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "title": "Document Id"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentField"
+            },
+            "type": "array",
+            "title": "Fields"
+          }
+        },
+        "type": "object",
+        "required": [
+          "document_id",
+          "fields"
+        ],
+        "title": "DocumentFieldsView"
+      },
+      "DocumentFillProposal": {
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "title": "Document Id"
+          },
+          "source_sha256": {
+            "type": "string",
+            "title": "Source Sha256"
+          },
+          "proposed_values": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Proposed Values"
+          },
+          "missing_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Fields"
+          },
+          "unknown_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Unknown Fields"
+          },
+          "proposal_sha256": {
+            "type": "string",
+            "title": "Proposal Sha256"
+          },
+          "requires_owner_confirmation": {
+            "type": "boolean",
+            "title": "Requires Owner Confirmation",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "document_id",
+          "source_sha256",
+          "proposed_values",
+          "proposal_sha256"
+        ],
+        "title": "DocumentFillProposal"
+      },
+      "DocumentRecord": {
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "title": "Document Id"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "mime_type": {
+            "type": "string",
+            "title": "Mime Type",
+            "default": "application/pdf"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "command_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command Id"
+          },
+          "mission_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mission Id"
+          },
+          "execution_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Id"
+          },
+          "source_artifact_id": {
+            "type": "string",
+            "title": "Source Artifact Id"
+          },
+          "output_artifact_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Artifact Id"
+          },
+          "source_sha256": {
+            "type": "string",
+            "title": "Source Sha256"
+          },
+          "output_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Sha256"
+          },
+          "page_count": {
+            "type": "integer",
+            "title": "Page Count"
+          },
+          "form_kind": {
+            "type": "string",
+            "title": "Form Kind"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentField"
+            },
+            "type": "array",
+            "title": "Fields"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DocumentStatus"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "created_at_ms": {
+            "type": "integer",
+            "title": "Created At Ms"
+          },
+          "updated_at_ms": {
+            "type": "integer",
+            "title": "Updated At Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "document_id",
+          "filename",
+          "source_artifact_id",
+          "source_sha256",
+          "page_count",
+          "form_kind",
+          "status",
+          "created_at_ms",
+          "updated_at_ms"
+        ],
+        "title": "DocumentRecord"
+      },
+      "DocumentStatus": {
+        "type": "string",
+        "enum": [
+          "IMPORTED",
+          "FILLED",
+          "REJECTED"
+        ],
+        "title": "DocumentStatus"
+      },
       "DomainSkillCanaryBody": {
         "properties": {
           "passed": {

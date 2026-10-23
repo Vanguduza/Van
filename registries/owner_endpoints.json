@@ -4422,7 +4422,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/documents/api.py:40",
+      "source": "backend/van_gateway/documents/api.py:43",
       "summary": "List Documents",
       "tags": [
         "documents"
@@ -4447,7 +4447,13 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DocumentRecord"
+                },
+                "title": "Response List Documents V1 Documents Get"
+              }
             }
           }
         },
@@ -4473,7 +4479,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/documents/api.py:44",
+      "source": "backend/van_gateway/documents/api.py:47",
       "summary": "Get Document",
       "tags": [
         "documents"
@@ -4495,7 +4501,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/DocumentRecord"
+              }
             }
           }
         },
@@ -4521,7 +4529,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/documents/api.py:74",
+      "source": "backend/van_gateway/documents/api.py:77",
       "summary": "Document Content",
       "tags": [
         "documents"
@@ -4541,6 +4549,10 @@
           "in": "path",
           "required": true,
           "schema": {
+            "enum": [
+              "source",
+              "output"
+            ],
             "type": "string",
             "title": "Variant"
           }
@@ -4551,8 +4563,11 @@
         "200": {
           "description": "Successful Response",
           "content": {
-            "application/json": {
-              "schema": {}
+            "application/pdf": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
             }
           }
         },
@@ -4578,7 +4593,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/documents/api.py:51",
+      "source": "backend/van_gateway/documents/api.py:54",
       "summary": "Document Fields",
       "tags": [
         "documents"
@@ -4600,7 +4615,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/DocumentFieldsView"
+              }
             }
           }
         },
@@ -17911,7 +17928,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/documents/api.py:20",
+      "source": "backend/van_gateway/documents/api.py:23",
       "summary": "Import Document",
       "tags": [
         "documents"
@@ -17932,7 +17949,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/DocumentRecord"
+              }
             }
           }
         },
@@ -17958,7 +17977,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/documents/api.py:66",
+      "source": "backend/van_gateway/documents/api.py:69",
       "summary": "Fill Document",
       "tags": [
         "documents"
@@ -17989,7 +18008,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/DocumentRecord"
+              }
             }
           }
         },
@@ -18015,7 +18036,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/documents/api.py:58",
+      "source": "backend/van_gateway/documents/api.py:61",
       "summary": "Propose Document Fill",
       "tags": [
         "documents"
@@ -18046,7 +18067,9 @@
           "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {
+                "$ref": "#/components/schemas/DocumentFillProposal"
+              }
             }
           }
         },
