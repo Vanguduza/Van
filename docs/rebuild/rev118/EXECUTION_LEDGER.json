@@ -105,7 +105,9 @@
       "acceptance": "NOT_ISSUED",
       "evidence": [
         "backend/tests/test_gateway_startup_storage.py",
-        "docs/rebuild/rev118/CANDIDATE_SOURCE_PROGRESS.json"
+        "docs/rebuild/rev118/CANDIDATE_SOURCE_PROGRESS.json",
+        "docs/rebuild/rev118/backend/BE-003_009_010_ORIGINAL_ENTRY_RECOVERY.md",
+        "docs/rebuild/rev118/receipts/ORIGINAL_ENTRY_RECOVERY_SOURCE_20261022.json"
       ]
     }
   },
@@ -170,19 +172,10 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-22T20:06:52.602028+00:00",
+    "updated_utc": "2026-10-23T00:15:07.792547+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": [
-      {
-        "kind": "frozen-backend-contract-audit",
-        "source": "396e036794c8ce96e5487099fa662da9d24a7db4",
-        "checkout": "/workspace/van-autonomous-qualification-20261022/Van",
-        "exec_session": 62957,
-        "log": "/tmp/van-396e-full-backend.txt",
-        "observed_status": "RUNNING at94%; wait for actual exit/JUnit/storage-audit and clean tree before reuse"
-      }
-    ],
+    "background_jobs": [],
     "last_validation": [
       "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
       "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -251,7 +244,9 @@
       "Native position recovery scope:9valid counterexamples fixed;2017fulltrading zero skip realprivatePG/DDS before final chain-test-only tightening;28restored focus/78rebuild pass. Ten actual faults caught after16controls, source restored/journal absent;privatefixturestopped/removed. Actual account/command uniqueness/current stop replace matching-label adoption; single-symbol startup stillnext.",
       "Frozen9ea broad audit FAIL:4842pass159skip5failure,stopped after5 at1024.34s;zero forbidden storage events,clean checkout. Five preflight/recovery regressions retained and corrected with43restored gateway/78rebuild/3faults after8controls. New exact-source broad audit required.",
       "Hosted9ea/39853172032 actual374legacy faults/383edits;18nativepass4core skips,VITS3.189s/2.189s;publicPG26voice117trading1989pass1privateDDSskip;actual source/merge trees equal. Only actual privateDDS-key/trusted-main prerequisite jobs fail. Separate broad9ea failures remain retained.",
-      "Single-symbol startup/source:6initial+2additional counterexample cases fixed;2032fulltrading zero skip realprivatePG/DDS,54restored focused+2PGopt-ins covered in full,78rebuild pass;11actual faults caught after31passing controls and restored. Exact pre-dispatch setup, native entries/protection/thesis/health; unknown contexts cannot manufacture feedback. Registry unchanged439/262; fixture stopped/removed. No provider/finality/unit/handset acceptance."
+      "Single-symbol startup/source:6initial+2additional counterexample cases fixed;2032fulltrading zero skip realprivatePG/DDS,54restored focused+2PGopt-ins covered in full,78rebuild pass;11actual faults caught after31passing controls and restored. Exact pre-dispatch setup, native entries/protection/thesis/health; unknown contexts cannot manufacture feedback. Registry unchanged439/262; fixture stopped/removed. No provider/finality/unit/handset acceptance.",
+      "Original UNKNOWN native entry retains risk and truthful status; read-only original result recovery, sealed queue claim, scoped producer identity/full-ID join, persistent thesis/cost publication and immediate-partial holds. 2118 full trading pass/zero skip with real privatePG/DDS;78rebuild;17 source faults caught after passing controls and source restored. Cold before-outcome/context preparation, partial progression and provider financial finality remain; no unit admission.",
+      "Frozen 9f4c and4e4a broad audits each6636pass166skip/zero failures,zero forbidden runtime storage and clean checkout; actual hosted4e4a374legacy cases383edits/18nativepass4explicit core-artwork skips, both real VITS methods,public PG26/voice117/trading2089+1privateDDSskip. DDS secret/trusted-main bootstrap failures retained."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -262,9 +257,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Continue original candidate programme: validate boolean native facts at the shared RiskAuthority (startup nowstrict but shared kernel truthiness remains to reproduce), reconcile economic finality/fees/cash consistently in live/replay risk and feedback, repair missing TCA/legacy context where native proof exists, implement persistent paper/native pending/late outcomes, physical account identity/migration and exposure/orders/funds/lease/retention-safe retirement. Frozen181a broad audit and hosted39856698736 are running; collect actual outcomes before replacing. No new frontend beforeBG-001; preserve all131units and original native/independent/owner/provider/production/signing/S24 gates.",
-    "previous_head": "181a11007591c53417cbb1fd902a340c4ab0548d",
-    "current_packet": "Original native single-symbol startup/setup/protection and uncertain-effect recovery; candidate source only"
+    "next_action": "Continue original programme with cold in-flight native result recovery and pre-dispatch prepared thesis provenance; then current native worker deadline/epoch/physical account identity, partial/corrected fills and financial finality, persistent paper/research studies and safe retirement. Recheck all whole-product obligations and original acceptance identities. Start fresh exact-source broad backend/contracts audit after commit. No new frontend before BG-001; no fabricated native, signature, unit, provider, production or S24 acceptance.",
+    "previous_head": "4e4a60ae415f89fc0b978005fdd2d2b5cf9590b4",
+    "current_packet": "Original native entry uncertainty, reservation, read-only recovery and immediate partial protection; candidate source only"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -322,6 +317,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Continue original candidate programme: reconcile original unknown entries before retry/new risk and preserve truthful accepted/unknown/rejected states; deferred provider expiry/epoch envelopes; consistent financial finality/fees/cash in live/replay; full historical research horizon with frozen study policy distinct from current financial authority; native TCA/legacy proof repair, persistent paper and pending/late provider effects, physical account identity/migration and exposure/orders/funds/lease/retention-safe retirement. Frozen9f4c backend/contracts audit still running; collect real exit and clean worktree before reuse. Hosted39863902537 completed374legacy faults/18emulatorpass4explicit skips; exact-source receipts retained. No new frontend beforeBG-001; preserve all131units and original independent/owner/provider/production/signing/S24 gates.",
-  "updated_at_utc": "2026-10-22T22:44:49.954172+00:00"
+  "current_action": "Continue original programme with cold in-flight native result recovery and pre-dispatch prepared thesis provenance; then current native worker deadline/epoch/physical account identity, partial/corrected fills and financial finality, persistent paper/research studies and safe retirement. Recheck all whole-product obligations and original acceptance identities. Start fresh exact-source broad backend/contracts audit after commit. No new frontend before BG-001; no fabricated native, signature, unit, provider, production or S24 acceptance.",
+  "updated_at_utc": "2026-10-23T00:15:07.792547+00:00"
 }

@@ -66,13 +66,42 @@ class BridgeQueue:
                               status TEXT NOT NULL DEFAULT 'QUEUED', result_json TEXT, created_ms INTEGER NOT NULL, taken_ms INTEGER, done_ms INTEGER)""")
         self._conn.execute("CREATE TABLE IF NOT EXISTS state (alias TEXT PRIMARY KEY, account_json TEXT NOT NULL, positions_json TEXT NOT NULL, updated_ms INTEGER NOT NULL, last_nonce TEXT)")
         self._conn.execute("CREATE TABLE IF NOT EXISTS nonces (alias TEXT NOT NULL, nonce TEXT NOT NULL, seen_ms INTEGER NOT NULL, PRIMARY KEY(alias, nonce))")
+        self._conn.execute("""CREATE UNIQUE INDEX IF NOT EXISTS native_entry_command
+            ON commands(alias,json_extract(body_json,'$.native_command_hash'))
+            WHERE op='ORDER_SEND' AND json_type(body_json,'$.native_command_hash')='text'""")
 
     def enqueue(self, alias: str, op: str, body: dict, *, now_ms: int) -> int:
         if op not in OPS:
             raise ValueError(f"op {op} not in bridge contract")
         with self._lock:
+            if op=='ORDER_SEND' and body.get('native_command_hash'):
+                # SQLite, rather than an instance-local lock, arbitrates the
+                # original native claim across independent bridge clients.
+                self._conn.execute('BEGIN IMMEDIATE')
+                try:
+                    encoded=json.dumps(body,sort_keys=True)
+                    row=self._conn.execute("SELECT id,body_json FROM commands WHERE alias=? AND op='ORDER_SEND' AND json_extract(body_json,'$.native_command_hash')=?",
+                        (alias,body['native_command_hash'])).fetchone()
+                    if row is not None:
+                        if row[1]!=encoded:raise VenueUnavailable('original native entry payload conflicts; reconcile without resubmission')
+                        cid=int(row[0])
+                    else:
+                        cid=int(self._conn.execute('INSERT INTO commands(alias,op,body_json,created_ms) VALUES (?,?,?,?)',
+                            (alias,op,encoded,now_ms)).lastrowid)
+                    self._conn.commit()
+                    return cid
+                except BaseException:
+                    self._conn.rollback();raise
             cur = self._conn.execute("INSERT INTO commands(alias, op, body_json, created_ms) VALUES (?,?,?,?)", (alias, op, json.dumps(body, sort_keys=True), now_ms))
             return int(cur.lastrowid)
+
+    def native_entries(self, alias: str) -> list[dict]:
+        """Original durable claims/results, scoped to this authenticated EA."""
+        with self._lock:
+            rows=self._conn.execute("SELECT id,body_json,status,result_json FROM commands WHERE alias=? AND op='ORDER_SEND' AND json_type(body_json,'$.native_command_hash')='text' ORDER BY id",(alias,)).fetchall()
+            return [{'id':int(cid),'body':json.loads(body),'status':status,
+                     'result':json.loads(result) if result is not None else None}
+                    for cid,body,status,result in rows]
 
     def take_pending(self, alias: str, *, now_ms: int, limit: int = 10) -> list[dict]:
         with self._lock:
@@ -202,9 +231,28 @@ class Mt5PullAdapter:
 
     def positions(self) -> list[VenuePosition]:
         out = []
+        entries=self.queue.native_entries(self.account_alias)
         for p in self._state()["positions"]:
+            comment=str(p.get('comment',''))
+            iid=comment[5:] if comment.startswith('vati:') else ''
+            bound=[e for e in entries if isinstance(e['result'],dict)
+                   and str(e['result'].get('position',''))==str(p['ticket'])
+                   and e['result'].get('status') in {'FILLED','PARTIAL'}]
+            if bound:
+                iid=''
+                if len(bound)==1:
+                    body=bound[0]['body'];result=bound[0]['result']
+                    try:
+                        qty=Decimal(str(p['volume']));filled=Decimal(str(result['volume']))
+                        if (body['symbol']==p['symbol'] and body['type']==p['type']
+                            and comment==body['comment'][:31] and int(p['magic'])==int(body['magic'])
+                            and qty.is_finite() and filled.is_finite() and ZERO<qty<=filled<=Decimal(body['volume'])):
+                            iid=body['trade_intent_id']
+                    except (KeyError,ValueError,ArithmeticError):pass
+            elif any(e['body'].get('comment','')[:31]==comment for e in entries):
+                iid=''  # a truncated comment alone cannot bind an unsettled claim
             out.append(VenuePosition(str(p["ticket"]), p["symbol"], Direction.LONG if p["type"] == "BUY" else Direction.SHORT, Decimal(str(p["volume"])), Decimal(str(p["price_open"])), Decimal(str(p["sl"])) if p.get("sl") else None,
-                                     str(p.get("comment", "")).replace("vati:", "") if str(p.get("comment", "")).startswith("vati:") else "", LossModel.STOP_DISTANCE))
+                                     iid, LossModel.STOP_DISTANCE))
         return out
 
     def heartbeat(self, *, now_ms: int) -> Health:
@@ -212,25 +260,66 @@ class Mt5PullAdapter:
         fresh = st is not None and now_ms - st["updated_ms"] <= STATE_FRESH_MS
         return Health(fresh, int(st["account"].get("server_time_ms", now_ms)) - now_ms if fresh else 0, now_ms)
 
-    def submit(self, cmd: OrderCommand, *, now_ms: int) -> ExecutionReceipt:
+    def _entry_body(self, cmd: OrderCommand) -> dict:
+        if cmd.account_alias!=self.account_alias or cmd.venue!=self.venue:
+            raise VenueUnavailable('native entry account/venue differs from the authenticated adapter')
+        if not cmd.command_hash or cmd.sealed().command_hash!=cmd.command_hash:
+            raise VenueUnavailable('native entry command seal is invalid')
+        return {"symbol": cmd.symbol, "type": "BUY" if cmd.direction is Direction.LONG else "SELL", "volume": str(cmd.quantity), "price": str(cmd.entry_price), "sl": str(cmd.protective_stop), "tp": str(cmd.targets[0]) if cmd.targets else "",
+                "comment": f"vati:{cmd.trade_intent_id}"[:31], "magic": int(cmd.decision_hash[:8], 16) % 2_147_483_647, "deviation": str(deviation_points(cmd.symbol, cmd.max_slippage, self.point_sizes)), "order_type": cmd.entry_type,
+                'native_command_hash':cmd.command_hash,'trade_intent_id':cmd.trade_intent_id}
+
+    def _entry_receipt(self, cmd: OrderCommand, r, *, now_ms: int) -> ExecutionReceipt:
         rej = lambda why, status="REJECTED": ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, status, ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason=why).sealed()  # noqa: E731
+        if r is None:
+            return rej("EA did not report within timeout; reconcile before retrying", "UNKNOWN")
+        if not isinstance(r,dict):return rej('native entry result malformed; reconcile original claim','UNKNOWN')
+        status=r.get('status')
+        if status in {'REJECTED','CANCELLED','EXPIRED'}:
+            try:
+                qty=Decimal(str(r.get('volume','0')))
+                if not qty.is_finite() or qty!=ZERO:return rej('native refusal contradicts reported fill','UNKNOWN')
+            except (ValueError,ArithmeticError):return rej('native refusal volume malformed','UNKNOWN')
+            return rej(str(r.get('reason') or status),status)
+        if status not in {'FILLED','PARTIAL'}:return rej('original native entry result unconfirmed','UNKNOWN')
+        try:
+            qty=Decimal(str(r['volume']));price=Decimal(str(r['price']))
+            if not qty.is_finite() or not ZERO<qty<=cmd.quantity or not price.is_finite() or price<=ZERO:raise ValueError('invalid fill')
+            if qty<cmd.quantity:status='PARTIAL'
+            stop_confirmed=r.get('sl_confirmed') is True
+            return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, status, qty, price, cmd.entry_price, Decimal(str(r.get('arrival',r['price']))), cmd.entry_price,
+                stop_confirmed,int(r.get('server_time_ms',now_ms)),now_ms,broker_order_id=str(r.get('order','')),broker_position_id=str(r.get('position','')),
+                protective_stop_price=cmd.protective_stop if stop_confirmed else None).sealed()
+        except (KeyError,ValueError,ArithmeticError):return rej('native fill malformed; reconcile original claim','UNKNOWN')
+
+    def recover_entry(self, cmd: OrderCommand, *, now_ms: int) -> Optional[ExecutionReceipt]:
+        """Read the original claim/result. Never enqueue, emit or retry."""
+        body=self._entry_body(cmd)
+        rows=[e for e in self.queue.native_entries(self.account_alias) if e['body'].get('native_command_hash')==cmd.command_hash]
+        if len(rows)!=1 or rows[0]['body']!=body:return None
+        self._state()  # absence/staleness is not a healthy empty account
+        return self._entry_receipt(cmd,rows[0]['result'],now_ms=now_ms)
+
+    def submit(self, cmd: OrderCommand, *, now_ms: int) -> ExecutionReceipt:
+        rej = lambda why: self._entry_receipt(cmd,{'status':'REJECTED','volume':'0','reason':why},now_ms=now_ms)
         if cmd.protective_stop is None:
             return rej("MT5 orders require SL in the same request")
+        body=self._entry_body(cmd)
+        previous=[e for e in self.queue.native_entries(self.account_alias) if e['body'].get('native_command_hash')==cmd.command_hash]
+        if previous:
+            if len(previous)!=1 or previous[0]['body']!=body:
+                return self._entry_receipt(cmd,None,now_ms=now_ms)
+            # Current availability cannot rewrite an existing UNKNOWN claim as
+            # a new preflight refusal. Return its original result without send.
+            return self._entry_receipt(cmd,previous[0]['result'],now_ms=now_ms)
         try:
             self._state()
         except VenueUnavailable as exc:
             return rej(str(exc))
-        body = {"symbol": cmd.symbol, "type": "BUY" if cmd.direction is Direction.LONG else "SELL", "volume": str(cmd.quantity), "price": str(cmd.entry_price), "sl": str(cmd.protective_stop), "tp": str(cmd.targets[0]) if cmd.targets else "",
-                "comment": f"vati:{cmd.trade_intent_id}"[:31], "magic": int(cmd.decision_hash[:8], 16) % 2_147_483_647, "deviation": str(deviation_points(cmd.symbol, cmd.max_slippage, self.point_sizes)), "order_type": cmd.entry_type}
+        body = self._entry_body(cmd)
         cid = self.queue.enqueue(self.account_alias, "ORDER_SEND", body, now_ms=now_ms)
         r = self._await(cid)
-        if r is None:
-            return rej("EA did not report within timeout; reconcile before retrying", "UNKNOWN")
-        if r.get("status") != "FILLED":
-            return rej(str(r.get("reason", r.get("status", "REJECTED"))), "REJECTED" if r.get("status") != "UNKNOWN" else "UNKNOWN")
-        stop_confirmed=r.get('sl_confirmed') is True
-        return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "FILLED", Decimal(str(r.get("volume", cmd.quantity))), Decimal(str(r["price"])), cmd.entry_price, Decimal(str(r.get("arrival", r["price"]))), cmd.entry_price,
-                                stop_confirmed, int(r.get("server_time_ms", now_ms)), now_ms, broker_order_id=str(r.get("order", "")), broker_position_id=str(r.get("position", "")), protective_stop_price=cmd.protective_stop if stop_confirmed else None).sealed()
+        return self._entry_receipt(cmd,r,now_ms=now_ms)
 
     def modify_stop(self, position_id: str, new_stop: Decimal, *, now_ms: int) -> ExecutionReceipt:
         try:

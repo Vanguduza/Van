@@ -138,7 +138,14 @@ def test_round_trip_order_stop_close_through_the_ea(bridge):
         stop.set(); th.join(timeout=1)
     # an EA that stops polling → orders time out as UNKNOWN, never as silent success
     fast = Mt5PullAdapter(q, account_alias="mt5_ea", clock=lambda: clock["ms"], timeout_s=0.2, poll_s=0.02)
-    r = fast.submit(cmd, now_ms=clock["ms"])
+    original = fast.submit(cmd, now_ms=clock["ms"])
+    assert original.status == 'FILLED' and original.broker_order_id == rec.broker_order_id
+    assert len(q.native_entries('mt5_ea')) == 1
+    # A different original command tests the non-responsive EA. Reusing the
+    # completed command must read its result rather than enqueue another order.
+    fresh = OrderCommand(**{**cmd.__dict__, 'trade_intent_id':'intent-8',
+        'idempotency_key':'new-native-key', 'command_hash':''}).sealed()
+    r = fast.submit(fresh, now_ms=clock["ms"])
     assert r.status == "UNKNOWN" and "reconcile" in r.reject_reason
 
 

@@ -145,6 +145,7 @@ class DecisionCycle:
         self._closed_seen = 0
         self._entries: dict[str, dict] = {}   # trade_intent_id → {entry, stop, direction, strategy_id, cost_pct}
         self.recovery_unresolved: tuple[str, ...] = ()
+        self.unresolved_entry_attempts: set[str] = set()
         # GAP-F-003. Active-trade intelligence on the single-symbol runtime.
         # Same components the account runtime uses, so backtest-to-live parity
         # covers the thesis path too rather than only the order path.
@@ -211,7 +212,7 @@ class DecisionCycle:
         only set the cycle can speak for; a position the venue holds that this cycle never
         opened is an orphan, and `reconcile` already treats it as blocking.
         """
-        if self.recovery_unresolved:
+        if self.recovery_unresolved or self.unresolved_entry_attempts:
             return False
         ledger_positions = [
             LedgerPosition(
@@ -417,10 +418,17 @@ class DecisionCycle:
                 ),
                 liquidity=LiquidityView(),
             )
-        except RouterError as exc:
-            self._log(EventKind.SESSION, {"router_refused": str(exc)}, now_ms=now_ms, corr=intent.trade_intent_id)
-            return CycleResult(state.as_of_ms, state.state_hash, "ROUTER_REFUSED", str(exc), decision.approved_size)
-        if rec.status == "ACCEPTED" and rec.reject_reason == "PENDING" and rec.filled_qty == ZERO:
+        except Exception as exc:
+            from vati.app.entry_recovery import command_outcome_unconfirmed
+            if command_outcome_unconfirmed(self,intent.trade_intent_id):
+                rec=None  # caller failure is not a fabricated provider receipt
+            elif isinstance(exc,RouterError):
+                self._log(EventKind.SESSION, {"router_refused": str(exc)}, now_ms=now_ms, corr=intent.trade_intent_id)
+                return CycleResult(state.as_of_ms, state.state_hash, "ROUTER_REFUSED", str(exc), decision.approved_size)
+            else:
+                raise
+        uncertain=rec is None or rec.status in {'UNKNOWN','PARTIAL'}
+        if uncertain or (rec.status == "ACCEPTED" and rec.reject_reason == "PENDING" and rec.filled_qty == ZERO):
             # P1-TRADE-EXEC-004: a resting entry (an untriggered STOP, a LIMIT away from the
             # market) is not a position. It reserves its worst-case risk until it fills or
             # expires (_open_positions), and is excluded from venue reconciliation.
@@ -428,7 +436,7 @@ class DecisionCycle:
                 "pending": True, "open": False, "entry": intent.entry, "stop": intent.stop,
                 "direction": intent.direction, "strategy_id": intent.strategy_id, "cost_pct": cost,
                 "decision_price": intent.entry, "quantity": ZERO, "pending_quantity": decision.approved_size,
-                "broker_order_id": rec.broker_order_id, "broker_position_id": "", "opened_ms": now_ms,
+                "broker_order_id": rec.broker_order_id if rec is not None else '', "broker_position_id": "", "opened_ms": now_ms,
                 "targets": tuple(targets), "original_approved_risk_pct": decision.approved_risk_pct,
                 "protective_stop_confirmed": False, "event_certified": bool(intent.is_event_certified),
                 "execution_policy_applied": True, "regime": state.regime.trend.value,
@@ -439,6 +447,16 @@ class DecisionCycle:
                 # In memory only: the fill seals the thesis from the approval that admitted it.
                 "_approval": (intent, decision, state, tuple(targets)),
             }
+            if uncertain:
+                self._entries[intent.trade_intent_id]['recovery_context_complete']=False
+                self.unresolved_entry_attempts.add(intent.trade_intent_id)
+                self._log(EventKind.SESSION,{'event':'ENTRY_UNKNOWN','entry_type':oa.entry_type,
+                    'reason':rec.reject_reason if rec is not None else 'native dispatcher outcome unconfirmed',
+                    'approved_quantity':str(decision.approved_size)},
+                    now_ms=now_ms,corr=intent.trade_intent_id)
+                return CycleResult(state.as_of_ms,state.state_hash,
+                    'PARTIAL' if rec is not None and rec.status=='PARTIAL' else 'UNKNOWN',
+                    'original native entry outcome unresolved; reconciliation required',decision.approved_size)
             self._log(EventKind.SESSION, {"event": "ENTRY_RESTING", "entry_type": oa.entry_type, "order": rec.broker_order_id},
                       now_ms=now_ms, corr=intent.trade_intent_id)
             return CycleResult(state.as_of_ms, state.state_hash, decision.decision.value, "pending", decision.approved_size)
@@ -517,33 +535,46 @@ class DecisionCycle:
                 "event_window": event_window,
                 "rejected": False,
             }
-        self._log(EventKind.TCA_RECORD, tca_payload, now_ms=now_ms, corr=rec.trade_intent_id)
+        original=[e for e in self.ledger.iter(EventKind.TCA_RECORD,correlation_id=rec.trade_intent_id)
+                  if e.producer=='vati-cycle' and e.hash==canonical_hash(e.body())]
+        if original:
+            core=tca.as_dict()
+            if any(any(e.payload.get(k)!=v for k,v in core.items()) for e in original):
+                raise ValueError('original cost measurement conflicts; use native correction/reconciliation')
+        else:
+            self._log(EventKind.TCA_RECORD, tca_payload, now_ms=now_ms, corr=rec.trade_intent_id)
         self._entries[rec.trade_intent_id]["cost_ratio"] = tca.cost_ratio
         if self.learning is not None:
             self.learning.on_tca(self.ledger, trade_intent_id=rec.trade_intent_id, symbol=cfg.symbol, session=session, event_window=event_window, cost_ratio=tca.cost_ratio, slippage=tca.slippage)
             self.engine.m.broker_liquidity[cfg.symbol] = self.learning.broker_liquidity(cfg.symbol)
 
-    def _settle_pending(self, r, row: dict, *, now_ms: int) -> None:
+    def _settle_pending(self, r, row: dict, *, now_ms: int, native_observation: bool = False) -> None:
         """A resting entry filled (becomes a position) or expired (reserves nothing)."""
-        self._log(EventKind.EXECUTION_RECEIPT, {k: (v.value if hasattr(v, "value") else v) for k, v in asdict(r).items()},
+        payload={k: (v.value if hasattr(v, "value") else v) for k, v in asdict(r).items()}
+        if native_observation:
+            payload['native_entry_observation']={'schema':'vati.native-entry-observation/1',
+                'command_hash':row['_native_command'].command_hash,
+                'source':'ORIGINAL_NATIVE_RESULT'}
+        self._log(EventKind.EXECUTION_RECEIPT, payload,
                   now_ms=now_ms, corr=r.trade_intent_id)
-        if r.status == "FILLED" and r.reject_reason == "PENDING_FILLED":
+        if r.status == "FILLED" and (r.reject_reason == "PENDING_FILLED" or native_observation):
             row.update({"pending": False, "open": True, "entry": r.average_fill, "quantity": r.filled_qty,
                         "fees": r.fees,
                         "broker_position_id": r.broker_position_id,
                         "protective_stop_confirmed": bool(r.protective_stop_confirmed or self.cfg.software_stops),
                         "best_price": r.average_fill, "worst_price": r.average_fill})
-            if row.get("stop") is not None:
+            if row.get("stop") is not None and not native_observation:
                 self.router.protection.register(r.broker_position_id, symbol=self.cfg.symbol, direction=row["direction"], entry=r.average_fill,
                                                 stop=row["stop"], target=row["targets"][0] if row.get("targets") else None, opened_ms=now_ms,
                                                 software_stop=bool(self.cfg.software_stops))
             self._log(EventKind.SESSION, {"event": "ENTRY_FILLED_FROM_REST", "fill": str(r.average_fill), "position": r.broker_position_id},
                       now_ms=now_ms, corr=r.trade_intent_id)
-            approval = row.pop("_approval", None)
+            approval = row.get("_approval")
             if approval is not None:
                 intent, decision, state, targets = approval
                 self._seal_thesis(intent, decision, state, targets, r.average_fill, now_ms)
             self._record_tca(r, row["direction"], row["cost_pct"], row["session"], row.get("event_window", ""), now_ms=now_ms)
+            if not native_observation:row.pop('_approval',None)
         elif r.status in ("EXPIRED", "CANCELLED", "REJECTED"):
             self._entries.pop(r.trade_intent_id, None)
             self._log(EventKind.SESSION, {"event": "ENTRY_REST_ENDED", "status": r.status, "reason": r.reject_reason},

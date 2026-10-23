@@ -164,6 +164,14 @@ def _recover_session(cycle,positions):
             expected[iid]=LedgerPosition(iid,command['symbol'],number(p['filled_qty'],positive=True),
                 None if command.get('protective_stop') is None else number(command['protective_stop']),
                 command['stop_mode']=='SOFTWARE')
-        elif not facts or any(p.get('status')!='REJECTED' or number(p.get('filled_qty','0'))!=0 for p in facts):
-            issues.add(iid)
+        else:
+            no_effect={'REJECTED','CANCELLED','EXPIRED'}
+            clean=bool(facts) and all(p.get('status') in no_effect and number(p.get('filled_qty','0'))==0 for p in facts)
+            observation=facts[-1].get('native_entry_observation',{}) if facts else {}
+            resolved=(bool(facts) and facts[-1].get('status') in no_effect
+                and number(facts[-1].get('filled_qty','0'))==0
+                and all(number(p.get('filled_qty','0'))==0 for p in facts)
+                and observation=={'schema':'vati.native-entry-observation/1',
+                    'command_hash':command['command_hash'],'source':'ORIGINAL_NATIVE_RESULT'})
+            if not clean and not resolved:issues.add(iid)
     return tuple(expected.values()),tuple(sorted(issues))

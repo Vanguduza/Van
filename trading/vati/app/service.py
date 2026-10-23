@@ -301,6 +301,8 @@ class SessionService:
                   and self.lease and self.lease.fence(self.lease.epoch, now_ms=self.clock())), "kill_switch": sorted(t.value for t in self.runner.cycle.kill.active) if self.runner else [],
               "lease_outcome": self._lease_outcome, "lease_epoch": self.lease.epoch if self.lease else None,
               "risk_history_issue": self.runner.cycle.streaks.recovery_issue if self.runner else "",
+              "unresolved_entry_count": len(self.runner.cycle.unresolved_entry_attempts) if self.runner else 0,
+              "unresolved_entry_ids": sorted(self.runner.cycle.unresolved_entry_attempts) if self.runner else [],
               "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
               "restated_learning": self.learning.projection_summary if getattr(self, "learning", None) else {"status":"NOT_CONSTRUCTED"},
               "updated_ms": self.clock(), "pid": os.getpid(), **(extra or {})}
@@ -403,6 +405,7 @@ class SessionService:
             return False
         self._observe_owner_halt(self.clock())
         return bool(self._lease_allows_entry and self.runner.permit_new_orders
+            and not self.runner.cycle.unresolved_entry_attempts
             and self.runner.cycle.mandate.sends_orders() and not self.runner.cycle.kill.halted)
 
     def step_once(self) -> Optional[str]:
@@ -415,6 +418,8 @@ class SessionService:
         self._lease_outcome = result.outcome.value
         self._lease_allows_entry = result.permits_orders
         self._observe_owner_halt(now)
+        from vati.app.entry_recovery import reconcile_inflight_entries
+        reconcile_inflight_entries(self.runner.cycle,now_ms=now)
         bars = self.bar_source(now)
         if not bars:
             self.runner.cycle.ledger.append(make_event(EventKind.MARKET_DATA_HEALTH, "vati-service", {"symbol": self.cfg.symbol, "state": "NO_DATA"}, event_time_ms=now, received_time_ms=now, correlation_id=self.cfg.symbol))

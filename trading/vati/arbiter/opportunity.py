@@ -243,7 +243,8 @@ class OpportunityEngine:
         decision_body = {"state_hash": state.state_hash, "strategy_id": cap.strategy_id, "capsule_hash": cap.capsule_hash, "signal": sig.__dict__, "meta": mv.__dict__, "horizon": horizon}
         decision_hash = canonical_hash(decision_body)
         intent = TradeIntent(
-            trade_intent_id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"vati:{decision_hash}")),
+            trade_intent_id=str(uuid.uuid5(uuid.NAMESPACE_URL, 'vati.intent/2:'+canonical_hash({
+                'account_alias':account_alias,'venue':venue,'decision_hash':decision_hash}))),
             idempotency_key=canonical_hash({"seed": idempotency_seed, "decision": decision_hash})[:32],
             account_alias=account_alias, venue=venue, symbol=sig.symbol, direction=sig.direction, strategy_id=cap.strategy_id, strategy_version=cap.version,
             strategy_state=cap.state, entry=sig.entry, stop=sig.stop, requested_risk_pct=Decimal(str(cap.data["risk_limits"].get("max_risk_per_trade", "0.005"))),
