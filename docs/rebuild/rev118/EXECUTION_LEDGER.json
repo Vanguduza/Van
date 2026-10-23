@@ -172,25 +172,10 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T00:18:58.298732+00:00",
+    "updated_utc": "2026-10-23T00:45:35.426470+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": [
-      {
-        "kind": "frozen-backend-contract-audit",
-        "source": "32118b50e876bacbf1e91b1bf264b0bbe0e8dc50",
-        "checkout": "/workspace/van-autonomous-qualification-20261022/Van",
-        "exec_session": 40531,
-        "log": "/tmp/van-32118b50-full-backend.txt",
-        "observed_status": "RUNNING; wait for actual exit, storage audit and clean tree before reuse"
-      },
-      {
-        "kind": "hosted-source-ci",
-        "source": "32118b50e876bacbf1e91b1bf264b0bbe0e8dc50",
-        "run_id": 39877043007,
-        "observed_status": "RUNNING; retain needed native/full corpus evidence before replacing"
-      }
-    ],
+    "background_jobs": [],
     "last_validation": [
       "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
       "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -262,7 +247,9 @@
       "Single-symbol startup/source:6initial+2additional counterexample cases fixed;2032fulltrading zero skip realprivatePG/DDS,54restored focused+2PGopt-ins covered in full,78rebuild pass;11actual faults caught after31passing controls and restored. Exact pre-dispatch setup, native entries/protection/thesis/health; unknown contexts cannot manufacture feedback. Registry unchanged439/262; fixture stopped/removed. No provider/finality/unit/handset acceptance.",
       "Original UNKNOWN native entry retains risk and truthful status; read-only original result recovery, sealed queue claim, scoped producer identity/full-ID join, persistent thesis/cost publication and immediate-partial holds. 2118 full trading pass/zero skip with real privatePG/DDS;78rebuild;17 source faults caught after passing controls and source restored. Cold before-outcome/context preparation, partial progression and provider financial finality remain; no unit admission.",
       "Frozen 9f4c and4e4a broad audits each6636pass166skip/zero failures,zero forbidden runtime storage and clean checkout; actual hosted4e4a374legacy cases383edits/18nativepass4explicit core-artwork skips, both real VITS methods,public PG26/voice117/trading2089+1privateDDSskip. DDS secret/trusted-main bootstrap failures retained.",
-      "Native outbox batch claim is atomic across independent bridge connections; actual signed HTTP race reproduced twice,23focused native protocol tests pass. Before-commit failure rolls back; lost successful commit remains TAKEN without redelivery. One source fault caught after passing control/restored. Source only, native worker/execution and full programme still required."
+      "Native outbox batch claim is atomic across independent bridge connections; actual signed HTTP race reproduced twice,23focused native protocol tests pass. Before-commit failure rolls back; lost successful commit remains TAKEN without redelivery. One source fault caught after passing control/restored. Source only, native worker/execution and full programme still required.",
+      "Pre-dispatch v2 context archives exact capsule/thesis and original risk/market facts; cold original-result readback reserves native quantity and restores actual protection/setup/cost without resend. Typed direction, native persisted-thesis lost-reply recovery, legacy zero-fill refusal, malformed setup preservation and actual-fill target-R verified. Final2134trading pass/zero skip realprivatePG/DDS;78rebuild;13faults caught after controls/restored. Owner kill latch is not auto-cleared; source only, original full programme retained.",
+      "Frozen32118b50 actual broad6636pass166skip/zero errors and forbidden runtime storage/clean tree, process exit0. Exact-source hosted39877043007:374legacy faults383edits,18emulatorpass4core-artworkskips, realVITS3.310s/2.594s, PG26voice117publictrading2117pass1privateDDSskip. Testedmerge8cdb81b8 treeequal. DDS key and trusted-main bootstrap failures retained."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -273,9 +260,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Complete native cold original-result recovery and prepared setup provenance; preserve owner-signed kill latch and original capsule rather than current replacement. Finish worker identity/deadline/epoch/order-type/precision protocol, financial finality and remaining whole-product programme. Hosted32118b50 and frozen broad audit run separately; do not cancel/replace qualification evidence prematurely. No new frontend beforeBG001 or fabricated native/unit/production/S24 acceptance.",
-    "previous_head": "32118b50e876bacbf1e91b1bf264b0bbe0e8dc50",
-    "current_packet": "Native delivery claim source; local checkpoint while preceding hosted qualification runs"
+    "next_action": "Continue original programme with usable owner-signed kill-clear/loss-reset/drawdown-resume commands and device-owned original-operation readback/registry contracts, current permission/profile enforcement, then native identity/epoch/deadline/precision, financial finality and remaining whole-product functions. No new frontend before BG001. Freeze new exact source for broad audit after commit; retain original gates and no fabricated native/provider/production/S24 acceptance.",
+    "previous_head": "6d8fc6d757fb60e08707339b09fb09d9a55b6db3",
+    "current_packet": "Original prepared entry provenance and cold readback; candidate source only"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -333,6 +320,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Complete native cold original-result recovery and prepared setup provenance; preserve owner-signed kill latch and original capsule rather than current replacement. Finish worker identity/deadline/epoch/order-type/precision protocol, financial finality and remaining whole-product programme. Hosted32118b50 and frozen broad audit run separately; do not cancel/replace qualification evidence prematurely. No new frontend beforeBG001 or fabricated native/unit/production/S24 acceptance.",
-  "updated_at_utc": "2026-10-23T00:18:58.298732+00:00"
+  "current_action": "Continue original programme with usable owner-signed kill-clear/loss-reset/drawdown-resume commands and device-owned original-operation readback/registry contracts, current permission/profile enforcement, then native identity/epoch/deadline/precision, financial finality and remaining whole-product functions. No new frontend before BG001. Freeze new exact source for broad audit after commit; retain original gates and no fabricated native/provider/production/S24 acceptance.",
+  "updated_at_utc": "2026-10-23T00:45:35.426470+00:00"
 }

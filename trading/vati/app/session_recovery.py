@@ -20,7 +20,7 @@ def number(value,*,positive=False):
 
 def original_context(history,iid):
     """Only context available before the first original native command counts."""
-    command,_=history.commands[iid];contexts={};risks=[]
+    command,_=history.commands[iid];contexts={};risks=[];risk_intents=[]
     for event in history.rows:
         if event.hash==history.command_refs[iid]:
             break
@@ -32,14 +32,16 @@ def original_context(history,iid):
             if (decision.get('decision_hash')==command['decision_hash']
                 and decision['decision_hash']==canonical_hash({k:v for k,v in decision.items() if k!='decision_hash'})
                 and intent.get('account_alias')==history.account_alias and intent.get('trade_intent_id')==iid):
-                risks.append(decision)
+                if decision.get('intent_hash') is not None and decision['intent_hash']!=canonical_hash(intent):continue
+                risks.append(decision);risk_intents.append(intent)
         if (event.kind is not EventKind.SESSION or p.get('event')!='ENTRY_CONTEXT'
-            or p.get('schema')!='vati.entry-context/1' or p.get('account_alias')!=history.account_alias
+            or p.get('schema') not in {'vati.entry-context/1','vati.entry-context/2'} or p.get('account_alias')!=history.account_alias
             or p.get('decision_hash')!=command['decision_hash']):
             continue
         try:
             context=dict(p['context'])
             if p['context_hash']!=canonical_hash(context):continue
+            if p['schema']=='vati.entry-context/2' and command.get('protective_stop') is not None and context.get('prepared_setup') is None:continue
             if any(context.get(k)!=command[k] for k in ('symbol','strategy_id','direction')):continue
             if any(type(context[k]) is not bool for k in ('opened_in_blackout','event_certified','execution_policy_applied')):continue
             if any(not isinstance(context[k],str) or not context[k] for k in ('regime','session','event_window')):continue
@@ -52,11 +54,28 @@ def original_context(history,iid):
     result=next(iter(contexts.values()))
     if any(number(r['approved_risk_pct'])!=number(result['original_approved_risk_pct']) for r in risks):
         return None
+    result['direction']=Direction(result['direction'])
     result['cost_pct']=number(result['cost_pct'])
     result['original_approved_risk_pct']=number(result['original_approved_risk_pct'])
     result['targets']=tuple(number(v,positive=True) for v in result['targets'])
     if result['targets']!=tuple(number(v,positive=True) for v in command.get('targets',())):
         return None
+    setup=result.pop('prepared_setup',None)
+    if setup is not None:
+        try:
+            from vati.app.entry_setup import prepared_thesis
+            prepared=prepared_thesis(setup)
+            if (prepared.trade_intent_id!=iid or prepared.symbol!=command['symbol']
+                or prepared.strategy_id!=command['strategy_id'] or prepared.direction.value!=command['direction']
+                or setup['capsule'].get('version')!=command['strategy_version']
+                or prepared.original_approved_risk_pct!=result['original_approved_risk_pct']
+                or prepared.created_ms>history.commands[iid][1]
+                or not risk_intents or any(i.get('market_snapshot_hash')!=prepared.market_state_hash
+                    or number(i['entry'])!=prepared.entry or number(i['stop'])!=prepared.original_stop for i in risk_intents)):
+                return None
+            result['_prepared_setup']=setup
+        except (KeyError,TypeError,ValueError,ArithmeticError):
+            return None
     return result
 
 
@@ -174,4 +193,26 @@ def _recover_session(cycle,positions):
                 and observation=={'schema':'vati.native-entry-observation/1',
                     'command_hash':command['command_hash'],'source':'ORIGINAL_NATIVE_RESULT'})
             if not clean and not resolved:issues.add(iid)
+    for iid in tuple(issues):
+        joined=history.commands.get(iid)
+        if joined is None or iid in closed:continue
+        command,opened=joined
+        if command['symbol']!=cfg.symbol:continue
+        context=original_context(history,iid)
+        facts=receipts[iid]
+        pending=not facts or any(p.get('status') in {'UNKNOWN','PARTIAL','ACCEPTED'} for p in facts)
+        if not pending:continue
+        row=cycle._entries.get(iid)
+        if row is None:
+            row={'symbol':command['symbol'],'entry':number(command['entry_price']),
+                'stop':None if command.get('protective_stop') is None else number(command['protective_stop']),
+                'direction':Direction(command['direction']),'strategy_id':command['strategy_id'],
+                'decision_price':number(command['entry_price']),'quantity':Decimal(0),
+                'broker_position_id':'','broker_order_id':'','opened_ms':opened,
+                'open':False,'pending':True,'recovered':True,'recovery_context_complete':False,
+                'protective_stop_confirmed':False,'cost_pct':None,'original_approved_risk_pct':None}
+            cycle._entries[iid]=row
+        if context is not None:row.update(context)
+        row['pending_quantity']=number(command['quantity'],positive=True)
+        cycle.unresolved_entry_attempts.add(iid)
     return tuple(expected.values()),tuple(sorted(issues))

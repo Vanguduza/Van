@@ -390,6 +390,10 @@ class DecisionCycle:
                 event_state=state.event_window.value,
                 entry_type=oa.entry_type,
             )
+            prepared_setup=None
+            if intent.stop is not None:
+                from vati.app.entry_setup import prepare_setup
+                prepared_setup=prepare_setup(self,intent,decision,state,targets,now_ms=now_ms)
             # Durable before dispatch: restart may not invent the old setup
             # from today's state, capsule, costs or policy.
             entry_context = {
@@ -401,8 +405,9 @@ class DecisionCycle:
                 'opened_in_blackout':state.event_window.value in ('PRE_BLACKOUT','POST_BLACKOUT'),
                 'event_certified':bool(intent.is_event_certified),
                 'execution_policy_applied':True, 'targets':[str(t) for t in targets],
+                'prepared_setup':prepared_setup,
             }
-            self._log(EventKind.SESSION,{'event':'ENTRY_CONTEXT','schema':'vati.entry-context/1',
+            self._log(EventKind.SESSION,{'event':'ENTRY_CONTEXT','schema':'vati.entry-context/2',
                 'decision_hash':decision.decision_hash,'context':entry_context,
                 'context_hash':canonical_hash(entry_context)},now_ms=now_ms,corr=intent.trade_intent_id)
             rec = self.router.execute(
@@ -446,6 +451,7 @@ class DecisionCycle:
                 "event_window": state.event_window.value,
                 # In memory only: the fill seals the thesis from the approval that admitted it.
                 "_approval": (intent, decision, state, tuple(targets)),
+                "_prepared_setup": prepared_setup,
             }
             if uncertain:
                 self._entries[intent.trade_intent_id]['recovery_context_complete']=False
@@ -467,6 +473,7 @@ class DecisionCycle:
                 "strategy_id": intent.strategy_id, "cost_pct": cost,
                 "decision_price": intent.entry,
                 "quantity": rec.filled_qty, "fees": rec.fees,
+                "_prepared_setup": prepared_setup,
                 "broker_position_id": rec.broker_position_id,
                 "opened_ms": now_ms,
                 "best_price": entry_price, "worst_price": entry_price,
@@ -570,7 +577,10 @@ class DecisionCycle:
             self._log(EventKind.SESSION, {"event": "ENTRY_FILLED_FROM_REST", "fill": str(r.average_fill), "position": r.broker_position_id},
                       now_ms=now_ms, corr=r.trade_intent_id)
             approval = row.get("_approval")
-            if approval is not None:
+            if row.get('_prepared_setup') is not None:
+                from vati.app.entry_setup import publish_prepared_thesis
+                publish_prepared_thesis(self,row['_prepared_setup'],r.average_fill,now_ms=now_ms)
+            elif approval is not None:
                 intent, decision, state, targets = approval
                 self._seal_thesis(intent, decision, state, targets, r.average_fill, now_ms)
             self._record_tca(r, row["direction"], row["cost_pct"], row["session"], row.get("event_window", ""), now_ms=now_ms)
@@ -590,6 +600,11 @@ class DecisionCycle:
         ceiling every later ADD is measured against.
         """
         if intent.stop is None:
+            return
+        prepared=self._entries.get(intent.trade_intent_id,{}).get('_prepared_setup')
+        if prepared is not None:
+            from vati.app.entry_setup import publish_prepared_thesis
+            publish_prepared_thesis(self,prepared,entry_price,now_ms=now_ms)
             return
         capsule_data: dict = {}
         capsule_hash = ""

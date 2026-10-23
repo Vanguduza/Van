@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T00:18:58.298732+00:00",
+  "updated_at_utc": "2026-10-23T00:45:35.426470+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -175,6 +175,10 @@
         {
           "description": "Native outbox batch claim is atomic across independent bridge connections; actual signed HTTP race reproduced twice,23focused native protocol tests pass. Before-commit failure rolls back; lost successful commit remains TAKEN without redelivery. One source fault caught after passing control/restored. Source only, native worker/execution and full programme still required.",
           "evidence": "backend/BE-003_010_NATIVE_DELIVERY_CLAIM.md; receipts/NATIVE_DELIVERY_CLAIM_SOURCE_20261023.json"
+        },
+        {
+          "description": "Pre-dispatch v2 context archives exact capsule/thesis and original risk/market facts; cold original-result readback reserves native quantity and restores actual protection/setup/cost without resend. Typed direction, native persisted-thesis lost-reply recovery, legacy zero-fill refusal, malformed setup preservation and actual-fill target-R verified. Final2134trading pass/zero skip realprivatePG/DDS;78rebuild;13faults caught after controls/restored. Owner kill latch is not auto-cleared; source only, original full programme retained.",
+          "evidence": "backend/BE-003_009_010_PREPARED_ENTRY_CONTEXT.md; receipts/PREPARED_ENTRY_CONTEXT_SOURCE_20261023.json"
         }
       ]
     },
@@ -368,6 +372,10 @@
         {
           "description": "Original UNKNOWN native entry retains risk and truthful status; read-only original result recovery, sealed queue claim, scoped producer identity/full-ID join, persistent thesis/cost publication and immediate-partial holds. 2118 full trading pass/zero skip with real privatePG/DDS;78rebuild;17 source faults caught after passing controls and source restored. Cold before-outcome/context preparation, partial progression and provider financial finality remain; no unit admission.",
           "evidence": "backend/BE-003_009_010_ORIGINAL_ENTRY_RECOVERY.md; receipts/ORIGINAL_ENTRY_RECOVERY_SOURCE_20261022.json"
+        },
+        {
+          "description": "Pre-dispatch v2 context archives exact capsule/thesis and original risk/market facts; cold original-result readback reserves native quantity and restores actual protection/setup/cost without resend. Typed direction, native persisted-thesis lost-reply recovery, legacy zero-fill refusal, malformed setup preservation and actual-fill target-R verified. Final2134trading pass/zero skip realprivatePG/DDS;78rebuild;13faults caught after controls/restored. Owner kill latch is not auto-cleared; source only, original full programme retained.",
+          "evidence": "backend/BE-003_009_010_PREPARED_ENTRY_CONTEXT.md; receipts/PREPARED_ENTRY_CONTEXT_SOURCE_20261023.json"
         }
       ]
     },
@@ -415,6 +423,10 @@
         {
           "description": "Native outbox batch claim is atomic across independent bridge connections; actual signed HTTP race reproduced twice,23focused native protocol tests pass. Before-commit failure rolls back; lost successful commit remains TAKEN without redelivery. One source fault caught after passing control/restored. Source only, native worker/execution and full programme still required.",
           "evidence": "backend/BE-003_010_NATIVE_DELIVERY_CLAIM.md; receipts/NATIVE_DELIVERY_CLAIM_SOURCE_20261023.json"
+        },
+        {
+          "description": "Pre-dispatch v2 context archives exact capsule/thesis and original risk/market facts; cold original-result readback reserves native quantity and restores actual protection/setup/cost without resend. Typed direction, native persisted-thesis lost-reply recovery, legacy zero-fill refusal, malformed setup preservation and actual-fill target-R verified. Final2134trading pass/zero skip realprivatePG/DDS;78rebuild;13faults caught after controls/restored. Owner kill latch is not auto-cleared; source only, original full programme retained.",
+          "evidence": "backend/BE-003_009_010_PREPARED_ENTRY_CONTEXT.md; receipts/PREPARED_ENTRY_CONTEXT_SOURCE_20261023.json"
         }
       ]
     },

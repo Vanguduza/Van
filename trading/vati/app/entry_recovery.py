@@ -50,6 +50,7 @@ def reconcile_inflight_entries(cycle,*,now_ms):
                     if any(p.trade_intent_id==iid or not p.trade_intent_id for p in positions):continue
                     cycle._settle_pending(receipt,row,now_ms=now_ms,native_observation=True)
                     cycle.unresolved_entry_attempts.discard(iid)
+                    cycle.recovery_unresolved=tuple(v for v in cycle.recovery_unresolved if v!=iid)
                     continue
                 owned=[p for p in positions if p.trade_intent_id==iid and p.position_id==receipt.broker_position_id]
                 if len(owned)!=1:continue
@@ -68,7 +69,8 @@ def reconcile_inflight_entries(cycle,*,now_ms):
                     software_stop=command.stop_mode is StopMode.SOFTWARE)
                 if (receipt.status!='FILLED' or receipt.filled_qty!=command.quantity
                     or position.quantity!=receipt.filled_qty or position.entry_price!=receipt.average_fill
-                    or receipt.protective_stop_confirmed is not True or row.get('_approval') is None):continue
+                    or receipt.protective_stop_confirmed is not True
+                    or (row.get('_approval') is None and row.get('_prepared_setup') is None)):continue
                 row['stop']=stop
                 cycle._settle_pending(receipt,row,now_ms=now_ms,native_observation=True)
                 from vati.core import EventKind
@@ -85,6 +87,7 @@ def reconcile_inflight_entries(cycle,*,now_ms):
                 cycle.thesis.adopt(next(iter(claims.values())))
                 row['recovery_context_complete']=True;row.pop('_approval',None)
                 cycle.unresolved_entry_attempts.discard(iid)
+                cycle.recovery_unresolved=tuple(v for v in cycle.recovery_unresolved if v!=iid)
             except Exception:
                 # Store/receipt/protection faults retain the original claim. A
                 # failed read, missing row or empty snapshot is never NoEffect.

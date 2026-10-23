@@ -21,7 +21,7 @@ pytestmark=pytest.mark.skipif(not os.environ.get('VATI_TEST_PG_DSN') or os.envir
 
 
 @contextmanager
-def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_partial_status=None):
+def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_partial_status=None,omit_context=False):
     alias='delayed_mt5_'+uuid.uuid4().hex[:12];key=b'local-source-fixture-key-32-bytes!'
     bars=synthetic_bars();clock={'ms':bars[100].end_ms};queue=BridgeQueue(tmp_path/'native-ea.sqlite')
     app=create_pull_app(queue,lambda who:key if who==alias else None,clock=lambda:clock['ms'])
@@ -61,6 +61,12 @@ def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_
             allowed_strategies=['FX-TREND-PULLBACK-01']),capsules=['FX-TREND-PULLBACK-01'],registry_path=str(registry.path),
         ledger=os.environ['VATI_TEST_PG_DSN'],heartbeat_path=str(tmp_path/'heartbeat.json'))
     poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+    if omit_context:
+        publish=service.runner.cycle._log
+        def old_context_producer(kind,payload,**kwargs):
+            if kind is EventKind.SESSION and payload.get('event')=='ENTRY_CONTEXT':return
+            return publish(kind,payload,**kwargs)
+        service.runner.cycle._log=old_context_producer
     def orders():return [e for e in service._ledger.iter(EventKind.ORDER_COMMAND) if e.payload['account_alias']==alias]
     try:
         service.start()
@@ -301,3 +307,85 @@ def test_initial_native_partial_fill_keeps_remaining_risk_and_truthful_status(tm
         for bar in bars[index+1:index+4]:
             clock['ms']=bar.end_ms+1000;poll();service.step_once()
         assert len(orders())==1 and original in cycle.unresolved_entry_attempts
+
+
+@pytest.mark.parametrize('outcome',['REJECTED','FILLED'])
+def test_process_restart_before_original_native_result_can_reconcile_without_resending(tmp_path,eurusd,outcome):
+    with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+        original=orders()[0].correlation_id;poll();fields=delivered[0].split('|');cid=int(fields[0])
+        service.close();service._ledger.close()
+        restarted=SessionService(service.cfg,lambda now:[],clock=lambda:clock['ms'],adapter=service.adapter).build()
+        try:
+            restarted.start()
+            assert original in restarted.runner.cycle.recovery_unresolved
+            assert not restarted.runner.permit_new_orders
+            ack={'id':cid,'status':outcome,'volume':'0','reason':'original native refusal'};positions=[]
+            if outcome=='FILLED':
+                ack.update(order='original-order',position=900,volume=fields[4],price=fields[5],sl_confirmed=True,server_time_ms=clock['ms'])
+                positions=[{'ticket':900,'symbol':fields[2],'type':fields[3],'volume':fields[4],'price_open':fields[5],
+                    'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}]
+            poll(results=[ack],positions=positions);restarted.step_once()
+            assert original not in restarted.runner.cycle.recovery_unresolved
+            assert original not in restarted.runner.cycle.unresolved_entry_attempts
+            assert len(queue.native_entries(service.cfg.account_alias))==1
+            if outcome=='FILLED':
+                assert restarted.runner.cycle.protection.stop_of('900') is not None
+                assert restarted.runner.cycle.thesis.thesis_for(original) is not None
+                assert restarted.runner.cycle._entries[original]['recovery_context_complete'] is True
+            # Reconciliation evidence cannot clear the existing owner-signed kill latch.
+            from vati.risk.contracts import KillSwitchTrigger
+            assert KillSwitchTrigger.RECONCILIATION_FAILURE in restarted.runner.cycle.kill.active
+        finally:restarted.close();restarted._ledger.close()
+
+
+def test_late_original_fill_uses_approved_capsule_not_a_current_replacement(tmp_path,eurusd):
+    from copy import deepcopy
+    from vati.strategies.capsule import Capsule
+    with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+        original=orders()[0].correlation_id;cycle=service.runner.cycle;strategy=orders()[0].payload['strategy_id']
+        old=cycle.engine.registry.get(strategy);original_hash=old.capsule_hash
+        new=deepcopy(old.data);new['version']='post-dispatch-fixture-version'
+        cycle.engine.registry.add(Capsule(cycle.engine.registry.seal(new)))
+        assert cycle.engine.registry.get(strategy).capsule_hash!=original_hash
+        poll();fields=delivered[0].split('|');cid=int(fields[0])
+        native={'ticket':900,'symbol':fields[2],'type':fields[3],'volume':fields[4],'price_open':fields[5],
+            'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}
+        poll(results=[{'id':cid,'status':'FILLED','volume':fields[4],'price':fields[5],'order':'original-order',
+            'position':900,'sl_confirmed':True,'server_time_ms':clock['ms']}],positions=[native])
+        service.step_once()
+        thesis=cycle.thesis.thesis_for(original)
+        assert thesis is not None and thesis.capsule_hash==original_hash
+        assert len(orders())==1
+
+
+def test_original_cold_refusal_does_not_require_missing_historical_thesis_inputs(tmp_path,eurusd):
+    # Historical producer without ENTRY_CONTEXT; genuine command/risk/queue remain.
+    with delayed_native_session(tmp_path,eurusd,omit_context=True) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+        original=orders()[0].correlation_id;poll();cid=int(delivered[0].split('|')[0])
+        service.close();service._ledger.close()
+        restarted=SessionService(service.cfg,lambda now:[],clock=lambda:clock['ms'],adapter=service.adapter).build()
+        try:
+            restarted.start();assert original in restarted.runner.cycle.recovery_unresolved
+            poll(results=[{'id':cid,'status':'REJECTED','volume':'0','reason':'native original refused'}]);restarted.step_once()
+            assert original not in restarted.runner.cycle.recovery_unresolved
+            assert original not in restarted.runner.cycle.unresolved_entry_attempts
+            assert not list(restarted._ledger.iter(EventKind.TRADE_THESIS,correlation_id=original))
+            assert not list(restarted._ledger.iter(EventKind.TCA_RECORD,correlation_id=original))
+            assert len(queue.native_entries(service.cfg.account_alias))==1
+        finally:restarted.close();restarted._ledger.close()
+
+
+def test_late_native_fill_keeps_original_setup_and_derives_target_r_from_actual_fill(tmp_path,eurusd):
+    from decimal import Decimal as D
+    with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+        original=orders()[0].correlation_id;poll();fields=delivered[0].split('|');cid=int(fields[0])
+        fill=D(fields[5])+D('0.00001')
+        native={'ticket':900,'symbol':fields[2],'type':fields[3],'volume':fields[4],'price_open':str(fill),
+            'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}
+        poll(results=[{'id':cid,'status':'FILLED','volume':fields[4],'price':str(fill),'order':'original-order',
+            'position':900,'sl_confirmed':True,'server_time_ms':clock['ms']}],positions=[native])
+        service.step_once();thesis=service.runner.cycle.thesis.thesis_for(original)
+        assert thesis is not None and thesis.entry==fill
+        expected=(D(fields[7])-fill)/abs(fill-D(fields[6]))
+        assert D(thesis.expected_path['target_r'])==expected
+        assert len(orders())==1

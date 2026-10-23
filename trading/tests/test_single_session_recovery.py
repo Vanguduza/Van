@@ -59,7 +59,7 @@ def test_cold_paper_process_cannot_treat_a_durable_open_trade_as_a_flat_account(
     finally:second.close();second._ledger.close()
 
 
-@pytest.mark.parametrize('damage',['missing-context','context-after-command','conflicting-context','wrong-context-account','wrong-context-decision'])
+@pytest.mark.parametrize('damage',['missing-context','context-after-command','conflicting-context','wrong-context-account','wrong-context-decision','prepared-capsule-content','prepared-capsule-version','prepared-thesis-market','prepared-thesis-risk','prepared-thesis-id','prepared-thesis-time','prepared-setup-shape'])
 def test_incomplete_historical_context_keeps_native_protection_without_inventing_feedback(tmp_path,eurusd,damage):
     from vati.core import make_event
     first,cfg,clock=opened_service(tmp_path,eurusd)
@@ -80,6 +80,22 @@ def test_incomplete_historical_context_keeps_native_protection_without_inventing
                 payload['context']['session']='CONFLICTING_ORIGINAL_SESSION'
                 payload['context_hash']=canonical_hash(payload['context'])
             elif damage=='wrong-context-account':payload['account_alias']='different_native_account'
+            elif damage=='prepared-setup-shape':
+                payload['context']['prepared_setup']=[]
+                payload['context_hash']=canonical_hash(payload['context'])
+            elif damage.startswith('prepared-'):
+                setup=payload['context']['prepared_setup'];thesis=setup['thesis']
+                if damage=='prepared-capsule-content':setup['capsule']['thesis']={'statement':'unhashed-replacement'}
+                elif damage=='prepared-capsule-version':
+                    setup['capsule']['version']='different-original-version'
+                    setup['capsule']['capsule_hash']=canonical_hash({k:v for k,v in setup['capsule'].items() if k!='capsule_hash'})
+                    thesis['capsule_hash']=setup['capsule']['capsule_hash']
+                elif damage=='prepared-thesis-market':thesis['market_state_hash']='0'*64
+                elif damage=='prepared-thesis-risk':thesis['original_approved_risk_pct']='0.99'
+                elif damage=='prepared-thesis-id':thesis['trade_intent_id']='another-original-trade'
+                else:thesis['created_ms']+=100000
+                thesis['seal']=canonical_hash({k:v for k,v in thesis.items() if k!='seal'})
+                payload['context_hash']=canonical_hash(payload['context'])
             else:payload['decision_hash']='0'*64
             history.append(make_event(event.kind,event.producer,payload,event_time_ms=event.event_time_ms,
                 received_time_ms=event.received_time_ms,correlation_id=event.correlation_id))
@@ -96,6 +112,7 @@ def test_incomplete_historical_context_keeps_native_protection_without_inventing
     try:
         second.start()
         assert not second.runner.permit_new_orders
+        assert position.trade_intent_id in second.runner.cycle._entries
         entry=second.runner.cycle._entries[position.trade_intent_id]
         assert entry['recovery_context_complete'] is False
         assert position.position_id in second.runner.cycle.protection.rules
