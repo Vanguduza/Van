@@ -172,7 +172,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T17:18:37.054679+00:00",
+    "updated_utc": "2026-10-23T17:27:36.207671+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
@@ -336,7 +336,8 @@
       "Hosted exact20125954/39982450483 all374legacy383edits/native18pass4existingartworkskips/VITS2.886+2.609s/publicPG26voice117trading2538pass1DDSskip. Native39982450472MetaEditor0errors0warnings/freshEX5, invalid4/noEX5. OnlyDDSreadcredential/trustedmainbootstrap CI failures remain; gates not waived.",
       "Hosted exact804ffe73/39986003124 all374legacy383edits/native18pass4existingartworkskips/source-mergetrees equal/publicPG26voice117trading2538pass1DDSskip;native39986003602MetaEditor0errors0warningsfreshEX5,invalid4/noEX5.OnlyDDSreadcredential/trustedmainbootstrapfail.Voiceactualmethods {'cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer': 'PASS 4.021s', 'realOfflineAnswerReachesTheApplicationQueueAsSpoken': 'PASS 2.354s'}",
       "Conversation integrity: serialized main creation and follow-up decisions; atomic message/draft/projection/follow-up parent updates; coherent thread snapshot; latest bounded history with actual total and scoped cursor paging, stable equal-time ordering; original canonical projection identity/scope, including late archived result without reopening. Typed API and existing Android SDK method added; UI paging consumer remains pending.8 original failures corrected;26 focused/169 integrated audited/29 owner contracts/79 rebuild pass0skip;12 fault/control pairs caught and source restored after an initial timing survivor. Android222 JVM pass0skip, debugAPK assembled and lint passes with pinned sealed voice assets. No history-as-authority, promotion dispatch, new frontend, whole-unit/native/production/S24 claim.",
-      "Hosted f124741f/39990636936 all374 inherited cases383edits caught, emulator18pass4existingartworkskips; nativeVITS methods3.818/2.381s are method durations, not latencySLO/S24. PublicPG26voice117trading2538pass1DDSskip. NativeMetaEditor39990637062 zeroerrors/warnings freshEX5, invalid4errors/noEX5. OriginalDDSreadkey andtrustedmain CI failures retained."
+      "Hosted f124741f/39990636936 all374 inherited cases383edits caught, emulator18pass4existingartworkskips; nativeVITS methods3.818/2.381s are method durations, not latencySLO/S24. PublicPG26voice117trading2538pass1DDSskip. NativeMetaEditor39990637062 zeroerrors/warnings freshEX5, invalid4errors/noEX5. OriginalDDSreadkey andtrustedmain CI failures retained.",
+      "Owner-intent memory: one serialized native observation conserves concurrent counts/project context and all constraints, earliest/latest times; original mission link commits with its observation, verifies native goal/project/constraints and refuses replay as additional owner repetition. Legacy link verifies real mission and original goal. Superseding edge and retired status share one transaction; self/cyclic supersession refused.6 original failures plus1 unchanged legacy-method failure corrected;62 focused/241 integrated audited/29 owner contracts/79 rebuild pass0skip;10 introduced defects rejected after valid controls and exact source restoration. Initial same-size timestamp-bytecode survivor retained; final child processes clear only affected temporary caches. Existing horizon thresholds unchanged, no claim of market truth/authority, all-feed or whole-unit completion."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -347,9 +348,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Commit and push the source-tested conversation/history packet and exact f124741f hosted receipts. Keep frozen f124741f full qualification running unchanged. Continue whole-product owner-memory source work in the isolated worktree:6 reproduced failures in IntentContinuityGraph (concurrent duplicate nodes/lost counts, partial superseding relation, mission replay inflation, discarded later constraints and backwards observation times); first implementation passes56 focused tests. Finish mission-bound replay/rollback/cycle/unknown-source tests, fault checks and integrated validation before copying only memory.py/feed.py/new test. Original131units/93plannedfeatures, BG001, independent/native/signing/production/provider/S24 obligations remain; no gatePASS issued.",
-    "previous_head": "f124741f2d176f005ab19578f104c446de8a0bc8",
-    "current_packet": "Conversation history and state source tested; next owner-memory observations."
+    "next_action": "Commit/push the owner-intent source packet after preserving current00260ad2 hosted runs. Keep frozen f124741f backend/trading qualification untouched. Continue actual BE-018 component construction: new chart_models.py/chart_schema.py/chart_workspaces.py/chart_api.py in isolatedworktree, additive Store migration56, not yet integrated or tested. Need genuine persistence/restart/conflict/undo-originalreplay/ownerisolation/privacy-delete/failedcommit faults, strict model/size/capacity tests, current authenticated gateway wiring, registry/backendfutureconsumer contracts. No renderer/newfrontend beforeBG001. Chart native instrument binding and certified server indicators remain explicit pending components, not fakequalified. All original131units/93features remain; gates not issued.",
+    "previous_head": "00260ad28a60e20ab0173888c9fe03e8acb31b08",
+    "current_packet": "Owner-intent memory source tested; next chart workspace backend component."
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -407,6 +408,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Commit and push the source-tested conversation/history packet and exact f124741f hosted receipts. Keep frozen f124741f full qualification running unchanged. Continue whole-product owner-memory source work in the isolated worktree:6 reproduced failures in IntentContinuityGraph (concurrent duplicate nodes/lost counts, partial superseding relation, mission replay inflation, discarded later constraints and backwards observation times); first implementation passes56 focused tests. Finish mission-bound replay/rollback/cycle/unknown-source tests, fault checks and integrated validation before copying only memory.py/feed.py/new test. Original131units/93plannedfeatures, BG001, independent/native/signing/production/provider/S24 obligations remain; no gatePASS issued.",
-  "updated_at_utc": "2026-10-23T17:18:37.054679+00:00"
+  "current_action": "Commit/push the owner-intent source packet after preserving current00260ad2 hosted runs. Keep frozen f124741f backend/trading qualification untouched. Continue actual BE-018 component construction: new chart_models.py/chart_schema.py/chart_workspaces.py/chart_api.py in isolatedworktree, additive Store migration56, not yet integrated or tested. Need genuine persistence/restart/conflict/undo-originalreplay/ownerisolation/privacy-delete/failedcommit faults, strict model/size/capacity tests, current authenticated gateway wiring, registry/backendfutureconsumer contracts. No renderer/newfrontend beforeBG001. Chart native instrument binding and certified server indicators remain explicit pending components, not fakequalified. All original131units/93features remain; gates not issued.",
+  "updated_at_utc": "2026-10-23T17:27:36.207671+00:00"
 }

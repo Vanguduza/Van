@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T17:18:37.054679+00:00",
+  "updated_at_utc": "2026-10-23T17:27:36.207671+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -279,6 +279,10 @@
         {
           "description": "Conversation integrity: serialized main creation and follow-up decisions; atomic message/draft/projection/follow-up parent updates; coherent thread snapshot; latest bounded history with actual total and scoped cursor paging, stable equal-time ordering; original canonical projection identity/scope, including late archived result without reopening. Typed API and existing Android SDK method added; UI paging consumer remains pending.8 original failures corrected;26 focused/169 integrated audited/29 owner contracts/79 rebuild pass0skip;12 fault/control pairs caught and source restored after an initial timing survivor. Android222 JVM pass0skip, debugAPK assembled and lint passes with pinned sealed voice assets. No history-as-authority, promotion dispatch, new frontend, whole-unit/native/production/S24 claim.",
           "evidence": "backend/BE-003_029_CONVERSATION_STATE_INTEGRITY.md; receipts/CONVERSATION_STATE_SOURCE_20261023.json"
+        },
+        {
+          "description": "Owner-intent memory: one serialized native observation conserves concurrent counts/project context and all constraints, earliest/latest times; original mission link commits with its observation, verifies native goal/project/constraints and refuses replay as additional owner repetition. Legacy link verifies real mission and original goal. Superseding edge and retired status share one transaction; self/cyclic supersession refused.6 original failures plus1 unchanged legacy-method failure corrected;62 focused/241 integrated audited/29 owner contracts/79 rebuild pass0skip;10 introduced defects rejected after valid controls and exact source restoration. Initial same-size timestamp-bytecode survivor retained; final child processes clear only affected temporary caches. Existing horizon thresholds unchanged, no claim of market truth/authority, all-feed or whole-unit completion.",
+          "evidence": "backend/BE-003_027_OWNER_INTENT_INTEGRITY.md; receipts/INTENT_MEMORY_SOURCE_20261023.json"
         }
       ]
     },
@@ -899,6 +903,10 @@
         {
           "description": "Owner goals: atomic create/milestones, patches that preserve concurrent omitted-field edits, coherent goal/list snapshots, parent change timestamps atomic with milestone/link writes, idempotent real existing-mission links without dispatch or mission-state changes, nonblank inputs and strict boolean/price distinction. Typed goal/watch endpoint response schemas refreshed without newUI.13 reproduced failures;41 isolated/108 integrated audited/29 registry/79 rebuild cases pass0skip;11 deliberate fault/control pairs caught/restored. Legacy phantom-positive fixture now creates a real mission. Existing legacy references retained; original-request recovery for allCRUD and whole-unit/native/production/handset acceptance not claimed.",
           "evidence": "backend/BE-003_027_OWNER_GOAL_INTEGRITY.md; receipts/OWNER_GOAL_INTEGRITY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Owner-intent memory: one serialized native observation conserves concurrent counts/project context and all constraints, earliest/latest times; original mission link commits with its observation, verifies native goal/project/constraints and refuses replay as additional owner repetition. Legacy link verifies real mission and original goal. Superseding edge and retired status share one transaction; self/cyclic supersession refused.6 original failures plus1 unchanged legacy-method failure corrected;62 focused/241 integrated audited/29 owner contracts/79 rebuild pass0skip;10 introduced defects rejected after valid controls and exact source restoration. Initial same-size timestamp-bytecode survivor retained; final child processes clear only affected temporary caches. Existing horizon thresholds unchanged, no claim of market truth/authority, all-feed or whole-unit completion.",
+          "evidence": "backend/BE-003_027_OWNER_INTENT_INTEGRITY.md; receipts/INTENT_MEMORY_SOURCE_20261023.json"
         }
       ]
     },

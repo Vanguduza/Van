@@ -119,8 +119,8 @@ class LearningFeed:
             project_id=mission.project_id,
             constraints=mission.constraints,
             now_ms=now_ms,
+            mission_id=mission.mission_id,
         )
-        await self.intents.link_mission(intent.intent_id, mission.mission_id, now_ms=now_ms)
 
         decision_id = None
         if mission.authority_envelope.requires_owner_presence:

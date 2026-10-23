@@ -200,90 +200,77 @@ class IntentContinuityGraph:
         self.store = store
 
     async def observe(
-        self,
-        *,
-        owner_goal: str,
-        project_id: str | None = None,
-        constraints: list[str] | None = None,
-        owner_declared_standing: bool = False,
-        now_ms: int | None = None,
+        self, *, owner_goal: str, project_id: str | None = None,
+        constraints: list[str] | None = None, owner_declared_standing: bool = False,
+        now_ms: int | None = None, mission_id: str | None = None,
     ) -> IntentNode:
-        """Record that the owner asked for this, and promote it only on evidence.
+        """Observe owner context atomically; replay of one mission is not repetition.
 
-        P2-MEM-003 — an observation is not a promotion. A new goal is EPHEMERAL, whatever
-        it says: VAN cannot tell an objective from an errand by reading one sentence, and
-        deciding it can is how a calendar lookup becomes a long-term commitment.
-
-        Two things promote. `owner_declared_standing` is the owner saying so, which needs
-        no corroboration and is not VAN's inference. Otherwise it takes
-        `STANDING_AFTER_OBSERVATIONS` separate observations, and a goal that arrives with a
-        project reaches PROJECT on the second. Each promotion records what caused it.
+        Existing horizon rules describe remembered owner intent, never market evidence,
+        execution permission or an instruction to act. Distinct missions are distinct
+        observations. Direct internal observations preserve the existing API.
         """
         now = int(time.time() * 1000) if now_ms is None else now_ms
         normalized = owner_goal.strip()
-        row = await self.store.fetchone(
-            "SELECT * FROM intent_nodes WHERE owner_goal = ?", (normalized,)
-        )
-        if row is not None:
-            projects = sorted(set(json.loads(str(row["projects_json"]))) | (
-                {project_id} if project_id else set()
-            ))
-            seen = int(row["observation_count"]) + 1
-            horizon, reason = self._horizon_for(
-                current=IntentHorizon(str(row["horizon"])),
-                observations=seen,
-                projects=projects,
-                owner_declared_standing=owner_declared_standing,
-            )
-            promoted = horizon is not IntentHorizon(str(row["horizon"]))
-            await self.store.execute(
-                "UPDATE intent_nodes SET latest_observed_ms = ?, projects_json = ?, "
-                "observation_count = ?, horizon = ?, "
-                "promoted_reason = COALESCE(?, promoted_reason), "
-                "promoted_at_ms = COALESCE(?, promoted_at_ms), "
-                "status = CASE WHEN status = 'STALE' THEN 'ACTIVE' ELSE status END "
-                "WHERE intent_id = ?",
-                (
-                    now, Store.dumps(projects), seen, horizon.value,
-                    reason if promoted else None, now if promoted else None,
-                    row["intent_id"],
-                ),
-            )
-            return await self.get(str(row["intent_id"]))  # type: ignore[return-value]
-
-        # A goal seen for the first time is EPHEMERAL unless the owner said otherwise.
-        # Not "unless it looks important": VAN cannot tell an objective from an errand by
-        # reading one sentence, and a rule that tried would promote whichever phrasing it
-        # happened to like.
-        horizon, reason = self._horizon_for(
-            current=IntentHorizon.EPHEMERAL,
-            observations=1,
-            projects=[project_id] if project_id else [],
-            owner_declared_standing=owner_declared_standing,
-        )
-        node = IntentNode(
-            intent_id=f"intent_{uuid.uuid4().hex}", owner_goal=normalized,
-            first_observed_ms=now, latest_observed_ms=now,
-            projects=[project_id] if project_id else [],
-            constraints=list(constraints or []),
-            horizon=horizon,
-            observation_count=1,
-            promoted_reason=reason if horizon is not IntentHorizon.EPHEMERAL else None,
-            promoted_at_ms=now if horizon is not IntentHorizon.EPHEMERAL else None,
-        )
-        await self.store.execute(
-            "INSERT INTO intent_nodes(intent_id, owner_goal, first_observed_ms, "
-            "latest_observed_ms, projects_json, constraints_json, status, priority, "
-            "horizon, observation_count, promoted_reason, promoted_at_ms) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                node.intent_id, node.owner_goal, now, now, Store.dumps(node.projects),
-                Store.dumps(node.constraints), node.status.value, node.priority,
-                node.horizon.value, node.observation_count, node.promoted_reason,
-                node.promoted_at_ms,
-            ),
-        )
-        return node
+        if not normalized:
+            raise ValueError("INTENT_GOAL_REQUIRED")
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            if mission_id is not None:
+                mission = await (await db.execute(
+                    "SELECT goal,project_id,constraints_json FROM missions WHERE mission_id=?", (mission_id,)
+                )).fetchone()
+                if mission is None:
+                    raise ValueError("INTENT_MISSION_UNKNOWN")
+                if (mission["goal"].strip(),mission["project_id"],json.loads(mission["constraints_json"])) != (normalized,project_id,list(constraints or [])):
+                    raise ValueError("INTENT_MISSION_SCOPE_CONFLICT")
+                links = await (await db.execute("SELECT intent_id FROM intent_missions WHERE mission_id=?",(mission_id,))).fetchall()
+                if links:
+                    if len(links) != 1:
+                        raise ValueError("INTENT_MISSION_SCOPE_CONFLICT")
+                    original = await self._get(db,links[0]["intent_id"])
+                    if original is None or original.owner_goal != normalized:
+                        raise ValueError("INTENT_MISSION_SCOPE_CONFLICT")
+                    return original
+            row = await (await db.execute(
+                "SELECT * FROM intent_nodes WHERE owner_goal = ? ORDER BY first_observed_ms,intent_id LIMIT 1", (normalized,)
+            )).fetchone()
+            if row is not None:
+                projects = sorted(set(json.loads(row["projects_json"])) | ({project_id} if project_id else set()))
+                retained_constraints = list(dict.fromkeys(json.loads(row["constraints_json"])+list(constraints or [])))
+                seen = int(row["observation_count"]) + 1
+                horizon, reason = self._horizon_for(current=IntentHorizon(row["horizon"]),
+                    observations=seen,projects=projects,owner_declared_standing=owner_declared_standing)
+                promoted = horizon is not IntentHorizon(row["horizon"])
+                intent_id = row["intent_id"]
+                await db.execute(
+                    "UPDATE intent_nodes SET first_observed_ms=MIN(first_observed_ms,?), "
+                    "latest_observed_ms=MAX(latest_observed_ms,?), projects_json=?,constraints_json=?, "
+                    "observation_count=?,horizon=?,promoted_reason=COALESCE(?,promoted_reason), "
+                    "promoted_at_ms=COALESCE(?,promoted_at_ms), "
+                    "status=CASE WHEN status='STALE' THEN 'ACTIVE' ELSE status END WHERE intent_id=?",
+                    (now,now,Store.dumps(projects),Store.dumps(retained_constraints),seen,horizon.value,
+                     reason if promoted else None,now if promoted else None,intent_id),
+                )
+            else:
+                horizon, reason = self._horizon_for(current=IntentHorizon.EPHEMERAL,observations=1,
+                    projects=[project_id] if project_id else [],owner_declared_standing=owner_declared_standing)
+                intent_id = f"intent_{uuid.uuid4().hex}"
+                await db.execute(
+                    "INSERT INTO intent_nodes(intent_id,owner_goal,first_observed_ms,latest_observed_ms, "
+                    "projects_json,constraints_json,status,priority,horizon,observation_count,promoted_reason,promoted_at_ms) "
+                    "VALUES(?,?,?,?,?,?,'ACTIVE',50,?,1,?,?)",
+                    (intent_id,normalized,now,now,Store.dumps([project_id] if project_id else []),
+                     Store.dumps(list(dict.fromkeys(constraints or []))),horizon.value,
+                     reason if horizon is not IntentHorizon.EPHEMERAL else None,
+                     now if horizon is not IntentHorizon.EPHEMERAL else None),
+                )
+            if mission_id is not None:
+                await db.execute("INSERT INTO intent_missions(intent_id,mission_id,linked_at_ms) VALUES(?,?,?)",(intent_id,mission_id,now))
+            result = await self._get(db,intent_id)
+            assert result is not None
+            await db.commit()
+            return result
 
     def _horizon_for(
         self,
@@ -325,23 +312,38 @@ class IntentContinuityGraph:
         now_ms: int | None = None,
     ) -> str:
         now = int(time.time() * 1000) if now_ms is None else now_ms
+        if from_intent_id == to_intent_id:
+            raise ValueError("INTENT_SELF_RELATION")
         edge_id = f"iedge_{uuid.uuid4().hex}"
-        await self.store.execute(
-            "INSERT INTO intent_edges(edge_id, from_intent_id, to_intent_id, edge_type, "
-            "evidence_ref, created_at_ms) VALUES (?, ?, ?, ?, ?, ?)",
-            (edge_id, from_intent_id, to_intent_id, edge_type.value, evidence_ref, now),
-        )
-        if edge_type is IntentEdgeType.SUPERSEDES:
-            await self.store.execute(
-                "UPDATE intent_nodes SET status = 'SUPERSEDED' WHERE intent_id = ?",
-                (to_intent_id,),
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            for identity in (from_intent_id,to_intent_id):
+                if await self._get(db,identity) is None:
+                    raise ValueError("INTENT_UNKNOWN")
+            if edge_type is IntentEdgeType.SUPERSEDES:
+                cycle = await (await db.execute(
+                    "WITH RECURSIVE descendants(id) AS (SELECT to_intent_id FROM intent_edges "
+                    "WHERE from_intent_id=? AND edge_type='supersedes' UNION SELECT e.to_intent_id "
+                    "FROM intent_edges e JOIN descendants d ON e.from_intent_id=d.id WHERE e.edge_type='supersedes') "
+                    "SELECT id FROM descendants WHERE id=? LIMIT 1",(to_intent_id,from_intent_id))).fetchone()
+                if cycle is not None:
+                    raise ValueError("INTENT_SUPERSESSION_CYCLE")
+            await db.execute(
+                "INSERT INTO intent_edges(edge_id,from_intent_id,to_intent_id,edge_type,evidence_ref,created_at_ms) VALUES(?,?,?,?,?,?)",
+                (edge_id,from_intent_id,to_intent_id,edge_type.value,evidence_ref,now),
             )
+            if edge_type is IntentEdgeType.SUPERSEDES:
+                await db.execute("UPDATE intent_nodes SET status='SUPERSEDED' WHERE intent_id=?",(to_intent_id,))
+            await db.commit()
         return edge_id
 
     async def get(self, intent_id: str) -> IntentNode | None:
-        row = await self.store.fetchone(
-            "SELECT * FROM intent_nodes WHERE intent_id = ?", (intent_id,)
-        )
+        async with self.store.connection() as db:
+            return await self._get(db,intent_id)
+
+    @staticmethod
+    async def _get(db: Any, intent_id: str) -> IntentNode | None:
+        row = await (await db.execute("SELECT * FROM intent_nodes WHERE intent_id = ?",(intent_id,))).fetchone()
         if row is None:
             return None
         return IntentNode(
@@ -374,12 +376,26 @@ class IntentContinuityGraph:
         return out
 
     async def link_mission(self, intent_id: str, mission_id: str, *, now_ms: int | None = None):
+        """Legacy linking API verifies the actual mission; it does not add observations."""
         now = int(time.time() * 1000) if now_ms is None else now_ms
-        await self.store.execute(
-            "INSERT INTO intent_missions(intent_id, mission_id, linked_at_ms) VALUES (?, ?, ?) "
-            "ON CONFLICT(intent_id, mission_id) DO NOTHING",
-            (intent_id, mission_id, now),
-        )
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            node = await self._get(db,intent_id)
+            if node is None:
+                raise ValueError("INTENT_UNKNOWN")
+            mission = await (await db.execute("SELECT goal FROM missions WHERE mission_id=?",(mission_id,))).fetchone()
+            if mission is None:
+                raise ValueError("INTENT_MISSION_UNKNOWN")
+            if node.owner_goal != mission["goal"].strip():
+                raise ValueError("INTENT_MISSION_SCOPE_CONFLICT")
+            links = await (await db.execute("SELECT intent_id FROM intent_missions WHERE mission_id=?",(mission_id,))).fetchall()
+            if any(row["intent_id"] != intent_id for row in links):
+                raise ValueError("INTENT_MISSION_SCOPE_CONFLICT")
+            await db.execute(
+                "INSERT INTO intent_missions(intent_id,mission_id,linked_at_ms) VALUES(?,?,?) "
+                "ON CONFLICT(intent_id,mission_id) DO NOTHING",(intent_id,mission_id,now),
+            )
+            await db.commit()
 
     async def mark_stale(self, *, now_ms: int | None = None) -> int:
         """§20 — surface stale objectives rather than acting on them silently."""
