@@ -1,0 +1,11 @@
+# Native MetaEditor source compilation
+
+`van-mql-native-source` runs on a disposable Windows Actions runner when the EA, compiler script or workflow changes. It also supports manual workflow dispatch. It uses a read-only repository token and no owner, DIAL, broker, handset or deployment credentials.
+
+The compiler script obtains the installer linked by the official MetaTrader download page, requires an admitted HTTPS MetaQuotes distribution location, and verifies the Windows Authenticode publisher before execution. It records installer and compiler hashes, signature identities and the actual compiler version. Installer preparation is bounded. The native standard library must be present. Terminal processes are stopped; the script never supplies an account login, attaches an EA or issues a trading command.
+
+Compilation uses the [documented MetaEditor command-line interface](https://www.metatrader5.com/en/metaeditor/help/beginning/integration_ide#compiler): `/compile`, `/include` and `/log`. The repository EA is copied byte-for-byte to a fresh temporary directory. A deliberately invalid source file must produce native compiler errors and no executable; otherwise the compiler-result check fails. The actual EA must then produce a fresh nonempty EX5 and a native log reporting zero errors. Warnings remain visible in the receipt and log. An exit code by itself never establishes a successful compile.
+
+Artifacts contain the native logs, the source-candidate EX5 when compilation succeeds, and a receipt with the exact checkout and source/tool hashes. They exclude the proprietary SDK/installer. Download, publisher, installer, timeout, unreadable-log and compilation failures fail the job and retain the observed failure. The current upstream installer supplies the SDK; its actual version is recorded rather than described as a pinned release toolchain.
+
+Local PowerShell grammar and workflow YAML checks validate the runner before publication. They do not run MetaEditor or establish MQL correctness. Actual hosted compilation remains pending until its native artifact is collected. Even a successful native source compile does not establish terminal order execution, precision, provider finality, live trading readiness, deployment, profitability or handset acceptance. Those remain the existing BE-031 and original release obligations.

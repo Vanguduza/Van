@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T08:11:45.756627+00:00",
+  "updated_at_utc": "2026-10-23T08:14:31.758348+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -836,6 +836,10 @@
         {
           "description": "Actual multi-instrument account actor reuses signed recovery/journal and PostgreSQL atomic effects; state binds opaque current account/lease/specs/contracts identity. Account-scoped owner halts, idle lease renewal, current issuer file guard and decoded PEM equivalence; original unknown/partial/invalid-money commands block recovery and new risk, while genuine zero-effect readback supports fresh approval without resend. Actual pairedgateway->signedCommander->PGactor original replay and realPGrollback/lostACK covered.2560full trading/recovery pass0skip605.59s,269affected,78rebuild,12owner contracts;14faults caught/restored. Source only; original native/provider/release gates remain.",
           "evidence": "backend/BE-003_009_ACCOUNT_RUNTIME_RECOVERY.md; receipts/ACCOUNT_RUNTIME_RECOVERY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Disposable Windows native MetaEditor source runner prepared: official SDK link, Authenticode publisher check, actual tool/source fingerprints, fresh logs/EX5, real invalid-source compiler oracle and bounded installer/process cleanup. PowerShell7.5.4 grammar/YAML pass; native compiler execution NOT_RUN until hosted artifact. Original precision/finality/provider/activation gates retained.",
+          "evidence": "backend/BE-031_NATIVE_METAEDITOR_SOURCE.md; receipts/NATIVE_METAEDITOR_RUNNER_SOURCE_20261023.json"
         }
       ]
     },
