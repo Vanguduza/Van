@@ -121,6 +121,7 @@ def _gateway_dial_dev_paths() -> set[str]:
         f"{PREFIX}/projects/{{}}/tasks",
         f"{PREFIX}/projects/{{}}/graph",
         f"{PREFIX}/tasks/{{}}",
+        f"{PREFIX}/actions/{{}}",
         f"{PREFIX}/agents",
         f"{PREFIX}/workspaces",
         f"{PREFIX}/workspaces/{{}}",
@@ -211,6 +212,8 @@ def test_the_route_scan_would_catch_a_renamed_route():
     assert _normalise_route("/v1/dial-dev/workspaces/${id}/terminal-tail?lines=200") in served
     assert _normalise_route("GET /v1/dial-dev/projects/{p}/tasks?view={view}".split(" ")[1]) in served
     assert _normalise_route("/v1/dial-dev/workspace/${id}") not in served
+    assert _normalise_route("/v1/dial-dev/actions/${encodeSegment(actionId)}") in served
+    assert _normalise_route("/v1/dial-dev/action/${encodeSegment(actionId)}") not in served
 
 
 def test_hub_sections_the_phone_names_are_hub_children_the_gateway_serves():
