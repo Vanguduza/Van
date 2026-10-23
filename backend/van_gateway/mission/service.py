@@ -105,6 +105,11 @@ class MissionService:
 
     # ------------------------------------------------------------- creation
 
+    @staticmethod
+    def report_learning_unavailable(mission_id: str, stage: str, error: Exception) -> None:
+        log_event(logging.getLogger("van.learning"),logging.WARNING,"learning projection unavailable",
+            mission_id=mission_id,error_class=type(error).__name__,detail={"stage":stage})
+
     async def create(
         self,
         *,
@@ -181,7 +186,10 @@ class MissionService:
             # P2-MEM-001 — a mission is a stated owner goal and, where it needed the
             # owner's presence, a decision they could have declined. Both stores existed
             # with no producer; this is the event they were waiting for.
-            await self.learning.record_mission_opened(mission, now_ms=now)
+            try:
+                await self.learning.record_mission_opened(mission, now_ms=now)
+            except Exception as exc:
+                self.report_learning_unavailable(mission.mission_id,"capture",exc)
         await self.record_event(
             mission_id=mission.mission_id,
             event_type=MissionEventType.MISSION_CREATED,
@@ -304,13 +312,16 @@ class MissionService:
                 },
             )
         if self.learning is not None and refreshed.is_terminal:
-            await self.learning.record_mission_outcome(
-                mission_id=mission_id,
-                state=refreshed.state,
-                goal=refreshed.goal,
-                verification_status=(verification.status.value if verification else None),
-                evidence_refs=(verification.evidence_refs if verification else []),
-            )
+            try:
+                await self.learning.record_mission_outcome(
+                    mission_id=mission_id,
+                    state=refreshed.state,
+                    goal=refreshed.goal,
+                    verification_status=(verification.status.value if verification else None),
+                    evidence_refs=(verification.evidence_refs if verification else []),
+                )
+            except Exception as exc:
+                self.report_learning_unavailable(mission_id,"mission_outcome",exc)
             # P1-LEARN-003 — the same terminal event, read as evidence about the approach
             # rather than about this one mission.
             #
@@ -319,10 +330,16 @@ class MissionService:
             # terminal state incremented failure_count: a cancellation, a policy refusal
             # and an UNVERIFIABLE run all read as "this approach does not work", and three
             # of them would have demoted a strategy that had never once failed.
-            await self.learning.record_strategy_outcome(refreshed, state=refreshed.state)
+            try:
+                await self.learning.record_strategy_outcome(refreshed, state=refreshed.state)
+            except Exception as exc:
+                self.report_learning_unavailable(mission_id,"strategy_outcome",exc)
             # §12 — how the owner's decision actually turned out, which is the only thing
             # that can falsify what VAN inferred from it.
-            await self.learning.record_decision_outcome(refreshed, state=refreshed.state)
+            try:
+                await self.learning.record_decision_outcome(refreshed, state=refreshed.state)
+            except Exception as exc:
+                self.report_learning_unavailable(mission_id,"decision_outcome",exc)
         if refreshed.is_terminal:
             await self.reconcile_terminal_projections(mission_id=mission_id)
         return refreshed

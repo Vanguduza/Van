@@ -14,6 +14,8 @@ stores, which is what the audit found.
 from __future__ import annotations
 
 import pytest
+import time
+import uuid
 import pytest_asyncio
 
 from van_gateway.learning.feed import LearningFeed
@@ -24,7 +26,7 @@ from van_gateway.mission.models import (
     Sensitivity,
 )
 from van_gateway.mission.service import MissionService
-from van_gateway.models import ActionClass, OriginChannel
+from van_gateway.models import ActionClass, OriginChannel, PrincipalType
 from van_gateway.storage.db import Store
 from van_gateway.understanding.memory import (
     DecisionFingerprints,
@@ -50,9 +52,21 @@ def _svc(store):
     return MissionService(store, learning=LearningFeed(store))
 
 
+async def _seal_fixture_choice(store,source):
+    from van_gateway.command.authority import CommandAuthorityService,CommandAuthorityRecord
+    from van_gateway.context.service import OwnerContextService
+    snapshot=await OwnerContextService(store).compile_snapshot(source,[])
+    now=int(time.time())
+    await CommandAuthorityService(store).seal(CommandAuthorityRecord(command_id=source,device_id='dev-memory-owner',
+        principal_type=PrincipalType.OWNER_DEVICE,requested_by='owner',origin_channel=OriginChannel.VOICE,
+        signed_action_class=ActionClass.A4,effective_action_class=ActionClass.A4,snapshot_id=snapshot.snapshot_id,
+        context_digest=snapshot.digest,request_hash='d'*64,issued_at_unix=now,sealed_at_unix_ms=now*1000,owner_approved=True))
+
 async def _open(svc, *, goal, approved=False, project_id=None, constraints=()):
+    source='cmd-fixture-'+uuid.uuid4().hex if approved else None
+    if approved:await _seal_fixture_choice(svc.store,source)
     return await svc.create(
-        owner_principal_id="owner",
+        owner_principal_id="device:dev-memory-owner" if approved else "owner",
         origin=MissionOrigin.OWNER_VOICE,
         origin_channel=OriginChannel.VOICE,
         title=goal[:40], goal=goal,
@@ -61,7 +75,7 @@ async def _open(svc, *, goal, approved=False, project_id=None, constraints=()):
         sensitivity=Sensitivity.ROUTINE,
         authority_envelope=AuthorityEnvelope(
             max_action_class=ActionClass.A4 if approved else ActionClass.A2,
-            requires_owner_presence=approved,
+            requires_owner_presence=approved,source_command_id=source,
         ),
     )
 
@@ -298,6 +312,16 @@ class TestDecisionsAreRecordedWithoutBeingInterpreted:
         assert await store.fetchall(
             "SELECT * FROM decision_fingerprints WHERE mission_id = ?", (mission.mission_id,)
         ) == []
+
+        # A sealed owner approval must also agree with the native mission's required
+        # presence. A migrated ordinary mission cannot inherit another interpretation.
+        source='cmd-inconsistent-memory'
+        mission=await svc.create(owner_principal_id='device:dev-memory-owner',origin=MissionOrigin.OWNER_VOICE,
+            origin_channel=OriginChannel.VOICE,title='Ordinary work',goal='Read ordinary information',
+            authority_envelope=AuthorityEnvelope(max_action_class=ActionClass.A4,requires_owner_presence=False,source_command_id=source))
+        await _seal_fixture_choice(store,source)
+        await svc.learning.record_mission_opened(mission)
+        assert not await store.fetchall('SELECT * FROM decision_fingerprints WHERE mission_id=?',(mission.mission_id,))
 
     async def test_nothing_is_inferred_about_why(self, store):
         """§12 — a fingerprint store that writes a plausible reason becomes a machine for

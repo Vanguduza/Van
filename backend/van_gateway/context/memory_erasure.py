@@ -292,3 +292,36 @@ async def memory_erasure_readback(store: Store, store_id: str, command_id: str, 
 
 
 __all__ = ["MemoryErasureDenied", "erase_memory", "memory_erasure_readback", "selected_stores"]
+
+
+async def source_memory_was_erased(db: Any, *, table: str, record_key: dict,
+                                 source_kernel_revision: int) -> bool:
+    """A committed owner erase cannot be undone by a late original-source projection.
+
+    Read the existing authoritative erase witness under the caller's write transaction.
+    Exact record tombstones cover selective erasure. Bulk erasure also excludes source snapshots before its native context-revision
+    barrier, including when the erased store was empty. Wall-clock order is not used.
+    This is a read guard, never an erasure or execution authorization.
+    """
+    from van_gateway.understanding.records import PRIMARY_KEYS
+    if not db.in_transaction:raise ValueError("memory_source_guard_requires_transaction")
+    if table not in PRIMARY_KEYS or set(record_key)!=set(PRIMARY_KEYS[table]):
+        raise ValueError("memory_source_identity_invalid")
+    if type(source_kernel_revision) is not int or source_kernel_revision<0:
+        raise ValueError("memory_source_revision_invalid")
+    identity=_identity(table,list(PRIMARY_KEYS[table]),record_key)
+    rows=await(await db.execute("SELECT key,value FROM runtime_meta WHERE key GLOB ?",(WITNESS_PREFIX+"*",))).fetchall()
+    for row in rows:
+        try:
+            original=json.loads(row['value'])
+            if not isinstance(original,dict) or type(original.get('schema_version')) is not int or original['schema_version']!=1:raise ValueError()
+            if row['key']!=WITNESS_PREFIX+original['command_id']:raise ValueError()
+            _original_removed(row['value'],entries=selected_stores(original['store']),store_id=original['store'],
+                command_id=original['command_id'],device_id=original['device_id'],
+                record_id=original.get('record_id'),expected_sha256=original.get('expected_sha256'))
+            if table not in original['tables']:continue
+            if identity in original['tables'][table]['before_ids']:return True
+            if original.get('record_id') is None and source_kernel_revision<original['context_revision_after']:return True
+        except (KeyError,TypeError,ValueError) as exc:
+            raise MemoryErasureDenied('memory_erasure_source_witness_unreadable') from exc
+    return False

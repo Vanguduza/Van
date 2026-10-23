@@ -86,3 +86,12 @@ def test_a_gradle_compile_failure_is_not_counted_as_a_detected_invariant(tmp_pat
         harness.run([("Guard.kt", "guarded", "unsafe", "invalid Kotlin")], [], root=tmp_path, command=["gradle", "test"])
     assert victim.read_text() == "guarded"
     assert not harness.JOURNAL.exists()
+
+
+def test_current_source_preserves_every_registered_mutation_anchor():
+    """The real default rebuild suite must detect drift before hosted shards start."""
+    checker = load('mutation_registry_current_source', ROOT / 'tools/rebuild/mutation_registry.py')
+    report = checker.inspect(checker.suite_groups())
+    assert report['mutation_count'] == 374
+    assert report['edit_count'] == 383
+    assert report['findings'] == [], report['findings']

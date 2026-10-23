@@ -109,10 +109,9 @@ class LearningFeed:
         intent instead of creating a second one — which is what makes STALE mean
         "unmentioned for ninety days" rather than "recorded once".
 
-        A decision fingerprint is recorded only where there was a decision: a mission
-        whose authority envelope required the owner's presence is one they could have
-        declined and did not. A command that needed no approval is not a choice, and
-        recording one would fill §65's store with the owner's ordinary use of VAN.
+        Approval learning additionally requires an exact sealed owner authority record.
+        A required presence flag alone is not evidence of an approved choice. At capture
+        the record may not yet exist; the command join observes it again after sealing.
         """
         intent = await self.intents.observe(
             owner_goal=mission.goal,
@@ -122,27 +121,64 @@ class LearningFeed:
             mission_id=mission.mission_id,
         )
 
-        decision_id = None
-        if mission.authority_envelope.requires_owner_presence:
-            decision_id = await self.fingerprints.record(
-                owner_choice=f"approved: {mission.goal[:200]}",
-                mission_id=mission.mission_id,
-                context={
-                    "mission_class": mission.mission_class,
-                    "action_class": mission.authority_envelope.max_action_class.value,
-                    "origin_channel": mission.origin_channel.value,
-                    "sensitivity": mission.sensitivity.value,
-                },
-                options_considered=["approve", "decline"],
-                # §12 — deliberately absent. VAN does not infer why the owner approved,
-                # and writing a plausible reason here is how a fingerprint store becomes
-                # a machine for justifying whatever the owner did last. `falsified()`
-                # therefore returns nothing, and the understanding surface says that this
-                # is because nothing was inferred rather than because nothing was wrong.
-                inferred_reason=None,
-                now_ms=now_ms,
-            )
+        decision_id = await self.record_owner_approval(mission,now_ms=now_ms)
         return {"intent_id": intent.intent_id, "decision_id": decision_id}
+
+    async def record_owner_approval(self, mission: Mission, *, now_ms: int | None = None) -> str | None:
+        """Observe a sealed owner approval; this method creates no authority.
+
+        At initial capture there may be no sealed record yet. The command join calls
+        again after seal, and original source identity makes that observation idempotent.
+        History may be recorded after a grant expires; it can never execute that grant.
+        """
+        from van_gateway.command.authority import CommandAuthorityRecord,CommandAuthorityService,AuthoritySource
+        from van_gateway.mission.models import AuthorityEnvelope
+        from van_gateway.models import ActionClass,OriginChannel,PrincipalType
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            native=await(await db.execute("SELECT * FROM missions WHERE mission_id=?",(mission.mission_id,))).fetchone()
+            if native is None:return None
+            envelope=AuthorityEnvelope.model_validate_json(native["authority_envelope_json"])
+            source=envelope.source_command_id
+            if not source:return None
+            row=await(await db.execute("SELECT value FROM runtime_meta WHERE key=?",(CommandAuthorityService.PREFIX+source,))).fetchone()
+            if row is None:return None
+            record=CommandAuthorityRecord.model_validate_json(row["value"])
+            if (record.command_id!=source or record.authority_source is not AuthoritySource.OWNER_COMMAND
+                or record.principal_type is not PrincipalType.OWNER_DEVICE or not record.owner_approved
+                or record.effective_action_class not in {ActionClass.A4,ActionClass.A5}
+                or envelope.max_action_class is not record.effective_action_class
+                or native["owner_principal_id"]!="device:"+record.device_id
+                or record.origin_channel not in {OriginChannel.VOICE,OriginChannel.TEXT,OriginChannel.UI}
+                or native["origin_channel"]!=record.origin_channel.value or not record.request_hash):
+                return None
+            snapshot=await(await db.execute("SELECT command_id,digest,kernel_revision FROM context_snapshots WHERE snapshot_id=?",(record.snapshot_id,))).fetchone()
+            if snapshot is None or snapshot['command_id']!=source or snapshot['digest']!=record.context_digest:
+                return None
+            # The authoritative mission is reread in this transaction. A caller's stale
+            # object cannot supply either approval, scope or presentation context.
+            mission=mission.model_copy(update={"goal":native["goal"],"mission_class":native["mission_class"],
+                "origin_channel":OriginChannel(native["origin_channel"]),"authority_envelope":envelope})
+            from van_gateway.context.memory_erasure import source_memory_was_erased
+            projection_key="owner-approval:"+source
+            identity=self.fingerprints.projection_id(mission.mission_id,projection_key)
+            if await source_memory_was_erased(db,table="decision_fingerprints",record_key={"decision_id":identity},
+                    source_kernel_revision=snapshot["kernel_revision"]):return None
+            decision_id = None
+            if mission.authority_envelope.requires_owner_presence:
+                decision_id = await self.fingerprints.record(
+                    owner_choice=f"approved: {mission.goal[:200]}",
+                    mission_id=mission.mission_id,
+                    context={"mission_class":native["mission_class"],"action_class":record.effective_action_class.value,"signed_action_class":record.signed_action_class.value,
+                        "origin_channel":native["origin_channel"],"sensitivity":native["sensitivity"],
+                        "approval_source_ref":"command-authority:"+source},
+                    options_considered=["approve","decline"],
+                    evidence_used=["command-authority:"+source],
+                    inferred_reason=None,
+                    now_ms=now_ms,projection_key=projection_key,_db=db,
+                )
+            await db.commit()
+            return decision_id
 
     async def record_decision_outcome(
         self, mission: Mission, *, state: MissionState, now_ms: int | None = None

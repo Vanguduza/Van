@@ -15,6 +15,7 @@ every read a filter and every write a guess about which kind of thing this is.
 from __future__ import annotations
 
 import json
+import hashlib
 import time
 import uuid
 from enum import Enum
@@ -214,6 +215,12 @@ class IntentContinuityGraph:
         normalized = owner_goal.strip()
         if not normalized:
             raise ValueError("INTENT_GOAL_REQUIRED")
+        initial_horizon, initial_reason = self._horizon_for(
+            current=IntentHorizon.EPHEMERAL,
+            observations=1,
+            projects=[project_id] if project_id else [],
+            owner_declared_standing=owner_declared_standing,
+        )
         async with self.store.connection() as db:
             await db.execute("BEGIN IMMEDIATE")
             if mission_id is not None:
@@ -253,8 +260,7 @@ class IntentContinuityGraph:
                      reason if promoted else None,now if promoted else None,intent_id),
                 )
             else:
-                horizon, reason = self._horizon_for(current=IntentHorizon.EPHEMERAL,observations=1,
-                    projects=[project_id] if project_id else [],owner_declared_standing=owner_declared_standing)
+                horizon, reason = initial_horizon, initial_reason
                 intent_id = f"intent_{uuid.uuid4().hex}"
                 await db.execute(
                     "INSERT INTO intent_nodes(intent_id,owner_goal,first_observed_ms,latest_observed_ms, "
@@ -504,26 +510,43 @@ class DecisionFingerprints:
         evidence_used: list[str] | None = None,
         rejected_alternatives: list[str] | None = None,
         now_ms: int | None = None,
+        projection_key: str | None = None,
+        _db: Any = None,
     ) -> str:
         now = int(time.time() * 1000) if now_ms is None else now_ms
-        decision_id = f"dfp_{uuid.uuid4().hex}"
-        await self.store.execute(
-            """
-            INSERT INTO decision_fingerprints(
-              decision_id, mission_id, context_json, options_considered_json, owner_choice,
-              owner_stated_reason, inferred_reason, tradeoffs_json, evidence_used_json,
-              rejected_alternatives_json, outcome, reassessment, created_at_ms, updated_at_ms
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?)
-            """,
-            (
-                decision_id, mission_id, Store.dumps(context or {}),
-                Store.dumps(options_considered or []), owner_choice, owner_stated_reason,
-                inferred_reason, Store.dumps(tradeoffs or []),
-                Store.dumps(evidence_used or []), Store.dumps(rejected_alternatives or []),
-                now, now,
-            ),
-        )
-        return decision_id
+        decision_id = (self.projection_id(mission_id,projection_key)
+            if projection_key is not None else f"dfp_{uuid.uuid4().hex}")
+        content = dict(mission_id=mission_id,context_json=Store.dumps(context or {}),
+            options_considered_json=Store.dumps(options_considered or []),owner_choice=owner_choice,
+            owner_stated_reason=owner_stated_reason,inferred_reason=inferred_reason,
+            tradeoffs_json=Store.dumps(tradeoffs or []),evidence_used_json=Store.dumps(evidence_used or []),
+            rejected_alternatives_json=Store.dumps(rejected_alternatives or []))
+        async def insert(db):
+            if projection_key is not None:
+                existing = await (await db.execute("SELECT * FROM decision_fingerprints WHERE decision_id=?",(decision_id,))).fetchone()
+                if existing is not None:
+                    if any(existing[key] != value for key,value in content.items()):
+                        raise ValueError("DECISION_PROJECTION_SCOPE_CONFLICT")
+                    return decision_id
+            await db.execute(
+                "INSERT INTO decision_fingerprints(decision_id,mission_id,context_json,options_considered_json,owner_choice,"
+                "owner_stated_reason,inferred_reason,tradeoffs_json,evidence_used_json,rejected_alternatives_json,"
+                "outcome,reassessment,created_at_ms,updated_at_ms) VALUES(?,?,?,?,?,?,?,?,?,?,NULL,NULL,?,?)",
+                (decision_id,*content.values(),now,now),
+            )
+            return decision_id
+        if _db is not None:
+            if not _db.in_transaction:raise ValueError("decision_projection_requires_transaction")
+            return await insert(_db)
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            result=await insert(db)
+            await db.commit()
+            return result
+
+    @staticmethod
+    def projection_id(mission_id: str | None, projection_key: str) -> str:
+        return "dfp_approval_"+hashlib.sha256(Store.dumps([mission_id,projection_key]).encode()).hexdigest()
 
     async def record_outcome(
         self, decision_id: str, *, outcome: str, reassessment: str | None = None,
