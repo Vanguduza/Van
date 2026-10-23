@@ -441,8 +441,9 @@ async def test_account_onboarding_is_device_signed_and_forwards_without_storing_
                 "action": action, "args": args}
         if approve and requires_owner_approval(action) and secret == "test-device-secret":
             challenge = await ac.post("/v1/trading/accounts/challenge", json=body)
-            if challenge.status_code == 200:
-                body["approval_proof"] = _approval_proof(challenge.json())
+            if challenge.status_code != 200:
+                return challenge
+            body["approval_proof"] = _approval_proof(challenge.json())
         return await ac.post("/v1/trading/accounts/action", json=body)
     assert (await act("account_upsert", {"alias": "paper_lab", "broker": "PAPER"}, secret="wrong")).status_code == 403
     assert (await act("account_upsert", {"alias": "paper_lab", "broker": "PAPER"}, issued=now - 3600)).status_code == 403
@@ -489,7 +490,15 @@ async def test_account_onboarding_is_device_signed_and_forwards_without_storing_
     assert (await act("oauth_start", {"broker": "ctrader"})).status_code == 422
     # MT5-EA key issue returns the key once to the app, stores it on the VM
     k = (await act("mt5_ea_issue_key", {"alias": "mt5_ea", "login": "1", "server": "Demo"})).json()
-    assert len(k["signing_key"]) == 64 and (await act("account_remove", {"alias": "mt5_ea"})).json()["removed"]
+    assert len(k["signing_key"]) == 64
+    # No terminal has supplied funds/exposure facts for this newly issued key.
+    # The existing credential and profile must survive an unqualified unlink.
+    refused = await act("account_remove", {"alias": "mt5_ea"})
+    assert refused.status_code == 409, refused.text
+    assert (tmp_path / "secrets" / "mt5_ea.env").exists()
+    assert any(a["alias"] == "mt5_ea" for a in (await ac.get("/v1/trading/accounts")).json()["accounts"])
+    # Keep the positive paired/native unlink path on the known paper account.
+    assert (await act("account_remove", {"alias": "paper_lab"})).json()["removed"]
 
 
 def test_cognitive_projections_and_imports_cannot_reach_order_authority(tmp_path, monkeypatch):

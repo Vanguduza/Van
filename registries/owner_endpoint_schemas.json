@@ -3932,6 +3932,113 @@
         "title": "DeviceTelemetrySample",
         "description": "One device-produced measurement (P3-OBS-002).\n\nThe name must be one the catalogue declares \u2014 see\n`instruments.DEVICE_HISTOGRAMS` and `DEVICE_GAUGES`. An unknown name is\nrefused rather than registered, because a metric that appears at runtime with\nno declared producer is exactly the drift Gate 11 exists to stop."
       },
+      "DialDevNativeAction": {
+        "properties": {
+          "action_id": {
+            "type": "string",
+            "title": "Action Id"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "target": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Target"
+          },
+          "state": {
+            "type": "string",
+            "title": "State",
+            "description": "Native ACCEPTED/APPLIED/REJECTED/SUPERSEDED. A control error does not establish no effect; task success has its own source."
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "typed_control": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typed Control"
+          },
+          "control_result": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Control Result"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "action_id",
+          "action",
+          "target",
+          "state"
+        ],
+        "title": "DialDevNativeAction",
+        "description": "Native control lifecycle, distinct from task success or proven no effect."
+      },
+      "DialDevNativeActionEnvelope": {
+        "properties": {
+          "projection_revision": {
+            "type": "string",
+            "title": "Projection Revision"
+          },
+          "observed_at": {
+            "type": "string",
+            "title": "Observed At"
+          },
+          "sources": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Sources"
+          },
+          "freshness_ms": {
+            "type": "integer",
+            "title": "Freshness Ms"
+          },
+          "degraded": {
+            "items": {},
+            "type": "array",
+            "title": "Degraded"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DialDevNativeAction"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "projection_revision",
+          "observed_at",
+          "sources",
+          "freshness_ms",
+          "degraded",
+          "data"
+        ],
+        "title": "DialDevNativeActionEnvelope"
+      },
       "DomainSkillCanaryBody": {
         "properties": {
           "passed": {

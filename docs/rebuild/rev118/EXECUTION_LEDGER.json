@@ -172,7 +172,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T11:49:22.216547+00:00",
+    "updated_utc": "2026-10-23T13:14:20.838346+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [],
@@ -302,7 +302,9 @@
       "Local account unlink binds exact resolved review/native funds/history/credential disposition; actual account lease row and submission guard exclude runtime, unresolved effects/exposure/stale facts retain profile. Shared/external credential references preserved, including late ownership drift. Typed gateway approval/native replay and existing Android confirmation wired; MT5 pending-orders and native cTrader/Deriv funding facts refuse missing observations. 2675 full trading/recovery pass0skip realPG(cleaned),91focused/29writer/3actualPG/78rebuild,16faults+controls caught/restored; Android222JVM/2APKs/lint0ErrorFatal. Source only; completed real-provider finality and all original gates remain.",
       "Exact d88 MetaEditor run39935785223 compiled0errors0warnings/freshEX5; negative4errors/noEX5. Hosted39935785250 all374legacyfaults383edits/native18pass4existingartworkskips/VITS5.291s3.431s/PG26voice117/publictrading2409pass1DDSskip. Source and tested merge trees equal; DDSreadkey/trustedmain bootstrap still fail.",
       "Mission activity wire preserves dependency/retry/verification contracts; transactional admission refuses invalid/orphan/foreign dependencies and terminal-race work. Owner graph reads one durable snapshot, stable IDs, owner-visible evidence and raw executor outcomes; cycles/orphans/conflicting bindings explicit, no layout authority or invented success/duration.2original failures fixed;157affected/166combined source cases,78rebuild,35owner contracts;10meaningful faults+controls caught/restored including actual concurrent-writer snapshot. Source only; project-wide CRUD/timed scheduling/native provider integration and whole-unit gates remain.",
-      "Reminder request-bound idempotency and actual concurrent create/fire are atomic; cancelled/resolved conflicts explicit, follow-up rollback/project/source preserved. Durable FIRED publication replays same event/attention after lost ACK, preserves original owner ACK and legacy events; server persistence never claims handset delivery. Attention concurrent upsert and persisted source/project corrected. Typed time errors/unique wall instants/elapsed DST arithmetic.12reminder+2attention beforefailures fixed;86focused/252combined pass0skip,78rebuild/35owner contracts;12faults+controls caught/restored, initial nondeterministic survivor retained and oracle corrected with actual independent owner write. Source only, original units/gates remain."
+      "Reminder request-bound idempotency and actual concurrent create/fire are atomic; cancelled/resolved conflicts explicit, follow-up rollback/project/source preserved. Durable FIRED publication replays same event/attention after lost ACK, preserves original owner ACK and legacy events; server persistence never claims handset delivery. Attention concurrent upsert and persisted source/project corrected. Typed time errors/unique wall instants/elapsed DST arithmetic.12reminder+2attention beforefailures fixed;86focused/252combined pass0skip,78rebuild/35owner contracts;12faults+controls caught/restored, initial nondeterministic survivor retained and oracle corrected with actual independent owner write. Source only, original units/gates remain.",
+      "Encrypted Android original DIAL controls survive restart with original body/key/revision; exact owner-authenticated native action read beyond recent lists, scoped typed acknowledgements, stale/foreign/malformed/uncertain facts retain identity. Distinct protective controls retain native authorization; late observers cannot settle newer work. 163 affected backend,7 typed-read,1326 pure Kotlin,222 app JVM,2 debug APKs,lint zero Error/Fatal;15 faults+15 controls assertion-caught/restored.78 rebuild,29 registry,15 actual-PG/lease pass. Failed broad59 backend/trading executions retained with focused test-only corrections; source candidate, no unit/live certification.",
+      "Hosted exact59d5777e all374 legacyfaults383edits/native18pass4explicitartworkskips/MetaEditor0errors0warnings+invalid4errors/noEX5. Full local frozen59 backend6961pass9skip1old-onboardingtestfail; trading2434pass1lease-testCAS-oraclefail. Both retained; focused corrected expectations pass without relaxing production guards."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -313,9 +315,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Publish the three tested source packets; collect exact new Windows MetaEditor/native-emulator/full374 hosted evidence. Freeze the resulting commit in the clean owned QA checkout and run full backend/contracts with actual PostgreSQL/Chromium/AGP/storage audit. Continue whole-product work by reviewing existing native DDS project/task graph/control integration before adding parallel project truth; finish original project-wide CRUD, timed scheduling, provider-bound interventions, privacy, owner timezone/recurring calendar and native financial finality/worker deadlines-epochs-risk. Preserve all131units/93plannedfeatures and frontendBG001. No invented acceptance or repeated connector-permission questions.",
-    "previous_head": "b494acf8231e073864ed6efd5ef02f9cb235c2f4",
-    "current_packet": "Reminder state/follow-up/publication and concurrent owner attention, source tested."
+    "next_action": "Commit/push verified original DIAL control packet; freeze new commit and repeat full backend/contracts+trading with actual privatePG/browser/AGP/DDS/storage audit. Continue original native cTrader precision/account-equity and truthful close/recovery source implementation, provider financial finality, worker deadline/epoch/risk envelopes and remaining whole-product domains. Preserve131units/93plannedfeatures, no newfrontend beforeBG001, no invented native/unit/production acceptance or repeated connector authorization questions.",
+    "previous_head": "59d5777e95cbd9d6141f5f49ac04d22e0b8d37c3",
+    "current_packet": "Original native DIAL control recovery; existing Android functional repairs, candidate source tested."
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -373,6 +375,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Publish the three tested source packets; collect exact new Windows MetaEditor/native-emulator/full374 hosted evidence. Freeze the resulting commit in the clean owned QA checkout and run full backend/contracts with actual PostgreSQL/Chromium/AGP/storage audit. Continue whole-product work by reviewing existing native DDS project/task graph/control integration before adding parallel project truth; finish original project-wide CRUD, timed scheduling, provider-bound interventions, privacy, owner timezone/recurring calendar and native financial finality/worker deadlines-epochs-risk. Preserve all131units/93plannedfeatures and frontendBG001. No invented acceptance or repeated connector-permission questions.",
-  "updated_at_utc": "2026-10-23T11:49:22.216547+00:00"
+  "current_action": "Commit/push verified original DIAL control packet; freeze new commit and repeat full backend/contracts+trading with actual privatePG/browser/AGP/DDS/storage audit. Continue original native cTrader precision/account-equity and truthful close/recovery source implementation, provider financial finality, worker deadline/epoch/risk envelopes and remaining whole-product domains. Preserve131units/93plannedfeatures, no newfrontend beforeBG001, no invented native/unit/production acceptance or repeated connector authorization questions.",
+  "updated_at_utc": "2026-10-23T13:14:20.838346+00:00"
 }

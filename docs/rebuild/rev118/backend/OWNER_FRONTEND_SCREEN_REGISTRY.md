@@ -1,6 +1,6 @@
 # VAN current frontend screen and feature registry
 
-Current source inventory: **42 features, 105 source functions, 78 screens/hosted surfaces, 446 endpoint declarations and 287 schemas**.
+Current source inventory: **42 features, 105 source functions, 78 screens/hosted surfaces, 447 endpoint declarations and 289 schemas**.
 
 This generated document renders the current source contracts, including gaps and unverified states. It does not declare features complete, qualify live services or authorize a redesigned frontend. No new frontend/prototype before BG-001. Current source features are distinct from the frozen Rev1.18 programme of **93 planned features, 349 owner actions, 324 requirements, 1,610 acceptance identities and 131 units**. The complete planned scope remains in [the frozen package](../../../review-inputs/van-rev115/package/) and its [backend consumption contract](../../../review-inputs/van-rev115/package/contracts/BACKEND_TO_FRONTEND_CONSUMPTION_CONTRACT.md).
 
@@ -14,10 +14,10 @@ Owner-access endpoints and service dependencies are listed separately below. An 
 
 | Registry | SHA-256 |
 | --- | --- |
-| [owner_features.json](../../../../registries/owner_features.json) | `14d17cd226862b7796d036043af487b73a6be019b485836329956b63f1843f77` |
-| [owner_screens.json](../../../../registries/owner_screens.json) | `3f88775a444a39cbea640d0e9b7ca5a6e62a9b2d5a1196b87715c687f5ac071e` |
-| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `74279136649f58b47e782e8d5310dbebbde51f6e524bf53bad0800dda03765fc` |
-| [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `6cf352912c6768af3f182a3b798fe18881faefcce90041f1d0a4577ad0f0cb15` |
+| [owner_features.json](../../../../registries/owner_features.json) | `7cce04f7b7638d5f2b4ac72a4ede26cb0da74dfd7c493c9baa436424bc103d36` |
+| [owner_screens.json](../../../../registries/owner_screens.json) | `51337c72fa712a1010274922dd9b9c2854f18d515c273752d48c922bd88fe071` |
+| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `998b28beefc16cef80197b50c13088a3b5f013917b0680aedda1b4a4a22592bc` |
+| [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `b401f9ca49989658d595cdd3d32a51282665a5d69633bca5436ca1961e477bdb` |
 
 Regenerate with `python3 tools/rebuild/render_frontend_registry.py --apply`; verify with `--check`.
 
@@ -1525,6 +1525,12 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; frontend integration: `SOURCE_PRESEN
 | GET | /v1/dial-dev/projects/{project_id}/home | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.DialDevClient.dialDev.home |
 | GET | /v1/dial-dev/events | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.DialDevClient.dialDev.events |
 
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/dial-dev/actions/{action_id} | VanGatewayClient.dialDev.action/reconcileAction | CANDIDATE_BACKEND_AND_EXISTING_ANDROID_CONTROL_RECOVERY_SOURCE_NATIVE_ACCEPTANCE_PENDING | Exact original action read beyond recent lists; encrypted prepared request retains parameters/revision/key across restart. Reads never POST. Changed instructions, malformed/foreign/stale facts and uncertain native control errors cannot replace an original. APPLIED is a control outcome, not task success. |
+
 ### van.work.dev.plan — Stage Plan
 
 Owner goal: Inspect DIAL stage/phase plan and act only against the live projection.
@@ -1562,6 +1568,12 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; frontend integration: `SOURCE_PRESEN
 | --- | --- | --- | --- |
 | GET | /v1/dial-dev/projects/{project_id}/stage-plan | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.DialDevClient.dialDev.stagePlan |
 | GET | /v1/dial-dev/events | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.DialDevClient.dialDev.events |
+
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/dial-dev/actions/{action_id} | VanGatewayClient.dialDev.action/reconcileAction | CANDIDATE_BACKEND_AND_EXISTING_ANDROID_CONTROL_RECOVERY_SOURCE_NATIVE_ACCEPTANCE_PENDING | Exact original action read beyond recent lists; encrypted prepared request retains parameters/revision/key across restart. Reads never POST. Changed instructions, malformed/foreign/stale facts and uncertain native control errors cannot replace an original. APPLIED is a control outcome, not task success. |
 
 ### van.work.dev.tasks — Development Tasks
 
@@ -1686,6 +1698,12 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; frontend integration: `SOURCE_PRESEN
 | POST | /v1/dial-dev/actions | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.DialDevClient.dialDev.submitAction |
 | GET | /v1/dial-dev/events | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.DialDevClient.dialDev.events |
 
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/dial-dev/actions/{action_id} | VanGatewayClient.dialDev.action/reconcileAction | CANDIDATE_BACKEND_AND_EXISTING_ANDROID_CONTROL_RECOVERY_SOURCE_NATIVE_ACCEPTANCE_PENDING | Exact original action read beyond recent lists; encrypted prepared request retains parameters/revision/key across restart. Reads never POST. Changed instructions, malformed/foreign/stale facts and uncertain native control errors cannot replace an original. APPLIED is a control outcome, not task success. |
+
 ### van.work.dev.agents — Agents
 
 Owner goal: Inspect DIAL agent registry/status and act only against the live projection.
@@ -1804,6 +1822,12 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; frontend integration: `SOURCE_PRESEN
 | GET | /v1/dial-dev/workspaces/{workspace_id}/terminal-tail | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.DialDevClient.dialDev.workspaceTerminalTail |
 | POST | /v1/dial-dev/actions | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.DialDevClient.dialDev.submitAction |
 | GET | /v1/dial-dev/events | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.DialDevClient.dialDev.events |
+
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/dial-dev/actions/{action_id} | VanGatewayClient.dialDev.action/reconcileAction | CANDIDATE_BACKEND_AND_EXISTING_ANDROID_CONTROL_RECOVERY_SOURCE_NATIVE_ACCEPTANCE_PENDING | Exact original action read beyond recent lists; encrypted prepared request retains parameters/revision/key across restart. Reads never POST. Changed instructions, malformed/foreign/stale facts and uncertain native control errors cannot replace an original. APPLIED is a control outcome, not task success. |
 
 ### van.work.dev.evidence — Evidence
 
@@ -6491,6 +6515,12 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; integration: `PARTIAL_OWNER_SURFACE`
 | GET | /v1/dial-dev/evidence/{evidence_ref} | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.DialDevClient.dialDev.evidence |
 | GET | /v1/dial-dev/events | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.DialDevClient.dialDev.events |
 | POST | /v1/dial-dev/actions | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.DialDevClient.dialDev.submitAction |
+
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/dial-dev/actions/{action_id} | VanGatewayClient.dialDev.action/reconcileAction | CANDIDATE_BACKEND_AND_EXISTING_ANDROID_CONTROL_RECOVERY_SOURCE_NATIVE_ACCEPTANCE_PENDING | Exact original action read beyond recent lists; encrypted prepared request retains parameters/revision/key across restart. Reads never POST. Changed instructions, malformed/foreign/stale facts and uncertain native control errors cannot replace an original. APPLIED is a control outcome, not task success. |
 
 ### OF-DEV-002 — Workspace evidence and terminal views
 

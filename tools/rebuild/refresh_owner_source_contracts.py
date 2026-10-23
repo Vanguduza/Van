@@ -138,6 +138,23 @@ def build():
     }
     for row in (mission_feature, mission_screen):
         row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(graph_extension))
+    native_action = next(r for r in endpoint_doc["endpoints"] if r["path"] == "/v1/dial-dev/actions/{action_id}")
+    native_recovery = {
+        "method": "GET", "path": native_action["path"], "endpoint_id": native_action["endpoint_id"],
+        "source_ref": native_action["source"], "authentication": native_action["authentication"],
+        "source_status": "CANDIDATE_BACKEND_AND_EXISTING_ANDROID_CONTROL_RECOVERY_SOURCE_NATIVE_ACCEPTANCE_PENDING",
+        "client_namespace": "VanGatewayClient.dialDev", "client_function": "action/reconcileAction",
+        "client_original_operations": "com.dial.van.dialdev.DialDevOriginalOperations",
+        "authority": "OWNER_READ_ORIGINAL_NATIVE_CONTROL_NO_DISPATCH_OR_TASK_SUCCESS_GRANT",
+        "scope": "Exact original action read beyond recent lists; encrypted prepared request retains parameters/revision/key across restart. Reads never POST. Changed instructions, malformed/foreign/stale facts and uncertain native control errors cannot replace an original. APPLIED is a control outcome, not task success.",
+        "specification": "docs/rebuild/rev118/backend/BE-003_024_DIAL_ORIGINAL_CONTROL_RECOVERY.md",
+        "new_ui_implemented": False, "existing_android_repair": True, "live_qualified": False,
+    }
+    native_rows = [next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-DEV-001")]
+    native_rows += [r for r in documents["owner_screens"]["screens"] if r["id"] in {
+        "van.work.dev.home", "van.work.dev.plan", "van.work.dev.task", "van.work.dev.workspace"}]
+    for row in native_rows:
+        row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(native_recovery))
     reminder_feature = next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-REMINDER-001")
     reminder_screen = next(r for r in documents["owner_screens"]["screens"] if r["id"] == "van.reminders.manage")
     for endpoint in endpoint_doc["endpoints"]:

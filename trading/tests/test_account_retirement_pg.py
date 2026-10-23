@@ -11,7 +11,7 @@ import pytest
 from fastapi import HTTPException
 from commander.accounts import AccountControlSettings,build_account_handlers,_write_secrets
 from vati.accounts import Account,AccountRegistry,CredentialRef
-from vati.app.account_lease import AccountRuntimeLease,PostgresLeaseStore
+from vati.app.account_lease import AccountRuntimeLease,PostgresLeaseStore,LeaseOutcome
 from vati.core.ledger_pg import PostgresLedger
 from vati.execution.base import AccountState,Health,OrderCommand,StopMode
 from vati.accounts.access import bind_entry_authority
@@ -78,7 +78,14 @@ def test_actual_pg_row_guard_fences_a_competing_actor_even_beyond_lease_ttl(pg_n
             assert not competing.done()
         finally:release.set()
         assert removal.result(timeout=5)['removed'] is True
-        assert competing.result(timeout=5).permits_orders
+        result=competing.result(timeout=5)
+        if not result.permits_orders:
+            # Retirement releases its row lock before expiring the lease. A
+            # waiter may read the old lease, then lose CAS to that expiry. This
+            # is a healthy refusal, not a promise that the first attempt wins.
+            assert result.outcome is LeaseOutcome.REFUSED_HELD_BY_OTHER
+            assert result.detail=='lost compare-and-set race'
+            assert other.acquire(now_ms=current.expires_at_ms+2).permits_orders
         assert n.alias not in AccountRegistry(n.registry).accounts
         sent=[]
         adapter=bind_entry_authority(NS(submit=lambda *a,**k:sent.append('unexpected SDK effect')),

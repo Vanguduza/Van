@@ -80,6 +80,28 @@ def invalid_response(reason: str, error: str = "dial_dev_request_invalid") -> JS
     return JSONResponse(status_code=422, content={"error": error, "reason": reason}, headers=_NO_STORE)
 
 
+class DialDevNativeAction(BaseModel):
+    """Native control lifecycle, distinct from task success or proven no effect."""
+    model_config = ConfigDict(extra="allow")
+    action_id: str
+    action: str
+    target: dict[str, Any]
+    state: str = Field(description="Native ACCEPTED/APPLIED/REJECTED/SUPERSEDED. A control error does not establish no effect; task success has its own source.")
+    reason: str | None = None
+    typed_control: dict[str, Any] | None = None
+    control_result: dict[str, Any] | None = None
+
+
+class DialDevNativeActionEnvelope(BaseModel):
+    model_config = ConfigDict(extra="allow")
+    projection_revision: str
+    observed_at: str
+    sources: dict[str, Any]
+    freshness_ms: int
+    degraded: list[Any]
+    data: DialDevNativeAction
+
+
 class DialDevActionBody(BaseModel):
     """§3.3, as the device sends it. Closed: an unknown field is a refusal."""
 
@@ -233,6 +255,13 @@ def build_dial_dev_router(
         if seg is None:
             return invalid_response("task_id")
         return await _read(f"{UPSTREAM_PREFIX}/tasks/{seg}")
+
+    @router.get("/actions/{action_id}", responses={200: {"model": DialDevNativeActionEnvelope}})
+    async def original_action(action_id: str):
+        seg = _seg(action_id)
+        if seg is None:
+            return invalid_response("action_id")
+        return await _read(f"{UPSTREAM_PREFIX}/actions/{seg}")
 
     @router.get("/agents")
     async def agents():

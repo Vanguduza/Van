@@ -89,6 +89,10 @@ class VanGatewayClient(context: Context) {
         override fun load(): String? = prefs.getString("native_runtime_recoveries_v1", null)
         override fun save(value: String): Boolean = prefs.edit().putString("native_runtime_recoveries_v1", value).commit()
     })
+    private val dialDevOriginals = com.dial.van.dialdev.DialDevOriginalOperations(object : com.dial.van.dialdev.DialDevOperationStore {
+        override fun load(): String? = prefs.getString("dial_dev_original_requests_v1", null)
+        override fun save(value: String): Boolean = prefs.edit().putString("dial_dev_original_requests_v1", value).commit()
+    })
 
     fun pendingRuntimeRecoveries(): List<PendingRuntimeRecovery> =
         deviceId?.let(runtimeRecoveries::pending).orEmpty()
@@ -1862,6 +1866,19 @@ class VanGatewayClient(context: Context) {
 
         suspend fun task(taskId: String): String = read("/tasks/${encodeSegment(taskId)}")
 
+        suspend fun action(actionId: String): String = read("/actions/${encodeSegment(actionId)}")
+
+        fun pendingActions(target: com.dial.van.dialdev.DialDevActionTarget) =
+            deviceId?.let { dialDevOriginals.pending(it,target) }.orEmpty()
+
+        suspend fun reconcileAction(original: com.dial.van.dialdev.PendingDialDevOperation): com.dial.van.dialdev.DialDevActionStatus? {
+            check(deviceId == original.deviceId) { "dial_dev_owner_changed" }
+            val id = original.actionId ?: return null
+            val body = action(id)
+            check(deviceId == original.deviceId) { "dial_dev_owner_changed" }
+            return dialDevOriginals.observe(original, body)
+        }
+
         suspend fun agents(): String = read("/agents")
 
         suspend fun workspaces(): String = read("/workspaces")
@@ -1887,7 +1904,22 @@ class VanGatewayClient(context: Context) {
          * `DialDevActionReducer.onResponse`.
          */
         suspend fun submitAction(request: DialDevActionRequest): JSONObject = withContext(Dispatchers.IO) {
-            postProved("$DIAL_DEV_PREFIX/actions", request.toJson())
+            val owner = deviceId ?: error("dial_dev_owner_required")
+            val original = dialDevOriginals.prepare(owner,request)
+            check(deviceId == owner) { "dial_dev_owner_changed" }
+            original.actionId?.let {
+                return@withContext JSONObject().put("action_id",it).put("state","ACCEPTED")
+            }
+            try {
+                val response = postProved("$DIAL_DEV_PREFIX/actions", JSONObject(original.requestBody))
+                dialDevOriginals.accepted(original,response)
+                response
+            } catch (http: GatewayHttpException) {
+                val outcome = com.dial.van.dialdev.DialDevActionReducer.onResponse(http.code,http.body)
+                if (outcome is com.dial.van.dialdev.DialDevActionStatus.StaleView)
+                    dialDevOriginals.staleViewNoEffect(original)
+                throw http
+            }
         }
 
         /**
