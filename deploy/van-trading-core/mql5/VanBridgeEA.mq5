@@ -76,6 +76,47 @@ string HmacSha256Hex(const string keyStr, const uchar &msg[])
 
 string JsonEscape(string s) { StringReplace(s, "\\", "\\\\"); StringReplace(s, "\"", "\\\""); StringReplace(s, "\n", " "); return s; }
 
+// Seventeen significant digits round-trip native doubles. Never round a
+// crypto-sized quantity to two decimals or an instrument price to five.
+string JsonNumber(double value) { return MathIsValidNumber(value) ? StringFormat("%.17g", value) : "null"; }
+
+// A timeout/connection loss is not proof that the venue refused an effect.
+bool NativeRefusal(uint rc)
+{
+   return rc == TRADE_RETCODE_REJECT || rc == TRADE_RETCODE_INVALID
+      || rc == TRADE_RETCODE_INVALID_VOLUME || rc == TRADE_RETCODE_INVALID_PRICE
+      || rc == TRADE_RETCODE_INVALID_STOPS || rc == TRADE_RETCODE_TRADE_DISABLED
+      || rc == TRADE_RETCODE_MARKET_CLOSED || rc == TRADE_RETCODE_NO_MONEY
+      || rc == TRADE_RETCODE_PRICE_CHANGED || rc == TRADE_RETCODE_PRICE_OFF
+      || rc == TRADE_RETCODE_INVALID_EXPIRATION || rc == TRADE_RETCODE_INVALID_FILL
+      || rc == TRADE_RETCODE_INVALID_ORDER || rc == TRADE_RETCODE_LIMIT_ORDERS
+      || rc == TRADE_RETCODE_LIMIT_VOLUME || rc == TRADE_RETCODE_LIMIT_POSITIONS
+      || rc == TRADE_RETCODE_LONG_ONLY || rc == TRADE_RETCODE_SHORT_ONLY
+      || rc == TRADE_RETCODE_CLOSE_ONLY || rc == TRADE_RETCODE_FIFO_CLOSE
+      || rc == TRADE_RETCODE_HEDGE_PROHIBITED || rc == TRADE_RETCODE_CLIENT_DISABLES_AT
+      || rc == TRADE_RETCODE_SERVER_DISABLES_AT;
+}
+
+// Order, deal, position identifier and position ticket are distinct native IDs.
+// Resolve the deal's stable position identifier to exactly one current ticket;
+// never fall back to an order ticket or a symbol-only guess.
+ulong ResolvePositionTicket(ulong deal, const string symbol)
+{
+   if(deal == 0 || !HistoryDealSelect(deal)) return 0;
+   long identifier = HistoryDealGetInteger(deal, DEAL_POSITION_ID);
+   if(identifier <= 0) return 0;
+   ulong found = 0;
+   for(int i = 0; i < PositionsTotal(); i++)
+   {
+      ulong ticket = PositionGetTicket(i);
+      if(ticket == 0 || !PositionSelectByTicket(ticket)) return 0;
+      if(PositionGetInteger(POSITION_IDENTIFIER) != identifier || PositionGetString(POSITION_SYMBOL) != symbol) continue;
+      if(found != 0) return 0;
+      found = ticket;
+   }
+   return found;
+}
+
 string Utf8Hex(const string value)
 {
    uchar data[]; StringToCharArray(value, data, 0, StringLen(value), CP_UTF8);
@@ -100,22 +141,22 @@ string SnapshotJson()
 {
    long accountMode = AccountInfoInteger(ACCOUNT_TRADE_MODE);
    string accountDemo = accountMode == ACCOUNT_TRADE_MODE_DEMO ? "true" : accountMode == ACCOUNT_TRADE_MODE_REAL ? "false" : "null";
-   string acct = StringFormat("{\"login\":%I64d,\"server\":\"%s\",\"demo\":%s,\"equity\":%.2f,\"balance\":%.2f,\"currency\":\"%s\",\"trade_allowed\":%s,\"hedging\":%s,\"server_time_ms\":%I64d}",
+   string acct = StringFormat("{\"login\":%I64d,\"server\":\"%s\",\"demo\":%s,\"equity\":%s,\"balance\":%s,\"currency\":\"%s\",\"trade_allowed\":%s,\"hedging\":%s,\"server_time_ms\":%I64d}",
       AccountInfoInteger(ACCOUNT_LOGIN), JsonEscape(AccountInfoString(ACCOUNT_SERVER)), accountDemo,
-      AccountInfoDouble(ACCOUNT_EQUITY), AccountInfoDouble(ACCOUNT_BALANCE), JsonEscape(AccountInfoString(ACCOUNT_CURRENCY)),
-      (AccountInfoInteger(ACCOUNT_TRADE_ALLOWED) && TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) && MQLInfoInteger(MQL_TRADE_ALLOWED)) ? "true" : "false",
+      JsonNumber(AccountInfoDouble(ACCOUNT_EQUITY)), JsonNumber(AccountInfoDouble(ACCOUNT_BALANCE)), JsonEscape(AccountInfoString(ACCOUNT_CURRENCY)),
+      (AccountInfoInteger(ACCOUNT_TRADE_ALLOWED) && AccountInfoInteger(ACCOUNT_TRADE_EXPERT) && TerminalInfoInteger(TERMINAL_CONNECTED) && TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) && MQLInfoInteger(MQL_TRADE_ALLOWED)) ? "true" : "false",
       AccountInfoInteger(ACCOUNT_MARGIN_MODE) == ACCOUNT_MARGIN_MODE_RETAIL_HEDGING ? "true" : "false", (long)TimeGMT() * 1000);
    string pos = "[";
    for(int i = 0; i < PositionsTotal(); i++)
    {
       ulong ticket = PositionGetTicket(i);
-      if(ticket == 0 || !PositionSelectByTicket(ticket)) continue;
+      if(ticket == 0 || !PositionSelectByTicket(ticket)) { pos = "null"; break; }
       if(i > 0 && StringLen(pos) > 1) pos += ",";
-      pos += StringFormat("{\"ticket\":%I64u,\"symbol\":\"%s\",\"type\":\"%s\",\"volume\":%.2f,\"price_open\":%.5f,\"sl\":%.5f,\"tp\":%.5f,\"comment\":\"%s\",\"magic\":%I64d,\"profit\":%.2f}",
-         ticket, PositionGetString(POSITION_SYMBOL), PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY ? "BUY" : "SELL", PositionGetDouble(POSITION_VOLUME), PositionGetDouble(POSITION_PRICE_OPEN),
-         PositionGetDouble(POSITION_SL), PositionGetDouble(POSITION_TP), JsonEscape(PositionGetString(POSITION_COMMENT)), PositionGetInteger(POSITION_MAGIC), PositionGetDouble(POSITION_PROFIT));
+      pos += StringFormat("{\"ticket\":%I64u,\"symbol\":\"%s\",\"type\":\"%s\",\"volume\":%s,\"price_open\":%s,\"sl\":%s,\"tp\":%s,\"comment\":\"%s\",\"magic\":%I64d,\"profit\":%s}",
+         ticket, JsonEscape(PositionGetString(POSITION_SYMBOL)), PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY ? "BUY" : "SELL", JsonNumber(PositionGetDouble(POSITION_VOLUME)), JsonNumber(PositionGetDouble(POSITION_PRICE_OPEN)),
+         JsonNumber(PositionGetDouble(POSITION_SL)), JsonNumber(PositionGetDouble(POSITION_TP)), JsonEscape(PositionGetString(POSITION_COMMENT)), PositionGetInteger(POSITION_MAGIC), JsonNumber(PositionGetDouble(POSITION_PROFIT)));
    }
-   pos += "]";
+   if(pos != "null") pos += "]";
    string res = "[";
    for(int i = 0; i < ArraySize(pendingResults); i++) { if(i > 0) res += ","; res += pendingResults[i]; }
    res += "]";
@@ -129,7 +170,10 @@ void PushResult(const string json) { int n = ArraySize(pendingResults); ArrayRes
 //+------------------------------------------------------------------+
 void ExecOrderSend(const string id, const string symbol, const string side, double volume, double price, double sl, double tp, const string comment, long magic, int deviation, const string orderType)
 {
-   if(sl <= 0) { PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"reason\":\"no sl\"}", id)); return; }
+   if(!MathIsValidNumber(sl) || sl <= 0 || !MathIsValidNumber(volume) || volume <= 0 || !MathIsValidNumber(price) || !MathIsValidNumber(tp) || tp < 0 || (side != "BUY" && side != "SELL") || (orderType != "MARKET" && orderType != "LIMIT") || (orderType == "LIMIT" && price <= 0))
+   { PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"volume\":\"0\",\"reason\":\"invalid native entry parameters or protective stop\"}", id)); return; }
+   if(!TerminalInfoInteger(TERMINAL_CONNECTED) || !TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) || !AccountInfoInteger(ACCOUNT_TRADE_ALLOWED) || !AccountInfoInteger(ACCOUNT_TRADE_EXPERT) || !MQLInfoInteger(MQL_TRADE_ALLOWED))
+   { PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"volume\":\"0\",\"reason\":\"current native entry permission unavailable\"}", id)); return; }
    if(!SymbolSelect(symbol, true)) { PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"reason\":\"unknown symbol\"}", id)); return; }
    trade.SetExpertMagicNumber(magic);
    trade.SetDeviationInPoints(deviation);
@@ -139,29 +183,57 @@ void ExecOrderSend(const string id, const string symbol, const string side, doub
    uint rc = trade.ResultRetcode();
    if(ok && (rc == TRADE_RETCODE_DONE || rc == TRADE_RETCODE_DONE_PARTIAL))
    {
-      ulong ticket = trade.ResultOrder();
+      // Capture the entry result before any protective action overwrites CTrade.
+      ulong order = trade.ResultOrder();
+      ulong deal = trade.ResultDeal();
+      double filled = trade.ResultVolume(), fillPrice = trade.ResultPrice();
+      ulong ticket = ResolvePositionTicket(deal, symbol);
       bool slConfirmed = false;
-      if(PositionSelectByTicket(ticket)) slConfirmed = PositionGetDouble(POSITION_SL) > 0;
-      PushResult(StringFormat("{\"id\":%s,\"status\":\"%s\",\"order\":%I64u,\"position\":%I64u,\"volume\":%.2f,\"price\":%.5f,\"arrival\":%.5f,\"sl_confirmed\":%s,\"server_time_ms\":%I64d,\"retcode\":%u}",
-         id, rc == TRADE_RETCODE_DONE ? "FILLED" : "PARTIAL", ticket, ticket, trade.ResultVolume(), trade.ResultPrice(), trade.ResultPrice(), slConfirmed ? "true" : "false", (long)TimeGMT() * 1000, rc));
-      // an entry that came back without its stop is flattened immediately: never hold an unprotected position
-      if(!slConfirmed && orderType != "LIMIT") { trade.PositionClose(ticket); PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"reason\":\"stop not confirmed; position flattened\"}", id)); }
+      if(ticket != 0 && PositionSelectByTicket(ticket))
+      {
+         double actualSl = PositionGetDouble(POSITION_SL);
+         slConfirmed = actualSl > 0 && ((side == "BUY" && actualSl >= sl) || (side == "SELL" && actualSl <= sl));
+      }
+      string recovery = "null";
+      // Preserve the original fill, and record the separate emergency close.
+      // An unavailable ticket must never target an unrelated order/position.
+      if(!slConfirmed && ticket != 0)
+      {
+         bool closed = trade.PositionClose(ticket);
+         uint closeRc = trade.ResultRetcode();
+         string closeStatus = closed && closeRc == TRADE_RETCODE_DONE ? "FILLED" : closed && closeRc == TRADE_RETCODE_DONE_PARTIAL ? "PARTIAL" : NativeRefusal(closeRc) ? "REJECTED" : "UNKNOWN";
+         recovery = StringFormat("{\"status\":\"%s\",\"position\":%I64u,\"volume\":%s,\"retcode\":%u}", closeStatus, ticket, JsonNumber(trade.ResultVolume()), closeRc);
+      }
+      PushResult(StringFormat("{\"id\":%s,\"status\":\"%s\",\"order\":%I64u,\"deal\":%I64u,\"position\":%s,\"volume\":%s,\"price\":%s,\"sl_confirmed\":%s,\"protection_recovery\":%s,\"server_time_ms\":%I64d,\"retcode\":%u}",
+         id, rc == TRADE_RETCODE_DONE ? "FILLED" : "PARTIAL", order, deal, ticket != 0 ? StringFormat("%I64u", ticket) : "null", JsonNumber(filled), JsonNumber(fillPrice), slConfirmed ? "true" : "false", recovery, (long)TimeGMT() * 1000, rc));
    }
    else if(ok && rc == TRADE_RETCODE_PLACED)
-      PushResult(StringFormat("{\"id\":%s,\"status\":\"ACCEPTED\",\"order\":%I64u,\"sl_confirmed\":true,\"retcode\":%u}", id, trade.ResultOrder(), rc));
+   {
+      ulong order = trade.ResultOrder();
+      bool confirmed = OrderSelect(order) && OrderGetString(ORDER_SYMBOL) == symbol && OrderGetDouble(ORDER_SL) > 0 && ((side == "BUY" && OrderGetDouble(ORDER_SL) >= sl) || (side == "SELL" && OrderGetDouble(ORDER_SL) <= sl));
+      PushResult(StringFormat("{\"id\":%s,\"status\":\"ACCEPTED\",\"order\":%I64u,\"sl_confirmed\":%s,\"retcode\":%u}", id, order, confirmed ? "true" : "false", rc));
+   }
    else
-      PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"reason\":\"%s\",\"retcode\":%u}", id, JsonEscape(trade.ResultRetcodeDescription()), rc));
+      PushResult(StringFormat("{\"id\":%s,\"status\":\"%s\",\"reason\":\"%s\",\"retcode\":%u}", id, NativeRefusal(rc) ? "REJECTED" : "UNKNOWN", JsonEscape(trade.ResultRetcodeDescription()), rc));
 }
 
 void ExecModifySl(const string id, ulong ticket, double sl, double tp)
 {
+   if(!MathIsValidNumber(sl) || sl <= 0) { PushResult(StringFormat("{\"id\":%s,\"ok\":false,\"reason\":\"positive finite stop required\"}", id)); return; }
    if(!PositionSelectByTicket(ticket)) { PushResult(StringFormat("{\"id\":%s,\"ok\":false,\"reason\":\"position not found\"}", id)); return; }
    double oldSl = PositionGetDouble(POSITION_SL);
    bool isBuy = PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY;
    if(oldSl > 0 && ((isBuy && sl < oldSl) || (!isBuy && sl > oldSl))) { PushResult(StringFormat("{\"id\":%s,\"ok\":false,\"reason\":\"refusing to widen protective stop\"}", id)); return; }
    if(tp <= 0) tp = PositionGetDouble(POSITION_TP);
    bool ok = trade.PositionModify(ticket, sl, tp);
-   PushResult(StringFormat("{\"id\":%s,\"ok\":%s,\"reason\":\"%s\",\"retcode\":%u}", id, ok ? "true" : "false", ok ? "" : JsonEscape(trade.ResultRetcodeDescription()), trade.ResultRetcode()));
+   uint rc = trade.ResultRetcode();
+   bool confirmed = false;
+   if(ok && rc == TRADE_RETCODE_DONE && PositionSelectByTicket(ticket))
+   {
+      double actualSl = PositionGetDouble(POSITION_SL);
+      confirmed = actualSl > 0 && (isBuy ? actualSl >= sl : actualSl <= sl);
+   }
+   PushResult(StringFormat("{\"id\":%s,\"ok\":%s,\"reason\":\"%s\",\"retcode\":%u}", id, confirmed ? "true" : NativeRefusal(rc) ? "false" : "null", confirmed ? "" : JsonEscape(trade.ResultRetcodeDescription()), rc));
 }
 
 void ExecClose(const string id, ulong ticket, double volume)
@@ -170,9 +242,9 @@ void ExecClose(const string id, ulong ticket, double volume)
    bool ok = (volume > 0 && volume < PositionGetDouble(POSITION_VOLUME)) ? trade.PositionClosePartial(ticket, volume) : trade.PositionClose(ticket);
    uint rc = trade.ResultRetcode();
    if(ok && (rc == TRADE_RETCODE_DONE || rc == TRADE_RETCODE_DONE_PARTIAL))
-      PushResult(StringFormat("{\"id\":%s,\"status\":\"FILLED\",\"volume\":%.2f,\"price\":%.5f}", id, trade.ResultVolume(), trade.ResultPrice()));
+      PushResult(StringFormat("{\"id\":%s,\"status\":\"%s\",\"volume\":%s,\"price\":%s,\"retcode\":%u}", id, rc == TRADE_RETCODE_DONE ? "FILLED" : "PARTIAL", JsonNumber(trade.ResultVolume()), JsonNumber(trade.ResultPrice()), rc));
    else
-      PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"reason\":\"%s\",\"retcode\":%u}", id, JsonEscape(trade.ResultRetcodeDescription()), rc));
+      PushResult(StringFormat("{\"id\":%s,\"status\":\"%s\",\"reason\":\"%s\",\"retcode\":%u}", id, NativeRefusal(rc) ? "REJECTED" : "UNKNOWN", JsonEscape(trade.ResultRetcodeDescription()), rc));
 }
 
 //+------------------------------------------------------------------+

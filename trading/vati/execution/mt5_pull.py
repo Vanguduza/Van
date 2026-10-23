@@ -328,7 +328,7 @@ class Mt5PullAdapter:
             if qty<cmd.quantity:status='PARTIAL'
             stop_confirmed=r.get('sl_confirmed') is True
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, status, qty, price, cmd.entry_price, Decimal(str(r.get('arrival',r['price']))), cmd.entry_price,
-                stop_confirmed,int(r.get('server_time_ms',now_ms)),now_ms,broker_order_id=str(r.get('order','')),broker_position_id=str(r.get('position','')),
+                stop_confirmed,int(r.get('server_time_ms',now_ms)),now_ms,broker_order_id=str(r.get('order') or ''),broker_position_id=str(r.get('position') or ''),
                 protective_stop_price=cmd.protective_stop if stop_confirmed else None).sealed()
         except (KeyError,ValueError,ArithmeticError):return rej('native fill malformed; reconcile original claim','UNKNOWN')
 
@@ -386,8 +386,8 @@ class Mt5PullAdapter:
             **({'expected_account':self.identity.as_dict()} if self.identity is not None else {})}, now_ms=now_ms)
         r = self._await(cid)
         if r is None:
-            return ExecutionReceipt("", "", self.venue, "UNKNOWN", ZERO, None, ZERO, ZERO, ZERO, True, now_ms, now_ms, broker_position_id=position_id, reject_reason=f"{reason}; EA timeout").sealed()
-        return ExecutionReceipt("", "", self.venue, r.get("status", "UNKNOWN"), Decimal(str(r.get("volume", "0"))), Decimal(str(r["price"])) if r.get("price") else None, ZERO, ZERO, ZERO, True, now_ms, now_ms, broker_position_id=position_id, reject_reason=reason).sealed()
+            return ExecutionReceipt("", "", self.venue, "UNKNOWN", ZERO, None, ZERO, ZERO, ZERO, False, now_ms, now_ms, broker_position_id=position_id, reject_reason=f"{reason}; EA timeout").sealed()
+        return ExecutionReceipt("", "", self.venue, r.get("status", "UNKNOWN"), Decimal(str(r.get("volume", "0"))), Decimal(str(r["price"])) if r.get("price") else None, ZERO, ZERO, ZERO, r.get('sl_confirmed') is True, now_ms, now_ms, broker_position_id=position_id, reject_reason=reason).sealed()
 
 
 # ------------------------------------------------------------------ pull server (EA side)

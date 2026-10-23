@@ -1,0 +1,390 @@
+{
+  "schema": "van.rebuild.mql-result-integrity-source/1",
+  "source_parent": "81522214b76af9d0e708c51b70b17c248ab0d902",
+  "observed_at_utc": "2026-10-23T09:35:07.607405+00:00",
+  "source_sha256": {
+    "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "de19ea6d909a955cb95e856f90fb8549ed0d162bf7717032e7e6995e3dfb720d",
+    "trading/vati/execution/mt5_pull.py": "f4b3916523cabf862a9591770d910ee765d33d4e6790c93c2879bb3758bdfc93",
+    "trading/tests/test_mql_native_function_bodies.py": "0854e8bc36cdd1e69aacd325152b5b9b87e8ed0d822df20921a953f6bd7634f5",
+    "trading/tests/mql_terminal_fixture.cpp": "d2ea377794b313e729536b004e12100201c625f56be93e198c3fae25a21f3bc3"
+  },
+  "executions": {
+    "valid-before": {
+      "tests": 22,
+      "failures": 18,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "1bbd8278edacebf0e3f69916d521b7ab024738872cdfaff6dd61c4e69c695464"
+    },
+    "entry-before": {
+      "tests": 4,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "275e94bba6c43ce780593f5d1334f8e0e0093f3a557c72fd139b5ab950bf6691"
+    },
+    "client-before": {
+      "tests": 3,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "578211939093f64bd6dd5848ee5c89e34a60fc37e19c2d43f09b6436f7581815"
+    },
+    "final-focused": {
+      "tests": 56,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "595bcf2fef387fdc173a0039506856458758bb2e33b285ec65fef0bd72658c6f"
+    },
+    "rebuild": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "e849a0f951219e0e47736f4ffec8ce65f07be9373d468c7abf05c18db3ed472f"
+    }
+  },
+  "faults": {
+    "definitions": [
+      [
+        [
+          "deploy/van-trading-core/mql5/VanBridgeEA.mq5",
+          "StringFormat(\"%.17g\", value)",
+          "StringFormat(\"%.2f\", value)",
+          "round native crypto-sized volumes to zero"
+        ],
+        "trading/tests/test_mql_native_function_bodies.py::test_snapshot_keeps_native_precision[positions-volume-0.00123456]"
+      ],
+      [
+        [
+          "deploy/van-trading-core/mql5/VanBridgeEA.mq5",
+          "ulong ticket = ResolvePositionTicket(deal, symbol);",
+          "ulong ticket = order;",
+          "confuse order ID with actual position ticket"
+        ],
+        "trading/tests/test_mql_native_function_bodies.py::test_entry_resolves_native_deal_position_not_order_ticket"
+      ],
+      [
+        [
+          "deploy/van-trading-core/mql5/VanBridgeEA.mq5",
+          "if(ticket == 0 || !PositionSelectByTicket(ticket)) { pos = \"null\"; break; }",
+          "if(ticket == 0 || !PositionSelectByTicket(ticket)) continue;",
+          "report unreadable native positions as known empty"
+        ],
+        "trading/tests/test_mql_native_function_bodies.py::test_failed_position_read_is_unknown_not_empty"
+      ],
+      [
+        [
+          "deploy/van-trading-core/mql5/VanBridgeEA.mq5",
+          "id, rc == TRADE_RETCODE_DONE ? \"FILLED\" : \"PARTIAL\", JsonNumber(trade.ResultVolume())",
+          "id, \"FILLED\", JsonNumber(trade.ResultVolume())",
+          "report a partial native close as complete"
+        ],
+        "trading/tests/test_mql_native_function_bodies.py::test_native_finality_is_not_invented[partial-close-PARTIAL]"
+      ],
+      [
+        [
+          "deploy/van-trading-core/mql5/VanBridgeEA.mq5",
+          "return rc == TRADE_RETCODE_REJECT",
+          "return rc == 10012 || rc == TRADE_RETCODE_REJECT",
+          "convert post-submission timeout into proof of refusal"
+        ],
+        "trading/tests/test_mql_native_function_bodies.py::test_native_finality_is_not_invented[entry-unknown-UNKNOWN]"
+      ],
+      [
+        [
+          "deploy/van-trading-core/mql5/VanBridgeEA.mq5",
+          "confirmed ? \"true\" : NativeRefusal(rc) ? \"false\" : \"null\"",
+          "\"true\"",
+          "invent confirmed stop change without native readback"
+        ],
+        "trading/tests/test_mql_native_function_bodies.py::test_native_modify_ack_without_confirming_readback_stays_unknown"
+      ],
+      [
+        [
+          "deploy/van-trading-core/mql5/VanBridgeEA.mq5",
+          "!TerminalInfoInteger(TERMINAL_CONNECTED) || !TerminalInfoInteger(TERMINAL_TRADE_ALLOWED)",
+          "!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED)",
+          "allow entry after losing current native connection"
+        ],
+        "trading/tests/test_mql_native_function_bodies.py::test_native_entry_rechecks_current_permission_and_valid_parameters[entry-disconnected]"
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_pull.py",
+          "broker_position_id=str(r.get('position') or '')",
+          "broker_position_id=str(r.get('position',''))",
+          "fabricate a literal None position ID from absent native readback"
+        ],
+        "trading/tests/test_mql_native_function_bodies.py::test_pull_entry_keeps_unresolved_position_absent"
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_pull.py",
+          "ZERO, ZERO, ZERO, r.get('sl_confirmed') is True, now_ms",
+          "ZERO, ZERO, ZERO, True, now_ms",
+          "invent native protection confirmation on unknown close"
+        ],
+        "trading/tests/test_mql_native_function_bodies.py::test_pull_client_preserves_unconfirmed_native_stop_state[unknown-close]"
+      ]
+    ],
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "adc9f4df85e5d1c6e9040b094d126eb062b9f70cbd202af2c4ce3bf8677a6d28",
+        "log_sha256": "0ee5888eac5501909c7d7da392d69c44baa7c918e85045cdb4f2eb4f722f4c68"
+      },
+      {
+        "phase": "mutation",
+        "why": "round native crypto-sized volumes to zero",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "913eff2d56163f8440726ba139ef3197b576506fa3c1365bd75da8ed4ebc9e2a",
+        "log_sha256": "9d284600222891c88b1d95274ccd87c5395c6f2bd32326d81c013d677dc58ed1"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "f78d1ad195731f4d609691902b6bea333b437b9dae743dcdd5095ecf894a5de7",
+        "log_sha256": "c952b5c568a02b83362e5cf5a0f46f1c733434977b415fd71a83aa63e7031707"
+      },
+      {
+        "phase": "mutation",
+        "why": "confuse order ID with actual position ticket",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "4983377dafd2406f44a8aff930e6de2d1ac65cc48d8fc8ef08e9471e888db4ba",
+        "log_sha256": "44aad5c3fcb5ddfc8379216a5975ee0226e8895c9866fd2cff5f3a557bf69c27"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "bed4ef337b4d9270396b2df0175d90686d58d876638c6b86e4312ad6c119bd9c",
+        "log_sha256": "c952b5c568a02b83362e5cf5a0f46f1c733434977b415fd71a83aa63e7031707"
+      },
+      {
+        "phase": "mutation",
+        "why": "report unreadable native positions as known empty",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "007b4f61e3c2ce0bad65f8d43e9d305cf59fc4edf563a097db1544b178cfbdae",
+        "log_sha256": "35e4d733f0b09365e30aaa9749ff0a652d4ba3aa6d5c55d17b9b847a28ba2549"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "4b89acd3ec41f0f81454a2d225b8165fd934aa9ecb796d7700f7af67dfe2f6c5",
+        "log_sha256": "6262dd4ae1e1610248aa7a1d90c86e6b7861110a1a434aeede186690d3652770"
+      },
+      {
+        "phase": "mutation",
+        "why": "report a partial native close as complete",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "a5188e136ba38738453680b17b4b699100261c5d4df0699475e2ea0765d2e682",
+        "log_sha256": "e26e697cc9af6044e4515d015b03b39665244614abece36cc2e8238a3c2b6b9d"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "8cb6011d1695e581824e078d32034463f54f0aff01f07361e39d25c39e7bc05c",
+        "log_sha256": "f9c9506451c8c246d741ba6f531e0c5616255ea5048df68bdc58562afc09939b"
+      },
+      {
+        "phase": "mutation",
+        "why": "convert post-submission timeout into proof of refusal",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "eec508c4f0a364f6530bbbc403c5b08740d4b4d6de414941fcba16184e4aaa38",
+        "log_sha256": "86f2154864319c0814bb646802bfc39c4b9414d4a01a62e94b55758a6f1b6d53"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "04464ed1dcc2e283175673f1721ffa2f535ae053adb091a469c8e55bf1f77033",
+        "log_sha256": "212504876166ec78d6893ba7cb632e14878599d119e4df02390a6a5464c97ea0"
+      },
+      {
+        "phase": "mutation",
+        "why": "invent confirmed stop change without native readback",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "ecbfe8176820cbc01ad627500843f90a24c72a1d1636b9e91e194b9a02925e22",
+        "log_sha256": "038c9443058519fcc9ea66e6e49f797942b06236d5ef80ad3f5cd4a84eed6566"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "767189ffeb28d295840df11ba079c2d0944b73325765421f1836617d632a36eb",
+        "log_sha256": "ac0988b070cfb8585ee6cce3a7e8654f43da14bf7e316bc0b9277c6ad43db855"
+      },
+      {
+        "phase": "mutation",
+        "why": "allow entry after losing current native connection",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "a4235b2964ca01e470ab6e0207da41e8dd378f810a03b75bd86a8a8fe8f3f3e2",
+        "log_sha256": "d9ab7c6cb17e4ac90e822ea93096c3d23388eefc680ec3372008d8c535fa7151"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "55b885f01ca97bb1a30cd0f5a24a065f5d615a7cf601f3094bfba3d46e61661d",
+        "log_sha256": "b3634ada821ed90bc490bdadc743fe74a1c5a55261f3235ef02701cf9d70934c"
+      },
+      {
+        "phase": "mutation",
+        "why": "fabricate a literal None position ID from absent native readback",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "8f758f76e616985efcfa29a7e165538f3bdac3ae4912d223b1d9733ad426e3a8",
+        "log_sha256": "7ad3bb76ab9c6c5e2a24dd45181ef41b45969076b438c9bfa4b18aba4d69c9da"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "9cdd84bb0beca037421150c6c65d51c09c815b8df8c921644805e39fc1a7d522",
+        "log_sha256": "781d8adb85d573445f0a3aa93007fd37217a9bd16cb36bbbb550e5b91756898b"
+      },
+      {
+        "phase": "mutation",
+        "why": "invent native protection confirmation on unknown close",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "1f9766a764402706fca02b5841befc7900a1193e05868d4cef73cf9b882fdd57",
+        "log_sha256": "533a9c2c249609894008445543f077161d98a8e608b693fa5838370128fad8a4"
+      }
+    ],
+    "source_before_sha256": {
+      "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "de19ea6d909a955cb95e856f90fb8549ed0d162bf7717032e7e6995e3dfb720d",
+      "trading/vati/execution/mt5_pull.py": "f4b3916523cabf862a9591770d910ee765d33d4e6790c93c2879bb3758bdfc93"
+    },
+    "source_after_sha256": {
+      "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "de19ea6d909a955cb95e856f90fb8549ed0d162bf7717032e7e6995e3dfb720d",
+      "trading/vati/execution/mt5_pull.py": "f4b3916523cabf862a9591770d910ee765d33d4e6790c93c2879bb3758bdfc93"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "full_private_postgresql": {
+    "state": "RUNNING",
+    "driver": "/tmp/van-mql-bodies-full.py",
+    "log": "/tmp/van-mql-bodies-full-driver.txt",
+    "pty_session": 68619
+  },
+  "previous_native_compile": "receipts/NATIVE_METAEDITOR_81522214.json; actual previous EA zero errors/warnings and negative probe rejected. Modified EA native compile pending its own hosted run.",
+  "qualification": "Actual EA function bodies executed with a controlled C++ terminal model, not a broker or MetaTrader execution. Full native compiler job independent. No unit/provider/production/profit/handset acceptance.",
+  "instrument_corrections": [
+    "Initial harness omitted its StringLen interface and errored; corrected before the valid original-source run, not counted as product failures."
+  ]
+}

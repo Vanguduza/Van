@@ -172,10 +172,17 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T09:14:31.170875+00:00",
+    "updated_utc": "2026-10-23T09:35:07.607405+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": [],
+    "background_jobs": [
+      {
+        "name": "Full trading and selected gateway recovery with isolated PostgreSQL",
+        "session": 68619,
+        "driver": "/tmp/van-mql-bodies-full.py",
+        "log": "/tmp/van-mql-bodies-full-driver.txt"
+      }
+    ],
     "last_validation": [
       "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
       "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -294,7 +301,9 @@
       "NativeWindowsretry39925980276 proves exact rawGitinput and installed MetaEditor executable, but cannotlocatestdlib;0compiler cases, FAIL retained. Bounded signededitor/offlineTerminal data initialization prepared with enforcing program-specificoutboundblock, expertsdisabled andnocredentials; parserPASS, nativeinitialization/notcompiler success remainspending.",
       "Exactclean8f7backend-only audit COMPLETE6907passed9explicit skips6916cases2747.61s,zero forbiddenruntime storage,actualPG/Chrome/AGP/bothDDS;privatePGstoppedremoved/exit0. Priorfull2560trading/recovery separate sourceboundreceipt, notQAtradingrerun.",
       "Hosted8d/39925980199 completeall374legacy faults383edits,native18pass4artworkskips,VITS2.389/2.054s,PG26voice117publictrading2340pass1DDSskip;treeidentical. Only originalDDSreadkey/trustedmain failures; separateWindowsSDKprep FAIL retained.",
-      "OBS001 debugcleartext confirmed already closed by fca473cc: basefalse andexactlocalhost/127.0.0.1/::1 only; no newAndroidsource change or newverification claim."
+      "OBS001 debugcleartext confirmed already closed by fca473cc: basefalse andexactlocalhost/127.0.0.1/::1 only; no newAndroidsource change or newverification claim.",
+      "Native EA exact numeric snapshots, deal-to-position identity, truthful partial/uncertain effects, observed stop protection and original fill retained across emergency close; final native entry guards. Pull consumer preserves null IDs and unconfirmed protection.18original+4entry+3consumer counterexamples fixed;56focused/78rebuild pass,9faults and9controls caught/restored. Full trading/recovery running; new actual MetaEditor compile pending. Source only; native finality/expiry/provider and original gates remain.",
+      "Hosted815/39930454915 all374legacycases383edits, Android18pass4existingartworkskips,VITS3.263/2.563s,PG26voice117publictrading2355pass1DDSskip; testedmerge54eb71c treeequal. Only DDSreadkey/trustedmain bootstrap fail. Separate native MetaEditor39930454950 SUCCESS0errors0warnings/invalid4errors."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -305,9 +314,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Continue autonomous whole-product implementation. Publish verified native observation/SDKdata changes, collect actual next Windows source compiler run and fix real MQL compiler/precision/order-vs-position defects. Complete safe local account retirement with native freshfunds/positions/pendingorders/originalunknown/lease fences; existing BE004 forbids deletion with activeexposure/unknownfunds/stalereadback. Then deferredworker epoch/deadline/risk envelopes, nativeoriginal fill/finality/corrections and remaining assistant domains. Alloriginal131units/93plannedfeatures preserved, no frontend beforeBG001 or invented native/provider/production/S24 acceptance. Debugcleartext observation alreadyresolved atfca473cc(loopbackonly), do notredo fromstaleOBS001text. Exact8f7broadQAcompleted, ownedcheckoutmaynowbe reused aftercleanreadback.",
-    "previous_head": "8d2f53889963baee482a7f524bf42828cdaa36b8",
-    "current_packet": "Native observation integrity, SDK effect uncertainty and offline compiler data initialization"
+    "next_action": "Continue autonomous whole-product source build. Publish the verified EA source and observe new native compile; collect the active full trading/recovery result. Bring Windows Python worker to the same native deal-position, stop and uncertain-retcode semantics; then safe account unlink with fresh native funds/positions/orders, original command and lease fences. Finish deferred worker deadline/epoch/risk envelopes, native financial finality/corrections and all original assistant domains. Preserve131units/93plannedfeatures and BG001 frontend gate; no invented acceptance.",
+    "previous_head": "81522214b76af9d0e708c51b70b17c248ab0d902",
+    "current_packet": "Native EA precision, native position identity and truthful original results; focused verified, full source suite running and new MetaEditor compile next."
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",

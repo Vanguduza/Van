@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T09:14:31.170875+00:00",
+  "updated_at_utc": "2026-10-23T09:35:07.607405+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -227,6 +227,10 @@
         {
           "description": "Actual multi-instrument account actor reuses signed recovery/journal and PostgreSQL atomic effects; state binds opaque current account/lease/specs/contracts identity. Account-scoped owner halts, idle lease renewal, current issuer file guard and decoded PEM equivalence; original unknown/partial/invalid-money commands block recovery and new risk, while genuine zero-effect readback supports fresh approval without resend. Actual pairedgateway->signedCommander->PGactor original replay and realPGrollback/lostACK covered.2560full trading/recovery pass0skip605.59s,269affected,78rebuild,12owner contracts;14faults caught/restored. Source only; original native/provider/release gates remain.",
           "evidence": "backend/BE-003_009_ACCOUNT_RUNTIME_RECOVERY.md; receipts/ACCOUNT_RUNTIME_RECOVERY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Native EA exact numeric snapshots, deal-to-position identity, truthful partial/uncertain effects, observed stop protection and original fill retained across emergency close; final native entry guards. Pull consumer preserves null IDs and unconfirmed protection.18original+4entry+3consumer counterexamples fixed;56focused/78rebuild pass,9faults and9controls caught/restored. Full trading/recovery running; new actual MetaEditor compile pending. Source only; native finality/expiry/provider and original gates remain.",
+          "evidence": "backend/BE-031_NATIVE_EA_RESULT_INTEGRITY.md; receipts/MQL_RESULT_INTEGRITY_SOURCE_20261023.json"
         }
       ]
     },
@@ -860,6 +864,14 @@
         {
           "description": "NativeWindowsretry39925980276 proves exact rawGitinput and installed MetaEditor executable, but cannotlocatestdlib;0compiler cases, FAIL retained. Bounded signededitor/offlineTerminal data initialization prepared with enforcing program-specificoutboundblock, expertsdisabled andnocredentials; parserPASS, nativeinitialization/notcompiler success remainspending.",
           "evidence": "backend/BE-031_NATIVE_METAEDITOR_SOURCE.md; receipts/NATIVE_METAEDITOR_8d2f5388.json"
+        },
+        {
+          "description": "Native EA exact numeric snapshots, deal-to-position identity, truthful partial/uncertain effects, observed stop protection and original fill retained across emergency close; final native entry guards. Pull consumer preserves null IDs and unconfirmed protection.18original+4entry+3consumer counterexamples fixed;56focused/78rebuild pass,9faults and9controls caught/restored. Full trading/recovery running; new actual MetaEditor compile pending. Source only; native finality/expiry/provider and original gates remain.",
+          "evidence": "backend/BE-031_NATIVE_EA_RESULT_INTEGRITY.md; receipts/MQL_RESULT_INTEGRITY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Actual signed MetaEditor5.0.0.6281 run39930454950 compiled exact815GitEA with0errors0warnings/freshEX5. Negative compiler probe4errors/noEX5, despite inverted exit-code conventions. Raw sourceblob/testedmerge/log/EX5 independently checked. Offline signed SDK data initialization succeeded. Source compile only; subsequent EA changes need a new run.",
+          "evidence": "backend/BE-031_NATIVE_METAEDITOR_SOURCE.md; receipts/NATIVE_METAEDITOR_81522214.json"
         }
       ]
     },
