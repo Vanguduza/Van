@@ -277,6 +277,25 @@ def build():
         "van.work", "van.floating", "van.voice.turn"}]
     for row in conversation_rows:
         row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(conversation_history))
+    chart_feature = next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-TRADING-002")
+    chart_screen = next(r for r in documents["owner_screens"]["screens"] if r["id"] == "van.trading.positions.detail")
+    for endpoint in endpoint_doc["endpoints"]:
+        if not endpoint["path"].startswith("/v1/trading/charts/"):
+            continue
+        extension = {
+            "method": endpoint["method"], "path": endpoint["path"], "endpoint_id": endpoint["endpoint_id"],
+            "source_ref": endpoint["source"], "authentication": endpoint["authentication"],
+            "device_proof_required_when_bound": endpoint["device_proof_required_when_bound"],
+            "source_status": "CANDIDATE_BACKEND_COMPONENT_ANDROID_CONSUMER_PENDING",
+            "authority": "OWNER_CHART_CONFIGURATION_ONLY_NO_ORDER_OR_CERTIFICATION_AUTHORITY",
+            "canonical_units": ["BE-003", "BE-018"],
+            "planned_feature_refs": ["VNX-F-CHART-02", "VNX-F-CHART-04", "VNX-F-CHART-05", "VNX-F-CHART-06", "VNX-F-CHART-09"],
+            "scope": "Typed renderer-independent workspace settings, exact native product references as owner context, price/time drawing anchors and presentation/research indicator parameters. Immutable revisions, expected-revision conflicts and restore-as-new-revision. Stable request IDs and exact original readback across uncertain writes; minimal receipts contain no notes/settings. Delete removes all stored revision bodies. Settings do not verify native instrument binding, calculate certified VATI indicators or qualify a renderer. No new UI or client consumption is claimed.",
+            "specification": "docs/rebuild/rev118/backend/BE-003_018_CHART_WORKSPACES.md",
+            "new_ui_implemented": False, "live_qualified": False,
+        }
+        for row in (chart_feature, chart_screen):
+            row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(extension))
     receipt = {"scope": "BOUNDED_SOURCE_REFERENCE_REFRESH_NOT_FULL_PRODUCT_REVIEW",
         "input_registry_commit": INPUT, "citation_source_commit": CITATION_BASE,
         "preserved_identity_sets": preserved, "citation_changes": changes,

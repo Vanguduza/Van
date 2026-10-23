@@ -1235,6 +1235,11 @@ def create_app() -> FastAPI:
     app.include_router(build_artifact_router(artifacts))
     app.include_router(build_document_router(documents))
     app.include_router(build_goal_router(goals))
+    from van_gateway.trading.chart_api import build_chart_router
+    from van_gateway.trading.chart_workspaces import ChartWorkspaceService
+    chart_workspaces = ChartWorkspaceService(store)
+    app.state.chart_workspaces = chart_workspaces
+    app.include_router(build_chart_router(chart_workspaces))
     app.include_router(build_suggestion_router(suggestions))
     app.include_router(build_conversation_router(conversations))
     app.include_router(build_computer_use_router(computer_use))

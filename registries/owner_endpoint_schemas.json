@@ -1223,6 +1223,29 @@
         "title": "AdmitBody",
         "description": "\u00a7221 \u2014 walk an artifact through the lifecycle, one guarded step at a time."
       },
+      "Anchor": {
+        "properties": {
+          "time_ms": {
+            "type": "integer",
+            "maximum": 253402300799000.0,
+            "minimum": 0.0,
+            "title": "Time Ms"
+          },
+          "price": {
+            "type": "string",
+            "maxLength": 80,
+            "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$",
+            "title": "Price"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "time_ms",
+          "price"
+        ],
+        "title": "Anchor"
+      },
       "AppPolicy": {
         "type": "string",
         "enum": [
@@ -1886,6 +1909,35 @@
         ],
         "title": "Body_import_document_v1_documents_import_post"
       },
+      "BollingerIndicator": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "BOLLINGER",
+            "title": "Kind"
+          },
+          "period": {
+            "type": "integer",
+            "maximum": 2000.0,
+            "minimum": 1.0,
+            "title": "Period",
+            "default": 20
+          },
+          "deviations": {
+            "type": "string",
+            "maxLength": 80,
+            "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$",
+            "title": "Deviations",
+            "default": "2"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "title": "BollingerIndicator"
+      },
       "BootstrapAttestBody": {
         "properties": {
           "token": {
@@ -2227,6 +2279,265 @@
           "attestation_chain_b64"
         ],
         "title": "CertifyBindingBody"
+      },
+      "ChartCapability": {
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1,
+            "title": "Schema Version",
+            "default": 1
+          },
+          "authority_effect": {
+            "type": "string",
+            "const": "NONE",
+            "title": "Authority Effect",
+            "default": "NONE"
+          },
+          "coordinate_system": {
+            "type": "string",
+            "const": "UTC_MILLISECONDS_AND_EXACT_DECIMAL_PRICE",
+            "title": "Coordinate System",
+            "default": "UTC_MILLISECONDS_AND_EXACT_DECIMAL_PRICE"
+          },
+          "workspace_versioning": {
+            "type": "string",
+            "const": "EXPECTED_REVISION_WITH_EXPLICIT_CONFLICT",
+            "title": "Workspace Versioning",
+            "default": "EXPECTED_REVISION_WITH_EXPLICIT_CONFLICT"
+          },
+          "history": {
+            "type": "string",
+            "const": "IMMUTABLE_SNAPSHOTS_RESTORE_AS_NEW_REVISION",
+            "title": "History",
+            "default": "IMMUTABLE_SNAPSHOTS_RESTORE_AS_NEW_REVISION"
+          },
+          "chart_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Chart Types",
+            "default": [
+              "CANDLES",
+              "LINE",
+              "AREA",
+              "HEIKIN_ASHI"
+            ]
+          },
+          "timeframes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Timeframes",
+            "default": [
+              "M1",
+              "M5",
+              "M15",
+              "M30",
+              "H1",
+              "H4",
+              "D1"
+            ]
+          },
+          "indicator_provenance_tiers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Indicator Provenance Tiers",
+            "default": [
+              "PRESENTATION",
+              "RESEARCH"
+            ]
+          },
+          "indicator_kinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Indicator Kinds",
+            "default": [
+              "SMA",
+              "EMA",
+              "RSI",
+              "ATR",
+              "MACD",
+              "BOLLINGER",
+              "VWAP"
+            ]
+          },
+          "drawing_kinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Drawing Kinds",
+            "default": [
+              "LEVEL",
+              "TREND",
+              "CHANNEL",
+              "FIBONACCI",
+              "RISK_REWARD",
+              "NOTE"
+            ]
+          },
+          "max_state_bytes": {
+            "type": "integer",
+            "title": "Max State Bytes",
+            "default": 262144
+          },
+          "max_workspaces": {
+            "type": "integer",
+            "title": "Max Workspaces",
+            "default": 128
+          },
+          "max_revisions": {
+            "type": "integer",
+            "title": "Max Revisions",
+            "default": 1024
+          },
+          "qualified_vati_indicator_calculation": {
+            "type": "boolean",
+            "title": "Qualified Vati Indicator Calculation",
+            "default": false
+          },
+          "renderer_qualification": {
+            "type": "boolean",
+            "title": "Renderer Qualification",
+            "default": false
+          },
+          "native_instrument_binding": {
+            "type": "boolean",
+            "title": "Native Instrument Binding",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ChartCapability"
+      },
+      "ChartErrorDetails": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
+          "current_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "title": "ChartErrorDetails"
+      },
+      "ChartErrorResponse": {
+        "properties": {
+          "detail": {
+            "$ref": "#/components/schemas/ChartErrorDetails"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "ChartErrorResponse"
+      },
+      "ChartPanel": {
+        "properties": {
+          "panel_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Panel Id"
+          },
+          "instrument": {
+            "$ref": "#/components/schemas/InstrumentRef"
+          },
+          "timeframe": {
+            "type": "string",
+            "enum": [
+              "M1",
+              "M5",
+              "M15",
+              "M30",
+              "H1",
+              "H4",
+              "D1"
+            ],
+            "title": "Timeframe"
+          },
+          "chart_type": {
+            "type": "string",
+            "enum": [
+              "CANDLES",
+              "LINE",
+              "AREA",
+              "HEIKIN_ASHI"
+            ],
+            "title": "Chart Type",
+            "default": "CANDLES"
+          },
+          "viewport": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Viewport"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "indicators": {
+            "items": {
+              "$ref": "#/components/schemas/IndicatorInstance"
+            },
+            "type": "array",
+            "maxItems": 64,
+            "title": "Indicators"
+          },
+          "drawings": {
+            "items": {
+              "$ref": "#/components/schemas/DrawingRecord"
+            },
+            "type": "array",
+            "maxItems": 256,
+            "title": "Drawings"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "panel_id",
+          "instrument",
+          "timeframe"
+        ],
+        "title": "ChartPanel"
       },
       "CognitiveCandidate": {
         "properties": {
@@ -3578,6 +3889,27 @@
         ],
         "title": "CreateTaskBody"
       },
+      "CreateWorkspace": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Request Id"
+          },
+          "state": {
+            "$ref": "#/components/schemas/WorkspaceState"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "state"
+        ],
+        "title": "CreateWorkspace"
+      },
       "CredentialClass": {
         "type": "string",
         "enum": [
@@ -4101,6 +4433,30 @@
           "EXPIRED"
         ],
         "title": "DecisionStatus"
+      },
+      "DeleteWorkspace": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Request Id"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "maximum": 1024.0,
+            "minimum": 1.0,
+            "title": "Expected Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "expected_revision"
+        ],
+        "title": "DeleteWorkspace"
       },
       "DependencyPath": {
         "properties": {
@@ -4888,6 +5244,58 @@
         },
         "type": "object",
         "title": "DraftBody"
+      },
+      "DrawingRecord": {
+        "properties": {
+          "drawing_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Drawing Id"
+          },
+          "schema_version": {
+            "type": "integer",
+            "const": 1,
+            "title": "Schema Version",
+            "default": 1
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "LEVEL",
+              "TREND",
+              "CHANNEL",
+              "FIBONACCI",
+              "RISK_REWARD",
+              "NOTE"
+            ],
+            "title": "Kind"
+          },
+          "anchors": {
+            "items": {
+              "$ref": "#/components/schemas/Anchor"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 1,
+            "title": "Anchors"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "drawing_id",
+          "kind",
+          "anchors"
+        ],
+        "title": "DrawingRecord"
       },
       "DurableSignalBody": {
         "properties": {
@@ -6327,6 +6735,175 @@
         ],
         "title": "Importance"
       },
+      "IndicatorInstance": {
+        "properties": {
+          "indicator_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Indicator Id"
+          },
+          "schema_version": {
+            "type": "integer",
+            "const": 1,
+            "title": "Schema Version",
+            "default": 1
+          },
+          "spec": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PeriodIndicator"
+              },
+              {
+                "$ref": "#/components/schemas/MacdIndicator"
+              },
+              {
+                "$ref": "#/components/schemas/BollingerIndicator"
+              },
+              {
+                "$ref": "#/components/schemas/VwapIndicator"
+              }
+            ],
+            "title": "Spec",
+            "discriminator": {
+              "propertyName": "kind",
+              "mapping": {
+                "ATR": "#/components/schemas/PeriodIndicator",
+                "BOLLINGER": "#/components/schemas/BollingerIndicator",
+                "EMA": "#/components/schemas/PeriodIndicator",
+                "MACD": "#/components/schemas/MacdIndicator",
+                "RSI": "#/components/schemas/PeriodIndicator",
+                "SMA": "#/components/schemas/PeriodIndicator",
+                "VWAP": "#/components/schemas/VwapIndicator"
+              }
+            }
+          },
+          "pane": {
+            "type": "string",
+            "enum": [
+              "PRICE",
+              "SEPARATE"
+            ],
+            "title": "Pane",
+            "default": "PRICE"
+          },
+          "source_timeframe": {
+            "type": "string",
+            "enum": [
+              "M1",
+              "M5",
+              "M15",
+              "M30",
+              "H1",
+              "H4",
+              "D1"
+            ],
+            "title": "Source Timeframe"
+          },
+          "provenance_tier": {
+            "type": "string",
+            "enum": [
+              "PRESENTATION",
+              "RESEARCH"
+            ],
+            "title": "Provenance Tier",
+            "default": "PRESENTATION"
+          },
+          "visible": {
+            "type": "boolean",
+            "title": "Visible",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "indicator_id",
+          "spec",
+          "source_timeframe"
+        ],
+        "title": "IndicatorInstance"
+      },
+      "InstrumentRef": {
+        "properties": {
+          "venue": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Venue"
+          },
+          "environment": {
+            "type": "string",
+            "enum": [
+              "LIVE",
+              "DEMO",
+              "HISTORICAL"
+            ],
+            "title": "Environment"
+          },
+          "api_family": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Api Family"
+          },
+          "product_id": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 1,
+            "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+            "title": "Product Id"
+          },
+          "symbol": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 1,
+            "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+            "title": "Symbol"
+          },
+          "account_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256,
+                "minLength": 1,
+                "pattern": "^[^\\x00-\\x1f\\x7f]+$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Id"
+          },
+          "contract_revision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "venue",
+          "environment",
+          "api_family",
+          "product_id",
+          "symbol"
+        ],
+        "title": "InstrumentRef"
+      },
       "IntentSignature": {
         "properties": {
           "goal_class": {
@@ -6766,6 +7343,42 @@
           "task_id"
         ],
         "title": "LeaseBody"
+      },
+      "MacdIndicator": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "MACD",
+            "title": "Kind"
+          },
+          "fast": {
+            "type": "integer",
+            "maximum": 2000.0,
+            "minimum": 1.0,
+            "title": "Fast",
+            "default": 12
+          },
+          "slow": {
+            "type": "integer",
+            "maximum": 2000.0,
+            "minimum": 1.0,
+            "title": "Slow",
+            "default": 26
+          },
+          "signal": {
+            "type": "integer",
+            "maximum": 2000.0,
+            "minimum": 1.0,
+            "title": "Signal",
+            "default": 9
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "title": "MacdIndicator"
       },
       "MemoryRecordErasurePlan": {
         "properties": {
@@ -8950,6 +9563,33 @@
         "title": "PathClass",
         "description": "\u00a720.5 \u2014 the three-level continuity ladder."
       },
+      "PeriodIndicator": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "SMA",
+              "EMA",
+              "RSI",
+              "ATR"
+            ],
+            "title": "Kind"
+          },
+          "period": {
+            "type": "integer",
+            "maximum": 2000.0,
+            "minimum": 1.0,
+            "title": "Period"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "period"
+        ],
+        "title": "PeriodIndicator"
+      },
       "PhoneNotification": {
         "properties": {
           "key": {
@@ -9677,6 +10317,34 @@
         "title": "RepairOpenBody",
         "description": "P2-DEAD-001 \u2014 what a failing capability needs to become a repair candidate."
       },
+      "ReplaceWorkspace": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Request Id"
+          },
+          "state": {
+            "$ref": "#/components/schemas/WorkspaceState"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "maximum": 1024.0,
+            "minimum": 1.0,
+            "title": "Expected Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "state",
+          "expected_revision"
+        ],
+        "title": "ReplaceWorkspace"
+      },
       "ResearchCitation": {
         "properties": {
           "evidence_id": {
@@ -9827,6 +10495,37 @@
           "query"
         ],
         "title": "ResearchSearchRequest"
+      },
+      "RestoreWorkspace": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Request Id"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "maximum": 1024.0,
+            "minimum": 1.0,
+            "title": "Expected Revision"
+          },
+          "target_revision": {
+            "type": "integer",
+            "maximum": 1024.0,
+            "minimum": 1.0,
+            "title": "Target Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "expected_revision",
+          "target_revision"
+        ],
+        "title": "RestoreWorkspace"
       },
       "ResumeBody": {
         "properties": {
@@ -9997,6 +10696,81 @@
           "NEVER_RETRY"
         ],
         "title": "RetryClass"
+      },
+      "RevisionList": {
+        "properties": {
+          "workspace_id": {
+            "type": "string",
+            "title": "Workspace Id"
+          },
+          "revisions": {
+            "items": {
+              "$ref": "#/components/schemas/RevisionSummary"
+            },
+            "type": "array",
+            "title": "Revisions"
+          },
+          "total_count": {
+            "type": "integer",
+            "title": "Total Count"
+          },
+          "next_before_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Before Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "workspace_id",
+          "revisions",
+          "total_count",
+          "next_before_revision"
+        ],
+        "title": "RevisionList"
+      },
+      "RevisionSummary": {
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "state_sha256": {
+            "type": "string",
+            "title": "State Sha256"
+          },
+          "recorded_at_ms": {
+            "type": "integer",
+            "title": "Recorded At Ms"
+          },
+          "restored_from_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Restored From Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "revision",
+          "state_sha256",
+          "recorded_at_ms",
+          "restored_from_revision"
+        ],
+        "title": "RevisionSummary"
       },
       "RuntimeLossScope": {
         "properties": {
@@ -11452,6 +12226,55 @@
         ],
         "title": "VerificationObservation"
       },
+      "Viewport": {
+        "properties": {
+          "start_ms": {
+            "type": "integer",
+            "maximum": 253402300799000.0,
+            "minimum": 0.0,
+            "title": "Start Ms"
+          },
+          "end_ms": {
+            "type": "integer",
+            "maximum": 253402300799000.0,
+            "minimum": 0.0,
+            "title": "End Ms"
+          },
+          "min_price": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80,
+                "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Price"
+          },
+          "max_price": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80,
+                "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Price"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "start_ms",
+          "end_ms"
+        ],
+        "title": "Viewport"
+      },
       "VisualAcceptanceBody": {
         "properties": {
           "token": {
@@ -11561,6 +12384,28 @@
           "system_operationalization"
         ],
         "title": "VocabularyDefinitionBody"
+      },
+      "VwapIndicator": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "VWAP",
+            "title": "Kind"
+          },
+          "anchor_ms": {
+            "type": "integer",
+            "maximum": 253402300799000.0,
+            "minimum": 0.0,
+            "title": "Anchor Ms"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "anchor_ms"
+        ],
+        "title": "VwapIndicator"
       },
       "Watch": {
         "properties": {
@@ -12168,6 +13013,232 @@
           "PAYMENT_INSTRUMENT_STORAGE"
         ],
         "title": "WorkflowStepEffect"
+      },
+      "WorkspaceList": {
+        "properties": {
+          "workspaces": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceSummary"
+            },
+            "type": "array",
+            "title": "Workspaces"
+          },
+          "total_count": {
+            "type": "integer",
+            "title": "Total Count"
+          },
+          "next_after_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next After Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "workspaces",
+          "total_count",
+          "next_after_id"
+        ],
+        "title": "WorkspaceList"
+      },
+      "WorkspaceRevision": {
+        "properties": {
+          "workspace_id": {
+            "type": "string",
+            "title": "Workspace Id"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "state": {
+            "$ref": "#/components/schemas/WorkspaceState"
+          },
+          "state_sha256": {
+            "type": "string",
+            "title": "State Sha256"
+          },
+          "recorded_at_ms": {
+            "type": "integer",
+            "title": "Recorded At Ms"
+          },
+          "restored_from_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Restored From Revision"
+          },
+          "authority_effect": {
+            "type": "string",
+            "const": "NONE",
+            "title": "Authority Effect",
+            "default": "NONE"
+          },
+          "instrument_scope_status": {
+            "type": "string",
+            "const": "OWNER_SELECTION_NOT_NATIVE_VERIFIED",
+            "title": "Instrument Scope Status",
+            "default": "OWNER_SELECTION_NOT_NATIVE_VERIFIED"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "workspace_id",
+          "revision",
+          "state",
+          "state_sha256",
+          "recorded_at_ms"
+        ],
+        "title": "WorkspaceRevision"
+      },
+      "WorkspaceState": {
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1,
+            "title": "Schema Version",
+            "default": 1
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "SINGLE",
+              "SPLIT_HORIZONTAL",
+              "SPLIT_VERTICAL",
+              "GRID"
+            ],
+            "title": "Layout",
+            "default": "SINGLE"
+          },
+          "panels": {
+            "items": {
+              "$ref": "#/components/schemas/ChartPanel"
+            },
+            "type": "array",
+            "maxItems": 8,
+            "minItems": 1,
+            "title": "Panels"
+          },
+          "selected_panel_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Selected Panel Id"
+          },
+          "sync_time": {
+            "type": "boolean",
+            "title": "Sync Time",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "panels",
+          "selected_panel_id"
+        ],
+        "title": "WorkspaceState"
+      },
+      "WorkspaceSummary": {
+        "properties": {
+          "workspace_id": {
+            "type": "string",
+            "title": "Workspace Id"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "updated_at_ms": {
+            "type": "integer",
+            "title": "Updated At Ms"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "workspace_id",
+          "revision",
+          "name",
+          "updated_at_ms"
+        ],
+        "title": "WorkspaceSummary"
+      },
+      "WorkspaceWrite": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "workspace_id": {
+            "type": "string",
+            "title": "Workspace Id"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "state_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Sha256"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SAVED",
+              "DELETED"
+            ],
+            "title": "Status"
+          },
+          "authority_effect": {
+            "type": "string",
+            "const": "NONE",
+            "title": "Authority Effect",
+            "default": "NONE"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "workspace_id",
+          "revision",
+          "state_sha256",
+          "status"
+        ],
+        "title": "WorkspaceWrite"
       },
       "van_gateway__automation__api__RouteBody": {
         "properties": {

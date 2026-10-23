@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-23T17:27:36.207671+00:00",
+  "updated_at_utc": "2026-10-23T17:41:16.323462+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -283,6 +283,10 @@
         {
           "description": "Owner-intent memory: one serialized native observation conserves concurrent counts/project context and all constraints, earliest/latest times; original mission link commits with its observation, verifies native goal/project/constraints and refuses replay as additional owner repetition. Legacy link verifies real mission and original goal. Superseding edge and retired status share one transaction; self/cyclic supersession refused.6 original failures plus1 unchanged legacy-method failure corrected;62 focused/241 integrated audited/29 owner contracts/79 rebuild pass0skip;10 introduced defects rejected after valid controls and exact source restoration. Initial same-size timestamp-bytecode survivor retained; final child processes clear only affected temporary caches. Existing horizon thresholds unchanged, no claim of market truth/authority, all-feed or whole-unit completion.",
           "evidence": "backend/BE-003_027_OWNER_INTENT_INTEGRITY.md; receipts/INTENT_MEMORY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Chart workspace backend component: additive migration56, typed renderer-independent multi-panel settings, exact native product refs as unverified owner context, decimal-string price/time drawings and seven typed presentation/research indicator configurations. Revision-checked atomic CRUD, immutable snapshots/restore-as-new-revision, paged histories, owner-scoped original request identities/outcomes and failed-commit recovery; deletion removes live SQL state/revision bodies and retains no notes in minimal outcome receipts. Explicit original scope/hash/capacity refusals; authenticated current owner/device proof and private no-store responses.57 focused/144 integrated/10 privacy/1 real backup-restore/29 registry/79 rebuild pass0skip,15 fault/control pairs caught/restored. New9routes ->457endpoints333schemas;42features105functions78surfaces preserved. No newUI/Androidconsumer, certifiedindicatorcalc/nativebinding/export/renderqualification or wholeBE018 claim.",
+          "evidence": "backend/BE-003_018_CHART_WORKSPACES.md; receipts/CHART_WORKSPACE_SOURCE_20261023.json"
         }
       ]
     },
@@ -749,7 +753,12 @@
       ],
       "candidate_status": "NOT_STARTED",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Chart workspace backend component: additive migration56, typed renderer-independent multi-panel settings, exact native product refs as unverified owner context, decimal-string price/time drawings and seven typed presentation/research indicator configurations. Revision-checked atomic CRUD, immutable snapshots/restore-as-new-revision, paged histories, owner-scoped original request identities/outcomes and failed-commit recovery; deletion removes live SQL state/revision bodies and retains no notes in minimal outcome receipts. Explicit original scope/hash/capacity refusals; authenticated current owner/device proof and private no-store responses.57 focused/144 integrated/10 privacy/1 real backup-restore/29 registry/79 rebuild pass0skip,15 fault/control pairs caught/restored. New9routes ->457endpoints333schemas;42features105functions78surfaces preserved. No newUI/Androidconsumer, certifiedindicatorcalc/nativebinding/export/renderqualification or wholeBE018 claim.",
+          "evidence": "backend/BE-003_018_CHART_WORKSPACES.md; receipts/CHART_WORKSPACE_SOURCE_20261023.json"
+        }
+      ]
     },
     "BE-019": {
       "title": "Historical replay, simulation and isolated practice data",

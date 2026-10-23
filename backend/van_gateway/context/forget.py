@@ -57,6 +57,12 @@ FORGETTABLE: tuple[ForgettableStore, ...] = (
 #: Named, with the reason, rather than silently omitted. Someone auditing this list should
 #: be able to see that the omission was decided rather than forgotten.
 DELIBERATELY_KEPT: dict[str, str] = {
+    "chart_workspaces": (
+        "owner-authored chart settings and annotations, rather than inferred owner memory. "
+        "Delete a workspace through its revision-checked chart control to remove its saved "
+        "state and every revision body. Minimal original operation outcomes retain only "
+        "identities, revisions and hashes; they do not retain chart notes or settings."
+    ),
     "audit": (
         "records what VAN did on the owner's authority, not what it concluded about them. "
         "Erasing it would destroy the hash-chained evidence trail that makes every other "

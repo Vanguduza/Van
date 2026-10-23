@@ -9,7 +9,9 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 55
+SCHEMA_VERSION = 56
+
+from van_gateway.trading.chart_schema import MIGRATION_56
 
 MIGRATION_41 = """
 CREATE TABLE IF NOT EXISTS automation_owner_plans (
@@ -2541,6 +2543,7 @@ MIGRATIONS: dict[int, str] = {
     53: BROWSER_HARDENING_MIGRATION_38,
     54: ACQUISITION_MIGRATION_31,
     55: ACQUISITION_MIGRATION_32,
+    56: MIGRATION_56,
 
 }
 
