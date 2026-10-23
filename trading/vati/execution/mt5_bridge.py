@@ -133,8 +133,8 @@ class Mt5BridgeAdapter:
         filled = Decimal(str(r.get("volume", "0")))
         stop_confirmed=r.get('sl_confirmed') is True
         return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, r.get("status", "UNKNOWN"), filled, Decimal(str(r["price"])) if r.get("price") else None,
-                                cmd.entry_price, Decimal(str(r.get("arrival", cmd.entry_price))), cmd.entry_price, stop_confirmed, int(r.get("server_time_ms", now_ms)), now_ms,
-                                broker_order_id=str(r.get("order", "")), broker_position_id=str(r.get("position", "")), protective_stop_price=cmd.protective_stop if stop_confirmed else None,
+                                cmd.entry_price, Decimal(str(r.get("arrival") or cmd.entry_price)), cmd.entry_price, stop_confirmed, int(r.get("server_time_ms", now_ms)), now_ms,
+                                broker_order_id=str(r.get("order") or ''), broker_position_id=str(r.get("position") or ''), protective_stop_price=cmd.protective_stop if stop_confirmed else None,
                                 reject_reason=str(r.get("reason") or r.get("error") or "") if r.get("status", "UNKNOWN") in ("REJECTED", "UNKNOWN") else "").sealed()
 
     def modify_stop(self, position_id: str, new_stop: Decimal, *, now_ms: int) -> ExecutionReceipt:

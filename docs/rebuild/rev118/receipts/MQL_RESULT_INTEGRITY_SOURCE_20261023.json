@@ -377,14 +377,23 @@
     "journal_present": false
   },
   "full_private_postgresql": {
-    "state": "RUNNING",
-    "driver": "/tmp/van-mql-bodies-full.py",
-    "log": "/tmp/van-mql-bodies-full-driver.txt",
-    "pty_session": 68619
+    "tests": 2610,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 595.026,
+    "xml_sha256": "e945419aec76a9a8a41c784d34873068b6d68836af8374f985f9e366efd47773",
+    "tested_source_commit": "6255c6c40608e529553d69c905567e35cbc37ff4",
+    "bound_files": "All four source/test hashes above match the tested committed inputs; docs metadata was committed while tests ran.",
+    "fixture_cleanup": {
+      "stopped": true,
+      "removed": true
+    }
   },
   "previous_native_compile": "receipts/NATIVE_METAEDITOR_81522214.json; actual previous EA zero errors/warnings and negative probe rejected. Modified EA native compile pending its own hosted run.",
   "qualification": "Actual EA function bodies executed with a controlled C++ terminal model, not a broker or MetaTrader execution. Full native compiler job independent. No unit/provider/production/profit/handset acceptance.",
   "instrument_corrections": [
     "Initial harness omitted its StringLen interface and errored; corrected before the valid original-source run, not counted as product failures."
-  ]
+  ],
+  "modified_ea_native_compile": "receipts/NATIVE_METAEDITOR_6255c6c4.json; actual modified EA zero errors/warnings/fresh EX5, invalid source rejected with four errors/no EX5."
 }

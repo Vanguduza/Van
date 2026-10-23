@@ -50,11 +50,13 @@ struct Position { ulong ticket=42, identifier=900; double volume=.00123456, pric
 std::map<ulong,Position> positions={{42,Position()}};
 ulong selected=0;
 bool selection_ok=true, connected=true, modify_effect=true, pending_order_visible=true;
+long margin_mode=ACCOUNT_MARGIN_MODE_RETAIL_HEDGING;
+int pending_count=0;
 int modify_calls=0, close_calls=0, entry_calls=0;
 long AccountInfoInteger(int field) {
  if(field==ACCOUNT_TRADE_MODE) return ACCOUNT_TRADE_MODE_DEMO;
  if(field==ACCOUNT_LOGIN) return 12345678;
- if(field==ACCOUNT_MARGIN_MODE) return ACCOUNT_MARGIN_MODE_RETAIL_HEDGING;
+ if(field==ACCOUNT_MARGIN_MODE) return margin_mode;
  return 1;
 }
 double AccountInfoDouble(int field) { return field==ACCOUNT_EQUITY ? 12345.12345678 : 12344.12345678; }
@@ -78,6 +80,8 @@ bool SymbolSelect(const string&,bool) { return true; }
 bool HistoryDealSelect(ulong ticket) { return ticket==77; }
 long HistoryDealGetInteger(ulong, int) { return 900; }
 bool OrderSelect(ulong ticket) { return pending_order_visible && ticket==11; }
+int OrdersTotal() { return pending_count; }
+ulong OrderGetTicket(int) { return 11; }
 double OrderGetDouble(int) { return 1.12; }
 string OrderGetString(int) { return "EURUSD"; }
 struct Trade {
@@ -125,6 +129,9 @@ int main(int argc, char** argv) {
   if(c=="entry-unknown") { trade.rc=10012; trade.action_ok=false; }
   if(c=="entry-pending") { trade.rc=TRADE_RETCODE_PLACED; pending_order_visible=false; }
   if(c=="entry-disconnected") connected=false;
+  if(c=="entry-netting-position" || c=="entry-netting-pending" || c=="entry-netting-empty") margin_mode=0;
+  if(c=="entry-netting-pending" || c=="entry-netting-empty") positions.clear();
+  if(c=="entry-netting-pending") pending_count=1;
   double volume=c=="entry-negative-volume" ? -.001 : .00123456;
   double sl=c=="entry-nan-stop" ? std::numeric_limits<double>::quiet_NaN() : 1.12;
   ExecOrderSend("1","EURUSD",c=="entry-invalid-side" ? "INVALID" : "BUY",volume,1.123456789012345,sl,1.2,"vati:fixture",123,20,c=="entry-pending" ? "LIMIT" : "MARKET");

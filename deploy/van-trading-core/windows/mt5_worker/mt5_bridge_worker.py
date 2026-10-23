@@ -23,6 +23,7 @@ import argparse
 import hashlib
 import hmac
 import json
+import math
 import ssl
 import sys
 import threading
@@ -107,6 +108,19 @@ class Terminal:
 
     def _request(self, b: dict) -> dict:
         m = self.mt5
+        def number(key,*,positive=False):
+            value=b[key]
+            if isinstance(value,bool):raise ValueError('invalid native entry parameters')
+            value=float(value)
+            if not math.isfinite(value) or (value<=0 if positive else value<0):
+                raise ValueError('invalid native entry parameters')
+            return value
+        if (b.get('type') not in {'BUY','SELL'} or b.get('order_type','MARKET') not in {'MARKET','LIMIT','PASSIVE_LIMIT'}
+            or not isinstance(b.get('symbol'),str) or not b['symbol'].strip()):
+            raise ValueError('invalid native entry parameters')
+        number('volume',positive=True);number('sl',positive=True)
+        for key in ('price','tp','deviation'):
+            if b.get(key) is not None and b[key]!='':number(key,positive=key=='price')
         is_buy = b["type"] == "BUY"
         market = b.get("order_type", "MARKET") in ("MARKET",)
         req = {"action": m.TRADE_ACTION_DEAL if market else m.TRADE_ACTION_PENDING, "symbol": b["symbol"], "volume": float(b["volume"]), "sl": float(b["sl"]), "magic": int(b.get("magic", 0)), "comment": str(b.get("comment", ""))[:31],
@@ -126,24 +140,89 @@ class Terminal:
     def order_check(self, b: dict) -> dict:
         if not b.get("sl"):
             return {"ok": False, "reason": "protective stop (sl) required in the same request"}
-        r = self.mt5.order_check(self._request(b))
+        try:request=self._request(b)
+        except (ValueError,TypeError,KeyError,OverflowError):
+            return {'ok':False,'reason':'invalid native entry parameters'}
+        r = self.mt5.order_check(request)
         return {"ok": r is not None and r.retcode == 0, "retcode": getattr(r, "retcode", None), "reason": getattr(r, "comment", ""), "margin": str(getattr(r, "margin", "")), "margin_free": str(getattr(r, "margin_free", ""))}
 
     def order_send(self, b: dict) -> dict:
         if not b.get("sl"):
             return {"status": "REJECTED", "reason": "protective stop (sl) required in the same request"}
         m = self.mt5
-        r = m.order_send(self._request(b))
+        try:request=self._request(b)
+        except (ValueError,TypeError,KeyError,OverflowError):
+            return {'status':'REJECTED','volume':'0','reason':'invalid native entry parameters'}
+        if not self._netting_symbol_clear(b['symbol']):
+            return {'status':'REJECTED','volume':'0','reason':'netting symbol has existing or unknown exposure; allocation reconciliation required'}
+        r = m.order_send(request)
         if r is None:
             return {"status": "UNKNOWN", "reason": "native order outcome unconfirmed; reconcile the original command"}
-        done = r.retcode in (m.TRADE_RETCODE_DONE, m.TRADE_RETCODE_DONE_PARTIAL, m.TRADE_RETCODE_PLACED)
-        status = "FILLED" if r.retcode == m.TRADE_RETCODE_DONE else ("PARTIAL" if r.retcode == m.TRADE_RETCODE_DONE_PARTIAL else ("ACCEPTED" if r.retcode == m.TRADE_RETCODE_PLACED else "REJECTED"))
+        status = "FILLED" if r.retcode == m.TRADE_RETCODE_DONE else ("PARTIAL" if r.retcode == m.TRADE_RETCODE_DONE_PARTIAL else ("ACCEPTED" if r.retcode == m.TRADE_RETCODE_PLACED else "REJECTED" if self._native_refusal(r.retcode) else "UNKNOWN"))
         sl_confirmed = False
-        if done and getattr(r, "order", 0):
-            pos = [p for p in (m.positions_get(ticket=r.order) or []) if p.ticket == r.order] if hasattr(m, "positions_get") else []
-            sl_confirmed = bool(pos and float(pos[0].sl) > 0) or (r.retcode == m.TRADE_RETCODE_PLACED)
-        return {"status": status, "retcode": r.retcode, "reason": getattr(r, "comment", ""), "order": getattr(r, "order", 0), "position": getattr(r, "order", 0), "volume": str(getattr(r, "volume", 0)), "price": str(getattr(r, "price", 0)) if getattr(r, "price", 0) else None,
+        position = None
+        if status in {'FILLED','PARTIAL'}:
+            pos = self._position_for_result(r,b)
+            if pos is not None:
+                position = pos.ticket
+                sl_confirmed = self._stop_at_least_as_protective(getattr(pos,'sl',None),b['sl'],b['type']=='BUY')
+        elif status == 'ACCEPTED':
+            try:
+                orders=self._observed_rows(m.orders_get(ticket=r.order),'pending orders')
+                matches=[o for o in orders if o.ticket==r.order and o.symbol==b['symbol']]
+                sl_confirmed=len(matches)==1 and self._stop_at_least_as_protective(matches[0].sl,b['sl'],b['type']=='BUY')
+            except Exception:
+                # A read fault after a native effect cannot erase that effect.
+                sl_confirmed=False
+        return {"status": status, "retcode": r.retcode, "reason": getattr(r, "comment", ""), "order": getattr(r, "order", 0), "deal":getattr(r,'deal',None), "position": position, "volume": str(getattr(r, "volume", 0)), "price": str(getattr(r, "price", 0)) if getattr(r, "price", 0) else None,
                 "arrival": str(getattr(r, "price", 0)) if getattr(r, "price", 0) else None, "sl_confirmed": sl_confirmed, "server_time_ms": int(time.time() * 1000)}
+
+    @staticmethod
+    def _native_refusal(retcode):
+        # MetaTrader's explicit refusal codes; TIMEOUT, CONNECTION, LOCKED and
+        # generic ERROR remain uncertain, not evidence of no venue effect.
+        return type(retcode) is int and retcode in {
+            10006,10013,10014,10015,10016,10017,10018,10019,10020,10021,10022,
+            10026,10027,10030,10033,10034,10035,10040,10042,10043,10044,10045,10046}
+
+    def _netting_symbol_clear(self,symbol):
+        try:
+            mode=getattr(self.mt5.account_info(),'margin_mode',None)
+            if type(mode) is not int or mode not in (0,1,2):return False
+            if mode==2:return True
+            positions=self._observed_rows(self.mt5.positions_get(),'positions')
+            orders=self._observed_rows(self.mt5.orders_get(),'orders')
+            return not any(p.symbol==symbol for p in (*positions,*orders))
+        except Exception:return False
+
+    @staticmethod
+    def _stop_at_least_as_protective(actual,requested,is_buy):
+        try:
+            actual=float(actual);requested=float(requested)
+            return (math.isfinite(actual) and math.isfinite(requested) and actual>0 and requested>0
+                    and (actual>=requested if is_buy else actual<=requested))
+        except (TypeError,ValueError,OverflowError):return False
+
+    def _position_for_result(self,result,body):
+        try:
+            deal=getattr(result,'deal',None);order=getattr(result,'order',None)
+            if type(deal) is not int or deal<=0 or type(order) is not int or order<=0:return None
+            # Python SDK's ticket filter is the ORDER ticket. Select the exact
+            # returned deal before resolving its stable native position ID.
+            deals=self._observed_rows(self.mt5.history_deals_get(ticket=order),'deals')
+            matches=[d for d in deals if d.ticket==deal and d.order==order and d.symbol==body['symbol']]
+            if len(matches)!=1:return None
+            identifier=matches[0].position_id
+            if type(identifier) is not int or identifier<=0:return None
+            positions=self._observed_rows(self.mt5.positions_get(),'positions')
+            side=self.mt5.ORDER_TYPE_BUY if body['type']=='BUY' else self.mt5.ORDER_TYPE_SELL
+            matches=[p for p in positions if p.identifier==identifier and p.symbol==body['symbol'] and p.type==side]
+            if len(matches)!=1 or type(matches[0].ticket) is not int or matches[0].ticket<=0:return None
+            return matches[0]
+        except Exception:
+            # Preserve the accepted fill and unconfirmed protection, never guess
+            # an order ticket after a history/position observation failed.
+            return None
 
     def positions(self) -> list[dict]:
         m = self.mt5
@@ -164,12 +243,21 @@ class Terminal:
             return {"ok": False, "reason": "position not found"}
         p = pos[0]
         new_sl = float(sl) if sl else float(p.sl)
+        if not math.isfinite(new_sl) or new_sl<=0:
+            return {'ok':False,'reason':'positive finite protective stop required'}
         # tighten-only: a stop may only move toward profit
         if p.sl and ((p.type == m.ORDER_TYPE_BUY and new_sl < float(p.sl)) or (p.type == m.ORDER_TYPE_SELL and new_sl > float(p.sl))):
             return {"ok": False, "reason": "refusing to widen protective stop"}
         r = m.order_send({"action": m.TRADE_ACTION_SLTP, "position": int(position), "symbol": p.symbol, "sl": new_sl, "tp": float(tp) if tp else float(p.tp)})
         if r is None:return {'ok':None,'reason':'native stop change outcome unconfirmed; reconcile the original command'}
-        return {"ok": r is not None and r.retcode == m.TRADE_RETCODE_DONE, "retcode": getattr(r, "retcode", None), "reason": getattr(r, "comment", "")}
+        confirmed=False
+        if r.retcode==m.TRADE_RETCODE_DONE:
+            try:
+                current=self._observed_rows(m.positions_get(ticket=int(position)),'positions')
+                matches=[v for v in current if v.ticket==int(position) and v.symbol==p.symbol and v.type==p.type]
+                confirmed=len(matches)==1 and self._stop_at_least_as_protective(matches[0].sl,new_sl,p.type==m.ORDER_TYPE_BUY)
+            except Exception:pass
+        return {"ok": True if confirmed else False if self._native_refusal(r.retcode) else None, "retcode": getattr(r, "retcode", None), "reason": getattr(r, "comment", "")}
 
     def close(self, position: int, volume: Optional[str], reason: str) -> dict:
         m = self.mt5
@@ -184,7 +272,7 @@ class Terminal:
         r = m.order_send(req)
         if r is None:return {'status':'UNKNOWN','reason':'native close outcome unconfirmed; reconcile the original command'}
         ok = r is not None and r.retcode in (m.TRADE_RETCODE_DONE, m.TRADE_RETCODE_DONE_PARTIAL)
-        status='PARTIAL' if r.retcode==m.TRADE_RETCODE_DONE_PARTIAL else 'FILLED' if ok else 'REJECTED'
+        status='PARTIAL' if r.retcode==m.TRADE_RETCODE_DONE_PARTIAL else 'FILLED' if ok else 'REJECTED' if self._native_refusal(r.retcode) else 'UNKNOWN'
         return {"status": status, "retcode": getattr(r, "retcode", None), "reason": getattr(r, "comment", reason), "volume": str(getattr(r, "volume", 0)), "price": str(getattr(r, "price", 0)) if ok else None}
 
 

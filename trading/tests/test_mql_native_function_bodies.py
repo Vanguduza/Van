@@ -154,3 +154,13 @@ def test_pull_entry_keeps_unresolved_position_absent(ea,tmp_path):
         assert r.status=='FILLED' and r.filled_qty>0 and r.broker_position_id==''
     finally:
         q.close()
+
+
+@pytest.mark.parametrize('case',['entry-netting-position','entry-netting-pending'])
+def test_native_netting_entry_cannot_change_existing_exposure_or_protection(ea,case):
+    r=ea(case)
+    assert r['results'][0]['status']=='REJECTED' and r['entry_calls']==0
+
+
+def test_native_empty_netting_account_can_still_submit_its_first_entry(ea):
+    assert ea('entry-netting-empty')['entry_calls']==1

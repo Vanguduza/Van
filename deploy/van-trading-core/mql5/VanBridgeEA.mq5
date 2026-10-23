@@ -175,6 +175,23 @@ void ExecOrderSend(const string id, const string symbol, const string side, doub
    if(!TerminalInfoInteger(TERMINAL_CONNECTED) || !TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) || !AccountInfoInteger(ACCOUNT_TRADE_ALLOWED) || !AccountInfoInteger(ACCOUNT_TRADE_EXPERT) || !MQLInfoInteger(MQL_TRADE_ALLOWED))
    { PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"volume\":\"0\",\"reason\":\"current native entry permission unavailable\"}", id)); return; }
    if(!SymbolSelect(symbol, true)) { PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"reason\":\"unknown symbol\"}", id)); return; }
+   // This route has no aggregate netting ownership/allocation contract. A new
+   // entry must not close somebody else's lot or reset its protective stop.
+   if(AccountInfoInteger(ACCOUNT_MARGIN_MODE) != ACCOUNT_MARGIN_MODE_RETAIL_HEDGING)
+   {
+      bool clear = true;
+      for(int i = 0; i < PositionsTotal(); i++)
+      {
+         ulong ticket = PositionGetTicket(i);
+         if(ticket == 0 || !PositionSelectByTicket(ticket) || PositionGetString(POSITION_SYMBOL) == symbol) { clear = false; break; }
+      }
+      for(int i = 0; clear && i < OrdersTotal(); i++)
+      {
+         ulong ticket = OrderGetTicket(i);
+         if(ticket == 0 || !OrderSelect(ticket) || OrderGetString(ORDER_SYMBOL) == symbol) { clear = false; break; }
+      }
+      if(!clear) { PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"volume\":\"0\",\"reason\":\"netting symbol has existing or unknown exposure; allocation reconciliation required\"}", id)); return; }
+   }
    trade.SetExpertMagicNumber(magic);
    trade.SetDeviationInPoints(deviation);
    bool ok;

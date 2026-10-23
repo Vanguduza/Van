@@ -36,6 +36,7 @@ class FakeMt5:
     def __init__(self):
         self.login_calls, self.sent = [], []
         self.pos = {}
+        self.deals = []
         self.trade_allowed = True
         self.expert_allowed = True
         self.connected = True
@@ -57,11 +58,12 @@ class FakeMt5:
         if req["action"] == self.TRADE_ACTION_DEAL and req.get("position"):
             self.pos.pop(req["position"]); return NS(retcode=self.TRADE_RETCODE_DONE, comment="closed", volume=req["volume"], price=req["price"])
         ticket = 700 + len(self.pos)
-        self.pos[ticket] = NS(ticket=ticket, symbol=req["symbol"], type=req["type"], volume=req["volume"], price_open=req["price"], sl=req["sl"], tp=req.get("tp", 0.0), comment=req["comment"], magic=req["magic"], profit=0.0)
-        return NS(retcode=self.TRADE_RETCODE_DONE, comment="done", order=ticket, volume=req["volume"], price=req["price"])
+        self.pos[ticket] = NS(ticket=ticket, identifier=ticket, symbol=req["symbol"], type=req["type"], volume=req["volume"], price_open=req["price"], sl=req["sl"], tp=req.get("tp", 0.0), comment=req["comment"], magic=req["magic"], profit=0.0)
+        self.deals.append(NS(ticket=ticket+10000,order=ticket,position_id=ticket,symbol=req['symbol']))
+        return NS(retcode=self.TRADE_RETCODE_DONE, comment="done", order=ticket, deal=ticket+10000, volume=req["volume"], price=req["price"])
     def positions_get(self, ticket=None): return [p for p in self.pos.values() if ticket is None or p.ticket == ticket]
-    def orders_get(self): return []
-    def history_deals_get(self, a, b): return []
+    def orders_get(self, **kwargs): return []
+    def history_deals_get(self, *args, **kwargs): return [d for d in self.deals if d.order==kwargs['ticket']] if 'ticket' in kwargs else []
 
 
 def make_worker(tmp_path, clock):
