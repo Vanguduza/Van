@@ -648,7 +648,7 @@
       "old_line": 94,
       "new_line": 124,
       "old_sha256": "39a8f0ee2fbf7087d989ccceef4e61fed3f70b39829e3f6ca300e2d6a4a556c0",
-      "new_sha256": "72aba370ae5b5c6d5a4c3541e6bc5a93bed2aacf0b774e3a64ba602847bfacd9",
+      "new_sha256": "2471c607991848d10047ad5f6fa44772c96cd631ada75907caa2dd2a3f5ba1fa",
       "exact_anchor": "async def erase_memory(store: Store, store_id: str, command_id: str, *, device_id: str,"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1606": {
@@ -802,6 +802,22 @@
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
       "new_sha256": "8ec4b7a971938d69a84e5b766b8b90b55ce2b86271d622cbb8d4b88ee795177f",
       "exact_anchor": "    suspend fun learningProducers(): JSONObject = withContext(Dispatchers.IO) { getJson(\"/v1/understanding/learning/producers\") }"
+    },
+    "backend/van_gateway/learning/observations.py:114": {
+      "file": "backend/van_gateway/learning/observations.py",
+      "old_line": 114,
+      "new_line": 114,
+      "old_sha256": "f5f61eac887f61742196d4d55140313a3717c9938d9f10394afb9a8988a18362",
+      "new_sha256": "98b2c934e44d47465cdd05d34873bb6e6ab56e0d34af8a564750630727cdf12b",
+      "exact_anchor": "class ObservedLearning:"
+    },
+    "backend/van_gateway/learning/observations.py:58": {
+      "file": "backend/van_gateway/learning/observations.py",
+      "old_line": 58,
+      "new_line": 58,
+      "old_sha256": "f5f61eac887f61742196d4d55140313a3717c9938d9f10394afb9a8988a18362",
+      "new_sha256": "98b2c934e44d47465cdd05d34873bb6e6ab56e0d34af8a564750630727cdf12b",
+      "exact_anchor": "async def record_external_claim(store: Store, *, evidence_id: str, content: Any, db: Any | None = None) -> str | None:"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:939": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
@@ -1902,13 +1918,13 @@
     "android/app/src/main/java/com/dial/van/memory/DerivedMemoryRecordsSection.kt": "da111f4209c5d094890befccb7bb1cc1cb8e4de9b74b97591040680e6d163a65",
     "android/app/src/main/java/com/dial/van/memory/MemoryEffectReceipt.kt": "eaa28e7fdab7dff3c7a7a6fc3ff462b70a33a026337d29b371d41e7c334f6f83",
     "backend/van_gateway/understanding/records.py": "2c55cc5943fa75790734f6fb0e6e25d6488a3cebab48076a27d4b146a6c32bdd",
-    "backend/van_gateway/context/memory_erasure.py": "72aba370ae5b5c6d5a4c3541e6bc5a93bed2aacf0b774e3a64ba602847bfacd9",
+    "backend/van_gateway/context/memory_erasure.py": "2471c607991848d10047ad5f6fa44772c96cd631ada75907caa2dd2a3f5ba1fa",
     "android/app/src/main/java/com/dial/van/memory/UnderstandingRoutes.kt": "febe4fe7a78d45b710bde189f0edc19b2fdd016bb97c875b8a5a4ae985060925",
     "android/app/src/main/java/com/dial/van/memory/OwnerDeclarationSections.kt": "ff35ceccb97055000c11693c94dad8f3cbceb54b257be24ddafc02ed2839e426",
     "backend/van_gateway/understanding/owner_preferences.py": "795252eff1e2b41b87e627b4597139d5352168ec5206787b5f7f65c8953e4d83",
     "android/app/src/main/java/com/dial/van/memory/GoalsRoute.kt": "27ab2175d41c6b3fc3eeb15aa8a3c43d2b9357b39ad48eb8f8c156e90c156bae",
     "android/app/src/main/java/com/dial/van/memory/LearningProducerSection.kt": "a175d700f719bc0862782a56dbeaddb94b4573cdb28c05dc54fa47cde3f5b8e7",
-    "backend/van_gateway/learning/observations.py": "f5f61eac887f61742196d4d55140313a3717c9938d9f10394afb9a8988a18362",
+    "backend/van_gateway/learning/observations.py": "98b2c934e44d47465cdd05d34873bb6e6ab56e0d34af8a564750630727cdf12b",
     "backend/van_gateway/knowledge/evidence.py": "cf4e30ba3a4c4f6aca0e47fc5546307acd0247296e5ce486d027e542b3c9792e",
     "android/app/src/main/java/com/dial/van/projects/ProjectRationaleRoute.kt": "2ba7df5139e8544a46f35d9d4936809ee445dce486cb4c85fd26aa65e45dbb90",
     "android/app/src/main/java/com/dial/van/command/settings/OwnerPermissionGrantSection.kt": "9953339b016a71ebddbeb2154a8598415d679bf54fb671aa5641c9aade47e1a0",

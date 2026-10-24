@@ -142,6 +142,22 @@ class ObservedLearning:
                     CASE WHEN json_valid(f.context_json) THEN f.context_json ELSE '{}' END,'$.source_decision_id')
                 LEFT JOIN decisions d ON d.id=x.decision_id
                 ORDER BY f.created_at_ms DESC, f.decision_id LIMIT ?""", (MAX_ROWS+1,))).fetchall()
+            # Read producer evidence in the same native snapshot as the projected
+            # fingerprints. A device principal is the command join's actual owner
+            # identity; the historical literal "owner" is not a sealed command.
+            from van_gateway.understanding.owner_source import owner_mission_source
+            from van_gateway.models import ActionClass
+            approval_sources = {}
+            for row in rows[:MAX_ROWS]:
+                identity = row["mission_id"]
+                if identity not in approval_sources:
+                    try:
+                        source = await owner_mission_source(db, identity) if identity else None
+                        valid = bool(source and source.authority.owner_approved
+                            and source.authority.effective_action_class in {ActionClass.A4,ActionClass.A5})
+                    except (ValueError, TypeError):
+                        valid = False
+                    approval_sources[identity] = valid
         groups = defaultdict(list)
         seen = set()
         unmeasured = 0
@@ -149,7 +165,10 @@ class ObservedLearning:
         for row in rows[:MAX_ROWS]:
             data = dict(row)
             inputs.append(_digest(data))
-            if (data["mission_owner"] != "owner"
+            principal = data["mission_owner"]
+            owner_scope = principal == "owner" or (isinstance(principal, str)
+                and principal.startswith("device:") and len(principal) > len("device:"))
+            if (not owner_scope
                     or data["created_at_ms"] > now or now-data["created_at_ms"] > MAX_AGE_MS
                     or data["typed_class"] in {None, "GENERAL_OWNER_INTENT"}):
                 unmeasured += 1
@@ -173,7 +192,8 @@ class ObservedLearning:
                     event_id = "owner-decision:" + context["source_decision_id"]
                 else:
                     sealed = json.loads(data["sealed_authority"] or "null")
-                    if (not isinstance(sealed, dict) or sealed.get("authority_source") != "OWNER_COMMAND"
+                    if (not approval_sources.get(data["mission_id"], False)
+                            or not isinstance(sealed, dict) or sealed.get("authority_source") != "OWNER_COMMAND"
                             or sealed.get("principal_type") != "OWNER_DEVICE" or sealed.get("owner_approved") is not True
                             or sealed.get("command_id") != envelope.get("source_command_id")
                             or sealed.get("effective_action_class") != envelope.get("max_action_class")

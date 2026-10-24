@@ -102,16 +102,12 @@ class LearningFeed:
     ) -> dict[str, str | None]:
         """P2-MEM-001 — §§65, 77. What the owner asked for, and what they decided.
 
-        A mission is a stated owner goal, which is what `IntentContinuityGraph` is a graph
-        of. Observing it here means the graph is built from instructions VAN actually
-        received rather than from a separate act of curation nobody performs. The node is
-        keyed on the goal text, so asking for the same thing again refreshes a standing
-        intent instead of creating a second one — which is what makes STALE mean
-        "unmentioned for ninety days" rather than "recorded once".
-
-        Approval learning additionally requires an exact sealed owner authority record.
-        A required presence flag alone is not evidence of an approved choice. At capture
-        the record may not yet exist; the command join observes it again after sealing.
+        Both projections require a matching native mission, exact sealed direct owner
+        command and its original context snapshot. An origin label alone is not evidence
+        that the owner stated the goal. Automatic work is not repeated owner intent.
+        Approval additionally requires an approved effective A4/A5 choice; a presence
+        requirement alone does not establish approval. Capture may precede sealing, so
+        the command join observes the same original source after the real seal.
         """
         intent = await self.intents.observe(
             owner_goal=mission.goal,
@@ -122,7 +118,7 @@ class LearningFeed:
         )
 
         decision_id = await self.record_owner_approval(mission,now_ms=now_ms)
-        return {"intent_id": intent.intent_id, "decision_id": decision_id}
+        return {"intent_id": None if intent is None else intent.intent_id, "decision_id": decision_id}
 
     async def record_owner_approval(self, mission: Mission, *, now_ms: int | None = None) -> str | None:
         """Observe a sealed owner approval; this method creates no authority.
@@ -131,30 +127,15 @@ class LearningFeed:
         again after seal, and original source identity makes that observation idempotent.
         History may be recorded after a grant expires; it can never execute that grant.
         """
-        from van_gateway.command.authority import CommandAuthorityRecord,CommandAuthorityService,AuthoritySource
-        from van_gateway.mission.models import AuthorityEnvelope
-        from van_gateway.models import ActionClass,OriginChannel,PrincipalType
+        from van_gateway.models import ActionClass,OriginChannel
+        from van_gateway.understanding.owner_source import owner_mission_source
         async with self.store.connection() as db:
             await db.execute("BEGIN IMMEDIATE")
-            native=await(await db.execute("SELECT * FROM missions WHERE mission_id=?",(mission.mission_id,))).fetchone()
-            if native is None:return None
-            envelope=AuthorityEnvelope.model_validate_json(native["authority_envelope_json"])
-            source=envelope.source_command_id
-            if not source:return None
-            row=await(await db.execute("SELECT value FROM runtime_meta WHERE key=?",(CommandAuthorityService.PREFIX+source,))).fetchone()
-            if row is None:return None
-            record=CommandAuthorityRecord.model_validate_json(row["value"])
-            if (record.command_id!=source or record.authority_source is not AuthoritySource.OWNER_COMMAND
-                or record.principal_type is not PrincipalType.OWNER_DEVICE or not record.owner_approved
-                or record.effective_action_class not in {ActionClass.A4,ActionClass.A5}
-                or envelope.max_action_class is not record.effective_action_class
-                or native["owner_principal_id"]!="device:"+record.device_id
-                or record.origin_channel not in {OriginChannel.VOICE,OriginChannel.TEXT,OriginChannel.UI}
-                or native["origin_channel"]!=record.origin_channel.value or not record.request_hash):
-                return None
-            snapshot=await(await db.execute("SELECT command_id,digest,kernel_revision FROM context_snapshots WHERE snapshot_id=?",(record.snapshot_id,))).fetchone()
-            if snapshot is None or snapshot['command_id']!=source or snapshot['digest']!=record.context_digest:
-                return None
+            evidence=await owner_mission_source(db,mission.mission_id)
+            if evidence is None:return None
+            native,envelope,record,snapshot=evidence.mission,evidence.envelope,evidence.authority,evidence.snapshot
+            source=record.command_id
+            if record.effective_action_class not in {ActionClass.A4,ActionClass.A5}:return None
             # The authoritative mission is reread in this transaction. A caller's stale
             # object cannot supply either approval, scope or presentation context.
             mission=mission.model_copy(update={"goal":native["goal"],"mission_class":native["mission_class"],

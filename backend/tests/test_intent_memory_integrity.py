@@ -39,7 +39,8 @@ async def test_failed_superseding_update_does_not_leave_a_committed_relationship
 @pytest.mark.asyncio
 async def test_replaying_same_real_mission_does_not_manufacture_repetition_evidence(tmp_path):
     graph=await graph_at(tmp_path)
-    mission=await MissionService(graph.store).create(owner_principal_id='owner',origin=MissionOrigin.OWNER_VOICE,origin_channel=OriginChannel.VOICE,title='One request',goal='Read the current balance')
+    from test_owner_memory_has_a_producer import _open
+    mission=await _open(MissionService(graph.store),goal='Read the current balance')
     feed=LearningFeed(graph.store)
     await feed.record_mission_opened(mission)
     await feed.record_mission_opened(mission)
@@ -64,7 +65,8 @@ async def test_old_observation_does_not_move_latest_owner_evidence_backwards(tmp
 @pytest.mark.asyncio
 async def test_mission_link_failure_rolls_back_the_observation_it_would_claim(tmp_path):
     graph=await graph_at(tmp_path)
-    mission=await MissionService(graph.store).create(owner_principal_id='owner',origin=MissionOrigin.OWNER_VOICE,origin_channel=OriginChannel.VOICE,title='Atomic source',goal='Do not invent a repeated instruction')
+    from test_owner_memory_has_a_producer import _open
+    mission=await _open(MissionService(graph.store),goal='Do not invent a repeated instruction')
     await graph.store.execute("CREATE TRIGGER fixture_refuse_link BEFORE INSERT ON intent_missions BEGIN SELECT RAISE(ABORT,'cannot link source'); END")
     with pytest.raises(Exception,match='cannot link source'):
         await LearningFeed(graph.store).record_mission_opened(mission)

@@ -209,7 +209,7 @@ class CommandMissionLink:
         current = await self._advance(mission, MissionState.AUTHORIZED, summary=summary)
         if self.missions.learning is not None:
             try:
-                await self.missions.learning.record_owner_approval(current)
+                await self.missions.learning.record_mission_opened(current)
             except Exception as exc:
                 self.missions.report_learning_unavailable(current.mission_id,"owner_approval",exc)
         return current

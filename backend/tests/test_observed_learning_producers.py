@@ -39,15 +39,27 @@ async def _mission(store, *, origin=MissionOrigin.OWNER_UI, mission_class="TRADI
     from van_gateway.command.authority import CommandAuthorityRecord, CommandAuthorityService
     from van_gateway.models import PrincipalType
     command_id = "observed-test-" + uuid.uuid4().hex
+    snapshot = await OwnerContextService(store).compile_snapshot(command_id, [])
     await CommandAuthorityService(store).seal(CommandAuthorityRecord(command_id=command_id,
         device_id="owner-phone", principal_type=PrincipalType.OWNER_DEVICE, requested_by="owner",
         origin_channel=OriginChannel.UI, signed_action_class=ActionClass.A4, effective_action_class=ActionClass.A4,
-        snapshot_id="test-snapshot", context_digest="a"*64, issued_at_unix=_now(store)//1000,
+        snapshot_id=snapshot.snapshot_id, context_digest=snapshot.digest, request_hash="a"*64,
+        issued_at_unix=_now(store)//1000,
         expires_at_unix=_now(store)//1000+30, no_stale_replay=True, owner_approved=approved, sealed_at_unix_ms=_now(store)))
     return await MissionService(store, learning=LearningFeed(store)).create(
-        owner_principal_id="owner", origin=origin, origin_channel=OriginChannel.UI,
+        owner_principal_id="device:owner-phone", origin=origin, origin_channel=OriginChannel.UI,
         title="test", goal="test observed approval", mission_class=mission_class,
         authority_envelope=AuthorityEnvelope(max_action_class=ActionClass.A4, requires_owner_presence=True, source_command_id=command_id),
+        now_ms=_now(store))
+
+
+async def _legacy_presence_only_observation(store, mission):
+    # Explicit migration input, not a new production approval. Old rows may still
+    # exist, and the read-side classifier must refuse to measure them as consent.
+    from van_gateway.understanding.memory import DecisionFingerprints
+    assert not await store.fetchone("SELECT decision_id FROM decision_fingerprints WHERE mission_id=?", (mission.mission_id,))
+    await DecisionFingerprints(store).record(owner_choice="approved: " + mission.goal,
+        mission_id=mission.mission_id, context={"mission_class": mission.mission_class},
         now_ms=_now(store))
 
 
@@ -167,7 +179,8 @@ async def test_matching_new_owner_correction_resolves_disagreement_without_choos
 
 async def test_owner_presence_requirement_without_actual_approval_stays_unmeasured(store):
     for _ in range(3):
-        await _mission(store, approved=False)
+        mission = await _mission(store, approved=False)
+        await _legacy_presence_only_observation(store, mission)
     result = await ObservedLearning(store).decisions(now_ms=_now(store)+10000)
     assert result["patterns"] == [] and result["unmeasured"] == 3
 
@@ -180,6 +193,7 @@ async def test_distinct_case_sensitive_owner_choice_ids_cannot_merge_into_candid
     service = DecisionService(store, AttentionEngine(store))
     for index, choice in enumerate(("BUY", "BUY", "buy")):
         mission = await _mission(store, approved=False)
+        await _legacy_presence_only_observation(store, mission)
         decision = await service.escalate(DecisionCreate(title="Choose", body="Distinct listed choices",
             mission_id=mission.mission_id, choices=[DecisionChoice(id="BUY", label="Upper choice"), DecisionChoice(id="buy", label="Lower choice")]))
         await service.answer(decision.id, DecisionAnswer(choice_id=choice, expected_revision=decision.revision,
@@ -263,3 +277,23 @@ async def test_provider_evidence_and_learning_projection_roll_back_and_recover_t
     evidence = await _evidence(store, claim)
     assert await store.fetchone("SELECT evidence_id FROM knowledge_evidence WHERE evidence_id=?", (evidence.evidence_id,))
     assert await store.fetchone("SELECT observation_id FROM external_reality")
+
+
+@pytest.mark.parametrize("tamper", ["principal", "origin", "context_digest", "context_command"])
+async def test_readback_requires_original_native_owner_and_context_not_a_plausible_fingerprint(store, tamper):
+    missions = [await _mission(store) for _ in range(3)]
+    before = await ObservedLearning(store).decisions(now_ms=_now(store)+10000)
+    assert before["status"] == "READY" and before["patterns"][0]["support_count"] == 3
+    mission = missions[0]
+    source = mission.authority_envelope.source_command_id
+    if tamper == "principal":
+        await store.execute("UPDATE missions SET owner_principal_id='device:foreign-phone' WHERE mission_id=?", (mission.mission_id,))
+    elif tamper == "origin":
+        await store.execute("UPDATE missions SET origin='SCHEDULED' WHERE mission_id=?", (mission.mission_id,))
+    elif tamper == "context_digest":
+        await store.execute("UPDATE context_snapshots SET digest=? WHERE command_id=?", ("f"*64, source))
+    else:
+        await store.execute("UPDATE context_snapshots SET command_id='foreign-command' WHERE command_id=?", (source,))
+    after = await ObservedLearning(store).decisions(now_ms=_now(store)+10000)
+    assert after["patterns"] == [] and after["unmeasured"] == 3
+    assert after["snapshot_sha256"] != before["snapshot_sha256"]

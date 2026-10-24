@@ -172,17 +172,18 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-23T18:23:37.695312+00:00",
+    "updated_utc": "2026-10-24T06:25:19.915108+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
       {
-        "job": "same-source f124741f retry after storage abort; backend/contracts then full trading",
-        "session": 98618,
-        "source": "f124741f2d176f005ab19578f104c446de8a0bc8",
+        "job": "exact90 r1 full backend/contracts then trading with private PostgreSQL and storage audit",
+        "session": 8981,
+        "source": "90e644522e96e554f0e18f3745af69fb16d7edcb",
         "worktree": "/workspace/van-autonomous-qualification-20261022/Van",
-        "stage_file": "/tmp/van-f124741f-r1-qualification-stage.txt",
-        "state": "RUNNING_NOT_A_PASS"
+        "stage_file": "/tmp/van-90e64452-r1-qualification-stage.txt",
+        "state": "RUNNING_NOT_A_PASS",
+        "scope": "Earlier frozen source; do not edit checkout while active. First interrupted attempt is separately recorded."
       }
     ],
     "last_validation": [
@@ -340,7 +341,11 @@
       "Owner-intent memory: one serialized native observation conserves concurrent counts/project context and all constraints, earliest/latest times; original mission link commits with its observation, verifies native goal/project/constraints and refuses replay as additional owner repetition. Legacy link verifies real mission and original goal. Superseding edge and retired status share one transaction; self/cyclic supersession refused.6 original failures plus1 unchanged legacy-method failure corrected;62 focused/241 integrated audited/29 owner contracts/79 rebuild pass0skip;10 introduced defects rejected after valid controls and exact source restoration. Initial same-size timestamp-bytecode survivor retained; final child processes clear only affected temporary caches. Existing horizon thresholds unchanged, no claim of market truth/authority, all-feed or whole-unit completion.",
       "Chart workspace backend component: additive migration56, typed renderer-independent multi-panel settings, exact native product refs as unverified owner context, decimal-string price/time drawings and seven typed presentation/research indicator configurations. Revision-checked atomic CRUD, immutable snapshots/restore-as-new-revision, paged histories, owner-scoped original request identities/outcomes and failed-commit recovery; deletion removes live SQL state/revision bodies and retains no notes in minimal outcome receipts. Explicit original scope/hash/capacity refusals; authenticated current owner/device proof and private no-store responses.57 focused/144 integrated/10 privacy/1 real backup-restore/29 registry/79 rebuild pass0skip,15 fault/control pairs caught/restored. New9routes ->457endpoints333schemas;42features105functions78surfaces preserved. No newUI/Androidconsumer, certifiedindicatorcalc/nativebinding/export/renderqualification or wholeBE018 claim.",
       "Approval learning source: presence requirement is not approval; native owner command/device/principal/origin/effectiveclass/request/context snapshot binding required. Genuine A1signed->A4exactapproval preserved with original signed class. Post-seal caller projects one original scoped fingerprint, preserves outcomes/reassessment on replay and never invents a reason. Existing native erasure witnesses suppress old/selectively erased sources and bulk pre-erasure contexts via native revisions; fresh consent remains learnable without wall-clock ordering. Optional capture/approval/terminal learning sink failures do not block canonical native work, hide its terminal result or suppress other sinks; stage/error-class diagnostics exclude raw error messages, cancellation propagates.2original bugs plus candidate/privacy/availability issues corrected;82focused/236integrated audited/29registry/80rebuild0skip;16 introduced faults caught/restored,6retainedC8+1RC4executed/caught;374cases383edits unchanged and actual preflight0findings. Prior hostedf2 all9mutation shards NOT_RUN due missing sourceanchor is retained; real-source preflight now part of default rebuild tests. No complete feedback/unit/live claim.",
-      "Hosted f2f541c9/39997193133:9mutation shards refused at preflight (RC4 source anchor) NOT_RUN; actual emulator18pass4artworkskips, VITS2.687/2.263 method seconds, PG26voice117trading2538pass1DDSskip. OriginalDDSreadcredential/trustedmain CI failures also retained. Native39997193097MetaEditor0errors0warnings/freshEX5, invalid4/noEX5. Source anchor restored without changing registry and actualRC4/C8 cases caught; defaultrebuild80 now checks all374anchors."
+      "Hosted f2f541c9/39997193133:9mutation shards refused at preflight (RC4 source anchor) NOT_RUN; actual emulator18pass4artworkskips, VITS2.687/2.263 method seconds, PG26voice117trading2538pass1DDSskip. OriginalDDSreadcredential/trustedmain CI failures also retained. Native39997193097MetaEditor0errors0warnings/freshEX5, invalid4/noEX5. Source anchor restored without changing registry and actualRC4/C8 cases caught; defaultrebuild80 now checks all374anchors.",
+      "Owner intent source and privacy: exact native owner command/device/origin/context required for observations; automatic events cannot manufacture standing goals. Original mission scope/identity receipt commits with native node/count/link, survives uncertain commit/replay, and prevents old or erased requests attaching to fresh same-text intent. Existing erasure revision barriers hold delayed/ambiguous sources while fresh consent remains learnable. Minimal non-content receipt retention disclosed. Real observed-pattern readback now handles actual device principals and revalidates original native source/context coherently, rather than requiring historical owner literal.4 original failures plus integration/fixture/readback findings retained and corrected;79 isolated/242 audited integrated/26 registry/80 rebuild pass0skip;11 introduced fault/control pairs caught with exact restoration.374 original identities383edits unchanged; current preflight zero findings. No new endpoint/UI or complete durable-learning/all-memory/unit/native/live claim.",
+      "Exact f124741f retry completed:7062 backend/contracts PASS9skip,2539trading PASS0skip, zero forbidden storage events and private PG stopped/removed. Prior storage-aborted attempt retained.",
+      "Exact90e64452 first broad run found interrupted/zombie on resume, no counts/PASS claimed; recorded separate interrupted receipt and started clean same-source r1.",
+      "Exact90hosted40003045752:all374legacy cases actually caught; emulator18PASS4artworkskips,VITS2.710/2.083 method seconds;publicPG26voice117trading2538PASS1DDSskip. Only original DDS read credential/trusted-main CI failures. Native40003045832actualMetaEditor0errors0warningsfreshEX5; invalid4errors/noEX5. No provider/native execution or S24 claim."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -351,9 +356,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Commit/push native approval/erasure/optional-learning component and source-anchor correction, retaining failedf2hosted evidence and no374PASSclaim. Current same-f124 retry98618 backend/contracts nearing completion; wait for actual XML/audit/PG/trading exit and cleanup, do not edit QA. Next prove/fix original mission intent replay after owner-erasure (approval guard is covered, graph is not), and provide durable optional-learning repair using original native source with idempotence/erasure barriers. Continue remaining whole-product backend components (native market identity/certifiedchartcalculation, funds/provider/forecast/chain/etc) under canonical programme; no newfrontend beforeBG001. All131units93features/release/host/provider/signature/native/S24 obligations retained.",
-    "previous_head": "f2f541c9f2d1fe3b52a5756f46d7b01556baa03a",
-    "current_packet": "Native approval learning, erasure and optional sink availability source tested."
+    "next_action": "Commit/push source intent/privacy/readback component plus actual earlier-source qualifications and hosted90corpus/native artifacts; current source registry457endpoints333schemas42features105functions78surfaces unchanged. Keep frozen exact90 r1 QA untouched; collect its actual exit/XML/audit/privatePG cleanup, not assumed completion. Next implement durable optional-learning recovery from original native lifecycle evidence with idempotent strategy counts and erasure barriers. Continue full original131unit/93feature backend programme (provider/funds/market/news/watchlist/certifiedchart/forecast/strategy/chain and other assistant components); candidate evidence is not formal acceptance. No newfrontend beforeBG001 or fabricated native/service/provider/signature/S24 results.",
+    "previous_head": "90e644522e96e554f0e18f3745af69fb16d7edcb",
+    "current_packet": "Owner intent native source, erasure/replay and device-principal pattern readback source tested; whole backend incomplete."
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -411,6 +416,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Commit/push native approval/erasure/optional-learning component and source-anchor correction, retaining failedf2hosted evidence and no374PASSclaim. Current same-f124 retry98618 backend/contracts nearing completion; wait for actual XML/audit/PG/trading exit and cleanup, do not edit QA. Next prove/fix original mission intent replay after owner-erasure (approval guard is covered, graph is not), and provide durable optional-learning repair using original native source with idempotence/erasure barriers. Continue remaining whole-product backend components (native market identity/certifiedchartcalculation, funds/provider/forecast/chain/etc) under canonical programme; no newfrontend beforeBG001. All131units93features/release/host/provider/signature/native/S24 obligations retained.",
-  "updated_at_utc": "2026-10-23T18:23:37.695312+00:00"
+  "current_action": "Commit/push source intent/privacy/readback component plus actual earlier-source qualifications and hosted90corpus/native artifacts; current source registry457endpoints333schemas42features105functions78surfaces unchanged. Keep frozen exact90 r1 QA untouched; collect its actual exit/XML/audit/privatePG cleanup, not assumed completion. Next implement durable optional-learning recovery from original native lifecycle evidence with idempotent strategy counts and erasure barriers. Continue full original131unit/93feature backend programme (provider/funds/market/news/watchlist/certifiedchart/forecast/strategy/chain and other assistant components); candidate evidence is not formal acceptance. No newfrontend beforeBG001 or fabricated native/service/provider/signature/S24 results.",
+  "updated_at_utc": "2026-10-24T06:25:19.915108+00:00"
 }

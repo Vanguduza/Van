@@ -54252,7 +54252,7 @@
                 "file": "backend/van_gateway/learning/observations.py",
                 "line": 114,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "f5f61eac887f61742196d4d55140313a3717c9938d9f10394afb9a8988a18362",
+                "sha256": "98b2c934e44d47465cdd05d34873bb6e6ab56e0d34af8a564750630727cdf12b",
                 "review_scope": "Reviewed current production entry."
               }
             ],
@@ -54276,7 +54276,7 @@
                 "file": "backend/van_gateway/learning/observations.py",
                 "line": 114,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "f5f61eac887f61742196d4d55140313a3717c9938d9f10394afb9a8988a18362",
+                "sha256": "98b2c934e44d47465cdd05d34873bb6e6ab56e0d34af8a564750630727cdf12b",
                 "review_scope": "Reviewed current production entry."
               }
             ],
@@ -54307,7 +54307,7 @@
                 "file": "backend/van_gateway/learning/observations.py",
                 "line": 58,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "f5f61eac887f61742196d4d55140313a3717c9938d9f10394afb9a8988a18362",
+                "sha256": "98b2c934e44d47465cdd05d34873bb6e6ab56e0d34af8a564750630727cdf12b",
                 "review_scope": "Reviewed current production entry."
               }
             ],
@@ -65981,7 +65981,7 @@
                 "file": "backend/van_gateway/context/memory_erasure.py",
                 "line": 124,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "72aba370ae5b5c6d5a4c3541e6bc5a93bed2aacf0b774e3a64ba602847bfacd9",
+                "sha256": "2471c607991848d10047ad5f6fa44772c96cd631ada75907caa2dd2a3f5ba1fa",
                 "review_scope": "Reviewed current production entry."
               },
               {
@@ -69580,7 +69580,7 @@
                 "file": "backend/van_gateway/context/memory_erasure.py",
                 "line": 124,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "72aba370ae5b5c6d5a4c3541e6bc5a93bed2aacf0b774e3a64ba602847bfacd9",
+                "sha256": "2471c607991848d10047ad5f6fa44772c96cd631ada75907caa2dd2a3f5ba1fa",
                 "review_scope": "Reviewed current production entry."
               },
               {
@@ -74087,7 +74087,7 @@
     "android_receipt": null,
     "android_receipt_sha256": null,
     "scope": "Bounded current source-citation/endpoint refresh; previous reviews retained. Whole-product, Android, deployment/provider and handset qualifications remain separate.",
-    "source_review_manifest_sha256": "840a2d4a795804bf9085d8e9aef99355f106f21b95a74a537e943bcd42b79202"
+    "source_review_manifest_sha256": "5d017b4cd5bd6b8fb0fe8ee63712907df89d44eaf533a36208158119dcd4a7a5"
   },
   "repaired_mutations": [
     {

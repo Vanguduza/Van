@@ -52,21 +52,21 @@ def _svc(store):
     return MissionService(store, learning=LearningFeed(store))
 
 
-async def _seal_fixture_choice(store,source):
+async def _seal_fixture_choice(store,source,approved=True):
     from van_gateway.command.authority import CommandAuthorityService,CommandAuthorityRecord
     from van_gateway.context.service import OwnerContextService
     snapshot=await OwnerContextService(store).compile_snapshot(source,[])
     now=int(time.time())
     await CommandAuthorityService(store).seal(CommandAuthorityRecord(command_id=source,device_id='dev-memory-owner',
         principal_type=PrincipalType.OWNER_DEVICE,requested_by='owner',origin_channel=OriginChannel.VOICE,
-        signed_action_class=ActionClass.A4,effective_action_class=ActionClass.A4,snapshot_id=snapshot.snapshot_id,
-        context_digest=snapshot.digest,request_hash='d'*64,issued_at_unix=now,sealed_at_unix_ms=now*1000,owner_approved=True))
+        signed_action_class=ActionClass.A4 if approved else ActionClass.A2,effective_action_class=ActionClass.A4 if approved else ActionClass.A2,snapshot_id=snapshot.snapshot_id,
+        context_digest=snapshot.digest,request_hash='d'*64,issued_at_unix=now,sealed_at_unix_ms=now*1000,owner_approved=approved))
 
 async def _open(svc, *, goal, approved=False, project_id=None, constraints=()):
-    source='cmd-fixture-'+uuid.uuid4().hex if approved else None
-    if approved:await _seal_fixture_choice(svc.store,source)
+    source='cmd-fixture-'+uuid.uuid4().hex
+    await _seal_fixture_choice(svc.store,source,approved)
     return await svc.create(
-        owner_principal_id="device:dev-memory-owner" if approved else "owner",
+        owner_principal_id="device:dev-memory-owner",
         origin=MissionOrigin.OWNER_VOICE,
         origin_channel=OriginChannel.VOICE,
         title=goal[:40], goal=goal,

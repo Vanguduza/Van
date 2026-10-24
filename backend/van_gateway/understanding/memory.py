@@ -204,7 +204,7 @@ class IntentContinuityGraph:
         self, *, owner_goal: str, project_id: str | None = None,
         constraints: list[str] | None = None, owner_declared_standing: bool = False,
         now_ms: int | None = None, mission_id: str | None = None,
-    ) -> IntentNode:
+    ) -> IntentNode | None:
         """Observe owner context atomically; replay of one mission is not repetition.
 
         Existing horizon rules describe remembered owner intent, never market evidence,
@@ -231,6 +231,23 @@ class IntentContinuityGraph:
                     raise ValueError("INTENT_MISSION_UNKNOWN")
                 if (mission["goal"].strip(),mission["project_id"],json.loads(mission["constraints_json"])) != (normalized,project_id,list(constraints or [])):
                     raise ValueError("INTENT_MISSION_SCOPE_CONFLICT")
+                from van_gateway.understanding.owner_source import owner_mission_source
+                from van_gateway.context.memory_erasure import source_memory_was_erased
+                evidence=await owner_mission_source(db,mission_id)
+                if evidence is None:return None
+                source_revision=evidence.snapshot['kernel_revision']
+                scope=hashlib.sha256(Store.dumps({'goal':normalized,'project_id':project_id,'constraints':list(constraints or []),
+                    'command_id':evidence.authority.command_id,'context_digest':evidence.authority.context_digest,'request_hash':evidence.authority.request_hash}).encode()).hexdigest()
+                receipt_key='intent_observation_source:'+mission_id
+                receipt=await(await db.execute('SELECT value FROM runtime_meta WHERE key=?',(receipt_key,))).fetchone()
+                if receipt is not None:
+                    original=json.loads(receipt['value'])
+                    if (not isinstance(original,dict) or type(original.get('schema')) is not int or original.get('schema')!=1 or original.get('scope_sha256')!=scope
+                        or not isinstance(original.get('intent_id'),str) or type(original.get('source_revision')) is not int or original.get('source_revision')!=source_revision):
+                        raise ValueError("INTENT_MISSION_SCOPE_CONFLICT")
+                    if await source_memory_was_erased(db,table='intent_nodes',record_key={'intent_id':original['intent_id']},source_kernel_revision=source_revision):return None
+                    node=await self._get(db,original['intent_id'])
+                    return node
                 links = await (await db.execute("SELECT intent_id FROM intent_missions WHERE mission_id=?",(mission_id,))).fetchall()
                 if links:
                     if len(links) != 1:
@@ -238,10 +255,17 @@ class IntentContinuityGraph:
                     original = await self._get(db,links[0]["intent_id"])
                     if original is None or original.owner_goal != normalized:
                         raise ValueError("INTENT_MISSION_SCOPE_CONFLICT")
+                    if await source_memory_was_erased(db,table='intent_nodes',record_key={'intent_id':original.intent_id},source_kernel_revision=source_revision):return None
+                    await db.execute('INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)',
+                        (receipt_key,Store.dumps({'schema':1,'intent_id':original.intent_id,'scope_sha256':scope,'source_revision':source_revision}),now))
+                    await db.commit()
                     return original
             row = await (await db.execute(
                 "SELECT * FROM intent_nodes WHERE owner_goal = ? ORDER BY first_observed_ms,intent_id LIMIT 1", (normalized,)
             )).fetchone()
+            new_intent_id=f"intent_{uuid.uuid4().hex}" if row is None else row['intent_id']
+            if mission_id is not None and await source_memory_was_erased(db,table='intent_nodes',
+                    record_key={'intent_id':new_intent_id},source_kernel_revision=source_revision,unknown_identity=True):return None
             if row is not None:
                 projects = sorted(set(json.loads(row["projects_json"])) | ({project_id} if project_id else set()))
                 retained_constraints = list(dict.fromkeys(json.loads(row["constraints_json"])+list(constraints or [])))
@@ -261,7 +285,7 @@ class IntentContinuityGraph:
                 )
             else:
                 horizon, reason = initial_horizon, initial_reason
-                intent_id = f"intent_{uuid.uuid4().hex}"
+                intent_id = new_intent_id
                 await db.execute(
                     "INSERT INTO intent_nodes(intent_id,owner_goal,first_observed_ms,latest_observed_ms, "
                     "projects_json,constraints_json,status,priority,horizon,observation_count,promoted_reason,promoted_at_ms) "
@@ -273,6 +297,8 @@ class IntentContinuityGraph:
                 )
             if mission_id is not None:
                 await db.execute("INSERT INTO intent_missions(intent_id,mission_id,linked_at_ms) VALUES(?,?,?)",(intent_id,mission_id,now))
+                await db.execute('INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)',
+                    (receipt_key,Store.dumps({'schema':1,'intent_id':intent_id,'scope_sha256':scope,'source_revision':source_revision}),now))
             result = await self._get(db,intent_id)
             assert result is not None
             await db.commit()

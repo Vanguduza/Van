@@ -295,12 +295,15 @@ __all__ = ["MemoryErasureDenied", "erase_memory", "memory_erasure_readback", "se
 
 
 async def source_memory_was_erased(db: Any, *, table: str, record_key: dict,
-                                 source_kernel_revision: int) -> bool:
+                                 source_kernel_revision: int,unknown_identity: bool=False) -> bool:
     """A committed owner erase cannot be undone by a late original-source projection.
 
     Read the existing authoritative erase witness under the caller's write transaction.
-    Exact record tombstones cover selective erasure. Bulk erasure also excludes source snapshots before its native context-revision
-    barrier, including when the erased store was empty. Wall-clock order is not used.
+    Exact record tombstones cover selective erasure. Bulk erasure also excludes source
+    snapshots before its native context-revision barrier, even for an empty store. An
+    old source with no original projection identity is conservatively held after a
+    selective erase too; fresh post-erase consent remains learnable. Wall-clock order
+    is not used.
     This is a read guard, never an erasure or execution authorization.
     """
     from van_gateway.understanding.records import PRIMARY_KEYS
@@ -321,7 +324,7 @@ async def source_memory_was_erased(db: Any, *, table: str, record_key: dict,
                 record_id=original.get('record_id'),expected_sha256=original.get('expected_sha256'))
             if table not in original['tables']:continue
             if identity in original['tables'][table]['before_ids']:return True
-            if original.get('record_id') is None and source_kernel_revision<original['context_revision_after']:return True
+            if (original.get('record_id') is None or unknown_identity) and source_kernel_revision<original['context_revision_after']:return True
         except (KeyError,TypeError,ValueError) as exc:
             raise MemoryErasureDenied('memory_erasure_source_witness_unreadable') from exc
     return False

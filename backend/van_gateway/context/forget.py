@@ -57,6 +57,12 @@ FORGETTABLE: tuple[ForgettableStore, ...] = (
 #: Named, with the reason, rather than silently omitted. Someone auditing this list should
 #: be able to see that the omission was decided rather than forgotten.
 DELIBERATELY_KEPT: dict[str, str] = {
+    "intent_observation_source": (
+        "minimal original mission projection receipts in runtime_meta prevent duplicate "
+        "delivery from recreating erased intent. They retain opaque identities, a scope "
+        "hash and the native context revision, without goal text, notes or constraints. "
+        "The learned intent, its edges and mission links remain deletable."
+    ),
     "chart_workspaces": (
         "owner-authored chart settings and annotations, rather than inferred owner memory. "
         "Delete a workspace through its revision-checked chart control to remove its saved "
