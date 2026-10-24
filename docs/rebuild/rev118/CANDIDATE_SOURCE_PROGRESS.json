@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-24T08:43:05.182413+00:00",
+  "updated_at_utc": "2026-10-24T10:06:31.566032+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -442,6 +442,10 @@
         {
           "description": "Native cTrader cash statement reader, original append-only SQLite/PostgreSQL observations, explicit classifications, bounded separate-connection runtime ingestion, exact unitization source core and paired-owner/Android read contracts. Native historical normalized returns remain unmeasured; reconciliation, other rails, reversals/reservations and BE-007 are still open. No whole-unit/live or economic qualification.",
           "evidence": "backend/BE-006_NATIVE_FUNDING_OBSERVATIONS.md; backend/FUNDING_OWNER_READ_CONTRACT.md; receipts/NATIVE_FUNDING_OBSERVATIONS_SOURCE_20261024.json"
+        },
+        {
+          "description": "Standalone JVM source set now includes the actual app funding parser. Hosted missing-dependency failure retained;1328 pure Kotlin tests pass0skip after bounded resource setup/owned daemon cleanup. Exact a1867 full trading2623PASS0skip; hosted258 mutations caught/116 Kotlin cases not executed. No whole-backend, full374 corpus, native/payment or unit acceptance.",
+          "evidence": "backend/BE-006_FUNDING_HARNESS_INTEGRATION.md; receipts/FUNDING_HARNESS_INTEGRATION_20261024.json; receipts/FULL_TRADING_SOURCE_a1867df4.json; receipts/HOSTED_SOURCE_a1867df4_PARTIAL_FAILED.json"
         }
       ]
     },

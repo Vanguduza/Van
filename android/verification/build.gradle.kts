@@ -161,6 +161,7 @@ sourceSets {
             // same reasoning as Gate 6: no Android import, so it is executed rather than only
             // reasoned about.
             "com/dial/van/trading/TradingModels.kt",
+            "com/dial/van/trading/FundingObservation.kt",
             "com/dial/van/trading/TradeBook.kt",
             "com/dial/van/trading/ChartGeometry.kt",
             "com/dial/van/trading/TradingReadModels.kt",

@@ -1,0 +1,35 @@
+{
+  "schema": "van.rebuild.full-trading-source/1",
+  "source_head": "a1867df4312bd4d35299ec56b8368b2ba1280f05",
+  "observed_at_utc": "2026-10-24T09:53:19.290695+00:00",
+  "state": "FULL_TRADING_SOURCE_PASS_BACKEND_UNRESOLVED",
+  "trading": {
+    "tests": 2623,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 2623,
+    "seconds": 485.333,
+    "xml_sha256": "f926e0f4a21768ea1af13c1e5966d9f15a4386def57743865437826bfc0a8522"
+  },
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-autonomous-qualification-20261022/Van",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "private_pg_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "worktree_clean": true,
+  "pinned_dds": "64d6b7158c723b7700e5b53175ea8048d4e92d00",
+  "backend": "Failed resource-affected run retained separately; this trading pass does not certify backend/browser findings.",
+  "logs_sha256": {
+    "van-a1867df4-trading-r1-full-trading.txt": "5314f07e4433c99467b459ae50bd0a9b600d890aed64fe4bbf84f93fe5d28299",
+    "van-a1867df4-trading-r1-driver.txt": "b92ee97af9a786baae2bdf7e23f1ea4c38e5f3b66bce02edb0bf875c736f5c2f"
+  },
+  "qualification": "Exact frozen candidate source and disposable PostgreSQL only; no live providers, production, native whole-unit/F15/BG or physical-handset acceptance."
+}
