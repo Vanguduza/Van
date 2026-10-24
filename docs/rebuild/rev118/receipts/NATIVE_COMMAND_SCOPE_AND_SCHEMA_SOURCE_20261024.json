@@ -1,0 +1,568 @@
+{
+  "schema": "van.rebuild.native-command-scope-source/1",
+  "source_preimage": "31a726ca20e28f36be5e3e86c27f386e62206e0d",
+  "paths": {
+    ".github/workflows/van-ci.yml": {
+      "preimage_sha256": "96087cac10efa81015f0fc58a57205121c63ff09928d447a309e52a2ea5bb971",
+      "source_sha256": "d6b36fc789fa5407bc52a11520db751bcd291dd6b2cdba7d9ccc0d459a49af8e"
+    },
+    "tools/ci/github-actions-ci.yml": {
+      "preimage_sha256": "96087cac10efa81015f0fc58a57205121c63ff09928d447a309e52a2ea5bb971",
+      "source_sha256": "d6b36fc789fa5407bc52a11520db751bcd291dd6b2cdba7d9ccc0d459a49af8e"
+    },
+    "trading/tests/test_contract_schemas.py": {
+      "preimage_sha256": "9e3604bd3d1cd8a28b8631668fb7449ea54dabde3b2bf67f2f4d5a905d1b1e04",
+      "source_sha256": "d254a360d1855fae23811849ed1d76056dfcae72358c45fb9a0738dd621bb61f"
+    },
+    "trading/tests/test_ctrader_original_outcomes.py": {
+      "preimage_sha256": "dd22185dbf4e6b6aafdbfa3b99a1b345be96cd47f03e94c01b8ba0b83043ad95",
+      "source_sha256": "77f23d9def4a672752851068f350a0e2c42cb26508efaaec3c41b1b680e313e4"
+    },
+    "trading/vati/contracts/schemas/risk_snapshot.schema.json": {
+      "preimage_sha256": "c3a7de1a784704e996298bf5794c5bbc4c39a584fedbeb3694d4ea08474df356",
+      "source_sha256": "8153229ca9f049d08891457ad51db150ac96911fbb4ac37bb7959221e0d318a4"
+    },
+    "trading/vati/execution/base.py": {
+      "preimage_sha256": "848b6e64af984ca04ba49be9e62c23c4c65481ab3e9b0d2efe1232a0937ae9b5",
+      "source_sha256": "453c7a02b129b50aa8adcb159750de440fe776b799f7df05fcdee386e6a3e46f"
+    },
+    "trading/vati/execution/ctrader/adapter.py": {
+      "preimage_sha256": "bbac42208cb8d0957c2652507612f881be2145d7c717f20fa5d7fe643ec50293",
+      "source_sha256": "55da5907f712125124d5eaaa8dd6b9c4757b10b44ed6b2b853cab72424a62cc1"
+    },
+    "trading/vati/execution/deriv.py": {
+      "preimage_sha256": "30fcd305bd43bac4e125d8c6354254dd570c0cc6733c93b3999efda18e71a4cf",
+      "source_sha256": "8e78bc67c660ad026fe00f5606b822694a0bf7be9352003f4e6122f8c9adc1e9"
+    },
+    "trading/vati/execution/mt5_bridge.py": {
+      "preimage_sha256": "2008264cefd65139bb6888d66d3138e3374ccdd614941000503c61ed071c3967",
+      "source_sha256": "89a1472f225deae7de340faa7d2a820edb110eab4beabec906b8976071d37a44"
+    },
+    "trading/vati/execution/router.py": {
+      "preimage_sha256": "ee22737292180b6b0452007025cc3184f6b435cbed1fa12f9f8ff204621a20ba",
+      "source_sha256": "8eb206ba7acdbc993ce4eea3db6abfbfe438ad3045fe6787925dd14274b68471"
+    },
+    "tools/rebuild/backend_public_source.py": {
+      "preimage_sha256": null,
+      "source_sha256": "23c0e7cad37e21a72e3a96c0c2dead54a5d3c4fa8b6fafe5a9ea8e20644ed279"
+    },
+    "tests/rebuild/test_backend_public_source.py": {
+      "preimage_sha256": null,
+      "source_sha256": "d70481c459ccf3a4ebf09ef82d3bc239b1d8b1f9a0c4b1ce4668789d7c3a0115"
+    },
+    "trading/tests/test_native_command_target_scope.py": {
+      "preimage_sha256": null,
+      "source_sha256": "f5dda8a99c979de38f67bb4fd6645086c76d796ebd2e01f0e67c4500e85e22cf"
+    }
+  },
+  "confirmed_before_failures": {
+    "native_account_venue": 4,
+    "deriv_identity_none_and_bad_entry_flag": 5,
+    "router_native_target_map": 2
+  },
+  "behavior": "Account and venue must match before adapter or router native I/O; legacy Deriv cannot bypass entry disable without identity; exact bool required. Paper simulation keeps its isolated namespace behavior. Risk snapshot schema preserves original required fields, permits optional native used_margin, and distinguishes value-only risk terms from the unchanged provenance-requiring native schema.",
+  "test_fixture_repair": {
+    "file": "trading/tests/test_ctrader_original_outcomes.py",
+    "helper_change": "Explicit ct_native account alias instead of incompatible adapter default",
+    "original_test_function_AST_unchanged": true
+  },
+  "regressions": {
+    "van-native-command-scope-baseline": {
+      "tests": 4,
+      "passed": 0,
+      "failures": [
+        "trading.tests.test_native_command_target_scope::test_actual_signed_worker_adapter_rejects_foreign_target_before_native_io[account]",
+        "trading.tests.test_native_command_target_scope::test_actual_signed_worker_adapter_rejects_foreign_target_before_native_io[venue]",
+        "trading.tests.test_native_command_target_scope::test_actual_ctrader_adapter_rejects_foreign_target_before_native_io[account]",
+        "trading.tests.test_native_command_target_scope::test_actual_ctrader_adapter_rejects_foreign_target_before_native_io[venue]"
+      ],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "9b52a2caba9b6b3900a16077b9486c6fde6ffdbe522e7eac0e55f82b74986af1"
+    },
+    "van-native-command-scope-deriv-baseline": {
+      "tests": 5,
+      "passed": 0,
+      "failures": [
+        "trading.tests.test_native_command_target_scope::test_legacy_deriv_receiver_does_not_bypass_target_or_entry_disable_without_identity[account]",
+        "trading.tests.test_native_command_target_scope::test_legacy_deriv_receiver_does_not_bypass_target_or_entry_disable_without_identity[venue]",
+        "trading.tests.test_native_command_target_scope::test_legacy_deriv_receiver_does_not_bypass_target_or_entry_disable_without_identity[disabled]",
+        "trading.tests.test_native_command_target_scope::test_legacy_deriv_receiver_does_not_bypass_target_or_entry_disable_without_identity[false-text]",
+        "trading.tests.test_native_command_target_scope::test_legacy_deriv_receiver_does_not_bypass_target_or_entry_disable_without_identity[true-integer]"
+      ],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "717ee6ad1133676d644b9846483073bb10fcbec556de74cdbedf7624b4ae3658"
+    },
+    "van-native-command-scope-router-baseline": {
+      "tests": 2,
+      "passed": 0,
+      "failures": [
+        "trading.tests.test_native_command_target_scope::test_router_misconfigured_native_map_refuses_before_io_key_or_order[account]",
+        "trading.tests.test_native_command_target_scope::test_router_misconfigured_native_map_refuses_before_io_key_or_order[venue]"
+      ],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "1145e2ac820d71222f1ec1b848782e34a215aa256bc6cb955e1aebf3dabf1f71"
+    },
+    "van-native-command-scope-r3": {
+      "tests": 121,
+      "passed": 121,
+      "failures": [],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "514ca5e26d17e40bf3b8c34dceac9387c778a0ec9258d2825d0f816229c0f792"
+    },
+    "van-native-command-scope-r5": {
+      "tests": 215,
+      "passed": 213,
+      "failures": [],
+      "errors": 0,
+      "skipped": [
+        {
+          "id": "trading.tests.test_single_session_lease::test_actual_single_symbol_processes_arbitrate_before_startup_reconciliation[postgres]",
+          "reason": "requires an explicitly isolated native PostgreSQL fixture"
+        },
+        {
+          "id": "trading.tests.test_single_session_lease::test_simultaneous_first_postgres_insert_reports_healthy_arbitration_not_outage",
+          "reason": "requires an explicitly isolated native PostgreSQL fixture"
+        }
+      ],
+      "sha256": "23509fbbe48c10d3ebf64f2d836dc0002b387948809ce546e994b8dbefa30378"
+    },
+    "van-native-command-scope-pg": {
+      "tests": 227,
+      "passed": 227,
+      "failures": [],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "d10eed88536a16320158fa125267d0791c2e692152e969314b5d408668490264"
+    },
+    "van-native-command-scope-schemas-r2": {
+      "tests": 83,
+      "passed": 83,
+      "failures": [],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "7adb159df50735f76068197efad36bcd69c76b1345808c2ebd859de339b08451"
+    },
+    "van-native-command-scope-root-contracts-r2": {
+      "tests": 30,
+      "passed": 30,
+      "failures": [],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "06ebed99f1087509a90295b236e4b6e4ed76a58cdcd2df15fb38b5f16b1900e3"
+    },
+    "van-public-backend-gate-final": {
+      "tests": 14,
+      "passed": 14,
+      "failures": [],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "3b218a1c18309646063d320a1f8f62158009f622bf50be12a09f21c75042b882"
+    },
+    "van-private-dds-source-contracts": {
+      "tests": 274,
+      "passed": 274,
+      "failures": [],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "32a0d254dca20fe40a452b8bbbace6d749ad9d0a649b2a6336219ea4db287e36"
+    },
+    "media_isolated_audited": {
+      "tests": 198,
+      "passed": 198,
+      "failures": [],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "04494ca1b346d0c9e1c172ddd9f1c3c6d97281692c3e4dc4e1509829010e0f39"
+    }
+  },
+  "postgres_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "semantic_fault_pairs": {
+    "baseline": {
+      "exit_code": 0,
+      "failures": [],
+      "errors": 0,
+      "skipped": 0,
+      "tests": 12,
+      "log_sha256": "9ecd3687c13c7ea0c91c7aedbd77d729daaef2e196e6b47103b080c8b0557eca",
+      "xml_sha256": "0f38879f7df9157c6333f5146128ae8882c2a8ce1cea6300fc661850bb96577b"
+    },
+    "cases": [
+      {
+        "case": "mt5-target-ignored",
+        "path": "trading/vati/execution/mt5_bridge.py",
+        "expected_failure": "test_actual_signed_worker_adapter_rejects_foreign_target",
+        "source_sha256": "89a1472f225deae7de340faa7d2a820edb110eab4beabec906b8976071d37a44",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_actual_signed_worker_adapter_rejects_foreign_target_before_native_io[account]",
+            "test_actual_signed_worker_adapter_rejects_foreign_target_before_native_io[venue]",
+            "test_native_target_refusal_leaves_the_real_signed_worker_send_available"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 12,
+          "log_sha256": "d5364067409fbdc5ee0e0c3c20a967f93a4db6c7575472062665b0cf38bc9815",
+          "xml_sha256": "0ad2e96b08eb6eaa1b2a3c4cb7dbac46356ac9501d1af597ed67fc24900a4355"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 12,
+          "log_sha256": "6b68487be8cb7888dd484c4315bec7c57a83f116ca55d197780f04e35f0d7f77",
+          "xml_sha256": "4fb00c3279081b61f83e136a3d103e8035000c9ccb6a1a8030f8d942b40ba50b"
+        },
+        "caught_by_expected_assertion": true
+      },
+      {
+        "case": "ctrader-target-ignored",
+        "path": "trading/vati/execution/ctrader/adapter.py",
+        "expected_failure": "test_actual_ctrader_adapter_rejects_foreign_target",
+        "source_sha256": "55da5907f712125124d5eaaa8dd6b9c4757b10b44ed6b2b853cab72424a62cc1",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_actual_ctrader_adapter_rejects_foreign_target_before_native_io[account]",
+            "test_actual_ctrader_adapter_rejects_foreign_target_before_native_io[venue]"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 12,
+          "log_sha256": "9894ee3e270cf5378c6a2f579c252d68cbbd5fe8ec45a3d0b7c4804439104976",
+          "xml_sha256": "16f8f306801c1884c9688d4c8e6a0ad3e1068e1cae4d22943f8f17bcf7cd5a57"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 12,
+          "log_sha256": "4a16b45441740c239c525f473af046e98a33055c366a98106c2d746a0554745b",
+          "xml_sha256": "b29043281bc327fa417eef7ba15454987a06ca11d1ef2ff1da7fed605b56c31c"
+        },
+        "caught_by_expected_assertion": true
+      },
+      {
+        "case": "deriv-no-identity-bypass",
+        "path": "trading/vati/execution/deriv.py",
+        "expected_failure": "test_legacy_deriv_receiver",
+        "source_sha256": "8e78bc67c660ad026fe00f5606b822694a0bf7be9352003f4e6122f8c9adc1e9",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_legacy_deriv_receiver_does_not_bypass_target_or_entry_disable_without_identity[account]",
+            "test_legacy_deriv_receiver_does_not_bypass_target_or_entry_disable_without_identity[venue]",
+            "test_legacy_deriv_receiver_does_not_bypass_target_or_entry_disable_without_identity[disabled]",
+            "test_legacy_deriv_receiver_does_not_bypass_target_or_entry_disable_without_identity[false-text]",
+            "test_legacy_deriv_receiver_does_not_bypass_target_or_entry_disable_without_identity[true-integer]"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 12,
+          "log_sha256": "4e17b20129819b60a2b1caa320276c666ea57b31f137716bdcbff22d64af79d8",
+          "xml_sha256": "c63fba3a2b1fec26a1daca66ba49e65f029835a2f05c4bf9a06cc2a09b7c0bba"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 12,
+          "log_sha256": "9ecd3687c13c7ea0c91c7aedbd77d729daaef2e196e6b47103b080c8b0557eca",
+          "xml_sha256": "0889edf00b0bc93857409d4bbde7ac6060f10e2ed45270b06718ad0aac145d5d"
+        },
+        "caught_by_expected_assertion": true
+      },
+      {
+        "case": "deriv-truthy-entry-enabled",
+        "path": "trading/vati/execution/deriv.py",
+        "expected_failure": "test_legacy_deriv_receiver",
+        "source_sha256": "8e78bc67c660ad026fe00f5606b822694a0bf7be9352003f4e6122f8c9adc1e9",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_legacy_deriv_receiver_does_not_bypass_target_or_entry_disable_without_identity[false-text]",
+            "test_legacy_deriv_receiver_does_not_bypass_target_or_entry_disable_without_identity[true-integer]"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 12,
+          "log_sha256": "b39c3932935cf4784875bebb6bbc7abc75573f5b65be7df5e69ac9d5e305a568",
+          "xml_sha256": "f65d4e8b15e46a43445a2c8e5d045c9f2c8825fcb5bdda999ccc995af8a74199"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 12,
+          "log_sha256": "43e8a207772d15eaf1c6d862548540f0c5c8786cc7be8b5e7667080534034ead",
+          "xml_sha256": "6555696001e9dba7618b8345410b48f72eb3a40ebf481dbbc274e4ae9b9a55dd"
+        },
+        "caught_by_expected_assertion": true
+      },
+      {
+        "case": "router-target-ignored",
+        "path": "trading/vati/execution/router.py",
+        "expected_failure": "test_router_misconfigured_native_map",
+        "source_sha256": "8eb206ba7acdbc993ce4eea3db6abfbfe438ad3045fe6787925dd14274b68471",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_router_misconfigured_native_map_refuses_before_io_key_or_order[account]",
+            "test_router_misconfigured_native_map_refuses_before_io_key_or_order[venue]"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 12,
+          "log_sha256": "b462306c3efa55ee515ac05fcdee00d74ca466af45a90c00f4330f04c910cefd",
+          "xml_sha256": "e81fdb21875a0c52e6817418846021a41dfdf3a7e8648cb1044887356efcd7f2"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 12,
+          "log_sha256": "4a16b45441740c239c525f473af046e98a33055c366a98106c2d746a0554745b",
+          "xml_sha256": "6a239ee6b2572c7d0c034116f95acf7d93fc74f97af4f3d1f4b04f1eee3baf0e"
+        },
+        "caught_by_expected_assertion": true
+      },
+      {
+        "case": "mt5-venue-ignored",
+        "path": "trading/vati/execution/mt5_bridge.py",
+        "expected_failure": "test_actual_signed_worker_adapter_rejects_foreign_target_before_native_io[venue]",
+        "source_sha256": "89a1472f225deae7de340faa7d2a820edb110eab4beabec906b8976071d37a44",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_actual_signed_worker_adapter_rejects_foreign_target_before_native_io[venue]"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 12,
+          "log_sha256": "8c0eea27753d96e15b4b1fafe1c39a26c79535b255f71a756f09ad218954bb8a",
+          "xml_sha256": "749d1ff06e2679c60f80751fa9e6506161927aa09d7eee9756e96d351896633e"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 12,
+          "log_sha256": "6b68487be8cb7888dd484c4315bec7c57a83f116ca55d197780f04e35f0d7f77",
+          "xml_sha256": "36ebf4a34ad2421fb2b6d794bba1546fbc418841ad76ad48dcc90a7f1c8a7b30"
+        },
+        "caught_by_expected_assertion": true
+      },
+      {
+        "case": "ctrader-account-ignored",
+        "path": "trading/vati/execution/ctrader/adapter.py",
+        "expected_failure": "test_actual_ctrader_adapter_rejects_foreign_target_before_native_io[account]",
+        "source_sha256": "55da5907f712125124d5eaaa8dd6b9c4757b10b44ed6b2b853cab72424a62cc1",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_actual_ctrader_adapter_rejects_foreign_target_before_native_io[account]"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 12,
+          "log_sha256": "9d4c5d27e07ddcb1f3f61250bebc4d43976dcdd118dc7fe398e81acfaee7ff23",
+          "xml_sha256": "19c9db52d8d6b4f48be6d00bed377bbbf6172b06d51c7b1332103f82ecd0c7e1"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 12,
+          "log_sha256": "ccc03f184f820f021127453e09e83d55e026e6b17aee2b49425353b0adb000c2",
+          "xml_sha256": "b321066933519964defe84c65775b5b7e400590b60232e0dbaf53d1ad3dd9e6e"
+        },
+        "caught_by_expected_assertion": true
+      }
+    ],
+    "scope": "Actual native adapter/signed worker boundary and real RiskAuthority/router; all SDK/API effects are explicit fixture simulations."
+  },
+  "external_schema_oracle": {
+    "current_valid": true,
+    "legacy_without_added_margin_valid": true,
+    "all_original_required_fields_preserved": true,
+    "risk_terms_do_not_qualify_as_native_sync_observation": true,
+    "negative_cases_rejected": [
+      [
+        "used_margin",
+        "int"
+      ],
+      [
+        "used_margin",
+        "bool"
+      ],
+      [
+        "used_margin",
+        "dict"
+      ],
+      [
+        "equity",
+        "NoneType"
+      ],
+      [
+        "missing-required",
+        "now_unix"
+      ],
+      [
+        "missing-required",
+        "account_alias"
+      ],
+      [
+        "missing-required",
+        "account_verified"
+      ],
+      [
+        "missing-required",
+        "equity"
+      ],
+      [
+        "missing-required",
+        "balance"
+      ],
+      [
+        "missing-required",
+        "peak_equity"
+      ],
+      [
+        "missing-required",
+        "day_start_equity"
+      ],
+      [
+        "missing-required",
+        "week_start_equity"
+      ],
+      [
+        "missing-required",
+        "consecutive_losses"
+      ],
+      [
+        "missing-required",
+        "open_positions"
+      ],
+      [
+        "missing-required",
+        "symbol_contract"
+      ],
+      [
+        "missing-required",
+        "quote_age_ms"
+      ],
+      [
+        "missing-required",
+        "max_quote_age_ms"
+      ],
+      [
+        "missing-required",
+        "broker_connected"
+      ],
+      [
+        "missing-required",
+        "reconciliation_ok"
+      ],
+      [
+        "missing-required",
+        "clock_sync_ok"
+      ],
+      [
+        "missing-required",
+        "risk_store_ok"
+      ],
+      [
+        "missing-required",
+        "market_integrity"
+      ],
+      [
+        "missing-required",
+        "tier1_event_blackout_active"
+      ],
+      [
+        "missing-required",
+        "kill_switch_triggers"
+      ],
+      [
+        "missing-required",
+        "margin_level_pct"
+      ],
+      [
+        "missing-required",
+        "free_margin"
+      ],
+      [
+        "missing-required",
+        "preservation_blocks_new_risk"
+      ],
+      [
+        "missing-required",
+        "preservation_reason"
+      ],
+      [
+        "missing-required",
+        "loss_streak_lock"
+      ],
+      [
+        "missing-required",
+        "loss_streak_multiplier"
+      ],
+      [
+        "missing-required",
+        "drawdown_top_state"
+      ]
+    ],
+    "schema_sha256": "8153229ca9f049d08891457ad51db150ac96911fbb4ac37bb7959221e0d318a4",
+    "instrument": "jsonschema Draft202012Validator with an offline registry of the actual repository schema IDs; no remote refs or fabricated native provenance"
+  },
+  "public_source_gate": {
+    "selected_modules": 370,
+    "gateway_modules": 359,
+    "media_modules": 11,
+    "explicit_separate_modules": 53,
+    "instrument_regressions": 14,
+    "induced_missing_false_evidence_cases_rejected": 12,
+    "actual_application_cases_executed_by_synthetic_instrument_fixtures": 0,
+    "fresh_full_hosted_gateway_run": "NOT_RUN_YET",
+    "media_source_cases_passed": 198,
+    "media_storage_audit": {
+      "schema": "van.source-storage-audit/1",
+      "forbidden_events": [],
+      "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+      "root": "/workspace/van-review-2026-10-18/publish",
+      "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+      "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+    },
+    "private_DDS_source_contract_cases_passed_locally": 274,
+    "private_pin": "64d6b7158c723b7700e5b53175ea8048d4e92d00",
+    "private_source_exported": false,
+    "original_required_backend_and_ledger_jobs_unchanged": true,
+    "runtime_pins": "Original backend lock and separate hashed media lock; not installed over each other."
+  },
+  "root_rebuild": {
+    "passed": 94,
+    "log_sha256": "2eb8133bafe2868acebd9e9794c81a56e6e26d8efc47441dd26760cc0eadbd93"
+  },
+  "retained_setup_failures": [
+    "Initial services collection lacked aiortc in backend environment. The separate locked media runtime collected and passed all198 cases.",
+    "Initial temporary media venv inherited global packages; changed to isolated before qualification and installed all missing pytest dependencies.",
+    "One root contract command named a nonexistent test file, collected0 and exited4. Corrected actual contract paths passed30."
+  ],
+  "all_unit_acceptance": "NOT_ISSUED",
+  "native_sdk_effects": "Explicit test fixtures only; no broker/order effects.",
+  "remaining": "Prospective margin and broker thresholds, physical-account/cash coverage, native symbol freshness, reservations, flow economics and remaining full-product implementation/qualification. Native/private-required gates and S24 are separate."
+}

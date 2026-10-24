@@ -23,7 +23,7 @@ class NativeOutcomes:
         return ('ProtoOAExecutionEvent',self.event) if self.event is not None and predicate('ProtoOAExecutionEvent',self.event) else None
 
 def adapter(native):
-    a=CtraderAdapter(native,'fixture',lambda:'fixture',lambda:'fixture',12345,fill_timeout_s=.01)
+    a=CtraderAdapter(native,'fixture',lambda:'fixture',lambda:'fixture',12345,account_alias='ct_native',fill_timeout_s=.01)
     a._authed=True;a.symbols={'EURUSD':SymbolInfo(1,'EURUSD',5,10000000,1000,1000,1000000000)}
     return a
 

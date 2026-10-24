@@ -146,19 +146,21 @@ class Mt5BridgeAdapter:
         return response['orders']
 
     def submit(self, cmd: OrderCommand, *, now_ms: int) -> ExecutionReceipt:
-        def deadline_rejected(reason):
+        def entry_rejected(reason):
             return ExecutionReceipt(cmd.trade_intent_id,cmd.decision_hash,self.venue,'REJECTED',ZERO,None,
                 cmd.entry_price,cmd.entry_price,cmd.entry_price,False,now_ms,now_ms,reject_reason=reason).sealed()
+        if cmd.account_alias != self.account_alias or cmd.venue != self.venue:
+            return entry_rejected('native command target differs from the configured account or venue; not dispatched')
         expiry=cmd.expires_at_ms
         if expiry is not None:
             if type(expiry) is not int or not 0<expiry<2**63 or expiry<=max(now_ms,self.clock()):
-                return deadline_rejected('explicit native entry deadline is invalid or expired; not dispatched')
+                return entry_rejected('explicit native entry deadline is invalid or expired; not dispatched')
             try:
                 support=self._call('sync_account',{'alias':self.account_alias},now_ms=now_ms).get('entry_constraints')
             except VenueUnavailable:
-                return deadline_rejected('native entry deadline support unavailable; not dispatched')
+                return entry_rejected('native entry deadline support unavailable; not dispatched')
             if support!={'schema':'van.mt5.entry-constraints/1','explicit_deadline':True,'required_op':'order_send_expiring'} or type(support.get('explicit_deadline')) is not bool:
-                return deadline_rejected('native worker cannot enforce the explicit entry deadline; not dispatched')
+                return entry_rejected('native worker cannot enforce the explicit entry deadline; not dispatched')
         if cmd.protective_stop is None:
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason="MT5 orders require SL in the same request").sealed()
         body = {"alias": self.account_alias, "symbol": cmd.symbol, "type": "BUY" if cmd.direction is Direction.LONG else "SELL", "volume": str(cmd.quantity), "price": str(cmd.entry_price),
@@ -169,7 +171,7 @@ class Mt5BridgeAdapter:
         if chk.get("ok") is not True:
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason=str(chk.get("reason", "order_check failed"))).sealed()
         if expiry is not None and expiry<=self.clock():
-            return deadline_rejected('explicit native entry deadline expired during precheck; not dispatched')
+            return entry_rejected('explicit native entry deadline expired during precheck; not dispatched')
         # A typed operation also fences a worker rollback between capability
         # read and dispatch: legacy workers refuse the unknown operation.
         r = self._call("order_send_expiring" if expiry is not None else "order_send", body, now_ms=now_ms)

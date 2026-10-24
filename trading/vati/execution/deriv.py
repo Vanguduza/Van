@@ -101,7 +101,7 @@ class DerivAdapter:
                 "duration": duration, "duration_unit": duration_unit, "symbol": cmd.symbol, "passthrough": {"trade_intent_id": cmd.trade_intent_id, "decision_hash": cmd.decision_hash}}
 
     def submit(self, cmd: OrderCommand, *, now_ms: int, family: str = "MULTIPLIERS", duration: int = 60) -> ExecutionReceipt:
-        if self.identity is not None and (not self.entry_enabled or cmd.account_alias != self.account_alias or cmd.venue != self.venue):
+        if self.entry_enabled is not True or cmd.account_alias != self.account_alias or cmd.venue != self.venue:
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason="Deriv command or configured mode does not match the bound account").sealed()
         if is_synthetic(cmd.symbol) and not self.allow_synthetics:
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason="synthetic index: OBSERVE only (Rev 3 A.8)").sealed()

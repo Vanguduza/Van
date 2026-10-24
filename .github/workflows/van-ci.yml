@@ -352,6 +352,86 @@ jobs:
           path: artifacts/browser-guard-source/
           if-no-files-found: error
 
+  # Supplemental public-source coverage. The original backend job below still
+  # requires pinned private DDS contracts and remains an independent required gate.
+  backend-public-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27
+        env:
+          POSTGRES_USER: van_fixture
+          POSTGRES_PASSWORD: van_ephemeral_test_only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U van_fixture -d postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      PYTHONPATH: backend:backend/tests:trading:trading/tests:.
+      VATI_TEST_PG_DSN: postgresql://van_fixture:van_ephemeral_test_only@127.0.0.1:5432/postgres
+      VATI_TEST_PG_ISOLATED_FIXTURE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.19.0"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install original locked public source dependencies
+        run: |
+          python -m pip install -r backend/requirements.lock
+          python -m pip install --no-deps psycopg==3.2.9 psycopg-binary==3.2.9
+          python -m pip install pytest==9.1.1 pytest-asyncio==1.4.0
+          python -m playwright install chromium
+      - name: Resolve actual Chromium and initialize the disposable schema
+        run: |
+          python - <<'PYCODE'
+          import os
+          from pathlib import Path
+          import psycopg
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as p:
+              executable = Path(p.chromium.executable_path)
+          assert executable.is_file() and os.access(executable, os.X_OK)
+          with open(os.environ["GITHUB_ENV"], "a") as env:
+              env.write(f"VAN_TEST_CHROMIUM={executable}\n")
+              for key in ("NO_PROXY", "no_proxy"):
+                  env.write(key+"="+",".join(["127.0.0.1", "localhost", "::1", os.environ.get(key, "")])+"\n")
+          with psycopg.connect(os.environ["VATI_TEST_PG_DSN"]) as conn:
+              conn.execute("CREATE SCHEMA vati")
+          PYCODE
+      - name: Inventory every public source module and explicit separate dependencies
+        run: |
+          python tools/rebuild/backend_public_source.py plan --output artifacts/backend-public-source
+          git rev-parse HEAD > artifacts/backend-public-source/tested-commit.txt
+      - name: Execute remaining backend, contract and Hermes source cases
+        run: >-
+          python tools/rebuild/backend_public_source.py run
+          --output artifacts/backend-public-source
+          --runtime gateway
+          --basetemp="${{ runner.temp }}/van-backend-public-source"
+      - name: Execute media service cases with their separate hashed runtime
+        run: |
+          python -m venv "$RUNNER_TEMP/public-media-venv"
+          "$RUNNER_TEMP/public-media-venv/bin/python" -m pip install --require-hashes -r deploy/van-browser-stream/requirements.lock
+          "$RUNNER_TEMP/public-media-venv/bin/python" -m pip install pytest==9.1.1 pytest-asyncio==1.4.0
+          "$RUNNER_TEMP/public-media-venv/bin/python" tools/rebuild/backend_public_source.py run \
+            --output artifacts/backend-public-source --runtime media \
+            --basetemp="$RUNNER_TEMP/van-public-media-source"
+      - name: Require complete selected coverage and exact declared prerequisite skips
+        if: always()
+        run: python tools/rebuild/backend_public_source.py verify --output artifacts/backend-public-source
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: van-backend-public-source
+          path: artifacts/backend-public-source/
+          if-no-files-found: error
+
   backend:
     runs-on: ubuntu-latest
     steps:

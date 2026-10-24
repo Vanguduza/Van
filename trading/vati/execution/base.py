@@ -140,6 +140,7 @@ class Health:
 
 class VenueAdapter(Protocol):
     venue: str
+    account_alias: str
 
     def sync_account(self) -> AccountState: ...
     def positions(self) -> list[VenuePosition]: ...

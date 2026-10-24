@@ -117,7 +117,8 @@
       "evidence": [
         "backend/BE-006_NATIVE_FUNDING_OBSERVATIONS.md; backend/FUNDING_OWNER_READ_CONTRACT.md; receipts/NATIVE_FUNDING_OBSERVATIONS_SOURCE_20261024.json",
         "backend/BE-006_NATIVE_BALANCE_RECONCILIATION.md; receipts/NATIVE_BALANCE_RECONCILIATION_SOURCE_20261024.json",
-        "backend/BE-006_NATIVE_FUNDING_RISK_FENCE.md; receipts/NATIVE_FUNDING_RISK_FENCE_SOURCE_20261024.json"
+        "backend/BE-006_NATIVE_FUNDING_RISK_FENCE.md; receipts/NATIVE_FUNDING_RISK_FENCE_SOURCE_20261024.json",
+        "backend/BE-006_NATIVE_COMMAND_SCOPE_AND_SCHEMAS.md; receipts/NATIVE_COMMAND_SCOPE_AND_SCHEMA_SOURCE_20261024.json"
       ]
     }
   },
@@ -182,7 +183,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-24T11:44:12.362788+00:00",
+    "updated_utc": "2026-10-24T17:15:28.157317+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [],
@@ -355,7 +356,8 @@
       "Private-core import boundary source: sharedStore now imports byte-identicalMIGRATION56 SQL from storage.chart_migration rather than trading package; old chart schema path reexports for compatibility. Original private forbidden-prefix contract unchanged. Directbefore importclosureFAIL reproduced; old trading import reintroduction caught after passingcontrol/restoration. Six legacy45/46 migration fixtures now use explicitpre57 test-only native producer; currentorigin-rule/runtimeassertions preserved, no productionmissingtablefallback.172focused audited0storagewrites/26registry/80rebuild PASS0skip;1fault/control caught;374case383edit preflight0findings. Fullolder815run7202PASS2FAIL9skip retained; no nativehost/privateplacement/unit/live acceptance.",
       "Exact815 fullbackend completed7213 cases:7202PASS2FAIL9SKIP2769.51s; storageaudit0 andprivatePGstoppedremoved. Retentionalreadyfixeda837 and importboundarycorrectedthispacket. FulltradingNOT_RUN. Oldcompletedownedfixturescleaned; frozenQA815nowinactive/clean.",
       "2026-10-24 native funding component:103native/unitization/runtime,27realPG,182audited gateway/storage/backup,19registry+16runtime contracts,80rebuild and5Android parser tests PASS0skip;12behavioral fault pairs caught/restored. Current native return qualification NOT_ISSUED. Fullc0b run7240PASS1FAIL9skip retained; stale backup version expectation corrected, no whole-backend PASS.",
-      "2026-10-24 exact a1867: fulltrading2623PASS0skip actualPG/audit0/cleanup; hosted258legacy mutations detected and116Kotlin cases NOTRUN due confirmed harness dependency omission. Corrected pureharness1328PASS0skip. Hosted emulator18PASS4artworkskips, MetaEditor6283 zeroerrorswarnings. Backendresource failure and both unrelatedCI prerequisites retained."
+      "2026-10-24 exact a1867: fulltrading2623PASS0skip actualPG/audit0/cleanup; hosted258legacy mutations detected and116Kotlin cases NOTRUN due confirmed harness dependency omission. Corrected pureharness1328PASS0skip. Hosted emulator18PASS4artworkskips, MetaEditor6283 zeroerrorswarnings. Backendresource failure and both unrelatedCI prerequisites retained.",
+      "Exact31a726ca hosted: publicPG26PASS, trading2898PASS1schemaFAIL1privateDDSskip; voice source NOT_RUN. All374retained mutants caught; full50browser files1542PASS1rootUIDskip with rootUID separately1PASS and firewall10PASS. Emulator18PASS4declaredskips; actual margin EA MetaEditor0errors0warningsfreshEX5/invalid4errorsnoEX5. Overall CI FAILED, originalDDSreadkey/trustedmain prerequisites retained. Nextsource fixes schema and adds native target guards:11originalbeforeFAIL,227actualPGPASS0skipcleanupTRUE,121nativePASS,83schemaPASS,7fault/restoredpairs caught; external schema31negativecases rejected. Media198auditedPASS,privateDDS274sourcePASS,94rebuildPASS,30owner/workflow/pinPASS. Supplemental public source job370modules uses separate backend/media locks; first complete hosted execution pending."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -367,8 +369,8 @@
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
     "next_action": "Publish private-storage import and legacy fixture compatibility fix, then advance the inactive clean frozenQA815checkout to that exact new commit and run a fresh full backend/contracts+trading privatePG/storage-audit qualification with separate logs/headassert. Continue BE006/007 in /tmp/van-funding-work-20261024: native cTrader cash history reader plus immutable money/scope DTOs and67passing source tests are uncommitted/isolated; flow-neutral ledger, accounting, service ingestion and owner read contracts remain to implement. Explicit-copy only owned funding files later; rootprivatefix differs from its e22base and is not a reason to overwritecurrentroot. Preserve93features131units324req1610acceptanceIDs, nofrontendbeforeBG001, no newfinancialauthority/nativehost/production/S24 claims, no routinecheckpointstop.",
-    "previous_head": "e22a4e7cccca690df5b9cb197f440eb06fb03f06",
-    "current_packet": "Private-core storage import boundary source tested; continuing funding/accounting."
+    "previous_head": "31a726ca20e28f36be5e3e86c27f386e62206e0d",
+    "current_packet": "Native account/venue command scope, compatible risk-value schema and separate public gateway/media source qualification."
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -426,6 +428,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Publish final dispatch halt/lease/quote/route/quantisation source controls (154focused,114actualPG,17CI,9fault/controlpairs), then execute expanded fresh-worker50browser files and original UID/firewall source controls. Retain exactab98 full trading2778pass0skip, failed backend896pass5Chromium startup failures and interrupted resource-exhausted broad attempt; no whole-backend pass. Continue full current-account/exposure RiskAuthority revalidation, joint funding/order reservations, flow-adjusted economics and provider/payment/handoff. All131unit/admission/native/production/security/S24 obligations and BG-001 remain unissued.",
-  "updated_at_utc": "2026-10-24T14:06:17.175263+00:00"
+  "current_action": "Publish tested native command scope/schema repairs and supplemental public gateway/media coverage. Execute all selected source modules on the fresh head, fix actual failures, and continue native account/contract/risk/economics and full-product work. All131unit/admission/BG001/native/production/S24 qualifications remain unissued.",
+  "updated_at_utc": "2026-10-24T17:15:28.157317+00:00"
 }

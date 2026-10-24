@@ -355,6 +355,13 @@ class ExecutionRouter:
         adapter = self.adapters.get(intent.venue)
         if adapter is None:
             raise RouterError(f"no adapter for venue {intent.venue}")
+        from vati.execution.paper import PaperAdapter
+        # Legacy isolated simulation can represent a caller's chosen venue;
+        # native and owner-ticket targets must be bound before any provider I/O.
+        if not isinstance(adapter, PaperAdapter) and (
+            getattr(adapter, 'account_alias', None) != intent.account_alias
+            or getattr(adapter, 'venue', None) != intent.venue):
+            raise RouterError('execution adapter target differs from the intent account or venue')
         hb = adapter.heartbeat(now_ms=now_ms)
         if not hb.connected:
             self.kill.trip(KillSwitchTrigger.VENUE_DISCONNECT, now_ms)

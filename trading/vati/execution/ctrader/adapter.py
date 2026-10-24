@@ -373,6 +373,8 @@ class CtraderAdapter:
 
     def submit(self, cmd: OrderCommand, *, now_ms: int) -> ExecutionReceipt:
         rej = lambda why: ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason=why).sealed()  # noqa: E731
+        if cmd.account_alias != self.account_alias or cmd.venue != self.venue:
+            return rej('native command target differs from the configured account or venue; not dispatched')
         if cmd.protective_stop is None:
             return rej("cTrader orders require a protective stop in the same request")
         try:

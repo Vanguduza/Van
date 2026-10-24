@@ -9,7 +9,7 @@ import json
 import pytest
 
 from vati.contracts import SCHEMA_DIR, SCHEMA_NAMES, load_schema, required_keys
-from vati.risk import RiskDecision, RiskSnapshot, TradeIntent
+from vati.risk import RiskDecision, RiskSnapshot, TradeIntent, SymbolContract
 
 
 @pytest.mark.parametrize("name", SCHEMA_NAMES)
@@ -39,7 +39,14 @@ def test_risk_decision_schema_matches_dataclass():
 
 def test_risk_snapshot_schema_matches_dataclass():
     fields = {f.name for f in dataclasses.fields(RiskSnapshot)}
-    assert fields == required_keys("risk_snapshot")
+    schema = load_schema("risk_snapshot")
+    assert fields == set(schema["properties"])
+    # New observations bind used margin. Legacy immutable snapshots omit it;
+    # all original required fields remain mandatory.
+    assert fields - {"used_margin"} == required_keys("risk_snapshot")
+    terms = schema["$defs"]["risk_symbol_terms"]
+    assert {f.name for f in dataclasses.fields(SymbolContract)} == set(terms["properties"]) == set(terms["required"])
+    assert {"synced_at_unix", "spec_hash"} <= required_keys("symbol_contract")
 
 
 def test_trade_intent_dataclass_fields_exist_in_schema():
