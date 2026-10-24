@@ -1,0 +1,17 @@
+# Original MT5 entry lifetimes survive native preparation
+
+Candidate BE-004/BE-006 source correction. No formal unit or native acceptance is issued.
+
+Two actual router-to-signed-worker counterexamples show that a valid mandate could expire during the terminal quote read while the SDK still sent the entry: the router had omitted the existing command deadline. Native MT5 commands now carry the original mandate expiry, narrowed by the original quote freshness window when supplied. Blocking adapter I/O cannot renew either lifetime. Successful controls still send exactly once.
+
+The pull EA receives a distinct ORDER_SEND_EXPIRING operation with an eighteenth UTC-millisecond field. Its signed account observation must advertise the exact supported protocol before a fresh bounded entry is queued. Older seventeen-field EAs refuse that operation. The EA checks physical account identity and the original deadline again after native preparation, immediately before CTrade entry. Its second-resolution clock is conservatively bounded through the last millisecond of that second; uncertain subsecond authority is refused. Protective close and tighten operations retain their existing behavior.
+
+Both entry operation names share an additive durable uniqueness index. Only unclaimed QUEUED requests can become known expiry refusals. An original TAKEN request keeps its uncertain-effect state and recovery identity, including after deadline expiry. Current availability cannot rewrite that original claim or trigger resubmission. Legacy entries retain their original body/hash and result readback; a legacy frame cannot silently discard an explicit deadline.
+
+The existing delayed-terminal fixture now explicitly claims the original entry before its deadline and withholds its result. Its nineteen original test functions (thirty parametrized scenarios) and all twenty-seven original EA-body test functions remain AST-identical. The fixture change distinguishes a genuinely uncertain native effect from a request that was never claimed. New queue controls exercise both states.
+
+The source receipt records 178 focused passes and eight actual fault/restored pairs: dropped mandate expiry, renewed quote lifetime, rewriting TAKEN uncertainty, missing mixed-version uniqueness, disabled-entry bypass, and the EA's final deadline, physical identity and subsecond uncertainty checks. The EA harness executes unchanged function bodies through controlled terminal interfaces; it is not a substitute for MetaEditor or broker execution.
+
+A broad local PostgreSQL run was incomplete because this container could not create threads, PostgreSQL connections or compiler processes. One original service unknown-entry scenario subsequently passed using a fresh disposable PostgreSQL fixture with unused background workers disabled. The next whole-file attempt failed at initdb before any test. These failures remain in the receipt; no combined recovery pass is claimed. An integrated-root retry passed twenty Python cases but all sixty EA cases failed compiler setup because cc1plus could not spawn; those cases were not executed in that retry. Fresh hosted trading/recovery and actual MetaEditor compilation are required for this source revision.
+
+CTrader/Deriv last-write deadlines, receipt-availability clocks, original setup lifetimes, prospective margin, funding reservations and remaining product implementation are separate unfinished work. No new endpoint, UI, runtime authority or blueprint-package change is introduced.

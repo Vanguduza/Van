@@ -125,13 +125,32 @@ string Utf8Hex(const string value)
 
 bool NativeIdentityMatches(const string &f[])
 {
-   if(ArraySize(f) != 17) return false;
+   if(ArraySize(f) != 17 && ArraySize(f) != 18) return false;
+   if(ArraySize(f) != (f[1] == "ORDER_SEND_EXPIRING" ? 18 : 17)) return false;
    long mode = AccountInfoInteger(ACCOUNT_TRADE_MODE);
    if(mode != ACCOUNT_TRADE_MODE_DEMO && mode != ACCOUNT_TRADE_MODE_REAL) return false;
    return f[13] == IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN))
       && f[14] == Utf8Hex(AccountInfoString(ACCOUNT_SERVER))
       && f[15] == Utf8Hex(AccountInfoString(ACCOUNT_CURRENCY))
       && f[16] == (mode == ACCOUNT_TRADE_MODE_DEMO ? "true" : "false");
+}
+
+bool NativeEntryDeadline(const string &f[], long &deadlineMs)
+{
+   deadlineMs = 0;
+   if(ArraySize(f) == 17 && f[1] == "ORDER_SEND") return true;
+   if(ArraySize(f) != 18 || f[1] != "ORDER_SEND_EXPIRING") return false;
+   deadlineMs = StringToInteger(f[17]);
+   return deadlineMs > 0 && IntegerToString(deadlineMs) == f[17];
+}
+
+bool NativeEntryDeadlineCurrent(long deadlineMs)
+{
+   if(deadlineMs == 0) return true; // Existing explicitly unbounded legacy frame.
+   long nowSeconds = (long)TimeGMT();
+   // TimeGMT has second resolution. Refuse uncertainty inside that second;
+   // rounding the original deadline up would silently extend its authority.
+   return nowSeconds > 0 && nowSeconds * 1000 + 999 < deadlineMs;
 }
 
 // Native cash selection uses terminal time; it is not a UTC or settlement certificate.
@@ -222,7 +241,7 @@ string SnapshotJson()
    string funding = NativeCashJson();
    long accountMode = AccountInfoInteger(ACCOUNT_TRADE_MODE);
    string accountDemo = accountMode == ACCOUNT_TRADE_MODE_DEMO ? "true" : accountMode == ACCOUNT_TRADE_MODE_REAL ? "false" : "null";
-   string acct = StringFormat("{\"login\":%I64d,\"server\":\"%s\",\"demo\":%s,\"equity\":\"%s\",\"balance\":\"%s\",\"credit\":\"%s\",\"currency_digits\":%I64d,\"currency\":\"%s\",\"trade_allowed\":%s,\"hedging\":%s,\"server_time_ms\":%I64d,\"funding\":%s,%s}",
+   string acct = StringFormat("{\"login\":%I64d,\"server\":\"%s\",\"demo\":%s,\"equity\":\"%s\",\"balance\":\"%s\",\"credit\":\"%s\",\"currency_digits\":%I64d,\"currency\":\"%s\",\"trade_allowed\":%s,\"hedging\":%s,\"server_time_ms\":%I64d,\"funding\":%s,%s,\"entry_constraints\":{\"schema\":\"van.mt5.ea-entry-constraints/1\",\"explicit_deadline\":true,\"required_op\":\"ORDER_SEND_EXPIRING\",\"framed_fields\":18}}",
       AccountInfoInteger(ACCOUNT_LOGIN), JsonEscape(AccountInfoString(ACCOUNT_SERVER)), accountDemo,
       DoubleToString(AccountInfoDouble(ACCOUNT_EQUITY),-16), DoubleToString(AccountInfoDouble(ACCOUNT_BALANCE),-16),
       DoubleToString(AccountInfoDouble(ACCOUNT_CREDIT),-16), AccountInfoInteger(ACCOUNT_CURRENCY_DIGITS), JsonEscape(AccountInfoString(ACCOUNT_CURRENCY)),
@@ -263,8 +282,11 @@ void PushResult(const string json) { int n = ArraySize(pendingResults); ArrayRes
 //+------------------------------------------------------------------+
 //| execution (SL required, tighten-only, no size decisions)          |
 //+------------------------------------------------------------------+
-void ExecOrderSend(const string id, const string symbol, const string side, double volume, double price, double sl, double tp, const string comment, long magic, int deviation, const string orderType)
+void ExecOrderSend(const string id, const string symbol, const string side, double volume, double price, double sl, double tp, const string comment, long magic, int deviation, const string orderType, const string &binding[])
 {
+   long deadlineMs = 0;
+   if(!NativeIdentityMatches(binding) || !NativeEntryDeadline(binding, deadlineMs) || !NativeEntryDeadlineCurrent(deadlineMs))
+   { PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"volume\":\"0\",\"reason\":\"native entry binding or deadline invalid or expired\"}", id)); return; }
    if(!MathIsValidNumber(sl) || sl <= 0 || !MathIsValidNumber(volume) || volume <= 0 || !MathIsValidNumber(price) || !MathIsValidNumber(tp) || tp < 0 || (side != "BUY" && side != "SELL") || (orderType != "MARKET" && orderType != "LIMIT") || (orderType == "LIMIT" && price <= 0))
    { PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"volume\":\"0\",\"reason\":\"invalid native entry parameters or protective stop\"}", id)); return; }
    if(!TerminalInfoInteger(TERMINAL_CONNECTED) || !TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) || !AccountInfoInteger(ACCOUNT_TRADE_ALLOWED) || !AccountInfoInteger(ACCOUNT_TRADE_EXPERT) || !MQLInfoInteger(MQL_TRADE_ALLOWED))
@@ -289,6 +311,8 @@ void ExecOrderSend(const string id, const string symbol, const string side, doub
    }
    trade.SetExpertMagicNumber(magic);
    trade.SetDeviationInPoints(deviation);
+   if(!NativeIdentityMatches(binding) || !NativeEntryDeadlineCurrent(deadlineMs) || !TerminalInfoInteger(TERMINAL_CONNECTED) || !TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) || !AccountInfoInteger(ACCOUNT_TRADE_ALLOWED) || !AccountInfoInteger(ACCOUNT_TRADE_EXPERT) || !MQLInfoInteger(MQL_TRADE_ALLOWED))
+   { PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"volume\":\"0\",\"reason\":\"native entry authority expired or changed before dispatch\"}", id)); return; }
    bool ok;
    if(orderType == "LIMIT") ok = (side == "BUY") ? trade.BuyLimit(volume, price, symbol, sl, tp, ORDER_TIME_GTC, 0, comment) : trade.SellLimit(volume, price, symbol, sl, tp, ORDER_TIME_GTC, 0, comment);
    else ok = (side == "BUY") ? trade.Buy(volume, symbol, 0.0, sl, tp, comment) : trade.Sell(volume, symbol, 0.0, sl, tp, comment);
@@ -391,12 +415,12 @@ void OnTimer()
          PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"ok\":false,\"volume\":\"0\",\"reason\":\"native physical identity binding differs\"}", id));
          continue;
       }
-      if(op == "ORDER_SEND" && f[12] != "MARKET" && f[12] != "LIMIT")
+      if((op == "ORDER_SEND" || op == "ORDER_SEND_EXPIRING") && f[12] != "MARKET" && f[12] != "LIMIT")
       {
          PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"volume\":\"0\",\"reason\":\"unsupported explicit order type\"}", id));
          continue;
       }
-      if(op == "ORDER_SEND")      ExecOrderSend(id, f[2], f[3], StringToDouble(f[4]), StringToDouble(f[5]), StringToDouble(f[6]), StringToDouble(f[7]), f[9], StringToInteger(f[10]), (int)StringToInteger(f[11]), f[12]);
+      if(op == "ORDER_SEND" || op == "ORDER_SEND_EXPIRING") ExecOrderSend(id, f[2], f[3], StringToDouble(f[4]), StringToDouble(f[5]), StringToDouble(f[6]), StringToDouble(f[7]), f[9], StringToInteger(f[10]), (int)StringToInteger(f[11]), f[12], f);
       else if(op == "MODIFY_SL")  ExecModifySl(id, (ulong)StringToInteger(f[8]), StringToDouble(f[6]), StringToDouble(f[7]));
       else if(op == "CLOSE")      ExecClose(id, (ulong)StringToInteger(f[8]), StringToDouble(f[4]));
       else PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"reason\":\"op not in contract\"}", id));

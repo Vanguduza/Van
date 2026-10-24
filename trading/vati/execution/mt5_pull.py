@@ -14,8 +14,10 @@ Wire (EA → server): POST /ea/v1/{alias}/poll   JSON {ts, nonce, account, posit
   headers: X-Van-Ts, X-Van-Nonce, X-Van-Signature = HMAC-SHA256(key, "{ts}\\n{nonce}\\n{alias}\\n{sha256(body)}")
 Wire (server → EA): text/plain, one command per line:
   id|op|symbol|type|volume|price|sl|tp|position|comment|magic|deviation|order_type|login|server_hex|currency_hex|demo
+  ORDER_SEND_EXPIRING adds the exact UTC expires_at_ms as field18; an older
+  17-field EA refuses the new frame rather than dropping its deadline.
   (legacy unbound component fixtures retain the original 12-column format)
-The EA never receives a command whose op is outside ORDER_SEND, MODIFY_SL, CLOSE."""
+The EA's operations are ORDER_SEND, ORDER_SEND_EXPIRING, MODIFY_SL and CLOSE."""
 
 from __future__ import annotations
 
@@ -39,7 +41,8 @@ from vati.execution.mt5_identity import Mt5Identity
 from vati.risk.contracts import Direction, LossModel
 
 ZERO = Decimal("0")
-OPS = ("ORDER_SEND", "MODIFY_SL", "CLOSE")
+ENTRY_OPS = ("ORDER_SEND", "ORDER_SEND_EXPIRING")
+OPS = (*ENTRY_OPS, "MODIFY_SL", "CLOSE")
 SKEW_S = 60
 STATE_FRESH_MS = 30_000
 
@@ -76,18 +79,25 @@ class BridgeQueue:
         self._conn.execute("""CREATE UNIQUE INDEX IF NOT EXISTS native_entry_command
             ON commands(alias,json_extract(body_json,'$.native_command_hash'))
             WHERE op='ORDER_SEND' AND json_type(body_json,'$.native_command_hash')='text'""")
+        # Retain the original index for old readers and fence mixed-version
+        # senders across both entry operations during a rolling source upgrade.
+        self._conn.execute("""CREATE UNIQUE INDEX IF NOT EXISTS native_entry_command_v2
+            ON commands(alias,json_extract(body_json,'$.native_command_hash'))
+            WHERE op IN ('ORDER_SEND','ORDER_SEND_EXPIRING') AND json_type(body_json,'$.native_command_hash')='text'""")
 
     def enqueue(self, alias: str, op: str, body: dict, *, now_ms: int) -> int:
         if op not in OPS:
             raise ValueError(f"op {op} not in bridge contract")
+        if op=='ORDER_SEND' and 'expires_at_ms' in body:
+            raise VenueUnavailable('explicit deadline requires the bounded native entry operation')
         with self._lock:
-            if op=='ORDER_SEND' and body.get('native_command_hash'):
+            if op in ENTRY_OPS and body.get('native_command_hash'):
                 # SQLite, rather than an instance-local lock, arbitrates the
                 # original native claim across independent bridge clients.
                 self._conn.execute('BEGIN IMMEDIATE')
                 try:
                     encoded=json.dumps(body,sort_keys=True)
-                    row=self._conn.execute("SELECT id,body_json FROM commands WHERE alias=? AND op='ORDER_SEND' AND json_extract(body_json,'$.native_command_hash')=?",
+                    row=self._conn.execute("SELECT id,body_json FROM commands WHERE alias=? AND op IN ('ORDER_SEND','ORDER_SEND_EXPIRING') AND json_extract(body_json,'$.native_command_hash')=?",
                         (alias,body['native_command_hash'])).fetchone()
                     if row is not None:
                         if row[1]!=encoded:raise VenueUnavailable('original native entry payload conflicts; reconcile without resubmission')
@@ -105,7 +115,7 @@ class BridgeQueue:
     def native_entries(self, alias: str) -> list[dict]:
         """Original durable claims/results, scoped to this authenticated EA."""
         with self._lock:
-            rows=self._conn.execute("SELECT id,body_json,status,result_json FROM commands WHERE alias=? AND op='ORDER_SEND' AND json_type(body_json,'$.native_command_hash')='text' ORDER BY id",(alias,)).fetchall()
+            rows=self._conn.execute("SELECT id,body_json,status,result_json FROM commands WHERE alias=? AND op IN ('ORDER_SEND','ORDER_SEND_EXPIRING') AND json_type(body_json,'$.native_command_hash')='text' ORDER BY id",(alias,)).fetchall()
             return [{'id':int(cid),'body':json.loads(body),'status':status,
                      'result':json.loads(result) if result is not None else None}
                     for cid,body,status,result in rows]
@@ -121,10 +131,16 @@ class BridgeQueue:
                 out = []
                 for cid, op, body in rows:
                     payload = json.loads(body)
+                    if ((op=='ORDER_SEND_EXPIRING' and not _deadline_valid(payload.get('expires_at_ms'),now_ms=now_ms))
+                        or (op=='ORDER_SEND' and 'expires_at_ms' in payload)):
+                        result={'status':'REJECTED','volume':'0','reason':'native entry deadline invalid or expired before dispatch'}
+                        self._conn.execute("UPDATE commands SET status='DONE', result_json=?, done_ms=? WHERE id=?",
+                            (json.dumps(result,sort_keys=True),now_ms,cid))
+                        continue
                     if expected_identity is not None:
                         try:
                             bound = Mt5Identity(**payload['expected_account'])
-                            admitted = bound == expected_identity and (op != 'ORDER_SEND' or allow_entry)
+                            admitted = bound == expected_identity and (op not in ENTRY_OPS or allow_entry is True)
                         except (KeyError, TypeError, ValueError, VenueUnavailable):
                             admitted = False
                         if not admitted:
@@ -189,16 +205,27 @@ def sign_poll(key: bytes, ts: str, nonce: str, alias: str, body: bytes) -> str:
     return hmac.new(key, f"{ts}\n{nonce}\n{alias}\n{hashlib.sha256(body).hexdigest()}".encode(), hashlib.sha256).hexdigest()
 
 
+def _deadline_valid(value, *, now_ms=None):
+    return (type(value) is int and 0<value<2**63
+        and (now_ms is None or type(now_ms) is int and 0<=now_ms<value))
+
+
 def format_commands(cmds: list[dict]) -> str:
     """Pipe-delimited lines the EA parses with StringSplit. Fields never contain '|' (comments are sanitised)."""
     lines = []
     for c in cmds:
+        if c['op']=='ORDER_SEND' and 'expires_at_ms' in c:
+            raise VenueUnavailable('explicit native deadline cannot be dropped from a legacy frame')
         f = [str(c["id"]), c["op"], c.get("symbol", ""), c.get("type", ""), str(c.get("volume", "")), str(c.get("price", "")), str(c.get("sl", "")), str(c.get("tp", "")), str(c.get("position", "")),
              str(c.get("comment", "")).replace("|", "/")[:31], str(c.get("magic", 0)), str(c.get("deviation", 20))]
         if 'expected_account' in c:
             identity = Mt5Identity(**c['expected_account'])
             f += [str(c.get('order_type','')), identity.login, identity.server.encode().hex(),
                   identity.currency.encode().hex(), 'true' if identity.demo else 'false']
+        if c['op']=='ORDER_SEND_EXPIRING':
+            if 'expected_account' not in c or not _deadline_valid(c.get('expires_at_ms')):
+                raise VenueUnavailable('bounded native entry frame requires physical identity and an exact deadline')
+            f.append(str(c['expires_at_ms']))
         lines.append("|".join(f))
     return "\n".join(lines) + ("\n" if lines else "")
 
@@ -336,6 +363,7 @@ class Mt5PullAdapter:
         return {"symbol": cmd.symbol, "type": "BUY" if cmd.direction is Direction.LONG else "SELL", "volume": str(cmd.quantity), "price": str(cmd.entry_price), "sl": str(cmd.protective_stop), "tp": str(cmd.targets[0]) if cmd.targets else "",
                 "comment": f"vati:{cmd.trade_intent_id}"[:31], "magic": int(cmd.decision_hash[:8], 16) % 2_147_483_647, "deviation": str(deviation_points(cmd.symbol, cmd.max_slippage, self.point_sizes)), "order_type": cmd.entry_type,
                 'native_command_hash':cmd.command_hash,'trade_intent_id':cmd.trade_intent_id,
+                **({'expires_at_ms':cmd.expires_at_ms} if cmd.expires_at_ms is not None else {}),
                 **({'expected_account':self.identity.as_dict()} if self.identity is not None else {})}
 
     def _entry_receipt(self, cmd: OrderCommand, r, *, now_ms: int) -> ExecutionReceipt:
@@ -383,11 +411,19 @@ class Mt5PullAdapter:
             # a new preflight refusal. Return its original result without send.
             return self._entry_receipt(cmd,previous[0]['result'],now_ms=now_ms)
         try:
-            self._state()
+            state=self._state()
         except VenueUnavailable as exc:
             return rej(str(exc))
+        if cmd.expires_at_ms is not None:
+            if not _deadline_valid(cmd.expires_at_ms,now_ms=now_ms) or not _deadline_valid(cmd.expires_at_ms,now_ms=self.clock()):
+                return rej('explicit native entry deadline invalid or expired; not queued')
+            support=state['account'].get('entry_constraints')
+            expected={'schema':'van.mt5.ea-entry-constraints/1','explicit_deadline':True,
+                      'required_op':'ORDER_SEND_EXPIRING','framed_fields':18}
+            if self.identity is None or support!=expected or support.get('explicit_deadline') is not True:
+                return rej('native EA cannot enforce the explicit entry deadline; not queued')
         body = self._entry_body(cmd)
-        cid = self.queue.enqueue(self.account_alias, "ORDER_SEND", body, now_ms=now_ms)
+        cid = self.queue.enqueue(self.account_alias, "ORDER_SEND_EXPIRING" if cmd.expires_at_ms is not None else "ORDER_SEND", body, now_ms=now_ms)
         r = self._await(cid)
         return self._entry_receipt(cmd,r,now_ms=now_ms)
 

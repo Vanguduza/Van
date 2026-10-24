@@ -21,6 +21,7 @@ def ea(tmp_path_factory):
     assert shutil.which('g++'), 'EA function-body controls require g++'
     source=EA.read_text()
     names={'JsonEscape','JsonNumber','NativeRefusal','ResolvePositionTicket',
+           'NativeIdentityMatches','NativeEntryDeadline','NativeEntryDeadlineCurrent',
            'NativeBindingJson','CashUnavailable','NativeCashJson','NativeMarginJson',
            'SnapshotJson','PushResult','ExecOrderSend','ExecModifySl','ExecClose'}
     bodies=[]
@@ -37,7 +38,11 @@ def ea(tmp_path_factory):
             elif not quoted:
                 if c=='{': depth+=1
                 elif c=='}': depth-=1
-        bodies.append(source[match.start():at])
+        # Only array-reference ABI spelling changes for the C++ interface;
+        # each actual function body remains byte-identical to the EA source.
+        header=source[match.start():match.end()]
+        header=re.sub(r'const string &(\w+)\[\]',r'const std::vector<string> &\1',header)
+        bodies.append(header+source[match.end():at])
     assert len(bodies)==len(names), 'every declared actual EA function must be extracted'
     folder=tmp_path_factory.mktemp('actual-ea-bodies')
     cpp=folder/'ea.cpp'; binary=folder/'ea'
@@ -126,6 +131,21 @@ def test_confirmed_stop_change_still_works(ea):
 def test_native_entry_rechecks_current_permission_and_valid_parameters(ea,case):
     r=ea(case)
     assert r['results'][0]['status']=='REJECTED' and r['entry_calls']==0
+
+
+@pytest.mark.parametrize('case',['entry-deadline-expired','entry-deadline-subsecond','entry-deadline-delayed',
+    'entry-deadline-malformed','entry-deadline-overflow','entry-identity-delayed','entry-permission-delayed'])
+def test_actual_ea_entry_binding_and_deadline_survive_native_preparation(ea,case):
+    value=ea(case)
+    assert value['entry_calls']==0 and value['results'][0]['status']=='REJECTED'
+
+
+def test_actual_ea_bounded_entry_still_executes_once_and_advertises_its_protocol(ea):
+    value=ea('entry-deadline-good')
+    assert value['entry_calls']==1 and value['results'][0]['status']=='FILLED'
+    assert ea('snapshot')['account']['entry_constraints']=={
+        'schema':'van.mt5.ea-entry-constraints/1','explicit_deadline':True,
+        'required_op':'ORDER_SEND_EXPIRING','framed_fields':18}
 
 
 @pytest.mark.parametrize('case',['unknown-close','partial-close'])

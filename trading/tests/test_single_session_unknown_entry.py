@@ -37,6 +37,8 @@ def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_
         margin_used=Decimal('1000')*len(terminal_positions)
         account=cash_telemetry({'login':native_login,'server':'fixture-native-ea','demo':True,'equity':'10000','balance':'10000','currency':'USD',
             'trade_allowed':True,'hedging':True,'server_time_ms':clock['ms'],
+            'entry_constraints':{'schema':'van.mt5.ea-entry-constraints/1','explicit_deadline':True,
+                                 'required_op':'ORDER_SEND_EXPIRING','framed_fields':18},
             'margin_used':str(margin_used),'margin_free':str(Decimal('10000')-margin_used),
             'margin_level':str(Decimal('1000000')/margin_used if margin_used else Decimal('0'))},credit='0',native_clock_ms=clock['ms'],movements=[],currency_digits=2)
         body=json.dumps({'account':account,'positions':terminal_positions,'results':list(results)}).encode()
@@ -111,6 +113,13 @@ def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_
                 else:
                     assert lose_enqueue_reply
                     assert queue._conn.execute('SELECT count(*) FROM commands WHERE alias=?',(alias,)).fetchone()[0]==1
+
+                if not initial_partial_status and not initial_terminal_status:
+                    # Preserve the original unknown-effect scenario: the
+                    # authentic terminal claims it before its entry deadline,
+                    # then withholds the result while later bars/restarts run.
+                    # Never model an expired unclaimed request as a late fill.
+                    poll()
 
                 yield service,bars,index,clock,poll,orders,result,queue,delivered
                 break

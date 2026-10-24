@@ -26,7 +26,15 @@ template<class... T> string StringFormat(string fmt, T... args) {
   return out.data();
 }
 bool MathIsValidNumber(double n) { return std::isfinite(n); }
-long TimeGMT() { return 1700000000; }
+long utc_clock=1700000000;
+long TimeGMT() { return utc_clock; }
+string IntegerToString(long value) { return std::to_string(value); }
+long StringToInteger(const string& value) { try { return std::stol(value); } catch(...) { return 0; } }
+string Utf8Hex(const string& value) {
+ std::ostringstream out;
+ for(unsigned char c:value) out<<std::hex<<std::setw(2)<<std::setfill('0')<<(int)c;
+ return out.str();
+}
 using datetime = long;
 long terminal_clock=1700000000;
 long TimeCurrent() { return terminal_clock; }
@@ -82,6 +90,7 @@ bool margin_available=true;
 bool funds_available=true, history_available=true, native_deal_available=true;
 bool cash_amount_available=true, change_funds_during_query=false, change_identity_during_query=false;
 bool expire_cash_query=false;
+bool expire_entry_read=false, drift_entry_identity=false, disable_entry_read=false;
 long native_login=12345678;
 struct CashDeal { ulong ticket=9007199254740993UL; long type=DEAL_TYPE_BALANCE, at=1699999999000L;
  double profit=12344.12345678, commission=0, swap=0, fee=-.00000013; };
@@ -117,7 +126,12 @@ double PositionGetDouble(int field) {
  case POSITION_SL:return p.sl; case POSITION_TP:return p.tp; default:return p.profit; }
 }
 string PositionGetString(int field) { return field==POSITION_SYMBOL ? positions.at(selected).symbol : "vati:fixture"; }
-bool SymbolSelect(const string&,bool) { return true; }
+bool SymbolSelect(const string&,bool) {
+ if(expire_entry_read) utc_clock++;
+ if(drift_entry_identity) native_login++;
+ if(disable_entry_read) connected=false;
+ return true;
+}
 bool HistoryDealSelect(ulong ticket) { return ticket==77; }
 bool HistorySelect(datetime from,datetime to) {
  if(from!=0 || to!=terminal_clock+1) { last_error=1; return false; }
@@ -217,7 +231,20 @@ int main(int argc, char** argv) {
   if(c=="entry-netting-pending") pending_count=1;
   double volume=c=="entry-negative-volume" ? -.001 : .00123456;
   double sl=c=="entry-nan-stop" ? std::numeric_limits<double>::quiet_NaN() : 1.12;
-  ExecOrderSend("1","EURUSD",c=="entry-invalid-side" ? "INVALID" : "BUY",volume,1.123456789012345,sl,1.2,"vati:fixture",123,20,c=="entry-pending" ? "LIMIT" : "MARKET");
+  std::vector<string> binding(17,""); binding[1]="ORDER_SEND";
+  binding[13]=IntegerToString(native_login); binding[14]=Utf8Hex(AccountInfoString(ACCOUNT_SERVER));
+  binding[15]=Utf8Hex(AccountInfoString(ACCOUNT_CURRENCY)); binding[16]="true";
+  if(c.rfind("entry-deadline",0)==0) {
+   binding[1]="ORDER_SEND_EXPIRING"; binding.push_back(IntegerToString(utc_clock*1000+1000));
+   if(c=="entry-deadline-expired") binding[17]=IntegerToString(utc_clock*1000);
+   if(c=="entry-deadline-subsecond") binding[17]=IntegerToString(utc_clock*1000+500);
+   if(c=="entry-deadline-malformed") binding[17]+="garbage";
+   if(c=="entry-deadline-overflow") binding[17]="9223372036854775808";
+   if(c=="entry-deadline-delayed") expire_entry_read=true;
+  }
+  if(c=="entry-identity-delayed") drift_entry_identity=true;
+  if(c=="entry-permission-delayed") disable_entry_read=true;
+  ExecOrderSend("1","EURUSD",c=="entry-invalid-side" ? "INVALID" : "BUY",volume,1.123456789012345,sl,1.2,"vati:fixture",123,20,c=="entry-pending" ? "LIMIT" : "MARKET",binding);
  }
  std::cout<<"{\"results\":[";
  for(size_t i=0;i<pendingResults.size();i++) { if(i) std::cout<<","; std::cout<<pendingResults[i]; }

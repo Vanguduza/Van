@@ -457,6 +457,16 @@ class ExecutionRouter:
         loss_model = LossModel.ILLIQUID_EQUITY if intent.venue in ("zse", "vfex") else (LossModel.FULL_STAKE if intent.stake is not None and intent.stop is None else LossModel.STOP_DISTANCE)
         if loss_model is LossModel.STOP_DISTANCE and command_stop is None:
             raise RouterError("stop-distance order without protective stop")
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        native_deadline = mandate.expires_at_unix*1000 if isinstance(adapter,(Mt5BridgeAdapter,Mt5PullAdapter)) else None
+        if native_deadline is not None and market_reference is not None:
+            if (type(market_reference.mark_age_ms) is not int or type(market_reference.max_mark_age_ms) is not int
+                or not 0<=market_reference.mark_age_ms<=market_reference.max_mark_age_ms):
+                raise RouterError('native entry quote lifetime unavailable; not dispatched')
+            # Quote freshness includes its last valid millisecond. Bind an
+            # exclusive deadline without renewing that original observation.
+            native_deadline=min(native_deadline,now_ms+market_reference.max_mark_age_ms-market_reference.mark_age_ms+1)
         cmd = OrderCommand(
             trade_intent_id=intent.trade_intent_id,
             decision_hash=decision.decision_hash,
@@ -474,6 +484,7 @@ class ExecutionRouter:
             targets=targets,
             time_in_force=time_in_force,
             max_slippage=max_slippage,
+            expires_at_ms=native_deadline,
             strategy_id=intent.strategy_id,
             strategy_version=intent.strategy_version,
             lease_epoch=lease_epoch,
