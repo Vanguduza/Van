@@ -88,6 +88,8 @@ class PostgresLedger:
     @contextmanager
     def atomic(self):
         """Keep a read/validate/append operation under the chain-head writer lock."""
+        if getattr(self,'_read_snapshot_depth',0):
+            raise LedgerError('cannot acquire a writer inside a read-only ledger snapshot')
         outer = self._atomic_depth == 0
         if outer:
             with self._conn.cursor() as cur:
@@ -105,11 +107,32 @@ class PostgresLedger:
         finally:
             self._atomic_depth -= 1
 
+    @contextmanager
+    def read_snapshot(self):
+        """A repeatable read does not lock the financial chain-head writer."""
+        if self._atomic_depth:
+            yield self
+            return
+        if int(self._conn.info.transaction_status)!=0:
+            raise LedgerError('read snapshot requires an idle ledger connection')
+        with self._conn.cursor() as cur:
+            cur.execute('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY')
+        self._atomic_depth+=1
+        self._read_snapshot_depth=1
+        try:
+            yield self
+        finally:
+            self._conn.rollback()
+            self._read_snapshot_depth=0
+            self._atomic_depth-=1
+
     def _finish_read(self):
         if self._atomic_depth == 0:
             self._conn.rollback()
 
     def append(self, event: Event) -> str:
+        if getattr(self,'_read_snapshot_depth',0):
+            raise LedgerError('cannot append inside a read-only ledger snapshot')
         if not event.hash or event.hash != canonical_hash(event.body()):
             raise LedgerError("event hash missing or does not match body")
         try:

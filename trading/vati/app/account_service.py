@@ -1012,8 +1012,12 @@ class AccountCoordinatorService:
         assert self.adapter is not None
         acct = self.adapter.sync_account()
         hb = self.adapter.heartbeat(now_ms=now_ms)
+        positions=self.adapter.positions()
         from vati.funding.worker import snapshot_funding
         funding = snapshot_funding(self,self._ledger,self.adapter,acct,now_ms=now_ms)
+        from vati.funding.native import NativeAccountMark
+        mark=acct.funding_mark.body() if isinstance(getattr(acct,'funding_mark',None),NativeAccountMark) else None
+        received_ms=max(now_ms,acct.server_time_unix_ms,self.clock())
         self._ledger.append(make_event(
             EventKind.ACCOUNT_SNAPSHOT, "vati-account-service",
             {
@@ -1023,9 +1027,10 @@ class AccountCoordinatorService:
                 "currency": acct.currency,
                 "verified": acct.verified,
                 "funding_observation": funding,
+                "native_account_mark": mark,
                 "connected": hb.connected,
                 "server_offset_ms": hb.server_offset_ms,
-                "open_positions": len(self.adapter.positions()),
+                "open_positions": len(positions),
                 "peak_equity": str(self.peak_equity),
                 "day_start_equity": str(self.day_start_equity),
                 "week_start_equity": str(self.week_start_equity),
@@ -1046,7 +1051,7 @@ class AccountCoordinatorService:
                     and self.coordinator.temperament_policy.admitted_edge_fn is None
                     else "NOT_APPLICABLE_OR_BOUND"),
             },
-            event_time_ms=now_ms, received_time_ms=now_ms,
+            event_time_ms=now_ms, received_time_ms=received_ms,
             correlation_id=self.cfg.account_alias,
         ))
 

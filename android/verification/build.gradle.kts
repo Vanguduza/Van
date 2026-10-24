@@ -162,6 +162,7 @@ sourceSets {
             // reasoned about.
             "com/dial/van/trading/TradingModels.kt",
             "com/dial/van/trading/FundingObservation.kt",
+            "com/dial/van/trading/NativeBalancePeriod.kt",
             "com/dial/van/trading/TradeBook.kt",
             "com/dial/van/trading/ChartGeometry.kt",
             "com/dial/van/trading/TradingReadModels.kt",

@@ -14,6 +14,13 @@ PRODUCER='vati-native-funding'
 SCHEMA='native-funding-observation/1'
 
 class FundingBook:
+    kind=EventKind.FUNDING_STATEMENT
+    producer=PRODUCER
+    schema=SCHEMA
+    statement_type=NativeCashStatement
+    row_field='movements'
+    row_label='movement'
+    correlation_prefix='funding:'
     def __init__(self,ledger,*,clock=None):
         self.ledger=ledger;self.clock=clock or (lambda:int(time.time()*1000))
 
@@ -49,15 +56,15 @@ class FundingBook:
             seen.add(row.native_id)
 
     def _events(self,scope_hash,as_of=None):
-        correlation='funding:'+scope_hash
-        rows=history_through(self.ledger,correlation,as_of) if as_of else list(self.ledger.iter(EventKind.FUNDING_STATEMENT,correlation_id=correlation))
+        correlation=self.correlation_prefix+scope_hash
+        rows=history_through(self.ledger,correlation,as_of) if as_of else list(self.ledger.iter(self.kind,correlation_id=correlation))
         output=[]
         for event in rows:
-            if (event.kind is not EventKind.FUNDING_STATEMENT or event.producer!=PRODUCER
-                or event.hash!=canonical_hash(event.body()) or event.payload.get('schema')!=SCHEMA
+            if (event.kind is not self.kind or event.producer!=self.producer
+                or event.hash!=canonical_hash(event.body()) or event.payload.get('schema')!=self.schema
                 or event.payload.get('scope_hash')!=scope_hash):raise LedgerError('funding_observation_journal_invalid')
             try:
-                statement=NativeCashStatement.from_body(event.payload['statement']);self._validate(statement)
+                statement=self.statement_type.from_body(event.payload['statement']);self._validate(statement)
                 if statement.scope_hash!=scope_hash or self._key(statement)!=event.payload['content_key'] or event.payload['state'] not in {'OBSERVED','CONFLICT'}:
                     raise ValueError('funding_observation_scope_invalid')
             except (KeyError,TypeError,ValueError,ArithmeticError) as exc:
@@ -76,16 +83,16 @@ class FundingBook:
             originals={};conflicts={}
             for event in previous:
                 if event.payload['state']!='OBSERVED':continue
-                for row in event.payload['statement']['movements']:
+                for row in event.payload['statement'][self.row_field]:
                     old=originals.setdefault(row['native_id'],(row,event.hash))
                     if old[0]!=row:raise LedgerError('funding_original_history_conflict')
-            for row in statement.movements:
+            for row in getattr(statement,self.row_field):
                 old=originals.get(row.native_id)
                 if old and old[0]!=row.body():conflicts[str(row.native_id)]=old[1]
-            event=make_event(EventKind.FUNDING_STATEMENT,PRODUCER,{'schema':SCHEMA,'scope_hash':scope,
+            event=make_event(self.kind,self.producer,{'schema':self.schema,'scope_hash':scope,
                 'content_key':key,'state':'CONFLICT' if conflicts else 'OBSERVED','statement':statement.body(),
                 'conflicting_original_refs':conflicts,'execution_authority':False},event_time_ms=statement.to_ms,
-                received_time_ms=received,correlation_id='funding:'+scope)
+                received_time_ms=received,correlation_id=self.correlation_prefix+scope)
             self.ledger.append(event)
         return self._receipt(event)
 
@@ -94,14 +101,13 @@ class FundingBook:
         # while waiting for a provider, nor submit a financial movement.
         return self.record_statement(adapter.cash_movements(from_ms=from_ms,to_ms=to_ms))
 
-    @staticmethod
-    def _receipt(event):
+    def _receipt(self,event):
         return {'statement_ref':event.hash,'scope_hash':event.payload['scope_hash'],'state':event.payload['state'],
             'observed_at_ms':event.payload['statement']['observed_at_ms'],'received_at_ms':event.received_time_ms,
-            'row_count':len(event.payload['statement']['movements']),'execution_authority':False}
+            'row_count':len(event.payload['statement'][self.row_field]),'execution_authority':False}
 
     def observations(self,scope_hash,*,as_of=None):
-        with self.ledger.atomic():
+        with self.ledger.read_snapshot():
             if not self.ledger.verify_incremental()[0]:raise LedgerError('funding_observation_chain_invalid')
             events=self._events(scope_hash,as_of);originals={};conflicts=[];windows=[]
             for event in events:
@@ -109,9 +115,11 @@ class FundingBook:
                     conflicts.append({'statement_ref':event.hash,'original_refs':event.payload['conflicting_original_refs']})
                     continue
                 body=event.payload['statement'];windows.append({'from_ms':body['from_ms'],'to_ms':body['to_ms'],'statement_ref':event.hash})
-                for row in body['movements']:
-                    old=originals.setdefault(row['native_id'],{'movement':row,'original_statement_ref':event.hash})
-                    if old['movement']!=row:raise LedgerError('funding_original_history_conflict')
+                for row in body[self.row_field]:
+                    old=originals.setdefault(row['native_id'],{self.row_label:row,'original_statement_ref':event.hash,
+                        'observed_at_ms':body['observed_at_ms'],'received_at_ms':event.received_time_ms})
+                    if old[self.row_label]!=row:raise LedgerError('funding_original_history_conflict')
             return {'scope_hash':scope_hash,'state':'CONFLICT' if conflicts else 'OBSERVED' if events else 'NO_DATA',
-                'movements':list(originals.values()),'coverage_windows':windows,'conflicts':conflicts,
+                self.row_field:list(originals.values()),'coverage_windows':windows,'conflicts':conflicts,
+                'knowledge_through_received_ms':max((event.received_time_ms for event in events),default=None),
                 'return_qualification':'NOT_ISSUED','execution_authority':False}

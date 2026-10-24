@@ -31,6 +31,33 @@ class NativeAccountMark:
             **{k:str(getattr(self,k)) if getattr(self,k) is not None else None for k in ('balance','net_equity','manager_bonus','ib_bonus','nonwithdrawable_bonus')},
             'valuation_basis':'BALANCE_PLUS_NATIVE_NET_UNREALIZED_EXCLUDING_SEPARATE_BONUSES'}
 
+    @classmethod
+    def from_body(cls,body):
+        fields=set(cls.__dataclass_fields__)
+        if (not isinstance(body,dict) or set(body)!=fields|{'schema','scope_hash','valuation_basis'}
+            or body['schema']!='native-account-mark/1'
+            or body['valuation_basis']!='BALANCE_PLUS_NATIVE_NET_UNREALIZED_EXCLUDING_SEPARATE_BONUSES'):
+            raise ValueError('native_account_mark_format_invalid')
+        values={k:body[k] for k in fields}
+        for key in ('balance','net_equity','manager_bonus','ib_bonus','nonwithdrawable_bonus'):
+            value=values[key]
+            if value is None and key not in {'balance','net_equity'}:continue
+            if not isinstance(value,str) or not 1<=len(value)<=128:raise ValueError('native_account_mark_money_invalid')
+            value=Decimal(value)
+            if (not value.is_finite() or len(value.as_tuple().digits)>4096 or abs(value.as_tuple().exponent)>4096):
+                raise ValueError('native_account_mark_money_invalid')
+            values[key]=value
+        for key in ('native_account_id','deposit_asset_id'):native_int(values[key],minimum=1)
+        native_int(values['observed_at_ms'],minimum=0)
+        for key in ('balance_version','registered_at_ms'):
+            if values[key] is not None:native_int(values[key],minimum=0)
+        if values['provider']!='CTRADER' or values['environment'] not in {'DEMO','LIVE'}:raise ValueError('native_account_mark_scope_invalid')
+        for key in ('currency','account_alias'):
+            if not isinstance(values[key],str) or not values[key].strip():raise ValueError('native_account_mark_scope_invalid')
+        mark=cls(**values)
+        if mark.scope_hash!=body['scope_hash']:raise ValueError('native_account_mark_scope_invalid')
+        return mark
+
 @dataclass(frozen=True)
 class NativeCashMovement:
     native_id: int

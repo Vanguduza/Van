@@ -77,6 +77,20 @@ def test_runtime_never_skips_weekly_catchup_or_merges_a_changed_native_account(t
     rejected=capture_funding(ledger,adapter,account,now_ms=account.server_time_unix_ms)
     assert rejected['reason']=='NATIVE_ACCOUNT_BINDING_CHANGED' and ledger.count(EventKind.FUNDING_STATEMENT)==3
 
+def test_deal_history_has_its_own_recovery_cursor_when_cash_collection_succeeded(tmp_path):
+    from test_native_deal_history import NativeDeals
+    from vati.execution.ctrader.transport import CtraderApiError
+    ledger=Ledger(tmp_path/'native.sqlite');transport=NativeDeals();adapter=ctrader(transport);adapter.clock=lambda:3000
+    original=adapter.deal_history
+    adapter.deal_history=lambda **_:(_ for _ in ()).throw(CtraderApiError('NOT_AVAILABLE','fixture-private-provider-note'))
+    first=capture_funding(ledger,adapter,adapter.sync_account(),now_ms=3000)
+    assert first['state']=='OBSERVED' and first['deal_observation']['state']=='UNAVAILABLE'
+    assert 'fixture-private-provider-note' not in str(first)
+    adapter.deal_history=original;adapter.clock=lambda:4000;transport.rows=[]
+    recovered=capture_funding(ledger,adapter,adapter.sync_account(),now_ms=4000)
+    assert recovered['coverage_from_ms']==3000 and recovered['deal_observation']['coverage_from_ms']==0
+    assert recovered['deal_observation']['state']=='OBSERVED' and ledger.count(EventKind.FUNDING_DEAL_STATEMENT)==1
+
 @pytest.mark.parametrize('runtime',['account','session'])
 def test_both_existing_runtime_snapshot_producers_ingest_native_facts(runtime,tmp_path):
     ledger,transport,adapter=setup(tmp_path)
@@ -95,6 +109,7 @@ def test_both_existing_runtime_snapshot_producers_ingest_native_facts(runtime,tm
         service=AccountCoordinatorService.__new__(AccountCoordinatorService);service.learning=None;service.adapter=adapter;service._ledger=ledger
         service.peak_equity=service.day_start_equity=service.week_start_equity=D('100.25')
         service.kill=N(active=[]);service.mandate=None;service.coordinator=None;service.lifecycle=None;service.cfg=N(account_alias=adapter.account_alias)
+    service.clock=lambda:3000
     from vati.funding.worker import stop_funding
     try:
         service._account_snapshot(3000)
@@ -103,8 +118,21 @@ def test_both_existing_runtime_snapshot_producers_ingest_native_facts(runtime,tm
         service._account_snapshot(3000)
         event=list(ledger.iter(EventKind.ACCOUNT_SNAPSHOT))[-1]
         assert event.payload['funding_observation']['state']=='OBSERVED'
+        assert event.payload['native_account_mark']['observed_at_ms']==3000
+        assert event.received_time_ms>=3000
         assert event.payload['funding_observation']['statement']['statement_ref']==list(ledger.iter(EventKind.FUNDING_STATEMENT))[0].hash
         assert service._funding_worker.wait_idle()
+        stop_funding(service)
+        previous=event.payload['funding_observation']
+        class OldWorkerResult:
+            def submit(self,*_):return previous
+            def close(self):pass
+        service._funding_worker=OldWorkerResult();adapter.clock=lambda:4000;service.clock=lambda:5000
+        service._account_snapshot(3000)
+        latest=list(ledger.iter(EventKind.ACCOUNT_SNAPSHOT))[-1]
+        assert latest.payload['native_account_mark']['observed_at_ms']==4000
+        assert latest.payload['funding_observation']['native_mark']['observed_at_ms']==3000
+        assert latest.received_time_ms==5000
     finally:stop_funding(service)
 
 def test_slow_cash_reader_does_not_block_snapshots_and_request_queue_is_bounded(tmp_path):

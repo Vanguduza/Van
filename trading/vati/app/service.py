@@ -334,15 +334,19 @@ class SessionService:
         positions = r.cycle.adapter.positions()
         from vati.funding.worker import snapshot_funding
         funding = snapshot_funding(self,r.cycle.ledger,r.cycle.adapter,acct,now_ms=now_ms)
+        from vati.funding.native import NativeAccountMark
+        mark=acct.funding_mark.body() if isinstance(getattr(acct,'funding_mark',None),NativeAccountMark) else None
+        received_ms=max(now_ms,acct.server_time_unix_ms,self.clock())
         r.cycle.ledger.append(make_event(EventKind.ACCOUNT_SNAPSHOT, "vati-service", {
             "account_alias": acct.account_alias, "equity": str(acct.equity), "balance": str(acct.balance), "currency": acct.currency, "verified": acct.verified,
             "funding_observation": funding,
+            "native_account_mark": mark,
             "connected": hb.connected, "server_offset_ms": hb.server_offset_ms, "open_positions": len(positions), "peak_equity": str(r.cycle.peak_equity), "day_start_equity": str(r.cycle.day_start_equity),
             "week_start_equity": str(r.cycle.week_start_equity), "kill_switch": sorted(t.value for t in r.cycle.kill.active), "mode": r.cycle.mandate.mode.value,
             "risk_history_issue": r.cycle.streaks.recovery_issue,
             "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
             "restated_learning": self.learning.projection_summary if getattr(self, "learning", None) else {"status":"NOT_CONSTRUCTED"},
-        }, event_time_ms=now_ms, received_time_ms=now_ms, correlation_id=r.cycle.cfg.session_id))
+        }, event_time_ms=now_ms, received_time_ms=received_ms, correlation_id=r.cycle.cfg.session_id))
 
     def start(self) -> None:
         assert self.runner is not None, "build() first"

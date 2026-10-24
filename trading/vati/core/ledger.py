@@ -136,6 +136,8 @@ class Ledger:
     @contextmanager
     def atomic(self):
         """Serialize a read/validate/append operation with every ledger writer."""
+        if getattr(self,'_read_snapshot_depth',0):
+            raise LedgerError('cannot acquire a writer inside a read-only ledger snapshot')
         if self._conn.in_transaction:
             yield self
             return
@@ -146,6 +148,23 @@ class Ledger:
         except BaseException:
             self._conn.rollback()
             raise
+
+    @contextmanager
+    def read_snapshot(self):
+        """Consistent WAL read without reserving the protective/order writer."""
+        if self._conn.in_transaction:
+            yield self
+            return
+        previous=self._conn.execute('PRAGMA query_only').fetchone()[0]
+        self._conn.execute('PRAGMA query_only=ON')
+        self._read_snapshot_depth=1
+        try:
+            self._conn.execute('BEGIN')
+            yield self
+        finally:
+            self._conn.rollback()
+            self._read_snapshot_depth=0
+            self._conn.execute('PRAGMA query_only='+('ON' if previous else 'OFF'))
 
     def append(self, event: Event) -> str:
         if not event.hash or event.hash != canonical_hash(event.body()):

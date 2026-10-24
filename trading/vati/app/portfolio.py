@@ -40,6 +40,9 @@ def _latest_by(ledger: Ledger, kind: EventKind, key) -> dict[str, Event]:
 
 # ------------------------------------------------------------------ accounts
 def account_states(ledger: Ledger, registry_public: list[dict]) -> list[dict[str, Any]]:
+    with ledger.read_snapshot():return _account_states(ledger,registry_public)
+
+def _account_states(ledger: Ledger, registry_public: list[dict]) -> list[dict[str, Any]]:
     snaps = _latest_by(ledger, EventKind.ACCOUNT_SNAPSHOT, lambda e: e.payload.get("account_alias"))
     sessions = _latest_by(ledger, EventKind.SESSION, lambda e: e.correlation_id.split(":")[0] if ":" in e.correlation_id else None)
     open_by_alias: dict[str, int] = defaultdict(int)
@@ -81,6 +84,9 @@ def account_states(ledger: Ledger, registry_public: list[dict]) -> list[dict[str
 
 
 def portfolio(ledger: Ledger, registry_public: list[dict], *, reporting_currency: str = "USD") -> dict[str, Any]:
+    with ledger.read_snapshot():return _portfolio(ledger,registry_public,reporting_currency=reporting_currency)
+
+def _portfolio(ledger: Ledger, registry_public: list[dict], *, reporting_currency: str = "USD") -> dict[str, Any]:
     accounts = account_states(ledger, registry_public)
     same = [a for a in accounts if a["currency"] == reporting_currency and a["equity"] is not None]
     other = [a["alias"] for a in accounts if a["equity"] is not None and a["currency"] != reporting_currency]

@@ -16,6 +16,7 @@ class NativeCash(FundsTransport):
     def call(self,name,body):
         self.requests.append((name,deepcopy(body)))
         if name=='ProtoOACashFlowHistoryListReq':return self.response_name,{'ctidTraderAccountId':self.response_account,'depositWithdraw':deepcopy(self.rows)}
+        if name=='ProtoOADealListReq':return 'ProtoOADealListRes',{'ctidTraderAccountId':12345,'deal':[],'hasMore':False}
         return deepcopy(super().call(name,body))
 
 

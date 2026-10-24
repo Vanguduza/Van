@@ -22,3 +22,14 @@ The paired-owner routes are `GET /v1/trading/accounts` and `GET /v1/trading/port
 Financial display must keep unknown/unavailable/pending/conflict distinct from an observed empty cash window. Do not calculate profit from balance or equity differences. Do not sum a missing account PnL as zero. A native profile change produces stale/unavailable data until the current identity is observed. Restricted broker credit, converted bonuses, negative-balance support, rebates, account charges and IB income retain their economic categories and must not be presented together as proven trading alpha.
 
 Android `FundingObservation` and `NativeCashMovement`, attached to `AccountCard`, preserve ID and monetary strings. Values above 2^53 are not converted to floating-point IDs. Existing clients remain compatible with the additive fields. The screen redesign, full cash-history export, source-normalized performance displays and actual provider/device acceptance remain under the canonical programme.
+
+
+## Native deal and period evidence
+
+`funding.native_deals` exposes `state`, `deal_count`, `deals_truncated`, `coverage_windows`, `conflicts` and at most100 original financial deal rows. Each row retains original statement, observation and receipt references/times, exact native identifiers, signed commission and optional close details. An absent optional fee/version is null. This preview is not a complete trade export.
+
+`funding.period` separates `balance_state` from performance `state`. Balance reconciliation uses native balance versions and post-operation balances; trade-cost settlement qualification remains `NOT_ISSUED`. `baseline_ref`, `closing_ref`, `evidence_refs`, interval and coverage state identify the actual inputs. `knowledge_through_received_ms` with `LATEST_OBSERVED_HISTORY_NOT_AS_KNOWN_AT_TRADE_TIME` is latest-observed evidence, not an as-known-at-decision replay.
+
+When reconciliation succeeds, `cash_neutral_net_account_pnl` removes external capital from native net mark changes. `separate_business_income_or_expense` and `net_account_pnl_excluding_capital_and_separate_business` distinguish IB/management income. These dollar values do not establish settled trade profitability. Missing balance evidence leaves these values null. External capital without historical normalized net-equity valuations leaves percentage `performance` null even when balance is reconciled. With no external capital, measured marked-account return and sampled drawdown retain their explicit return/drawdown bases and `NOT_ISSUED` qualification.
+
+`NativeBalancePeriod`, `NativeDealLedger` and `NativeDealObservation` extend the existing Android account parser. Monetary quantities and native IDs stay exact strings; availability uses exact integer parsing. Missing data never becomes zero profit or an observed empty history. Existing legacy native day/week PnL and risk baselines are not activated by this read model.

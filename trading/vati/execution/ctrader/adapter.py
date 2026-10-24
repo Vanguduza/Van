@@ -99,15 +99,24 @@ class CtraderAdapter:
         adapter=CtraderAdapter(transport,self.client_id,self.client_secret_provider,self.access_token_provider,
             self.ctid_trader_account_id,self.account_alias,self.venue,clock=self.clock)
         class CashReader:
-            def cash_movements(self,**window):
+            def _authenticate(self):
                 if not adapter._authed or not transport.connected:
                     transport.connect()
                     transport.call('ProtoOAApplicationAuthReq',{'clientId':adapter.client_id,'clientSecret':adapter.client_secret_provider()})
                     transport.call('ProtoOAAccountAuthReq',{'ctidTraderAccountId':adapter.ctid_trader_account_id,'accessToken':adapter.access_token_provider()})
                     adapter._authed=True
+            def cash_movements(self,**window):
+                self._authenticate()
                 return adapter.cash_movements(**window)
+            def deal_history(self,**window):
+                self._authenticate()
+                return adapter.deal_history(**window)
             def close(self):transport.close()
         return CashReader()
+
+    def deal_history(self,*,from_ms,to_ms):
+        from vati.funding.deals import collect_native_deals
+        return collect_native_deals(self,from_ms=from_ms,to_ms=to_ms)
 
     def _native_trader_identity(self):
         name, r = self.transport.call("ProtoOATraderReq", {"ctidTraderAccountId": self.ctid_trader_account_id})
