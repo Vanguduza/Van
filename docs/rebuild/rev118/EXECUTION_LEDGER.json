@@ -373,8 +373,9 @@
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
     "next_action": "Publish private-storage import and legacy fixture compatibility fix, then advance the inactive clean frozenQA815checkout to that exact new commit and run a fresh full backend/contracts+trading privatePG/storage-audit qualification with separate logs/headassert. Continue BE006/007 in /tmp/van-funding-work-20261024: native cTrader cash history reader plus immutable money/scope DTOs and67passing source tests are uncommitted/isolated; flow-neutral ledger, accounting, service ingestion and owner read contracts remain to implement. Explicit-copy only owned funding files later; rootprivatefix differs from its e22base and is not a reason to overwritecurrentroot. Preserve93features131units324req1610acceptanceIDs, nofrontendbeforeBG001, no newfinancialauthority/nativehost/production/S24 claims, no routinecheckpointstop.",
-    "previous_head": "130191cdf6fe0d588e377fbd339e9732835f246b",
-    "current_packet": "Native account identity/valuation independent of cash coverage, exact owner/API/Android DTO contracts, and public-source runner corrections."
+    "previous_head": "93728a4d22da926f2b62b3e2e50fb838ef26c32f",
+    "current_packet": "Original selected-setup validity reaches bounded native commands; source evidence and fresh937 hosted qualification.",
+    "ci_credential_capability": "receipts/CI_CREDENTIAL_CAPABILITY_20261024.json: repo admin metadata available, integration secret/deploy-key reads403; no credential changes."
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -432,6 +433,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Qualify original MT5/cTrader/Deriv local entry bounds and real receipt availability with fresh hosted full source runs; retain failed3444 parser-fixture evidence and explicit nullable clock/protective recovery semantics. Continue original setup lifetime, direct/exit availability clocks, prospective margin/broker thresholds, native symbol freshness, funding reservations, provider flow economics and remaining whole-product implementation. No independent/admission/BG001/host/provider/production/S24 qualification inferred.",
-  "updated_at_utc": "2026-10-24T19:24:46.897328+00:00"
+  "current_action": "Qualify selected-setup bounds; continue direct/exit availability clocks, unknown-clock native readback, prospective margin/broker thresholds, native symbol freshness, funding reservations, provider economics and remaining whole-product source implementation. Preserve independent/native/admission/BG001/production/S24 gates as unissued.",
+  "updated_at_utc": "2026-10-24T20:28:22.575618+00:00"
 }

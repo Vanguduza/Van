@@ -786,6 +786,14 @@ class AccountCoordinatorService:
 
     def _execute(self, candidate, intent, decision, targets, lease_epoch):
         assert self.router is not None and self.account is not None and self.mandate is not None
+        selection_ms = self.clock()
+        setup_from_ms = getattr(candidate, 'valid_from_ms', None)
+        setup_until_ms = getattr(candidate, 'valid_until_ms', None)
+        if (type(selection_ms) is not int or type(setup_from_ms) is not int
+            or type(setup_until_ms) is not int
+            or not 0 <= setup_from_ms < setup_until_ms < 2**63
+            or not setup_from_ms <= selection_ms < setup_until_ms):
+            raise RouterError('original selected setup window invalid or not current; not dispatched')
         state = self.evaluators[candidate.symbol.upper()].last_state
         if state is None:
             raise RouterError("candidate has no current market state")
@@ -821,6 +829,7 @@ class AccountCoordinatorService:
             stop_mode=StopMode.SOFTWARE if software else StopMode.VENUE,
             targets=targets, time_in_force=self.specs[candidate.symbol.upper()].time_in_force,
             entry_type=candidate.entry_type,
+            setup_valid_until_ms=setup_until_ms,
             lease_epoch=lease_epoch, execution_policy_decision=policy_decision,
             market_reference=MarketReference(
                 last_price=state.features.close,

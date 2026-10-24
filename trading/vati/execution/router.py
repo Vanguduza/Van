@@ -316,7 +316,8 @@ class ExecutionRouter:
                 lease_epoch: Optional[int] = None, execution_policy_decision=None,
                 market_reference: Optional[MarketReference] = None,
                 liquidity: Optional[LiquidityView] = None,
-                urgency: Urgency = Urgency.NORMAL) -> ExecutionReceipt:
+                urgency: Urgency = Urgency.NORMAL,
+                setup_valid_until_ms: Optional[int] = None) -> ExecutionReceipt:
         corr = intent.trade_intent_id
         for pending in self.exit_journal.unresolved():
             if pending.payload.get("state", "UNKNOWN") != "ACCEPTED":
@@ -469,6 +470,12 @@ class ExecutionRouter:
             # Quote freshness includes its last valid millisecond. Bind an
             # exclusive deadline without renewing that original observation.
             native_deadline=min(native_deadline,now_ms+market_reference.max_mark_age_ms-market_reference.mark_age_ms+1)
+        if setup_valid_until_ms is not None:
+            if (type(setup_valid_until_ms) is not int or not 0 < setup_valid_until_ms < 2**63
+                or type(now_ms) is not int or now_ms >= setup_valid_until_ms):
+                raise RouterError('original selected setup validity unavailable or expired; not dispatched')
+            if native_deadline is not None:
+                native_deadline = min(native_deadline, setup_valid_until_ms)
         cmd = OrderCommand(
             trade_intent_id=intent.trade_intent_id,
             decision_hash=decision.decision_hash,

@@ -1,0 +1,294 @@
+{
+  "schema": "van.rebuild.original-selected-setup-deadline-source/1",
+  "source_preimage": "93728a4d22da926f2b62b3e2e50fb838ef26c32f",
+  "paths": {
+    "trading/vati/app/account_service.py": {
+      "preimage_sha256": "b3b66fdff06156df41cd60337ddd8cd97ec97eca62f32ab9a396d11033b17fdf",
+      "source_sha256": "c079b0e6f695266fdfbdf939660b5eb1ed857baddc981b33e23837e96a4c4130"
+    },
+    "trading/vati/execution/router.py": {
+      "preimage_sha256": "efad7f1eb836192c86cb424f877b20b0b067989e73a1908d8b36570adbfac44d",
+      "source_sha256": "f900edce7aea06a282548f81e02e1ddcb6f5e426e756157e94aed45691325918"
+    },
+    "trading/tests/test_setup_entry_deadline.py": {
+      "preimage_sha256": null,
+      "source_sha256": "df2d48425c981ddb3cffb1c8e43b17af27948dccb80c1da06717310bf75e5423"
+    },
+    "trading/tests/test_dispatch_current_controls.py": {
+      "preimage_sha256": "dc9d72fd464e89021dbcac399163029b91fd13bcbdf08c8ad2f8433086bf6122",
+      "source_sha256": "107cc419088d70b8677384d56a381c9def0222e4bdb6790477ab4dbce1b53ec9"
+    }
+  },
+  "original_reproduction": {
+    "path": "/tmp/van-setup-entry-deadline-before-r2.xml",
+    "sha256": "a7e33f84b9be774d725e0a8937e4f49937bc4f720ae5f32ae78d348e0c565f81",
+    "tests": 3,
+    "passed": 1,
+    "failures": [
+      {
+        "name": "test_original_setup_expiry_is_not_renewed_by_current_quotes_or_route_preparation[route_refresh]",
+        "message": "AssertionError: an expired selected setup reached the actual native entry\nassert (False)\n +  where False = <built-in method startswith of str object at 0x7f07226da940>('REJECTED')\n +    where <built-in method startswith of str object at 0x7f07226da940> = 'FILLED'.startswith"
+      },
+      {
+        "name": "test_original_setup_expiry_is_not_renewed_by_current_quotes_or_route_preparation[native_quote]",
+        "message": "AssertionError: an expired selected setup reached the actual native entry\nassert (False)\n +  where False = <built-in method startswith of str object at 0x7f07226da940>('REJECTED')\n +    where <built-in method startswith of str object at 0x7f07226da940> = 'FILLED'.startswith"
+      }
+    ],
+    "errors": 0,
+    "skipped": 0
+  },
+  "focused": {
+    "path": "/tmp/van-setup-entry-deadline-r3.xml",
+    "sha256": "a38e9f0e98606f6382bcc00da573029d4bb2ab8cad3830bbcaea0f75ecdb9a74",
+    "tests": 75,
+    "passed": 75,
+    "failures": [],
+    "errors": 0,
+    "skipped": 0
+  },
+  "coordinator_current_risk": {
+    "path": "/tmp/van-setup-entry-deadline-r4.xml",
+    "sha256": "b14feec9740b101e68fb97a3350b89749fa96bd1d2a5c9818ab3cff2223de683",
+    "tests": 180,
+    "passed": 180,
+    "failures": [],
+    "errors": 0,
+    "skipped": 0
+  },
+  "final_policy_economics_attempt": {
+    "path": "/tmp/van-setup-entry-deadline-r6.xml",
+    "sha256": "8b9772f72878ab74f393cd5ded6d196b383b50a089184c7ff07eb1006c40852d",
+    "tests": 179,
+    "passed": 178,
+    "failures": [
+      {
+        "name": "test_submission_guard_blocks_takeover_even_after_nominal_ttl",
+        "message": "RuntimeError: can't start new thread"
+      }
+    ],
+    "errors": 0,
+    "skipped": 0
+  },
+  "isolated_original_lease_thread_retry": {
+    "path": "/tmp/van-setup-entry-deadline-lease-thread-retry.xml",
+    "sha256": "f1768111781145b9e93dd6ff229cf67e30dee4874bffb0bc86e16e85ddc2d6a1",
+    "tests": 1,
+    "passed": 1,
+    "failures": [],
+    "errors": 0,
+    "skipped": 0
+  },
+  "semantic_faults": [
+    {
+      "name": "coordinator-admits-unqualified-window-final",
+      "path": "trading/vati/app/account_service.py",
+      "before": "raise RouterError('original selected setup window invalid or not current; not dispatched')",
+      "after": "pass",
+      "expected": "test_unqualified_or_future_original_setup_window_cannot_dispatch",
+      "source_sha256": "c079b0e6f695266fdfbdf939660b5eb1ed857baddc981b33e23837e96a4c4130",
+      "fault": {
+        "tests": 22,
+        "failures": [
+          {
+            "name": "test_unknown_or_malformed_selected_setup_time_never_reaches_native_entry[None]",
+            "message": "AssertionError: assert (False)\n +  where False = <built-in method startswith of str object at 0x7f90b5cc3b70>('REJECTED')\n +    where <built-in method startswith of str object at 0x7f90b5cc3b70> = 'FILLED'.startswith"
+          },
+          {
+            "name": "test_unqualified_or_future_original_setup_window_cannot_dispatch[None]",
+            "message": "AssertionError: assert (False)\n +  where False = <built-in method startswith of str object at 0x7f90b5cc3b70>('REJECTED')\n +    where <built-in method startswith of str object at 0x7f90b5cc3b70> = 'FILLED'.startswith"
+          },
+          {
+            "name": "test_unqualified_or_future_original_setup_window_cannot_dispatch[True]",
+            "message": "AssertionError: assert (False)\n +  where False = <built-in method startswith of str object at 0x7f90b5cc3b70>('REJECTED')\n +    where <built-in method startswith of str object at 0x7f90b5cc3b70> = 'FILLED'.startswith"
+          },
+          {
+            "name": "test_unqualified_or_future_original_setup_window_cannot_dispatch[False]",
+            "message": "AssertionError: assert (False)\n +  where False = <built-in method startswith of str object at 0x7f90b5cc3b70>('REJECTED')\n +    where <built-in method startswith of str object at 0x7f90b5cc3b70> = 'FILLED'.startswith"
+          },
+          {
+            "name": "test_unqualified_or_future_original_setup_window_cannot_dispatch[-1]",
+            "message": "AssertionError: assert (False)\n +  where False = <built-in method startswith of str object at 0x7f90b5cc3b70>('REJECTED')\n +    where <built-in method startswith of str object at 0x7f90b5cc3b70> = 'FILLED'.startswith"
+          },
+          {
+            "name": "test_unqualified_or_future_original_setup_window_cannot_dispatch[1800000000000]",
+            "message": "AssertionError: assert (False)\n +  where False = <built-in method startswith of str object at 0x7f90b5cc3b70>('REJECTED')\n +    where <built-in method startswith of str object at 0x7f90b5cc3b70> = 'FILLED'.startswith"
+          },
+          {
+            "name": "test_unqualified_or_future_original_setup_window_cannot_dispatch[1800000000001]",
+            "message": "AssertionError: assert (False)\n +  where False = <built-in method startswith of str object at 0x7f90b5cc3b70>('REJECTED')\n +    where <built-in method startswith of str object at 0x7f90b5cc3b70> = 'FILLED'.startswith"
+          },
+          {
+            "name": "test_unqualified_or_future_original_setup_window_cannot_dispatch[1800000000050]",
+            "message": "AssertionError: assert (False)\n +  where False = <built-in method startswith of str object at 0x7f90b5cc3b70>('REJECTED')\n +    where <built-in method startswith of str object at 0x7f90b5cc3b70> = 'FILLED'.startswith"
+          }
+        ],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "1a32832c829a2c54ce5d9141712a67da00b74e909d2c9ef333f2e92c62ec5c81"
+      },
+      "restored": {
+        "tests": 22,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "31950bf9a821694938e7c60d1596baade7debde97b16ca42bdf77d2cdf966d47"
+      },
+      "caught": true,
+      "restored_pass": true
+    },
+    {
+      "name": "coordinator-drops-original-setup-bound-final",
+      "path": "trading/vati/app/account_service.py",
+      "before": "setup_valid_until_ms=setup_until_ms,",
+      "after": "setup_valid_until_ms=None,",
+      "expected": "test_original_setup_expiry_is_not_renewed",
+      "source_sha256": "c079b0e6f695266fdfbdf939660b5eb1ed857baddc981b33e23837e96a4c4130",
+      "fault": {
+        "tests": 22,
+        "failures": [
+          {
+            "name": "test_original_setup_expiry_is_not_renewed_by_current_quotes_or_route_preparation[route_refresh]",
+            "message": "AssertionError: an expired selected setup reached the actual native entry\nassert (False)\n +  where False = <built-in method startswith of str object at 0x7f88d4a53930>('REJECTED')\n +    where <built-in method startswith of str object at 0x7f88d4a53930> = 'FILLED'.startswith"
+          },
+          {
+            "name": "test_original_setup_expiry_is_not_renewed_by_current_quotes_or_route_preparation[native_quote]",
+            "message": "AssertionError: an expired selected setup reached the actual native entry\nassert (False)\n +  where False = <built-in method startswith of str object at 0x7f88d4a53930>('REJECTED')\n +    where <built-in method startswith of str object at 0x7f88d4a53930> = 'FILLED'.startswith"
+          },
+          {
+            "name": "test_actual_selected_setup_bound_is_sealed_into_the_native_command",
+            "message": "AssertionError: assert 1800000000101 == 1800000000050\n +  where 1800000000050 = CandidateOpportunity(candidate_id='original-selected', account_alias='native', venue='mt5', symbol='EURUSD', strategy_...idence_refs=(), entry_type='MARKET', candidate_hash='efd61c2278efa736861a151d439078ec78261b9e1c65f5cb105039116e22972c').valid_until_ms"
+          }
+        ],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "b6d2df1f82b584cafb3cad68a4201a89efe74252d4ce26b67bd13a119619cf24"
+      },
+      "restored": {
+        "tests": 22,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "8e74c6c08953b35e6e0f9d0f5a357085a991dd5b9d9c1b566029f602ae2d09d4"
+      },
+      "caught": true,
+      "restored_pass": true
+    },
+    {
+      "name": "router-drops-native-setup-cap-final",
+      "path": "trading/vati/execution/router.py",
+      "before": "native_deadline = min(native_deadline, setup_valid_until_ms)",
+      "after": "native_deadline = native_deadline",
+      "expected": "test_original_setup_expiry_is_not_renewed",
+      "source_sha256": "f900edce7aea06a282548f81e02e1ddcb6f5e426e756157e94aed45691325918",
+      "fault": {
+        "tests": 22,
+        "failures": [
+          {
+            "name": "test_original_setup_expiry_is_not_renewed_by_current_quotes_or_route_preparation[native_quote]",
+            "message": "AssertionError: an expired selected setup reached the actual native entry\nassert (False)\n +  where False = <built-in method startswith of str object at 0x7f16033a39f0>('REJECTED')\n +    where <built-in method startswith of str object at 0x7f16033a39f0> = 'FILLED'.startswith"
+          },
+          {
+            "name": "test_actual_selected_setup_bound_is_sealed_into_the_native_command",
+            "message": "AssertionError: assert 1800000000101 == 1800000000050\n +  where 1800000000050 = CandidateOpportunity(candidate_id='original-selected', account_alias='native', venue='mt5', symbol='EURUSD', strategy_...idence_refs=(), entry_type='MARKET', candidate_hash='efd61c2278efa736861a151d439078ec78261b9e1c65f5cb105039116e22972c').valid_until_ms"
+          }
+        ],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "95006f58a9f5fc07c317c755fdf45be6c10cb408a237e9ca3c8ddb0da69e2d4f"
+      },
+      "restored": {
+        "tests": 22,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "8424a71eceaf874e58e168f49160a666702c49c5f6639763f8847b67acacb23f"
+      },
+      "caught": true,
+      "restored_pass": true
+    },
+    {
+      "name": "setup-overrides-original-quote-or-grant-final",
+      "path": "trading/vati/execution/router.py",
+      "before": "native_deadline = min(native_deadline, setup_valid_until_ms)",
+      "after": "native_deadline = setup_valid_until_ms",
+      "expected": "test_longer_setup_cannot_authorize_an_entry",
+      "source_sha256": "f900edce7aea06a282548f81e02e1ddcb6f5e426e756157e94aed45691325918",
+      "fault": {
+        "tests": 22,
+        "failures": [
+          {
+            "name": "test_selected_setup_never_extends_original_quote_or_mandate[5000-100-101]",
+            "message": "AssertionError: assert 1800000005000 == (1800000000000 + 101)\n +  where 1800000000000 = CandidateOpportunity(candidate_id='original-selected', account_alias='native', venue='mt5', symbol='EURUSD', strategy_...idence_refs=(), entry_type='MARKET', candidate_hash='42945bd0b2ab45d9fb32e2fa44052794ead45c0521480f12d0ed2155d727c571').valid_from_ms"
+          },
+          {
+            "name": "test_selected_setup_never_extends_original_quote_or_mandate[5000-5000-1000]",
+            "message": "AssertionError: assert 1800000005000 == (1800000000000 + 1000)\n +  where 1800000000000 = CandidateOpportunity(candidate_id='original-selected', account_alias='native', venue='mt5', symbol='EURUSD', strategy_...idence_refs=(), entry_type='MARKET', candidate_hash='42945bd0b2ab45d9fb32e2fa44052794ead45c0521480f12d0ed2155d727c571').valid_from_ms"
+          },
+          {
+            "name": "test_longer_setup_cannot_authorize_an_entry_after_the_original_quote_or_grant[native_quote_after_quote-100]",
+            "message": "AssertionError: assert (False)\n +  where False = <built-in method startswith of str object at 0x7fabd59cbab0>('REJECTED')\n +    where <built-in method startswith of str object at 0x7fabd59cbab0> = 'FILLED'.startswith"
+          },
+          {
+            "name": "test_longer_setup_cannot_authorize_an_entry_after_the_original_quote_or_grant[native_quote_after_mandate-5000]",
+            "message": "AssertionError: assert (False)\n +  where False = <built-in method startswith of str object at 0x7fabd59cbab0>('REJECTED')\n +    where <built-in method startswith of str object at 0x7fabd59cbab0> = 'FILLED'.startswith"
+          }
+        ],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "73b0c77c6613711c0c5111ce43c02608afe15b7f53c03b76f71179571a291a57"
+      },
+      "restored": {
+        "tests": 22,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "cada83e9477fdfbbc6234f119069cca3e5e90b11bc98d69cbc4838d8ce94452f"
+      },
+      "caught": true,
+      "restored_pass": true
+    }
+  ],
+  "original_stale_mark_oracle": {
+    "path": "trading/tests/test_dispatch_current_controls.py",
+    "test": "test_actual_account_entry_sender_does_not_reset_age_to_a_fresh_reference",
+    "original_assertions_and_exception_oracles_unchanged": true
+  },
+  "retained_failures": {
+    "prototype": "Initial failed current-setup control selected LIMIT, while the signed SDK fixture models MARKET fills. Corrected probe explicitly uses existing registered MARKET_WITH_SLIPPAGE_CAP. No production policy changed.",
+    "r5": {
+      "path": "/tmp/van-setup-entry-deadline-r5.xml",
+      "sha256": "87d46f583381bfcddd3d709c2c95fa1f333825ed76e2cd0b0e3c62dcff8feab3",
+      "tests": 179,
+      "passed": 178,
+      "failures": [
+        {
+          "name": "test_actual_account_entry_sender_does_not_reset_age_to_a_fresh_reference",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'valid_from_ms'"
+        }
+      ],
+      "errors": 0,
+      "skipped": 0
+    },
+    "r5_resolution": "Stale-quote fixture supplies explicit valid candidate window. Original assertions and MARK_STALE exception oracle remain AST-identical. Missing source window is a controlled RouterError.",
+    "r6_failure": "One unchanged lease-fencing test could not start a native thread; distinct single-test retry passed. No combined179-case final pass claimed.",
+    "transport": "Stalled patch/read calls were cancelled after exec-server disconnect. On recovery target was unchanged. Future tests added once, duplicate definitions/imports checked."
+  },
+  "limits": [
+    "Native last-write cap, not cancellation of an accepted order or uncertainty reconciliation.",
+    "Independent adjustments, legacy single-symbol and non-native lifecycle validity remain separate.",
+    "No new endpoint, UI, financial permission, native/broker/production/S24 acceptance or admitted blueprint change."
+  ],
+  "integrated_root": {
+    "tests": 23,
+    "passed": 23,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xml_sha256": "d932a2ed5e52bf5e5118582dd916a86508b5e03adaca7c5e3e1d2b7bdd46a54c"
+  },
+  "owner_contract_check": {
+    "changed": [],
+    "exit_code": 0,
+    "log_sha256": "35a9b4641c85055b16c3a6458a7b1f99fb5df7ec0f5a6280ca45c3ab14cd7103"
+  }
+}

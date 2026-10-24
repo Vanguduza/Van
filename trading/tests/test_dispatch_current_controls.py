@@ -197,6 +197,7 @@ def test_actual_account_entry_sender_does_not_reset_age_to_a_fresh_reference(eur
     service.routes=routes;service.contracts={'EURUSD':replace(eurusd,venue='paper')};service.clock=lambda:clock['ms']
     service.lease=None;service.specs={'EURUSD':N(time_in_force='DAY')};service.cfg=N(max_quote_age_ms=30)
     service._ledger=ledger
-    candidate=N(symbol='EURUSD',candidate_id=trade.trade_intent_id,direction=trade.direction,entry_type='MARKET')
+    candidate=N(symbol='EURUSD',candidate_id=trade.trade_intent_id,direction=trade.direction,entry_type='MARKET',
+        valid_from_ms=clock['ms']-100,valid_until_ms=clock['ms']+1000)
     with pytest.raises(RouterError,match='MARK_STALE'):service._execute(candidate,trade,decision,(),None)
     assert not paper.positions() and ledger.count(EventKind.ORDER_COMMAND)==0
