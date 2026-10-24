@@ -1,0 +1,315 @@
+{
+  "schema": "van.rebuild.current-account-risk-source/1",
+  "observed_at_utc": "2026-10-24T15:06:56.609703+00:00",
+  "source_parent": "ff5252878ffae3f55af6bc35af6ff7f36ba5eb35",
+  "integration_files": {
+    "android/app/src/main/java/com/dial/van/trading/TradeBook.kt": {
+      "preimage_sha256": "f435948e3d254a169c2bd0d0efb09996a459f1a99a3917702bd96921dba1c80a",
+      "source_sha256": "f00726b356062348cab0071ee1e81a26c522fd41b4662718c38ab0a0bc951afd"
+    },
+    "android/verification/build.gradle.kts": {
+      "preimage_sha256": "57caaf8026d4a0a3e679a04df47861167c851af117d0763320aa6477469430a4",
+      "source_sha256": "e7b9a31e6c91a2ded9c24d0afd716b548f05dfca290564ffa643d56b756e3ff3"
+    },
+    "trading/vati/app/account_service.py": {
+      "preimage_sha256": "8ede36774f79b12ee3a33a6fc8749c9c952fc150b3c853b3195cffd48bf3f7cb",
+      "source_sha256": "9e072db5ed93909addcd33497ceafcf3f299557127839cc18bbe5522fa58fbe4"
+    },
+    "trading/vati/app/cycle.py": {
+      "preimage_sha256": "0bc3ca3e830bc2c1a2f34a14a9627264ee9e79b1aec5d3f7a8d1c4a9170b7c5b",
+      "source_sha256": "76e5c51847d6f9a5e1774e6d9773fb05d6eabe90f54025a3e274ab7cbdc9c2fb"
+    },
+    "trading/vati/app/portfolio.py": {
+      "preimage_sha256": "eefb66f0e795ca91a50328a146eb3366cdb78b5834a5803c8df3d293579246e4",
+      "source_sha256": "28e06650322876a2bbba87671a249a4214be65521eba457c2f3381c488a3f244"
+    },
+    "trading/vati/app/tradebook.py": {
+      "preimage_sha256": "fb6936abbd097095ba12606d808c5e01bf8f143a739187fed52810f3e51720e2",
+      "source_sha256": "5695dff5f166a27a1726c98eafc11b4362292caff6082ab3a7fcd73b1961cf94"
+    },
+    "trading/vati/core/events.py": {
+      "preimage_sha256": "d2ef6a429810849098e8abe8265cce0bd2a8a16fac036ceae6b764e6a927a4f6",
+      "source_sha256": "28ac40e3b5cc4f74a24f8972e523737bb363c8bb06ba9031c05ac01037c3b803"
+    },
+    "trading/vati/execution/router.py": {
+      "preimage_sha256": "e2e89fd5936b62cf02c26dfb8b2c230a1c11286c8b14737ef735d91becfd84be",
+      "source_sha256": "ee22737292180b6b0452007025cc3184f6b435cbed1fa12f9f8ff204621a20ba"
+    },
+    "android/app/src/main/java/com/dial/van/trading/CurrentAccountRisk.kt": {
+      "preimage_sha256": null,
+      "source_sha256": "f6373eb3112756ab9337b1242ba1ce9a0380d22f0869aae4e5f7f80b8985cd6d"
+    },
+    "android/verification/src/test/kotlin/com/dial/van/trading/CurrentAccountRiskTest.kt": {
+      "preimage_sha256": null,
+      "source_sha256": "744dc174b4904c774dff381054263b1dc42b5b1d9d1c7016d5f76346aa0d8b5f"
+    },
+    "trading/tests/test_dispatch_current_risk.py": {
+      "preimage_sha256": null,
+      "source_sha256": "751b54e5d4972bc8cdd2efbbd1676ab5edbe893416bc7b145025009ff77437a9"
+    },
+    "trading/vati/execution/risk_refresh.py": {
+      "preimage_sha256": null,
+      "source_sha256": "a8764e58da539354fed83154fc4cb182a2f262143ff36684ce88043581d1233b"
+    }
+  },
+  "executions": {
+    "counterexample_before_fix": {
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "tests": 3,
+      "passed": 1,
+      "sha256": "a5406810ea6d92d4c377a7d5f150fe7d3d587d514b061efc8e53ca200c4532c6"
+    },
+    "focused_current_risk": {
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "tests": 40,
+      "passed": 40,
+      "sha256": "12cabcbf0c9bc9ca2718ebd1e64e988b398df1f0e0b511d6ba8d32ca9a7f7545"
+    },
+    "broader_execution_recovery": {
+      "failures": 0,
+      "errors": 0,
+      "skipped": 2,
+      "tests": 208,
+      "passed": 206,
+      "sha256": "bc379112e109a208499f37674f1da2bd1e7adf8677732ae7b07a11916e4cc3b7"
+    },
+    "owner_book_detail_projection": {
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "tests": 45,
+      "passed": 45,
+      "sha256": "523c1b48608cf511b8cb1a660d6d4ae89049ba9fa68b932d0ffedc86160ef65c"
+    },
+    "isolated_postgres": {
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "tests": 154,
+      "passed": 154,
+      "sha256": "ec673f37e53993c64871645185d0d2992b266e55f2f41a756d00277ccd28a476"
+    },
+    "existing_authenticated_api": {
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "tests": 15,
+      "passed": 15,
+      "sha256": "55b0c8655ce64618fa492543f5a418aec984fee3f5eca8b5716ec0a5d0256277"
+    },
+    "direct_kotlin_junit": {
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "tests": 1333,
+      "passed": 1333,
+      "sha256": "5344f721a4d71d7df2d4dfb96941d6c56216836bae1bd5d3b945a3aaa109354f"
+    },
+    "owner_source_contracts": {
+      "tests": 35,
+      "passed": 35,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "3c6f068f59189775708a00f1f258c6e511a4e588b244988e7c569a8572192c15"
+    },
+    "rebuild_source_contracts": {
+      "tests": 80,
+      "passed": 80,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "9889aa44d876a9bdd837b4afadd3055c60638223e771ac07b560845a0296e180"
+    }
+  },
+  "fault_control_pairs": {
+    "baseline": {
+      "exit_code": 0,
+      "log_sha256": "d0b15fa24e2dfbeb81d1794622e3549dada420bd8b8ec1ca7c978b9f207ccca1",
+      "xml_sha256": "14ae4b493b166177d0eb70a0a5af21efaad4177584c13ca45ec9e449c2f4f387"
+    },
+    "cases": [
+      {
+        "case": "omit-current-facts",
+        "path": "trading/vati/execution/router.py",
+        "source_sha256": "ee22737292180b6b0452007025cc3184f6b435cbed1fa12f9f8ff204621a20ba",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "a2866585c91d83070888a4ded1b4cf4d26fbab3ad53b5f5afa5788690996e677",
+          "xml_sha256": "4b675d1c79d442c88920c3e9d0d9a3e85e67e53326edae9e9bd142191590d77d"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "43dd6082ddeb8a0e1a6b30af40ee8f3c052e7cb99f2d8c112eab6630c14edfb5",
+          "xml_sha256": "c9bd08c3c98671af75e903995d2af131d163869d1d6b2f27f9015c1a91992ebb"
+        }
+      },
+      {
+        "case": "ignore-smaller-budget",
+        "path": "trading/vati/execution/router.py",
+        "source_sha256": "ee22737292180b6b0452007025cc3184f6b435cbed1fa12f9f8ff204621a20ba",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "6bc5071b55542e962f718afbff89b9adf898af8eeb6a518a2b4a3c2b0b7eb6db",
+          "xml_sha256": "4dc61c779c202b4364e58f5a5dfb6c85f35dfc71e787b4a56421a515668d310e"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "51c2fe5295c6c974dee80ddc95caacceba5fbc2e506decb079ab3401934adf69",
+          "xml_sha256": "bc82e12d853d7aee4a1f66a440f907ff275143cf352c83a5db82598c57a27f0e"
+        }
+      },
+      {
+        "case": "ignore-proof-journal-failure",
+        "path": "trading/vati/execution/router.py",
+        "source_sha256": "ee22737292180b6b0452007025cc3184f6b435cbed1fa12f9f8ff204621a20ba",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "038d6123c051687e296cc5a417cac015a2de88884e56c61124ae475f7a5d842b",
+          "xml_sha256": "ca0d8c3e10f685f3837c01279f35f7510d5a351e139561c30379ac78b4597a2a"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "7a18c04c8ade43ce41e9b3c04c10eec7904ec52716b554d68a18b56ee0a056a6",
+          "xml_sha256": "2ae214b9ac523c4051ef1f5bc21a66b77639c76e871efc9538cbf063995cf843"
+        }
+      },
+      {
+        "case": "omit-account-snapshot-binding",
+        "path": "trading/vati/execution/risk_refresh.py",
+        "source_sha256": "a8764e58da539354fed83154fc4cb182a2f262143ff36684ce88043581d1233b",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "c5debb11cc56dd00aac0c73c411b7012bb71af44b4fdbf764f01b5c819671a0a",
+          "xml_sha256": "086b515b2f5cbd96f5d685de97251488ad26b010f4873211618d9532c1e0768a"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "94478bf69c5d9f6d5e9599205015b354b5586ed94c7ae9a1714dd4222d7534f8",
+          "xml_sha256": "5e40c51f7b9a5be829c4275f344f84aea3887ab9dbab24ec51facebb91ba81dc"
+        }
+      },
+      {
+        "case": "ignore-readback-authority-claim",
+        "path": "trading/vati/execution/risk_refresh.py",
+        "source_sha256": "a8764e58da539354fed83154fc4cb182a2f262143ff36684ce88043581d1233b",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "0bba25dbf738071f655d337bde545b48c8bcf42cc0ff2348153e1a09c509f6b8",
+          "xml_sha256": "38770f09736ad5075abe084dcf932e4e51290c6d85f53b65a247396e0c3bfd59"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "43dd6082ddeb8a0e1a6b30af40ee8f3c052e7cb99f2d8c112eab6630c14edfb5",
+          "xml_sha256": "281d5030d490c5e3306e5fd95216df9b8c66ae915801fef40d9f7b77d2990eac"
+        }
+      },
+      {
+        "case": "omit-single-runtime-read",
+        "path": "trading/vati/app/cycle.py",
+        "source_sha256": "76e5c51847d6f9a5e1774e6d9773fb05d6eabe90f54025a3e274ab7cbdc9c2fb",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "09ca2c95b5bbb857cc0c781d7a164c7cf888be1a51bd99937734d1d582e3483a",
+          "xml_sha256": "7331017fe57da32bd56b03388f156f02358e7535431a8aac4f8e09b4607bdb08"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "e3834020917607fb3118ee17af9f6cab46ed2b8f740d61e8bebbe7069c14ecc0",
+          "xml_sha256": "0ff5f399d8213d1461b11fcade6abf8381092cf04f75617b6e25b811c18a36c6"
+        }
+      },
+      {
+        "case": "stamp-book-request-as-native-read-time",
+        "path": "trading/vati/app/account_service.py",
+        "source_sha256": "9e072db5ed93909addcd33497ceafcf3f299557127839cc18bbe5522fa58fbe4",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "96568072d7b51b9ea22ae268d164bf37e6a5bcfc059f4b6ed05fe2401db369da",
+          "xml_sha256": "12f15263caa999854e2f77802bb8d8d407879b20e291e5443d2cc55565305811"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "7275d133fec30839bd13d7faa2729bfebbc0052594244efbec1ef36da2eccc22",
+          "xml_sha256": "ef142007ad3bb4ecf0d795b8b853ca6128561a6848bc555083946ba617e89367"
+        }
+      },
+      {
+        "case": "omit-original-command-proof-join",
+        "path": "trading/vati/execution/router.py",
+        "source_sha256": "ee22737292180b6b0452007025cc3184f6b435cbed1fa12f9f8ff204621a20ba",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "d8c852c0dccb657850d2cfcb00399bcc8f305a90332b5dfa64336478d3dbb790",
+          "xml_sha256": "d460fdc2e73c23a8536d5269bb6bc09226d23ba2cca4af75e2cd14397b6a7477"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "23f1b6b7b552f287075945818cec014b9323a432a38f6eee5dbcadca0e34b9fa",
+          "xml_sha256": "a36e0af3567c3111adf970dca531d7a3e5eb2a81f332fcd61a1ab25404bc1b55"
+        }
+      }
+    ],
+    "scope": "Actual RiskAuthority, single runtime, book provider and paper sender; read-only bounded evidence. No native broker or effect authority."
+  },
+  "postgres_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "api_storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/tmp/van-dispatch-risk-work-20261024",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "kotlin_runtime": {
+    "exit_code": 0,
+    "mode": "Kotlin 2.0.21 direct delta compilation against original verified Gradle runtime and unchanged compiled/source-verified tests",
+    "working_directory": "/tmp/van-dispatch-risk-work-20261024/android/verification",
+    "runtime_files_sha256": {
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test-junit5/2.0.21/9eff871dcc7b7cbc6050945b906dfdd6d5b76f02/kotlin-test-junit5-2.0.21.jar": "ac47de619b7d87e2bfdf7f6eec6a62a61d1bdc0c325740df52186b141936713d",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test/2.0.21/c6ea143e356327ddfda57e53e829c553e3b45b64/kotlin-test-2.0.21.jar": "a897b28c6a3ea8ec8f00ed766941a0c0df993d7f65908875879868e08ceb8985",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm/1.7.3/1f226780b845ff9206474c05159245d861556249/kotlinx-serialization-core-jvm-1.7.3.jar": "f0adde45864144475385cf4aa7e0b7feb27f61fcf9472665ed98cc971b06b1eb",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-json-jvm/1.7.3/6701e8c68d9e82387ce72ee96e8ddf058208d58f/kotlinx-serialization-json-jvm-1.7.3.jar": "b1e9138499ed8d20375edda3f2b1c95f3103a258eff6af9edc5ea07100f2b29c",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.1/bb0e192bd7c2b6b8217440d36e9758e377e450/kotlinx-coroutines-core-jvm-1.8.1.jar": "f3d4f5de1c391bbcc20f3b3435ccbac013521e76b6902d7d59635ec15c1f797e",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/com.squareup.okhttp3/okhttp/4.12.0/2f4525d4a200e97e1b87449c2cd9bd2e25b7e8cd/okhttp-4.12.0.jar": "b1050081b14bb7a3a7e55a4d3ef01b5dcfabc453b4573a4fc019767191d5f4e0",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/com.squareup.okio/okio-jvm/3.6.0/5600569133b7bdefe1daf9ec7f4abeb6d13e1786/okio-jvm-3.6.0.jar": "67543f0736fc422ae927ed0e504b98bc5e269fda0d3500579337cb713da28412",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.9.10/c7510d64a83411a649c76f2778304ddf71d7437b/kotlin-stdlib-jdk8-1.9.10.jar": "a4c74d94d64ce1abe53760fe0389dd941f6fc558d0dab35e47c085a11ec80f28",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.9.10/bc5bfc2690338defd5195b05c57562f2194eeb10/kotlin-stdlib-jdk7-1.9.10.jar": "ac6361bf9ad1ed382c2103d9712c47cdec166232b4903ed596e8876b0681c9b7",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.0.21/618b539767b4899b4660a83006e052b63f1db551/kotlin-stdlib-2.0.21.jar": "f31cc53f105a7e48c093683bbd5437561d1233920513774b470805641bedbc09",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.json/json/20240303/ebb88e8fb5122b7506d5cf1d69f1ccdb790d22a/json-20240303.jar": "3cf6cd6892e32e2b4c1c39e0f52f5248a2f5b37646fdfbb79a66b46b618414ed",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/23.0.0/8cc20c07506ec18e0834947b84a864bfc094484e/annotations-23.0.0.jar": "7b0f19724082cbfcbc66e5abea2b9bc92cf08a1ea11e191933ed43801eb3cd05",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-launcher/1.10.1/ce85bf5e38bee0989ded9bd468dd4ff78dc0cfa8/junit-platform-launcher-1.10.1.jar": "ded414c504e88d02270331071969084e1b2fd9bcf8443f35d44da2c6e3301bc2",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-engine/1.10.1/f32ae4af74fde68414b8a3d2b7cf1fb43824a83a/junit-platform-engine-1.10.1.jar": "baa48e470d6dee7369a0a8820c51da89c1463279eda6e13a304d11f45922c760",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-api/5.10.1/eb90c7d8bfaae8fdc97b225733fcb595ddd72843/junit-jupiter-api-5.10.1.jar": "60d5c398c32dc7039b99282514ad6064061d8417cf959a1f6bd2038cc907c913",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-commons/1.10.1/2bfcd4a4e38b10c671b6916d7e543c20afe25579/junit-platform-commons-1.10.1.jar": "7d9855ee3f3f71f015eb1479559bf923783243c24fbfbd8b29bed8e8099b5672",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-engine/5.10.1/6c9ff773f9aa842b91d1f2fe4658973252ce2428/junit-jupiter-engine-5.10.1.jar": "02930dfe495f93fe70b26550ace3a28f7e1b900c84426c2e4626ce020c7282d6",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.opentest4j/opentest4j/1.3.0/152ea56b3a72f655d4fd677fc0ef2596c3dd5e6e/opentest4j-1.3.0.jar": "48e2df636cab6563ced64dcdff8abb2355627cb236ef0bf37598682ddf742f1b"
+    },
+    "reused_test_sources_byte_identical": true,
+    "source_sha256": {
+      "android/app/src/main/java/com/dial/van/trading/TradeBook.kt": "f00726b356062348cab0071ee1e81a26c522fd41b4662718c38ab0a0bc951afd",
+      "android/app/src/main/java/com/dial/van/trading/CurrentAccountRisk.kt": "f6373eb3112756ab9337b1242ba1ce9a0380d22f0869aae4e5f7f80b8985cd6d",
+      "android/verification/src/test/kotlin/com/dial/van/trading/CurrentAccountRiskTest.kt": "744dc174b4904c774dff381054263b1dc42b5b1d9d1c7016d5f76346aa0d8b5f"
+    }
+  },
+  "gradle_status": "FAILED before compilation: native thread creation unavailable; retained /tmp/van-current-risk-jvm-gradle-r1.txt. No Gradle or AGP success claimed.",
+  "first_direct_runtime_status": "1332 passed, one original TLS test failed because launcher omitted unchanged certificate resources. Corrected launcher includes original build resources; full1333 pass.",
+  "scope": "Strict current account facts, exact-policy RiskAuthority recalculation, durable immutable proof and original command binding; existing Android/API readback. No new financial permission or frontend redesign.",
+  "remaining": [
+    "Whole committed-source qualification",
+    "Native unknown-margin admission and margin facts",
+    "Joint order/funding reservations",
+    "Refreshed native contract observations",
+    "Flow-adjusted economics and remaining backend work",
+    "Private DDS/trusted-main prerequisites",
+    "Native host deployment, security, recovery, signing and S24 acceptance"
+  ],
+  "certificates_issued": []
+}

@@ -187,7 +187,7 @@ def risk(ledger: Ledger, mandate: Optional[dict] = None) -> dict[str, Any]:
 
 
 # ------------------------------------------------------------------ trade detail
-TIMELINE = {EventKind.RISK_DECISION: "RISK_DECISION", EventKind.ORDER_COMMAND: "ORDER_SENT", EventKind.EXECUTION_RECEIPT: "EXECUTION", EventKind.TCA_RECORD: "TCA", EventKind.TRADE_REVIEW: "REVIEW",
+TIMELINE = {EventKind.RISK_REVALIDATION: "RISK_RECHECK", EventKind.RISK_DECISION: "RISK_DECISION", EventKind.ORDER_COMMAND: "ORDER_SENT", EventKind.EXECUTION_RECEIPT: "EXECUTION", EventKind.TCA_RECORD: "TCA", EventKind.TRADE_REVIEW: "REVIEW",
             EventKind.TRADE_EXPERIENCE_ARTIFACT: "EXPERIENCE_ARTIFACT", EventKind.OWNER_TICKET: "OWNER_TICKET", EventKind.CAPSULE_STATE: "CAPSULE_STATE", EventKind.KILL_SWITCH: "KILL_SWITCH", EventKind.SESSION: "SESSION"}
 
 
@@ -196,6 +196,8 @@ def _timeline_entry(ev: Event) -> dict:
     label = TIMELINE.get(ev.kind, ev.kind.value)
     if ev.kind is EventKind.RISK_DECISION:
         d = p.get("decision", {}); text = f"Risk Authority {d.get('decision')} · size {d.get('approved_size')} · risk {d.get('approved_risk_pct')} · heat {d.get('portfolio_heat_before')}→{d.get('portfolio_heat_after')}" + (f" · {d.get('reason_code')}" if d.get("reason_code") else "")
+    elif ev.kind is EventKind.RISK_REVALIDATION:
+        text = f"current risk {p.get('state')} · {p.get('reason_code')} · size limit {p.get('decision', {}).get('approved_size')} · observation only"
     elif ev.kind is EventKind.ORDER_COMMAND:
         text = f"{p.get('entry_type')} {p.get('direction')} {p.get('quantity')} @ {p.get('entry_price')} · stop {p.get('protective_stop')} ({p.get('stop_mode')})"
     elif ev.kind is EventKind.EXECUTION_RECEIPT:

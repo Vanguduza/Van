@@ -126,7 +126,9 @@ class DecisionCycle:
             lease_fence=(lambda epoch: lease_permission() and runtime_lease.fence(epoch, now_ms=lease_clock(), min_validity_ms=2_000)) if runtime_lease else None,
             lease_submission_guard=self._runtime_submission_guard if runtime_lease else None,
             pretrade_controls=self.pretrade, style_selector=self.style_selector,
-            enforce_rev51_controls=True, clock=lease_clock)
+            enforce_rev51_controls=True, clock=lease_clock,
+            current_risk_facts_provider=self._current_risk_facts,
+            current_risk_authority=self.authority)
         self.admission = admission or AdmissionLedger()
         self.ctx_fn = ctx_fn or (lambda st, cost: StrategyContext(round_trip_cost_pct=cost))
         self.peak_equity = ZERO
@@ -174,6 +176,12 @@ class DecisionCycle:
         self.proposals: list = []
 
     # --------------------------------------------------------------- helpers
+    def _current_risk_facts(self, intent, *, now_ms, market_reference):
+        from vati.execution.risk_refresh import CurrentRiskFacts
+        age=market_reference.mark_age_ms if market_reference is not None else -1
+        snapshot=self.snapshot(now_ms=now_ms,quote_age_ms=age,strategy_id=intent.strategy_id)
+        return CurrentRiskFacts(snapshot,self._risk_snapshot_ms)
+
     @contextmanager
     def _runtime_submission_guard(self, epoch):
         if not self._lease_permission():

@@ -26,7 +26,7 @@ from vati.execution.style_selector import (
     ExecutionStyleSelector, LiquidityView, StyleRefused, Urgency,
 )
 from vati.observability import metrics
-from vati.risk.authority import Decision, RiskDecision
+from vati.risk.authority import Decision, RiskDecision, RiskAuthority
 from vati.risk.contracts import KillSwitchTrigger, LossModel, TradeIntent
 from vati.risk.governor import KillSwitch
 from vati.risk.mandate import TradingMandate
@@ -82,7 +82,9 @@ class ExecutionRouter:
                  pretrade_controls: Optional[PreTradeControls] = None,
                  style_selector: Optional[ExecutionStyleSelector] = None,
                  enforce_rev51_controls: bool = False,
-                 clock: Optional[Callable[[], int]] = None) -> None:
+                 clock: Optional[Callable[[], int]] = None,
+                 current_risk_facts_provider: Optional[Callable] = None,
+                 current_risk_authority: Optional[RiskAuthority] = None) -> None:
         self.ledger, self.adapters, self.kill, self.protection, self.producer = ledger, adapters, kill_switch, protection, producer
         self.lease_fence = lease_fence
         self.lease_submission_guard = lease_submission_guard
@@ -91,6 +93,13 @@ class ExecutionRouter:
         self.style_selector = style_selector
         self.enforce_rev51_controls = enforce_rev51_controls
         self.clock = clock
+        if (current_risk_facts_provider is None) != (current_risk_authority is None):
+            raise RouterError('current risk requires both a facts provider and RiskAuthority')
+        if current_risk_authority is not None and (
+            not callable(current_risk_facts_provider) or not isinstance(current_risk_authority,RiskAuthority)):
+            raise RouterError('current risk provider or authority is invalid')
+        self.current_risk_facts_provider = current_risk_facts_provider
+        self.current_risk_authority = current_risk_authority
         if enforce_rev51_controls and (
             route_registry is None or pretrade_controls is None or style_selector is None
         ):
@@ -120,6 +129,84 @@ class ExecutionRouter:
         if not mandate.owner_keys_current():
             raise RouterError('current mandate owner signer is unavailable; re-admission required')
         return observed
+
+    def _current_account_risk(self, intent, decision, mandate, command, adapter, *, now_ms, market_reference):
+        from vati.execution.paper import PaperAdapter
+        from vati.execution.zse_ticket import OwnerTicketAdapter
+        from vati.execution.risk_refresh import CurrentRiskFacts
+        from vati.risk.contracts import RiskSnapshot
+        from vati.risk.serde import snapshot_to_dict
+        if self.current_risk_facts_provider is None:
+            if not isinstance(adapter,(PaperAdapter,OwnerTicketAdapter)):
+                raise RouterError('current native account risk facts unavailable; not dispatched')
+            return None
+        if mandate_binding_hash(self.current_risk_authority.mandate)!=mandate_binding_hash(mandate):
+            raise RouterError('current RiskAuthority differs from the exact mandate')
+        try:
+            facts=self.current_risk_facts_provider(intent,now_ms=now_ms,market_reference=market_reference)
+        except Exception as exc:
+            raise RouterError('current account risk read unavailable: '+type(exc).__name__) from None
+        observed=self._dispatch_time(mandate,now_ms=now_ms)
+        if (type(facts) is not CurrentRiskFacts or type(facts.snapshot) is not RiskSnapshot
+            or type(facts.observed_at_ms) is not int or not now_ms<=facts.observed_at_ms<=observed
+            or facts.snapshot.now_unix!=facts.observed_at_ms//1000):
+            raise RouterError('current account risk facts have no valid original observation clock')
+        # The original authority already consumed the proposal key. A separate
+        # calculator with the same exact policy rechecks facts; it cannot reset
+        # that original key or grant a second native submission.
+        calculator=RiskAuthority(self.current_risk_authority.mandate,
+            ceilings=self.current_risk_authority.ceilings,
+            conformal_gate=self.current_risk_authority.conformal_gate)
+        fresh=calculator.evaluate_safe(intent,facts.snapshot)
+        if (fresh.decision_hash!=recompute_decision_hash(fresh)
+            or fresh.intent_hash!=decision.intent_hash or fresh.mandate_hash!=decision.mandate_hash):
+            raise RouterError('current RiskAuthority result is not bound to the exact intent and mandate')
+        fits=(fresh.decision in (Decision.APPROVED,Decision.REDUCED) and fresh.approved_size.is_finite()
+            and command.quantity<=fresh.approved_size)
+        reason=(fresh.reason_code if fresh.decision is Decision.REJECTED else
+            'CURRENT_COMMAND_EXCEEDS_RISK' if not fits else fresh.reason_code)
+        detail=(fresh.reason_detail if fresh.decision is Decision.REJECTED or fits else
+            f'current size limit {fresh.approved_size} is below original command {command.quantity}')
+        try:
+            current_snapshot=snapshot_to_dict(facts.snapshot)
+        except Exception:
+            raise RouterError('current account risk facts cannot be journaled; not dispatched') from None
+        try:
+            evidence=make_event(EventKind.RISK_REVALIDATION,self.producer,{'schema':'vati.current-account-risk/1',
+                'account_alias':intent.account_alias,'original_decision_hash':decision.decision_hash,
+                'original_command_hash':command.command_hash,'observed_at_ms':facts.observed_at_ms,
+                'original_command_quantity':str(command.quantity),'state':'SUFFICIENT' if fits else 'REFUSED',
+                'reason_code':reason,'reason_detail':detail,
+                'snapshot':current_snapshot,'decision':fresh.to_dict(),
+                'execution_authority':False},event_time_ms=observed,received_time_ms=observed,
+                correlation_id=intent.trade_intent_id,decision_time_ms=now_ms)
+            # No provider read belongs in this short journal transaction. An
+            # identical retry after a lost commit ACK retains first availability.
+            with self.ledger.atomic():
+                if not self.ledger.verify_incremental()[0]:raise RouterError('risk journal invalid')
+                previous=list(self.ledger.iter(EventKind.RISK_REVALIDATION,correlation_id=intent.trade_intent_id))
+                if any(e.hash!=canonical_hash(e.body()) for e in previous):raise RouterError('risk evidence invalid')
+                if not any(e.hash==evidence.hash for e in previous):self.ledger.append(evidence)
+            ref=evidence.hash
+        except Exception:
+            raise RouterError('current account risk evidence not committed; not dispatched') from None
+        if fresh.decision not in (Decision.APPROVED,Decision.REDUCED):
+            raise RouterError('current account risk refused '+fresh.reason_code+': '+fresh.reason_detail)
+        if not fresh.approved_size.is_finite() or command.quantity>fresh.approved_size:
+            raise RouterError('current account risk budget is below the original command; re-evaluation required')
+        return ref
+
+    def _current_command_controls(self, intent, decision, command, *, market_reference, decision_time_ms, now_ms):
+        if not self.enforce_rev51_controls:
+            return
+        current_mark=market_reference.aged(observed_at_ms=decision_time_ms,now_ms=now_ms) if market_reference is not None else None
+        result=self.pretrade_controls.check(intent=intent,decision=decision,mark=current_mark,now_ms=now_ms)
+        if not result.passed or result.quantised is None:
+            raise RouterError(f"pre-trade refused {result.reason_code}: {result.reason_detail}")
+        current=result.quantised
+        if (current.quantity!=command.quantity or (current.entry_price or intent.entry)!=command.entry_price
+            or (current.stop_price if intent.stop is not None else None)!=command.protective_stop):
+            raise RouterError('current venue quantisation changed; re-evaluation required')
 
     def _uncertain_exit(self, position_id: str, *, now_ms: int, request_ref: str) -> None:
         if position_id in self.protection.rules:
@@ -406,15 +493,22 @@ class ExecutionRouter:
                 raise RouterError(f"kill switch active: {sorted(t.value for t in self.kill.active)}")
             if not lease_current:
                 raise RouterError(f"account runtime lease fence refused epoch {lease_epoch!r}")
-            if self.enforce_rev51_controls:
-                current_mark = market_reference.aged(observed_at_ms=decision_time_ms,now_ms=now_ms) if market_reference is not None else None
-                final_check = self.pretrade_controls.check(intent=intent,decision=decision,mark=current_mark,now_ms=now_ms)
-                if not final_check.passed or final_check.quantised is None:
-                    raise RouterError(f"pre-trade refused {final_check.reason_code}: {final_check.reason_detail}")
-                current_order = final_check.quantised
-                if (current_order.quantity!=cmd.quantity or (current_order.entry_price or intent.entry)!=cmd.entry_price
-                    or (current_order.stop_price if intent.stop is not None else None)!=cmd.protective_stop):
-                    raise RouterError('current venue quantisation changed; re-evaluation required')
+            self._current_command_controls(intent,decision,cmd,market_reference=market_reference,
+                decision_time_ms=decision_time_ms,now_ms=now_ms)
+            current_risk_ref=self._current_account_risk(intent,decision,mandate,cmd,adapter,now_ms=now_ms,
+                market_reference=market_reference.aged(observed_at_ms=decision_time_ms,now_ms=now_ms) if market_reference is not None else None)
+            if current_risk_ref is not None:
+                # Account reads may block. Preserve refusal facts across that
+                # read as well as across lease and signer acquisition.
+                now_ms=self._dispatch_time(mandate,now_ms=now_ms)
+                lease_current=self.lease_fence(lease_epoch) if self.lease_fence is not None else True
+                now_ms=self._dispatch_time(mandate,now_ms=now_ms)
+                if self.kill.halted:
+                    raise RouterError(f"kill switch active: {sorted(t.value for t in self.kill.active)}")
+                if not lease_current:
+                    raise RouterError(f"account runtime lease fence refused epoch {lease_epoch!r}")
+                self._current_command_controls(intent,decision,cmd,market_reference=market_reference,
+                    decision_time_ms=decision_time_ms,now_ms=now_ms)
             self._seen.add(intent.idempotency_key)
             if self.enforce_rev51_controls:
                 assert self.pretrade_controls is not None
@@ -425,6 +519,7 @@ class ExecutionRouter:
                     now_ms=now_ms,
                 )
             self._log(EventKind.ORDER_COMMAND, {**asdict(cmd), "direction": cmd.direction.value, "stop_mode": cmd.stop_mode.value, "loss_model": cmd.loss_model.value,
+                                                **({'risk_revalidation_ref':current_risk_ref} if current_risk_ref is not None else {}),
                                                 **({"requested_entry_type": requested_entry_type, "entry_type_substituted": True} if substituted else {})},
                       now_ms=now_ms, corr=corr, decision_time=decision_time_ms)
             metrics.inc("vati_orders_sent_total", venue=intent.venue)

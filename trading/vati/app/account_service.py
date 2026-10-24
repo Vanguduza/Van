@@ -257,6 +257,8 @@ class AccountCoordinatorService:
             style_selector=self.style_selector,
             enforce_rev51_controls=True,
             clock=self.clock,
+            current_risk_facts_provider=self._current_risk_facts,
+            current_risk_authority=self.authority,
         )
 
         capsule_root = c.capsule_dir or ROOT / "strategies" / "registry"
@@ -553,6 +555,11 @@ class AccountCoordinatorService:
         except Exception:  # noqa: BLE001 — no snapshot means no adjustment
             return None
 
+    def _current_risk_facts(self, intent, *, now_ms, market_reference):
+        from vati.execution.risk_refresh import CurrentRiskFacts
+        snapshot=self._snapshot_for(intent)
+        return CurrentRiskFacts(snapshot,self._risk_snapshot_ms)
+
     def _execute_delta(self, intent, decision):
         """Submit an authority-approved delta intent through ExecutionRouter.
 
@@ -687,6 +694,7 @@ class AccountCoordinatorService:
         streaks = getattr(self.lifecycle, "streaks", None) if self.lifecycle is not None else None
         sid = getattr(candidate, "strategy_id", "")
         streak = streaks.verdict(sid, now_ms) if (streaks is not None and (sid or streaks.recovery_issue)) else None
+        self._risk_snapshot_ms=now_ms
         return RiskSnapshot(
             now_unix=now_ms // 1000, account_alias=acct.account_alias,
             account_verified=acct.verified, equity=acct.equity, balance=acct.balance,
