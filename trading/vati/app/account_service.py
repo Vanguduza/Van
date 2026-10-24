@@ -670,9 +670,6 @@ class AccountCoordinatorService:
         started_ms = self.clock()
         acct = self.adapter.sync_account()
         now_ms = max(started_ms,self.clock())
-        if self.peak_equity == 0:
-            self.peak_equity = self.day_start_equity = self.week_start_equity = acct.equity
-        self.peak_equity = max(self.peak_equity, acct.equity)
         hb = self.adapter.heartbeat(now_ms=now_ms)
         report = reconcile(self._ledger_positions(), self.adapter.positions(), account_verified=acct.verified)
         from vati.app.account_recovery import unresolved_account_entries
@@ -684,6 +681,10 @@ class AccountCoordinatorService:
         from vati.funding.mt5_runtime import capture_cached_mt5
         capture_cached_mt5(self._ledger, acct, now_ms=now_ms)
         funding = funding_risk_fence(self._ledger, self.adapter, acct, now_ms=now_ms)
+        if funding.available:
+            if self.peak_equity == 0:
+                self.peak_equity = self.day_start_equity = self.week_start_equity = acct.equity
+            self.peak_equity = max(self.peak_equity, acct.equity)
         state = self.evaluators[candidate.symbol.upper()].last_state
         from vati.execution.pretrade import quote_age_at
         quote_age = quote_age_at(age_ms=state.quote_age_ms,observed_at_ms=getattr(state,'as_of_ms',None),now_ms=now_ms) if state is not None else -1
@@ -1182,9 +1183,15 @@ class AccountCoordinatorService:
             peak = day = week = None
             risk_history_issue = str(exc)
             self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, now)
-        self.peak_equity = max(peak, acct.equity) if peak is not None else acct.equity
-        self.day_start_equity = day if day is not None else acct.equity
-        self.week_start_equity = week if week is not None else acct.equity
+        from vati.funding.mt5_runtime import capture_cached_mt5
+        from vati.funding.risk_fence import funding_risk_fence
+        risk_observed_ms=max(now,self.clock())
+        capture_cached_mt5(self._ledger,acct,now_ms=risk_observed_ms)
+        funding=funding_risk_fence(self._ledger,self.adapter,acct,now_ms=risk_observed_ms)
+        self.peak_equity = max(peak, acct.equity) if funding.available and peak is not None else (
+            acct.equity if funding.available else peak if peak is not None else Decimal('0'))
+        self.day_start_equity = day if day is not None else acct.equity if funding.available else Decimal('0')
+        self.week_start_equity = week if week is not None else acct.equity if funding.available else Decimal('0')
         self._observe_owner_halt(now)
 
         self._ledger.append(make_event(

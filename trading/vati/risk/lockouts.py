@@ -180,6 +180,13 @@ class LossStreakGovernor:
         return g
 
 
+def _funding_baseline_held(snapshot):
+    # Older producers raised their peak before refusing the same observation.
+    # Keep that original decision intact; its held capital is not a risk basis.
+    return (snapshot.get('preservation_blocks_new_risk') is True
+            and 'FUNDING_RISK_' in str(snapshot.get('preservation_reason', '')))
+
+
 def restore_peak_equity(events: Iterable, *, account_alias: str | None = None) -> Optional[Decimal]:
     """The high-water mark the account last decided against, or an owner re-baseline.
 
@@ -197,6 +204,8 @@ def restore_peak_equity(events: Iterable, *, account_alias: str | None = None) -
         kind = getattr(ev.kind, "value", ev.kind)
         if kind == "RISK_DECISION":
             snap = (ev.payload.get("inputs") or {}).get("snapshot") or {}
+            if _funding_baseline_held(snap):
+                continue
             if snap.get("peak_equity") is not None:
                 peak = Decimal(str(snap["peak_equity"]))
         elif kind == "SESSION" and ev.payload.get("event") == DRAWDOWN_RESUME_EVENT:
@@ -224,6 +233,8 @@ def restore_equity_baselines(events: Iterable, now_ms: int, *, account_alias: st
     for ev in events:
         if getattr(ev.kind, "value", ev.kind) == "RISK_DECISION":
             snap = (ev.payload.get("inputs") or {}).get("snapshot") or {}
+            if _funding_baseline_held(snap):
+                continue
             if snap.get("day_start_equity") is not None:
                 day, week, last_ms = Decimal(str(snap["day_start_equity"])), Decimal(str(snap["week_start_equity"])), ev.event_time_ms
     if last_ms is None:

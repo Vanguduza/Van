@@ -110,7 +110,9 @@ def _eligible(c, state, account, heartbeat, positions, now_ms):
         scope = c.streaks._scopes.get(args['scope'])
         return scope is not None and (scope.suspended or scope.probation or scope.losses > 0 or scope.cooldown_until_ms > now_ms)
     if action == 'resume_drawdown':
-        return c.peak_equity.is_finite() and account.equity < c.peak_equity
+        from vati.funding.risk_fence import funding_risk_fence
+        return (funding_risk_fence(c.ledger,c.adapter,account,now_ms=now_ms).available
+                and c.peak_equity.is_finite() and account.equity < c.peak_equity)
     trigger = KillSwitchTrigger(args['trigger'])
     if trigger not in c.kill.active:
         return False

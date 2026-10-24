@@ -308,13 +308,6 @@ class DecisionCycle:
         started_ms = now_ms
         self.restore_risk_baselines(now_ms)
         acct = self.adapter.sync_account()
-        if self.peak_equity == ZERO:
-            self.peak_equity = acct.equity
-        if self.day_start_equity == ZERO:
-            self.day_start_equity = acct.equity
-        if self.week_start_equity == ZERO:
-            self.week_start_equity = acct.equity
-        self.peak_equity = max(self.peak_equity, acct.equity)
         hb = self.adapter.heartbeat(now_ms=now_ms)
         positions = self._open_positions()
         reconciled = self._reconciliation_ok(account_verified=acct.verified)
@@ -328,6 +321,16 @@ class DecisionCycle:
         from vati.funding.mt5_runtime import capture_cached_mt5
         capture_cached_mt5(self.ledger, acct, now_ms=now_ms)
         funding = funding_risk_fence(self.ledger, self.adapter, acct, now_ms=now_ms)
+        # A held observation remains visible, but cannot seed or increase the
+        # baselines used by later decisions after native evidence recovers.
+        if funding.available:
+            if self.peak_equity == ZERO:
+                self.peak_equity = acct.equity
+            if self.day_start_equity == ZERO:
+                self.day_start_equity = acct.equity
+            if self.week_start_equity == ZERO:
+                self.week_start_equity = acct.equity
+            self.peak_equity = max(self.peak_equity, acct.equity)
         streak = self.streaks.verdict(strategy_id, now_ms) if strategy_id or self.streaks.recovery_issue else None
         return RiskSnapshot(now_unix=now_ms // 1000, account_alias=acct.account_alias, account_verified=acct.verified, equity=acct.equity, balance=acct.balance,
                             peak_equity=self.peak_equity, day_start_equity=self.day_start_equity, week_start_equity=self.week_start_equity,
@@ -534,7 +537,14 @@ class DecisionCycle:
     def resume_after_drawdown(self, *, owner_signature_ref: str, authority, now_ms: int) -> None:
         """Owner decision to resume after the suspending drawdown tier: re-baseline the peak."""
         authority.verify(owner_signature_ref, act="drawdown-resume", subject=self.cfg.account_alias, now_unix=now_ms // 1000)
-        equity = self.adapter.sync_account().equity
+        account = self.adapter.sync_account()
+        from vati.funding.mt5_runtime import capture_cached_mt5
+        from vati.funding.risk_fence import funding_risk_fence
+        capture_cached_mt5(self.ledger, account, now_ms=now_ms)
+        funding = funding_risk_fence(self.ledger, self.adapter, account, now_ms=now_ms)
+        if not funding.available:
+            raise ValueError('drawdown baseline unavailable: ' + funding.reason)
+        equity = account.equity
         old = self.peak_equity
         self.peak_equity = equity
         self._log(EventKind.SESSION, {"event": DRAWDOWN_RESUME_EVENT, "old_peak_equity": str(old), "new_peak_equity": str(equity),
