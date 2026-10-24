@@ -330,10 +330,10 @@ jobs:
           cases = list(roots["full-report.xml"].iter("testcase"))
           assert cases and not any(c.find("failure") is not None or c.find("error") is not None for c in cases)
           skipped = [c for c in cases if c.find("skipped") is not None]
-          allowed = "backend.tests.test_browser_egress_proxy_i8::test_only_the_configured_client_uid_may_use_a_listener"
+          allowed = "tests.test_browser_egress_proxy_i8::test_only_the_configured_client_uid_may_use_a_listener"
           assert len(skipped) <= 1 and all(c.get("classname")+"::"+c.get("name")==allowed and c.find("skipped").get("message")=="needs root and setpriv" for c in skipped)
           for source in json.loads((base/"full-suite-files.json").read_text()):
-              module = source.removesuffix(".py").replace("/", ".")
+              module = source.removeprefix("backend/").removesuffix(".py").replace("/", ".")
               assert any(c.get("classname")==module or c.get("classname", "").startswith(module+".") for c in cases), source
           uid = list(roots["uid-report.xml"].iter("testcase"))
           assert len(uid)==1 and all(uid[0].find(k) is None for k in ("failure", "error", "skipped"))
