@@ -149,6 +149,8 @@ def episode_from_ledger(ledger: Ledger, trade_intent_id: str, *, environment: En
         if ev.kind is EventKind.RISK_DECISION:
             dec = ev
         elif ev.kind is EventKind.EXECUTION_RECEIPT:
+            if "received_time_unix_ms" in ev.payload and ev.payload["received_time_unix_ms"] is None:
+                return None  # Known financial effect, unavailable causal learning time.
             receipts.append(ev)
         elif ev.kind is EventKind.TCA_RECORD:
             tca = ev

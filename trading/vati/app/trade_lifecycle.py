@@ -172,7 +172,8 @@ class AccountTradeLifecycle:
             submitted_price=dec("submitted_price"),
             protective_stop_confirmed=bool(payload.get("protective_stop_confirmed")),
             broker_time_unix_ms=int(payload.get("broker_time_unix_ms") or 0),
-            received_time_unix_ms=int(payload.get("received_time_unix_ms") or 0),
+            received_time_unix_ms=(None if "received_time_unix_ms" in payload and payload["received_time_unix_ms"] is None
+                                   else int(payload.get("received_time_unix_ms") or 0)),
             execution_channel=str(payload.get("execution_channel") or "ADAPTER"),
             broker_order_id=str(payload.get("broker_order_id") or ""),
             broker_position_id=str(payload.get("broker_position_id") or ""),
@@ -376,6 +377,8 @@ class AccountTradeLifecycle:
             if cost_ratio is None and iid in entry_receipts:
                 try:
                     receipt = self._receipt_from_payload(entry_receipts[iid])
+                    if receipt.received_time_unix_ms is None:
+                        raise ValueError("native receipt availability remains unmeasured")
                     modelled_cost = self.modelled_costs.get(
                         symbol, contract.round_trip_cost_pct)
                     value_per_unit = (
@@ -584,7 +587,9 @@ class AccountTradeLifecycle:
             "fees": receipt.fees,
             "family_id": family_id,
         }
-        if not filled:
+        if not filled or receipt.received_time_unix_ms is None:
+            # Keep the real exposure above. Family/thesis/TCA learning needs a
+            # qualified availability time and can be repaired after readback.
             return
 
         if self.families.for_intent(intent.trade_intent_id) is None:

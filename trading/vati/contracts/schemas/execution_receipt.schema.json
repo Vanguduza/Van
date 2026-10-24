@@ -111,7 +111,12 @@
       "type": "integer"
     },
     "received_time_unix_ms": {
-      "type": "integer"
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "Local result availability, independent of dispatch and broker clocks. Null retains a known native effect while withholding unmeasured availability; it is ineligible for causal learning until qualified readback.",
+      "minimum": 0
     },
     "receipt_hash": {
       "type": "string",

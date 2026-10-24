@@ -19,13 +19,17 @@ def native_flow(contract,*,check=True,stop=True,modify=True):
         assert client.verify(BridgeRequest(**request));calls.append(request['op'])
         data={'nonce':request['nonce'],'worker_time_ms':request['issued_ms']}
         if request['op']=='sync_account':
-            return {**data,'account':{'equity':'10000','balance':'10000','currency':'USD',
+            return {**data,'entry_constraints':{'schema':'van.mt5.entry-constraints/1','explicit_deadline':True,'required_op':'order_send_expiring'},'account':{'equity':'10000','balance':'10000','currency':'USD',
                 'verified':True,'hedging':True,'server_time_ms':request['issued_ms']}}
         if request['op']=='order_check':return {**data,'ok':check}
+        if request['op']=='order_send_expiring':
+            assert type(request['body']['expires_at_ms']) is int
+            if request['body']['expires_at_ms']<=NOW*1000:
+                return {**data,'status':'REJECTED','volume':'0','reason':'fixture original deadline expired'}
         if request['op']=='modify_sl_tp':return {**data,'ok':modify}
         return {**data,'status':'FILLED','volume':'0.18','price':'1.1001','order':'O1','position':'P1','sl_confirmed':stop}
     client=Mt5BridgeClient(signing_key=b'fixture-native-request-key',transport=transport)
-    adapter=Mt5BridgeAdapter(client);mandate=TradingMandate.from_mapping(mandate_dict())
+    adapter=Mt5BridgeAdapter(client,clock=lambda:NOW*1000);mandate=TradingMandate.from_mapping(mandate_dict())
     trade=intent();native=snapshot(contract);authority=RiskAuthority(mandate);decision=authority.evaluate_safe(trade,native)
     from vati.execution.risk_refresh import CurrentRiskFacts
     # These native-parser fixtures state exact current facts; no truthy approval
@@ -39,14 +43,14 @@ def native_flow(contract,*,check=True,stop=True,modify=True):
 def test_false_text_from_order_check_cannot_reach_the_actual_send(eurusd):
     adapter,router,trade,decision,mandate,calls=native_flow(eurusd,check='false')
     result=router.execute(trade,decision,mandate,now_ms=NOW*1000)
-    assert result.status=='REJECTED' and calls==['sync_account','order_check']
+    assert result.status=='REJECTED' and calls==['sync_account','sync_account','order_check']
 
 
 def test_unconfirmed_native_stop_is_not_reported_protected_and_uses_the_actual_flatten_path(eurusd):
     adapter,router,trade,decision,mandate,calls=native_flow(eurusd,stop='false')
     with pytest.raises(RouterError,match='flattened'):
         router.execute(trade,decision,mandate,now_ms=NOW*1000)
-    assert calls==['sync_account','order_check','order_send','close']
+    assert calls==['sync_account','sync_account','order_check','order_send_expiring','close']
     assert KillSwitchTrigger.STOP_REJECTED in router.kill.active
 
 

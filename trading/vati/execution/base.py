@@ -71,7 +71,7 @@ class ExecutionReceipt:
     submitted_price: Decimal
     protective_stop_confirmed: bool
     broker_time_unix_ms: int
-    received_time_unix_ms: int
+    received_time_unix_ms: Optional[int]  # None: native effect known, local availability clock unavailable
     execution_channel: str = "ADAPTER"
     broker_order_id: str = ""
     broker_position_id: str = ""

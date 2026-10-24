@@ -9,7 +9,7 @@ STOP_REJECTED. Every step is a ledger event."""
 from __future__ import annotations
 
 from contextlib import nullcontext
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from decimal import Decimal
 from typing import Callable, Optional
 
@@ -544,7 +544,32 @@ class ExecutionRouter:
                       now_ms=now_ms, corr=corr, decision_time=decision_time_ms)
             metrics.inc("vati_orders_sent_total", venue=intent.venue)
             receipt = adapter.submit(cmd, now_ms=now_ms)
-            self._log(EventKind.EXECUTION_RECEIPT, {k: (v.value if hasattr(v, "value") else v) for k, v in asdict(receipt).items()}, now_ms=now_ms, corr=corr)
+            # An admitted write may return after the grant expires. Retain the
+            # native effect; its actual availability is a different clock.
+            received_ms = now_ms
+            if self.clock is not None:
+                try:
+                    received_ms = self.clock()
+                except Exception:
+                    received_ms = None
+                if type(received_ms) is not int or received_ms < now_ms:
+                    received_ms = None
+                receipt = replace(receipt, received_time_unix_ms=received_ms, receipt_hash="").sealed()
+            clock_evidence = {}
+            if received_ms is None:
+                # A NOT NULL ledger envelope keeps the last qualified lower
+                # bound. The payload explicitly withholds an arrival time.
+                clock_evidence = {'receipt_availability': {'state':'UNAVAILABLE',
+                    'received_at_ms':None,'dispatch_lower_bound_ms':now_ms}}
+                self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE,now_ms)
+            self._log(EventKind.EXECUTION_RECEIPT,
+                {**{k: (v.value if hasattr(v, "value") else v) for k, v in asdict(receipt).items()}, **clock_evidence},
+                now_ms=received_ms if received_ms is not None else now_ms, corr=corr)
+            if received_ms is None:
+                self._log(EventKind.KILL_SWITCH, {'trigger':'RECONCILIATION_FAILURE',
+                    'reason':'RECEIPT_AVAILABILITY_CLOCK_UNAVAILABLE',
+                    'clock_basis':'LAST_QUALIFIED_DISPATCH_LOWER_BOUND',
+                    'position':receipt.broker_position_id},now_ms=now_ms,corr=corr)
             # --- protection ---
             if receipt.status in ("FILLED", "PARTIAL") and receipt.filled_qty > ZERO:
                 if cmd.stop_mode is StopMode.VENUE and not receipt.protective_stop_confirmed:
