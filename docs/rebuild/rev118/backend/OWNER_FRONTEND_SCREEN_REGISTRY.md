@@ -14,8 +14,8 @@ Owner-access endpoints and service dependencies are listed separately below. An 
 
 | Registry | SHA-256 |
 | --- | --- |
-| [owner_features.json](../../../../registries/owner_features.json) | `5adf3b695f37bbe239a3dde2018c7d74e8dd1308729d18a1499f2630445e130d` |
-| [owner_screens.json](../../../../registries/owner_screens.json) | `e9ebe5204569f6959b8dca698f795328e141421388f8008bf879d0a9bdf8a9da` |
+| [owner_features.json](../../../../registries/owner_features.json) | `acf2cad0d454dba57963da05806eb5d8810b51040425edfc10e35fe299a85a72` |
+| [owner_screens.json](../../../../registries/owner_screens.json) | `86d8135997f59546c6592483a1743aadf66f1c211dd153eef5ccd5c63691b2df` |
 | [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `fcdaecc7af451c2ca89a09ddcbcf19656cc176706432355e5fc2235b9fb509a2` |
 | [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `10d2c2fc4ea1ca88599b21fdd2e3c72016c9d30dfeed84069c7a203b0f1915d4` |
 
@@ -964,6 +964,13 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; frontend integration: `PARTIAL_OWNER
 | --- | --- | --- | --- |
 | GET | /v1/trading/accounts | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.tradingAccounts |
 
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/trading/accounts | VanGatewayClient.tradingAccounts | CANDIDATE_NATIVE_FACTS_ANDROID_DTO_SOURCE_TESTED | native_account_observation preserves current physical identity, original equity/balance/credit, credit-excluded risk valuation or explicit unknown/liability, source/read clocks and original snapshot references independently of cash-history coverage. Invalid evidence or changed profiles withhold financial values. Exact Kotlin decimal text and 64-bit identity/clock parsing; existing AccountCard DTO only, no new UI. Response schema: trading/vati/contracts/schemas/native_account_observation.schema.json |
+| GET /v1/trading/portfolio | VanGatewayClient.tradingPortfolio | CANDIDATE_NATIVE_FACTS_ANDROID_DTO_SOURCE_TESTED | native_account_observation preserves current physical identity, original equity/balance/credit, credit-excluded risk valuation or explicit unknown/liability, source/read clocks and original snapshot references independently of cash-history coverage. Invalid evidence or changed profiles withhold financial values. Exact Kotlin decimal text and 64-bit identity/clock parsing; existing AccountCard DTO only, no new UI. Response schema: trading/vati/contracts/schemas/native_account_observation.schema.json |
+
 ### van.trading.cognition — Cognition
 
 Owner goal: Inspect VAN cognition status.
@@ -1055,6 +1062,8 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; frontend integration: `PARTIAL_OWNER
 | --- | --- | --- | --- |
 | GET /v1/trading/accounts/operations/{operation_id} | VanGatewayClient.tradingAccountOperation | CANDIDATE_SOURCE_ANDROID_REPAIR_NATIVE_ACCEPTANCE_PENDING | Native journal for account_upsert/account_credentials/account_remove/mt5_ea_issue_key; original non-secret operation identity survives Android restart; absence and incomplete effects stay UNKNOWN |
 | GET /v1/trading/accounts/catalog | VanGatewayClient.tradingAccountCatalog | CANDIDATE_SOURCE_ANDROID_REPAIR_NATIVE_ACCEPTANCE_PENDING | Exact existing action fields, credential-key names, approval and original-result capabilities. Partial account edits preserve omitted settings. Generic edits require native resolved before/after review bound to the biometric proof and checked again by the native writer. |
+| GET /v1/trading/accounts | VanGatewayClient.tradingAccounts | CANDIDATE_NATIVE_FACTS_ANDROID_DTO_SOURCE_TESTED | native_account_observation preserves current physical identity, original equity/balance/credit, credit-excluded risk valuation or explicit unknown/liability, source/read clocks and original snapshot references independently of cash-history coverage. Invalid evidence or changed profiles withhold financial values. Exact Kotlin decimal text and 64-bit identity/clock parsing; existing AccountCard DTO only, no new UI. Response schema: trading/vati/contracts/schemas/native_account_observation.schema.json |
+| GET /v1/trading/portfolio | VanGatewayClient.tradingPortfolio | CANDIDATE_NATIVE_FACTS_ANDROID_DTO_SOURCE_TESTED | native_account_observation preserves current physical identity, original equity/balance/credit, credit-excluded risk valuation or explicit unknown/liability, source/read clocks and original snapshot references independently of cash-history coverage. Invalid evidence or changed profiles withhold financial values. Exact Kotlin decimal text and 64-bit identity/clock parsing; existing AccountCard DTO only, no new UI. Response schema: trading/vati/contracts/schemas/native_account_observation.schema.json |
 
 ### van.trading.strategies — Strategies
 
@@ -6346,6 +6355,7 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; integration: `PARTIAL_OWNER_SURFACE`
 - capabilities
 - live/readiness status
 - pending challenge
+- Original physical-account/valuation facts, credit qualification and exact observation clocks remain distinct from cash-history coverage, settled funds and execution permission.
 
 **Owner interactions and controls**
 
@@ -6384,6 +6394,8 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; integration: `PARTIAL_OWNER_SURFACE`
 | --- | --- | --- | --- |
 | GET /v1/trading/accounts/operations/{operation_id} | VanGatewayClient.tradingAccountOperation | CANDIDATE_SOURCE_ANDROID_REPAIR_NATIVE_ACCEPTANCE_PENDING | Native journal for account_upsert/account_credentials/account_remove/mt5_ea_issue_key; original non-secret operation identity survives Android restart; absence and incomplete effects stay UNKNOWN |
 | GET /v1/trading/accounts/catalog | VanGatewayClient.tradingAccountCatalog | CANDIDATE_SOURCE_ANDROID_REPAIR_NATIVE_ACCEPTANCE_PENDING | Exact existing action fields, credential-key names, approval and original-result capabilities. Partial account edits preserve omitted settings. Generic edits require native resolved before/after review bound to the biometric proof and checked again by the native writer. |
+| GET /v1/trading/accounts | VanGatewayClient.tradingAccounts | CANDIDATE_NATIVE_FACTS_ANDROID_DTO_SOURCE_TESTED | native_account_observation preserves current physical identity, original equity/balance/credit, credit-excluded risk valuation or explicit unknown/liability, source/read clocks and original snapshot references independently of cash-history coverage. Invalid evidence or changed profiles withhold financial values. Exact Kotlin decimal text and 64-bit identity/clock parsing; existing AccountCard DTO only, no new UI. Response schema: trading/vati/contracts/schemas/native_account_observation.schema.json |
+| GET /v1/trading/portfolio | VanGatewayClient.tradingPortfolio | CANDIDATE_NATIVE_FACTS_ANDROID_DTO_SOURCE_TESTED | native_account_observation preserves current physical identity, original equity/balance/credit, credit-excluded risk valuation or explicit unknown/liability, source/read clocks and original snapshot references independently of cash-history coverage. Invalid evidence or changed profiles withhold financial values. Exact Kotlin decimal text and 64-bit identity/clock parsing; existing AccountCard DTO only, no new UI. Response schema: trading/vati/contracts/schemas/native_account_observation.schema.json |
 
 **External dependencies**
 

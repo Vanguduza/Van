@@ -39263,7 +39263,8 @@
         "credential reference",
         "capabilities",
         "live/readiness status",
-        "pending challenge"
+        "pending challenge",
+        "Original physical-account/valuation facts, credit qualification and exact observation clocks remain distinct from cash-history coverage, settled funds and execution permission."
       ],
       "actions": [
         "request exact account challenge",
@@ -39921,6 +39922,46 @@
           "specification": "docs/rebuild/rev118/backend/BE-002_004_005_ACCOUNT_UPDATE_REVIEW.md",
           "new_ui_implemented": false,
           "existing_android_repair": true,
+          "live_qualified": false
+        },
+        {
+          "method": "GET",
+          "path": "/v1/trading/accounts",
+          "endpoint_id": "VE-74f3be9cd819",
+          "client_namespace": "VanGatewayClient",
+          "client_function": "tradingAccounts",
+          "source_ref": "backend/van_gateway/app.py:3465",
+          "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+          "device_proof_required_when_bound": false,
+          "source_status": "CANDIDATE_NATIVE_FACTS_ANDROID_DTO_SOURCE_TESTED",
+          "authority": "READ_ORIGINAL_NATIVE_ACCOUNT_FACTS_NO_ORDER_OR_SETTLEMENT_AUTHORITY",
+          "scope": "native_account_observation preserves current physical identity, original equity/balance/credit, credit-excluded risk valuation or explicit unknown/liability, source/read clocks and original snapshot references independently of cash-history coverage. Invalid evidence or changed profiles withhold financial values. Exact Kotlin decimal text and 64-bit identity/clock parsing; existing AccountCard DTO only, no new UI. Response schema: trading/vati/contracts/schemas/native_account_observation.schema.json",
+          "response_schema": "trading/vati/contracts/schemas/native_account_observation.schema.json",
+          "response_schema_sha256": "af0c32a5ac27d55218474da3c8ea24a049c3c7b1bc59dc9abf465ae4a2b83a9f",
+          "android_dto": "android/app/src/main/java/com/dial/van/trading/NativeAccountObservation.kt",
+          "android_dto_sha256": "c6da23e70724022d1f813bb779b0e31661142565a8729949ca6a016ddf06927d",
+          "specification": "docs/rebuild/rev118/backend/BE-004_006_NATIVE_ACCOUNT_OBSERVATION.md",
+          "new_ui_implemented": false,
+          "live_qualified": false
+        },
+        {
+          "method": "GET",
+          "path": "/v1/trading/portfolio",
+          "endpoint_id": "VE-df932ad7aa9c",
+          "client_namespace": "VanGatewayClient",
+          "client_function": "tradingPortfolio",
+          "source_ref": "backend/van_gateway/app.py:3438",
+          "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+          "device_proof_required_when_bound": false,
+          "source_status": "CANDIDATE_NATIVE_FACTS_ANDROID_DTO_SOURCE_TESTED",
+          "authority": "READ_ORIGINAL_NATIVE_ACCOUNT_FACTS_NO_ORDER_OR_SETTLEMENT_AUTHORITY",
+          "scope": "native_account_observation preserves current physical identity, original equity/balance/credit, credit-excluded risk valuation or explicit unknown/liability, source/read clocks and original snapshot references independently of cash-history coverage. Invalid evidence or changed profiles withhold financial values. Exact Kotlin decimal text and 64-bit identity/clock parsing; existing AccountCard DTO only, no new UI. Response schema: trading/vati/contracts/schemas/native_account_observation.schema.json",
+          "response_schema": "trading/vati/contracts/schemas/native_account_observation.schema.json",
+          "response_schema_sha256": "af0c32a5ac27d55218474da3c8ea24a049c3c7b1bc59dc9abf465ae4a2b83a9f",
+          "android_dto": "android/app/src/main/java/com/dial/van/trading/NativeAccountObservation.kt",
+          "android_dto_sha256": "c6da23e70724022d1f813bb779b0e31661142565a8729949ca6a016ddf06927d",
+          "specification": "docs/rebuild/rev118/backend/BE-004_006_NATIVE_ACCOUNT_OBSERVATION.md",
+          "new_ui_implemented": false,
           "live_qualified": false
         }
       ]
@@ -46911,7 +46952,7 @@
     "android_receipt": null,
     "android_receipt_sha256": null,
     "scope": "Bounded current source-citation/endpoint refresh; previous reviews retained. Whole-product, Android, deployment/provider and handset qualifications remain separate.",
-    "source_review_manifest_sha256": "5d017b4cd5bd6b8fb0fe8ee63712907df89d44eaf533a36208158119dcd4a7a5"
+    "source_review_manifest_sha256": "3b00a6c56af662ca87efbccb2d16292bb4ecba4f8ddcc0a40949bdd456e2ffcd"
   },
   "functional_wiring_status_semantics": {
     "SOURCE_WIRED_REQUIRES_ACCEPTANCE": "Supported source producer/consumer path is reviewed; stated provider, deployment, visual or physical acceptance remains required.",

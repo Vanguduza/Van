@@ -2001,7 +2001,9 @@
     "android/app/src/main/java/com/dial/van/dialdev/DialDevFabricModels.kt": "1af806b9c95c264028c50350009f4b99a82c307bff3174f2115dc2daa013add7",
     "android/app/src/main/java/com/dial/van/command/dev/DevWorkspacesRoute.kt": "9bf318301f27f2d3bcad851dc575dc527b97c13f47ae731e66cde0675a5ab5e2",
     "android/app/src/main/java/com/dial/van/command/artemis/ArtemisConsoleRoute.kt": "67ca665acc636cb6d4f4669d1b495273062ceae5c4a73c0b26aa418c8ef3b818",
-    "android/app/src/main/java/com/dial/van/visual/VanCharacterAcceptance.kt": "7b282fa7815e4557cb4c2cd9e87d34ee9e5d4673b5fa5d93ecef2f1ded648e47"
+    "android/app/src/main/java/com/dial/van/visual/VanCharacterAcceptance.kt": "7b282fa7815e4557cb4c2cd9e87d34ee9e5d4673b5fa5d93ecef2f1ded648e47",
+    "trading/vati/contracts/schemas/native_account_observation.schema.json": "af0c32a5ac27d55218474da3c8ea24a049c3c7b1bc59dc9abf465ae4a2b83a9f",
+    "android/app/src/main/java/com/dial/van/trading/NativeAccountObservation.kt": "c6da23e70724022d1f813bb779b0e31661142565a8729949ca6a016ddf06927d"
   },
   "endpoint_count": 457,
   "schema_count": 333,

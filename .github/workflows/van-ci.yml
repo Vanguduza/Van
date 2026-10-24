@@ -375,6 +375,9 @@ jobs:
       VATI_TEST_PG_ISOLATED_FIXTURE: '1'
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: "24.19.0"
@@ -386,6 +389,7 @@ jobs:
           python -m pip install -r backend/requirements.lock
           python -m pip install --no-deps psycopg==3.2.9 psycopg-binary==3.2.9
           python -m pip install pytest==9.1.1 pytest-asyncio==1.4.0
+          python -m pip install --no-deps Pillow==12.3.0
           python -m playwright install chromium
       - name: Resolve actual Chromium and initialize the disposable schema
         run: |
@@ -415,6 +419,7 @@ jobs:
           --runtime gateway
           --basetemp="${{ runner.temp }}/van-backend-public-source"
       - name: Execute media service cases with their separate hashed runtime
+        if: always()
         run: |
           python -m venv "$RUNNER_TEMP/public-media-venv"
           "$RUNNER_TEMP/public-media-venv/bin/python" -m pip install --require-hashes -r deploy/van-browser-stream/requirements.lock
@@ -698,6 +703,32 @@ jobs:
       - name: Pure Kotlin logic (owner status projection, mission read models)
         working-directory: android/verification
         run: gradle test --console=plain
+      - name: Actual AGP release-profile and signing refusal controls
+        env:
+          VAN_ANDROID_GRADLE_BIN: ${{ github.workspace }}/android/gradlew
+        run: |
+          python -m pip install -r backend/requirements.lock
+          python -m pip install pytest==9.1.1 PyYAML==6.0.2
+          mkdir -p artifacts/android-release-guards
+          python -m pytest -q \
+            tests/contracts/test_android_instrumentation_abi.py::test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile \
+            tests/contracts/test_android_production_target.py::test_actual_agp_valid_target_still_refuses_missing_production_signing \
+            --basetemp="$RUNNER_TEMP/van-actual-release-guards" \
+            --junitxml=artifacts/android-release-guards/report.xml
+          python - <<'PYCODE'
+          import xml.etree.ElementTree as ET
+          cases=list(ET.parse('artifacts/android-release-guards/report.xml').getroot().iter('testcase'))
+          expected={'test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile',
+                    'test_actual_agp_valid_target_still_refuses_missing_production_signing'}
+          assert len(cases)==2 and {c.get('name') for c in cases}==expected
+          assert not any(c.find(k) is not None for c in cases for k in ('failure','error','skipped'))
+          PYCODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: van-actual-release-guards
+          path: artifacts/android-release-guards/
+          if-no-files-found: error
       # P2-AND-016 — the debug keystore is generated per machine, so before this every run
       # signed with a different key: no CI build could upgrade another, and an existing VAN
       # install refused the next one on a signature mismatch. With the secret set, every run

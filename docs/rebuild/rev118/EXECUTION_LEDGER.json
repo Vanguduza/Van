@@ -119,7 +119,8 @@
         "backend/BE-006_NATIVE_BALANCE_RECONCILIATION.md; receipts/NATIVE_BALANCE_RECONCILIATION_SOURCE_20261024.json",
         "backend/BE-006_NATIVE_FUNDING_RISK_FENCE.md; receipts/NATIVE_FUNDING_RISK_FENCE_SOURCE_20261024.json",
         "backend/BE-006_NATIVE_COMMAND_SCOPE_AND_SCHEMAS.md; receipts/NATIVE_COMMAND_SCOPE_AND_SCHEMA_SOURCE_20261024.json",
-        "backend/BE-006_FUNDING_BASELINE_PRESERVATION.md; receipts/FUNDING_BASELINE_PRESERVATION_SOURCE_20261024.json"
+        "backend/BE-006_FUNDING_BASELINE_PRESERVATION.md; receipts/FUNDING_BASELINE_PRESERVATION_SOURCE_20261024.json",
+        "backend/BE-004_006_NATIVE_ACCOUNT_OBSERVATION.md; receipts/NATIVE_ACCOUNT_OBSERVATION_SOURCE_20261024.json"
       ]
     }
   },
@@ -184,7 +185,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-24T17:28:54.442432+00:00",
+    "updated_utc": "2026-10-24T18:07:52.552355+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [],
@@ -359,7 +360,8 @@
       "2026-10-24 native funding component:103native/unitization/runtime,27realPG,182audited gateway/storage/backup,19registry+16runtime contracts,80rebuild and5Android parser tests PASS0skip;12behavioral fault pairs caught/restored. Current native return qualification NOT_ISSUED. Fullc0b run7240PASS1FAIL9skip retained; stale backup version expectation corrected, no whole-backend PASS.",
       "2026-10-24 exact a1867: fulltrading2623PASS0skip actualPG/audit0/cleanup; hosted258legacy mutations detected and116Kotlin cases NOTRUN due confirmed harness dependency omission. Corrected pureharness1328PASS0skip. Hosted emulator18PASS4artworkskips, MetaEditor6283 zeroerrorswarnings. Backendresource failure and both unrelatedCI prerequisites retained.",
       "Exact31a726ca hosted: publicPG26PASS, trading2898PASS1schemaFAIL1privateDDSskip; voice source NOT_RUN. All374retained mutants caught; full50browser files1542PASS1rootUIDskip with rootUID separately1PASS and firewall10PASS. Emulator18PASS4declaredskips; actual margin EA MetaEditor0errors0warningsfreshEX5/invalid4errorsnoEX5. Overall CI FAILED, originalDDSreadkey/trustedmain prerequisites retained. Nextsource fixes schema and adds native target guards:11originalbeforeFAIL,227actualPGPASS0skipcleanupTRUE,121nativePASS,83schemaPASS,7fault/restoredpairs caught; external schema31negativecases rejected. Media198auditedPASS,privateDDS274sourcePASS,94rebuildPASS,30owner/workflow/pinPASS. Supplemental public source job370modules uses separate backend/media locks; first complete hosted execution pending.",
-      "Funding baseline packet:6original snapshot failures and2historical replay failures reproduced. Both producers/startup and owner recovery require usable funding before rebasing; original ledger remains immutable.125focused/75final rootPASS;5semanticfault/restoredpairs caught. FinalactualPG225case batch223PASS2explicitthread/forkexhaustionfailures, allnewPGbaseline/startup casesPASS; cleanupTRUE. Startupfault control failed nativeforksetup, mutantNOTRUN/notcounted. Hostedbe61 run40115383483 executing prior schema/target/public-backend source; avoidcanceling before usable results. No whole-backend/unit/prod/device claims."
+      "Funding baseline packet:6original snapshot failures and2historical replay failures reproduced. Both producers/startup and owner recovery require usable funding before rebasing; original ledger remains immutable.125focused/75final rootPASS;5semanticfault/restoredpairs caught. FinalactualPG225case batch223PASS2explicitthread/forkexhaustionfailures, allnewPGbaseline/startup casesPASS; cleanupTRUE. Startupfault control failed nativeforksetup, mutantNOTRUN/notcounted. Hostedbe61 run40115383483 executing prior schema/target/public-backend source; avoidcanceling before usable results. No whole-backend/unit/prod/device claims.",
+      "Exactbe61 hosted40115383483:PG26PASS,trading2911PASS1DDSskip,voice117PASS0skip; full50browser1542ordinaryPASS1rootUIDskip plusseparateUID1PASS/firewall10PASS/audits0; emulator18PASS4declaredskips; all374retainedmutationscaught; nativeMetaEditor0errors/warningsfreshEX5,invalid4errorsnoEX5. Publicgateway5647cases5636PASS1JEVreferenceFAIL10SKIP;mediaNOTRUN; overallFAILED,originalDDSreadkey/trustedmainstillrequired. Nextsource preservesoriginalB0/private/trust/PG/browserchecks,canonicaltest-pathskipmetadata,Pillowpin,fullhistorySOURCEHEAD,2actualAGPrefusalcontrolsintheAndroidjob,independentmediaevenafterfailure. Nativeaccountpacket:5beforeFAIL,legacyalias-onlyvaluesLIVEwithoutscopeprobe;190finalnative/schema/funding/portfolioPASS,20auditedAPI0forbiddenwrites,96rebuild/30owner-workflow-pin/31JEV-gate/Pillow12PASS. Ninecurrentsemanticfault/restoredpairs caught;schema5valid35invalidshapes. AllcurrentKotlin1341testsourcecompiled;fullruntimeABORTEDnativecoroutinethreadEAGAINnotPASS;8focusedactualJunitPASS0skip.10originalfundingreportassertionspreservedwithexplicitnativephysicalmarkfixture. No newUI orunit/native/prod/S24 acceptance."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -371,8 +373,8 @@
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
     "next_action": "Publish private-storage import and legacy fixture compatibility fix, then advance the inactive clean frozenQA815checkout to that exact new commit and run a fresh full backend/contracts+trading privatePG/storage-audit qualification with separate logs/headassert. Continue BE006/007 in /tmp/van-funding-work-20261024: native cTrader cash history reader plus immutable money/scope DTOs and67passing source tests are uncommitted/isolated; flow-neutral ledger, accounting, service ingestion and owner read contracts remain to implement. Explicit-copy only owned funding files later; rootprivatefix differs from its e22base and is not a reason to overwritecurrentroot. Preserve93features131units324req1610acceptanceIDs, nofrontendbeforeBG001, no newfinancialauthority/nativehost/production/S24 claims, no routinecheckpointstop.",
-    "previous_head": "be61c629ffdfaf3db71b084e9cae1acb9d6ea31c",
-    "current_packet": "Held native funding no longer seeds/increases loss baselines or replays old invalid baselines; original protective reads remain available."
+    "previous_head": "130191cdf6fe0d588e377fbd339e9732835f246b",
+    "current_packet": "Native account identity/valuation independent of cash coverage, exact owner/API/Android DTO contracts, and public-source runner corrections."
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -430,6 +432,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finish hostedbe61 full trading/voice/public gateway+media qualification and fix real failures. Publish tested funding-baseline correction, then implement independent native account identity/valuation facts and remaining native contract/margin/reservations/flow economics plus full-product source work. All independent/admission/unit/BG001/host/provider/prod/S24 obligations remain unissued.",
-  "updated_at_utc": "2026-10-24T17:28:54.442432+00:00"
+  "current_action": "Publish native account observation/source-schema/Android DTO and explicit public-source qualification fixes, then execute fresh full gateway/media/trading/voice/browser/Android/AGP coverage and fix failures. Continue native order deadline wiring, prospective margin/broker stop-out facts, native symbol freshness, reservations, flow accounting/provider rails and remaining product source work. No independent/admission/BG001/host/provider/prod/S24 qualification is inferred.",
+  "updated_at_utc": "2026-10-24T18:07:52.552355+00:00"
 }

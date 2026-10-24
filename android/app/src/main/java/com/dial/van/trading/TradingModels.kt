@@ -58,6 +58,7 @@ data class AccountCard(
     val floatingPnl: Money, val dayPnl: Money, val drawdown: Pct, val connection: DataState, val openPositions: Int, val killSwitch: List<String>, val lastSyncMs: Long?,
     val performanceState: String = "UNMEASURED", val funding: FundingObservation = FundingObservation.from(null),
     val margin: AccountMargin = AccountMargin.from(null),
+    val nativeObservation: NativeAccountObservation = NativeAccountObservation.from(null),
 ) {
     companion object {
         fun from(o: JsonObject) = AccountCard(
@@ -66,6 +67,7 @@ data class AccountCard(
             DataState.parse(o.str("connection_state")), o.long("open_positions")?.toInt() ?: 0, o.strList("kill_switch"), o.long("last_sync_ms"),
             o.str("performance_state") ?: "UNMEASURED", FundingObservation.from(o.obj("funding")),
             AccountMargin.from(o.obj("margin")),
+            NativeAccountObservation.from(o.obj("native_account_observation")),
         )
     }
 }

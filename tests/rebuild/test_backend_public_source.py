@@ -79,8 +79,23 @@ def test_exact_prerequisite_skip_is_disclosed_without_claiming_it_executed(instr
     report = folder / "gateway-report.xml"
     suite = ET.parse(report).getroot()
     case = next(c for c in suite if c.get("classname") == "backend.tests.test_jev_no_generic_executor")
+    case.set('name', 'test_no_fabric_or_generic_operation_survives_the_b1_validator[click]')
     ET.SubElement(case, "skipped", message="member of the B1 closed set by definition")
     report.write_bytes(ET.tostring(suite))
     result = judge(manifest, folder)
     assert result["passed"] == len(manifest["selected"]) - 1
     assert len(result["declared_unexecuted"]) == 1
+
+
+@pytest.mark.parametrize('wrong_case', [False, True])
+def test_android_guard_skip_is_disclosed_only_for_its_exact_separate_case(instrument, wrong_case):
+    manifest, folder = instrument
+    report = folder / 'gateway-report.xml'; suite = ET.parse(report).getroot()
+    case = next(c for c in suite if c.get('classname') == 'tests.contracts.test_android_instrumentation_abi')
+    case.set('name', 'unrelated_case' if wrong_case else 'test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile')
+    ET.SubElement(case, 'skipped', message='opt-in actual AGP release guard check')
+    report.write_bytes(ET.tostring(suite))
+    if wrong_case:
+        with pytest.raises(ValueError): judge(manifest, folder)
+    else:
+        assert len(judge(manifest, folder)['declared_unexecuted']) == 1

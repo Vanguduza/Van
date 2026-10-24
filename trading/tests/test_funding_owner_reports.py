@@ -16,7 +16,14 @@ def snapshot(ledger,**changes):
     ledger.append(event);return event
 
 def test_native_deposit_without_qualified_cash_coverage_is_not_reported_as_profit(tmp_path):
-    ledger=Ledger(tmp_path/'facts.sqlite');snapshot(ledger)
+    from test_native_balance_reconciliation import mark
+    ledger=Ledger(tmp_path/'facts.sqlite')
+    # This test has a known physical native mark but unqualified cash coverage.
+    # Alias-only legacy snapshots are separately held as unbound, not trusted.
+    native=mark(3000,balance='200',equity='200')
+    snapshot(ledger,native_account_mark=native.body(),funding_observation={
+        'state':'UNMEASURED','reason':'NATIVE_CASH_HISTORY_NOT_PROVIDED',
+        'scope_hash':native.scope_hash,'native_mark':native.body()})
     account=account_states(ledger,[profile()])[0]
     assert account['day_pnl'] is None and account['week_pnl'] is None and account['drawdown_pct'] is None
     assert account['raw_equity_change']['day']=='100'

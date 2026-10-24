@@ -1042,6 +1042,7 @@ class AccountCoordinatorService:
         funding = snapshot_funding(self,self._ledger,self.adapter,acct,now_ms=now_ms)
         from vati.funding.native import account_mark_body
         mark=account_mark_body(acct)
+        from vati.execution.mt5_observation import account_observation_body
         received_ms=max(now_ms,acct.server_time_unix_ms,self.clock())
         self._ledger.append(make_event(
             EventKind.ACCOUNT_SNAPSHOT, "vati-account-service",
@@ -1054,6 +1055,7 @@ class AccountCoordinatorService:
                 "funding_observation": funding,
                 "margin": margin,
                 "native_account_mark": mark,
+                "native_account_observation": account_observation_body(acct),
                 "connected": hb.connected,
                 "server_offset_ms": hb.server_offset_ms,
                 "open_positions": len(positions),

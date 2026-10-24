@@ -15,9 +15,11 @@ PRIVATE = {"tests/contracts/test_artemis_acceptance_plan.py", "tests/contracts/t
 FIREWALL = "tests/contracts/test_van_browser_core_firewall.py"
 ROOTS = ("backend/tests", "tests/contracts", "hermes/policy/tests", "tests/hermes", "services")
 ALLOWED_SKIPS = {
-    "member of the B1 closed set by definition": ("backend.tests.test_jev_no_generic_executor", "tests.test_jev_no_generic_executor"),
-    "DDS checkout not present; blob hashes pinned above": ("backend.tests.test_jev_browser_eligibility", "tests.test_jev_browser_eligibility"),
-    "no DDS git clone beside this checkout; the CI step verifies the same table itself": ("tests.contracts.test_ci_dds_contract_pin",),
+    "member of the B1 closed set by definition": (("backend/tests/test_jev_no_generic_executor.py", "test_no_fabric_or_generic_operation_survives_the_b1_validator"),),
+    "DDS checkout not present; blob hashes pinned above": (("backend/tests/test_jev_browser_eligibility.py", "test_vendored_dds_files_are_the_audited_blobs"),),
+    "no DDS git clone beside this checkout; the CI step verifies the same table itself": (("tests/contracts/test_ci_dds_contract_pin.py", "test_recorded_blobs_are_the_pinned_dds_blobs_when_dds_is_present"),),
+    "opt-in actual AGP release guard check": (("tests/contracts/test_android_instrumentation_abi.py", "test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile"),),
+    "opt-in actual AGP signing guard check": (("tests/contracts/test_android_production_target.py", "test_actual_agp_valid_target_still_refuses_missing_production_signing"),),
 }
 
 def digest(path):
@@ -80,7 +82,8 @@ def verify(manifest, report, audit, root=ROOT):
         skip=c.find("skipped")
         if skip is None:continue
         reason=skip.get("message","");allowed=ALLOWED_SKIPS.get(reason,())
-        if not any(c.get("classname","")==n or c.get("classname","").startswith(n+".") for n in allowed):
+        if not any((c.get('name')==test or c.get('name','').startswith(test+'[')) and
+            any(c.get("classname","")==n or c.get("classname","").startswith(n+".") for n in modules(path,stems)) for path,test in allowed):
             raise ValueError("unexpected unexecuted case: "+c.get("classname","")+"::"+c.get("name","")+": "+reason)
         skipped.append({"id":c.get("classname","")+"::"+c.get("name",""),"reason":reason})
     return {"status":"PUBLIC_SOURCE_SUBSET_PASS","tests":len(cases),"passed":len(cases)-len(skipped),

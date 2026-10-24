@@ -72,22 +72,37 @@ def _account_states(ledger: Ledger, registry_public: list[dict]) -> list[dict[st
         row['funding']=reported_funding(ledger,s,a)
         from vati.execution.native_margin import reported_account_margin
         row["margin"]=reported_account_margin(s,a["alias"])
-        if a.get("broker") in {"MT5","CTRADER"} and not row["funding"].get("scope_hash"):
+        from vati.execution.mt5_observation import reported_account_observation
+        row['native_account_observation']=reported_account_observation(s,a)
+        native_scope=(row['native_account_observation'].get('scope_hash')
+            if row['native_account_observation']['state']=='OBSERVED' else None)
+        native_unbound=a.get("broker") in {"MT5","CTRADER"} and not (row["funding"].get("scope_hash") or native_scope)
+        if native_unbound:
             row["margin"]={"state":"UNAVAILABLE","reason":"NATIVE_SCOPE_UNBOUND","execution_authority":False}
-        if a.get('broker')=='MT5' and row['funding']['state'] not in {'OBSERVED','CONFLICT'}:
+        if (a.get('broker')=='MT5' and row['funding']['state'] not in {'OBSERVED','CONFLICT'}
+            and not (native_scope and row['native_account_observation']['valuation_state']=='CREDIT_EXCLUDED')):
             # Legacy MT5 equity can include broker credit. Without the bound
             # credit-excluded account mark its difference is not floating PnL.
             row['floating_pnl']=None
+        if (row['native_account_observation']['state']=='OBSERVED'
+            and row['native_account_observation']['valuation_state']!='CREDIT_EXCLUDED'):
+            row['equity']=None
         row['raw_equity_change']={'day':row['day_pnl'],'week':row['week_pnl'],
             'drawdown_from_raw_peak':row['drawdown_pct'],'basis':'UNADJUSTED_EQUITY_INCLUDES_CAPITAL_FLOWS'}
+        if row['equity'] is None:
+            row['raw_equity_change']={**row['raw_equity_change'],'day':None,'week':None,'drawdown_from_raw_peak':None}
         if a.get('broker')!='PAPER':
             # Native deposits, withdrawals and restricted credit can change all
             # three old metrics without any trade. Never label those changes PnL.
             row['day_pnl']=row['week_pnl']=row['drawdown_pct']=None
         row['performance_state']='SIMULATED_PAPER_EQUITY' if a.get('broker')=='PAPER' else 'UNMEASURED'
-        if row['funding']['reason']=='CURRENT_PROFILE_NATIVE_SCOPE_MISMATCH':
+        if (row['funding']['reason']=='CURRENT_PROFILE_NATIVE_SCOPE_MISMATCH'
+            or row['native_account_observation']['state']=='UNAVAILABLE' or native_unbound):
+            unavailable_reason=(row['native_account_observation'].get('reason')
+                if row['native_account_observation']['state']=='UNAVAILABLE' else
+                'CURRENT_PROFILE_NATIVE_SCOPE_MISMATCH' if row['funding']['reason']=='CURRENT_PROFILE_NATIVE_SCOPE_MISMATCH' else 'NATIVE_SCOPE_UNBOUND')
             row.update(equity=None,balance=None,floating_pnl=None,connected=False,verified=False,connection_state='STALE',currency=a.get('currency'))
-            row["margin"]={"state":"UNAVAILABLE","reason":"CURRENT_PROFILE_NATIVE_SCOPE_MISMATCH","execution_authority":False}
+            row["margin"]={"state":"UNAVAILABLE","reason":unavailable_reason,"execution_authority":False}
             row['raw_equity_change']={**row['raw_equity_change'],'day':None,'week':None,'drawdown_from_raw_peak':None}
     return out
 

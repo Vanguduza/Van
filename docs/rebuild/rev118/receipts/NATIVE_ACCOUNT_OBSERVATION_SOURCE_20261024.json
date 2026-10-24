@@ -1,0 +1,1015 @@
+{
+  "schema": "van.rebuild.native-account-observation-source/1",
+  "source_preimage": "130191cdf6fe0d588e377fbd339e9732835f246b",
+  "paths": {
+    ".github/workflows/van-ci.yml": {
+      "preimage_sha256": "d6b36fc789fa5407bc52a11520db751bcd291dd6b2cdba7d9ccc0d459a49af8e",
+      "source_sha256": "31953a2dadac4717c03d165d2bd0ab471f73ba143b90f95b2a0981932bcd686e"
+    },
+    "android/app/src/main/java/com/dial/van/trading/TradingModels.kt": {
+      "preimage_sha256": "1407d215b37374785fac3ef87a3e243661f4fe4fab2c77c54981b23ac2d97d5d",
+      "source_sha256": "aa7bfa98e6b0a8c7cecd49aa9b57b34189393d0d52a694e57a6784d5ef87d962"
+    },
+    "android/verification/build.gradle.kts": {
+      "preimage_sha256": "fca3ee0f3931b7ed4c4a1bfca8b8ec758d8847d973bfa45c11fcfb0c40830156",
+      "source_sha256": "b980a83a6f6d22dec56fdc7a08bb1a3a628d49c1df2f3a6c76d55589f836a698"
+    },
+    "docs/rebuild/rev118/backend/OWNER_FRONTEND_SCREEN_REGISTRY.md": {
+      "preimage_sha256": "2d51ae136daae42cbbd64e314f84f669ae324afc586053267607b5a9aeef3b5b",
+      "source_sha256": "eae45cf6d15ae6ded1ac4b0981ea5f282a5e75e4ed8b53cf3e9e13555ba8e6f8"
+    },
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json": {
+      "preimage_sha256": "efdd63db8ae2097c31488638f91a05802e99dfa324bc7955237dfa6645dab08d",
+      "source_sha256": "f0636faa1aa0e806d615fb2f82d7e7a5dec51431c208209fed29a8ddb8a6f3bb"
+    },
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_SOURCE_REFRESH_20261022.json": {
+      "preimage_sha256": "5d017b4cd5bd6b8fb0fe8ee63712907df89d44eaf533a36208158119dcd4a7a5",
+      "source_sha256": "3b00a6c56af662ca87efbccb2d16292bb4ecba4f8ddcc0a40949bdd456e2ffcd"
+    },
+    "registries/owner_features.json": {
+      "preimage_sha256": "5adf3b695f37bbe239a3dde2018c7d74e8dd1308729d18a1499f2630445e130d",
+      "source_sha256": "acf2cad0d454dba57963da05806eb5d8810b51040425edfc10e35fe299a85a72"
+    },
+    "registries/owner_screens.json": {
+      "preimage_sha256": "e9ebe5204569f6959b8dca698f795328e141421388f8008bf879d0a9bdf8a9da",
+      "source_sha256": "86d8135997f59546c6592483a1743aadf66f1c211dd153eef5ccd5c63691b2df"
+    },
+    "tests/rebuild/test_backend_public_source.py": {
+      "preimage_sha256": "d70481c459ccf3a4ebf09ef82d3bc239b1d8b1f9a0c4b1ce4668789d7c3a0115",
+      "source_sha256": "98aef223b852392782526a35eca403ea1beb8a67f9481fee68acb00a70083d88"
+    },
+    "tools/ci/github-actions-ci.yml": {
+      "preimage_sha256": "d6b36fc789fa5407bc52a11520db751bcd291dd6b2cdba7d9ccc0d459a49af8e",
+      "source_sha256": "31953a2dadac4717c03d165d2bd0ab471f73ba143b90f95b2a0981932bcd686e"
+    },
+    "tools/rebuild/backend_public_source.py": {
+      "preimage_sha256": "23c0e7cad37e21a72e3a96c0c2dead54a5d3c4fa8b6fafe5a9ea8e20644ed279",
+      "source_sha256": "8c1a4ce1e6e92905a609efc52ed1ac9467696eb4b1b86d49656839e31f61ddd4"
+    },
+    "tools/rebuild/refresh_owner_source_contracts.py": {
+      "preimage_sha256": "6b4e106981dc2f1eaa7b8822f43f572021569d90f2aa9830c1f5db7c5e768e73",
+      "source_sha256": "7a6e1f3f2a8dac723a5fea4463154f5545865f3d8d4a4e8c8b5720734d05e6bf"
+    },
+    "trading/tests/test_funding_owner_reports.py": {
+      "preimage_sha256": "cbd8275c5f9daa20fe584f870e763793c1629296568c279fba2c21d71f342c5a",
+      "source_sha256": "f90140337aa1d14ee25c17dcdb753d07fdbf0d952ce95883c9d79bf52c170a2f"
+    },
+    "trading/vati/app/account_service.py": {
+      "preimage_sha256": "57e9ea99098fe18d356c75e99b30b42bcf245816a984f276c0bc727a4a5f270b",
+      "source_sha256": "b3b66fdff06156df41cd60337ddd8cd97ec97eca62f32ab9a396d11033b17fdf"
+    },
+    "trading/vati/app/portfolio.py": {
+      "preimage_sha256": "a541b089b606c277e71597e862009e0fdabb3dcfe480bcd8287183d2be47bcc7",
+      "source_sha256": "4edeb4ea65a2f390311c3bc5bee17cf68f7319f4afaa9eb778a0f963df701188"
+    },
+    "trading/vati/app/service.py": {
+      "preimage_sha256": "436f8d175f24b70097078677b65b754cc7cd31a44291ac440facdf0399fb9451",
+      "source_sha256": "39109f3d03b9f867d177d321ce1952f1b87cc3cc3f8292bb8ed0f6abd3d7b434"
+    },
+    "trading/vati/contracts/__init__.py": {
+      "preimage_sha256": "19bbb7e22efaecef65da2445f9da1d102def518f25dd5ede470e773664e60fe7",
+      "source_sha256": "f72e89e5b8b445da4133ccd6128696a89fd9ba9b007317770ac63c769b4b27d4"
+    },
+    "trading/vati/execution/base.py": {
+      "preimage_sha256": "453c7a02b129b50aa8adcb159750de440fe776b799f7df05fcdee386e6a3e46f",
+      "source_sha256": "f74af1ca8eb853cffcdd95861d4d814a45303e33e759beeabcbe9d7595f6d3c2"
+    },
+    "trading/vati/execution/mt5_bridge.py": {
+      "preimage_sha256": "89a1472f225deae7de340faa7d2a820edb110eab4beabec906b8976071d37a44",
+      "source_sha256": "1a995750c71c3a7fc971444db7dbad48c04529974d7ea2d7460941fb1df251bd"
+    },
+    "trading/vati/execution/mt5_pull.py": {
+      "preimage_sha256": "e9de45c71986f5519f2e570ed7eade4ad10a6123d29a36eacc802f3e3ca574c4",
+      "source_sha256": "93eda3ea9da79effceff1526ebc6ee76c2fcfd126c09828b544772cee9bc0f59"
+    },
+    "trading/vati/execution/native_margin.py": {
+      "preimage_sha256": "35f99bbb17fb360e1b4fd0f25942edf5dfedc660f58fcd206f29f73a76b610ea",
+      "source_sha256": "1cd3c84214ddec4ce258ab1753d708257bdd1bc10e90345479585bec0eaafc19"
+    },
+    "android/app/src/main/java/com/dial/van/trading/NativeAccountObservation.kt": {
+      "preimage_sha256": null,
+      "source_sha256": "c6da23e70724022d1f813bb779b0e31661142565a8729949ca6a016ddf06927d"
+    },
+    "android/verification/src/test/kotlin/com/dial/van/trading/NativeAccountObservationTest.kt": {
+      "preimage_sha256": null,
+      "source_sha256": "5b07f05b41252b061d52062e7ac8e0d31922544cc92bc69ed5e60fc2f298f8f4"
+    },
+    "backend/tests/test_native_account_observation_api.py": {
+      "preimage_sha256": null,
+      "source_sha256": "c26a9f902422a9ca0fb3d576543f890201c819a7d8fa675d4d5722ddc986d9da"
+    },
+    "trading/tests/test_native_account_observation.py": {
+      "preimage_sha256": null,
+      "source_sha256": "7fd2376bc9d15b7de5c8eae29156b52c30263ff11a2af1949151d939aec3a4b3"
+    },
+    "trading/vati/contracts/schemas/native_account_observation.schema.json": {
+      "preimage_sha256": null,
+      "source_sha256": "af0c32a5ac27d55218474da3c8ea24a049c3c7b1bc59dc9abf465ae4a2b83a9f"
+    },
+    "trading/vati/execution/mt5_observation.py": {
+      "preimage_sha256": null,
+      "source_sha256": "c81c9617b1ea3c0f71f2e3399afc30c2b0b8ec377f2f0e948e05d2e21fd127b8"
+    }
+  },
+  "source_cases": {
+    "van-native-observation-before": {
+      "tests": 5,
+      "passed": 0,
+      "failed": [
+        {
+          "id": "trading.tests.test_native_account_observation::test_actual_signed_worker_keeps_physical_observation_without_cash_history",
+          "message": "AssertionError: physical account facts were discarded with unrelated cash-query coverage\nassert None is not None"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[None]",
+          "message": "assert None is not None"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[missing]",
+          "message": "assert None is not None"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[nan]",
+          "message": "assert None is not None"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[-10.0]",
+          "message": "assert None is not None"
+        }
+      ],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "dd2bd894d9e7d9ccb93a2a3986ffc63f264709adff3d4a300a95cf95e080c201"
+    },
+    "van-native-observation-r2": {
+      "tests": 30,
+      "passed": 8,
+      "failed": [
+        {
+          "id": "trading.tests.test_native_account_observation::test_actual_snapshot_producers_supply_bound_account_and_margin_during_cash_outage[single]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_owner_receives_original_amounts_with_explicit_unknown_risk_valuation[None]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_owner_receives_original_amounts_with_explicit_unknown_risk_valuation[-10.0]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[login-12345679]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[server-Different-Demo]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[currency-EUR]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[demo-False]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[broker-CTRADER]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[login-None]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[authority]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[numeric-authority]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[source-seal]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[scope]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[future]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[bad-clock]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[money]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[source-kind]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[alias]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[unknown-field]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[producer]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[snapshot-seal]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        },
+        {
+          "id": "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[snapshot-valuation]",
+          "message": "AttributeError: 'types.SimpleNamespace' object has no attribute 'mandate'"
+        }
+      ],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "cf8583b97be2c3f266b396f995f4e0353d25873b80881d4b2825213b1215a0c8"
+    },
+    "van-native-observation-r5": {
+      "tests": 155,
+      "passed": 155,
+      "failed": [],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "acdd9bd31dc4c5915f562f2e0d491d23ccc7f3fb448ee6c3189e2ba2c5cdbe4b"
+    },
+    "van-native-observation-legacy-r2": {
+      "tests": 148,
+      "passed": 147,
+      "failed": [
+        {
+          "id": "trading.tests.test_funding_owner_reports::test_native_deposit_without_qualified_cash_coverage_is_not_reported_as_profit",
+          "message": "AssertionError: assert None == '100'"
+        }
+      ],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "ddb092bba10a23bfe536df28ad7ef6200d27e09dd3d000d101bc0915a1536ee2"
+    },
+    "van-native-observation-legacy-r3": {
+      "tests": 148,
+      "passed": 148,
+      "failed": [],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "d4ec5b4036acae516508c7b614fcf8a72539da507eb3b3ab638f19cf9f78d533"
+    },
+    "van-native-observation-root-final": {
+      "tests": 190,
+      "passed": 190,
+      "failed": [],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "89b4b79649e27930b0f30d45e890f2496e7a759ad076180a453ef855e0eee76d"
+    },
+    "van-native-observation-root-api": {
+      "tests": 20,
+      "passed": 20,
+      "failed": [],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "15172a45f3d67f813a496941a0c21f61edaabc63a59f8c100a3d77834c294237"
+    },
+    "van-native-observation-root-contracts": {
+      "tests": 30,
+      "passed": 30,
+      "failed": [],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "0436495ff6ba0745dad9a7a109bb96f5ce6371c5059f5978c1b9ff2c925e3b04"
+    },
+    "van-public-gate-final": {
+      "tests": 31,
+      "passed": 31,
+      "failed": [],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "5db0716e13a94485c3c823d790852e217fd4733a9874295096645d24caaf9217"
+    },
+    "van-public-backend-corrections": {
+      "tests": 78,
+      "passed": 26,
+      "failed": [],
+      "errors": 50,
+      "skipped": [
+        {
+          "id": "tests.contracts.test_android_instrumentation_abi::test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile",
+          "reason": "opt-in actual AGP release guard check"
+        },
+        {
+          "id": "tests.contracts.test_android_production_target::test_actual_agp_valid_target_still_refuses_missing_production_signing",
+          "reason": "opt-in actual AGP signing guard check"
+        }
+      ],
+      "sha256": "da81f67bd8849849083ca76936231b550114c7ca302abe0ff8de08ac2d316373"
+    },
+    "van-public-pillow-source": {
+      "tests": 12,
+      "passed": 12,
+      "failed": [],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "cd826f3ffd9c84df15e9a8fd241c4b056ec50b254acb4ca2cea356f6d28e355a"
+    }
+  },
+  "source_storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-review-2026-10-18/publish",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "legacy_scope_before": {
+    "source_head": "130191cdf6fe0d588e377fbd339e9732835f246b",
+    "source_sha256": "a541b089b606c277e71597e862009e0fdabb3dcfe480bcd8287183d2be47bcc7",
+    "profile_server": "Different-Demo",
+    "legacy_snapshot_bound_only_by_alias": true,
+    "observed": {
+      "equity": "10000",
+      "balance": "10000",
+      "verified": true,
+      "connected": true,
+      "connection_state": "LIVE"
+    },
+    "unbound_profile_money_withheld": false,
+    "interpretation": "A legacy alias-only snapshot lacks physical-scope evidence yet is shown as live current-profile money. The old record does not establish which physical account produced it."
+  },
+  "semantic_fault_pairs": {
+    "baseline": {
+      "exit_code": 0,
+      "failures": [],
+      "errors": 0,
+      "skipped": 0,
+      "tests": 32,
+      "log_sha256": "49bf2e3fe893df523c94522a2965c1c4141587564261cfea143b8e4b7dc1a6dd",
+      "xml_sha256": "eac9876714fdb57a9d0a54dff4080685c938b5f72c79abe3d0498888324a1c91"
+    },
+    "cases": [
+      {
+        "case": "legacy-native-binding-ignored",
+        "paths": {
+          "trading/vati/app/portfolio.py": "4edeb4ea65a2f390311c3bc5bee17cf68f7319f4afaa9eb778a0f963df701188"
+        },
+        "expected_failure": "test_legacy_alias_only_native_snapshot",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            {
+              "name": "test_legacy_alias_only_native_snapshot_cannot_supply_current_profile_money",
+              "message": "AssertionError: assert ('10000' is None)"
+            }
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 32,
+          "log_sha256": "578a6dae0b3a9d1557cc77048f5d52fd571591a4cfe4bcb5489ac7e37aab4bba",
+          "xml_sha256": "caf6973ba5580dcb0db4303fdcc766ee41893b79aa8909716bb71ffcd1444269"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 32,
+          "log_sha256": "23d999c1cea51d107e0441431d5491ca574dd30db54fd21ac47260ca3aee6bdd",
+          "xml_sha256": "bb175e0fecc5e90b2ecca7ddf5f64961cac7a55c02017432ec110eca08a8ff01"
+        },
+        "caught": true
+      },
+      {
+        "case": "unknown-credit-becomes-capital",
+        "paths": {
+          "trading/vati/execution/mt5_observation.py": "c81c9617b1ea3c0f71f2e3399afc30c2b0b8ec377f2f0e948e05d2e21fd127b8"
+        },
+        "expected_failure": "test_unknown_or_liability_credit",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            {
+              "name": "test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[None]",
+              "message": "AssertionError: assert (Decimal('10250.5') is None)\n +  where Decimal('10250.5') = Mt5AccountObservation(account_alias='native', identity=Mt5Identity(login='12345678', server='Broker-Demo', currency='U...LS_READ', source_nonce='41691100424846205897312272387170893825', source_received_at_ms=1000000, observed_at_ms=1000000).risk_equity"
+            },
+            {
+              "name": "test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[missing]",
+              "message": "AssertionError: assert (Decimal('10250.5') is None)\n +  where Decimal('10250.5') = Mt5AccountObservation(account_alias='native', identity=Mt5Identity(login='12345678', server='Broker-Demo', currency='U...S_READ', source_nonce='158866126526452578636495844242100322305', source_received_at_ms=1000000, observed_at_ms=1000000).risk_equity"
+            },
+            {
+              "name": "test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[nan]",
+              "message": "AssertionError: assert (Decimal('10250.5') is None)\n +  where Decimal('10250.5') = Mt5AccountObservation(account_alias='native', identity=Mt5Identity(login='12345678', server='Broker-Demo', currency='U...S_READ', source_nonce='128879874884405073644242421543862272001', source_received_at_ms=1000000, observed_at_ms=1000000).risk_equity"
+            },
+            {
+              "name": "test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[-10.0]",
+              "message": "AssertionError: assert (Decimal('10250.5') is None)\n +  where Decimal('10250.5') = Mt5AccountObservation(account_alias='native', identity=Mt5Identity(login='12345678', server='Broker-Demo', currency='U...LS_READ', source_nonce='94384581010730989288296997908536885249', source_received_at_ms=1000000, observed_at_ms=1000000).risk_equity"
+            },
+            {
+              "name": "test_owner_receives_original_amounts_with_explicit_unknown_risk_valuation[None]",
+              "message": "AssertionError: assert ('OBSERVED' == 'OBSERVED'\n  \n    OBSERVED and '10250.5' is None)"
+            },
+            {
+              "name": "test_owner_receives_original_amounts_with_explicit_unknown_risk_valuation[-10.0]",
+              "message": "AssertionError: assert ('OBSERVED' == 'OBSERVED'\n  \n    OBSERVED and '10250.5' is None)"
+            },
+            {
+              "name": "test_actual_pull_adapter_keeps_poll_and_read_clocks_without_cash_history[None]",
+              "message": "AssertionError: assert Decimal('10200') == None\n +  where Decimal('10200') = Mt5AccountObservation(account_alias='native', identity=Mt5Identity(login='12345678', server='Broker-Demo', currency='U...source_kind='MT5_SIGNED_EA_POLL', source_nonce='actual-poll-fixture', source_received_at_ms=9900, observed_at_ms=10000).risk_equity"
+            }
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 32,
+          "log_sha256": "435bba07208590266aa4c960b6325f0041052bf6fb51a9cdb98c8c47d4514ead",
+          "xml_sha256": "1db96a15312bab33ddd9552d5b9e8e073222b12400af9a62d05ea1827a018001"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 32,
+          "log_sha256": "23d999c1cea51d107e0441431d5491ca574dd30db54fd21ac47260ca3aee6bdd",
+          "xml_sha256": "8616ab05419a362c008d013cd264a5b99a3036e0c16b1e1fcaba3bd68f6b8c9f"
+        },
+        "caught": true
+      },
+      {
+        "case": "negative-credit-becomes-capital",
+        "paths": {
+          "trading/vati/execution/mt5_observation.py": "c81c9617b1ea3c0f71f2e3399afc30c2b0b8ec377f2f0e948e05d2e21fd127b8"
+        },
+        "expected_failure": "test_unknown_or_liability_credit",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            {
+              "name": "test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[-10.0]",
+              "message": "AssertionError: assert (Decimal('10260.5') is None)\n +  where Decimal('10260.5') = Mt5AccountObservation(account_alias='native', identity=Mt5Identity(login='12345678', server='Broker-Demo', currency='U...S_READ', source_nonce='243365669947057568707631553644060475393', source_received_at_ms=1000000, observed_at_ms=1000000).risk_equity"
+            },
+            {
+              "name": "test_owner_receives_original_amounts_with_explicit_unknown_risk_valuation[-10.0]",
+              "message": "AssertionError: assert ('UNAVAILABLE' == 'OBSERVED'\n  \n  - OBSERVED\n  + UNAVAILABLE)"
+            }
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 32,
+          "log_sha256": "2d9c805bdd46c1a04ce218e631b4a717bcc927bb7326aa96808364b466b2556b",
+          "xml_sha256": "ede8b4514a89898431acad3b57d49e6c37bf28a5669f2f68af9ffd19e65aa1a4"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 32,
+          "log_sha256": "a40bfc93b4d80a142e763cec790c4b9f6766ff3739963796ce5b43e257f1c99c",
+          "xml_sha256": "8cfc11b3a167aa15c9137ff8ab36a7fd35e5cb12574e7dea2bfd6b7adbbb0ed9"
+        },
+        "caught": true
+      },
+      {
+        "case": "profile-binding-ignored",
+        "paths": {
+          "trading/vati/execution/mt5_observation.py": "c81c9617b1ea3c0f71f2e3399afc30c2b0b8ec377f2f0e948e05d2e21fd127b8"
+        },
+        "expected_failure": "test_cash_outage_does_not_let_old_native_values",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            {
+              "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[login-12345679]",
+              "message": "KeyError: 'reason'"
+            },
+            {
+              "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[server-Different-Demo]",
+              "message": "KeyError: 'reason'"
+            },
+            {
+              "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[currency-EUR]",
+              "message": "KeyError: 'reason'"
+            },
+            {
+              "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[demo-False]",
+              "message": "KeyError: 'reason'"
+            },
+            {
+              "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[broker-CTRADER]",
+              "message": "KeyError: 'reason'"
+            }
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 32,
+          "log_sha256": "a480ada6f68b514b781b977eb7fd58022f940e5a5f25d3d57f611b5fab6c69b6",
+          "xml_sha256": "296c987811cc9c62861bf487698ec96f11b448cb6faf1e10af7229dbf25e460e"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 32,
+          "log_sha256": "49bf2e3fe893df523c94522a2965c1c4141587564261cfea143b8e4b7dc1a6dd",
+          "xml_sha256": "f03d6312a60c91f50aa1328566d5a7ee9e5334da262687926c228b0c1a4a4c99"
+        },
+        "caught": true
+      },
+      {
+        "case": "source-seals-and-shape-ignored",
+        "paths": {
+          "trading/vati/execution/mt5_observation.py": "c81c9617b1ea3c0f71f2e3399afc30c2b0b8ec377f2f0e948e05d2e21fd127b8"
+        },
+        "expected_failure": "test_original_account_readback_rejects_forged_or_unjoined_observations",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[authority]",
+              "message": "AssertionError: assert ('OBSERVED' == 'UNAVAILABLE'\n  \n  - UNAVAILABLE\n  + OBSERVED)"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[numeric-authority]",
+              "message": "AssertionError: assert ('OBSERVED' == 'UNAVAILABLE'\n  \n  - UNAVAILABLE\n  + OBSERVED)"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[source-seal]",
+              "message": "AssertionError: assert ('OBSERVED' == 'UNAVAILABLE'\n  \n  - UNAVAILABLE\n  + OBSERVED)"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[scope]",
+              "message": "AssertionError: assert ('OBSERVED' == 'UNAVAILABLE'\n  \n  - UNAVAILABLE\n  + OBSERVED)"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[money]",
+              "message": "AssertionError: assert ('OBSERVED' == 'UNAVAILABLE'\n  \n  - UNAVAILABLE\n  + OBSERVED)"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[unknown-field]",
+              "message": "AssertionError: assert ('OBSERVED' == 'UNAVAILABLE'\n  \n  - UNAVAILABLE\n  + OBSERVED)"
+            }
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 32,
+          "log_sha256": "0d1b48fbaad9f4cab0cde0b8d9e19931212f33fd62c1f28b536830f54b49db4a",
+          "xml_sha256": "737bd5cfbf0821a6d1805086797c3e3612b0ba46e36e57f34147955cb84ee306"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 32,
+          "log_sha256": "aecc3156aee27b41e2419c83e1dcd7bf5eb9f0298343c0cdc224460620ae6b63",
+          "xml_sha256": "f93cdac5074128a95bb12bbd674aef480cbaa5f362088856826621e5224a6c4f"
+        },
+        "caught": true
+      },
+      {
+        "case": "invalid-proof-falls-back-to-old-money",
+        "paths": {
+          "trading/vati/app/portfolio.py": "4edeb4ea65a2f390311c3bc5bee17cf68f7319f4afaa9eb778a0f963df701188"
+        },
+        "expected_failure": "test_cash_outage_does_not_let_old_native_values",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            {
+              "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[login-12345679]",
+              "message": "AssertionError: assert ('10000.0' is None)"
+            },
+            {
+              "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[server-Different-Demo]",
+              "message": "AssertionError: assert ('10000.0' is None)"
+            },
+            {
+              "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[currency-EUR]",
+              "message": "AssertionError: assert ('10000.0' is None)"
+            },
+            {
+              "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[demo-False]",
+              "message": "AssertionError: assert ('10000.0' is None)"
+            },
+            {
+              "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[broker-CTRADER]",
+              "message": "AssertionError: assert ('10000.0' is None)"
+            },
+            {
+              "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[login-None]",
+              "message": "AssertionError: assert ('10000.0' is None)"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[authority]",
+              "message": "AssertionError: assert ('10000.0' is None)"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[numeric-authority]",
+              "message": "AssertionError: assert ('10000.0' is None)"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[source-seal]",
+              "message": "AssertionError: assert ('10000.0' is None)"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[scope]",
+              "message": "AssertionError: assert ('10000.0' is None)"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[future]",
+              "message": "AssertionError: assert ('10000.0' is None)"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[bad-clock]",
+              "message": "AssertionError: assert ('10000.0' is None)"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[money]",
+              "message": "AssertionError: assert ('10000.0' is None)"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[source-kind]",
+              "message": "AssertionError: assert ('10000.0' is None)"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[alias]",
+              "message": "AssertionError: assert ('10000.0' is None)"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[unknown-field]",
+              "message": "AssertionError: assert ('10000.0' is None)"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[producer]",
+              "message": "AssertionError: assert ('10000.0' is None)"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[snapshot-valuation]",
+              "message": "AssertionError: assert ('999999999' is None)"
+            },
+            {
+              "name": "test_legacy_alias_only_native_snapshot_cannot_supply_current_profile_money",
+              "message": "AssertionError: assert ('10000' is None)"
+            }
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 32,
+          "log_sha256": "51b1506c94a076d8bbe94204070cdd246df1960694d4e25798e4fc609b69ac4e",
+          "xml_sha256": "ddaeab06da2e8db8e42d0e7f13475e8864ca7bdd32a48b7e1d26472bf7bacf1c"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 32,
+          "log_sha256": "9e080b729514e295585dc4112c2f883893a0e6578ba9e1f71a6c088df09c85d2",
+          "xml_sha256": "b3b03d900b145da9b98b595257b62089da06cd6b3b000bf2c1ad76cccdc4831c"
+        },
+        "caught": true
+      },
+      {
+        "case": "unqualified-credit-still-healthy-margin",
+        "paths": {
+          "trading/vati/execution/native_margin.py": "1cd3c84214ddec4ce258ab1753d708257bdd1bc10e90345479585bec0eaafc19"
+        },
+        "expected_failure": "test_owner_receives_original_amounts",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            {
+              "name": "test_owner_receives_original_amounts_with_explicit_unknown_risk_valuation[None]",
+              "message": "AssertionError: assert (None is None and None is None and 'OBSERVED' == 'UNAVAILABLE'\n  \n  - UNAVAILABLE\n  + OBSERVED)"
+            },
+            {
+              "name": "test_owner_receives_original_amounts_with_explicit_unknown_risk_valuation[-10.0]",
+              "message": "AssertionError: assert (None is None and None is None and 'OBSERVED' == 'UNAVAILABLE'\n  \n  - UNAVAILABLE\n  + OBSERVED)"
+            }
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 32,
+          "log_sha256": "3b26fd6fc18ca62f8cd4a44554fe47caaef8cc1f82beca810a9f7c15ee54442a",
+          "xml_sha256": "a02bd0f3ec2db6939676997d776596c5a7e0056d4b45c3cc5bd70f51235883b3"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 32,
+          "log_sha256": "7f454bff5bf4d39afc32cfc8d5622d7430199c04faa4b1a99d30044d23e1734d",
+          "xml_sha256": "7b350b2719eabd2306e4197f3e8d7c88cd2e12854244b7124a4136711c24c694"
+        },
+        "caught": true
+      },
+      {
+        "case": "legacy-nonce-breaks-protection",
+        "paths": {
+          "trading/vati/execution/mt5_observation.py": "c81c9617b1ea3c0f71f2e3399afc30c2b0b8ec377f2f0e948e05d2e21fd127b8"
+        },
+        "expected_failure": "test_legacy_missing_observation_nonce",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            {
+              "name": "test_legacy_missing_observation_nonce_withholds_proof_without_disabling_protective_reads",
+              "message": "vati.execution.base.VenueUnavailable: MT5 native account amounts unavailable"
+            }
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 32,
+          "log_sha256": "419b064d423712d92da3909bccd14da7f5c6c5310ef21bd89551a53f2d14e799",
+          "xml_sha256": "0d506a6230e0a9d435700aa40d8fb1dc6e8a11110d2f109bf8c45f7873abb0b9"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 32,
+          "log_sha256": "49bf2e3fe893df523c94522a2965c1c4141587564261cfea143b8e4b7dc1a6dd",
+          "xml_sha256": "bbd5993d21741ab7511252c31696137b30e389fa017bdf9d94d9f56ce48c242a"
+        },
+        "caught": true
+      },
+      {
+        "case": "signed-worker-observation-discarded",
+        "paths": {
+          "trading/vati/execution/mt5_bridge.py": "1a995750c71c3a7fc971444db7dbad48c04529974d7ea2d7460941fb1df251bd"
+        },
+        "expected_failure": "test_actual_signed_worker_keeps_physical_observation",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            {
+              "name": "test_actual_signed_worker_keeps_physical_observation_without_cash_history",
+              "message": "AssertionError: physical account facts were discarded with unrelated cash-query coverage\nassert None is not None"
+            },
+            {
+              "name": "test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[None]",
+              "message": "assert None is not None"
+            },
+            {
+              "name": "test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[missing]",
+              "message": "assert None is not None"
+            },
+            {
+              "name": "test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[nan]",
+              "message": "assert None is not None"
+            },
+            {
+              "name": "test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[-10.0]",
+              "message": "assert None is not None"
+            },
+            {
+              "name": "test_actual_snapshot_producers_supply_bound_account_and_margin_during_cash_outage[single]",
+              "message": "AssertionError: assert ('UNMEASURED' == 'OBSERVED'\n  \n  - OBSERVED\n  + UNMEASURED)"
+            },
+            {
+              "name": "test_actual_snapshot_producers_supply_bound_account_and_margin_during_cash_outage[account]",
+              "message": "AssertionError: assert ('UNMEASURED' == 'OBSERVED'\n  \n  - OBSERVED\n  + UNMEASURED)"
+            },
+            {
+              "name": "test_owner_receives_original_amounts_with_explicit_unknown_risk_valuation[None]",
+              "message": "AssertionError: assert ('UNMEASURED' == 'OBSERVED'\n  \n  - OBSERVED\n  + UNMEASURED)"
+            },
+            {
+              "name": "test_owner_receives_original_amounts_with_explicit_unknown_risk_valuation[-10.0]",
+              "message": "AssertionError: assert ('UNMEASURED' == 'OBSERVED'\n  \n  - OBSERVED\n  + UNMEASURED)"
+            },
+            {
+              "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[login-12345679]",
+              "message": "KeyError: 'reason'"
+            },
+            {
+              "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[server-Different-Demo]",
+              "message": "KeyError: 'reason'"
+            },
+            {
+              "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[currency-EUR]",
+              "message": "KeyError: 'reason'"
+            },
+            {
+              "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[demo-False]",
+              "message": "KeyError: 'reason'"
+            },
+            {
+              "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[broker-CTRADER]",
+              "message": "KeyError: 'reason'"
+            },
+            {
+              "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[login-None]",
+              "message": "KeyError: 'reason'"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[authority]",
+              "message": "TypeError: 'NoneType' object does not support item assignment"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[numeric-authority]",
+              "message": "TypeError: 'NoneType' object does not support item assignment"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[source-seal]",
+              "message": "TypeError: 'NoneType' object does not support item assignment"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[scope]",
+              "message": "TypeError: 'NoneType' object does not support item assignment"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[future]",
+              "message": "TypeError: 'NoneType' object does not support item assignment"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[bad-clock]",
+              "message": "TypeError: 'NoneType' object does not support item assignment"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[money]",
+              "message": "TypeError: 'NoneType' object does not support item assignment"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[source-kind]",
+              "message": "TypeError: 'NoneType' object does not support item assignment"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[alias]",
+              "message": "TypeError: 'NoneType' object does not support item assignment"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[unknown-field]",
+              "message": "TypeError: 'NoneType' object does not support item assignment"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[producer]",
+              "message": "AttributeError: 'NoneType' object has no attribute 'items'"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[snapshot-seal]",
+              "message": "AssertionError: assert ('UNMEASURED' == 'UNAVAILABLE'\n  \n  - UNAVAILABLE\n  + UNMEASURED)"
+            },
+            {
+              "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[snapshot-valuation]",
+              "message": "AttributeError: 'NoneType' object has no attribute 'items'"
+            }
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 32,
+          "log_sha256": "134371592d5e2e07dd9e84c9646ac7345b99694365d37ac0653bcc110d71588d",
+          "xml_sha256": "41305b8cd1b0045decf7423b949e198417add239b9d49ca8b8dd5aafb1844134"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 32,
+          "log_sha256": "47c35ac72fb4eedf4dc8217e61d1b4cc299b7d6f8319dba71765ceb16732ce0e",
+          "xml_sha256": "17b5d86ec117079f794e5a70e018fae3b182a53b1344f60754d6693e4f4459ea"
+        },
+        "caught": true
+      }
+    ],
+    "scope": "Real account adapter/producer/projection code; native SDK and cash history are explicit fixtures only."
+  },
+  "schema_oracle": {
+    "schema_sha256": "af0c32a5ac27d55218474da3c8ea24a049c3c7b1bc59dc9abf465ae4a2b83a9f",
+    "accepted_actual_and_unavailable_owner_variants": 5,
+    "invalid_shapes_rejected": [
+      "missing-required-state",
+      "missing-required-execution_authority",
+      "missing-required-schema",
+      "missing-required-provider",
+      "missing-required-account_alias",
+      "missing-required-server",
+      "missing-required-currency",
+      "missing-required-source_nonce",
+      "missing-required-login",
+      "missing-required-demo",
+      "missing-required-scope_hash",
+      "missing-required-source_ref",
+      "missing-required-snapshot_ref",
+      "missing-required-source_received_at_ms",
+      "missing-required-observed_at_ms",
+      "missing-required-received_at_ms",
+      "missing-required-reported_equity",
+      "missing-required-balance",
+      "missing-required-credit",
+      "missing-required-risk_equity",
+      "missing-required-source_kind",
+      "missing-required-money_basis",
+      "missing-required-valuation_state",
+      "wrong-shape-execution_authority-True",
+      "wrong-shape-execution_authority-0",
+      "wrong-shape-login-True",
+      "wrong-shape-login-9223372036854775808",
+      "wrong-shape-login-1.5",
+      "wrong-shape-credit-1",
+      "wrong-shape-reported_equity-NaN",
+      "wrong-shape-observed_at_ms-1000",
+      "wrong-shape-demo-1",
+      "wrong-shape-source_kind-LOG_IMPORT",
+      "unavailable-state-carries-money-UNMEASURED",
+      "unavailable-state-carries-money-UNAVAILABLE"
+    ],
+    "oracle": "jsonschema Draft202012Validator; no remote references",
+    "limits": "Shape only. Actual source/readback tests separately check profile, seals, chronology and exact valuation arithmetic."
+  },
+  "kotlin": {
+    "all_current_test_source_compiled": true,
+    "expected_current_test_count": 1341,
+    "complete_runtime_status": "ABORTED_NATIVE_COROUTINE_THREAD_EXHAUSTION_NO_PASS",
+    "full_runtime_log_sha256": "9b5471ed16c4e8c19fced0562953fb62c16a7300c0da106ea802ddc4f29b5949",
+    "compile_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runtime": {
+      "exit_code": 1,
+      "mode": "Kotlin 2.0.21 direct production delta and all current test source compilation against original verified Gradle runtime",
+      "working_directory": "/tmp/van-native-account-observation-work-20261024/android/verification",
+      "runtime_files_sha256": {
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test-junit5/2.0.21/9eff871dcc7b7cbc6050945b906dfdd6d5b76f02/kotlin-test-junit5-2.0.21.jar": "ac47de619b7d87e2bfdf7f6eec6a62a61d1bdc0c325740df52186b141936713d",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test/2.0.21/c6ea143e356327ddfda57e53e829c553e3b45b64/kotlin-test-2.0.21.jar": "a897b28c6a3ea8ec8f00ed766941a0c0df993d7f65908875879868e08ceb8985",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm/1.7.3/1f226780b845ff9206474c05159245d861556249/kotlinx-serialization-core-jvm-1.7.3.jar": "f0adde45864144475385cf4aa7e0b7feb27f61fcf9472665ed98cc971b06b1eb",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-json-jvm/1.7.3/6701e8c68d9e82387ce72ee96e8ddf058208d58f/kotlinx-serialization-json-jvm-1.7.3.jar": "b1e9138499ed8d20375edda3f2b1c95f3103a258eff6af9edc5ea07100f2b29c",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.1/bb0e192bd7c2b6b8217440d36e9758e377e450/kotlinx-coroutines-core-jvm-1.8.1.jar": "f3d4f5de1c391bbcc20f3b3435ccbac013521e76b6902d7d59635ec15c1f797e",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/com.squareup.okhttp3/okhttp/4.12.0/2f4525d4a200e97e1b87449c2cd9bd2e25b7e8cd/okhttp-4.12.0.jar": "b1050081b14bb7a3a7e55a4d3ef01b5dcfabc453b4573a4fc019767191d5f4e0",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/com.squareup.okio/okio-jvm/3.6.0/5600569133b7bdefe1daf9ec7f4abeb6d13e1786/okio-jvm-3.6.0.jar": "67543f0736fc422ae927ed0e504b98bc5e269fda0d3500579337cb713da28412",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.9.10/c7510d64a83411a649c76f2778304ddf71d7437b/kotlin-stdlib-jdk8-1.9.10.jar": "a4c74d94d64ce1abe53760fe0389dd941f6fc558d0dab35e47c085a11ec80f28",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.9.10/bc5bfc2690338defd5195b05c57562f2194eeb10/kotlin-stdlib-jdk7-1.9.10.jar": "ac6361bf9ad1ed382c2103d9712c47cdec166232b4903ed596e8876b0681c9b7",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.0.21/618b539767b4899b4660a83006e052b63f1db551/kotlin-stdlib-2.0.21.jar": "f31cc53f105a7e48c093683bbd5437561d1233920513774b470805641bedbc09",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.json/json/20240303/ebb88e8fb5122b7506d5cf1d69f1ccdb790d22a/json-20240303.jar": "3cf6cd6892e32e2b4c1c39e0f52f5248a2f5b37646fdfbb79a66b46b618414ed",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/23.0.0/8cc20c07506ec18e0834947b84a864bfc094484e/annotations-23.0.0.jar": "7b0f19724082cbfcbc66e5abea2b9bc92cf08a1ea11e191933ed43801eb3cd05",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-launcher/1.10.1/ce85bf5e38bee0989ded9bd468dd4ff78dc0cfa8/junit-platform-launcher-1.10.1.jar": "ded414c504e88d02270331071969084e1b2fd9bcf8443f35d44da2c6e3301bc2",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-engine/1.10.1/f32ae4af74fde68414b8a3d2b7cf1fb43824a83a/junit-platform-engine-1.10.1.jar": "baa48e470d6dee7369a0a8820c51da89c1463279eda6e13a304d11f45922c760",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-api/5.10.1/eb90c7d8bfaae8fdc97b225733fcb595ddd72843/junit-jupiter-api-5.10.1.jar": "60d5c398c32dc7039b99282514ad6064061d8417cf959a1f6bd2038cc907c913",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-commons/1.10.1/2bfcd4a4e38b10c671b6916d7e543c20afe25579/junit-platform-commons-1.10.1.jar": "7d9855ee3f3f71f015eb1479559bf923783243c24fbfbd8b29bed8e8099b5672",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-engine/5.10.1/6c9ff773f9aa842b91d1f2fe4658973252ce2428/junit-jupiter-engine-5.10.1.jar": "02930dfe495f93fe70b26550ace3a28f7e1b900c84426c2e4626ce020c7282d6",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.opentest4j/opentest4j/1.3.0/152ea56b3a72f655d4fd677fc0ef2596c3dd5e6e/opentest4j-1.3.0.jar": "48e2df636cab6563ced64dcdff8abb2355627cb236ef0bf37598682ddf742f1b"
+      },
+      "all_current_tests_compiled": true,
+      "source_sha256": {
+        "android/app/src/main/java/com/dial/van/trading/TradeBook.kt": "f00726b356062348cab0071ee1e81a26c522fd41b4662718c38ab0a0bc951afd",
+        "android/app/src/main/java/com/dial/van/trading/CurrentAccountRisk.kt": "f6373eb3112756ab9337b1242ba1ce9a0380d22f0869aae4e5f7f80b8985cd6d",
+        "android/verification/src/test/kotlin/com/dial/van/trading/CurrentAccountRiskTest.kt": "744dc174b4904c774dff381054263b1dc42b5b1d9d1c7016d5f76346aa0d8b5f",
+        "android/app/src/main/java/com/dial/van/trading/TradingModels.kt": "aa7bfa98e6b0a8c7cecd49aa9b57b34189393d0d52a694e57a6784d5ef87d962",
+        "android/app/src/main/java/com/dial/van/trading/AccountMargin.kt": "b2d5f4312f1773435efb6575d8d6d99cbed3763d97cd590d5dd143ee7f909f7a",
+        "android/verification/src/test/kotlin/com/dial/van/trading/AccountMarginTest.kt": "6b7618f53573b77becc3d505bf783e0c435175bc46a52c6756fe91a142db7ce5",
+        "android/app/src/main/java/com/dial/van/trading/NativeAccountObservation.kt": "c6da23e70724022d1f813bb779b0e31661142565a8729949ca6a016ddf06927d",
+        "android/verification/src/test/kotlin/com/dial/van/trading/NativeAccountObservationTest.kt": "5b07f05b41252b061d52062e7ac8e0d31922544cc92bc69ed5e60fc2f298f8f4"
+      }
+    },
+    "executed_focused_cases": {
+      "tests": 8,
+      "passed": 8,
+      "failed": [],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "948741f352846a8ebb7172e796488f70365d77a18b1f7679f8709a93e6d6bfd5"
+    },
+    "scope": "Five new native observation DTO cases plus three original margin cases; actual K2 production/test source against verified original Gradle runtime. No full app/AGP or handset claim."
+  },
+  "root_rebuild": {
+    "passed": 96,
+    "log_sha256": "72b0ca23dd39ac58145063d202f8d7099a13d33070a02cd64598d8a82c72cbb1"
+  },
+  "preservation": {
+    "original_funding_owner_report_assertions_unchanged": 10,
+    "original_single_JEV_guard_unchanged": true,
+    "original_private_backend_trusted_ledger_postgres_browser_jobs_unchanged": true,
+    "source_inventory": {
+      "features": 42,
+      "original_owner_functions": 105,
+      "surfaces": 78,
+      "endpoints": 457,
+      "API_component_schemas": 333,
+      "internal_VATI_schemas": 8
+    },
+    "no_new_frontend": true,
+    "frozen_blueprint_unchanged": true
+  },
+  "public_source_corrections": "Exact-case-scoped declared prerequisites; actual AGP checks assigned to Android job, pinned image dependency, complete source-head history and independent isolated media execution. Original required private/trusted gates retained. Fresh full hosted execution pending.",
+  "retained_setup_failures": [
+    "Initial SessionService snapshot fixture omitted its existing mandate/mode; fixed fixture without weakening runtime checks.",
+    "Mixed local Android target-contract run had50JDK setup errors from native process exhaustion; no guard pass inferred.",
+    "Three local commands guessed nonexistent test filenames and collected0; corrected discovered paths executed successfully.",
+    "Initial isolated media setup inherited global packages; isolated and installed locked dependencies before its earlier198-case pass."
+  ],
+  "all_unit_acceptance": "NOT_ISSUED",
+  "limits": "Actual native adapters and owner/API/Android pure logic use explicit SDK fixtures. No broker effects, independent unit/BG001 admission, deployed credentials/host/provider, production signing, handset or profit qualification."
+}

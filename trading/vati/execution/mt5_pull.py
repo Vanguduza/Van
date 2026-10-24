@@ -278,9 +278,13 @@ class Mt5PullAdapter:
         from vati.execution.native_margin import mt5_margin, mt5_risk_equity
         used,free,level=mt5_margin(a)
         try:
+            from vati.execution.mt5_observation import observe_mt5_account
+            observation=observe_mt5_account(self.account_alias,self.identity,a,
+                source_kind='MT5_SIGNED_EA_POLL',source_nonce=st['source_nonce'],
+                source_received_at_ms=st['updated_ms'],observed_at_ms=self.clock())
             equity=mark.net_equity if mark is not None else mt5_risk_equity(a)
             return AccountState(self.account_alias,equity,amount(str(a['balance'])),text(a['currency']),allowed and bool(a.get('login')),
-                hedging,int(a.get('server_time_ms',0)),funding_mark=mark,used_margin=used,free_margin=free,margin_level_pct=level)
+                hedging,int(a.get('server_time_ms',0)),funding_mark=mark,used_margin=used,free_margin=free,margin_level_pct=level,native_observation=observation)
         except (KeyError,TypeError,ValueError,ArithmeticError):
             raise VenueUnavailable('MT5 native account amounts unavailable') from None
 

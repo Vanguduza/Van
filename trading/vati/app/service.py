@@ -340,12 +340,14 @@ class SessionService:
         funding = snapshot_funding(self,r.cycle.ledger,r.cycle.adapter,acct,now_ms=now_ms)
         from vati.funding.native import account_mark_body
         mark=account_mark_body(acct)
+        from vati.execution.mt5_observation import account_observation_body
         received_ms=max(now_ms,acct.server_time_unix_ms,self.clock())
         r.cycle.ledger.append(make_event(EventKind.ACCOUNT_SNAPSHOT, "vati-service", {
             "account_alias": acct.account_alias, "equity": str(acct.equity), "balance": str(acct.balance), "currency": acct.currency, "verified": acct.verified,
             "funding_observation": funding,
             "margin": margin,
             "native_account_mark": mark,
+            "native_account_observation": account_observation_body(acct),
             "connected": hb.connected, "server_offset_ms": hb.server_offset_ms, "open_positions": len(positions), "peak_equity": str(r.cycle.peak_equity), "day_start_equity": str(r.cycle.day_start_equity),
             "week_start_equity": str(r.cycle.week_start_equity), "kill_switch": sorted(t.value for t in r.cycle.kill.active), "mode": r.cycle.mandate.mode.value,
             "risk_history_issue": r.cycle.streaks.recovery_issue,

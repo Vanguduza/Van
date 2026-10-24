@@ -20,6 +20,7 @@ def mt5_risk_equity(account):
     equity=amount(str(account['equity']))
     try:credit=amount(account['credit'])
     except (KeyError,TypeError,ValueError,ArithmeticError):return equity
+    if credit<0:return equity  # A native liability needs qualification, not extra risk capital.
     with localcontext() as context:
         context.prec=512
         return equity-credit
@@ -40,6 +41,8 @@ def account_margin_body(adapter, account, *, observed_at_ms):
     used,free,level=(getattr(account,name,None) for name in ('used_margin','free_margin','margin_level_pct'))
     finite=all(v is None or type(v) is Decimal and v.is_finite() for v in (used,free,level))
     known=finite and type(account.equity) is Decimal and account.equity.is_finite() and used is not None and used>=0 and free is not None and (used==0 and level is None or used>0 and level is not None)
+    if basis=='MT5_NATIVE_ACCOUNT_INFORMATION' and getattr(account,'native_observation',None) is not None:
+        known=known and account.native_observation.risk_equity is not None
     risk_free=risk_level=None
     if known:
         from vati.risk.margin import cash_margin_bounds

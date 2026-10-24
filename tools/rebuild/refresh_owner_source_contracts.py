@@ -240,6 +240,30 @@ def build():
     }
     for row in (accounts, account_screen):
         row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(account_controls))
+    account_fact_targets = [accounts] + [r for r in documents['owner_screens']['screens']
+        if accounts['id'] in r.get('feature_ids', [])]
+    if len(account_fact_targets) == 1:
+        raise ValueError('Native account facts have no existing account surface')
+    fact_schema = 'trading/vati/contracts/schemas/native_account_observation.schema.json'
+    fact_client = 'android/app/src/main/java/com/dial/van/trading/NativeAccountObservation.kt'
+    for path in (fact_schema, fact_client):
+        sources[path] = sha((ROOT/path).read_bytes())
+    for path, client in [('/v1/trading/accounts', 'tradingAccounts'), ('/v1/trading/portfolio', 'tradingPortfolio')]:
+        endpoint = next(r for r in endpoint_doc['endpoints'] if (r['method'], r['path']) == ('GET', path))
+        extension = {'method':'GET', 'path':path, 'endpoint_id':endpoint['endpoint_id'],
+            'client_namespace':'VanGatewayClient', 'client_function':client,
+            'source_ref':endpoint['source'], 'authentication':endpoint['authentication'],
+            'device_proof_required_when_bound':endpoint['device_proof_required_when_bound'],
+            'source_status':'CANDIDATE_NATIVE_FACTS_ANDROID_DTO_SOURCE_TESTED',
+            'authority':'READ_ORIGINAL_NATIVE_ACCOUNT_FACTS_NO_ORDER_OR_SETTLEMENT_AUTHORITY',
+            'scope':'native_account_observation preserves current physical identity, original equity/balance/credit, credit-excluded risk valuation or explicit unknown/liability, source/read clocks and original snapshot references independently of cash-history coverage. Invalid evidence or changed profiles withhold financial values. Exact Kotlin decimal text and 64-bit identity/clock parsing; existing AccountCard DTO only, no new UI. Response schema: '+fact_schema,
+            'response_schema':fact_schema, 'response_schema_sha256':sources[fact_schema],
+            'android_dto':fact_client, 'android_dto_sha256':sources[fact_client],
+            'specification':'docs/rebuild/rev118/backend/BE-004_006_NATIVE_ACCOUNT_OBSERVATION.md',
+            'new_ui_implemented':False, 'live_qualified':False}
+        for row in account_fact_targets:
+            row.setdefault('backend_contract_extensions', []).append(copy.deepcopy(extension))
+    accounts['information'].append('Original physical-account/valuation facts, credit qualification and exact observation clocks remain distinct from cash-history coverage, settled funds and execution permission.')
     voice_clients = {
         ("POST", "/v1/voice/responses"): "openSpokenResult",
         ("GET", "/v1/voice/streams/{stream_id}"): "speechStream",
