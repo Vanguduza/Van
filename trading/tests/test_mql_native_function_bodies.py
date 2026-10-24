@@ -21,6 +21,7 @@ def ea(tmp_path_factory):
     assert shutil.which('g++'), 'EA function-body controls require g++'
     source=EA.read_text()
     names={'JsonEscape','JsonNumber','NativeRefusal','ResolvePositionTicket',
+           'NativeBindingJson','CashUnavailable','NativeCashJson',
            'SnapshotJson','PushResult','ExecOrderSend','ExecModifySl','ExecClose'}
     bodies=[]
     for match in re.finditer(r'^(?:string|void|bool|ulong) (\w+)\([^\n]*\)\s*\{',source,re.M):
@@ -37,7 +38,7 @@ def ea(tmp_path_factory):
                 if c=='{': depth+=1
                 elif c=='}': depth-=1
         bodies.append(source[match.start():at])
-    assert len(bodies)>=6
+    assert len(bodies)==len(names), 'every declared actual EA function must be extracted'
     folder=tmp_path_factory.mktemp('actual-ea-bodies')
     cpp=folder/'ea.cpp'; binary=folder/'ea'
     fixture=Path(__file__).with_name('mql_terminal_fixture.cpp').read_text()
@@ -176,3 +177,38 @@ def test_native_pending_order_snapshot_is_explicit_and_precise(ea):
 
 def test_failed_native_pending_order_read_stays_unknown(ea):
     assert ea('snapshot-order-unavailable')['orders'] is None
+
+
+def test_actual_ea_cash_body_reaches_the_same_native_funding_parser(ea):
+    from vati.funding.mt5 import frame_from_poll
+    account=ea('snapshot')['account']
+    frame=frame_from_poll('controlled-terminal',account,received_ms=1700000000000,nonce='controlled-signed-poll')
+    assert frame.movements[0].native_id==9007199254740993
+    assert frame.movements[0].operation=='DEAL_TYPE_BALANCE'
+    assert abs(frame.movements[0].fee-Decimal('-0.00000013'))<Decimal('1e-22')
+    assert frame.credit==200 and frame.net_equity==frame.reported_equity-200
+    assert frame.body()['native_time_basis']=='MT5_TERMINAL_NATIVE_NOT_UTC_QUALIFIED'
+
+
+@pytest.mark.parametrize('case',['history-unavailable','deal-unavailable','values-unavailable','funds-unavailable',
+    'funds-changed','identity-changed','query-expired','nonfinite','bound','history-bound'])
+def test_actual_ea_cash_failures_stay_unavailable_while_existing_positions_and_results_survive(ea,case):
+    snapshot=ea('snapshot-cash-'+case)
+    assert snapshot['account']['funding']['complete'] is False
+    assert 'movements' not in snapshot['account']['funding']
+    assert len(snapshot['positions'])==1 and snapshot['results']==[]
+
+
+@pytest.mark.parametrize('case',['empty','trade'])
+def test_observed_empty_cash_and_excluded_trade_rows_are_explicit_successful_queries(ea,case):
+    funding=ea('snapshot-cash-'+case)['account']['funding']
+    assert funding['complete'] is True and funding['movements']==[]
+    assert funding['native_from_ms']==0 and funding['native_to_ms']>=funding['native_clock_ms']
+
+
+def test_native_cash_formatter_does_not_round_a_small_finite_fee_to_zero(ea):
+    from vati.funding.mt5 import frame_from_poll
+    account=ea('snapshot-cash-tiny-fee')['account']
+    frame=frame_from_poll('controlled-terminal',account,received_ms=1700000000000,nonce='controlled-tiny-fee-poll')
+    assert frame.movements[0].fee!=0
+    assert abs(frame.movements[0].fee-Decimal('-1.2345678901234567e-30'))<Decimal('1e-45')

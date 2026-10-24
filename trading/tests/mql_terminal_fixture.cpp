@@ -6,6 +6,8 @@
 #include <iostream>
 #include <map>
 #include <limits>
+#include <iomanip>
+#include <sstream>
 #include <string>
 #include <vector>
 using string = std::string;
@@ -25,6 +27,25 @@ template<class... T> string StringFormat(string fmt, T... args) {
 }
 bool MathIsValidNumber(double n) { return std::isfinite(n); }
 long TimeGMT() { return 1700000000; }
+using datetime = long;
+long terminal_clock=1700000000;
+long TimeCurrent() { return terminal_clock; }
+int last_error=0;
+void ResetLastError() { last_error=0; }
+int GetLastError() { return last_error; }
+string DoubleToString(double value,int digits) {
+ std::ostringstream out;
+ out << (digits < 0 ? std::scientific : std::fixed) << std::setprecision(std::abs(digits)) << value;
+ return out.str();
+}
+enum ENUM_DEAL_TYPE { DEAL_TYPE_BUY=0, DEAL_TYPE_SELL=1, DEAL_TYPE_BALANCE=2,
+ DEAL_TYPE_CREDIT=3, DEAL_TYPE_CHARGE=4, DEAL_TYPE_CORRECTION=5, DEAL_TYPE_BONUS=6 };
+string EnumToString(ENUM_DEAL_TYPE value) {
+ switch(value) { case DEAL_TYPE_BUY:return "DEAL_TYPE_BUY"; case DEAL_TYPE_SELL:return "DEAL_TYPE_SELL";
+ case DEAL_TYPE_BALANCE:return "DEAL_TYPE_BALANCE"; case DEAL_TYPE_CREDIT:return "DEAL_TYPE_CREDIT";
+ case DEAL_TYPE_CHARGE:return "DEAL_TYPE_CHARGE"; case DEAL_TYPE_CORRECTION:return "DEAL_TYPE_CORRECTION";
+ case DEAL_TYPE_BONUS:return "DEAL_TYPE_BONUS"; default:return "DEAL_TYPE_UNKNOWN"; }
+}
 enum {
  ACCOUNT_TRADE_MODE, ACCOUNT_LOGIN, ACCOUNT_EQUITY, ACCOUNT_BALANCE, ACCOUNT_CURRENCY,
  ACCOUNT_SERVER, ACCOUNT_TRADE_ALLOWED, ACCOUNT_MARGIN_MODE, ACCOUNT_TRADE_EXPERT,
@@ -32,7 +53,8 @@ enum {
  POSITION_SYMBOL, POSITION_TYPE, POSITION_VOLUME, POSITION_PRICE_OPEN, POSITION_SL,
  POSITION_TP, POSITION_COMMENT, POSITION_MAGIC, POSITION_PROFIT, POSITION_IDENTIFIER,
  DEAL_POSITION_ID, ORDER_SL, ORDER_SYMBOL, ORDER_TYPE, ORDER_VOLUME_CURRENT, ORDER_PRICE_OPEN,
- ORDER_TP, ORDER_COMMENT, ORDER_MAGIC
+ ORDER_TP, ORDER_COMMENT, ORDER_MAGIC, ACCOUNT_CREDIT, ACCOUNT_CURRENCY_DIGITS,
+ DEAL_TYPE, DEAL_TIME_MSC, DEAL_PROFIT, DEAL_COMMISSION, DEAL_SWAP, DEAL_FEE
 };
 const long ACCOUNT_TRADE_MODE_DEMO=20, ACCOUNT_TRADE_MODE_REAL=21;
 const long ACCOUNT_MARGIN_MODE_RETAIL_HEDGING=22, POSITION_TYPE_BUY=0, ORDER_TIME_GTC=0;
@@ -53,13 +75,25 @@ bool selection_ok=true, connected=true, modify_effect=true, pending_order_visibl
 long margin_mode=ACCOUNT_MARGIN_MODE_RETAIL_HEDGING;
 int pending_count=0;
 int modify_calls=0, close_calls=0, entry_calls=0;
+double account_credit=200, account_balance=12344.12345678;
+bool funds_available=true, history_available=true, native_deal_available=true;
+bool cash_amount_available=true, change_funds_during_query=false, change_identity_during_query=false;
+bool expire_cash_query=false;
+long native_login=12345678;
+struct CashDeal { ulong ticket=9007199254740993UL; long type=DEAL_TYPE_BALANCE, at=1699999999000L;
+ double profit=12344.12345678, commission=0, swap=0, fee=-.00000013; };
+std::vector<CashDeal> native_deals={CashDeal()};
 long AccountInfoInteger(int field) {
  if(field==ACCOUNT_TRADE_MODE) return ACCOUNT_TRADE_MODE_DEMO;
- if(field==ACCOUNT_LOGIN) return 12345678;
+ if(field==ACCOUNT_LOGIN) return native_login;
+ if(field==ACCOUNT_CURRENCY_DIGITS) return 2;
  if(field==ACCOUNT_MARGIN_MODE) return margin_mode;
  return 1;
 }
-double AccountInfoDouble(int field) { return field==ACCOUNT_EQUITY ? 12345.12345678 : 12344.12345678; }
+double AccountInfoDouble(int field) {
+ if(!funds_available) last_error=1;
+ return field==ACCOUNT_EQUITY ? 12345.12345678 : field==ACCOUNT_CREDIT ? account_credit : account_balance;
+}
 string AccountInfoString(int field) { return field==ACCOUNT_CURRENCY ? "USD" : "broker-demo"; }
 long TerminalInfoInteger(int field) { return field==TERMINAL_CONNECTED ? connected : 1; }
 long MQLInfoInteger(int) { return 1; }
@@ -78,7 +112,30 @@ double PositionGetDouble(int field) {
 string PositionGetString(int field) { return field==POSITION_SYMBOL ? positions.at(selected).symbol : "vati:fixture"; }
 bool SymbolSelect(const string&,bool) { return true; }
 bool HistoryDealSelect(ulong ticket) { return ticket==77; }
-long HistoryDealGetInteger(ulong, int) { return 900; }
+bool HistorySelect(datetime from,datetime to) {
+ if(from!=0 || to!=terminal_clock+1) { last_error=1; return false; }
+ if(change_funds_during_query) account_balance+=1;
+ if(change_identity_during_query) native_login+=1;
+ if(expire_cash_query) terminal_clock+=2;
+ return history_available;
+}
+int HistoryDealsTotal() { return native_deals.size(); }
+ulong HistoryDealGetTicket(int index) {
+ if(!native_deal_available) { last_error=1; return 0; }
+ return native_deals.at(index).ticket;
+}
+long HistoryDealGetInteger(ulong ticket,int field) {
+ if(field==DEAL_POSITION_ID) return 900;
+ for(auto& row:native_deals) if(row.ticket==ticket) return field==DEAL_TYPE ? row.type : row.at;
+ last_error=1; return 0;
+}
+double HistoryDealGetDouble(ulong ticket,int field) {
+ if(!cash_amount_available) { last_error=1; return 0; }
+ for(auto& row:native_deals) if(row.ticket==ticket) {
+  return field==DEAL_PROFIT ? row.profit : field==DEAL_COMMISSION ? row.commission : field==DEAL_SWAP ? row.swap : row.fee;
+ }
+ last_error=1; return 0;
+}
 bool OrderSelect(ulong ticket) { return pending_order_visible && ticket==11; }
 int OrdersTotal() { return pending_count; }
 ulong OrderGetTicket(int) { return 11; }
@@ -109,11 +166,24 @@ std::vector<string> pendingResults;
 
 int main(int argc, char** argv) {
  string c=argv[1];
- if(c=="snapshot" || c=="snapshot-missing" || c=="snapshot-escaped" || c=="snapshot-pending" || c=="snapshot-order-unavailable") {
+ if(c.rfind("snapshot",0)==0) {
   if(c=="snapshot-missing") selection_ok=false;
   if(c=="snapshot-escaped") positions[42].symbol="ABC\"Q\\R";
   if(c=="snapshot-pending" || c=="snapshot-order-unavailable") pending_count=1;
   if(c=="snapshot-order-unavailable") pending_order_visible=false;
+  if(c=="snapshot-cash-history-unavailable") history_available=false;
+  if(c=="snapshot-cash-deal-unavailable") native_deal_available=false;
+  if(c=="snapshot-cash-values-unavailable") cash_amount_available=false;
+  if(c=="snapshot-cash-funds-unavailable") funds_available=false;
+  if(c=="snapshot-cash-funds-changed") change_funds_during_query=true;
+  if(c=="snapshot-cash-identity-changed") change_identity_during_query=true;
+  if(c=="snapshot-cash-query-expired") expire_cash_query=true;
+  if(c=="snapshot-cash-nonfinite") native_deals[0].fee=std::numeric_limits<double>::quiet_NaN();
+  if(c=="snapshot-cash-tiny-fee") native_deals[0].fee=-1.2345678901234567e-30;
+  if(c=="snapshot-cash-empty") native_deals.clear();
+  if(c=="snapshot-cash-trade") native_deals[0].type=DEAL_TYPE_BUY;
+  if(c=="snapshot-cash-bound") native_deals.resize(4097);
+  if(c=="snapshot-cash-history-bound") native_deals.resize(200001);
   std::cout<<SnapshotJson(); return 0;
  }
  if(c=="partial-close") { trade.rc=TRADE_RETCODE_DONE_PARTIAL; ExecClose("1",42,.001); }

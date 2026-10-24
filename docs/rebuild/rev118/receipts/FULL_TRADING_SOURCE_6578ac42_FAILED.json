@@ -1,0 +1,21 @@
+{
+  "schema": "van.rebuild.full-trading-source-attempt/1",
+  "status": "FAILED",
+  "source_head": "6578ac42c008fca73c81d55454754063e0c0c332",
+  "observed_at_utc": "2026-10-24T13:25:13.322898+00:00",
+  "result": {
+    "tests": 1227,
+    "failures": 0,
+    "errors": 5,
+    "skipped": 0,
+    "passed": 1222
+  },
+  "xml_sha256": "1e503a4a66681d4ffe054b9c8b93c84a5cdfc092ec5f6fae547a6d1fd7ab465b",
+  "log_sha256": "9aa28846ec42342a9921ad43306dec8a3cd14c62dc68966b9c24749286f7432f",
+  "storage_audit_sha256": "0de909d408ee984d89f6869cb6bad0472c4d593f3e1a499ec20de1abeb23fdb8",
+  "storage_forbidden_events": 0,
+  "private_postgres_stopped_and_removed": true,
+  "source_tree_clean": true,
+  "failure": "Controlled C++ terminal fixture lacked newly extracted NativeCashJson, DoubleToString and native credit/currency-digits constants. The actual MetaEditor compiler separately passed exact new EA with0errors0warnings and invalid-source control. Five fixture setup errors stopped full suite; source-native harness must be extended without replacing EA bodies or weakening original assertions.",
+  "qualification": "Failed exact-head source run; no whole-trading/backend/unit/provider/production/device acceptance."
+}
